@@ -18,7 +18,7 @@ Scenario: Visit account summary report page from header link
 Scenario: The Account Summary has been disabled
   Given I am on the "Account Summary" report page
   When the "Account Summary" report has been disabled
-  Then I should see an error page
+  Then I should see 6 report tables with multiple data rows
 
 @jira-mem-826 @resque-backed @smoke
 Scenario: Member downloads a PDF of the Account Summary report

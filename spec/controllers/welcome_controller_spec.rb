@@ -224,17 +224,22 @@ RSpec.describe WelcomeController, :type => :controller do
 
   describe '`get_revision` method' do
     let(:call_method) { subject.send(:get_revision) }
-    describe 'without a REVISION file' do
-      before { `rm ./REVISION 2>/dev/null` }
-      it 'should return false' do
-        expect(call_method).to eq(false)
+    describe 'without a `DEPLOY_REVISION` env variable' do
+      before { allow(ENV).to receive(:[]).with('DEPLOY_REVISION').and_return(nil) }
+      it 'returns false' do
+        expect(call_method).to be(false)
       end
     end
-    describe 'with a REVISION file' do
-      before { `echo '#{revision}' > ./REVISION` }
-      after { `rm ./REVISION 2>/dev/null` }
-      it 'should return the contents' do
+    describe 'with a `DEPLOY_REVISION` env variable' do
+      before { allow(ENV).to receive(:[]).with('DEPLOY_REVISION').and_return(revision) }
+      it 'returns the revision' do
         expect(call_method).to eq(revision)
+      end
+    end
+    describe 'with an empty `DEPLOY_REVISION` env variable' do
+      before { allow(ENV).to receive(:[]).with('DEPLOY_REVISION').and_return('') }
+      it 'returns false' do
+        expect(call_method).to be(false)
       end
     end
   end

@@ -25,13 +25,17 @@ RSpec.describe SecuritiesController, type: :controller do
       before { allow(member_balance_service_instance).to receive(:managed_securities).and_return(securities) }
       it_behaves_like 'a user required action', :get, :manage
       it_behaves_like 'a controller action with an active nav setting', :manage, :securities
-      it 'renders the manage view' do
+      it 'renders the `manage` view' do
         call_action
         expect(response.body).to render_template('manage')
       end
       it 'raises an error if the managed_securities endpoint returns nil' do
         allow(member_balance_service_instance).to receive(:managed_securities).and_return(nil)
         expect{call_action}.to raise_error(StandardError)
+      end
+      it 'sets `@title`' do
+        call_action
+        expect(assigns[:title]).to eq(I18n.t('securities.manage.title'))
       end
       it 'assigns @securities_table_data the correct column_headings' do
         call_action
@@ -45,19 +49,16 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(row[:columns][0][:type]).to eq(:checkbox)
             end
           end
-          it 'has a `name` that includes its cusip value' do
-            security[:cusip] = SecureRandom.hex
-            name = "cusip_#{security[:cusip]}"
-            allow(member_balance_service_instance).to receive(:managed_securities).and_return([security])
+          it 'has a `name` of `securities[]`' do
             call_action
             assigns[:securities_table_data][:rows].each do |row|
-              expect(row[:columns][0][:name]).to eq(name)
+              expect(row[:columns][0][:name]).to eq('securities[]')
             end
           end
-          it 'has a `value` that is its cusip value' do
+          it 'has a `value` that is a JSON\'d string of the security' do
             call_action
             assigns[:securities_table_data][:rows].each do |row|
-              expect(row[:columns][0][:value]).to eq(security[:cusip])
+              expect(row[:columns][0][:value]).to eq(security.to_json)
             end
           end
           it 'has `disabled` set to `false` if there is a cusip value' do
@@ -159,6 +160,14 @@ RSpec.describe SecuritiesController, type: :controller do
     it_behaves_like 'a user required action', :get, :requests
     it_behaves_like 'a controller action with an active nav setting', :requests, :securities
 
+    it 'renders the `requests` view' do
+      call_action
+      expect(response.body).to render_template('requests')
+    end
+    it 'sets `@title`' do
+      call_action
+      expect(assigns[:title]).to eq(I18n.t('securities.requests.title'))
+    end
     it 'raises an error if the `authorized` securities request endpoint returns nil' do
       allow(securities_requests_service).to receive(:authorized).and_return(nil)
       expect{call_action}.to raise_error(/SecuritiesController#requests has encountered nil/i)
@@ -253,6 +262,115 @@ RSpec.describe SecuritiesController, type: :controller do
         end
         call_action
         expect(assigns[:awaiting_authorization_requests_table][:rows]).to eq(rows)
+      end
+    end
+  end
+
+  describe 'POST edit_release' do
+    let(:security) { {
+      cusip: SecureRandom.hex,
+      description: SecureRandom.hex,
+      original_par: SecureRandom.hex
+    } }
+    let(:call_action) { post :edit_release, securities: [security.to_json] }
+
+    it 'renders the `edit_release` view' do
+      call_action
+      expect(response.body).to render_template('edit_release')
+    end
+    it 'sets `@title`' do
+      call_action
+      expect(assigns[:title]).to eq(I18n.t('securities.release.title'))
+    end
+    it 'sets `@transaction_code_dropdown`' do
+      transaction_code_dropdown = [
+        [I18n.t('securities.release.transaction_code.standard'), described_class::SECURITIES_TRANSACTION_CODES[:standard]],
+        [I18n.t('securities.release.transaction_code.repo'), described_class::SECURITIES_TRANSACTION_CODES[:repo]]
+      ]
+      call_action
+      expect(assigns[:transaction_code_dropdown]).to eq(transaction_code_dropdown)
+    end
+    it 'sets `@settlement_type_dropdown`' do
+      settlement_type_dropdown = [
+        [I18n.t('securities.release.settlement_type.free'), described_class::SECURITIES_SETTLEMENT_TYPES[:free]],
+        [I18n.t('securities.release.settlement_type.vs_payment'), described_class::SECURITIES_SETTLEMENT_TYPES[:payment]]
+      ]
+      call_action
+      expect(assigns[:settlement_type_dropdown]).to eq(settlement_type_dropdown)
+    end
+    it 'sets `@delivery_instructions_dropdown`' do
+      delivery_instructions_dropdown = [
+        [I18n.t('securities.release.delivery_instructions.dtc'), described_class::SECURITIES_DELIVERY_INSTRUCTIONS[:dtc]],
+        [I18n.t('securities.release.delivery_instructions.fed'), described_class::SECURITIES_DELIVERY_INSTRUCTIONS[:fed]],
+        [I18n.t('securities.release.delivery_instructions.mutual_fund'), described_class::SECURITIES_DELIVERY_INSTRUCTIONS[:mutual_fund]],
+        [I18n.t('securities.release.delivery_instructions.physical_securities'), described_class::SECURITIES_DELIVERY_INSTRUCTIONS[:physical]]
+      ]
+      call_action
+      expect(assigns[:delivery_instructions_dropdown]).to eq(delivery_instructions_dropdown)
+    end
+    describe '`@securities_table_data`' do
+      it 'contains the proper `column_headings`' do
+        column_headings = [I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.description'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'), fhlb_add_unit_to_table_header(I18n.t('securities.release.settlement_amount'), '$')]
+        call_action
+        expect(assigns[:securities_table_data][:column_headings]).to eq(column_headings)
+      end
+      it 'contains rows of columns that have a `cusip` value' do
+        call_action
+        expect(assigns[:securities_table_data][:rows].length).to be > 0
+        assigns[:securities_table_data][:rows].each do |row|
+          expect(row[:columns].first[:value]).to eq(security[:cusip])
+        end
+      end
+      it "contains rows of columns that have a `cusip` value equal to `#{I18n.t('global.missing_value')}` if the security has no cusip value" do
+        security[:cusip] = nil
+        call_action
+        expect(assigns[:securities_table_data][:rows].length).to be > 0
+        assigns[:securities_table_data][:rows].each do |row|
+          expect(row[:columns].first[:value]).to eq(I18n.t('global.missing_value'))
+        end
+      end
+      it 'contains rows of columns that have a `description` value' do
+        call_action
+        expect(assigns[:securities_table_data][:rows].length).to be > 0
+        assigns[:securities_table_data][:rows].each do |row|
+          expect(row[:columns][1][:value]).to eq(security[:description])
+        end
+      end
+      it "contains rows of columns that have a `description` value equal to `#{I18n.t('global.missing_value')}` if the security has no description value" do
+        security[:description] = nil
+        call_action
+        expect(assigns[:securities_table_data][:rows].length).to be > 0
+        assigns[:securities_table_data][:rows].each do |row|
+          expect(row[:columns][1][:value]).to eq(I18n.t('global.missing_value'))
+        end
+      end
+      it 'contains rows of columns that have an `original_par` value' do
+        call_action
+        expect(assigns[:securities_table_data][:rows].length).to be > 0
+        assigns[:securities_table_data][:rows].each do |row|
+          expect(row[:columns][2][:value]).to eq(security[:original_par])
+        end
+      end
+      it 'contains rows of columns whose `original_par` value has a type of `number`' do
+        call_action
+        expect(assigns[:securities_table_data][:rows].length).to be > 0
+        assigns[:securities_table_data][:rows].each do |row|
+          expect(row[:columns][2][:type]).to eq(:number)
+        end
+      end
+      it 'contains rows of columns whose last member has a nil value' do
+        call_action
+        expect(assigns[:securities_table_data][:rows].length).to be > 0
+        assigns[:securities_table_data][:rows].each do |row|
+          expect(row[:columns].last[:value]).to be_nil
+        end
+      end
+      it 'contains rows of columns whose last member has a type of `:number`' do
+        call_action
+        expect(assigns[:securities_table_data][:rows].length).to be > 0
+        assigns[:securities_table_data][:rows].each do |row|
+          expect(row[:columns].last[:type]).to eq(:number)
+        end
       end
     end
   end

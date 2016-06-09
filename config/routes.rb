@@ -185,7 +185,8 @@ Rails.application.routes.draw do
     scope 'securities', as: :securities do
       get 'manage' => 'securities#manage'
       get 'requests' => 'securities#requests'
-      post 'edit_release' => 'error#not_found'
+      post 'edit_release' => 'securities#edit_release'
+      post 'submit_release' => 'error#not_found'
     end
   end
 

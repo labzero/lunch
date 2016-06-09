@@ -39,7 +39,8 @@
             -# Show Overnight VRC rate if desk is :open or :closed
             - if [:open,:closed].include?(@etransact_status)
               %p.dashboard-vrc-overnight-message= t('global.standard_vrc_overnight')
-              .dashboard-element-loading.dashboard-advances-rate
+              .dashboard-advances-rate{class: @current_overnight_vrc ? nil : 'dashboard-element-loading'}
+                = @current_overnight_vrc
                 %span<> %
             -# Include form action and link to Add Advance if etransact_status is :open
             - if @etransact_status == :open

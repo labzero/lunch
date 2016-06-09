@@ -76,16 +76,17 @@ $(function () {
           });
         };
       };
-
       $datePickerTrigger.data('datepicker-initialized', true);
     });
     var $datePickerFields = $(".datepicker_input_field .input-mini");
+    var $datePickerWrapper = $('.datepicker-wrapper');
     $datePickerFields.keypress(function(e) {
       Fhlb.Utils.onlyAllowDigits(e, [47]); // 47 = / (forward slash)
     });
 
     $datePickerFields.keyup(function(e) {
       normalizeDateFormatPreservingSelection(e);
+      changeApplyButtonStatus($datePickerWrapper, false);
     });
 
     $datePickerFields.change(function(e) {
@@ -141,12 +142,16 @@ $(function () {
     addUpdateEventTrigger($datePickerTrigger);
     $datePickerTrigger.daterangepicker(optionsHash); // reinitialize the datepicker with the prototype changes made by `addUpdateEventTrigger`
 
+    // Disable apply button
+    changeApplyButtonStatus($datePickerWrapper, true);
+
     // Append the daterangepicker's start and end inputs to our own div for design purposes, then attach its event handlers
     var $datePickerStartInput = $datePickerWrapper.find('.daterangepicker_start_input');
     var $datePickerEndInput = $datePickerWrapper.find('.daterangepicker_end_input');
     $datePickerWrapper.find('.daterangepicker').prepend('<div class="datepicker_input_field"><div class="daterangepicker_start_input_wrapper"></div><div class="daterangepicker_end_input_wrapper"></div></div>');
     $datePickerEndInput.prependTo($('.daterangepicker_end_input_wrapper'));
     $datePickerStartInput.prependTo($('.daterangepicker_start_input_wrapper'));
+
     $([$datePickerEndInput, $datePickerStartInput]).each(function(){this.on('change', function(e) {
       convertTwoDigitYearToFourDigitYear(e, $datePickerTrigger.data('daterangepicker'), options);
       snapToValidDate(e, $datePickerTrigger.data('daterangepicker'), options);
@@ -162,7 +167,14 @@ $(function () {
     if (options.singleDatePicker) {
       $datePickerWrapper.find('.ranges').show(); // always show the pre-selected tabs (daterangepicker.js hides these when set with the option singleDatePicker
     }
+
   };
+
+  // change apply button status
+  function changeApplyButtonStatus($datePickerWrapper, disabled)  {
+    var $applyButton = $datePickerWrapper.find('button.applyBtn.btn.btn-small.btn-sm.btn-success');
+    $applyButton.attr('disabled', disabled);
+  }
 
   // accessing the start and end dates once the apply button is pressed
   function setDatePickerApplyListener($datePickerTrigger, $form){

@@ -1686,6 +1686,17 @@ class ReportsController < ApplicationController
     }
   end
 
+  DEFAULT_MEMBER_PROFILE = {
+    credit_outstanding: {},
+    collateral_borrowing_capacity: {
+      standard: {
+      },
+      sbc: {
+      }
+    },
+    capital_stock: {}
+  }
+
   def account_summary
 
     @now = Time.zone.now
@@ -1693,27 +1704,14 @@ class ReportsController < ApplicationController
     @report_name = ReportConfiguration.report_title(:account_summary)
     report_download_name = "account-summary-#{fhlb_report_date_numeric(@date)}"
     downloadable_report(:pdf, nil, report_download_name) do
-      if report_disabled?(ACCOUNT_SUMMARY_WEB_FLAGS)
-        raise 'Report Disabled'
-      end
-
       member_balance_service = MemberBalanceService.new(current_member_id, request)
-      member_profile = member_balance_service.profile
-      if !member_profile
-        member_profile = {
-          credit_outstanding: {},
-          collateral_borrowing_capacity: {
-            standard: {
-            },
-            sbc: {
-            }
-          },
-          capital_stock: {}
-        }
-      end
-
       members_service = MembersService.new(request)
-      member_details = members_service.member(current_member_id) || {}
+      member_profile = DEFAULT_MEMBER_PROFILE
+      member_details = {}
+      unless report_disabled?(ACCOUNT_SUMMARY_WEB_FLAGS)
+        member_profile = member_balance_service.profile || DEFAULT_MEMBER_PROFILE
+        member_details = members_service.member(current_member_id) || {}
+      end
 
       @intraday_datetime = @now
       @credit_datetime = @now
@@ -1771,7 +1769,6 @@ class ReportsController < ApplicationController
           {value: member_profile[:remaining_financing_available], type: :currency_whole}
         ]
       }
-
       if member_profile[:mpf_credit_available].present? && member_profile[:mpf_credit_available] > 0
         @financing_availability[:rows].insert(-2, {
                                                   columns: [

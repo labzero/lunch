@@ -122,7 +122,9 @@ $(function () {
         getOvernightVrc();
       };
     }, 30000);
-    getOvernightVrc();
+    if ($rate_element.is('.dashboard-element-loading')) {
+      getOvernightVrc();
+    }
     if (!addAdvanceEnabled) {
       getQuickAdvanceRates();
     };
@@ -150,7 +152,7 @@ $(function () {
         }
       }).always(function() {
         isCheckingRate = false;
-        $rate_element.removeClass('dashboard-element-loading')
+        $rate_element.removeClass('dashboard-element-loading');
       });
     };
   };

@@ -84,7 +84,7 @@ module MAPI
         end
 
         def should_fake?(app)
-          app.environment != :production
+          app.settings.environment != :production
         end
 
         def map_hash_values(hash, mapping, downcase_keys=false)

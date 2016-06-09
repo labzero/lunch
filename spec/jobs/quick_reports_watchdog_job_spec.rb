@@ -1,13 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe QuickReportsWatchdogJob, type: :job do
-  let(:now) { double(Time) }
+  let(:now) { instance_double(Time) }
   let(:total) { rand(10..100) }
   let(:completed) { rand(0..9) }
-  let(:period) { double('A Period') }
-  let(:quick_report) { double('A Quick Report') }
-  let(:member) { double('A Member', quick_report_list: Array.new(rand(1..5)) { quick_report }) }
-  let(:members) { Array.new(rand(1..5)) { member } }
+  let(:period) { instance_double('A Period') }
+  let(:member_hash) { { id: SecureRandom.hex } }
+  let(:members) { Array.new(rand(1..5)) { member_hash } }
+  let(:member) { instance_double(Member, quick_report_list: Array.new(rand(1..5)) { quick_report }) }
   let(:run_job) { subject.perform(members, period) }
   let(:quick_report_status) { double('A QuickReport Status') }
   describe 'class level behavior' do
@@ -34,23 +34,32 @@ RSpec.describe QuickReportsWatchdogJob, type: :job do
     end
   end
   describe '`perform` method' do
+    let(:quick_report_period) { class_double(QuickReport, completed: []) }
     before do
-      allow(members).to receive(:sum).and_yield(member).and_return(total)
+      allow(QuickReportSet).to receive(:current_period).and_return(period)
+      allow(members).to receive(:sum).and_yield(member_hash).and_return(total)
+      allow(QuickReport).to receive(:for_period).with(period).and_return(quick_report_period)
+      allow(quick_report_period.completed).to receive(:count).and_return(total)
     end
-    it 'calls sum and yields' do
-      expect(members).to receive(:sum).and_yield(member)
+    it 'invokes job with an array of members' do
+      expect(subject).to receive(:perform).with(members, period)
+      run_job
+    end
+    it 'calls `sum` and yields' do
+      expect(members).to receive(:sum).and_yield(member_hash)
       run_job
     end
     it "calls sum on members' `quick_report_list`s" do
       allow(members).to receive(:sum) do |*args, &block|
-        expect(args[0].quick_report_list).to receive(:size)
+        expect(Member.class).to receive(:new).with(args[0]['id']).and_return(member)
+        expect(member.quick_report_list).to receive(:size)
         block.call
       end
       run_job
     end
     it 'returns the sum of `quick_report_list`s fromt the block' do
       allow(members).to receive(:sum) do |*args, &block|
-        expect(block.call).to eq(members.sum { |m| m.quick_report_list.size })
+        expect(block.call).to eq(members.sum { |m| Member.new(m['id']).quick_report_list.size })
       end
       run_job
     end
@@ -59,14 +68,12 @@ RSpec.describe QuickReportsWatchdogJob, type: :job do
       subject.perform(members)
     end
     describe 'continuous loop' do
-      let(:quick_report_period) { double('A QuickReport Period', completed: []) }
       let(:current_time) { Time.zone.now }
       let(:start_time) { current_time - rand(1..3).seconds }
       let(:end_time) { start_time + 5.minutes }
       before do
         allow(Time.zone).to receive(:now).and_return(current_time)
         allow(subject).to receive(:get_start_time).and_return(start_time)
-        allow(QuickReportSet).to receive(:for_period).with(period).and_return(quick_report_period)
         allow(quick_report_period.completed).to receive(:count).and_return(completed)
         allow(subject).to receive(:sleep).with(any_args).and_return(nil)
       end
@@ -91,7 +98,7 @@ RSpec.describe QuickReportsWatchdogJob, type: :job do
           run_job
         end
         it 'completes loop if `completed == total`' do
-          allow(QuickReportSet.for_period(period).completed).to receive(:count).and_return(total)
+          allow(QuickReport.for_period(period).completed).to receive(:count).and_return(total)
           allow(subject).to receive(:loop) do |*args, &block|
             expect(subject).not_to receive(:sleep)
             block.call
@@ -99,7 +106,7 @@ RSpec.describe QuickReportsWatchdogJob, type: :job do
           run_job
         end
         it 'completes loop if `completed > total`' do
-          allow(QuickReportSet.for_period(period).completed).to receive(:count).and_return(total + 1)
+          allow(QuickReport.for_period(period).completed).to receive(:count).and_return(total + 1)
           allow(subject).to receive(:loop) do |*args, &block|
             expect(subject).not_to receive(:sleep)
             block.call
