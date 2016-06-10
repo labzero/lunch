@@ -39,4 +39,10 @@ $(function() {
     });
     $('.flyout').addClass('flyout-confirmation-dialogue');
   };
+
+  // Toggle Edit Securities Instructions
+  $('.securities-download').on('click', function(){
+    $('.securities-download-instructions').toggle();
+  });
+
 });

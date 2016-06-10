@@ -325,4 +325,17 @@ describe CustomFormattingHelper do
       expect(helper.fhlb_formatted_duration(271545)).to eq('75:25:45')
     end
   end
+
+  describe '`fhlb_footnote_marker` method' do
+    marker = I18n.t('global.footnote_indicator')
+
+    it "returns `#{marker}` if no index is passed" do
+      expect(helper.fhlb_footnote_marker). to eq(marker)
+    end
+    10.times do |i|
+      it "returns a string of `#{marker}`'s whose length is equal to the index plus one" do
+        expect(helper.fhlb_footnote_marker(i).length).to eq(i + 1)
+      end
+    end
+  end
 end

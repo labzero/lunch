@@ -10,8 +10,11 @@
   header {
     margin: 0 0 15px;
   }
+}
+
+.securities-requests {
   p {
-    margin: 5px 0 10px;
+        margin: 5px 0 10px;
   }
 }
 
@@ -173,12 +176,12 @@
       width: 100px;
     }
     &:nth-child(3), &:nth-child(4) {
-      width: 150px;
+      width: 155px;
     }
   }
 }
 
-.securities-actions {
+.securities-actions, .securities-download-actions {
   .primary-button, .secondary-button {
     cursor: pointer;
     padding: 7px 40px;
@@ -191,4 +194,78 @@
 
 .flyout .delete-release-flyout {
   display: block;
+}
+
+.securities-download {
+  @extend %typography-table-button;
+  text-transform: uppercase;
+  color: $actionable-blue;
+  cursor: pointer;
+  margin: 20px 0 0;
+}
+
+.securities-download-instructions {
+  @extend %typography-dashboard-account-summary;
+  display: none;
+  border: 1px dashed $actionable-blue;
+  border-radius: $default-border-radius;
+  background: $lightest-blue;
+  margin-top: 20px;
+  padding: 20px;
+  & > p:first-child {
+    @extend %typography-default-text;
+    margin: 0 0 5px;
+  }
+  [data-form-submit-trigger] {
+    color: $actionable-blue;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+}
+
+.securities-download-instructions-step, .securities-download-instructions strong {
+  @extend %typography-field-value;
+  text-transform: uppercase;
+  span {
+    text-transform: none;
+  }
+}
+
+.securities-download-instructions-step, .securities-download-instructions-description {
+  display: inline-block;
+  float: left;
+  margin: 15px 0 0;
+}
+
+.securities-download-actions {
+  clear: both;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 30px 0;
+  span {
+    margin-right: 30px;
+    &:first-child {
+      color: $actionable-blue;
+    }
+  }
+}
+
+.securities-download-instructions-description {
+  margin-left: 15px;
+  width: 555px;
+  p {
+    margin: 0;
+  }
+  span {
+    @extend %typography-field-value;
+  }
+}
+
+.securities-download-instructions-description-term {
+  float: left;
+  width: 270px;
+  margin-top: 15px;
+  &:nth-of-type(2), &:nth-of-type(4) {
+    margin-left: 15px;
+  }
 }

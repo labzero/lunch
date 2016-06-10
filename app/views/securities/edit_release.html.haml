@@ -43,6 +43,35 @@
               = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_account_number, label: t('securities.release.delivery_instructions.account_number'), horizontal: true
         %section.securities-display
           = render 'reports/reports_table', table_class: 'securities-release-table', table_data: @securities_table_data, sortable: false, disable_auto_width: true
+          %p.securities-download= t('securities.release.edit.title')
+          .securities-download-instructions
+            %p= t('securities.release.edit.intro')
+            %p.securities-download-instructions-step= t('securities.release.edit.step_1.title')
+            %p.securities-download-instructions-description{data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}}= t('securities.release.edit.step_1.description')
+            %p.securities-download-instructions-step= t('securities.release.edit.step_2.title')
+            .securities-download-instructions-description
+              %p= t('securities.release.edit.step_2.make_edits')
+              %p= t('securities.release.edit.step_2.include_information')
+              .securities-download-instructions-description-term
+                %strong= t('securities.release.edit.step_2.cusip.title')
+                %p= t('securities.release.edit.step_2.cusip.description')
+              .securities-download-instructions-description-term
+                %strong= t('securities.release.edit.step_2.payment_amount.title_html')
+                %p= t('securities.release.edit.step_2.payment_amount.description')
+              .securities-download-instructions-description-term
+                %strong= t('securities.release.edit.step_2.original_par.title')
+                %p= t('securities.release.edit.step_2.original_par.description')
+              .securities-download-instructions-description-term
+                %strong= t('securities.release.edit.step_2.custodian_name.title_html')
+                %p= t('securities.release.edit.step_2.custodian_name.description')
+            %p.securities-download-instructions-step= t('securities.release.edit.step_3.title')
+            %p.securities-download-instructions-description= t('securities.release.edit.step_3.description')
+            .securities-download-actions
+              - span = capture_haml do
+                %span= t('securities.release.edit.drag_drop')
+              - button = capture_haml do
+                %button.secondary-button= t('securities.release.edit.select_file')
+              =t('securities.release.edit.download_actions_html', span: span, button: button)
         .securities-actions
           %span.secondary-button.delete-release-trigger= t('global.delete')
           = submit_tag(t('securities.release.submit_authorization'), class: 'primary-button')
@@ -50,3 +79,5 @@
       %h2= t('securities.release.delete_request.title')
       %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')
       = link_to(t('securities.release.delete_request.delete'), securities_manage_path, class: 'primary-button')
+    =form_tag(securities_download_release_path, name: 'securities-release-download') do
+      =hidden_field_tag(:securities, (@securities_table_data[:rows]).to_json)

@@ -126,6 +126,18 @@ When(/^I click on the button to delete the release$/) do
   page.find('.delete-release-flyout a', text: I18n.t('securities.release.delete_request.delete').upcase).click
 end
 
+When(/^I click on the Edit Securities link$/) do
+  page.find('.securities-download').click
+end
+
+Then(/^I should see instructions on how to edit securities$/) do
+  page.assert_selector('.securities-download-instructions', visible: :visible)
+end
+
+Then(/^I should not see instructions on how to edit securities$/) do
+  page.assert_selector('.securities-download-instructions', visible: :hidden)
+end
+
 def delivery_instructions(text)
   case text
     when 'DTC'

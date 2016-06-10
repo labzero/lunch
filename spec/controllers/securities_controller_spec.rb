@@ -310,9 +310,8 @@ RSpec.describe SecuritiesController, type: :controller do
     end
     describe '`@securities_table_data`' do
       it 'contains the proper `column_headings`' do
-        column_headings = [I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.description'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'), fhlb_add_unit_to_table_header(I18n.t('securities.release.settlement_amount'), '$')]
         call_action
-        expect(assigns[:securities_table_data][:column_headings]).to eq(column_headings)
+        expect(assigns[:securities_table_data][:column_headings]).to eq(controller.send(:release_securities_table_headings))
       end
       it 'contains rows of columns that have a `cusip` value' do
         call_action
@@ -375,6 +374,25 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
+  describe 'POST download_release' do
+    let(:securities) { [{"security" => SecureRandom.hex}, {"security" => SecureRandom.hex}] }
+    let(:call_method) { post :download_release, securities: securities.to_json }
+
+    it_behaves_like 'a user required action', :post, :download_release
+    it 'sets `@securities_table_data[:column_headings]`' do
+      call_method
+      expect(assigns[:securities_table_data][:column_headings]).to eq(controller.send(:release_securities_table_headings))
+    end
+    it 'sets `@securities_table_data[:rows]`' do
+      call_method
+      expect(assigns[:securities_table_data][:rows]).to eq(securities)
+    end
+    it 'responds with an xlsx file' do
+      call_method
+      expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
+    end
+  end
+
   describe 'private methods' do
     describe '`custody_account_type_to_status`' do
       ['P', 'p', :P, :p].each do |custody_account_type|
@@ -407,6 +425,19 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'returns the localization value for `global.missing_value` when passed an unknown form type' do
         expect(controller.send(:form_type_to_description, double(String))).to eq(I18n.t('global.missing_value'))
+      end
+    end
+
+    describe '`release_securities_table_headings`' do
+      let(:call_method) { controller.send(:release_securities_table_headings) }
+      headings = [
+        I18n.t('common_table_headings.cusip'),
+        I18n.t('common_table_headings.description'),
+        fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+        I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker)
+      ]
+      it 'returns the correct headings for the securities release table' do
+        expect(call_method).to eq(headings)
       end
     end
   end

@@ -147,7 +147,7 @@ class SecuritiesController < ApplicationController
     ]
 
     @securities_table_data = {
-      column_headings: [t('common_table_headings.cusip'), t('common_table_headings.description'), fhlb_add_unit_to_table_header(t('common_table_headings.original_par'), '$'), fhlb_add_unit_to_table_header(t('securities.release.settlement_amount'), '$')],
+      column_headings: release_securities_table_headings,
       rows: params[:securities].collect do |security|
         security = JSON.parse(security).with_indifferent_access
         {
@@ -160,6 +160,14 @@ class SecuritiesController < ApplicationController
         }
       end
     }
+  end
+
+  def download_release
+    @securities_table_data = {
+      column_headings: release_securities_table_headings,
+      rows: JSON.parse(params[:securities]).collect { |x| x.with_indifferent_access }
+    }
+    render xlsx: 'release', filename: "securities.xlsx"
   end
 
   private
@@ -187,6 +195,15 @@ class SecuritiesController < ApplicationController
     else
       t('global.missing_value')
     end
+  end
+
+  def release_securities_table_headings
+    [
+      I18n.t('common_table_headings.cusip'),
+      I18n.t('common_table_headings.description'),
+      fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+      I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker)
+    ]
   end
 
 end

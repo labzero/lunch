@@ -187,6 +187,7 @@ Rails.application.routes.draw do
       get 'requests' => 'securities#requests'
       post 'edit_release' => 'securities#edit_release'
       post 'submit_release' => 'error#not_found'
+      post 'download_release' => 'securities#download_release'
     end
   end
 

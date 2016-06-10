@@ -45,3 +45,10 @@ Scenario: Member interacts with the Delete Release flyout dialogue
   And I click on the button to delete the release
   Then I should be on the Manage Securities page
 
+@jira-mem-1589
+Scenario: Member views edit securities instructions
+  Given I am on the release securities page
+  When I click on the Edit Securities link
+  Then I should see instructions on how to edit securities
+  When I click on the Edit Securities link
+  Then I should not see instructions on how to edit securities

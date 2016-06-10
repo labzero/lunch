@@ -1192,12 +1192,41 @@ en:
         account_number: Account No.
       clearing_agent: "Clearing Agent's Fed Wire Address:"
       further_credit: For Further Credit to Account No.
-      settlement_amount: Settlement Amount
+      settlement_amount: 'Settlement Amount %{unit}%{footnote_marker}'
+      settlement_amount_footnote: '%{footnote_marker}If Vs. Payment'
       submit_authorization: Submit for Authorization
       delete_request:
         title: Delete this Release Securities request?
         delete: Yes, Delete Request
         continue: No, Continue
+      edit:
+        title: Edit Securities
+        intro: "To edit the listed securities:"
+        step_1:
+          title: "Step 1."
+          description: Download Securities Excel File
+        step_2:
+          title: "Step 2."
+          make_edits: In the file, make your edits.
+          include_information: "Each security should include the following information:"
+          cusip:
+            title: CUSIP
+            description: The security's CUSIP identifier.
+          payment_amount:
+            title_html: "Payment Amount <span>(if needed)</span>"
+            description: "If your Settlement Type is 'vs Payment', add the Payment Amount for each security."
+          original_par:
+            title: Original Par Value
+            description: The security's Original Par Value
+          custodian_name:
+            title_html: "Custodian Name <span>(if needed)</span>"
+            description: "For each security that is not of the type 'Agency', add the Custodian Name at the end of the line."
+        step_3:
+          title: "Step 3."
+          description: Save your file, and then upload it by either dragging it on to this page, or selecting it from your file system.
+        drag_drop: Drag and Drop Here
+        select_file: Select File
+        download_actions_html: '%{span} <span>or</span> %{button}'
   reports:
     meta_title: FHLB - Reports
     title: Reports

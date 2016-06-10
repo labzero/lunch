@@ -103,6 +103,11 @@ module CustomFormattingHelper
     header + ' (' + unit + ')'
   end
 
+  def fhlb_footnote_marker(index=0)
+    marker = I18n.t('global.footnote_indicator')
+    marker + (marker*index)
+  end
+
   def fhlb_formatted_percentage(number, precision=0)
     return t('global.missing_value') if number.nil?
     number_to_percentage(number, precision: precision)

@@ -1,0 +1,45 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  table_body_format = styles.add_style(sz: 9)
+  whole_number_format = styles.add_style(num_fmt: 1, sz: 9)
+  border = styles.add_style(:border => { :style => :thin, :color => "FFD9E3ED" }, :type => :dxf)
+  blue =  styles.add_style(:bg_color=> 'FFE5EFF9', :type => :dxf)
+  header_style = styles.add_style(:b => true, :bg_color=> 'FFEEF1F0')
+
+  styles = [table_body_format, table_body_format, whole_number_format, whole_number_format]
+
+  workbook.add_worksheet(name: 'release') do |sheet|
+    logo_path = File.join(Rails.root, 'app', 'assets', 'images', 'logo-black-140x50.png')
+    logo_dimensions = Paperclip::Geometry.from_file(logo_path)
+    sheet.sheet_view.show_grid_lines = false
+
+    sheet.add_image(:image_src => logo_path, :noSelect => true, :noMove => true) do |image|
+      image.width= logo_dimensions.width.to_i
+      image.height= logo_dimensions.height.to_i
+      image.start_at 0,0
+    end
+
+    sheet.add_row
+    sheet.add_row [nil, nil, nil, I18n.t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)], style: table_body_format
+    3.times do
+      sheet.add_row
+    end
+    sheet.add_row @securities_table_data[:column_headings], style: header_style
+    @securities_table_data[:rows].each_with_index do |row, i|
+      values = row[:columns].collect { |column| column[:value] }
+      sheet.add_row values, style: styles
+    end
+
+    sheet.add_conditional_formatting('A:D', { :type => :expression,
+                                          :formula => "ROW()>=6",
+                                          :dxfId => border,
+                                          :priority => 1 })
+    sheet.add_conditional_formatting('A:D', { :type => :expression,
+                                          :formula => "AND(ROW()>=7, ISEVEN(ROW()))",
+                                          :dxfId => blue,
+                                          :priority => 2 })
+    sheet.column_widths(18, nil, 15, 22)
+
+  end
+end
