@@ -1191,7 +1191,7 @@ td.dataTables_empty {
 .report-mcu-table {
   margin-bottom: 35px;
   width: 540px;
-  &:last-of-type {
+  &.report-mcu-totals-table {
     margin-bottom: 10px;
     tbody tr:first-child {
       @extend %table-footer-cell;
