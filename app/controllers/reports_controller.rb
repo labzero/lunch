@@ -11,7 +11,7 @@ class ReportsController < ApplicationController
   BORROWING_CAPACITY_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
   CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MembersService::CURRENT_SECURITIES_POSITION, MembersService::CAPSTOCK_REPORT_BALANCE, MembersService::CAPSTOCK_REPORT_TRIAL_BALANCE]
   HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
-  CURRENT_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::RATE_CURRENT_STANDARD_ARC, MembersService::RATE_CURRENT_SBC_ARC, MembersService::RATE_CURRENT_STANDARD_FRC, MembersService::RATE_CURRENT_SBC_FRC, MembersService::RATE_CURRENT_STANDARD_VRC, MembersService::RATE_CURRENT_SBC_VRC]
+  CURRENT_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::AUTOTRADE_RATES_DATA]
   SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
   CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
   DIVIDEND_STATEMENT_WEB_FLAGS = [MembersService::CAPSTOCK_REPORT_DIVIDEND_TRANSACTION, MembersService::CAPSTOCK_REPORT_DIVIDEND_STATEMENT]
@@ -27,6 +27,15 @@ class ReportsController < ApplicationController
   INTEREST_RATE_RESETS_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
   TODAYS_CREDIT_ACTIVITY_WEB_FLAGS = [MembersService::TODAYS_CREDIT_ACTIVITY]
   MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
+
+  CURRENT_PRICE_INDICATIONS_WEB_FLAG_MAPPING = {
+    standard_arc_data: [MembersService::RATE_CURRENT_STANDARD_ARC],
+    sbc_arc_data: [MembersService::RATE_CURRENT_SBC_ARC],
+    standard_frc_data: [MembersService::RATE_CURRENT_STANDARD_FRC],
+    sbc_frc_data: [MembersService::RATE_CURRENT_SBC_FRC],
+    standard_vrc_data: [MembersService::RATE_CURRENT_STANDARD_VRC],
+    sbc_vrc_data: [MembersService::RATE_CURRENT_SBC_VRC]
+  }.freeze
 
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
@@ -953,6 +962,10 @@ class ReportsController < ApplicationController
           raise ActiveRecord::RecordNotFound unless job_status
           data = JSON.parse(job_status.result_as_string).with_indifferent_access
           job_status.destroy
+        end
+
+        CURRENT_PRICE_INDICATIONS_WEB_FLAG_MAPPING.each do |key, flags|
+          data[key] = {} if report_disabled?(flags)
         end
 
         #sta data
