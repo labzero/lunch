@@ -1407,7 +1407,7 @@ en:
           leverage: Remaining Leverage
       price_indications:
         current:
-          title: Current Price Indications
+          title: Current Price Indications and STA Rates
           summary: "Variable Rate Credit advances are available from 7:00 am to 2:00 pm.\nAll other advances are generally available from 7:00 am to 12:00 pm."
           advance_maturity: Advance Maturity
           overnight_fed_funds_benchmark: Overnight Fed Funds Benchmark
