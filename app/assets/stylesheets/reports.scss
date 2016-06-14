@@ -95,12 +95,15 @@
   margin-bottom: 20px;
   h2 {
     @extend %typography-subtitle;
-    margin-bottom: 0;
+    margin-bottom: 7px;
   }
   p {
     @extend %typography-dashboard-account-summary;
-    margin: 0;
+    margin: 0 0 7px 0;
     color: $medium-gray;
+  }
+  p:last-child {
+    margin-bottom: 0px;
   }
 }
 
@@ -121,7 +124,7 @@
   }
   p {
     clear: both;
-    width: 540px;
+    width: 700px;
     display: block;
   }
 }
@@ -222,7 +225,7 @@
     margin: 0 0 15px;
   }
   .report-details h2 {
-    margin: 0;
+    margin: 0 0 7px 0;
   }
 }
 
