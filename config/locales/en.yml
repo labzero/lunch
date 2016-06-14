@@ -1454,7 +1454,7 @@ en:
           freshness: This report reflects price indications as of 6:00 am PT on the current business day and the STA rate as of the end of the prior business day. For current quotes, call the Member Services Desk at %{phone_number}.
           date_html: "<span>Date:</span> %{date}"
         historical:
-          title: Historical Price Indications
+          title: Historical Price Indications and STA Rates
           freshness: This report reflects price indications as of 6:00 am PT on the date displayed and the STA rate as of the date displayed.
           availability: Historical data available varies by credit product.
         standard_credit_program: Standard Credit Program
