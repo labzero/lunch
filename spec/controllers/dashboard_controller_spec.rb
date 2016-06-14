@@ -798,7 +798,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:processed_activities) { double('processed_activities') }
 
     before do
-      allow(subject).to receive(:process_recent_activities)
+      allow(subject).to receive(:process_activity_entries)
       allow(subject).to receive(:deferred_job_data).and_return(activities)
       [activity_1, activity_2].each do |activity|
         allow(activity).to receive(:with_indifferent_access)
@@ -814,11 +814,11 @@ RSpec.describe DashboardController, :type => :controller do
       recent_activity
     end
     it 'processes the activities hash' do
-      expect(subject).to receive(:process_recent_activities).with(activities)
+      expect(subject).to receive(:process_activity_entries).with(activities)
       recent_activity
     end
     it 'renders the `dashboard_recent_activity` partial with the correct data' do
-      allow(subject).to receive(:process_recent_activities).and_return(processed_activities)
+      allow(subject).to receive(:process_activity_entries).and_return(processed_activities)
       expect(subject).to receive(:render).with({partial: 'dashboard/dashboard_recent_activity', locals: {table_data: processed_activities}, layout: false})
       recent_activity
     end
@@ -1149,247 +1149,6 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
-  describe '`process_recent_activities` private method' do
-    let(:future_date) { Time.zone.today + rand(1000) }
-    let(:past_date) { Time.zone.today - rand(1..1000) }
-    let(:product_description) { double('product description') }
-    let(:current_par) { double('current_par') }
-    let(:maturity_date) { double('maturity date') }
-    let(:trade_date) { instance_double(Date) }
-    let(:transaction_number) { rand(100000) }
-    let(:activity) { { instrument_type: 'LC', transaction_number: transaction_number, current_par: current_par } }
-    let(:activities) { [activity, activity, activity, activity, activity, activity] }
-    let(:call_method) { controller.send(:process_recent_activities, activities) }
-    let(:process_recent_activities) { subject.send(:process_recent_activities, activity) }
-    before do
-      allow(subject).to receive(:fhlb_date_standard_numeric).and_return(future_date)
-    end
-
-    it 'returns an empty array if passed nil' do
-      expect(controller.send(:process_recent_activities, nil)).to eq([])
-    end
-    describe 'a processed activity array' do
-      it 'has a current_par in the second position' do
-        expect(call_method.first[1]).to eq(current_par)
-      end
-      it 'has a transaction_number in the fourth position' do
-        expect(call_method.first[3]).to eq(transaction_number)
-      end
-    end
-    context 'letters of credit' do
-      let(:activity) { [{ instrument_type: 'LC', product_description: 'LC' }] }
-      it 'displays `Letter of Credit` when product description is `LC` in the description' do
-        expect(process_recent_activities.first[0]).to eq(I18n.t('dashboard.recent_activity.letter_of_credit'))
-      end
-      let(:activity) { [{ instrument_type: 'LC', product_description: "LC LC LC" }] }
-      it 'displays `Letter of Credit` when product description is `LC LC LC` in the description' do
-        expect(process_recent_activities.first[0]).to eq(I18n.t('dashboard.recent_activity.letter_of_credit'))
-      end
-      context 'amended' do
-        let(:activity) { [{ instrument_type: 'LC', status: 'INTER_AMEND_STA' }] }
-        it 'displays `Amended Today` in the description' do
-          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.amended_today'))
-        end
-      end
-      context 'terminated' do
-        let(:activity) { [{ instrument_type: 'LC', status: 'TERMINATED' }] }
-        it 'displays `Terminated Today` in the description' do
-          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.terminated_today'))
-        end
-      end
-      context 'expired' do
-        let(:activity) { [{ instrument_type: 'LC', status: 'EXPIRED' }] }
-        it 'displays `Expires Today` in the description' do
-          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.expires_today'))
-        end
-      end
-      context 'matured' do
-        let(:activity) { [{ instrument_type: 'LC', status: 'MATURED' }] }
-        it 'displays `Matures Today` in the description' do
-          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.expires_today'))
-        end
-      end
-      context 'verified' do
-        let(:activity) { [{ instrument_type: 'LC', status: 'VERIFIED', maturity_date: future_date, trade_date: Time.zone.today }] }
-        it 'displays `Expires on [Date]` in the description' do
-          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.expires_on', date: future_date))
-        end
-      end
-      context 'amended' do
-        let(:activity) { [{ instrument_type: 'LC', status: 'VERIFIED', maturity_date: future_date, trade_date: past_date }] }
-        it 'displays `Amended Today` in the description' do
-          expect(process_recent_activities.first[2]).to eq(I18n.t('dashboard.recent_activity.amended_today'))
-        end
-      end
-      let(:letter_of_credit_with_unknown_status) { [{ instrument_type: 'LC',
-                                             status: 'FOO',
-                                             maturity_date: Time.zone.today }] }
-      it 'displays `Today` as the event for an advance of an unknown status with a maturity date of today' do
-        expect(subject.send(:process_recent_activities, letter_of_credit_with_unknown_status).first[2]).to eq(I18n.t('global.today'))
-      end
-    end
-    context 'advances' do
-      context 'full' do
-        let(:termination_full_partial) { double(:termination_full_partial, to_s: 'FULL PREPAYMENT') }
-        let(:terminated_advance) { [{ instrument_type: 'ADVANCE',
-                                      status: 'TERMINATED',
-                                      termination_full_partial: termination_full_partial }] }
-        it 'displays contents of `termination_full_partial` for terminated advances in description' do
-          expect(subject.send(:process_recent_activities, terminated_advance).first[2]).to eq(termination_full_partial)
-        end
-        let(:verified_advance) { [{ instrument_type: 'ADVANCE',
-                                      status: 'VERIFIED',
-                                      termination_full_partial: termination_full_partial }] }
-        it 'displays contents of `termination_full_partial` for verified advances in description' do
-          expect(subject.send(:process_recent_activities, terminated_advance).first[2]).to eq(termination_full_partial)
-        end
-        let(:advance_with_matured_status) { [{ instrument_type: 'ADVANCE',
-                                               status: 'MATURED',
-                                               termination_full_partial: termination_full_partial }] }
-        it 'displays `Matured Today` in the description' do
-          expect(subject.send(:process_recent_activities, advance_with_matured_status).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_today'))
-        end
-        let(:advance_with_unknown_status) { [{ instrument_type: 'ADVANCE',
-                                               status: 'FOO',
-                                               maturity_date: Time.zone.today }] }
-        it 'displays `Today` as the event for an advance of an unknown status with a maturity date of today' do
-          expect(subject.send(:process_recent_activities, advance_with_unknown_status).first[2]).to eq(I18n.t('global.today'))
-        end
-      end
-      context 'partial prepayment' do
-        let(:termination_full_partial) { 'PARTIAL PREPAYMENT' }
-        let(:amount_paid) { double(Float) }
-        let(:partial_vrc_advance) { [{
-          instrument_type: 'ADVANCE',
-          sub_product: 'VRC - WL',
-          termination_full_partial: termination_full_partial,
-          termination_par: amount_paid
-        }] }
-        let(:partial_frc_advance) { [{
-          instrument_type: 'ADVANCE',
-          sub_product: 'FRC - Wholeloan',
-          termination_full_partial: termination_full_partial,
-          termination_par: amount_paid
-        }] }
-        let(:prepayment_event) { I18n.t('dashboard.recent_activity.partial_prepayment') }
-        let(:repayment_event) { I18n.t('dashboard.recent_activity.partial_repayment') }
-        it 'displays partial repayment for the event of a partially paid VRC advances' do
-          expect(subject.send(:process_recent_activities, partial_vrc_advance).first[2]).to eq(repayment_event)
-        end
-        it 'displays partial repayment for the event of a partially paid FRC advances' do
-          expect(subject.send(:process_recent_activities, partial_frc_advance).first[2]).to eq(prepayment_event)
-        end
-        it 'displays the `termination_par` as the amount for partial payments' do
-          results = subject.send(:process_recent_activities, [partial_vrc_advance, partial_frc_advance].flatten)
-          expect(results.length).to be(2)
-          results.each do |activity|
-            expect(activity[1]).to be(amount_paid)
-          end
-        end
-        ['Foo VRC BAR', 'VRC FOO', 'BAR VRC'].each do |sub_product|
-          it 'treats an advance with a sub product containing the word VRC as a VRC product' do
-            partial_vrc_advance.first[:sub_product] = sub_product
-            expect(subject.send(:process_recent_activities, partial_vrc_advance).first[2]).to eq(repayment_event)
-          end
-        end
-        it 'treats an advance with a sub product containing VRC but not as a word as a non-VRC product' do
-            partial_frc_advance.first[:sub_product] = 'FOOVRCBAR'
-            expect(subject.send(:process_recent_activities, partial_frc_advance).first[2]).to eq(prepayment_event)
-          end
-      end
-      context 'pending termination' do
-        let(:advance_with_pend_term_status) { [{ instrument_type: 'ADVANCE', status: 'PEND_TERM' }] }
-        it 'displays `Open` for maturity date when status is `PEND_TERM` and there is no maturity date' do
-          expect(subject.send(:process_recent_activities, advance_with_pend_term_status).first[2]).to eq(I18n.t('dashboard.open'))
-        end
-        let(:advance_with_maturity_and_pend_term_status) { [{ instrument_type: 'ADVANCE', status: 'PEND_TERM', maturity_date: future_date }] }
-        it 'displays `Matures On` for the maturity date when status is `PEND_TERM` and there is a maturity date' do
-          expect(subject.send(:process_recent_activities, advance_with_maturity_and_pend_term_status).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
-        end
-      end
-      context 'forward-funded advances' do
-        let(:forward_funded_advance) { [{ instrument_type: 'ADVANCE',
-                                          status: 'COLLATERAL_AUTH',
-                                          funding_date: future_date }] }
-        it 'displays `Will be funded on [Date]` in the description' do
-          expect(subject.send(:process_recent_activities, forward_funded_advance).first[2]).to eq(I18n.t('dashboard.recent_activity.will_be_funded_on', date: future_date))
-        end
-      end
-      context 'matured' do
-        let(:advance_matured_today) { [{ instrument_type: 'ADVANCE', status: 'MATURED' }] }
-        it 'displays `Matures Today` if status is `MATURED`' do
-          expect(subject.send(:process_recent_activities, advance_matured_today).first[2]).to eq(I18n.t("dashboard.recent_activity.matures_today"))
-        end
-      end
-      context 'executed' do
-        let(:advance_executed) { [{ instrument_type: 'ADVANCE', status: 'EXECUTED', maturity_date: future_date }] }
-        it 'displays `Matures [Date]` if status is `EXECUTED`' do
-          expect(subject.send(:process_recent_activities, advance_executed).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
-        end
-      end
-      context 'verified' do
-        let(:advance_executed) { [{ instrument_type: 'ADVANCE', status: 'VERIFIED', maturity_date: future_date }] }
-        it 'displays `Matures [Date]` if status is `VERIFIED`' do
-          expect(subject.send(:process_recent_activities, advance_executed).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
-        end
-      end
-      context 'in review' do
-        let(:advance_in_ops_review) { [{ instrument_type: 'ADVANCE', status: 'OPS_REVIEW' }] }
-        it 'displays `In Review` if status is `OPS_REVIEW`' do
-          expect(subject.send(:process_recent_activities, advance_in_ops_review).first[2]).to eq(I18n.t('dashboard.recent_activity.in_review'))
-        end
-        let(:advance_in_sec_review) { [{ instrument_type: 'ADVANCE', status: 'SEC_REVIEWED' }] }
-        it 'displays `In Review` if status is `SEC_REVIEWED`' do
-          expect(subject.send(:process_recent_activities, advance_in_sec_review).first[2]).to eq(I18n.t('dashboard.recent_activity.in_review'))
-        end
-      end
-      context 'OPEN VRC' do
-        let(:open_vrc) { [{ instrument_type: 'ADVANCE', status: 'VERIFIED', product: 'OPEN VRC' }] }
-        it 'displays `Open` for any `OPEN VRC` product' do
-          expect(subject.send(:process_recent_activities, open_vrc).first[2]).to eq(I18n.t('dashboard.open'))
-        end
-        let(:advance_in_sec_review) { [{ instrument_type: 'ADVANCE', status: 'SEC_REVIEWED' }] }
-        it 'displays `In Review` if status is `SEC_REVIEWED`' do
-          expect(subject.send(:process_recent_activities, advance_in_sec_review).first[2]).to eq(I18n.t('dashboard.recent_activity.in_review'))
-        end
-      end
-    end
-    context 'investments' do
-      let(:investment_with_matured_status) { [{ instrument_type: 'INVESTMENT', maturity_date: Time.zone.today }] }
-      it 'displays `Matured Today` for investments maturing today' do
-        expect(subject.send(:process_recent_activities, investment_with_matured_status).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_today'))
-      end
-      let(:investment_maturing_in_the_future) { [{ instrument_type: 'INVESTMENT', maturity_date: future_date }] }
-      it 'displays `Matures on [Date]` for investments maturing in the future`' do
-        expect(subject.send(:process_recent_activities, investment_maturing_in_the_future).first[2]).to eq(I18n.t('dashboard.recent_activity.matures_on', date: future_date))
-      end
-      let(:investment_with_no_maturity_date) { [{ instrument_type: 'INVESTMENT', maturity_date: nil }] }
-      it 'displays `Open` for investments without maturing dates`' do
-        expect(subject.send(:process_recent_activities, investment_with_no_maturity_date).first[2]).to eq(I18n.t('dashboard.open'))
-      end
-      let(:investment_terminated) { [{instrument_type: 'INVESTMENT', status: 'TERMINATED', maturity_date: future_date}] }
-      it 'displays the maturity date for the event when the investment is TERMINATED' do
-        formatted_date = SecureRandom.hex
-        allow(controller).to receive(:fhlb_date_standard_numeric).with(future_date).and_return(formatted_date)
-        expect(subject.send(:process_recent_activities, investment_terminated).first[2]).to eq(formatted_date)
-      end
-    end
-    context 'other instrument types' do
-      let(:deposit) { [{ instrument_type: 'DEPOSIT' }] }
-      let(:simpletransfer) { [{ instrument_type: 'SIMPLETRANSFER' }] }
-      let(:ca) { [{ instrument_type: 'CA' }] }
-      let(:bonds) { [{ instrument_type: 'BONDS' }] }
-      let(:mm) { [{ instrument_type: 'MM' }] }
-      let(:repo) { [{ instrument_type: 'REPO' }] }
-      let(:whatever) { [{ instrument_type: 'WHATEVER' }] }
-      it 'does not return activities with any other instrument types' do
-        [deposit, simpletransfer, ca, bonds, mm, repo, whatever].each do |activity|
-          expect(subject.send(:process_recent_activities, activity)).to eq([])
-        end
-      end
-    end
-  end
-
   describe '`deferred_job_data` private method' do
     let(:request) { double('request') }
     let(:action_name) { %w(foo wizz bang bar).sample }
@@ -1679,6 +1438,191 @@ RSpec.describe DashboardController, :type => :controller do
         expect(borrowing_capacity_gauge[:total][:sbc_percentage]).to eq(total_sbc_percentage)
       end
     end
+  end
+
+  describe '`process_activity_entries` private method' do
+    let(:entry) { double('An Entry') }
+    let(:description) { double('A Description') }
+    let(:amount) { double('An Amount') }
+    let(:event) { double('An Event') }
+    let(:transaction_number) { double('A Transaction Number') }
+    let(:process_patterns_return) { {description: description, amount: amount, event: event, transaction_number: transaction_number}  }
+    let(:entries) { [ entry ] }
+    let(:call_method) { subject.send(:process_activity_entries, entries) }
+    before do
+      allow(subject).to receive(:process_patterns).and_return(process_patterns_return)
+    end
+    it 'calls `process_patterns` method' do
+      expect(subject).to receive(:process_patterns)
+      call_method
+    end
+    it 'raises an ArgumentError `Missing description` if result does not have `description`' do
+      allow(process_patterns_return).to receive(:[]).and_return(nil, amount, event, transaction_number)
+      expect{call_method}.to raise_error(ArgumentError, 'Missing `description`')
+    end
+    it 'raises an ArgumentError `Missing amount` if result does not have `amount`' do
+      allow(process_patterns_return).to receive(:[]).and_return(description, nil, event, transaction_number)
+      expect{call_method}.to raise_error(ArgumentError, 'Missing `amount`')
+    end
+    it 'raises an ArgumentError `Missing event` if result does not have `event`' do
+      allow(process_patterns_return).to receive(:[]).and_return(description, amount, nil, transaction_number)
+      expect{call_method}.to raise_error(ArgumentError, 'Missing `event`')
+    end
+    it 'raises an ArgumentError `Missing transaction_number` if result does not have `transaction_number`' do
+      allow(process_patterns_return).to receive(:[]).and_return(description, amount, event, nil)
+      expect{call_method}.to raise_error(ArgumentError, 'Missing `transaction_number`')
+    end
+    it 'returns [] if no process_patterns are found' do
+      allow(subject).to receive(:process_patterns).and_return(nil)
+      expect(call_method).to eq([])
+    end
+    it 'returns an array of process_patterns returns' do
+      expect(call_method).to eq([process_patterns_return])
+    end
+    describe 'process multiple entries' do
+      let(:entries) { [entry, entry, entry, entry, entry] }
+      it 'returns no more than 4 elements in the array' do
+        expect(call_method).to eq([process_patterns_return, process_patterns_return, process_patterns_return, process_patterns_return])
+      end
+    end
+  end
+
+  describe '`process_patterns` private method' do
+    let(:pattern1) { double('A Pattern 1') }
+    let(:pattern2) { double('A Pattern 2') }
+    let(:pattern3) { double('A Pattern 3') }
+    let(:returns1) { {} }
+    let(:returns2) { {} }
+    let(:returns3) { {} }
+    let(:returns_matched) { {} }
+    let(:pattern_definition1) { {pattern: pattern1, returns: returns1} }
+    let(:pattern_definition2) { {pattern: pattern2, returns: returns2} }
+    let(:pattern_definition3) { {pattern: pattern3, returns: returns3} }
+    let(:patterns) { [pattern_definition1, pattern_definition2, pattern_definition3] }
+    let(:entry) { {} }
+    let(:call_method) { subject.send(:process_patterns, patterns, entry) }
+    before do
+      allow(subject).to receive(:pattern_matches?).with(pattern_definition1[:pattern], entry).and_return(true)
+    end
+    it 'calls `pattern_matches?` method' do
+      expect(subject).to receive(:pattern_matches?).at_least(:once)
+      call_method
+    end
+    it 'returns nil if no patters have been found' do
+      allow(subject).to receive(:pattern_matches?).at_least(:once).and_return(false)
+      expect(call_method).to be(nil)
+    end
+    describe 'pattern matching' do
+      let(:key) { double('A Key') }
+      let(:value) { double('A Value', call: nil) }
+      let(:call_return) { double('A Call Return') }
+      before do
+        allow(subject).to receive(:pattern_matches?).with(pattern_definition1[:pattern], entry).and_return(false)
+        allow(subject).to receive(:pattern_matches?).with(pattern_definition2[:pattern], entry).and_return(true)
+        allow(subject).to receive(:pattern_matches?).with(pattern_definition3[:pattern], entry).and_return(true)
+        returns2[key] = value
+      end
+      it 'selects the first matching pattern and all others are ignored' do
+        allow(value).to receive(:call).and_return(call_return)
+        expect(call_method[key]).to eq(call_return)
+      end
+    end
+    describe 'returns includes a value that responds to `call`' do
+      let(:key) { double('A Key') }
+      let(:value) { double('A Value', call: nil) }
+      let(:call_return) { double('A Call Return') }
+      before do
+        returns1[key] = value
+      end
+      it 'calls the `call` method on the value passing the entry, the key and the controller' do
+        expect(value).to receive(:call).with(entry, key, subject)
+        call_method
+      end
+      it 'returns call_return' do
+        allow(value).to receive(:call).and_return(call_return)
+        expect(call_method[key]).to eq(call_return)
+      end
+    end
+    describe 'returns includes a value that is a string' do
+      let(:key) { double('A Key') }
+      let(:value) { double('A Value') }
+      before do
+        returns1[key] = value
+      end
+      it 'returns call_return' do
+        expect(call_method[key]).to eq(value)
+      end
+    end
+  end
+
+
+  describe '`pattern_matches?` private method' do
+    let(:pattern) { {} }
+    let(:entry) { {} }
+    let(:call_method) { subject.send(:pattern_matches?, pattern, entry) }
+
+    describe 'pattern includes a matcher that responds to `call`' do
+      let(:key) { double('A Key') }
+      let(:matcher) { double('A Matcher', call: nil) }
+      before do
+        pattern[key] = matcher
+      end
+      it 'calls the `call` method on the matcher passing the entry, the key and the controller' do
+        expect(matcher).to receive(:call).with(entry, key, subject)
+        call_method
+      end
+      it 'returns true if the `call` method returns not nil and not false' do
+        allow(matcher).to receive(:call).and_return(double())
+        expect(call_method).to be(true)
+      end
+      it 'returns false if the `call` method returns nil' do
+        expect(call_method).to be(false)
+      end
+      it 'returns false if the `call` method returns false' do
+        allow(matcher).to receive(:call).and_return(false)
+        expect(call_method).to be(false)
+      end
+    end
+    describe 'pattern includes a matcher that is a regular expression' do
+      let(:key) { double('A Key') }
+      let(:valid_value) { SecureRandom.hex }
+      let(:matcher) { /\A#{valid_value}\z/ }
+      before do
+        pattern[key] = matcher
+      end
+      it 'returns true if the regular expression matches' do
+        entry[key] = valid_value
+        expect(call_method).to be(true)
+      end
+      it 'returns false if the regular expression does not match' do
+        entry[key] = SecureRandom.hex
+        expect(call_method).to be(false)
+      end
+      it 'returns false if the `entry[key]` is nil' do
+        entry[key] = nil
+        expect(call_method).to be(false)
+      end
+    end
+    describe 'pattern includes a matcher that is a string' do
+      let(:key) { double('A Key') }
+      let(:matcher) { double('A Macher') }
+      before do
+        pattern[key] = matcher
+      end
+      it 'returns true if the string matches' do
+        entry[key] = matcher
+        expect(call_method).to be(true)
+      end
+      it 'returns false if the string does not match' do
+        entry[key] = double('A String')
+        expect(call_method).to be(false)
+      end
+      it 'returns false if the `entry[key]` is nil' do
+        entry[key] = nil
+        expect(call_method).to be(false)
+      end
+    end
+
   end
 
 end

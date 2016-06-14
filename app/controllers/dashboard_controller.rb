@@ -49,6 +49,160 @@ class DashboardController < ApplicationController
     settlement_transaction_account: I18n.t('reports.account.settlement_transaction_account.title')
   }.with_indifferent_access.freeze
 
+  ACTIVITY_DEFAULT_TRANSACTION_NUMBER = ->(entry, key, controller) { entry[:transaction_number] }
+  ACTIVITY_CURRENT_PAR_AMOUNT = ->(entry, key, controller) { entry[:current_par] }
+
+  ACTIVITY_PATTERNS = [
+    # LC Amended Today
+    {
+      returns: {
+        description: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.letter_of_credit') },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.amended_today') }
+      },
+      pattern: {
+        product: 'LC',
+        status: 'VERIFIED',
+        trade_date: -> (entry, key, controller) { entry[:trade_date].to_date < Time.zone.today }
+      }
+    },
+    # LC Executed Today
+    {
+      returns: {
+        description: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.letter_of_credit') },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) { I18n.t('dashboard.recent_activity.expires_on', date: controller.fhlb_date_standard_numeric(entry[:maturity_date])) }
+      },
+      pattern: {
+        product: 'LC',
+        status: 'VERIFIED',
+        trade_date: -> (entry, key, controller) { entry[:trade_date].to_date == Time.zone.today }
+      }
+    },
+    # LC Expired Today
+    {
+      returns: {
+        description: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.letter_of_credit') },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.expires_today') }
+      },
+      pattern: {
+        product: 'LC',
+        status: 'MATURED'
+      }
+    },
+    # LC Terminated Today
+    {
+      returns: {
+        description: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.letter_of_credit') },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) { I18n.t('dashboard.recent_activity.terminated_today') },
+      },
+      pattern: {
+        product: 'LC',
+        status: 'TERMINATED'
+      }
+    },
+    # Advance Terminated Today
+    {
+      returns: {
+        description: ->(entry, key, controller) { entry[:product_description] },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) { entry[:termination_full_partial] }
+      },
+      pattern: {
+        instrument_type: 'ADVANCE',
+        status: 'TERMINATED'
+      }
+    },
+    # Advance/Investment Matured Today
+    {
+      returns: {
+        description: ->(entry, key, controller) { entry[:product_description] },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) { I18n.t('dashboard.recent_activity.matures_today') },
+      },
+      pattern: {
+        instrument_type: /\A(ADVANCE|INVESTMENT)\z/,
+        status: 'MATURED'
+      }
+    },
+    # Advance Partial Prepayments/Repayments
+    {
+      returns: {
+        description: ->(entry, key, controller) {entry[:product_description]},
+        amount: ->(entry, key, controller) { entry[:termination_par] },
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) {entry[:termination_full_partial]}
+      },
+      pattern: {
+        instrument_type: 'ADVANCE',
+        termination_full_partial: /\A(PARTIAL PREPAYMENT|PARTIAL REPAYMENT)\z/,
+        status: 'VERIFIED',
+      }
+    },
+    # Advance/Investment Executed Today
+    {
+      returns: {
+        description: ->(entry, key, controller) {entry[:product_description]},
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) {I18n.t('dashboard.recent_activity.matures_on', date: controller.fhlb_date_standard_numeric(entry[:maturity_date]))}
+      },
+      pattern: {
+        instrument_type: /\A(ADVANCE|INVESTMENT)\z/,
+        status: 'VERIFIED',
+        product: ->(entry, key, controller) {entry[:product] != 'OPEN VRC'},
+        termination_full_partial: ''
+      }
+    },
+    # Open Advances
+    {
+      returns: {
+        description: ->(entry, key, controller) {entry[:product_description]},
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: I18n.t('dashboard.open')
+      },
+      pattern: {
+        instrument_type: 'ADVANCE',
+        status: /\A(VERIFIED|PEND_TERM)\z/,
+        product: 'OPEN VRC',
+      }
+    },
+    # Forward funded advances
+    {
+      returns: {
+        description: ->(entry, key, controller) {entry[:product_description]},
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) {I18n.t('dashboard.recent_activity.will_be_funded_on', date: controller.fhlb_date_standard_numeric(entry[:funding_date]))}
+      },
+      pattern: {
+        instrument_type: 'ADVANCE',
+        status: 'COLLATERAL_AUTH',
+      }
+    },
+    # 'OPS_REVIEW', 'SEC_REVIEWED'
+    {
+      returns: {
+        description: ->(entry, key, controller) {entry[:product_description]},
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: I18n.t('dashboard.recent_activity.in_review')
+      },
+      pattern: {
+        status: /\A(OPS_REVIEW|SEC_REVIEWED)\z/
+      }
+    },
+  ].freeze
+
   def index
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)
@@ -267,7 +421,7 @@ class DashboardController < ApplicationController
   def recent_activity
     activities = deferred_job_data || []
     activities = activities.collect! {|o| o.with_indifferent_access}
-    recent_activity_data = process_recent_activities(activities)
+    recent_activity_data = process_activity_entries(activities)
     render partial: 'dashboard/dashboard_recent_activity', locals: {table_data: recent_activity_data}, layout: false
   end
 
@@ -432,101 +586,6 @@ class DashboardController < ApplicationController
     new_gauge_hash
   end
 
-  def process_recent_activities(activities)
-    activity_data = []
-    if activities
-      i = 0
-      activities.each do |activity|
-        break if i > 4
-        next unless activity[:instrument_type] == 'LC' ||
-                    activity[:instrument_type] == 'ADVANCE' ||
-                    activity[:instrument_type] == 'INVESTMENT'
-        amount = activity[:current_par]
-        description = activity[:product_description]
-        transaction_number = activity[:transaction_number]
-        trade_date = activity[:trade_date].to_date if activity[:trade_date]
-        maturity_date = activity[:maturity_date].to_date if activity[:maturity_date]
-        event = case activity[:status]
-        when 'TERMINATED'
-          if activity[:instrument_type] == 'LC'
-            t('dashboard.recent_activity.terminated_today')
-          elsif activity[:instrument_type] == 'ADVANCE'
-            activity[:termination_full_partial]
-          else
-            fhlb_date_standard_numeric(maturity_date)
-          end
-        when 'INTER_AMEND_STA'
-          t('dashboard.recent_activity.amended_today')
-        when 'EXPIRED'
-          t('dashboard.recent_activity.expires_today')
-        when 'MATURED'
-          if activity[:instrument_type] == 'LC'
-            t('dashboard.recent_activity.expires_today')
-          else
-            t('dashboard.recent_activity.matures_today')
-          end
-        when 'VERIFIED'
-          if activity[:product] == 'OPEN VRC'
-            t('dashboard.open')
-          elsif activity[:instrument_type] == 'LC'
-            if trade_date == Time.zone.today
-              t('dashboard.recent_activity.expires_on', date: fhlb_date_standard_numeric(maturity_date))
-            else
-              t('dashboard.recent_activity.amended_today')
-            end
-          else
-            t('dashboard.recent_activity.matures_on', date: fhlb_date_standard_numeric(maturity_date))
-          end
-        when 'COLLATERAL_AUTH'
-          t('dashboard.recent_activity.will_be_funded_on', date: fhlb_date_standard_numeric(activity[:funding_date]))
-        when 'OPS_REVIEW', 'SEC_REVIEWED'
-          t('dashboard.recent_activity.in_review')
-        when 'EXECUTED'
-          t('dashboard.recent_activity.matures_on', date: maturity_date)
-        when 'PEND_TERM'
-          if maturity_date
-            t('dashboard.recent_activity.matures_on', date: maturity_date)
-          else
-            t('dashboard.open')
-          end
-        else
-          if activity[:instrument_type] == 'INVESTMENT'
-            if maturity_date == Time.zone.today
-              t('dashboard.recent_activity.matures_today')
-            else
-              if maturity_date
-                t('dashboard.recent_activity.matures_on', date: maturity_date)
-              else
-                t('dashboard.open')
-              end
-            end
-          else
-            if maturity_date == Time.zone.today
-              t('global.today')
-            else
-              fhlb_date_standard_numeric(maturity_date)
-            end
-          end
-        end
-        if activity[:termination_full_partial] == 'PARTIAL PREPAYMENT'
-          event = if activity[:sub_product].match(/(^|\s)VRC($|\s)/)
-            t('dashboard.recent_activity.partial_repayment')
-          else
-            t('dashboard.recent_activity.partial_prepayment')
-          end
-          amount = activity[:termination_par]
-          date = activity[:termination_date]
-        end
-        if activity[:product_description] == "LC" || activity[:product_description] == "LC LC LC"
-          description = t('dashboard.recent_activity.letter_of_credit')
-        end
-        activity_data.push([description, amount, event, transaction_number])
-        i += 1
-      end
-    end
-    activity_data
-  end
-
   def deferred_job_data
     raise "Invalid request: must be XMLHttpRequest (xhr) in order to be valid" unless request.xhr?
     param_name = "#{action_name}_job_id".to_sym
@@ -636,4 +695,54 @@ class DashboardController < ApplicationController
     end
     borrowing_capacity_gauge
   end
+
+  def process_activity_entries(entries)
+    activity_data = []
+    entries.each do |entry|
+
+      break if activity_data.length == 4
+      result = process_patterns(ACTIVITY_PATTERNS, entry)
+      if result
+        raise ArgumentError.new('Missing `description`') unless result[:description]
+        raise ArgumentError.new('Missing `amount`') unless result[:amount]
+        raise ArgumentError.new('Missing `event`') unless result[:event]
+        raise ArgumentError.new('Missing `transaction_number`') unless result[:transaction_number]
+        activity_data.push(result)
+      end
+    end
+    activity_data
+  end
+
+  def process_patterns(patterns, entry)
+    patterns.each do |pattern_definition|
+      if pattern_matches?(pattern_definition[:pattern], entry)
+        result = {}
+        pattern_definition[:returns].each do |key, value|
+          if value.respond_to?(:call)
+            result[key] = value.call(entry, key,  self)
+          else
+            result[key] = value
+          end
+        end
+        return result
+      end
+    end
+    return nil
+  end
+
+  def pattern_matches?(pattern, entry)
+    matched = true
+    pattern.each do |key, matcher|
+      if matcher.respond_to?(:call)
+        matched = !!matcher.call(entry, key, self)
+      elsif matcher.is_a?(Regexp)
+        matched = !!matcher.match(entry[key].to_s)
+      else
+        matched = matcher == entry[key]
+      end
+      break unless matched
+    end
+    matched
+  end
+
 end
