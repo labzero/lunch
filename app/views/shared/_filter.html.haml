@@ -1,4 +1,6 @@
 - filter_class = Array.wrap(filter_class)
 .filter{class: filter_class}
   - filters.each do |filter|
-    %span{data: {filter: filter[:value]}, class: filter[:class]}= filter[:text]
+    - classes = Array.wrap(filter[:class])
+    - classes << 'active' if filter[:active]
+    %span{data: {filter: filter[:value]}, class: classes}= filter[:text]

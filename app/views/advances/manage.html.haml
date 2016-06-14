@@ -6,4 +6,6 @@
     .advances-header-buttons
       =link_to(t('advances.add_advance.nav'), advances_select_rate_path, class: 'secondary-button')
   .advances-main-body
-    = render 'reports/reports_table', table_class: 'manage-advances-table', table_data: @advances_data_table, sortable: false
+    = form_tag(advances_manage_path, method: :get) do
+      = render 'shared/filter', filter_class: @advances_data_table[:filter][:name], filters: @advances_data_table[:filter][:data]
+      = render 'reports/reports_table', table_class: 'manage-advances-table', table_data: @advances_data_table, sortable: false

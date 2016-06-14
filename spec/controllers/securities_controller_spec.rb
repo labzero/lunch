@@ -138,7 +138,7 @@ RSpec.describe SecuritiesController, type: :controller do
             {
               text: I18n.t('securities.manage.all'),
               value: 'all',
-              class: 'active'
+              active: true
             }
           ]
         }

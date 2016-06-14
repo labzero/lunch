@@ -311,3 +311,22 @@ end
 When(/^I click the Add Advance button$/) do
   page.find('.advances-header-buttons a', text: I18n.t('advances.add_advance.nav').upcase, exact: true).click
 end
+
+Then(/^I see the "([^"]*)" filter selected$/) do |filter|
+  page.assert_selector('.advances-filter span.active', text: filter, exact: true)
+end
+
+When(/^I filter the advances by "([^"]*)"$/) do |filter|
+  page.find('.advances-filter span', text: filter, exact: true).click
+end
+
+Then(/^I see (only outstanding|all) advances$/) do |type|
+  case type
+  when 'only outstanding'
+    page.assert_selector('.manage-advances-table tr td:nth-child(6) span')
+  when 'all'
+    page.assert_selector('.manage-advances-table tr td:nth-child(6)', text: I18n.t('global.missing_value'), exact: true)
+  else
+    raise ArgumentError.new("unknown advance type: #{type}")
+  end
+end

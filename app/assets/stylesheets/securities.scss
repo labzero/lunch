@@ -41,19 +41,7 @@
 }
 
 .securities-status-filter {
-  float: left;
-  span {
-    margin-left: 20px;
-    cursor: pointer;
-    line-height: 27px;
-    &:first-child {
-      margin-left: 0;
-    }
-    &.active {
-      color: $actionable-blue;
-      cursor: default;
-    }
-  }
+  @extend %table-filter;
 }
 
 .manage-securities-table-actions {

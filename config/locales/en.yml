@@ -1906,6 +1906,8 @@ en:
         stock_leverage: Stock Leverage
     manage_advances:
       title: Manage Advances
+      all: All Advances
+      outstanding: Outstanding Advances
     confirmation:
       title: Advance Confirmation
       in_progress: In Progress

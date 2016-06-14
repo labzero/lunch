@@ -977,6 +977,19 @@ describe MemberBalanceService do
     end
   end
 
+  describe '`advances` method' do
+    let(:call_method) { subject.advances }
+    it 'calls `get_json` with the advances endpoint' do
+      expect(subject).to receive(:get_json).with(:advances, "member/#{member_id}/advances")
+      call_method
+    end
+    it 'returns the result of the `get_json` call' do
+      results = double('Some Results')
+      allow(subject).to receive(:get_json).and_return(results)
+      expect(call_method).to be(results)
+    end
+  end
+
   describe 'the `parallel_shift` method', :vcr do
     let(:parallel_shift) {subject.parallel_shift}
     let(:response_no_dates) { JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'parallel_shift_no_dates.json'))).with_indifferent_access }

@@ -64,7 +64,7 @@ class SecuritiesController < ApplicationController
           {
             text: t('securities.manage.all'),
             value: 'all',
-            class: 'active'
+            active: true
           }
         ]
       },

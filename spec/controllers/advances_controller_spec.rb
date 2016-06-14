@@ -94,18 +94,66 @@ RSpec.describe AdvancesController, :type => :controller do
       call_action
       expect(response.body).to render_template(:manage)
     end
-    it 'sets @advances_table_data[:column_headings] appropriately' do
+    it 'sets @advances_data_table[:column_headings] appropriately' do
       call_action
       expect(assigns[:advances_data_table][:column_headings]).to eq(column_headings)
     end
-    describe 'when a job_id is not present' do
-      it_behaves_like 'a MemberBalanceServiceJob backed report', 'active_advances', :perform_later
-
-      before { allow(MemberBalanceServiceJob).to receive(:perform_later).and_return(member_balance_service_job_instance) }
-
-      it 'sets the @load_url with the appropriate params' do
+    describe 'filtering' do
+      it 'sets a `filter` entry on `@advances_data_table`' do
         call_action
-        expect(assigns[:load_url]).to eq(advances_manage_url(job_id: job_status.id))
+        expect(assigns[:advances_data_table][:filter]).to include(name: 'advances-filter', remote: 'maturity', data:[
+          include(text: I18n.t('advances.manage_advances.outstanding'), value: described_class::ADVANCES_OUTSTANDING),
+          include(text: I18n.t('advances.manage_advances.all'), value: described_class::ADVANCES_ALL)
+        ])
+      end
+      {
+        'when the `maturity` param is not set' => nil,
+        'when the `maturity` param is set to `ADVANCES_OUTSTANDING`' => described_class::ADVANCES_OUTSTANDING
+      }.each do |clause, value|
+        describe clause do
+          let(:call_action) { get :manage, maturity: value }
+          it 'sets the `active` attribute of the `ADVANCES_OUTSTANDING` filter to true' do
+            call_action
+            expect(assigns[:advances_data_table][:filter][:data]).to include(include(active: true, value: described_class::ADVANCES_OUTSTANDING))
+          end
+          it 'sets the `active` attribute of the `ADVANCES_ALL` filter to false' do
+            call_action
+            expect(assigns[:advances_data_table][:filter][:data]).to include(include(active: false, value: described_class::ADVANCES_ALL))
+          end
+        end
+      end
+      describe 'when the `maturity` param is set to `ADVANCES_ALL`' do
+        let(:call_action) { get :manage, maturity: described_class::ADVANCES_ALL }
+        it 'sets the `active` attribute of the `ADVANCES_OUTSTANDING` filter to false' do
+          call_action
+          expect(assigns[:advances_data_table][:filter][:data]).to include(include(active: false, value: described_class::ADVANCES_OUTSTANDING))
+        end
+        it 'sets the `active` attribute of the `ADVANCES_ALL` filter to true' do
+          call_action
+          expect(assigns[:advances_data_table][:filter][:data]).to include(include(active: true, value: described_class::ADVANCES_ALL))
+        end
+      end
+    end
+    describe 'when a job_id is not present' do
+      before { allow(MemberBalanceServiceJob).to receive(:perform_later).and_return(member_balance_service_job_instance) }
+      ['when the `maturity` param is not set', 'when the `maturity` param is set to `ADVANCES_OUTSTANDING`'].each do |clause|
+        describe clause do
+          it_behaves_like 'a MemberBalanceServiceJob backed report', 'active_advances', :perform_later
+
+          it 'sets the @load_url with the appropriate params' do
+            call_action
+            expect(assigns[:load_url]).to eq(advances_manage_url(job_id: job_status.id, maturity: described_class::ADVANCES_OUTSTANDING))
+          end
+        end
+      end
+      describe 'when the `maturity` param is set to `ADVANCES_ALL`' do
+        let(:call_action) { get :manage, maturity: described_class::ADVANCES_ALL }
+        it_behaves_like 'a MemberBalanceServiceJob backed report', 'advances', :perform_later
+
+        it 'sets the @load_url with the appropriate params' do
+          call_action
+          expect(assigns[:load_url]).to eq(advances_manage_url(job_id: job_status.id, maturity: described_class::ADVANCES_ALL))
+        end
       end
       it 'sets @advances_data_table[:deferred] to true' do
         call_action

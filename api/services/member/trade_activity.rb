@@ -361,6 +361,68 @@ module MAPI
           end
           credit_activity
         end
+
+        def self.historic_advances_query(member_id, after_date, limit=2000)
+          <<-SQL
+            SELECT TRADE_DATE, SETTLEMENT_DATE FUNDING_DATE, NVL(TERMINATION_DATE, MATURITY_DATE) MATURITY_DATE,
+            DEAL_NUMBER ADVANCE_NUMBER, DEAL_STRUCTURE_CODE ADVANCE_TYPE, ORIGINAL_PAR
+            FROM ODS.DEAL@ODS_LK WHERE INSTRUMENT = 'ADVS' AND NVL(TERMINATION_DATE, MATURITY_DATE) < SYSDATE
+            AND NVL(TERMINATION_DATE, MATURITY_DATE) >= #{quote(after_date)}
+            AND FHLB_ID = #{quote(member_id)}
+            AND ROWNUM <= #{quote(limit)}
+            ORDER BY TRADE_DATE DESC
+          SQL
+        end
+
+        def self.historic_advances_fetch(app, member_id, after_date)
+          unless should_fake?(app)
+            fetch_hashes(app.logger, historic_advances_query(member_id, after_date))
+          else
+            rng = Random.new((member_id.to_i * 10**10) + after_date.to_time.to_i)
+            days = Time.zone.today - after_date
+            entries = []
+            rng.rand(1..18).times do
+              maturity_date = after_date + rng.rand(0..days).days
+              trade_date = maturity_date - rng.rand(1..1000).days
+              entries << {
+                'ADVANCE_NUMBER' => rng.rand(100000..999999),
+                'MATURITY_DATE' => maturity_date,
+                'TRADE_DATE' => trade_date,
+                'FUNDING_DATE' => trade_date + rng.rand(1..3).days,
+                'ORIGINAL_PAR' =>  rng.rand(10**6..10**9),
+                'ADVANCE_TYPE' => ['FX CONSTANT', 'VR S-I FLTR', 'O/N VRC'].sample(random: rng)
+              }
+            end
+            entries
+          end
+        end
+
+        def self.historic_advances(app, member_id, after_date=nil)
+          after_date ||= Time.zone.today - 18.months
+          rows = historic_advances_fetch(app, member_id, after_date) || []
+
+          rows.collect! do |advance|
+            {
+              maturity_date: advance['MATURITY_DATE'].try(:to_date).try(:iso8601),
+              trade_date: advance['TRADE_DATE'].try(:to_date).try(:iso8601),
+              funding_date: advance['FUNDING_DATE'].try(:to_date).try(:iso8601),
+              original_par: advance['ORIGINAL_PAR'].try(:to_i),
+              advance_number: advance['ADVANCE_NUMBER'].try(:to_s),
+              advance_type: advance['ADVANCE_TYPE'].try(:to_s),
+              advance_confirmation: []
+            }.with_indifferent_access
+          end
+
+          advance_numbers = rows.collect { |trade| trade[:advance_number] }
+          advance_confirmations = advance_confirmation(app, member_id, advance_numbers)
+
+          advance_confirmations.each do |confirmation|
+            advance = rows.find{ |trade| trade[:advance_number] == confirmation[:advance_number] }
+            advance[:advance_confirmation] << confirmation if advance
+          end
+
+          rows
+        end
       end
     end
   end
