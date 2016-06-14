@@ -55,6 +55,12 @@ class InternalMailer < ActionMailer::Base
     mail(subject: I18n.t('emails.quick_report_status.subject', completed: @completed, total: @total))
   end
 
+  def quick_report_long_run(completed, total)
+    @completed = completed
+    @total = total
+    mail(subject: I18n.t('emails.quick_report_long_run.subject'))
+  end
+
   protected
 
   def user_name_from_user(user)

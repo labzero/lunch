@@ -2776,6 +2776,8 @@ en:
       start_time: 'Start time: %{time}'
       end_time: 'End time: %{time}'
       elapsed_time: 'Elapsed time: %{time}'
+    quick_report_long_run:
+      subject: 'URGENT: Batch reports not finished by midnight!'
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

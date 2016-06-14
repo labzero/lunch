@@ -218,6 +218,23 @@ RSpec.describe InternalMailer, :type => :mailer do
     end
   end
 
+  describe '`quick_report_long_run` email' do
+    let(:completed) { rand(1..499) }
+    let(:total) { rand(500..999) }
+    let(:build_mail) { mail :quick_report_long_run, completed, total }
+
+    it_behaves_like 'an internal notification email', I18n.t('emails.quick_report_long_run.subject')
+
+    it 'assigns @completed' do
+      build_mail
+      expect(assigns[:completed]).to be(completed)
+    end
+    it 'assigns @total' do
+      build_mail
+      expect(assigns[:total]).to be(total)
+    end
+  end
+
   describe '`user_name_from_user` protected method' do
     subject { described_class.send :new }
     let(:user) { double('A User', display_name: nil, username: nil)}
