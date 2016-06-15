@@ -121,6 +121,7 @@ en:
     defined_term: '%{term}:'
     authorizations: Authorizations
     letters_of_credit: Lettters of Credit
+    time_on_date: '%{time} on %{date}'
     enter: Enter
     uploading: 'Uploading...'
     cancel_upload: Cancel Upload
@@ -1921,7 +1922,7 @@ en:
     vrc_rates: VRC Rates
     frc_rates: FRC Rates
     actions:
-      preview: Add Advance
+      review: Review Advance
       submit: Submit Advance
       another_advance: Add Another Advance
       view: View rate options

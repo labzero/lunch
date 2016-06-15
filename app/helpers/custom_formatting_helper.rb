@@ -74,6 +74,11 @@ module CustomFormattingHelper
     datetime.to_datetime.strftime('%l:%M %P %m/%d/%Y')
   end
 
+  def fhlb_datetime_standard_numeric_with_on(datetime)
+    return t('global.missing_value') if datetime.nil?
+    t('global.time_on_date', time: datetime.to_datetime.strftime('%l:%M %P'), date: datetime.to_datetime.strftime('%m/%d/%Y'))
+  end
+
   def fhlb_report_date_numeric(date)
     return t('global.missing_value') if date.nil?
     date.to_date.strftime('%-m-%-d-%Y')

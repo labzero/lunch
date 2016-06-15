@@ -40,7 +40,7 @@
                 = render 'rates_table', advance_terms: @advance_terms, advance_types: @advance_types, loading: true, selected_type: @selected_type, selected_term: @selected_term
           .advances-actions
             = link_to(t('global.cancel'), advances_manage_path, class: 'secondary-button cancel-advance')
-            = f.submit({disabled: true, class: ["primary-button initiate-add-advance"], value: t('advances.actions.preview')})
+            = f.submit({disabled: true, class: ["primary-button initiate-add-advance"], value: t('advances.actions.review')})
           %small
             %p.add-advances-footer= t('advances.add_advance.terms')
         = render 'borrowing_capacity', profile: @profile
