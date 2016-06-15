@@ -195,9 +195,6 @@
 .securities-download-instructions {
   @extend %typography-dashboard-account-summary;
   display: none;
-  border: 1px dashed $actionable-blue;
-  border-radius: $default-border-radius;
-  background: $lightest-blue;
   margin-top: 20px;
   padding: 20px;
   & > p:first-child {
@@ -208,6 +205,11 @@
     color: $actionable-blue;
     cursor: pointer;
     text-transform: uppercase;
+  }
+  .file-upload-progress {
+    p:last-of-type {
+      margin-top: 120px;
+    }
   }
 }
 

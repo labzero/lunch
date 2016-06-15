@@ -86,6 +86,11 @@
   font-weight: $semibold-weight;
 }
 
+@mixin typography-transition-message {
+  font-size: 0.8667rem;
+  font-weight: $light-weight;
+}
+
 @mixin typography-table-cell {
   font-size: 0.8rem;
   font-weight: $normal-weight;
@@ -437,4 +442,8 @@
 
 %typography-module-summary-data {
   @include typography-module-summary-data;
+}
+
+%typography-transition-message {
+  @include typography-transition-message;
 }

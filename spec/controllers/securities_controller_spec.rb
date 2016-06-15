@@ -393,6 +393,14 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
+  describe 'POST upload_release' do
+    let(:call_method) { post :upload_release }
+    it 'renders nothing' do
+      call_method
+      expect(response.body).to be_empty
+    end
+  end
+
   describe 'private methods' do
     describe '`custody_account_type_to_status`' do
       ['P', 'p', :P, :p].each do |custody_account_type|

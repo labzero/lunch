@@ -122,6 +122,8 @@ en:
     authorizations: Authorizations
     letters_of_credit: Lettters of Credit
     enter: Enter
+    uploading: 'Uploading...'
+    cancel_upload: Cancel Upload
     dates:
       1_day: 1 day
       1_month: 1 mo

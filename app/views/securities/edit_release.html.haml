@@ -44,7 +44,7 @@
         %section.securities-display
           = render 'reports/reports_table', table_class: 'securities-release-table', table_data: @securities_table_data, sortable: false, disable_auto_width: true
           %p.securities-download= t('securities.release.edit.title')
-          .securities-download-instructions
+          .securities-download-instructions.fade{data: {dropzone: true}}
             %p= t('securities.release.edit.intro')
             %p.securities-download-instructions-step= t('securities.release.edit.step_1.title')
             %p.securities-download-instructions-description{data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}}= t('securities.release.edit.step_1.description')
@@ -70,8 +70,15 @@
               - span = capture_haml do
                 %span= t('securities.release.edit.drag_drop')
               - button = capture_haml do
-                %button.secondary-button= t('securities.release.edit.select_file')
+                .input-file-button-wrapper
+                  %button.secondary-button= t('securities.release.edit.select_file')
+                  %input#fileupload{type: "file", name: "file", data: {url: securities_upload_release_path}}
               =t('securities.release.edit.download_actions_html', span: span, button: button)
+            .file-upload-progress
+              %p{data: {cancel_upload: true}}= t('global.cancel_upload')
+              %p= t('global.uploading')
+              .gauge-section
+                .inner-gauge-section
         .securities-actions
           %span.secondary-button.delete-release-trigger= t('global.delete')
           = submit_tag(t('securities.release.submit_authorization'), class: 'primary-button')

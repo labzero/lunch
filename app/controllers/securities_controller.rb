@@ -170,6 +170,10 @@ class SecuritiesController < ApplicationController
     render xlsx: 'release', filename: "securities.xlsx"
   end
 
+  def upload_release
+    render nothing: true
+  end
+
   private
 
   def custody_account_type_to_status(custody_account_type)
