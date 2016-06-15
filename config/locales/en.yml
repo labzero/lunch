@@ -1459,6 +1459,7 @@ en:
           title: Historical Price Indications and STA Rates
           freshness: This report reflects price indications as of 6:00 am PT on the date displayed and the STA rate as of the date displayed.
           availability: Historical data available varies by credit product.
+          sta_freshness: This report reflects the STA rate as of the date displayed.
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit Program
         settlement_transaction_account: Settlement/Transaction Account (STA)
