@@ -7,7 +7,7 @@ RSpec.describe InternalMailer, :type => :mailer do
     end
   end
 
-  shared_examples 'an internal error notification email' do |message_subject|
+  shared_examples 'an internal error notification email' do |message_subject, address=InternalMailer::GENERAL_ALERT_ADDRESS|
     it 'assigns @user to the return of `user_name_from_user`' do
       a_name = double('Some Name')
       allow_any_instance_of(described_class).to receive(:user_name_from_user).and_return(a_name)
@@ -27,21 +27,21 @@ RSpec.describe InternalMailer, :type => :mailer do
       build_mail
       expect(response.body).to match(request_id.to_s)
     end
-    it_behaves_like 'an internal notification email', message_subject
+    it_behaves_like 'an internal notification email', message_subject, address
   end
 
-  shared_examples 'an internal notification email' do |message_subject|
+  shared_examples 'an internal notification email' do |message_subject, address=InternalMailer::GENERAL_ALERT_ADDRESS|
     it 'sets the `to` of the email' do
       build_mail
-      expect(response.to.first).to eq InternalMailer::GENERAL_ALERT_ADDRESS
+      expect(response.to.first).to eq(address)
     end
     it 'sets the `from` of the email' do
       build_mail
-      expect(response.from.first).to eq InternalMailer::GENERAL_ALERT_ADDRESS
+      expect(response.from.first).to eq(address)
     end
     it 'sets the `subject` of the email' do
       build_mail
-      expect(response.subject).to eq message_subject
+      expect(response.subject).to eq(message_subject)
     end
   end
 
@@ -155,7 +155,7 @@ RSpec.describe InternalMailer, :type => :mailer do
       allow_any_instance_of(described_class).to receive(:fhlb_formatted_currency).with(amount, anything).and_return(formatted_amount)
     end
 
-    it_behaves_like 'an internal notification email', I18n.t('emails.long_term_advance.subject', amount: formatted_amount, term: term)
+    it_behaves_like 'an internal notification email', I18n.t('emails.long_term_advance.subject', amount: formatted_amount, term: term), InternalMailer::WEB_TRADE_ALERT_ADDRESS
     [:advance, :confirmation_number, :trade_date, :funding_date, :maturity_date, :signer, :type, :term, :rate, :member_id, :member_name, :amount].each do |param|
       it "assigns @#{param}" do
         build_mail
