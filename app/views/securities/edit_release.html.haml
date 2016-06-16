@@ -42,7 +42,10 @@
               = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_name, label: t('securities.release.delivery_instructions.mutual_fund'), horizontal: true
               = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_account_number, label: t('securities.release.delivery_instructions.account_number'), horizontal: true
         %section.securities-display
-          = render 'reports/reports_table', table_class: 'securities-release-table', table_data: @securities_table_data, sortable: false, disable_auto_width: true
+          %h2= t('securities.title')
+          %p.securities-release-upload-error= t('securities.release.edit.upload_error')
+          .securities-release-table-wrapper
+            = render 'upload_release'
           %p.securities-download= t('securities.release.edit.title')
           .securities-download-instructions.fade{data: {dropzone: true}}
             %p= t('securities.release.edit.intro')
@@ -72,7 +75,7 @@
               - button = capture_haml do
                 .input-file-button-wrapper
                   %button.secondary-button= t('securities.release.edit.select_file')
-                  %input#fileupload{type: "file", name: "file", data: {url: securities_upload_release_path}}
+                  %input#fileupload{type: "file", name: "file", accept: SecuritiesController::ACCEPTED_UPLOAD_MIMETYPES.join(' ,'), data: {url: securities_upload_release_path, 'results-container-class' => 'securities-release-table-wrapper', 'error-class' => 'securities-release-upload-error', 'form-name' => 'securities-release-download', 'input-name' => 'securities'}}
               =t('securities.release.edit.download_actions_html', span: span, button: button)
             .file-upload-progress
               %p{data: {cancel_upload: true}}= t('global.cancel_upload')

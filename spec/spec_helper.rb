@@ -66,6 +66,7 @@ RSpec.configure do |config|
   config.include UserHelpers, :type => :controller
   config.include Paperclip::Shoulda::Matchers
   config.extend AuthorizationHelpers, :type => :controller
+  config.extend FileUploadHelpers, :type => :controller
   config.filter_run_excluding :skip => true
 
   config.before(:all) do

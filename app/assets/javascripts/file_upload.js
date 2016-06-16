@@ -1,6 +1,7 @@
 $(function () {
   var jqXHR = false;
   var dropZone = $('[data-dropzone]');
+  var resultsContainer = $('[data-results-container]');
   var progressBar = $('.file-upload-progress .inner-gauge-section');
   $('#fileupload').fileupload({
     dataType: 'json',
@@ -9,6 +10,7 @@ $(function () {
       if (jqXHR) {
         return false;
       } else {
+        toggleUploadError($(e.target).data('error-class'), false);
         dropZone.addClass('file-uploading');
         jqXHR = data.submit();
       };
@@ -21,16 +23,34 @@ $(function () {
       );
     },
     done: function (e, data) {
-      $.each(data.result.files, function (index, file) {
-        // TODO: Redraw table with new data as part of MEM-1591
-      });
+      var $target = $(e.target);
+      var resultsContainerClass = $target.data('results-container-class');
+      var formName = $target.data('form-name');
+      var inputName = $target.data('input-name');
+      if (resultsContainerClass) {
+        $('.' + resultsContainerClass).html(data.result.html);
+      };
+      if (formName && inputName) {
+        $('form[name=' + formName + '] input[name=' + inputName + ']').attr('value', data.result.form_data);
+      };
     },
     always: function(e, data) {
       dropZone.removeClass('file-uploading');
       progressBar.css('width', '0%');
       jqXHR = false;
+    },
+    fail: function(e, data) {
+      toggleUploadError($(e.target).data('error-class'), true);
     }
   });
+
+  function toggleUploadError(errorClass, active) {
+    if (errorClass && active) {
+      $('.' + errorClass).show();
+    } else if (errorClass) {
+      $('.' + errorClass).hide();
+    };
+  };
 
   $('[data-cancel-upload]').click(function (e) {
     jqXHR.abort();

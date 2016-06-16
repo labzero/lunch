@@ -1230,6 +1230,7 @@ en:
         drag_drop: Drag and Drop Here
         select_file: Select File
         download_actions_html: '%{span} <span>or</span> %{button}'
+        upload_error: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
   reports:
     meta_title: FHLB - Reports
     title: Reports
