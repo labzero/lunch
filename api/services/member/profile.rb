@@ -71,9 +71,9 @@ module MAPI
           SBC_MARKET_VALUE_AA,
           SBC_MARKET_VALUE,
           EXCESS_SBC_MARKET_VALUE,
-          EXCESS_SBC_MARKET_VALUE_AG,
-          EXCESS_SBC_MARKET_VALUE_AAA,
-          EXCESS_SBC_MARKET_VALUE_AA,
+          EXCESS_SBC_MV_AG,
+          EXCESS_SBC_MV_AAA,
+          EXCESS_SBC_MV_AA,
           (
             (NVL(ADVANCES_OUTS_EOD, 0) -
             (NVL(REG_ADV_MAT_TDY_TRM, 0) + NVL(SBC_MATURING_TDY_TRM, 0)) -
@@ -168,19 +168,19 @@ module MAPI
                   total: member_position_hash['SBC_BORR_CAP_AA'].to_i,
                   remaining: member_position_hash['EXCESS_SBC_BORR_CAP_AA'].to_i,
                   total_market: member_position_hash['SBC_MARKET_VALUE_AA'].to_i,
-                  remaining_market: member_position_hash['EXCESS_SBC_MARKET_VALUE_AA'].to_i
+                  remaining_market: member_position_hash['EXCESS_SBC_MV_AA'].to_i
                 },
                 aaa: {
                   total: member_position_hash['SBC_BORR_CAP_AAA'].to_i,
                   remaining: member_position_hash['EXCESS_SBC_BORR_CAP_AAA'].to_i,
                   total_market: member_position_hash['SBC_MARKET_VALUE_AAA'].to_i,
-                  remaining_market: member_position_hash['EXCESS_SBC_MARKET_VALUE_AAA'].to_i
+                  remaining_market: member_position_hash['EXCESS_SBC_MV_AAA'].to_i
                 },
                 agency: {
                   total: member_position_hash['SBC_BORR_CAP_AG'].to_i,
                   remaining: member_position_hash['EXCESS_SBC_BORR_CAP_AG'].to_i,
                   total_market: member_position_hash['SBC_MARKET_VALUE_AG'].to_i,
-                  remaining_market: member_position_hash['EXCESS_SBC_MARKET_VALUE_AG'].to_i
+                  remaining_market: member_position_hash['EXCESS_SBC_MV_AG'].to_i
                 }
               }
             },

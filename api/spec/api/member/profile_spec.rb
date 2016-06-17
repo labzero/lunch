@@ -55,9 +55,9 @@ describe MAPI::ServiceApp do
         let(:some_financial_data) do
           data = {}
           %w(RECOM_EXPOSURE_PCT MAX_TERM TOTAL_ASSETS RHFA_ADVANCES_LIMIT REG_ADVANCES_OUTS SBC_ADVANCES_OUTS SWAP_MARKET_OUTS SWAP_NOTIONAL_PRINCIPAL UNSECURED_CREDIT LCS_OUTS MPF_CE_COLLATERAL_REQ STX_LEDGER_BALANCE CREDIT_OUTSTANDING COMMITTED_FUND_LESS_MPF AVAILABLE_CREDIT RECOM_EXPOSURE REG_BORR_CAP SBC_BORR_CAP EXCESS_REG_BORR_CAP EXCESS_SBC_BORR_CAP_AG EXCESS_SBC_BORR_CAP_AAA EXCESS_SBC_BORR_CAP_AA EXCESS_SBC_BORR_CAP SBC_MARKET_VALUE_AG SBC_MARKET_VALUE_AAA SBC_MARKET_VALUE_AA SBC_MARKET_VALUE EXCESS_SBC_MARKET_VALUE ADVANCES_OUTSTANDING MPF_UNPAID_BALANCE TOTAL_CAPITAL_STOCK MRTG_RELATED_ASSETS MRTG_RELATED_ASSETS_round100
-            SBC_BORR_CAP_AG EXCESS_SBC_BORR_CAP_AG SBC_MARKET_VALUE_AG EXCESS_SBC_MARKET_VALUE_AG
-            SBC_BORR_CAP_AA EXCESS_SBC_BORR_CAP_AA SBC_MARKET_VALUE_AA EXCESS_SBC_MARKET_VALUE_AA
-            SBC_BORR_CAP_AAA EXCESS_SBC_BORR_CAP_AAA SBC_MARKET_VALUE_AAA EXCESS_SBC_MARKET_VALUE_AAA
+            SBC_BORR_CAP_AG EXCESS_SBC_BORR_CAP_AG SBC_MARKET_VALUE_AG EXCESS_SBC_MV_AG
+            SBC_BORR_CAP_AA EXCESS_SBC_BORR_CAP_AA SBC_MARKET_VALUE_AA EXCESS_SBC_MV_AA
+            SBC_BORR_CAP_AAA EXCESS_SBC_BORR_CAP_AAA SBC_MARKET_VALUE_AAA EXCESS_SBC_MV_AAA
           ).each do |key|
             data[key] = rand(1..1000000)
           end
@@ -115,19 +115,19 @@ describe MAPI::ServiceApp do
             'total' => 'SBC_BORR_CAP_AG',
             'remaining' => 'EXCESS_SBC_BORR_CAP_AG',
             'total_market' => 'SBC_MARKET_VALUE_AG',
-            'remaining_market' => 'EXCESS_SBC_MARKET_VALUE_AG'
+            'remaining_market' => 'EXCESS_SBC_MV_AG'
           },
           'aa' => {
             'total' => 'SBC_BORR_CAP_AA',
             'remaining' => 'EXCESS_SBC_BORR_CAP_AA',
             'total_market' => 'SBC_MARKET_VALUE_AA',
-            'remaining_market' => 'EXCESS_SBC_MARKET_VALUE_AA'
+            'remaining_market' => 'EXCESS_SBC_MV_AA'
           },
           'aaa' => {
             'total' => 'SBC_BORR_CAP_AAA',
             'remaining' => 'EXCESS_SBC_BORR_CAP_AAA',
             'total_market' => 'SBC_MARKET_VALUE_AAA',
-            'remaining_market' => 'EXCESS_SBC_MARKET_VALUE_AAA'
+            'remaining_market' => 'EXCESS_SBC_MV_AAA'
           }
         }.each do |collateral_type, keys|
           keys.each do |key, field|
