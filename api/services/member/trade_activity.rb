@@ -388,7 +388,7 @@ module MAPI
                 'ADVANCE_NUMBER' => rng.rand(100000..999999),
                 'MATURITY_DATE' => maturity_date,
                 'TRADE_DATE' => trade_date,
-                'FUNDING_DATE' => trade_date + rng.rand(1..3).days,
+                'FUNDING_DATE' => [trade_date + rng.rand(1..3).days, maturity_date].min,
                 'ORIGINAL_PAR' =>  rng.rand(10**6..10**9),
                 'ADVANCE_TYPE' => ['FX CONSTANT', 'VR S-I FLTR', 'O/N VRC'].sample(random: rng)
               }
