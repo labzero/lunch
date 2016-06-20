@@ -26,7 +26,7 @@ workbook.styles do |styles|
     sheet.add_row @securities_table_data[:column_headings], style: header_style
     @securities_table_data[:rows].each_with_index do |row, i|
       values = row[:columns].collect { |column| column[:value] }
-      sheet.add_row values
+      sheet.add_row values, types: [:string, :string, :float, :float]
     end
 
     sheet.add_conditional_formatting('A:D', { :type => :expression,
