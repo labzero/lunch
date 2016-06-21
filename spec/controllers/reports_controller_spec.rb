@@ -1931,6 +1931,10 @@ RSpec.describe ReportsController, :type => :controller do
           ]
         )
       end
+      it 'sets @whole_report_disabled to false' do
+        current_price_indications
+        expect(assigns[:whole_report_disabled]).to be(false)
+      end
       describe 'when the `skip_deferred_load` controller attribute is true' do
         before do
           controller.skip_deferred_load = true
@@ -1990,6 +1994,9 @@ RSpec.describe ReportsController, :type => :controller do
           end
           it 'sets `@vrc_date` to `nil`' do
             expect(assigns[:vrc_date]).to be_nil
+          end
+          it 'sets @whole_report_disabled to true' do
+            expect(assigns[:whole_report_disabled]).to be(true)
           end
         end
         describe 'when a specific price is disabled' do

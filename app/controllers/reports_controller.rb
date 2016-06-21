@@ -952,9 +952,11 @@ class ReportsController < ApplicationController
 
       @job_status_url = false
       @load_url = false
+      @whole_report_disabled = false
       if params[:job_id] || self.skip_deferred_load
         if report_disabled?(CURRENT_PRICE_INDICATIONS_WEB_FLAGS)
           data = {}
+          @whole_report_disabled = true
         elsif self.skip_deferred_load
           data = ReportCurrentPriceIndicationsJob.perform_now(current_member_id, request.uuid)
         else
