@@ -1,0 +1,291 @@
+                                                                                                                                                                                                                                                               
+Delivered-To: ned@labzero.com
+Received: by 10.103.132.79 with SMTP id g76csp1385189vsd;
+        Mon, 20 Jun 2016 11:38:52 -0700 (PDT)
+X-Received: by 10.129.27.9 with SMTP id b9mr9510512ywb.173.1466447932115;
+        Mon, 20 Jun 2016 11:38:52 -0700 (PDT)
+Return-Path: <v-dbeccnf_daffpofpok_didecpdi_didecpdi_a@bounce.mkt1700.com>
+Received: from mail1843.federalhomeloan.mkt1700.com (mail1843.federalhomeloan.mkt1700.com. [208.85.53.43])
+        by mx.google.com with ESMTP id m136si13191353ywd.372.2016.06.20.11.38.51
+        for <ned@labzero.com>;
+        Mon, 20 Jun 2016 11:38:51 -0700 (PDT)
+Received-SPF: pass (google.com: domain of v-dbeccnf_daffpofpok_didecpdi_didecpdi_a@bounce.mkt1700.com designates 208.85.53.43 as permitted sender) client-ip=208.85.53.43;
+Authentication-Results: mx.google.com;
+       dkim=fail header.i=@info.fhlbsf.com;
+       spf=pass (google.com: domain of v-dbeccnf_daffpofpok_didecpdi_didecpdi_a@bounce.mkt1700.com designates 208.85.53.43 as permitted sender) smtp.mailfrom=v-dbeccnf_daffpofpok_didecpdi_didecpdi_a@bounce.mkt1700.com
+DKIM-Signature: v=1; a=rsa-sha1; c=relaxed/relaxed; s=spop; d=info.fhlbsf.com;
+ h=Date:From:Reply-To:To:Message-ID:Subject:MIME-Version:Content-Type:List-Unsubscribe; i=marketing@info.fhlbsf.com;
+ bh=xGpAIJUNLkK/fb+nwD+ITXxw7BY=;
+ b=gzfjDSiF0Jrz1qlLken3YrzH8uZmi9RqMFDFZSBN88ibfre3693/C4jrKg34KWyJJmMvLf34oTFY
+   NShL0x1W/w==
+DomainKey-Signature: a=rsa-sha1; c=nofws; q=dns; s=spop; d=info.fhlbsf.com;
+ b=PRtD/Ah0dQSWkFbeHRFb19CZ/fyN09hHKdMlDNAPK9ykap/O5gvRgzuxkfkAxMZt865eelF8kCXT
+   wLW9J3eUqw==;
+Received: by mail1843.federalhomeloan.mkt1700.com id hd0s3m19if44 for <ned@labzero.com>; Mon, 20 Jun 2016 18:38:51 +0000 (envelope-from <v-dbeccnf_daffpofpok_didecpdi_didecpdi_a@bounce.mkt1700.com>)
+Date: Mon, 20 Jun 2016 18:38:50 +0000 (GMT)
+From: FHLBank San Francisco <marketing@info.fhlbsf.com>
+Reply-To: marketing@info.fhlbsf.com
+To: ned@labzero.com
+Message-ID: <286922290.436395321466447930989.JavaMail.app@rbg43.atlis1>
+Subject: Community Works Newsletter - Spring 2016
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+  boundary="----=_Part_215525_525833206.1466447930966"
+x-mid: 51651285
+x-rpcampaign: sp51651285
+Feedback-ID: pod4_26686_51651285_942944056:pod4_26686:ibmsilverpop
+x-job: 51651285
+x-orgId: 26686
+List-Unsubscribe: <mailto:v-dbeccnf_daffpofpok_didecpdi_didecpdi_a@bounce.mkt1700.com?subject=Unsubscribe>
+
+------=_Part_215525_525833206.1466447930966
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org=
+/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns=3D"http://www.w3.org/1999/xhtml"><head xmlns=3D""><title>Commun=
+ity Works</title><meta http-equiv=3D"Content-Type" content=3D"text/html; ch=
+arset=3Dutf-8"><meta name=3D"viewport" content=3D"width=3Ddevice-width, ini=
+tial-scale=3D1.0"><style type=3D"text/css" xmlns=3D"">
+=09a:link {color:#4160AB;}
+=09</style></head><body xmlns=3D"" style=3D"width: 100%; padding-bottom: 0p=
+x; -ms-text-size-adjust: 100%; padding-top: 0px; padding-left: 0px; margin:=
+ 0px; padding-right: 0px; -webkit-text-size-adjust: 100%"><CENTER><FONT SIZ=
+E=3D"1" COLOR=3D"#000000" FACE=3D"ARIAL">If you are unable to see the messa=
+ge below, <A href=3D"http://links.mkt1700.com/servlet/MailView?ms=3DNTE2NTE=
+yODUS1&r=3DMjA3NjAxMTY0MjY2S0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0">click here =
+to view</A>.</FONT><font face=3D"ARIAL" color=3D"#808080" size=3D"2"><br></=
+font></CENTER><table id=3D"backgroundTable" cellspacing=3D"0" cellpadding=
+=3D"0" border=3D"0" xmlns=3D"" style=3D"width: 100%; border-collapse: colla=
+pse; color: #333; padding-bottom: 0px; padding-top: 0px; padding-left: 0px;=
+ margin: 0px; line-height: 1.35em; padding-right: 0px; mso-table-lspace: 0p=
+t; mso-table-rspace: 0pt"><tr xmlns=3D""><td valign=3D"top" xmlns=3D"" styl=
+e=3D"font-family: sans-serif; border-collapse: collapse; text-align: left">=
+<table cellspacing=3D"0" cellpadding=3D"0" width=3D"585" align=3D"center" b=
+order=3D"0" xmlns=3D"" style=3D"border-collapse: collapse; mso-table-lspace=
+: 0pt; mso-table-rspace: 0pt"><tr xmlns=3D""><td colspan=3D"3" xmlns=3D"" s=
+tyle=3D"font-family: sans-serif; border-collapse: collapse; text-align: lef=
+t"><a xmlns=3D""  href=3D"http://links.mkt1700.com/ctt?kn=3D17&ms=3DNTE2NTE=
+yODUS1&r=3DMjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=
+=3D"www_fhlbsf_com_"><img class=3D"logo" border=3D"0"  alt=3D"" width=3D"10=
+4" height=3D"38" xmlns=3D"" style=3D"text-decoration: none; outline-width: =
+medium; outline-style: none; display: block; outline-color: invert; -ms-int=
+erpolation-mode: bicubic" src=3D"http://www.fhlbsf.com/images/fhlbsf.logo.e=
+mail.png" /></a> <a xmlns=3D""  href=3D"http://links.mkt1700.com/ctt?kn=3D5=
+&ms=3DNTE2NTEyODUS1&r=3DMjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&=
+rt=3D0" name=3D"www_fhlbsf_com_resource_center"><img border=3D"0"  alt=3D""=
+ width=3D"585" height=3D"54" xmlns=3D"" style=3D"text-decoration: none; out=
+line-width: medium; outline-style: none; outline-color: invert; -ms-interpo=
+lation-mode: bicubic" src=3D"http://fhlbsf.com/images/cw-elogo.gif" /></a><=
+/td></tr><tr xmlns=3D""><td colspan=3D"3" xmlns=3D"" style=3D"font-family: =
+sans-serif; border-collapse: collapse; text-align: left"><div class=3D"edit=
+ion" xmlns=3D"" style=3D"font-size: 14px; color: #4f4f4f; padding-bottom: 0=
+px; padding-top: 5px; padding-left: 0px; padding-right: 0px">Spring 2016</d=
+iv></td></tr><tr xmlns=3D""><td valign=3D"top" width=3D"280" xmlns=3D"" sty=
+le=3D"font-family: sans-serif; border-collapse: collapse; text-align: left"=
+><a xmlns=3D""  style=3D"text-decoration: none; color: #4160ab; display: bl=
+ock" href=3D"http://links.mkt1700.com/ctt?kn=3D10&ms=3DNTE2NTEyODUS1&r=3DMj=
+A3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=3D"www_fhlbsf=
+_com_resource_c_1"><img class=3D"image_fix" border=3D"1"  alt=3D"" width=3D=
+"280" height=3D"186" xmlns=3D"" style=3D"text-decoration: none; border-top:=
+ #ccc 1px solid; border-right: #ccc 1px solid; border-bottom: #ccc 1px soli=
+d; outline-width: medium; outline-style: none; border-left: #ccc 1px solid;=
+ display: block; outline-color: invert; -ms-interpolation-mode: bicubic" sr=
+c=3D"http://www.fhlbsf.com/images/stories/2016/yolanda-eric-hug-lg.jpg" /><=
+/a><div class=3D"date" xmlns=3D"" style=3D"font-size: 0.9em; color: #666"><=
+/div></td><td valign=3D"top" width=3D"25" xmlns=3D"" style=3D"font-family: =
+sans-serif; border-collapse: collapse; text-align: left"></td><td valign=3D=
+"top" width=3D"280" xmlns=3D"" style=3D"font-family: sans-serif; border-col=
+lapse: collapse; text-align: left"><h2 class=3D"topStory" xmlns=3D"" style=
+=3D"font-size: 20px; font-weight: 100; color: #333; margin: 0px; line-heigh=
+t: 26px"><a xmlns=3D""  style=3D"text-decoration: none; color: #4160ab; dis=
+play: block" href=3D"http://links.mkt1700.com/ctt?kn=3D10&ms=3DNTE2NTEyODUS=
+1&r=3DMjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=3D"ww=
+w_fhlbsf_com_resource_c_1">Driven to Achieve Big Goals</a></h2><p xmlns=3D"=
+" style=3D"font-size: 13px; color: #333; margin: 0.25em 0px 0px; line-heigh=
+t: 19px">Determination. Yolanda Fulton&rsquo;s story is a case study in uns=
+toppable determination. Determined to have a family. Determined to pursue h=
+igher education and a professional career. And determined to finally own a =
+home of her own.</p></td></tr><tr xmlns=3D""><td valign=3D"top" width=3D"28=
+0" xmlns=3D"" style=3D"font-family: sans-serif; border-collapse: collapse; =
+text-align: left">&nbsp;<br xmlns=3D"" /><h1 xmlns=3D"" style=3D"font-size:=
+ 18px; font-weight: 100; color: #333; padding-bottom: 0.5em; padding-top: 0=
+.25em; padding-left: 0px; margin: 0px; padding-right: 0px"><a xmlns=3D""  s=
+tyle=3D"text-decoration: none; color: #602f75; display: block" href=3D"http=
+://links.mkt1700.com/ctt?kn=3D7&ms=3DNTE2NTEyODUS1&r=3DMjA3NjAxMTY0MjY2S0&b=
+=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=3D"www_fhlbsf_com_about_news_re=
+le">NEWS</a></h1></td><td valign=3D"top" width=3D"25" xmlns=3D"" style=3D"f=
+ont-family: sans-serif; border-collapse: collapse; text-align: left"></td><=
+td valign=3D"top" width=3D"280" xmlns=3D"" style=3D"font-family: sans-serif=
+; border-collapse: collapse; text-align: left">&nbsp;<br xmlns=3D"" /><h1 x=
+mlns=3D"" style=3D"font-size: 18px; font-weight: 100; color: #333; padding-=
+bottom: 0.5em; padding-top: 0.25em; padding-left: 0px; margin: 0px; padding=
+-right: 0px"><a xmlns=3D""  style=3D"text-decoration: none; color: #602f75;=
+ display: block" href=3D"http://links.mkt1700.com/ctt?kn=3D15&ms=3DNTE2NTEy=
+ODUS1&r=3DMjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=
+=3D"fhlbsf_com_events_default_aspx">UPCOMING EVENTS</a></h1></td></tr><tr x=
+mlns=3D""><td valign=3D"top" width=3D"280" xmlns=3D"" style=3D"font-family:=
+ sans-serif; border-collapse: collapse; text-align: left"><table cellspacin=
+g=3D"0" cellpadding=3D"0" border=3D"0" xmlns=3D"" style=3D"border-collapse:=
+ collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt"><tr xmlns=3D""><td=
+ class=3D"newsList" valign=3D"top" xmlns=3D"" style=3D"font-family: sans-se=
+rif; border-collapse: collapse; text-align: left"><h2 xmlns=3D"" style=3D"f=
+ont-size: 16px; font-weight: 100; color: #333; margin: 0px"><a xmlns=3D""  =
+style=3D"text-decoration: none; color: #4160ab; display: block" href=3D"htt=
+p://links.mkt1700.com/ctt?kn=3D4&ms=3DNTE2NTEyODUS1&r=3DMjA3NjAxMTY0MjY2S0&=
+b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=3D"www_fhlbsf_com_about_news_1=
+">Greg Seibly Named President and Chief Executive Officer of the Bank</a></=
+h2><p xmlns=3D"" style=3D"font-size: 13px; color: #333; margin: 0.25em 0px =
+0px; line-height: 19px">Effective May 12, 2016, Greg Seibly became Presiden=
+t and CEO of FHLBank San Francisco. He succeeds Dean Schultz, who previousl=
+y announced his retirement. Seibly most recently served as the President of=
+ Consumer Banking at Umpqua Bank.</p><br xmlns=3D"" /><h2 xmlns=3D"" style=
+=3D"font-size: 16px; font-weight: 100; color: #333; margin: 0px"><a xmlns=
+=3D""  style=3D"text-decoration: none; color: #4160ab; display: block" href=
+=3D"http://links.mkt1700.com/ctt?kn=3D11&ms=3DNTE2NTEyODUS1&r=3DMjA3NjAxMTY=
+0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=3D"www_fhlbsf_com_reso=
+urce_c_2">AHEAD Deadline is June 2</a></h2><p xmlns=3D"" style=3D"font-size=
+: 13px; color: #333; margin: 0.25em 0px 0px; line-height: 19px">The deadlin=
+e for members to submit applications for the 2016 AHEAD Program is June 2.<=
+/p><br xmlns=3D"" /><h2 xmlns=3D"" style=3D"font-size: 16px; font-weight: 1=
+00; color: #333; margin: 0px"><a xmlns=3D""  style=3D"text-decoration: none=
+; color: #4160ab; display: block" href=3D"http://links.mkt1700.com/ctt?kn=
+=3D3&ms=3DNTE2NTEyODUS1&r=3DMjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=
+=3D1&rt=3D0" name=3D"www_fhlbsf_com_about_news_2">Bank Makes $12 Million Av=
+ailable to Fund Matching Grants for First-Time Homebuyers</a></h2><p xmlns=
+=3D"" style=3D"font-size: 13px; color: #333; margin: 0.25em 0px 0px; line-h=
+eight: 19px">With the 2016 allocation, 35 Bank members will use WISH and ID=
+EA funds to assist homebuyers in Arizona, California, Nevada, and other sta=
+tes where Bank members do business. Fifteen are first-time participants.</p=
+><br xmlns=3D"" /><h2 xmlns=3D"" style=3D"font-size: 16px; font-weight: 100=
+; color: #333; margin: 0px"><a xmlns=3D""  style=3D"text-decoration: none; =
+color: #4160ab; display: block" href=3D"http://links.mkt1700.com/ctt?kn=3D2=
+&ms=3DNTE2NTEyODUS1&r=3DMjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&=
+rt=3D0" name=3D"www_fhlbsf_com_about_news_3">Bank to Direct $40 Million to =
+Create New Job Opportunities in Underserved Communities</a></h2><p xmlns=3D=
+"" style=3D"font-size: 13px; color: #333; margin: 0.25em 0px 0px; line-heig=
+ht: 19px">To help structure the initiative, the Bank is holding a series of=
+ roundtable discussions where local, regional, and national leaders will di=
+scuss best practices for growing quality jobs and supporting small business=
+ expansion. The Aspen Institute will assist in developing a white paper tha=
+t will help shape the RFP phase of this initiative.</p><br xmlns=3D"" /><h2=
+ xmlns=3D"" style=3D"font-size: 16px; font-weight: 100; color: #333; margin=
+: 0px"><a xmlns=3D""  style=3D"text-decoration: none; color: #4160ab; displ=
+ay: block" href=3D"http://links.mkt1700.com/ctt?kn=3D6&ms=3DNTE2NTEyODUS1&r=
+=3DMjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=3D"www_f=
+hlbsf_com_about_news_4">Affordable Housing Advisory Council Reelects Chair =
+and Elects New Vice Chair</a></h2><p xmlns=3D"" style=3D"font-size: 13px; c=
+olor: #333; margin: 0.25em 0px 0px; line-height: 19px">The Bank&rsquo;s Aff=
+ordable Housing Advisory Council reelected Ralph Lippman to an additional o=
+ne-year term as chair and elected Laura Archuleta as vice chair.</p></td></=
+tr></table></td><td valign=3D"top" width=3D"25" xmlns=3D"" style=3D"font-fa=
+mily: sans-serif; border-collapse: collapse; text-align: left"></td><td cla=
+ss=3D"events" valign=3D"top" width=3D"280" xmlns=3D"" style=3D"font-family:=
+ sans-serif; border-collapse: collapse; text-align: left"><h2 xmlns=3D"" st=
+yle=3D"font-size: 16px; font-weight: 100; color: #333; margin: 0px">NHC's H=
+ousing Visionary Awards Gala</h2><div class=3D"date" xmlns=3D"" style=3D"fo=
+nt-size: 12px; color: #666; margin: 5px 0px 10px">June 2, 2016</div><p xmln=
+s=3D"" style=3D"font-size: 13px; color: #333; margin: 0.25em 0px 0px; line-=
+height: 19px">The Bank is a sponsor of this annual event, which will celebr=
+ate 85 years of effective advocacy for policies and practices that move aff=
+ordable housing forward.<br xmlns=3D"" /><a xmlns=3D""  style=3D"text-decor=
+ation: none; color: #4160ab" href=3D"http://links.mkt1700.com/ctt?kn=3D12&m=
+s=3DNTE2NTEyODUS1&r=3DMjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=
+=3D0" name=3D"www_nhc_org___gala_dbdr4">Learn More</a></p><br xmlns=3D"" />=
+<h2 xmlns=3D"" style=3D"font-size: 16px; font-weight: 100; color: #333; mar=
+gin: 0px">Muir Ridge Home Dedication</h2><div class=3D"date" xmlns=3D"" sty=
+le=3D"font-size: 12px; color: #666; margin: 5px 0px 10px">June 4, 2016</div=
+><p xmlns=3D"" style=3D"font-size: 13px; color: #333; margin: 0.25em 0px 0p=
+x; line-height: 19px">Habitat for Humanity East Bay/Silicon Valley will cel=
+ebrate the completion of Phase One of the Muir Ridge development with the p=
+artner families and volunteers who built the new single-family homes. The p=
+roject received a $120,000 AHP grant through member Bank of the West.<br xm=
+lns=3D"" /><a xmlns=3D""  style=3D"text-decoration: none; color: #4160ab" h=
+ref=3D"http://links.mkt1700.com/ctt?kn=3D8&ms=3DNTE2NTEyODUS1&r=3DMjA3NjAxM=
+TY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=3D"www_habitatebsv_o=
+rg_events">Learn More</a></p><br xmlns=3D"" /><h2 xmlns=3D"" style=3D"font-=
+size: 16px; font-weight: 100; color: #333; margin: 0px">Mosaic Gardens at W=
+estlake Groundbreaking</h2><div class=3D"date" xmlns=3D"" style=3D"font-siz=
+e: 12px; color: #666; margin: 5px 0px 10px">June 9, 2016</div><p xmlns=3D""=
+ style=3D"font-size: 13px; color: #333; margin: 0.25em 0px 0px; line-height=
+: 19px">LINC Housing Corporation will celebrate the groundbreaking of Mosai=
+c Gardens at Westlake, a new affordable housing community that will feature=
+ 125 units for individuals and families, including 63 units set aside for f=
+ormerly homeless residents. The project received a $600,000 AHP grant.<br x=
+mlns=3D"" /><a xmlns=3D""  style=3D"text-decoration: none; color: #4160ab" =
+href=3D"http://links.mkt1700.com/ctt?kn=3D14&ms=3DNTE2NTEyODUS1&r=3DMjA3NjA=
+xMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=3D"50879_thankyou4=
+caring_org_emai">Learn More</a></p><br xmlns=3D"" /><h2 xmlns=3D"" style=3D=
+"font-size: 16px; font-weight: 100; color: #333; margin: 0px">Access to Aff=
+ordable Mortgage Credit in San Diego</h2><div class=3D"date" xmlns=3D"" sty=
+le=3D"font-size: 12px; color: #666; margin: 5px 0px 10px">June 15, 2016</di=
+v><p xmlns=3D"" style=3D"font-size: 13px; color: #333; margin: 0.25em 0px 0=
+px; line-height: 19px">The Bank will be part of a panel discussion on affor=
+dable housing finance at this event hosted by the Federal Reserve Bank of S=
+an Francisco.<br xmlns=3D"" /><a xmlns=3D""  style=3D"text-decoration: none=
+; color: #4160ab" href=3D"http://links.mkt1700.com/ctt?kn=3D9&ms=3DNTE2NTEy=
+ODUS1&r=3DMjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=
+=3D"www_frbsf_org_community_develo">Learn More</a></p><br xmlns=3D"" /><h2 =
+xmlns=3D"" style=3D"font-size: 16px; font-weight: 100; color: #333; margin:=
+ 0px">Access to Affordable Mortgage Credit in Southern Nevada</h2><div clas=
+s=3D"date" xmlns=3D"" style=3D"font-size: 12px; color: #666; margin: 5px 0p=
+x 10px">June 25, 2016</div><p xmlns=3D"" style=3D"font-size: 13px; color: #=
+333; margin: 0.25em 0px 0px; line-height: 19px">The Bank will be part of a =
+panel discussion on affordable housing finance at this event hosted by the =
+Federal Reserve Bank of San Francisco.<br xmlns=3D"" /><a xmlns=3D""  style=
+=3D"text-decoration: none; color: #4160ab" href=3D"http://links.mkt1700.com=
+/ctt?kn=3D18&ms=3DNTE2NTEyODUS1&r=3DMjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MD=
+U2S0&mt=3D1&rt=3D0" name=3D"www_frbsf_org_community_d_1">Learn More</a></p>=
+<br xmlns=3D"" /><h2 xmlns=3D"" style=3D"font-size: 16px; font-weight: 100;=
+ color: #333; margin: 0px">San Francisco Housing Expo</h2><div class=3D"dat=
+e" xmlns=3D"" style=3D"font-size: 12px; color: #666; margin: 5px 0px 10px">=
+June 25, 2016</div><p xmlns=3D"" style=3D"font-size: 13px; color: #333; mar=
+gin: 0.25em 0px 0px; line-height: 19px">The Bank will present information a=
+bout the WISH and IDEA homeownership programs at this event.<br xmlns=3D"" =
+/><a xmlns=3D""  style=3D"text-decoration: none; color: #4160ab" href=3D"ht=
+tp://links.mkt1700.com/ctt?kn=3D1&ms=3DNTE2NTEyODUS1&r=3DMjA3NjAxMTY0MjY2S0=
+&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=3D"www_homeownershipsf_org_">=
+Learn More</a></p><br xmlns=3D"" /><h1 xmlns=3D"" style=3D"font-size: 16px;=
+ font-weight: 100; color: #333; padding-left: 0px; margin: 5px 0px 10px; pa=
+dding-right: 0px">FOLLOW US</h1><a class=3D"follow_linkedin" xmlns=3D""  st=
+yle=3D"text-decoration: none; color: #4160ab; display: block" href=3D"http:=
+//links.mkt1700.com/ctt?kn=3D16&ms=3DNTE2NTEyODUS1&r=3DMjA3NjAxMTY0MjY2S0&b=
+=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=3D"www_linkedin_com_company_171=
+71"><img border=3D"0"  alt=3D"" align=3D"top" xmlns=3D"" style=3D"text-deco=
+ration: none; border-top: medium none; border-right: medium none; border-bo=
+ttom: medium none; outline-width: medium; outline-style: none; border-left:=
+ medium none; outline-color: invert; -ms-interpolation-mode: bicubic" src=
+=3D"http://fhlbsf.com/images/linkedinfaded.png" />LinkedIn</a></td></tr><tr=
+ xmlns=3D""><td colspan=3D"4" xmlns=3D""><br xmlns=3D"" /><span xmlns=3D"" =
+style=3D"font-size: 9px; font-family: Verdana; color: rgb(119,119,119); lin=
+e-height: 13px"><strong xmlns=3D"">Federal Home Loan Bank of San Francisco<=
+/strong> 600 California Street, Suite 300, San Francisco, California 94108<=
+br xmlns=3D"" /><br xmlns=3D"" />FHLBank San Francisco Community Works is p=
+ublished by the Federal Home Loan Bank of San Francisco to share news and i=
+nformation with our members, their community partners, and other Bank stake=
+holders. The Federal Home Loan Bank of San Francisco helps local community =
+lenders meet the diverse credit needs of families, businesses, and communit=
+ies by providing them with prompt, reliable access to low-cost funding, fin=
+ancial risk management tools, and targeted affordable housing and economic =
+development grant and loan programs. <br xmlns=3D"" /><br xmlns=3D"" />This=
+ email may provide links to other websites. The Bank is not responsible for=
+ any content, advertising, products, or other materials on or available fro=
+m these websites or any damage or loss incurred in connection with your use=
+ of or reliance on any content, goods, or services available on or through =
+any of these websites.<br xmlns=3D"" /><br xmlns=3D"" />If this email has b=
+een forwarded to you, please visit our website to <a target=3D"_blank" xmln=
+s=3D""  href=3D"http://links.mkt1700.com/ctt?kn=3D5&ms=3DNTE2NTEyODUS1&r=3D=
+MjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&mt=3D1&rt=3D0" name=3D"www_fhlb=
+sf_com_resource_center">subscribe</a>. <br xmlns=3D"" /><br xmlns=3D"" />If=
+ you do not wish to receive this information in the future, please <a targe=
+t=3D"_blank" xmlns=3D""  href=3D"http://links.mkt1700.com/servlet/OneClickO=
+ptOutServlet?m=3D51651285&r=3DMjA3NjAxMTY0MjY2S0&b=3D0&j=3DOTQyOTQ0MDU2S0&m=
+t=3D1&rt=3D0" name=3D"OptOutCW_1">notify</a> us.<br xmlns=3D"" /><br xmlns=
+=3D"" />&copy; 2016 Federal Home Loan Bank of San Francisco. All rights res=
+erved.<br xmlns=3D"" /><br xmlns=3D"" /></span></td></tr></table></td></tr>=
+</table><IMG src=3D"http://open.mkt1700.com/open/log/51651285/MjA3NjAxMTY0M=
+jY2S0/0/OTQyOTQ0MDU2S0/1/0"></body></html>
+
+
+------=_Part_215525_525833206.1466447930966--

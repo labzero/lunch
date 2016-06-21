@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: http://links.mkt1700.com/ctt?b=0&j=Nzg0Mjc4MzkxS0&kn=5&ms=NDk5MDY3ODcS1&mt=1&r=ODkwNzA0NTc0OQS2&rt=3
+    uri: http://links.mkt1700.com/ctt?b=0&j=OTQyOTcxMzIwS0&kn=5&ms=NTE2NTI0MDQS1&mt=1&r=MjA3NjA3MDQzNzk0S0&rt=0
     body:
       encoding: US-ASCII
       string: ''
@@ -19,10 +19,9 @@ http_interactions:
       message: Found
     headers:
       Date:
-      - Tue, 21 Jun 2016 00:17:34 GMT
+      - Tue, 21 Jun 2016 00:18:05 GMT
       Location:
-      - http://fhlbsf.com/cofi/monthly/monthly.asp?utm_source=SilverpopMailing&utm_medium=email&utm_campaign=COFI
-        (5)&utm_content=
+      - http://www.sec.gov/Archives/edgar/data/1316944/000131694416000325/0001316944-16-000325-index.htm
       Content-Length:
       - '0'
       Connection:
@@ -33,10 +32,10 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Tue, 21 Jun 2016 00:17:34 GMT
+  recorded_at: Tue, 21 Jun 2016 00:18:05 GMT
 - request:
     method: get
-    uri: http://links.mkt1700.com/ctt?b=0&j=Nzg0Mjc4MzkxS0&kn=2&ms=NDk5MDY3ODcS1&mt=1&r=ODkwNzA0NTc0OQS2&rt=3
+    uri: http://links.mkt1700.com/ctt?b=0&j=OTQyOTcxMzIwS0&kn=3&ms=NTE2NTI0MDQS1&mt=1&r=MjA3NjA3MDQzNzk0S0&rt=0
     body:
       encoding: US-ASCII
       string: ''
@@ -53,10 +52,10 @@ http_interactions:
       message: Found
     headers:
       Date:
-      - Tue, 21 Jun 2016 00:17:34 GMT
+      - Tue, 21 Jun 2016 00:18:06 GMT
       Location:
-      - http://www.fhlbsf.com?utm_source=SilverpopMailing&utm_medium=email&utm_campaign=COFI
-        (5)&utm_content=
+      - http://www.fhlbsf.com?utm_source=SilverpopMailing&utm_medium=email&utm_campaign=Copy
+        of 050616_1Q16_10Q (1) (2)&utm_content=
       Content-Length:
       - '0'
       Connection:
@@ -67,5 +66,5 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Tue, 21 Jun 2016 00:17:34 GMT
+  recorded_at: Tue, 21 Jun 2016 00:18:06 GMT
 recorded_with: VCR 2.9.3

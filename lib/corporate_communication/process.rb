@@ -31,6 +31,19 @@ class CorporateCommunication
       body.xpath('//p//span[contains(text(), "You are receiving this email as a test mailing")]').remove
       body.xpath('//center[//*[contains(text(), "This message contains graphics")]]').remove
       body.xpath('//tr[contains(comment(), "Read online link to silverpop")]').remove
+      body.xpath('//center[//*[contains(text(), "If you are unable to see the message")]]').remove
+      
+      body.xpath('//a[starts-with(@href, "http://links.mkt1700.com/servlet/OneClickOptOutServlet")]').each do |link|
+        link.replace(link.text)
+      end
+
+      body.xpath('//a[starts-with(@href, "mailto:")]').each do |link|
+        link.replace(link.text) if link[:href].match(/unsubscribe/i)
+      end
+
+      body.xpath('//a[contains(text(), "subscribe")]').each do |link|
+        link.replace(link.text)
+      end
 
       body.xpath('//a[starts-with(@href, "http://links.mkt1700.com/")]/@href').each do |link|
         uri = URI.parse(link)

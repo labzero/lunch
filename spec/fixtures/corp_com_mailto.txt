@@ -1,0 +1,215 @@
+                                                                                                                                                                                                                                                               
+Delivered-To: ned+fhlb@labzero.com
+Received: by 10.103.132.79 with SMTP id g76csp1472261vsd;
+        Mon, 20 Jun 2016 16:19:24 -0700 (PDT)
+X-Received: by 10.129.81.134 with SMTP id f128mr11416459ywb.260.1466464764708;
+        Mon, 20 Jun 2016 16:19:24 -0700 (PDT)
+Return-Path: <v-dbechde_dafgfibgnc_didejjli_didejjli_a@bounce.mkt1700.com>
+Received: from mail1843.federalhomeloan.mkt1700.com (mail1843.federalhomeloan.mkt1700.com. [208.85.53.43])
+        by mx.google.com with ESMTP id 126si15136068ybm.271.2016.06.20.16.19.24
+        for <ned+fhlb@labzero.com>;
+        Mon, 20 Jun 2016 16:19:24 -0700 (PDT)
+Received-SPF: pass (google.com: domain of v-dbechde_dafgfibgnc_didejjli_didejjli_a@bounce.mkt1700.com designates 208.85.53.43 as permitted sender) client-ip=208.85.53.43;
+Authentication-Results: mx.google.com;
+       dkim=fail header.i=@info.fhlbsf.com;
+       spf=pass (google.com: domain of v-dbechde_dafgfibgnc_didejjli_didejjli_a@bounce.mkt1700.com designates 208.85.53.43 as permitted sender) smtp.mailfrom=v-dbechde_dafgfibgnc_didejjli_didejjli_a@bounce.mkt1700.com
+DKIM-Signature: v=1; a=rsa-sha1; c=relaxed/relaxed; s=spop; d=info.fhlbsf.com;
+ h=Date:From:Reply-To:To:Message-ID:Subject:MIME-Version:Content-Type:List-Unsubscribe; i=marketing@info.fhlbsf.com;
+ bh=wFVnra862lZabFsMWei0ArdfX1E=;
+ b=lLV0LnZgY0VXwZ4/bLKMGEASuu019E0AdWxcxTqMxmjEscVkQw7bVEDrUTREL8ZlUq6LKKTAVhqE
+   a5FbitvdQg==
+DomainKey-Signature: a=rsa-sha1; c=nofws; q=dns; s=spop; d=info.fhlbsf.com;
+ b=EKbv0UXl5ZLiD09oGhDGFTCYExWHJA32T+QPGvS+Hi+8d6L3t18hldcUNTb8jMlD5hWCs4K9BSrk
+   1j6mic+rBg==;
+Received: by mail1843.federalhomeloan.mkt1700.com id hd1svo19if4n for <ned+fhlb@labzero.com>; Mon, 20 Jun 2016 23:19:24 +0000 (envelope-from <v-dbechde_dafgfibgnc_didejjli_didejjli_a@bounce.mkt1700.com>)
+Date: Mon, 20 Jun 2016 23:19:24 +0000 (GMT)
+From: FHLBank San Francisco <marketing@info.fhlbsf.com>
+Reply-To: marketing@info.fhlbsf.com
+To: ned+fhlb@labzero.com
+Message-ID: <1064346591.438670361466464764257.JavaMail.app@rbg42.atlis1>
+Subject: First Quarter Financial Report Now Available
+MIME-Version: 1.0
+Content-Type: multipart/alternative; 
+  boundary="----=_Part_224954_714094643.1466464764234"
+x-mid: 51652404
+x-rpcampaign: sp51652404
+Feedback-ID: pod4_26686_51652404_942971320:pod4_26686:ibmsilverpop
+x-job: 51652404
+x-orgId: 26686
+List-Unsubscribe: <mailto:v-dbechde_dafgfibgnc_didejjli_didejjli_a@bounce.mkt1700.com?subject=Unsubscribe>
+
+------=_Part_224954_714094643.1466464764234
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+To view this mail in a browser, copy http://links.mkt1700.com/servlet/MailV=
+iew?ms=3DNTE2NTI0MDQS1&r=3DMjA3NjA3MDQzNzk0S0&j=3DOTQyOTcxMzIwS0&mt=3D1&rt=
+=3D0 into your browser.
+May 6, 2016
+
+Bank Files 10-Q with the SEC
+
+The Bank filed its first quarter 2016 financial report on Form 10-Q [1] wit=
+h the Securities and Exchange Commission today.
+[1] http://links.mkt1700.com/ctt?kn=3D5&ms=3DNTE2NTI0MDQS1&r=3DMjA3NjA3MDQz=
+Nzk0S0&b=3D2&j=3DOTQyOTcxMzIwS0&mt=3D1&rt=3D0=20
+
+To request a paper copy of this report, please reply to web_mkt@fhlbsf.com =
+and include your name, title, organization, and address.
+
+
+
+
+Federal Home Loan Bank of San Francisco  600 California Street, Suite 300, =
+San Francisco, California 94108=20
+
+The contents of this email, together with any attachments, are intended onl=
+y for the use of the individual or entity to which they are addressed and m=
+ay contain information that is legally privileged, confidential, and exempt=
+ from disclosure. If you are not the intended recipient, you are hereby not=
+ified that any dissemination, distribution, or copying of this email, or an=
+y attachment, is strictly prohibited. If you have received this email in er=
+ror, please: (i) reply immediately to this email indicating that you receiv=
+ed this communication in error; and (ii) promptly delete this message, alon=
+g with any attachments, from your computer. Thank you.=20
+
+If you do not wish to receive this information in the future, please notify=
+ us.
+
+=C2=A9 2016 Federal Home Loan Bank of San Francisco. All rights reserved.=
+=20
+
+=20
+
+
+------=_Part_224954_714094643.1466464764234
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<html><head><title></title></head><body><CENTER><FONT SIZE=3D"1" COLOR=3D"#=
+000000" FACE=3D"ARIAL">This message contains graphics.  If you do not see t=
+he graphics, <A href=3D"http://links.mkt1700.com/servlet/MailView?ms=3DNTE2=
+NTI0MDQS1&r=3DMjA3NjA3MDQzNzk0S0&j=3DOTQyOTcxMzIwS0&mt=3D1&rt=3D0">click he=
+re to view</A>.</FONT><font face=3D"ARIAL" color=3D"#808080" size=3D"2"><br=
+></font></CENTER><p><style type=3D"text/css">
+a {
+=09=09color: #366
+=09}
+p {
+=09=09font-family: Verdana, Geneva, sans-serif;
+=09=09font-size:11px;
+=09=09line-height:18px;
+=09=09font-weight:normal;
+=09=09color:#222
+=09}
+table.mtable {
+=09=09border-collapse: collapse;
+=09=09border: 1px solid #BBB;
+=09=09padding-left: 10px;
+=09=09padding-right: 10px;
+=09}
+th.mtable {
+=09=09font-size:  0.6em;
+=09=09font-weight: bold;
+=09=09font-family: verdana;
+=09=09padding-left:10px;
+=09=09padding-right:10px;
+=09=09text-align: right;
+=09=09vertical-align:top;
+=09=09color: gray;
+=09=09border-bottom: 1px solid #BBB;
+=09}
+tr.mtable{
+=09border: 1px solid #BBB;
+=09}
+td.mtable {
+=09=09align: right;
+=09=09vertical-align:top;
+=09=09background-color: #FFFFCE;
+=09=09padding-left:10px;
+=09=09padding-right:10px;
+=09=09font-size: 0.6em;
+=09=09font-family: verdana;
+=09=09color: gray;
+=09=09border: 1px solid #BBB;
+=09}
+td.mtableright {
+=09vertical-align: top;
+=09background-color: #FFFFCE;
+=09padding-left:10px;
+=09padding-right:10px;
+=09font-size: 0.6em;
+=09font-family: verdana;
+=09color: gray;
+=09border: 1px solid #BBB;
+=09text-align: right;
+=09}</style><!--Map for fhlbsf.com homepage hyperlink in top banner--></p><=
+p><map id=3D"top_banner" name=3D"top_banner"><area shape=3D"rect" alt=3D"FH=
+LBank San Francisco" coords=3D"690, 9, 600, 40" name=3D"www_fhlbsf_com"  hr=
+ef=3D"http://links.mkt1700.com/ctt?kn=3D3&ms=3DNTE2NTI0MDQS1&r=3DMjA3NjA3MD=
+QzNzk0S0&b=3D0&j=3DOTQyOTcxMzIwS0&mt=3D1&rt=3D0" /></map><!--Email Table 70=
+0px centered--></p><p><table cellspacing=3D"0" cellpadding=3D"0" width=3D"7=
+00" align=3D"center" border=3D"0"><tr><!--Read online link to silverpop--><=
+td width=3D"700" colspan=3D"2" align=3D"center" style=3D"font-size: 9px; fo=
+nt-family: Verdana,Geneva,sans-serif; color: rgb(0,0,0); padding-bottom: 5p=
+x; padding-top: 5px; padding-left: 5px; padding-right: 5px">Read <a target=
+=3D"_blank" xt=3D"SPCLICKTOVIEW"  href=3D"http://links.mkt1700.com/servlet/=
+MailView?ms=3DNTE2NTI0MDQS1&r=3DMjA3NjA3MDQzNzk0S0&j=3DOTQyOTcxMzIwS0&mt=3D=
+1&rt=3D0" name=3D"CustomClickToView_SPCLICKTOVIE">online</a>.</td></tr><tr>=
+<!--Top Banner--><td colspan=3D"2"><img border=3D"0"  alt=3D"fhlbsf_announc=
+ement" width=3D"700" height=3D"94" usemap=3D"#top_banner"    src=3D'http://=
+contentz.mkt1700.com/ra/2016/26686/06/51652404/10940443_Corp_announce.gif' =
+/></td></tr><tr><!--Left Body Column--><td valign=3D"top" width=3D"175" sty=
+le=3D"border-left: rgb(204,204,204) 1px solid"><table cellspacing=3D"0" cel=
+lpadding=3D"0" width=3D"175" border=3D"0"><tr><td valign=3D"top" style=3D"f=
+ont-size: 11px; font-family: Verdana,Arial,Helvetica,sans-serif; color: rgb=
+(34,34,34); padding-top: 25px; padding-left: 10px; line-height: 16px">May 6=
+, 2016</td></tr><tr><td valign=3D"top" style=3D"font-size: 11px; font-famil=
+y: Verdana,Arial,Helvetica,sans-serif; font-weight: normal; color: rgb(34,3=
+4,34); padding-bottom: 10px; padding-left: 10px; line-height: 16px">&nbsp;<=
+/td></tr></table></td><!--Right Body Column--><td valign=3D"top" width=3D"5=
+22" style=3D"border-right: rgb(204,204,204) 1px solid; border-left: rgb(204=
+,204,204) 1px solid"><table cellspacing=3D"0" cellpadding=3D"0" width=3D"52=
+2" border=3D"0"><tr><td valign=3D"top" align=3D"left" style=3D"font-size: 1=
+4px; font-family: Verdana,Arial,Helvetica,sans-serif; font-weight: normal; =
+color: rgb(1,0,0); padding-top: 20px; padding-left: 10px; line-height: 25px=
+; padding-right: 14px">Bank Files 10-Q with the SEC</td></tr><tr><td valign=
+=3D"top" align=3D"left" style=3D"font-size: 11px; font-family: Verdana,Aria=
+l,Helvetica,sans-serif; font-weight: normal; color: rgb(34,34,34); padding-=
+bottom: 10px; padding-top: 10px; padding-left: 10px; line-height: 18px; pad=
+ding-right: 14px"><p>The Bank filed its <a target=3D"_blank"  href=3D"http:=
+//links.mkt1700.com/ctt?kn=3D5&ms=3DNTE2NTI0MDQS1&r=3DMjA3NjA3MDQzNzk0S0&b=
+=3D0&j=3DOTQyOTcxMzIwS0&mt=3D1&rt=3D0" name=3D"1Q16_1">first quarter 2016 f=
+inancial report on Form 10-Q</a> with the Securities and Exchange Commissio=
+n today.</p><p>To request a paper copy of this report, please reply to <a  =
+href=3D"mailto:web_mkt@fhlbsf.com" name=3D"web_mkt_fhlbsf_com">web_mkt@fhlb=
+sf.com</a> and include your name, title, organization, and address.</p></td=
+></tr></table></td></tr><tr><!--Bank Address--><td valign=3D"top" width=3D"=
+700" colspan=3D"2" style=3D"font-size: 9px; border-top: rgb(204,204,204) 1p=
+x solid; font-family: Verdana,sans-serif; color: rgb(119,119,119); padding-=
+top: 10px; line-height: 13px"><strong>Federal Home Loan Bank of San Francis=
+co</strong> &nbsp;600 California Street, Suite 300, San Francisco, Californ=
+ia 94108</td></tr><tr><!--Disclaimer--><td valign=3D"top" width=3D"700" col=
+span=3D"2" style=3D"font-size: 9px; font-family: Verdana,sans-serif; color:=
+ rgb(119,119,119); padding-top: 5px; line-height: 13px">The contents of thi=
+s email, together with any attachments, are intended only for the use of th=
+e individual or entity to which they are addressed and may contain informat=
+ion that is legally privileged, confidential, and exempt from disclosure. I=
+f you are not the intended recipient, you are hereby notified that any diss=
+emination, distribution, or copying of this email, or any attachment, is st=
+rictly prohibited. If you have received this email in error, please: (i) re=
+ply immediately to this email indicating that you received this communicati=
+on in error; and (ii) promptly delete this message, along with any attachme=
+nts, from your computer. Thank you.</td></tr><tr><!--Opt out and Copyright-=
+-><td valign=3D"top" width=3D"700" colspan=3D"2" style=3D"font-size: 9px; f=
+ont-family: Verdana,sans-serif; color: rgb(119,119,119); padding-top: 10px;=
+ padding-left: 0px; line-height: 13px">If you do not wish to receive this i=
+nformation in the future, please <a target=3D"_blank"  href=3D"mailto:v-dbe=
+chde_dafgfibgnc_didejjli_didejjli_a@reply.mkt1700.com?subject=3DUnsubscribe=
+" name=3D"optout_html">notify us</a>.<br /><br />&copy; 2016 Federal Home L=
+oan Bank of San Francisco. All rights reserved.</td></tr></table></p><IMG s=
+rc=3D"http://open.mkt1700.com/open/log/51652404/MjA3NjA3MDQzNzk0S0/0/OTQyOT=
+cxMzIwS0/1/0"></body></html>
+
+
+------=_Part_224954_714094643.1466464764234--

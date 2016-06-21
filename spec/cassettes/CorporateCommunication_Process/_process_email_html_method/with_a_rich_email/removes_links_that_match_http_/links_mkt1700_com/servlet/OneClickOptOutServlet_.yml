@@ -19,7 +19,7 @@ http_interactions:
       message: Found
     headers:
       Date:
-      - Tue, 21 Jun 2016 00:17:34 GMT
+      - Tue, 21 Jun 2016 00:17:33 GMT
       Location:
       - http://fhlbsf.com/cofi/monthly/monthly.asp?utm_source=SilverpopMailing&utm_medium=email&utm_campaign=COFI
         (5)&utm_content=
@@ -33,7 +33,7 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Tue, 21 Jun 2016 00:17:34 GMT
+  recorded_at: Tue, 21 Jun 2016 00:17:33 GMT
 - request:
     method: get
     uri: http://links.mkt1700.com/ctt?b=0&j=Nzg0Mjc4MzkxS0&kn=2&ms=NDk5MDY3ODcS1&mt=1&r=ODkwNzA0NTc0OQS2&rt=3
@@ -53,7 +53,7 @@ http_interactions:
       message: Found
     headers:
       Date:
-      - Tue, 21 Jun 2016 00:17:34 GMT
+      - Tue, 21 Jun 2016 00:17:33 GMT
       Location:
       - http://www.fhlbsf.com?utm_source=SilverpopMailing&utm_medium=email&utm_campaign=COFI
         (5)&utm_content=
@@ -67,5 +67,5 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Tue, 21 Jun 2016 00:17:34 GMT
+  recorded_at: Tue, 21 Jun 2016 00:17:33 GMT
 recorded_with: VCR 2.9.3

@@ -3,7 +3,8 @@ namespace :corporate_communication do
   task :process, [:file_location, :category] => [:environment] do |task, args|
     require 'corporate_communication/process'
 
-    print JSON.pretty_generate(CorporateCommunication::Process.process_email(args.file_location, args.category))
+    email = Mail.read(args.file_location)
+    print JSON.pretty_generate(CorporateCommunication::Process.process_email(email, args.category))
   end
 
   desc 'Fetches and processes email found in the corporate communication inboxes'
