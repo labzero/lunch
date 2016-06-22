@@ -1,3 +1,4 @@
+#nocov
 module Logging::Appenders
 
   def self.rack( *args )
@@ -40,3 +41,4 @@ module Logging::Appenders
 
   end
 end
+#nocov

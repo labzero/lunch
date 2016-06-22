@@ -366,7 +366,7 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe "GET quick_advance_rates", :vcr do
-    allow_policy :advances, :show?
+    allow_policy :advance, :show?
     let(:rate_data) { {some: 'data'} }
     let(:RatesService) {class_double(RatesService)}
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
@@ -378,7 +378,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
 
     it_behaves_like 'a user required action', :get, :quick_advance_rates
-    it_behaves_like 'an authorization required method', :get, :quick_advance_rates, :advances, :show?
+    it_behaves_like 'an authorization required method', :get, :quick_advance_rates, :advance, :show?
     it 'gets the rates from the advance request' do
       expect(subject).to receive(:advance_request).and_return(advance_request)
       expect(advance_request).to receive(:rates).and_return(rate_data)
@@ -428,7 +428,7 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe "POST quick_advance_preview", :vcr do
-    allow_policy :advances, :show?
+    allow_policy :advance, :show?
     let(:member_id) {750}
     let(:advance_term) {'1week'}
     let(:advance_type) {'aa'}
@@ -451,7 +451,7 @@ RSpec.describe DashboardController, :type => :controller do
       allow(subject).to receive(:advance_request_from_session).and_return(advance_request)
     end
     it_behaves_like 'a user required action', :post, :quick_advance_preview
-    it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advances, :show?
+    it_behaves_like 'an authorization required method', :post, :quick_advance_preview, :advance, :show?
 
     it 'calls `advance_request_from_session`' do
       expect(subject).to receive(:advance_request_from_session).ordered
@@ -606,7 +606,7 @@ RSpec.describe DashboardController, :type => :controller do
   end
 
   describe "POST quick_advance_perform", :vcr do
-    allow_policy :advances, :show?
+    allow_policy :advance, :show?
     let(:member_id) {750}
     let(:advance_term) {'someterm'}
     let(:advance_type) {'sometype'}
@@ -631,7 +631,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
 
     it_behaves_like 'a user required action', :post, :quick_advance_perform
-    it_behaves_like 'an authorization required method', :post, :quick_advance_perform, :advances, :show?
+    it_behaves_like 'an authorization required method', :post, :quick_advance_perform, :advance, :show?
     it 'calls `advance_request_from_session`' do
       expect(subject).to receive(:advance_request_from_session).ordered
       expect(subject).to receive(:session_elevated?).ordered

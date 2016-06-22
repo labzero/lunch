@@ -159,7 +159,7 @@ if !custom_host
   begin
     ENV.delete('VERBOSE')
     puts "Starting resque-pool (#{ENV['RESQUE_REDIS_URL']})..."
-    resque_pool = "resque-pool -i -E #{ENV['RAILS_ENV'] || ENV['RACK_ENV']}"
+    resque_pool = "resque-pool --single-process-group -E #{ENV['RAILS_ENV'] || ENV['RACK_ENV']}"
     resque_stdin, resque_stdout, resque_stderr, resque_thr = Open3.popen3({'TERM_CHILD' => '1'}, resque_pool)
   ensure
     ENV['VERBOSE'] = verbose # reset the VERBOSE env variable after resque process is finished.

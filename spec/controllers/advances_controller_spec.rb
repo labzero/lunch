@@ -9,7 +9,7 @@ RSpec.describe AdvancesController, :type => :controller do
 
   {AASM::InvalidTransition => [AdvanceRequest.new(7, 'foo'), 'executed', :default], AASM::UnknownStateMachineError => ['message'], AASM::UndefinedState => ['foo'], AASM::NoDirectAssignmentError => ['message']}.each do |exception, args|
     describe "`rescue_from` #{exception}" do
-      allow_policy :advances, :show?
+      allow_policy :advance, :show?
       let(:make_request) { get :select_rate }
       before do
         allow(subject).to receive(:fetch_advance_request)
@@ -187,7 +187,7 @@ RSpec.describe AdvancesController, :type => :controller do
   end
 
   describe 'GET select_rate' do
-    allow_policy :advances, :show?
+    allow_policy :advance, :show?
     let(:advance_id) { SecureRandom.uuid }
     let(:advance_amount) { double('amount') }
     let(:advance_type) { double('type') }
@@ -287,7 +287,7 @@ RSpec.describe AdvancesController, :type => :controller do
   end
 
   describe 'GET fetch_rates' do
-    allow_policy :advances, :show?
+    allow_policy :advance, :show?
     let(:advance_id) { SecureRandom.uuid }
     let(:amount) {  }
     let(:rate_data) { {some: 'data'} }
@@ -304,7 +304,7 @@ RSpec.describe AdvancesController, :type => :controller do
     end
 
     it_behaves_like 'a user required action', :get, :fetch_rates
-    it_behaves_like 'an authorization required method', :get, :fetch_rates, :advances, :show?
+    it_behaves_like 'an authorization required method', :get, :fetch_rates, :advance, :show?
     it { should use_before_filter(:fetch_advance_request) }
     it { should use_before_filter(:set_html_class) }
     it { should use_after_filter(:save_advance_request) }
@@ -357,7 +357,7 @@ RSpec.describe AdvancesController, :type => :controller do
   end
 
   describe 'POST preview' do
-    allow_policy :advances, :show?
+    allow_policy :advance, :show?
     let(:member_id) {750}
     let(:advance_id) { SecureRandom.uuid }
     let(:advance_term) {'1week'}
@@ -383,7 +383,7 @@ RSpec.describe AdvancesController, :type => :controller do
       allow(controller).to receive(:fetch_advance_request).and_return(advance_request)
     end
     it_behaves_like 'a user required action', :post, :preview
-    it_behaves_like 'an authorization required method', :post, :preview, :advances, :show?
+    it_behaves_like 'an authorization required method', :post, :preview, :advance, :show?
     it { should use_before_filter(:fetch_advance_request) }
     it { should use_before_filter(:set_html_class) }
     it { should use_after_filter(:save_advance_request) }
@@ -523,7 +523,7 @@ RSpec.describe AdvancesController, :type => :controller do
   end
 
   describe 'POST execute' do
-    allow_policy :advances, :show?
+    allow_policy :advance, :show?
     let(:member_id) {750}
     let(:advance_id) { SecureRandom.uuid }
     let(:advance_term) { double('someterm') }
@@ -549,7 +549,7 @@ RSpec.describe AdvancesController, :type => :controller do
     end
 
     it_behaves_like 'a user required action', :post, :perform
-    it_behaves_like 'an authorization required method', :post, :perform, :advances, :show?
+    it_behaves_like 'an authorization required method', :post, :perform, :advance, :show?
     it { should use_before_filter(:fetch_advance_request) }
     it { should use_before_filter(:set_html_class) }
     it { should use_after_filter(:save_advance_request) }

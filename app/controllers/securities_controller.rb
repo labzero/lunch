@@ -174,7 +174,7 @@ class SecuritiesController < ApplicationController
       column_headings: release_securities_table_headings,
       rows: JSON.parse(params[:securities]).collect { |x| x.with_indifferent_access }
     }
-    render xlsx: 'release', filename: "securities.xlsx"
+    render xlsx: 'release', filename: "securities.xlsx", formats: [:xlsx]
   end
 
   def upload_release

@@ -5,7 +5,7 @@ class DashboardController < ApplicationController
   include ReportsHelper
 
   before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform, :quick_advance_started] do
-    authorize :advances, :show?
+    authorize :advance, :show?
   end
 
   before_action only: [:quick_advance_perform, :quick_advance_preview, :quick_advance_started] do
