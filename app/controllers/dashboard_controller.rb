@@ -159,7 +159,7 @@ class DashboardController < ApplicationController
         instrument_type: /\A(ADVANCE|INVESTMENT)\z/,
         status: 'VERIFIED',
         product: ->(entry, key, controller) {entry[:product] != 'OPEN VRC'},
-        termination_full_partial: ''
+        termination_full_partial: nil
       }
     },
     # Open Advances

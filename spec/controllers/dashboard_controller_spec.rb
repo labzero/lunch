@@ -1449,6 +1449,8 @@ RSpec.describe DashboardController, :type => :controller do
     let(:process_patterns_return) { {description: description, amount: amount, event: event, transaction_number: transaction_number}  }
     let(:entries) { [ entry ] }
     let(:call_method) { subject.send(:process_activity_entries, entries) }
+    let(:product_description) { double('A Product Description') }
+    let(:termination_full_partial) { double('A Full or Partial Termination') }
     before do
       allow(subject).to receive(:process_patterns).and_return(process_patterns_return)
     end
@@ -1483,6 +1485,122 @@ RSpec.describe DashboardController, :type => :controller do
       let(:entries) { [entry, entry, entry, entry, entry] }
       it 'returns no more than 4 elements in the array' do
         expect(call_method).to eq([process_patterns_return, process_patterns_return, process_patterns_return, process_patterns_return])
+      end
+    end
+    describe '`Letters of Credit` entries' do
+      before do
+        allow(subject).to receive(:process_patterns).and_call_original
+      end
+      context 'amended' do
+        let(:entry) { { product: 'LC', status: 'VERIFIED', trade_date: Time.zone.today - rand(1..100), current_par: amount, transaction_number: transaction_number} }
+        it 'displays LC Amended Today' do
+          expect(call_method).to eq([{description: I18n.t('dashboard.recent_activity.letter_of_credit'), amount: amount, event: I18n.t('dashboard.recent_activity.amended_today'), transaction_number: transaction_number}])
+        end
+      end
+      context 'executed' do
+        let(:entry) { { product: 'LC', status: 'VERIFIED', trade_date: Time.zone.today, current_par: amount, transaction_number: transaction_number, maturity_date: Time.zone.today + rand(1..100)} }
+        it 'displays LC Executed Today' do
+          expect(call_method).to eq([{description: I18n.t('dashboard.recent_activity.letter_of_credit'), amount: amount, event: I18n.t('dashboard.recent_activity.expires_on', date: controller.fhlb_date_standard_numeric(entry[:maturity_date])), transaction_number: transaction_number}])
+        end
+      end
+      context 'expired' do
+        let(:entry) { { product: 'LC', status: 'MATURED', trade_date: Time.zone.today, current_par: amount, transaction_number: transaction_number } }
+        it 'displays LC Expired Today' do
+          expect(call_method).to eq([{description: I18n.t('dashboard.recent_activity.letter_of_credit'), amount: amount, event: I18n.t('dashboard.recent_activity.expires_today'), transaction_number: transaction_number}])
+        end
+      end
+      context 'terminated' do
+        let(:entry) { { product: 'LC', status: 'TERMINATED', trade_date: double('A Trade Date'), current_par: amount, transaction_number: transaction_number} }
+        it 'displays LC Terminated Today' do
+          expect(call_method).to eq([{description: I18n.t('dashboard.recent_activity.letter_of_credit'), amount: amount, event: I18n.t('dashboard.recent_activity.terminated_today'), transaction_number: transaction_number}])
+        end
+      end
+    end
+    describe '`Advances` entries' do
+      before do
+        allow(subject).to receive(:process_patterns).and_call_original
+      end
+      context 'terminated' do
+        let(:entry) { { instrument_type: 'ADVANCE', status: 'TERMINATED', trade_date: double('A Trade Date'), current_par: amount, transaction_number: transaction_number, product_description: product_description, termination_full_partial: termination_full_partial} }
+        it 'displays ADVANCE Terminated Today' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: termination_full_partial, transaction_number: transaction_number}])
+        end
+      end
+      context 'matured' do
+        let(:entry) { { instrument_type: 'ADVANCE', status: 'MATURED', trade_date: double('A Trade Date'), current_par: amount, transaction_number: transaction_number, product_description: product_description} }
+        it 'displays ADVANCE Matured Today' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: I18n.t('dashboard.recent_activity.matures_today'), transaction_number: transaction_number}])
+        end
+      end
+      context 'executed' do
+        let(:entry) { { instrument_type: 'ADVANCE', status: 'VERIFIED', product: double('A Product'), trade_date: double('A Trade Date'), current_par: amount, transaction_number: transaction_number, product_description: product_description, termination_full_partial: nil} }
+        it 'displays ADVANCE Executed Today' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: I18n.t('dashboard.recent_activity.matures_on', date: controller.fhlb_date_standard_numeric(entry[:maturity_date])), transaction_number: transaction_number}])
+        end
+      end
+      context 'partial prepayment' do
+        let(:entry) { { instrument_type: 'ADVANCE', status: 'VERIFIED', trade_date: double('A Trade Date'), termination_par: amount, transaction_number: transaction_number, product_description: product_description, termination_full_partial: 'PARTIAL PREPAYMENT'} }
+        it 'displays Partial Prepayments Today' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: 'PARTIAL PREPAYMENT', transaction_number: transaction_number}])
+        end
+      end
+      context 'partial repayment' do
+        let(:entry) { { instrument_type: 'ADVANCE', status: 'VERIFIED', trade_date: double('A Trade Date'), termination_par: amount, transaction_number: transaction_number, product_description: product_description, termination_full_partial: 'PARTIAL REPAYMENT'} }
+        it 'displays Partial Repayments Today' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: 'PARTIAL REPAYMENT', transaction_number: transaction_number}])
+        end
+      end
+      context 'open verified' do
+        let(:entry) { { instrument_type: 'ADVANCE', status: 'VERIFIED', product: 'OPEN VRC', trade_date: double('A Trade Date'), current_par: amount, transaction_number: transaction_number, product_description: product_description} }
+        it 'displays ADVANCE Open' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: I18n.t('dashboard.open'), transaction_number: transaction_number}])
+        end
+      end
+      context 'open pend term' do
+        let(:entry) { { instrument_type: 'ADVANCE', status: 'PEND_TERM', product: 'OPEN VRC', trade_date: double('A Trade Date'), current_par: amount, transaction_number: transaction_number, product_description: product_description} }
+        it 'displays ADVANCE Open' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: I18n.t('dashboard.open'), transaction_number: transaction_number}])
+        end
+      end
+      context 'forward funded' do
+        let(:entry) { { instrument_type: 'ADVANCE', status: 'COLLATERAL_AUTH', product: double('A Product'), funding_date: Time.zone.today + rand(1..100), current_par: amount, transaction_number: transaction_number, product_description: product_description} }
+        it 'displays ADVANCE forward funded' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: I18n.t('dashboard.recent_activity.will_be_funded_on', date: controller.fhlb_date_standard_numeric(entry[:funding_date])), transaction_number: transaction_number}])
+        end
+      end
+    end
+    describe '`Investment` entries' do
+      before do
+        allow(subject).to receive(:process_patterns).and_call_original
+      end
+      context 'matured' do
+        let(:entry) { { instrument_type: 'INVESTMENT', status: 'MATURED', trade_date: double('A Trade Date'), current_par: amount, transaction_number: transaction_number, product_description: product_description} }
+        it 'displays Investments Matured Today' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: I18n.t('dashboard.recent_activity.matures_today'), transaction_number: transaction_number}])
+        end
+      end
+      context 'executed' do
+        let(:entry) { { instrument_type: 'INVESTMENT', status: 'VERIFIED', product: double('A Product'), trade_date: double('A Trade Date'), current_par: amount, transaction_number: transaction_number, product_description: product_description, termination_full_partial: nil} }
+        it 'displays ADVANCE Investments Today' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: I18n.t('dashboard.recent_activity.matures_on', date: controller.fhlb_date_standard_numeric(entry[:maturity_date])), transaction_number: transaction_number}])
+        end
+      end
+    end
+    describe 'Other Statuses' do
+      before do
+        allow(subject).to receive(:process_patterns).and_call_original
+      end
+      context 'OPS_REVIEW' do
+        let(:entry) { { status: 'OPS_REVIEW', current_par: amount, transaction_number: transaction_number, product_description: product_description} }
+        it 'displays OPS_REVIEW trade' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: I18n.t('dashboard.recent_activity.in_review'), transaction_number: transaction_number}])
+        end
+      end
+      context 'SEC_REVIEWED' do
+        let(:entry) { { status: 'SEC_REVIEWED', current_par: amount, transaction_number: transaction_number, product_description: product_description} }
+        it 'displays SEC_REVIEWED trade' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: I18n.t('dashboard.recent_activity.in_review'), transaction_number: transaction_number}])
+        end
       end
     end
   end
