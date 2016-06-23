@@ -27,11 +27,17 @@ $(function () {
       var resultsContainerClass = $target.data('results-container-class');
       var formName = $target.data('form-name');
       var inputName = $target.data('input-name');
-      if (resultsContainerClass) {
-        $('.' + resultsContainerClass).html(data.result.html);
-      };
-      if (formName && inputName) {
-        $('form[name=' + formName + '] input[name=' + inputName + ']').attr('value', data.result.form_data);
+      if (data.result) {
+        if (data.result.error) {
+          failUpload(e, data); // For IE
+        } else {
+          if (resultsContainerClass) {
+            $('.' + resultsContainerClass).html(data.result.html);
+          };
+          if (formName && inputName) {
+            $('form[name=' + formName + '] input[name=' + inputName + ']').attr('value', data.result.form_data);
+          };
+        };
       };
     },
     always: function(e, data) {
@@ -39,10 +45,12 @@ $(function () {
       progressBar.css('width', '0%');
       jqXHR = false;
     },
-    fail: function(e, data) {
-      toggleUploadError($(e.target).data('error-class'), true);
-    }
+    fail: failUpload
   });
+
+  function failUpload(e, data) {
+    toggleUploadError($(e.target).data('error-class'), true);
+  }
 
   function toggleUploadError(errorClass, active) {
     if (errorClass && active) {

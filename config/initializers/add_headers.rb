@@ -16,4 +16,4 @@ module Rack
   end
 end
 
-Rails.application.config.middleware.use(Rack::AddResponseHeaders, {'X-Frame-Options' => 'DENY'})
+Rails.application.config.middleware.use(Rack::AddResponseHeaders, {'X-Frame-Options' => 'SAMEORIGIN'})

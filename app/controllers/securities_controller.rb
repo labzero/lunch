@@ -22,7 +22,8 @@ class SecuritiesController < ApplicationController
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'application/vnd.ms-excel',
     'text/csv',
-    'application/vnd.oasis.opendocument.spreadsheet'
+    'application/vnd.oasis.opendocument.spreadsheet',
+    'application/octet-stream'
   ]
 
   before_action do
@@ -215,7 +216,7 @@ class SecuritiesController < ApplicationController
       error = "Uploaded file has unsupported MIME type: #{content_type}"
       status = 415
     end
-    render json: {html: html, error: error, form_data: (@securities_table_data[:rows].to_json if @securities_table_data)}, status: status
+    render json: {html: html, error: error, form_data: (@securities_table_data[:rows].to_json if @securities_table_data)}, status: status, content_type: request.format
   end
 
   private
