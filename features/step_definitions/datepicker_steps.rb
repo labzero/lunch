@@ -35,6 +35,10 @@ When(/^I click the datepicker apply button$/) do
   page.find('.daterangepicker button', text: I18n.t('global.apply').upcase, visible: true).click
 end
 
+When(/^I click the datepicker cancel button$/) do
+  page.find('.daterangepicker button.cancelBtn', visible: true).click
+end
+
 Then(/^I should see two calendars$/) do
   page.assert_selector('.daterangepicker .calendar.first', visible: true)
   page.assert_selector('.daterangepicker .calendar.second', visible: true)

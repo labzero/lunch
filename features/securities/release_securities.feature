@@ -61,3 +61,21 @@ Scenario: Member cancels an upload of a securities release file
   Then I should see an upload progress bar
   When I click to cancel the securities release file upload
   Then I should not see an upload progress bar
+
+@jira-mem-1654
+Scenario: Member changes trade and settlement dates
+  # This should be flushed out once we have actual date ranges to check
+  Given I am on the release securities page
+  When I click the trade date datepicker
+  And I click the datepicker apply button
+  Then I should be on the securities release page
+  When I click the trade date datepicker
+  And I click the datepicker cancel button
+  Then I should be on the securities release page
+  When I click the settlement date datepicker
+  And I click the datepicker apply button
+  Then I should be on the securities release page
+  When I click the settlement date datepicker
+  And I click the datepicker cancel button
+  Then I should be on the securities release page
+  

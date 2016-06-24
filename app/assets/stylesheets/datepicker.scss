@@ -209,3 +209,12 @@
   }
 
 }
+
+.datepicker-wrapper-no-presets {
+  .daterangepicker {
+    width: auto;
+    .datepicker_input_field {
+      margin-left: 0;
+    }
+  }
+}

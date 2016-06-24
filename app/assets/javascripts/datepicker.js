@@ -143,7 +143,15 @@ $(function () {
     $datePickerTrigger.daterangepicker(optionsHash); // reinitialize the datepicker with the prototype changes made by `addUpdateEventTrigger`
 
     // Disable apply button
-    changeApplyButtonStatus($datePickerWrapper, true);
+    var disableApply = true;
+
+    if ($.isEmptyObject(options.ranges)) {
+      $datePickerWrapper.addClass('datepicker-wrapper-no-presets');
+      disableApply = false;
+    };
+
+    changeApplyButtonStatus($datePickerWrapper, disableApply);
+    blockDefaultButtonActions($datePickerWrapper);
 
     // Append the daterangepicker's start and end inputs to our own div for design purposes, then attach its event handlers
     var $datePickerStartInput = $datePickerWrapper.find('.daterangepicker_start_input');
@@ -197,6 +205,12 @@ $(function () {
     else {
       $datePickerTrigger.find('input').val(startDate.format('MM/DD/YYYY') + ' - ' + endDate.format('MM/DD/YYYY'));
     };
+  };
+
+  function blockDefaultButtonActions($datePickerWrapper) {
+    $datePickerWrapper.click(function(e) {
+      e.preventDefault();
+    });
   };
 
   function filterDates(filter, filterOptions) {

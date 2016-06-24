@@ -2,12 +2,14 @@ When(/^I click on the Securities link in the header$/) do
   page.find('.secondary-nav a', text: I18n.t('securities.title'), exact: true).click
 end
 
-Then(/^I should be on the (Manage Securities|Securities Requests) page$/) do |page_type|
+Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release) page$/i) do |page_type|
   text = case page_type
-    when 'Manage Securities'
+    when /\AManage Securities\z/i
       I18n.t('securities.manage.title')
-    when 'Securities Requests'
+    when /\ASecurities Requests\z/i
       I18n.t('securities.requests.title')
+    when /\ASecurities Release\z/i
+      I18n.t('securities.release.title')
   end
   page.assert_selector('h1', text: text, exact: true)
   step 'I should see a report table with multiple data rows'
@@ -160,6 +162,19 @@ end
 
 Then(/^I should not see an upload progress bar$/) do
   page.assert_selector('.file-upload-progress .gauge-section', visible: :hidden)
+end
+
+When(/^I click the (trade|settlement) date datepicker$/) do |field|
+  text = case field
+  when 'trade'
+    I18n.t('common_table_headings.trade_date')
+  when 'settlement'
+    I18n.t('common_table_headings.settlement_date')
+  else
+    raise ArgumentError.new("Unknown datepicker field: #{field}")
+  end
+  field_container = page.find('.securities-broker-instructions .input-field-container-horizontal', text: text, exact: true, visible: :visible)
+  field_container.find('.datepicker-trigger').click
 end
 
 def delivery_instructions(text)
