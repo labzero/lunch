@@ -17,6 +17,18 @@ Scenario: Visit  Manage Advances Page from header link
   And I should see a advances table with multiple data rows
   And I should see the "Trade Date" column values in "descending" order
 
+@jira-mem-1578
+Scenario: Members filter the Advances list
+  Given I am on the "Manage Advances" advances page
+  Then I see only outstanding advances
+  And  I see the "Outstanding Advances" filter selected
+  When I filter the advances by "All Advances"
+  Then I see all advances
+  And  I see the "All Advances" filter selected
+  When I filter the advances by "Outstanding Advances"
+  Then I see only outstanding advances
+  And  I see the "Outstanding Advances" filter selected
+
 @data-unavailable @jira-mem-535 @jira-mem-1053
 Scenario: No data is available to show in the Manage Advances Page
   Given I am on the "Manage Advances" advances page

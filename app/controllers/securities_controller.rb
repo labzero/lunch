@@ -18,6 +18,13 @@ class SecuritiesController < ApplicationController
     physical: 'physical'
   }.freeze
 
+  ACCEPTED_UPLOAD_MIMETYPES = [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-excel',
+    'text/csv',
+    'application/vnd.oasis.opendocument.spreadsheet'
+  ]
+
   before_action do
     set_active_nav(:securities)
     @html_class ||= 'white-background'
@@ -64,7 +71,7 @@ class SecuritiesController < ApplicationController
           {
             text: t('securities.manage.all'),
             value: 'all',
-            class: 'active'
+            active: true
           }
         ]
       },
@@ -147,7 +154,7 @@ class SecuritiesController < ApplicationController
     ]
 
     @securities_table_data = {
-      column_headings: [t('common_table_headings.cusip'), t('common_table_headings.description'), fhlb_add_unit_to_table_header(t('common_table_headings.original_par'), '$'), fhlb_add_unit_to_table_header(t('securities.release.settlement_amount'), '$')],
+      column_headings: release_securities_table_headings,
       rows: params[:securities].collect do |security|
         security = JSON.parse(security).with_indifferent_access
         {
@@ -160,6 +167,55 @@ class SecuritiesController < ApplicationController
         }
       end
     }
+  end
+
+  def download_release
+    @securities_table_data = {
+      column_headings: release_securities_table_headings,
+      rows: JSON.parse(params[:securities]).collect { |x| x.with_indifferent_access }
+    }
+    render xlsx: 'release', filename: "securities.xlsx"
+  end
+
+  def upload_release
+    uploaded_file = params[:file]
+    content_type = uploaded_file.content_type
+    if ACCEPTED_UPLOAD_MIMETYPES.include?(content_type)
+      @securities_table_data = {
+        column_headings: release_securities_table_headings,
+        rows: []
+      }
+      spreadsheet = Roo::Spreadsheet.open(uploaded_file.path)
+      data_start_index = nil
+      spreadsheet.each do |row|
+        if data_start_index
+          @securities_table_data[:rows] << {
+            columns: [
+              {value: row[data_start_index] || t('global.missing_value')},
+              {value: row[data_start_index + 1] || t('global.missing_value')},
+              {value: (row[data_start_index + 2].to_i if row[data_start_index + 2]), type: :number},
+              {value: (row[data_start_index + 3].to_i if row[data_start_index + 3]), type: :number}
+            ]
+          }
+        else
+          row.each_with_index do |cell, i|
+            regex = /\Acusip\z/i
+            data_start_index = i if regex.match(cell.to_s)
+          end
+        end
+      end
+      if data_start_index
+        html = render_to_string(layout: false)
+        status = 200
+      else
+        error = 'No header row found'
+        status = 400
+      end
+    else
+      error = "Uploaded file has unsupported MIME type: #{content_type}"
+      status = 415
+    end
+    render json: {html: html, error: error, form_data: (@securities_table_data[:rows].to_json if @securities_table_data)}, status: status
   end
 
   private
@@ -187,6 +243,15 @@ class SecuritiesController < ApplicationController
     else
       t('global.missing_value')
     end
+  end
+
+  def release_securities_table_headings
+    [
+      I18n.t('common_table_headings.cusip'),
+      I18n.t('common_table_headings.description'),
+      fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+      I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker)
+    ]
   end
 
 end

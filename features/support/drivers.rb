@@ -118,7 +118,7 @@ if defined?(Capybara)
   end
 
   Capybara.register_driver :sauce_safari_9_osx_11 do |app|
-    caps = base_opts.merge({:platform => 'OS X 10.11', :version => '9.0', :screenResolution => ENV['SAUCE_SCREEN_RESOLUTION'] || '1024x768'})
+    caps = base_opts.merge({:platform => 'OS X 10.11', :version => '9.0', :screenResolution => ENV['SAUCE_SCREEN_RESOLUTION'] || '1376x1032'})
 
     Capybara::Selenium::Driver.new(app,
                                    :browser => :remote,

@@ -284,6 +284,10 @@ class MemberBalanceService < MAPIService
     get_json(:active_advances, "member/#{@member_id}/active_advances")
   end
 
+  def advances
+    get_json(:advances, "member/#{@member_id}/advances")
+  end
+
   def parallel_shift
     if data = fix_date( get_hash(:parallel_shift, "member/#{@member_id}/parallel_shift_analysis") )
       data[:putable_advances].each { |advance| fix_date(advance, :issue_date) }

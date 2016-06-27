@@ -28,6 +28,9 @@ class AdvancesController < ApplicationController
     render :error
   end
 
+  ADVANCES_ALL = 'all'.freeze
+  ADVANCES_OUTSTANDING = 'outstanding'.freeze
+
   def confirmation
     render nothing: true
     MemberBalanceService.new(current_member_id, request).advance_confirmation(params[:advance_number],params[:confirmation_number], &stream_attachment_processor(response))
@@ -36,37 +39,55 @@ class AdvancesController < ApplicationController
   def manage
     column_headings = [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), t('advances.rate'), t('common_table_headings.current_par') + ' ($)']
     column_headings << t('advances.confirmation.title') if feature_enabled?('advance-confirmation')
+    outstanding_only = params[:maturity] == ADVANCES_OUTSTANDING || params[:maturity].nil?
     @advances_data_table = {
-      :column_headings => column_headings,
-      :rows => []
+      column_headings: column_headings,
+      rows: [],
+      filter: {
+        name: 'advances-filter',
+        remote: 'maturity',
+        data: [
+          {
+            text: t('advances.manage_advances.outstanding'),
+            value: ADVANCES_OUTSTANDING,
+            active: outstanding_only
+          },
+          {
+            text: t('advances.manage_advances.all'),
+            value: ADVANCES_ALL,
+            active: !outstanding_only
+          }
+        ]
+      }
     }
     if params[:job_id]
       job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
       raise ActiveRecord::RecordNotFound unless job_status
-      active_advances_response = JSON.parse(job_status.result_as_string).collect! {|o| o.with_indifferent_access}
+      json = job_status.result_as_string
+      raise StandardError, "There has been an error and AdvancesController#manage_advances has encountered nil. Check error logs." if json.nil?
+      active_advances_response = JSON.parse(json).collect! {|o| o.with_indifferent_access}
       job_status.destroy
-      raise StandardError, "There has been an error and AdvancesController#manage_advances has encountered nil. Check error logs." if active_advances_response.nil?
       rows = active_advances_response.collect do |row|
         columns = []
-        row.each do |value|
-          key = value[0].to_sym
+        [:trade_date, :funding_date, :maturity_date, :advance_number, :advance_type, :interest_rate, :current_par, :advance_confirmation].each do |key|
+          value = row[key]
           if key == :interest_rate
-            columns << {type: :index, value: value[1]}
+            columns << {type: :index, value: value}
           elsif key == :current_par
-            columns << {type: :number, value: value[1]}
-          elsif key == :trade_date || key == :funding_date || (key == :maturity_date and value[1] != 'Open')
-            columns << {type: :date, value: value[1]}
+            columns << {type: :number, value: value}
+          elsif key == :trade_date || key == :funding_date || (key == :maturity_date and value != 'Open')
+            columns << {type: :date, value: value}
           elsif key == :advance_confirmation
             if feature_enabled?('advance-confirmation')
-              cell_value = advance_confirmation_link_data(row[:trade_date], value[1])
+              cell_value = advance_confirmation_link_data(row[:trade_date], value)
               columns << {type: :link_list, value: cell_value}
             else
               next
             end
-          elsif key == :status
+          elsif key == :status || key == :original_par
             next
           else
-            columns << {value: value[1]}
+            columns << {value: value}
           end
         end
         {columns: columns}
@@ -76,10 +97,11 @@ class AdvancesController < ApplicationController
 
       render layout: false if request.xhr?
     else
-      job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'active_advances', request.uuid).job_status
+      job_method = outstanding_only ? 'active_advances' : 'advances'
+      job_status = MemberBalanceServiceJob.perform_later(current_member_id, job_method, request.uuid).job_status
       job_status.update_attributes!(user_id: current_user.id)
       @job_status_url = job_status_url(job_status)
-      @load_url = advances_manage_url(job_id: job_status.id)
+      @load_url = advances_manage_url(job_id: job_status.id, maturity: outstanding_only ? ADVANCES_OUTSTANDING : ADVANCES_ALL )
       @advances_data_table[:deferred] = true
     end
   end

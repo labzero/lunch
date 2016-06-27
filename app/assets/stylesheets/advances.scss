@@ -59,7 +59,6 @@
 
 .advances-header {
   @extend %pseudoelement-clearfix;
-  margin-bottom: 30px;
   h1 {
     float: left;
   }
@@ -690,4 +689,9 @@
       text-align: right;
     }
   }
+}
+
+.advances-filter {
+  @extend %table-filter;
+  margin-bottom: 10px;
 }

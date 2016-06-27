@@ -103,6 +103,16 @@ describe CustomFormattingHelper do
     end
   end
 
+  describe '`fhlb_datetime_standard_numeric_with_on` method' do
+    let(:date) {DateTime.new(2015,1,2, 10, 12, 13)}
+    it 'converts a datetime into a string following the `Time on MM/DD/YYYY` format' do
+      expect(helper.fhlb_datetime_standard_numeric_with_on(date)).to eq('10:12 am on 01/02/2015')
+    end
+    it 'returns the I18n value for `missing_value` if passed nil' do
+      expect(helper.fhlb_datetime_standard_numeric_with_on(nil)).to eq(I18n.t('global.missing_value'))
+    end
+  end
+
   describe '`fhlb_date_long_alpha` method' do
     let(:date) {Date.new(2015,1,2)}
     it 'converts a date into an alphanumeric string following the `Month d, YYYY` format' do
@@ -310,7 +320,7 @@ describe CustomFormattingHelper do
   describe '`fhlb_formatted_duration` method' do
     let(:duration_under_24_hours) { rand(1..86399).seconds }
     it 'throws an `ArgumentError` for negative values' do
-      expect { helper.fhlb_formatted_duration(0 - rand(42)) }.to raise_error(ArgumentError)
+      expect { helper.fhlb_formatted_duration(0 - rand(1..42)) }.to raise_error(ArgumentError)
     end
     it 'returns a valid response for zero' do
       expect(helper.fhlb_formatted_duration(0)).to eq("00:00:00")
@@ -323,6 +333,19 @@ describe CustomFormattingHelper do
     end
     it 'format the duration (over 24 hours)' do
       expect(helper.fhlb_formatted_duration(271545)).to eq('75:25:45')
+    end
+  end
+
+  describe '`fhlb_footnote_marker` method' do
+    marker = I18n.t('global.footnote_indicator')
+
+    it "returns `#{marker}` if no index is passed" do
+      expect(helper.fhlb_footnote_marker). to eq(marker)
+    end
+    10.times do |i|
+      it "returns a string of `#{marker}`'s whose length is equal to the index plus one" do
+        expect(helper.fhlb_footnote_marker(i).length).to eq(i + 1)
+      end
     end
   end
 end

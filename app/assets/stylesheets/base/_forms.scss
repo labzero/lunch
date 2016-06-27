@@ -163,3 +163,79 @@ label {
     color: $alert-red;
   }
 }
+
+.input-file-button-wrapper {
+  position: relative;
+  width: 150px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  input {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    font-size: 200px;
+  }
+}
+
+[data-dropzone] {
+  position: relative;
+  border: 1px dashed $actionable-blue;
+  border-radius: $default-border-radius;
+  background: $lightest-blue;
+  transition: all 0.3s ease-out;
+  &.hover {
+    background: $light-blue;
+    border: 1px solid $actionable-blue;
+  }
+  &.file-uploading {
+    background: $white;
+    border: 1px solid $light-blue;
+    .file-upload-progress {
+      display: block;
+    }
+  }
+}
+
+.file-upload-progress {
+  position: absolute;
+  display: none;
+  width: 100%;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  padding: 20px;
+  box-sizing: border-box;
+  background: $white;
+  p {
+    &:first-of-type{
+      @extend %typography-table-heading;
+      color: $actionable-blue;
+      cursor: pointer;
+      text-align: right;
+      text-transform: uppercase;
+    }
+    &:last-of-type {
+      @extend %typography-transition-message;
+    }
+  }
+  .gauge-section {
+    background: $secondary-gray;
+    width: 100%;
+    height: 20px;
+    padding: 2px;
+    box-sizing: border-box;
+    border-radius: $default-border-radius;
+  }
+  .inner-gauge-section {
+    background: $brand-blue;
+    height: 16px;
+    width: 0;
+    border-radius: $default-border-radius;
+  }
+}

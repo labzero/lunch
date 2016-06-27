@@ -1931,6 +1931,10 @@ RSpec.describe ReportsController, :type => :controller do
           ]
         )
       end
+      it 'sets @whole_report_disabled to false' do
+        current_price_indications
+        expect(assigns[:whole_report_disabled]).to be(false)
+      end
       describe 'when the `skip_deferred_load` controller attribute is true' do
         before do
           controller.skip_deferred_load = true
@@ -1957,35 +1961,80 @@ RSpec.describe ReportsController, :type => :controller do
           current_price_indications
         end
       end
-      describe 'when the report is disabled' do
+      describe 'disabled reports' do
         let(:be_an_empty_report) { include(rows: []) }
         before do
-          allow(controller).to receive(:report_disabled?).with(described_class::CURRENT_PRICE_INDICATIONS_WEB_FLAGS).and_return(true)
-          current_price_indications
+          allow(controller).to receive(:report_disabled?).and_return(false)
         end
-        it 'sets `@standard_vrc_table_data` to an empty report' do
-          expect(assigns[:standard_vrc_table_data]).to be_an_empty_report
+        describe 'when the whole report is disabled' do
+          before do
+            allow(controller).to receive(:report_disabled?).with(described_class::CURRENT_PRICE_INDICATIONS_WEB_FLAGS).and_return(true)
+            current_price_indications
+          end
+          it 'sets `@standard_vrc_table_data` to an empty report' do
+            expect(assigns[:standard_vrc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@sbc_vrc_table_data` to an empty report' do
+            expect(assigns[:sbc_vrc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@standard_frc_table_data` to an empty report' do
+            expect(assigns[:standard_frc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@sbc_frc_table_data` to an empty report' do
+            expect(assigns[:sbc_frc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@standard_arc_table_data` to an empty report' do
+            expect(assigns[:standard_arc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@sbc_arc_table_data` to an empty report' do
+            expect(assigns[:sbc_arc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@sta_table_data` to an empty report' do
+            expect(assigns[:sta_table_data][:row_value]).to be_nil
+          end
+          it 'sets `@vrc_date` to `nil`' do
+            expect(assigns[:vrc_date]).to be_nil
+          end
+          it 'sets @whole_report_disabled to true' do
+            expect(assigns[:whole_report_disabled]).to be(true)
+          end
         end
-        it 'sets `@sbc_vrc_table_data` to an empty report' do
-          expect(assigns[:sbc_vrc_table_data]).to be_an_empty_report
-        end
-        it 'sets `@standard_frc_table_data` to an empty report' do
-          expect(assigns[:standard_frc_table_data]).to be_an_empty_report
-        end
-        it 'sets `@sbc_frc_table_data` to an empty report' do
-          expect(assigns[:sbc_frc_table_data]).to be_an_empty_report
-        end
-        it 'sets `@standard_arc_table_data` to an empty report' do
-          expect(assigns[:standard_arc_table_data]).to be_an_empty_report
-        end
-        it 'sets `@sbc_arc_table_data` to an empty report' do
-          expect(assigns[:sbc_arc_table_data]).to be_an_empty_report
-        end
-        it 'sets `@sta_table_data` to an empty report' do
-          expect(assigns[:sta_table_data][:row_value]).to be_nil
-        end
-        it 'sets `@vrc_date` to `nil`' do
-          expect(assigns[:vrc_date]).to be_nil
+        describe 'when a specific price is disabled' do
+          it 'sets `@standard_vrc_table_data` to an empty report when `MembersService::RATE_CURRENT_STANDARD_VRC` is disabled' do
+            allow(controller).to receive(:report_disabled?).with([MembersService::RATE_CURRENT_STANDARD_VRC]).and_return(true)
+            current_price_indications
+            expect(assigns[:standard_vrc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@sbc_vrc_table_data` to an empty report when `MembersService::RATE_CURRENT_SBC_VRC` is disabled' do
+            allow(controller).to receive(:report_disabled?).with([MembersService::RATE_CURRENT_SBC_VRC]).and_return(true)
+            current_price_indications
+            expect(assigns[:sbc_vrc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@standard_frc_table_data` to an empty report when `MembersService::RATE_CURRENT_STANDARD_FRC` is disabled' do
+            allow(controller).to receive(:report_disabled?).with([MembersService::RATE_CURRENT_STANDARD_FRC]).and_return(true)
+            current_price_indications
+            expect(assigns[:standard_frc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@sbc_frc_table_data` to an empty report when `MembersService::RATE_CURRENT_SBC_FRC` is disabled' do
+            allow(controller).to receive(:report_disabled?).with([MembersService::RATE_CURRENT_SBC_FRC]).and_return(true)
+            current_price_indications
+            expect(assigns[:sbc_frc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@standard_arc_table_data` to an empty report when `MembersService::RATE_CURRENT_STANDARD_ARC` is disabled' do
+            allow(controller).to receive(:report_disabled?).with([MembersService::RATE_CURRENT_STANDARD_ARC]).and_return(true)
+            current_price_indications
+            expect(assigns[:standard_arc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@sbc_arc_table_data` to an empty report when `MembersService::RATE_CURRENT_SBC_ARC` is disabled' do
+            allow(controller).to receive(:report_disabled?).with([MembersService::RATE_CURRENT_SBC_ARC]).and_return(true)
+            current_price_indications
+            expect(assigns[:sbc_arc_table_data]).to be_an_empty_report
+          end
+          it 'sets `@vrc_date` to an empty report when `MembersService::RATE_CURRENT_STANDARD_VRC` is disabled' do
+            allow(controller).to receive(:report_disabled?).with([MembersService::RATE_CURRENT_STANDARD_VRC]).and_return(true)
+            current_price_indications
+            expect(assigns[:vrc_date]).to be_nil
+          end
         end
       end
     end

@@ -77,6 +77,10 @@ gem 'axlsx_rails', '>= 0.3.0'
 gem 'resque-pool'
 gem 'resque-scheduler'
 
+# for uploading/processing xlsx
+gem 'roo'
+gem "jquery-fileupload-rails"
+
 # for AWS assets
 gem 'paperclip'
 gem 'fog-aws'

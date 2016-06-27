@@ -3,6 +3,7 @@ class InternalMailer < ActionMailer::Base
   helper AssetHelper
   include CustomFormattingHelper
   GENERAL_ALERT_ADDRESS = 'MemberPortalAlert@fhlbsf.com'
+  WEB_TRADE_ALERT_ADDRESS = 'WebTrade@fhlbsf.com'
   layout 'mailer'
   default to: GENERAL_ALERT_ADDRESS, from: GENERAL_ALERT_ADDRESS
 
@@ -44,7 +45,11 @@ class InternalMailer < ActionMailer::Base
     @amount = advance.total_amount
     @member_id = advance.member_id
     @member_name = MembersService.new(advance.request || ActionDispatch::TestRequest.new).member(advance.member_id).try(:[], :name)
-    mail(subject: I18n.t('emails.long_term_advance.subject', amount: fhlb_formatted_currency(@amount, html: false), term: @term))
+    mail(
+      subject: I18n.t('emails.long_term_advance.subject', amount: fhlb_formatted_currency(@amount, html: false), term: @term),
+      from: WEB_TRADE_ALERT_ADDRESS,
+      to: WEB_TRADE_ALERT_ADDRESS
+    )
   end
 
   def quick_report_status(start_time, end_time, completed, total)
@@ -53,6 +58,12 @@ class InternalMailer < ActionMailer::Base
     @completed = completed
     @total = total
     mail(subject: I18n.t('emails.quick_report_status.subject', completed: @completed, total: @total))
+  end
+
+  def quick_report_long_run(completed, total)
+    @completed = completed
+    @total = total
+    mail(subject: I18n.t('emails.quick_report_long_run.subject'))
   end
 
   protected

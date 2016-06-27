@@ -491,7 +491,7 @@ describe MAPI::ServiceApp do
   describe 'Todays Credit Activity' do
     string_attributes = [['instrument_type','instrumentType'], ['status', 'status'], ['transaction_number', 'tradeID'], ['product_description', 'productDescription'], ['termination_full_partial', 'terminationFullPartial'], ['product', 'product'], ['sub_product', 'subProduct']]
     float_attributes = [['termination_par', 'terminationPar'], ['current_par', 'amount'], ['interest_rate', 'rate'], ['termination_fee', 'terminationFee']]
-    date_attributes = [['funding_date', 'fundingDate'], ['maturity_date', 'maturityDate']]
+    date_attributes = [[['trade_date', 'tradeDate'], 'funding_date', 'fundingDate'], ['maturity_date', 'maturityDate']]
 
     let(:attribute) { double('attribute') }
     let(:activity) { double('activity', :[] => nil, :[]= => nil, at_css: nil) }
@@ -508,6 +508,7 @@ describe MAPI::ServiceApp do
       expect(activity[:transaction_number]).to eq('318614')
       expect(activity[:current_par]).to eq(10600000.to_f)
       expect(activity[:interest_rate]).to be_nil
+      expect(activity[:trade_date]).to eq('2013-03-19')
       expect(activity[:funding_date]).to eq('2013-03-19')
       expect(activity[:maturity_date]).to eq('2015-09-14')
       expect(activity[:product_description]).to eq('LC LC LC')
@@ -691,6 +692,218 @@ describe MAPI::ServiceApp do
           allow(DateTime).to receive(:strptime).with(attribute, anything).and_return(double(DateTime, to_date: value))
           expect(todays_credit_activity.first[:termination_date]).to be(value)
         end
+      end
+    end
+  end
+
+  describe '`historic_advances_query` class method' do
+    let(:limit) { double('A Limit') }
+    let(:after_date) { instance_double(Date) }
+    let(:member_id) { double('Member ID') }
+    let(:quoted_value) { SecureRandom.hex }
+    let(:call_method) { MAPI::Services::Member::TradeActivity.historic_advances_query(member_id, after_date, limit) }
+
+    before do
+      allow(MAPI::Services::Member::TradeActivity).to receive(:quote).and_call_original
+    end
+
+    it 'returns a SELECT statement' do
+      expect(call_method).to match(/\A\s*SELECT.*\s+FROM\s+ODS\.DEAL@ODS_LK\s+WHERE\s+.*\s+ORDER\s+BY\s+TRADE_DATE DESC\s*\z/mi)
+    end
+    it 'includes the quoted `limit` in the statement' do
+      allow(MAPI::Services::Member::TradeActivity).to receive(:quote).with(limit).and_return(quoted_value)
+      expect(call_method).to match /\sAND\s+ROWNUM\s+<=\s+#{quoted_value}\s/mi
+    end
+    it 'includes the quoted `member_id` in the statement' do
+      allow(MAPI::Services::Member::TradeActivity).to receive(:quote).with(member_id).and_return(quoted_value)
+      expect(call_method).to match /\sAND\s+FHLB_ID\s+=\s+#{quoted_value}\s/mi
+    end
+    it 'includes the quoted `after_date` in the statement' do
+      allow(MAPI::Services::Member::TradeActivity).to receive(:quote).with(after_date).and_return(quoted_value)
+      expect(call_method).to match /\sAND\s+NVL\(TERMINATION_DATE,\s+MATURITY_DATE\)\s+>=\s+#{quoted_value}\s/mi
+    end
+    it 'defaults the limit to `2000` if not provided' do
+      expect(MAPI::Services::Member::TradeActivity).to receive(:quote).with(2000)
+      MAPI::Services::Member::TradeActivity.historic_advances_query(member_id, after_date)
+    end
+  end
+
+  describe '`historic_advances_fetch` class method' do
+    let(:member_id) { double('Member ID') }
+    let(:app_instance) { instance_double(app, logger: instance_double(Logger))}
+    let(:entries) { instance_double(Array) }
+    let(:call_method) { MAPI::Services::Member::TradeActivity.historic_advances_fetch(app_instance, member_id, after_date) }
+
+    describe 'when not faking' do
+      let(:after_date) { instance_double(Date) }
+      let(:sql) { double('An SQL Query') }
+      before do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:should_fake?).with(app_instance).and_return(false)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:historic_advances_query).with(member_id, after_date).and_return(sql)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:fetch_hashes).and_return(entries)
+      end
+      it 'calls `historic_advances_query` with the `after_date` and `member_id`' do
+        expect(MAPI::Services::Member::TradeActivity).to receive(:historic_advances_query).with(member_id, after_date)
+        call_method
+      end
+      it 'calls `fetch_hashes` with the built SQL' do
+        expect(MAPI::Services::Member::TradeActivity).to receive(:fetch_hashes).with(app_instance.logger, sql)
+        call_method
+      end
+      it 'returns the result of the fetch' do
+        expect(call_method).to be(entries)
+      end
+    end
+
+    describe 'when faking' do
+      let(:after_date) { Time.zone.today }
+      let(:member_id_str) { member_id.to_i.to_s }
+      let(:rng) { Random.new }
+      before do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:should_fake?).with(app_instance).and_return(true)
+        allow(member_id).to receive(:to_i).and_return(rand(1..100))
+        allow(Random).to receive(:new).and_return(rng)
+      end
+      it 'constructs a random number generator based on the `member_id` as the leading digits of the seed' do
+        expect(Random).to receive(:new).with(digits_in_range(member_id.to_i, 0..(member_id_str.length - 1))).and_call_original
+        call_method
+      end
+      it 'constructs a random number generator based on the `after_date` as the trailing digits of the seed' do
+        expect(Random).to receive(:new).with(digits_in_range(after_date.to_time.to_i, member_id_str.length..-1)).and_call_original
+        call_method
+      end
+      it 'does not call `Kernel.rand`' do
+        expect(Kernel).to_not receive(:rand)
+        call_method
+      end
+      it 'does call rand on the seeded RNG' do
+        expect(rng).to receive(:rand).at_least(:once).and_call_original
+        call_method
+      end
+      it 'builds some entries' do
+        expect(call_method).to include(hash_including('TRADE_DATE', 'FUNDING_DATE', 'MATURITY_DATE', 'ADVANCE_NUMBER', 'ORIGINAL_PAR', 'ADVANCE_TYPE'))
+      end
+      it 'builds the same entries each time' do
+        expect(call_method).to match(call_method)
+      end
+      it 'builds entries with a `TRADE_DATE` that is before the `FUNDING_DATE`' do
+        entry = call_method.first
+        expect(entry['TRADE_DATE']).to be < entry['FUNDING_DATE']
+      end
+      it 'builds entries with a `FUNDING_DATE` that is before the `MATURITY_DATE`' do
+        entry = call_method.first
+        expect(entry['FUNDING_DATE']).to be < entry['MATURITY_DATE']
+      end
+    end
+  end
+
+  describe '`historic_advances` class method' do
+    let(:member_id) { double('Member ID') }
+    let(:after_date) { instance_double(Date) }
+    let(:app_instance) { instance_double(app, logger: instance_double(Logger))}
+    let(:call_method) { MAPI::Services::Member::TradeActivity.historic_advances(app_instance, member_id, after_date) }
+
+    it 'calls `historic_advances_fetch` with the `member_id`' do
+      expect(MAPI::Services::Member::TradeActivity).to receive(:historic_advances_fetch).with(anything, member_id, anything)
+      call_method
+    end
+    it 'calls `historic_advances_fetch` with the app instance' do
+      expect(MAPI::Services::Member::TradeActivity).to receive(:historic_advances_fetch).with(app_instance, anything, anything)
+      call_method
+    end
+    it 'calls `historic_advances_fetch` with the `after_date`' do
+      expect(MAPI::Services::Member::TradeActivity).to receive(:historic_advances_fetch).with(anything, anything, after_date)
+      call_method
+    end
+    it 'defaults the `after_date` to 18 months ago if not provided' do
+      today = Time.zone.today
+      allow(Time.zone).to receive(:today).and_return(today)
+      expect(MAPI::Services::Member::TradeActivity).to receive(:historic_advances_fetch).with(anything, anything, match(Time.zone.today - 18.months))
+      MAPI::Services::Member::TradeActivity.historic_advances(app_instance, member_id)
+    end
+    describe 'processing entries' do
+      let(:maturity_date) { instance_double(String) }
+      let(:funding_date) { instance_double(String) }
+      let(:trade_date) { instance_double(String) }
+      let(:original_par) { instance_double(String) }
+      let(:advance_type) { instance_double(String) }
+      let(:advance_number) { instance_double(String) }
+      let(:matching_confirmation) { 
+        {
+          advance_number: advance_number
+        }
+      }
+      let(:confirmations) {
+        [
+          {
+            advance_number: double(String)
+          },
+          matching_confirmation,
+          {
+            advance_number: double(String)
+          }
+        ]
+      }
+      let(:raw_entries) { [
+        {
+          'MATURITY_DATE' => maturity_date,
+          'FUNDING_DATE' => funding_date,
+          'TRADE_DATE' => trade_date,
+          'ORIGINAL_PAR' => original_par,
+          'ADVANCE_TYPE' => advance_type,
+          'ADVANCE_NUMBER' => advance_number
+        }
+      ] }
+      before do
+        allow(MAPI::Services::Member::TradeActivity).to receive(:historic_advances_fetch).and_return(raw_entries)
+        allow(MAPI::Services::Member::TradeActivity).to receive(:advance_confirmation).and_return(confirmations)
+        allow(advance_number).to receive(:to_s).and_return(advance_number)
+      end
+
+      it 'converts each entries `MATURITY_DATE` to an ISO-8601 string' do
+        expect(maturity_date).to receive_message_chain(:to_date, :iso8601)
+        call_method
+      end
+      it 'converts each entries `FUNDING_DATE` to an ISO-8601 string' do
+        expect(funding_date).to receive_message_chain(:to_date, :iso8601)
+        call_method
+      end
+      it 'converts each entries `TRADE_DATE` to an ISO-8601 string' do
+        expect(trade_date).to receive_message_chain(:to_date, :iso8601)
+        call_method
+      end
+      it 'converts each entries `ORIGINAL_PAR` to an integer' do
+        expect(original_par).to receive(:to_i)
+        call_method
+      end
+      it 'converts each entries `ADVANCE_NUMBER` to a string' do
+        expect(advance_number).to receive(:to_s)
+        call_method
+      end
+      it 'converts each entries `ADVANCE_TYPE` to a string' do
+        expect(advance_type).to receive(:to_s)
+        call_method
+      end
+      it 'returns an array of indifferent access hashes' do
+        expect(call_method.first).to be_kind_of(ActiveSupport::HashWithIndifferentAccess)
+      end
+      it 'calls `advance_confirmation` with the app instance' do
+        expect(MAPI::Services::Member::TradeActivity).to receive(:advance_confirmation).with(app_instance, anything, anything)
+        call_method
+      end
+      it 'calls `advance_confirmation` with the `member_id`' do
+        expect(MAPI::Services::Member::TradeActivity).to receive(:advance_confirmation).with(anything, member_id, anything)
+        call_method
+      end
+      it 'calls `advance_confirmation` with the advances numbers from the entries' do
+        expect(MAPI::Services::Member::TradeActivity).to receive(:advance_confirmation).with(anything, anything, include(advance_number))
+        call_method
+      end
+      it 'populates the each entries `advance_confirmation`' do
+        expect(call_method.first[:advance_confirmation]).to match([matching_confirmation])
+      end
+      it 'downcases the keys of the entries' do
+        expect(call_method).to match([hash_including(:maturity_date, :trade_date, :funding_date, :original_par, :advance_number, :advance_type, :advance_confirmation)])
       end
     end
   end

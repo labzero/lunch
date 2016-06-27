@@ -316,12 +316,40 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/advances'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve All Advances for a member (limited to ones that matured/termianted in the last 18 months)'
+              key :notes, 'Returns All Advances'
+              key :type, :array
+              items do
+                key :'$ref', :AllAdvances
+              end
+              key :nickname, :getAdvancesForMember
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/advance_confirmation/{advance_number}/{confirmation_number}'
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve Advance Confirmation as data stream for a member'
               key :notes, 'Advance confirmation found by member_id, advance_number, confirmation_number'
               key :description, 'Returns an advance confirmation attachment using `rack.hijack` if available to allow streaming.'
+              key :nickname, :getAdvanceConfirmation
+              key :type, :string
+              key :format, :byte
+              key :produces, ['application/pdf']
               parameter do
                 key :paramType, :path
                 key :name, :id
@@ -1036,6 +1064,19 @@ module MAPI
             halt 503, 'Internal Service Error'
           end
           result.to_json
+        end
+
+        # All Advances
+        relative_get '/:id/advances' do
+          member_id = params[:id]
+          historic = MAPI::Services::Member::TradeActivity.historic_advances(self, member_id)
+          begin
+            current = MAPI::Services::Member::TradeActivity.trade_activity(self, member_id, 'ADVANCE')
+          rescue Savon::Error => error
+            logger.error error
+            halt 503, 'Internal Service Error'
+          end
+          MAPI::Services::Member::TradeActivity.sort_trades(historic + current).to_json
         end
 
         # Advance Confirmation

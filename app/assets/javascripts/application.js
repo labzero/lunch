@@ -18,4 +18,5 @@
 //= require moment
 //= require daterangepicker
 //= require rails.validations
+//= require jquery-fileupload/basic
 //= require_tree .

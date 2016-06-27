@@ -30,8 +30,16 @@ class DashboardController < ApplicationController
 
   # {action_name: [job_klass, path_helper_as_string]}
   DEFERRED_JOBS = {
-    recent_activity: [MemberBalanceTodaysCreditActivityJob, "dashboard_recent_activity_url"],
-    account_overview: [MemberBalanceProfileJob, "dashboard_account_overview_url"]
+    recent_activity: {
+      job: MemberBalanceTodaysCreditActivityJob,
+      load_helper: :dashboard_recent_activity_url
+    },
+    account_overview: {
+      job: MemberBalanceProfileJob,
+      load_helper: :dashboard_account_overview_url,
+      cache_key: ->(controller) { CacheConfiguration.key(:account_overview, controller.session.id, controller.current_member_id) },
+      cache_data_handler: :populate_account_overview_view_parameters
+    }
   }.freeze
 
   QUICK_REPORT_MAPPING = {
@@ -40,6 +48,160 @@ class DashboardController < ApplicationController
     borrowing_capacity: I18n.t('reports.collateral.borrowing_capacity.title'),
     settlement_transaction_account: I18n.t('reports.account.settlement_transaction_account.title')
   }.with_indifferent_access.freeze
+
+  ACTIVITY_DEFAULT_TRANSACTION_NUMBER = ->(entry, key, controller) { entry[:transaction_number] }
+  ACTIVITY_CURRENT_PAR_AMOUNT = ->(entry, key, controller) { entry[:current_par] }
+
+  ACTIVITY_PATTERNS = [
+    # LC Amended Today
+    {
+      returns: {
+        description: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.letter_of_credit') },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.amended_today') }
+      },
+      pattern: {
+        product: 'LC',
+        status: 'VERIFIED',
+        trade_date: -> (entry, key, controller) { entry[:trade_date].to_date < Time.zone.today }
+      }
+    },
+    # LC Executed Today
+    {
+      returns: {
+        description: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.letter_of_credit') },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) { I18n.t('dashboard.recent_activity.expires_on', date: controller.fhlb_date_standard_numeric(entry[:maturity_date])) }
+      },
+      pattern: {
+        product: 'LC',
+        status: 'VERIFIED',
+        trade_date: -> (entry, key, controller) { entry[:trade_date].to_date == Time.zone.today }
+      }
+    },
+    # LC Expired Today
+    {
+      returns: {
+        description: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.letter_of_credit') },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.expires_today') }
+      },
+      pattern: {
+        product: 'LC',
+        status: 'MATURED'
+      }
+    },
+    # LC Terminated Today
+    {
+      returns: {
+        description: -> (entry, key, controller) { I18n.t('dashboard.recent_activity.letter_of_credit') },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) { I18n.t('dashboard.recent_activity.terminated_today') },
+      },
+      pattern: {
+        product: 'LC',
+        status: 'TERMINATED'
+      }
+    },
+    # Advance Terminated Today
+    {
+      returns: {
+        description: ->(entry, key, controller) { entry[:product_description] },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) { entry[:termination_full_partial] }
+      },
+      pattern: {
+        instrument_type: 'ADVANCE',
+        status: 'TERMINATED'
+      }
+    },
+    # Advance/Investment Matured Today
+    {
+      returns: {
+        description: ->(entry, key, controller) { entry[:product_description] },
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) { I18n.t('dashboard.recent_activity.matures_today') },
+      },
+      pattern: {
+        instrument_type: /\A(ADVANCE|INVESTMENT)\z/,
+        status: 'MATURED'
+      }
+    },
+    # Advance Partial Prepayments/Repayments
+    {
+      returns: {
+        description: ->(entry, key, controller) {entry[:product_description]},
+        amount: ->(entry, key, controller) { entry[:termination_par] },
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) {entry[:termination_full_partial]}
+      },
+      pattern: {
+        instrument_type: 'ADVANCE',
+        termination_full_partial: /\A(PARTIAL PREPAYMENT|PARTIAL REPAYMENT)\z/,
+        status: 'VERIFIED',
+      }
+    },
+    # Advance/Investment Executed Today
+    {
+      returns: {
+        description: ->(entry, key, controller) {entry[:product_description]},
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) {I18n.t('dashboard.recent_activity.matures_on', date: controller.fhlb_date_standard_numeric(entry[:maturity_date]))}
+      },
+      pattern: {
+        instrument_type: /\A(ADVANCE|INVESTMENT)\z/,
+        status: 'VERIFIED',
+        product: ->(entry, key, controller) {entry[:product] != 'OPEN VRC'},
+        termination_full_partial: ''
+      }
+    },
+    # Open Advances
+    {
+      returns: {
+        description: ->(entry, key, controller) {entry[:product_description]},
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: I18n.t('dashboard.open')
+      },
+      pattern: {
+        instrument_type: 'ADVANCE',
+        status: /\A(VERIFIED|PEND_TERM)\z/,
+        product: 'OPEN VRC',
+      }
+    },
+    # Forward funded advances
+    {
+      returns: {
+        description: ->(entry, key, controller) {entry[:product_description]},
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) {I18n.t('dashboard.recent_activity.will_be_funded_on', date: controller.fhlb_date_standard_numeric(entry[:funding_date]))}
+      },
+      pattern: {
+        instrument_type: 'ADVANCE',
+        status: 'COLLATERAL_AUTH',
+      }
+    },
+    # 'OPS_REVIEW', 'SEC_REVIEWED'
+    {
+      returns: {
+        description: ->(entry, key, controller) {entry[:product_description]},
+        amount: ACTIVITY_CURRENT_PAR_AMOUNT,
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: I18n.t('dashboard.recent_activity.in_review')
+      },
+      pattern: {
+        status: /\A(OPS_REVIEW|SEC_REVIEWED)\z/
+      }
+    },
+  ].freeze
 
   def index
     rate_service = RatesService.new(request)
@@ -259,65 +421,75 @@ class DashboardController < ApplicationController
   def recent_activity
     activities = deferred_job_data || []
     activities = activities.collect! {|o| o.with_indifferent_access}
-    recent_activity_data = process_recent_activities(activities)
+    recent_activity_data = process_activity_entries(activities)
     render partial: 'dashboard/dashboard_recent_activity', locals: {table_data: recent_activity_data}, layout: false
   end
 
   def account_overview
-    today = Time.zone.now.to_date
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    members_service = MembersService.new(request)
+    cache_context = :account_overview
+    cached_data = Rails.cache.fetch(CacheConfiguration.key(cache_context, session.id, current_member_id), expires_in: CacheConfiguration.expiry(cache_context)) do
+      today = Time.zone.now.to_date
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      members_service = MembersService.new(request)
 
-    # Borrowing Capacity Gauge
-    borrowing_capacity = member_balances.borrowing_capacity_summary(today)
-    @borrowing_capacity_gauge = calculate_borrowing_capacity_gauge(borrowing_capacity) unless members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_REPORT_DATA])
+      # Borrowing Capacity Gauge
+      borrowing_capacity = member_balances.borrowing_capacity_summary(today)
+      borrowing_capacity_gauge = calculate_borrowing_capacity_gauge(borrowing_capacity) unless members_service.report_disabled?(current_member_id, [MembersService::COLLATERAL_REPORT_DATA])
 
-    profile = deferred_job_data || {}
-    profile = sanitize_profile_if_endpoints_disabled(profile.with_indifferent_access)
+      profile = deferred_job_data || {}
+      profile = sanitize_profile_if_endpoints_disabled(profile.with_indifferent_access)
 
-    # Account Overview Sub-Tables - format: [title, value, footnote(optional), precision(optional)]
-    # STA Balance Sub-Table
-    sta_balance = [
-      [[t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
-    ]
+      # Account Overview Sub-Tables - format: [title, value, footnote(optional), precision(optional)]
+      # STA Balance Sub-Table
+      sta_balance = [
+        [[t('dashboard.your_account.table.balance'), reports_settlement_transaction_account_path], profile[:sta_balance], t('dashboard.your_account.table.balance_footnote')],
+      ]
 
-    # Credit Outstanding Sub-Table
-    credit_outstanding = [
-      [t('dashboard.your_account.table.credit_outstanding'), (profile[:credit_outstanding] || {})[:total]]
-    ]
+      # Credit Outstanding Sub-Table
+      credit_outstanding = [
+        [t('dashboard.your_account.table.credit_outstanding'), (profile[:credit_outstanding] || {})[:total]]
+      ]
 
-    # Remaining Borrowing Capacity Sub-Table
-    total_standard_bc = borrowing_capacity[:net_plus_securities_capacity].to_i
-    total_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:total_borrowing_capacity].to_i
-    total_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:total_borrowing_capacity].to_i
-    total_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:total_borrowing_capacity].to_i
-    remaining_standard_bc = borrowing_capacity[:standard_excess_capacity].to_i
-    remaining_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:remaining_borrowing_capacity].to_i
-    remaining_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:remaining_borrowing_capacity].to_i
-    remaining_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:remaining_borrowing_capacity].to_i
+      # Remaining Borrowing Capacity Sub-Table
+      total_standard_bc = borrowing_capacity[:net_plus_securities_capacity].to_i
+      total_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:total_borrowing_capacity].to_i
+      total_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:total_borrowing_capacity].to_i
+      total_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:total_borrowing_capacity].to_i
+      remaining_standard_bc = borrowing_capacity[:standard_excess_capacity].to_i
+      remaining_agency_bc = borrowing_capacity[:sbc][:collateral][:agency][:remaining_borrowing_capacity].to_i
+      remaining_aaa_bc = borrowing_capacity[:sbc][:collateral][:aaa][:remaining_borrowing_capacity].to_i
+      remaining_aa_bc = borrowing_capacity[:sbc][:collateral][:aa][:remaining_borrowing_capacity].to_i
 
-    remaining_borrowing_capacity = unless borrowing_capacity[:total_borrowing_capacity].to_i == 0
-      bc_array = [{title: t('dashboard.your_account.table.remaining_borrowing_capacity')}]
-      bc_array << [t('dashboard.your_account.table.remaining.standard'), remaining_standard_bc] unless total_standard_bc == 0
-      bc_array << [t('dashboard.your_account.table.remaining.agency'), remaining_agency_bc] unless total_agency_bc == 0
-      bc_array << [t('dashboard.your_account.table.remaining.aaa'), remaining_aaa_bc] unless total_aaa_bc == 0
-      bc_array << [t('dashboard.your_account.table.remaining.aa'), remaining_aa_bc] unless total_aa_bc == 0
-      bc_array
+      remaining_borrowing_capacity = unless borrowing_capacity[:total_borrowing_capacity].to_i == 0
+        bc_array = [{title: t('dashboard.your_account.table.remaining_borrowing_capacity')}]
+        bc_array << [t('dashboard.your_account.table.remaining.standard'), remaining_standard_bc] unless total_standard_bc == 0
+        bc_array << [t('dashboard.your_account.table.remaining.agency'), remaining_agency_bc] unless total_agency_bc == 0
+        bc_array << [t('dashboard.your_account.table.remaining.aaa'), remaining_aaa_bc] unless total_aaa_bc == 0
+        bc_array << [t('dashboard.your_account.table.remaining.aa'), remaining_aa_bc] unless total_aa_bc == 0
+        bc_array
+      end
+
+      # Remaining Financing Availability and Stock Leverage Sub-Table
+      leverage_title = if feature_enabled?('report-capital-stock-position-and-leverage')
+        [t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path]
+      else
+        t('dashboard.your_account.table.remaining.leverage')
+      end
+      other_remaining = [
+        {title: t('dashboard.your_account.table.remaining.title')},
+        [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
+        [leverage_title, (profile[:capital_stock] || {})[:remaining_leverage]]
+      ]
+
+      account_overview_table_data = {credit_outstanding: credit_outstanding, sta_balance: sta_balance, remaining_borrowing_capacity: remaining_borrowing_capacity, other_remaining: other_remaining}
+      {
+        table_data: account_overview_table_data,
+        gauge_data: borrowing_capacity_gauge
+      }
     end
 
-    # Remaining Financing Availability and Stock Leverage Sub-Table
-    leverage_title = if feature_enabled?('report-capital-stock-position-and-leverage')
-      [t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path]
-    else
-      t('dashboard.your_account.table.remaining.leverage')
-    end
-    other_remaining = [
-      {title: t('dashboard.your_account.table.remaining.title')},
-      [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]],
-      [leverage_title, (profile[:capital_stock] || {})[:remaining_leverage]]
-    ]
+    populate_account_overview_view_parameters(cached_data)
 
-    @account_overview_table_data = {credit_outstanding: credit_outstanding, sta_balance: sta_balance, remaining_borrowing_capacity: remaining_borrowing_capacity, other_remaining: other_remaining}
     render layout: false
   end
 
@@ -353,6 +525,11 @@ class DashboardController < ApplicationController
     @old_rate = advance_request.old_rate
     @rate_changed = advance_request.rate_changed?
     @total_amount = advance_request.total_amount
+  end
+
+  def populate_account_overview_view_parameters(data)
+    @account_overview_table_data = data[:table_data]
+    @borrowing_capacity_gauge = data[:gauge_data]
   end
 
   def advance_request_from_session(id)
@@ -409,90 +586,6 @@ class DashboardController < ApplicationController
     new_gauge_hash
   end
 
-  def process_recent_activities(activities)
-    activity_data = []
-    if activities
-      i = 0
-      activities.each do |activity|
-        break if i > 4
-        next unless activity[:instrument_type] == 'LC' ||
-                    activity[:instrument_type] == 'ADVANCE' ||
-                    activity[:instrument_type] == 'INVESTMENT'
-        amount = activity[:current_par]
-        description = activity[:product_description]
-        transaction_number = activity[:transaction_number]
-        maturity_date = activity[:maturity_date].to_date if activity[:maturity_date]
-        event = case activity[:status]
-        when 'TERMINATED'
-          if activity[:instrument_type] == 'LC'
-            t('dashboard.recent_activity.terminated_today')
-          elsif activity[:instrument_type] == 'ADVANCE'
-            activity[:termination_full_partial]
-          else
-            fhlb_date_standard_numeric(maturity_date)
-          end
-        when 'INTER_AMEND_STA'
-          t('dashboard.recent_activity.amended_today')
-        when 'EXPIRED'
-          t('dashboard.recent_activity.expires_today')
-        when 'MATURED'
-          t('dashboard.recent_activity.matures_today')
-        when 'VERIFIED'
-          if activity[:product] == 'OPEN VRC'
-            t('dashboard.open')
-          else
-            t('dashboard.recent_activity.matures_on', date: fhlb_date_standard_numeric(maturity_date))
-          end
-        when 'COLLATERAL_AUTH'
-          t('dashboard.recent_activity.will_be_funded_on', date: fhlb_date_standard_numeric(activity[:funding_date]))
-        when 'OPS_REVIEW', 'SEC_REVIEWED'
-          t('dashboard.recent_activity.in_review')
-        when 'EXECUTED'
-          t('dashboard.recent_activity.matures_on', date: maturity_date)
-        when 'PEND_TERM'
-          if maturity_date
-            t('dashboard.recent_activity.matures_on', date: maturity_date)
-          else
-            t('dashboard.open')
-          end
-        else
-          if activity[:instrument_type] == 'INVESTMENT'
-            if maturity_date == Time.zone.today
-              t('dashboard.recent_activity.matures_today')
-            else
-              if maturity_date
-                t('dashboard.recent_activity.matures_on', date: maturity_date)
-              else
-                t('dashboard.open')
-              end
-            end
-          else
-            if maturity_date == Time.zone.today
-              t('global.today')
-            else
-              fhlb_date_standard_numeric(maturity_date)
-            end
-          end
-        end
-        if activity[:termination_full_partial] == 'PARTIAL PREPAYMENT'
-          event = if activity[:sub_product].match(/(^|\s)VRC($|\s)/)
-            t('dashboard.recent_activity.partial_repayment')
-          else
-            t('dashboard.recent_activity.partial_prepayment')
-          end
-          amount = activity[:termination_par]
-          date = activity[:termination_date]
-        end
-        if activity[:product_description] == "LC" || activity[:product_description] == "LC LC LC"
-          description = t('dashboard.recent_activity.letter_of_credit')
-        end
-        activity_data.push([description, amount, event, transaction_number])
-        i += 1
-      end
-    end
-    activity_data
-  end
-
   def deferred_job_data
     raise "Invalid request: must be XMLHttpRequest (xhr) in order to be valid" unless request.xhr?
     param_name = "#{action_name}_job_id".to_sym
@@ -506,12 +599,24 @@ class DashboardController < ApplicationController
 
   def populate_deferred_jobs_view_parameters(jobs_hash)
     jobs_hash.each do |name, args|
-      job_klass = args.first
-      path = args.last
-      job_status = job_klass.perform_later(current_member_id, (request.uuid if defined?(request))).job_status
-      job_status.update_attributes!(user_id: current_user.id)
-      instance_variable_set("@#{name}_job_status_url", job_status_url(job_status))
-      instance_variable_set("@#{name}_load_url", send(path, :"#{name}_job_id" => job_status.id))
+      cached_data = nil
+      if cache_key = args[:cache_key]
+        cache_key = cache_key.call(self) if cache_key.respond_to?(:call)
+        cached_data = Rails.cache.fetch(cache_key)
+      end
+      unless cached_data
+        job_klass = args[:job]
+        job_status = job_klass.perform_later(current_member_id, (request.uuid if defined?(request))).job_status
+        job_status.update_attributes!(user_id: current_user.id)
+        instance_variable_set("@#{name}_job_status_url", job_status_url(job_status))
+        instance_variable_set("@#{name}_load_url", send(args[:load_helper], :"#{name}_job_id" => job_status.id))
+      else
+        if args[:cache_data_handler].respond_to?(:call)
+          args[:cache_data_handler].call(cached_data)
+        else
+          send(args[:cache_data_handler], cached_data)
+        end
+      end
     end
   end
 
@@ -590,4 +695,54 @@ class DashboardController < ApplicationController
     end
     borrowing_capacity_gauge
   end
+
+  def process_activity_entries(entries)
+    activity_data = []
+    entries.each do |entry|
+
+      break if activity_data.length == 4
+      result = process_patterns(ACTIVITY_PATTERNS, entry)
+      if result
+        raise ArgumentError.new('Missing `description`') unless result[:description]
+        raise ArgumentError.new('Missing `amount`') unless result[:amount]
+        raise ArgumentError.new('Missing `event`') unless result[:event]
+        raise ArgumentError.new('Missing `transaction_number`') unless result[:transaction_number]
+        activity_data.push(result)
+      end
+    end
+    activity_data
+  end
+
+  def process_patterns(patterns, entry)
+    patterns.each do |pattern_definition|
+      if pattern_matches?(pattern_definition[:pattern], entry)
+        result = {}
+        pattern_definition[:returns].each do |key, value|
+          if value.respond_to?(:call)
+            result[key] = value.call(entry, key,  self)
+          else
+            result[key] = value
+          end
+        end
+        return result
+      end
+    end
+    return nil
+  end
+
+  def pattern_matches?(pattern, entry)
+    matched = true
+    pattern.each do |key, matcher|
+      if matcher.respond_to?(:call)
+        matched = !!matcher.call(entry, key, self)
+      elsif matcher.is_a?(Regexp)
+        matched = !!matcher.match(entry[key].to_s)
+      else
+        matched = matcher == entry[key]
+      end
+      break unless matched
+    end
+    matched
+  end
+
 end

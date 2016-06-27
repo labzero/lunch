@@ -9,9 +9,9 @@
       - table_data.each do |row|
         %tr
           %td
-            %div.dashboard-module-content-truncated= row[0]
-            %div.dashboard-module-content-light= row[2]
+            %div.dashboard-module-content-truncated= row[:description]
+            %div.dashboard-module-content-light= row[:event]
           %td
-            = fhlb_formated_currency_unit(row[1])
-            %div.dashboard-module-content-light=row[3]
+            = fhlb_formated_currency_unit(row[:amount])
+            %div.dashboard-module-content-light=row[:transaction_number]
 %p= t('dashboard.recent_activity.view_report_html', url: reports_todays_credit_path)

@@ -7,34 +7,54 @@ describe CorporateCommunication::Process do
   it { expect(subject).to respond_to(:process_email_attachments) }
 
   describe '`process_email_html` method', :vcr do
+    let(:email) { Mail.read(email_path) }
+    let(:call_method) { subject.process_email_html(email) }
+    let(:processed_image) { double('A Processed Image') }
+
+    before do
+      allow(subject).to receive(:process_email_image).and_return(processed_image)
+      allow(processed_image).to receive(:[]).with(:fingerprint).and_return(SecureRandom.hex)
+    end
+
     shared_examples 'process_email_html' do
-      let(:email) { Mail.read(email_path) }
-      let(:call_method) { subject.process_email_html(email) }
-      let(:processed_image) { double('A Processed Image') }
-
-      before do
-        allow(subject).to receive(:process_email_image).and_return(processed_image)
-        allow(processed_image).to receive(:[]).with(:fingerprint).and_return(SecureRandom.hex)
-      end
-
       it 'removes images that start with http://open.mkt1700.com/open/log/' do
         expect(call_method[:html]).not_to include('http://open.mkt1700.com/open/log/')
       end
       it 'replaces html element links that start with http://links.mkt1700.com/' do
         expect(call_method[:html]).not_to include('http://links.mkt1700.com/')
       end
+      it 'removes links that match `http://links.mkt1700.com/servlet/OneClickOptOutServlet`' do
+        expect(call_method[:html]).not_to include('http://links.mkt1700.com/servlet/OneClickOptOutServlet')
+      end
+      it 'does not fetch one click unsubscribe links' do
+        allow(URI).to receive(:parse).and_call_original
+        expect(URI).to_not receive(:parse).with(/\Ahttp:\/\/links.mkt1700.com\/servlet\/OneClickOptOutServlet/)
+        call_method
+      end
     end
 
-    shared_examples 'process_email_html images' do
+    shared_examples 'process_email_html images' do |images=[/\Ahttp:\/\/contentz.mkt1700.com\//]|
       it 'replaces the images with CID references' do
         expect(call_method[:html]).to match(/src=["']?cid:#{processed_image[:fingerprint]}["']?/)
       end
       it 'processes the found images' do
-        expect(subject).to receive(:process_email_image).with(/\Ahttp:\/\/contentz.mkt1700.com\//)
+        expect(images.length).to be >= 1
+        images.each do |image|
+          expect(subject).to receive(:process_email_image).with(image)
+        end
         call_method
       end
       it 'returns the processed images' do
-        expect(call_method[:images]).to eq([processed_image])
+        expect(call_method[:images]).to eq(Array.new(images.length, processed_image))
+      end
+    end
+
+    shared_examples 'process_email_html styles' do
+      it 'moves the `style` element from the email\'s `head` node into its `body` node' do
+        expect(call_method[:html]).to match(/<style type="text\/css"[^>]*>/)
+      end
+      it 'prepends the styles contained in the style node with `.corporate-communication-detail-reset`' do
+        expect(call_method[:html]).to include('.corporate-communication-detail-reset a')
       end
     end
 
@@ -42,13 +62,33 @@ describe CorporateCommunication::Process do
       let(:email_path) { File.join(Rails.root + 'spec' + 'fixtures' + 'corp_com_fixture.txt') }
       include_examples 'process_email_html'
       include_examples 'process_email_html images'
+      include_examples 'process_email_html styles'
+    end
 
-      it 'moves the `style` element from the email\'s `head` node into its `body` node' do
-        expect(call_method[:html]).to include('<style type="text/css">')
+    describe 'with a rich email containing a view message link' do
+      let(:email_path) { File.join(Rails.root + 'spec' + 'fixtures' + 'corp_com_view_link.txt') }
+      include_examples 'process_email_html'
+      include_examples 'process_email_html images', [
+        'http://www.fhlbsf.com/images/fhlbsf.logo.email.png',
+        'http://fhlbsf.com/images/cw-elogo.gif',
+        'http://www.fhlbsf.com/images/stories/2016/yolanda-eric-hug-lg.jpg',
+        'http://fhlbsf.com/images/linkedinfaded.png'
+      ]
+      include_examples 'process_email_html styles'
+
+      it 'removes `subscribe` links' do
+        expect(call_method[:html]).to_not match(/<a[^>]*>[^<]*subscribe[^<]*<\/a>/)
       end
-      it 'prepends the styles contained in the style node with `.corporate-communication-detail-reset`' do
-        expect(call_method[:html]).to include('.corporate-communication-detail-reset a')
-        expect(call_method[:html]).to include('.corporate-communication-detail-reset p')
+    end
+
+    describe 'with a rich email containing mailto: unsubscribe link' do
+      let(:email_path) { File.join(Rails.root + 'spec' + 'fixtures' + 'corp_com_mailto.txt') }
+      include_examples 'process_email_html'
+      include_examples 'process_email_html images'
+      include_examples 'process_email_html styles'
+      
+      it 'removes `unsubscribe` links' do
+        expect(call_method[:html]).to_not match(/<a[^>]*href="mailto:[^"]*unsubscribe[^"]*"/i)
       end
     end
 
@@ -465,14 +505,16 @@ describe Rake do
     let(:email_path) { double('A Path') }
     let(:category) { double('A Category') }
     let(:processed_email) { double('Processed Email') }
+    let(:email) { instance_double(Mail::Message) }
     before do
       load 'lib/tasks/corporate_communication.rake'
       Rake::Task.define_task(:environment)
       allow(CorporateCommunication::Process).to receive(:process_email).and_return(processed_email)
       allow(JSON).to receive(:pretty_generate)
+      allow(Mail).to receive(:read).with(email_path).and_return(email)
     end
     it 'calls the method `process_email` on the `CorporateCommunication::Process` module with the supplied arguments' do
-      expect(CorporateCommunication::Process).to receive(:process_email).with(email_path, category)
+      expect(CorporateCommunication::Process).to receive(:process_email).with(email, category)
       ::Rake::Task["corporate_communication:process"].invoke(email_path, category)
     end
   end

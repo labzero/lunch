@@ -126,6 +126,42 @@ When(/^I click on the button to delete the release$/) do
   page.find('.delete-release-flyout a', text: I18n.t('securities.release.delete_request.delete').upcase).click
 end
 
+When(/^I click on the Edit Securities link$/) do
+  page.find('.securities-download').click
+end
+
+Then(/^I should see instructions on how to edit securities$/) do
+  page.assert_selector('.securities-download-instructions', visible: :visible)
+end
+
+Then(/^I should not see instructions on how to edit securities$/) do
+  page.assert_selector('.securities-download-instructions', visible: :hidden)
+end
+
+When(/^the edit securities section is open$/) do
+  step 'I click on the Edit Securities link'
+  step 'I should see instructions on how to edit securities'
+end
+
+When(/^I drag and drop the "(.*?)" file into the edit securities dropzone$/) do |filename|
+  # Simulate drag and drop of given file
+  page.execute_script("seleniumUpload = window.$('<input/>').attr({id: 'seleniumUpload', type:'file'}).appendTo('body');")
+  attach_file('seleniumUpload', Rails.root + "spec/fixtures/#{filename}")
+  page.execute_script("e = $.Event('drop'); e.originalEvent = {dataTransfer : { files : seleniumUpload.get(0).files } }; $('.securities-download-instructions').trigger(e);")
+end
+
+Then(/^I should see an upload progress bar$/) do
+  page.assert_selector('.file-upload-progress .gauge-section', visible: :visible)
+end
+
+When(/^I click to cancel the securities release file upload$/) do
+  page.find('.file-upload-progress p', text: I18n.t('global.cancel_upload').upcase, exact: true).click
+end
+
+Then(/^I should not see an upload progress bar$/) do
+  page.assert_selector('.file-upload-progress .gauge-section', visible: :hidden)
+end
+
 def delivery_instructions(text)
   case text
     when 'DTC'

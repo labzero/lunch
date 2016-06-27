@@ -45,3 +45,19 @@ Scenario: Member interacts with the Delete Release flyout dialogue
   And I click on the button to delete the release
   Then I should be on the Manage Securities page
 
+@jira-mem-1589
+Scenario: Member views edit securities instructions
+  Given I am on the release securities page
+  When I click on the Edit Securities link
+  Then I should see instructions on how to edit securities
+  When I click on the Edit Securities link
+  Then I should not see instructions on how to edit securities
+
+@jira-mem-1590 @data-unavailable
+Scenario: Member cancels an upload of a securities release file
+  Given I am on the release securities page
+  And the edit securities section is open
+  When I drag and drop the "upload-test-file.txt" file into the edit securities dropzone
+  Then I should see an upload progress bar
+  When I click to cancel the securities release file upload
+  Then I should not see an upload progress bar

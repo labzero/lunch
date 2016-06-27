@@ -52,21 +52,40 @@ $(function() {
       $this.data('table-intialized', true);
 
       var filterClass = $this.data('filter-class');
-      if (filterClass && $dataTable) {
+      if (filterClass) {
         var $filterContainer = $('.' + filterClass);
         var $filters = $filterContainer.find('span');
+        var remoteFieldName = $this.data('filter-remote');
+        var $form;
+        var $remoteField;
+        if (remoteFieldName) {
+          $form = $this.parents('form');
+          $remoteField = $form.find('input[name=' + remoteFieldName + ']');
+          if (!$remoteField.length) {
+            $remoteField = $('<input type=hidden name="' + remoteFieldName + '">');
+            $remoteField.val($filterContainer.find('.active').data('filter'));
+            $form.prepend($remoteField);
+          };
+        };
         $filterContainer.on('click', function(e){
           var $filter = $(e.target);
           var filterValue = $filter.data('filter');
-          filterValue = (filterValue == 'all') ? '' : filterValue;
           $filters.removeClass('active');
           $filter.addClass('active');
-          $dataTable.search(filterValue).draw();
+          if ($remoteField) {
+            $remoteField.val(filterValue);
+            $form.submit();
+          } else if ($dataTable) {
+            filterValue = (filterValue == 'all') ? '' : filterValue;
+            $dataTable.search(filterValue).draw();
+          };
         });
-        // Include anything that should be reset when table is filtered (e.g. checkboxes, states, etc.)
-        $dataTable.on('draw', function(){
-          $this.find('input[type=checkbox]').attr('checked', false);
-        });
+        if ($dataTable) {
+          // Include anything that should be reset when table is filtered (e.g. checkboxes, states, etc.)
+          $dataTable.on('draw', function(){
+            $this.find('input[type=checkbox]').attr('checked', false);
+          });
+        };
       };
 
     });

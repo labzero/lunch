@@ -58,6 +58,9 @@ module MAPI
           RECOM_EXPOSURE,
           REG_BORR_CAP,
           SBC_BORR_CAP,
+          SBC_BORR_CAP_AG,
+          SBC_BORR_CAP_AAA,
+          SBC_BORR_CAP_AA,
           EXCESS_REG_BORR_CAP,
           EXCESS_SBC_BORR_CAP_AG,
           EXCESS_SBC_BORR_CAP_AAA,
@@ -68,6 +71,9 @@ module MAPI
           SBC_MARKET_VALUE_AA,
           SBC_MARKET_VALUE,
           EXCESS_SBC_MARKET_VALUE,
+          EXCESS_SBC_MV_AG,
+          EXCESS_SBC_MV_AAA,
+          EXCESS_SBC_MV_AA,
           (
             (NVL(ADVANCES_OUTS_EOD, 0) -
             (NVL(REG_ADV_MAT_TDY_TRM, 0) + NVL(SBC_MATURING_TDY_TRM, 0)) -
@@ -126,18 +132,12 @@ module MAPI
           mpf_credit_available = total_financing_available - (total_credit_outstanding + forward_commitments + remaining_financing_available)
 
           {
+            member_id: member_id.to_i,
             sta_balance: member_sta_hash['STX_CURRENT_LEDGER_BALANCE'].to_f,
             sta_update_date: member_sta_hash['STX_UPDATE_DATE'].nil? ? nil : member_sta_hash['STX_UPDATE_DATE'].to_date,
             total_financing_available: total_financing_available,
             remaining_financing_available: remaining_financing_available,
             mpf_credit_available: mpf_credit_available,
-            collateral_market_value_sbc_agency: member_position_hash['SBC_MARKET_VALUE_AG'].to_i,
-            collateral_market_value_sbc_aaa: member_position_hash['SBC_MARKET_VALUE_AAA'].to_i,
-            collateral_market_value_sbc_aa: member_position_hash['SBC_MARKET_VALUE_AA'].to_i,
-            total_borrowing_capacity_standard: member_position_hash['EXCESS_REG_BORR_CAP'].to_i,
-            total_borrowing_capacity_sbc_agency: member_position_hash['EXCESS_SBC_BORR_CAP_AG'].to_i,
-            total_borrowing_capacity_sbc_aaa: member_position_hash['EXCESS_SBC_BORR_CAP_AAA'].to_i,
-            total_borrowing_capacity_sbc_aa: member_position_hash['EXCESS_SBC_BORR_CAP_AA'].to_i,
             collateral_delivery_status: member_position_hash['DELIVERY_STATUS_FLAG'].to_s,
             financing_percentage: member_position_hash['RECOM_EXPOSURE_PCT'].to_f,
             maximum_term: member_position_hash['MAX_TERM'].to_i,
@@ -163,7 +163,25 @@ module MAPI
                 total_borrowing: sbc_borrowing_capacity,
                 remaining_borrowing: sbc_borrowing_capacity_remaining,
                 total_market: member_position_hash['SBC_MARKET_VALUE'].to_i,
-                remaining_market: member_position_hash['EXCESS_SBC_MARKET_VALUE'].to_i
+                remaining_market: member_position_hash['EXCESS_SBC_MARKET_VALUE'].to_i,
+                aa: {
+                  total: member_position_hash['SBC_BORR_CAP_AA'].to_i,
+                  remaining: member_position_hash['EXCESS_SBC_BORR_CAP_AA'].to_i,
+                  total_market: member_position_hash['SBC_MARKET_VALUE_AA'].to_i,
+                  remaining_market: member_position_hash['EXCESS_SBC_MV_AA'].to_i
+                },
+                aaa: {
+                  total: member_position_hash['SBC_BORR_CAP_AAA'].to_i,
+                  remaining: member_position_hash['EXCESS_SBC_BORR_CAP_AAA'].to_i,
+                  total_market: member_position_hash['SBC_MARKET_VALUE_AAA'].to_i,
+                  remaining_market: member_position_hash['EXCESS_SBC_MV_AAA'].to_i
+                },
+                agency: {
+                  total: member_position_hash['SBC_BORR_CAP_AG'].to_i,
+                  remaining: member_position_hash['EXCESS_SBC_BORR_CAP_AG'].to_i,
+                  total_market: member_position_hash['SBC_MARKET_VALUE_AG'].to_i,
+                  remaining_market: member_position_hash['EXCESS_SBC_MV_AG'].to_i
+                }
               }
             },
             credit_outstanding: {

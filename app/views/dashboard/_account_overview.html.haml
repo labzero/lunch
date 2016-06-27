@@ -1,0 +1,28 @@
+= render 'dashboard/dashboard_account_overview_table', table_data: @account_overview_table_data[:credit_outstanding]
+- if @borrowing_capacity_gauge
+  - total_borrowing_capacity = @borrowing_capacity_gauge[:total][:amount]
+  .dashboard-borrowing-capacity
+    = link_to(t('dashboard.your_account.borrowing_capacity.title'), reports_borrowing_capacity_url)
+    .dashboard-gauge
+      - if total_borrowing_capacity == 0
+        .guage-section.borrowing-capacity-gauge-empty
+          .inner-gauge-section
+      - else
+        - first_key = true
+        - @borrowing_capacity_gauge.each do |key, details|
+          - if details[:display_percentage] > 0 && key != :total
+            - style = first_key ? "width: #{details[:display_percentage]}%;" : "width: calc(#{details[:display_percentage]}% - 2px);"
+            - first_key = false
+            .gauge-section{style: style, class: key == :mortgages ? 'borrowing-capacity-gauge-standard' : 'borrowing-capacity-gauge-sbc'}
+              .inner-gauge-section{style: "height: #{details[:breakdown][:used][:display_percentage]}%;"}
+              = render 'borrowing_capacity_tooltip', key: key, details: details
+    .dashboard-guage-totals
+      %span= t('dashboard.your_account.borrowing_capacity.standard_percentage', percentage: fhlb_formatted_percentage(@borrowing_capacity_gauge[:total][:standard_percentage]))
+      %span= t('dashboard.your_account.borrowing_capacity.sbc_percentage', percentage: fhlb_formatted_percentage(@borrowing_capacity_gauge[:total][:sbc_percentage]))
+    .dashboard-borrowing-capacity-total
+      %p= t('dashboard.your_account.table.total_borrowing_capacity')
+      %p= fhlb_formatted_currency_whole(total_borrowing_capacity)
+= render 'dashboard/dashboard_account_overview_table', table_data: @account_overview_table_data[:remaining_borrowing_capacity] if @account_overview_table_data[:remaining_borrowing_capacity]
+= render 'dashboard/dashboard_account_overview_table', table_data: @account_overview_table_data[:other_remaining]
+= render 'dashboard/dashboard_account_overview_table', table_data: @account_overview_table_data[:sta_balance]
+.account-overview-note= t('dashboard.your_account.table.view_full_report_html', url: reports_account_summary_url)

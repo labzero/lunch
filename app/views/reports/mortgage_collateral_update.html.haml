@@ -21,6 +21,6 @@
     %h2.report-table-title= t('reports.pages.mortgage_collateral_update.loans_submitted')
     = render 'reports/reports_table', table_class: 'report-mcu-table', table_data: @submitted_loans_table_data, sortable: false
     %h2.report-table-title= t('reports.pages.mortgage_collateral_update.loans_depledged')
-    = render 'reports/reports_table', table_class: 'report-mcu-table', table_data: @depledged_loans_table_data, sortable: false        
+    = render 'reports/reports_table', table_class: ['report-mcu-table', 'report-mcu-totals-table'], table_data: @depledged_loans_table_data, sortable: false        
     %small
       %p= t('reports.pages.mortgage_collateral_update.version_request', phone_number: mcu_phone_number)

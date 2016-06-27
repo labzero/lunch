@@ -15,4 +15,9 @@ $(function() {
     $(this).find('input[type=checkbox][name=check_all]').attr('checked', false);
   });
 
+  $('[data-form-submit-trigger]').on('click', function(e){
+    var formName = $(e.currentTarget).data('form-name');
+    $('form[name=' + formName + ']').submit();
+  });
+
 });

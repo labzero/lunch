@@ -121,7 +121,10 @@ en:
     defined_term: '%{term}:'
     authorizations: Authorizations
     letters_of_credit: Lettters of Credit
+    time_on_date: '%{time} on %{date}'
     enter: Enter
+    uploading: 'Uploading...'
+    cancel_upload: Cancel Upload
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -1192,12 +1195,42 @@ en:
         account_number: Account No.
       clearing_agent: "Clearing Agent's Fed Wire Address:"
       further_credit: For Further Credit to Account No.
-      settlement_amount: Settlement Amount
+      settlement_amount: 'Settlement Amount %{unit}%{footnote_marker}'
+      settlement_amount_footnote: '%{footnote_marker}If Vs. Payment'
       submit_authorization: Submit for Authorization
       delete_request:
         title: Delete this Release Securities request?
         delete: Yes, Delete Request
         continue: No, Continue
+      edit:
+        title: Edit Securities
+        intro: "To edit the listed securities:"
+        step_1:
+          title: "Step 1."
+          description: Download Securities Excel File
+        step_2:
+          title: "Step 2."
+          make_edits: In the file, make your edits.
+          include_information: "Each security should include the following information:"
+          cusip:
+            title: CUSIP
+            description: The security's CUSIP identifier.
+          payment_amount:
+            title_html: "Payment Amount <span>(if needed)</span>"
+            description: "If your Settlement Type is 'vs Payment', add the Payment Amount for each security."
+          original_par:
+            title: Original Par Value
+            description: The security's Original Par Value
+          custodian_name:
+            title_html: "Custodian Name <span>(if needed)</span>"
+            description: "For each security that is not of the type 'Agency', add the Custodian Name at the end of the line."
+        step_3:
+          title: "Step 3."
+          description: Save your file, and then upload it by either dragging it on to this page, or selecting it from your file system.
+        drag_drop: Drag and Drop Here
+        select_file: Select File
+        download_actions_html: '%{span} <span>or</span> %{button}'
+        upload_error: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
   reports:
     meta_title: FHLB - Reports
     title: Reports
@@ -1378,7 +1411,7 @@ en:
           leverage: Remaining Leverage
       price_indications:
         current:
-          title: Current Price Indications
+          title: Current Price Indications and STA Rates
           summary: "Variable Rate Credit advances are available from 7:00 am to 2:00 pm.\nAll other advances are generally available from 7:00 am to 12:00 pm."
           advance_maturity: Advance Maturity
           overnight_fed_funds_benchmark: Overnight Fed Funds Benchmark
@@ -1425,9 +1458,10 @@ en:
           freshness: This report reflects price indications as of 6:00 am PT on the current business day and the STA rate as of the end of the prior business day. For current quotes, call the Member Services Desk at %{phone_number}.
           date_html: "<span>Date:</span> %{date}"
         historical:
-          title: Historical Price Indications
+          title: Historical Price Indications and STA Rates
           freshness: This report reflects price indications as of 6:00 am PT on the date displayed and the STA rate as of the date displayed.
           availability: Historical data available varies by credit product.
+          sta_freshness: This report reflects the STA rate as of the date displayed.
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit Program
         settlement_transaction_account: Settlement/Transaction Account (STA)
@@ -1877,6 +1911,8 @@ en:
         stock_leverage: Stock Leverage
     manage_advances:
       title: Manage Advances
+      all: All Advances
+      outstanding: Outstanding Advances
     confirmation:
       title: Advance Confirmation
       in_progress: In Progress
@@ -1887,7 +1923,7 @@ en:
     vrc_rates: VRC Rates
     frc_rates: FRC Rates
     actions:
-      preview: Add Advance
+      review: Review Advance
       submit: Submit Advance
       another_advance: Add Another Advance
       view: View rate options
@@ -2747,6 +2783,8 @@ en:
       start_time: 'Start time: %{time}'
       end_time: 'End time: %{time}'
       elapsed_time: 'Elapsed time: %{time}'
+    quick_report_long_run:
+      subject: 'URGENT: Batch reports not finished by midnight!'
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

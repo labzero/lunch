@@ -23,6 +23,10 @@ unless defined?(CacheConfiguration)
         key_prefix: "rates#{SEPARATOR}overnight#{SEPARATOR}vrc",
         expiry: 30.seconds
       },
+      account_overview: {
+        key_prefix: 'account_overview',
+        expiry: 20.minutes
+      },
       default: {
         key_prefix: 'default',
         expiry: 24.hours
