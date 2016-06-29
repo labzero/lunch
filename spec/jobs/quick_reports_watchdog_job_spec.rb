@@ -218,8 +218,8 @@ RSpec.describe QuickReportsWatchdogJob, type: :job do
         expect(subject).to receive(:last_completed_at=).with(start_time)
         run_job
       end
-      it 'sets the `long_run_threshold` attribute to the end of the day' do
-        expect(subject).to receive(:long_run_threshold=).with(start_time.end_of_day)
+      it 'sets the `long_run_threshold` attribute to `MAX_RUN_TIME` hours after the start time' do
+        expect(subject).to receive(:long_run_threshold=).with(start_time + QuickReportsWatchdogJob::MAX_RUN_TIME)
         run_job
       end
     end
