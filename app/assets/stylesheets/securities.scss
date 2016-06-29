@@ -22,6 +22,34 @@
   @extend %page-main-body;
 }
 
+.securities-success
+{
+  p {
+    &:before {
+      @extend %extra-large-icon-font;
+      margin-right: 26px;
+      vertical-align: middle;
+      color: $approval-green;
+    }
+  }
+  ul {
+    margin-left: 29px;
+    list-style-type: decimal;
+    li {
+      margin-bottom: 5px;
+    }
+  }
+  a {
+    margin-right: 10px;
+    width: 219px;
+  }
+}
+
+.securities-success-table
+{
+  width: 350px;
+}
+
 .manage-securities-table {
   th, td {
     &:nth-child(1) {

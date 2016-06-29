@@ -219,6 +219,21 @@ class SecuritiesController < ApplicationController
     render json: {html: html, error: error, form_data: (@securities_table_data[:rows].to_json if @securities_table_data)}, status: status, content_type: request.format
   end
 
+  def submit_release_success
+    @title = t('securities.success.title')
+    @authorized_user_data = []
+    users = MembersService.new(request).signers_and_users(current_member_id) || []
+    users.sort_by! { |user| [user[:surname] || '', user[:given_name] || ''] }
+    users.each do |user|
+      user[:roles].each do |role|
+        if role == User::Roles::SECURITIES_SIGNER
+          @authorized_user_data.push(user)
+          break;
+        end
+      end
+    end
+  end
+
   private
 
   def custody_account_type_to_status(custody_account_type)

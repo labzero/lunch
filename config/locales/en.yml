@@ -1231,6 +1231,20 @@ en:
         select_file: Select File
         download_actions_html: '%{span} <span>or</span> %{button}'
         upload_error: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
+    success:
+      title: Release Securities Request Sent
+      request_will_remain: 'This request will remain in the queue for authorization until one of the following occurs:'
+      request_authorized: Request is authorized by an authorized signer
+      request_rejected: Request is rejected or removed
+      request_date_passed: The settlement date for the request has passed
+      authorizers: Your Instution's Authorizers
+      buttons:
+        manage: manage securities
+        view: view securities requests
+        notify: notify authorizers(s)
+      email:
+        subject: FHLBSF Securities Authorization Required
+        body_html: "There is a Securities Request awaiting authorization.\n\n %{url}"
   reports:
     meta_title: FHLB - Reports
     title: Reports

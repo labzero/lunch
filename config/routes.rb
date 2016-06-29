@@ -189,6 +189,7 @@ Rails.application.routes.draw do
       post 'submit_release' => 'error#not_found'
       post 'download_release' => 'securities#download_release'
       post 'upload_release' => 'securities#upload_release'
+      get 'success' => 'securities#submit_release_success'
     end
   end
 

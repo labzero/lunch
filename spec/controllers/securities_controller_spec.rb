@@ -560,6 +560,45 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
+  describe 'GET `submit_release_success`' do
+    let(:member_service_instance) {double('MembersService')}
+    let(:user_no_roles) {{display_name: 'User With No Roles', roles: [], surname: 'With No Roles', given_name: 'User'}}
+    let(:user_etransact) {{display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER], surname: 'User', given_name: 'Etransact'}}
+    let(:user_a) { {display_name: 'R&A User', roles: [User::Roles::SIGNER_MANAGER], given_name: 'R&A', surname: 'User'} }
+    let(:user_b) { {display_name: 'Collateral User', roles: [User::Roles::COLLATERAL_SIGNER], given_name: 'Collateral', surname: 'User'} }
+    let(:user_c) { {display_name: 'Securities User', roles: [User::Roles::SECURITIES_SIGNER], given_name: 'Securities', surname: 'User'} }
+    let(:user_d) { {display_name: 'No Surname', roles: [User::Roles::WIRE_SIGNER], given_name: 'No', surname: nil} }
+    let(:user_e) { {display_name: 'No Given Name', roles: [User::Roles::WIRE_SIGNER], given_name: nil, surname: 'Given'} }
+    let(:user_f) { {display_name: 'Entire Authority User', roles: [User::Roles::SIGNER_ENTIRE_AUTHORITY], given_name: 'Entire Authority', surname: 'User'} }
+    let(:signers_and_users) {[user_no_roles, user_etransact, user_a, user_b, user_c, user_d, user_e, user_f]}
+    let(:call_action) { get :submit_release_success }
+    before do
+      allow(MembersService).to receive(:new).and_return(member_service_instance)
+      allow(member_service_instance).to receive(:signers_and_users).and_return(signers_and_users)
+    end
+
+    it_behaves_like 'a user required action', :get, :submit_release_success
+
+    it 'renders the `submit_release_success` view' do
+      call_action
+      expect(response.body).to render_template('submit_release_success')
+    end
+    it 'sets `@title`' do
+      call_action
+      expect(assigns[:title]).to eq(I18n.t('securities.success.title'))
+    end
+    it 'sets `@authorized_user_data` to a list of users with securities authority' do
+      call_action
+      expect(assigns[:authorized_user_data]).to eq([user_c])
+    end
+    it 'sets `@authorized_user_data` to [] if no users are found' do
+      allow(member_service_instance).to receive(:signers_and_users).and_return([])
+      call_action
+      expect(assigns[:authorized_user_data]).to eq([])
+    end
+
+  end
+
   describe 'private methods' do
     describe '`custody_account_type_to_status`' do
       ['P', 'p', :P, :p].each do |custody_account_type|

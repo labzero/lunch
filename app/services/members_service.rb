@@ -95,7 +95,7 @@ class MembersService < MAPIService
           end
 
           users.each do |user|
-            signers_and_users << {display_name: user.display_name || user.username, roles: user.roles, surname: user.surname, given_name: user.given_name}
+            signers_and_users << {display_name: user.display_name || user.username, roles: user.roles, surname: user.surname, given_name: user.given_name, email: user.email}
           end
         end
       end

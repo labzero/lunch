@@ -22,10 +22,12 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release) securities page$/) do |page|
+When(/^I am on the (manage|release|success) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
+  when 'success'
+    visit '/securities/success'
   when 'release'
     step 'I am on the manage securities page'
     step 'I check the 1st Pledged security'
@@ -175,6 +177,11 @@ When(/^I click the (trade|settlement) date datepicker$/) do |field|
   end
   field_container = page.find('.securities-broker-instructions .input-field-container-horizontal', text: text, exact: true, visible: :visible)
   field_container.find('.datepicker-trigger').click
+end
+
+Then(/^I should see a list of securities authorized users$/) do
+  page.assert_selector('h2', text: /\A#{Regexp.quote(I18n.t('securities.success.authorizers'))}\z/, visible: true)
+  page.assert_selector('.settings-users-table', visible: true)
 end
 
 def delivery_instructions(text)
