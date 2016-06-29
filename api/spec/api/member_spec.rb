@@ -64,4 +64,56 @@ describe MAPI::ServiceApp do
       end
     end
   end
+  describe 'POST `securities/release`' do
+    let(:security) { {  'cusip' => SecureRandom.hex,
+                        'description' => SecureRandom.hex,
+                        'original_par' => rand(1..100000) + rand.round(2),
+                        'payment_amount' => rand(1..100000) + rand.round(2) } }
+    let(:delivery_type) { MAPI::Services::Member::SecuritiesRequests::DELIVERY_TYPE.keys[rand(0..3)] }
+    let(:delivery_instructions) { { 'delivery_type' => delivery_type } }
+    let(:post_body) { {
+      'broker_instructions' => { 'transaction_code' => MAPI::Services::Member::SecuritiesRequests::TRANSACTION_CODE.keys[rand(0..1)],
+        'settlement_type' => MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE.keys[rand(0..1)],
+        'trade_date' => "2016-06-20T16:28:55-07:00",
+        'settlement_date' => "2016-06-20T16:28:55-07:00" },
+      'delivery_instructions' => delivery_instructions,
+      'securities' => rand(1..5).times.map { security },
+      'user' => {
+          'username' => SecureRandom.hex,
+          'full_name' => SecureRandom.hex,
+          'session_id' => SecureRandom.hex }
+      } }
+    let(:make_request) { post("/member/#{member_id}/securities/release", post_body.to_json) }
+    let(:exception_message) { SecureRandom.hex }
+
+    before do
+      MAPI::Services::Member::SecuritiesRequests.delivery_keys_for_delivery_type(delivery_type).each do |key|
+        delivery_instructions[key] = SecureRandom.hex
+      end
+    end
+
+    it 'calls `MAPI::Services::Member::SecuritiesRequests.create_release`' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:create_release).with(
+        kind_of(app),
+        member_id.to_i,
+        post_body['user']['username'],
+        post_body['user']['full_name'],
+        post_body['user']['session_id'],
+        post_body['broker_instructions'],
+        post_body['delivery_instructions'],
+        post_body['securities'])
+      make_request
+      expect(last_response.status).to be(200)
+    end
+
+    it 'doesn\'t raise an error' do
+      expect { make_request }.to_not raise_error
+    end
+
+    it 'returns a status of 400 on error' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:create_release).and_raise(ArgumentError, exception_message)
+      make_request
+      expect(last_response.status).to be(400)
+    end
+  end
 end

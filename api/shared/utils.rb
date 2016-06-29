@@ -21,10 +21,22 @@ module MAPI
         def fake_hashes(filename)
           fake(filename).collect(&:with_indifferent_access)
         end
-        
+
+        def execute_sql(logger, sql)
+          begin
+            ActiveRecord::Base.connection.execute(sql)
+          rescue => e
+            logger.error(e.message)
+            nil
+          end
+        end
+
         def fetch_hash(logger, sql)
           begin
-            ActiveRecord::Base.connection.execute(sql).try(:fetch_hash) || {}
+            cursor = execute_sql(logger, sql)
+            if cursor
+              cursor.fetch_hash || {}
+            end
           rescue => e
             logger.error(e.message)
             nil
@@ -42,7 +54,7 @@ module MAPI
         def fetch_hashes(logger, sql, map_values={}, downcase_keys=false)
           begin
             results = []
-            cursor  = ActiveRecord::Base.connection.execute(sql)
+            cursor  = execute_sql(logger, sql)
             while row = cursor.fetch_hash()
               results.push(map_hash_values(row, map_values, downcase_keys))
             end
@@ -56,7 +68,8 @@ module MAPI
         def fetch_objects(logger, sql)
           begin
             results = []
-            cursor  = ActiveRecord::Base.connection.execute(sql)
+            cursor  = execute_sql(logger, sql)
+            raise MAPI::Shared::Errors::SQLError, "SQL execution failed" if cursor.nil?
             while objects = cursor.fetch()
               results += objects
             end
@@ -88,7 +101,7 @@ module MAPI
         end
 
         def map_hash_values(hash, mapping, downcase_keys=false)
-          mapping.each do |op, keys| 
+          mapping.each do |op, keys|
             keys.each do |key|
               hash[key] = if op.respond_to?(:call)
                 op.call(hash[key])
@@ -98,6 +111,10 @@ module MAPI
             end
           end
           downcase_keys ? Hash[hash.map{ |k,v| [k.downcase,v] }] : hash
+        end
+
+        def nil_to_zero(value)
+          value ? value : 0
         end
       end
     end

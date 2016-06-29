@@ -9,12 +9,13 @@ module MAPI
           SIGNED = 85
           ACKNOWLEDGED = 86
           AWAITING_AUTHORIZATION = 87
+          SUBMITTED = 90
         end
 
         module SSKFormType
           SECURITIES_PLEDGED = 70
           SECURITIES_RELEASE = 71
-          SAFEKEPT_DEPOST = 72
+          SAFEKEPT_DEPOSIT = 72
           SAFEKEPT_RELEASE = 73
         end
 
@@ -31,7 +32,7 @@ module MAPI
         REQUEST_FORM_TYPE_MAPPING = {
           SSKFormType::SECURITIES_PLEDGED => :pledge_intake,
           SSKFormType::SECURITIES_RELEASE => :pledge_release,
-          SSKFormType::SAFEKEPT_DEPOST => :safekept_intake,
+          SSKFormType::SAFEKEPT_DEPOSIT => :safekept_intake,
           SSKFormType::SAFEKEPT_RELEASE => :safekept_release
         }.with_indifferent_access.freeze
 
@@ -84,6 +85,240 @@ module MAPI
           )
           requests.collect do |request|
             map_hash_values(request, REQUEST_VALUE_MAPPING, true).with_indifferent_access
+          end
+        end
+
+        module SSKFormType
+          SecuritiesPledge = 70
+          SecuritiesRelease = 71
+          SafekeepingDeposit = 72
+          SafekeepingRelease = 73
+        end
+
+        module SSKDeliverTo
+          FED = 30
+          DTC = 31
+          INTERNAL_TRANSFER = 32
+          MUTUAL_FUND = 33
+          PHYSICAL_SECURITIES = 34
+        end
+
+        module SSKTransactionCode
+          STANDARD = 50
+          REPO = 51
+        end
+
+        module SSKSettlementType
+          FREE = 60
+          VS_PAYMENT = 61
+        end
+
+        NEXT_ID_SQL = 'SELECT SAFEKEEPING.SSK_WEB_FORM_SEQ.NEXTVAL FROM DUAL'.freeze
+        BROKER_INSTRUCTIONS_MAPPING = { 'transaction_code' => 'PLEDGE_TYPE',
+                                        'settlement_type' => 'REQUEST_STATUS',
+                                        'trade_date' => 'TRADE_DATE',
+                                        'settlement_date' => 'SETTLE_DATE' }.freeze
+        DELIVERY_TYPE = { 'fed' => SSKDeliverTo::FED,
+                          'dtc' => SSKDeliverTo::DTC,
+                          'mutual_fund' => SSKDeliverTo::MUTUAL_FUND,
+                          'physical_securities' => SSKDeliverTo::PHYSICAL_SECURITIES }.freeze
+        TRANSACTION_CODE = { 'standard' => SSKTransactionCode::STANDARD, 'repo' => SSKTransactionCode::REPO }.freeze
+        SETTLEMENT_TYPE = { 'free' => SSKSettlementType::FREE, 'vs_payment' => SSKSettlementType::VS_PAYMENT }.freeze
+        ACCOUNT_NUMBER_MAPPING = { 'fed' => 'CREDIT_ACCT_NO1',
+                                   'dtc' => 'CREDIT_ACCT_NO2',
+                                   'mutual_fund' => 'MUTUAL_FUND_ACCT_NO',
+                                   'physical_securities' => 'CREDIT_ACCT_NO3' }
+        REQUIRED_SECURITY_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
+        LAST_MODIFIED_BY_MAX_LENGTH = 30.freeze
+
+        def self.delivery_type_mapping(delivery_type)
+          { 'clearing_agent_fed_wire_address' => 'BROKER_WIRE_ADDR',
+            'aba_number' => 'ABA_NO',
+            'clearing_agent_participant_number' => 'DTC_AGENT_PARTICIPANT_NO',
+            'mutual_fund_company' => 'MUTUAL_FUND_COMPANY',
+            'delivery_bank_agent' => 'DELIVERY_BANK_AGENT',
+            'receiving_bank_agent_name' => 'REC_BANK_AGENT_NAME',
+            'receiving_bank_agent_address' => 'REC_BANK_AGENT_ADDR',
+            'account_number' => ACCOUNT_NUMBER_MAPPING[delivery_type] }
+        end
+
+        def self.delivery_keys_for_delivery_type(delivery_type)
+          [ 'account_number' ] +
+          case delivery_type
+            when 'fed'
+              [ 'clearing_agent_fed_wire_address', 'aba_number' ]
+            when 'dtc'
+              [ 'clearing_agent_participant_number' ]
+            when 'mutual_fund'
+              [ 'mutual_fund_company' ]
+            when 'physical_securities'
+              [ 'delivery_bank_agent', 'receiving_bank_agent_name', 'receiving_bank_agent_address' ]
+          else
+            raise ArgumentError, "delivery_type must be one of the following values: #{DELIVERY_TYPE.keys.join(', ')}"
+          end
+        end
+
+        def self.insert_release_header_query(member_id, header_id, user_name, session_id, full_name, pledged_adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
+          now = Time.zone.today
+          <<-SQL
+            INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
+                                                         FHLB_ID,
+                                                         STATUS,
+                                                         PLEDGE_TYPE,
+                                                         TRADE_DATE,
+                                                         REQUEST_STATUS,
+                                                         SETTLE_DATE,
+                                                         DELIVER_TO,
+                                                         FORM_TYPE,
+                                                         CREATED_DATE,
+                                                         CREATED_BY,
+                                                         CREATED_BY_NAME,
+                                                         LAST_MODIFIED_BY,
+                                                         LAST_MODIFIED_DATE,
+                                                         LAST_MODIFIED_BY_NAME,
+                                                         PLEDGED_ADX_ID,
+                                                         #{delivery_columns.join(', ')}
+                                                        )
+            VALUES (#{quote(header_id)},
+                    #{quote(member_id)},
+                    #{quote(SSKRequestStatus::SUBMITTED)},
+                    #{quote(TRANSACTION_CODE[broker_instructions['transaction_code']])},
+                    #{quote(broker_instructions['trade_date'])},
+                    #{quote(SETTLEMENT_TYPE[broker_instructions['settlement_type']])},
+                    #{quote(broker_instructions['settlement_date'])},
+                    #{quote(DELIVERY_TYPE[delivery_type])},
+                    #{quote(SSKFormType::SecuritiesRelease)},
+                    #{quote(now)},
+                    #{quote(user_name)},
+                    #{quote(full_name)},
+                    #{quote((user_name + '\\\\' + session_id)[0..LAST_MODIFIED_BY_MAX_LENGTH - 1])},
+                    #{quote(now)},
+                    #{quote(full_name)},
+                    #{quote(pledged_adx_id)},
+                    #{delivery_values.join(', ')}
+                   )
+          SQL
+        end
+
+        def self.insert_security_query(header_id, detail_id, user_name, session_id, security, ssk_id)
+          now = Time.zone.today
+          <<-SQL
+            INSERT INTO SAFEKEEPING.SSK_WEB_FORM_DETAIL (DETAIL_ID,
+                                                         HEADER_ID,
+                                                         CUSIP,
+                                                         DESCRIPTION,
+                                                         ORIGINAL_PAR,
+                                                         PAYMENT_AMOUNT,
+                                                         CREATED_DATE,
+                                                         CREATED_BY,
+                                                         LAST_MODIFIED_DATE,
+                                                         LAST_MODIFIED_BY,
+                                                         SSK_ID
+                                                        )
+            VALUES (#{quote(detail_id)},
+                    #{quote(header_id)},
+                    UPPER(#{quote(security['cusip'])}),
+                    #{quote(security['description'])},
+                    #{quote(nil_to_zero(security['original_par']))},
+                    #{quote(nil_to_zero(security['payment_amount']))},
+                    #{quote(now)}
+                    #{quote(user_name)},
+                    #{quote(now)},
+                    #{quote((user_name + '\\\\' + session_id)[0..LAST_MODIFIED_BY_MAX_LENGTH - 1])},
+                    #{quote(ssk_id)}
+                   )
+          SQL
+        end
+        def self.pledged_adx_query(member_id)
+          <<-SQL
+            SELECT ADX.ADX_ID
+            FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF ADX, SAFEKEEPING.BTC_ACCOUNT_TYPE BAT, SAFEKEEPING.CUSTOMER_PROFILE CP
+            WHERE ADX.BAT_ID = BAT.BAT_ID
+            AND ADX.CP_ID = CP.CP_ID
+            AND CP.FHLB_ID = #{quote(member_id)}
+            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = 'P'
+            AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
+            AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
+            ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
+          SQL
+        end
+
+        def self.ssk_id_query(member_id, pledged_adx_id, cusip)
+          <<-SQL
+            SELECT SSK.SSK_ID
+            FROM SAFEKEEPING.SSK SSK, SAFEKEEPING.SSK_TRANS SSKT
+            WHERE UPPER(SSK.SSK_CUSIP) = UPPER(#{quote(cusip)})
+            AND SSK.FHLB_ID = #{quote(member_id)}
+            AND SSK.ADX_ID = #{quote(pledged_adx_id)}
+            AND SSKT.SSK_ID = SSK.SSK_ID
+            AND SSKT.SSX_BTC_DATE = (SELECT MAX(SSX_BTC_DATE) FROM SAFEKEEPING.SSK_TRANS)
+          SQL
+        end
+
+        def self.format_delivery_columns(delivery_type, required_delivery_keys, provided_delivery_keys)
+          delivery_type_map = delivery_type_mapping(delivery_type)
+          required_delivery_keys.map do |key|
+            raise ArgumentError, "delivery_instructions must contain #{key}" unless provided_delivery_keys.include?(key)
+            "#{delivery_type_map[key]}"
+          end
+        end
+
+        def self.format_delivery_values(required_delivery_keys, delivery_instructions)
+          required_delivery_keys.map do |key|
+            quote(delivery_instructions[key])
+          end
+        end
+
+        def self.execute_sql_single_result(app, sql, description)
+          cursor = execute_sql(app.logger, sql)
+          raise MAPI::Shared::Errors::SQLError, "#{description} returned nil" unless cursor
+          records = cursor.fetch
+          raise MAPI::Shared::Errors::SQLError, "Calling fetch on the cursor returned nil" unless records
+          sequence = records.first
+          raise MAPI::Shared::Errors::SQLError, "Calling first on the record set returned nil" unless sequence
+          sequence
+        end
+
+        def self.create_release(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
+          raise ArgumentError, "broker_instructions must be a non-empty hash" unless !broker_instructions.nil? && broker_instructions.is_a?(Hash) && !broker_instructions.empty?
+          raise ArgumentError, "delivery_instructions must be a non-empty hash" unless !delivery_instructions.nil? && delivery_instructions.is_a?(Hash) && !delivery_instructions.empty?
+          BROKER_INSTRUCTIONS_MAPPING.keys.each do |key|
+            raise ArgumentError, "broker_instructions must contain a value for #{key}" unless broker_instructions[key]
+          end
+          { 'transaction_code' => TRANSACTION_CODE, 'settlement_type' => SETTLEMENT_TYPE }.each do |key, allowed_values|
+            allowed_values = allowed_values.keys
+            raise ArgumentError, "#{key.to_s} must be set to one of the following values: #{allowed_values.join(', ')}" unless allowed_values.include?(broker_instructions[key])
+          end
+          broker_instructions['trade_date'] = dateify(broker_instructions['trade_date'])
+          broker_instructions['settlement_date'] = dateify(broker_instructions['settlement_date'])
+          delivery_type = delivery_instructions.delete('delivery_type')
+          raise ArgumentError, "delivery_instructions must contain the key delivery_type set to one of #{DELIVERY_TYPE.keys.join(', ')}" unless DELIVERY_TYPE.keys.include?(delivery_type)
+          provided_delivery_keys = delivery_instructions.keys
+          required_delivery_keys = delivery_keys_for_delivery_type(delivery_type)
+          delivery_columns = format_delivery_columns(delivery_type, required_delivery_keys, provided_delivery_keys)
+          delivery_values = format_delivery_values(required_delivery_keys, delivery_instructions)
+          raise ArgumentError, "securities must be an array containing at least one security" unless !securities.nil? && securities.is_a?(Array) && !securities.empty?
+          required_security_keys = broker_instructions['settlement_type'] == 'vs_payment' ?
+            REQUIRED_SECURITY_KEYS + ['payment_amount'] : REQUIRED_SECURITY_KEYS
+          securities.each do |security|
+            raise ArgumentError, "each security must be a non-empty hash" unless !security.nil? && security.is_a?(Hash) && !security.empty?
+            required_security_keys.each do |key|
+              raise ArgumentError, "each security must consist of a hash containing a value for #{key}" unless security[key]
+            end
+          end
+          user_name.downcase!
+          unless should_fake?(app)
+            header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
+            ActiveRecord::Base.transaction do
+              pledged_adx_id = execute_sql_single_result(app, pledged_adx_query(member_id), "Pledged ADX ID")
+              insert_header_sql = insert_release_header_query(member_id, header_id, user_name, full_name, session_id, pledged_adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
+              raise "failed to insert security release request header" unless execute_sql(app.logger, insert_header_sql)
+              securities.each do |security|
+                ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, pledged_adx_id, security['cusip']), "SSK ID")
+                insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
+                raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
+              end
+            end
           end
         end
       end

@@ -8,15 +8,15 @@ module MAPI
           key :description, 'Last date FHLB calculated Cash Projections for members'
         end
         property :total_net_amount do
-          key :type, :float
+          key :type, :number
           key :description, 'The total net amount for all cash projections'
         end
         property :total_principal do
-          key :type, :float
+          key :type, :number
           key :description, 'The total principal for all cash projections'
         end
         property :total_interest do
-          key :type, :float
+          key :type, :number
           key :description, 'The total interest for all cash projections'
         end
         property :projections do
@@ -53,11 +53,11 @@ module MAPI
           key :description, 'Pool Number'
         end
         property :original_par do
-          key :type, :float
+          key :type, :number
           key :description, 'Original Par'
         end
         property :coupon_rate do
-          key :type, :float
+          key :type, :number
           key :description, 'Original Par'
         end
         property :maturity_date do
@@ -65,15 +65,15 @@ module MAPI
           key :description, 'Maturity Date of security'
         end
         property :principal do
-          key :type, :float
+          key :type, :number
           key :description, 'The projected principal for the security'
         end
         property :interest do
-          key :type, :float
+          key :type, :number
           key :description, 'The projected interest for the security'
         end
         property :total do
-          key :type, :float
+          key :type, :number
           key :description, 'The projected total for the security'
         end
       end

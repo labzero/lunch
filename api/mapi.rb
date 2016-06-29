@@ -6,6 +6,7 @@ require 'savon'
 HTTPI::Adapter.use # force Savon to load its adapters
 
 require_relative 'shared/constants'
+require_relative 'shared/exceptions'
 require_relative 'shared/utils'
 
 require_relative 'services/base'
@@ -80,7 +81,7 @@ module MAPI
     def call(env)
       resp = nil
       tags = ["request_id=#{env['HTTP_X_REQUEST_ID'] || SecureRandom.uuid}"]
-      @logger.tagged(*tags) do 
+      @logger.tagged(*tags) do
         env['rack.logger'] = @logger
         env['logger.tags'] = tags
         resp = @app.call env
@@ -214,7 +215,7 @@ module MAPI
         key :path, '/healthy'
         key :description, 'Health status'
       end
-      api do 
+      api do
         key :path, '/fees'
         key :description, 'Operations about fees associated with FHLB services and procedures'
       end

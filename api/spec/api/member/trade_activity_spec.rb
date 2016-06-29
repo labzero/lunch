@@ -188,10 +188,10 @@ describe MAPI::ServiceApp do
       let(:sub_product) { double('sub_product')}
       let(:collateral) { double('collateral', gsub: double('fixed_collateral'))}
       let(:ods_deal_structure_code) { MAPI::Services::Member::TradeActivity.get_ods_deal_structure_code(app, sub_product, collateral) }
-      let(:empty_result_set) {double('Oracle Result Set', fetch: nil)}
+      let(:empty_result_set) {double('Oracle Result Set', fetch_hash: nil)}
       let(:ods_code) {double('ods_code')}
       it 'return nil if there are no records found' do
-        allow(ActiveRecord::Base.connection).to receive(:execute).and_return(double(empty_result_set))
+        allow(ActiveRecord::Base.connection).to receive(:execute).and_return(empty_result_set)
         expect(ods_deal_structure_code).to eq(nil)
       end
       it 'return ods deal structure code if sub product and collateral match a record' do
@@ -428,7 +428,7 @@ describe MAPI::ServiceApp do
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       end
-      
+
       it 'checks if the trades are new web trades' do
         expect(MAPI::Services::Member::TradeActivity).to receive(:is_new_web_advance?).at_least(:once)
         todays_advances
@@ -828,7 +828,7 @@ describe MAPI::ServiceApp do
       let(:original_par) { instance_double(String) }
       let(:advance_type) { instance_double(String) }
       let(:advance_number) { instance_double(String) }
-      let(:matching_confirmation) { 
+      let(:matching_confirmation) {
         {
           advance_number: advance_number
         }
