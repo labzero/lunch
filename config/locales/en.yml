@@ -500,7 +500,7 @@ en:
         collateral_asset_manager: Collateral Asset Manager
     quick_reports:
       title: Quick Reports
-      description: 'The following monthend reports are available for download:'
+      description: 'Download monthend reports:'
       all_reports_html: '<a href="%{url}">View a list</a> of all available reports.'
     quick_advance:
       title: Quick Advance

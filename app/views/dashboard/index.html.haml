@@ -117,7 +117,6 @@
     - if @quick_reports.present?
       = render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_reports.title'), classes: 'dashboard-module-quick-reports'} do
         %p= t('dashboard.quick_reports.description')
-        %h3= fhlb_date_short_alpha(@quick_reports_period)
         %ul
           - @quick_reports.each do |report_name, details|
             %li
