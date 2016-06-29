@@ -48,7 +48,7 @@ en:
     loan_collateral_type: Loan Collateral Type
     count: Count
     original_amount: Original Amount
-    unpaid_principal: Unpaid Principal
+    unpaid_principal: Unpaid Principal Balance
     balance_as_of_close_of_business: Balance as of close of business
     reference_number: Reference Number
     debits: Debits
