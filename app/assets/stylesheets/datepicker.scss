@@ -1,5 +1,12 @@
 .datepicker-wrapper {
   position: relative;
+  &[data-date-picker-from-label=""] {
+    .daterangepicker_start_input, .daterangepicker_end_input {
+      label {
+        margin-right: 0;
+      }
+    }
+  }
 }
 
 .daterangepicker {
