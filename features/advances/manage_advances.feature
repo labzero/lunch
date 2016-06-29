@@ -39,3 +39,11 @@ Scenario: No data is available to show in the Manage Advances Page
 Scenario: Member sees an advance confirmation column
   When I am on the "Manage Advances" advances page
   Then I should see an Advance Confirmation column in the data table
+
+@jira-mem-1634
+Scenario: Member sees an "Add Advance" button if they can take out an advance
+  When I am on the "Manage Advances" advances page
+  Then I should not see an "Add Advance" button
+  When I am logged in as a "quick-advance signer"
+  And I am on the "Manage Advances" advances page
+  Then I should see an "Add Advance" button

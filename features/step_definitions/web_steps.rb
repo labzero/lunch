@@ -69,6 +69,15 @@ Then(/^I should not see a flyout$/) do
   page.assert_selector('.flyout', :visible => :hidden)
 end
 
+Then(/^I should( not)? see an "([^"]*)" button$/) do |negation, text|
+  options = ['.secondary-button, .primary-button', text: /#{Regexp.quote(text)}/i, visible: true, exact: true]
+  if negation
+    page.assert_no_selector(*options)
+  else
+    page.assert_selector(*options)
+  end
+end
+
 def jquery_guard(timeout=10)
   times_out_at = Time.now + timeout
   while page.evaluate_script('typeof $') == 'undefined'
