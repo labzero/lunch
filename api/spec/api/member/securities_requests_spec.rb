@@ -556,82 +556,59 @@ describe MAPI::ServiceApp do
             [key, SecureRandom.hex]
           end.to_h.merge('delivery_type' => delivery_type) }
         let(:securities) { [ security, security, security ]}
-        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_release(app,
-                                                                                      member_id,
-                                                                                      user_name,
-                                                                                      full_name,
-                                                                                      session_id,
-                                                                                      broker_instructions,
-                                                                                      delivery_instructions,
-                                                                                      securities) }
+        let(:method_params) { [ app,
+                                member_id,
+                                user_name,
+                                full_name,
+                                session_id,
+                                broker_instructions,
+                                delivery_instructions,
+                                securities ] }
+        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_release(*method_params) }
         context 'validations' do
           before do
             allow(securities_request_module).to receive(:should_fake?).and_return(true)
           end
 
-          context 'missing broker_instructions' do
-            let(:broker_instructions) { nil }
-            it 'raises an error if `broker_instructions` is nil' do
-              expect{ call_method }.to raise_error(ArgumentError, "broker_instructions must be a non-empty hash")
-            end
+          it 'raises an error if `broker_instructions` is nil' do
+            method_params[5] = nil
+            expect{ call_method }.to raise_error(ArgumentError, "broker_instructions must be a non-empty hash")
           end
 
-          context 'missing delivery_instructions' do
-            let(:delivery_instructions) { nil }
-            it 'raises an error if `delivery_instructions` is nil' do
-              expect{ call_method }.to raise_error(ArgumentError, "delivery_instructions must be a non-empty hash")
-            end
+          it 'raises an error if `delivery_instructions` is nil' do
+            method_params[6] = nil
+            expect{ call_method }.to raise_error(ArgumentError, "delivery_instructions must be a non-empty hash")
           end
 
-          context 'missing values in broker_instructions' do
-            before do
-              broker_instructions.delete(broker_instructions.keys[rand(0..3)])
-            end
-
-            it 'raises an error if something is missing' do
-              expect{ call_method }.to raise_error(ArgumentError, /broker_instructions must contain a value for \S+/)
-            end
+          it 'raises an error if something is missing' do
+            broker_instructions.delete(broker_instructions.keys[rand(0..3)])
+            expect{ call_method }.to raise_error(ArgumentError, /broker_instructions must contain a value for \S+/)
           end
 
-          context 'incorrect `transaction_code`' do
-            before do
-              broker_instructions['transaction_code'] = SecureRandom.hex
-            end
 
-            it 'raises an error if `transaction_code` is out of range' do
-              expect{ call_method }.to raise_error(ArgumentError, /transaction_code must be set to one of the following values: \S/)
-            end
+          it 'raises an error if `transaction_code` is out of range' do
+            broker_instructions['transaction_code'] = SecureRandom.hex
+            expect{ call_method }.to raise_error(ArgumentError, /transaction_code must be set to one of the following values: \S/)
           end
 
-          context 'incorrect `settlement_type`' do
-            before do
-              broker_instructions['settlement_type'] = SecureRandom.hex
-            end
-
-            it 'raises an error if `settlement_type` is out of range' do
-              expect{ call_method }.to raise_error(ArgumentError, /settlement_type must be set to one of the following values: \S/)
-            end
+          it 'raises an error if `settlement_type` is out of range' do
+            broker_instructions['settlement_type'] = SecureRandom.hex
+            expect{ call_method }.to raise_error(ArgumentError, /settlement_type must be set to one of the following values: \S/)
           end
 
-          context 'incorrect `delivery_type`' do
-            before do
-              delivery_instructions['delivery_type'] = SecureRandom.hex
-            end
-            it 'raises an error if `delivery_type` is out of range' do
-              expect{ call_method }.to raise_error(ArgumentError, /delivery_instructions must contain the key delivery_type set to one of \S/)
-            end
+          it 'raises an error if `delivery_type` is out of range' do
+            delivery_instructions['delivery_type'] = SecureRandom.hex
+            expect{ call_method }.to raise_error(ArgumentError, /delivery_instructions must contain the key delivery_type set to one of \S/)
           end
 
-          context 'missing `securities`' do
-            let(:securities) { nil }
-            it 'raises an error if `securities` is nil' do
-              expect{ call_method }.to raise_error(ArgumentError, "securities must be an array containing at least one security")
-            end
+          it 'raises an error if `securities` is nil' do
+            method_params[7] = nil
+            expect{ call_method }.to raise_error(ArgumentError, "securities must be an array containing at least one security")
           end
 
           context 'empty `securities`' do
-            let(:securities) { [ ] }
             it 'raises an error if `securities` is empty' do
+              method_params[7] = []
               expect{ call_method }.to raise_error(ArgumentError, "securities must be an array containing at least one security")
             end
           end
@@ -667,40 +644,31 @@ describe MAPI::ServiceApp do
             end
           end
 
-          context 'securities validation' do
-            context do
-              let(:securities) { nil }
-              it 'raises an `ArgumentError` if securities is nil' do
-                expect { call_method }.to raise_error(ArgumentError, "securities must be an array containing at least one security")
-              end
+          context 'securities validations' do
+            it 'raises an `ArgumentError` if securities is nil' do
+              method_params[7] = nil
+              expect { call_method }.to raise_error(ArgumentError, "securities must be an array containing at least one security")
             end
 
-            context do
-              let(:securities) { {} }
-              it 'raises an `ArgumentError` if securities is not an array' do
-                expect { call_method }.to raise_error(ArgumentError, "securities must be an array containing at least one security")
-              end
+            it 'raises an `ArgumentError` if securities is not an array' do
+              method_params[7] = {}
+              expect { call_method }.to raise_error(ArgumentError, "securities must be an array containing at least one security")
             end
 
-            context do
-              let(:securities) { [] }
-              it 'raises an `ArgumentError` if the securities array is empty' do
-                expect { call_method }.to raise_error(ArgumentError, "securities must be an array containing at least one security")
-              end
+
+            it 'raises an `ArgumentError` if the securities array is empty' do
+              method_params[7] = []
+              expect { call_method }.to raise_error(ArgumentError, "securities must be an array containing at least one security")
             end
 
-            context do
-              let(:securities) { [ security, nil, security ] }
-              it 'raises an `ArgumentError` if the securities array contains a `nil`' do
-                expect { call_method }.to raise_error(ArgumentError, "each security must be a non-empty hash")
-              end
+            it 'raises an `ArgumentError` if the securities array contains a `nil`' do
+              method_params[7] = [ security, nil, security ]
+              expect { call_method }.to raise_error(ArgumentError, "each security must be a non-empty hash")
             end
 
-            context do
-              let(:securities) { [ security, [], security ] }
-              it 'raises an `ArgumentError` if the securities array contains a non-hash value' do
-                expect { call_method }.to raise_error(ArgumentError, "each security must be a non-empty hash")
-              end
+            it 'raises an `ArgumentError` if the securities array contains a non-hash value' do
+              method_params[7] = [ security, [], security ]
+              expect { call_method }.to raise_error(ArgumentError, "each security must be a non-empty hash")
             end
 
             context do
@@ -712,21 +680,14 @@ describe MAPI::ServiceApp do
                                                'original_par' => rand(1..100000) + rand.round(2),
                                                'payment_amount' => rand(1..100000) + rand.round(2) } }
               let(:securities) { [ security, security_without_cusip, security ] }
+
               it 'raises an `ArgumentError` if a security is missing a key' do
                 expect { call_method }.to raise_error(ArgumentError, /each security must consist of a hash containing a value for \S+/)
               end
-            end
 
-            context do
-              let(:broker_instructions) { { 'transaction_code' => rand(0..1) == 0 ? 'standard' : 'repo',
-                                            'trade_date' => trade_date,
-                                            'settlement_type' => 'vs_payment',
-                                            'settlement_date' => settlement_date } }
-              let(:security_without_payment_amount) { { 'cusip' => SecureRandom.hex,
-                                                        'description' => SecureRandom.hex,
-                                                        'original_par' => rand(1..100000) + rand.round(2) } }
-              let(:securities) { [ security, security_without_payment_amount, security ] }
               it 'raises an `ArgumentError` if `settlement_type` is `vs_payment` and `payment_amount` is missing' do
+                broker_instructions['settlement_type'] = 'vs_payment'
+                security['payment_amount'] = nil
                 expect { call_method }.to raise_error(ArgumentError, /each security must consist of a hash containing a value for payment_amount/)
               end
             end

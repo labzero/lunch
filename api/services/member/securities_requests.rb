@@ -129,7 +129,7 @@ module MAPI
                                    'mutual_fund' => 'MUTUAL_FUND_ACCT_NO',
                                    'physical_securities' => 'CREDIT_ACCT_NO3' }
         REQUIRED_SECURITY_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
-        LAST_MODIFIED_BY_MAX_LENGTH = 30.freeze
+        LAST_MODIFIED_BY_MAX_LENGTH = 30
 
         def self.delivery_type_mapping(delivery_type)
           { 'clearing_agent_fed_wire_address' => 'BROKER_WIRE_ADDR',
@@ -221,7 +221,7 @@ module MAPI
                     #{quote(security['description'])},
                     #{quote(nil_to_zero(security['original_par']))},
                     #{quote(nil_to_zero(security['payment_amount']))},
-                    #{quote(now)}
+                    #{quote(now)},
                     #{quote(user_name)},
                     #{quote(now)},
                     #{quote((user_name + '\\\\' + session_id)[0..LAST_MODIFIED_BY_MAX_LENGTH - 1])},
