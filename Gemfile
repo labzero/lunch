@@ -118,6 +118,7 @@ group :test do
   gem 'net-ping'
   gem 'database_cleaner'
   gem 'shoulda-callback-matchers'
+  gem 'sauce_whisk'
 end
 
 # Use ActiveModel has_secure_password

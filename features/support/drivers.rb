@@ -38,6 +38,10 @@ if defined?(Capybara)
     end
   end
 
+  def sauce_labs?
+    ::Capybara.current_session.driver.options[:url] == SAUCE_CONNECT_URL
+  end
+
   base_opts = {
     :username => SAUCE_USERNAME,
     :access_key => SAUCE_ACCESS_KEY,

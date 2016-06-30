@@ -22,6 +22,16 @@ is_parallel = is_parallel_primary || is_parallel_secondary
 
 custom_host = ENV['APP_HOST'] || env_config['app_host']
 
+failed_scenarios = []
+passed_scenarios = []
+sauce_job_id = nil
+run_start_time = nil
+first_step_time_delta = nil
+
+def human_location(scenario)
+  scenario.location[:file] + ':' + scenario.location[:lines].to_s
+end
+
 if is_parallel_secondary && !custom_host
   timeout_at = Time.now + 60.seconds
   while !File.exists?('cucumber-primary-ready')
@@ -202,6 +212,20 @@ at_exit do
   STDOUT.flush
   puts %x[curl -m 10 -sL #{Capybara.app_host}/healthy]
   puts "Finished run `#{run_name}`"
+  if sauce_labs?
+    require 'sauce_whisk'
+    job = SauceWhisk::Jobs.fetch sauce_job_id
+    format_scenario_data = ->(entry) do
+      {
+        location: human_location(entry[:scenario]),
+        start_time: entry[:runtime].first.round(1),
+        end_time: entry[:runtime].last.round(1)
+      }
+    end
+    job.passed = failed_scenarios.empty?
+    job.custom_data = {passed: passed_scenarios.collect(&format_scenario_data), failed: failed_scenarios.collect(&format_scenario_data) }
+    job.save
+  end
 end
 
 AfterConfiguration do
@@ -254,10 +278,35 @@ if ENV['CUCUMBER_INCLUDE_SAUCE_SESSION']
 end
 
 Around do |scenario, block|
+  scenario_start_time = Time.zone.now
+  run_start_time ||= scenario_start_time
+  unless first_step_time_delta
+    Capybara.current_session.visit('/healthy')
+    first_step_time_delta = Time.zone.now - run_start_time
+  end
   begin
     block.call
   ensure
     Timecop.return if defined?(Timecop)
+  end
+  scenario_end_time = Time.zone.now
+  sauce_job_id ||= ::Capybara.current_session.driver.browser.session_id if sauce_labs?
+  runtime_range = ((scenario_start_time - run_start_time) + first_step_time_delta)..((scenario_end_time - run_start_time) + first_step_time_delta)
+  unless scenario.status == :unknown
+    if scenario.failed?
+      failed_scenarios << {scenario: scenario, runtime: runtime_range}
+    else
+      passed_scenarios << {scenario: scenario, runtime: runtime_range}
+    end
+    puts "started at: #{runtime_range.first.round(1)}, finished at: #{runtime_range.last.round(1)} (times approximate)"
+  end
+end
+
+Around('@local-only') do |scenario, block|
+  if custom_host
+    skip_this_scenario 
+  else
+    block.call
   end
 end
 
