@@ -54,7 +54,7 @@ describe SecuritiesRequestService do
   describe '`awaiting_authorization`' do
     let(:call_method) { subject.awaiting_authorization }
 
-    it_should_behave_like 'a MAPI backed service object method', :awaiting_authorization
+    it_behaves_like 'a MAPI backed service object method', :awaiting_authorization
     
     it 'calls `get_json` with the securities requests end point' do
       expect(subject).to receive(:get_json).with(:awaiting_authorization, "/member/#{member_id}/securities/requests", anything)
@@ -71,6 +71,59 @@ describe SecuritiesRequestService do
     it 'returns the result of calling `process_securities_requests`' do
       allow(subject).to receive(:process_securities_requests).and_return(processed_requests)
       expect(call_method).to be(processed_requests)
+    end
+  end
+
+  describe '`submit_release_for_authorization`' do
+    let(:broker_instructions) { SecureRandom.hex }
+    let(:delivery_instructions) { SecureRandom.hex }
+    let(:securities) { SecureRandom.hex }
+    let(:session_id) { SecureRandom.hex }
+    let(:session) { instance_double(ActionDispatch::Request::Session, id: session_id) }
+    let(:user) { instance_double(User, username: SecureRandom.hex, display_name: SecureRandom.hex) }
+    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, broker_instructions: broker_instructions, delivery_instructions: delivery_instructions, securities: securities) }
+    let(:call_method) { subject.submit_release_for_authorization(securities_release_request, user) }
+
+    before do
+      allow(request).to receive(:session).and_return(session)
+    end
+
+    it_behaves_like 'a MAPI backed service object method', :submit_release_for_authorization do
+      let(:user) { instance_double(User, username: SecureRandom.hex, display_name: SecureRandom.hex) }
+      let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, broker_instructions: nil, delivery_instructions: nil, securities: nil) }
+      let(:call_method) { subject.submit_release_for_authorization(securities_release_request, user) }
+    end
+    it 'calls `post_hash` with `:securities_submit_release_for_authorization` for the name arg' do
+      expect(subject).to receive(:post_hash).with(:securities_submit_release_for_authorization, any_args)
+      call_method
+    end
+    it 'calls `post_hash` with `{member_id}/securities/release` for the endpoint arg' do
+      expect(subject).to receive(:post_hash).with(anything, "#{member_id}/securities/release", anything)
+      call_method
+    end
+    it 'calls `post_hash` with a JSON body argument including the broker instructions from the security_release_request' do
+      expect(subject).to receive(:post_hash).with(anything, anything, satisfy { |arg| JSON.parse(arg)['broker_instructions'] == broker_instructions })
+      call_method
+    end
+    it 'calls `post_hash` with a body argument including the delivery instructions from the security_release_request' do
+      expect(subject).to receive(:post_hash).with(anything, anything, satisfy { |arg| JSON.parse(arg)['delivery_instructions'] == delivery_instructions })
+      call_method
+    end
+    it 'calls `post_hash` with a body argument including the securities from the security_release_request' do
+      expect(subject).to receive(:post_hash).with(anything, anything, satisfy { |arg| JSON.parse(arg)['securities'] == securities })
+      call_method
+    end
+    it 'calls `post_hash` with a body argument including the `username` of the passed user' do
+      expect(subject).to receive(:post_hash).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['username'] == user.username })
+      call_method
+    end
+    it 'calls `post_hash` with a body argument including the `full_name` of the passed user' do
+      expect(subject).to receive(:post_hash).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['full_name'] == user.display_name })
+      call_method
+    end
+    it 'calls `post_hash` with a body argument including the `session_id` of the passed user\'s session' do
+      expect(subject).to receive(:post_hash).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['session_id'] == session_id })
+      call_method
     end
   end
 

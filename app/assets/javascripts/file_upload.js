@@ -24,9 +24,9 @@ $(function () {
     },
     done: function (e, data) {
       var $target = $(e.target);
-      var resultsContainerClass = $target.data('results-container-class');
       var formName = $target.data('form-name');
       var inputName = $target.data('input-name');
+      var resultsContainerClass = $target.data('results-container-class');
       if (data.result) {
         if (data.result.error) {
           failUpload(e, data); // For IE

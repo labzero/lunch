@@ -99,7 +99,7 @@ Then(/^I should see the "(.*?)" release instructions fields$/) do |instructions|
     when 'Mutual Fund'
       'mutual-fund'
     when 'Physical'
-      'physical'
+      'physical-securities'
   end
   page.assert_selector(".securities-delivery-instructions-field-#{selector}", visible: :visible)
 end
