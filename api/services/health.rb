@@ -3,12 +3,16 @@ module MAPI
     module Health
       include MAPI::Services::Base
 
+      SOAP_OPEN_TIMEOUT = 0.2 # seconds
+      SOAP_READ_TIMEOUT = 5 # seconds
+
       def self.ping_cal_service(environment)
         cal_status = false
         cal_connection = MAPI::Services::Rates.init_cal_connection(environment)
         if cal_connection
           message = {'v1:endDate' => '1991-01-01'}
           begin
+            add_soap_timeouts(cal_connection)
             response = cal_connection.call(:get_holiday, message_tag: 'holidayRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER)
             response.doc.remove_namespaces!
             nodes = response.doc.xpath('//Envelope//Body//holidayResponse//transactionResult')
@@ -25,6 +29,7 @@ module MAPI
         pi_connection = MAPI::Services::Rates.init_pi_connection(environment)
         if pi_connection
           begin
+            add_soap_timeouts(pi_connection)
             response = pi_connection.call(:get_pricing_indications, message_tag: 'pricingIndicationsRequest', message: {}, :soap_header => MAPI::Services::Rates::SOAP_HEADER )
             response.doc.remove_namespaces!
             pi_status = response.doc.xpath('//Envelope//Body//pricingIndicationsResponse//response//Items').count > 0
@@ -56,6 +61,7 @@ module MAPI
             }]
           }
           begin
+            add_soap_timeouts(mds_connection)
             response = mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, :soap_header => MAPI::Services::Rates::SOAP_HEADER )
             response.doc.remove_namespaces!
             mds_status = response.doc.xpath('//fhlbsfMarketDataResponse').count > 0
@@ -64,6 +70,12 @@ module MAPI
           end
         end
         mds_status
+      end
+
+      def self.add_soap_timeouts(connection)
+        raise ArgumentError.new('connection can\'t be nil') if connection.nil?
+        connection.globals[:open_timeout] = SOAP_OPEN_TIMEOUT
+        connection.globals[:read_timeout] = SOAP_READ_TIMEOUT
       end
 
       def self.registered(app)
