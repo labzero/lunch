@@ -184,6 +184,18 @@ Then(/^I should see a list of securities authorized users$/) do
   page.assert_selector('.settings-users-table', visible: true)
 end
 
+When(/^I fill in the "(.*?)" securities field with "(.*?)"$/) do |field_name, value|
+  page.fill_in("securities_release_request[#{field_name}]", with: value)
+end
+
+When(/^I submit the securities release request for authorization$/) do
+  page.find('.securities-submit-release-form input[type=submit]').click
+end
+
+Then(/^I should see the success page for the securities release request$/) do
+  page.assert_selector('.securities h1', text: I18n.t('securities.success.title'))
+end
+
 def delivery_instructions(text)
   case text
     when 'DTC'

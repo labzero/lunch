@@ -1,19 +1,16 @@
 require 'rails_helper'
 
 RSpec.describe SecuritiesReleaseRequest, :type => :model do
-  let(:member_id) { rand(1000..99999) }
-  let(:subject) { described_class.new(member_id) }
-
   describe 'validations' do
-    (described_class::BROKER_INSTRUCTION_KEYS + [:deliver_to, :securities]).each do |attr|
+    (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities]).each do |attr|
       it "should validate the presence of `#{attr}`" do
         expect(subject).to validate_presence_of attr
       end
     end
     described_class::DELIVERY_TYPES.keys.each do |delivery_type|
-      describe "when `:deliver_to` is `#{delivery_type}`" do
+      describe "when `:delivery_type` is `#{delivery_type}`" do
         before do
-          subject.deliver_to = delivery_type
+          subject.delivery_type = delivery_type
         end
         described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type].each do |attr|
           it "should validate the presence of `#{attr}`" do
@@ -90,23 +87,17 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
     end
   end
 
-  describe 'initializtion' do
-    it 'sets the `member_id` to the one provided' do
-      expect(subject.member_id).to eq(member_id)
-    end
-  end
-
   describe 'class methods' do
     describe '`from_hash`' do
-      it 'creates a SecuritiesReleaseRequest from a hash and a member_id' do
+      it 'creates a SecuritiesReleaseRequest from a hash' do
         aba_number = SecureRandom.hex
-        securities_request_release = described_class.from_hash({aba_number: aba_number}, member_id)
+        securities_request_release = described_class.from_hash({aba_number: aba_number})
         expect(securities_request_release.aba_number).to eq(aba_number)
       end
       describe 'with methods stubbed' do
         let(:hash) { instance_double(Hash) }
         let(:securities_request_release) { instance_double(SecuritiesReleaseRequest, :attributes= => nil) }
-        let(:call_method) { described_class.from_hash(hash, member_id) }
+        let(:call_method) { described_class.from_hash(hash) }
         before do
           allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_request_release)
         end
@@ -150,7 +141,7 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
     end
 
     describe '`attributes=`' do
-      sym_attrs = [:deliver_to, :transaction_code, :settlement_type]
+      sym_attrs = [:delivery_type, :transaction_code, :settlement_type]
       date_attrs = [:trade_date, :settlement_date]
       let(:hash) { {} }
       let(:value) { double('some value') }
@@ -272,20 +263,29 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
       let(:call_method) { subject.delivery_instructions }
 
       described_class::DELIVERY_INSTRUCTION_KEYS.keys.each do |key|
-        it "returns a hash containing the `deliver_to` attribute" do
-          subject.deliver_to = key
-          expect(call_method[:deliver_to]).to eq(key)
+        it "returns a hash containing the `delivery_type` attribute" do
+          subject.delivery_type = key
+          expect(call_method[:delivery_type]).to eq(key)
         end
         described_class::DELIVERY_INSTRUCTION_KEYS[key].each do |attr|
-          it "returns a hash containing the `#{attr}`" do
-            subject.deliver_to = key
-            value = double('some value')
-            if attr == :clearing_agent_fed_wire_address
-              subject.clearing_agent_fed_wire_address_1 = value
-            else
+          if described_class::ACCOUNT_NUMBER_TYPES.include?(attr)
+            it "returns a hash containing an `account_number` key with the value for `attr`" do
+              subject.delivery_type = key
+              value = double('some value')
               subject.send( "#{attr.to_s}=", value)
+              expect(call_method[:account_number]).to eq(value)
             end
-            expect(call_method[attr]).to eq(value)
+          else
+            it "returns a hash containing the `#{attr}`" do
+              subject.delivery_type = key
+              value = double('some value')
+              if attr == :clearing_agent_fed_wire_address
+                subject.clearing_agent_fed_wire_address_1 = value
+              else
+                subject.send( "#{attr.to_s}=", value)
+              end
+              expect(call_method[attr]).to eq(value)
+            end
           end
         end
       end

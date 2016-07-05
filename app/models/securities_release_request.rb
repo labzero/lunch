@@ -27,7 +27,9 @@ class SecuritiesReleaseRequest
     physical_securities: [:delivery_bank_agent, :receiving_bank_agent_name, :receiving_bank_agent_address, :physical_securities_credit_account_number]
   }.freeze
 
-  OTHER_PARAMETERS = [:deliver_to, :member_id, :clearing_agent_fed_wire_address_1, :clearing_agent_fed_wire_address_2].freeze
+  ACCOUNT_NUMBER_TYPES = [:fed_credit_account_number, :dtc_credit_account_number, :mutual_fund_account_number, :physical_securities_credit_account_number]
+
+  OTHER_PARAMETERS = [:delivery_type, :member_id, :clearing_agent_fed_wire_address_1, :clearing_agent_fed_wire_address_2].freeze
 
   ACCESSIBLE_ATTRS = BROKER_INSTRUCTION_KEYS + OTHER_PARAMETERS + DELIVERY_INSTRUCTION_KEYS.values.flatten - [:clearing_agent_fed_wire_address]
 
@@ -35,20 +37,16 @@ class SecuritiesReleaseRequest
   attr_writer :clearing_agent_fed_wire_address
   attr_reader :securities
 
-  validates *(BROKER_INSTRUCTION_KEYS + [:deliver_to, :securities]), presence: true
-  validates *DELIVERY_INSTRUCTION_KEYS[:fed], presence: true, if: Proc.new { |request| request.deliver_to && request.deliver_to.to_sym == :fed }
-  validates *DELIVERY_INSTRUCTION_KEYS[:dtc], presence: true, if: Proc.new { |request| request.deliver_to && request.deliver_to.to_sym == :dtc }
-  validates *DELIVERY_INSTRUCTION_KEYS[:mutual_fund], presence: true, if: Proc.new { |request| request.deliver_to && request.deliver_to.to_sym == :mutual_fund }
-  validates *DELIVERY_INSTRUCTION_KEYS[:physical_securities], presence: true, if: Proc.new { |request| request.deliver_to && request.deliver_to.to_sym == :physical_securities }
+  validates *(BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities]), presence: true
+  validates *DELIVERY_INSTRUCTION_KEYS[:fed], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :fed }
+  validates *DELIVERY_INSTRUCTION_KEYS[:dtc], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :dtc }
+  validates *DELIVERY_INSTRUCTION_KEYS[:mutual_fund], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :mutual_fund }
+  validates *DELIVERY_INSTRUCTION_KEYS[:physical_securities], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :physical_securities }
   validate :trade_date_must_come_before_settlement_date
   validate :securities_must_have_payment_amount, if: Proc.new { |request| request.settlement_type && request.settlement_type.to_sym == :payment }
 
-  def initialize(member_id)
-    @member_id = member_id
-  end
-
-  def self.from_hash(hash, member_id)
-    obj = new(member_id)
+  def self.from_hash(hash)
+    obj = new
     obj.attributes = hash
     obj
   end
@@ -69,7 +67,7 @@ class SecuritiesReleaseRequest
       value = case key
       when :trade_date, :settlement_date
         Time.zone.parse(value)
-      when :deliver_to, :transaction_code, :settlement_type
+      when :delivery_type, :transaction_code, :settlement_type
         value.to_sym
       when :securities, *ACCESSIBLE_ATTRS
         value
@@ -111,10 +109,14 @@ class SecuritiesReleaseRequest
 
   def delivery_instructions
     delivery_instructions_hash = {
-      deliver_to: deliver_to
+      delivery_type: delivery_type
     }
-    DELIVERY_INSTRUCTION_KEYS[deliver_to.to_sym].each do |attr|
-      delivery_instructions_hash[attr] = self.send(attr)
+    DELIVERY_INSTRUCTION_KEYS[delivery_type.to_sym].each do |attr|
+      if ACCOUNT_NUMBER_TYPES.include?(attr)
+        delivery_instructions_hash[:account_number] = self.send(attr)
+      else
+        delivery_instructions_hash[attr] = self.send(attr)
+      end
     end
     delivery_instructions_hash
   end

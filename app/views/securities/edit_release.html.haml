@@ -23,7 +23,7 @@
             = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_release_request[settlement_date]'
         %section.securities-delivery-instructions
           %h2= t('securities.release.delivery_instructions.label')
-          = render 'shared/dropdown', dropdown_name: 'securities_release_request[deliver_to]', default_value: @delivery_instructions_dropdown.first.last, default_text: @delivery_instructions_dropdown.first.first, dropdown_options: @delivery_instructions_dropdown
+          = render 'shared/dropdown', dropdown_name: 'securities_release_request[delivery_type]', default_value: @delivery_instructions_dropdown.first.last, default_text: @delivery_instructions_dropdown.first.first, dropdown_options: @delivery_instructions_dropdown
           .securities-delivery-instructions-fields{data: {'selected-delivery-instruction' => @delivery_instructions_dropdown.first.last}}
             .securities-delivery-instructions-field.securities-delivery-instructions-field-physical-securities
               = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_name, label: t('securities.release.delivery_instructions.agent_name'), horizontal: true

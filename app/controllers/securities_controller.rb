@@ -170,10 +170,13 @@ class SecuritiesController < ApplicationController
 
   # POST
   def submit_release
-    @securities_release_request = SecuritiesReleaseRequest.from_hash(params[:securities_release_request], current_member_id)
+    @securities_release_request = SecuritiesReleaseRequest.from_hash(params[:securities_release_request])
+    errors = nil
     if @securities_release_request.valid?
-      response = SecuritiesRequestService.new(current_member_id, request).submit_release_for_authorization(@securities_release_request, current_user)
-      errors = { mapi_endpoint: response.body } unless response.status == 200
+      response = SecuritiesRequestService.new(current_member_id, request).submit_release_for_authorization(@securities_release_request, current_user) do |error|
+        errors = { mapi_endpoint: [error.http_body] }
+      end
+      errors ||= { mapi_endpoint: ['SecuritiesRequestService#submit_release_for_authorization has returned nil'] } unless response
     else
       errors = @securities_release_request.errors.messages
     end
@@ -257,7 +260,7 @@ class SecuritiesController < ApplicationController
       [t('securities.release.delivery_instructions.physical_securities'), SecuritiesReleaseRequest::DELIVERY_TYPES[:physical_securities]]
     ]
 
-    @securities_release_request ||= SecuritiesReleaseRequest.new(current_member_id)
+    @securities_release_request ||= SecuritiesReleaseRequest.new
     @securities_release_request.securities = params[:securities] if params[:securities]
     @securities_release_request.trade_date ||= Time.zone.today
     @securities_release_request.settlement_date ||= Time.zone.today

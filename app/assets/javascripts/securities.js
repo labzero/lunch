@@ -23,7 +23,7 @@ $(function() {
   });
 
   // Value of data attribute used in CSS to show/hide appropriate 'delivery-instructions-field'
-  $('select[name="securities_release_request[deliver_to]"]').on('change', function(){
+  $('select[name="securities_release_request[delivery_type]"]').on('change', function(){
     $('.securities-delivery-instructions-fields').attr('data-selected-delivery-instruction', $(this).val());
   });
 

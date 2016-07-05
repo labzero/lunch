@@ -425,8 +425,7 @@ RSpec.describe SecuritiesController, type: :controller do
   describe 'POST submit_release' do
     let(:member_id) { rand(1000..99999) }
     let(:securities_release_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
-    let(:success_response) { ActionDispatch::TestResponse.new(200) }
-    let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_release_for_authorization: success_response) }
+    let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_release_for_authorization: true) }
     let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, :valid? => true) }
     let(:call_action) { post :submit_release, securities_release_request: securities_release_request_param }
 
@@ -437,11 +436,7 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(SecuritiesReleaseRequest).to receive(:from_hash).and_return(securities_release_request)
     end
     it 'builds a SecuritiesReleaseRequest instance with the `securities_release_request` params' do
-      expect(SecuritiesReleaseRequest).to receive(:from_hash).with(securities_release_request_param, anything)
-      call_action
-    end
-    it 'builds a SecuritiesReleaseRequest instance with the `current_member_id`' do
-      expect(SecuritiesReleaseRequest).to receive(:from_hash).with(anything, member_id)
+      expect(SecuritiesReleaseRequest).to receive(:from_hash).with(securities_release_request_param)
       call_action
     end
     it 'sets @securities_release_request' do
@@ -458,28 +453,32 @@ RSpec.describe SecuritiesController, type: :controller do
         call_action
       end
       it 'calls `submit_release_for_authorization` on the SecuritiesRequestService instance with the `securities_release_request`' do
-        expect(securities_request_service).to receive(:submit_release_for_authorization).with(securities_release_request, anything).and_return(success_response)
+        expect(securities_request_service).to receive(:submit_release_for_authorization).with(securities_release_request, anything).and_return(true)
         call_action
       end
       it 'calls `submit_release_for_authorization` on the SecuritiesRequestService instance with the current_user' do
-        expect(securities_request_service).to receive(:submit_release_for_authorization).with(anything, controller.current_user).and_return(success_response)
+        expect(securities_request_service).to receive(:submit_release_for_authorization).with(anything, controller.current_user).and_return(true)
         call_action
       end
-      describe 'when the service object returns a status of 200' do
+      describe 'when the service object returns true' do
         it 'redirects to the `securities_success_url`' do
           expect(call_action).to redirect_to(securities_success_url)
         end
       end
-      describe 'when the service object returns a status other than a 200' do
-        let(:status) { (201..999).to_a.sample }
+      describe 'when the service object returns nil' do
         let(:error_message) { SecureRandom.hex }
-        let(:error_response) { ActionDispatch::TestResponse.new(status, {}, error_message) }
+        let(:error) { instance_double(RestClient::Exception, http_body: error_message) }
 
         before do
-          allow(securities_request_service).to receive(:submit_release_for_authorization).and_return(error_response)
+          allow(securities_request_service).to receive(:submit_release_for_authorization).and_return(nil)
         end
-        it 'calls `populate_edit_release_view_variables` with an `mapi_endpoint` error whose value is the reponse body' do
-          expect(controller).to receive(:populate_edit_release_view_variables).with({mapi_endpoint: error_message})
+        it 'calls `populate_edit_release_view_variables` with a specific `mapi_endpoint` error when the error handler is invoked' do
+          allow(securities_request_service).to receive(:submit_release_for_authorization).and_yield(error)
+          expect(controller).to receive(:populate_edit_release_view_variables).with({mapi_endpoint: [error_message]})
+          call_action
+        end
+        it 'calls `populate_edit_release_view_variables` with an `mapi_endpoint` error' do
+          expect(controller).to receive(:populate_edit_release_view_variables).with({mapi_endpoint: ['SecuritiesRequestService#submit_release_for_authorization has returned nil']})
           call_action
         end
         it 'renders the `edit_release` view' do
@@ -620,7 +619,7 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(assigns[:securities_release_request]).to eq(securities_release_request)
       end
       it 'creates a new instance of SecuritiesReleaseRequest if `@securities_release_request` not already set' do
-        expect(SecuritiesReleaseRequest).to receive(:new).with(member_id).and_return(securities_release_request)
+        expect(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
         call_action
       end
       it 'does not create a new instance of SecuritiesReleaseRequest if `securities_release_request` is already set' do

@@ -78,4 +78,12 @@ Scenario: Member changes trade and settlement dates
   When I click the settlement date datepicker
   And I click the datepicker cancel button
   Then I should be on the securities release page
-  
+
+@jira-mem-1594 @jira-mem-1595
+Scenario: Member sees success page after submitting releases for authorization
+  Given I am on the release securities page
+  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  And I submit the securities release request for authorization
+  Then I should see the success page for the securities release request
+
