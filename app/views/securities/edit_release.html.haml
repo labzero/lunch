@@ -7,6 +7,10 @@
       = form_for(@securities_release_request, validate: true, url: securities_submit_release_path, html: {class: 'securities-submit-release-form'}) do |f|
         = f.hidden_field(:trade_date)
         = f.hidden_field(:settlement_date)
+        - if @errors
+          .securities-submit-release-form-errors
+            - @errors.values.uniq.each do |message|
+              %p= message
         %section.securities-broker-instructions
           %h2= t('securities.release.broker_instructions')
           .input-field-container-horizontal

@@ -87,3 +87,9 @@ Scenario: Member sees success page after submitting releases for authorization
   And I submit the securities release request for authorization
   Then I should see the success page for the securities release request
 
+@jira-mem-1593
+Scenario: Member sees error when submitting release with required information missing
+  Given I am on the release securities page
+  And I submit the securities release request for authorization
+  Then I should see the generic error message for the securities release request
+

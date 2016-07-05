@@ -196,6 +196,10 @@ Then(/^I should see the success page for the securities release request$/) do
   page.assert_selector('.securities h1', text: I18n.t('securities.success.title'))
 end
 
+Then(/^I should see the generic error message for the securities release request$/) do
+  page.assert_selector('.securities-submit-release-form-errors p', text: I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number), exact: true)
+end
+
 def delivery_instructions(text)
   case text
     when 'DTC'

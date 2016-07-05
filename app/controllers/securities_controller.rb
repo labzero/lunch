@@ -1,5 +1,6 @@
 class SecuritiesController < ApplicationController
   include CustomFormattingHelper
+  include ContactInformationHelper
 
   ACCEPTED_UPLOAD_MIMETYPES = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -181,7 +182,7 @@ class SecuritiesController < ApplicationController
       errors = @securities_release_request.errors.messages
     end
     if errors
-      populate_edit_release_view_variables(errors) # TODO - handle errors in the 'edit_release' view as part of MEM-1593
+      populate_edit_release_view_variables(errors)
       render :edit_release
     else
       redirect_to securities_success_url
@@ -243,7 +244,7 @@ class SecuritiesController < ApplicationController
   end
 
   def populate_edit_release_view_variables(errors=nil)
-    @errors = errors if errors
+    @errors = human_submit_release_error_messages(errors) if errors
     @title = t('securities.release.title')
     @transaction_code_dropdown = [
       [t('securities.release.transaction_code.standard'), SecuritiesReleaseRequest::TRANSACTION_CODES[:standard]],
@@ -265,6 +266,15 @@ class SecuritiesController < ApplicationController
     @securities_release_request.trade_date ||= Time.zone.today
     @securities_release_request.settlement_date ||= Time.zone.today
     populate_securities_table_data_view_variable(@securities_release_request.securities)
+  end
+
+  def human_submit_release_error_messages(errors)
+    error_message_hash = {}
+    errors.each do |key, value|
+      # TODO add error messaging for specific errors as they become outlined in future tickets
+      error_message_hash[key] = I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number)
+    end
+    error_message_hash
   end
 
 end

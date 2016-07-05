@@ -53,43 +53,13 @@ describe ContactInformationHelper, type: :helper do
     end
   end
 
-  describe '`web_support_phone_number` method' do
-    let(:call_method) { helper.web_support_phone_number }
-    it 'responds to `web_support_phone_number`' do
-      expect(helper).to respond_to(:web_support_phone_number)
+  %i(web_support_phone_number service_desk_phone_number operations_phone_number mcu_phone_number accounting_phone_number securities_services_phone_number).each do |helper_method|
+    describe "`#{helper_method}` method" do
+      let(:call_method) {helper.send(helper_method) }
+      it "responds to `#{helper_method}`" do
+        expect(helper).to respond_to(helper_method)
+      end
+      include_examples 'phone number contact method', helper_method.to_s.upcase
     end
-    include_examples 'phone number contact method', 'WEB_SUPPORT_PHONE_NUMBER' 
-  end
-
-  describe '`service_desk_phone_number` method' do
-    let(:call_method) { helper.service_desk_phone_number }
-    it 'responds to `service_desk_phone_number`' do
-      expect(helper).to respond_to(:service_desk_phone_number)
-    end
-    include_examples 'phone number contact method', 'SERVICE_DESK_PHONE_NUMBER'
-  end
-
-  describe '`operations_phone_number` method' do
-    let(:call_method) { helper.operations_phone_number }
-    it 'responds to `operations_phone_number`' do
-      expect(helper).to respond_to(:operations_phone_number)
-    end
-    include_examples 'phone number contact method', 'OPERATIONS_PHONE_NUMBER'
-  end
-
-  describe '`mcu_phone_number` method' do
-    let(:call_method) { helper.mcu_phone_number }
-    it 'responds to `mcu_phone_number`' do
-      expect(helper).to respond_to(:mcu_phone_number)
-    end
-    include_examples 'phone number contact method', 'MCU_PHONE_NUMBER'
-  end
-  
-  describe '`accounting_phone_number` method' do
-    let(:call_method) { helper.accounting_phone_number }
-    it 'responds to `accounting_phone_number`' do
-      expect(helper).to respond_to(:accounting_phone_number)
-    end
-    include_examples 'phone number contact method', 'ACCOUNTING_PHONE_NUMBER'
   end
 end

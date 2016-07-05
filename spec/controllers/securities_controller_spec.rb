@@ -1,5 +1,6 @@
 require 'rails_helper'
 include CustomFormattingHelper
+include ContactInformationHelper
 
 RSpec.describe SecuritiesController, type: :controller do
   login_user
@@ -572,6 +573,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:securities) { [instance_double(Security)] }
       let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, securities: securities, :securities= => nil, trade_date: nil, :trade_date= => nil, settlement_date: nil, :settlement_date= => nil) }
       let(:call_action) { controller.send(:populate_edit_release_view_variables) }
+      let(:errors) { instance_double(Hash) }
 
       before do
         allow(controller).to receive(:current_member_id).and_return(member_id)
@@ -579,8 +581,12 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(controller).to receive(:populate_securities_table_data_view_variable)
       end
 
+      it 'calls `human_submit_release_error_messages` if errors are present' do
+        expect(controller).to receive(:human_submit_release_error_messages).with(errors).and_return(errors)
+        controller.send(:populate_edit_release_view_variables, errors)
+      end
       it 'sets `@errors` if errors are passed' do
-        errors = instance_double(Hash)
+        allow(controller).to receive(:human_submit_release_error_messages).and_return(errors)
         controller.send(:populate_edit_release_view_variables, errors)
         expect(assigns[:errors]).to eq(errors)
       end
@@ -737,10 +743,15 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(assigns[:securities_table_data][:rows]).to eq([])
       end
     end
-  end
-end
 
-def security_to_hash(security)
-  hash = {}
-  security
+    describe '`human_submit_release_error_messages`' do
+      it 'returns a generic message for errors it is provided with' do
+        errors = {
+          foo: ['some error message']
+        }
+        human_errors = subject.send(:human_submit_release_error_messages, errors)
+        expect(human_errors[:foo]).to eq(I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number))
+      end
+    end
+  end
 end

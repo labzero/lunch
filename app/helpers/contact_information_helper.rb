@@ -10,6 +10,7 @@ module ContactInformationHelper
   OPERATIONS_PHONE_NUMBER = '4156162559'
   MCU_PHONE_NUMBER = '4156162757'
   ACCOUNTING_PHONE_NUMBER = '4156162620'
+  SECURITIES_SERVICES_PHONE_NUMBER = '4156162970'
 
   def web_support_email
     "mailto:#{WEB_SUPPORT_EMAIL}"
@@ -49,5 +50,9 @@ module ContactInformationHelper
 
   def accounting_phone_number
     fhlb_formatted_phone_number(ACCOUNTING_PHONE_NUMBER)
+  end
+
+  def securities_services_phone_number
+    fhlb_formatted_phone_number(SECURITIES_SERVICES_PHONE_NUMBER)
   end
 end

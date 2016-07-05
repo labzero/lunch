@@ -33,11 +33,11 @@ class Security
     hash.each do |key, value|
       key = key.to_sym
       value = case key
-                when *ACCESSIBLE_ATTRS
-                  value
-                else
-                  raise ArgumentError, "unknown attribute: '#{key}'"
-              end
+        when *ACCESSIBLE_ATTRS
+          value
+        else
+          raise ArgumentError, "unknown attribute: '#{key}'"
+      end
       send("#{key}=", value)
     end
   end
