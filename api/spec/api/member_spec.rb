@@ -93,7 +93,7 @@ describe MAPI::ServiceApp do
     end
 
     it 'calls `MAPI::Services::Member::SecuritiesRequests.create_release`' do
-      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:create_release).with(
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:create_release).with(
         kind_of(app),
         member_id.to_i,
         post_body['user']['username'],
@@ -101,10 +101,11 @@ describe MAPI::ServiceApp do
         post_body['user']['session_id'],
         post_body['broker_instructions'],
         post_body['delivery_instructions'],
-        post_body['securities'])
+        post_body['securities']).and_return(true)
       make_request
       expect(last_response.status).to be(200)
-    end
+      expect(last_response.body).to eq("")
+     end
 
     it 'doesn\'t raise an error' do
       expect { make_request }.to_not raise_error

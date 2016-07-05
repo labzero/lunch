@@ -1328,14 +1328,14 @@ module MAPI
           begin
             post_body_json = JSON.parse(request.body.read)
             user = post_body_json['user']
-            MAPI::Services::Member::SecuritiesRequests.create_release(self,
-                                                                      params['id'].to_i,
-                                                                      user['username'],
-                                                                      user['full_name'],
-                                                                      user['session_id'],
-                                                                      post_body_json['broker_instructions'] || '{}',
-                                                                      post_body_json['delivery_instructions'] || '{}',
-                                                                      post_body_json['securities'] || '[]')
+            "" if MAPI::Services::Member::SecuritiesRequests.create_release(self,
+                                                                            params['id'].to_i,
+                                                                            user['username'],
+                                                                            user['full_name'],
+                                                                            user['session_id'],
+                                                                            post_body_json['broker_instructions'] || {},
+                                                                            post_body_json['delivery_instructions'] || {},
+                                                                            post_body_json['securities'] || [])
           rescue => error
             logger.error error
             halt 400, error.message

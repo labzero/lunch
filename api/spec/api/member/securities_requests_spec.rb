@@ -750,7 +750,7 @@ describe MAPI::ServiceApp do
                 insert_security_sql).exactly(3).times.and_return(true)
               expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                 insert_header_sql).and_return(true)
-              call_method
+              expect(call_method).to eq(true)
             end
 
             it 'inserts the securities' do
@@ -758,7 +758,7 @@ describe MAPI::ServiceApp do
                 insert_header_sql).and_return(true)
               expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                 insert_security_sql).exactly(3).times.and_return(true)
-              call_method
+              expect(call_method).to eq(true)
             end
 
             it 'raises errors for SQL failures on header insert' do
