@@ -21,7 +21,7 @@ module MAPI
 
         module MAPIRequestStatus
           AUTHORIZED = [SSKRequestStatus::SIGNED, SSKRequestStatus::ACKNOWLEDGED]
-          AWAITING_AUTHORIZATION = [SSKRequestStatus::AWAITING_AUTHORIZATION]
+          AWAITING_AUTHORIZATION = [SSKRequestStatus::SUBMITTED]
         end
 
         REQUEST_STATUS_MAPPING = {
