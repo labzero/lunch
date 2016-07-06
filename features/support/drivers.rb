@@ -6,7 +6,7 @@ puts "my_driver:  #{my_driver}"
 if defined?(Capybara)
   Capybara.default_driver = my_driver
   Capybara.javascript_driver = my_driver
-  Capybara.default_wait_time = 10
+  Capybara.default_max_wait_time = 10
 
   if Capybara.default_driver =~ /safari/i
     safari_port = [2000, 2001, 2020, 2109, 2222, 2310, 3001, 3030,
@@ -36,6 +36,10 @@ if defined?(Capybara)
     else
       `hostname`.strip
     end
+  end
+
+  def sauce_labs?
+    ::Capybara.current_session.driver.options[:url] == SAUCE_CONNECT_URL
   end
 
   base_opts = {

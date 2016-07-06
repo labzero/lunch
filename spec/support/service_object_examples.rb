@@ -1,5 +1,9 @@
-RSpec.shared_examples 'a MAPI backed service object method' do |method, params=nil, action=:get, return_value=nil|
-  let(:call_method) {subject.send(method.to_sym, *params)}
+RSpec.shared_examples 'a MAPI backed service object method' do |method, params=nil, action=:get, return_value=nil, &context_block|
+  if context_block.present?
+    context_block.call
+  else
+    let(:call_method) { subject.send(method.to_sym, *params) }
+  end
   it 'should return nil if there was an API error' do
     allow_any_instance_of(RestClient::Resource).to receive(action).and_raise(RestClient::InternalServerError)
     expect(call_method).to eq(return_value)

@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
+  let(:connection) { Savon::Client.new(endpoint: SecureRandom.hex, namespace: SecureRandom.hex) }
   describe 'GET /healthy' do
     let(:make_request) { get "/healthy"; JSON.parse(last_response.body) }
     it 'should return a JSON hash' do
@@ -71,7 +72,6 @@ describe MAPI::ServiceApp do
   describe '`ping_pi_service` class method' do
     let(:env) { :production }
     let(:call_method) { MAPI::Services::Health.ping_pi_service(env) }
-    let(:connection) { double('SOAP Connection') }
     let(:document) { double('XML Document', remove_namespaces!: nil, xpath: []) }
     let(:response) { double('SOAP Response', doc: document)}
     before do
@@ -93,12 +93,15 @@ describe MAPI::ServiceApp do
       allow(document).to receive(:xpath).with('//Envelope//Body//pricingIndicationsResponse//response//Items').and_return([double('A Node')])
       expect(call_method).to eq(true)
     end
+    it 'adds timeouts' do
+      expect(MAPI::Services::Health).to receive(:add_soap_timeouts).with(connection)
+      call_method
+    end
   end
 
   describe '`ping_mds_service` class method' do
     let(:env) { :production }
     let(:call_method) { MAPI::Services::Health.ping_mds_service(env) }
-    let(:connection) { double('SOAP Connection') }
     let(:document) { double('XML Document', remove_namespaces!: nil, xpath: []) }
     let(:response) { double('SOAP Response', doc: document)}
     before do
@@ -120,12 +123,15 @@ describe MAPI::ServiceApp do
       allow(document).to receive(:xpath).with('//fhlbsfMarketDataResponse').and_return([double('A Node')])
       expect(call_method).to eq(true)
     end
+    it 'adds timeouts' do
+      expect(MAPI::Services::Health).to receive(:add_soap_timeouts).with(connection)
+      call_method
+    end
   end
 
   describe '`ping_cal_service` class method' do
     let(:env) { :production }
     let(:call_method) { MAPI::Services::Health.ping_cal_service(env) }
-    let(:connection) { double('SOAP Connection') }
     let(:transactionResultNode) { double('A transactionResult Node', text: 'Error') }
     let(:document) { double('XML Document', remove_namespaces!: nil, xpath: []) }
     let(:response) { double('SOAP Response', doc: document)}
@@ -152,6 +158,26 @@ describe MAPI::ServiceApp do
       allow(transactionResultNode).to receive(:text).and_return('Success')
       allow(document).to receive(:xpath).with('//Envelope//Body//holidayResponse//transactionResult').and_return([transactionResultNode])
       expect(call_method).to eq(true)
+    end
+    it 'adds timeouts' do
+      expect(MAPI::Services::Health).to receive(:add_soap_timeouts).with(connection)
+      call_method
+    end
+  end
+
+  describe '`add_soap_timeouts` class method' do
+    let(:call_method) { MAPI::Services::Health.add_soap_timeouts(connection) }
+
+    it 'adds `SOAP_OPEN_TIMEOUT to the passed clients `globals`' do
+      call_method
+      expect(connection.globals[:open_timeout]).to be(MAPI::Services::Health::SOAP_OPEN_TIMEOUT)
+    end
+    it 'adds `SOAP_READ_TIMEOUT to the passed clients `globals`' do
+      call_method
+      expect(connection.globals[:read_timeout]).to be(MAPI::Services::Health::SOAP_READ_TIMEOUT)
+    end
+    it 'raises an error if passed `nil`' do
+      expect{MAPI::Services::Health.add_soap_timeouts(nil)}.to raise_error(ArgumentError)
     end
   end
 

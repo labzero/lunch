@@ -25,10 +25,10 @@ We use [Vagrant](https://www.vagrantup.com/) to manage a VM that provides all th
 
 Oracle Instant Client is needed for the Oracle DB adapter used by ActiveRecord. To install, follow these steps (POSIX systems):
 
-1. [Download](http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html) the Oracle Instant Client (11g release 2, currently 11.2.0.4.0) for your platform, as well as the SDK package and SQL*Plus package for your platform (found on the same page).
+1. [Download](http://www.oracle.com/technetwork/database/features/instant-client/index-097480.html) the Oracle Instant Client (12c release 1, currently 12.1.0.2) for your platform, as well as the SDK package and SQL*Plus package for your platform (found on the same page).
 2. Extract all three zip files into the same directory.
 3. Place that directory somewhere in your system in a path that **contains no spaces**. If there are any spaces anywhere in the path the gem install will not work. If you are on `OS X` version `10.11 (El Capitan)` or later, you need to either place the OCI in `~/lib` or symlink its libraries there.
-4. `cd` into the Oracle Instant Client directory in your shell and run `ln -s libclntsh.dylib.11.1 libclntsh.dylib` (OS X) or `ln -s libclntsh.so.11.1 libclntsh.so` (Linux), which creates a needed symlink.
+4. `cd` into the Oracle Instant Client directory in your shell and run `ln -s libclntsh.dylib.12.1 libclntsh.dylib` (OS X) or `ln -s libclntsh.so.12.1 libclntsh.so` (Linux), which creates a needed symlink.
 5. Open `~/.bash_profile` (or `~/.bashrc` depending on your OS/shell) and add the following lines (replacing `YOUR_PATH` with the absolute path to the Oracle Instant Client directory):
 
    OS X:
@@ -46,6 +46,10 @@ Oracle Instant Client is needed for the Oracle DB adapter used by ActiveRecord. 
    ```
 
 6. `source ~/.bashrc` to load the new environment variables into your current shell.
+
+NOTE: If updating from Oracle Instant Client 11g (11.2.0.4.0)
+1. Remove old files before replacing with Instant Client 12 (`libocci.dylib.11.1`, `libclntsh.dylib.11.1`, `libnnz11.dylib`, `libocijdbc11.dylib`)
+2. Remove old symlink (`libclntsh.dylib`) before attempting to create new one
 
 ### ACE Agent SDK
 

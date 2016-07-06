@@ -61,3 +61,35 @@ Scenario: Member cancels an upload of a securities release file
   Then I should see an upload progress bar
   When I click to cancel the securities release file upload
   Then I should not see an upload progress bar
+
+@jira-mem-1654
+Scenario: Member changes trade and settlement dates
+  # This should be flushed out once we have actual date ranges to check
+  Given I am on the release securities page
+  When I click the trade date datepicker
+  And I click the datepicker apply button
+  Then I should be on the securities release page
+  When I click the trade date datepicker
+  And I click the datepicker cancel button
+  Then I should be on the securities release page
+  When I click the settlement date datepicker
+  And I click the datepicker apply button
+  Then I should be on the securities release page
+  When I click the settlement date datepicker
+  And I click the datepicker cancel button
+  Then I should be on the securities release page
+
+@jira-mem-1594 @jira-mem-1595
+Scenario: Member sees success page after submitting releases for authorization
+  Given I am on the release securities page
+  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  And I submit the securities release request for authorization
+  Then I should see the success page for the securities release request
+
+@jira-mem-1593
+Scenario: Member sees error when submitting release with required information missing
+  Given I am on the release securities page
+  And I submit the securities release request for authorization
+  Then I should see the generic error message for the securities release request
+

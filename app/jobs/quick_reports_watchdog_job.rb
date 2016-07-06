@@ -3,6 +3,7 @@ class QuickReportsWatchdogJob < FhlbJob
 
   POLLING_INTERVAL = 10.seconds.freeze
   TIMEOUT = 10.minutes.freeze
+  MAX_RUN_TIME = 3.hours
 
   def perform(member_ids, _period=QuickReportSet.current_period)
     get_start_time
@@ -10,7 +11,7 @@ class QuickReportsWatchdogJob < FhlbJob
     self.total = member_ids.sum { |id| Member.new(id).quick_report_list.size }
     self.completed = 0
     self.last_completed_at = get_start_time
-    self.long_run_threshold = get_start_time.end_of_day
+    self.long_run_threshold = get_start_time + MAX_RUN_TIME
     next_poll_at = get_start_time + POLLING_INTERVAL
     while !done? do
       if long_run?

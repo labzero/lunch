@@ -23,7 +23,7 @@ $(function() {
   });
 
   // Value of data attribute used in CSS to show/hide appropriate 'delivery-instructions-field'
-  $('select[name=securities_release_delivery_instructions]').on('change', function(){
+  $('select[name="securities_release_request[delivery_type]"]').on('change', function(){
     $('.securities-delivery-instructions-fields').attr('data-selected-delivery-instruction', $(this).val());
   });
 
@@ -43,6 +43,17 @@ $(function() {
   // Toggle Edit Securities Instructions
   $('.securities-download').on('click', function(){
     $('.securities-download-instructions').toggle();
+  });
+
+  // Add the securities fields to release form from the download form.  Keeps one source of truth for securities in the DOM.
+  $('.securities-submit-release-form').on('submit', function(e){
+    var submitReleaseForm = $(this);
+    var securitiesFieldsClones = $('input[name="securities"]').clone();
+    $.each(securitiesFieldsClones, function(i, input) {
+      $(input).attr('name', 'securities_release_request[securities]');
+      submitReleaseForm.append(input);
+    });
+
   });
 
 });

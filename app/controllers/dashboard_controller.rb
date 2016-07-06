@@ -5,7 +5,7 @@ class DashboardController < ApplicationController
   include ReportsHelper
 
   before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform, :quick_advance_started] do
-    authorize :advances, :show?
+    authorize :advance, :show?
   end
 
   before_action only: [:quick_advance_perform, :quick_advance_preview, :quick_advance_started] do
@@ -159,7 +159,7 @@ class DashboardController < ApplicationController
         instrument_type: /\A(ADVANCE|INVESTMENT)\z/,
         status: 'VERIFIED',
         product: ->(entry, key, controller) {entry[:product] != 'OPEN VRC'},
-        termination_full_partial: ''
+        termination_full_partial: nil
       }
     },
     # Open Advances

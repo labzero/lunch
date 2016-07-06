@@ -42,6 +42,11 @@
   font-size: 1.3333rem;
 }
 
+%extra-large-icon-font {
+  @extend %icon-font;
+  font-size: 2rem;
+}
+
 $icon-gear: "\e600";
 $icon-chevron: "\e601";
 $icon-envelope: "\e602";

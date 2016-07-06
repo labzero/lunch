@@ -23,6 +23,7 @@ $(function () {
       var filterOptions = $wrapper.data('date-picker-filter-options');
       var fromLabel = $wrapper.data('date-picker-from-label');
       var today = $wrapper.data('date-picker-today');
+      var linkedInputField = $wrapper.data('date-picker-linked-input-field');
       var options = {
         ranges: ranges,
         opens: openDir,
@@ -67,7 +68,7 @@ $(function () {
       options.endDate = endDate;
 
       initializeDatePicker($datePickerTrigger, $wrapper, options);
-      setDatePickerApplyListener($datePickerTrigger, $form);
+      setDatePickerApplyListener($datePickerTrigger, $form, linkedInputField);
       setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
       if (filter !== undefined) {
         if (singleDatePicker) {
@@ -136,14 +137,23 @@ $(function () {
         fromLabel: options.fromLabel
       },
       opens: options.opens,
-      singleDatePicker: options.singleDatePicker
+      singleDatePicker: options.singleDatePicker,
+      linkedInputField: options.linkedInputField
     };
     $datePickerTrigger.daterangepicker(optionsHash);
     addUpdateEventTrigger($datePickerTrigger);
     $datePickerTrigger.daterangepicker(optionsHash); // reinitialize the datepicker with the prototype changes made by `addUpdateEventTrigger`
 
     // Disable apply button
-    changeApplyButtonStatus($datePickerWrapper, true);
+    var disableApply = true;
+
+    if ($.isEmptyObject(options.ranges)) {
+      $datePickerWrapper.addClass('datepicker-wrapper-no-presets');
+      disableApply = false;
+    };
+
+    changeApplyButtonStatus($datePickerWrapper, disableApply);
+    blockDefaultButtonActions($datePickerWrapper);
 
     // Append the daterangepicker's start and end inputs to our own div for design purposes, then attach its event handlers
     var $datePickerStartInput = $datePickerWrapper.find('.daterangepicker_start_input');
@@ -174,14 +184,17 @@ $(function () {
   function changeApplyButtonStatus($datePickerWrapper, disabled)  {
     var $applyButton = $datePickerWrapper.find('button.applyBtn.btn.btn-small.btn-sm.btn-success');
     $applyButton.attr('disabled', disabled);
-  }
+  };
 
   // accessing the start and end dates once the apply button is pressed
-  function setDatePickerApplyListener($datePickerTrigger, $form){
+  function setDatePickerApplyListener($datePickerTrigger, $form, linkedInputField){
     $datePickerTrigger.on('apply.daterangepicker', function(ev, picker) {
       ev.stopPropagation();
       setDatePickerPlaceholder($datePickerTrigger, picker.startDate, picker.endDate);
       $form.find('input[name=start_date]').val(picker.startDate.format('YYYY-MM-DD'));
+      if (linkedInputField) {
+        $('input[name="' + linkedInputField + '"]').val(picker.startDate.format('YYYY-MM-DD'));
+      }
       if (!$($datePickerTrigger.siblings('.datepicker-wrapper')).data('date-picker-single-date-picker')) {
         $form.find('input[name=end_date]').val(picker.endDate.format('YYYY-MM-DD'));
       }
@@ -197,6 +210,12 @@ $(function () {
     else {
       $datePickerTrigger.find('input').val(startDate.format('MM/DD/YYYY') + ' - ' + endDate.format('MM/DD/YYYY'));
     };
+  };
+
+  function blockDefaultButtonActions($datePickerWrapper) {
+    $datePickerWrapper.click(function(e) {
+      e.preventDefault();
+    });
   };
 
   function filterDates(filter, filterOptions) {

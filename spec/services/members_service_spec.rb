@@ -200,7 +200,7 @@ describe MembersService do
       let(:signer) {{name: 'Some Signer', roles: signer_roles, last_name: 'signer last name', first_name: 'signer first name'}}
       let(:duplicate_signer) {{name: 'A Duplicate User', username: 'username', roles: signer_roles}}
       let(:user_roles) {['user']}
-      let(:user) {double('Some User', :display_name => 'User Display Name', roles: user_roles, username: 'username', surname: 'last name', given_name: 'first name')}
+      let(:user) {double('Some User', :display_name => 'User Display Name', roles: user_roles, username: 'username', surname: 'last name', given_name: 'first name', email: 'email')}
       let(:member) { subject.signers_and_users(member_id) }
 
       it 'should return nil if there was an API error' do
@@ -223,7 +223,7 @@ describe MembersService do
             expect(member).to satisfy { |list| list.find {|e| e[attr] == value }}
           end
         end
-        {display_name: :name, roles: :roles, surname: :last_name, given_name: :first_name}.each do |attr, signer_attr|
+        {display_name: :name, roles: :roles, surname: :last_name, given_name: :first_name, email: :email}.each do |attr, signer_attr|
           it "contains hashes with a `#{attr}` representing all signers associated with a bank" do
             value = signer[signer_attr]
             value = signer_mapped_roles if attr == :roles

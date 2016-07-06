@@ -48,7 +48,7 @@ en:
     loan_collateral_type: Loan Collateral Type
     count: Count
     original_amount: Original Amount
-    unpaid_principal: Unpaid Principal
+    unpaid_principal: Unpaid Principal Balance
     balance_as_of_close_of_business: Balance as of close of business
     reference_number: Reference Number
     debits: Debits
@@ -500,7 +500,7 @@ en:
         collateral_asset_manager: Collateral Asset Manager
     quick_reports:
       title: Quick Reports
-      description: 'The following monthend reports are available for download:'
+      description: 'Download monthend reports:'
       all_reports_html: '<a href="%{url}">View a list</a> of all available reports.'
     quick_advance:
       title: Quick Advance
@@ -1231,6 +1231,21 @@ en:
         select_file: Select File
         download_actions_html: '%{span} <span>or</span> %{button}'
         upload_error: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
+        generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number}
+    success:
+      title: Release Securities Request Sent
+      request_will_remain: 'This request will remain in the queue for authorization until one of the following occurs:'
+      request_authorized: Request is authorized by an authorized signer
+      request_rejected: Request is rejected or removed
+      request_date_passed: The settlement date for the request has passed
+      authorizers: Your Instution's Authorizers
+      buttons:
+        manage: manage securities
+        view: view securities requests
+        notify: notify authorizers(s)
+      email:
+        subject: FHLBSF Securities Authorization Required
+        body_html: "There is a Securities Request awaiting authorization.\n\n %{url}"
   reports:
     meta_title: FHLB - Reports
     title: Reports

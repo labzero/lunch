@@ -938,6 +938,30 @@ module MAPI
               end
             end
           end
+
+          api do
+            key :path, '/{id}/securities/release'
+            operation do
+              key :method, 'POST'
+              key :summary, 'Create a new securities release request'
+              key :nickname, 'createSecuritiesReleaseRequest'
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution requesting securities release.'
+              end
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :SecuritiesRelease
+                key :description, "Securities to release and their associated metadata"
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -1262,7 +1286,7 @@ module MAPI
             halt 503, 'Internal Service Error'
           end
         end
-        
+
         # Mortgage Collateral Update
         relative_get '/:id/mortgage_collateral_update' do
           member_id = params[:id].to_i
@@ -1298,6 +1322,24 @@ module MAPI
           end_date = (params[:settle_end_date] || Time.zone.today).to_date
           start_date = (params[:settle_start_date] || (end_date - 100.years)).to_date
           MAPI::Services::Member::SecuritiesRequests.requests(self, id, MAPI::Services::Member::SecuritiesRequests::REQUEST_STATUS_MAPPING[params[:status]], (start_date..end_date)).to_json
+        end
+
+        relative_post '/:id/securities/release' do
+          begin
+            post_body_json = JSON.parse(request.body.read)
+            user = post_body_json['user']
+            MAPI::Services::Member::SecuritiesRequests.create_release(self,
+                                                                      params['id'].to_i,
+                                                                      user['username'],
+                                                                      user['full_name'],
+                                                                      user['session_id'],
+                                                                      post_body_json['broker_instructions'] || '{}',
+                                                                      post_body_json['delivery_instructions'] || '{}',
+                                                                      post_body_json['securities'] || '[]')
+          rescue => error
+            logger.error error
+            halt 400, error.message
+          end
         end
       end
 
@@ -1341,7 +1383,7 @@ module MAPI
           out.string
         end
       end
-      
+
     end
   end
 end

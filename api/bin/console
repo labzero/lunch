@@ -41,6 +41,19 @@ module MAPI
         MAPI::ServiceApp
       end
 
+      def app_instance
+        @instance ||= (
+          instance = nil
+          route = "/fetch-sinatra-instance/#{SecureRandom.hex}"
+          proc = Proc.new { instance = self }
+          session = Rack::MockSession.new(app.dup)
+          session.app.class_eval { get route, &proc }
+          session.header('Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"")
+          session.get(route)
+          instance
+        )
+      end
+
       def get_json(*args, &block)
         JSON.parse(get(*args, &block).body)
       end

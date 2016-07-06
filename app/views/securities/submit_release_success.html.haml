@@ -1,0 +1,30 @@
+- @page_title = t('global.page_meta_title', title: @title)
+.securities.row
+  .securities-header
+    %h1= @title
+  .securities-main-body
+    %section.securities-success
+      %p.icon-success-before=t('securities.success.request_will_remain')
+      %ul
+        %li=t('securities.success.request_authorized')
+        %li=t('securities.success.request_rejected')
+        %li=t('securities.success.request_date_passed')
+    %section.settings-users.securities-success
+      %header
+        %h2=t('securities.success.authorizers')
+      .settings-users-table.securities-success-table
+        %table
+          %thead
+            %tr
+              %th= t('global.name')
+              %th= t('global.email')
+          %tbody
+            %tr
+            - @authorized_user_data.each do |user|
+              %tr
+                %td= user[:display_name]
+                %td= user[:email]
+    %section.securities-success
+      = link_to(t('securities.success.buttons.manage'), securities_manage_path, class: 'secondary-button')
+      = link_to(t('securities.success.buttons.view'), securities_requests_path, class: 'secondary-button')
+      = mail_to('', t('securities.success.buttons.notify'), :class => 'primary-button', :subject => t('securities.success.email.subject'), :body => t('securities.success.email.body_html', url: securities_requests_url))

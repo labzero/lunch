@@ -4,7 +4,7 @@ RSpec.describe CorporateCommunicationsController, :type => :controller do
   login_user
 
   describe 'before_filter methods' do
-    let(:current_user) { FactoryGirl.build(User) }
+    let(:current_user) { FactoryGirl.build(:user) }
     let(:message_service_instance) { double('MessageServiceInstance') }
     let(:corporate_communications_zero) { double('Array of Messages', count: 0) }
     let(:corporate_communications_non_zero) { double('Array of Messages', count: 7) }
@@ -54,7 +54,7 @@ RSpec.describe CorporateCommunicationsController, :type => :controller do
 
   describe 'GET category' do
     it_behaves_like 'a user required action', :get, :category, category: 'all'
-    let(:current_user) { FactoryGirl.build(User) }
+    let(:current_user) { FactoryGirl.build(:user) }
     let(:perform_action) { get :category, category: 'all' }
     let(:message_service_instance) { double('MessageServiceInstance') }
     let(:corporate_communications) { double('Array of Messages', count: 7 ) }

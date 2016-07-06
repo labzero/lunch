@@ -186,9 +186,10 @@ Rails.application.routes.draw do
       get 'manage' => 'securities#manage'
       get 'requests' => 'securities#requests'
       post 'edit_release' => 'securities#edit_release'
-      post 'submit_release' => 'error#not_found'
+      post 'submit_release' => 'securities#submit_release'
       post 'download_release' => 'securities#download_release'
       post 'upload_release' => 'securities#upload_release'
+      get 'success' => 'securities#submit_release_success'
     end
   end
 

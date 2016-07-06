@@ -139,7 +139,7 @@ module MAPI
             remaining_financing_available: remaining_financing_available,
             mpf_credit_available: mpf_credit_available,
             collateral_delivery_status: member_position_hash['DELIVERY_STATUS_FLAG'].to_s,
-            financing_percentage: member_position_hash['RECOM_EXPOSURE_PCT'].to_f,
+            financing_percentage: member_position_hash['RECOM_EXPOSURE_PCT'].to_f * 100.0,
             maximum_term: member_position_hash['MAX_TERM'].to_i,
             total_assets: member_position_hash['TOTAL_ASSETS'].to_i,
             approved_long_term_credit: member_position_hash['RHFA_ADVANCES_LIMIT'].to_f,

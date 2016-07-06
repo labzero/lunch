@@ -11,13 +11,13 @@ describe MAPI::Shared::Utils::ClassMethods do
   describe 'fetch_hash' do
     let(:logger)        { double('logger') }
     let(:sql)           { double('sql') }
-    let(:sql_response)  { double('result of sql query') }
+    let(:sql_response)  { double('result of sql query', fetch_hash: nil) }
     let(:response_hash) { double('a hash of results') }
     let(:call_method)   { subject.fetch_hash(logger, sql) }
-    before { allow(ActiveRecord::Base.connection).to receive(:execute).and_return(sql_response) }
+    before { allow(subject).to receive(:execute_sql).with(logger, sql).and_return(sql_response) }
 
-    it 'executes a SQL query on the ActiveRecord::Base.connection' do
-      expect(ActiveRecord::Base.connection).to receive(:execute).with(sql)
+    it 'invokes execute sql with a logger and a sql query' do
+      expect(subject).to receive(:execute_sql).with(logger, sql)
       call_method
     end
     it 'returns a fetched hash of the results of the SQL query' do
@@ -33,7 +33,7 @@ describe MAPI::Shared::Utils::ClassMethods do
       call_method
     end
   end
-  
+
   describe 'fetch_hashes' do
     let(:logger) { double(Logger) }
     let(:sql)    { double('sql') }
@@ -51,31 +51,36 @@ describe MAPI::Shared::Utils::ClassMethods do
     let(:call_method) { subject.fetch_hashes(logger, sql, mapping, downcase)}
 
     before do
-      allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
+      allow(subject).to receive(:execute_sql).with(logger, sql).and_return(cursor)
       allow(cursor).to receive(:fetch_hash).and_return(*([*hashes, nil]))
     end
 
-    it 'executes a SQL query' do
-      expect(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
+    it 'invokes execute sql with a logger and a sql query' do
+      expect(subject).to receive(:execute_sql).with(logger, sql).and_return(cursor)
       call_method
     end
+
     it 'calls `fetch_hash` on the results cursor until nil is receieved' do
       expect(cursor).to receive(:fetch_hash).and_return(*([*hashes, nil])).exactly(hashes.length + 1)
       call_method
     end
+
     it 'calls `map_hash_values` on each returned row' do
       hashes.each do |hash|
         expect(subject).to receive(:map_hash_values).with(hash, mapping, downcase)
       end
       call_method
     end
+
     it 'returns the mapped results' do
       expect(call_method).to eq(mapped_hashes)
     end
+
     it 'returns an empty array if the SQL query yields no results' do
       allow(cursor).to receive(:fetch_hash).and_return(nil)
       expect(call_method).to eq([])
     end
+
     it 'logs an error for exceptions' do
       allow(cursor).to receive(:fetch_hash).and_raise(exception)
       expect(logger).to receive(:error).with(exception_message)
@@ -275,7 +280,7 @@ describe MAPI::Shared::Utils::ClassMethods do
       SecureRandom.hex.upcase => double('A Value')
     } }
     let(:call_method) { subject.map_hash_values(hash, mapping, true) }
-    
+
     it 'returns a new hash with the keys downcased if `downcase` is true' do
       downcased_keys = upcased_hash.keys.collect{|x| x.downcase}
       expect(subject.map_hash_values(upcased_hash, [], true).keys).to eq(downcased_keys)
@@ -319,6 +324,45 @@ describe MAPI::Shared::Utils::ClassMethods do
                                   unmapped_key => hash[unmapped_key],
                                   missing_key => nil
                                 })
+    end
+  end
+
+  describe '`execute_sql` method' do
+    let(:logger)        { double('logger', error: nil) }
+    let(:sql)           { double('sql') }
+    let(:call_method)   { subject.execute_sql(logger, sql) }
+
+    it 'executes a SQL query on the ActiveRecord::Base.connection' do
+      expect(ActiveRecord::Base.connection).to receive(:execute).with(sql)
+      call_method
+    end
+
+    it 'logs an error for any exceptions' do
+      allow(ActiveRecord::Base.connection).to receive(:execute).and_raise(exception)
+      expect(logger).to receive(:error).with(exception_message)
+      call_method
+    end
+
+    it 'returns `nil` if there was an exception' do
+      allow(ActiveRecord::Base.connection).to receive(:execute).and_raise(exception)
+      expect(call_method).to eq(nil)
+    end
+
+    let(:sql_result) { double('SQL result') }
+    it 'returns the result of the query' do
+      allow(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(sql_result)
+      expect(call_method).to eq(sql_result)
+    end
+  end
+
+  describe '`nil_to_zero` method' do
+    let(:value) { SecureRandom.hex }
+    it 'returns 0 for nil' do
+      expect(subject.nil_to_zero(nil)).to eq(0)
+    end
+
+    it 'returns the value passed if not nil' do
+      expect(subject.nil_to_zero(value)).to eq(value)
     end
   end
 end

@@ -1,19 +1,19 @@
 [
   {
-    "tradeID": 348992,
-    "amount": 5250000021,
+    "tradeID": 544607,
+    "amount": 565465.0,
     "rate": null,
-    "tradeDate": "2016-05-31-07:00",
-    "fundingDate": "2014-09-03-07:00",
-    "maturityDate": "2015-09-03-07:00",
-    "productDescription": "LC LC LC",
-    "instrumentType": "LC",
+    "tradeDate": "2016-06-17-07:00",
+    "fundingDate": "2016-06-17-07:00",
+    "maturityDate": "2016-06-20-07:00",
+    "productDescription": "ADVANCE O/N VRC VRC - WL",
+    "instrumentType": "ADVANCE",
     "status": "VERIFIED",
     "terminationPar": null,
     "terminationFee": null,
     "terminationFullPartial": null,
-    "product": "LC",
-    "subProduct": "LC"
+    "product": "O/N VRC",
+    "subProduct": "VRC - WL"
   },
   {
     "tradeID": 387183,

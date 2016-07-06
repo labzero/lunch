@@ -15,7 +15,7 @@ gem 'uglifier', '>= 1.3.0'
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
 gem 'momentjs-rails'
-gem 'bootstrap-daterangepicker-rails'
+gem 'bootstrap-daterangepicker-rails', '0.1.1'
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
 gem 'turbolinks'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
@@ -118,6 +118,7 @@ group :test do
   gem 'net-ping'
   gem 'database_cleaner'
   gem 'shoulda-callback-matchers'
+  gem 'sauce_whisk'
 end
 
 # Use ActiveModel has_secure_password
@@ -127,7 +128,7 @@ end
 # gem 'unicorn'
 
 group :development do
-  gem 'capistrano', '~> 3.2.0'
+  gem 'capistrano'
   gem 'capistrano-rvm'
   gem 'capistrano-rails'
   gem 'growl'

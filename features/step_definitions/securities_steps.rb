@@ -2,12 +2,14 @@ When(/^I click on the Securities link in the header$/) do
   page.find('.secondary-nav a', text: I18n.t('securities.title'), exact: true).click
 end
 
-Then(/^I should be on the (Manage Securities|Securities Requests) page$/) do |page_type|
+Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release) page$/i) do |page_type|
   text = case page_type
-    when 'Manage Securities'
+    when /\AManage Securities\z/i
       I18n.t('securities.manage.title')
-    when 'Securities Requests'
+    when /\ASecurities Requests\z/i
       I18n.t('securities.requests.title')
+    when /\ASecurities Release\z/i
+      I18n.t('securities.release.title')
   end
   page.assert_selector('h1', text: text, exact: true)
   step 'I should see a report table with multiple data rows'
@@ -20,10 +22,12 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release) securities page$/) do |page|
+When(/^I am on the (manage|release|success) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
+  when 'success'
+    visit '/securities/success'
   when 'release'
     step 'I am on the manage securities page'
     step 'I check the 1st Pledged security'
@@ -95,7 +99,7 @@ Then(/^I should see the "(.*?)" release instructions fields$/) do |instructions|
     when 'Mutual Fund'
       'mutual-fund'
     when 'Physical'
-      'physical'
+      'physical-securities'
   end
   page.assert_selector(".securities-delivery-instructions-field-#{selector}", visible: :visible)
 end
@@ -160,6 +164,40 @@ end
 
 Then(/^I should not see an upload progress bar$/) do
   page.assert_selector('.file-upload-progress .gauge-section', visible: :hidden)
+end
+
+When(/^I click the (trade|settlement) date datepicker$/) do |field|
+  text = case field
+  when 'trade'
+    I18n.t('common_table_headings.trade_date')
+  when 'settlement'
+    I18n.t('common_table_headings.settlement_date')
+  else
+    raise ArgumentError.new("Unknown datepicker field: #{field}")
+  end
+  field_container = page.find('.securities-broker-instructions .input-field-container-horizontal', text: text, exact: true, visible: :visible)
+  field_container.find('.datepicker-trigger').click
+end
+
+Then(/^I should see a list of securities authorized users$/) do
+  page.assert_selector('h2', text: /\A#{Regexp.quote(I18n.t('securities.success.authorizers'))}\z/, visible: true)
+  page.assert_selector('.settings-users-table', visible: true)
+end
+
+When(/^I fill in the "(.*?)" securities field with "(.*?)"$/) do |field_name, value|
+  page.fill_in("securities_release_request[#{field_name}]", with: value)
+end
+
+When(/^I submit the securities release request for authorization$/) do
+  page.find('.securities-submit-release-form input[type=submit]').click
+end
+
+Then(/^I should see the success page for the securities release request$/) do
+  page.assert_selector('.securities h1', text: I18n.t('securities.success.title'))
+end
+
+Then(/^I should see the generic error message for the securities release request$/) do
+  page.assert_selector('.securities-submit-release-form-errors p', text: I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number), exact: true)
 end
 
 def delivery_instructions(text)

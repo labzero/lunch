@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160621160238) do
+ActiveRecord::Schema.define(version: 20160621233601) do
 
   create_table "attachments", force: :cascade do |t|
     t.string   "owner_type"
@@ -34,8 +34,8 @@ ActiveRecord::Schema.define(version: 20160621160238) do
     t.datetime "date_sent"
     t.string   "category"
     t.text     "body"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   add_index "corporate_communications", ["category"], name: "i_cor_com_cat"

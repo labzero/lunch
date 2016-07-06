@@ -73,12 +73,15 @@ describe MAPI::ServiceApp do
           allow(member_sta_result).to receive(:fetch_hash).and_return(some_sta_data, nil)
         end
 
+        it 'returns the `financing_percentage` from the `RECOM_EXPOSURE_PCT` field a percentage' do
+          expect(member_financial_position['financing_percentage']).to eq(some_financial_data['RECOM_EXPOSURE_PCT'] * 100)
+        end
+
         it "should json with expected column (exclude stock leverage)" , vcr: {cassette_name: 'capital_stock_requirements_service'} do
           {
             'total_financing_available' => 'RECOM_EXPOSURE',
             'remaining_financing_available' => 'AVAILABLE_CREDIT',
             'collateral_delivery_status' => 'DELIVERY_STATUS_FLAG',
-            'financing_percentage' => 'RECOM_EXPOSURE_PCT',
             'maximum_term' => 'MAX_TERM',
             'total_assets' => 'TOTAL_ASSETS',
             'approved_long_term_credit' => 'RHFA_ADVANCES_LIMIT'

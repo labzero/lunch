@@ -10,7 +10,7 @@ class AdvancesController < ApplicationController
   before_action :set_html_class
 
   before_action only: [:select_rate, :fetch_rates, :preview, :perform] do
-    authorize :advances, :show?
+    authorize :advance, :show?
   end
 
   before_action :fetch_advance_request, only: [:select_rate, :fetch_rates, :perform, :preview]
