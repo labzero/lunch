@@ -725,6 +725,33 @@ describe MAPI::ServiceApp do
               "SSK ID").and_return(ssk_id)
           end
 
+          context 'prepares SQL' do
+            before do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
+            end
+
+            it 'calls `insert_release_header_query`' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_release_header_query).with(
+                member_id,
+                next_id,
+                user_name,
+                full_name,
+                session_id,
+                pledged_adx_id,
+                delivery_columns,
+                broker_instructions,
+                delivery_type,
+                delivery_values)
+              call_method
+            end
+
+            it 'calls `insert_security_query`' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_security_query).with(next_id,
+                next_id, user_name, session_id, security, ssk_id).exactly(3).times
+              call_method
+            end
+          end
+
           context 'calls `execute_sql`' do
             let(:insert_header_sql) { double('Insert Header SQL') }
             let(:insert_security_sql) { double('Insert Security SQL') }

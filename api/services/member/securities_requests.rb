@@ -158,7 +158,7 @@ module MAPI
           end
         end
 
-        def self.insert_release_header_query(member_id, header_id, user_name, session_id, full_name, pledged_adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
+        def self.insert_release_header_query(member_id, header_id, user_name, full_name, session_id, pledged_adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
           now = Time.zone.today
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
