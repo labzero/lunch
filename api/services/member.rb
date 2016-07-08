@@ -938,7 +938,6 @@ module MAPI
               end
             end
           end
-
           api do
             key :path, '/{id}/securities/release'
             operation do
@@ -951,7 +950,7 @@ module MAPI
                 key :name, :id
                 key :required, true
                 key :type, :string
-                key :description, 'The FHLB ID of the member institution requesting securities release.'
+                key :description, 'The FHLB ID of the member institution requesting securities release'
               end
               parameter do
                 key :paramType, :body
@@ -959,6 +958,29 @@ module MAPI
                 key :required, true
                 key :type, :SecuritiesRelease
                 key :description, "Securities to release and their associated metadata"
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/securities/release/{header_id}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the details of the release request and associated securities'
+              key :nickname, 'getSecurityReleaseRequestDetails'
+              key :type, :SecuritiesRelease
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution requesting securities release'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :header_id
+                key :required, true
+                key :type, :string
+                key :description, 'The header ID of the security release request'
               end
             end
           end
@@ -1321,7 +1343,9 @@ module MAPI
           id = params[:id].to_i
           end_date = (params[:settle_end_date] || Time.zone.today).to_date
           start_date = (params[:settle_start_date] || (end_date - 100.years)).to_date
-          MAPI::Services::Member::SecuritiesRequests.requests(self, id, MAPI::Services::Member::SecuritiesRequests::REQUEST_STATUS_MAPPING[params[:status]], (start_date..end_date)).to_json
+          MAPI::Services::Member::SecuritiesRequests.requests(self, id,
+            MAPI::Services::Member::SecuritiesRequests::REQUEST_STATUS_MAPPING[params[:status]],
+            (start_date..end_date)).to_json
         end
 
         relative_post '/:id/securities/release' do
@@ -1340,6 +1364,10 @@ module MAPI
             logger.error error
             halt 400, error.message
           end
+        end
+
+        relative_get '/:id/securities/release/:request_id' do
+          MAPI::Services::Member::SecuritiesRequests.release_details(self, params[:id].to_i, params[:request_id].to_i).to_json
         end
       end
 

@@ -52,7 +52,7 @@ module MAPI
       end
 
       swagger_model :User do
-        key :requred, %i(username, full_name, session_id)
+        key :requred, %i(username full_name session_id)
 
         property 'username' do
           key :type, :string
@@ -191,18 +191,13 @@ module MAPI
         end
       end
 
-      swagger_model :Securities do
-        property :securities do
-          key :type, :array
-          key :description, 'An array of securities to be included in the release request.'
-          items do
-            key :'$ref', :Security
-          end
-        end
-      end
-
       swagger_model :SecuritiesRelease do
         key :required, %i(user broker_instructions delivery_instructions securities)
+
+        property :request_id do
+          key :type, :string
+          key :description, 'The ID of the request'
+        end
 
         property :user do
           key :type, :User
@@ -220,8 +215,11 @@ module MAPI
         end
 
         property :securities do
-          key :type, :Securities
-          key :description, 'The securities to release'
+          key :type, :array
+          key :description, 'An array of securities to be included in the release request.'
+          items do
+            key :'$ref', :Security
+          end
         end
       end
     end

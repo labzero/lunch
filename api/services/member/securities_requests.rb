@@ -61,22 +61,10 @@ module MAPI
             if should_fake?(app)
               rng = Random.new(member_id.to_i + end_date.to_time.to_i + start_date.to_time.to_i + status.sum)
               list = []
-              names = fake('securities_request_names')
               rng.rand(1..7).times do
-                submitted_date = end_date - rng.rand(0..4).days
-                authorized_date = submitted_date + rng.rand(0..2).days
+                request_id = rng.rand(100000..999999)
                 status = flat_status[rng.rand(0..flat_status.length-1)]
-                authorized = MAPIRequestStatus::AUTHORIZED.include?(status)
-                list << {
-                  'REQUEST_ID' => rng.rand(100000..999999),
-                  'FORM_TYPE' => rng.rand(70..73),
-                  'STATUS' => status,
-                  'SETTLE_DATE' => (authorized ? authorized_date : submitted_date) + 1.days,
-                  'SUBMITTED_DATE' => submitted_date,
-                  'SUBMITTED_BY' => names[rng.rand(0..names.length-1)],
-                  'AUTHORIZED_BY' => authorized ? names[rng.rand(0..names.length-1)] : nil,
-                  'AUTHORIZED_DATE' => authorized ? authorized_date : nil
-                }
+                list << fake_header_details(request_id, end_date, status)
               end
               list
             else
@@ -321,6 +309,161 @@ module MAPI
             end
           end
           true
+        end
+
+        def self.release_request_header_details_query(member_id, header_id)
+          <<-SQL
+            SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
+              MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME
+            FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
+            WHERE HEADER_ID = #{quote(header_id)}
+            AND FHLB_ID = #{quote(member_id)}
+          SQL
+        end
+
+        def self.release_request_securities_query(header_id)
+          <<-SQL
+            SELECT CUSIP, DESCRIPTION, ORIGINAL_PAR, PAYMENT_AMOUNT
+            FROM SAFEKEEPING.SSK_WEB_FORM_DETAIL
+            WHERE HEADER_ID = #{quote(header_id)}
+          SQL
+        end
+
+        RELEASE_REQUEST_HEADER_MAPPING = {
+          Proc.new { |value| TRANSACTION_CODE.invert[value.to_i] } => ['PLEDGE_TYPE'],
+          Proc.new { |value| SETTLEMENT_TYPE.invert[value.to_i] } => ['REQUEST_STATUS'],
+          Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO'],
+          to_s: ['BROKER_WIRE_ADDR', 'ABA_NO', 'DTC_AGENT_PARTICIPANT_NO', 'MUTUAL_FUND_COMPANY', 'DELIVERY_BANK_AGENT',
+                 'REC_BANK_AGENT_NAME', 'REC_BANK_AGENT_ADDR', 'CREDIT_ACCT_NO1', 'CREDIT_ACCT_NO2', 'MUTUAL_FUND_ACCT_NO',
+                 'CREDIT_ACCT_NO3', 'CREATED_BY', 'CREATED_BY_NAME'],
+          to_date: ['SETTLE_DATE', 'TRADE_DATE']
+        }
+
+        RELEASE_REQUEST_SECURITIES_MAPPING = {
+          to_s: ['CUSIP', 'DESCRIPTION'],
+          to_i: ['ORIGINAL_PAR', 'PAYMENT_AMOUNT']
+        }
+
+        def self.release_details(app, member_id, request_id)
+          if should_fake?(app)
+            header_details = fake_header_details(request_id, Time.zone.today, MAPIRequestStatus::AWAITING_AUTHORIZATION.first)
+            securities = fake_securities(request_id, header_details['REQUEST_STATUS'])
+          else
+            header_details = fetch_hash(app.logger, release_request_header_details_query(member_id, request_id))
+            securities = fetch_hashes(app.logger, release_request_securities_query(request_id))
+          end
+          raise MAPI::Shared::Errors::SQLError, 'No header details found' unless header_details
+          raise MAPI::Shared::Errors::SQLError, 'No securities found' unless securities
+          header_details = map_hash_values(header_details, RELEASE_REQUEST_HEADER_MAPPING).with_indifferent_access
+          securities.collect do |security|
+            map_hash_values(security, RELEASE_REQUEST_SECURITIES_MAPPING).with_indifferent_access
+          end
+          {
+            request_id: request_id,
+            broker_instructions: broker_instructions_from_header_details(header_details),
+            delivery_instructions: delivery_instructions_from_header_details(header_details),
+            securities: format_securities(securities),
+            user: {
+              username: header_details['CREATED_BY'],
+              full_name: header_details['CREATED_BY_NAME'],
+              session_id: nil
+            }
+          }
+        end
+
+        def self.broker_instructions_from_header_details(header)
+          {
+            transaction_code: header['PLEDGE_TYPE'],
+            settlement_type: header['REQUEST_STATUS'],
+            trade_date: header['TRADE_DATE'],
+            settlement_date: header['SETTLE_DATE']
+          }
+        end
+
+        def self.delivery_instructions_from_header_details(header)
+          delivery_type = header['DELIVER_TO']
+          delivery_type_mapping = delivery_type_mapping(delivery_type)
+          required_delivery_keys = delivery_keys_for_delivery_type(delivery_type)
+          delivery_instructions = {
+            delivery_type: delivery_type
+          }
+          required_delivery_keys.each do |delivery_key|
+            delivery_instructions[delivery_key] = header[delivery_type_mapping[delivery_key]]
+          end
+          delivery_instructions
+        end
+        
+        def self.format_securities(securities)
+          securities.collect do |security|
+            {
+              cusip: security['CUSIP'],
+              description: security['DESCRIPTION'],
+              original_par: security['ORIGINAL_PAR'],
+              payment_amount: security['PAYMENT_AMOUNT']
+            }
+          end
+        end
+
+        def self.fake_header_details(request_id, end_date, status)
+          rng = Random.new(request_id)
+          fake_data = fake('securities_release_request_details')
+          names = fake_data['names']
+          pledge_type = TRANSACTION_CODE.values[rng.rand(0..1)]
+          request_status = SETTLEMENT_TYPE.values[rng.rand(0..1)]
+          delivery_type = DELIVERY_TYPE.values[rng.rand(0..3)]
+          aba_number = rng.rand(10000..99999)
+          participant_number = rng.rand(10000..99999)
+          account_number = rng.rand(10000..99999)
+          submitted_date = end_date - rng.rand(0..4).days
+          authorized = MAPIRequestStatus::AUTHORIZED.include?(status)
+          authorized_date = submitted_date + rng.rand(0..2).days
+          created_by_offset = rng.rand(0..names.length-1)
+          created_by = fake_data['usernames'][created_by_offset]
+          created_by_name = names[created_by_offset]
+          {
+            'REQUEST_ID' => request_id,
+            'PLEDGE_TYPE' => pledge_type,
+            'REQUEST_STATUS' => request_status,
+            'DELIVER_TO' => delivery_type,
+            'BROKER_WIRE_ADDR' => '123 Fake St., Anywhere, USA',
+            'ABA_NO' => aba_number,
+            'DTC_AGENT_PARTICIPANT_NO' => participant_number,
+            'MUTUAL_FUND_COMPANY' => "Mutual Funds R'Us",
+            'DELIVERY_BANK_AGENT' => 'MI6',
+            'REC_BANK_AGENT_NAME' => 'James Bond',
+            'REC_BANK_AGENT_ADDR' => '600 Mulberry Court, Boston, MA, 42893',
+            'CREDIT_ACCT_NO1' => account_number,
+            'CREDIT_ACCT_NO2' => account_number,
+            'MUTUAL_FUND_ACCT_NO' => account_number,
+            'CREDIT_ACCT_NO3' => account_number,
+            'SETTLE_DATE' => (authorized ? authorized_date : submitted_date) + 1.days,
+            'TRADE_DATE' => submitted_date,
+            'CREATED_BY' => created_by,
+            'CREATED_BY_NAME' => created_by_name,
+            'FORM_TYPE' => rng.rand(70..73),
+            'STATUS' => status,
+            'SUBMITTED_DATE' => submitted_date,
+            'SUBMITTED_BY' => created_by_name,
+            'AUTHORIZED_BY' => authorized ? names[rng.rand(0..names.length-1)] : nil,
+            'AUTHORIZED_DATE' => authorized ? authorized_date : nil
+          }
+        end
+
+        def self.fake_securities(request_id, settlement_type)
+          rng = Random.new(request_id)
+          securities = []
+          fake_data = fake('securities_release_request_details')
+          rng.rand(1..6).times do
+            original_par = rng.rand(10000..999999)
+            securities << {
+              'CUSIP' => fake_data['cusips'][rng.rand(0..5)],
+              'DESCRIPTION' => fake_data['descriptions'][rng.rand(0..5)],
+              'ORIGINAL_PAR' => original_par,
+              'PAYMENT_AMOUNT' => (original_par - (original_par/3) if settlement_type == SSKSettlementType::VS_PAYMENT)
+            }
+          end
+          securities
         end
       end
     end

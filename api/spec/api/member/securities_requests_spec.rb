@@ -3,7 +3,7 @@ require 'spec_helper'
 describe MAPI::ServiceApp do
   include MAPI::Shared::Utils
   describe 'Securities Requests' do
-    let(:securities_request_module) { MAPI::Services::Member::SecuritiesRequests }
+    securities_request_module = MAPI::Services::Member::SecuritiesRequests
     describe 'GET `/securities/requests`' do
       let(:response) { double('response', to_json: nil) }
       let(:call_endpoint) { get "/member/#{member_id}/securities/requests"}
@@ -11,7 +11,7 @@ describe MAPI::ServiceApp do
         allow(securities_request_module).to receive(:requests).and_return(response)
       end
 
-      it 'calls `MAPI::Services::Member::SecuritiesRequests.requests` with an instance of the MAPI::Service app `member_id` param' do
+      it 'calls `MAPI::Services::Member::SecuritiesRequests.requests` with an instance of the MAPI::Service app' do
         expect(securities_request_module).to receive(:requests).with(an_instance_of(MAPI::ServiceApp), any_args)
         call_endpoint
       end
@@ -53,8 +53,9 @@ describe MAPI::ServiceApp do
       let(:call_method) { MAPI::Services::Member::SecuritiesRequests.requests(app, member_id) }
 
       describe 'when using fake data' do
-        names = fake('securities_request_names')
+        names = fake('securities_release_request_details')['names']
         let(:rng) { instance_double(Random) }
+        let(:status_offset) { rand(0..1) }
         let(:submit_offset) { rand(0..4) }
         let(:authorized_offset) { rand(0..2) }
         let(:request_id) { rand(100000..999999) }
@@ -66,7 +67,7 @@ describe MAPI::ServiceApp do
         before do
           allow(securities_request_module).to receive(:should_fake?).and_return(true)
           allow(Random).to receive(:new).and_return(rng)
-          allow(rng).to receive(:rand).and_return(1, submit_offset, authorized_offset, 0, request_id, form_type, submitted_by_offset, authorized_by_offset)
+          allow(rng).to receive(:rand).and_return(1, request_id, status_offset)
         end
 
         it 'constructs a list of request objects' do
@@ -74,36 +75,16 @@ describe MAPI::ServiceApp do
           allow(rng).to receive(:rand).with(1..7).and_return(n)
           expect(call_method.length).to eq(n)
         end
-        it 'constructs request objects with a `REQUEST_ID` to pass to `map_hash_values`' do
-          expect(securities_request_module).to receive(:map_hash_values).with(hash_including('REQUEST_ID' => request_id), any_args).and_return({})
+        it 'passes the `request_id` to the `fake_header_details` method' do
+          expect(securities_request_module).to receive(:fake_header_details).with(request_id, any_args).and_return({})
           call_method
         end
-        it 'constructs request objects with a `FORM_TYPE` to pass to `map_hash_values`' do
-          expect(securities_request_module).to receive(:map_hash_values).with(hash_including('FORM_TYPE' => form_type), any_args).and_return({})
+        it 'passes the `end_date` to the `fake_header_details` method' do
+          expect(securities_request_module).to receive(:fake_header_details).with(request_id, Time.zone.today, any_args).and_return({})
           call_method
         end
-        it 'constructs request objects with a `STATUS` to pass to `map_hash_values`' do
-          expect(securities_request_module).to receive(:map_hash_values).with(hash_including('STATUS' => 85), any_args).and_return({})
-          call_method
-        end
-        it 'constructs request objects with a `SETTLE_DATE` to pass to `map_hash_values`' do
-          expect(securities_request_module).to receive(:map_hash_values).with(hash_including('SETTLE_DATE' => authorized_date + 1.day), any_args).and_return({})
-          call_method
-        end
-        it 'constructs request objects with a `SUBMITTED_DATE` to pass to `map_hash_values`' do
-          expect(securities_request_module).to receive(:map_hash_values).with(hash_including('SUBMITTED_DATE' => submitted_date), any_args).and_return({})
-          call_method
-        end
-        it 'constructs request objects with a `SUBMITTED_BY` to pass to `map_hash_values`' do
-          expect(securities_request_module).to receive(:map_hash_values).with(hash_including('SUBMITTED_BY' => names[submitted_by_offset]), any_args).and_return({})
-          call_method
-        end
-        it 'constructs request objects with a `AUTHORIZED_BY` to pass to `map_hash_values`' do
-          expect(securities_request_module).to receive(:map_hash_values).with(hash_including('AUTHORIZED_BY' => names[authorized_by_offset]), any_args).and_return({})
-          call_method
-        end
-        it 'constructs request objects with a `AUTHORIZED_DATE` to pass to `map_hash_values`' do
-          expect(securities_request_module).to receive(:map_hash_values).with(hash_including('AUTHORIZED_DATE' => authorized_date), any_args).and_return({})
+        it 'passes the `status` to the `fake_header_details` method' do
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, securities_request_module::MAPIRequestStatus::AUTHORIZED[status_offset]).and_return({})
           call_method
         end
       end
@@ -801,6 +782,486 @@ describe MAPI::ServiceApp do
                 insert_security_sql).and_return(false)
               expect { call_method }.to raise_error(Exception)
             end
+          end
+        end
+      end
+    end
+    describe 'GET securities/release/%{request_id}' do
+      let(:request_id) { rand(1000..99999) }
+      let(:response) { instance_double(Hash, to_json: nil) }
+      let(:call_endpoint) { get "/member/#{member_id}/securities/release/#{request_id}"}
+      before do
+        allow(securities_request_module).to receive(:release_details).and_return(response)
+      end
+      it 'calls `MAPI::Services::Member::SecuritiesRequests.release_details` with an instance of the MAPI::Service app' do
+        expect(securities_request_module).to receive(:release_details).with(an_instance_of(MAPI::ServiceApp), any_args)
+        call_endpoint
+      end
+      it 'calls `MAPI::Services::Member::SecuritiesRequests.release_details` with the `member_id` param' do
+        expect(securities_request_module).to receive(:release_details).with(anything, member_id, any_args)
+        call_endpoint
+      end
+      it 'calls `MAPI::Services::Member::SecuritiesRequests.release_details` with the `request_id` param' do
+        expect(securities_request_module).to receive(:release_details).with(anything, anything, request_id)
+        call_endpoint
+      end
+      it 'returns the results of `MAPI::Services::Member::SecuritiesRequests.release_details` as JSON' do
+        json_response = SecureRandom.hex
+        allow(response).to receive(:to_json).and_return(json_response)
+        call_endpoint
+        expect(call_endpoint.body).to eq(json_response)
+      end
+    end
+
+    describe '`MAPI::Services::Member::SecuritiesRequests.release_request_header_details_query`' do
+      let(:member_id) { rand(1000..99999) }
+      let(:header_id) { rand(1000..99999) }
+
+      before do
+        allow(securities_request_module).to receive(:quote).with(member_id).and_return(member_id)
+        allow(securities_request_module).to receive(:quote).with(header_id).and_return(header_id)
+      end
+
+      it 'constructs the proper SQL' do
+        expected_sql = <<-SQL
+            SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
+              MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME
+            FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
+            WHERE HEADER_ID = #{header_id}
+            AND FHLB_ID = #{member_id}
+        SQL
+        expect(securities_request_module.release_request_header_details_query(member_id, header_id)).to eq(expected_sql)
+      end
+    end
+
+    describe '`MAPI::Services::Member::SecuritiesRequests.release_request_securities_query`' do
+      let(:header_id) { rand(1000..99999) }
+
+      before { allow(securities_request_module).to receive(:quote).with(header_id).and_return(header_id) }
+
+      it 'constructs the proper SQL' do
+        expected_sql = <<-SQL
+            SELECT CUSIP, DESCRIPTION, ORIGINAL_PAR, PAYMENT_AMOUNT
+            FROM SAFEKEEPING.SSK_WEB_FORM_DETAIL
+            WHERE HEADER_ID = #{header_id}
+        SQL
+        expect(securities_request_module.release_request_securities_query(header_id)).to eq(expected_sql)
+      end
+    end
+
+    describe '`MAPI::Services::Member::SecuritiesRequests.release_details`' do
+      let(:request_id) { rand(1000..99999) }
+      let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
+      let(:header_details) {{
+        'CREATED_BY' => SecureRandom.hex,
+        'CREATED_BY_NAME' => SecureRandom.hex,
+        'REQUEST_STATUS' => SecureRandom.hex
+      }}
+      let(:security) { instance_double(Hash) }
+      let(:securities) { [security] }
+      let(:call_method) { securities_request_module.release_details(app, member_id, request_id) }
+
+      before do
+        allow(securities_request_module).to receive(:fake_securities).and_return(securities)
+        allow(securities_request_module).to receive(:fake_header_details).and_return(header_details)
+        allow(securities_request_module).to receive(:fetch_hashes).and_return(securities)
+        allow(securities_request_module).to receive(:fetch_hash).and_return(header_details)
+        allow(securities_request_module).to receive(:broker_instructions_from_header_details)
+        allow(securities_request_module).to receive(:delivery_instructions_from_header_details)
+        allow(securities_request_module).to receive(:format_securities)
+        allow(securities_request_module).to receive(:should_fake?).and_return(true)
+        allow(securities_request_module).to receive(:map_hash_values).with(header_details, any_args).and_return(header_details)
+        allow(securities_request_module).to receive(:map_hash_values).with(security, any_args).and_return(security)
+        allow(security).to receive(:with_indifferent_access).and_return(security)
+      end
+
+      describe 'when using fake data' do
+        before { allow(securities_request_module).to receive(:should_fake?).and_return(true) }
+
+        it 'constructs `fake_securities` using the `request_id` as an arg' do
+          expect(securities_request_module).to receive(:fake_securities).with(request_id, anything).and_return(securities)
+          call_method
+        end
+        it 'constructs `fake_securities` using the `REQUEST_STATUS` from the `header_details` as an arg' do
+          expect(securities_request_module).to receive(:fake_securities).with(anything, header_details['REQUEST_STATUS']).and_return(securities)
+          call_method
+        end
+        it 'constructs `fake_header_details` using the `request_id` as an arg' do
+          expect(securities_request_module).to receive(:fake_header_details).with(request_id, any_args).and_return(header_details)
+          call_method
+        end
+        it 'constructs `fake_header_details` using `Time.zone.today` as an arg' do
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, Time.zone.today, any_args).and_return(header_details)
+          call_method
+        end
+        it 'constructs `fake_header_details` using the status for AWAITING_AUTHORIZATION as an arg' do
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, securities_request_module::MAPIRequestStatus::AWAITING_AUTHORIZATION.first).and_return(header_details)
+          call_method
+        end
+      end
+      describe 'when using real data' do
+        let(:release_request_header_details_query) { instance_double(String) }
+        let(:release_request_securities_query) { instance_double(String) }
+        before do
+          allow(securities_request_module).to receive(:should_fake?).and_return(false)
+          allow(securities_request_module).to receive(:release_request_header_details_query).and_return(release_request_header_details_query)
+          allow(securities_request_module).to receive(:release_request_securities_query).and_return(release_request_securities_query)
+        end
+
+        describe 'fetching the `header_details`' do
+          it 'calls `fetch_hash` with the logger' do
+            expect(securities_request_module).to receive(:fetch_hash).with(app.logger, anything).and_return(header_details)
+            call_method
+          end
+          it 'calls `fetch_hash` with the result of `release_request_header_details_query`' do
+            expect(securities_request_module).to receive(:fetch_hash).with(anything, release_request_header_details_query).and_return(header_details)
+            call_method
+          end
+          it 'calls `release_request_header_details_query` with the `member_id`' do
+            expect(securities_request_module).to receive(:release_request_header_details_query).with(member_id, anything)
+            call_method
+          end
+          it 'calls `release_request_header_details_query` with the `request_id`' do
+            expect(securities_request_module).to receive(:release_request_header_details_query).with(anything, request_id)
+            call_method
+          end
+          it 'raises an exception if `fetch_hash` returns nil' do
+            allow(securities_request_module).to receive(:fetch_hash)
+            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, 'No header details found')
+          end
+        end
+        describe 'fetching the `securities`' do
+          it 'calls `fetch_hashes` with the logger' do
+            expect(securities_request_module).to receive(:fetch_hashes).with(app.logger, anything).and_return(securities)
+            call_method
+          end
+          it 'calls `fetch_hashes` with the result of `release_request_securities_query`' do
+            expect(securities_request_module).to receive(:fetch_hashes).with(anything, release_request_securities_query).and_return(securities)
+            call_method
+          end
+          it 'calls `release_request_securities_query` with the `request_id`' do
+            expect(securities_request_module).to receive(:release_request_securities_query).with(request_id)
+            call_method
+          end
+          it 'raises an exception if `fetch_hashes` returns nil' do
+            allow(securities_request_module).to receive(:fetch_hashes)
+            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, 'No securities found')
+          end
+        end
+      end
+      it 'calls `map_hash_values` on the `header_details`' do
+        expect(securities_request_module).to receive(:map_hash_values).with(header_details, any_args).and_return(header_details)
+        call_method
+      end
+      it 'calls `map_hash_values` with the `RELEASE_REQUEST_HEADER_MAPPING` for the `header_details`' do
+        expect(securities_request_module).to receive(:map_hash_values).with(anything, securities_request_module::RELEASE_REQUEST_HEADER_MAPPING).exactly(:once).and_return(header_details)
+        call_method
+      end
+      it 'calls `map_hash_values` on each security' do
+        securities.each do |security|
+          expect(securities_request_module).to receive(:map_hash_values).with(security, any_args).and_return(security)
+        end
+        call_method
+      end
+      it 'calls `map_hash_values` with the `RELEASE_REQUEST_SECURITIES_MAPPING` for each security' do
+        expect(securities_request_module).to receive(:map_hash_values).with(anything, securities_request_module::RELEASE_REQUEST_SECURITIES_MAPPING).exactly(securities.length).and_return(security)
+        call_method
+      end
+      describe 'the returned hash' do
+        let(:broker_instructions) { double(Hash) }
+        let(:delivery_instructions) { double(Hash) }
+        let(:formatted_securities) { double(Array) }
+        it 'contains the `request_id` it was passed' do
+          expect(call_method[:request_id]).to eq(request_id)
+        end
+        it 'passes the `header_details` to `broker_instructions_from_header_details`' do
+          expect(securities_request_module).to receive(:broker_instructions_from_header_details).with(header_details)
+          call_method
+        end
+        it 'contains `broker_instructions` that are the result of `broker_instructions_from_header_details`' do
+          allow(securities_request_module).to receive(:broker_instructions_from_header_details).and_return(broker_instructions)
+          expect(call_method[:broker_instructions]).to eq(broker_instructions)
+        end
+        it 'passes the `header_details` to `delivery_instructions_from_header_details`' do
+          expect(securities_request_module).to receive(:delivery_instructions_from_header_details).with(header_details)
+          call_method
+        end
+        it 'contains `broker_instructions` that are the result of `delivery_instructions_from_header_details`' do
+          allow(securities_request_module).to receive(:delivery_instructions_from_header_details).and_return(delivery_instructions)
+          expect(call_method[:delivery_instructions]).to eq(delivery_instructions)
+        end
+        it 'passes the securities to the `format_securities` method' do
+          expect(securities_request_module).to receive(:format_securities).with(securities)
+          call_method
+        end
+        it 'contains `securities` that are the result of `format_securities`' do
+          allow(securities_request_module).to receive(:format_securities).and_return(formatted_securities)
+          expect(call_method[:securities]).to eq(formatted_securities)
+        end
+        it 'contains a `user` hash with a `username` equal to the `CREATED_BY` value in the `header_details`' do
+          expect(call_method[:user][:username]).to eq(header_details['CREATED_BY'])
+        end
+        it 'contains a `user` hash with a `full_name` equal to the `CREATED_BY_NAME` value in the `header_details`' do
+          expect(call_method[:user][:full_name]).to eq(header_details['CREATED_BY_NAME'])
+        end
+        it 'contains a `user` hash with a nil value for `session_id`' do
+          expect(call_method[:user][:session_id]).to eq(nil)
+        end
+      end
+    end
+
+    describe '`MAPI::Services::Member::SecuritiesRequests.broker_instructions_from_header_details`' do
+      let(:header_details) {{
+        'PLEDGE_TYPE' => instance_double(String),
+        'REQUEST_STATUS' => instance_double(String),
+        'TRADE_DATE' => instance_double(Date),
+        'SETTLE_DATE' => instance_double(Date)
+      }}
+      let(:call_method) { securities_request_module.broker_instructions_from_header_details(header_details) }
+
+      {
+        transaction_code: 'PLEDGE_TYPE',
+        settlement_type: 'REQUEST_STATUS',
+        trade_date: 'TRADE_DATE',
+        settlement_date: 'SETTLE_DATE'
+      }.each do |key, value|
+        it "returns a hash with a `#{key}` equal to the `#{value}` of the passed `header_details`" do
+          expect(call_method[key]).to eq(header_details[value])
+        end
+      end
+    end
+
+    describe '`MAPI::Services::Member::SecuritiesRequests.delivery_instructions_from_header_details`' do
+      let(:header_details) {{
+        'BROKER_WIRE_ADDR' => instance_double(String),
+        'ABA_NO' => instance_double(String),
+        'DTC_AGENT_PARTICIPANT_NO' => instance_double(String),
+        'MUTUAL_FUND_COMPANY' => instance_double(String),
+        'DELIVERY_BANK_AGENT' => instance_double(String),
+        'REC_BANK_AGENT_NAME' => instance_double(String),
+        'REC_BANK_AGENT_ADDR' => instance_double(String),
+        'CREDIT_ACCT_NO1' => instance_double(String),
+        'CREDIT_ACCT_NO2' => instance_double(String),
+        'MUTUAL_FUND_ACCT_NO' => instance_double(String),
+        'CREDIT_ACCT_NO3' => instance_double(String)
+      }}
+      let(:call_method) { securities_request_module.delivery_instructions_from_header_details(header_details) }
+      securities_request_module::DELIVERY_TYPE.keys.each do |delivery_type|
+        describe "when the passed header_details hash has a `DELIVER_TO` value of `#{delivery_type}`" do
+          before do
+            header_details['DELIVER_TO'] = delivery_type
+          end
+          it "returns a hash with a `delivery_type` equal `#{delivery_type}`" do
+            expect(call_method[:delivery_type]).to eq(delivery_type)
+          end
+          securities_request_module.delivery_keys_for_delivery_type(delivery_type).each do |required_key|
+            security_key = securities_request_module.delivery_type_mapping(delivery_type)[required_key]
+            it "returns a hash with a `#{required_key}` equal to the `#{security_key}` value of the passed header_details hash" do
+              expect(call_method[required_key]).to eq(header_details[security_key])
+            end
+          end
+        end
+      end
+    end
+
+    describe '`MAPI::Services::Member::SecuritiesRequests.format_securities`' do
+      let(:security) {{
+        'CUSIP' => instance_double(String),
+        'DESCRIPTION' => instance_double(String),
+        'ORIGINAL_PAR' => instance_double(Integer),
+        'PAYMENT_AMOUNT' => instance_double(Integer)
+      }}
+      let(:securities) { [security] }
+      let(:call_method) { securities_request_module.format_securities(securities) }
+
+      {
+        cusip: 'CUSIP',
+        description: 'DESCRIPTION',
+        original_par: 'ORIGINAL_PAR',
+        payment_amount: 'PAYMENT_AMOUNT'
+      }.each do |key, value|
+        it "returns an array of hashes with a `#{key}` equal to the `#{value}` of each passed security" do
+          expect(call_method.length).to be > 0
+          call_method.each do |returned_security|
+            expect(returned_security[key]).to eq(security[value])
+          end
+        end
+      end
+    end
+
+    describe '`MAPI::Services::Member::SecuritiesRequests.fake_header_details`' do
+      fake_data = fake('securities_release_request_details')
+      names = fake_data['names']
+      let(:request_id) { rand(1000..9999)}
+      let(:end_date) { Time.zone.today - rand(0..7).days }
+      let(:status) { (securities_request_module::MAPIRequestStatus::AUTHORIZED + securities_request_module::MAPIRequestStatus::AWAITING_AUTHORIZATION).sample }
+      let(:rng) { instance_double(Random) }
+      let(:pledge_type_offset) { rand(0..1) }
+      let(:request_status_offset) { rand(0..1) }
+      let(:delivery_type_offset) { rand(0..3) }
+      let(:aba_number) { rand(10000..99999) }
+      let(:participant_number) { rand(10000..99999) }
+      let(:account_number) { rand(10000..99999) }
+      let(:submitted_date_offset) { rand(0..4) }
+      let(:authorized_date_offset) { rand(0..2) }
+      let(:created_by_offset) { rand(0..names.length-1) }
+      let(:form_type) { rand(70..73) }
+      let(:authorized_by_offset) { rand(0..names.length-1) }
+
+      let(:call_method) { securities_request_module.fake_header_details(request_id, end_date, status) }
+      before do
+        allow(Random).to receive(:new).and_return(rng)
+        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date_offset, authorized_date_offset, created_by_offset, form_type, authorized_by_offset)
+      end
+
+      it 'constructs a hash with a securities with a `REQUEST_ID` value equal to the passed arg' do
+        expect(call_method['REQUEST_ID']).to eq(request_id)
+      end
+      it 'constructs a hash with a `PLEDGE_TYPE` value' do
+        expect(call_method['PLEDGE_TYPE']).to eq(securities_request_module::TRANSACTION_CODE.values[pledge_type_offset])
+      end
+      it 'constructs a hash with a `REQUEST_STATUS` value' do
+        expect(call_method['REQUEST_STATUS']).to eq(securities_request_module::SETTLEMENT_TYPE.values[request_status_offset])
+      end
+      it 'constructs a hash with a `DELIVER_TO` value' do
+        expect(call_method['DELIVER_TO']).to eq(securities_request_module::DELIVERY_TYPE.values[delivery_type_offset])
+      end
+      it 'constructs a hash with an `ABA_NO` value' do
+        expect(call_method['ABA_NO']).to eq(aba_number)
+      end
+      it 'constructs a hash with a `DTC_AGENT_PARTICIPANT_NO` value' do
+        expect(call_method['DTC_AGENT_PARTICIPANT_NO']).to eq(participant_number)
+      end
+      it 'constructs a hash with a `TRADE_DATE` value' do
+        expect(call_method['TRADE_DATE']).to eq(end_date - (submitted_date_offset).days)
+      end
+      it 'constructs a hash with a `SUBMITTED_DATE` value' do
+        expect(call_method['SUBMITTED_DATE']).to eq(end_date - (submitted_date_offset).days)
+      end
+      it 'constructs a hash with a `CREATED_BY` value' do
+        expect(call_method['CREATED_BY']).to eq(fake_data['usernames'][created_by_offset])
+      end
+      it 'constructs a hash with a `CREATED_BY_NAME` value' do
+        expect(call_method['CREATED_BY_NAME']).to eq(names[created_by_offset])
+      end
+      it 'constructs a hash with a `SUBMITTED_BY` value equal to the `CREATED_BY_NAME`' do
+        expect(call_method['SUBMITTED_BY']).to eq(names[created_by_offset])
+      end
+      it 'constructs a hash with a `FORM_TYPE` value' do
+        expect(call_method['FORM_TYPE']).to eq(form_type)
+      end
+      it 'constructs a hash with a `STATUS` value equal to the passed `status`' do
+        expect(call_method['STATUS']).to eq(status)
+      end
+      [
+        'CREDIT_ACCT_NO1',
+        'CREDIT_ACCT_NO2',
+        'MUTUAL_FUND_ACCT_NO',
+        'CREDIT_ACCT_NO3'
+      ].each do |key|
+        it "constructs a hash with a `#{key}` value" do
+          expect(call_method[key]).to eq(account_number)
+        end
+      end
+      {
+        'BROKER_WIRE_ADDR' => '123 Fake St., Anywhere, USA',
+        'MUTUAL_FUND_COMPANY' => "Mutual Funds R'Us",
+        'DELIVERY_BANK_AGENT' => 'MI6',
+        'REC_BANK_AGENT_NAME' => 'James Bond',
+        'REC_BANK_AGENT_ADDR' => '600 Mulberry Court, Boston, MA, 42893',
+      }.each do |key, value|
+        it "constructs a hash with a `#{key}` value of `#{value}`" do
+          expect(call_method[key]).to eq(value)
+        end
+      end
+      describe 'when an `AUTHORIZED` status is passed' do
+        let(:status) { securities_request_module::MAPIRequestStatus::AUTHORIZED.sample }
+
+        it 'constructs a hash with an `AUTHORIZED_DATE` value that is equal to the `SUBMITTED_DATE` plus an offset' do
+          submitted_date = end_date - (submitted_date_offset).days
+          expect(call_method['AUTHORIZED_DATE']).to eq(submitted_date + (authorized_date_offset).days)
+        end
+        it 'constructs a hash with a `SETTLE_DATE` value equal to the `AUTHORIZED_DATE` plus one day' do
+          authorized_date = end_date - (submitted_date_offset).days + (authorized_date_offset).days
+          expect(call_method['SETTLE_DATE']).to eq(authorized_date + 1.day)
+        end
+        it 'constructs a hash with an `AUTHORIZED_BY` value' do
+          expect(call_method['AUTHORIZED_BY']).to eq(fake_data['names'][authorized_by_offset])
+        end
+      end
+      describe 'when an `AWAITING_AUTHORIZATION` status is passed' do
+        let(:status) { securities_request_module::MAPIRequestStatus::AWAITING_AUTHORIZATION.sample }
+
+        it 'constructs a hash with a nil value for `AUTHORIZED_DATE`' do
+          expect(call_method['AUTHORIZED_DATE']).to be_nil
+        end
+        it 'constructs a hash with a `SETTLE_DATE` value equal to the `SUBMITTED_DATE` plus one day' do
+          submitted_date = end_date - (submitted_date_offset).days
+          expect(call_method['SETTLE_DATE']).to eq(submitted_date + 1.day)
+        end
+        it 'constructs a hash with a nil value for `AUTHORIZED_BY`' do
+          expect(call_method['AUTHORIZED_BY']).to be_nil
+        end
+      end
+    end
+
+    describe '`MAPI::Services::Member::SecuritiesRequests.fake_securities`' do
+      fake_data = fake('securities_release_request_details')
+      let(:request_id) { rand(1000..9999)}
+      let(:settlement_type) { securities_request_module::SETTLEMENT_TYPE.values.sample }
+      let(:rng) { instance_double(Random) }
+      let(:original_par) { rand(10000..99999) }
+      let(:cusip_offset) { rand(0..5) }
+      let(:description_offset) { rand(0..5) }
+
+      let(:call_method) { securities_request_module.fake_securities(request_id, settlement_type) }
+      before do
+        allow(Random).to receive(:new).and_return(rng)
+        allow(rng).to receive(:rand).and_return(1, original_par, cusip_offset, description_offset)
+      end
+
+      it 'constructs an array of securities' do
+        n = rand(1..6)
+        allow(rng).to receive(:rand).with(1..6).and_return(n)
+        expect(call_method.length).to eq(n)
+      end
+      it 'constructs securities with a `CUSIP` value' do
+        results = call_method
+        expect(results.length).to be > 0
+        results.each do |result|
+          expect(result['CUSIP']).to eq(fake_data['cusips'][cusip_offset])
+        end
+      end
+      it 'constructs securities with a `DESCRIPTION` value' do
+        results = call_method
+        expect(results.length).to be > 0
+        results.each do |result|
+          expect(result['DESCRIPTION']).to eq(fake_data['descriptions'][description_offset])
+        end
+      end
+      it 'constructs securities with an `ORIGINAL_PAR` value' do
+        results = call_method
+        expect(results.length).to be > 0
+        results.each do |result|
+          expect(result['ORIGINAL_PAR']).to eq(original_par)
+        end
+      end
+      describe "when the `settlement_type` is `#{securities_request_module::SSKSettlementType::FREE}`" do
+        it 'constructs securities with a nil value for `PAYMENT_AMOUNT`' do
+          results = securities_request_module.fake_securities(request_id, securities_request_module::SSKSettlementType::FREE)
+          expect(results.length).to be > 0
+          results.each do |result|
+            expect(result['PAYMENT_AMOUNT']).to be_nil
+          end
+        end
+      end
+      describe "when the `settlement_type` is `#{securities_request_module::SSKSettlementType::VS_PAYMENT}`" do
+        it 'constructs securities with a nil value for `PAYMENT_AMOUNT`' do
+          results = securities_request_module.fake_securities(request_id, securities_request_module::SSKSettlementType::VS_PAYMENT)
+          expect(results.length).to be > 0
+          results.each do |result|
+            expect(result['PAYMENT_AMOUNT']).to eq(original_par - (original_par/3))
           end
         end
       end
