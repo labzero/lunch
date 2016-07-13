@@ -222,6 +222,21 @@ module MAPI
           end
         end
       end
+
+      swagger_model :SecuritiesRequestAuthorization do
+        key :required, %i(user request_id)
+
+        property :user do
+          key :type, :User
+          key :description, 'The user information'
+        end
+
+        property :request_id do
+          key :type, :string
+          key :required, true
+          key :description, 'The request ID of the request to authorize.'
+        end
+      end
     end
   end
 end

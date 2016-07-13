@@ -961,6 +961,7 @@ module MAPI
               end
             end
           end
+          
           api do
             key :path, '/{id}/securities/release/{header_id}'
             operation do
@@ -981,6 +982,30 @@ module MAPI
                 key :required, true
                 key :type, :string
                 key :description, 'The header ID of the security release request'
+              end
+            end
+          end
+
+          api do
+            key :path, '/{id}/securities/authorize'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Authorize an existing securities request'
+              key :nickname, 'authorizeSecuritiesRelease'
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member whose request is being authorized.'
+              end
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :SecuritiesRequestAuthorization
+                key :description, 'Security to authorize and the authorizer details'
               end
             end
           end
@@ -1368,6 +1393,22 @@ module MAPI
 
         relative_get '/:id/securities/release/:request_id' do
           MAPI::Services::Member::SecuritiesRequests.release_details(self, params[:id].to_i, params[:request_id].to_i).to_json
+        end
+
+        relative_put '/:id/securities/authorize' do
+          begin
+            body = JSON.parse(request.body.read)
+            user = body['user']
+            halt 400, '`user` is required' unless user
+            if MAPI::Services::Member::SecuritiesRequests.authorize_request(app, params['id'].to_i, body['request_id'], user['username'], user['full_name'], user['session_id'])
+              ''
+            else
+              halt 404, 'request already authorized or not found'
+            end
+          rescue ArgumentError => e
+            logger.error e
+            halt 400, e.message
+          end
         end
       end
 

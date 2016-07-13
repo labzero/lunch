@@ -228,74 +228,85 @@ describe MAPI::ServiceApp do
                                                                                                     broker_instructions,
                                                                                                     delivery_type,
                                                                                                     delivery_values ) }
+        let(:sentinel) { SecureRandom.hex }
+        let(:today) { Time.zone.today }
+
+        before do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
+          allow(Time.zone).to receive(:today).and_return(today)
+        end
+
         it 'expands delivery columns into the insert statement' do
           expect(call_method).to match(
             /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+PLEDGED_ADX_ID,\s+#{delivery_columns.join(',\s+')}/)
         end
 
         it 'sets the `header_id`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(header_id)
-          expect(call_method).to match /VALUES\s\(#{header_id},/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(header_id).and_return(sentinel)
+          expect(call_method).to match /VALUES\s\(#{sentinel},/
         end
 
         it 'sets the `member_id`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(member_id)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){1}#{member_id}/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(member_id).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){1}#{sentinel},/
         end
 
         it 'sets the `status`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SUBMITTED)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){2}#{MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SUBMITTED}/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SUBMITTED).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){2}#{sentinel},/
         end
 
         it 'sets the `transaction_code`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(broker_instructions['pledge_type'])
-          expect(call_method).to match /VALUES\s+\((\S+\s+){3}#{broker_instructions[:pledge_type]}/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::TRANSACTION_CODE[broker_instructions['transaction_code']]).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){3}#{sentinel},/
         end
 
         it 'sets the `trade_date`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(broker_instructions['trade_date'])
-          expect(call_method).to match /VALUES\s+\((\S+\s+){4}#{broker_instructions[:trade_date]}/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(broker_instructions['trade_date']).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){4}#{sentinel},/
         end
 
         it 'sets the `settlement_type`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(broker_instructions['settlement_type'])
-          expect(call_method).to match /VALUES\s+\((\S+\s+){5}#{broker_instructions[:settlement_type]}/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE[broker_instructions['settlement_type']]).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){5}#{sentinel},/
         end
 
         it 'sets the `settlement_date`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(broker_instructions['settlement_date'])
-          expect(call_method).to match /VALUES\s+\((\S+\s+){6}#{broker_instructions[:settlement_date]}/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(broker_instructions['settlement_date']).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){6}#{sentinel},/
         end
 
         it 'sets the `delivery_type`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(delivery_type)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){7}#{delivery_type}/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::DELIVERY_TYPE[delivery_type]).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){7}#{sentinel},/
         end
 
         it 'sets the `form_type`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(form_type)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){8}#{form_type}/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(form_type).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){8}#{sentinel},/
         end
 
         it 'sets the `created_date`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(Time.zone.today)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){9}#{Time.zone.today}/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){9}#{sentinel},/
         end
 
         it 'sets the `created_by`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(user_name)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){10}#{user_name}/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(user_name).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){10}#{sentinel},/
         end
 
         it 'sets the `created_by_name`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(full_name)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){11}#{full_name}/
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(full_name).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){11}#{sentinel},/
         end
 
         it 'sets the `last_modified_by`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(user_name + '\\\\' + session_id)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){12}#{user_name + '\\\\\\\\' + session_id}/
+          formatted_modification_by = double('Formatted Modification By')
+          quoted_modification_by = SecureRandom.hex
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).and_return(formatted_modification_by)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(formatted_modification_by).and_return(quoted_modification_by)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){12}#{quoted_modification_by}/
         end
 
         it 'sets the `last_modified_date`' do
@@ -326,6 +337,13 @@ describe MAPI::ServiceApp do
 
       describe '`insert_security_query`' do
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.insert_security_query(header_id, detail_id, user_name, session_id, security, ssk_id) }
+        let(:sentinel) { SecureRandom.hex }
+        let(:today) { Time.zone.today }
+
+        before do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
+          allow(Time.zone).to receive(:today).and_return(today)
+        end
 
         it 'constructs an insert statement with the appropriate column names' do
           expect(call_method).to match(
@@ -333,53 +351,61 @@ describe MAPI::ServiceApp do
         end
 
         it 'sets the `detail_id`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(detail_id)
-          expect(call_method).to match(/VALUES\s+\(#{detail_id}/)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(detail_id).and_return(sentinel)
+          expect(call_method).to match(/VALUES\s+\(#{sentinel},/)
         end
 
         it 'sets the `header_id`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(header_id)
-          expect(call_method).to match(/VALUES\s+\((\S+\s+){1}#{header_id}/)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(header_id).and_return(sentinel)
+          expect(call_method).to match(/VALUES\s+\((\S+\s+){1}#{sentinel},/)
         end
 
         it 'sets the `cusip`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(security['cusip'])
-          expect(call_method).to match(/VALUES\s+\((\S+\s+){2}#{security[:cusip]}/)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(security['cusip']).and_return(sentinel)
+          expect(call_method).to match(/VALUES\s+\((\S+\s+){2}UPPER\(#{sentinel}\),/)
         end
 
         it 'sets the `description`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(security['description'])
-          expect(call_method).to match(/VALUES\s+\((\S+\s+){3}#{security[:description]}/)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(security['description']).and_return(sentinel)
+          expect(call_method).to match(/VALUES\s+\((\S+\s+){3}#{sentinel},/)
         end
 
         it 'sets the `original_par`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(security['original_par'])
-          expect(call_method).to match(/VALUES\s+\((\S+\s+){4}#{security[:original_par]}/)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(security['original_par']).and_return(sentinel)
+          expect(call_method).to match(/VALUES\s+\((\S+\s+){4}#{sentinel},/)
         end
 
         it 'sets the `payment_amount`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(security['payment_amount'])
-          expect(call_method).to match(/VALUES\s+\((\S+\s+){5}#{security[:payment_amount]}/)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(security['payment_amount']).and_return(sentinel)
+          expect(call_method).to match(/VALUES\s+\((\S+\s+){5}#{sentinel},/)
         end
 
         it 'sets the `created_date`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(Time.zone.today)
-          expect(call_method).to match(/VALUES\s+\((\S+\s+){6}#{Time.zone.today}/)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
+          expect(call_method).to match(/VALUES\s+\((\S+\s+){6}#{sentinel},/)
         end
 
         it 'sets the `created_by`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(user_name)
-          expect(call_method).to match(/VALUES\s+\((\S+\s+){7}#{user_name}/)
+          formatted_username = SecureRandom.hex
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_username).and_return(formatted_username)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(formatted_username).and_return(sentinel)
+          expect(call_method).to match(/VALUES\s+\((\S+\s+){7}#{sentinel},/)
         end
 
         it 'sets the `last_modified_date`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(Time.zone.today)
-          expect(call_method).to match(/VALUES\s+\((\S+\s+){8}#{Time.zone.today}/)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
+          expect(call_method).to match(/VALUES\s+\((\S+\s+){8}#{sentinel},/)
         end
 
         it 'sets the `last_modified_by`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(user_name + '\\\\' + session_id)
-          expect(call_method).to match(/VALUES\s+\((\S+\s+){9}#{user_name + '\\\\\\\\' + session_id}/)
+          formatted_modification_by = double('Formatted Modification By')
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).and_return(formatted_modification_by)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(formatted_modification_by).and_return(sentinel)
+          expect(call_method).to match(/VALUES\s+\((\S+\s+){9}#{sentinel},/)
+        end
+        it 'sets the `ssk_id`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(ssk_id).and_return(sentinel)
+          expect(call_method).to match(/VALUES\s+\((\S+\s+){10}#{sentinel}/)
         end
       end
 
@@ -424,6 +450,36 @@ describe MAPI::ServiceApp do
         it 'maps keys to values in `delivery_instructions`' do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(delivery_instruction_value)
           expect(call_method).to eq([delivery_instruction_value, delivery_instruction_value, delivery_instruction_value])
+        end
+      end
+
+      describe '`format_modification_by` class method' do
+        let(:username) { double('Username') }
+        let(:formatted_username) { SecureRandom.hex(5) }
+        let(:session_id) { SecureRandom.hex(5) }
+        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.format_modification_by(username, session_id) }
+        before do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_username).with(username).and_return(formatted_username)
+        end
+        it 'calls `format_user_name` with the supplied `username`' do
+          expect(MAPI::Services::Member::SecuritiesRequests).to receive(:format_username).with(username).and_return(formatted_username)
+          call_method
+        end
+        it 'adds a separator and the `session_id` to the formatted username' do
+          expect(call_method).to eq("#{formatted_username}\\\\#{session_id}")
+        end
+        it 'truncates the formatted modification_by to `LAST_MODIFIED_BY_MAX_LENGTH`' do
+          long_session_id = SecureRandom.hex
+          result = MAPI::Services::Member::SecuritiesRequests.format_modification_by(username, long_session_id)
+          truncated_result = "#{formatted_username}\\\\#{long_session_id}"[0..MAPI::Services::Member::SecuritiesRequests::LAST_MODIFIED_BY_MAX_LENGTH-1]
+          expect(result).to eq(truncated_result)
+        end
+      end
+      describe '`format_username` class method' do
+        let(:username) { SecureRandom.hex.upcase }
+        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.format_username(username)}
+        it 'downcases the supplied username' do
+          expect(call_method).to eq(username.downcase)
         end
       end
 
@@ -1264,6 +1320,133 @@ describe MAPI::ServiceApp do
             expect(result['PAYMENT_AMOUNT']).to eq(original_par - (original_par/3))
           end
         end
+      end
+    end
+  end
+
+  describe '`authorize_request_query` class method' do
+    let(:request_id) { double('A Request ID') }
+    let(:username) { double('A Username') }
+    let(:full_name) { double('A Full Name') }
+    let(:session_id) { double('A Session ID') }
+    let(:signer_id) { double('A Signer ID') }
+    let(:modification_by) { double('A Modification By') }
+    let(:sentinel) { SecureRandom.hex }
+    let(:today) { Time.zone.today }
+    let(:call_method) { MAPI::Services::Member::SecuritiesRequests.authorize_request_query(member_id, request_id, username, full_name, session_id, signer_id) }
+
+    before do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
+      allow(Time.zone).to receive(:today).and_return(today)
+    end
+    
+    it 'returns an UPDATE query' do
+      expect(call_method).to match(/\A\s*UPDATE\s+SAFEKEEPING.SSK_WEB_FORM_HEADER\s+SET\s+/i)
+    end
+    it 'updates the `STATUS`' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SIGNED).and_return(sentinel)
+      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+STATUS\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+    end
+    it 'updates the `SIGNED_BY`' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(signer_id).and_return(sentinel)
+      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+SIGNED_BY\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+    end
+    it 'updates the `SIGNED_BY_NAME`' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(full_name).and_return(sentinel)
+      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+SIGNED_BY_NAME\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+    end
+    it 'updates the `SIGNED_DATE`' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
+      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+SIGNED_DATE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+    end
+    it 'updates the `LAST_MODIFIED_BY`' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(modification_by).and_return(sentinel)
+      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+    end
+    it 'updates the `LAST_MODIFIED_DATE`' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
+      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_DATE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+    end
+    it 'updates the `LAST_MODIFIED_BY_NAME`' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(full_name).and_return(sentinel)
+      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY_NAME\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+    end
+    it 'includes the `request_id` in the WHERE clause' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(request_id).and_return(sentinel)
+      expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+HEADER_ID\s+=\s+#{sentinel}(\s+|\z)/)
+    end
+    it 'includes the `member_id` in the WHERE clause' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(member_id).and_return(sentinel)
+      expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+FHLB_ID\s+=\s+#{sentinel}(\s+|\z)/)
+    end
+    it 'restricts the updates to unauthorized queries' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SUBMITTED).and_return(sentinel)
+      expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+STATUS\s+=\s+#{sentinel}(\s+|\z)/)
+    end
+  end
+
+  describe '`authorize_request` class method' do
+    let(:request_id) { double('A Request ID') }
+    let(:username) { double('A Username') }
+    let(:full_name) { double('A Full Name') }
+    let(:session_id) { double('A Session ID') }
+    let(:signer_id) { double('A Signer ID') }
+    let(:modification_by) { double('A Modification By') }
+    let(:authorization_query) { double('An Authorization Query') }
+    let(:call_method) { MAPI::Services::Member::SecuritiesRequests.authorize_request(app, member_id, request_id, username, full_name, session_id) }
+
+    before do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request_query).and_return(authorization_query)
+    end
+
+    describe '`should_fake?` returns true' do
+      before do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(true)
+      end
+      it 'generates an authorization query using `nil` for the signer ID' do
+        expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request_query).with(member_id, request_id, username, full_name, session_id, nil)
+        call_method
+      end
+      it 'does not execute a query' do
+        expect(ActiveRecord::Base.connection).to_not receive(:execute)
+        call_method
+      end
+      it 'returns true' do
+        expect(call_method).to be(true)
+      end
+    end
+    describe '`should_fake?` returns false' do
+      let(:signer_id) { double('A Signer ID') }
+      let(:signer_id_query) { double('A Signer ID Query') }
+      before do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(false)
+        allow(MAPI::Services::Users).to receive(:signer_id_query).with(username).and_return(signer_id_query)
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(app, signer_id_query, 'Signer ID').and_return(signer_id)
+        allow(ActiveRecord::Base.connection).to receive(:execute).with(authorization_query).and_return(1)
+      end
+      it 'generates a signer ID query' do
+        expect(MAPI::Services::Users).to receive(:signer_id_query).with(username).and_return(signer_id_query)
+        call_method
+      end
+      it 'converts the username into a signer ID' do
+        expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(app, signer_id_query, 'Signer ID').and_return(signer_id)
+        call_method
+      end
+      it 'raises an error if the signer ID is not found' do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(app, signer_id_query, 'Signer ID').and_raise(MAPI::Shared::Errors::SQLError)
+        expect{call_method}.to raise_error(/signer not found/i)
+      end
+      it 'generates an authorization query using the signer ID' do
+        expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request_query).with(member_id, request_id, username, full_name, session_id, signer_id).and_return(authorization_query)
+        call_method
+      end
+      it 'returns true if executing the query updates one row' do
+        expect(call_method).to be(true)
+      end
+      it 'returns false if executing the query updates no rows' do
+        allow(ActiveRecord::Base.connection).to receive(:execute).with(authorization_query).and_return(0)
+        expect(call_method).to be(false)
       end
     end
   end

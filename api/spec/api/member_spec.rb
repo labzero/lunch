@@ -117,4 +117,54 @@ describe MAPI::ServiceApp do
       expect(last_response.status).to be(400)
     end
   end
+  describe 'PUT `securities/authorize`' do
+    let(:username) { SecureRandom.hex }
+    let(:full_name) { SecureRandom.hex }
+    let(:session_id) { SecureRandom.hex }
+    let(:request_id) { rand(100000..999999) }
+    let(:make_request) { put "/member/#{member_id}/securities/authorize", {user: {username: username, full_name: full_name, session_id: session_id}, request_id: request_id}.to_json }
+
+    before do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).and_return(true)
+    end
+
+    it 'calls `authorize_request` with the `request_id`' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(app, anything, request_id, anything, anything, anything)
+      make_request
+    end
+    it 'calls `authorize_request` with the `username`' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(app, anything, anything, username, anything, anything)
+      make_request
+    end
+    it 'calls `authorize_request` with the `full_name`' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(app, anything, anything, anything, full_name, anything)
+      make_request
+    end
+    it 'calls `authorize_request` with the `session_id`' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(app, anything, anything, anything, anything, session_id)
+      make_request
+    end
+    it 'calls `authorize_request` with the `member_id`' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(app, member_id, anything, anything, anything, anything)
+      make_request
+    end
+    it 'returns a 200 if `authorize_request` returns true' do
+      make_request
+      expect(last_response.status).to be(200)
+    end
+    it 'returns a 404 if `authorize_request` returns false' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).and_return(false)
+      make_request
+      expect(last_response.status).to be(404)
+    end
+    it 'returns a 400 if `authorize_request` raises an error' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).and_raise(ArgumentError.new('some error'))
+      make_request
+      expect(last_response.status).to be(400)
+    end
+    it 'returns a 400 if no `user` is provided' do
+      put "/member/#{member_id}/securities/authorize", {request_id: request_id}.to_json
+      expect(last_response.status).to be(400)
+    end
+  end
 end

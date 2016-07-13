@@ -177,9 +177,9 @@ module MAPI
                     #{quote(DELIVERY_TYPE[delivery_type])},
                     #{quote(SSKFormType::SecuritiesRelease)},
                     #{quote(now)},
-                    #{quote(user_name)},
+                    #{quote(format_username(user_name))},
                     #{quote(full_name)},
-                    #{quote((user_name + '\\\\' + session_id)[0..LAST_MODIFIED_BY_MAX_LENGTH - 1])},
+                    #{quote(format_modification_by(user_name, session_id))},
                     #{quote(now)},
                     #{quote(full_name)},
                     #{quote(pledged_adx_id)},
@@ -210,9 +210,9 @@ module MAPI
                     #{quote(nil_to_zero(security['original_par']))},
                     #{quote(nil_to_zero(security['payment_amount']))},
                     #{quote(now)},
-                    #{quote(user_name)},
+                    #{quote(format_username(user_name))},
                     #{quote(now)},
-                    #{quote((user_name + '\\\\' + session_id)[0..LAST_MODIFIED_BY_MAX_LENGTH - 1])},
+                    #{quote(format_modification_by(user_name, session_id))},
                     #{quote(ssk_id)}
                    )
           SQL
@@ -243,6 +243,23 @@ module MAPI
           SQL
         end
 
+        def self.authorize_request_query(member_id, request_id, user_name, full_name, session_id, signer_id)
+          now = Time.zone.today
+          <<-SQL
+            UPDATE SAFEKEEPING.SSK_WEB_FORM_HEADER SET
+            STATUS = #{quote(SSKRequestStatus::SIGNED)},
+            SIGNED_BY = #{quote(signer_id)},
+            SIGNED_BY_NAME = #{quote(full_name)},
+            SIGNED_DATE = #{quote(now)},
+            LAST_MODIFIED_BY = #{quote(format_modification_by(user_name, session_id))},
+            LAST_MODIFIED_DATE = #{quote(now)},
+            LAST_MODIFIED_BY_NAME = #{quote(full_name)}
+            WHERE HEADER_ID = #{quote(request_id)}
+            AND FHLB_ID = #{quote(member_id)}
+            AND STATUS = #{quote(SSKRequestStatus::SUBMITTED)}
+          SQL
+        end
+
         def self.format_delivery_columns(delivery_type, required_delivery_keys, provided_delivery_keys)
           delivery_type_map = delivery_type_mapping(delivery_type)
           required_delivery_keys.map do |key|
@@ -255,6 +272,14 @@ module MAPI
           required_delivery_keys.map do |key|
             quote(delivery_instructions[key])
           end
+        end
+
+        def self.format_modification_by(username, session_id)
+          (format_username(username) + '\\\\' + session_id)[0..LAST_MODIFIED_BY_MAX_LENGTH - 1]
+        end
+
+        def self.format_username(username)
+          username.downcase
         end
 
         def self.execute_sql_single_result(app, sql, description)
@@ -464,6 +489,25 @@ module MAPI
             }
           end
           securities
+        end
+
+        def self.authorize_request(app, member_id, request_id, user_name, full_name, session_id)
+          signer_id = nil
+          unless should_fake?(app)
+            begin
+              signer_id = execute_sql_single_result(app, MAPI::Services::Users.signer_id_query(user_name), 'Signer ID')
+            rescue MAPI::Shared::Errors::SQLError => e
+              raise ArgumentError, 'Signer Not Found'
+            end
+          end
+          query = authorize_request_query(member_id, request_id, user_name, full_name, session_id, signer_id)
+          record_count = 0
+          if should_fake?(app)
+            record_count = 1
+          else
+            record_count = ActiveRecord::Base.connection.execute(query)
+          end
+          record_count == 1
         end
       end
     end

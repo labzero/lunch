@@ -3,6 +3,13 @@ module MAPI
     module Users
 
       include MAPI::Services::Base
+      include MAPI::Shared::Utils
+
+      def self.signer_id_query(username)
+        <<-SQL
+          SELECT SIGNER_ID FROM WEB_ADM.ETRANSACT_SIGNER WHERE LOWER(LOGIN_ID) = #{quote(username.downcase)}
+        SQL
+      end
 
       def self.registered(app)
         service_root '/users', app
@@ -38,10 +45,7 @@ module MAPI
           roles = []
           signer_id = nil
           if settings.environment == :production
-            signer_id_query = <<-SQL
-              SELECT SIGNER_ID FROM WEB_ADM.ETRANSACT_SIGNER WHERE LOWER(LOGIN_ID) = #{ActiveRecord::Base.connection.quote(username.downcase)}
-            SQL
-            ActiveRecord::Base.connection.execute(signer_id_query).fetch do |row|
+            ActiveRecord::Base.connection.execute(MAPI::Services::Users.signer_id_query(username)).fetch do |row|
               signer_id = row[0].to_i
             end
             halt 404, 'User not found' unless signer_id
