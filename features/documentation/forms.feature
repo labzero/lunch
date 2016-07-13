@@ -49,10 +49,22 @@ Scenario: Member navigates to the authorizations topic and sees sign token form 
   When I click on the authorizations link in the header
   Then I should see "sign" link
 
-@data-unavailable @jira-mem-1410 @flip-on-resources-token
-Scenario: Member navigates to docusign token page
+@smoke @jira-mem-1681 @flip-on-resources-token
+Scenario: Member interacts with docusign flyout
   Given I hover on the resources link in the header
   When I click on the authorizations link in the header
   When I click on the sign link
-  Then I should see the forms page
+  Then I should see the docusign flyout
+  When I cancel the docusign flyout
+  Then I should not see the docusign flyout
+
+@jira-mem-1681 @flip-on-resources-token
+Scenario: Member navigates to docusign site
+  Given I hover on the resources link in the header
+  When I click on the authorizations link in the header
+  When I click on the sign link
+  Then I should see the docusign flyout
+  When I click on the Sign with Docusign button
+  Then I should see Docusign website and close it
+  And I should not see the docusign flyout
 

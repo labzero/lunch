@@ -943,6 +943,12 @@ en:
           title: Third-Party Creditor Relationships
           amendment: Amendment to Corporate Credit Union Security Agreement
           agreement: 'Subordination Agreement: Credit Unions'
+      docusign:
+        header: Review and sign using DocuSign
+        when_you_press: When you press "Sign with DocuSign", you will be redirected to DocuSign's website. A new tab will open in your browser, and the document will display within DocuSign, where you can complete, review, and sign the document.
+        first_time: If this is the first time you are using DocuSign to complete a Bank document, you will be asked to agree to DocuSign's terms of service.
+        after_submit: After you submit the document, you will be able to download a PDF of the signed document for your records.
+        sign: Sign with Docusign
     faq:
       title: FAQs
     capital_plan:
