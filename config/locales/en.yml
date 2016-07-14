@@ -1210,6 +1210,8 @@ en:
       settlement_amount: 'Settlement Amount %{unit}%{footnote_marker}'
       settlement_amount_footnote: '%{footnote_marker}If Vs. Payment'
       submit_authorization: Submit for Authorization
+      authorize: Authorize
+      legal_copy: "Pursuant to the Advances and Security Agreement (Agreement) between your institution and the Bank, your institution requests the release and redelivery or reassignment of the securities listed above.\n\nBy authorizing the release of these securities, your institution certifies that, as of the date the securities are released, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Agreement) that will remain pledged to the Bank immediately after the requested release will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Agreement)."
       delete_request:
         title: Delete this Release Securities request?
         delete: Yes, Delete Request

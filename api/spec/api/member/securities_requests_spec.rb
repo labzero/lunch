@@ -584,6 +584,45 @@ describe MAPI::ServiceApp do
         end
       end
 
+      describe '`consolidate_broker_wire_address`' do
+        let(:delivery_instructions) {{
+          foo: SecureRandom.hex,
+          bar: SecureRandom.hex
+        }}
+        let(:call_method) { securities_request_module.consolidate_broker_wire_address(delivery_instructions) }
+        describe 'when the `delivery_instructions` hash does not contain keys found in BROKER_WIRE_ADDRESS_FIELDS' do
+          it 'does nothing to the delivery_instructions hash' do
+            unmutated_delivery_instructions = delivery_instructions.clone
+            call_method
+            expect(delivery_instructions).to eq(unmutated_delivery_instructions)
+          end
+        end
+        describe 'when the `delivery_instructions` hash contains keys found in BROKER_WIRE_ADDRESS_FIELDS' do
+          let(:address_1) { SecureRandom.hex }
+          let(:address_2) { SecureRandom.hex }
+          before do
+            delivery_instructions['clearing_agent_fed_wire_address_1'] = address_1
+            delivery_instructions['clearing_agent_fed_wire_address_2'] = address_2
+          end
+          it 'deletes the `clearing_agent_fed_wire_address_1` from the hash' do
+            expect(delivery_instructions['clearing_agent_fed_wire_address_1']).to eq(address_1)
+            call_method
+            expect(delivery_instructions).not_to have_key('clearing_agent_fed_wire_address_1')
+          end
+          it 'deletes the `clearing_agent_fed_wire_address_2` from the hash' do
+            expect(delivery_instructions['clearing_agent_fed_wire_address_2']).to eq(address_2)
+            call_method
+            expect(delivery_instructions).not_to have_key('clearing_agent_fed_wire_address_2')
+          end
+          it 'adds a `clearing_agent_fed_wire_address` value to the hash that joins `clearing_agent_fed_wire_address_1` and `clearing_agent_fed_wire_address_2` with a `/` character' do
+            expect(delivery_instructions).not_to have_key('clearing_agent_fed_wire_address')
+            call_method
+            expect(delivery_instructions['clearing_agent_fed_wire_address']).to eq([address_1, address_2].join('/'))
+          end
+        end
+
+      end
+
       describe '`create_release method`' do
         let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
         let(:member_id) { rand(100000..999999) }
@@ -605,6 +644,11 @@ describe MAPI::ServiceApp do
         context 'validations' do
           before do
             allow(securities_request_module).to receive(:should_fake?).and_return(true)
+          end
+
+          it 'calls `consolidate_broker_wire_address` with the provided `delivery_instructions`' do
+            expect(securities_request_module).to receive(:consolidate_broker_wire_address).with(delivery_instructions)
+            call_method
           end
 
           it 'raises an error if `broker_instructions` is nil' do
@@ -1089,8 +1133,11 @@ describe MAPI::ServiceApp do
     end
 
     describe '`MAPI::Services::Member::SecuritiesRequests.delivery_instructions_from_header_details`' do
+      let(:address_1) { SecureRandom.hex }
+      let(:address_2) { SecureRandom.hex }
+      let(:address_3) { SecureRandom.hex }
       let(:header_details) {{
-        'BROKER_WIRE_ADDR' => instance_double(String),
+        'BROKER_WIRE_ADDR' => [address_1, address_2].join('/'),
         'ABA_NO' => instance_double(String),
         'DTC_AGENT_PARTICIPANT_NO' => instance_double(String),
         'MUTUAL_FUND_COMPANY' => instance_double(String),
@@ -1105,17 +1152,45 @@ describe MAPI::ServiceApp do
       let(:call_method) { securities_request_module.delivery_instructions_from_header_details(header_details) }
       securities_request_module::DELIVERY_TYPE.keys.each do |delivery_type|
         describe "when the passed header_details hash has a `DELIVER_TO` value of `#{delivery_type}`" do
-          before do
-            header_details['DELIVER_TO'] = delivery_type
-          end
+          before { header_details['DELIVER_TO'] = delivery_type }
           it "returns a hash with a `delivery_type` equal `#{delivery_type}`" do
             expect(call_method[:delivery_type]).to eq(delivery_type)
           end
           securities_request_module.delivery_keys_for_delivery_type(delivery_type).each do |required_key|
+            next if required_key == 'clearing_agent_fed_wire_address'
             security_key = securities_request_module.delivery_type_mapping(delivery_type)[required_key]
             it "returns a hash with a `#{required_key}` equal to the `#{security_key}` value of the passed header_details hash" do
               expect(call_method[required_key]).to eq(header_details[security_key])
             end
+          end
+        end
+      end
+      describe 'handling the `clearing_agent_fed_wire_address` value' do
+        before { header_details['DELIVER_TO'] = 'fed' }
+        describe 'when the `clearing_agent_fed_wire_address` header value does not contain the `/` character' do
+          before { header_details['BROKER_WIRE_ADDR'] = address_3 }
+          it 'assigns the `clearing_agent_fed_wire_address` header value to the `clearing_agent_fed_wire_address_1` field' do
+            expect(call_method['clearing_agent_fed_wire_address_1']).to eq(address_3)
+          end
+          it 'assigns nil to the `clearing_agent_fed_wire_address_2` field' do
+            expect(call_method['clearing_agent_fed_wire_address_2']).to be_nil
+          end
+        end
+        describe 'when the `clearing_agent_fed_wire_address` header value contains one `/` character' do
+          it 'splits the `clearing_agent_fed_wire_address` header value by the `/` character and assigns `clearing_agent_fed_wire_address_1` the first value' do
+            expect(call_method['clearing_agent_fed_wire_address_1']).to eq(address_1)
+          end
+          it 'splits the `clearing_agent_fed_wire_address` header value by the `/` character and assigns `clearing_agent_fed_wire_address_2` the second value' do
+            expect(call_method['clearing_agent_fed_wire_address_2']).to eq(address_2)
+          end
+        end
+        describe 'when the `clearing_agent_fed_wire_address` header value contains more than one `/` character' do
+          before { header_details['BROKER_WIRE_ADDR'] = [address_1, address_2, address_3].join('/') }
+          it 'splits the `clearing_agent_fed_wire_address` header value by the `/` character and assigns `clearing_agent_fed_wire_address_1` the first value' do
+            expect(call_method['clearing_agent_fed_wire_address_1']).to eq(address_1)
+          end
+          it 'splits the `clearing_agent_fed_wire_address` header value by the `/` character and assigns `clearing_agent_fed_wire_address_2` all remaining values joined by the `/` character' do
+            expect(call_method['clearing_agent_fed_wire_address_2']).to eq([address_2, address_3].join('/'))
           end
         end
       end
@@ -1221,7 +1296,7 @@ describe MAPI::ServiceApp do
         end
       end
       {
-        'BROKER_WIRE_ADDR' => '123 Fake St., Anywhere, USA',
+        'BROKER_WIRE_ADDR' => '0541254875/FIRST TENN',
         'MUTUAL_FUND_COMPANY' => "Mutual Funds R'Us",
         'DELIVERY_BANK_AGENT' => 'MI6',
         'REC_BANK_AGENT_NAME' => 'James Bond',

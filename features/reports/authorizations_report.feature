@@ -57,5 +57,5 @@ Scenario: Member sees Resolution and Authorization users when filtering by a rol
   And I should see user "Ronald Ruck" with the "Resolution and Authorization" footnoted authorization and no "Collateral" authorization
   When I select "Securities Services" from the authorizations filter
   And I wait for the report to load
-  Then I should see 1 authorized user
+  Then I should see 2 authorized users
   And I should see user "Ronald Ruck" with the "Resolution and Authorization" footnoted authorization and no "Securities Services" authorization

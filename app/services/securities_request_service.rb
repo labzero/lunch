@@ -36,7 +36,29 @@ class SecuritiesRequestService < MAPIService
     response.code == 200 if response
   end
 
+  def submitted_release(request_id)
+    response_hash = get_hash(:submitted_release, "/member/#{member_id}/securities/release/#{request_id}")
+    if response_hash
+      securities_release_hash = map_response_to_securities_release_hash(response_hash)
+      SecuritiesReleaseRequest.from_hash(securities_release_hash)
+    end
+  end
+
   private
+
+  def map_response_to_securities_release_hash(response_hash)
+    securities_release = {}
+    response_hash[:broker_instructions].each do |key, value|
+      securities_release[key] = value
+    end
+    response_hash[:delivery_instructions].each do |key, value|
+      key = SecuritiesReleaseRequest::ACCOUNT_NUMBER_TYPE_MAPPING[response_hash[:delivery_instructions][:delivery_type].to_sym] if key.to_sym == :account_number
+      securities_release[key] = value
+    end
+    securities_release[:request_id] = response_hash[:request_id]
+    securities_release[:securities] = response_hash[:securities]
+    securities_release
+  end
 
   def process_securities_requests(requests)
     requests.try(:collect) do |request|

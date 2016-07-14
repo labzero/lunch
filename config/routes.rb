@@ -192,6 +192,8 @@ Rails.application.routes.draw do
       get 'success' => 'securities#submit_release_success'
       get 'edit_safekeep' => 'securities#edit_safekeep'
       post 'submit_safekeep' => 'error#not_found'
+      get 'view_release/:request_id' => 'securities#view_release', as: 'view_release'
+      post 'authorize_release' => 'error#not_found'
     end
   end
 

@@ -58,11 +58,11 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
         expect(subject).not_to receive(:securities_must_have_payment_amount)
         subject.valid?
       end
-      describe 'when the `settlement_type` is `:payment`' do
+      describe 'when the `settlement_type` is `:vs_payment`' do
         let(:security_without_payment_amount) { FactoryGirl.build(:security, payment_amount: nil) }
         let(:security_with_payment_amount) { FactoryGirl.build(:security, payment_amount: rand(1000.99999)) }
         before do
-          subject.settlement_type = :payment
+          subject.settlement_type = :vs_payment
         end
         it 'is called as a validator' do
           expect(subject).to receive(:securities_must_have_payment_amount)
@@ -117,29 +117,6 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
   end
 
   describe 'instance methods' do
-    describe '`clearing_agent_fed_wire_address`' do
-      let(:clearing_agent_fed_wire_address_1) { SecureRandom.hex }
-      let(:clearing_agent_fed_wire_address_2) { SecureRandom.hex }
-      let(:call_method) { subject.clearing_agent_fed_wire_address }
-
-      it 'returns a string that joins `clearing_agent_fed_wire_address_1` and `clearing_agent_fed_wire_address_2` with an empty character' do
-        subject.clearing_agent_fed_wire_address_1 = clearing_agent_fed_wire_address_1
-        subject.clearing_agent_fed_wire_address_2 = clearing_agent_fed_wire_address_2
-        expect(call_method).to eq(clearing_agent_fed_wire_address_1 + ' ' + clearing_agent_fed_wire_address_2)
-      end
-      it 'returns only `clearing_agent_fed_wire_address_1` if `clearing_agent_fed_wire_address_2` is not present' do
-        subject.clearing_agent_fed_wire_address_1 = clearing_agent_fed_wire_address_1
-        expect(call_method).to eq(clearing_agent_fed_wire_address_1)
-      end
-      it 'returns only `clearing_agent_fed_wire_address_2` if `clearing_agent_fed_wire_address_1` is not present' do
-        subject.clearing_agent_fed_wire_address_2 = clearing_agent_fed_wire_address_2
-        expect(call_method).to eq(clearing_agent_fed_wire_address_2)
-      end
-      it 'returns nil if neither `clearing_agent_fed_wire_address_1` or `clearing_agent_fed_wire_address_2` is present' do
-        expect(call_method).to be_nil
-      end
-    end
-
     describe '`attributes=`' do
       sym_attrs = [:delivery_type, :transaction_code, :settlement_type]
       date_attrs = [:trade_date, :settlement_date]
@@ -268,7 +245,7 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
           expect(call_method[:delivery_type]).to eq(key)
         end
         described_class::DELIVERY_INSTRUCTION_KEYS[key].each do |attr|
-          if described_class::ACCOUNT_NUMBER_TYPES.include?(attr)
+          if described_class::ACCOUNT_NUMBER_TYPE_MAPPING.values.include?(attr)
             it "returns a hash containing an `account_number` key with the value for `attr`" do
               subject.delivery_type = key
               value = double('some value')

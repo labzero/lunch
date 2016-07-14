@@ -26,7 +26,7 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release|success|safekeep) securities page$/) do |page|
+When(/^I am on the (manage|release|success|request|safekeep) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
@@ -38,6 +38,8 @@ When(/^I am on the (manage|release|success|safekeep) securities page$/) do |page
     step 'I click the button to release the securities'
   when 'safekeep'
     visit '/securities/edit_safekeep'
+  when 'request'
+    visit '/securities/requests'
   end
 end
 
@@ -212,6 +214,19 @@ end
 
 Then(/^Account Number should be disabled$/) do
   page.assert_selector('#securities_release_request_account_number[disabled]')
+end
+
+Then(/^I should a disabled state for the Authorize action$/) do
+  page.assert_selector('.securities-request-table .report-cell-actions', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
+  page.assert_no_selector('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
+end
+
+Then(/^I should an active state for the Authorize action$/) do
+  page.assert_selector('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
+end
+
+When(/^I click to Authorize the first release$/) do
+  page.all('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true).first.click
 end
 
 def delivery_instructions(text)

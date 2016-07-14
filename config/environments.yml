@@ -55,6 +55,9 @@ default: &default
   extended_info:
     username: <%= ENV['CUCUMBER_EXTENDED_INFO_USERNAME'] || 'local-extended-info' %>
     password: <%= ENV['CUCUMBER_EXTENDED_INFO_PASSWORD'] || 'development' %>
+  securities_signer:
+    username: <%= ENV['CUCUMBER_SIGNER_ADVANCES_USERNAME'] || 'extra-signer' %>
+    password: <%= ENV['CUCUMBER_SIGNER_ADVANCES_PASSWORD'] || 'development' %>
   valid_password: <%= ENV['CUCUMBER_VALID_PASSWORD'] || '123Abcd3!' %>
 
 local:

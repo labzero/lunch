@@ -107,9 +107,14 @@ module MAPI
           key :description, 'To whom to deliver the securties'
         end
 
-        property :clearing_agent_fed_wire_address do
+        property :clearing_agent_fed_wire_address_1 do
           key :type, :string
-          key :description, 'The fed wire address of the clearing agent (a.k.a. broker wire address) when deliver to is fed'
+          key :description, 'Part 1 of the fed wire address of the clearing agent (a.k.a. broker wire address) when deliver to is fed'
+        end
+
+        property :clearing_agent_fed_wire_address_2 do
+          key :type, :string
+          key :description, 'Part 2 of the fed wire address of the clearing agent (a.k.a. broker wire address) when deliver to is fed'
         end
 
         property :aba_number do

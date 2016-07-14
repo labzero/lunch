@@ -118,6 +118,7 @@ module MAPI
                                    'physical_securities' => 'CREDIT_ACCT_NO3' }
         REQUIRED_SECURITY_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
         LAST_MODIFIED_BY_MAX_LENGTH = 30
+        BROKER_WIRE_ADDRESS_FIELDS = ['clearing_agent_fed_wire_address_1', 'clearing_agent_fed_wire_address_2']
 
         def self.delivery_type_mapping(delivery_type)
           { 'clearing_agent_fed_wire_address' => 'BROKER_WIRE_ADDR',
@@ -260,6 +261,14 @@ module MAPI
           SQL
         end
 
+        def self.consolidate_broker_wire_address(delivery_instructions)
+          unless (delivery_instructions.keys & BROKER_WIRE_ADDRESS_FIELDS).blank?
+            address_1 = delivery_instructions.delete('clearing_agent_fed_wire_address_1')
+            address_2 = delivery_instructions.delete('clearing_agent_fed_wire_address_2')
+            delivery_instructions['clearing_agent_fed_wire_address'] = [address_1, address_2].join('/')
+          end
+        end
+
         def self.format_delivery_columns(delivery_type, required_delivery_keys, provided_delivery_keys)
           delivery_type_map = delivery_type_mapping(delivery_type)
           required_delivery_keys.map do |key|
@@ -306,6 +315,7 @@ module MAPI
           broker_instructions['settlement_date'] = dateify(broker_instructions['settlement_date'])
           delivery_type = delivery_instructions.delete('delivery_type')
           raise ArgumentError, "delivery_instructions must contain the key delivery_type set to one of #{DELIVERY_TYPE.keys.join(', ')}" unless DELIVERY_TYPE.keys.include?(delivery_type)
+          consolidate_broker_wire_address(delivery_instructions)
           provided_delivery_keys = delivery_instructions.keys
           required_delivery_keys = delivery_keys_for_delivery_type(delivery_type)
           delivery_columns = format_delivery_columns(delivery_type, required_delivery_keys, provided_delivery_keys)
@@ -414,7 +424,12 @@ module MAPI
             delivery_type: delivery_type
           }
           required_delivery_keys.each do |delivery_key|
-            delivery_instructions[delivery_key] = header[delivery_type_mapping[delivery_key]]
+            delivery_instructions[delivery_key] = header[delivery_type_mapping[delivery_key]] unless delivery_key == 'clearing_agent_fed_wire_address'
+          end
+          if required_delivery_keys.include?('clearing_agent_fed_wire_address')
+            addresses = header[delivery_type_mapping['clearing_agent_fed_wire_address']].split('/', 2)
+            delivery_instructions['clearing_agent_fed_wire_address_1'] = addresses.shift
+            delivery_instructions['clearing_agent_fed_wire_address_2'] = addresses.shift
           end
           delivery_instructions
         end
@@ -451,7 +466,7 @@ module MAPI
             'PLEDGE_TYPE' => pledge_type,
             'REQUEST_STATUS' => request_status,
             'DELIVER_TO' => delivery_type,
-            'BROKER_WIRE_ADDR' => '123 Fake St., Anywhere, USA',
+            'BROKER_WIRE_ADDR' => '0541254875/FIRST TENN',
             'ABA_NO' => aba_number,
             'DTC_AGENT_PARTICIPANT_NO' => participant_number,
             'MUTUAL_FUND_COMPANY' => "Mutual Funds R'Us",

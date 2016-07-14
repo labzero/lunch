@@ -326,6 +326,8 @@ def user_for_type(user_type)
     dual_signers_required_user
   when 'extended info user'
     extended_info_user
+  when 'securities signer'
+    securities_signer
   else
     raise 'unknown user type'
   end
@@ -401,6 +403,10 @@ end
 
 def extended_info_user
   CustomConfig.env_config['extended_info']
+end
+
+def securities_signer
+  CustomConfig.env_config['securities_signer']
 end
 
 def current_member_name
