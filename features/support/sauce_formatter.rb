@@ -1,13 +1,17 @@
+require 'active_support/concern'
+require 'active_support/core_ext/module'
+
 unless defined? SauceFormatter
   module SauceFormatter
     extend ::ActiveSupport::Concern
 
     included do
       def sauce_labs?
-        ::Capybara.current_session.driver.options[:url] == SAUCE_CONNECT_URL
+        !@dry_run && ::Capybara.current_session.driver.options[:url] == SAUCE_CONNECT_URL
       end
 
       def initialize_with_sauce(step_mother, io, options)
+        @dry_run = options[:dry_run]
         @failed_scenarios = []
         @passed_scenarios = []
         @sauce_job_id = nil
@@ -69,6 +73,14 @@ unless defined? SauceFormatter
 
       private
 
+      def now
+        if Time.respond_to?(:zone)
+          (Time.zone || Time).now
+        else
+          Time.now
+        end
+      end
+
       def debug(name, *args)
         STDOUT.puts("#{name}: " + summarize(*args).to_json)
       end
@@ -105,35 +117,37 @@ unless defined? SauceFormatter
       end
 
       def start_sauce_run
-        unless @run_start_time
-          @run_start_time = Time.zone.now
-          Capybara.current_session.visit('/healthy')
+        unless @dry_run || @run_start_time
+          @run_start_time = now
+          ::Capybara.current_session.driver.visit('about:blank')
         end
       end
 
       def start_sauce_scenario(scenario)
-        if @scenario != scenario
+        if !@dry_run && @scenario != scenario
           end_sauce_scenario(@scenario) if @scenario
-          @scenario_start_time = Time.zone.now
+          @scenario_start_time = now
           @scenario = scenario
         end
       end
 
       def end_sauce_scenario(scenario)
-        scenario_end_time = Time.zone.now
-        @sauce_job_id ||= ::Capybara.current_session.driver.browser.session_id if sauce_labs?
-        unless @last_step_result.nil? || @last_step_result.is_a?(Cucumber::Core::Test::Result::Skipped)
-          runtime_range = ((@scenario_start_time - @run_start_time))..((scenario_end_time - @run_start_time))
-          unless @last_step_result.ok?
-            @failed_scenarios << {scenario: scenario, runtime: runtime_range}
-          else
-            @passed_scenarios << {scenario: scenario, runtime: runtime_range}
+        unless @dry_run
+          scenario_end_time = now
+          @sauce_job_id ||= ::Capybara.current_session.driver.browser.session_id if sauce_labs?
+          unless @last_step_result.nil? || @last_step_result.is_a?(Cucumber::Core::Test::Result::Skipped)
+            runtime_range = ((@scenario_start_time - @run_start_time))..((scenario_end_time - @run_start_time))
+            unless @last_step_result.ok?
+              @failed_scenarios << {scenario: scenario, runtime: runtime_range}
+            else
+              @passed_scenarios << {scenario: scenario, runtime: runtime_range}
+            end
+            sauce_print "started at: #{runtime_range.first.round(1)}, finished at: #{runtime_range.last.round(1)} (times approximate)"
           end
-          sauce_print "started at: #{runtime_range.first.round(1)}, finished at: #{runtime_range.last.round(1)} (times approximate)"
+          @last_step_result = nil
+          @scenario_start_time = nil
+          @scenario = nil
         end
-        @last_step_result = nil
-        @scenario_start_time = nil
-        @scenario = nil
       end
 
       def sauce_print(message)
