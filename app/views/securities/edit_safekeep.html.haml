@@ -4,7 +4,7 @@
     %h1= @title
   .securities-main-body.securities-release
     .column-9x3-left
-      = render partial: 'form', layout: false, locals: { account_number: nil, url: securities_submit_release_path }
+      = render partial: 'form', locals: { account_number: @securities_release_request.account_number, url: securities_submit_safekeep_path }
     .delete-release-flyout
       %h2= t('securities.release.delete_request.title')
       %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')

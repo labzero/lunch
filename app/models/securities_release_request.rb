@@ -18,6 +18,11 @@ class SecuritiesReleaseRequest
     physical_securities: 'physical_securities'
   }.freeze
 
+  PLEDGE_TYPES = {
+    sbc: 'sbc',
+    standard: 'standard'
+  }.freeze
+
   BROKER_INSTRUCTION_KEYS = [:transaction_code, :settlement_type, :trade_date, :settlement_date].freeze
 
   DELIVERY_INSTRUCTION_KEYS = {
@@ -29,7 +34,12 @@ class SecuritiesReleaseRequest
 
   ACCOUNT_NUMBER_TYPES = [:fed_credit_account_number, :dtc_credit_account_number, :mutual_fund_account_number, :physical_securities_credit_account_number]
 
-  OTHER_PARAMETERS = [:delivery_type, :member_id, :clearing_agent_fed_wire_address_1, :clearing_agent_fed_wire_address_2].freeze
+  OTHER_PARAMETERS = [:delivery_type,
+                      :member_id,
+                      :clearing_agent_fed_wire_address_1,
+                      :clearing_agent_fed_wire_address_2,
+                      :account_number,
+                      :pledge_type].freeze
 
   ACCESSIBLE_ATTRS = BROKER_INSTRUCTION_KEYS + OTHER_PARAMETERS + DELIVERY_INSTRUCTION_KEYS.values.flatten - [:clearing_agent_fed_wire_address]
 
@@ -103,7 +113,9 @@ class SecuritiesReleaseRequest
       transaction_code: transaction_code,
       settlement_type: settlement_type,
       trade_date: trade_date,
-      settlement_date: settlement_date
+      settlement_date: settlement_date,
+      account_number: account_number,
+      pledge_type: pledge_type
     }
   end
 

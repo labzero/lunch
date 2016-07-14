@@ -2,17 +2,21 @@ When(/^I click on the Securities link in the header$/) do
   page.find('.secondary-nav a', text: I18n.t('securities.title'), exact: true).click
 end
 
-Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release) page$/i) do |page_type|
+Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities) page$/i) do |page_type|
   text = case page_type
     when /\AManage Securities\z/i
+      step 'I should see a report table with multiple data rows'
       I18n.t('securities.manage.title')
     when /\ASecurities Requests\z/i
+      step 'I should see a report table with multiple data rows'
       I18n.t('securities.requests.title')
     when /\ASecurities Release\z/i
+      step 'I should see a report table with multiple data rows'
       I18n.t('securities.release.title')
+    when /\ASafekeep Securities\z/i
+      I18n.t('securities.release.safekeep.title')
   end
   page.assert_selector('h1', text: text, exact: true)
-  step 'I should see a report table with multiple data rows'
 end
 
 Then(/^I should see two securities requests tables with data rows$/) do
@@ -22,7 +26,7 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release|success) securities page$/) do |page|
+When(/^I am on the (manage|release|success|safekeep) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
@@ -32,6 +36,8 @@ When(/^I am on the (manage|release|success) securities page$/) do |page|
     step 'I am on the manage securities page'
     step 'I check the 1st Pledged security'
     step 'I click the button to release the securities'
+  when 'safekeep'
+    visit '/securities/edit_safekeep'
   end
 end
 
@@ -83,6 +89,10 @@ end
 
 When(/^I click the button to release the securities$/) do
   page.find('.manage-securities-form input[type=submit]').click
+end
+
+When(/^I click the button to create a new safekeep request$/) do
+  page.find('.manage-securities-table-actions a').click
 end
 
 Then(/^I should see "(.*?)" as the selected release delivery instructions$/) do |instructions|
@@ -198,6 +208,10 @@ end
 
 Then(/^I should see the generic error message for the securities release request$/) do
   page.assert_selector('.securities-submit-release-form-errors p', text: I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number), exact: true)
+end
+
+Then(/^Account Number should be disabled$/) do
+  page.assert_selector('#securities_release_request_account_number[disabled]')
 end
 
 def delivery_instructions(text)

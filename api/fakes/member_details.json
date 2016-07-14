@@ -7,7 +7,9 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "2": {
     "name": "Bobby's Payday Loans",
@@ -17,7 +19,9 @@
     "street": "2799 S. 4th Avenue",
     "city": "Payme",
     "state": "CA",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "3": {
     "name": "Irish Bank",
@@ -27,7 +31,9 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "4": {
     "name": "S'more Bank",
@@ -37,8 +43,10 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
-  },
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
+},
   "5": {
     "name": "Wells Faygo",
     "fhfa_number": "15013",
@@ -47,7 +55,9 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "6": {
     "name": "Chaste Manhattan",
@@ -57,7 +67,9 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "7": {
     "name": "Subprime Backalley Lenders",
@@ -67,7 +79,9 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "8": {
     "name": "Loan Sharks Incorporated",
@@ -77,7 +91,9 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "9": {
     "name": "Marina Bank",
@@ -87,7 +103,9 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "10": {
     "name": "Overseas Bank",
@@ -97,7 +115,9 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "11": {
     "name": "Cayman Islands Holding Company",
@@ -107,7 +127,9 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "12": {
     "name": "The Bank With The Really Really Long Name That Requires Truncation or Expansion",
@@ -117,7 +139,9 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "13": {
     "name": "The Bank With Disabled Signers",
@@ -127,7 +151,9 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
   },
   "14": {
     "name": "The Bank Requiring Dual Signers for Advances",
@@ -137,6 +163,8 @@
     "street": "123 Farm",
     "city": "Mc Farm",
     "state": "AZ",
-    "postal_code": "12345"
-  }
+    "postal_code": "12345",
+    "pledged_account_number": "12345",
+    "unpledged_account_number": "67890"
+ }
 }

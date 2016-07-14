@@ -190,6 +190,8 @@ Rails.application.routes.draw do
       post 'download_release' => 'securities#download_release'
       post 'upload_release' => 'securities#upload_release'
       get 'success' => 'securities#submit_release_success'
+      get 'edit_safekeep' => 'securities#edit_safekeep'
+      post 'submit_safekeep' => 'error#not_found'
     end
   end
 

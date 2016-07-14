@@ -73,7 +73,7 @@ class SecuritiesController < ApplicationController
     authorized_requests = service.authorized
     awaiting_authorization_requests = service.awaiting_authorization
     raise StandardError, "There has been an error and SecuritiesController#requests has encountered nil. Check error logs." if authorized_requests.nil? || awaiting_authorization_requests.nil?
-    
+
     @awaiting_authorization_requests_table = {
       column_headings: [
         t('securities.requests.columns.request_id'),
@@ -121,9 +121,16 @@ class SecuritiesController < ApplicationController
     }
   end
 
+  def edit_safekeep
+    populate_view_variables
+    @title = t('securities.release.safekeep.title')
+    @securities_release_request.account_number = MembersService.new(request).member(current_member_id)['unpledged_account_number']
+  end
+
   # POST
   def edit_release
-    populate_edit_release_view_variables
+    populate_view_variables
+    @title = t('securities.release.title')
   end
 
   def download_release
@@ -182,7 +189,8 @@ class SecuritiesController < ApplicationController
       errors = @securities_release_request.errors.messages
     end
     if errors
-      populate_edit_release_view_variables(errors)
+      populate_view_variables(errors)
+      @title = t('securities.release.title')
       render :edit_release
     else
       redirect_to securities_success_url
@@ -243,9 +251,12 @@ class SecuritiesController < ApplicationController
     }
   end
 
-  def populate_edit_release_view_variables(errors=nil)
+  def populate_view_variables(errors=nil)
     @errors = human_submit_release_error_messages(errors) if errors
-    @title = t('securities.release.title')
+    @pledge_type_dropdown = [
+      [t('securities.release.pledge_type.sbc'), SecuritiesReleaseRequest::PLEDGE_TYPES[:sbc]],
+      [t('securities.release.pledge_type.standard'), SecuritiesReleaseRequest::PLEDGE_TYPES[:standard]]
+    ]
     @transaction_code_dropdown = [
       [t('securities.release.transaction_code.standard'), SecuritiesReleaseRequest::TRANSACTION_CODES[:standard]],
       [t('securities.release.transaction_code.repo'), SecuritiesReleaseRequest::TRANSACTION_CODES[:repo]]
@@ -276,5 +287,4 @@ class SecuritiesController < ApplicationController
     end
     error_message_hash
   end
-
 end

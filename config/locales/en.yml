@@ -1152,6 +1152,7 @@ en:
       pledged: Pledged
       safekept: Safekept
       release: Release
+      safekeep_new: Safekeep New
     requests:
       title: Securities Requests
       actions:
@@ -1175,11 +1176,16 @@ en:
       add_securities: Add Securities
       broker_instructions: Broker Instructions
       pledge_account: Pledge Account
+      account_number:
+        label: Account No.
       transaction_code:
         label: Transcation Code
         standard: Standard
         repo: Repo
-      pledge_type: Pledge Type
+      pledge_type:
+        label: Pledge Type
+        sbc: SBC
+        standard: Standard
       settlement_type:
         label: Settlement Type
         free: Free
@@ -1238,6 +1244,8 @@ en:
         download_actions_html: '%{span} <span>or</span> %{button}'
         upload_error: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
         generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number}
+      safekeep:
+        title: Safekeep Securities
     success:
       title: Release Securities Request Sent
       request_will_remain: 'This request will remain in the queue for authorization until one of the following occurs:'

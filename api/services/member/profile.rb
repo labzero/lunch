@@ -11,8 +11,6 @@ module MAPI
 
         def self.member_profile(app, member_id)
           member_id = member_id.to_i
-          quoted_member_id = ActiveRecord::Base.connection.quote(member_id)
-
           member_position_connection_string = <<-SQL
           SELECT
           FHFB_ID,
@@ -95,7 +93,7 @@ module MAPI
                  MRTG_RELATED_ASSETS, trunc(MRTG_RELATED_ASSETS/100)  * 100,
                  (trunc(MRTG_RELATED_ASSETS/100)  * 100) + 100) as MRTG_RELATED_ASSETS_round100
           FROM CR_MEASURES.FINAN_SUMMARY_DATA_INTRADAY_V
-          WHERE fhlb_id = #{quoted_member_id}
+          WHERE fhlb_id = #{quote(member_id)}
           SQL
 
           member_sta_cursor_string = <<-SQL
@@ -103,7 +101,7 @@ module MAPI
             STX_CURRENT_LEDGER_BALANCE, STX_UPDATE_DATE
             FROM PORTFOLIOS.STA e, PORTFOLIOS.STA_TRANS f
             WHERE e.STA_ACCOUNT_TYPE = 1
-            AND  f.STA_ID = e.STA_ID AND e.fhlb_id = #{quoted_member_id}
+            AND  f.STA_ID = e.STA_ID AND e.fhlb_id = #{quote(member_id)}
             AND f.STX_UPDATE_DATE =
             (SELECT MAX(STX_UPDATE_DATE) FROM PORTFOLIOS.STA_TRANS)
           SQL
@@ -217,7 +215,6 @@ module MAPI
         end
 
         def self.member_details(app, logger, member_id)
-          quoted_member_id = ActiveRecord::Base.connection.quote(member_id)
           fhfa_number = nil
           sta_number = nil
           member_name = nil
@@ -229,7 +226,7 @@ module MAPI
           member_name_query = <<-SQL
             SELECT web_adm.web_member_data.CP_ASSOC
             FROM web_adm.web_member_data
-            WHERE web_adm.web_member_data.FHLB_ID = #{quoted_member_id}
+            WHERE web_adm.web_member_data.FHLB_ID = #{quote(member_id)}
           SQL
 
           sta_number_query = <<-SQL
@@ -238,7 +235,7 @@ module MAPI
             FROM
             portfolios.sta sta,
             portfolios.sta_trans st
-            where sta.fhlb_id = #{quoted_member_id}
+            where sta.fhlb_id = #{quote(member_id)}
             AND sta.sta_id = st.sta_id
             AND sta.sta_account_type = 1
             AND TRUNC(st.stx_update_date) = (SELECT TRUNC(MAX(stx_update_date))  FROM  portfolios.sta_trans)
@@ -255,7 +252,7 @@ module MAPI
             on
               cu.fhlb_id = s.fhlb_id
             where
-              cu.fhlb_id = #{quoted_member_id}
+              cu.fhlb_id = #{quote(member_id)}
           SQL
 
           address_sql = <<-SQL
@@ -271,7 +268,7 @@ module MAPI
             on
               cu.cu_fhfb_id = acc.fhfa_id__c
             WHERE
-              cu.fhlb_id = #{quoted_member_id}
+              cu.fhlb_id = #{quote(member_id)}
           SQL
 
           if app.settings.environment == :production
@@ -289,6 +286,9 @@ module MAPI
               member_state = address_data['SHIPPINGSTATE']
               member_postal_code = address_data['SHIPPINGPOSTALCODE']
             end
+            account_numbers = get_account_numbers(logger, member_id.to_i)
+            member_pledged_account_number = account_numbers['P']
+            member_unpledged_account_number = account_numbers['U']
           else
             member = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_details.json')))[member_id.to_s]
             if member
@@ -300,6 +300,8 @@ module MAPI
               member_city = member['city']
               member_state = member['state']
               member_postal_code = member['postal_code']
+              member_pledged_account_number = member['pledged_account_number']
+              member_unpledged_account_number = member['unpledged_account_number']
             end
           end
 
@@ -313,7 +315,9 @@ module MAPI
             street: member_street,
             city: member_city,
             state: member_state,
-            postal_code: member_postal_code
+            postal_code: member_postal_code,
+            pledged_account_number: member_pledged_account_number,
+            unpledged_account_number: member_unpledged_account_number
           }
 
         end
@@ -333,14 +337,13 @@ module MAPI
 
         def self.member_contacts(app, member_id)
           member_id = member_id.to_i
-          quoted_member_id = ActiveRecord::Base.connection.quote(member_id)
 
           if app.settings.environment == :production
             # Collateral Asset Manager
             cam_query = <<-SQL
               select customer_master_id as fhlb_id, cs_user_id as username,  user_first_name || ' ' || user_last_name as full_name, email as email, user_first_name as first_name, user_last_name as last_name
               from fhlbown.customer_profile@colaprod_link p, fhlbown.v_cs_user_profile@colaprod_link c
-              Where c.cs_user_id = p.collateral_analyst and customer_master_id = #{quoted_member_id}
+              Where c.cs_user_id = p.collateral_analyst and customer_master_id = #{quote(member_id)}
             SQL
             cam = ActiveRecord::Base.connection.execute(cam_query).fetch_hash || {}
 
@@ -348,7 +351,7 @@ module MAPI
             rm_query = <<-SQL
               select c.fhlb_id, MR_FIRST || ' ' || MR_LAST as full_name, MR_PHONE as phone_number, MR_EMAIL as email, MR_FIRST as first_name, MR_LAST as last_name
               from PORTFOLIOS.CUSTOMERS C, PORTFOLIOS.MARKETING_REPS R
-              where R.MR_INITIALS = C.CU_MARKETING_REP and fhlb_id = #{quoted_member_id}
+              where R.MR_INITIALS = C.CU_MARKETING_REP and fhlb_id = #{quote(member_id)}
             SQL
             rm = ActiveRecord::Base.connection.execute(rm_query).fetch_hash || {}
           else
@@ -376,6 +379,28 @@ module MAPI
             cam: cam,
             rm: rm
           }.with_indifferent_access
+        end
+
+        def self.get_account_numbers_query(member_id)
+          <<-SQL
+            SELECT UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) AS ACCOUNT_TYPE, ADX.ADX_ID
+            FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF ADX, SAFEKEEPING.BTC_ACCOUNT_TYPE BAT, SAFEKEEPING.CUSTOMER_PROFILE CP
+            WHERE ADX.BAT_ID = BAT.BAT_ID
+            AND ADX.CP_ID = CP.CP_ID
+            AND CP.FHLB_ID = #{quote(member_id)}
+            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) IN ('P', 'U')
+            AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
+            AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
+            ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
+          SQL
+        end
+
+        def self.get_account_numbers(logger, member_id)
+          account_numbers = {}
+          fetch_hashes(logger, get_account_numbers_query(member_id)).each do |adx_ids_by_account_type|
+            account_numbers[adx_ids_by_account_type["ACCOUNT_TYPE"]] = adx_ids_by_account_type["ADX_ID"]
+          end
+          account_numbers
         end
       end
     end

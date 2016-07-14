@@ -275,13 +275,50 @@ RSpec.describe SecuritiesController, type: :controller do
 
     it_behaves_like 'a user required action', :post, :edit_release
     it_behaves_like 'a controller action with an active nav setting', :edit_release, :securities
+    it 'sets `@title`' do
+      call_action
+      expect(assigns[:title]).to eq(I18n.t('securities.release.title'))
+    end
     it 'renders its view' do
       call_action
       expect(response.body).to render_template('edit_release')
     end
-    it 'calls `populate_edit_release_view_variables`' do
-      expect(controller).to receive(:populate_edit_release_view_variables)
+    it 'calls `populate_view_variables`' do
+      expect(controller).to receive(:populate_view_variables)
       call_action
+    end
+  end
+
+  describe 'GET edit_safekeep' do
+    let(:securities_release_request) { double(SecuritiesReleaseRequest,
+                                              :settlement_date => Time.zone.now,
+                                              :trade_date => Time.zone.now,
+                                              :securities => {} ) }
+    let(:unpledged_account_number) { rand(999..9999) }
+    let(:member_service_instance) { double('MembersService') }
+    let(:member_details) { { 'unpledged_account_number' => rand(999..9999) } }
+    let(:call_action) { get :edit_safekeep }
+
+    it_behaves_like 'a user required action', :get, :edit_safekeep
+    it_behaves_like 'a controller action with an active nav setting', :edit_safekeep, :securities
+
+    before do
+      allow(MembersService).to receive(:new).with(request).and_return(member_service_instance)
+      allow(member_service_instance).to receive(:member).with(anything).and_return(member_details)
+    end
+
+    it 'sets `@title`' do
+      call_action
+      expect(assigns[:title]).to eq(I18n.t('securities.release.safekeep.title'))
+    end
+    it 'gets the `unpledged_account_number` from the `MembersService` and assigns to `@securities_release_request.account_number`' do
+      controller.instance_variable_set(:@securities_release_request, securities_release_request)
+      expect(securities_release_request).to receive(:account_number=).with(member_details['unpledged_account_number'])
+      call_action
+    end
+    it 'renders its view' do
+      call_action
+      expect(response.body).to render_template('edit_safekeep')
     end
   end
 
@@ -432,7 +469,7 @@ RSpec.describe SecuritiesController, type: :controller do
 
     before do
       allow(controller).to receive(:current_member_id).and_return(member_id)
-      allow(controller).to receive(:populate_edit_release_view_variables)
+      allow(controller).to receive(:populate_view_variables)
       allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service)
       allow(SecuritiesReleaseRequest).to receive(:from_hash).and_return(securities_release_request)
     end
@@ -473,13 +510,13 @@ RSpec.describe SecuritiesController, type: :controller do
         before do
           allow(securities_request_service).to receive(:submit_release_for_authorization).and_return(nil)
         end
-        it 'calls `populate_edit_release_view_variables` with a specific `mapi_endpoint` error when the error handler is invoked' do
+        it 'calls `populate_view_variables` with a specific `mapi_endpoint` error when the error handler is invoked' do
           allow(securities_request_service).to receive(:submit_release_for_authorization).and_yield(error)
-          expect(controller).to receive(:populate_edit_release_view_variables).with({mapi_endpoint: [error_message]})
+          expect(controller).to receive(:populate_view_variables).with({mapi_endpoint: [error_message]})
           call_action
         end
-        it 'calls `populate_edit_release_view_variables` with an `mapi_endpoint` error' do
-          expect(controller).to receive(:populate_edit_release_view_variables).with({mapi_endpoint: ['SecuritiesRequestService#submit_release_for_authorization has returned nil']})
+        it 'calls `populate_view_variables` with an `mapi_endpoint` error' do
+          expect(controller).to receive(:populate_view_variables).with({mapi_endpoint: ['SecuritiesRequestService#submit_release_for_authorization has returned nil']})
           call_action
         end
         it 'renders the `edit_release` view' do
@@ -496,8 +533,8 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(securities_release_request).to receive(:errors).and_return(errors)
       end
 
-      it 'calls `populate_edit_release_view_variables` with the securities_release_request validation errors' do
-        expect(controller).to receive(:populate_edit_release_view_variables).with(error_messages)
+      it 'calls `populate_view_variables` with the securities_release_request validation errors' do
+        expect(controller).to receive(:populate_view_variables).with(error_messages)
         call_action
       end
       it 'renders the `edit_release` view' do
@@ -563,7 +600,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
     end
 
-    describe '`populate_edit_release_view_variables`' do
+    describe '`populate_view_variables`' do
       let(:member_id) { rand(1000..99999) }
       let(:security) { {
         cusip: SecureRandom.hex,
@@ -572,7 +609,7 @@ RSpec.describe SecuritiesController, type: :controller do
       } }
       let(:securities) { [instance_double(Security)] }
       let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, securities: securities, :securities= => nil, trade_date: nil, :trade_date= => nil, settlement_date: nil, :settlement_date= => nil) }
-      let(:call_action) { controller.send(:populate_edit_release_view_variables) }
+      let(:call_action) { controller.send(:populate_view_variables) }
       let(:errors) { instance_double(Hash) }
 
       before do
@@ -583,16 +620,12 @@ RSpec.describe SecuritiesController, type: :controller do
 
       it 'calls `human_submit_release_error_messages` if errors are present' do
         expect(controller).to receive(:human_submit_release_error_messages).with(errors).and_return(errors)
-        controller.send(:populate_edit_release_view_variables, errors)
+        controller.send(:populate_view_variables, errors)
       end
       it 'sets `@errors` if errors are passed' do
         allow(controller).to receive(:human_submit_release_error_messages).and_return(errors)
-        controller.send(:populate_edit_release_view_variables, errors)
+        controller.send(:populate_view_variables, errors)
         expect(assigns[:errors]).to eq(errors)
-      end
-      it 'sets `@title`' do
-        call_action
-        expect(assigns[:title]).to eq(I18n.t('securities.release.title'))
       end
       it 'sets `@transaction_code_dropdown`' do
         transaction_code_dropdown = [
