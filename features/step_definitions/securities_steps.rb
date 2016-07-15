@@ -2,7 +2,7 @@ When(/^I click on the Securities link in the header$/) do
   page.find('.secondary-nav a', text: I18n.t('securities.title'), exact: true).click
 end
 
-Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities) page$/i) do |page_type|
+Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities) page$/i) do |page_type|
   text = case page_type
     when /\AManage Securities\z/i
       step 'I should see a report table with multiple data rows'
@@ -15,6 +15,8 @@ Then(/^I should be on the (Manage Securities|Securities Requests|Securities Rele
       I18n.t('securities.release.title')
     when /\ASafekeep Securities\z/i
       I18n.t('securities.release.safekeep.title')
+    when /\APledge Securities\z/i
+      I18n.t('securities.release.pledge.title')
   end
   page.assert_selector('h1', text: text, exact: true)
 end
@@ -26,7 +28,7 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release|success|request|safekeep) securities page$/) do |page|
+When(/^I am on the (manage|release|success|request|safekeep|pledge) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
@@ -40,6 +42,8 @@ When(/^I am on the (manage|release|success|request|safekeep) securities page$/) 
     visit '/securities/edit_safekeep'
   when 'request'
     visit '/securities/requests'
+  when 'pledge'
+    visit '/securities/edit_pledge'
   end
 end
 
@@ -93,8 +97,8 @@ When(/^I click the button to release the securities$/) do
   page.find('.manage-securities-form input[type=submit]').click
 end
 
-When(/^I click the button to create a new safekeep request$/) do
-  page.find('.manage-securities-table-actions a').click
+When(/^I click the button to create a new (safekeep|pledge) request$/) do |type|
+  page.find(".manage-securities-table-actions a.#{type}").click
 end
 
 Then(/^I should see "(.*?)" as the selected release delivery instructions$/) do |instructions|
@@ -229,20 +233,32 @@ When(/^I click to Authorize the first release$/) do
   page.all('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true).first.click
 end
 
+Then(/^I should see "(.*?)" as the selected pledge type$/) do |type|
+  page.assert_selector('.securities-broker-instructions .pledge_type .dropdown-selection', text: pledge_types(type), exact: true)
+end
+
 def delivery_instructions(text)
   case text
-    when 'DTC'
-      I18n.t('securities.release.delivery_instructions.dtc')
-    when 'Fed'
-      I18n.t('securities.release.delivery_instructions.fed')
-    when 'Mutual Fund'
-      I18n.t('securities.release.delivery_instructions.mutual_fund')
-    when 'Physical'
-      I18n.t('securities.release.delivery_instructions.physical_securities')
+  when 'DTC'
+    I18n.t('securities.release.delivery_instructions.dtc')
+  when 'Fed'
+    I18n.t('securities.release.delivery_instructions.fed')
+  when 'Mutual Fund'
+    I18n.t('securities.release.delivery_instructions.mutual_fund')
+  when 'Physical'
+    I18n.t('securities.release.delivery_instructions.physical_securities')
+  end
+end
+
+def pledge_types(text)
+  case text
+  when 'SBC'
+    I18n.t('securities.release.pledge_type.sbc')
+  when 'Standard'
+    I18n.t('securities.release.pledge_type.standard')
   end
 end
 
 def table_not_empty
   !page.find(".report-table tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
 end
-

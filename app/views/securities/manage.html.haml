@@ -6,6 +6,7 @@
     = form_tag(securities_edit_release_path, class: 'manage-securities-form') do
       .manage-securities-table-actions
         = render 'shared/filter', filter_class: @securities_table_data[:filter][:name], filters: @securities_table_data[:filter][:data]
-        = link_to(t('securities.manage.safekeep_new'), securities_edit_safekeep_path, class: 'primary-button')
+        = link_to(t('securities.manage.pledge_new'), securities_edit_pledge_path, class: ['pledge', 'primary-button'])
+        = link_to(t('securities.manage.safekeep_new'), securities_edit_safekeep_path, class: ['safekeep', 'primary-button'])
         = submit_tag(t('securities.manage.release'), disabled: true, class: 'primary-button')
       = render 'reports/reports_table', table_class: 'manage-securities-table', table_data: @securities_table_data, sortable: false

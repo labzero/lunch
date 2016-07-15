@@ -399,6 +399,43 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
+  describe 'GET edit_pledge' do
+    let(:securities_release_request) { double(SecuritiesReleaseRequest,
+                                              :settlement_date => Time.zone.now,
+                                              :trade_date => Time.zone.now,
+                                              :transaction_code => SecuritiesReleaseRequest::TRANSACTION_CODES.values[rand(0..1)],
+                                              :settlement_type => SecuritiesReleaseRequest::SETTLEMENT_TYPES.values[rand(0..1)],
+                                              :delivery_type => SecuritiesReleaseRequest::DELIVERY_TYPES.values[rand(0..3)],
+                                              :securities => {},
+                                              :account_number= => nil ) }
+    let(:pledged_account_number) { rand(999..9999) }
+    let(:member_service_instance) { double('MembersService') }
+    let(:member_details) { { 'pledged_account_number' => rand(999..9999) } }
+    let(:call_action) { get :edit_pledge }
+
+    it_behaves_like 'a user required action', :get, :edit_pledge
+    it_behaves_like 'a controller action with an active nav setting', :edit_pledge, :securities
+
+    before do
+      allow(MembersService).to receive(:new).with(request).and_return(member_service_instance)
+      allow(member_service_instance).to receive(:member).with(anything).and_return(member_details)
+      allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
+    end
+
+    it 'sets `@title`' do
+      call_action
+      expect(assigns[:title]).to eq(I18n.t('securities.release.pledge.title'))
+    end
+    it 'gets the `pledged_account_number` from the `MembersService` and assigns to `@securities_release_request.account_number`' do
+      expect(securities_release_request).to receive(:account_number=).with(member_details['pledged_account_number'])
+      call_action
+    end
+    it 'renders its view' do
+      call_action
+      expect(response.body).to render_template('edit_pledge')
+    end
+  end
+
   describe 'POST download_release' do
     let(:security) { instance_double(Security) }
     let(:security_1) {{
