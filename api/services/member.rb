@@ -1009,6 +1009,29 @@ module MAPI
               end
             end
           end
+
+          api do
+            key :path, '/{id}/securities/request/{header_id}'
+            operation do
+              key :method, 'DELETE'
+              key :summary, 'Delete the security release request header detail record and associated securities records'
+              key :nickname, 'deleteSecurityReleaseRequestDetails'
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution requesting the securities release delete'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :header_id
+                key :required, true
+                key :type, :string
+                key :description, 'The header ID of the security release request to be deleted'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -1408,6 +1431,14 @@ module MAPI
           rescue ArgumentError => e
             logger.error e
             halt 400, e.message
+          end
+        end
+
+        relative_delete '/:id/securities/request/:request_id' do
+          if MAPI::Services::Member::SecuritiesRequests.delete_request(self, params[:id].to_i, params[:request_id].to_i)
+            ''
+          else
+            halt 404, 'Resource Not Found'
           end
         end
       end

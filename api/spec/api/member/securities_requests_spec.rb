@@ -1397,6 +1397,115 @@ describe MAPI::ServiceApp do
         end
       end
     end
+
+    describe '`delete_request_header_details_query` class method' do
+      submitted_status = securities_request_module::SSKRequestStatus::SUBMITTED
+      let(:header_id) { instance_double(String) }
+      let(:member_id) { instance_double(String) }
+      let(:sentinel) { SecureRandom.hex }
+      let(:call_method) { securities_request_module.delete_request_header_details_query(member_id, header_id) }
+
+      before { allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex) }
+
+      it 'returns a DELETE query' do
+        expect(call_method).to match(/\A\s*DELETE\s+FROM\s+SAFEKEEPING.SSK_WEB_FORM_HEADER\s+/i)
+      end
+      it 'includes the `header_id` in the WHERE clause' do
+        allow(securities_request_module).to receive(:quote).with(header_id).and_return(sentinel)
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+HEADER_ID\s+=\s+#{sentinel}(\s+|\z)/)
+      end
+      it 'includes the `member_id` in the WHERE clause' do
+        allow(securities_request_module).to receive(:quote).with(member_id).and_return(sentinel)
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+FHLB_ID\s+=\s+#{sentinel}(\s+|\z)/)
+      end
+      it "includes the `#{submitted_status}` STATUS in the WHERE clause" do
+        allow(securities_request_module).to receive(:quote).with(submitted_status).and_return(sentinel)
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+STATUS\s+=\s+#{sentinel}(\s+|\z)/)
+      end
+    end
+    describe '`delete_request_securities_query` class method' do
+      let(:header_id) { instance_double(String) }
+      let(:sentinel) { SecureRandom.hex }
+      let(:call_method) { securities_request_module.delete_request_securities_query(header_id) }
+
+      before { allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex) }
+
+      it 'returns a DELETE query' do
+        expect(call_method).to match(/\A\s*DELETE\s+FROM\s+SAFEKEEPING.SSK_WEB_FORM_DETAIL\s+/i)
+      end
+      it 'includes the `header_id` in the WHERE clause' do
+        allow(securities_request_module).to receive(:quote).with(header_id).and_return(sentinel)
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+HEADER_ID\s+=\s+#{sentinel}(\s+|\z)/)
+      end
+    end
+    describe '`delete_request` class method' do
+      let(:request_id) { rand(1000..9999) }
+      let(:member_id) { rand(1000..9999) }
+      let(:connection) { instance_double(ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter, transaction: nil, execute: nil) }
+      let(:delete_request_securities_query) { instance_double(String) }
+      let(:delete_request_header_details_query) { instance_double(String) }
+      let(:call_method) { securities_request_module.delete_request(app, member_id, request_id) }
+      before do
+        allow(ActiveRecord::Base).to receive(:connection).and_return(connection)
+        allow(securities_request_module).to receive(:delete_request_securities_query).and_return(delete_request_securities_query)
+        allow(securities_request_module).to receive(:delete_request_header_details_query).and_return(delete_request_header_details_query)
+      end
+      describe 'when `should_fake?` returns true' do
+        before { allow(securities_request_module).to receive(:should_fake?).and_return(true) }
+        it 'returns true' do
+          expect(call_method).to be true
+        end
+      end
+      describe 'when `should_fake?` returns false' do
+        before { allow(securities_request_module).to receive(:should_fake?).and_return(false) }
+        it 'executes code within a transaction where the `isolation` has been set to `:read_committed`' do
+          expect(connection).to receive(:transaction).with(isolation: :read_committed)
+          call_method
+        end
+        describe 'the transaction block' do
+          before do
+            allow(connection).to receive(:transaction) do |&block|
+              begin
+                block.call
+              rescue ActiveRecord::Rollback
+              end
+            end
+          end
+          it 'generates a delete request securities query' do
+            expect(securities_request_module).to receive(:delete_request_securities_query).with(request_id)
+            call_method
+          end
+          it 'executes the delete request securities query' do
+            allow(securities_request_module).to receive(:delete_request_securities_query).with(request_id).and_return(delete_request_securities_query)
+            expect(connection).to receive(:execute).with(delete_request_securities_query)
+            call_method
+          end
+          it 'generates a delete request header details query' do
+            expect(securities_request_module).to receive(:delete_request_header_details_query).with(member_id, request_id)
+            call_method
+          end
+          it 'executes the delete request header details query' do
+            expect(connection).to receive(:execute).with(delete_request_header_details_query)
+            call_method
+          end
+          it 'rolls back the transaction if the delete request header details query deletes no records' do
+            allow(connection).to receive(:execute).with(delete_request_header_details_query).and_return(0)
+            allow(connection).to receive(:transaction) do |&block|
+              expect{block.call}.to raise_error(ActiveRecord::Rollback, 'No header details found to delete')
+            end
+            call_method
+          end
+          it 'returns false if the delete request header details query deletes no records' do
+            allow(connection).to receive(:execute).with(delete_request_header_details_query).and_return(0)
+            expect(call_method).to be false
+          end
+          it 'returns true if the delete request header details query deletes at least one record' do
+            allow(connection).to receive(:execute).with(delete_request_header_details_query).and_return(1)
+            expect(call_method).to be true
+          end
+        end
+      end
+    end
   end
 
   describe '`authorize_request_query` class method' do

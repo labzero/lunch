@@ -524,6 +524,37 @@ module MAPI
           end
           record_count == 1
         end
+
+        def self.delete_request_header_details_query(member_id, header_id)
+          <<-SQL
+            DELETE FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
+            WHERE HEADER_ID = #{quote(header_id)}
+            AND FHLB_ID = #{quote(member_id)}
+            AND STATUS = #{quote(SSKRequestStatus::SUBMITTED)}
+          SQL
+        end
+
+        def self.delete_request_securities_query(header_id)
+          <<-SQL
+            DELETE FROM SAFEKEEPING.SSK_WEB_FORM_DETAIL
+            WHERE HEADER_ID = #{quote(header_id)}
+          SQL
+        end
+
+        def self.delete_request(app, member_id, request_id)
+          header_delete_count = 0
+          if should_fake?(app)
+            header_delete_count = 1
+          else
+            connection = ActiveRecord::Base.connection
+            connection.transaction(isolation: :read_committed) do
+              connection.execute(delete_request_securities_query(request_id))
+              header_delete_count = connection.execute(delete_request_header_details_query(member_id, request_id)) || 0
+              raise ActiveRecord::Rollback, 'No header details found to delete' unless header_delete_count > 0
+            end
+          end
+          header_delete_count > 0
+        end
       end
     end
   end

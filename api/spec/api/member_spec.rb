@@ -167,4 +167,38 @@ describe MAPI::ServiceApp do
       expect(last_response.status).to be(400)
     end
   end
+  describe 'DELETE `securities/request`' do
+    let(:member_id) { rand(1000..9999) }
+    let(:request_id) { rand(1000..9999) }
+    let(:error_message) { SecureRandom.hex }
+    let(:argument_error) { ArgumentError.new(error_message) }
+    let(:make_request) { delete "/member/#{member_id}/securities/request/#{request_id}" }
+    it 'calls `delete_request` with the `app`' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:delete_request).with(app, any_args)
+      make_request
+    end
+    it 'calls `delete_request` with the `member_id`' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:delete_request).with(anything, member_id, anything)
+      make_request
+    end
+    it 'calls `delete_request` with the `request_id`' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:delete_request).with(anything, anything, request_id)
+      make_request
+    end
+    it 'returns a 200 if `delete_request` returns true' do
+      make_request
+      expect(last_response.status).to be(200)
+    end
+    describe 'when `delete_request` returns false' do
+      before { allow(MAPI::Services::Member::SecuritiesRequests).to receive(:delete_request).and_return(false) }
+      it 'returns a 404 as its status' do
+        make_request
+        expect(last_response.status).to be(404)
+      end
+      it 'returns an error message as the response body' do
+        make_request
+        expect(last_response.body).to eq('Resource Not Found')
+      end
+    end
+  end
 end
