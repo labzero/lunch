@@ -128,24 +128,29 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).and_return(true)
     end
 
+
+    it 'calls `authorize_request` with the app instance' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(instance_of(described_class), anything, anything, anything, anything, anything)
+      make_request
+    end
     it 'calls `authorize_request` with the `request_id`' do
-      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(app, anything, request_id, anything, anything, anything)
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(anything, anything, request_id, anything, anything, anything)
       make_request
     end
     it 'calls `authorize_request` with the `username`' do
-      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(app, anything, anything, username, anything, anything)
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(anything, anything, anything, username, anything, anything)
       make_request
     end
     it 'calls `authorize_request` with the `full_name`' do
-      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(app, anything, anything, anything, full_name, anything)
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(anything, anything, anything, anything, full_name, anything)
       make_request
     end
     it 'calls `authorize_request` with the `session_id`' do
-      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(app, anything, anything, anything, anything, session_id)
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(anything, anything, anything, anything, anything, session_id)
       make_request
     end
     it 'calls `authorize_request` with the `member_id`' do
-      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(app, member_id, anything, anything, anything, anything)
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request).with(anything, member_id, anything, anything, anything, anything)
       make_request
     end
     it 'returns a 200 if `authorize_request` returns true' do

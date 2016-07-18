@@ -1423,7 +1423,7 @@ module MAPI
             body = JSON.parse(request.body.read)
             user = body['user']
             halt 400, '`user` is required' unless user
-            if MAPI::Services::Member::SecuritiesRequests.authorize_request(app, params['id'].to_i, body['request_id'], user['username'], user['full_name'], user['session_id'])
+            if MAPI::Services::Member::SecuritiesRequests.authorize_request(self, params['id'].to_i, body['request_id'], user['username'], user['full_name'], user['session_id'])
               ''
             else
               halt 404, 'request already authorized or not found'
