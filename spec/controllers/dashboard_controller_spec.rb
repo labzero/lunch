@@ -1520,6 +1520,12 @@ RSpec.describe DashboardController, :type => :controller do
       before do
         allow(subject).to receive(:process_patterns).and_call_original
       end
+      context 'amortized' do
+        let(:entry) { { instrument_type: 'ADVANCE', status: 'TERMINATED', product: 'AMORTIZING', trade_date: double('A Trade Date'), termination_par: amount, transaction_number: transaction_number, product_description: product_description, termination_full_partial: termination_full_partial} }
+        it 'displays ADVANCE Terminated Today with the termination par' do
+          expect(call_method).to eq([{description: product_description, amount: amount, event: termination_full_partial, transaction_number: transaction_number}])
+        end
+      end
       context 'terminated' do
         let(:entry) { { instrument_type: 'ADVANCE', status: 'TERMINATED', trade_date: double('A Trade Date'), current_par: amount, transaction_number: transaction_number, product_description: product_description, termination_full_partial: termination_full_partial} }
         it 'displays ADVANCE Terminated Today' do
