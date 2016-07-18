@@ -38,16 +38,6 @@ Scenario: Member interacts with the Delete Release flyout dialogue
   And I click on the button to delete the release
   Then I should be on the Manage Securities page
 
-
-@jira-mem-1679 @data-unavailable
-Scenario: Member cancels an upload of a securities release file
-  Given I am on the safekeep securities page
-  And the edit securities section is open
-  When I drag and drop the "upload-test-file.txt" file into the edit securities dropzone
-  Then I should see an upload progress bar
-  When I click to cancel the securities release file upload
-  Then I should not see an upload progress bar
-
 @jira-mem-1679
 Scenario: Member changes trade and settlement dates
   # This should be flushed out once we have actual date ranges to check

@@ -14,9 +14,9 @@ Then(/^I should be on the (Manage Securities|Securities Requests|Securities Rele
       step 'I should see a report table with multiple data rows'
       I18n.t('securities.release.title')
     when /\ASafekeep Securities\z/i
-      I18n.t('securities.release.safekeep.title')
+      I18n.t('securities.safekeep.title')
     when /\APledge Securities\z/i
-      I18n.t('securities.release.pledge.title')
+      I18n.t('securities.pledge.title')
   end
   page.assert_selector('h1', text: text, exact: true)
 end

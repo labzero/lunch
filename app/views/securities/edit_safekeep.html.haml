@@ -6,7 +6,7 @@
     .column-9x3-left
       = render partial: 'form', locals: { type: 'safekeep', account_number: @securities_release_request.account_number, url: securities_submit_safekeep_path }
     .delete-release-flyout
-      %h2= t('securities.release.delete_request.title')
+      %h2= t('securities.safekeep.delete_request.title')
       %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')
       = link_to(t('securities.release.delete_request.delete'), securities_manage_path, class: 'primary-button')
     =form_tag(securities_download_release_path, name: 'securities-release-download') do

@@ -170,13 +170,13 @@ class SecuritiesController < ApplicationController
 
   def edit_safekeep
     populate_view_variables
-    @title = t('securities.release.safekeep.title')
+    @title = t('securities.safekeep.title')
     @securities_release_request.account_number = MembersService.new(request).member(current_member_id)['unpledged_account_number']
   end
 
   def edit_pledge
     populate_view_variables
-    @title = t('securities.release.pledge.title')
+    @title = t('securities.pledge.title')
     @securities_release_request.account_number = MembersService.new(request).member(current_member_id)['pledged_account_number']
   end
 
