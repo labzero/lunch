@@ -6,6 +6,10 @@ class SecuritiesController < ApplicationController
     authorize :security, :authorize?
   end
 
+  before_action only: [:delete_request] do
+    authorize :security, :delete?
+  end
+
   ACCEPTED_UPLOAD_MIMETYPES = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'application/vnd.ms-excel',
@@ -189,7 +193,6 @@ class SecuritiesController < ApplicationController
   # GET
   def view_release
     request_id = params[:request_id]
-    raise ActionController::RoutingError.new("A Request ID can only be comprised of letters and numbers. You entered: #{request_id}") if Regexp.new(/[^a-zA-Z0-9]/).match(request_id)
     @securities_release_request = SecuritiesRequestService.new(current_member_id, request).submitted_release(request_id)
     raise ActionController::RoutingError.new("There has been an error and SecuritiesController#authorize_release has encountered nil. Check error logs.") if @securities_release_request.nil?
     populate_view_variables
@@ -274,6 +277,14 @@ class SecuritiesController < ApplicationController
         end
       end
     end
+  end
+
+  # DELETE
+  def delete_request
+    request_id = params[:request_id]
+    response = SecuritiesRequestService.new(current_member_id, request).delete_request(request_id)
+    status = response ? 200 : 404
+    render json: {url: securities_requests_url, error_message: I18n.t('securities.release.delete_request.error_message')}, status: status
   end
 
   private

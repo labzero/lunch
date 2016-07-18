@@ -322,11 +322,6 @@ RSpec.describe SecuritiesController, type: :controller do
     it_behaves_like 'a controller action with an active nav setting', :view_release, :securities, request_id: SecureRandom.hex
     it_behaves_like 'an authorization required method', :get, :view_release, :security, :authorize?, request_id: SecureRandom.hex
 
-    it 'raises an ActionController::RoutingError if the `request_id` includes any non-letters or non-digits' do
-      allow(Regexp).to receive(:new).and_call_original
-      allow(Regexp).to receive(:new).with(/[^a-zA-Z0-9]/).and_return(instance_double(Regexp, match: true))
-      expect{call_action}.to raise_error(ActionController::RoutingError, "A Request ID can only be comprised of letters and numbers. You entered: #{request_id}")
-    end
     it 'raises an ActionController::RoutingError if the service object returns nil' do
       allow(service).to receive(:submitted_release)
       expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#authorize_release has encountered nil. Check error logs.')
@@ -692,7 +687,51 @@ RSpec.describe SecuritiesController, type: :controller do
       call_action
       expect(assigns[:authorized_user_data]).to eq([])
     end
+  end
 
+  describe 'DELETE delete_request' do
+    allow_policy :security, :delete?
+    let(:request_id) { SecureRandom.hex }
+    let(:securities_request_service) { instance_double(SecuritiesRequestService, delete_request: true) }
+    let(:call_action) { delete :delete_request, request_id: request_id }
+    before { allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service) }
+
+    it_behaves_like 'a user required action', :delete, :delete_request, request_id: SecureRandom.hex
+    it_behaves_like 'an authorization required method', :delete, :delete_request, :security, :delete?, request_id: SecureRandom.hex
+    it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
+      expect(SecuritiesRequestService).to receive(:new).with(member_id, any_args).and_return(securities_request_service)
+      call_action
+    end
+    it 'creates a new `SecuritiesRequestService` with the `request`' do
+      expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(securities_request_service)
+      call_action
+    end
+    it 'calls `delete_request` on the `SecuritiesRequestService` instance with the `request_id`' do
+      expect(securities_request_service).to receive(:delete_request).with(request_id)
+      call_action
+    end
+    it 'renders JSON hash with a `url` body value `securities_requests_url`' do
+      call_action
+      expect(JSON.parse(response.body)['url']).to eq(securities_requests_url)
+    end
+    it "renders JSON hash with an `error_message` body value `#{I18n.t('securities.release.delete_request.error_message')}`" do
+      call_action
+      expect(JSON.parse(response.body)['error_message']).to eq(I18n.t('securities.release.delete_request.error_message'))
+    end
+    it 'returns a 200 if the SecuritiesRequestService returns true' do
+      call_action
+      expect(response.status).to eq(200)
+    end
+    it 'returns a 404 if the SecuritiesRequestService returns false' do
+      allow(securities_request_service).to receive(:delete_request).and_return(false)
+      call_action
+      expect(response.status).to eq(404)
+    end
+    it 'returns a 404 if the SecuritiesRequestService returns nil' do
+      allow(securities_request_service).to receive(:delete_request).and_return(nil)
+      call_action
+      expect(response.status).to eq(404)
+    end
   end
 
   describe 'private methods' do

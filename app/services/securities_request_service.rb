@@ -44,6 +44,10 @@ class SecuritiesRequestService < MAPIService
     end
   end
 
+  def delete_request(request_id)
+    delete(:delete_request, "/member/#{member_id}/securities/request/#{request_id}")
+  end
+
   private
 
   def map_response_to_securities_release_hash(response_hash)

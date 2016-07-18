@@ -179,6 +179,28 @@ describe SecuritiesRequestService do
     end
   end
 
+  describe '`delete_request`' do
+    let(:request_id) { SecureRandom.hex }
+    let(:response) { instance_double(RestClient::Response) }
+    let(:call_method) { subject.delete_request(request_id) }
+
+    before { allow_any_instance_of(RestClient::Resource).to receive(:delete).and_return(response) }
+
+    it_behaves_like 'a MAPI backed service object method', :delete_request, SecureRandom.hex, :delete, nil, false
+
+    it 'calls `delete` with `:delete_request` for the name arg' do
+      expect(subject).to receive(:delete).with(:delete_request, any_args)
+      call_method
+    end
+    it 'calls `delete` with `{member_id}/securities/request/{request_id}` for the endpoint arg' do
+      expect(subject).to receive(:delete).with(anything, "/member/#{member_id}/securities/request/#{request_id}")
+      call_method
+    end
+    it 'returns the value of the `delete` call' do
+      expect(call_method).to eq(response)
+    end
+  end
+
   describe 'private methods' do
     describe '`map_response_to_securities_release_hash`' do
       let(:raw_hash) {{

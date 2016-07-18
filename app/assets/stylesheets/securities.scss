@@ -305,3 +305,12 @@
 .securities-request-legal {
   margin-top: -10px;
 }
+
+.securities-delete-request-error {
+  @extend %clearfix;
+  display: none;
+  margin-top: -49px;
+  .primary-button {
+    float: right;
+  }
+}

@@ -1,4 +1,5 @@
 - @page_title = t('global.page_meta_title', title: @title)
+- request_id = @securities_release_request.request_id
 .securities.row
   .securities-header
     %h1= @title
@@ -7,7 +8,14 @@
       = render partial: 'form', layout: false, locals: { account_number: nil, url: @form_data[:url] }
     .delete-release-flyout
       %h2= t('securities.release.delete_request.title')
-      %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')
-      = link_to(t('securities.release.delete_request.delete'), securities_manage_path, class: 'primary-button')
+      .securities-delete-request-confirmation
+        %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')
+        - if request_id
+          = link_to(t('securities.release.delete_request.delete'), securities_delete_request_path(request_id: request_id), method: :delete, remote: true, class: 'primary-button')
+        - else
+          = link_to(t('securities.release.delete_request.delete'), securities_manage_path, class: 'primary-button')
+      .securities-delete-request-error
+        %p= t('securities.release.delete_request.error_message')
+        = link_to(t('global.close'), securities_requests_path, class: 'primary-button')
     =form_tag(securities_download_release_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_release_request.securities.to_json)

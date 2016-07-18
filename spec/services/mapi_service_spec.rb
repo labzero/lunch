@@ -243,29 +243,32 @@ describe MAPIService do
     end
   end
 
-  describe '`get` method' do
-    let(:endpoint) { double('An Endpoint', to_s: '/') }
-    let(:name) { double('A Name') }
-    let(:endpoint_client) { double('An Endpoint Client', post: nil) }
-    let(:response) { double('A Response') }
-    let(:params) { double('Query String Parameter Hash') }
-    let(:call_method) { subject.get(name, endpoint, params) }
+  [:get, :delete].each do |action|
+    describe "`#{action}` method" do
+      let(:endpoint) { double('An Endpoint', to_s: '/') }
+      let(:name) { double('A Name') }
+      let(:endpoint_client) { double('An Endpoint Client') }
+      let(:response) { double('A Response') }
+      let(:params) { double('Query String Parameter Hash') }
+      let(:call_method) { subject.send(action, name, endpoint, params) }
+      before { allow(endpoint_client).to receive(action) }
 
-    it_behaves_like 'a MAPI REST request', :get
+      it_behaves_like 'a MAPI REST request', action
 
-    it 'GETs the `endpoint`' do
-      allow_any_instance_of(RestClient::Resource).to receive(:[]).with(endpoint).and_return(endpoint_client)
-      expect(endpoint_client).to receive(:get)
-      call_method
-    end
-    it 'returns the result of the GET' do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(response)
-      expect(call_method).to be(response)
-    end
-    it 'passes along any supplied query string parameters' do
-      allow_any_instance_of(RestClient::Resource).to receive(:[]).with(endpoint).and_return(endpoint_client)
-      expect(endpoint_client).to receive(:get).with(params: params)
-      call_method
+      it "#{action.to_s.upcase}s the `endpoint`" do
+        allow_any_instance_of(RestClient::Resource).to receive(:[]).with(endpoint).and_return(endpoint_client)
+        expect(endpoint_client).to receive(action)
+        call_method
+      end
+      it "returns the result of the #{action.to_s.upcase}" do
+        allow_any_instance_of(RestClient::Resource).to receive(action).and_return(response)
+        expect(call_method).to be(response)
+      end
+      it 'passes along any supplied query string parameters' do
+        allow_any_instance_of(RestClient::Resource).to receive(:[]).with(endpoint).and_return(endpoint_client)
+        expect(endpoint_client).to receive(action).with(params: params)
+        call_method
+      end
     end
   end
 

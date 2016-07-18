@@ -196,6 +196,7 @@ Rails.application.routes.draw do
       post 'authorize_release' => 'error#not_found'
       get 'edit_pledge' => 'securities#edit_pledge'
       post 'submit_pledge' => 'error#not_found'
+      delete 'request/:request_id' => 'securities#delete_request', as: 'delete_request'
     end
   end
 
