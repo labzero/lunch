@@ -58,6 +58,12 @@ $(function() {
     $('.securities-download-instructions').toggle();
   });
 
+
+  // Toggle Edit Securities Instructions for Pleding and Safekeeping New Securities
+  $('.securities-download-safekeep-pledge').on('click', function(){
+    $('.securities-upload-instructions').toggle();
+  });
+
   // Add the securities fields to release form from the download form.  Keeps one source of truth for securities in the DOM.
   $('.securities-submit-release-form').on('submit', function(e){
     var submitReleaseForm = $(this);

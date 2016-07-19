@@ -12,7 +12,7 @@
       .input-field-container-horizontal
         = render 'shared/input_field', form_builder: f, field_name: :account_number, label: t('securities.release.account_number.label'), field_class: ['disabled'], html_attributes: { disabled: true }
       .input-field-container-horizontal.pledge_type
-        - if type == 'pledge'
+        - if type == :pledge
           %label{for: 'pledge_type'}= t('securities.release.pledge_type.label')
           = render 'shared/dropdown', dropdown_name: 'securities_release_request[pledge_type]', default_value: @pledge_type_dropdown.first.last, default_text: @pledge_type_dropdown.first.first, dropdown_options: @pledge_type_dropdown
     .input-field-container-horizontal
@@ -50,47 +50,20 @@
         = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_company, label: t('securities.release.delivery_instructions.mutual_fund'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_account_number, label: t('securities.release.delivery_instructions.account_number'), horizontal: true
   %section.securities-display
-    %h2= t('securities.title')
+    -if type == :safekeep || type == :pledge
+      %h2.safekeep-pledge-title= t('securities.title')
+      .securities-download-template.safekeep-pledge-download-title{data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}}= t('securities.safekeep_pledge.upload_instructions.download_template')
+    -else
+      %h2= t('securities.title')
     %p.securities-release-upload-error= t('securities.release.edit.upload_error')
     -if @securities_release_request.securities
       .securities-release-table-wrapper
         = render 'upload_release'
-      %p.securities-download= t('securities.release.edit.title')
-    .securities-download-instructions.fade{data: {dropzone: true}}
-      %p= t('securities.release.edit.intro')
-      %p.securities-download-instructions-step= t('securities.release.edit.step_1.title')
-      %p.securities-download-instructions-description{data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}}= t('securities.release.edit.step_1.description')
-      %p.securities-download-instructions-step= t('securities.release.edit.step_2.title')
-      .securities-download-instructions-description
-        %p= t('securities.release.edit.step_2.make_edits')
-        %p= t('securities.release.edit.step_2.include_information')
-        .securities-download-instructions-description-term
-          %strong= t('securities.release.edit.step_2.cusip.title')
-          %p= t('securities.release.edit.step_2.cusip.description')
-        .securities-download-instructions-description-term
-          %strong= t('securities.release.edit.step_2.payment_amount.title_html')
-          %p= t('securities.release.edit.step_2.payment_amount.description')
-        .securities-download-instructions-description-term
-          %strong= t('securities.release.edit.step_2.original_par.title')
-          %p= t('securities.release.edit.step_2.original_par.description')
-        .securities-download-instructions-description-term
-          %strong= t('securities.release.edit.step_2.custodian_name.title_html')
-          %p= t('securities.release.edit.step_2.custodian_name.description')
-      %p.securities-download-instructions-step= t('securities.release.edit.step_3.title')
-      %p.securities-download-instructions-description= t('securities.release.edit.step_3.description')
-      .securities-download-actions
-        - span = capture_haml do
-          %span= t('securities.release.edit.drag_drop')
-        - button = capture_haml do
-          .input-file-button-wrapper
-            %button.secondary-button= t('securities.release.edit.select_file')
-            %input#fileupload{type: "file", name: "file", accept: SecuritiesController::ACCEPTED_UPLOAD_MIMETYPES.join(' ,'), data: {url: securities_upload_release_path, 'results-container-class' => 'securities-release-table-wrapper', 'form-name' => 'securities-release-download', 'input-name' => 'securities', 'error-class' => 'securities-release-upload-error'}}
-        =t('securities.release.edit.download_actions_html', span: span, button: button)
-      .file-upload-progress
-        %p{data: {cancel_upload: true}}= t('global.cancel_upload')
-        %p= t('global.uploading')
-        .gauge-section
-          .inner-gauge-section
+      %p.securities-table-footnote= t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)
+    -if type == :release
+      = render partial: "release_help"
+    -elsif type == :safekeep || type == :pledge
+      = render partial: "safekeep_pledge_help"
   - if policy(:security).authorize?
     .securities-request-legal
       =simple_format(t('securities.release.legal_copy'))

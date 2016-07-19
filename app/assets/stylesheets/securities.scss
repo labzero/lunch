@@ -10,6 +10,9 @@
   header {
     margin: 0 0 15px;
   }
+  input[disabled] {
+    background-color: $white;
+  }
 }
 
 .securities-requests {
@@ -61,6 +64,11 @@
   }
 }
 
+.securities-table-footnote {
+  @extend %typography-horizontal-axis-label;
+  text-transform: none;
+}
+
 .manage-securities-form, .securities-submit-release-form {
   input[type=submit], a {
     float: right;
@@ -76,6 +84,27 @@
 .manage-securities-table-actions {
   @extend %clearfix;
   margin-bottom: 15px;
+}
+
+.safekeep-pledge-title {
+  display: inline;
+}
+
+%safekeep-pledge-download {
+  @extend %typography-table-button;
+  display: inline-block;
+  color: $actionable-blue;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.safekeep-pledge-download {
+  @extend %safekeep-pledge-download;
+}
+
+.safekeep-pledge-download-title {
+  @extend %safekeep-pledge-download;
+  margin-left: 325px;
 }
 
 .securities-release {
@@ -245,7 +274,39 @@
   }
 }
 
-.securities-download-instructions-step, .securities-download-instructions strong {
+.safekeep-pledge-download-area {
+  @extend %typography-dashboard-account-summary;
+  margin-top: 20px;
+  padding: 20px;
+  & > p:first-child {
+    @extend %typography-default-text;
+    margin: 0 0 5px;
+  }
+  [data-form-submit-trigger] {
+    color: $actionable-blue;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+  .file-upload-progress {
+    p:last-of-type {
+      margin-top: 120px;
+    }
+  }
+}
+
+.securities-upload-instructions {
+  display: none;
+}
+
+.securities-download-safekeep-pledge {
+  @extend %typography-table-button;
+  text-transform: uppercase;
+  color: $actionable-blue;
+  cursor: pointer;
+  margin: 20px 0 0;
+}
+
+.securities-download-instructions-step, .securities-download-instructions strong, .securities-upload-instructions strong {
   @extend %typography-field-value;
   text-transform: uppercase;
   span {

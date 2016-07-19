@@ -356,7 +356,7 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  describe 'GET edit_pledge' do
+  context 'new securities requests (pledged and safekept)' do
     let(:securities_release_request) { double(SecuritiesReleaseRequest,
                                               :settlement_date => Time.zone.now,
                                               :trade_date => Time.zone.now,
@@ -365,68 +365,65 @@ RSpec.describe SecuritiesController, type: :controller do
                                               :delivery_type => SecuritiesReleaseRequest::DELIVERY_TYPES.values[rand(0..3)],
                                               :securities => {},
                                               :account_number= => nil ) }
-    let(:pledged_account_number) { rand(999..9999) }
     let(:member_service_instance) { double('MembersService') }
-    let(:member_details) { { 'pledged_account_number' => rand(999..9999) } }
-    let(:call_action) { get :edit_pledge }
-
-    it_behaves_like 'a user required action', :get, :edit_pledge
-    it_behaves_like 'a controller action with an active nav setting', :edit_pledge, :securities
-
     before do
       allow(MembersService).to receive(:new).with(request).and_return(member_service_instance)
-      allow(member_service_instance).to receive(:member).with(anything).and_return(member_details)
       allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
     end
 
-    it 'sets `@title`' do
-      call_action
-      expect(assigns[:title]).to eq(I18n.t('securities.pledge.title'))
-    end
-    it 'gets the `pledged_account_number` from the `MembersService` and assigns to `@securities_release_request.account_number`' do
-      expect(securities_release_request).to receive(:account_number=).with(member_details['pledged_account_number'])
-      call_action
-    end
-    it 'renders its view' do
-      call_action
-      expect(response.body).to render_template('edit_pledge')
-    end
-  end
+    describe 'GET edit_pledge' do
+      let(:pledged_account_number) { rand(999..9999) }
+      let(:member_details) { { 'pledged_account_number' => rand(999..9999) } }
+      let(:call_action) { get :edit_pledge }
 
-  describe 'GET edit_safekeep' do
-    let(:securities_release_request) { double(SecuritiesReleaseRequest,
-                                              :settlement_date => Time.zone.now,
-                                              :trade_date => Time.zone.now,
-                                              :transaction_code => SecuritiesReleaseRequest::TRANSACTION_CODES.values[rand(0..1)],
-                                              :settlement_type => SecuritiesReleaseRequest::SETTLEMENT_TYPES.values[rand(0..1)],
-                                              :delivery_type => SecuritiesReleaseRequest::DELIVERY_TYPES.values[rand(0..3)],
-                                              :securities => {},
-                                              :account_number= => nil ) }
-    let(:unpledged_account_number) { rand(999..9999) }
-    let(:member_service_instance) { double('MembersService') }
-    let(:member_details) { { 'unpledged_account_number' => rand(999..9999) } }
-    let(:call_action) { get :edit_safekeep }
+      before do
+        allow(member_service_instance).to receive(:member).with(anything).and_return(member_details)
+      end
 
-    it_behaves_like 'a user required action', :get, :edit_safekeep
-    it_behaves_like 'a controller action with an active nav setting', :edit_safekeep, :securities
+      it_behaves_like 'a user required action', :get, :edit_pledge
+      it_behaves_like 'a controller action with an active nav setting', :edit_pledge, :securities
 
-    before do
-      allow(MembersService).to receive(:new).with(request).and_return(member_service_instance)
-      allow(member_service_instance).to receive(:member).with(anything).and_return(member_details)
-      allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
+      it 'sets `@title`' do
+        call_action
+        expect(assigns[:title]).to eq(I18n.t('securities.pledge.title'))
+      end
+      it 'gets the `pledged_account_number` from the `MembersService` and assigns to `@securities_release_request.account_number`' do
+        expect(securities_release_request).to receive(:account_number=).with(member_details['pledged_account_number'])
+        call_action
+      end
+      it 'renders its view' do
+        call_action
+        expect(response.body).to render_template('edit_pledge')
+      end
     end
 
-    it 'sets `@title`' do
-      call_action
-      expect(assigns[:title]).to eq(I18n.t('securities.safekeep.title'))
-    end
-    it 'gets the `unpledged_account_number` from the `MembersService` and assigns to `@securities_release_request.account_number`' do
-      expect(securities_release_request).to receive(:account_number=).with(member_details['unpledged_account_number'])
-      call_action
-    end
-    it 'renders its view' do
-      call_action
-      expect(response.body).to render_template('edit_safekeep')
+    describe 'GET edit_safekeep' do
+      let(:unpledged_account_number) { rand(999..9999) }
+      let(:member_service_instance) { double('MembersService') }
+      let(:member_details) { { 'unpledged_account_number' => rand(999..9999) } }
+      let(:call_action) { get :edit_safekeep }
+
+      it_behaves_like 'a user required action', :get, :edit_safekeep
+      it_behaves_like 'a controller action with an active nav setting', :edit_safekeep, :securities
+
+      before do
+        allow(MembersService).to receive(:new).with(request).and_return(member_service_instance)
+        allow(member_service_instance).to receive(:member).with(anything).and_return(member_details)
+        allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
+      end
+
+      it 'sets `@title`' do
+        call_action
+        expect(assigns[:title]).to eq(I18n.t('securities.safekeep.title'))
+      end
+      it 'gets the `unpledged_account_number` from the `MembersService` and assigns to `@securities_release_request.account_number`' do
+        expect(securities_release_request).to receive(:account_number=).with(member_details['unpledged_account_number'])
+        call_action
+      end
+      it 'renders its view' do
+        call_action
+        expect(response.body).to render_template('edit_safekeep')
+      end
     end
   end
 
@@ -455,9 +452,37 @@ RSpec.describe SecuritiesController, type: :controller do
     end
     it 'calls `populate_securities_table_data_view_variable` with the securities' do
       allow(Security).to receive(:from_hash).and_return(security)
-      expect(controller).to receive(:populate_securities_table_data_view_variable).with([security, security])
+      expect(controller).to receive(:populate_securities_table_data_view_variable).with(:release, [security, security])
       call_action
     end
+    it 'responds with an xlsx file' do
+      call_action
+      expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
+    end
+  end
+
+  describe 'GET download_safekeep' do
+    let(:call_action) { post :download_safekeep }
+
+    it 'calls `populate_securities_table_data_view_variable` without securities' do
+      expect(controller).to receive(:populate_securities_table_data_view_variable).with(:safekeep)
+      call_action
+    end
+
+    it 'responds with an xlsx file' do
+      call_action
+      expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
+    end
+  end
+
+  describe 'GET download_pledge' do
+    let(:call_action) { post :download_pledge }
+
+    it 'calls `populate_securities_table_data_view_variable` without securities' do
+      expect(controller).to receive(:populate_securities_table_data_view_variable).with(:pledge)
+      call_action
+    end
+
     it 'responds with an xlsx file' do
       call_action
       expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
@@ -504,7 +529,7 @@ RSpec.describe SecuritiesController, type: :controller do
       call_action
     end
     it 'calls `populate_securities_table_data_view_variable` with the securities' do
-      expect(controller).to receive(:populate_securities_table_data_view_variable).with(sample_securities_upload_array)
+      expect(controller).to receive(:populate_securities_table_data_view_variable).with(:release, sample_securities_upload_array)
       call_action
     end
     it 'begins parsing data in the row and cell underneath the `cusip` header cell' do
@@ -619,11 +644,11 @@ RSpec.describe SecuritiesController, type: :controller do
         end
         it 'calls `populate_view_variables` with a specific `mapi_endpoint` error when the error handler is invoked' do
           allow(securities_request_service).to receive(:submit_release_for_authorization).and_yield(error)
-          expect(controller).to receive(:populate_view_variables).with({mapi_endpoint: [error_message]})
+          expect(controller).to receive(:populate_view_variables).with(:release, {mapi_endpoint: [error_message]})
           call_action
         end
         it 'calls `populate_view_variables` with an `mapi_endpoint` error' do
-          expect(controller).to receive(:populate_view_variables).with({mapi_endpoint: ['SecuritiesRequestService#submit_release_for_authorization has returned nil']})
+          expect(controller).to receive(:populate_view_variables).with(:release, {mapi_endpoint: ['SecuritiesRequestService#submit_release_for_authorization has returned nil']})
           call_action
         end
         it 'renders the `edit_release` view' do
@@ -641,7 +666,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
 
       it 'calls `populate_view_variables` with the securities_release_request validation errors' do
-        expect(controller).to receive(:populate_view_variables).with(error_messages)
+        expect(controller).to receive(:populate_view_variables).with(:release, error_messages)
         call_action
       end
       it 'renders the `edit_release` view' do
@@ -895,7 +920,7 @@ RSpec.describe SecuritiesController, type: :controller do
       } }
       let(:securities) { [instance_double(Security)] }
       let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, securities: securities, :securities= => nil, trade_date: nil, :trade_date= => nil, settlement_date: nil, :settlement_date= => nil) }
-      let(:call_action) { controller.send(:populate_view_variables) }
+      let(:call_action) { controller.send(:populate_view_variables, :release) }
       let(:errors) { instance_double(Hash) }
 
       before do
@@ -908,11 +933,11 @@ RSpec.describe SecuritiesController, type: :controller do
 
       it 'calls `human_submit_release_error_messages` if errors are present' do
         expect(controller).to receive(:human_submit_release_error_messages).with(errors).and_return(errors)
-        controller.send(:populate_view_variables, errors)
+        controller.send(:populate_view_variables, :release, errors)
       end
       it 'sets `@errors` if errors are passed' do
         allow(controller).to receive(:human_submit_release_error_messages).and_return(errors)
-        controller.send(:populate_view_variables, errors)
+        controller.send(:populate_view_variables, :release, errors)
         expect(assigns[:errors]).to eq(errors)
       end
       it 'sets `@pledge_type_dropdown`' do
@@ -980,7 +1005,7 @@ RSpec.describe SecuritiesController, type: :controller do
         call_action
       end
       it 'calls `populate_securities_table_data_view_variable` with the securities' do
-        expect(controller).to receive(:populate_securities_table_data_view_variable).with(securities)
+        expect(controller).to receive(:populate_securities_table_data_view_variable).with(:release, securities)
         call_action
       end
       it 'sets the proper @form_data for a user to submit a request for authorization' do
@@ -1003,19 +1028,36 @@ RSpec.describe SecuritiesController, type: :controller do
     end
 
     describe '`populate_securities_table_data_view_variable`' do
-      headings = [
+      release_headings = [
         I18n.t('common_table_headings.cusip'),
         I18n.t('common_table_headings.description'),
         fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
         I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker)
       ]
+      safekeep_and_pledge_headings = [
+        I18n.t('common_table_headings.cusip'),
+        fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+        I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker),
+        I18n.t('securities.safekeep.custodian_name', footnote_marker: fhlb_footnote_marker(1))
+      ]
       let(:securities) { [FactoryGirl.build(:security)] }
-      let(:call_method) { controller.send(:populate_securities_table_data_view_variable, securities) }
+      let(:call_method) { controller.send(:populate_securities_table_data_view_variable, :release, securities) }
 
       it 'sets `column_headings`' do
         call_method
-        expect(assigns[:securities_table_data][:column_headings]).to eq(headings)
+        expect(assigns[:securities_table_data][:column_headings]).to eq(release_headings)
       end
+
+      it 'sets `column_headings` for pledge' do
+        controller.send(:populate_securities_table_data_view_variable, :pledge, securities)
+        expect(assigns[:securities_table_data][:column_headings]).to eq(safekeep_and_pledge_headings)
+      end
+
+      it 'sets `column_headings` for safekeep' do
+        controller.send(:populate_securities_table_data_view_variable, :safekeep, securities)
+        expect(assigns[:securities_table_data][:column_headings]).to eq(safekeep_and_pledge_headings)
+      end
+
       it 'contains rows of columns that have a `cusip` value' do
         call_method
         expect(assigns[:securities_table_data][:rows].length).to be > 0
@@ -1025,7 +1067,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it "contains rows of columns that have a `cusip` value equal to `#{I18n.t('global.missing_value')}` if the security has no cusip value" do
         securities = [FactoryGirl.build(:security, cusip: nil)]
-        controller.send(:populate_securities_table_data_view_variable, securities)
+        controller.send(:populate_securities_table_data_view_variable, :release, securities)
         expect(assigns[:securities_table_data][:rows].length).to be > 0
         assigns[:securities_table_data][:rows].each do |row|
           expect(row[:columns].first[:value]).to eq(I18n.t('global.missing_value'))
@@ -1040,7 +1082,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it "contains rows of columns that have a `description` value equal to `#{I18n.t('global.missing_value')}` if the security has no description value" do
         securities = [FactoryGirl.build(:security, description: nil)]
-        controller.send(:populate_securities_table_data_view_variable, securities)
+        controller.send(:populate_securities_table_data_view_variable, :release, securities)
         expect(assigns[:securities_table_data][:rows].length).to be > 0
         assigns[:securities_table_data][:rows].each do |row|
           expect(row[:columns][1][:value]).to eq(I18n.t('global.missing_value'))
@@ -1075,7 +1117,7 @@ RSpec.describe SecuritiesController, type: :controller do
         end
       end
       it 'contains an empty array for rows if no securities are passed in' do
-        controller.send(:populate_securities_table_data_view_variable, nil)
+        controller.send(:populate_securities_table_data_view_variable, :release)
         expect(assigns[:securities_table_data][:rows]).to eq([])
       end
     end

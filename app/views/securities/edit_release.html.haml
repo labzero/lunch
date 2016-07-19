@@ -5,7 +5,7 @@
     %h1= @title
   .securities-main-body.securities-release
     .column-9x3-left
-      = render partial: 'form', layout: false, locals: { account_number: nil, url: @form_data[:url] }
+      = render partial: 'form', locals: { type: :release, account_number: nil, url: @form_data[:url] }
     .delete-release-flyout
       %h2= t('securities.release.delete_request.title')
       .securities-delete-request-confirmation

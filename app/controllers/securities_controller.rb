@@ -173,20 +173,20 @@ class SecuritiesController < ApplicationController
   end
 
   def edit_safekeep
-    populate_view_variables
+    populate_view_variables(:safekeep)
     @title = t('securities.safekeep.title')
     @securities_release_request.account_number = MembersService.new(request).member(current_member_id)['unpledged_account_number']
   end
 
   def edit_pledge
-    populate_view_variables
+    populate_view_variables(:pledge)
     @title = t('securities.pledge.title')
     @securities_release_request.account_number = MembersService.new(request).member(current_member_id)['pledged_account_number']
   end
 
   # POST
   def edit_release
-    populate_view_variables
+    populate_view_variables(:release)
     @title = t('securities.release.title')
   end
 
@@ -195,15 +195,25 @@ class SecuritiesController < ApplicationController
     request_id = params[:request_id]
     @securities_release_request = SecuritiesRequestService.new(current_member_id, request).submitted_release(request_id)
     raise ActionController::RoutingError.new("There has been an error and SecuritiesController#authorize_release has encountered nil. Check error logs.") if @securities_release_request.nil?
-    populate_view_variables
+    populate_view_variables(:release)
     @title = t('securities.release.title')
     render :edit_release
   end
 
   def download_release
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
-    populate_securities_table_data_view_variable(securities)
-    render xlsx: 'release', filename: "securities.xlsx", formats: [:xlsx]
+    populate_securities_table_data_view_variable(:release, securities)
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :release }
+  end
+
+  def download_safekeep
+    populate_securities_table_data_view_variable(:safekeep)
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep }
+  end
+
+  def download_pledge
+    populate_securities_table_data_view_variable(:pledge)
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge }
   end
 
   def upload_release
@@ -229,7 +239,7 @@ class SecuritiesController < ApplicationController
         end
       end
       if data_start_index
-        populate_securities_table_data_view_variable(securities)
+        populate_securities_table_data_view_variable(:release, securities)
         html = render_to_string(layout: false)
         status = 200
       else
@@ -256,7 +266,7 @@ class SecuritiesController < ApplicationController
       errors = @securities_release_request.errors.messages
     end
     if errors
-      populate_view_variables(errors)
+      populate_view_variables(:release, errors)
       @title = t('securities.release.title')
       render :edit_release
     else
@@ -302,13 +312,19 @@ class SecuritiesController < ApplicationController
     end
   end
 
-  def populate_securities_table_data_view_variable(securities)
-    column_headings = [
-      I18n.t('common_table_headings.cusip'),
-      I18n.t('common_table_headings.description'),
-      fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
-      I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker)
-    ]
+  def populate_securities_table_data_view_variable(type, securities=[])
+    column_headings = case type
+    when :release
+      [ I18n.t('common_table_headings.cusip'),
+        I18n.t('common_table_headings.description'),
+        fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+        I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker) ]
+    when :pledge, :safekeep
+      [ I18n.t('common_table_headings.cusip'),
+        fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+        I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker),
+        I18n.t('securities.safekeep.custodian_name', footnote_marker: fhlb_footnote_marker(1)) ]
+    end
     securities ||= []
     rows = securities.collect do |security|
       {
@@ -326,7 +342,7 @@ class SecuritiesController < ApplicationController
     }
   end
 
-  def populate_view_variables(errors=nil)
+  def populate_view_variables(type, errors=nil)
     @errors = human_submit_release_error_messages(errors) if errors
     @pledge_type_dropdown = [
       [t('securities.release.pledge_type.sbc'), SecuritiesReleaseRequest::PLEDGE_TYPES[:sbc]],
@@ -342,7 +358,7 @@ class SecuritiesController < ApplicationController
     populate_transaction_code_dropdown_variables(@securities_release_request)
     populate_settlement_type_dropdown_variables(@securities_release_request)
     populate_delivery_instructions_dropdown_variables(@securities_release_request)
-    populate_securities_table_data_view_variable(@securities_release_request.securities)
+    populate_securities_table_data_view_variable(type, @securities_release_request.securities)
 
     @form_data = if policy(:security).authorize?
       {

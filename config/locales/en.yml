@@ -1208,7 +1208,7 @@ en:
         account_number: Account No.
       clearing_agent: "Clearing Agent's Fed Wire Address:"
       further_credit: For Further Credit to Account No.
-      settlement_amount: 'Settlement Amount %{unit}%{footnote_marker}'
+      settlement_amount: 'Settlement Amount%{unit}%{footnote_marker}'
       settlement_amount_footnote: '%{footnote_marker}If Vs. Payment'
       submit_authorization: Submit for Authorization
       authorize: Authorize
@@ -1231,12 +1231,18 @@ en:
           cusip:
             title: CUSIP
             description: The security's CUSIP identifier.
+          description:
+            title: Description
+            description: The security's description.
           payment_amount:
             title_html: "Payment Amount <span>(if needed)</span>"
             description: "If your Settlement Type is 'vs Payment', add the Payment Amount for each security."
           original_par:
             title: Original Par Value
             description: The security's Original Par Value
+          settlement_amount:
+            title_html: "Settlement Amount <span>(if needed)</span>"
+            description: If your Settlement Type is 'vs Payment', add the Settlement Amount for each security.
           custodian_name:
             title_html: "Custodian Name <span>(if needed)</span>"
             description: "For each security that is not of the type 'Agency', add the Custodian Name at the end of the line."
@@ -1252,10 +1258,20 @@ en:
       title: Safekeep Securities
       delete_request:
         title: Delete this Safekeep Securities request?
+      custodian_name: 'Custodian Name%{footnote_marker}'
+      custodian_name_footnote: '%{footnote_marker}If security not type "Agency"'
+      download_template: Download Add Securities Template File
     pledge:
       title: Pledge Securities
       delete_request:
         title: Delete this Pledge Securities request?
+    safekeep_pledge:
+      upload_instructions:
+        download_template: Download Add Securities Template File
+        intro: Upload an Excel file containing your securities.
+        learn_how: Learn How
+        step_2:
+          enter_securities: In the file, enter one security per line.
     success:
       title: Release Securities Request Sent
       request_will_remain: 'This request will remain in the queue for authorization until one of the following occurs:'

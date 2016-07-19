@@ -150,12 +150,16 @@ When(/^I click on the Edit Securities link$/) do
   page.find('.securities-download').click
 end
 
-Then(/^I should see instructions on how to edit securities$/) do
-  page.assert_selector('.securities-download-instructions', visible: :visible)
+When(/^I click on the Learn How link$/) do
+  page.find('.securities-download-safekeep-pledge').click
 end
 
-Then(/^I should not see instructions on how to edit securities$/) do
-  page.assert_selector('.securities-download-instructions', visible: :hidden)
+Then(/^I should see instructions on how to (edit|upload) securities$/) do |action|
+  page.assert_selector(".securities-#{action == 'edit' ? 'download' : 'upload'}-instructions", visible: :visible)
+end
+
+Then(/^I should not see instructions on how to (edit|upload) securities$/) do |action|
+  page.assert_selector(".securities-#{action == 'edit' ? 'download' : 'upload'}-instructions", visible: :hidden)
 end
 
 When(/^the edit securities section is open$/) do
