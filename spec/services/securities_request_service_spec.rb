@@ -201,6 +201,44 @@ describe SecuritiesRequestService do
     end
   end
 
+  describe '`authorize_request`' do
+    let(:user) { instance_double(User) }
+    let(:user_details) { SecureRandom.hex }
+    let(:request_id) { SecureRandom.hex }
+    let(:call_method) { subject.send(:authorize_request, request_id, user) }
+    let(:response) { instance_double(RestClient::Response) }
+
+    before do
+      allow(subject).to receive(:user_details).and_return(nil)
+      allow(subject).to receive(:user_details).with(user).and_return(user_details)
+      allow_any_instance_of(RestClient::Resource).to receive(:put).and_return(response)
+    end
+
+    it_behaves_like 'a MAPI backed service object method', :authorize_request, nil, :put, nil, false do
+      let(:call_method) { subject.authorize_request(request_id, user) }
+    end
+
+    it 'calls `put` with `:authoize_securities_request` for the name arg' do
+      expect(subject).to receive(:put).with(:authoize_securities_request, any_args)
+      call_method
+    end
+    it 'calls `put` with `{member_id}/securities/authorize` for the endpoint arg' do
+      expect(subject).to receive(:put).with(anything, "/member/#{member_id}/securities/authorize", any_args)
+      call_method
+    end
+    it 'calls `put` with a JSON blob containing the `request_id`' do
+      expect(subject).to receive(:put).with(anything, anything, satisfy { |arg| JSON.parse(arg)['request_id'] == request_id })
+      call_method
+    end
+    it 'calls `put` with a JSON blob containing the user details' do
+      expect(subject).to receive(:put).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user'] == user_details })
+      call_method
+    end
+    it 'returns the value of the `put` call' do
+      expect(call_method).to eq(response)
+    end
+  end
+
   describe 'private methods' do
     describe '`map_response_to_securities_release_hash`' do
       let(:raw_hash) {{
@@ -285,6 +323,35 @@ describe SecuritiesRequestService do
       end
       it 'returns the processed requests' do
         expect(call_method).to eq(fixed_requests)
+      end
+    end
+
+    describe '`user_details`' do
+      let(:username) { double('A Username') }
+      let(:full_name) { double('A Full Name') }
+      let(:session_id) { double('A Session ID') }
+      let(:session) { instance_double(ActionDispatch::Request::Session, id: session_id) }
+      let(:user) { instance_double(User, username: username, display_name: full_name) }
+      let(:call_method) { subject.send(:user_details, user) }
+
+      before do
+        request.session = session
+      end
+
+      it 'returns a hash containing the `username` of the user' do
+        expect(call_method).to include(username: username)
+      end
+      it 'returns a hash containing the `full_name` of the user' do
+        expect(call_method).to include(full_name: full_name)
+      end
+      it 'returns a hash containing the bound requests `session_id` if no request is passed' do
+        expect(call_method).to include(session_id: session_id)
+      end
+      it 'returns a hash containing the passed requests `session_id`' do
+        session_id = double('A Session ID')
+        request = ActionDispatch::TestRequest.new
+        request.session = instance_double(ActionDispatch::Request::Session, id: session_id)
+        expect(subject.send(:user_details, user, request)).to include(session_id: session_id)
       end
     end
   end

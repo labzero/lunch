@@ -194,7 +194,7 @@ Rails.application.routes.draw do
       post 'download_safekeep' => 'securities#download_safekeep'
       post 'submit_safekeep' => 'error#not_found'
       get 'view_release/:request_id' => 'securities#view_release', as: 'view_release'
-      post 'authorize_release' => 'error#not_found'
+      post 'authorize_release' => 'securities#authorize_request'
       get 'edit_pledge' => 'securities#edit_pledge'
       post 'download_pledge' => 'securities#download_pledge'
       post 'submit_pledge' => 'error#not_found'

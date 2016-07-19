@@ -2,7 +2,7 @@ class SecuritiesController < ApplicationController
   include CustomFormattingHelper
   include ContactInformationHelper
 
-  before_action only: [:view_release] do
+  before_action only: [:view_release, :authorize_request] do
     authorize :security, :authorize?
   end
 
@@ -251,6 +251,13 @@ class SecuritiesController < ApplicationController
       status = 415
     end
     render json: {html: html, form_data: (securities.to_json if securities), error: error}, status: status, content_type: request.format
+  end
+
+  # POST
+  def authorize_request
+    response = SecuritiesRequestService.new(current_member_id, request).authorize_request(params[:request_id], current_user)
+    raise ActiveRecord::RecordNotFound unless response
+    @title = t('securities.authorize.release.title')
   end
 
   # POST

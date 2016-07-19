@@ -28,7 +28,7 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release|success|request|safekeep|pledge) securities page$/) do |page|
+When(/^I am on the (manage|release|success|safekeep|pledge) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
@@ -40,11 +40,13 @@ When(/^I am on the (manage|release|success|request|safekeep|pledge) securities p
     step 'I click the button to release the securities'
   when 'safekeep'
     visit '/securities/edit_safekeep'
-  when 'request'
-    visit '/securities/requests'
   when 'pledge'
     visit '/securities/edit_pledge'
   end
+end
+
+Given(/^I am on the securities request page$/) do
+  visit '/securities/requests'
 end
 
 When(/^I filter the securities by (Safekept|Pledged|All)$/) do |filter|
@@ -239,6 +241,14 @@ end
 
 Then(/^I should see "(.*?)" as the selected pledge type$/) do |type|
   page.assert_selector('.securities-broker-instructions .pledge_type .dropdown-selection', text: pledge_types(type), exact: true)
+end
+
+When(/^I authorize the request$/) do
+  page.find(".securities-actions .primary-button[value=#{I18n.t('securities.release.authorize')}").click
+end
+
+Then(/^I should see the authorize request success page$/) do
+  page.assert_selector('.securities-authorize-success')
 end
 
 def delivery_instructions(text)

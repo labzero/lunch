@@ -759,6 +759,50 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
+  describe 'POST `authorize_request`' do
+    allow_policy :security, :authorize?
+    let(:request_id) { SecureRandom.hex }
+    let(:call_action) { post :authorize_request, request_id: request_id }
+    let(:securities_request_service) { instance_double(SecuritiesRequestService, authorize_request: true) }
+
+    before do
+      allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service)
+    end
+
+    it_behaves_like 'a user required action', :post, :authorize_request, request_id: SecureRandom.hex
+    it_behaves_like 'an authorization required method', :post, :authorize_request, :security, :authorize?, request_id: SecureRandom.hex
+    it_behaves_like 'a controller action with an active nav setting', :authorize_request, :securities
+
+    it 'constructs a new `SecuritiesRequestService` instance with the current member ID' do
+      expect(SecuritiesRequestService).to receive(:new).with(member_id, anything).and_return(securities_request_service)
+      call_action
+    end
+    it 'constructs a new `SecuritiesRequestService` instance with the current request' do
+      expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(securities_request_service)
+      call_action
+    end
+    it 'calls `authorize_request` on the `SecuritiesRequestService` instance with the `request_id`' do
+      expect(securities_request_service).to receive(:authorize_request).with(request_id, anything)
+      call_action
+    end
+    it 'calls `authorize_request` on the `SecuritiesRequestService` instance with the `current_user`' do
+      expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
+      call_action
+    end
+    it 'raises an `ActiveRecord::RecordNotFound` if `authorize_request` returns `nil`' do
+      allow(securities_request_service).to receive(:authorize_request).and_return(nil)
+      expect{ call_action }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+    it 'renders the view if `authorize_request` returns something truthy' do
+      call_action
+      expect(response.body).to render_template('authorize_request')
+    end
+    it 'sets `@title`' do
+      call_action
+      expect(assigns[:title]).to eq(I18n.t('securities.authorize.release.title'))
+    end
+  end
+
   describe 'private methods' do
     describe '`form_type_to_description`' do
       {

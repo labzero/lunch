@@ -93,3 +93,11 @@ Scenario: Member sees error when submitting release with required information mi
   And I submit the securities release request for authorization
   Then I should see the generic error message for the securities release request
 
+@jira-mem-1599
+Scenario: A signer authorizes a previously submittied release request
+  Given I am logged in as a "quick-advance signer"
+  And I am on the securities request page
+  When I click to Authorize the first release
+  Then I should be on the Securities Release page
+  When I authorize the request
+  Then I should see the authorize request success page

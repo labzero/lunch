@@ -35,8 +35,13 @@ describe ContactInformationHelper, type: :helper do
   describe '`operations_email` method' do
     it_behaves_like 'an email helper method', :operations_email, 'OPERATIONS_EMAIL'
   end
+  
   describe '`accounting_email` method' do
     it_behaves_like 'an email helper method', :accounting_email, 'ACCOUNTING_EMAIL'
+  end
+
+  describe '`securities_services_email` method' do
+    it_behaves_like 'an email helper method', :securities_services_email, 'SECURITIES_SERVICES_EMAIL'
   end
 
   shared_examples 'phone number contact method' do |constant|

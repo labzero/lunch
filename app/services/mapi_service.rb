@@ -79,6 +79,20 @@ class MAPIService
       warn(name, "connection error: #{e.class.name}", e, &error_handler)
     end
   end
+
+  def put(name, endpoint, body, content_type = nil, &error_handler)
+    begin
+      if content_type
+        @connection[endpoint].put body, {:content_type => content_type}
+      else
+        @connection[endpoint].put body
+      end
+    rescue RestClient::Exception => e
+      warn(name, "RestClient error: #{e.class.name}:#{e.http_code}", e, &error_handler)
+    rescue Errno::ECONNREFUSED => e
+      warn(name, "connection error: #{e.class.name}", e, &error_handler)
+    end
+  end
   
   def parse(name, response, &error_handler)
     begin

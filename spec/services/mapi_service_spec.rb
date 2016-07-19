@@ -361,6 +361,40 @@ describe MAPIService do
     end
   end
 
+  describe '`put` method', :vcr do
+    let(:endpoint) { double('An Endpoint', to_s: '/') }
+    let(:name) { double('A Name') }
+    let(:body) { double('Data To PUT') }
+    let(:content_type) { double('content type') }
+    let(:endpoint_client) { double('An Endpoint Client', put: nil) }
+    let(:call_method) { subject.put(name, endpoint, body, content_type) }
+
+    it_behaves_like 'a MAPI REST request', :put, 'Data to PUT', 'application/json'
+
+    it 'PUTs to the `endpoint`' do
+      expect_any_instance_of(RestClient::Resource).to receive(:[]).with(endpoint).and_return(endpoint_client)
+      call_method
+    end
+    it 'PUTs the `body`' do
+      expect_any_instance_of(RestClient::Resource).to receive(:put).with(body, anything)
+      call_method
+    end
+    it 'PUTs the `content_type` if one is given' do
+      expect_any_instance_of(RestClient::Resource).to receive(:put).with(anything, content_type: content_type)
+      call_method
+    end
+    it 'does not set the `content_type` if one is not given' do
+      expect_any_instance_of(RestClient::Resource).to receive(:put).with(anything)
+      subject.put(name, endpoint, body)
+    end
+    it 'succeeds if a `content_type` is given' do
+      expect{call_method}.to_not raise_exception
+    end
+    it 'succeeds if no `content_type` is given' do
+      expect{subject.put(name, endpoint, body)}.to_not raise_exception
+    end
+  end
+
   describe '`post_json` method' do
     it_behaves_like 'a MAPI JSON REST request', :post, 'Data to POST'
   end
