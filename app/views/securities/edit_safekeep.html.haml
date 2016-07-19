@@ -2,7 +2,7 @@
 .securities.row
   .securities-header
     %h1= @title
-  .securities-main-body.securities-release
+  .securities-main-body.securities-safekeep
     .column-9x3-left
       = render partial: 'form', locals: { type: :safekeep, account_number: @securities_release_request.account_number, url: securities_submit_safekeep_path }
     .delete-release-flyout
