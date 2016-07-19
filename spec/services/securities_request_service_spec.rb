@@ -98,31 +98,35 @@ describe SecuritiesRequestService do
       call_method
     end
     it 'calls `post` with `{member_id}/securities/release` for the endpoint arg' do
-      expect(subject).to receive(:post).with(anything, "/member/#{member_id}/securities/release", anything)
+      expect(subject).to receive(:post).with(anything, "/member/#{member_id}/securities/release", any_args)
+      call_method
+    end
+    it 'calls `post` with `application/json` for the content type' do
+      expect(subject).to receive(:post).with(anything, anything, anything, 'application/json', any_args)
       call_method
     end
     it 'calls `post` with a JSON body argument including the broker instructions from the security_release_request' do
-      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['broker_instructions'] == broker_instructions })
+      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['broker_instructions'] == broker_instructions }, any_args)
       call_method
     end
     it 'calls `post` with a body argument including the delivery instructions from the security_release_request' do
-      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['delivery_instructions'] == delivery_instructions })
+      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['delivery_instructions'] == delivery_instructions }, any_args)
       call_method
     end
     it 'calls `post` with a body argument including the securities from the security_release_request' do
-      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['securities'] == securities })
+      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['securities'] == securities }, any_args)
       call_method
     end
     it 'calls `post` with a body argument including the `username` of the passed user' do
-      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['username'] == user.username })
+      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['username'] == user.username }, any_args)
       call_method
     end
     it 'calls `post` with a body argument including the `full_name` of the passed user' do
-      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['full_name'] == user.display_name })
+      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['full_name'] == user.display_name }, any_args)
       call_method
     end
     it 'calls `post` with a body argument including the `session_id` of the passed user\'s session' do
-      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['session_id'] == session_id })
+      expect(subject).to receive(:post).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['session_id'] == session_id }, any_args)
       call_method
     end
     describe 'when the POST to MAPI succeeds' do
@@ -218,20 +222,24 @@ describe SecuritiesRequestService do
       let(:call_method) { subject.authorize_request(request_id, user) }
     end
 
-    it 'calls `put` with `:authoize_securities_request` for the name arg' do
-      expect(subject).to receive(:put).with(:authoize_securities_request, any_args)
+    it 'calls `put` with `:authorize_securities_request` for the name arg' do
+      expect(subject).to receive(:put).with(:authorize_securities_request, any_args)
       call_method
     end
     it 'calls `put` with `{member_id}/securities/authorize` for the endpoint arg' do
       expect(subject).to receive(:put).with(anything, "/member/#{member_id}/securities/authorize", any_args)
       call_method
     end
+    it 'calls `put` with `application/json` for the content type' do
+      expect(subject).to receive(:put).with(anything, anything, anything, 'application/json', any_args)
+      call_method
+    end
     it 'calls `put` with a JSON blob containing the `request_id`' do
-      expect(subject).to receive(:put).with(anything, anything, satisfy { |arg| JSON.parse(arg)['request_id'] == request_id })
+      expect(subject).to receive(:put).with(anything, anything, satisfy { |arg| JSON.parse(arg)['request_id'] == request_id }, any_args)
       call_method
     end
     it 'calls `put` with a JSON blob containing the user details' do
-      expect(subject).to receive(:put).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user'] == user_details })
+      expect(subject).to receive(:put).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user'] == user_details }, any_args)
       call_method
     end
     it 'returns the value of the `put` call' do

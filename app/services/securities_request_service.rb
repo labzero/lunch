@@ -24,7 +24,7 @@ class SecuritiesRequestService < MAPIService
       securities: securities_release_request.securities,
       user: user_details(user)
     }
-    response = post(:securities_submit_release_for_authorization, "/member/#{member_id}/securities/release", body.to_json) do |name, msg, err|
+    response = post(:securities_submit_release_for_authorization, "/member/#{member_id}/securities/release", body.to_json, 'application/json') do |name, msg, err|
       if err.is_a?(RestClient::Exception) && err.http_code >= 400 && err.http_code < 500 && error_handler
         error_handler.call(err)
       end
@@ -45,7 +45,7 @@ class SecuritiesRequestService < MAPIService
   end
 
   def authorize_request(request_id, user)
-    put(:authoize_securities_request, "/member/#{member_id}/securities/authorize", {request_id: request_id, user: user_details(user)}.to_json)
+    put(:authorize_securities_request, "/member/#{member_id}/securities/authorize", {request_id: request_id, user: user_details(user)}.to_json, 'application/json')
   end
 
   private
