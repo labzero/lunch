@@ -356,12 +356,6 @@ class ResourcesController < ApplicationController
       filename = 'mpf-post-closing-information.pdf'
     when 'servicer'
       filename = 'mpf-servicer-information.pdf'
-    when 'servicer_account_remittance'
-      filename = 'mpf-PI-custodial-account-agreement-SS-or-AA-single-remittance.pdf'
-    when 'servicer_account_actual'
-      filename = 'mpf-PI-custodial-account-agreement-AA.pdf'
-    when 'servicer_account'
-      filename = 'mpf-TI-custodial-account-agreement.pdf'
     when 'xtra_agreement'
       filename = 'mpf-xtra-agreement-for-access-to-fannie-mae-du-only.pdf'
     when 'xtra_addendum_mpf'
@@ -376,6 +370,8 @@ class ResourcesController < ApplicationController
       filename = 'mpf-direct-addendum-to-pfi-agreement.pdf'
     when 'direct_questionnaire'
       filename = 'mpf-direct-operations-questionnaire.pdf'
+    when 'direct_gov'
+      filename = 'mpf-government.pdf'
     when /\Aform_(\d{3,4})\z/
       filename = "fc#{$1}.pdf"
     else

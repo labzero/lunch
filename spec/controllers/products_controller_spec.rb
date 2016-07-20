@@ -30,7 +30,7 @@ RSpec.describe ProductsController, :type => :controller do
       expect(response.body).to render_template('pfi')
     end
     [
-      :all_applicants_rows, :mpf_original_rows, :mpf_government_rows, :mpf_xtra_rows, :mpf_direct_rows
+      :all_applicants_rows, :mpf_original_rows, :mpf_xtra_rows, :mpf_direct_rows, :mpf_gov_rows
     ].each do |var|
       it "should assign `@#{var}`" do
         get :pfi

@@ -2277,23 +2277,24 @@ en:
         title: "Mortgage Partnership Finance (MPF) Program"
         description_html: "The Mortgage Partnership Finance&#174; (MPF&#174;) Program offers members a competitive alternative to traditional investors when selling residential mortgage loans in the secondary market. The Bank offers the following MPF products:"
         description_list:
-          mpf_original_html: "%{download_link}: The Bank purchases conventional, conforming fixed rate mortgage loans and holds them in the Bank’s portfolio."
-          mpf_government_html: "%{download_link}: The Bank purchases FHA/VA-insured mortgage loans and holds them in the Bank’s portfolio."
-          mpf_xtra_html: "%{download_link}&#174;: The Bank facilitates the purchase of conventional, conforming fixed rate mortgage loans for concurrent sale to Fannie Mae."
-          mpf_direct_html: "%{download_link}: The Bank facilitates the purchase of jumbo fixed rate mortgage loans for concurrent sale into the secondary market through an exclusive arrangement with Redwood Trust, Inc."
+          mpf_original_html: "%{download_link}: The member sells fixed rate conventional conforming mortgage loans to the Bank, and the Bank holds them in portfolio."
+          mpf_xtra_html: "%{download_link}&#174;: The member sells fixed rate conventional  conforming mortgage loans for concurrent sale to Fannie Mae."
+          mpf_direct_html: "%{download_link}: The member sells jumbo fixed rate mortgage loans for concurrent sale into the secondary market through an exclusive arrangement with Redwood Trust, Inc."
+          mpf_government_mbs_html: "%{download_link}: The member sells eligible government-insured or government-guaranteed loan, which are then packaged into securities backed by the mortgages and guaranteed by Ginnie Mae. Eligible loans include fixed rate mortgage loans insured or guaranteed by the FHA or the VA or by the USDA through its RHS Section 502 loan program."
         member_eligibility_html: "To participate in the MPF Program, a member must be approved as a Participating Financial Institution (PFI) by the Bank. The member must submit a <a href=%{url}>PFI Application</a> and meet the loan origination, servicing, reporting, credit, and collateral standards established for the MPF Program. Eligibility criteria include:"
         eligibility_list:
           creditworthiness: "Overall satisfactory creditworthiness according to the Bank’s credit quality standards, including an acceptable exam rating from the member’s primary regulator, a “Well Capitalized” PCA status, satisfactory asset quality, and positive net income in four of the most recent six quarters"
           lending: Acceptable lending policies, procedures, and practices
           servicing: The ability to originate and service first-lien, one- to four-family residential mortgage loans in accordance with GSE guidelines for loans typically sold in the secondary market
-          mpf_direct: For MPF Direct, the ability to manually underwrite loans in accordance with MPF Direct guidelines
+        mpf_direct: For MPF Direct, the ability to manually underwrite loans in accordance with MPF Direct guidelines.
+        mpf_gov_mbs: For MPF Government MBS, the member must be an approved mortgagee/lender in good standing with the applicable government agency and have sufficient experience in the origination, underwriting, and servicing (if servicing is retained) of government loans.
         agreement_header: MPF Participating Financial Institution Agreement
         agreement_html: Members approved by the Bank to participate in the MPF Program will be required to execute an MPF Participating Financial Institution Agreement (PFI Agreement). The PFI Agreement sets forth the basic terms and conditions governing the PFI’s participation in the MPF Program through the Bank and incorporates additional program terms and requirements that the PFI must follow, including those established in the MPF Origination Guide and the MPF Servicing Guide. These program guides are available through the eMPF&#174; website or All-Regs&#174;.
         enhancement_header: "Credit Enhancement: MPF Original"
         enhancement: Under MPF Original, the Bank and the PFI share in the credit risk of loans purchased by the Bank. Loans sold into MPF Original are credit enhanced by the PFI, with credit enhancement fees generally paid to the PFI based on the performance of the loans. The Bank manages the liquidity, interest rate, and prepayment risks of the loans while the PFI manages the credit risk of the loans. The credit risk sharing feature of MPF Original allocates future loan losses, if any, between the PFI and the Bank after borrower equity and private mortgage insurance are depleted.
         collateral: "The credit enhancement obligation under MPF Original must be fully secured by eligible collateral.\n\nFor all MPF products, the Bank may require loans sold that become subject to repurchase or subject to an indemnification agreement to be secured by eligible collateral."
         servicing_header: Servicing of MPF Loans
-        servicing: Under most MPF products, the PFI may sell loans servicing retained or servicing released. Loans sold under the MPF Direct product must be sold servicing released.
+        servicing: Under most MPF products, the PFI may sell loans servicing retained or servicing released. Loans sold under MPF Direct must be sold servicing released.
         remittance: Remittance options for MPF loans may include actual/actual, actual/actual single remittance, and scheduled/scheduled.
         training_html: After a member is approved as a PFI, the Bank contacts the member to schedule training on MPF products, pricing, and master commitments; MPF loan delivery; use of eMPF and the MPF Guides; and MPF servicing and reporting. For MPF Direct, training on underwriting and exceptions is provided. For MPF Xtra, Fannie Mae Desktop Underwriter&#174; (DU&#174;) training is also required.
         ongoing: Outstanding loans sold to the Bank under the MPF Program and held by the Bank, including loans sold under MPF Original and MPF Plus between 2002 and 2006, remain subject to the credit enhancement requirements in effect when the loans were sold to the Bank and to the Bank’s current collateral requirements.
@@ -2325,10 +2326,6 @@ en:
           post_closing: Post Closing Information Form
           servicer: Servicer Information Form
           servicing_retained_only: Servicing Retained Only
-          agreement_servicer_account_remittance: "Agreement for Servicer’s Custodial P & I Account: Scheduled/Scheduled or Actual/Actual Single Remittance"
-          agreement_servicer_account_actual: "Agreement for Servicer’s Custodial P & I Account: Actual/Actual"
-          agreement_servicer_account: "Agreement for Servicer’s Custodial T & I Account"
-          mfp_government: MPF Government FHA/VA
           mpf_extra: MPF Xtra
           mpf_extra_agreement: "MPF Xtra: Agreement for Access to Fannie Mae’s DU® Only"
           mpf_xtra_addendum_mpf: MPF Xtra Addendum to MPF Program PFI Agreement (Servicing Retained)
@@ -2339,6 +2336,8 @@ en:
           mpf_direct: MPF Direct
           mpf_direct_agreement: MPF Direct Addendum to MPF Program PFI Agreement
           mpf_direct_questionnaire: MPF Direct Mortgage Operations Questionnaire
+          mpf_gov: MPF Government MBS
+          mpf_gov_questionnaire: MPF Government MBS Operations Questionnaire
         exhibits:
           title: Exhibits
           organization_chart: Organization Chart of Major Mortgage Functional Areas
@@ -2894,6 +2893,6 @@ en:
       putable_advances: 'Statement of Authority: Putable Advances'
     mpf:
       original: MPF Original
-      government: MPF Government
       xtra: MPF Xtra
       direct: MPF Direct
+      mbs: MPF Government MBS
