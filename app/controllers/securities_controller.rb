@@ -255,7 +255,7 @@ class SecuritiesController < ApplicationController
 
   # POST
   def authorize_request
-    response = SecuritiesRequestService.new(current_member_id, request).authorize_request(params[:request_id], current_user)
+    response = SecuritiesRequestService.new(current_member_id, request).authorize_request((params[:securities_release_request] || {})[:request_id], current_user)
     raise ActiveRecord::RecordNotFound unless response
     @title = t('securities.authorize.release.title')
   end

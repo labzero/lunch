@@ -762,7 +762,7 @@ RSpec.describe SecuritiesController, type: :controller do
   describe 'POST `authorize_request`' do
     allow_policy :security, :authorize?
     let(:request_id) { SecureRandom.hex }
-    let(:call_action) { post :authorize_request, request_id: request_id }
+    let(:call_action) { post :authorize_request, securities_release_request: {request_id: request_id} }
     let(:securities_request_service) { instance_double(SecuritiesRequestService, authorize_request: true) }
 
     before do
