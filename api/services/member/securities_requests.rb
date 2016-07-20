@@ -321,12 +321,12 @@ module MAPI
           delivery_columns = format_delivery_columns(delivery_type, required_delivery_keys, provided_delivery_keys)
           delivery_values = format_delivery_values(required_delivery_keys, delivery_instructions)
           raise ArgumentError, "securities must be an array containing at least one security" unless !securities.nil? && securities.is_a?(Array) && !securities.empty?
-          required_security_keys = broker_instructions['settlement_type'] == 'vs_payment' ?
-            REQUIRED_SECURITY_KEYS + ['payment_amount'] : REQUIRED_SECURITY_KEYS
+          required_security_keys = REQUIRED_SECURITY_KEYS
+          required_security_keys += ['payment_amount'] if broker_instructions['settlement_type'] == 'vs_payment'
           securities.each do |security|
             raise ArgumentError, "each security must be a non-empty hash" unless !security.nil? && security.is_a?(Hash) && !security.empty?
             required_security_keys.each do |key|
-              raise ArgumentError, "each security must consist of a hash containing a value for #{key}" unless security[key]
+              raise MAPI::Shared::Errors::ValidationError.new("each security must consist of a hash containing a value for #{key}", 'settlement_amount') unless security[key]
             end
           end
           user_name.downcase!

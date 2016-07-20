@@ -266,9 +266,9 @@ class SecuritiesController < ApplicationController
     errors = nil
     if @securities_release_request.valid?
       response = SecuritiesRequestService.new(current_member_id, request).submit_release_for_authorization(@securities_release_request, current_user) do |error|
-        errors = { mapi_endpoint: [error.http_body] }
+        errors = JSON.parse(error.http_body)['errors']
       end
-      errors ||= { mapi_endpoint: ['SecuritiesRequestService#submit_release_for_authorization has returned nil'] } unless response
+      errors ||= ['unknown'] unless response
     else
       errors = @securities_release_request.errors.messages
     end
@@ -413,9 +413,12 @@ class SecuritiesController < ApplicationController
 
   def human_submit_release_error_messages(errors)
     error_message_hash = {}
-    errors.each do |key, value|
-      # TODO add error messaging for specific errors as they become outlined in future tickets
-      error_message_hash[key] = I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number)
+    errors.each do |error|
+      if error == 'settlement_amount'
+        error_message_hash[error] = I18n.t('securities.release.edit.no_settlement_amount_error')
+      else
+        error_message_hash[error] = I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number)
+      end
     end
     error_message_hash
   end

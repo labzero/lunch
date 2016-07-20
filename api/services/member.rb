@@ -1408,9 +1408,12 @@ module MAPI
                                                                             post_body_json['broker_instructions'] || {},
                                                                             post_body_json['delivery_instructions'] || {},
                                                                             post_body_json['securities'] || [])
+          rescue MAPI::Shared::Errors::ValidationError => error
+            logger.error error.message
+            halt 400, {errors: [error.code]}.to_json
           rescue => error
             logger.error error
-            halt 400, error.message
+            halt 400, {errors: ['unknown'], human_errors: error.message}.to_json
           end
         end
 

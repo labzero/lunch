@@ -637,18 +637,20 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       describe 'when the service object returns nil' do
         let(:error_message) { SecureRandom.hex }
-        let(:error) { instance_double(RestClient::Exception, http_body: error_message) }
+        let(:error_message_body) { double('error_message_body') }
+        let(:error) { instance_double(RestClient::Exception, http_body: error_message_body.to_json) }
 
         before do
           allow(securities_request_service).to receive(:submit_release_for_authorization).and_return(nil)
+          allow(JSON).to receive(:parse).and_return(error_message)
         end
         it 'calls `populate_view_variables` with a specific `mapi_endpoint` error when the error handler is invoked' do
           allow(securities_request_service).to receive(:submit_release_for_authorization).and_yield(error)
-          expect(controller).to receive(:populate_view_variables).with(:release, {mapi_endpoint: [error_message]})
+          expect(controller).to receive(:populate_view_variables).with(:release, ['unknown'])
           call_action
         end
         it 'calls `populate_view_variables` with an `mapi_endpoint` error' do
-          expect(controller).to receive(:populate_view_variables).with(:release, {mapi_endpoint: ['SecuritiesRequestService#submit_release_for_authorization has returned nil']})
+          expect(controller).to receive(:populate_view_variables).with(:release, ['unknown'])
           call_action
         end
         it 'renders the `edit_release` view' do
@@ -663,6 +665,7 @@ RSpec.describe SecuritiesController, type: :controller do
       before do
         allow(securities_release_request).to receive(:valid?).and_return(false)
         allow(securities_release_request).to receive(:errors).and_return(errors)
+        allow(JSON).to receive(:parse).and_return(error_messages)
       end
 
       it 'calls `populate_view_variables` with the securities_release_request validation errors' do
@@ -1168,11 +1171,14 @@ RSpec.describe SecuritiesController, type: :controller do
 
     describe '`human_submit_release_error_messages`' do
       it 'returns a generic message for errors it is provided with' do
-        errors = {
-          foo: ['some error message']
-        }
+        errors = ['some error message']
         human_errors = subject.send(:human_submit_release_error_messages, errors)
-        expect(human_errors[:foo]).to eq(I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number))
+        expect(human_errors['some error message']).to eq(I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number))
+      end
+      it 'return settlement amount error message if settlement_amount is in the error parameter' do
+        errors = ['settlement_amount']
+        human_errors = subject.send(:human_submit_release_error_messages, errors)
+        expect(human_errors['settlement_amount']).to eq(I18n.t('securities.release.edit.no_settlement_amount_error'))
       end
     end
 

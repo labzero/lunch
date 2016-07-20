@@ -116,6 +116,12 @@ describe MAPI::ServiceApp do
       make_request
       expect(last_response.status).to be(400)
     end
+
+    it 'returns a status of 400 on ValidationError' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:create_release).and_raise(MAPI::Shared::Errors::ValidationError)
+      make_request
+      expect(last_response.status).to be(400)
+    end
   end
   describe 'PUT `securities/authorize`' do
     let(:username) { SecureRandom.hex }
