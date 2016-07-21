@@ -1254,6 +1254,7 @@ en:
         download_actions_html: '%{span} <span>or</span> %{button}'
         upload_error: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
         generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number}
+        no_settlement_amount_error: When 'Versus Payment' is selected, each security must have a settlement amount.
     safekeep:
       title: Safekeep Securities
       delete_request:
@@ -1265,7 +1266,6 @@ en:
       title: Pledge Securities
       delete_request:
         title: Delete this Pledge Securities request?
-      no_settlement_amount_error: When 'Versus Payment' is selected, each security must have a settlement amount.
     safekeep_pledge:
       upload_instructions:
         download_template: Download Add Securities Template File
