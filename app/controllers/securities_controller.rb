@@ -414,8 +414,11 @@ class SecuritiesController < ApplicationController
   def human_submit_release_error_messages(errors)
     error_message_hash = {}
     errors.each do |error|
-      if error == 'settlement_amount'
+      case error
+      when 'settlement_amount'
         error_message_hash[error] = I18n.t('securities.release.edit.no_settlement_amount_error')
+      when 'original_par'
+        error_message_hash[error] = I18n.t('securities.release.edit.fed_fifty_m_error')
       else
         error_message_hash[error] = I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number)
       end

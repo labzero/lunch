@@ -1180,6 +1180,11 @@ RSpec.describe SecuritiesController, type: :controller do
         human_errors = subject.send(:human_submit_release_error_messages, errors)
         expect(human_errors['settlement_amount']).to eq(I18n.t('securities.release.edit.no_settlement_amount_error'))
       end
+      it 'return original par error message if original_par is in the error parameter' do
+        errors = ['original_par']
+        human_errors = subject.send(:human_submit_release_error_messages, errors)
+        expect(human_errors['original_par']).to eq(I18n.t('securities.release.edit.fed_fifty_m_error'))
+      end
     end
 
     describe '`translated_dropdown_mapping`' do

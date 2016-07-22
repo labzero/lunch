@@ -43,6 +43,8 @@ module MAPI
           to_date: ['SETTLE_DATE', 'SUBMITTED_DATE', 'AUTHORIZED_DATE']
         }.freeze
 
+        FED_AMOUNT_LIMIT = 50000000
+
         def self.requests_query(member_id, status_array, date_range)
           quoted_statuses = status_array.collect { |status| quote(status) }.join(',')
           <<-SQL
@@ -327,6 +329,11 @@ module MAPI
             raise ArgumentError, "each security must be a non-empty hash" unless !security.nil? && security.is_a?(Hash) && !security.empty?
             required_security_keys.each do |key|
               raise MAPI::Shared::Errors::ValidationError.new("each security must consist of a hash containing a value for #{key}", 'settlement_amount') unless security[key]
+            end
+          end
+          if delivery_type == 'fed'
+            securities.each do |security|
+              raise MAPI::Shared::Errors::ValidationError.new("original par must be less than $#{FED_AMOUNT_LIMIT}", 'original_par') unless security['original_par'] < FED_AMOUNT_LIMIT
             end
           end
           user_name.downcase!

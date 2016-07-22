@@ -183,7 +183,7 @@ describe MAPI::ServiceApp do
       let(:delivery_values) { [ SecureRandom.hex, SecureRandom.hex, SecureRandom.hex ] }
       let(:security) { {  'cusip' => SecureRandom.hex,
                           'description' => SecureRandom.hex,
-                          'original_par' => rand(1..100000) + rand.round(2),
+                          'original_par' => rand(1..40000) + rand.round(2),
                           'payment_amount' => rand(1..100000) + rand.round(2) } }
       let(:required_delivery_keys) { [ 'a', 'b', 'c' ] }
       let(:delivery_columns) { MAPI::Services::Member::SecuritiesRequests.delivery_type_mapping(delivery_type).keys }
@@ -751,14 +751,20 @@ describe MAPI::ServiceApp do
               method_params[7] = [ security, [], security ]
               expect { call_method }.to raise_error(ArgumentError, "each security must be a non-empty hash")
             end
-
+            it "raises an `ValidationError` if `delivery_type` is `fed` and `original_par` is greater than #{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}" do
+              delivery_instructions['delivery_type'] = 'fed'
+              delivery_instructions['clearing_agent_fed_wire_address'] = SecureRandom.hex
+              delivery_instructions['aba_number'] = SecureRandom.hex
+              security['original_par'] = rand(50000001..99999999)
+              expect { call_method }.to raise_error(ValidationError, "original par must be less than $#{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}")
+            end
             context do
               let(:broker_instructions) { { 'transaction_code' => rand(0..1) == 0 ? 'standard' : 'repo',
                                             'trade_date' => trade_date,
                                             'settlement_type' => 'free',
                                             'settlement_date' => settlement_date } }
               let(:security_without_cusip) { { 'description' => SecureRandom.hex,
-                                               'original_par' => rand(1..100000) + rand.round(2),
+                                               'original_par' => rand(1..49000) + rand.round(2),
                                                'payment_amount' => rand(1..100000) + rand.round(2) } }
               let(:securities) { [ security, security_without_cusip, security ] }
 
@@ -766,10 +772,10 @@ describe MAPI::ServiceApp do
                 expect { call_method }.to raise_error(ArgumentError, /each security must consist of a hash containing a value for \S+/)
               end
 
-              it 'raises an `ArgumentError` if `settlement_type` is `vs_payment` and `payment_amount` is missing' do
+              it 'raises an `ValidationError` if `settlement_type` is `vs_payment` and `payment_amount` is missing' do
                 broker_instructions['settlement_type'] = 'vs_payment'
                 security['payment_amount'] = nil
-                expect { call_method }.to raise_error(ArgumentError, /each security must consist of a hash containing a value for payment_amount/)
+                expect { call_method }.to raise_error(ValidationError, /each security must consist of a hash containing a value for payment_amount/)
               end
             end
           end
