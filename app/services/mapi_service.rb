@@ -56,6 +56,16 @@ class MAPIService
     end
   end
 
+  def delete(name, endpoint, params={}, &error_handler)
+    begin
+      @connection[endpoint].delete params: params
+    rescue RestClient::Exception => e
+      warn(name, "RestClient error: #{e.class.name}:#{e.http_code}", e, &error_handler)
+    rescue Errno::ECONNREFUSED => e
+      warn(name, "connection error: #{e.class.name}", e, &error_handler)
+    end
+  end
+
   def post(name, endpoint, body, content_type = nil, &error_handler)
     begin
       if content_type

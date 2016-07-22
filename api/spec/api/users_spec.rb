@@ -54,9 +54,11 @@ describe MAPI::ServiceApp do
         allow(roles_cursor).to receive(:fetch_hash).and_yield({'ADVSIGNER' => -1})
         expect(json).to match_array(['signer-advances', 'signer'])
       end
-      it 'downcases the username' do
-        expect(ActiveRecord::Base.connection).to receive(:execute).with(match('foobar'))
-        get "/users/FooBar/roles"
+      it 'executes the `signer_id_query`' do
+        query = double('Signer ID Query')
+        allow(MAPI::Services::Users).to receive(:signer_id_query).with(username).and_return(query)
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(query)
+        make_request
       end
       role_mapping = {
         'ADVSIGNER' => ['signer-advances'],
@@ -112,6 +114,24 @@ describe MAPI::ServiceApp do
         allow(roles_cursor).to receive(:fetch_hash)
         expect(json).to match_array([])
       end
+    end
+  end
+
+  describe '`signer_id_query` class method' do
+    let(:username) { SecureRandom.hex.upcase }
+    let(:call_method) { MAPI::Services::Users.signer_id_query(username) }
+
+    it 'generates a SELECT statement' do
+      expect(call_method).to match(/\A\s*SELECT\s+SIGNER_ID\s+FROM\s+WEB_ADM.ETRANSACT_SIGNER\s+/i)
+    end
+    it 'quotes the downcased `username`' do
+      expect(MAPI::Services::Users).to receive(:quote).with(username.downcase)
+      call_method
+    end
+    it 'includes the quoted `username`' do
+      quoted_username = SecureRandom.hex
+      allow(MAPI::Services::Users).to receive(:quote).with(username.downcase).and_return(quoted_username)
+      expect(call_method).to match(/\s+WHERE\s+LOWER\(LOGIN_ID\)\s+=\s+#{quoted_username}\s*\z/m)
     end
   end
 

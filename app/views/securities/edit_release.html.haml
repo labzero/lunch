@@ -1,99 +1,21 @@
 - @page_title = t('global.page_meta_title', title: @title)
+- request_id = @securities_release_request.request_id
 .securities.row
   .securities-header
     %h1= @title
   .securities-main-body.securities-release
     .column-9x3-left
-      = form_for(@securities_release_request, validate: true, url: securities_submit_release_path, html: {class: 'securities-submit-release-form'}) do |f|
-        = f.hidden_field(:trade_date)
-        = f.hidden_field(:settlement_date)
-        - if @errors
-          .securities-submit-release-form-errors
-            - @errors.values.uniq.each do |message|
-              %p= message
-        %section.securities-broker-instructions
-          %h2= t('securities.release.broker_instructions')
-          .input-field-container-horizontal
-            %label{for: 'release_transaction_code'}= t('securities.release.transaction_code.label')
-            = render 'shared/dropdown', dropdown_name: 'securities_release_request[transaction_code]', default_value: @transaction_code_dropdown.first.last, default_text: @transaction_code_dropdown.first.first, dropdown_options: @transaction_code_dropdown
-          .input-field-container-horizontal
-            %label{for: 'release_settlement_type'}= t('securities.release.settlement_type.label')
-            = render 'shared/dropdown', dropdown_name: 'securities_release_request[settlement_type]', default_value: @settlement_type_dropdown.first.last, default_text: @settlement_type_dropdown.first.first, dropdown_options: @settlement_type_dropdown
-          .input-field-container-horizontal
-            %span= t('common_table_headings.trade_date')
-            = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_release_request[trade_date]'
-          .input-field-container-horizontal
-            %span= t('common_table_headings.settlement_date')
-            = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_release_request[settlement_date]'
-        %section.securities-delivery-instructions
-          %h2= t('securities.release.delivery_instructions.label')
-          = render 'shared/dropdown', dropdown_name: 'securities_release_request[delivery_type]', default_value: @delivery_instructions_dropdown.first.last, default_text: @delivery_instructions_dropdown.first.first, dropdown_options: @delivery_instructions_dropdown
-          .securities-delivery-instructions-fields{data: {'selected-delivery-instruction' => @delivery_instructions_dropdown.first.last}}
-            .securities-delivery-instructions-field.securities-delivery-instructions-field-physical-securities
-              = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_name, label: t('securities.release.delivery_instructions.agent_name'), horizontal: true
-              = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_address, label: t('securities.release.delivery_instructions.agent_name'), horizontal: true
-              = render 'shared/input_field', form_builder: f, field_name: :physical_securities_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
-            .securities-delivery-instructions-field.securities-delivery-instructions-field-fed
-              .securities-fed-wire-address-fields
-                %p= t('securities.release.clearing_agent')
-                = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_fed_wire_address_1
-                %span /
-                = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_fed_wire_address_2
-              = render 'shared/input_field', form_builder: f, field_name: :aba_number, label: t('securities.release.delivery_instructions.aba'), horizontal: true
-              = render 'shared/input_field', form_builder: f, field_name: :fed_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
-            .securities-delivery-instructions-field.securities-delivery-instructions-field-dtc
-              = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_participant_number, label: t('securities.release.delivery_instructions.participant_number'), horizontal: true
-              = render 'shared/input_field', form_builder: f, field_name: :dtc_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
-            .securities-delivery-instructions-field.securities-delivery-instructions-field-mutual-fund
-              = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_company, label: t('securities.release.delivery_instructions.mutual_fund'), horizontal: true
-              = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_account_number, label: t('securities.release.delivery_instructions.account_number'), horizontal: true
-        %section.securities-display
-          %h2= t('securities.title')
-          %p.securities-release-upload-error= t('securities.release.edit.upload_error')
-          .securities-release-table-wrapper
-            = render 'upload_release'
-          %p.securities-download= t('securities.release.edit.title')
-          .securities-download-instructions.fade{data: {dropzone: true}}
-            %p= t('securities.release.edit.intro')
-            %p.securities-download-instructions-step= t('securities.release.edit.step_1.title')
-            %p.securities-download-instructions-description{data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}}= t('securities.release.edit.step_1.description')
-            %p.securities-download-instructions-step= t('securities.release.edit.step_2.title')
-            .securities-download-instructions-description
-              %p= t('securities.release.edit.step_2.make_edits')
-              %p= t('securities.release.edit.step_2.include_information')
-              .securities-download-instructions-description-term
-                %strong= t('securities.release.edit.step_2.cusip.title')
-                %p= t('securities.release.edit.step_2.cusip.description')
-              .securities-download-instructions-description-term
-                %strong= t('securities.release.edit.step_2.payment_amount.title_html')
-                %p= t('securities.release.edit.step_2.payment_amount.description')
-              .securities-download-instructions-description-term
-                %strong= t('securities.release.edit.step_2.original_par.title')
-                %p= t('securities.release.edit.step_2.original_par.description')
-              .securities-download-instructions-description-term
-                %strong= t('securities.release.edit.step_2.custodian_name.title_html')
-                %p= t('securities.release.edit.step_2.custodian_name.description')
-            %p.securities-download-instructions-step= t('securities.release.edit.step_3.title')
-            %p.securities-download-instructions-description= t('securities.release.edit.step_3.description')
-            .securities-download-actions
-              - span = capture_haml do
-                %span= t('securities.release.edit.drag_drop')
-              - button = capture_haml do
-                .input-file-button-wrapper
-                  %button.secondary-button= t('securities.release.edit.select_file')
-                  %input#fileupload{type: "file", name: "file", accept: SecuritiesController::ACCEPTED_UPLOAD_MIMETYPES.join(' ,'), data: {url: securities_upload_release_path, 'results-container-class' => 'securities-release-table-wrapper', 'form-name' => 'securities-release-download', 'input-name' => 'securities', 'error-class' => 'securities-release-upload-error'}}
-              =t('securities.release.edit.download_actions_html', span: span, button: button)
-            .file-upload-progress
-              %p{data: {cancel_upload: true}}= t('global.cancel_upload')
-              %p= t('global.uploading')
-              .gauge-section
-                .inner-gauge-section
-        .securities-actions
-          %span.secondary-button.delete-release-trigger= t('global.delete')
-          = submit_tag(t('securities.release.submit_authorization'), class: 'primary-button')
+      = render partial: 'form', layout: false, locals: { account_number: nil, url: @form_data[:url] }
     .delete-release-flyout
       %h2= t('securities.release.delete_request.title')
-      %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')
-      = link_to(t('securities.release.delete_request.delete'), securities_manage_path, class: 'primary-button')
+      .securities-delete-request-confirmation
+        %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')
+        - if request_id
+          = link_to(t('securities.release.delete_request.delete'), securities_delete_request_path(request_id: request_id), method: :delete, remote: true, class: 'primary-button')
+        - else
+          = link_to(t('securities.release.delete_request.delete'), securities_manage_path, class: 'primary-button')
+      .securities-delete-request-error
+        %p= t('securities.release.delete_request.error_message')
+        = link_to(t('global.close'), securities_requests_path, class: 'primary-button')
     =form_tag(securities_download_release_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_release_request.securities.to_json)

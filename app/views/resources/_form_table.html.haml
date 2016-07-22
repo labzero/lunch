@@ -1,16 +1,20 @@
 - row_renderer = Proc.new do |row, nested|
+  - links = []
   %tr{class: nested ? 'nested-row' : nil}
     %td
       = row[:title]
       - if row[:form_number]
         %span.resource-form-number= row[:form_number]
-    %td
-      - if row[:pdf_link]
-        = link_to_download_resource(t('global.view_pdf'), row[:pdf_link])
-      - elsif row[:word_link]
-        = link_to_download_resource(t('global.view_doc'), row[:word_link])
-      - elsif row[:docusign_link]
-        = link_to(t('global.sign'),  row[:docusign_link])
+    - if row[:pdf_link]
+      - links << link_to_download_resource(t('global.view_pdf'), row[:pdf_link])
+    - if row[:word_link]
+      - links << link_to_download_resource(t('global.view_doc'), row[:word_link])
+    - if row[:docusign_link]
+      - links << render('docusign_link', title: row[:title], link: row[:docusign_link])
+    - while links.length < 2
+      - links.unshift(nil)
+    - links.each do |link|
+      %td= link
   - if row[:rows]
     - row[:rows].each do |row|
       - row_renderer.call(row, true)

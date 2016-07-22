@@ -943,6 +943,12 @@ en:
           title: Third-Party Creditor Relationships
           amendment: Amendment to Corporate Credit Union Security Agreement
           agreement: 'Subordination Agreement: Credit Unions'
+      docusign:
+        header: Review and sign using DocuSign
+        when_you_press: When you press "Sign with DocuSign", you will be redirected to DocuSign's website. A new tab will open in your browser, and the document will display within DocuSign, where you can complete, review, and sign the document.
+        first_time: If this is the first time you are using DocuSign to complete a Bank document, you will be asked to agree to DocuSign's terms of service.
+        after_submit: After you submit the document, you will be able to download a PDF of the signed document for your records.
+        sign: Sign with Docusign
     faq:
       title: FAQs
     capital_plan:
@@ -1146,6 +1152,8 @@ en:
       pledged: Pledged
       safekept: Safekept
       release: Release
+      safekeep_new: Safekeep New
+      pledge_new: Pledge New
     requests:
       title: Securities Requests
       actions:
@@ -1169,11 +1177,16 @@ en:
       add_securities: Add Securities
       broker_instructions: Broker Instructions
       pledge_account: Pledge Account
+      account_number:
+        label: Account No.
       transaction_code:
         label: Transcation Code
         standard: Standard
         repo: Repo
-      pledge_type: Pledge Type
+      pledge_type:
+        label: Pledge Type
+        sbc: SBC
+        standard: Standard
       settlement_type:
         label: Settlement Type
         free: Free
@@ -1198,10 +1211,13 @@ en:
       settlement_amount: 'Settlement Amount %{unit}%{footnote_marker}'
       settlement_amount_footnote: '%{footnote_marker}If Vs. Payment'
       submit_authorization: Submit for Authorization
+      authorize: Authorize
+      legal_copy: "Pursuant to the Advances and Security Agreement (Agreement) between your institution and the Bank, your institution requests the release and redelivery or reassignment of the securities listed above.\n\nBy authorizing the release of these securities, your institution certifies that, as of the date the securities are released, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Agreement) that will remain pledged to the Bank immediately after the requested release will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Agreement)."
       delete_request:
         title: Delete this Release Securities request?
         delete: Yes, Delete Request
         continue: No, Continue
+        error_message: This request cannot be deleted right now.
       edit:
         title: Edit Securities
         intro: "To edit the listed securities:"
@@ -1232,6 +1248,14 @@ en:
         download_actions_html: '%{span} <span>or</span> %{button}'
         upload_error: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
         generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number}
+    safekeep:
+      title: Safekeep Securities
+      delete_request:
+        title: Delete this Safekeep Securities request?
+    pledge:
+      title: Pledge Securities
+      delete_request:
+        title: Delete this Pledge Securities request?
     success:
       title: Release Securities Request Sent
       request_will_remain: 'This request will remain in the queue for authorization until one of the following occurs:'

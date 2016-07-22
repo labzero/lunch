@@ -44,3 +44,11 @@
     = render 'form_table', rows: @loan_document_rows
     %h3= t('resources.forms.collateral.creditor_relationship.title')
     = render 'form_table', rows: @creditor_relationship_rows
+  .docusign-form-flyout
+    %h2= t('resources.forms.docusign.header')
+    %h2.docusign-form-name="hi"
+    %p= t('resources.forms.docusign.when_you_press')
+    %p= t('resources.forms.docusign.first_time')
+    %p= t('resources.forms.docusign.after_submit')
+    %button.secondary-button{data: {'flyout-action' => 'close'}}= t('global.cancel')
+    = link_to(t('resources.forms.docusign.sign'), '#', target: '_blank', class: 'primary-button', data: {'flyout-action' => 'close'})

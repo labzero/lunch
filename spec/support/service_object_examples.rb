@@ -1,4 +1,4 @@
-RSpec.shared_examples 'a MAPI backed service object method' do |method, params=nil, action=:get, return_value=nil, &context_block|
+RSpec.shared_examples 'a MAPI backed service object method' do |method, params=nil, action=:get, return_value=nil, parses_json=true, &context_block|
   if context_block.present?
     context_block.call
   else
@@ -12,9 +12,11 @@ RSpec.shared_examples 'a MAPI backed service object method' do |method, params=n
     allow_any_instance_of(RestClient::Resource).to receive(action).and_raise(Errno::ECONNREFUSED)
     expect(call_method).to eq(return_value)
   end
-  it 'returns nil if there is a JSON parsing error' do
-    allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
-    allow(Rails.logger).to receive(:warn)
-    expect(call_method).to be(return_value)
+  if parses_json
+    it 'returns nil if there is a JSON parsing error' do
+      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
+      allow(Rails.logger).to receive(:warn)
+      expect(call_method).to be(return_value)
+    end
   end
 end

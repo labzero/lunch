@@ -155,14 +155,61 @@ describe MAPI::ServiceApp do
     end
   end
 
+  context 'account numbers' do
+    let(:account_numbers) { { 'P' => rand(999..9999), 'U' => rand(999..9999) } }
+    let(:account_numbers_hash_array) { [ { 'ACCOUNT_TYPE' => 'P', 'ADX_ID' => account_numbers['P'] },
+                                         { 'ACCOUNT_TYPE' => 'U', 'ADX_ID' => account_numbers['U'] } ] }
+    let(:member_id) { rand(999..9999) }
+
+    describe '`get_account_numbers_query`' do
+      let(:sql) {
+        <<-SQL
+            SELECT UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) AS ACCOUNT_TYPE, ADX.ADX_ID
+            FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF ADX, SAFEKEEPING.BTC_ACCOUNT_TYPE BAT, SAFEKEEPING.CUSTOMER_PROFILE CP
+            WHERE ADX.BAT_ID = BAT.BAT_ID
+            AND ADX.CP_ID = CP.CP_ID
+            AND CP.FHLB_ID = #{member_id}
+            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) IN ('P', 'U')
+            AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
+            AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
+            ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
+        SQL
+      }
+
+      it 'returns SQL with the member id' do
+        expect(MAPI::Services::Member::Profile.get_account_numbers_query(member_id)).to eq(sql)
+      end
+    end
+
+    describe '`get_account_numbers`' do
+      let(:logger) { double('A Logger') }
+      let(:account_numbers_query) { double('Account Numbers Query') }
+      let(:call_method) { MAPI::Services::Member::Profile.get_account_numbers(logger, member_id) }
+
+      before do
+        allow(MAPI::Services::Member::Profile).to receive(:get_account_numbers_query).with(member_id).and_return(account_numbers_query)
+        allow(MAPI::Services::Member::Profile).to receive(:fetch_hashes).and_return(account_numbers_hash_array)
+      end
+
+      it 'calls `fetch_hashes`' do
+        expect(MAPI::Services::Member::Profile).to receive(:fetch_hashes).with(logger, account_numbers_query)
+        call_method
+      end
+
+      it 'returns the `account_numbers` in a hash by account type' do
+        expect(call_method).to eq(account_numbers)
+      end
+    end
+  end
+
   describe 'member_details' do
     let(:make_request) { get "/member/#{member_id}/" }
     let(:member_details) { make_request; JSON.parse(last_response.body) }
-    let(:member_name) {SecureRandom.uuid}
+    let(:member_name) { SecureRandom.uuid }
     let(:member_name_cursor) { double('Member Query', fetch: [member_name])}
-    let(:sta_number) {SecureRandom.uuid}
+    let(:sta_number) { SecureRandom.uuid }
     let(:sta_number_cursor) { double('STA Number Query', fetch: [sta_number])}
-    let(:fhfa_number) {SecureRandom.uuid}
+    let(:fhfa_number) { SecureRandom.uuid }
     let(:customer_signature_card_response) { {'CU_FHFB_ID' => fhfa_number } }
     let(:customer_signature_card_cursor) { double('customer_signature_card_cursor', fetch_hash: customer_signature_card_response)}
     let(:address_data_response) { {'CU_FHFB_ID' => fhfa_number } }
@@ -172,7 +219,11 @@ describe MAPI::ServiceApp do
     let(:shippingstate) { SecureRandom.uuid }
     let(:shippingpostalcode) { SecureRandom.uuid }
     let(:address_data_response) { {'SHIPPINGSTREET' => shippingstreet, 'SHIPPINGCITY'=> shippingcity, 'SHIPPINGSTATE'=> shippingstate, 'SHIPPINGPOSTALCODE' => shippingpostalcode} }
-    let(:dual_signers_required) {SecureRandom.uuid}
+    let(:dual_signers_required) { SecureRandom.uuid }
+    let(:account_numbers_query) { double('Account Numbers Query') }
+    let(:account_numbers) { { "P" => rand(999..9999), "U" => rand(999..9999) } }
+    let(:member_id) { rand(999..9999) }
+
     let(:development_json) {
       {
         member_id => {
@@ -183,7 +234,9 @@ describe MAPI::ServiceApp do
           'street' => shippingstreetdata,
           'city' => shippingcity,
           'state' => shippingstate,
-          'postal_code' => shippingpostalcode
+          'postal_code' => shippingpostalcode,
+          'pledged_account_number' => account_numbers['P'],
+          'unpledged_account_number' => account_numbers['U']
         }
       }
     }
@@ -196,6 +249,7 @@ describe MAPI::ServiceApp do
           allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(env)
           allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_name_cursor, sta_number_cursor, customer_signature_card_cursor)
           allow(MAPI::Services::Member::Profile).to receive(:fetch_hash).and_return(address_data_response)
+          allow(MAPI::Services::Member::Profile).to receive(:get_account_numbers).and_return(account_numbers)
         end
         it 'returns a 404 if the member name isn\'t found' do
           allow(member_name_cursor).to receive(:fetch).and_return(nil)
@@ -268,6 +322,10 @@ describe MAPI::ServiceApp do
               expect(member_details['dual_signers_required']).to eq(false)
             end
           end
+          it 'calls `get_account_numbers`' do
+            expect(MAPI::Services::Member::Profile).to receive(:get_account_numbers).with(anything, member_id).and_return(account_numbers)
+            make_request
+          end
         end
         it 'returns the member name' do
           expect(member_details['name']).to eq(member_name)
@@ -289,6 +347,12 @@ describe MAPI::ServiceApp do
         end
         it 'returns the member postal code' do
           expect(member_details['postal_code']).to eq(shippingpostalcode)
+        end
+        it 'returns the pledged account number' do
+          expect(member_details['pledged_account_number']).to eq(account_numbers['P'])
+        end
+        it 'returns the unpledged account number' do
+          expect(member_details['unpledged_account_number']).to eq(account_numbers['U'])
         end
       end
     end

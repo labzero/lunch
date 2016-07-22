@@ -190,6 +190,13 @@ Rails.application.routes.draw do
       post 'download_release' => 'securities#download_release'
       post 'upload_release' => 'securities#upload_release'
       get 'success' => 'securities#submit_release_success'
+      get 'edit_safekeep' => 'securities#edit_safekeep'
+      post 'submit_safekeep' => 'error#not_found'
+      get 'view_release/:request_id' => 'securities#view_release', as: 'view_release'
+      post 'authorize_release' => 'error#not_found'
+      get 'edit_pledge' => 'securities#edit_pledge'
+      post 'submit_pledge' => 'error#not_found'
+      delete 'request/:request_id' => 'securities#delete_request', as: 'delete_request'
     end
   end
 

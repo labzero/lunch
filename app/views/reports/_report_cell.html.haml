@@ -39,7 +39,7 @@
         - else
           %li= list_item
 - when :actions
-  - value = cell[:value].collect {|action| link_to(action.first, action.last)}.join(' ').html_safe
+  - value = cell[:value].collect {|action| action.is_a?(Array) ? link_to(action.first, action.last) : action}.join(' ').html_safe
   - classes = [:'report-cell-actions', :'report-cell-narrow']
 - else
   - value = cell[:value]

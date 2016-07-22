@@ -127,7 +127,10 @@ $resource-page-padding: 140px !default;
   td{
     @extend %typography-table-cell;
     padding: 7px 20px;
-
+    &:nth-last-child(2) {
+      width: 70px;
+      text-align: right;
+    }
     &:last-child {
       width: 70px;
       text-align: right;
@@ -197,4 +200,19 @@ $resource-page-padding: 140px !default;
 .docusign-form{
   width: $row-width;
   height: 1000px;
+}
+
+.docusign-form-flyout  {
+  display: none;
+}
+
+.flyout .docusign-form-flyout  {
+  display: block;
+  h2 {
+    margin-bottom: 0;
+  }
+}
+
+.resource-view-pdf {
+  float: left;
 }

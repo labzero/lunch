@@ -144,7 +144,112 @@ describe SecuritiesRequestService do
     end
   end
 
+  describe '`submitted_release`' do
+    let(:request_id) { SecureRandom.hex }
+    let(:response_hash) { instance_double(Hash) }
+    let(:mapped_hash) { instance_double(Hash) }
+    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest) }
+    let(:call_method) { subject.submitted_release(request_id) }
+
+    it_behaves_like 'a MAPI backed service object method', :submitted_release, SecureRandom.hex
+
+    describe 'with MAPI call stubbed' do
+      before do
+        allow(subject).to receive(:get_hash).and_return(response_hash)
+        allow(subject).to receive(:map_response_to_securities_release_hash).and_return(mapped_hash)
+        allow(SecuritiesReleaseRequest).to receive(:from_hash).and_return(securities_release_request)
+      end
+
+      it 'calls `get_hash` with `:submitted_release` as an argument' do
+        expect(subject).to receive(:get_hash).with(:submitted_release, any_args).and_return(response_hash)
+        call_method
+      end
+      it 'calls `get_hash` with "/member/#{member_id}/securities/release/#{request_id}" as the endpoint argument' do
+        endpoint = "/member/#{member_id}/securities/release/#{request_id}"
+        expect(subject).to receive(:get_hash).with(anything, endpoint).and_return(response_hash)
+        call_method
+      end
+      it 'calls `map_response_to_securities_release_hash` with the returned securities release request' do
+        expect(subject).to receive(:map_response_to_securities_release_hash).with(response_hash).and_return(securities_release_request)
+        call_method
+      end
+      it 'returns the mapped securities release request' do
+        expect(call_method).to eq(securities_release_request)
+      end
+    end
+  end
+
+  describe '`delete_request`' do
+    let(:request_id) { SecureRandom.hex }
+    let(:response) { instance_double(RestClient::Response) }
+    let(:call_method) { subject.delete_request(request_id) }
+
+    before { allow_any_instance_of(RestClient::Resource).to receive(:delete).and_return(response) }
+
+    it_behaves_like 'a MAPI backed service object method', :delete_request, SecureRandom.hex, :delete, nil, false
+
+    it 'calls `delete` with `:delete_request` for the name arg' do
+      expect(subject).to receive(:delete).with(:delete_request, any_args)
+      call_method
+    end
+    it 'calls `delete` with `{member_id}/securities/request/{request_id}` for the endpoint arg' do
+      expect(subject).to receive(:delete).with(anything, "/member/#{member_id}/securities/request/#{request_id}")
+      call_method
+    end
+    it 'returns the value of the `delete` call' do
+      expect(call_method).to eq(response)
+    end
+  end
+
   describe 'private methods' do
+    describe '`map_response_to_securities_release_hash`' do
+      let(:raw_hash) {{
+        broker_instructions: {
+          transaction_code: instance_double(String),
+          settlement_type: instance_double(String),
+          trade_date: instance_double(String),
+          settlement_date: instance_double(String)
+        },
+        delivery_instructions: {},
+        request_id: instance_double(String),
+        securities: instance_double(Array)
+      }}
+      let(:call_method) { subject.send(:map_response_to_securities_release_hash, raw_hash) }
+
+      SecuritiesReleaseRequest::BROKER_INSTRUCTION_KEYS.each do |broker_instruction|
+        it "returns a hash with a `#{broker_instruction}` value" do
+          expect(call_method[broker_instruction]).to eq(raw_hash[:broker_instructions][broker_instruction])
+        end
+      end
+      SecuritiesReleaseRequest::DELIVERY_TYPES.keys.each do |delivery_type|
+        describe "when the `delivery_type` is `#{delivery_type}`" do
+          before do
+            raw_hash[:delivery_instructions] = {
+              delivery_type: delivery_type,
+              account_number: instance_double(String)
+            }
+          end
+          SecuritiesReleaseRequest::DELIVERY_INSTRUCTION_KEYS[delivery_type].each do |delivery_key|
+            if SecuritiesReleaseRequest::ACCOUNT_NUMBER_TYPE_MAPPING.values.include?(delivery_key)
+              account_number_key = SecuritiesReleaseRequest::ACCOUNT_NUMBER_TYPE_MAPPING[delivery_type]
+              it "sets the `account_number` value of the passed hash to the `#{account_number_key}` in the returned hash" do
+                expect(call_method[account_number_key]).to eq(raw_hash[:delivery_instructions][:account_number])
+              end
+            else
+              it "returns a hash with a `#{delivery_key}` value" do
+                expect(call_method[delivery_key]).to eq(raw_hash[:delivery_instructions][delivery_key])
+              end
+            end
+          end
+        end
+      end
+      [:request_id, :securities].each do |attr|
+        it "returns a hash with a `#{attr}` value" do
+          expect(call_method[attr]).to eq(raw_hash[attr])
+        end
+      end
+    end
+
     describe '`process_securities_requests`' do
       let(:requests) { [ double(Hash), double(Hash) ] }
       let(:indifferent_requests) do

@@ -1,0 +1,4 @@
+- title ||= nil
+- link ||= nil
+%span.docusign-sign-trigger
+  = link_to(t('global.sign'), link, :data => {:docusign_title => title})

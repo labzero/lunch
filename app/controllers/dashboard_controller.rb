@@ -107,6 +107,20 @@ class DashboardController < ApplicationController
         status: 'TERMINATED'
       }
     },
+    # Advance Amortized Today
+    {
+      returns: {
+        description: ->(entry, key, controller) { entry[:product_description] },
+        amount: ->(entry, key, controller) { entry[:termination_par] },
+        transaction_number: ACTIVITY_DEFAULT_TRANSACTION_NUMBER,
+        event: ->(entry, key, controller) { entry[:termination_full_partial] }
+      },
+      pattern: {
+        instrument_type: 'ADVANCE',
+        status: 'TERMINATED',
+        product: 'AMORTIZING'
+      }
+    },
     # Advance Terminated Today
     {
       returns: {

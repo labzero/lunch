@@ -146,9 +146,9 @@
   }
   .primary-button, .secondary-button {
     width: 220px;
-    &:last-child {
-      margin-left: 14px;
-    }
+  }
+  .primary-button {
+    margin-left: 14px;
   }
   .flyout-top-section {
     padding: 15px 20px 20px;

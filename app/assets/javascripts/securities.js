@@ -40,6 +40,19 @@ $(function() {
     $('.flyout').addClass('flyout-confirmation-dialogue');
   };
 
+  // Handle DELETE request
+  $('.delete-release-flyout').on('ajax:success', function(e, data, status, xhr) {
+    window.location.href = data['url']
+  }).on('ajax:error', function(e, data, status, xhr) {
+    var $errorSection = $('.securities-delete-request-error');
+    var error_message = data['error_message'];
+    if (error_message) {
+      $errorSection.find('p').text(error_message);
+    };
+    $('.securities-delete-request-confirmation').hide();
+    $errorSection.show();
+  });
+
   // Toggle Edit Securities Instructions
   $('.securities-download').on('click', function(){
     $('.securities-download-instructions').toggle();

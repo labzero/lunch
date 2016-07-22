@@ -65,13 +65,16 @@ $form-input-field-height: 30px !default;
     }
     height: auto;
   }
-
   &[class*=" icon-"], &[class^="icon-"] {
     &[class$="-before"], &[class*="-before "] {
       input {
         padding-left: 30px;
       }
     }
+  }
+  .disabled {
+    color: $medium-gray;
+    border-color: $light-blue;
   }
 }
 

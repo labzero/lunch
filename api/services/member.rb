@@ -938,7 +938,6 @@ module MAPI
               end
             end
           end
-
           api do
             key :path, '/{id}/securities/release'
             operation do
@@ -951,7 +950,7 @@ module MAPI
                 key :name, :id
                 key :required, true
                 key :type, :string
-                key :description, 'The FHLB ID of the member institution requesting securities release.'
+                key :description, 'The FHLB ID of the member institution requesting securities release'
               end
               parameter do
                 key :paramType, :body
@@ -959,6 +958,77 @@ module MAPI
                 key :required, true
                 key :type, :SecuritiesRelease
                 key :description, "Securities to release and their associated metadata"
+              end
+            end
+          end
+          
+          api do
+            key :path, '/{id}/securities/release/{header_id}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the details of the release request and associated securities'
+              key :nickname, 'getSecurityReleaseRequestDetails'
+              key :type, :SecuritiesRelease
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution requesting securities release'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :header_id
+                key :required, true
+                key :type, :string
+                key :description, 'The header ID of the security release request'
+              end
+            end
+          end
+
+          api do
+            key :path, '/{id}/securities/authorize'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Authorize an existing securities request'
+              key :nickname, 'authorizeSecuritiesRelease'
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member whose request is being authorized.'
+              end
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :SecuritiesRequestAuthorization
+                key :description, 'Security to authorize and the authorizer details'
+              end
+            end
+          end
+
+          api do
+            key :path, '/{id}/securities/request/{header_id}'
+            operation do
+              key :method, 'DELETE'
+              key :summary, 'Delete the security release request header detail record and associated securities records'
+              key :nickname, 'deleteSecurityReleaseRequestDetails'
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution requesting the securities release delete'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :header_id
+                key :required, true
+                key :type, :string
+                key :description, 'The header ID of the security release request to be deleted'
               end
             end
           end
@@ -1321,24 +1391,54 @@ module MAPI
           id = params[:id].to_i
           end_date = (params[:settle_end_date] || Time.zone.today).to_date
           start_date = (params[:settle_start_date] || (end_date - 100.years)).to_date
-          MAPI::Services::Member::SecuritiesRequests.requests(self, id, MAPI::Services::Member::SecuritiesRequests::REQUEST_STATUS_MAPPING[params[:status]], (start_date..end_date)).to_json
+          MAPI::Services::Member::SecuritiesRequests.requests(self, id,
+            MAPI::Services::Member::SecuritiesRequests::REQUEST_STATUS_MAPPING[params[:status]],
+            (start_date..end_date)).to_json
         end
 
         relative_post '/:id/securities/release' do
           begin
             post_body_json = JSON.parse(request.body.read)
             user = post_body_json['user']
-            MAPI::Services::Member::SecuritiesRequests.create_release(self,
-                                                                      params['id'].to_i,
-                                                                      user['username'],
-                                                                      user['full_name'],
-                                                                      user['session_id'],
-                                                                      post_body_json['broker_instructions'] || '{}',
-                                                                      post_body_json['delivery_instructions'] || '{}',
-                                                                      post_body_json['securities'] || '[]')
+            "" if MAPI::Services::Member::SecuritiesRequests.create_release(self,
+                                                                            params['id'].to_i,
+                                                                            user['username'],
+                                                                            user['full_name'],
+                                                                            user['session_id'],
+                                                                            post_body_json['broker_instructions'] || {},
+                                                                            post_body_json['delivery_instructions'] || {},
+                                                                            post_body_json['securities'] || [])
           rescue => error
             logger.error error
             halt 400, error.message
+          end
+        end
+
+        relative_get '/:id/securities/release/:request_id' do
+          MAPI::Services::Member::SecuritiesRequests.release_details(self, params[:id].to_i, params[:request_id].to_i).to_json
+        end
+
+        relative_put '/:id/securities/authorize' do
+          begin
+            body = JSON.parse(request.body.read)
+            user = body['user']
+            halt 400, '`user` is required' unless user
+            if MAPI::Services::Member::SecuritiesRequests.authorize_request(self, params['id'].to_i, body['request_id'], user['username'], user['full_name'], user['session_id'])
+              ''
+            else
+              halt 404, 'request already authorized or not found'
+            end
+          rescue ArgumentError => e
+            logger.error e
+            halt 400, e.message
+          end
+        end
+
+        relative_delete '/:id/securities/request/:request_id' do
+          if MAPI::Services::Member::SecuritiesRequests.delete_request(self, params[:id].to_i, params[:request_id].to_i)
+            ''
+          else
+            halt 404, 'Resource Not Found'
           end
         end
       end

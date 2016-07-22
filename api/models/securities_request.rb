@@ -52,7 +52,7 @@ module MAPI
       end
 
       swagger_model :User do
-        key :requred, %i(username, full_name, session_id)
+        key :requred, %i(username full_name session_id)
 
         property 'username' do
           key :type, :string
@@ -107,9 +107,14 @@ module MAPI
           key :description, 'To whom to deliver the securties'
         end
 
-        property :clearing_agent_fed_wire_address do
+        property :clearing_agent_fed_wire_address_1 do
           key :type, :string
-          key :description, 'The fed wire address of the clearing agent (a.k.a. broker wire address) when deliver to is fed'
+          key :description, 'Part 1 of the fed wire address of the clearing agent (a.k.a. broker wire address) when deliver to is fed'
+        end
+
+        property :clearing_agent_fed_wire_address_2 do
+          key :type, :string
+          key :description, 'Part 2 of the fed wire address of the clearing agent (a.k.a. broker wire address) when deliver to is fed'
         end
 
         property :aba_number do
@@ -191,18 +196,13 @@ module MAPI
         end
       end
 
-      swagger_model :Securities do
-        property :securities do
-          key :type, :array
-          key :description, 'An array of securities to be included in the release request.'
-          items do
-            key :'$ref', :Security
-          end
-        end
-      end
-
       swagger_model :SecuritiesRelease do
         key :required, %i(user broker_instructions delivery_instructions securities)
+
+        property :request_id do
+          key :type, :string
+          key :description, 'The ID of the request'
+        end
 
         property :user do
           key :type, :User
@@ -220,8 +220,26 @@ module MAPI
         end
 
         property :securities do
-          key :type, :Securities
-          key :description, 'The securities to release'
+          key :type, :array
+          key :description, 'An array of securities to be included in the release request.'
+          items do
+            key :'$ref', :Security
+          end
+        end
+      end
+
+      swagger_model :SecuritiesRequestAuthorization do
+        key :required, %i(user request_id)
+
+        property :user do
+          key :type, :User
+          key :description, 'The user information'
+        end
+
+        property :request_id do
+          key :type, :string
+          key :required, true
+          key :description, 'The request ID of the request to authorize.'
         end
       end
     end
