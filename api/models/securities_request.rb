@@ -122,9 +122,10 @@ module MAPI
           key :description, 'The ABA number when deliver to is fed'
         end
 
-        property :fed_credit_account_number do
+        property :account_number do
+          key :required, true
           key :type, :string
-          key :description, 'The for credit account number when deliver to is fed'
+          key :description, 'The credit account number for the delivery type'
         end
 
         property :clearing_agent_participant_number do
@@ -132,19 +133,9 @@ module MAPI
           key :description, 'The clearing agent participant number when deliver to is DTC'
         end
 
-        property :dtc_credit_account_number do
-          key :type, :string
-          key :description, 'The further credit account number when deliver to is DTC'
-        end
-
         property :mutual_fund_company do
           key :type, :string
           key :description, 'The mutual fund company name when deliver to is mutual fund'
-        end
-
-        property :mutual_fund_account_number do
-          key :type, :string
-          key :description, 'The mutual fund account number name when deliver to is mutual fund'
         end
 
         property :delivery_bank_agent do
@@ -160,11 +151,6 @@ module MAPI
         property :receiving_bank_agent_address do
           key :type, :string
           key :description, 'The receiving bank agent address when deliver to is physical securities'
-        end
-
-        property :physical_securities_credit_account_number do
-          key :type, :string
-          key :description, 'The for further credit account number when deliver to is physical securities'
         end
       end
 

@@ -4,6 +4,51 @@ require 'date'
 describe MAPI::ServiceApp do
   subject { MAPI::Services::Member }
 
+  shared_examples 'a MAPI endpoint with JSON error handling' do |endpoint, action, module_name, module_method, params={}|
+    let(:logger) { double('MAPI logger', error: nil) }
+    let(:error_message) { SecureRandom.hex }
+    let(:error_code) { SecureRandom.hex }
+    let(:error) { MAPI::Shared::Errors::ValidationError.new(error_message, error_code) }
+    let(:make_request) { send(action, "/member/#{member_id}/#{endpoint}", params) }
+    let(:response_body) { make_request; JSON.parse(last_response.body).with_indifferent_access }
+    let(:response_status) { make_request; last_response.status }
+
+    before do
+      allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
+      allow(module_name).to receive(module_method).and_raise(error)
+    end
+
+    describe "when the `#{module_name}.#{module_method}` method returns a ValidationError" do
+      it 'returns a 400' do
+        expect(response_status).to eq(400)
+      end
+      it 'logs an error message' do
+        expect(logger).to receive(:error).with(error_message)
+        make_request
+      end
+      it 'returns an error code of in its body' do
+        expect(response_body[:errors]).to include(error_code)
+      end
+    end
+    describe "when the `#{module_name}.#{module_method}` method returns an error that is not a ValidationError" do
+      let(:error) { StandardError.new(error_message) }
+
+      it 'returns a 400' do
+        expect(response_status).to eq(400)
+      end
+      it 'logs the error' do
+        expect(logger).to receive(:error).with(error)
+        make_request
+      end
+      it 'returns `unknown` in the `errors` array of its body' do
+        expect(response_body[:errors]).to include('unknown')
+      end
+      it 'returns the error message as the `human_errors` value in its body' do
+        expect(response_body[:human_errors]).to eq(error_message)
+      end
+    end
+  end
+
   describe 'capital_stock_trial_balance' do
     let(:result){ { "certificates" => [], "number_of_certificates" => 0, "number_of_shares" => 0 }}
     let(:id) { 750 }
@@ -92,6 +137,8 @@ describe MAPI::ServiceApp do
       end
     end
 
+    it_behaves_like 'a MAPI endpoint with JSON error handling', "securities/release", :post, MAPI::Services::Member::SecuritiesRequests, :create_release, {user:{}}.to_json
+
     it 'calls `MAPI::Services::Member::SecuritiesRequests.create_release`' do
       allow(MAPI::Services::Member::SecuritiesRequests).to receive(:create_release).with(
         kind_of(app),
@@ -109,18 +156,6 @@ describe MAPI::ServiceApp do
 
     it 'doesn\'t raise an error' do
       expect { make_request }.to_not raise_error
-    end
-
-    it 'returns a status of 400 on error' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:create_release).and_raise(ArgumentError, exception_message)
-      make_request
-      expect(last_response.status).to be(400)
-    end
-
-    it 'returns a status of 400 on ValidationError' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:create_release).and_raise(MAPI::Shared::Errors::ValidationError)
-      make_request
-      expect(last_response.status).to be(400)
     end
   end
   describe 'PUT `securities/authorize`' do
@@ -209,6 +244,113 @@ describe MAPI::ServiceApp do
       it 'returns an error message as the response body' do
         make_request
         expect(last_response.body).to eq('Resource Not Found')
+      end
+    end
+  end
+
+  describe 'PUT `securities/release`' do
+    let(:post_body) {{
+      request_id: SecureRandom.hex,
+      broker_instructions: SecureRandom.hex,
+      delivery_instructions: SecureRandom.hex,
+      securities: SecureRandom.hex,
+      user: {
+        username: SecureRandom.hex,
+        full_name: SecureRandom.hex,
+        session_id: SecureRandom.hex
+      }
+    }}
+    let(:logger) { double('MAPI logger', error: nil) }
+    let(:make_request) { put "/member/#{member_id}/securities/release", post_body.to_json }
+    let(:response_body) { make_request; JSON.parse(last_response.body).with_indifferent_access }
+    let(:response_status) { make_request; last_response.status }
+
+    before do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:update_release).and_return(true)
+    end
+
+    it 'calls `MAPI::Services::Member::SecuritiesRequests.update_release` with all of the appropriate arguments' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:update_release).with(
+        kind_of(app),
+        member_id.to_i,
+        post_body[:request_id],
+        post_body[:user][:username],
+        post_body[:user][:full_name],
+        post_body[:user][:session_id],
+        post_body[:broker_instructions],
+        post_body[:delivery_instructions],
+        post_body[:securities]
+      )
+      make_request
+    end
+    it 'calls `update_release` with an empty hash for `broker_instructions` if they are not included in the posted body' do
+      post_body.delete(:broker_instructions)
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:update_release).with(anything, anything, anything, anything, anything, anything, {}, any_args)
+      make_request
+    end
+    it 'calls `update_release` with an empty hash for `delivery_instructions` if they are not included in the posted body' do
+      post_body.delete(:delivery_instructions)
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:update_release).with(anything, anything, anything, anything, anything, anything, anything, {}, any_args)
+      make_request
+    end
+    it 'calls `update_release` with an empty array for `securities` if they are not included in the posted body' do
+      post_body.delete(:securities)
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:update_release).with(anything, anything, anything, anything, anything, anything, anything, anything, [])
+      make_request
+    end
+    describe 'when `update_release` returns true' do
+      before { allow(MAPI::Services::Member::SecuritiesRequests).to receive(:update_release).and_return(true) }
+
+      it 'returns an empty hash as JSON as its response body' do
+        expect(response_body).to eq({})
+      end
+      it 'returns a status of 200' do
+        expect(response_status).to eq(200)
+      end
+    end
+    describe 'when `update_release` returns false' do
+      before { allow(MAPI::Services::Member::SecuritiesRequests).to receive(:update_release).and_return(false) }
+
+      it 'returns an empty string as its response body' do
+        make_request
+        expect(last_response.body).to eq('')
+      end
+      it 'returns a status of 200' do
+        expect(response_status).to eq(200)
+      end
+    end
+    describe 'error handling' do
+      before { allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger) }
+
+      it_behaves_like 'a MAPI endpoint with JSON error handling', "securities/release", :put, MAPI::Services::Member::SecuritiesRequests, :update_release, {user: SecureRandom.hex, request_id: SecureRandom.hex}.to_json
+
+      describe 'when there is no `user` hash in the posted body' do
+        before { post_body.delete(:user) }
+
+        it 'returns a 400' do
+          expect(response_status).to eq(400)
+        end
+        it 'logs an error message' do
+          expect(logger).to receive(:error).with('`user` is required')
+          make_request
+        end
+        it 'returns an error code of `user` in its body' do
+          expect(response_body[:errors]).to include('user')
+        end
+      end
+      describe 'when there is no `request_id` in the posted body' do
+        before { post_body.delete(:request_id) }
+
+        it 'returns a 400' do
+          expect(response_status).to eq(400)
+        end
+        it 'logs an error message' do
+          expect(logger).to receive(:error).with('`request_id` is required')
+          make_request
+        end
+        it 'returns an error code of `request_id` in its body' do
+          expect(response_body[:errors]).to include('request_id')
+        end
       end
     end
   end

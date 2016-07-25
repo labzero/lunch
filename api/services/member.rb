@@ -961,7 +961,29 @@ module MAPI
               end
             end
           end
-          
+          api do
+            key :path, '/{id}/securities/release'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Update a securities release request'
+              key :nickname, 'updateSecuritiesReleaseRequest'
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution requesting the securities release update'
+              end
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :SecuritiesRelease
+                key :description, "Securities to update and their associated metadata"
+              end
+            end
+          end
           api do
             key :path, '/{id}/securities/release/{header_id}'
             operation do
@@ -1408,6 +1430,31 @@ module MAPI
                                                                             post_body_json['broker_instructions'] || {},
                                                                             post_body_json['delivery_instructions'] || {},
                                                                             post_body_json['securities'] || [])
+          rescue MAPI::Shared::Errors::ValidationError => error
+            logger.error error.message
+            halt 400, {errors: [error.code]}.to_json
+          rescue => error
+            logger.error error
+            halt 400, {errors: ['unknown'], human_errors: error.message}.to_json
+          end
+        end
+
+        relative_put '/:id/securities/release' do
+          begin
+            body = JSON.parse(request.body.read)
+            user = body['user']
+            raise MAPI::Shared::Errors::ValidationError.new('`user` is required', 'user') unless user
+            request_id = body['request_id']
+            raise MAPI::Shared::Errors::ValidationError.new('`request_id` is required', 'request_id') unless request_id
+            {}.to_json if MAPI::Services::Member::SecuritiesRequests.update_release(self,
+                                                                            params['id'].to_i,
+                                                                            request_id,
+                                                                            user['username'],
+                                                                            user['full_name'],
+                                                                            user['session_id'],
+                                                                            body['broker_instructions'] || {},
+                                                                            body['delivery_instructions'] || {},
+                                                                            body['securities'] || [])
           rescue MAPI::Shared::Errors::ValidationError => error
             logger.error error.message
             halt 400, {errors: [error.code]}.to_json

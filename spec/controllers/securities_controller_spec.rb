@@ -1175,15 +1175,15 @@ RSpec.describe SecuritiesController, type: :controller do
         human_errors = subject.send(:human_submit_release_error_messages, errors)
         expect(human_errors['some error message']).to eq(I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number))
       end
-      it 'return settlement amount error message if settlement_amount is in the error parameter' do
-        errors = ['settlement_amount']
+      it 'return settlement amount error message if `missing_security_settlement_amount_key` is in the error parameter' do
+        errors = ['missing_security_settlement_amount_key']
         human_errors = subject.send(:human_submit_release_error_messages, errors)
-        expect(human_errors['settlement_amount']).to eq(I18n.t('securities.release.edit.no_settlement_amount_error'))
+        expect(human_errors['missing_security_settlement_amount_key']).to eq(I18n.t('securities.release.edit.no_settlement_amount_error'))
       end
-      it 'return original par error message if original_par is in the error parameter' do
-        errors = ['original_par']
+      it 'return original par error message if `invalid_security_original_par_key` is in the error parameter' do
+        errors = ['invalid_security_original_par_key']
         human_errors = subject.send(:human_submit_release_error_messages, errors)
-        expect(human_errors['original_par']).to eq(I18n.t('securities.release.edit.fed_fifty_m_error'))
+        expect(human_errors['invalid_security_original_par_key']).to eq(I18n.t('securities.release.edit.fed_fifty_m_error'))
       end
     end
 

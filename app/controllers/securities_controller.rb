@@ -415,9 +415,9 @@ class SecuritiesController < ApplicationController
     error_message_hash = {}
     errors.each do |error|
       case error
-      when 'settlement_amount'
+      when 'missing_security_settlement_amount_key'
         error_message_hash[error] = I18n.t('securities.release.edit.no_settlement_amount_error')
-      when 'original_par'
+      when 'invalid_security_original_par_key'
         error_message_hash[error] = I18n.t('securities.release.edit.fed_fifty_m_error')
       else
         error_message_hash[error] = I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number)
