@@ -39,6 +39,9 @@
     @extend %typography-page-title;
     margin: 32px 0 17px;
   }
+  footer {
+    @extend %typography-table-cell;
+  }
 }
 
 .limited-pricing-message {

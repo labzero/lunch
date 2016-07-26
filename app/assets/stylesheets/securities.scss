@@ -77,9 +77,8 @@
 }
 
 .manage-securities-form, .securities-submit-release-form {
-  input[type=submit], a {
+  input[type=submit], .primary-button {
     float: right;
-    color: $white;
     margin-left: 15px;
   }
 }
