@@ -27,6 +27,12 @@ Scenario: Visiting the Securities Transactions Report Page with new securities t
   Given I am on the "Securities Transactions" report page
   Then I should see a security that is indicated as a new transaction
 
+@resque-backed @smoke @jira-mem-814
+Scenario: Member downloads a PDF of the Advances Detail report
+  Given I am on the "Securities Transactions" report page
+  When I request a PDF
+  Then I should begin downloading a file
+
 @resque-backed @smoke @jira-mem-815
 Scenario: Member downloads an XLSX of the Securities Transactions report
   Given I am on the "Securities Transactions" report page

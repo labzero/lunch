@@ -1428,7 +1428,7 @@ class ReportsController < ApplicationController
   def securities_transactions
     initialize_dates(:securities_transactions, params[:start_date])
     report_download_name = "securities-transactions-#{fhlb_report_date_numeric(@start_date)}"
-    downloadable_report(:xlsx, {start_date: params[:start_date]}, report_download_name) do
+    downloadable_report(DOWNLOAD_FORMATS, {start_date: params[:start_date]}, report_download_name) do
       @report_name = ReportConfiguration.report_title(:securities_transactions)
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
