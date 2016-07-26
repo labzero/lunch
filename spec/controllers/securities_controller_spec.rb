@@ -290,6 +290,8 @@ RSpec.describe SecuritiesController, type: :controller do
   describe 'POST edit_release' do
     let(:call_action) { post :edit_release }
 
+    before { allow(controller).to receive(:populate_view_variables) }
+
     it_behaves_like 'a user required action', :post, :edit_release
     it_behaves_like 'a controller action with an active nav setting', :edit_release, :securities
     it 'sets `@title`' do
@@ -369,6 +371,9 @@ RSpec.describe SecuritiesController, type: :controller do
     before do
       allow(MembersService).to receive(:new).with(request).and_return(member_service_instance)
       allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
+      allow(controller).to receive(:populate_view_variables) do
+        controller.instance_variable_set(:@securities_release_request, securities_release_request)
+      end
     end
 
     describe 'GET edit_pledge' do
@@ -969,6 +974,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, securities: securities, :securities= => nil, trade_date: nil, :trade_date= => nil, settlement_date: nil, :settlement_date= => nil) }
       let(:call_action) { controller.send(:populate_view_variables, :release) }
       let(:errors) { instance_double(Hash) }
+      let(:date_restrictions) { instance_double(Hash) }
 
       before do
         allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
@@ -976,6 +982,7 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(controller).to receive(:populate_settlement_type_dropdown_variables)
         allow(controller).to receive(:populate_delivery_instructions_dropdown_variables)
         allow(controller).to receive(:populate_securities_table_data_view_variable)
+        allow(controller).to receive(:date_restrictions)
       end
 
       it 'calls `human_submit_release_error_messages` if errors are present' do
@@ -1060,6 +1067,11 @@ RSpec.describe SecuritiesController, type: :controller do
           url: securities_submit_release_path,
           submit_text: I18n.t('securities.release.submit_authorization')
         }
+      end
+      it 'sets `@date_restrictions` to the result of calling the `date_restrictions` method' do
+        allow(controller).to receive(:date_restrictions).and_return(date_restrictions)
+        call_action
+        expect(assigns[:date_restrictions]).to eq(date_restrictions)
       end
       describe 'when the current user is a securities signer' do
         allow_policy :security, :authorize?
@@ -1217,6 +1229,81 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'returns a hash with I18n translated `text` values' do
         expect(call_method).to eq(translated_hash)
+      end
+    end
+
+    describe '`date_restrictions`' do
+      let(:today) { Time.zone.today }
+      let(:max_date) { today + 3.months }
+      let(:holidays) do
+        holidays = []
+        rand(2..4).times do
+          holidays << (today + rand(1..70).days).iso8601
+        end
+        holidays
+      end
+      let(:weekends) do
+        weekends = []
+        date_iterator = today.clone
+        while date_iterator <= max_date do
+          weekends << date_iterator.iso8601 if (date_iterator.sunday? || date_iterator.saturday?)
+          date_iterator += 1.day
+        end
+      end
+      let(:calendar_service) { instance_double(CalendarService, holidays: holidays) }
+      let(:call_method) { subject.send(:date_restrictions) }
+
+      before { allow(Rails.cache).to receive(:fetch).and_return(holidays) }
+
+      it 'fetches the `calendar_holidays` from the Rails cache with the proper key and expiry param' do
+        expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:calendar_holidays), expires_in: CacheConfiguration.expiry(:calendar_holidays)).and_return(holidays)
+        call_method
+      end
+      describe 'when `calendar_holidays` already exists in the Rails cache' do
+        it 'does not create a new instance of CalendarService' do
+          expect(CalendarService).not_to receive(:new)
+          call_method
+        end
+      end
+      describe 'when `calendar_holidays` does not yet exist in the Rails cache' do
+        before do
+          allow(Rails.cache).to receive(:fetch).and_yield
+          allow(CalendarService).to receive(:new).and_return(calendar_service)
+        end
+
+        it 'creates a new instance of the CalendarService with the request as an arg' do
+          expect(CalendarService).to receive(:new).with(request).and_return(calendar_service)
+          call_method
+        end
+        it 'calls `holidays` on the service instance with today as an arg' do
+          expect(calendar_service).to receive(:holidays).with(today, any_args).and_return(holidays)
+          call_method
+        end
+        it 'calls `holidays` on the service instance with a date three months from today as an arg' do
+          expect(calendar_service).to receive(:holidays).with(anything, max_date).and_return(holidays)
+          call_method
+        end
+        it 'raises an error if CalendarService returns nil' do
+          allow(calendar_service).to receive(:holidays).with(today, any_args).and_return(nil)
+          expect{call_method}.to raise_error(StandardError, 'There has been an error and SecuritiesController#date_restrictions has encountered nil while querying the CalendarService. Check error logs.')
+        end
+      end
+
+      describe 'the returned hash' do
+        it 'has a `min_date` of today' do
+          expect(call_method[:min_date]).to eq(today)
+        end
+        it 'has a `max_date` of three months from now' do
+          expect(call_method[:max_date]).to eq(max_date)
+        end
+        describe 'the `invalid_dates` array' do
+          it 'includes all dates returned from the CalendarService' do
+            expect(call_method[:invalid_dates]).to include(*holidays)
+          end
+          it 'includes all weekends between the today and 3 months from now' do
+            expect(call_method[:invalid_dates]).to include(*weekends)
+          end
+        end
       end
     end
   end

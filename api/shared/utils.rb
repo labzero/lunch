@@ -116,6 +116,19 @@ module MAPI
         def nil_to_zero(value)
           value ? value : 0
         end
+
+        def rescued_json_response(app)
+          begin
+            results = yield
+            results.to_json if results
+          rescue MAPI::Shared::Errors::ValidationError => error
+            app.logger.error error.message
+            app.halt 400, {errors: [error.code]}.to_json
+          rescue => error
+            app.logger.error error
+            app.halt 400, {errors: ['unknown'], human_errors: error.message}.to_json
+          end
+        end
       end
     end
   end

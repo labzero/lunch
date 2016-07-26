@@ -26,6 +26,7 @@ module MAPI
   module Services
     module Member
       include MAPI::Services::Base
+      include MAPI::Shared::Utils
 
       def self.registered(app)
         service_root '/member', app
@@ -1419,48 +1420,40 @@ module MAPI
         end
 
         relative_post '/:id/securities/release' do
-          begin
+          MAPI::Services::Member.rescued_json_response(self) do
             post_body_json = JSON.parse(request.body.read)
             user = post_body_json['user']
-            "" if MAPI::Services::Member::SecuritiesRequests.create_release(self,
-                                                                            params['id'].to_i,
-                                                                            user['username'],
-                                                                            user['full_name'],
-                                                                            user['session_id'],
-                                                                            post_body_json['broker_instructions'] || {},
-                                                                            post_body_json['delivery_instructions'] || {},
-                                                                            post_body_json['securities'] || [])
-          rescue MAPI::Shared::Errors::ValidationError => error
-            logger.error error.message
-            halt 400, {errors: [error.code]}.to_json
-          rescue => error
-            logger.error error
-            halt 400, {errors: ['unknown'], human_errors: error.message}.to_json
+            {} if MAPI::Services::Member::SecuritiesRequests.create_release(
+              self,
+              params['id'].to_i,
+              user['username'],
+              user['full_name'],
+              user['session_id'],
+              post_body_json['broker_instructions'] || {},
+              post_body_json['delivery_instructions'] || {},
+              post_body_json['securities'] || []
+            )
           end
         end
 
         relative_put '/:id/securities/release' do
-          begin
+          MAPI::Services::Member.rescued_json_response(self) do
             body = JSON.parse(request.body.read)
             user = body['user']
             raise MAPI::Shared::Errors::ValidationError.new('`user` is required', 'user') unless user
             request_id = body['request_id']
             raise MAPI::Shared::Errors::ValidationError.new('`request_id` is required', 'request_id') unless request_id
-            {}.to_json if MAPI::Services::Member::SecuritiesRequests.update_release(self,
-                                                                            params['id'].to_i,
-                                                                            request_id,
-                                                                            user['username'],
-                                                                            user['full_name'],
-                                                                            user['session_id'],
-                                                                            body['broker_instructions'] || {},
-                                                                            body['delivery_instructions'] || {},
-                                                                            body['securities'] || [])
-          rescue MAPI::Shared::Errors::ValidationError => error
-            logger.error error.message
-            halt 400, {errors: [error.code]}.to_json
-          rescue => error
-            logger.error error
-            halt 400, {errors: ['unknown'], human_errors: error.message}.to_json
+            {} if MAPI::Services::Member::SecuritiesRequests.update_release(
+              self,
+              params['id'].to_i,
+              request_id,
+              user['username'],
+              user['full_name'],
+              user['session_id'],
+              body['broker_instructions'] || {},
+              body['delivery_instructions'] || {},
+              body['securities'] || []
+            )
           end
         end
 

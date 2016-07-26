@@ -4,51 +4,6 @@ require 'date'
 describe MAPI::ServiceApp do
   subject { MAPI::Services::Member }
 
-  shared_examples 'a MAPI endpoint with JSON error handling' do |endpoint, action, module_name, module_method, params={}|
-    let(:logger) { double('MAPI logger', error: nil) }
-    let(:error_message) { SecureRandom.hex }
-    let(:error_code) { SecureRandom.hex }
-    let(:error) { MAPI::Shared::Errors::ValidationError.new(error_message, error_code) }
-    let(:make_request) { send(action, "/member/#{member_id}/#{endpoint}", params) }
-    let(:response_body) { make_request; JSON.parse(last_response.body).with_indifferent_access }
-    let(:response_status) { make_request; last_response.status }
-
-    before do
-      allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
-      allow(module_name).to receive(module_method).and_raise(error)
-    end
-
-    describe "when the `#{module_name}.#{module_method}` method returns a ValidationError" do
-      it 'returns a 400' do
-        expect(response_status).to eq(400)
-      end
-      it 'logs an error message' do
-        expect(logger).to receive(:error).with(error_message)
-        make_request
-      end
-      it 'returns an error code of in its body' do
-        expect(response_body[:errors]).to include(error_code)
-      end
-    end
-    describe "when the `#{module_name}.#{module_method}` method returns an error that is not a ValidationError" do
-      let(:error) { StandardError.new(error_message) }
-
-      it 'returns a 400' do
-        expect(response_status).to eq(400)
-      end
-      it 'logs the error' do
-        expect(logger).to receive(:error).with(error)
-        make_request
-      end
-      it 'returns `unknown` in the `errors` array of its body' do
-        expect(response_body[:errors]).to include('unknown')
-      end
-      it 'returns the error message as the `human_errors` value in its body' do
-        expect(response_body[:human_errors]).to eq(error_message)
-      end
-    end
-  end
-
   describe 'capital_stock_trial_balance' do
     let(:result){ { "certificates" => [], "number_of_certificates" => 0, "number_of_shares" => 0 }}
     let(:id) { 750 }
@@ -137,7 +92,7 @@ describe MAPI::ServiceApp do
       end
     end
 
-    it_behaves_like 'a MAPI endpoint with JSON error handling', "securities/release", :post, MAPI::Services::Member::SecuritiesRequests, :create_release, {user:{}}.to_json
+    it_behaves_like 'a MAPI endpoint with JSON error handling', "/member/#{rand(1000..99999)}/securities/release", :post, MAPI::Services::Member::SecuritiesRequests, :create_release, {user:{}}.to_json
 
     it 'calls `MAPI::Services::Member::SecuritiesRequests.create_release`' do
       allow(MAPI::Services::Member::SecuritiesRequests).to receive(:create_release).with(
@@ -151,7 +106,7 @@ describe MAPI::ServiceApp do
         post_body['securities']).and_return(true)
       make_request
       expect(last_response.status).to be(200)
-      expect(last_response.body).to eq("")
+      expect(last_response.body).to eq({}.to_json)
      end
 
     it 'doesn\'t raise an error' do
@@ -322,7 +277,7 @@ describe MAPI::ServiceApp do
     describe 'error handling' do
       before { allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger) }
 
-      it_behaves_like 'a MAPI endpoint with JSON error handling', "securities/release", :put, MAPI::Services::Member::SecuritiesRequests, :update_release, {user: SecureRandom.hex, request_id: SecureRandom.hex}.to_json
+      it_behaves_like 'a MAPI endpoint with JSON error handling', "/member/#{rand(1000..99999)}/securities/release", :put, MAPI::Services::Member::SecuritiesRequests, :update_release, {user: SecureRandom.hex, request_id: SecureRandom.hex}.to_json
 
       describe 'when there is no `user` hash in the posted body' do
         before { post_body.delete(:user) }

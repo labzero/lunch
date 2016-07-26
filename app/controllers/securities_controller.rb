@@ -378,6 +378,7 @@ class SecuritiesController < ApplicationController
         submit_text: t('securities.release.submit_authorization')
       }
     end
+    @date_restrictions = date_restrictions
   end
 
   def translated_dropdown_mapping(dropdown_hash)
@@ -424,5 +425,26 @@ class SecuritiesController < ApplicationController
       end
     end
     error_message_hash
+  end
+
+  def date_restrictions
+    today = Time.zone.today
+    max_date = today + 3.months
+    holidays =  Rails.cache.fetch(CacheConfiguration.key(:calendar_holidays), expires_in: CacheConfiguration.expiry(:calendar_holidays)) do
+      holidays = CalendarService.new(request).holidays(today, max_date)
+      raise StandardError, 'There has been an error and SecuritiesController#date_restrictions has encountered nil while querying the CalendarService. Check error logs.' if holidays.nil?
+      holidays
+    end
+    weekends = []
+    date_iterator = today.clone
+    while date_iterator <= max_date do
+      weekends << date_iterator.iso8601 if (date_iterator.sunday? || date_iterator.saturday?)
+      date_iterator += 1.day
+    end
+    {
+      min_date: today,
+      max_date: today + 3.months,
+      invalid_dates: holidays + weekends
+    }
   end
 end
