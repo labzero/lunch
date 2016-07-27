@@ -1253,8 +1253,8 @@ en:
         select_file: Select File
         download_actions_html: '%{span} <span>or</span> %{button}'
         upload_error: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
-        generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number}
-        no_settlement_amount_error: When 'Versus Payment' is selected, each security must have a settlement amount.
+        generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number} or via %{email}
+        no_payment_amount_error: When 'Versus Payment' is selected, each security must have a settlement amount.
         fed_fifty_m_error: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
     safekeep:
       title: Safekeep Securities

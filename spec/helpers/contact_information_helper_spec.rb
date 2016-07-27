@@ -44,6 +44,16 @@ describe ContactInformationHelper, type: :helper do
     it_behaves_like 'an email helper method', :securities_services_email, 'SECURITIES_SERVICES_EMAIL'
   end
 
+  describe '`securities_services_email_text` method' do
+    let(:call_method) { helper.send(:securities_services_email_text) }
+    it 'responds to `securities_services_email_text`' do
+      expect(helper).to respond_to(:securities_services_email_text)
+    end
+    it 'returns `SECURITIES_SERVICES_EMAIL`' do
+      expect(call_method).to eq('securities@fhlbsf.com')
+    end
+  end
+
   shared_examples 'phone number contact method' do |constant|
     it "calls `fhlb_formatted_phone_number` with the #{constant}" do
       phone_number = double('A Number')

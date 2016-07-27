@@ -219,7 +219,7 @@ Then(/^I should see the success page for the securities release request$/) do
 end
 
 Then(/^I should see the generic error message for the securities release request$/) do
-  page.assert_selector('.securities-submit-release-form-errors p', text: I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number), exact: true)
+  page.assert_selector('.securities-submit-release-form-errors p', text: I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text), exact: true)
 end
 
 Then(/^Account Number should be disabled$/) do
