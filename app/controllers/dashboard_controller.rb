@@ -217,6 +217,8 @@ class DashboardController < ApplicationController
     },
   ].freeze
 
+  CURRENT_ACTIVITY_COUNT = 5
+
   def index
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)
@@ -701,7 +703,7 @@ class DashboardController < ApplicationController
     activity_data = []
     entries.each do |entry|
 
-      break if activity_data.length == 4
+      break if activity_data.length == CURRENT_ACTIVITY_COUNT
       result = process_patterns(ACTIVITY_PATTERNS, entry)
       if result
         raise ArgumentError.new('Missing `description`') unless result[:description]

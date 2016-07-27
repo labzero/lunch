@@ -1467,9 +1467,9 @@ RSpec.describe DashboardController, :type => :controller do
       expect(call_method).to eq([process_patterns_return])
     end
     describe 'process multiple entries' do
-      let(:entries) { [entry, entry, entry, entry, entry] }
-      it 'returns no more than 4 elements in the array' do
-        expect(call_method).to eq([process_patterns_return, process_patterns_return, process_patterns_return, process_patterns_return])
+      let(:entries) { [entry, entry, entry, entry, entry, entry, entry] }
+      it "returns no more than #{DashboardController::CURRENT_ACTIVITY_COUNT} elements in the array" do
+        expect(call_method.length).to eq(DashboardController::CURRENT_ACTIVITY_COUNT)
       end
     end
     describe '`Letters of Credit` entries' do
