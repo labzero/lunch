@@ -1284,7 +1284,7 @@ en:
       buttons:
         manage: manage securities
         view: view securities requests
-        notify: notify authorizers(s)
+        notify: notify authorizer(s)
       email:
         subject: FHLBSF Securities Authorization Required
         body_html: "There is a Securities Request awaiting authorization.\n\n %{url}"
