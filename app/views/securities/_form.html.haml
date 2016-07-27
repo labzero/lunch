@@ -53,20 +53,23 @@
   %section.securities-display
     -if type == :safekeep || type == :pledge
       %h2.safekeep-pledge-title= t('securities.title')
-      .securities-download-template.safekeep-pledge-download-title{data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}}= t('securities.safekeep_pledge.upload_instructions.download_template')
+      =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), securities_pledge_download_path, class: [ 'securities-download-template', 'safekeep-pledge-download-title' ]
     -else
       %h2= t('securities.title')
     %p.securities-release-upload-error= t('securities.release.edit.upload_error')
-    -if @securities_release_request.securities
-      .securities-release-table-wrapper
-        = render 'upload_release'
-      %p.securities-table-footnote= t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)
+    .securities-release-table-wrapper
+      -unless @securities_table_data[:rows].empty?
+        = render 'table', locals: { type: type }
+        %p.securities-table-footnote= t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)
     -if type == :release
-      = render partial: "release_help"
+      = render partial: "release_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes}
     -elsif type == :safekeep || type == :pledge
-      = render partial: "safekeep_pledge_help"
+      = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes}
   - if authorizer
     %section.securities-request-legal
+      = render partial: "release_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes}
+  - if policy(:security).authorize?
+    .securities-request-legal
       =simple_format(t('securities.release.legal_copy'))
     - unless @session_elevated
       = render 'shared/securid_module', error: @securid_status

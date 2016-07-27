@@ -1,0 +1,5 @@
+= render 'reports/reports_table', table_class: 'securities-release-table', table_data: @securities_table_data, sortable: false, disable_auto_width: true
+%p.securities-table-footnote= t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)
+-if type == :pledge || type == :safekeep
+  %p.securities-table-footnote= t('securities.release.custodian_name_footnote', footnote_marker: fhlb_footnote_marker(1))
+  %p.safekeep-pledge-upload-again= t('securities.safekeep_pledge.discard_and_upload_again')

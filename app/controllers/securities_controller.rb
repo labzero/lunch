@@ -10,6 +10,10 @@ class SecuritiesController < ApplicationController
     authorize :security, :delete?
   end
 
+  before_action only: [ :edit_safekeep, :edit_pledge, :edit_release, :view_release ] do
+    @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')
+  end
+
   ACCEPTED_UPLOAD_MIMETYPES = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'application/vnd.ms-excel',
@@ -134,7 +138,7 @@ class SecuritiesController < ApplicationController
       ],
       rows: awaiting_authorization_requests.collect do |request|
         request_id = request[:request_id]
-        action_cell_value = policy(:security).authorize? ? [[t('securities.requests.actions.authorize'), securities_view_release_path(request_id) ]] : [t('securities.requests.actions.authorize')]
+        action_cell_value = policy(:security).authorize? ? [[t('securities.requests.actions.authorize'), securities_release_view_path(request_id) ]] : [t('securities.requests.actions.authorize')]
         {
           columns: [
             {value: request_id},
@@ -211,26 +215,31 @@ class SecuritiesController < ApplicationController
     render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep }
   end
 
-  def download_pledge
-    populate_securities_table_data_view_variable(:pledge)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge }
-  end
-
-  def upload_release
+  def upload_securities
     uploaded_file = params[:file]
     content_type = uploaded_file.content_type
+    type = params[:type].to_sym
     if ACCEPTED_UPLOAD_MIMETYPES.include?(content_type)
       securities = []
       spreadsheet = Roo::Spreadsheet.open(uploaded_file.path)
       data_start_index = nil
       spreadsheet.each do |row|
         if data_start_index
-          securities << Security.from_hash({
-            cusip: row[data_start_index],
-            description: row[data_start_index + 1],
-            original_par: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
-            payment_amount: (row[data_start_index + 3].to_i if row[data_start_index + 3])
-          })
+          if type == :release
+            securities << Security.from_hash({
+              cusip: row[data_start_index],
+              description: row[data_start_index + 1],
+              original_par: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
+              payment_amount: (row[data_start_index + 3].to_i if row[data_start_index + 3])
+            })
+          elsif type == :pledge || type == :safekeep
+            securities << Security.from_hash({
+              cusip: row[data_start_index],
+              original_par: (row[data_start_index + 1].to_i if row[data_start_index + 1]),
+              settlement_amount: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
+              custodian_name: (row[data_start_index + 3] if row[data_start_index + 3])
+            })
+          end
         else
           row.each_with_index do |cell, i|
             regex = /\Acusip\z/i
@@ -239,9 +248,14 @@ class SecuritiesController < ApplicationController
         end
       end
       if data_start_index
-        populate_securities_table_data_view_variable(:release, securities)
-        html = render_to_string(layout: false)
-        status = 200
+        if securities.empty?
+          error = 'No securities found'
+          status = 400
+        else
+          populate_securities_table_data_view_variable(type, securities)
+          html = render_to_string(:upload_table, layout: false, locals: { type: type })
+          status = 200
+        end
       else
         error = 'No header row found'
         status = 400
@@ -250,7 +264,12 @@ class SecuritiesController < ApplicationController
       error = "Uploaded file has unsupported MIME type: #{content_type}"
       status = 415
     end
-    render json: {html: html, form_data: (securities.to_json if securities), error: error}, status: status, content_type: request.format
+    render json: {html: html, form_data: (securities.to_json if securities && !securities.empty?), error: error}, status: status, content_type: request.format
+  end
+
+  def download_pledge
+    populate_securities_table_data_view_variable(:pledge)
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge }
   end
 
   # POST
@@ -291,7 +310,7 @@ class SecuritiesController < ApplicationController
       @title = t('securities.authorize.release.title')
       render :authorize_request
     else
-      redirect_to securities_success_url
+      redirect_to securities_release_success_url
     end
   end
 
@@ -348,14 +367,21 @@ class SecuritiesController < ApplicationController
     end
     securities ||= []
     rows = securities.collect do |security|
-      {
-        columns: [
+      if type == :release
+        { columns: [
           {value: security.cusip || t('global.missing_value')},
           {value: security.description || t('global.missing_value')},
           {value: security.original_par, type: :number},
           {value: security.payment_amount, type: :number}
-        ]
-      }
+        ] }
+      else
+        { columns: [
+          {value: security.cusip || t('global.missing_value')},
+          {value: security.original_par, type: :number},
+          {value: security.settlement_amount, type: :number},
+          {value: security.custodian_name || t('global.missing_value')}
+        ] }
+      end
     end
     @securities_table_data = {
       column_headings: column_headings,
@@ -382,11 +408,18 @@ class SecuritiesController < ApplicationController
     populate_delivery_instructions_dropdown_variables(@securities_release_request)
     populate_securities_table_data_view_variable(type, @securities_release_request.securities)
 
+    @form_data = if policy(:security).authorize?
+      {
+        url: securities_release_authorize_path,
+        submit_text: t('securities.release.authorize')
+      }
+    else
+      {
+        url: securities_release_submit_path,
+        submit_text: t('securities.release.submit_authorization')
+      }
+    end
     @date_restrictions = date_restrictions
-    @form_data = {
-      url: securities_submit_release_path,
-      submit_text: policy(:security).authorize? ? t('securities.release.authorize') : t('securities.release.submit_authorization')
-    }
   end
 
   def translated_dropdown_mapping(dropdown_hash)

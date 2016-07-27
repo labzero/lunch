@@ -280,7 +280,7 @@ RSpec.describe SecuritiesController, type: :controller do
           call_action
           expect(assigns[:awaiting_authorization_requests_table][:rows].length).to be > 0
           assigns[:awaiting_authorization_requests_table][:rows].each do |row|
-            expect(row[:columns].last).to eq({value: [[I18n.t('securities.requests.actions.authorize'), securities_view_release_path(request_id) ]], type: :actions})
+            expect(row[:columns].last).to eq({value: [[I18n.t('securities.requests.actions.authorize'), securities_release_view_path(request_id) ]], type: :actions})
           end
         end
       end
@@ -494,14 +494,13 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  describe 'POST upload_release' do
+  describe 'POST upload_securities' do
     uploaded_file = excel_fixture_file_upload('sample-securities-upload.xlsx')
     headerless_file = excel_fixture_file_upload('sample-securities-upload-headerless.xlsx')
     let(:security) { instance_double(Security) }
     let(:sample_securities_upload_array) { [security,security,security,security,security] }
     let(:html_response_string) { SecureRandom.hex }
     let(:form_fields_html_response_string) { SecureRandom.hex }
-    let(:call_action) { post :upload_release, file: uploaded_file }
     let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
     let(:cusip) { SecureRandom.hex }
     let(:description) { SecureRandom.hex }
@@ -517,6 +516,7 @@ RSpec.describe SecuritiesController, type: :controller do
       [nil, nil, 'cusip', 'description', 'original par', 'settlement amount'],
       [nil, nil, cusip, description, original_par, payment_amount]
     ]}
+    let(:call_action) { post :upload_securities, file: uploaded_file, type: :release }
 
     before do
       allow(controller).to receive(:populate_securities_table_data_view_variable)
@@ -524,13 +524,13 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(Security).to receive(:from_hash).and_return(security)
     end
 
-    it_behaves_like 'a user required action', :post, :upload_release
+    it_behaves_like 'a user required action', :post, :upload_securities
     it 'succeeds' do
       call_action
       expect(response.status).to eq(200)
     end
     it 'renders the view to a string with `layout` set to false' do
-      expect(controller).to receive(:render_to_string).with(layout: false)
+      expect(controller).to receive(:render_to_string).with(:upload_table, layout: false, locals: { type: :release})
       call_action
     end
     it 'calls `populate_securities_table_data_view_variable` with the securities' do
@@ -547,8 +547,35 @@ RSpec.describe SecuritiesController, type: :controller do
       }).and_return(security)
       call_action
     end
+
+    context 'pledge and safekeep' do
+      let(:settlement_amount) { rand(9999..999999) }
+      let(:custodian_name) { SecureRandom.hex }
+      let(:call_action) { post :upload_securities, file: uploaded_file, type: [:pledge, :safekeep][rand(0..1)] }
+      let(:securities_rows) {[
+        ['cusip', 'original par', 'settlement amount', 'custodian name'],
+        [cusip, original_par, settlement_amount, custodian_name]
+      ]}
+      let(:securities_rows_padding) {[
+        [],
+        [],
+        [nil, nil, 'cusip', 'original par', 'settlement amount', 'custodian name'],
+        [nil, nil, cusip, original_par, settlement_amount, custodian_name]
+      ]}
+      it 'begins parsing data in the row and cell underneath the `cusip` header cell' do
+        allow(Roo::Spreadsheet).to receive(:open).and_return(securities_rows_padding)
+        expect(Security).to receive(:from_hash).with({
+          cusip: cusip,
+          original_par: original_par,
+          settlement_amount: settlement_amount,
+          custodian_name: custodian_name
+        }).and_return(security)
+        call_action
+      end
+    end
+
     it 'returns a json object with `html`' do
-      allow(controller).to receive(:render_to_string).with(layout: false).and_return(html_response_string)
+      allow(controller).to receive(:render_to_string).with(:upload_table, layout: false, locals: { type: :release}).and_return(html_response_string)
       call_action
       expect(parsed_response_body[:html]).to eq(html_response_string)
     end
@@ -561,7 +588,7 @@ RSpec.describe SecuritiesController, type: :controller do
       expect(parsed_response_body[:error]).to be_nil
     end
     describe 'when the uploaded file does not contain a header row with `CUSIP` as a value' do
-      let(:call_action) { post :upload_release, file: headerless_file }
+      let(:call_action) { post :upload_securities, file: headerless_file, type: :release }
       it 'returns a 400' do
         call_action
         expect(response.status).to eq(400)
@@ -577,7 +604,7 @@ RSpec.describe SecuritiesController, type: :controller do
     end
     describe 'when the MIME type of the uploaded file is not in the list of accepted types' do
       let(:incorrect_mime_type) { fixture_file_upload('sample-securities-upload.xlsx', 'text/html') }
-      let(:call_action) { post :upload_release, file: incorrect_mime_type }
+      let(:call_action) { post :upload_securities, file: incorrect_mime_type, type: :release }
       let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
       it 'returns a 415' do
         call_action
@@ -586,6 +613,27 @@ RSpec.describe SecuritiesController, type: :controller do
       it 'renders a json object with an error message' do
         call_action
         expect(parsed_response_body[:error]).to eq('Uploaded file has unsupported MIME type: text/html')
+      end
+      it 'renders a json object with a nil value for `html`' do
+        call_action
+        expect(parsed_response_body[:html]).to be_nil
+      end
+      it 'renders a json object with a nil value for `form_data`' do
+        call_action
+        expect(parsed_response_body[:form_data]).to be_nil
+      end
+    end
+    describe 'when the XLS file does not contain any rows of securities' do
+      no_securities = excel_fixture_file_upload('sample-empty-securities-upload.xlsx')
+      let(:call_action) { post :upload_securities, file: no_securities, type: :release }
+      let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
+      it 'returns a 400' do
+        call_action
+        expect(response.status).to eq(400)
+      end
+      it 'renders a json object with an error message' do
+        call_action
+        expect(parsed_response_body[:error]).to eq('No securities found')
       end
       it 'renders a json object with a nil value for `html`' do
         call_action
@@ -636,8 +684,8 @@ RSpec.describe SecuritiesController, type: :controller do
         call_action
       end
       describe 'when the service object returns true' do
-        it 'redirects to the `securities_success_url`' do
-          expect(call_action).to redirect_to(securities_success_url)
+        it 'redirects to the `securities_release_success_url`' do
+          expect(call_action).to redirect_to(securities_release_success_url)
         end
       end
       describe 'when the service object returns nil' do
@@ -1121,7 +1169,7 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(securities_release_request).not_to receive(:trade_date=)
         call_action
       end
-      it 'sets `securities_release_request.settlement_date` to today if there is not already a settlment date' do
+      it 'sets `securities_release_request.settlement_date` to today if there is not already a settlement date' do
         expect(securities_release_request).to receive(:settlement_date=).with(Time.zone.today)
         call_action
       end
@@ -1136,7 +1184,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'sets the proper @form_data for a user to submit a request for authorization' do
         form_data = {
-          url: securities_submit_release_path,
+          url: securities_release_submit_path,
           submit_text: I18n.t('securities.release.submit_authorization')
         }
       end
@@ -1149,7 +1197,7 @@ RSpec.describe SecuritiesController, type: :controller do
         allow_policy :security, :authorize?
         it 'sets the proper @form_data for an authorized securities signer' do
           form_data = {
-            url: securities_submit_release_path,
+            url: securities_release_authorize_path,
             submit_text: I18n.t('securities.release.authorize')
           }
           call_action

@@ -33,15 +33,15 @@ When(/^I am on the (manage|release|success|safekeep|pledge) securities page$/) d
   when 'manage'
     visit '/securities/manage'
   when 'success'
-    visit '/securities/success'
+    visit '/securities/release/success'
   when 'release'
     step 'I am on the manage securities page'
     step 'I check the 1st Pledged security'
     step 'I click the button to release the securities'
   when 'safekeep'
-    visit '/securities/edit_safekeep'
+    visit '/securities/safekeep/edit'
   when 'pledge'
-    visit '/securities/edit_pledge'
+    visit '/securities/pledge/edit'
   end
 end
 

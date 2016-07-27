@@ -1210,6 +1210,7 @@ en:
       further_credit: For Further Credit to Account No.
       settlement_amount: 'Settlement Amount%{unit}%{footnote_marker}'
       settlement_amount_footnote: '%{footnote_marker}If Vs. Payment'
+      custodian_name_footnote: '%{footnote_marker}The name of the custodian is required for all non-agency mortgage-backed securities (MBS). If the custodian of the note supporting the MBS transaction is the Issuer or a related party and the mortgage notes have not been endorsed to the trustee, the Bank requires that the party that has control over the mortgage notes (as determined by the Bank) have a long-term debt rating of at least BBB.'
       submit_authorization: Submit for Authorization
       authorize: Authorize
       legal_copy: "Pursuant to the Advances and Security Agreement (Agreement) between your institution and the Bank, your institution requests the release and redelivery or reassignment of the securities listed above.\n\nBy authorizing the release of these securities, your institution certifies that, as of the date the securities are released, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Agreement) that will remain pledged to the Bank immediately after the requested release will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Agreement)."
@@ -1274,6 +1275,7 @@ en:
         learn_how: Learn How
         step_2:
           enter_securities: In the file, enter one security per line.
+      discard_and_upload_again: Discard and Upload Again
     success:
       title: Release Securities Request Sent
       request_will_remain: 'This request will remain in the queue for authorization until one of the following occurs:'

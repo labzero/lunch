@@ -27,7 +27,7 @@
     - button = capture_haml do
       .input-file-button-wrapper
         %button.secondary-button= t('securities.release.edit.select_file')
-        %input#fileupload{type: "file", name: "file", accept: SecuritiesController::ACCEPTED_UPLOAD_MIMETYPES.join(' ,'), data: {url: securities_upload_release_path, 'results-container-class' => 'securities-release-table-wrapper', 'form-name' => 'securities-release-download', 'input-name' => 'securities', 'error-class' => 'securities-release-upload-error'}}
+        %input#fileupload{type: "file", name: "file", accept: accepted_upload_mimetypes, data: {url: securities_release_upload_path, 'results-container-class' => 'securities-release-table-wrapper', 'form-name' => 'securities-release-download', 'input-name' => 'securities', 'error-class' => 'securities-release-upload-error'}}
     =t('securities.release.edit.download_actions_html', span: span, button: button)
   .file-upload-progress
     %p{data: {cancel_upload: true}}= t('global.cancel_upload')

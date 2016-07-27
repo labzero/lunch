@@ -104,7 +104,11 @@ $(function() {
       return false;
     } else {
       return true;
-    };
+    }
+  });
+
+  $('.securities-release-table-wrapper').on('click', '.safekeep-pledge-upload-again', function(event) {
+    $('.securities-release-table-wrapper').empty();
   });
 
 });
