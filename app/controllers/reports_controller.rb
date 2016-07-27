@@ -1440,6 +1440,8 @@ class ReportsController < ApplicationController
       end
       @picker_presets = date_picker_presets(@start_date, nil, nil, @max_date)
       @total_net = securities_transactions[:total_net]
+      @total_credits = securities_transactions[:total_credits]
+      @total_debits = securities_transactions[:total_debits]
       @final = securities_transactions[:final]
       column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('common_table_headings.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('common_table_headings.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
       rows = securities_transactions[:transactions].sort { |a, b| [a['custody_account_no'], a['cusip']] <=> [b['custody_account_no'], b['cusip']] }.collect do |row|

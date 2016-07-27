@@ -888,7 +888,6 @@ td.dataTables_empty {
 
 .securities-report {
   .report-summary-data {
-    width: 290px;
     margin-right: 20px;
     span {
       white-space: nowrap;
@@ -1394,10 +1393,14 @@ td.dataTables_empty {
     }
   }
   .report-summary-data {
-    margin-right: 25px;
+    width: 30%;
+    margin-right: 4%;
     p {
       color: $print-color;
       @include typography-print-summary-data;
+    }
+    &:last-child {
+      margin-right: 0;
     }
   }
   .authorizations-report .report-table tbody td {

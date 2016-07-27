@@ -2127,7 +2127,16 @@ RSpec.describe ReportsController, :type => :controller do
   describe 'GET securities_transactions' do
     let(:start_date)                       { Date.new(2014,12,31) }
     let(:member_balances_service_instance) { double('MemberBalanceService') }
-    let(:response_hash)                    { double('MemberBalanceServiceHash') }
+    let(:response_hash)                    { {
+      total_net: total_net,
+      total_debits: total_debits,
+      total_credits: total_credits,
+      final: final,
+      total_payment_or_principal: nil,
+      total_interest: nil,
+      previous_business_day: nil,
+      transactions: transaction_hash
+    } }
     let(:transaction_hash)                 { double('transaction_hash', collect: nil, sort: []) }
     let(:custody_account_no)               { double('custody_account_no') }
     let(:new_transaction)                  { double('new_transaction') }
@@ -2140,6 +2149,8 @@ RSpec.describe ReportsController, :type => :controller do
     let(:interest)                         { double('interest') }
     let(:total)                            { double('total') }
     let(:total_net)                        { double('total_net') }
+    let(:total_credits)                        { double('total_credits') }
+    let(:total_debits)                        { double('total_debits') }
     let(:final)                            { double('final') }
     let(:previous_business_day)            { double('previous_business_day') }
     let(:securities_transactions_hash) do
@@ -2182,12 +2193,6 @@ RSpec.describe ReportsController, :type => :controller do
       allow(MemberBalanceService).to receive(:new).and_return(member_balances_service_instance)
       allow(member_balances_service_instance).to receive(:securities_transactions).with(kind_of(Date)).at_least(1).and_return(response_hash)
       allow(member_balances_service_instance).to receive(:securities_transactions).with(restricted_start_date).at_least(1).and_return(response_hash)
-      allow(response_hash).to receive(:[]).with(:total_net).and_return(total_net)
-      allow(response_hash).to receive(:[]).with(:final).and_return(final)
-      allow(response_hash).to receive(:[]).with(:total_payment_or_principal)
-      allow(response_hash).to receive(:[]).with(:total_interest)
-      allow(response_hash).to receive(:[]).with(:previous_business_day)
-      allow(response_hash).to receive(:[]).with(:transactions).and_return(transaction_hash)
     end
     it_behaves_like 'a user required action', :get, :securities_transactions
     it_behaves_like 'a report with instance variables set in a before_filter', :securities_transactions
@@ -2226,7 +2231,7 @@ RSpec.describe ReportsController, :type => :controller do
         'transaction_code' => rand
       }
       sorted_transactions = [transaction_2, transaction_4, transaction_1, transaction_3]
-      expect(response_hash).to receive(:[]).with(:transactions).and_return([transaction_1, transaction_2, transaction_3, transaction_4])
+      response_hash[:transactions] = [transaction_1, transaction_2, transaction_3, transaction_4]
       get :securities_transactions
       sorted_transactions.each_with_index do |transaction, i|
         expect(assigns[:securities_transactions_table_data][:rows][i][:columns].last[:value]).to eq(transaction['transaction_code'])
@@ -2235,21 +2240,29 @@ RSpec.describe ReportsController, :type => :controller do
     it 'should pass @start_date and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
       allow(controller).to receive(:most_recent_business_day).and_return(max_date)
       allow(controller).to receive(:date_picker_presets).with(restricted_start_date, nil, nil, max_date).and_return(date_picker_presets)
-      allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response_with_new_transaction)
+      response_hash[:transactions] = securities_transactions_response_with_new_transaction
       get :securities_transactions, start_date: start_date
       expect(assigns[:picker_presets]).to eq(date_picker_presets)
     end
     it 'should return securities transactions data' do
-      allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response)
+      response_hash[:transactions] = securities_transactions_response
       get :securities_transactions
       expect(assigns[:total_net]).to eq(total_net)
       expect(assigns[:final]).to eq(final)
       expect(assigns[:securities_transactions_table_data][:rows][0][:columns]).to eq(securities_transactions_table_data)
     end
     it 'should return securities transactions data with new transaction indicator' do
-      allow(response_hash).to receive(:[]).with(:transactions).and_return(securities_transactions_response_with_new_transaction)
+      response_hash[:transactions] = securities_transactions_response_with_new_transaction
       get :securities_transactions
       expect(assigns[:securities_transactions_table_data][:rows][0][:columns]).to eq(securities_transactions_table_data_with_new_transaction)
+    end
+    it 'assigns @total_credits' do
+      get :securities_transactions
+      expect(assigns[:total_credits]).to be(total_credits)
+    end
+    it 'assigns @total_debits' do
+      get :securities_transactions
+      expect(assigns[:total_debits]).to be(total_debits)
     end
   end
 
