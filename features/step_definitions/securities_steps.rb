@@ -244,11 +244,25 @@ Then(/^I should see "(.*?)" as the selected pledge type$/) do |type|
 end
 
 When(/^I authorize the request$/) do
-  page.find(".securities-actions .primary-button[value=#{I18n.t('securities.release.authorize')}").click
+  step %{I enter my SecurID pin and token}
+  step %{I click to authorize the request}
+end
+
+When(/^I click to authorize the request$/) do
+  page.find(".securities-actions .primary-button[value=#{I18n.t('securities.release.authorize')}]").click
 end
 
 Then(/^I should see the authorize request success page$/) do
   page.assert_selector('.securities-authorize-success')
+end
+
+Then(/^the Authorize action is (disabled|enabled)$/) do |state|
+  base = ".securities-actions .primary-button[value=#{I18n.t('securities.release.authorize')}]"
+  if state == 'disabled'
+    page.assert_selector(base + '[disabled]')
+  else
+    page.assert_selector(base + ':not([disabled])')
+  end
 end
 
 def delivery_instructions(text)

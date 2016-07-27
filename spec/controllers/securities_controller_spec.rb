@@ -600,7 +600,7 @@ RSpec.describe SecuritiesController, type: :controller do
 
   describe 'POST submit_release' do
     let(:securities_release_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
-    let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_release_for_authorization: true) }
+    let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_release_for_authorization: true, authorize_request: true) }
     let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, :valid? => true) }
     let(:call_action) { post :submit_release, securities_release_request: securities_release_request_param }
 
@@ -651,21 +651,29 @@ RSpec.describe SecuritiesController, type: :controller do
         end
         it 'calls `populate_view_variables` with a specific `mapi_endpoint` error when the error handler is invoked' do
           allow(securities_request_service).to receive(:submit_release_for_authorization).and_yield(error)
-          expect(controller).to receive(:populate_view_variables).with(:release, ['unknown'])
+          expect(controller).to receive(:populate_view_variables).with(:release, [:unknown])
           call_action
         end
         it 'calls `populate_view_variables` with an `mapi_endpoint` error' do
-          expect(controller).to receive(:populate_view_variables).with(:release, ['unknown'])
+          expect(controller).to receive(:populate_view_variables).with(:release, [:unknown])
           call_action
         end
         it 'renders the `edit_release` view' do
           call_action
           expect(response.body).to render_template(:edit_release)
         end
+
+        describe 'when the user is an authorizer' do
+          allow_policy :security, :authorize?
+          it 'does not check the SecurID details' do
+            expect(subject).to_not receive(:securid_perform_check)
+            call_action
+          end
+        end
       end
     end
     describe 'when the securities_release_request is invalid' do
-      let(:error_messages) { instance_double(Hash) }
+      let(:error_messages) { {double('error key') => double('error message')} }
       let(:errors) { instance_double(ActiveModel::Errors, messages: error_messages) }
       before do
         allow(securities_release_request).to receive(:valid?).and_return(false)
@@ -674,13 +682,77 @@ RSpec.describe SecuritiesController, type: :controller do
       end
 
       it 'calls `populate_view_variables` with the securities_release_request validation errors' do
-        expect(controller).to receive(:populate_view_variables).with(:release, error_messages)
+        expect(controller).to receive(:populate_view_variables).with(:release, error_messages.keys)
         call_action
       end
       it 'renders the `edit_release` view' do
         call_action
         expect(response.body).to render_template(:edit_release)
       end
+      describe 'when the user is an authorizer' do
+        allow_policy :security, :authorize?
+        it 'does not check the SecurID details' do
+          expect(subject).to_not receive(:securid_perform_check)
+          call_action
+        end
+      end
+    end
+
+    describe 'when the user is an authorizer' do
+      let(:request_id) { double('A Request ID') }
+      allow_policy :security, :authorize?
+      before do
+        allow(securities_release_request).to receive(:request_id).and_return(request_id)
+      end
+      it 'checks the SecurID details if no errors are found in the data' do
+        expect(subject).to receive(:securid_perform_check).and_return(:authenticated)
+        call_action
+      end
+      describe 'when SecurID passes' do
+        before do
+          allow(subject).to receive(:session_elevated?).and_return(true)
+        end
+        it 'authorizes the request' do
+          expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
+          call_action
+        end
+        it 'renders the `authorize_request` view' do
+          call_action
+          expect(response.body).to render_template(:authorize_request)
+        end
+        describe 'when the authorization fails' do
+          before do
+            allow(securities_request_service).to receive(:authorize_request).and_return(false)
+          end
+          it 'calls `populate_view_variables` with an `authorize_failed` error' do
+            expect(controller).to receive(:populate_view_variables).with(:release, include(:authorize_failed))
+            call_action
+          end
+          it 'renders the `edit_release` view' do
+            call_action
+            expect(response.body).to render_template(:edit_release)
+          end
+        end
+      end
+      describe 'when SecurID fails' do
+        let(:securid_error) { double('A SecurID error') }
+        before do
+          allow(subject).to receive(:securid_perform_check).and_return(securid_error)
+        end
+        it 'does not authorize the request' do
+          expect(securities_request_service).to_not receive(:authorize_request)
+          call_action
+        end
+        it 'renders the `edit_release` view' do
+          call_action
+          expect(response.body).to render_template(:edit_release)
+        end
+        it 'calls `populate_view_variables` with the SecurID error' do
+          expect(controller).to receive(:populate_view_variables).with(:release, include(securid_error))
+          call_action
+        end
+      end
+
     end
   end
 
@@ -1077,7 +1149,7 @@ RSpec.describe SecuritiesController, type: :controller do
         allow_policy :security, :authorize?
         it 'sets the proper @form_data for an authorized securities signer' do
           form_data = {
-            url: securities_authorize_release_path,
+            url: securities_submit_release_path,
             submit_text: I18n.t('securities.release.authorize')
           }
           call_action

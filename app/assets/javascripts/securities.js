@@ -75,4 +75,36 @@ $(function() {
 
   });
 
+  var $securitiesForm = $('.securities-submit-release-form');
+  var $submitField = $securitiesForm.find('input[type=submit]');
+  var $secureIDTokenField = $('#securid_token');
+  var $secureIDPinField = $('#securid_pin');
+
+  // Validate length of SecurID token and pin
+  if ($secureIDPinField.length && $secureIDTokenField.length) {
+    $.each([$secureIDPinField, $secureIDTokenField], (function(i, $element){
+      $element.on('keyup', function(){
+        if ($secureIDTokenField.val().length == 6 && $secureIDPinField.val().length == 4) {
+          $submitField.addClass('active');
+          $submitField.attr('disabled', false);
+        } else {
+          $submitField.removeClass('active');
+          $submitField.attr('disabled', true);
+        };
+      });
+    }));
+  };
+
+  if ($securitiesForm.length > 0) {
+    Fhlb.Utils.findAndDisplaySecurIDErrors($securitiesForm);
+  };
+
+  $securitiesForm.on('submit', function(e) {
+    if ($secureIDTokenField.length > 0 && $secureIDPinField.length > 0 && !Fhlb.Utils.validateSecurID($(this))) {
+      return false;
+    } else {
+      return true;
+    };
+  });
+
 });

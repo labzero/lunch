@@ -264,18 +264,32 @@ class SecuritiesController < ApplicationController
   def submit_release
     @securities_release_request = SecuritiesReleaseRequest.from_hash(params[:securities_release_request])
     errors = nil
+    authorizer = policy(:security).authorize?
     if @securities_release_request.valid?
       response = SecuritiesRequestService.new(current_member_id, request).submit_release_for_authorization(@securities_release_request, current_user) do |error|
         errors = JSON.parse(error.http_body)['errors']
       end
-      errors ||= ['unknown'] unless response
+      errors = (errors || []) << :unknown unless response
     else
-      errors = @securities_release_request.errors.messages
+      errors = @securities_release_request.errors.messages.keys
+    end
+    if authorizer
+      @securid_status = securid_perform_check unless errors.present?
+      unless session_elevated?
+        errors = (errors || []) << @securid_status
+      end
+      unless errors.present?
+        response = SecuritiesRequestService.new(current_member_id, request).authorize_request(@securities_release_request.request_id, current_user)
+        errors = (errors || []) << :authorize_failed unless response
+      end
     end
     if errors
       populate_view_variables(:release, errors)
       @title = t('securities.release.title')
       render :edit_release
+    elsif authorizer
+      @title = t('securities.authorize.release.title')
+      render :authorize_request
     else
       redirect_to securities_success_url
     end
@@ -290,7 +304,7 @@ class SecuritiesController < ApplicationController
       user[:roles].each do |role|
         if role == User::Roles::SECURITIES_SIGNER
           @authorized_user_data.push(user)
-          break;
+          break
         end
       end
     end
@@ -356,6 +370,7 @@ class SecuritiesController < ApplicationController
       [t('securities.release.pledge_type.standard'), SecuritiesReleaseRequest::PLEDGE_TYPES[:standard]]
     ]
     @title = t('securities.release.title')
+    @session_elevated = session_elevated?
 
     @securities_release_request ||= SecuritiesReleaseRequest.new
     @securities_release_request.securities = params[:securities] if params[:securities]
@@ -367,18 +382,11 @@ class SecuritiesController < ApplicationController
     populate_delivery_instructions_dropdown_variables(@securities_release_request)
     populate_securities_table_data_view_variable(type, @securities_release_request.securities)
 
-    @form_data = if policy(:security).authorize?
-      {
-        url: securities_authorize_release_path,
-        submit_text: t('securities.release.authorize')
-      }
-    else
-      {
-        url: securities_submit_release_path,
-        submit_text: t('securities.release.submit_authorization')
-      }
-    end
     @date_restrictions = date_restrictions
+    @form_data = {
+      url: securities_submit_release_path,
+      submit_text: policy(:security).authorize? ? t('securities.release.authorize') : t('securities.release.submit_authorization')
+    }
   end
 
   def translated_dropdown_mapping(dropdown_hash)

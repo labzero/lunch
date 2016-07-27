@@ -279,8 +279,8 @@ Then(/^I should see an? "(.*?)" error(?: with amount (\d+) and type "(.*?)")?$/)
 end
 
 Then(/^I should see SecurID errors$/) do
-  page.assert_selector('.quick-advance-preview .form-error', visible: true)
-  page.assert_selector('.quick-advance-preview input.input-field-error', visible: true)
+  page.assert_selector('.securid-form .form-error', visible: true)
+  page.assert_selector('.securid-form input.input-field-error', visible: true)
 end
 
 def validate_passed_advance_params

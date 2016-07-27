@@ -4,9 +4,6 @@
     @extend %typography-section-title;
     margin: 0 0 5px;
   }
-  section {
-    margin-bottom: 35px;
-  }
   header {
     margin: 0 0 15px;
   }
@@ -24,6 +21,7 @@
 
 .securities-success
 {
+  margin-bottom: 35px;
   &:before {
     @extend %extra-large-icon-font;
     margin-right: 26px;
@@ -117,12 +115,15 @@
   h2 {
     margin-bottom: 20px;
   }
-  section {
+  section:not(.securities-request-legal) {
     @extend %bordered-section;
   }
-  .input-field-container {
-    width: 180px;
+  input[disabled]:not([type=submit]) {
+    background-color: $white;
   }
+}
+
+.securities-delivery-instructions, .securities-broker-instructions {
   .input-field-container-horizontal {
     display: block;
     float: none;
@@ -134,8 +135,8 @@
       margin-right: 20px;
     }
   }
-  input[disabled] {
-    background-color: $white;
+  .input-field-container {
+    width: 180px;
   }
 }
 
@@ -374,6 +375,7 @@
 
 .securities-request-legal {
   margin-top: -10px;
+  margin-bottom: inherit;
 }
 
 .securities-delete-request-error {

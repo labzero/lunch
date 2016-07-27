@@ -188,7 +188,7 @@ describe MAPI::ServiceApp do
       let(:required_delivery_keys) { [ 'a', 'b', 'c' ] }
       let(:delivery_columns) { MAPI::Services::Member::SecuritiesRequests.delivery_type_mapping(delivery_type).keys }
       let(:delivery_values) { MAPI::Services::Member::SecuritiesRequests.delivery_type_mapping(delivery_type).values }
-      let(:form_type) { MAPI::Services::Member::SecuritiesRequests::SSKFormType::SecuritiesRelease }
+      let(:form_type) { MAPI::Services::Member::SecuritiesRequests::SSKFormType::SECURITIES_RELEASE }
       let(:user_name) {  SecureRandom.hex }
       let(:full_name) { SecureRandom.hex }
       let(:session_id) { SecureRandom.hex }
@@ -707,6 +707,11 @@ describe MAPI::ServiceApp do
               "SSK ID").and_return(ssk_id)
           end
 
+          it 'returns the inserted request ID' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
+            expect(call_method).to be(next_id)
+          end
+
           context 'prepares SQL' do
             before do
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
@@ -759,7 +764,7 @@ describe MAPI::ServiceApp do
                 insert_security_sql).exactly(3).times.and_return(true)
               expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                 insert_header_sql).and_return(true)
-              expect(call_method).to eq(true)
+              call_method
             end
 
             it 'inserts the securities' do
@@ -767,7 +772,7 @@ describe MAPI::ServiceApp do
                 insert_header_sql).and_return(true)
               expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                 insert_security_sql).exactly(3).times.and_return(true)
-              expect(call_method).to eq(true)
+              call_method
             end
 
             it 'raises errors for SQL failures on header insert' do
@@ -1644,7 +1649,7 @@ describe MAPI::ServiceApp do
         expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+DELIVER_TO\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
       it 'updates the `FORM_TYPE`' do
-        allow(securities_request_module).to receive(:quote).with(securities_request_module::SSKFormType::SecuritiesRelease).and_return(sentinel)
+        allow(securities_request_module).to receive(:quote).with(securities_request_module::SSKFormType::SECURITIES_RELEASE).and_return(sentinel)
         expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+FORM_TYPE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
       it 'updates the `LAST_MODIFIED_BY`' do

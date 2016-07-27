@@ -19,6 +19,24 @@ module MAPI
           SAFEKEPT_RELEASE = 73
         end
 
+        module SSKDeliverTo
+          FED = 30
+          DTC = 31
+          INTERNAL_TRANSFER = 32
+          MUTUAL_FUND = 33
+          PHYSICAL_SECURITIES = 34
+        end
+
+        module SSKTransactionCode
+          STANDARD = 50
+          REPO = 51
+        end
+
+        module SSKSettlementType
+          FREE = 60
+          VS_PAYMENT = 61
+        end
+
         module MAPIRequestStatus
           AUTHORIZED = [SSKRequestStatus::SIGNED, SSKRequestStatus::ACKNOWLEDGED]
           AWAITING_AUTHORIZATION = [SSKRequestStatus::SUBMITTED]
@@ -43,6 +61,39 @@ module MAPI
           to_date: ['SETTLE_DATE', 'SUBMITTED_DATE', 'AUTHORIZED_DATE']
         }.freeze
 
+        RELEASE_REQUEST_HEADER_MAPPING = {
+          Proc.new { |value| TRANSACTION_CODE.invert[value.to_i] } => ['PLEDGE_TYPE'],
+          Proc.new { |value| SETTLEMENT_TYPE.invert[value.to_i] } => ['REQUEST_STATUS'],
+          Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO'],
+          to_s: ['BROKER_WIRE_ADDR', 'ABA_NO', 'DTC_AGENT_PARTICIPANT_NO', 'MUTUAL_FUND_COMPANY', 'DELIVERY_BANK_AGENT',
+                 'REC_BANK_AGENT_NAME', 'REC_BANK_AGENT_ADDR', 'CREDIT_ACCT_NO1', 'CREDIT_ACCT_NO2', 'MUTUAL_FUND_ACCT_NO',
+                 'CREDIT_ACCT_NO3', 'CREATED_BY', 'CREATED_BY_NAME'],
+          to_date: ['SETTLE_DATE', 'TRADE_DATE']
+        }
+
+        RELEASE_REQUEST_SECURITIES_MAPPING = {
+          to_s: ['CUSIP', 'DESCRIPTION'],
+          to_i: ['ORIGINAL_PAR', 'PAYMENT_AMOUNT']
+        }
+
+        NEXT_ID_SQL = 'SELECT SAFEKEEPING.SSK_WEB_FORM_SEQ.NEXTVAL FROM DUAL'.freeze
+        BROKER_INSTRUCTIONS_MAPPING = { 'transaction_code' => 'PLEDGE_TYPE',
+                                        'settlement_type' => 'REQUEST_STATUS',
+                                        'trade_date' => 'TRADE_DATE',
+                                        'settlement_date' => 'SETTLE_DATE' }.freeze
+        DELIVERY_TYPE = { 'fed' => SSKDeliverTo::FED,
+                          'dtc' => SSKDeliverTo::DTC,
+                          'mutual_fund' => SSKDeliverTo::MUTUAL_FUND,
+                          'physical_securities' => SSKDeliverTo::PHYSICAL_SECURITIES }.freeze
+        TRANSACTION_CODE = { 'standard' => SSKTransactionCode::STANDARD, 'repo' => SSKTransactionCode::REPO }.freeze
+        SETTLEMENT_TYPE = { 'free' => SSKSettlementType::FREE, 'vs_payment' => SSKSettlementType::VS_PAYMENT }.freeze
+        ACCOUNT_NUMBER_MAPPING = { 'fed' => 'CREDIT_ACCT_NO1',
+                                   'dtc' => 'CREDIT_ACCT_NO2',
+                                   'mutual_fund' => 'MUTUAL_FUND_ACCT_NO',
+                                   'physical_securities' => 'CREDIT_ACCT_NO3' }
+        REQUIRED_SECURITY_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
+        LAST_MODIFIED_BY_MAX_LENGTH = 30
+        BROKER_WIRE_ADDRESS_FIELDS = ['clearing_agent_fed_wire_address_1', 'clearing_agent_fed_wire_address_2']
         FED_AMOUNT_LIMIT = 50000000
 
         def self.requests_query(member_id, status_array, date_range)
@@ -77,50 +128,6 @@ module MAPI
             map_hash_values(request, REQUEST_VALUE_MAPPING, true).with_indifferent_access
           end
         end
-
-        module SSKFormType
-          SecuritiesPledge = 70
-          SecuritiesRelease = 71
-          SafekeepingDeposit = 72
-          SafekeepingRelease = 73
-        end
-
-        module SSKDeliverTo
-          FED = 30
-          DTC = 31
-          INTERNAL_TRANSFER = 32
-          MUTUAL_FUND = 33
-          PHYSICAL_SECURITIES = 34
-        end
-
-        module SSKTransactionCode
-          STANDARD = 50
-          REPO = 51
-        end
-
-        module SSKSettlementType
-          FREE = 60
-          VS_PAYMENT = 61
-        end
-
-        NEXT_ID_SQL = 'SELECT SAFEKEEPING.SSK_WEB_FORM_SEQ.NEXTVAL FROM DUAL'.freeze
-        BROKER_INSTRUCTIONS_MAPPING = { 'transaction_code' => 'PLEDGE_TYPE',
-                                        'settlement_type' => 'REQUEST_STATUS',
-                                        'trade_date' => 'TRADE_DATE',
-                                        'settlement_date' => 'SETTLE_DATE' }.freeze
-        DELIVERY_TYPE = { 'fed' => SSKDeliverTo::FED,
-                          'dtc' => SSKDeliverTo::DTC,
-                          'mutual_fund' => SSKDeliverTo::MUTUAL_FUND,
-                          'physical_securities' => SSKDeliverTo::PHYSICAL_SECURITIES }.freeze
-        TRANSACTION_CODE = { 'standard' => SSKTransactionCode::STANDARD, 'repo' => SSKTransactionCode::REPO }.freeze
-        SETTLEMENT_TYPE = { 'free' => SSKSettlementType::FREE, 'vs_payment' => SSKSettlementType::VS_PAYMENT }.freeze
-        ACCOUNT_NUMBER_MAPPING = { 'fed' => 'CREDIT_ACCT_NO1',
-                                   'dtc' => 'CREDIT_ACCT_NO2',
-                                   'mutual_fund' => 'MUTUAL_FUND_ACCT_NO',
-                                   'physical_securities' => 'CREDIT_ACCT_NO3' }
-        REQUIRED_SECURITY_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
-        LAST_MODIFIED_BY_MAX_LENGTH = 30
-        BROKER_WIRE_ADDRESS_FIELDS = ['clearing_agent_fed_wire_address_1', 'clearing_agent_fed_wire_address_2']
 
         def self.delivery_type_mapping(delivery_type)
           { 'clearing_agent_fed_wire_address' => 'BROKER_WIRE_ADDR',
@@ -178,7 +185,7 @@ module MAPI
                     #{quote(SETTLEMENT_TYPE[broker_instructions['settlement_type']])},
                     #{quote(broker_instructions['settlement_date'])},
                     #{quote(DELIVERY_TYPE[delivery_type])},
-                    #{quote(SSKFormType::SecuritiesRelease)},
+                    #{quote(SSKFormType::SECURITIES_RELEASE)},
                     #{quote(now)},
                     #{quote(format_username(user_name))},
                     #{quote(full_name)},
@@ -220,6 +227,7 @@ module MAPI
                    )
           SQL
         end
+
         def self.pledged_adx_query(member_id)
           <<-SQL
             SELECT ADX.ADX_ID
@@ -358,7 +366,7 @@ module MAPI
               REQUEST_STATUS        = #{quote(SETTLEMENT_TYPE[broker_instructions['settlement_type']])},
               SETTLE_DATE           = #{quote(broker_instructions['settlement_date'])},
               DELIVER_TO            = #{quote(DELIVERY_TYPE[delivery_type])},
-              FORM_TYPE             = #{quote(SSKFormType::SecuritiesRelease)},
+              FORM_TYPE             = #{quote(SSKFormType::SECURITIES_RELEASE)},
               LAST_MODIFIED_BY      = #{quote(format_modification_by(user_name, session_id))},
               LAST_MODIFIED_DATE    = #{quote(Time.zone.today)},
               LAST_MODIFIED_BY_NAME = #{quote(full_name)},
@@ -410,8 +418,10 @@ module MAPI
                 raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
               end
             end
+          else
+            header_id = rand(100000..999999)
           end
-          true
+          header_id
         end
 
         def self.update_release(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
@@ -486,21 +496,6 @@ module MAPI
             WHERE HEADER_ID = #{quote(header_id)}
           SQL
         end
-
-        RELEASE_REQUEST_HEADER_MAPPING = {
-          Proc.new { |value| TRANSACTION_CODE.invert[value.to_i] } => ['PLEDGE_TYPE'],
-          Proc.new { |value| SETTLEMENT_TYPE.invert[value.to_i] } => ['REQUEST_STATUS'],
-          Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO'],
-          to_s: ['BROKER_WIRE_ADDR', 'ABA_NO', 'DTC_AGENT_PARTICIPANT_NO', 'MUTUAL_FUND_COMPANY', 'DELIVERY_BANK_AGENT',
-                 'REC_BANK_AGENT_NAME', 'REC_BANK_AGENT_ADDR', 'CREDIT_ACCT_NO1', 'CREDIT_ACCT_NO2', 'MUTUAL_FUND_ACCT_NO',
-                 'CREDIT_ACCT_NO3', 'CREATED_BY', 'CREATED_BY_NAME'],
-          to_date: ['SETTLE_DATE', 'TRADE_DATE']
-        }
-
-        RELEASE_REQUEST_SECURITIES_MAPPING = {
-          to_s: ['CUSIP', 'DESCRIPTION'],
-          to_i: ['ORIGINAL_PAR', 'PAYMENT_AMOUNT']
-        }
 
         def self.release_details(app, member_id, request_id)
           if should_fake?(app)

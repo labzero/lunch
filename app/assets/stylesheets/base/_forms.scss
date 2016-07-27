@@ -139,6 +139,42 @@ label {
   }
 }
 
+.securid-module {
+  @extend %bordered-section;
+  background: $light-gray;
+  p {
+    margin: 0 0 10px 0;
+  }
+  .securid-form-link-wrapper {
+    clear: both;
+  }
+  a {
+    text-transform: uppercase;
+  }
+  .input-field-container {
+    display: block;
+    margin-bottom: 10px;
+    input {
+      padding-left: 10px;
+      padding-right: 10px;
+      &[name=securid_pin] {
+        width: 55px;
+      }
+      &[name=securid_token] {
+        width: 85px;
+      }
+    }
+  }
+  .form-error {
+    margin-bottom: 10px;
+    display: none;
+    clear: both;
+  }
+  .loading & {
+    display: none;
+  }
+}
+
 .form-flash-message {
   position: relative;
   display: none;

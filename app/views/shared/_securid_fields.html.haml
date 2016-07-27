@@ -1,13 +1,16 @@
 - fields ||= [:pin, :token]
 - fields = Array.wrap(fields)
 - token_label ||= t('global.token')
+- error ||= nil
+- error = error.to_sym if error
+- display_style = 'display: block'
 - if fields.include?(:pin)
   = render 'shared/input_field', field_name: 'securid_pin', field_type: :password, label: t('global.pin'), html_attributes: {maxlength: 4}, horizontal: true, field_class: 'securid-field-pin'
 - if fields.include?(:token)
   = render 'shared/input_field', field_name: 'securid_token', label: token_label, html_attributes: {maxlength: 6}, horizontal: true, field_class: 'securid-field-token'
-%p.form-error{data: {'error-type' => :invalid_pin}}= t('dashboard.quick_advance.securid.errors.invalid_pin')
-%p.form-error{data: {'error-type' => :invalid_token}}= t('dashboard.quick_advance.securid.errors.invalid_token')
-%p.form-error{data: {'error-type' => :unknown}}= t('dashboard.quick_advance.securid.errors.unknown')
-%p.form-error{data: {'error-type' => :must_change_pin}}= t('dashboard.quick_advance.securid.errors.change_pin')
-%p.form-error{data: {'error-type' => :must_resynchronize}}= t('dashboard.quick_advance.securid.errors.resynchronize')
-%p.form-error{data: {'error-type' => :denied}}= t('dashboard.quick_advance.securid.errors.denied')
+%p.form-error{data: {'error-type' => :invalid_pin}, style: (error == :invalid_pin ? display_style : nil)}= t('dashboard.quick_advance.securid.errors.invalid_pin')
+%p.form-error{data: {'error-type' => :invalid_token}, style: (error == :invalid_token ? display_style : nil)}= t('dashboard.quick_advance.securid.errors.invalid_token')
+%p.form-error{data: {'error-type' => :unknown}, style: (error == :unknown ? display_style : nil)}= t('dashboard.quick_advance.securid.errors.unknown')
+%p.form-error{data: {'error-type' => :must_change_pin}, style: (error == :must_change_pin ? display_style : nil)}= t('dashboard.quick_advance.securid.errors.change_pin')
+%p.form-error{data: {'error-type' => :must_resynchronize}, style: (error == :must_resynchronize ? display_style : nil)}= t('dashboard.quick_advance.securid.errors.resynchronize')
+%p.form-error{data: {'error-type' => :denied}, style: (error == :denied ? display_style : nil)}= t('dashboard.quick_advance.securid.errors.denied')

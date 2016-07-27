@@ -228,6 +228,14 @@ module MAPI
           key :description, 'The request ID of the request to authorize.'
         end
       end
+
+      swagger_model :SecuritiesReleaseResponse do
+        property :request_id do
+          key :type, :string
+          key :required, true
+          key :description, 'The request ID of the newly created request.'
+        end
+      end
     end
   end
 end

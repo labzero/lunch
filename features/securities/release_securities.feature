@@ -101,3 +101,35 @@ Scenario: A signer authorizes a previously submittied release request
   Then I should be on the Securities Release page
   When I authorize the request
   Then I should see the authorize request success page
+
+@jira-mem-1600
+Scenario: A signer uses a SecurID token to authenticate when authorizing
+  Given I am logged in as a "quick-advance signer"
+  And I am on the securities request page
+  When I click to Authorize the first release
+  Then I should be on the Securities Release page
+  And the Authorize action is disabled
+  When I enter "123" for my SecurID pin
+  And I enter my SecurID token
+  Then the Authorize action is disabled
+  When I enter "12345" for my SecurID token
+  And I enter my SecurID pin
+  Then the Authorize action is disabled
+  When I enter my SecurID pin and token
+  Then the Authorize action is enabled
+  When I enter "12ab" for my SecurID pin
+  And I click to authorize the request
+  Then I should see SecurID errors
+  When I enter my SecurID pin
+  And I enter "1234ab" for my SecurID token
+  And I click to authorize the request
+  Then I should see SecurID errors
+
+@jira-mem-1601
+Scenario: A signer authorizes a request while submitting it
+  Given I am logged in as a "quick-advance signer"
+  And I am on the release securities page
+  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  When I authorize the request
+  Then I should see the authorize request success page

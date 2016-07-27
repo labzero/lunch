@@ -95,6 +95,7 @@ describe MAPI::ServiceApp do
     it_behaves_like 'a MAPI endpoint with JSON error handling', "/member/#{rand(1000..99999)}/securities/release", :post, MAPI::Services::Member::SecuritiesRequests, :create_release, {user:{}}.to_json
 
     it 'calls `MAPI::Services::Member::SecuritiesRequests.create_release`' do
+      request_id = SecureRandom.hex
       allow(MAPI::Services::Member::SecuritiesRequests).to receive(:create_release).with(
         kind_of(app),
         member_id.to_i,
@@ -103,10 +104,10 @@ describe MAPI::ServiceApp do
         post_body['user']['session_id'],
         post_body['broker_instructions'],
         post_body['delivery_instructions'],
-        post_body['securities']).and_return(true)
+        post_body['securities']).and_return(request_id)
       make_request
       expect(last_response.status).to be(200)
-      expect(last_response.body).to eq({}.to_json)
+      expect(JSON.parse(last_response.body)['request_id']).to eq(request_id)
      end
 
     it 'doesn\'t raise an error' do

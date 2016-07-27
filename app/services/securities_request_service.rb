@@ -24,12 +24,14 @@ class SecuritiesRequestService < MAPIService
       securities: securities_release_request.securities,
       user: user_details(user)
     }
-    response = post(:securities_submit_release_for_authorization, "/member/#{member_id}/securities/release", body.to_json, 'application/json') do |name, msg, err|
+    response = post_hash(:securities_submit_release_for_authorization, "/member/#{member_id}/securities/release", body) do |name, msg, err|
       if err.is_a?(RestClient::Exception) && err.http_code >= 400 && err.http_code < 500 && error_handler
         error_handler.call(err)
       end
     end
-    response.code == 200 if response
+    request_id = response.try(:[], :request_id)
+    securities_release_request.request_id ||= request_id
+    !!request_id
   end
 
   def submitted_release(request_id)

@@ -81,16 +81,14 @@ describe SecuritiesRequestService do
     let(:session_id) { SecureRandom.hex }
     let(:session) { instance_double(ActionDispatch::Request::Session, id: session_id) }
     let(:user) { instance_double(User, username: SecureRandom.hex, display_name: SecureRandom.hex) }
-    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, broker_instructions: broker_instructions, delivery_instructions: delivery_instructions, securities: securities) }
+    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, broker_instructions: broker_instructions, delivery_instructions: delivery_instructions, securities: securities, request_id: nil, 'request_id=': nil) }
     let(:call_method) { subject.submit_release_for_authorization(securities_release_request, user) }
 
     before do
       allow(request).to receive(:session).and_return(session)
     end
 
-    it_behaves_like 'a MAPI backed service object method', :submit_release_for_authorization do
-      let(:user) { instance_double(User, username: SecureRandom.hex, display_name: SecureRandom.hex) }
-      let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, broker_instructions: nil, delivery_instructions: nil, securities: nil) }
+    it_behaves_like 'a MAPI backed service object method', :submit_release_for_authorization, nil, :get, false do
       let(:call_method) { subject.submit_release_for_authorization(securities_release_request, user) }
     end
     it 'calls `post` with `:securities_submit_release_for_authorization` for the name arg' do
@@ -130,7 +128,9 @@ describe SecuritiesRequestService do
       call_method
     end
     describe 'when the POST to MAPI succeeds' do
-      before { allow_any_instance_of(RestClient::Resource).to receive(:post).and_return(instance_double(RestClient::Response, code: 200)) }
+      before do
+        allow_any_instance_of(RestClient::Resource).to receive(:post).and_return(instance_double(RestClient::Response, code: 200, body: {request_id: SecureRandom.hex}.to_json))
+      end
       it 'returns true' do
         expect(call_method).to be(true)
       end
@@ -142,8 +142,8 @@ describe SecuritiesRequestService do
       it 'calls the error handler with the error if an error handler was supplied' do
         expect{|error_handler| subject.submit_release_for_authorization(securities_release_request, user, &error_handler)}.to yield_with_args(error)
       end
-      it 'returns nil' do
-        expect(call_method).to be_nil
+      it 'returns false' do
+        expect(call_method).to be(false)
       end
     end
   end

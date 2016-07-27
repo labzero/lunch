@@ -536,12 +536,10 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:securid_pin) { '1111' }
     let(:securid_token) { '222222' }
     let(:make_request) { post :perform, member_id: member_id, advance_request: {term: advance_term, type: advance_type, id: advance_id}, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }
-    let(:securid_service) { SecurIDService.new('a user', test_mode: true) }
     let(:advance_request) { double(AdvanceRequest, expired?: false, executed?: true, execute: nil, sta_debit_amount: 0, errors: [], id: SecureRandom.uuid) }
 
     before do
       allow(subject).to receive(:session_elevated?).and_return(true)
-      allow(SecurIDService).to receive(:new).and_return(securid_service)
       allow(subject).to receive(:populate_advance_summary_view_parameters)
       allow(subject).to receive(:save_advance_request)
       allow(subject).to receive(:advance_request).and_return(advance_request)
@@ -560,6 +558,10 @@ RSpec.describe AdvancesController, :type => :controller do
     end
     it 'checks if the session has been elevated' do
       expect(subject).to receive(:session_elevated?).at_least(:once)
+      make_request
+    end
+    it 'calls `securid_perform_check`' do
+      expect(subject).to receive(:securid_perform_check).once
       make_request
     end
     it 'checks if the rate has expired' do
@@ -590,35 +592,23 @@ RSpec.describe AdvancesController, :type => :controller do
         allow(subject).to receive(:session_elevated?).and_return(false)
       end
       it 'populates the preview view parameters with the securid_status, preview set to false and without calculating stock' do
-        expect(subject).to receive(:populate_advance_preview_view_parameters).with({securid_status: 'invalid_pin'})
-        post :perform, securid_pin: 'foo', securid_token: securid_token
+        status = double('A SecurID Status')
+        allow(subject).to receive(:securid_perform_check).and_return(status)
+        expect(subject).to receive(:populate_advance_preview_view_parameters).with({securid_status: status})
+        make_request
       end
       it 'renders the preview view if the securid status is not :authenticated' do
-        post :perform, securid_pin: 'foo', securid_token: securid_token
+        make_request
         expect(response.body).to render_template('preview')
       end
       it 'sets securid_status to `invalid_pin` if the pin is malformed' do
-        expect(subject).to receive(:populate_advance_preview_view_parameters).with(hash_including(securid_status: 'invalid_pin'))
-        post :perform, securid_pin: 'foo', securid_token: securid_token
+        allow(subject).to receive(:securid_perform_check).and_return(:invalid_pin)
+        expect(subject).to receive(:populate_advance_preview_view_parameters).with(hash_including(securid_status: :invalid_pin))
+        make_request
       end
       it 'sets securid_status to `invalid_token` if the token is malformed' do
-        expect(subject).to receive(:populate_advance_preview_view_parameters).with(hash_including(securid_status: 'invalid_token'))
-        post :perform, securid_token: 'foo', securid_pin: securid_pin
-      end
-      it 'authenticates the user via RSA SecurID if the session is not elevated' do
-        expect(securid_service).to receive(:authenticate).with(securid_pin, securid_token)
-        make_request
-      end
-      it 'elevates the session if RSA SecurID authentication succeeds' do
-        expect(securid_service).to receive(:authenticate).with(securid_pin, securid_token).ordered
-        expect(securid_service).to receive(:authenticated?).ordered.and_return(true)
-        expect(subject).to receive(:session_elevate!).ordered
-        make_request
-      end
-      it 'does not elevate the session if RSA SecurID authentication fails' do
-        expect(securid_service).to receive(:authenticate).with(securid_pin, securid_token).ordered
-        expect(securid_service).to receive(:authenticated?).ordered.and_return(false)
-        expect(subject).to_not receive(:session_elevate!).ordered
+        allow(subject).to receive(:securid_perform_check).and_return(:invalid_token)
+        expect(subject).to receive(:populate_advance_preview_view_parameters).with(hash_including(securid_status: :invalid_token))
         make_request
       end
       it 'does not perform the advance if the session is not elevated' do

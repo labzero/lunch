@@ -212,6 +212,72 @@ RSpec.describe ApplicationController, :type => :controller do
     end
   end
 
+  describe '`securid_perform_check` method' do
+    let(:pin) { rand(0..9999).to_s.rjust(4, '0') }
+    let(:token) { rand(0..999999).to_s.rjust(6, '0') }
+    let(:securid_service) { SecurIDService.new('a user', test_mode: true) }
+    let(:call_method) { subject.securid_perform_check(pin, token) }
+
+    before do
+      allow(subject).to receive(:current_user).and_return(instance_double(User, username: SecureRandom.hex))
+      allow(SecurIDService).to receive(:new).and_return(securid_service)
+    end
+
+    describe 'with unelevated session' do
+      before do
+        allow(subject).to receive(:session_elevated?).and_return(false)
+      end
+      it 'returns a securid status of `invalid_pin` if the pin is malformed' do
+        expect(subject.securid_perform_check('foo', token)).to eq(:invalid_pin)
+      end
+      it 'returns a securid status of `invalid_token` if the token is malformed' do
+        expect(subject.securid_perform_check(pin, 'foo')).to eq(:invalid_token)
+      end
+      it 'authenticates the user via RSA SecurID if the session is not elevated' do
+        expect(securid_service).to receive(:authenticate).with(pin, token)
+        call_method
+      end
+      it 'elevates the session if RSA SecurID authentication succedes' do
+        expect(securid_service).to receive(:authenticate).with(pin, token).ordered
+        expect(securid_service).to receive(:authenticated?).ordered.and_return(true)
+        expect(subject).to receive(:session_elevate!).ordered
+        call_method
+      end
+      it 'does not elevate the session if RSA SecurID authentication fails' do
+        expect(securid_service).to receive(:authenticate).with(pin, token).ordered
+        expect(securid_service).to receive(:authenticated?).ordered.and_return(false)
+        expect(subject).to_not receive(:session_elevate!).ordered
+        call_method
+      end
+      it 'returns a securid status of `authenticated` on success' do
+        expect(call_method).to eq(:authenticated)
+      end
+      it 'defaults the `token` to `params[:securid_token]` if not provided' do
+        subject.params[:securid_token] = token
+        expect(securid_service).to receive(:authenticate).with(anything, token)
+        subject.securid_perform_check
+      end
+      it 'defaults the `pin` to `params[:securid_pin]` if not provided' do
+        subject.params[:securid_pin] = pin
+        expect(securid_service).to receive(:authenticate).with(pin, anything)
+        subject.securid_perform_check
+      end
+    end
+
+    describe 'with an elevated session' do
+      before do
+        allow(subject).to receive(:session_elevated?).and_return(true)
+      end
+      it 'returns a securid status of `authenticated`' do
+        expect(call_method).to eq(:authenticated)
+      end
+      it 'does not hit the RSA SecurID service' do
+        expect(securid_service).to_not receive(:authenticate)
+        call_method
+      end
+    end
+  end
+
   describe '`current_member_name` method' do
     let(:member_name) { double('A Member Name') }
     let(:member_id) { double('A Member ID') }

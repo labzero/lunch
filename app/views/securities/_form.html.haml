@@ -1,3 +1,4 @@
+- authorizer = policy(:security).authorize?
 = form_for(@securities_release_request, validate: true, url: url, html: {class: 'securities-submit-release-form'}) do |f|
   = f.hidden_field(:request_id)
   = f.hidden_field(:trade_date)
@@ -64,9 +65,11 @@
       = render partial: "release_help"
     -elsif type == :safekeep || type == :pledge
       = render partial: "safekeep_pledge_help"
-  - if policy(:security).authorize?
-    .securities-request-legal
+  - if authorizer
+    %section.securities-request-legal
       =simple_format(t('securities.release.legal_copy'))
+    - unless @session_elevated
+      = render 'shared/securid_module', error: @securid_status
   .securities-actions
     %span.secondary-button.delete-release-trigger= t('global.delete')
-    = submit_tag(@form_data[:submit_text], class: 'primary-button')
+    =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: (authorizer && !@session_elevated))

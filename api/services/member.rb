@@ -946,6 +946,7 @@ module MAPI
               key :summary, 'Create a new securities release request'
               key :nickname, 'createSecuritiesReleaseRequest'
               key :consumes, ['application/json']
+              key :type, :SecuritiesReleaseResponse
               parameter do
                 key :paramType, :path
                 key :name, :id
@@ -1423,16 +1424,15 @@ module MAPI
           MAPI::Services::Member.rescued_json_response(self) do
             post_body_json = JSON.parse(request.body.read)
             user = post_body_json['user']
-            {} if MAPI::Services::Member::SecuritiesRequests.create_release(
-              self,
-              params['id'].to_i,
-              user['username'],
-              user['full_name'],
-              user['session_id'],
-              post_body_json['broker_instructions'] || {},
-              post_body_json['delivery_instructions'] || {},
-              post_body_json['securities'] || []
-            )
+            request_id = MAPI::Services::Member::SecuritiesRequests.create_release(self,
+                                                                            params['id'].to_i,
+                                                                            user['username'],
+                                                                            user['full_name'],
+                                                                            user['session_id'],
+                                                                            post_body_json['broker_instructions'] || {},
+                                                                            post_body_json['delivery_instructions'] || {},
+                                                                            post_body_json['securities'] || [])
+            {request_id: request_id}
           end
         end
 

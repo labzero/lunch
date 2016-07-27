@@ -56,6 +56,24 @@ class ApplicationController < ActionController::Base
     session[SessionKeys::SECURID_AUTHENTICATED] = true
   end
 
+  def securid_perform_check(pin=params[:securid_pin], token=params[:securid_token])
+    if session_elevated?
+      securid_status = RSA::SecurID::Session::AUTHENTICATED
+    else
+      securid = SecurIDService.new(current_user.username)
+      begin
+        securid.authenticate(pin, token)
+        session_elevate! if securid.authenticated?
+        securid_status = securid.status
+      rescue SecurIDService::InvalidPin => e
+        securid_status = :invalid_pin
+      rescue SecurIDService::InvalidToken => e
+        securid_status = :invalid_token
+      end
+    end
+    securid_status
+  end
+
   def current_user
     user = super
     if user
