@@ -1284,6 +1284,9 @@ en:
         step_2:
           enter_securities: In the file, enter one security per line.
       discard_and_upload_again: Discard and Upload Again
+      success:
+        pledge: Pledge Securities Request Sent
+        safekeep: Safekeep Securities Request Sent
     success:
       title: Release Securities Request Sent
       request_will_remain: 'This request will remain in the queue for authorization until one of the following occurs:'

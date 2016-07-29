@@ -804,7 +804,12 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  describe 'GET `submit_release_success`' do
+  describe 'GET `submit_request_success`' do
+    request_type_translations = {
+      release: I18n.t('securities.success.title'),
+      pledge: I18n.t('securities.safekeep_pledge.success.pledge'),
+      safekeep: I18n.t('securities.safekeep_pledge.success.safekeep')
+    }
     let(:member_service_instance) {double('MembersService')}
     let(:user_no_roles) {{display_name: 'User With No Roles', roles: [], surname: 'With No Roles', given_name: 'User'}}
     let(:user_etransact) {{display_name: 'Etransact User', roles: [User::Roles::ETRANSACT_SIGNER], surname: 'User', given_name: 'Etransact'}}
@@ -815,21 +820,27 @@ RSpec.describe SecuritiesController, type: :controller do
     let(:user_e) { {display_name: 'No Given Name', roles: [User::Roles::WIRE_SIGNER], given_name: nil, surname: 'Given'} }
     let(:user_f) { {display_name: 'Entire Authority User', roles: [User::Roles::SIGNER_ENTIRE_AUTHORITY], given_name: 'Entire Authority', surname: 'User'} }
     let(:signers_and_users) {[user_no_roles, user_etransact, user_a, user_b, user_c, user_d, user_e, user_f]}
-    let(:call_action) { get :submit_release_success }
+    let(:type) { [:release, :safekeep, :pledge].sample }
+    let(:call_action) { get :submit_request_success, type: type }
     before do
       allow(MembersService).to receive(:new).and_return(member_service_instance)
       allow(member_service_instance).to receive(:signers_and_users).and_return(signers_and_users)
     end
 
-    it_behaves_like 'a user required action', :get, :submit_release_success
-
-    it 'renders the `submit_release_success` view' do
-      call_action
-      expect(response.body).to render_template('submit_release_success')
+    it_behaves_like 'a user required action', :get, :submit_request_success
+    request_type_translations.keys.each do |type|
+      it_behaves_like 'a controller action with an active nav setting', :submit_request_success, :securities, type: type
     end
-    it 'sets `@title`' do
+
+    it 'renders the `submit_request_success` view' do
       call_action
-      expect(assigns[:title]).to eq(I18n.t('securities.success.title'))
+      expect(response.body).to render_template('submit_request_success')
+    end
+    request_type_translations.each do |type, title|
+      it "sets `@title` to `#{title}` when the `type` param is `#{type}`" do
+        get :submit_request_success, type: type
+        expect(assigns[:title]).to eq(title)
+      end
     end
     it 'sets `@authorized_user_data` to a list of users with securities authority' do
       call_action

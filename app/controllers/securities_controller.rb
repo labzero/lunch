@@ -314,8 +314,15 @@ class SecuritiesController < ApplicationController
     end
   end
 
-  def submit_release_success
-    @title = t('securities.success.title')
+  def submit_request_success
+    @title = case params[:type].to_sym
+      when :release
+        t('securities.success.title')
+      when :pledge
+        t('securities.safekeep_pledge.success.pledge')
+      when :safekeep
+        t('securities.safekeep_pledge.success.safekeep')
+    end
     @authorized_user_data = []
     users = MembersService.new(request).signers_and_users(current_member_id) || []
     users.sort_by! { |user| [user[:surname] || '', user[:given_name] || ''] }
