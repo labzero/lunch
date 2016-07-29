@@ -408,17 +408,10 @@ class SecuritiesController < ApplicationController
     populate_delivery_instructions_dropdown_variables(@securities_release_request)
     populate_securities_table_data_view_variable(type, @securities_release_request.securities)
 
-    @form_data = if policy(:security).authorize?
-      {
-        url: securities_release_authorize_path,
-        submit_text: t('securities.release.authorize')
-      }
-    else
-      {
-        url: securities_release_submit_path,
-        submit_text: t('securities.release.submit_authorization')
-      }
-    end
+    @form_data = {
+      url: securities_release_submit_path,
+      submit_text: policy(:security).authorize? ? t('securities.release.authorize') : t('securities.release.submit_authorization')
+    }
     @date_restrictions = date_restrictions
   end
 

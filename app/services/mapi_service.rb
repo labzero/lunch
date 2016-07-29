@@ -118,6 +118,14 @@ class MAPIService
     parse(name, post(name, endpoint, body.to_json, 'application/json', &error_handler), &error_handler)
   end
 
+  def put_hash(name, endpoint, body, &error_handler)
+    put_json(name, endpoint, body, &error_handler).try(:with_indifferent_access)
+  end
+
+  def put_json(name, endpoint, body, &error_handler)
+    parse(name, put(name, endpoint, body.to_json, 'application/json', &error_handler), &error_handler)
+  end
+
   def fix_date(data, field=:as_of_date)
     fields = [field].flatten
     fields.each do |field|

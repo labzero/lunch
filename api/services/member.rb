@@ -1443,7 +1443,7 @@ module MAPI
             raise MAPI::Shared::Errors::ValidationError.new('`user` is required', 'user') unless user
             request_id = body['request_id']
             raise MAPI::Shared::Errors::ValidationError.new('`request_id` is required', 'request_id') unless request_id
-            {} if MAPI::Services::Member::SecuritiesRequests.update_release(
+            {request_id: request_id} if MAPI::Services::Member::SecuritiesRequests.update_release(
               self,
               params['id'].to_i,
               request_id,

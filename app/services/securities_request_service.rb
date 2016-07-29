@@ -22,9 +22,11 @@ class SecuritiesRequestService < MAPIService
       broker_instructions: securities_release_request.broker_instructions,
       delivery_instructions: securities_release_request.delivery_instructions,
       securities: securities_release_request.securities,
-      user: user_details(user)
+      user: user_details(user),
+      request_id: securities_release_request.request_id
     }
-    response = post_hash(:securities_submit_release_for_authorization, "/member/#{member_id}/securities/release", body) do |name, msg, err|
+    method = body[:request_id] ? :put_hash : :post_hash
+    response = send(method, :securities_submit_release_for_authorization, "/member/#{member_id}/securities/release", body) do |name, msg, err|
       if err.is_a?(RestClient::Exception) && err.http_code >= 400 && err.http_code < 500 && error_handler
         error_handler.call(err)
       end

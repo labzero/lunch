@@ -171,7 +171,7 @@ describe MAPIService do
       allow(subject).to receive(rest_action).and_return(nil)
     end
 
-    if rest_action == :post
+    if rest_action == :post || rest_action == :put
       it "calls `#{rest_action}` with a JSON body and a content_type of 'application/json'" do
         new_args = args.collect{|x| x.to_json} + ['application/json']
         expect(subject).to receive(rest_action).with(name, endpoint, *new_args)
@@ -401,6 +401,14 @@ describe MAPIService do
 
   describe '`post_hash` method' do
     it_behaves_like 'a MAPI JSON REST request with Hash response', :post, 'Data to POST'
+  end
+
+  describe '`put_json` method' do
+    it_behaves_like 'a MAPI JSON REST request', :put, 'Data to PUT'
+  end
+
+  describe '`put_hash` method' do
+    it_behaves_like 'a MAPI JSON REST request with Hash response', :put, 'Data to PUT'
   end
 
   describe '`fix_date`' do

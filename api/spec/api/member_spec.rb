@@ -257,8 +257,8 @@ describe MAPI::ServiceApp do
     describe 'when `update_release` returns true' do
       before { allow(MAPI::Services::Member::SecuritiesRequests).to receive(:update_release).and_return(true) }
 
-      it 'returns an empty hash as JSON as its response body' do
-        expect(response_body).to eq({})
+      it 'returns a hash with the request_id as JSON as its response body' do
+        expect(response_body).to eq({"request_id" => post_body[:request_id]})
       end
       it 'returns a status of 200' do
         expect(response_status).to eq(200)

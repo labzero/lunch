@@ -1197,7 +1197,7 @@ RSpec.describe SecuritiesController, type: :controller do
         allow_policy :security, :authorize?
         it 'sets the proper @form_data for an authorized securities signer' do
           form_data = {
-            url: securities_release_authorize_path,
+            url: securities_release_submit_path,
             submit_text: I18n.t('securities.release.authorize')
           }
           call_action
