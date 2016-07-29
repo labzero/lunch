@@ -75,7 +75,7 @@
 }
 
 .manage-securities-form, .securities-submit-release-form {
-  input[type=submit], .primary-button, a {
+  input[type=submit], .primary-button {
     float: right;
     margin-left: 15px;
   }
@@ -94,7 +94,7 @@
   display: inline;
 }
 
-%safekeep-pledge-download {
+%actionable-text {
   @extend %typography-table-button;
   display: inline-block;
   color: $actionable-blue;
@@ -102,8 +102,8 @@
   text-transform: uppercase;
 }
 
-.safekeep-pledge-download, .safekeep-pledge-upload-again {
-  @extend %safekeep-pledge-download;
+.safekeep-pledge-download, .safekeep-pledge-upload-again, .additional-legal h3 {
+  @extend %actionable-text;
 }
 
 .safekeep-pledge-upload-again {
@@ -113,8 +113,27 @@
 }
 
 .safekeep-pledge-download-title {
-  @extend %safekeep-pledge-download;
+  @extend %actionable-text;
   margin-left: 325px;
+}
+
+.additional-legal {
+  margin-bottom: 2em;
+  p {
+    display: none;
+  }
+  &.expanded-legal {
+    span {
+      display: none;
+    }
+    p {
+      display: block;
+    }
+  }
+}
+
+.legal-footer {
+  @extend %typography-footnote
 }
 
 .securities-release, .securities-safekeep, .securities-pledge {

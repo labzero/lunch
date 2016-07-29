@@ -111,4 +111,7 @@ $(function() {
     $('.securities-release-table-wrapper').empty();
   });
 
+  $('.additional-legal h3').on('click', function(event) {
+    $('.additional-legal').toggleClass('expanded-legal');
+  });
 });
