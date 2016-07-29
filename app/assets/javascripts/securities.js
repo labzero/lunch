@@ -59,7 +59,7 @@ $(function() {
   });
 
 
-  // Toggle Edit Securities Instructions for Pleding and Safekeeping New Securities
+  // Toggle Edit Securities Instructions for Pledging and Safekeeping New Securities
   $('.securities-download-safekeep-pledge').on('click', function(){
     $('.securities-upload-instructions').toggle();
   });
