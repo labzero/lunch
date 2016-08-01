@@ -750,6 +750,10 @@ RSpec.describe ReportsController, :type => :controller do
           make_request
           expect(assigns[:start_date]).to eq(report_end_date)
         end
+        it 'sets @as_of to `@start_date`' do
+          make_request
+          expect(assigns[:as_of]).to eq(report_end_date)
+        end
         it 'should assign `@statement` to the result of calling MemberBalanceService.securities_services_statement' do
           make_request
           expect(assigns[:statement]).to eq(response_hash)
@@ -1624,6 +1628,10 @@ RSpec.describe ReportsController, :type => :controller do
       it 'sets @start_date to `start_date`' do
         get :advances_detail, start_date: start_date
         expect(assigns[:start_date]).to eq(start_date)
+      end
+      it 'sets @as_of to `start_date`' do
+        get :advances_detail, start_date: start_date
+        expect(assigns[:as_of]).to eq(start_date)
       end
       it 'should pass @as_of_date, `date_restriction` and @max_date to DatePickerHelper#date_picker_presets and set @picker_presets to its outcome' do
         allow(controller).to receive(:date_picker_presets).with(start_date, nil, ReportsController::DATE_RESTRICTION_MAPPING[:advances_detail], max_date).and_return(picker_preset_hash)

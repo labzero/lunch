@@ -805,6 +805,7 @@ class ReportsController < ApplicationController
   def advances_detail
     initialize_dates(:advances_detail, params[:start_date])
     report_download_name = "advances-#{fhlb_report_date_numeric(@start_date)}"
+    @as_of = @start_date # for `reports/pdf_footer.html.haml`
     downloadable_report(DOWNLOAD_FORMATS, {start_date: @start_date.to_s}, report_download_name) do
       @report_name = t('global.advances')
       @picker_presets = date_picker_presets(@start_date, nil, ReportConfiguration.date_restrictions(:advances_detail), @max_date)
@@ -1372,10 +1373,11 @@ class ReportsController < ApplicationController
       @data_available        = true
       @dropdown_options      = available_reports.map{ |entry| [entry['report_end_date'].strftime('%B %Y'), entry['report_end_date']] }
       @start_date            = params[:start_date].try(:to_date) || @dropdown_options[0][1]
+      @as_of = @start_date   # for `reports/pdf_footer.html.haml`
       @dropdown_options_text = @dropdown_options.find{ |option| option[1] == @start_date }.try(:first)
 
       report_download_name = "securities-services-monthly-statement-#{fhlb_report_date_numeric(@start_date)}"
-      downloadable_report(:pdf, {start_date: params[@start_date]}, report_download_name) do
+      downloadable_report(:pdf, {start_date: @start_date.to_s}, report_download_name) do
         if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
           @statement = {}
           @debit_date = nil
