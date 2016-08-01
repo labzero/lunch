@@ -531,10 +531,10 @@ en:
         aa: AA
         ACTACT: Actual/Actual
         ACT360: Actual/360
-        maturity: At maturity
-        monthendorrepayment: At monthend and/or at repayment
-        repayment: At repayment
-        semiannualandrepayment: Semiannually and at repayment
+        maturity: At Maturity
+        monthendorrepayment: At Monthend and/or at Repayment
+        repayment: At Repayment
+        semiannualandrepayment: Semiannually and at Repayment
         footer: All advances are subject to the terms and conditions on the Bank’s Credit Program, the Advances and Security Agreement with the Member, and the appropriate Advance Confirmation, as well as the Terms of Use.
         axes_labels:
           standard: Standard
