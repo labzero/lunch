@@ -2,6 +2,8 @@ $(function() {
   var $form = $('.manage-securities-form');
   var $checkboxes = $form.find('input[type=checkbox]');
   var $submitButton = $form.find('input[type=submit]');
+  var $securitiesUploadInstructions = $('.securities-upload-instructions');
+  var $securitiesReleaseWrapper = $('.securities-release-table-wrapper');
   $checkboxes.on('change', function(e){
     // if boxes checked and all values are the same, enable submit
     var status = false;
@@ -61,7 +63,7 @@ $(function() {
 
   // Toggle Edit Securities Instructions for Pledging and Safekeeping New Securities
   $('.securities-download-safekeep-pledge').on('click', function(){
-    $('.securities-upload-instructions').toggle();
+    $securitiesUploadInstructions.toggle();
   });
 
   // Add the securities fields to release form from the download form.  Keeps one source of truth for securities in the DOM.
@@ -107,8 +109,10 @@ $(function() {
     }
   });
 
-  $('.securities-release-table-wrapper').on('click', '.safekeep-pledge-upload-again', function(event) {
-    $('.securities-release-table-wrapper').empty();
+  $securitiesReleaseWrapper.on('click', '.safekeep-pledge-upload-again', function(e){
+    $securitiesUploadInstructions.hide();
+    $('.safekeep-pledge-download-area').show();
+    $securitiesReleaseWrapper.empty();
   });
 
   $('.additional-legal h3').on('click', function(event) {

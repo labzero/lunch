@@ -40,9 +40,8 @@ $(function () {
       };
     },
     always: function(e, data) {
-      var instructionsContainerClass = $(e.target).data('instructions-container-class');
-      $('.' + instructionsContainerClass).hide();
       dropZone.removeClass('file-uploading');
+      dropZone.hide();
       progressBar.css('width', '0%');
       jqXHR = false;
     },
