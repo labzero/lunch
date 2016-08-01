@@ -2295,7 +2295,7 @@ en:
           special_notice: "The Knockout Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Knockout Advance may contract or extend adversely to market movements, and the Bank makes no representations as to the expected life of the advance. This information is not intended as investment advice. The decision to obtain a Knockout Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for the knockout option, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Knockout Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Knockout Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement."
       mpf:
         title: "Mortgage Partnership Finance (MPF) Program"
-        description_html: "The Mortgage Partnership Finance&#174; (MPF&#174;) Program offers members a competitive alternative to traditional investors when selling residential mortgage loans in the secondary market. The Bank offers the following MPF products:"
+        description_html: "The Mortgage Partnership Finance&#174; (MPF&#174;) Program offers members a competitively priced alternative to traditional investors when selling residential mortgage loans in the secondary market. The Bank offers the following MPF products:"
         description_list:
           mpf_original_html: "%{download_link}: The member sells fixed rate conventional conforming mortgage loans to the Bank, and the Bank holds them in portfolio."
           mpf_xtra_html: "%{download_link}&#174;: The member sells fixed rate conventional  conforming mortgage loans for concurrent sale to Fannie Mae."
@@ -2346,6 +2346,9 @@ en:
           post_closing: Post Closing Information Form
           servicer: Servicer Information Form
           servicing_retained_only: Servicing Retained Only
+          agreement_servicer_account_remittance: "Agreement for Servicer’s Custodial P & I Account: Scheduled/Scheduled or Actual/Actual Single Remittance"
+          agreement_servicer_account_actual: "Agreement for Servicer’s Custodial P & I Account: Actual/Actual"
+          agreement_servicer_account: "Agreement for Servicer’s Custodial T & I Account"
           mpf_extra: MPF Xtra
           mpf_extra_agreement: "MPF Xtra: Agreement for Access to Fannie Mae’s DU® Only"
           mpf_xtra_addendum_mpf: MPF Xtra Addendum to MPF Program PFI Agreement (Servicing Retained)
