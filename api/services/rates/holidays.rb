@@ -6,6 +6,7 @@ module MAPI
       module Holidays
         include MAPI::Services::Base
         include MAPI::Shared::Constants
+        include MAPI::Shared::Utils
 
         def self.get_holidays_from_soap(logger, connection, start, finish)
           begin
@@ -19,18 +20,19 @@ module MAPI
           end
         end
 
-        def self.holidays(logger, environment, start=Time.zone.today, finish=Time.zone.today + 3.years)
-          if connection = MAPI::Services::Rates.init_cal_connection(environment)
-            if response = get_holidays_from_soap(logger, connection, start, finish)
+        def self.holidays(app, start=Time.zone.today, finish=Time.zone.today + 3.years)
+          if should_fake?(app)
+            MAPI::Services::Rates.fake('calendar_holidays').map { |holiday| Date.parse(holiday) }
+          else
+            connection = MAPI::Services::Rates.init_cal_connection(app.settings.environment)
+            if response = get_holidays_from_soap(app.logger, connection, start, finish)
               response.doc.remove_namespaces!
               r1 = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')
               return [] if r1.blank?
-              r1[0].css('days day date').map { |holiday| Time.zone.parse(holiday.content) }
+              r1[0].css('days day date').map { |holiday| Date.parse(holiday.content) }
             else
               []
             end
-          else
-            MAPI::Services::Rates.fake('calendar_holidays')
           end
         end
       end

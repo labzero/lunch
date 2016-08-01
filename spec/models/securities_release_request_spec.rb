@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe SecuritiesReleaseRequest, :type => :model do
+  before { allow_any_instance_of(CalendarService).to receive(:holidays).and_return([]) }
   describe 'validations' do
     (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities]).each do |attr|
       it "should validate the presence of `#{attr}`" do
@@ -20,34 +21,100 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
       end
     end
     describe '`trade_date_must_come_before_settlement_date`' do
-      let(:call_validation) { subject.send(:trade_date_must_come_before_settlement_date) }
+      let(:trade_date_errors) { subject.valid?; subject.errors.messages[:trade_date] || [] }
       let(:today) { Time.zone.today }
       it 'is called as a validator' do
         expect(subject).to receive(:trade_date_must_come_before_settlement_date)
         subject.valid?
       end
-      it 'returns nil if there is no `trade_date`' do
+      it 'does not add an error if there is no `trade_date`' do
         subject.settlement_date = today
-        expect(call_validation).to be_nil
+        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
       end
-      it 'returns nil if there is no `settlement_date`' do
+      it 'does not add an error if there is no `settlement_date`' do
         subject.trade_date = today
-        expect(call_validation).to be_nil
+        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
       end
-      it 'returns false if the `trade_date` comes after the `settlement_date`' do
+      it 'adds an error if the `trade_date` comes after the `settlement_date`' do
         subject.trade_date = today
         subject.settlement_date = today - 2.days
-        expect(call_validation).to eq(false)
+        expect(trade_date_errors).to include("must come before 'settlement_date'")
       end
-      it 'returns true if the `trade_date` comes before the `settlement_date`' do
+      it 'does not add an error if the `trade_date` comes before the `settlement_date`' do
         subject.trade_date = today - 2.days
         subject.settlement_date = today
-        expect(call_validation).to eq(true)
+        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
       end
-      it 'returns true if the `trade_date` is equal to the `settlement_date`' do
+      it 'does not add an error if the `trade_date` is equal to the `settlement_date`' do
         subject.trade_date = today
         subject.settlement_date = today
-        expect(call_validation).to eq(true)
+        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
+      end
+    end
+    [[:trade_date, :trade_date_within_range], [:settlement_date, :settlement_date_within_range]].each do |attr_array|
+      attr = attr_array.first
+      method = attr_array.last
+      describe "`#{method}`" do
+        let(:call_validation) { subject.send(method) }
+        let(:attr_errors) { subject.valid?; subject.errors.messages[attr] || [] }
+
+        before { allow(subject).to receive(:date_within_range) }
+
+        it 'is called as a validator' do
+          expect(subject).to receive(method)
+          subject.valid?
+        end
+        it "calls `date_within_range` with the `#{attr}` as an arg" do
+          date = instance_double(Date)
+          subject.send("#{attr}=", date)
+          expect(subject).to receive(:date_within_range).with(date)
+          call_validation
+        end
+        it "adds an error for `#{attr}` if `date_within_range` returns false" do
+          allow(subject).to receive(:date_within_range).and_return(false)
+          expect(attr_errors).to include('must not be a holiday, weekend, or in the past')
+        end
+        it "does not add an error for `#{attr}` if `date_within_range` returns true" do
+          allow(subject).to receive(:date_within_range).and_return(true)
+          expect(attr_errors).to_not include('must not be a holiday, weekend, or in the past')
+        end
+      end
+    end
+    describe '`date_within_range`' do
+      let(:today) { Time.zone.today }
+      let(:max_date) { today + described_class::MAX_DATE_RESTRICTION }
+      let(:date) { instance_double(Date, sunday?: false, saturday?: false, :>= => true, :<= => true) }
+      let(:call_method) { subject.send(:date_within_range, date) }
+
+      it 'fetches `holidays` from the CalendarService instance with today and the max_date as args' do
+        expect_any_instance_of(CalendarService).to receive(:holidays).with(today, max_date).and_return([])
+        call_method
+      end
+      it 'returns nil if passed nil' do
+        expect(subject.send(:date_within_range, nil)).to be_nil
+      end
+      it 'returns false if the provided date is a Saturday' do
+        allow(date).to receive(:saturday?).and_return(true)
+        expect(call_method).to be false
+      end
+      it 'returns false if the provided date is a Sunday' do
+        allow(date).to receive(:sunday?).and_return(true)
+        expect(call_method).to be false
+      end
+      it 'returns false if the provided date is a bank holiday' do
+        allow_any_instance_of(CalendarService).to receive(:holidays).and_return([date])
+        expect(call_method).to be false
+      end
+      it 'returns false if the provided date occurs before today' do
+        allow(date).to receive(:>=).with(today).and_return(false)
+        expect(call_method).to be false
+      end
+      it 'returns false if the provided date occurs after today plus the `MAX_DATE_RESTRICTION`' do
+        allow(date).to receive(:<=).with(max_date).and_return(false)
+        expect(call_method).to be false
+      end
+      it 'returns true if all of the above conditions are satisfied' do
+        expect(call_method).to be true
       end
     end
     describe '`securities_must_have_payment_amount`' do

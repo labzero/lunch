@@ -1365,7 +1365,7 @@ RSpec.describe SecuritiesController, type: :controller do
 
     describe '`date_restrictions`' do
       let(:today) { Time.zone.today }
-      let(:max_date) { today + 3.months }
+      let(:max_date) { today + SecuritiesReleaseRequest::MAX_DATE_RESTRICTION }
       let(:holidays) do
         holidays = []
         rand(2..4).times do
@@ -1384,54 +1384,32 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:calendar_service) { instance_double(CalendarService, holidays: holidays) }
       let(:call_method) { subject.send(:date_restrictions) }
 
-      before { allow(Rails.cache).to receive(:fetch).and_return(holidays) }
+      before { allow(CalendarService).to receive(:new).and_return(calendar_service) }
 
-      it 'fetches the `calendar_holidays` from the Rails cache with the proper key and expiry param' do
-        expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:calendar_holidays), expires_in: CacheConfiguration.expiry(:calendar_holidays)).and_return(holidays)
+      it 'creates a new instance of the CalendarService with the request as an arg' do
+        expect(CalendarService).to receive(:new).with(request).and_return(calendar_service)
         call_method
       end
-      describe 'when `calendar_holidays` already exists in the Rails cache' do
-        it 'does not create a new instance of CalendarService' do
-          expect(CalendarService).not_to receive(:new)
-          call_method
-        end
+      it 'calls `holidays` on the service instance with today as an arg' do
+        expect(calendar_service).to receive(:holidays).with(today, any_args).and_return(holidays)
+        call_method
       end
-      describe 'when `calendar_holidays` does not yet exist in the Rails cache' do
-        before do
-          allow(Rails.cache).to receive(:fetch).and_yield
-          allow(CalendarService).to receive(:new).and_return(calendar_service)
-        end
-
-        it 'creates a new instance of the CalendarService with the request as an arg' do
-          expect(CalendarService).to receive(:new).with(request).and_return(calendar_service)
-          call_method
-        end
-        it 'calls `holidays` on the service instance with today as an arg' do
-          expect(calendar_service).to receive(:holidays).with(today, any_args).and_return(holidays)
-          call_method
-        end
-        it 'calls `holidays` on the service instance with a date three months from today as an arg' do
-          expect(calendar_service).to receive(:holidays).with(anything, max_date).and_return(holidays)
-          call_method
-        end
-        it 'raises an error if CalendarService returns nil' do
-          allow(calendar_service).to receive(:holidays).with(today, any_args).and_return(nil)
-          expect{call_method}.to raise_error(StandardError, 'There has been an error and SecuritiesController#date_restrictions has encountered nil while querying the CalendarService. Check error logs.')
-        end
+      it 'calls `holidays` on the service instance with a date three months from today as an arg' do
+        expect(calendar_service).to receive(:holidays).with(anything, max_date).and_return(holidays)
+        call_method
       end
-
       describe 'the returned hash' do
         it 'has a `min_date` of today' do
           expect(call_method[:min_date]).to eq(today)
         end
-        it 'has a `max_date` of three months from now' do
+        it 'has a `max_date` of today plus the `SecuritiesReleaseRequest::MAX_DATE_RESTRICTION`' do
           expect(call_method[:max_date]).to eq(max_date)
         end
         describe 'the `invalid_dates` array' do
           it 'includes all dates returned from the CalendarService' do
             expect(call_method[:invalid_dates]).to include(*holidays)
           end
-          it 'includes all weekends between the today and 3 months from now' do
+          it 'includes all weekends between the today and the max date' do
             expect(call_method[:invalid_dates]).to include(*weekends)
           end
         end

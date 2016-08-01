@@ -470,12 +470,8 @@ class SecuritiesController < ApplicationController
 
   def date_restrictions
     today = Time.zone.today
-    max_date = today + 3.months
-    holidays =  Rails.cache.fetch(CacheConfiguration.key(:calendar_holidays), expires_in: CacheConfiguration.expiry(:calendar_holidays)) do
-      holidays = CalendarService.new(request).holidays(today, max_date)
-      raise StandardError, 'There has been an error and SecuritiesController#date_restrictions has encountered nil while querying the CalendarService. Check error logs.' if holidays.nil?
-      holidays
-    end
+    max_date = today + SecuritiesReleaseRequest::MAX_DATE_RESTRICTION
+    holidays =  CalendarService.new(request).holidays(today, max_date)
     weekends = []
     date_iterator = today.clone
     while date_iterator <= max_date do
@@ -484,7 +480,7 @@ class SecuritiesController < ApplicationController
     end
     {
       min_date: today,
-      max_date: today + 3.months,
+      max_date: max_date,
       invalid_dates: holidays + weekends
     }
   end

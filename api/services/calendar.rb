@@ -46,7 +46,7 @@ module MAPI
             start_date      = params[:start_date].to_date
             end_date        = params[:end_date].to_date
             raise MAPI::Shared::Errors::ValidationError.new('Invalid date range: start_date must occur earlier than end_date or on the same day', 'invalid_date_range') unless start_date <= end_date
-            {holidays: MAPI::Services::Rates::Holidays.holidays(logger, settings.environment, start_date, end_date)}
+            {holidays: MAPI::Services::Rates::Holidays.holidays(self, start_date, end_date)}
           end
         end
       end

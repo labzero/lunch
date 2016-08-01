@@ -20,20 +20,16 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return(response)
     end
 
-    it 'calls `MAPI::Services::Rates::Holidays.holidays` with the `logger`' do
-      expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(logger, any_args)
-      make_request
-    end
-    it 'calls `MAPI::Services::Rates::Holidays.holidays` with the `environment`' do
-      expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(anything, MAPI::ServiceApp.environment, any_args)
+    it 'calls `MAPI::Services::Rates::Holidays.holidays` with the app' do
+      expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(an_instance_of(MAPI::ServiceApp), any_args)
       make_request
     end
     it 'calls `MAPI::Services::Rates::Holidays.holidays` with the `start_date`' do
-      expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(anything, anything, start_date, anything)
+      expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(anything, start_date, anything)
       make_request
     end
     it 'calls `MAPI::Services::Rates::Holidays.holidays` with the `end_date`' do
-      expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(anything, anything, anything, end_date)
+      expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(anything, anything, end_date)
       make_request
     end
     it 'returns a status of 200' do

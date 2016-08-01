@@ -633,7 +633,7 @@ describe MAPI::ServiceApp do
       end
 
       describe '`create_release method`' do
-        let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
+        let(:app) { double(MAPI::ServiceApp, logger: double('logger'), settings: nil) }
         let(:member_id) { rand(100000..999999) }
         let(:delivery_type) { MAPI::Services::Member::SecuritiesRequests::DELIVERY_TYPE.keys[rand(0..3)] }
         let(:delivery_instructions) {
@@ -650,11 +650,18 @@ describe MAPI::ServiceApp do
                                 delivery_instructions,
                                 securities ] }
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_release(*method_params) }
+
+        before { allow(securities_request_module).to receive(:validate_broker_instructions) }
+
         context 'validations' do
           before { allow(securities_request_module).to receive(:should_fake?).and_return(true) }
 
           it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
-            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions)
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything)
+            call_method
+          end
+          it 'calls `validate_broker_instructions` with the app as an arg' do
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app)
             call_method
           end
           it 'calls `validate_delivery_instructions` with the `delivery_instructions` arg' do
@@ -1413,23 +1420,27 @@ describe MAPI::ServiceApp do
       end
     end
     describe '`validate_broker_instructions` class method' do
+      let(:app) { instance_double(MAPI::ServiceApp) }
       let(:broker_instructions) {{
         'transaction_code' => securities_request_module::TRANSACTION_CODE.keys.sample,
         'trade_date' => instance_double(String),
         'settlement_type' => securities_request_module::SETTLEMENT_TYPE.keys.sample,
         'settlement_date' => instance_double(String)
       }}
-      let(:call_method) { securities_request_module.validate_broker_instructions(broker_instructions) }
+      let(:call_method) { securities_request_module.validate_broker_instructions(broker_instructions, app) }
 
-      before { allow(securities_request_module).to receive(:dateify) }
+      before do
+        allow(securities_request_module).to receive(:dateify)
+        allow(securities_request_module).to receive(:validate_broker_instructions_date)
+      end
 
       it 'raises an error if `broker_instructions` is nil' do
-        expect{securities_request_module.validate_broker_instructions(nil)}.to raise_error(MAPI::Shared::Errors::ValidationError, "broker_instructions must be a non-empty hash") do |error|
+        expect{securities_request_module.validate_broker_instructions(nil, app)}.to raise_error(MAPI::Shared::Errors::ValidationError, "broker_instructions must be a non-empty hash") do |error|
           expect(error.code).to eq('missing_broker_instructions')
         end
       end
       it 'raises an error if `broker_instructions` is an empty hash' do
-        expect{securities_request_module.validate_broker_instructions({})}.to raise_error(MAPI::Shared::Errors::ValidationError, "broker_instructions must be a non-empty hash") do |error|
+        expect{securities_request_module.validate_broker_instructions({}, app)}.to raise_error(MAPI::Shared::Errors::ValidationError, "broker_instructions must be a non-empty hash") do |error|
           expect(error.code).to eq('missing_broker_instructions')
         end
       end
@@ -1453,12 +1464,65 @@ describe MAPI::ServiceApp do
         end
       end
       it 'calls `dateify` on `trade_date`' do
-        expect(MAPI::Services::Member::SecuritiesRequests).to receive(:dateify).with(broker_instructions['trade_date'])
+        expect(securities_request_module).to receive(:dateify).with(broker_instructions['trade_date'])
         call_method
       end
       it 'calls `dateify` on `settlement_date`' do
-        expect(MAPI::Services::Member::SecuritiesRequests).to receive(:dateify).with(broker_instructions['settlement_date'])
+        expect(securities_request_module).to receive(:dateify).with(broker_instructions['settlement_date'])
         call_method
+      end
+      it 'calls `validate_broker_instructions_date` with the `trade_date`' do
+        allow(securities_request_module).to receive(:dateify).with(broker_instructions['trade_date']).and_return(broker_instructions['trade_date'])
+        expect(securities_request_module).to receive(:validate_broker_instructions_date).with(app, broker_instructions['trade_date'], 'trade_date')
+        call_method
+      end
+      it 'calls `validate_broker_instructions_date` with the `settlement_date`' do
+        allow(securities_request_module).to receive(:dateify).with(broker_instructions['settlement_date']).and_return(broker_instructions['settlement_date'])
+        expect(securities_request_module).to receive(:validate_broker_instructions_date).with(app, broker_instructions['settlement_date'], 'settlement_date')
+        call_method
+      end
+    end
+    describe '`validate_broker_instructions_date`' do
+      let(:app) { instance_double(MAPI::ServiceApp) }
+      let(:date) { instance_double(Date, :>= => true, :<= => true) }
+      let(:attr_name) { SecureRandom.hex }
+      let(:today) { Time.zone.today }
+      let(:max_date) { today + securities_request_module::MAX_DATE_RESTRICTION }
+      let(:holidays) { instance_double(Array) }
+      let(:call_method) { securities_request_module.validate_broker_instructions_date(app, date, attr_name) }
+      before do
+        allow(MAPI::Services::Rates::Holidays).to receive(:holidays)
+        allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(false)
+      end
+      it 'fetches the holidays array from the endpoint with the proper args' do
+        expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(app, today, max_date)
+        call_method
+      end
+      it 'calls the `weekend_or_holiday?` method with the date and the holidays array' do
+        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return(holidays)
+        expect(securities_request_module).to receive(:weekend_or_holiday?).with(date, holidays).and_return(false)
+        call_method
+      end
+      it 'raises an error if the date is a weekend or holiday' do
+        allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(true)
+        expect{call_method}.to raise_error(MAPI::Shared::Errors::ValidationError, "#{attr_name} must not be set to a weekend date or a bank holiday") do |error|
+          expect(error.code).to eq("invalid_broker_instructions_#{attr_name}_key")
+        end
+      end
+      it 'raises an error if the date occurs before today' do
+        allow(date).to receive(:>=).with(today).and_return(false)
+        expect{call_method}.to raise_error(MAPI::Shared::Errors::ValidationError, "#{attr_name} must not occur before today") do |error|
+          expect(error.code).to eq("invalid_broker_instructions_#{attr_name}_key")
+        end
+      end
+      it 'raises an error if the date after today plus the MAX_DATE_RESTRICTION' do
+        allow(date).to receive(:<=).with(max_date).and_return(false)
+        expect{call_method}.to raise_error(MAPI::Shared::Errors::ValidationError, "#{attr_name} must not occur after after the 3 months from today") do |error|
+          expect(error.code).to eq("invalid_broker_instructions_#{attr_name}_key")
+        end
+      end
+      it 'does not raise an error if the provided date is within range and is not a weekend or holiday' do
+        expect{call_method}.not_to raise_error
       end
     end
     describe '`validate_securities` class method' do
@@ -1806,7 +1870,11 @@ describe MAPI::ServiceApp do
       end
 
       it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
-        expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions)
+        expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything)
+        call_method
+      end
+      it 'calls `validate_broker_instructions` with the app as an arg' do
+        expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app)
         call_method
       end
       it 'calls `validate_delivery_instructions` with the `delivery_instructions` arg' do

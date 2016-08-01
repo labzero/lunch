@@ -99,7 +99,9 @@ Scenario: A signer authorizes a previously submittied release request
   And I am on the securities request page
   When I click to Authorize the first release
   Then I should be on the Securities Release page
-  When I authorize the request
+  When I choose the first available date for trade date
+  And I choose the first available date for settlement date
+  And I authorize the request
   Then I should see the authorize request success page
 
 @jira-mem-1600

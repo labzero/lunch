@@ -281,6 +281,11 @@ Then(/^the Authorize action is (disabled|enabled)$/) do |state|
   end
 end
 
+When(/^I choose the first available date for (trade|settlement) date$/) do |attr|
+step "I click the #{attr} date datepicker"
+step 'I choose the first available date'
+end
+
 def delivery_instructions(text)
   case text
   when 'DTC'

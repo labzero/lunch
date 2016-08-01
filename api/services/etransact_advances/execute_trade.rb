@@ -69,7 +69,7 @@ module MAPI
         end
 
         def self.get_maturity_date (app, settlement_date, term)
-          holidays = MAPI::Services::Rates::Holidays.holidays(app.logger, app.settings.environment)
+          holidays = MAPI::Services::Rates::Holidays.holidays(app)
           MAPI::Services::Rates.get_maturity_date(settlement_date+TERM_MAPPING[term][:time], TERM_MAPPING[term][:frequency_unit], holidays)
         end
 

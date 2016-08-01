@@ -1363,7 +1363,7 @@ module MAPI
           member_id = params[:id].to_i
           date = params[:date].to_date
           begin
-            MAPI::Services::Member::SecuritiesTransactions.securities_transactions(self.settings.environment, logger, member_id, date).to_json
+            MAPI::Services::Member::SecuritiesTransactions.securities_transactions(self, member_id, date).to_json
           rescue => e
             logger.error e
             halt 503, 'Internal Service Error'

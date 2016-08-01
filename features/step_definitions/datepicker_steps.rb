@@ -274,3 +274,14 @@ Then(/^I am not able to enter prohibited characters in the datepicker inputs?$/)
     step %{I should see the date "1/1/2011" in the datepicker end input field}
   end
 end
+
+When(/^I choose the first available date$/) do
+  available_dates = page.all('td.available:not(.off)', visible: true)
+  i = 0
+  while available_dates.blank? && i < 12 do
+    page.find('.fa-arrow-right', visible: true).click
+    available_dates = page.all('td.available:not(.off)', visible: true)
+    i += 1
+  end
+  available_dates[0].click unless available_dates.blank?
+end

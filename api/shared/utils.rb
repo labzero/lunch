@@ -129,6 +129,10 @@ module MAPI
             app.halt 400, {errors: ['unknown'], human_errors: error.message}.to_json
           end
         end
+
+        def weekend_or_holiday?(date, holidays)
+          date.saturday? || date.sunday? || holidays.include?(date)
+        end
       end
     end
   end

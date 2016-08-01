@@ -422,4 +422,24 @@ describe MAPI::Shared::Utils::ClassMethods do
       end
     end
   end
+
+  describe '`weekend_or_holiday?` method' do
+    let(:date) { instance_double(Date, saturday?: false, sunday?: false) }
+    let(:call_method) { subject.weekend_or_holiday?(date, []) }
+
+    it 'should return true for saturday' do
+      allow(date).to receive(:saturday?).and_return(true)
+      expect(call_method).to be true
+    end
+    it 'should return true for sunday' do
+      allow(date).to receive(:sunday?).and_return(true)
+      expect(call_method).to be true
+    end
+    it 'should return true if the date is included in teh `holidays` array' do
+      expect(subject.weekend_or_holiday?(date, [date])).to be true
+    end
+    it 'should return false if the date is not a weekend and not in the holidays array' do
+      expect(call_method).to be false
+    end
+  end
 end

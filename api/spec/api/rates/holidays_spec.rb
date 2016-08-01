@@ -4,55 +4,76 @@ require 'date'
 describe MAPI::Services::Rates::Holidays do
   subject{ MAPI::Services::Rates::Holidays }
   describe 'holidays' do
-    let(:logger){ double( 'logger' ) }
-    let(:environment){ double('environment') }
-    let(:connection){ double('connection') }
-    let(:start){ double('start') }
-    let(:finish){ double('finish') }
-    let(:xml_doc){ double('xml_doc') }
-    let(:fake){ double('fake') }
-    let(:soap_response){ double('soap_response', doc: xml_doc) }
-    let(:results){ double('results') }
-    let(:holiday1_string){ double('holiday1_string') }
-    let(:holiday2_string){ double('holiday2_string') }
-    let(:holiday3_string){ double('holiday3_string') }
-    let(:holiday1_date){ double('holiday1_date') }
-    let(:holiday2_date){ double('holiday2_date') }
-    let(:holiday3_date){ double('holiday3_date') }
-    let(:holiday1){ double('holiday1', content: holiday1_string)}
-    let(:holiday2){ double('holiday2', content: holiday2_string)}
-    let(:holiday3){ double('holiday3', content: holiday3_string)}
-    let(:holidays_results){ [holiday1, holiday2, holiday3]}
-    let(:holidays){ [holiday1_date, holiday2_date, holiday3_date] }
-    before do
-      allow(MAPI::Services::Rates).to receive(:init_cal_connection).with(environment).and_return(connection)
-      allow(subject).to receive(:get_holidays_from_soap).with(logger, connection, start, finish).and_return(soap_response)
-      allow(xml_doc).to receive(:remove_namespaces!)
-    end
+    let(:date_1) { Time.zone.today + rand(0..360).days }
+    let(:date_2) { Time.zone.today + rand(0..360).days }
+    let(:date_array) { [date_1, date_2] }
+    let(:date_string_1) { date_1.iso8601 }
+    let(:date_string_2) { date_2.iso8601 }
+    let(:date_string_array) { [date_string_1, date_string_2] }
+    let(:app) { instance_double(MAPI::ServiceApp, logger: double('logger'), settings: double('app settings', environment: instance_double(Symbol))) }
+    let(:call_method) { subject.holidays(app) }
 
-    it 'returns fake results if connection is nil' do
-      allow(MAPI::Services::Rates).to receive(:init_cal_connection).with(environment).and_return(nil)
-      allow(MAPI::Services::Rates).to receive(:fake).with('calendar_holidays').and_return(fake)
-      expect(subject.holidays(logger, environment, start, finish)).to eq(fake)
-    end
+    describe 'when `should_fake?` returns true' do
+      before { allow(subject).to receive(:should_fake?).and_return(true) }
 
-    it 'returns [] if soap response is empty' do
-      allow(subject).to receive(:get_holidays_from_soap).with(logger, connection, start, finish).and_return(nil)
-      expect(subject.holidays(logger, environment, start, finish)).to eq([])
+      it 'calls `MAPI::Services::Rates.fake` with `calendar_holidays` as an arg' do
+        expect(MAPI::Services::Rates).to receive(:fake).and_return(date_string_array)
+        call_method
+      end
+      it 'returns an array of Date objects' do
+        allow(MAPI::Services::Rates).to receive(:fake).and_return(date_string_array)
+        expect(call_method).to eq(date_array)
+      end
     end
+    describe 'when `should_fake?` returns false' do
+      let(:connection) { instance_double(Savon::Client) }
+      let(:document) { double('xml doc', remove_namespaces!: nil, xpath: nil) }
+      let(:response) { double('soap response', doc: document) }
 
-    it 'returns [] when xpath returns []' do
-      allow(xml_doc).to receive(:xpath).with('//Envelope//Body//holidayResponse//holidays//businessCenters').and_return([])
-      expect(subject.holidays(logger, environment, start, finish)).to eq([])
-    end
+      before do
+        allow(subject).to receive(:should_fake?).and_return(false)
+        allow(MAPI::Services::Rates).to receive(:init_cal_connection)
+        allow(subject).to receive(:get_holidays_from_soap)
+      end
 
-    it 'returns a list of dates extracted from the XML' do
-      allow(xml_doc).to receive(:xpath).with('//Envelope//Body//holidayResponse//holidays//businessCenters').and_return([results])
-      allow(results).to receive(:css).with('days day date').and_return(holidays_results)
-      allow(Time).to receive_message_chain(:zone, :parse).with(holiday1_string).and_return(holiday1_date)
-      allow(Time).to receive_message_chain(:zone, :parse).with(holiday2_string).and_return(holiday2_date)
-      allow(Time).to receive_message_chain(:zone, :parse).with(holiday3_string).and_return(holiday3_date)
-      expect(subject.holidays(logger, environment, start, finish)).to eq(holidays)
+      it 'initiates a calendar connection with the app\'s environment as an arg' do
+        expect(MAPI::Services::Rates).to receive(:init_cal_connection).with(app.settings.environment)
+        call_method
+      end
+      it 'returns an empty hash if `get_holidays_from_soap` returns nil' do
+        expect(call_method).to eq([])
+      end
+      describe 'when `get_holidays_from_soap` returns a response' do
+        before do
+          allow(subject).to receive(:get_holidays_from_soap).and_return(response)
+        end
+
+        it 'removes namespaces from the doc' do
+          expect(document).to receive(:remove_namespaces!)
+          call_method
+        end
+        it 'retrieves the node at xpath `//Envelope//Body//holidayResponse//holidays//businessCenters`' do
+          expect(document).to receive(:xpath).with('//Envelope//Body//holidayResponse//holidays//businessCenters')
+          call_method
+        end
+        it 'returns an empty array if nothing is found at the xpath address' do
+          expect(call_method).to eq([])
+        end
+        describe 'when a node is found at the xpath address' do
+          let(:date_node_array) { [double('node', content: date_string_1), double('node', content: date_string_2)] }
+          let(:node) { double('xml node', css: date_node_array) }
+
+          before { expect(document).to receive(:xpath).and_return([node]) }
+
+          it 'calls `css` with `days day date`' do
+            expect(node).to receive(:css).with('days day date')
+            call_method
+          end
+          it 'returns an array of dates from the strings found at `days day date`' do
+            expect(call_method).to eq(date_array)
+          end
+        end
+      end
     end
   end
 end

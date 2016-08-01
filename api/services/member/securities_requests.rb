@@ -95,6 +95,7 @@ module MAPI
         LAST_MODIFIED_BY_MAX_LENGTH = 30
         BROKER_WIRE_ADDRESS_FIELDS = ['clearing_agent_fed_wire_address_1', 'clearing_agent_fed_wire_address_2']
         FED_AMOUNT_LIMIT = 50000000
+        MAX_DATE_RESTRICTION = 3.months.freeze
 
         def self.requests_query(member_id, status_array, date_range)
           quoted_statuses = status_array.collect { |status| quote(status) }.join(',')
@@ -311,7 +312,7 @@ module MAPI
           sequence
         end
 
-        def self.validate_broker_instructions(broker_instructions)
+        def self.validate_broker_instructions(broker_instructions, app)
           raise MAPI::Shared::Errors::ValidationError.new('broker_instructions must be a non-empty hash', 'missing_broker_instructions') unless !broker_instructions.nil? && broker_instructions.is_a?(Hash) && !broker_instructions.empty?
           BROKER_INSTRUCTIONS_MAPPING.keys.each do |key|
             raise MAPI::Shared::Errors::ValidationError.new("broker_instructions must contain a value for #{key}", "missing_broker_instructions_#{key}_key") unless broker_instructions[key]
@@ -322,6 +323,17 @@ module MAPI
           end
           broker_instructions['trade_date'] = dateify(broker_instructions['trade_date'])
           broker_instructions['settlement_date'] = dateify(broker_instructions['settlement_date'])
+          validate_broker_instructions_date(app, broker_instructions['trade_date'], 'trade_date')
+          validate_broker_instructions_date(app, broker_instructions['settlement_date'], 'settlement_date')
+        end
+
+        def self.validate_broker_instructions_date(app, date, attr_name)
+          today = Time.zone.today
+          max_date = today + MAX_DATE_RESTRICTION
+          holidays = MAPI::Services::Rates::Holidays.holidays(app, today, max_date)
+          raise MAPI::Shared::Errors::ValidationError.new("#{attr_name} must not be set to a weekend date or a bank holiday", "invalid_broker_instructions_#{attr_name}_key") if weekend_or_holiday?(date, holidays)
+          raise MAPI::Shared::Errors::ValidationError.new("#{attr_name} must not occur before today", "invalid_broker_instructions_#{attr_name}_key") unless date >= today
+          raise MAPI::Shared::Errors::ValidationError.new("#{attr_name} must not occur after after the 3 months from today", "invalid_broker_instructions_#{attr_name}_key") unless date <= max_date
         end
 
         def self.validate_securities(securities, settlement_type, delivery_type)
@@ -401,7 +413,7 @@ module MAPI
         end
 
         def self.create_release(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
-          validate_broker_instructions(broker_instructions)
+          validate_broker_instructions(broker_instructions, app)
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'])
           validate_delivery_instructions(delivery_instructions)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
@@ -426,7 +438,7 @@ module MAPI
 
         def self.update_release(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
           original_delivery_instructions = delivery_instructions.clone # Used to see if header details have changes below
-          validate_broker_instructions(broker_instructions)
+          validate_broker_instructions(broker_instructions, app)
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'])
           validate_delivery_instructions(delivery_instructions)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
