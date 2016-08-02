@@ -3176,7 +3176,7 @@ RSpec.describe ReportsController, :type => :controller do
     let(:member_id) {6}
     let(:make_request) { get :account_summary }
     let(:now) { Date.new(2015, 1, 12).to_time }
-    let(:financing_percentage) { rand(0..100) / 100 }
+    let(:financing_percentage) { rand(0..100) }
     let(:maximum_term) { rand(1..48) }
     let(:total_assets) { double(Float) }
     let(:total_financing_available) { double(Float) }
@@ -3282,7 +3282,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'assigns values in column' do
         make_request
-        [ financing_percentage * 100,
+        [ financing_percentage,
           maximum_term,
           total_assets,
           total_financing_available,

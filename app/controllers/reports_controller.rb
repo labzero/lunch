@@ -1739,7 +1739,7 @@ class ReportsController < ApplicationController
           {
             columns: [
               {value: t('reports.pages.account_summary.financing_availability.asset_percentage')},
-              {value: (member_profile[:financing_percentage] * 100 if member_profile[:financing_percentage]), type: :percentage}
+              {value: (member_profile[:financing_percentage] if member_profile[:financing_percentage]), type: :percentage}
             ]
           },
           {
