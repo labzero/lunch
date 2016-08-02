@@ -134,7 +134,7 @@ class MemberBalanceService < MAPIService
           end
         end
         data[:sbc_excess_capacity] = data[:sbc_totals][:remaining_borrowing_capacity].to_i - data[:sbc][:utilized].values.sum
-        data[:total_borrowing_capacity] = data[:standard_credit_totals][:borrowing_capacity].to_i + data[:sbc_totals][:total_borrowing_capacity].to_i
+        data[:total_borrowing_capacity] = data[:net_plus_securities_capacity].to_i + data[:sbc_totals][:total_borrowing_capacity].to_i
         data[:remaining_borrowing_capacity] = data[:standard_excess_capacity].to_i + data[:sbc_excess_capacity].to_i
       rescue => e
         return warn(:borrowing_capacity_summary, "malformed data[:sbc] hash: #{data[:sbc]} and threw the following error: #{e}", e)
