@@ -157,7 +157,7 @@ module MAPI
           end
         end
 
-        def self.insert_release_header_query(member_id, header_id, user_name, full_name, session_id, pledged_adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
+        def self.insert_release_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
           now = Time.zone.today
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
@@ -193,7 +193,7 @@ module MAPI
                     #{quote(format_modification_by(user_name, session_id))},
                     #{quote(now)},
                     #{quote(full_name)},
-                    #{quote(pledged_adx_id)},
+                    #{quote(adx_id)},
                     #{delivery_values.join(', ')}
                    )
           SQL
@@ -229,27 +229,27 @@ module MAPI
           SQL
         end
 
-        def self.pledged_adx_query(member_id)
+        def self.adx_query(member_id, type)
           <<-SQL
             SELECT ADX.ADX_ID
             FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF ADX, SAFEKEEPING.BTC_ACCOUNT_TYPE BAT, SAFEKEEPING.CUSTOMER_PROFILE CP
             WHERE ADX.BAT_ID = BAT.BAT_ID
             AND ADX.CP_ID = CP.CP_ID
             AND CP.FHLB_ID = #{quote(member_id)}
-            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = 'P'
+            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = #{quote(type)}
             AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
             AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
             ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
           SQL
         end
 
-        def self.ssk_id_query(member_id, pledged_adx_id, cusip)
+        def self.ssk_id_query(member_id, adx_id, cusip)
           <<-SQL
             SELECT SSK.SSK_ID
             FROM SAFEKEEPING.SSK SSK, SAFEKEEPING.SSK_TRANS SSKT
             WHERE UPPER(SSK.SSK_CUSIP) = UPPER(#{quote(cusip)})
             AND SSK.FHLB_ID = #{quote(member_id)}
-            AND SSK.ADX_ID = #{quote(pledged_adx_id)}
+            AND SSK.ADX_ID = #{quote(adx_id)}
             AND SSKT.SSK_ID = SSK.SSK_ID
             AND SSKT.SSX_BTC_DATE = (SELECT MAX(SSX_BTC_DATE) FROM SAFEKEEPING.SSK_TRANS)
           SQL
@@ -370,7 +370,7 @@ module MAPI
           }
         end
 
-        def self.update_request_header_details_query(member_id, header_id, user_name, full_name, session_id, pledged_adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
+        def self.update_request_header_details_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
           <<-SQL
             UPDATE SAFEKEEPING.SSK_WEB_FORM_HEADER SET
               PLEDGE_TYPE           = #{quote(TRANSACTION_CODE[broker_instructions['transaction_code']])},
@@ -382,7 +382,7 @@ module MAPI
               LAST_MODIFIED_BY      = #{quote(format_modification_by(user_name, session_id))},
               LAST_MODIFIED_DATE    = #{quote(Time.zone.today)},
               LAST_MODIFIED_BY_NAME = #{quote(full_name)},
-              PLEDGED_ADX_ID        = #{quote(pledged_adx_id)},
+              PLEDGED_ADX_ID        = #{quote(adx_id)},
               #{delivery_columns.each_with_index.collect{|column_name, i| "#{column_name} = #{delivery_values[i]}"}.join(', ') }
             WHERE HEADER_ID = #{quote(header_id)}
             AND FHLB_ID = #{quote(member_id)}
@@ -421,11 +421,11 @@ module MAPI
           unless should_fake?(app)
             header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
             ActiveRecord::Base.transaction do
-              pledged_adx_id = execute_sql_single_result(app, pledged_adx_query(member_id), "Pledged ADX ID")
-              insert_header_sql = insert_release_header_query(member_id, header_id, user_name, full_name, session_id, pledged_adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions, processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values])
+              adx_id = execute_sql_single_result(app, adx_query(member_id, securities.first['custody_account_type'].to_s.upcase), "Pledged ADX ID")
+              insert_header_sql = insert_release_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions, processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values])
               raise "failed to insert security release request header" unless execute_sql(app.logger, insert_header_sql)
               securities.each do |security|
-                ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, pledged_adx_id, security['cusip']), "SSK ID")
+                ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
                 insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
                 raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
               end
@@ -446,7 +446,7 @@ module MAPI
             ActiveRecord::Base.transaction(isolation: :read_committed) do
               cusips = securities.collect{|x| x['cusip']}
               raise MAPI::Shared::Errors::SQLError, 'Failed to delete old security release request detail by CUSIP' unless execute_sql(app.logger, delete_request_securities_by_cusip_query(request_id, cusips))
-              pledged_adx_id = execute_sql_single_result(app, pledged_adx_query(member_id), 'Pledged ADX ID')
+              adx_id = execute_sql_single_result(app, adx_query(member_id, securities.first['custody_account_type'].to_s.upcase), 'Pledged ADX ID')
               existing_securities = format_securities(fetch_hashes(app.logger, release_request_securities_query(request_id)))
               securities.each do |security|
                 existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
@@ -454,7 +454,7 @@ module MAPI
                   update_security_sql = update_request_security_query(request_id, user_name, session_id, security)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to update security release request detail' unless execute_sql(app.logger, update_security_sql)
                 elsif !existing_security
-                  ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, pledged_adx_id, security['cusip']), 'SSK ID')
+                  ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
                   detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
                   insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security release request detail' unless execute_sql(app.logger, insert_security_sql)
@@ -464,7 +464,7 @@ module MAPI
               raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless existing_header
               existing_header = map_hash_values(existing_header, RELEASE_REQUEST_HEADER_MAPPING)
               if header_has_changed(existing_header, broker_instructions, original_delivery_instructions)
-                update_header_sql = update_request_header_details_query(member_id, request_id, user_name, full_name, session_id, pledged_adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions, processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values])
+                update_header_sql = update_request_header_details_query(member_id, request_id, user_name, full_name, session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions, processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values])
                 header_update_count = execute_sql(app.logger, update_header_sql).to_i
                 raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless header_update_count == 1
               end
@@ -562,7 +562,7 @@ module MAPI
           end
           delivery_instructions
         end
-        
+
         def self.format_securities(securities)
           securities.collect do |security|
             {

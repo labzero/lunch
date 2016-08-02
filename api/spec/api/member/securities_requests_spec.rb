@@ -184,7 +184,8 @@ describe MAPI::ServiceApp do
       let(:security) { {  'cusip' => SecureRandom.hex,
                           'description' => SecureRandom.hex,
                           'original_par' => rand(1..40000) + rand.round(2),
-                          'payment_amount' => rand(1..100000) + rand.round(2) } }
+                          'payment_amount' => rand(1..100000) + rand.round(2),
+                          'custody_account_type' => ['P', 'U'][rand(0..1)] } }
       let(:required_delivery_keys) { [ 'a', 'b', 'c' ] }
       let(:delivery_columns) { MAPI::Services::Member::SecuritiesRequests.delivery_type_mapping(delivery_type).keys }
       let(:delivery_values) { MAPI::Services::Member::SecuritiesRequests.delivery_type_mapping(delivery_type).values }
@@ -192,7 +193,7 @@ describe MAPI::ServiceApp do
       let(:user_name) {  SecureRandom.hex }
       let(:full_name) { SecureRandom.hex }
       let(:session_id) { SecureRandom.hex }
-      let(:pledged_adx_id) { rand(1000..10000) }
+      let(:adx_id) { rand(1000..10000) }
       let(:ssk_id) { rand(1000..10000) }
 
       describe '`delivery_keys_for_delivery_type`' do
@@ -232,7 +233,7 @@ describe MAPI::ServiceApp do
                                                                                                     user_name,
                                                                                                     full_name,
                                                                                                     session_id,
-                                                                                                    pledged_adx_id,
+                                                                                                    adx_id,
                                                                                                     delivery_columns,
                                                                                                     broker_instructions,
                                                                                                     delivery_type,
@@ -328,9 +329,9 @@ describe MAPI::ServiceApp do
           expect(call_method).to match /VALUES\s+\((\S+\s+){14}#{full_name}/
         end
 
-        it 'sets the `pledged_adx_id`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(pledged_adx_id)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){15}#{pledged_adx_id}/
+        it 'sets the `adx_id`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(adx_id)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){15}#{adx_id}/
         end
 
         describe 'delivery values' do
@@ -546,11 +547,13 @@ describe MAPI::ServiceApp do
         end
       end
 
-      describe '`pledged_adx_query`' do
-        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.pledged_adx_query(member_id) }
+      describe '`adx_query`' do
+        let(:adx_type) { ['P', 'U'].sample }
+        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.adx_query(member_id, adx_type) }
 
         before do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(member_id)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(member_id).and_return(member_id)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(adx_type).and_return(adx_type)
         end
 
         it 'constructs the appropriate sql' do
@@ -560,7 +563,7 @@ describe MAPI::ServiceApp do
             WHERE ADX.BAT_ID = BAT.BAT_ID
             AND ADX.CP_ID = CP.CP_ID
             AND CP.FHLB_ID = #{member_id}
-            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = 'P'
+            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = #{adx_type}
             AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
             AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
             ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
@@ -571,11 +574,11 @@ describe MAPI::ServiceApp do
 
       describe '`ssk_id_query`' do
         let(:cusip) { SecureRandom.hex }
-        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.ssk_id_query(member_id, pledged_adx_id, cusip) }
+        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.ssk_id_query(member_id, adx_id, cusip) }
 
         before do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(member_id).and_return(member_id)
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(pledged_adx_id).and_return(pledged_adx_id)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(adx_id).and_return(adx_id)
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(cusip).and_return(cusip)
         end
 
@@ -585,7 +588,7 @@ describe MAPI::ServiceApp do
             FROM SAFEKEEPING.SSK SSK, SAFEKEEPING.SSK_TRANS SSKT
             WHERE UPPER(SSK.SSK_CUSIP) = UPPER(#{cusip})
             AND SSK.FHLB_ID = #{member_id}
-            AND SSK.ADX_ID = #{pledged_adx_id}
+            AND SSK.ADX_ID = #{adx_id}
             AND SSKT.SSK_ID = SSK.SSK_ID
             AND SSKT.SSX_BTC_DATE = (SELECT MAX(SSX_BTC_DATE) FROM SAFEKEEPING.SSK_TRANS)
             SQL
@@ -640,6 +643,12 @@ describe MAPI::ServiceApp do
           MAPI::Services::Member::SecuritiesRequests.delivery_keys_for_delivery_type(delivery_type).map do |key|
             [key, SecureRandom.hex]
           end.to_h.merge('delivery_type' => delivery_type) }
+        let(:adx_type) { ['P', 'U'].sample }
+        let(:security) { { 'cusip' => instance_double(String),
+                           'description' => instance_double(String),
+                           'original_par' => rand(0...50000000),
+                           'payment_amount' => instance_double(Numeric),
+                           'custody_account_type' => adx_type } }
         let(:securities) { [ security, security, security ]}
         let(:method_params) { [ app,
                                 member_id,
@@ -651,7 +660,9 @@ describe MAPI::ServiceApp do
                                 securities ] }
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_release(*method_params) }
 
-        before { allow(securities_request_module).to receive(:validate_broker_instructions) }
+        before do
+          allow(securities_request_module).to receive(:validate_broker_instructions)
+        end
 
         context 'validations' do
           before { allow(securities_request_module).to receive(:should_fake?).and_return(true) }
@@ -689,16 +700,17 @@ describe MAPI::ServiceApp do
         context 'preparing and executing SQL' do
           let(:next_id) { double('Next ID') }
           let(:sequence_result) { double('Sequence Result', to_i: next_id) }
-          let(:pledged_adx_sql) { double('Pledged ADX SQL') }
+          let(:adx_sql) { double('ADX SQL') }
           let(:ssk_sql) { double('SSK SQL') }
+
           before do
             allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_delivery_columns).and_return(
               delivery_columns)
             allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_delivery_values).and_return(
               delivery_values)
             allow(securities_request_module).to receive(:should_fake?).and_return(false)
-            allow(securities_request_module).to receive(:pledged_adx_query).with(member_id).and_return(pledged_adx_sql)
-            allow(securities_request_module).to receive(:ssk_id_query).with(member_id, pledged_adx_id, security['cusip']).
+            allow(securities_request_module).to receive(:adx_query).with(member_id, adx_type).and_return(adx_sql)
+            allow(securities_request_module).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip']).
               exactly(3).times.and_return(ssk_sql)
             allow(securities_request_module).to receive(:execute_sql_single_result).with(
               app,
@@ -706,8 +718,8 @@ describe MAPI::ServiceApp do
               "Next ID Sequence").and_return(sequence_result)
             allow(securities_request_module).to receive(:execute_sql_single_result).with(
               app,
-              pledged_adx_sql,
-              "Pledged ADX ID").and_return(pledged_adx_id)
+              adx_sql,
+              "Pledged ADX ID").and_return(adx_id)
             allow(securities_request_module).to receive(:execute_sql_single_result).with(
               app,
               ssk_sql,
@@ -731,7 +743,7 @@ describe MAPI::ServiceApp do
                 user_name,
                 full_name,
                 session_id,
-                pledged_adx_id,
+                adx_id,
                 delivery_columns,
                 broker_instructions,
                 delivery_type,
@@ -757,7 +769,7 @@ describe MAPI::ServiceApp do
                 user_name,
                 full_name,
                 session_id,
-                pledged_adx_id,
+                adx_id,
                 delivery_columns,
                 broker_instructions,
                 delivery_type,
@@ -1836,6 +1848,7 @@ describe MAPI::ServiceApp do
       let(:full_name) { instance_double(String) }
       let(:session_id) { instance_double(String) }
       let(:delivery_type) { instance_double(String) }
+      let(:adx_type) { ['P', 'U'].sample }
       let(:delivery_instructions) {{
         'delivery_type' => delivery_type,
         'account_number' => instance_double(String),
@@ -1856,7 +1869,8 @@ describe MAPI::ServiceApp do
         'cusip' => instance_double(String),
         'description' => instance_double(String),
         'original_par' => instance_double(Numeric),
-        'payment_amount' => instance_double(Numeric)
+        'payment_amount' => instance_double(Numeric),
+        'custody_account_type' => adx_type
       }}
       let(:securities) { [security] }
       let(:call_method) { securities_request_module.update_release(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities) }
@@ -1905,7 +1919,7 @@ describe MAPI::ServiceApp do
       describe 'when `should_fake` returns false' do
         queries = [
           :delete_request_securities_by_cusip_query,
-          :pledged_adx_query,
+          :adx_query,
           :update_request_security_query,
           :insert_security_query,
           :ssk_id_query,
@@ -1916,7 +1930,7 @@ describe MAPI::ServiceApp do
         queries.each do |query|
           let(query) { instance_double(String) }
         end
-        let(:pledged_adx_id) { instance_double(String) }
+        let(:adx_id) { instance_double(String) }
         let(:detail_id) { rand(1000..9999) }
         let(:ssk_id) { rand(1000..9999) }
         let(:existing_header) { instance_double(Hash) }
@@ -1927,7 +1941,7 @@ describe MAPI::ServiceApp do
           allow(securities_request_module).to receive(:execute_sql)
           allow(securities_request_module).to receive(:execute_sql).with(anything, delete_request_securities_by_cusip_query).and_return(true)
           allow(securities_request_module).to receive(:execute_sql_single_result)
-          allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, pledged_adx_query, any_args).and_return(pledged_adx_id)
+          allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, adx_query, any_args).and_return(adx_id)
           allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, ssk_id_query, any_args).and_return(ssk_id)
           allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, securities_request_module::NEXT_ID_SQL, any_args).and_return(detail_id)
           allow(securities_request_module).to receive(:fetch_hashes)
@@ -1981,13 +1995,13 @@ describe MAPI::ServiceApp do
               end
             end
           end
-          describe 'fetching the `pledged_adx_id`' do
-            it 'constructs the `pledged_adx_query` with the `member_id`' do
-              expect(securities_request_module).to receive(:pledged_adx_query).with(member_id)
+          describe 'fetching the `adx_id`' do
+            it 'constructs the `adx_query` with the `member_id` and `adx_type`' do
+              expect(securities_request_module).to receive(:adx_query).with(member_id, adx_type)
               call_method
             end
-            it 'calls `execute_sql_single_result` with the results of `pledged_adx_query`' do
-              expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, pledged_adx_query, any_args)
+            it 'calls `execute_sql_single_result` with the results of `adx_query`' do
+              expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, adx_query, any_args)
               call_method
             end
             it 'calls `execute_sql_single_result` with `Pledged ADX ID`' do
@@ -2023,8 +2037,8 @@ describe MAPI::ServiceApp do
                   expect(securities_request_module).to receive(:ssk_id_query).with(member_id, any_args)
                   call_method
                 end
-                it 'constructs the `ssk_id_query` with the `pledged_adx_id`' do
-                  expect(securities_request_module).to receive(:ssk_id_query).with(anything, pledged_adx_id, any_args)
+                it 'constructs the `ssk_id_query` with the `adx_id`' do
+                  expect(securities_request_module).to receive(:ssk_id_query).with(anything, adx_id, any_args)
                   call_method
                 end
                 it 'constructs the `ssk_id_query` with the `cusip` from the security' do
@@ -2233,8 +2247,8 @@ describe MAPI::ServiceApp do
                   expect(securities_request_module).to receive(:update_request_header_details_query).with(anything, anything, anything, anything, session_id, any_args)
                   call_method
                 end
-                it 'constructs the `update_request_header_details_query` with the `pledged_adx_id`' do
-                  expect(securities_request_module).to receive(:update_request_header_details_query).with(anything, anything, anything, anything, anything, pledged_adx_id, any_args)
+                it 'constructs the `update_request_header_details_query` with the `adx_id`' do
+                  expect(securities_request_module).to receive(:update_request_header_details_query).with(anything, anything, anything, anything, anything, adx_id, any_args)
                   call_method
                 end
                 it 'constructs the `update_request_header_details_query` with the `delivery_columns` from the processed delivery_instructions' do
@@ -2393,7 +2407,7 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
       allow(Time.zone).to receive(:today).and_return(today)
     end
-    
+
     it 'returns an UPDATE query' do
       expect(call_method).to match(/\A\s*UPDATE\s+SAFEKEEPING.SSK_WEB_FORM_HEADER\s+SET\s+/i)
     end
