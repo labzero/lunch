@@ -187,12 +187,13 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
     describe '`attributes=`' do
       sym_attrs = [:delivery_type, :transaction_code, :settlement_type]
       date_attrs = [:trade_date, :settlement_date]
+      custom_attrs = [:request_id]
       let(:hash) { {} }
       let(:value) { double('some value') }
       let(:call_method) { subject.send(:attributes=, hash) }
       let(:excluded_attrs) { [] }
 
-      (described_class::ACCESSIBLE_ATTRS - date_attrs - sym_attrs).each do |key|
+      (described_class::ACCESSIBLE_ATTRS - date_attrs - sym_attrs - custom_attrs).each do |key|
         it "assigns the value found under `#{key}` to the attribute `#{key}`" do
           hash[key.to_s] = value
           call_method
@@ -289,6 +290,32 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
           end
           expect(subject.securities).to be_nil
         end
+      end
+    end
+
+    describe '`request_id=`' do
+      it 'sets the `request_id` to the supplied value' do
+        request_id = SecureRandom.hex
+        subject.request_id = request_id
+        expect(subject.request_id).to eq(request_id)
+      end
+      it 'sets the `request_id` to nil if passed an empty string' do
+        subject.request_id = ""
+        expect(subject.request_id).to be_nil
+      end
+      it 'sets the `request_id` to nil if passed nil' do
+        subject.request_id = nil
+        expect(subject.request_id).to be_nil
+      end
+      it 'sets the `request_id` to nil if passed false' do
+        subject.request_id = false
+        expect(subject.request_id).to be_nil
+      end
+      it 'raises an exception if passed `true`' do
+        expect{subject.request_id = true}.to raise_error(ArgumentError)
+      end
+      it 'raises an exception if passed an object' do
+        expect{subject.request_id = Object.new}.to raise_error(ArgumentError)
       end
     end
 

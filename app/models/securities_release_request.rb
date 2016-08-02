@@ -130,6 +130,14 @@ class SecuritiesReleaseRequest
     delivery_instructions_hash
   end
 
+  def request_id=(new_value)
+    if new_value.is_a?(String) || new_value.is_a?(Numeric) || new_value.nil? || new_value.is_a?(FalseClass)
+      @request_id = new_value.present? ? new_value : nil
+    else
+      raise ArgumentError, '`request_id` must be a string, number or blank' 
+    end
+  end
+
   private
 
   def trade_date_must_come_before_settlement_date
