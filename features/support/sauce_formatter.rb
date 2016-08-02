@@ -48,17 +48,21 @@ unless defined? SauceFormatter
       def done_with_sauce(&block)
         if sauce_labs?
           require 'sauce_whisk'
-          job = SauceWhisk::Jobs.fetch @sauce_job_id
-          format_scenario_data = ->(entry) do
-            {
-              location: human_location(entry[:scenario]),
-              start_time: entry[:runtime].first.round(1),
-              end_time: entry[:runtime].last.round(1)
-            }
+          begin
+            job = SauceWhisk::Jobs.fetch @sauce_job_id
+            format_scenario_data = ->(entry) do
+              {
+                location: human_location(entry[:scenario]),
+                start_time: entry[:runtime].first.round(1),
+                end_time: entry[:runtime].last.round(1)
+              }
+            end
+            job.passed = @failed_scenarios.empty?
+            job.custom_data = {passed: @passed_scenarios.collect(&format_scenario_data), failed: @failed_scenarios.collect(&format_scenario_data) }
+            job.save
+          rescue RestClient::Exception => e
+            sauce_print("Failed to annotate Sauce job: #{e}")
           end
-          job.passed = @failed_scenarios.empty?
-          job.custom_data = {passed: @passed_scenarios.collect(&format_scenario_data), failed: @failed_scenarios.collect(&format_scenario_data) }
-          job.save
         end
         done_without_sauce(&block)
       end
