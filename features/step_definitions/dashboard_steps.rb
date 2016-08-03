@@ -15,6 +15,10 @@ Then /^I should see dashboard modules$/ do
   page.assert_selector('.dashboard-module', :minimum => 1)
 end
 
+When /^I wait for the dashboard to fully load$/ do
+  page.assert_no_selector('.dashboard-module-loading', wait: 180)
+end
+
 Then(/^I should see (\d+) contacts$/) do |count|
   mod = page.find('.dashboard-module', :text => I18n.t('dashboard.contacts.title'))
   mod.assert_selector('.dashboard-contact', :minimum => count)
