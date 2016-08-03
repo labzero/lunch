@@ -12,12 +12,12 @@
     %h3= t('products.advances.pfi.product_specific.title')
     %h4= t('products.advances.pfi.product_specific.mpf_original')
     = render 'pfi_table', rows: @mpf_original_rows
-    %h4= t('products.advances.pfi.product_specific.mfp_government')
-    = render 'pfi_table', rows: @mpf_government_rows
     %h4= t('products.advances.pfi.product_specific.mpf_extra')
     = render 'pfi_table', rows: @mpf_xtra_rows
     %h4= t('products.advances.pfi.product_specific.mpf_direct')
     = render 'pfi_table', rows: @mpf_direct_rows
+    %h4= t('products.advances.pfi.product_specific.mpf_gov')
+    = render 'pfi_table', rows: @mpf_gov_rows
     .product-mpf-exhibits
       %h2= t('products.advances.pfi.exhibits.title')
       %h3= t('products.advances.pfi.all_applicants.title')
@@ -56,6 +56,3 @@
       %p= t('products.advances.pfi.exhibits.your_institutions_most_recent_servicing')
       %h4= t('products.advances.pfi.exhibits.compliance')
       %p= t('products.advances.pfi.exhibits.information_on_your_institutions_compliance_html', url:'https://www.federalregister.gov/articles/2015/06/26/2015-15836/2013-integrated-mortgage-disclosures-rule-under-the-real-estate-settlement-procedures-act-regulation#h-11')
-      %h4= t('products.advances.pfi.product_specific.mfp_government')
-      %p= t('products.advances.pfi.exhibits.evidence_of_authorization')
-

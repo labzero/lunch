@@ -134,7 +134,7 @@ class MemberBalanceService < MAPIService
           end
         end
         data[:sbc_excess_capacity] = data[:sbc_totals][:remaining_borrowing_capacity].to_i - data[:sbc][:utilized].values.sum
-        data[:total_borrowing_capacity] = data[:standard_credit_totals][:borrowing_capacity].to_i + data[:sbc_totals][:total_borrowing_capacity].to_i
+        data[:total_borrowing_capacity] = data[:net_plus_securities_capacity].to_i + data[:sbc_totals][:total_borrowing_capacity].to_i
         data[:remaining_borrowing_capacity] = data[:standard_excess_capacity].to_i + data[:sbc_excess_capacity].to_i
       rescue => e
         return warn(:borrowing_capacity_summary, "malformed data[:sbc] hash: #{data[:sbc]} and threw the following error: #{e}", e)
@@ -250,16 +250,24 @@ class MemberBalanceService < MAPIService
     data
   end
 
-  def lenient_sum(hashes, field)
-    hashes.nil? ? 0 : hashes.map{|hash| hash[field]}.compact.sum
-  end
-
   def securities_transactions(as_of_date)
     if data = get_hash(:securities_transactions, "/member/#{@member_id}/securities_transactions/#{as_of_date.to_date.iso8601}")
+      total_debits = 0
+      total_credits = 0
+      data[:transactions].each do |transaction|
+        amount = transaction[:payment_or_principal] || 0
+        if amount > 0
+          total_credits += amount
+        else
+          total_debits += amount
+        end
+      end
       data.merge(
           total_payment_or_principal: lenient_sum(data[:transactions], :payment_or_principal),
           total_interest:             lenient_sum(data[:transactions], :interest),
-          total_net:                  lenient_sum(data[:transactions], :total)
+          total_net:                  lenient_sum(data[:transactions], :total),
+          total_debits:               total_debits,
+          total_credits:              total_credits
       )
     end
   end
@@ -361,6 +369,12 @@ class MemberBalanceService < MAPIService
     response = HTTP.auth("Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"").get(Rails.configuration.mapi.endpoint + "/member/#{@member_id}/advance_confirmation/#{advance_number}/#{confirmation_number}")
     block.call(response.status, response.headers, response.body) if block
     response.body
+  end
+
+  private
+
+  def lenient_sum(hashes, field)
+    hashes.nil? ? 0 : hashes.map{|hash| hash[field]}.compact.sum
   end
 
 end

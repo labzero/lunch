@@ -365,4 +365,81 @@ describe MAPI::Shared::Utils::ClassMethods do
       expect(subject.nil_to_zero(value)).to eq(value)
     end
   end
+
+  describe '`return_json` method' do
+    let(:logger) { double('MAPI logger', error: nil) }
+    let(:app) { instance_double(MAPI::ServiceApp, logger: logger, halt: nil) }
+    let(:error_message) { SecureRandom.hex }
+    let(:error_code) { SecureRandom.hex }
+    let(:validation_error) { MAPI::Shared::Errors::ValidationError.new(error_message, error_code) }
+    let(:error) { StandardError.new(error_message) }
+    let(:response) { double('some response', to_json: nil) }
+
+    it 'yields to the given block' do
+      expect{|x| subject.rescued_json_response(app, &x)}.to yield_control
+    end
+    it 'returns the yielded block as JSON' do
+      expect(response).to receive(:to_json)
+      subject.rescued_json_response(app) { response }
+    end
+    it 'returns nil if the yielded block is nil' do
+      expect(subject.rescued_json_response(app) { }).to be_nil
+    end
+    describe "when the yielded block raises a ValidationError" do
+      let(:call_method) { subject.rescued_json_response(app) {raise validation_error} }
+
+      it 'calls `halt` with a 400' do
+        expect(app).to receive(:halt).with(400, anything)
+        call_method
+      end
+      it 'calls `halt` with a JSONed error code' do
+        expect(app).to receive(:halt).with(anything, {errors: [error_code]}.to_json)
+        call_method
+      end
+      it 'logs an error message' do
+        expect(logger).to receive(:error).with(error_message)
+        call_method
+      end
+    end
+    describe "when the yielded block raises an error that is not a ValidationError" do
+      let(:call_method) { subject.rescued_json_response(app) {raise error} }
+
+      it 'calls `halt` with a 400' do
+        expect(app).to receive(:halt).with(400, anything)
+        call_method
+      end
+      it 'logs the error' do
+        expect(logger).to receive(:error).with(error)
+        call_method
+      end
+      it 'calls `halt` with `unknown` in the `errors` array' do
+        expect(app).to receive(:halt).with(anything, include({errors: ['unknown']}.to_json.delete('{}')))
+        call_method
+      end
+      it 'calls `halt` with the error message as the `human_errors` value' do
+        expect(app).to receive(:halt).with(anything, include({human_errors: error_message}.to_json.delete('{}')))
+        call_method
+      end
+    end
+  end
+
+  describe '`weekend_or_holiday?` method' do
+    let(:date) { instance_double(Date, saturday?: false, sunday?: false) }
+    let(:call_method) { subject.weekend_or_holiday?(date, []) }
+
+    it 'should return true for saturday' do
+      allow(date).to receive(:saturday?).and_return(true)
+      expect(call_method).to be true
+    end
+    it 'should return true for sunday' do
+      allow(date).to receive(:sunday?).and_return(true)
+      expect(call_method).to be true
+    end
+    it 'should return true if the date is included in teh `holidays` array' do
+      expect(subject.weekend_or_holiday?(date, [date])).to be true
+    end
+    it 'should return false if the date is not a weekend and not in the holidays array' do
+      expect(call_method).to be false
+    end
+  end
 end

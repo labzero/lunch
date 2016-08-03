@@ -531,10 +531,10 @@ en:
         aa: AA
         ACTACT: Actual/Actual
         ACT360: Actual/360
-        maturity: At maturity
-        monthendorrepayment: At monthend and/or at repayment
-        repayment: At repayment
-        semiannualandrepayment: Semiannually and at repayment
+        maturity: At Maturity
+        monthendorrepayment: At Monthend and/or at Repayment
+        repayment: At Repayment
+        semiannualandrepayment: Semiannually and at Repayment
         footer: All advances are subject to the terms and conditions on the Bank’s Credit Program, the Advances and Security Agreement with the Member, and the appropriate Advance Confirmation, as well as the Terms of Use.
         axes_labels:
           standard: Standard
@@ -1208,8 +1208,9 @@ en:
         account_number: Account No.
       clearing_agent: "Clearing Agent's Fed Wire Address:"
       further_credit: For Further Credit to Account No.
-      settlement_amount: 'Settlement Amount %{unit}%{footnote_marker}'
+      settlement_amount: 'Settlement Amount%{unit}%{footnote_marker}'
       settlement_amount_footnote: '%{footnote_marker}If Vs. Payment'
+      custodian_name_footnote: '%{footnote_marker}The name of the custodian is required for all non-agency mortgage-backed securities (MBS). If the custodian of the note supporting the MBS transaction is the Issuer or a related party and the mortgage notes have not been endorsed to the trustee, the Bank requires that the party that has control over the mortgage notes (as determined by the Bank) have a long-term debt rating of at least BBB.'
       submit_authorization: Submit for Authorization
       authorize: Authorize
       legal_copy: "Pursuant to the Advances and Security Agreement (Agreement) between your institution and the Bank, your institution requests the release and redelivery or reassignment of the securities listed above.\n\nBy authorizing the release of these securities, your institution certifies that, as of the date the securities are released, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Agreement) that will remain pledged to the Bank immediately after the requested release will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Agreement)."
@@ -1231,12 +1232,18 @@ en:
           cusip:
             title: CUSIP
             description: The security's CUSIP identifier.
+          description:
+            title: Description
+            description: The security's description.
           payment_amount:
             title_html: "Payment Amount <span>(if needed)</span>"
             description: "If your Settlement Type is 'vs Payment', add the Payment Amount for each security."
           original_par:
             title: Original Par Value
             description: The security's Original Par Value
+          settlement_amount:
+            title_html: "Settlement Amount <span>(if needed)</span>"
+            description: If your Settlement Type is 'vs Payment', add the Settlement Amount for each security.
           custodian_name:
             title_html: "Custodian Name <span>(if needed)</span>"
             description: "For each security that is not of the type 'Agency', add the Custodian Name at the end of the line."
@@ -1247,15 +1254,39 @@ en:
         select_file: Select File
         download_actions_html: '%{span} <span>or</span> %{button}'
         upload_error: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
-        generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number}
+        generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number} or via %{email}
+        no_payment_amount_error: When 'Versus Payment' is selected, each security must have a settlement amount.
+        fed_fifty_m_error: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
     safekeep:
       title: Safekeep Securities
       delete_request:
         title: Delete this Safekeep Securities request?
+      custodian_name: 'Custodian Name%{footnote_marker}'
+      custodian_name_footnote: '%{footnote_marker}If security not type "Agency"'
+      download_template: Download Add Securities Template File
     pledge:
       title: Pledge Securities
       delete_request:
         title: Delete this Pledge Securities request?
+      legal_copy: Pursuant to the Advances and Security Agreement between your institution and the Bank, your institution has pledged and granted a security interest to the Bank in the securities listed above.
+      additional_certifications: 'By authorizing the pledge of the specific securities listed above, your institution makes the following certifications:'
+      anti_preditory_lending_title: Anti-Predatory Lending Policy Certification
+      anti_preditory_lending_text: Your institution hereby certifies that it is aware of, and will comply with the Bank’s Anti-Predatory Lending Policy (as amended from time to time) at all times and represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date twhich any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
+      nontraditional_and_subprime_mortgage_title: Nontraditional and Subprime Mortgage Lending Certification
+      nontraditional_and_subprime_mortgage_text: Your institution hereby certifies that all residential mortgage loans pledged to the Bank that were originated or acquired by your institution after July 10, 2007, comply at all times with the Interagency Guidance on Nontraditional Mortgage Product Risks dated October 4, 2006, and the Statement on Subprime Mortgage Lending dated July 10, 2007. Your institution represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date on which any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
+      and: and
+      legal_footer: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
+    safekeep_pledge:
+      upload_instructions:
+        download_template: Download Add Securities Template File
+        intro: Upload an Excel file containing your securities.
+        learn_how: Learn How
+        step_2:
+          enter_securities: In the file, enter one security per line.
+      discard_and_upload_again: Discard and Upload Again
+      success:
+        pledge: Pledge Securities Request Sent
+        safekeep: Safekeep Securities Request Sent
     success:
       title: Release Securities Request Sent
       request_will_remain: 'This request will remain in the queue for authorization until one of the following occurs:'
@@ -1266,10 +1297,18 @@ en:
       buttons:
         manage: manage securities
         view: view securities requests
-        notify: notify authorizers(s)
+        notify: notify authorizer(s)
       email:
         subject: FHLBSF Securities Authorization Required
         body_html: "There is a Securities Request awaiting authorization.\n\n %{url}"
+    authorize:
+      release:
+        title: Release Securities Request Sent
+      confirmation: "We received your securities request at %{date}.\nWe will provide a confirmation to your institution later today."
+      timeframe: You will typically see this transaction reflected in your STA within the next 24 hours.
+      issues: "If there are any issues with your request, you will be contacted by the Securities Department or the Collateral Department."
+      contact_html: "If you wish to change your request, please email the <a href=\"%{mailto_url}\">Securities Department</a> or call %{phone_number}."
+      make_request: make another request
   reports:
     meta_title: FHLB - Reports
     title: Reports
@@ -1715,6 +1754,10 @@ en:
         indicates_a_new_transaction_html: "*Indicates a new transaction."
         total_net_settled_preliminary: "Total Net Amount settled as of 11:30 am. on %{date}:"
         total_net_settled_final: "Total Net Amount settled as of close of business on %{date}:"
+        total_debits_settled_preliminary: "Total Debits settled as of 11:30 am. on %{date}:"
+        total_debits_settled_final: "Total Debits settled as of close of business on %{date}:"
+        total_credits_settled_preliminary: "Total Credits settled as of 11:30 am. on %{date}:"
+        total_credits_settled_final: "Total Credits settled as of close of business on %{date}:"
         yesterdays_report: View the final securities transaction report for the previous business day.
         no_results_today: No records to display
         custody_account_no: Custody Account No.
@@ -1952,6 +1995,7 @@ en:
       title: Manage Advances
       all: All Advances
       outstanding: Outstanding Advances
+      footnote_html: "If you have questions, please email <a href=\"%{mailto_url}\">Operations</a> or call %{phone_number}."
     confirmation:
       title: Advance Confirmation
       in_progress: In Progress
@@ -2251,25 +2295,26 @@ en:
           special_notice: "The Knockout Advance has a complex risk profile and may be an inappropriate product for some institutions. The expected maturity of the Knockout Advance may contract or extend adversely to market movements, and the Bank makes no representations as to the expected life of the advance. This information is not intended as investment advice. The decision to obtain a Knockout Advance and the analysis of how it may fit into a borrower’s financial or business strategy remain solely the borrower’s responsibility.\n\nNotwithstanding any lockout period for the knockout option, the Bank reserves all of its rights under the Advances and Security Agreement, including, without limitation, its right to terminate the Knockout Advance and accelerate repayment of the advance and its right to liquidate collateral pledged by the borrower as security for the Knockout Advance at any time upon the occurrence of an event of default described in the Advances and Security Agreement."
       mpf:
         title: "Mortgage Partnership Finance (MPF) Program"
-        description_html: "The Mortgage Partnership Finance&#174; (MPF&#174;) Program offers members a competitive alternative to traditional investors when selling residential mortgage loans in the secondary market. The Bank offers the following MPF products:"
+        description_html: "The Mortgage Partnership Finance&#174; (MPF&#174;) Program offers members a competitively priced alternative to traditional investors when selling residential mortgage loans in the secondary market. The Bank offers the following MPF products:"
         description_list:
-          mpf_original_html: "%{download_link}: The Bank purchases conventional, conforming fixed rate mortgage loans and holds them in the Bank’s portfolio."
-          mpf_government_html: "%{download_link}: The Bank purchases FHA/VA-insured mortgage loans and holds them in the Bank’s portfolio."
-          mpf_xtra_html: "%{download_link}&#174;: The Bank facilitates the purchase of conventional, conforming fixed rate mortgage loans for concurrent sale to Fannie Mae."
-          mpf_direct_html: "%{download_link}: The Bank facilitates the purchase of jumbo fixed rate mortgage loans for concurrent sale into the secondary market through an exclusive arrangement with Redwood Trust, Inc."
+          mpf_original_html: "%{download_link}: The member sells fixed rate conventional conforming mortgage loans to the Bank, and the Bank holds them in portfolio."
+          mpf_xtra_html: "%{download_link}&#174;: The member sells fixed rate conventional  conforming mortgage loans for concurrent sale to Fannie Mae."
+          mpf_direct_html: "%{download_link}: The member sells jumbo mortgage loans for concurrent sale into the secondary market through an exclusive arrangement with Redwood Trust, Inc."
+          mpf_government_mbs_html: "%{download_link}: The member sells eligible government-insured or government-guaranteed loans, which are then packaged into securities backed by the mortgages and guaranteed by Ginnie Mae. Eligible loans include fixed rate mortgage loans insured or guaranteed by the FHA or the VA or by the USDA through its RHS Section 502 loan program."
         member_eligibility_html: "To participate in the MPF Program, a member must be approved as a Participating Financial Institution (PFI) by the Bank. The member must submit a <a href=%{url}>PFI Application</a> and meet the loan origination, servicing, reporting, credit, and collateral standards established for the MPF Program. Eligibility criteria include:"
         eligibility_list:
           creditworthiness: "Overall satisfactory creditworthiness according to the Bank’s credit quality standards, including an acceptable exam rating from the member’s primary regulator, a “Well Capitalized” PCA status, satisfactory asset quality, and positive net income in four of the most recent six quarters"
           lending: Acceptable lending policies, procedures, and practices
           servicing: The ability to originate and service first-lien, one- to four-family residential mortgage loans in accordance with GSE guidelines for loans typically sold in the secondary market
-          mpf_direct: For MPF Direct, the ability to manually underwrite loans in accordance with MPF Direct guidelines
+        mpf_direct: For MPF Direct, the member must have the ability to manually underwrite loans in accordance with MPF Direct guidelines.
+        mpf_gov_mbs: For MPF Government MBS, the member must be an approved mortgagee/lender in good standing with the applicable government agency and have sufficient experience in the origination, underwriting, and servicing (if servicing is retained) of government loans.
         agreement_header: MPF Participating Financial Institution Agreement
         agreement_html: Members approved by the Bank to participate in the MPF Program will be required to execute an MPF Participating Financial Institution Agreement (PFI Agreement). The PFI Agreement sets forth the basic terms and conditions governing the PFI’s participation in the MPF Program through the Bank and incorporates additional program terms and requirements that the PFI must follow, including those established in the MPF Origination Guide and the MPF Servicing Guide. These program guides are available through the eMPF&#174; website or All-Regs&#174;.
         enhancement_header: "Credit Enhancement: MPF Original"
         enhancement: Under MPF Original, the Bank and the PFI share in the credit risk of loans purchased by the Bank. Loans sold into MPF Original are credit enhanced by the PFI, with credit enhancement fees generally paid to the PFI based on the performance of the loans. The Bank manages the liquidity, interest rate, and prepayment risks of the loans while the PFI manages the credit risk of the loans. The credit risk sharing feature of MPF Original allocates future loan losses, if any, between the PFI and the Bank after borrower equity and private mortgage insurance are depleted.
         collateral: "The credit enhancement obligation under MPF Original must be fully secured by eligible collateral.\n\nFor all MPF products, the Bank may require loans sold that become subject to repurchase or subject to an indemnification agreement to be secured by eligible collateral."
         servicing_header: Servicing of MPF Loans
-        servicing: Under most MPF products, the PFI may sell loans servicing retained or servicing released. Loans sold under the MPF Direct product must be sold servicing released.
+        servicing: Under most MPF products, the PFI may sell loans servicing retained or servicing released. Loans sold under MPF Direct must be sold servicing released.
         remittance: Remittance options for MPF loans may include actual/actual, actual/actual single remittance, and scheduled/scheduled.
         training_html: After a member is approved as a PFI, the Bank contacts the member to schedule training on MPF products, pricing, and master commitments; MPF loan delivery; use of eMPF and the MPF Guides; and MPF servicing and reporting. For MPF Direct, training on underwriting and exceptions is provided. For MPF Xtra, Fannie Mae Desktop Underwriter&#174; (DU&#174;) training is also required.
         ongoing: Outstanding loans sold to the Bank under the MPF Program and held by the Bank, including loans sold under MPF Original and MPF Plus between 2002 and 2006, remain subject to the credit enhancement requirements in effect when the loans were sold to the Bank and to the Bank’s current collateral requirements.
@@ -2304,7 +2349,6 @@ en:
           agreement_servicer_account_remittance: "Agreement for Servicer’s Custodial P & I Account: Scheduled/Scheduled or Actual/Actual Single Remittance"
           agreement_servicer_account_actual: "Agreement for Servicer’s Custodial P & I Account: Actual/Actual"
           agreement_servicer_account: "Agreement for Servicer’s Custodial T & I Account"
-          mfp_government: MPF Government FHA/VA
           mpf_extra: MPF Xtra
           mpf_extra_agreement: "MPF Xtra: Agreement for Access to Fannie Mae’s DU® Only"
           mpf_xtra_addendum_mpf: MPF Xtra Addendum to MPF Program PFI Agreement (Servicing Retained)
@@ -2315,6 +2359,8 @@ en:
           mpf_direct: MPF Direct
           mpf_direct_agreement: MPF Direct Addendum to MPF Program PFI Agreement
           mpf_direct_questionnaire: MPF Direct Mortgage Operations Questionnaire
+          mpf_gov: MPF Government MBS
+          mpf_gov_questionnaire: MPF Government MBS Operations Questionnaire
         exhibits:
           title: Exhibits
           organization_chart: Organization Chart of Major Mortgage Functional Areas
@@ -2870,6 +2916,6 @@ en:
       putable_advances: 'Statement of Authority: Putable Advances'
     mpf:
       original: MPF Original
-      government: MPF Government
       xtra: MPF Xtra
       direct: MPF Direct
+      mbs: MPF Government MBS

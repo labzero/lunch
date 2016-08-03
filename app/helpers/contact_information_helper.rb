@@ -5,6 +5,7 @@ module ContactInformationHelper
   MEMBERSHIP_EMAIL = 'membership@fhlbsf.com'
   OPERATIONS_EMAIL = 'portfoliooperations@fhlbsf.com'
   ACCOUNTING_EMAIL = 'capitalstock@fhlbsf.com'
+  SECURITIES_SERVICES_EMAIL = 'securities@fhlbsf.com'
   WEB_SUPPORT_PHONE_NUMBER = '4156162610'
   SERVICE_DESK_PHONE_NUMBER = '8004443452'
   OPERATIONS_PHONE_NUMBER = '4156162559'
@@ -30,6 +31,14 @@ module ContactInformationHelper
 
   def accounting_email
     "mailto:#{ACCOUNTING_EMAIL}"
+  end
+
+  def securities_services_email
+    "mailto:#{SECURITIES_SERVICES_EMAIL}"
+  end
+
+  def securities_services_email_text
+    SECURITIES_SERVICES_EMAIL
   end
 
   def web_support_phone_number

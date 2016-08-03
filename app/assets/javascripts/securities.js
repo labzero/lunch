@@ -2,6 +2,8 @@ $(function() {
   var $form = $('.manage-securities-form');
   var $checkboxes = $form.find('input[type=checkbox]');
   var $submitButton = $form.find('input[type=submit]');
+  var $securitiesUploadInstructions = $('.securities-upload-instructions');
+  var $securitiesReleaseWrapper = $('.securities-release-table-wrapper');
   $checkboxes.on('change', function(e){
     // if boxes checked and all values are the same, enable submit
     var status = false;
@@ -58,6 +60,12 @@ $(function() {
     $('.securities-download-instructions').toggle();
   });
 
+
+  // Toggle Edit Securities Instructions for Pledging and Safekeeping New Securities
+  $('.securities-download-safekeep-pledge').on('click', function(){
+    $securitiesUploadInstructions.toggle();
+  });
+
   // Add the securities fields to release form from the download form.  Keeps one source of truth for securities in the DOM.
   $('.securities-submit-release-form').on('submit', function(e){
     var submitReleaseForm = $(this);
@@ -69,4 +77,45 @@ $(function() {
 
   });
 
+  var $securitiesForm = $('.securities-submit-release-form');
+  var $submitField = $securitiesForm.find('input[type=submit]');
+  var $secureIDTokenField = $('#securid_token');
+  var $secureIDPinField = $('#securid_pin');
+
+  // Validate length of SecurID token and pin
+  if ($secureIDPinField.length && $secureIDTokenField.length) {
+    $.each([$secureIDPinField, $secureIDTokenField], (function(i, $element){
+      $element.on('keyup', function(){
+        if ($secureIDTokenField.val().length == 6 && $secureIDPinField.val().length == 4) {
+          $submitField.addClass('active');
+          $submitField.attr('disabled', false);
+        } else {
+          $submitField.removeClass('active');
+          $submitField.attr('disabled', true);
+        };
+      });
+    }));
+  };
+
+  if ($securitiesForm.length > 0) {
+    Fhlb.Utils.findAndDisplaySecurIDErrors($securitiesForm);
+  };
+
+  $securitiesForm.on('submit', function(e) {
+    if ($secureIDTokenField.length > 0 && $secureIDPinField.length > 0 && !Fhlb.Utils.validateSecurID($(this))) {
+      return false;
+    } else {
+      return true;
+    }
+  });
+
+  $securitiesReleaseWrapper.on('click', '.safekeep-pledge-upload-again', function(e){
+    $securitiesUploadInstructions.hide();
+    $('.safekeep-pledge-download-area').show();
+    $securitiesReleaseWrapper.empty();
+  });
+
+  $('.additional-legal h3').on('click', function(event) {
+    $('.additional-legal').toggleClass('expanded-legal');
+  });
 });

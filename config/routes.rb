@@ -185,18 +185,30 @@ Rails.application.routes.draw do
     scope 'securities', as: :securities do
       get 'manage' => 'securities#manage'
       get 'requests' => 'securities#requests'
-      post 'edit_release' => 'securities#edit_release'
-      post 'submit_release' => 'securities#submit_release'
-      post 'download_release' => 'securities#download_release'
-      post 'upload_release' => 'securities#upload_release'
-      get 'success' => 'securities#submit_release_success'
-      get 'edit_safekeep' => 'securities#edit_safekeep'
-      post 'submit_safekeep' => 'error#not_found'
-      get 'view_release/:request_id' => 'securities#view_release', as: 'view_release'
-      post 'authorize_release' => 'error#not_found'
-      get 'edit_pledge' => 'securities#edit_pledge'
-      post 'submit_pledge' => 'error#not_found'
       delete 'request/:request_id' => 'securities#delete_request', as: 'delete_request'
+      scope 'release', as: :release do
+        get 'view/:request_id' => 'securities#view_release', as: 'view'
+        post 'edit' => 'securities#edit_release'
+        post 'download' => 'securities#download_release'
+        post 'upload' => 'securities#upload_securities', defaults: { type: :release }
+        post 'submit' => 'securities#submit_release'
+        post 'authorize' => 'securities#authorize_request'
+        get 'success' => 'securities#submit_request_success', defaults: { type: :release }
+      end
+      scope 'safekeep', as: :safekeep do
+        get 'edit' => 'securities#edit_safekeep'
+        get 'download' => 'securities#download_safekeep'
+        post 'upload' => 'securities#upload_securities', defaults: { type: :safekeep }
+        post 'submit' => 'error#not_found'
+        get 'success' => 'securities#submit_request_success', defaults: { type: :safekeep }
+      end
+      scope 'pledge', as: :pledge do
+        get 'edit' => 'securities#edit_pledge'
+        get 'download' => 'securities#download_pledge'
+        post 'upload' => 'securities#upload_securities', defaults: { type: :pledge }
+        post 'submit' => 'error#not_found'
+        get 'success' => 'securities#submit_request_success', defaults: { type: :pledge }
+      end
     end
   end
 

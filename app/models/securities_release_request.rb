@@ -47,6 +47,8 @@ class SecuritiesReleaseRequest
 
   ACCESSIBLE_ATTRS = BROKER_INSTRUCTION_KEYS + OTHER_PARAMETERS + DELIVERY_INSTRUCTION_KEYS.values.flatten
 
+  MAX_DATE_RESTRICTION = 3.months.freeze
+
   attr_accessor *ACCESSIBLE_ATTRS
   attr_reader :securities
 
@@ -56,6 +58,8 @@ class SecuritiesReleaseRequest
   validates *DELIVERY_INSTRUCTION_KEYS[:mutual_fund], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :mutual_fund }
   validates *DELIVERY_INSTRUCTION_KEYS[:physical_securities], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :physical_securities }
   validate :trade_date_must_come_before_settlement_date
+  validate :trade_date_within_range
+  validate :settlement_date_within_range
   validate :securities_must_have_payment_amount, if: Proc.new { |request| request.settlement_type && request.settlement_type.to_sym == :vs_payment }
 
   def self.from_hash(hash)
@@ -126,10 +130,35 @@ class SecuritiesReleaseRequest
     delivery_instructions_hash
   end
 
+  def request_id=(new_value)
+    if new_value.is_a?(String) || new_value.is_a?(Numeric) || new_value.nil? || new_value.is_a?(FalseClass)
+      @request_id = new_value.present? ? new_value : nil
+    else
+      raise ArgumentError, '`request_id` must be a string, number or blank' 
+    end
+  end
+
   private
 
   def trade_date_must_come_before_settlement_date
-    trade_date <= settlement_date if trade_date && settlement_date
+    if trade_date && settlement_date
+      errors.add(:trade_date, "must come before 'settlement_date'") unless trade_date <= settlement_date
+    end
+  end
+
+  def trade_date_within_range
+    errors.add(:trade_date, 'must not be a holiday, weekend, or in the past') unless date_within_range(trade_date)
+  end
+
+  def settlement_date_within_range
+    errors.add(:settlement_date, 'must not be a holiday, weekend, or in the past') unless date_within_range(settlement_date)
+  end
+
+  def date_within_range(date)
+    today = Time.zone.today
+    max_date = today + MAX_DATE_RESTRICTION
+    holidays = CalendarService.new(ActionDispatch::TestRequest.new).holidays(today, max_date)
+    !(date.try(:sunday?) || date.try(:saturday?)) && !(holidays.include?(date)) && date.try(:>=, today) && date.try(:<=, max_date)
   end
 
   def securities_must_have_payment_amount

@@ -26,6 +26,7 @@ module MAPI
   module Services
     module Member
       include MAPI::Services::Base
+      include MAPI::Shared::Utils
 
       def self.registered(app)
         service_root '/member', app
@@ -945,6 +946,7 @@ module MAPI
               key :summary, 'Create a new securities release request'
               key :nickname, 'createSecuritiesReleaseRequest'
               key :consumes, ['application/json']
+              key :type, :SecuritiesReleaseResponse
               parameter do
                 key :paramType, :path
                 key :name, :id
@@ -961,7 +963,29 @@ module MAPI
               end
             end
           end
-          
+          api do
+            key :path, '/{id}/securities/release'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Update a securities release request'
+              key :nickname, 'updateSecuritiesReleaseRequest'
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution requesting the securities release update'
+              end
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :SecuritiesRelease
+                key :description, "Securities to update and their associated metadata"
+              end
+            end
+          end
           api do
             key :path, '/{id}/securities/release/{header_id}'
             operation do
@@ -1339,7 +1363,7 @@ module MAPI
           member_id = params[:id].to_i
           date = params[:date].to_date
           begin
-            MAPI::Services::Member::SecuritiesTransactions.securities_transactions(self.settings.environment, logger, member_id, date).to_json
+            MAPI::Services::Member::SecuritiesTransactions.securities_transactions(self, member_id, date).to_json
           rescue => e
             logger.error e
             halt 503, 'Internal Service Error'
@@ -1397,10 +1421,10 @@ module MAPI
         end
 
         relative_post '/:id/securities/release' do
-          begin
+          MAPI::Services::Member.rescued_json_response(self) do
             post_body_json = JSON.parse(request.body.read)
             user = post_body_json['user']
-            "" if MAPI::Services::Member::SecuritiesRequests.create_release(self,
+            request_id = MAPI::Services::Member::SecuritiesRequests.create_release(self,
                                                                             params['id'].to_i,
                                                                             user['username'],
                                                                             user['full_name'],
@@ -1408,9 +1432,28 @@ module MAPI
                                                                             post_body_json['broker_instructions'] || {},
                                                                             post_body_json['delivery_instructions'] || {},
                                                                             post_body_json['securities'] || [])
-          rescue => error
-            logger.error error
-            halt 400, error.message
+            {request_id: request_id}
+          end
+        end
+
+        relative_put '/:id/securities/release' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            body = JSON.parse(request.body.read)
+            user = body['user']
+            raise MAPI::Shared::Errors::ValidationError.new('`user` is required', 'user') unless user
+            request_id = body['request_id']
+            raise MAPI::Shared::Errors::ValidationError.new('`request_id` is required', 'request_id') unless request_id
+            {request_id: request_id} if MAPI::Services::Member::SecuritiesRequests.update_release(
+              self,
+              params['id'].to_i,
+              request_id,
+              user['username'],
+              user['full_name'],
+              user['session_id'],
+              body['broker_instructions'] || {},
+              body['delivery_instructions'] || {},
+              body['securities'] || []
+            )
           end
         end
 

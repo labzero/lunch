@@ -118,28 +118,29 @@ describe MAPI::ServiceApp do
 
     [:test, :development, :production].each do |environment|
       describe 'securities_transactions' do
-        let(:logger) { double('logger')  }
+        let(:app) { instance_double(MAPI::ServiceApp, settings: double('settings', environment: instance_double(Symbol)), logger: double('logger')) }
         let(:fhlb_id){ double('fhlb_id') }
         let(:rundate){ double('rundate') }
         let(:previous_business_day){ double('previous_business_day')}
+        let(:call_method) { subject.securities_transactions(app, fhlb_id, rundate) }
 
         it 'returns a valid result for final' do
-          allow(subject).to receive(:fetch_final_securities_count).with(environment, logger, fhlb_id, rundate).and_return([{'RECORDSCOUNT' => 2}])
-          allow(subject).to receive(:fetch_securities_transactions).with(environment, logger, fhlb_id, rundate, true).and_return([before_hash, before_hash2])
-          expect(subject.securities_transactions(environment, logger, fhlb_id, rundate)).to eq({ final: true, transactions: [after_hash, after_hash2]})
+          allow(subject).to receive(:fetch_final_securities_count).with(app.settings.environment, app.logger, fhlb_id, rundate).and_return([{'RECORDSCOUNT' => 2}])
+          allow(subject).to receive(:fetch_securities_transactions).with(app.settings.environment, app.logger, fhlb_id, rundate, true).and_return([before_hash, before_hash2])
+          expect(call_method).to eq({ final: true, transactions: [after_hash, after_hash2]})
         end
 
         it 'returns a valid result for non-final' do
-          allow(subject).to receive(:fetch_final_securities_count).with(environment, logger, fhlb_id, rundate).and_return([{'RECORDSCOUNT' => 0}])
-          allow(subject).to receive(:fetch_securities_transactions).with(environment, logger, fhlb_id, rundate, false).and_return([before_hash, before_hash2])
-          expect(subject.securities_transactions(environment, logger, fhlb_id, rundate)).to eq({ final: false, transactions: [after_hash, after_hash2]})
+          allow(subject).to receive(:fetch_final_securities_count).with(app.settings.environment, app.logger, fhlb_id, rundate).and_return([{'RECORDSCOUNT' => 0}])
+          allow(subject).to receive(:fetch_securities_transactions).with(app.settings.environment, app.logger, fhlb_id, rundate, false).and_return([before_hash, before_hash2])
+          expect(call_method).to eq({ final: false, transactions: [after_hash, after_hash2]})
         end
 
         it 'returns populate previous_business_day for empty transactions' do
-          allow(subject).to receive(:fetch_final_securities_count).with(environment, logger, fhlb_id, rundate).and_return([{'RECORDSCOUNT' => 0}])
-          allow(subject).to receive(:fetch_securities_transactions).with(environment, logger, fhlb_id, rundate, false).and_return([])
-          allow(subject).to receive(:previous_business_day).with(environment, logger, rundate).and_return(previous_business_day)
-          expect(subject.securities_transactions(environment, logger, fhlb_id, rundate)).to eq({ final: false, transactions: [], previous_business_day: previous_business_day})
+          allow(subject).to receive(:fetch_final_securities_count).with(app.settings.environment, app.logger, fhlb_id, rundate).and_return([{'RECORDSCOUNT' => 0}])
+          allow(subject).to receive(:fetch_securities_transactions).with(app.settings.environment, app.logger, fhlb_id, rundate, false).and_return([])
+          allow(subject).to receive(:previous_business_day).with(app, rundate).and_return(previous_business_day)
+          expect(call_method).to eq({ final: false, transactions: [], previous_business_day: previous_business_day})
         end
       end
     end

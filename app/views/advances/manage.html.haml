@@ -10,3 +10,5 @@
     = form_tag(advances_manage_path, method: :get) do
       = render 'shared/filter', filter_class: @advances_data_table[:filter][:name], filters: @advances_data_table[:filter][:data]
       = render 'reports/reports_table', table_class: 'manage-advances-table', table_data: @advances_data_table, sortable: false
+      %footer
+        = t('advances.manage_advances.footnote_html', mailto_url: operations_email, phone_number: operations_phone_number)

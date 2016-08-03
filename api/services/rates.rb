@@ -13,14 +13,6 @@ module MAPI
         Hash[LOAN_TYPES.map { |type| [type, Hash[LOAN_TERMS.map{ |term| [term, yield(type, term)] }]] }]
       end
 
-      def self.holiday?(date, holidays)
-        holidays.include?(date.strftime('%F'))
-      end
-
-      def self.weekend_or_holiday?(date, holidays)
-        date.saturday? || date.sunday? || holiday?(date, holidays)
-      end
-
       def self.find_next_business_day(candidate, delta, holidays)
         weekend_or_holiday?(candidate, holidays) ? find_next_business_day(candidate + delta, delta, holidays) : candidate
       end
@@ -692,7 +684,7 @@ module MAPI
         end
 
         relative_get "/summary" do
-          halt 503, 'Internal Service Error' unless holidays       = MAPI::Services::Rates::Holidays.holidays(logger, settings.environment)
+          halt 503, 'Internal Service Error' unless holidays       = MAPI::Services::Rates::Holidays.holidays(self)
           halt 503, 'Internal Service Error' unless blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(logger,settings.environment)
           halt 503, 'Internal Service Error' unless loan_terms     = MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment)
           halt 503, 'Internal Service Error' unless rate_bands     = MAPI::Services::Rates::RateBands.rate_bands(logger,settings.environment)

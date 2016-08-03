@@ -28,23 +28,29 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release|success|request|safekeep|pledge) securities page$/) do |page|
+When(/^I am on the (manage|release|release success|safekeep success|pledge success|safekeep|pledge) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
-  when 'success'
-    visit '/securities/success'
+  when 'release success'
+    visit '/securities/release/success'
+  when 'pledge success'
+    visit '/securities/pledge/success'
+  when 'safekeep success'
+    visit '/securities/safekeep/success'
   when 'release'
     step 'I am on the manage securities page'
     step 'I check the 1st Pledged security'
     step 'I click the button to release the securities'
   when 'safekeep'
-    visit '/securities/edit_safekeep'
-  when 'request'
-    visit '/securities/requests'
+    visit '/securities/safekeep/edit'
   when 'pledge'
-    visit '/securities/edit_pledge'
+    visit '/securities/pledge/edit'
   end
+end
+
+Given(/^I am on the securities request page$/) do
+  visit '/securities/requests'
 end
 
 When(/^I filter the securities by (Safekept|Pledged|All)$/) do |filter|
@@ -150,12 +156,16 @@ When(/^I click on the Edit Securities link$/) do
   page.find('.securities-download').click
 end
 
-Then(/^I should see instructions on how to edit securities$/) do
-  page.assert_selector('.securities-download-instructions', visible: :visible)
+When(/^I click on the Learn How link$/) do
+  page.find('.securities-download-safekeep-pledge').click
 end
 
-Then(/^I should not see instructions on how to edit securities$/) do
-  page.assert_selector('.securities-download-instructions', visible: :hidden)
+Then(/^I should see instructions on how to (edit|upload) securities$/) do |action|
+  page.assert_selector(".securities-#{action == 'edit' ? 'download' : 'upload'}-instructions", visible: :visible)
+end
+
+Then(/^I should not see instructions on how to (edit|upload) securities$/) do |action|
+  page.assert_selector(".securities-#{action == 'edit' ? 'download' : 'upload'}-instructions", visible: :hidden)
 end
 
 When(/^the edit securities section is open$/) do
@@ -200,6 +210,18 @@ Then(/^I should see a list of securities authorized users$/) do
   page.assert_selector('.settings-users-table', visible: true)
 end
 
+Then(/^I should see the title for the "(.*?)" page$/) do |success_page|
+  translation = case success_page
+    when 'release success'
+      'securities.success.title'
+    when 'pledge success'
+      'securities.safekeep_pledge.success.pledge'
+    when 'safekeep success'
+      'securities.safekeep_pledge.success.safekeep'
+  end
+  page.assert_selector('.securities-header h1', text: I18n.t(translation), exact: true)
+end
+
 When(/^I fill in the "(.*?)" securities field with "(.*?)"$/) do |field_name, value|
   page.fill_in("securities_release_request[#{field_name}]", with: value)
 end
@@ -213,7 +235,7 @@ Then(/^I should see the success page for the securities release request$/) do
 end
 
 Then(/^I should see the generic error message for the securities release request$/) do
-  page.assert_selector('.securities-submit-release-form-errors p', text: I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number), exact: true)
+  page.assert_selector('.securities-submit-release-form-errors p', text: I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text), exact: true)
 end
 
 Then(/^Account Number should be disabled$/) do
@@ -235,6 +257,33 @@ end
 
 Then(/^I should see "(.*?)" as the selected pledge type$/) do |type|
   page.assert_selector('.securities-broker-instructions .pledge_type .dropdown-selection', text: pledge_types(type), exact: true)
+end
+
+When(/^I authorize the request$/) do
+  step %{I enter my SecurID pin and token}
+  step %{I click to authorize the request}
+end
+
+When(/^I click to authorize the request$/) do
+  page.find(".securities-actions .primary-button[value=#{I18n.t('securities.release.authorize')}]").click
+end
+
+Then(/^I should see the authorize request success page$/) do
+  page.assert_selector('.securities-authorize-success')
+end
+
+Then(/^the Authorize action is (disabled|enabled)$/) do |state|
+  base = ".securities-actions .primary-button[value=#{I18n.t('securities.release.authorize')}]"
+  if state == 'disabled'
+    page.assert_selector(base + '[disabled]')
+  else
+    page.assert_selector(base + ':not([disabled])')
+  end
+end
+
+When(/^I choose the first available date for (trade|settlement) date$/) do |attr|
+step "I click the #{attr} date datepicker"
+step 'I choose the first available date'
 end
 
 def delivery_instructions(text)

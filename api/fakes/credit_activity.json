@@ -80,5 +80,21 @@
     "terminationFullPartial": null,
     "product": "OPEN VRC",
     "subProduct": "VRC Open - WL"
+  },
+  {
+    "tradeID": 944607,
+    "amount": 185425.0,
+    "rate": null,
+    "tradeDate": "2016-06-19-07:00",
+    "fundingDate": "2016-06-19-07:00",
+    "maturityDate": "2016-06-24-07:00",
+    "productDescription": "ADVANCE O/N VRC VRC - WL",
+    "instrumentType": "ADVANCE",
+    "status": "VERIFIED",
+    "terminationPar": null,
+    "terminationFee": null,
+    "terminationFullPartial": null,
+    "product": "O/N VRC",
+    "subProduct": "VRC - WL"
   }
 ]

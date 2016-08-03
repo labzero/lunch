@@ -76,7 +76,7 @@ class ProductsController < ApplicationController
 
   # GET
   def mpf
-    @last_modified = Date.new(2016, 4, 1)
+    @last_modified = Date.new(2016, 7, 1)
   end
 
   # GET
@@ -160,26 +160,6 @@ class ProductsController < ApplicationController
       }
     ]
 
-    @mpf_government_rows = [
-      {
-        title_only: t('products.advances.pfi.product_specific.servicing_retained_only'),
-        rows: [
-          {
-            title: t('products.advances.pfi.product_specific.agreement_servicer_account_remittance'),
-            pdf_link: resources_download_path(file: :servicer_account_remittance)
-          },
-          {
-            title: t('products.advances.pfi.product_specific.agreement_servicer_account_actual'),
-            pdf_link: resources_download_path(file: :servicer_account_actual)
-          },
-          {
-            title: t('products.advances.pfi.product_specific.agreement_servicer_account'),
-            pdf_link: resources_download_path(file: :servicer_account)
-          }
-        ]
-      }
-    ]
-
     @mpf_xtra_rows = [
       {
         title: t('products.advances.pfi.product_specific.mpf_extra_agreement'),
@@ -233,6 +213,13 @@ class ProductsController < ApplicationController
       {
         title: t('products.advances.pfi.product_specific.mpf_direct_questionnaire'),
         pdf_link: resources_download_path(file: :direct_questionnaire)
+      }
+    ]
+
+    @mpf_gov_rows = [
+      {
+        title: t('products.advances.pfi.product_specific.mpf_gov_questionnaire'),
+        pdf_link: resources_download_path(file: :direct_gov)
       }
     ]
 

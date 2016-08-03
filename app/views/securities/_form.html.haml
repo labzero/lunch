@@ -1,3 +1,4 @@
+- authorizer = policy(:security).authorize?
 = form_for(@securities_release_request, validate: true, url: url, html: {class: 'securities-submit-release-form'}) do |f|
   = f.hidden_field(:request_id)
   = f.hidden_field(:trade_date)
@@ -12,7 +13,7 @@
       .input-field-container-horizontal
         = render 'shared/input_field', form_builder: f, field_name: :account_number, label: t('securities.release.account_number.label'), field_class: ['disabled'], html_attributes: { disabled: true }
       .input-field-container-horizontal.pledge_type
-        - if type == 'pledge'
+        - if type == :pledge
           %label{for: 'pledge_type'}= t('securities.release.pledge_type.label')
           = render 'shared/dropdown', dropdown_name: 'securities_release_request[pledge_type]', default_value: @pledge_type_dropdown.first.last, default_text: @pledge_type_dropdown.first.first, dropdown_options: @pledge_type_dropdown
     .input-field-container-horizontal
@@ -23,10 +24,10 @@
       = render 'shared/dropdown', dropdown_name: 'securities_release_request[settlement_type]', default_value: @settlement_type_defaults[:value], default_text: @settlement_type_defaults[:text], dropdown_options: @settlement_type_dropdown
     .input-field-container-horizontal
       %span= t('common_table_headings.trade_date')
-      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_release_request[trade_date]', start_date: @securities_release_request.trade_date
+      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_release_request[trade_date]', start_date: @securities_release_request.trade_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates]
     .input-field-container-horizontal
       %span= t('common_table_headings.settlement_date')
-      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_release_request[settlement_date]', start_date: @securities_release_request.settlement_date
+      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_release_request[settlement_date]', start_date: @securities_release_request.settlement_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates]
   %section.securities-delivery-instructions
     %h2= t('securities.release.delivery_instructions.label')
     = render 'shared/dropdown', dropdown_name: 'securities_release_request[delivery_type]', default_value: @delivery_instructions_defaults[:value], default_text: @delivery_instructions_defaults[:text], dropdown_options: @delivery_instructions_dropdown
@@ -50,50 +51,35 @@
         = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_company, label: t('securities.release.delivery_instructions.mutual_fund'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_account_number, label: t('securities.release.delivery_instructions.account_number'), horizontal: true
   %section.securities-display
-    %h2= t('securities.title')
+    -if type == :safekeep || type == :pledge
+      %h2.safekeep-pledge-title= t('securities.title')
+      =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), securities_pledge_download_path, class: [ 'securities-download-template', 'safekeep-pledge-download-title' ]
+    -else
+      %h2= t('securities.title')
     %p.securities-release-upload-error= t('securities.release.edit.upload_error')
-    -if @securities_release_request.securities
-      .securities-release-table-wrapper
-        = render 'upload_release'
-      %p.securities-download= t('securities.release.edit.title')
-    .securities-download-instructions.fade{data: {dropzone: true}}
-      %p= t('securities.release.edit.intro')
-      %p.securities-download-instructions-step= t('securities.release.edit.step_1.title')
-      %p.securities-download-instructions-description{data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}}= t('securities.release.edit.step_1.description')
-      %p.securities-download-instructions-step= t('securities.release.edit.step_2.title')
-      .securities-download-instructions-description
-        %p= t('securities.release.edit.step_2.make_edits')
-        %p= t('securities.release.edit.step_2.include_information')
-        .securities-download-instructions-description-term
-          %strong= t('securities.release.edit.step_2.cusip.title')
-          %p= t('securities.release.edit.step_2.cusip.description')
-        .securities-download-instructions-description-term
-          %strong= t('securities.release.edit.step_2.payment_amount.title_html')
-          %p= t('securities.release.edit.step_2.payment_amount.description')
-        .securities-download-instructions-description-term
-          %strong= t('securities.release.edit.step_2.original_par.title')
-          %p= t('securities.release.edit.step_2.original_par.description')
-        .securities-download-instructions-description-term
-          %strong= t('securities.release.edit.step_2.custodian_name.title_html')
-          %p= t('securities.release.edit.step_2.custodian_name.description')
-      %p.securities-download-instructions-step= t('securities.release.edit.step_3.title')
-      %p.securities-download-instructions-description= t('securities.release.edit.step_3.description')
-      .securities-download-actions
-        - span = capture_haml do
-          %span= t('securities.release.edit.drag_drop')
-        - button = capture_haml do
-          .input-file-button-wrapper
-            %button.secondary-button= t('securities.release.edit.select_file')
-            %input#fileupload{type: "file", name: "file", accept: SecuritiesController::ACCEPTED_UPLOAD_MIMETYPES.join(' ,'), data: {url: securities_upload_release_path, 'results-container-class' => 'securities-release-table-wrapper', 'form-name' => 'securities-release-download', 'input-name' => 'securities', 'error-class' => 'securities-release-upload-error'}}
-        =t('securities.release.edit.download_actions_html', span: span, button: button)
-      .file-upload-progress
-        %p{data: {cancel_upload: true}}= t('global.cancel_upload')
-        %p= t('global.uploading')
-        .gauge-section
-          .inner-gauge-section
-  - if policy(:security).authorize?
-    .securities-request-legal
-      =simple_format(t('securities.release.legal_copy'))
+    .securities-release-table-wrapper
+      -unless @securities_table_data[:rows].empty?
+        = render 'table', locals: { type: type }
+        %p.securities-table-footnote= t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)
+    -if type == :release
+      = render partial: "release_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes}
+    -elsif type == :safekeep || type == :pledge
+      = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes}
+  - if authorizer
+    - if policy(:security).authorize? && type != :safekeep
+      .securities-request-legal
+        =simple_format(t("securities.#{type}.legal_copy"))
+      -if type == :pledge
+        =simple_format(t("securities.pledge.additional_certifications"))
+        .additional-legal
+          %h3= t("securities.pledge.anti_preditory_lending_title")
+          =simple_format(t("securities.pledge.anti_preditory_lending_text"))
+          %span= t('securities.pledge.and')
+          %h3= t("securities.pledge.nontraditional_and_subprime_mortgage_title")
+          =simple_format(t("securities.pledge.nontraditional_and_subprime_mortgage_text"))
+        .expanded-legal
+    - unless @session_elevated
+      = render 'shared/securid_module', error: @securid_status
   .securities-actions
     %span.secondary-button.delete-release-trigger= t('global.delete')
-    = submit_tag(@form_data[:submit_text], class: 'primary-button')
+    =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: (authorizer && !@session_elevated))

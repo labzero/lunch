@@ -376,6 +376,8 @@ class ResourcesController < ApplicationController
       filename = 'mpf-direct-addendum-to-pfi-agreement.pdf'
     when 'direct_questionnaire'
       filename = 'mpf-direct-operations-questionnaire.pdf'
+    when 'direct_gov'
+      filename = 'mpf-government.pdf'
     when /\Aform_(\d{3,4})\z/
       filename = "fc#{$1}.pdf"
     else

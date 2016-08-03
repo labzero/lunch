@@ -19,6 +19,24 @@ module MAPI
           SAFEKEPT_RELEASE = 73
         end
 
+        module SSKDeliverTo
+          FED = 30
+          DTC = 31
+          INTERNAL_TRANSFER = 32
+          MUTUAL_FUND = 33
+          PHYSICAL_SECURITIES = 34
+        end
+
+        module SSKTransactionCode
+          STANDARD = 50
+          REPO = 51
+        end
+
+        module SSKSettlementType
+          FREE = 60
+          VS_PAYMENT = 61
+        end
+
         module MAPIRequestStatus
           AUTHORIZED = [SSKRequestStatus::SIGNED, SSKRequestStatus::ACKNOWLEDGED]
           AWAITING_AUTHORIZATION = [SSKRequestStatus::SUBMITTED]
@@ -42,6 +60,42 @@ module MAPI
           to_s: ['REQUEST_ID', 'SUBMITTED_BY', 'AUTHORIZED_BY'],
           to_date: ['SETTLE_DATE', 'SUBMITTED_DATE', 'AUTHORIZED_DATE']
         }.freeze
+
+        RELEASE_REQUEST_HEADER_MAPPING = {
+          Proc.new { |value| TRANSACTION_CODE.invert[value.to_i] } => ['PLEDGE_TYPE'],
+          Proc.new { |value| SETTLEMENT_TYPE.invert[value.to_i] } => ['REQUEST_STATUS'],
+          Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO'],
+          to_s: ['BROKER_WIRE_ADDR', 'ABA_NO', 'DTC_AGENT_PARTICIPANT_NO', 'MUTUAL_FUND_COMPANY', 'DELIVERY_BANK_AGENT',
+                 'REC_BANK_AGENT_NAME', 'REC_BANK_AGENT_ADDR', 'CREDIT_ACCT_NO1', 'CREDIT_ACCT_NO2', 'MUTUAL_FUND_ACCT_NO',
+                 'CREDIT_ACCT_NO3', 'CREATED_BY', 'CREATED_BY_NAME'],
+          to_date: ['SETTLE_DATE', 'TRADE_DATE']
+        }
+
+        RELEASE_REQUEST_SECURITIES_MAPPING = {
+          to_s: ['CUSIP', 'DESCRIPTION'],
+          to_i: ['ORIGINAL_PAR', 'PAYMENT_AMOUNT']
+        }
+
+        NEXT_ID_SQL = 'SELECT SAFEKEEPING.SSK_WEB_FORM_SEQ.NEXTVAL FROM DUAL'.freeze
+        BROKER_INSTRUCTIONS_MAPPING = { 'transaction_code' => 'PLEDGE_TYPE',
+                                        'settlement_type' => 'REQUEST_STATUS',
+                                        'trade_date' => 'TRADE_DATE',
+                                        'settlement_date' => 'SETTLE_DATE' }.freeze
+        DELIVERY_TYPE = { 'fed' => SSKDeliverTo::FED,
+                          'dtc' => SSKDeliverTo::DTC,
+                          'mutual_fund' => SSKDeliverTo::MUTUAL_FUND,
+                          'physical_securities' => SSKDeliverTo::PHYSICAL_SECURITIES }.freeze
+        TRANSACTION_CODE = { 'standard' => SSKTransactionCode::STANDARD, 'repo' => SSKTransactionCode::REPO }.freeze
+        SETTLEMENT_TYPE = { 'free' => SSKSettlementType::FREE, 'vs_payment' => SSKSettlementType::VS_PAYMENT }.freeze
+        ACCOUNT_NUMBER_MAPPING = { 'fed' => 'CREDIT_ACCT_NO1',
+                                   'dtc' => 'CREDIT_ACCT_NO2',
+                                   'mutual_fund' => 'MUTUAL_FUND_ACCT_NO',
+                                   'physical_securities' => 'CREDIT_ACCT_NO3' }
+        REQUIRED_SECURITY_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
+        LAST_MODIFIED_BY_MAX_LENGTH = 30
+        BROKER_WIRE_ADDRESS_FIELDS = ['clearing_agent_fed_wire_address_1', 'clearing_agent_fed_wire_address_2']
+        FED_AMOUNT_LIMIT = 50000000
+        MAX_DATE_RESTRICTION = 3.months.freeze
 
         def self.requests_query(member_id, status_array, date_range)
           quoted_statuses = status_array.collect { |status| quote(status) }.join(',')
@@ -76,50 +130,6 @@ module MAPI
           end
         end
 
-        module SSKFormType
-          SecuritiesPledge = 70
-          SecuritiesRelease = 71
-          SafekeepingDeposit = 72
-          SafekeepingRelease = 73
-        end
-
-        module SSKDeliverTo
-          FED = 30
-          DTC = 31
-          INTERNAL_TRANSFER = 32
-          MUTUAL_FUND = 33
-          PHYSICAL_SECURITIES = 34
-        end
-
-        module SSKTransactionCode
-          STANDARD = 50
-          REPO = 51
-        end
-
-        module SSKSettlementType
-          FREE = 60
-          VS_PAYMENT = 61
-        end
-
-        NEXT_ID_SQL = 'SELECT SAFEKEEPING.SSK_WEB_FORM_SEQ.NEXTVAL FROM DUAL'.freeze
-        BROKER_INSTRUCTIONS_MAPPING = { 'transaction_code' => 'PLEDGE_TYPE',
-                                        'settlement_type' => 'REQUEST_STATUS',
-                                        'trade_date' => 'TRADE_DATE',
-                                        'settlement_date' => 'SETTLE_DATE' }.freeze
-        DELIVERY_TYPE = { 'fed' => SSKDeliverTo::FED,
-                          'dtc' => SSKDeliverTo::DTC,
-                          'mutual_fund' => SSKDeliverTo::MUTUAL_FUND,
-                          'physical_securities' => SSKDeliverTo::PHYSICAL_SECURITIES }.freeze
-        TRANSACTION_CODE = { 'standard' => SSKTransactionCode::STANDARD, 'repo' => SSKTransactionCode::REPO }.freeze
-        SETTLEMENT_TYPE = { 'free' => SSKSettlementType::FREE, 'vs_payment' => SSKSettlementType::VS_PAYMENT }.freeze
-        ACCOUNT_NUMBER_MAPPING = { 'fed' => 'CREDIT_ACCT_NO1',
-                                   'dtc' => 'CREDIT_ACCT_NO2',
-                                   'mutual_fund' => 'MUTUAL_FUND_ACCT_NO',
-                                   'physical_securities' => 'CREDIT_ACCT_NO3' }
-        REQUIRED_SECURITY_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
-        LAST_MODIFIED_BY_MAX_LENGTH = 30
-        BROKER_WIRE_ADDRESS_FIELDS = ['clearing_agent_fed_wire_address_1', 'clearing_agent_fed_wire_address_2']
-
         def self.delivery_type_mapping(delivery_type)
           { 'clearing_agent_fed_wire_address' => 'BROKER_WIRE_ADDR',
             'aba_number' => 'ABA_NO',
@@ -143,11 +153,11 @@ module MAPI
             when 'physical_securities'
               [ 'delivery_bank_agent', 'receiving_bank_agent_name', 'receiving_bank_agent_address' ]
           else
-            raise ArgumentError, "delivery_type must be one of the following values: #{DELIVERY_TYPE.keys.join(', ')}"
+            raise MAPI::Shared::Errors::ValidationError.new("delivery_type must be one of the following values: #{DELIVERY_TYPE.keys.join(', ')}", 'invalid_delivery_instructions_delivery_type_key')
           end
         end
 
-        def self.insert_release_header_query(member_id, header_id, user_name, full_name, session_id, pledged_adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
+        def self.insert_release_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
           now = Time.zone.today
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
@@ -176,14 +186,14 @@ module MAPI
                     #{quote(SETTLEMENT_TYPE[broker_instructions['settlement_type']])},
                     #{quote(broker_instructions['settlement_date'])},
                     #{quote(DELIVERY_TYPE[delivery_type])},
-                    #{quote(SSKFormType::SecuritiesRelease)},
+                    #{quote(SSKFormType::SECURITIES_RELEASE)},
                     #{quote(now)},
                     #{quote(format_username(user_name))},
                     #{quote(full_name)},
                     #{quote(format_modification_by(user_name, session_id))},
                     #{quote(now)},
                     #{quote(full_name)},
-                    #{quote(pledged_adx_id)},
+                    #{quote(adx_id)},
                     #{delivery_values.join(', ')}
                    )
           SQL
@@ -218,27 +228,28 @@ module MAPI
                    )
           SQL
         end
-        def self.pledged_adx_query(member_id)
+
+        def self.adx_query(member_id, type)
           <<-SQL
             SELECT ADX.ADX_ID
             FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF ADX, SAFEKEEPING.BTC_ACCOUNT_TYPE BAT, SAFEKEEPING.CUSTOMER_PROFILE CP
             WHERE ADX.BAT_ID = BAT.BAT_ID
             AND ADX.CP_ID = CP.CP_ID
             AND CP.FHLB_ID = #{quote(member_id)}
-            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = 'P'
+            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = #{quote(type)}
             AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
             AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
             ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
           SQL
         end
 
-        def self.ssk_id_query(member_id, pledged_adx_id, cusip)
+        def self.ssk_id_query(member_id, adx_id, cusip)
           <<-SQL
             SELECT SSK.SSK_ID
             FROM SAFEKEEPING.SSK SSK, SAFEKEEPING.SSK_TRANS SSKT
             WHERE UPPER(SSK.SSK_CUSIP) = UPPER(#{quote(cusip)})
             AND SSK.FHLB_ID = #{quote(member_id)}
-            AND SSK.ADX_ID = #{quote(pledged_adx_id)}
+            AND SSK.ADX_ID = #{quote(adx_id)}
             AND SSKT.SSK_ID = SSK.SSK_ID
             AND SSKT.SSX_BTC_DATE = (SELECT MAX(SSX_BTC_DATE) FROM SAFEKEEPING.SSK_TRANS)
           SQL
@@ -272,7 +283,7 @@ module MAPI
         def self.format_delivery_columns(delivery_type, required_delivery_keys, provided_delivery_keys)
           delivery_type_map = delivery_type_mapping(delivery_type)
           required_delivery_keys.map do |key|
-            raise ArgumentError, "delivery_instructions must contain #{key}" unless provided_delivery_keys.include?(key)
+            raise MAPI::Shared::Errors::ValidationError.new("delivery_instructions must contain #{key}", "missing_delivery_instructions_#{key}_key") unless provided_delivery_keys.include?(key)
             "#{delivery_type_map[key]}"
           end
         end
@@ -301,49 +312,182 @@ module MAPI
           sequence
         end
 
-        def self.create_release(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
-          raise ArgumentError, "broker_instructions must be a non-empty hash" unless !broker_instructions.nil? && broker_instructions.is_a?(Hash) && !broker_instructions.empty?
-          raise ArgumentError, "delivery_instructions must be a non-empty hash" unless !delivery_instructions.nil? && delivery_instructions.is_a?(Hash) && !delivery_instructions.empty?
+        def self.validate_broker_instructions(broker_instructions, app)
+          raise MAPI::Shared::Errors::ValidationError.new('broker_instructions must be a non-empty hash', 'missing_broker_instructions') unless !broker_instructions.nil? && broker_instructions.is_a?(Hash) && !broker_instructions.empty?
           BROKER_INSTRUCTIONS_MAPPING.keys.each do |key|
-            raise ArgumentError, "broker_instructions must contain a value for #{key}" unless broker_instructions[key]
+            raise MAPI::Shared::Errors::ValidationError.new("broker_instructions must contain a value for #{key}", "missing_broker_instructions_#{key}_key") unless broker_instructions[key]
           end
           { 'transaction_code' => TRANSACTION_CODE, 'settlement_type' => SETTLEMENT_TYPE }.each do |key, allowed_values|
             allowed_values = allowed_values.keys
-            raise ArgumentError, "#{key.to_s} must be set to one of the following values: #{allowed_values.join(', ')}" unless allowed_values.include?(broker_instructions[key])
+            raise MAPI::Shared::Errors::ValidationError.new("#{key.to_s} must be set to one of the following values: #{allowed_values.join(', ')}", "invalid_broker_instructions_#{key}_key") unless allowed_values.include?(broker_instructions[key])
           end
           broker_instructions['trade_date'] = dateify(broker_instructions['trade_date'])
           broker_instructions['settlement_date'] = dateify(broker_instructions['settlement_date'])
-          delivery_type = delivery_instructions.delete('delivery_type')
-          raise ArgumentError, "delivery_instructions must contain the key delivery_type set to one of #{DELIVERY_TYPE.keys.join(', ')}" unless DELIVERY_TYPE.keys.include?(delivery_type)
-          consolidate_broker_wire_address(delivery_instructions)
-          provided_delivery_keys = delivery_instructions.keys
-          required_delivery_keys = delivery_keys_for_delivery_type(delivery_type)
-          delivery_columns = format_delivery_columns(delivery_type, required_delivery_keys, provided_delivery_keys)
-          delivery_values = format_delivery_values(required_delivery_keys, delivery_instructions)
-          raise ArgumentError, "securities must be an array containing at least one security" unless !securities.nil? && securities.is_a?(Array) && !securities.empty?
-          required_security_keys = broker_instructions['settlement_type'] == 'vs_payment' ?
-            REQUIRED_SECURITY_KEYS + ['payment_amount'] : REQUIRED_SECURITY_KEYS
+          validate_broker_instructions_date(app, broker_instructions['trade_date'], 'trade_date')
+          validate_broker_instructions_date(app, broker_instructions['settlement_date'], 'settlement_date')
+        end
+
+        def self.validate_broker_instructions_date(app, date, attr_name)
+          today = Time.zone.today
+          max_date = today + MAX_DATE_RESTRICTION
+          holidays = MAPI::Services::Rates::Holidays.holidays(app, today, max_date)
+          raise MAPI::Shared::Errors::ValidationError.new("#{attr_name} must not be set to a weekend date or a bank holiday", "invalid_broker_instructions_#{attr_name}_key") if weekend_or_holiday?(date, holidays)
+          raise MAPI::Shared::Errors::ValidationError.new("#{attr_name} must not occur before today", "invalid_broker_instructions_#{attr_name}_key") unless date >= today
+          raise MAPI::Shared::Errors::ValidationError.new("#{attr_name} must not occur after after the 3 months from today", "invalid_broker_instructions_#{attr_name}_key") unless date <= max_date
+        end
+
+        def self.validate_securities(securities, settlement_type, delivery_type)
+          raise MAPI::Shared::Errors::ValidationError.new('securities must be an array containing at least one security', 'missing_securities') unless !securities.nil? && securities.is_a?(Array) && !securities.empty?
+          required_security_keys = REQUIRED_SECURITY_KEYS
+          required_security_keys += ['payment_amount'] if settlement_type == 'vs_payment'
           securities.each do |security|
-            raise ArgumentError, "each security must be a non-empty hash" unless !security.nil? && security.is_a?(Hash) && !security.empty?
+            raise MAPI::Shared::Errors::ValidationError.new('each security must be a non-empty hash', 'missing_security') unless !security.nil? && security.is_a?(Hash) && !security.empty?
             required_security_keys.each do |key|
-              raise ArgumentError, "each security must consist of a hash containing a value for #{key}" unless security[key]
+              raise MAPI::Shared::Errors::ValidationError.new("each security must consist of a hash containing a value for #{key}", "missing_security_#{key}_key") unless security[key]
             end
           end
+          if delivery_type == 'fed'
+            securities.each do |security|
+              raise MAPI::Shared::Errors::ValidationError.new("original par must be less than $#{FED_AMOUNT_LIMIT}", 'invalid_security_original_par_key') unless security['original_par'] < FED_AMOUNT_LIMIT
+            end
+          end
+        end
+
+        def self.validate_delivery_instructions(delivery_instructions)
+          raise MAPI::Shared::Errors::ValidationError.new('delivery_instructions must be a non-empty hash', 'missing_delivery_instructions') unless !delivery_instructions.nil? && delivery_instructions.is_a?(Hash) && !delivery_instructions.empty?
+          delivery_type = delivery_instructions['delivery_type']
+          raise MAPI::Shared::Errors::ValidationError.new("delivery_instructions must contain the key delivery_type set to one of #{DELIVERY_TYPE.keys.join(', ')}", 'invalid_delivery_instructions_delivery_type_key') unless DELIVERY_TYPE.keys.include?(delivery_type)
+        end
+
+        def self.process_delivery_instructions(delivery_instructions)
+          delivery_type = delivery_instructions.delete('delivery_type')
+          consolidate_broker_wire_address(delivery_instructions)
+          required_delivery_keys = delivery_keys_for_delivery_type(delivery_type)
+          {
+            delivery_type: delivery_type,
+            delivery_columns: format_delivery_columns(delivery_type, required_delivery_keys, delivery_instructions.keys),
+            delivery_values: format_delivery_values(required_delivery_keys, delivery_instructions)
+          }
+        end
+
+        def self.update_request_header_details_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
+          <<-SQL
+            UPDATE SAFEKEEPING.SSK_WEB_FORM_HEADER SET
+              PLEDGE_TYPE           = #{quote(TRANSACTION_CODE[broker_instructions['transaction_code']])},
+              TRADE_DATE            = #{quote(broker_instructions['trade_date'])},
+              REQUEST_STATUS        = #{quote(SETTLEMENT_TYPE[broker_instructions['settlement_type']])},
+              SETTLE_DATE           = #{quote(broker_instructions['settlement_date'])},
+              DELIVER_TO            = #{quote(DELIVERY_TYPE[delivery_type])},
+              FORM_TYPE             = #{quote(SSKFormType::SECURITIES_RELEASE)},
+              LAST_MODIFIED_BY      = #{quote(format_modification_by(user_name, session_id))},
+              LAST_MODIFIED_DATE    = #{quote(Time.zone.today)},
+              LAST_MODIFIED_BY_NAME = #{quote(full_name)},
+              PLEDGED_ADX_ID        = #{quote(adx_id)},
+              #{delivery_columns.each_with_index.collect{|column_name, i| "#{column_name} = #{delivery_values[i]}"}.join(', ') }
+            WHERE HEADER_ID = #{quote(header_id)}
+            AND FHLB_ID = #{quote(member_id)}
+            AND STATUS = #{quote(SSKRequestStatus::SUBMITTED)}
+          SQL
+        end
+
+        def self.update_request_security_query(header_id, user_name, session_id, security)
+          <<-SQL
+            UPDATE SAFEKEEPING.SSK_WEB_FORM_DETAIL SET
+              DESCRIPTION        = #{quote(security['description'])},
+              ORIGINAL_PAR       = #{quote(nil_to_zero(security['original_par']))},
+              PAYMENT_AMOUNT     = #{quote(nil_to_zero(security['payment_amount']))},
+              LAST_MODIFIED_DATE = #{quote(Time.zone.today)},
+              LAST_MODIFIED_BY   = #{quote(format_modification_by(user_name, session_id))}
+            WHERE CUSIP = UPPER(#{quote(security['cusip'])})
+            AND HEADER_ID = #{quote(header_id)}
+          SQL
+        end
+
+        def self.delete_request_securities_by_cusip_query(request_id, cusips)
+          quoted_cusips = cusips.collect { |cusip| quote(cusip) }.join(',')
+          <<-SQL
+            DELETE FROM SAFEKEEPING.SSK_WEB_FORM_DETAIL
+            WHERE HEADER_ID = #{quote(request_id)}
+            AND CUSIP NOT IN (#{quoted_cusips})
+          SQL
+        end
+
+        def self.create_release(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
+          validate_broker_instructions(broker_instructions, app)
+          validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'])
+          validate_delivery_instructions(delivery_instructions)
+          processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           user_name.downcase!
           unless should_fake?(app)
             header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
             ActiveRecord::Base.transaction do
-              pledged_adx_id = execute_sql_single_result(app, pledged_adx_query(member_id), "Pledged ADX ID")
-              insert_header_sql = insert_release_header_query(member_id, header_id, user_name, full_name, session_id, pledged_adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
+              adx_id = execute_sql_single_result(app, adx_query(member_id, securities.first['custody_account_type'].to_s.upcase), "Pledged ADX ID")
+              insert_header_sql = insert_release_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions, processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values])
               raise "failed to insert security release request header" unless execute_sql(app.logger, insert_header_sql)
               securities.each do |security|
-                ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, pledged_adx_id, security['cusip']), "SSK ID")
+                ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
                 insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
                 raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
               end
             end
+          else
+            header_id = rand(100000..999999)
+          end
+          header_id
+        end
+
+        def self.update_release(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
+          original_delivery_instructions = delivery_instructions.clone # Used to see if header details have changes below
+          validate_broker_instructions(broker_instructions, app)
+          validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'])
+          validate_delivery_instructions(delivery_instructions)
+          processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
+          unless should_fake?(app)
+            ActiveRecord::Base.transaction(isolation: :read_committed) do
+              cusips = securities.collect{|x| x['cusip']}
+              raise MAPI::Shared::Errors::SQLError, 'Failed to delete old security release request detail by CUSIP' unless execute_sql(app.logger, delete_request_securities_by_cusip_query(request_id, cusips))
+              adx_id = execute_sql_single_result(app, adx_query(member_id, securities.first['custody_account_type'].to_s.upcase), 'Pledged ADX ID')
+              existing_securities = format_securities(fetch_hashes(app.logger, release_request_securities_query(request_id)))
+              securities.each do |security|
+                existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
+                if existing_security && security_has_changed(security, existing_security)
+                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security)
+                  raise MAPI::Shared::Errors::SQLError, 'Failed to update security release request detail' unless execute_sql(app.logger, update_security_sql)
+                elsif !existing_security
+                  ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
+                  detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
+                  insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
+                  raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security release request detail' unless execute_sql(app.logger, insert_security_sql)
+                end
+              end
+              existing_header = fetch_hash(app.logger, release_request_header_details_query(member_id, request_id))
+              raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless existing_header
+              existing_header = map_hash_values(existing_header, RELEASE_REQUEST_HEADER_MAPPING)
+              if header_has_changed(existing_header, broker_instructions, original_delivery_instructions)
+                update_header_sql = update_request_header_details_query(member_id, request_id, user_name, full_name, session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions, processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values])
+                header_update_count = execute_sql(app.logger, update_header_sql).to_i
+                raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless header_update_count == 1
+              end
+            end
           end
           true
+        end
+
+        def self.security_has_changed(new_security, old_security)
+          new_security = new_security.with_indifferent_access
+          old_security = old_security.with_indifferent_access
+          [:original_par, :payment_amount].each do |integer_key|
+            new_security[integer_key] = new_security[integer_key].to_i
+            old_security[integer_key] = old_security[integer_key].to_i
+          end
+          new_security != old_security
+        end
+
+        def self.header_has_changed(existing_header, broker_instructions, delivery_instructions)
+          existing_header = existing_header.with_indifferent_access
+          old_broker_instructions = broker_instructions_from_header_details(existing_header).with_indifferent_access
+          old_delivery_instructions = delivery_instructions_from_header_details(existing_header).with_indifferent_access
+          !(old_broker_instructions == broker_instructions.with_indifferent_access && old_delivery_instructions == delivery_instructions.with_indifferent_access)
         end
 
         def self.release_request_header_details_query(member_id, header_id)
@@ -364,21 +508,6 @@ module MAPI
             WHERE HEADER_ID = #{quote(header_id)}
           SQL
         end
-
-        RELEASE_REQUEST_HEADER_MAPPING = {
-          Proc.new { |value| TRANSACTION_CODE.invert[value.to_i] } => ['PLEDGE_TYPE'],
-          Proc.new { |value| SETTLEMENT_TYPE.invert[value.to_i] } => ['REQUEST_STATUS'],
-          Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO'],
-          to_s: ['BROKER_WIRE_ADDR', 'ABA_NO', 'DTC_AGENT_PARTICIPANT_NO', 'MUTUAL_FUND_COMPANY', 'DELIVERY_BANK_AGENT',
-                 'REC_BANK_AGENT_NAME', 'REC_BANK_AGENT_ADDR', 'CREDIT_ACCT_NO1', 'CREDIT_ACCT_NO2', 'MUTUAL_FUND_ACCT_NO',
-                 'CREDIT_ACCT_NO3', 'CREATED_BY', 'CREATED_BY_NAME'],
-          to_date: ['SETTLE_DATE', 'TRADE_DATE']
-        }
-
-        RELEASE_REQUEST_SECURITIES_MAPPING = {
-          to_s: ['CUSIP', 'DESCRIPTION'],
-          to_i: ['ORIGINAL_PAR', 'PAYMENT_AMOUNT']
-        }
 
         def self.release_details(app, member_id, request_id)
           if should_fake?(app)
@@ -433,7 +562,7 @@ module MAPI
           end
           delivery_instructions
         end
-        
+
         def self.format_securities(securities)
           securities.collect do |security|
             {

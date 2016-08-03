@@ -22,18 +22,18 @@ class SecuritiesRequestService < MAPIService
       broker_instructions: securities_release_request.broker_instructions,
       delivery_instructions: securities_release_request.delivery_instructions,
       securities: securities_release_request.securities,
-      user: {
-        username: user.username,
-        full_name: user.display_name,
-        session_id: request.session.id
-      }
+      user: user_details(user),
+      request_id: securities_release_request.request_id
     }
-    response = post(:securities_submit_release_for_authorization, "/member/#{member_id}/securities/release", body.to_json) do |name, msg, err|
+    method = body[:request_id] ? :put_hash : :post_hash
+    response = send(method, :securities_submit_release_for_authorization, "/member/#{member_id}/securities/release", body) do |name, msg, err|
       if err.is_a?(RestClient::Exception) && err.http_code >= 400 && err.http_code < 500 && error_handler
         error_handler.call(err)
       end
     end
-    response.code == 200 if response
+    request_id = response.try(:[], :request_id)
+    securities_release_request.request_id ||= request_id
+    !!request_id
   end
 
   def submitted_release(request_id)
@@ -48,7 +48,19 @@ class SecuritiesRequestService < MAPIService
     delete(:delete_request, "/member/#{member_id}/securities/request/#{request_id}")
   end
 
+  def authorize_request(request_id, user)
+    put(:authorize_securities_request, "/member/#{member_id}/securities/authorize", {request_id: request_id, user: user_details(user)}.to_json, 'application/json')
+  end
+
   private
+
+  def user_details(user, request=self.request)
+    {
+      username: user.username,
+      full_name: user.display_name,
+      session_id: request.session.id
+    }
+  end
 
   def map_response_to_securities_release_hash(response_hash)
     securities_release = {}

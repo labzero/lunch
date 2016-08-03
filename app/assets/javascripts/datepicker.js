@@ -24,6 +24,7 @@ $(function () {
       var fromLabel = $wrapper.data('date-picker-from-label');
       var today = $wrapper.data('date-picker-today');
       var linkedInputField = $wrapper.data('date-picker-linked-input-field');
+      var invalidDates = $wrapper.data('date-picker-invalid-dates');
       var options = {
         ranges: ranges,
         opens: openDir,
@@ -69,6 +70,7 @@ $(function () {
 
       initializeDatePicker($datePickerTrigger, $wrapper, options);
       setDatePickerApplyListener($datePickerTrigger, $form, linkedInputField);
+      $.isArray(invalidDates) ? disableInvalidDatesForCalendar($datePickerTrigger, $wrapper, invalidDates) : false; // Disable invalid dates if present
       setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
       if (filter !== undefined) {
         if (singleDatePicker) {
@@ -260,6 +262,48 @@ $(function () {
     disableDay($node);
   };
 
+  function disableInvalidDatesForCalendar($datePickerTrigger, wrapper, invalidDates) {
+    var $wrapper = $(wrapper);
+    $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(e, picker) {
+      var monthYearMoment = moment($wrapper.find('.calendar.first .month').text(), 'MMM YYYY');
+      var thisMonthsDateCells = $wrapper.find('td.available:not(".off")');
+      var lastMonthsDateCells = [];
+      var nextMonthsDateCells = [];
+      var availableOffCells = $wrapper.find('td.available.off');
+      $.each(availableOffCells, function(i, dateCell) {
+        var integerDate = parseInt($(dateCell).text());
+        var rowNumber = parseRowFromDateCell(dateCell);
+        if (integerDate > 20 && rowNumber === '0') {
+          lastMonthsDateCells.push(dateCell);
+        }
+        else if (integerDate < 15 && (rowNumber === '4' || rowNumber === '5')) {
+          nextMonthsDateCells.push(dateCell);
+        };
+      });
+
+      disableNodesByInvalidDates(thisMonthsDateCells, invalidDates, monthYearMoment);
+      disableNodesByInvalidDates(lastMonthsDateCells, invalidDates, monthYearMoment.clone().subtract(1, 'month'));
+      disableNodesByInvalidDates(nextMonthsDateCells, invalidDates, monthYearMoment.clone().add(1, 'month'));
+    });
+  };
+
+  function parseRowFromDateCell(dateCell) {
+    var regex = /r([\d])/i;
+    var regexResults = regex.exec($(dateCell).data('title'));
+    if ($.isArray(regexResults)) {
+      return regexResults[1];
+    };
+  };
+
+  function disableNodesByInvalidDates(dateNodes, invalidDates, monthYearMoment) {
+    $.each(dateNodes, function(i, dateCell) {
+      var $dateCell = $(dateCell);
+      if (invalidDates.indexOf(monthYearMoment.clone().set('date', $dateCell.text()).format('YYYY-MM-DD')) > -1) {
+        disableDay($dateCell);
+      };
+    });
+  };
+
   // monkeypatch DateRangePicker to trigger event when calendar is updated
   function addUpdateEventTrigger(picker) {
     var picker = $(picker).data('daterangepicker');
@@ -396,5 +440,7 @@ $(function () {
       }
     }
   };
+
+
 
 });

@@ -64,17 +64,17 @@ module MAPI
           end
         end
 
-        def self.securities_transactions(environment, logger, fhlb_id, rundate)
-          final      = fetch_final_securities_count(environment, logger, fhlb_id, rundate).first['RECORDSCOUNT'] > 0
-          originals  = fetch_securities_transactions(environment, logger, fhlb_id, rundate, final)
+        def self.securities_transactions(app, fhlb_id, rundate)
+          final      = fetch_final_securities_count(app.settings.environment, app.logger, fhlb_id, rundate).first['RECORDSCOUNT'] > 0
+          originals  = fetch_securities_transactions(app.settings.environment, app.logger, fhlb_id, rundate, final)
           translated = originals.map{ |h| translate_securities_transactions_fields(h) }
           result     = { final: final, transactions: translated }
-          result.merge!( previous_business_day: previous_business_day(environment, logger, rundate) ) if translated.empty?
+          result.merge!( previous_business_day: previous_business_day(app, rundate) ) if translated.empty?
           result
         end
 
-        def self.previous_business_day(environment, logger, date)
-          holidays = MAPI::Services::Rates::Holidays.holidays(logger, environment, date-1.week, date-1.day)
+        def self.previous_business_day(app, date)
+          holidays = MAPI::Services::Rates::Holidays.holidays(app, date-1.week, date-1.day)
           MAPI::Services::Rates.find_next_business_day(date-1.day, -1.day, holidays)
         end
       end

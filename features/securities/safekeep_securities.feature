@@ -59,3 +59,27 @@ Scenario: Member changes trade and settlement dates
 Scenario: Member cannot click on the account number input
   Given I am on the safekeep securities page
   Then Account Number should be disabled
+
+@jira-mem-1677
+Scenario Outline: Member views edit securities instructions
+  Given I am on the <page> page
+  When I click on the Learn How link
+  Then I should see instructions on how to upload securities
+  When I click on the Learn How link
+  Then I should not see instructions on how to upload securities
+  Examples:
+    | page                |
+    | safekeep securities |
+    | pledge securities   |
+
+@jira-mem-1676 @data-unavailable
+Scenario Outline: Member cancels an upload of a securities release file
+  Given I am on the <page> page
+  When I drag and drop the "upload-test-file.txt" file into the edit securities dropzone
+  Then I should see an upload progress bar
+  When I click to cancel the securities release file upload
+  Then I should not see an upload progress bar
+  Examples:
+    | page                |
+    | safekeep securities |
+    | pledge securities   |

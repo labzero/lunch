@@ -1,0 +1,6 @@
+- error ||= nil
+%fieldset.securid-form.securid-module
+  %p= t('dashboard.quick_advance.securid.intro')
+  = render 'shared/securid_fields', error: error
+  .securid-form-link-wrapper
+    = link_to(t('dashboard.quick_advance.securid.help'), settings_two_factor_path)

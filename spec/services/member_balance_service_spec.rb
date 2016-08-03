@@ -295,21 +295,22 @@ describe MemberBalanceService do
 
     [[:a,0],[:b,-8],[:c,8],[:d,0]].each do |(sym,sum)|
       it "should return #{sum} for #{sym}" do
-        expect(subject.lenient_sum(sample,sym)).to be(sum)
+        expect(subject.send(:lenient_sum, sample, sym)).to be(sum)
       end
     end
   end
 
-  # TODO add vcr once MAPI endpoint is rigged up
   describe 'securities_transactions'do
     let(:as_of_date) { Date.new(2015, 1, 20) }
+    let(:securities_transactions) { subject.securities_transactions(as_of_date) } 
     describe 'happy path', :vcr  do
-      let(:securities_transactions) { subject.securities_transactions(as_of_date) }
       it 'should return securities transactions data' do
         expect(securities_transactions.length).to be >= 1
         expect(securities_transactions[:final]).to be_boolean
         expect(securities_transactions[:total_payment_or_principal]).to be_kind_of(Numeric)
         expect(securities_transactions[:total_net]).to be_kind_of(Numeric)
+        expect(securities_transactions[:total_credits]).to be_kind_of(Numeric)
+        expect(securities_transactions[:total_debits]).to be_kind_of(Numeric)
         expect(securities_transactions[:total_interest]).to be_kind_of(Numeric)
         expect(securities_transactions[:transactions]).to be_kind_of(Array)
         securities_transactions[:transactions].each do |security|
@@ -324,6 +325,28 @@ describe MemberBalanceService do
           expect(security[:interest]).to be_kind_of(Numeric)
           expect(security[:total]).to be_kind_of(Numeric)
         end
+      end
+    end
+
+    describe 'totals' do
+      let(:debits) { Array.new(10, nil).collect { rand(-10000..0) } }
+      let(:credits) { Array.new(10, nil).collect { rand(0..10000) } }
+      let(:transactions) { (debits + credits).collect { |amount| {payment_or_principal: amount} } }
+      before do
+        allow(subject).to receive(:get_hash).and_return({
+          final: true,
+          transactions: transactions
+        })
+      end
+      it 'sets `total_debits` to the sum of all debit transactions' do
+        expect(securities_transactions[:total_debits]).to be(debits.inject(:+))
+      end
+      it 'sets `total_credits` to the sum of all credit transactions' do
+        expect(securities_transactions[:total_credits]).to be(credits.inject(:+))
+      end
+      it 'handles nils in the `payment_or_principal` data' do
+        transactions << {payment_or_principal: nil}
+        expect{securities_transactions}.to_not raise_error
       end
     end
 
@@ -345,12 +368,13 @@ describe MemberBalanceService do
           }]
         }.with_indifferent_access
       end
-      let(:securities_transactions) { subject.securities_transactions(as_of_date) }
       it 'should pass nil values if data from MAPI has nil values' do
         allow(subject).to receive(:get_hash).and_return(bad_data)
         expect(securities_transactions[:final]).to be(nil)
         expect(securities_transactions[:total_payment_or_principal]).to be(0)
         expect(securities_transactions[:total_net]).to be(0)
+        expect(securities_transactions[:total_credits]).to be(0)
+        expect(securities_transactions[:total_debits]).to be(0)
         expect(securities_transactions[:total_interest]).to be(0)
         securities_transactions[:transactions].each do |security|
           expect(security[:custody_account_no]).to be(nil)
@@ -473,7 +497,7 @@ describe MemberBalanceService do
             expect(borrowing_capacity_summary[:sbc_excess_capacity]).to eq(76634)
           end
           it 'should calculate total borrowing capacity and remaining borrowing capacity across all security types' do
-            expect(borrowing_capacity_summary[:total_borrowing_capacity]).to eq(2217350292)
+            expect(borrowing_capacity_summary[:total_borrowing_capacity]).to eq(2216573960 + 601332)
             expect(borrowing_capacity_summary[:remaining_borrowing_capacity]).to eq(2207262094)
           end
           it 'should calculate `borrowing_capacity`/`unpaid_principal_balance` as a rounded, whole-number percentage' do

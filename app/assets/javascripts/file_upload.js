@@ -1,7 +1,6 @@
 $(function () {
   var jqXHR = false;
   var dropZone = $('[data-dropzone]');
-  var resultsContainer = $('[data-results-container]');
   var progressBar = $('.file-upload-progress .inner-gauge-section');
   $('#fileupload').fileupload({
     dataType: 'json',
@@ -42,6 +41,7 @@ $(function () {
     },
     always: function(e, data) {
       dropZone.removeClass('file-uploading');
+      dropZone.hide();
       progressBar.css('width', '0%');
       jqXHR = false;
     },

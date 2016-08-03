@@ -27,6 +27,10 @@ unless defined?(CacheConfiguration)
         key_prefix: 'account_overview',
         expiry: 20.minutes
       },
+      calendar_holidays: {
+        key_prefix: 'calendar_holidays',
+        expiry: 24.hours
+      },
       default: {
         key_prefix: 'default',
         expiry: 24.hours

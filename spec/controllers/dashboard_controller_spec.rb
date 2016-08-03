@@ -618,12 +618,11 @@ RSpec.describe DashboardController, :type => :controller do
     let(:securid_pin) { '1111' }
     let(:securid_token) { '222222' }
     let(:make_request) { post :quick_advance_perform, member_id: member_id, advance_term: advance_term, advance_type: advance_type, advance_rate: advance_rate, amount: amount, securid_pin: securid_pin, securid_token: securid_token }
-    let(:securid_service) { SecurIDService.new('a user', test_mode: true) }
     let(:advance_request) { double(AdvanceRequest, expired?: false, executed?: true, execute: nil, sta_debit_amount: 0, errors: [], id: SecureRandom.uuid) }
 
     before do
+      allow(subject).to receive(:securid_perform_check).and_return(:authenticated)
       allow(subject).to receive(:session_elevated?).and_return(true)
-      allow(SecurIDService).to receive(:new).and_return(securid_service)
       allow(subject).to receive(:populate_advance_request_view_parameters)
       allow(subject).to receive(:advance_request_to_session)
       allow(subject).to receive(:advance_request).and_return(advance_request)
@@ -634,7 +633,7 @@ RSpec.describe DashboardController, :type => :controller do
     it_behaves_like 'an authorization required method', :post, :quick_advance_perform, :advance, :show?
     it 'calls `advance_request_from_session`' do
       expect(subject).to receive(:advance_request_from_session).ordered
-      expect(subject).to receive(:session_elevated?).ordered
+      expect(subject).to receive(:securid_perform_check).ordered
       make_request
     end
     it 'calls `advance_request_to_session`' do
@@ -655,8 +654,8 @@ RSpec.describe DashboardController, :type => :controller do
       expect(json['securid']).to eq(RSA::SecurID::Session::AUTHENTICATED.to_s)
       expect(json['advance_success']).to be(true)
     end
-    it 'should check if the session has been elevated' do
-      expect(subject).to receive(:session_elevated?).at_least(:once)
+    it 'calls `securid_perform_check`' do
+      expect(subject).to receive(:securid_perform_check).once
       make_request
     end
     it 'should check if the rate has expired' do
@@ -675,33 +674,19 @@ RSpec.describe DashboardController, :type => :controller do
       before do
         allow(subject).to receive(:session_elevated?).and_return(false)
       end
-      it 'should return a securid status of `invalid_pin` if the pin is malformed' do
-        post :quick_advance_perform, securid_pin: 'foo', securid_token: securid_token
+      it 'returns a securid status of `invalid_pin` if the pin is malformed' do
+        allow(subject).to receive(:securid_perform_check).and_return(:invalid_pin)
+        make_request
         json = JSON.parse(response.body)
         expect(json['securid']).to eq('invalid_pin')
       end
-      it 'should return a securid status of `invalid_token` if the token is malformed' do
-        post :quick_advance_perform, securid_token: 'foo', securid_pin: securid_pin
+      it 'returns a securid status of `invalid_token` if the token is malformed' do
+        allow(subject).to receive(:securid_perform_check).and_return(:invalid_token)
+        make_request
         json = JSON.parse(response.body)
         expect(json['securid']).to eq('invalid_token')
       end
-      it 'should authenticate the user via RSA SecurID if the session is not elevated' do
-        expect(securid_service).to receive(:authenticate).with(securid_pin, securid_token)
-        make_request
-      end
-      it 'should elevate the session if RSA SecurID authentication succedes' do
-        expect(securid_service).to receive(:authenticate).with(securid_pin, securid_token).ordered
-        expect(securid_service).to receive(:authenticated?).ordered.and_return(true)
-        expect(subject).to receive(:session_elevate!).ordered
-        make_request
-      end
-      it 'should not elevate the session if RSA SecurID authentication fails' do
-        expect(securid_service).to receive(:authenticate).with(securid_pin, securid_token).ordered
-        expect(securid_service).to receive(:authenticated?).ordered.and_return(false)
-        expect(subject).to_not receive(:session_elevate!).ordered
-        make_request
-      end
-      it 'should not perform the advance if the session is not elevated' do
+      it 'does not perform the advance if the session is not elevated' do
         expect(advance_request).to_not receive(:execute)
         make_request
       end
@@ -1482,9 +1467,9 @@ RSpec.describe DashboardController, :type => :controller do
       expect(call_method).to eq([process_patterns_return])
     end
     describe 'process multiple entries' do
-      let(:entries) { [entry, entry, entry, entry, entry] }
-      it 'returns no more than 4 elements in the array' do
-        expect(call_method).to eq([process_patterns_return, process_patterns_return, process_patterns_return, process_patterns_return])
+      let(:entries) { [entry, entry, entry, entry, entry, entry, entry] }
+      it "returns no more than #{DashboardController::CURRENT_ACTIVITY_COUNT} elements in the array" do
+        expect(call_method.length).to eq(DashboardController::CURRENT_ACTIVITY_COUNT)
       end
     end
     describe '`Letters of Credit` entries' do

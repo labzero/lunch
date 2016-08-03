@@ -805,6 +805,7 @@ class ReportsController < ApplicationController
   def advances_detail
     initialize_dates(:advances_detail, params[:start_date])
     report_download_name = "advances-#{fhlb_report_date_numeric(@start_date)}"
+    @as_of = @start_date # for `reports/pdf_footer.html.haml`
     downloadable_report(DOWNLOAD_FORMATS, {start_date: @start_date.to_s}, report_download_name) do
       @report_name = t('global.advances')
       @picker_presets = date_picker_presets(@start_date, nil, ReportConfiguration.date_restrictions(:advances_detail), @max_date)
@@ -1372,10 +1373,11 @@ class ReportsController < ApplicationController
       @data_available        = true
       @dropdown_options      = available_reports.map{ |entry| [entry['report_end_date'].strftime('%B %Y'), entry['report_end_date']] }
       @start_date            = params[:start_date].try(:to_date) || @dropdown_options[0][1]
+      @as_of = @start_date   # for `reports/pdf_footer.html.haml`
       @dropdown_options_text = @dropdown_options.find{ |option| option[1] == @start_date }.try(:first)
 
       report_download_name = "securities-services-monthly-statement-#{fhlb_report_date_numeric(@start_date)}"
-      downloadable_report(:pdf, {start_date: params[@start_date]}, report_download_name) do
+      downloadable_report(:pdf, {start_date: @start_date.to_s}, report_download_name) do
         if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
           @statement = {}
           @debit_date = nil
@@ -1428,7 +1430,7 @@ class ReportsController < ApplicationController
   def securities_transactions
     initialize_dates(:securities_transactions, params[:start_date])
     report_download_name = "securities-transactions-#{fhlb_report_date_numeric(@start_date)}"
-    downloadable_report(:xlsx, {start_date: params[:start_date]}, report_download_name) do
+    downloadable_report(DOWNLOAD_FORMATS, {start_date: params[:start_date]}, report_download_name) do
       @report_name = ReportConfiguration.report_title(:securities_transactions)
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
@@ -1440,6 +1442,8 @@ class ReportsController < ApplicationController
       end
       @picker_presets = date_picker_presets(@start_date, nil, nil, @max_date)
       @total_net = securities_transactions[:total_net]
+      @total_credits = securities_transactions[:total_credits]
+      @total_debits = securities_transactions[:total_debits]
       @final = securities_transactions[:final]
       column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('common_table_headings.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('common_table_headings.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
       rows = securities_transactions[:transactions].sort { |a, b| [a['custody_account_no'], a['cusip']] <=> [b['custody_account_no'], b['cusip']] }.collect do |row|

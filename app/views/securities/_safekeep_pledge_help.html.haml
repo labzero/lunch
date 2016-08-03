@@ -1,0 +1,38 @@
+.safekeep-pledge-download-area{data: {dropzone: true}}
+  %p
+    =t('securities.safekeep_pledge.upload_instructions.intro')
+    %span.securities-download-safekeep-pledge= t('securities.safekeep_pledge.upload_instructions.learn_how')
+  .securities-upload-instructions.fade
+    %p.securities-download-instructions-step= t('securities.release.edit.step_1.title')
+    =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), securities_pledge_download_path, class: [ 'securities-download-instructions-description', 'safekeep-pledge-download' ]
+    %p.securities-download-instructions-step= t('securities.release.edit.step_2.title')
+    .securities-download-instructions-description
+      %p= t('securities.safekeep_pledge.upload_instructions.step_2.enter_securities')
+      %p= t('securities.release.edit.step_2.include_information')
+      .securities-download-instructions-description-term
+        %strong= t('securities.release.edit.step_2.cusip.title')
+        %p= t('securities.release.edit.step_2.cusip.description')
+      .securities-download-instructions-description-term
+        %strong= t('securities.release.edit.step_2.settlement_amount.title_html')
+        %p= t('securities.release.edit.step_2.settlement_amount.description')
+      .securities-download-instructions-description-term
+        %strong= t('securities.release.edit.step_2.original_par.title')
+        %p= t('securities.release.edit.step_2.original_par.description')
+      .securities-download-instructions-description-term
+        %strong= t('securities.release.edit.step_2.custodian_name.title_html')
+        %p= t('securities.release.edit.step_2.custodian_name.description')
+    %p.securities-download-instructions-step= t('securities.release.edit.step_3.title')
+    %p.securities-download-instructions-description= t('securities.release.edit.step_3.description')
+  .securities-download-actions
+    - span = capture_haml do
+      %span= t('securities.release.edit.drag_drop')
+    - button = capture_haml do
+      .input-file-button-wrapper
+        %button.secondary-button= t('securities.release.edit.select_file')
+        %input#fileupload{type: "file", name: "file", accept: accepted_upload_mimetypes, data: {url: securities_safekeep_upload_path, 'results-container-class' => 'securities-release-table-wrapper', 'form-name' => 'securities-release-download', 'input-name' => 'securities', 'error-class' => 'securities-release-upload-error'}}
+    =t('securities.release.edit.download_actions_html', span: span, button: button)
+  .file-upload-progress
+    %p{data: {cancel_upload: true}}= t('global.cancel_upload')
+    %p= t('global.uploading')
+    .gauge-section
+      .inner-gauge-section

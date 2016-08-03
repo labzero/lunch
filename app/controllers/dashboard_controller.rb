@@ -217,6 +217,8 @@ class DashboardController < ApplicationController
     },
   ].freeze
 
+  CURRENT_ACTIVITY_COUNT = 5
+
   def index
     rate_service = RatesService.new(request)
     etransact_service = EtransactAdvancesService.new(request)
@@ -377,20 +379,7 @@ class DashboardController < ApplicationController
   end
 
   def quick_advance_perform
-    unless session_elevated?
-      securid = SecurIDService.new(current_user.username)
-      begin
-        securid.authenticate(params[:securid_pin], params[:securid_token])
-        session_elevate! if securid.authenticated?
-        securid_status = securid.status
-      rescue SecurIDService::InvalidPin => e
-        securid_status = 'invalid_pin'
-      rescue SecurIDService::InvalidToken => e
-        securid_status = 'invalid_token'
-      end
-    else
-      securid_status = :authenticated
-    end
+    securid_status = securid_perform_check
     advance_success = false
     response_html = false
     if session_elevated?
@@ -714,7 +703,7 @@ class DashboardController < ApplicationController
     activity_data = []
     entries.each do |entry|
 
-      break if activity_data.length == 4
+      break if activity_data.length == CURRENT_ACTIVITY_COUNT
       result = process_patterns(ACTIVITY_PATTERNS, entry)
       if result
         raise ArgumentError.new('Missing `description`') unless result[:description]

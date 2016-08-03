@@ -2,12 +2,16 @@ class SecuritiesController < ApplicationController
   include CustomFormattingHelper
   include ContactInformationHelper
 
-  before_action only: [:view_release] do
+  before_action only: [:view_release, :authorize_request] do
     authorize :security, :authorize?
   end
 
   before_action only: [:delete_request] do
     authorize :security, :delete?
+  end
+
+  before_action only: [ :edit_safekeep, :edit_pledge, :edit_release, :view_release ] do
+    @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')
   end
 
   ACCEPTED_UPLOAD_MIMETYPES = [
@@ -134,7 +138,7 @@ class SecuritiesController < ApplicationController
       ],
       rows: awaiting_authorization_requests.collect do |request|
         request_id = request[:request_id]
-        action_cell_value = policy(:security).authorize? ? [[t('securities.requests.actions.authorize'), securities_view_release_path(request_id) ]] : [t('securities.requests.actions.authorize')]
+        action_cell_value = policy(:security).authorize? ? [[t('securities.requests.actions.authorize'), securities_release_view_path(request_id) ]] : [t('securities.requests.actions.authorize')]
         {
           columns: [
             {value: request_id},
@@ -173,20 +177,20 @@ class SecuritiesController < ApplicationController
   end
 
   def edit_safekeep
-    populate_view_variables
+    populate_view_variables(:safekeep)
     @title = t('securities.safekeep.title')
     @securities_release_request.account_number = MembersService.new(request).member(current_member_id)['unpledged_account_number']
   end
 
   def edit_pledge
-    populate_view_variables
+    populate_view_variables(:pledge)
     @title = t('securities.pledge.title')
     @securities_release_request.account_number = MembersService.new(request).member(current_member_id)['pledged_account_number']
   end
 
   # POST
   def edit_release
-    populate_view_variables
+    populate_view_variables(:release)
     @title = t('securities.release.title')
   end
 
@@ -195,32 +199,47 @@ class SecuritiesController < ApplicationController
     request_id = params[:request_id]
     @securities_release_request = SecuritiesRequestService.new(current_member_id, request).submitted_release(request_id)
     raise ActionController::RoutingError.new("There has been an error and SecuritiesController#authorize_release has encountered nil. Check error logs.") if @securities_release_request.nil?
-    populate_view_variables
+    populate_view_variables(:release)
     @title = t('securities.release.title')
     render :edit_release
   end
 
   def download_release
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
-    populate_securities_table_data_view_variable(securities)
-    render xlsx: 'release', filename: "securities.xlsx", formats: [:xlsx]
+    populate_securities_table_data_view_variable(:release, securities)
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :release }
   end
 
-  def upload_release
+  def download_safekeep
+    populate_securities_table_data_view_variable(:safekeep)
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep }
+  end
+
+  def upload_securities
     uploaded_file = params[:file]
     content_type = uploaded_file.content_type
+    type = params[:type].to_sym
     if ACCEPTED_UPLOAD_MIMETYPES.include?(content_type)
       securities = []
       spreadsheet = Roo::Spreadsheet.open(uploaded_file.path)
       data_start_index = nil
       spreadsheet.each do |row|
         if data_start_index
-          securities << Security.from_hash({
-            cusip: row[data_start_index],
-            description: row[data_start_index + 1],
-            original_par: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
-            payment_amount: (row[data_start_index + 3].to_i if row[data_start_index + 3])
-          })
+          if type == :release
+            securities << Security.from_hash({
+              cusip: row[data_start_index],
+              description: row[data_start_index + 1],
+              original_par: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
+              payment_amount: (row[data_start_index + 3].to_i if row[data_start_index + 3])
+            })
+          elsif type == :pledge || type == :safekeep
+            securities << Security.from_hash({
+              cusip: row[data_start_index],
+              original_par: (row[data_start_index + 1].to_i if row[data_start_index + 1]),
+              settlement_amount: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
+              custodian_name: (row[data_start_index + 3] if row[data_start_index + 3])
+            })
+          end
         else
           row.each_with_index do |cell, i|
             regex = /\Acusip\z/i
@@ -229,9 +248,14 @@ class SecuritiesController < ApplicationController
         end
       end
       if data_start_index
-        populate_securities_table_data_view_variable(securities)
-        html = render_to_string(layout: false)
-        status = 200
+        if securities.empty?
+          error = 'No securities found'
+          status = 400
+        else
+          populate_securities_table_data_view_variable(type, securities)
+          html = render_to_string(:upload_table, layout: false, locals: { type: type })
+          status = 200
+        end
       else
         error = 'No header row found'
         status = 400
@@ -240,32 +264,65 @@ class SecuritiesController < ApplicationController
       error = "Uploaded file has unsupported MIME type: #{content_type}"
       status = 415
     end
-    render json: {html: html, form_data: (securities.to_json if securities), error: error}, status: status, content_type: request.format
+    render json: {html: html, form_data: (securities.to_json if securities && !securities.empty?), error: error}, status: status, content_type: request.format
+  end
+
+  def download_pledge
+    populate_securities_table_data_view_variable(:pledge)
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge }
+  end
+
+  # POST
+  def authorize_request
+    response = SecuritiesRequestService.new(current_member_id, request).authorize_request((params[:securities_release_request] || {})[:request_id], current_user)
+    raise ActiveRecord::RecordNotFound unless response
+    @title = t('securities.authorize.release.title')
   end
 
   # POST
   def submit_release
     @securities_release_request = SecuritiesReleaseRequest.from_hash(params[:securities_release_request])
     errors = nil
+    authorizer = policy(:security).authorize?
     if @securities_release_request.valid?
       response = SecuritiesRequestService.new(current_member_id, request).submit_release_for_authorization(@securities_release_request, current_user) do |error|
-        errors = { mapi_endpoint: [error.http_body] }
+        errors = JSON.parse(error.http_body)['errors']
       end
-      errors ||= { mapi_endpoint: ['SecuritiesRequestService#submit_release_for_authorization has returned nil'] } unless response
+      errors = (errors || []) << :unknown unless response
     else
-      errors = @securities_release_request.errors.messages
+      errors = @securities_release_request.errors.messages.keys
+    end
+    if authorizer
+      @securid_status = securid_perform_check unless errors.present?
+      unless session_elevated?
+        errors = (errors || []) << @securid_status
+      end
+      unless errors.present?
+        response = SecuritiesRequestService.new(current_member_id, request).authorize_request(@securities_release_request.request_id, current_user)
+        errors = (errors || []) << :authorize_failed unless response
+      end
     end
     if errors
-      populate_view_variables(errors)
+      populate_view_variables(:release, errors)
       @title = t('securities.release.title')
       render :edit_release
+    elsif authorizer
+      @title = t('securities.authorize.release.title')
+      render :authorize_request
     else
-      redirect_to securities_success_url
+      redirect_to securities_release_success_url
     end
   end
 
-  def submit_release_success
-    @title = t('securities.success.title')
+  def submit_request_success
+    @title = case params[:type].to_sym
+      when :release
+        t('securities.success.title')
+      when :pledge
+        t('securities.safekeep_pledge.success.pledge')
+      when :safekeep
+        t('securities.safekeep_pledge.success.safekeep')
+    end
     @authorized_user_data = []
     users = MembersService.new(request).signers_and_users(current_member_id) || []
     users.sort_by! { |user| [user[:surname] || '', user[:given_name] || ''] }
@@ -273,7 +330,7 @@ class SecuritiesController < ApplicationController
       user[:roles].each do |role|
         if role == User::Roles::SECURITIES_SIGNER
           @authorized_user_data.push(user)
-          break;
+          break
         end
       end
     end
@@ -302,23 +359,36 @@ class SecuritiesController < ApplicationController
     end
   end
 
-  def populate_securities_table_data_view_variable(securities)
-    column_headings = [
-      I18n.t('common_table_headings.cusip'),
-      I18n.t('common_table_headings.description'),
-      fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
-      I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker)
-    ]
+  def populate_securities_table_data_view_variable(type, securities=[])
+    column_headings = case type
+    when :release
+      [ I18n.t('common_table_headings.cusip'),
+        I18n.t('common_table_headings.description'),
+        fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+        I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker) ]
+    when :pledge, :safekeep
+      [ I18n.t('common_table_headings.cusip'),
+        fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+        I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker),
+        I18n.t('securities.safekeep.custodian_name', footnote_marker: fhlb_footnote_marker(1)) ]
+    end
     securities ||= []
     rows = securities.collect do |security|
-      {
-        columns: [
+      if type == :release
+        { columns: [
           {value: security.cusip || t('global.missing_value')},
           {value: security.description || t('global.missing_value')},
           {value: security.original_par, type: :number},
           {value: security.payment_amount, type: :number}
-        ]
-      }
+        ] }
+      else
+        { columns: [
+          {value: security.cusip || t('global.missing_value')},
+          {value: security.original_par, type: :number},
+          {value: security.settlement_amount, type: :number},
+          {value: security.custodian_name || t('global.missing_value')}
+        ] }
+      end
     end
     @securities_table_data = {
       column_headings: column_headings,
@@ -326,13 +396,14 @@ class SecuritiesController < ApplicationController
     }
   end
 
-  def populate_view_variables(errors=nil)
+  def populate_view_variables(type, errors=nil)
     @errors = human_submit_release_error_messages(errors) if errors
     @pledge_type_dropdown = [
       [t('securities.release.pledge_type.sbc'), SecuritiesReleaseRequest::PLEDGE_TYPES[:sbc]],
       [t('securities.release.pledge_type.standard'), SecuritiesReleaseRequest::PLEDGE_TYPES[:standard]]
     ]
     @title = t('securities.release.title')
+    @session_elevated = session_elevated?
 
     @securities_release_request ||= SecuritiesReleaseRequest.new
     @securities_release_request.securities = params[:securities] if params[:securities]
@@ -342,19 +413,13 @@ class SecuritiesController < ApplicationController
     populate_transaction_code_dropdown_variables(@securities_release_request)
     populate_settlement_type_dropdown_variables(@securities_release_request)
     populate_delivery_instructions_dropdown_variables(@securities_release_request)
-    populate_securities_table_data_view_variable(@securities_release_request.securities)
+    populate_securities_table_data_view_variable(type, @securities_release_request.securities)
 
-    @form_data = if policy(:security).authorize?
-      {
-        url: securities_authorize_release_path,
-        submit_text: t('securities.release.authorize')
-      }
-    else
-      {
-        url: securities_submit_release_path,
-        submit_text: t('securities.release.submit_authorization')
-      }
-    end
+    @form_data = {
+      url: securities_release_submit_path,
+      submit_text: policy(:security).authorize? ? t('securities.release.authorize') : t('securities.release.submit_authorization')
+    }
+    @date_restrictions = date_restrictions
   end
 
   def translated_dropdown_mapping(dropdown_hash)
@@ -390,10 +455,33 @@ class SecuritiesController < ApplicationController
 
   def human_submit_release_error_messages(errors)
     error_message_hash = {}
-    errors.each do |key, value|
-      # TODO add error messaging for specific errors as they become outlined in future tickets
-      error_message_hash[key] = I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number)
+    errors.each do |error|
+      case error
+      when 'missing_security_payment_amount_key'
+        error_message_hash[error] = I18n.t('securities.release.edit.no_payment_amount_error')
+      when 'invalid_security_original_par_key'
+        error_message_hash[error] = I18n.t('securities.release.edit.fed_fifty_m_error')
+      else
+        error_message_hash[error] = I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
+      end
     end
     error_message_hash
+  end
+
+  def date_restrictions
+    today = Time.zone.today
+    max_date = today + SecuritiesReleaseRequest::MAX_DATE_RESTRICTION
+    holidays =  CalendarService.new(request).holidays(today, max_date)
+    weekends = []
+    date_iterator = today.clone
+    while date_iterator <= max_date do
+      weekends << date_iterator.iso8601 if (date_iterator.sunday? || date_iterator.saturday?)
+      date_iterator += 1.day
+    end
+    {
+      min_date: today,
+      max_date: max_date,
+      invalid_dates: holidays + weekends
+    }
   end
 end

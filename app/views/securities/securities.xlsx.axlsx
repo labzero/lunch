@@ -19,6 +19,9 @@ workbook.styles do |styles|
 
     sheet.add_row
     sheet.add_row [nil, nil, nil, I18n.t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)], style: styles.add_style(sz: 9)
+    if type == :pledge || type == :safekeep
+      sheet.add_row [nil, nil, nil, I18n.t('securities.safekeep.custodian_name_footnote', footnote_marker: fhlb_footnote_marker(1))], style: styles.add_style(sz: 9)
+    end
     3.times do
       sheet.add_row
     end

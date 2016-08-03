@@ -5,7 +5,7 @@
     %h1= @title
   .securities-main-body.securities-release
     .column-9x3-left
-      = render partial: 'form', layout: false, locals: { account_number: nil, url: @form_data[:url] }
+      = render partial: 'form', locals: { type: :release, account_number: nil, url: @form_data[:url], accepted_upload_mimetypes: @accepted_upload_mimetypes }
     .delete-release-flyout
       %h2= t('securities.release.delete_request.title')
       .securities-delete-request-confirmation
@@ -17,5 +17,5 @@
       .securities-delete-request-error
         %p= t('securities.release.delete_request.error_message')
         = link_to(t('global.close'), securities_requests_path, class: 'primary-button')
-    =form_tag(securities_download_release_path, name: 'securities-release-download') do
+    =form_tag(securities_release_download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_release_request.securities.to_json)

@@ -414,29 +414,6 @@ describe MAPI::ServiceApp do
     end
   end
 
-  describe "weekend_or_holiday?" do
-    let(:saturday) { double('saturday', saturday?: true,  sunday?: false, strftime: nonholiday) }
-    let(:sunday)   { double('sunday',   saturday?: false, sunday?: true,  strftime: nonholiday) }
-    let(:monday)   { double('monday',   saturday?: false, sunday?: false, strftime: nonholiday) }
-    let(:holiday)  { double('holiday',  saturday?: false, sunday?: false, strftime: formatted)  }
-    let(:formatted){ double('formatted') }
-    let(:nonholiday) { double('nonholiday') }
-    let(:holidays) { [formatted] }
-
-    it "should return true for saturday" do
-      expect(subject.weekend_or_holiday?(saturday, holidays)).to be_truthy
-    end
-    it "should return true for sunday" do
-      expect(subject.weekend_or_holiday?(sunday, holidays)).to be_truthy
-    end
-    it "should return true for monday" do
-      expect(subject.weekend_or_holiday?(monday, holidays)).to be_falsey
-    end
-    it "should return true for holiday" do
-      expect(subject.weekend_or_holiday?(holiday, holidays)).to be_truthy
-    end
-  end
-
   describe "get_maturity_date" do
     let (:day1_str) { double('day1 str', to_date: day1) }
     let (:day2_str) { double('day2 str', to_date: day2) }
