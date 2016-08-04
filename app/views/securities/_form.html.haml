@@ -33,6 +33,7 @@
     = render 'shared/dropdown', dropdown_name: 'securities_release_request[delivery_type]', default_value: @delivery_instructions_defaults[:value], default_text: @delivery_instructions_defaults[:text], dropdown_options: @delivery_instructions_dropdown
     .securities-delivery-instructions-fields{data: {'selected-delivery-instruction' => @delivery_instructions_defaults[:value]}}
       .securities-delivery-instructions-field.securities-delivery-instructions-field-physical-securities
+        = render 'shared/input_field', form_builder: f, field_name: :delivery_bank_agent, label: t('securities.release.delivery_instructions.delivery_agent'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_name, label: t('securities.release.delivery_instructions.agent_name'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_address, label: t('securities.release.delivery_instructions.agent_address'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :physical_securities_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true

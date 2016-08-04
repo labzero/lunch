@@ -1198,6 +1198,7 @@ en:
         dtc: DTC
         mutual_fund: Mutual Fund
         internal: Internal Transfer
+        delivery_agent: "Delivery Bank/Agent's Name"
         agent_name: "Receiving Bank/Agent's Name"
         agent_address: "Receving Bank/Agent's Address"
         further_credit: For Further Credit to Account No.
