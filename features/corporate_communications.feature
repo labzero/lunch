@@ -11,7 +11,7 @@ Feature: Visiting the Messages Page
 Scenario: Visit the messages page from the header
   Given I visit the dashboard
   When I click on the announcements icon in the header
-  Then I should see "Categories" as the sidebar title
+  Then I should see "Filters" as the sidebar title
     And I should see a list of message categories in the sidebar
     And I should see "Announcements" as the page's title
 
