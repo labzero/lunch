@@ -57,7 +57,7 @@
       =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), securities_pledge_download_path, class: [ 'securities-download-template', 'safekeep-pledge-download-title' ]
     -else
       %h2= t('securities.title')
-    %p.securities-release-upload-error= t('securities.release.edit.upload_error')
+    %p.securities-release-upload-error= t('securities.upload_errors.generic')
     .securities-release-table-wrapper
       -unless @securities_table_data[:rows].empty?
         = render 'table', locals: { type: type }

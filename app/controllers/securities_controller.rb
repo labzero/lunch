@@ -219,52 +219,55 @@ class SecuritiesController < ApplicationController
     uploaded_file = params[:file]
     content_type = uploaded_file.content_type
     type = params[:type].to_sym
+    errors = []
     if ACCEPTED_UPLOAD_MIMETYPES.include?(content_type)
       securities = []
-      spreadsheet = Roo::Spreadsheet.open(uploaded_file.path)
-      data_start_index = nil
-      spreadsheet.each do |row|
-        if data_start_index
-          if type == :release
-            securities << Security.from_hash({
-              cusip: row[data_start_index],
-              description: row[data_start_index + 1],
-              original_par: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
-              payment_amount: (row[data_start_index + 3].to_i if row[data_start_index + 3])
-            })
-          elsif type == :pledge || type == :safekeep
-            securities << Security.from_hash({
-              cusip: row[data_start_index],
-              original_par: (row[data_start_index + 1].to_i if row[data_start_index + 1]),
-              settlement_amount: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
-              custodian_name: (row[data_start_index + 3] if row[data_start_index + 3])
-            })
-          end
-        else
-          row.each_with_index do |cell, i|
-            regex = /\Acusip\z/i
-            data_start_index = i if regex.match(cell.to_s)
-          end
-        end
+      begin
+        spreadsheet = Roo::Spreadsheet.open(uploaded_file.path)
+      rescue ArgumentError, IOError, Zip::ZipError => e
+        errors << MAPIService::Error.new(:security_upload, :unable_to_open)
       end
-      if data_start_index
-        if securities.empty?
-          error = 'No securities found'
-          status = 400
-        else
-          populate_securities_table_data_view_variable(type, securities)
-          html = render_to_string(:upload_table, layout: false, locals: { type: type })
-          status = 200
+      if errors.blank?
+        data_start_index = nil
+        spreadsheet.each do |row|
+          if data_start_index
+            if type == :release
+              securities << Security.from_hash({
+                cusip: row[data_start_index],
+                description: row[data_start_index + 1],
+                original_par: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
+                payment_amount: (row[data_start_index + 3].to_i if row[data_start_index + 3])
+              })
+            elsif type == :pledge || type == :safekeep
+              securities << Security.from_hash({
+                cusip: row[data_start_index],
+                original_par: (row[data_start_index + 1].to_i if row[data_start_index + 1]),
+                settlement_amount: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
+                custodian_name: (row[data_start_index + 3] if row[data_start_index + 3])
+              })
+            end
+          else
+            row.each_with_index do |cell, i|
+              regex = /\Acusip\z/i
+              data_start_index = i if regex.match(cell.to_s)
+            end
+          end
         end
-      else
-        error = 'No header row found'
-        status = 400
+        if data_start_index
+          if securities.empty?
+            errors << MAPIService::Error.new(:security_upload, :no_securities)
+          else
+            populate_securities_table_data_view_variable(type, securities)
+            html = render_to_string(:upload_table, layout: false, locals: { type: type })
+          end
+        else
+          errors << MAPIService::Error.new(:security_upload, :no_header_row)
+        end
       end
     else
-      error = "Uploaded file has unsupported MIME type: #{content_type}"
-      status = 415
+      errors << MAPIService::Error.new(:security_upload, :unsupported_mime_type)
     end
-    render json: {html: html, form_data: (securities.to_json if securities && !securities.empty?), error: error}, status: status, content_type: request.format
+    render json: {html: html, form_data: (securities.to_json if securities && !securities.empty?), errors: (human_error_messages(errors) unless errors.blank?)}, content_type: request.format
   end
 
   def download_pledge
@@ -483,5 +486,19 @@ class SecuritiesController < ApplicationController
       max_date: max_date,
       invalid_dates: holidays + weekends
     }
+  end
+
+  def human_error_messages(errors)
+    security_upload_error = errors.find {|e| e.type == :security_upload }
+    if security_upload_error.present?
+      case security_upload_error.code
+        when :unable_to_open
+          I18n.t('securities.upload_errors.cannot_open')
+        else
+          I18n.t('securities.upload_errors.generic')
+      end
+    else
+      I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
+    end
   end
 end

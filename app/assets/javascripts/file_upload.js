@@ -9,7 +9,7 @@ $(function () {
       if (jqXHR) {
         return false;
       } else {
-        toggleUploadError($(e.target).data('error-class'), false);
+        toggleUploadError($(e.target).data('error-class'), false, null);
         dropZone.addClass('file-uploading');
         jqXHR = data.submit();
       };
@@ -27,8 +27,8 @@ $(function () {
       var inputName = $target.data('input-name');
       var resultsContainerClass = $target.data('results-container-class');
       if (data.result) {
-        if (data.result.error) {
-          failUpload(e, data); // For IE
+        if (data.result.errors) {
+          failUpload(e, data.result.errors); // For IE
         } else {
           if (resultsContainerClass) {
             $('.' + resultsContainerClass).html(data.result.html);
@@ -45,18 +45,20 @@ $(function () {
       progressBar.css('width', '0%');
       jqXHR = false;
     },
-    fail: failUpload
+    fail: function(e) {failUpload(e, null)}
   });
 
-  function failUpload(e, data) {
-    toggleUploadError($(e.target).data('error-class'), true);
+  function failUpload(e, errorMessage) {
+    toggleUploadError($(e.target).data('error-class'), true, errorMessage);
   }
 
-  function toggleUploadError(errorClass, active) {
-    if (errorClass && active) {
-      $('.' + errorClass).show();
-    } else if (errorClass) {
-      $('.' + errorClass).hide();
+  function toggleUploadError(errorClass, active, errorMessage) {
+    var $errorNode = errorClass ? $('.' + errorClass) : null;
+    if ($errorNode && active) {
+      errorMessage ? $errorNode.text(errorMessage) : null;
+      $errorNode.show();
+    } else if ($errorNode) {
+      $errorNode.hide();
     };
   };
 

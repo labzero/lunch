@@ -1254,7 +1254,6 @@ en:
         drag_drop: Drag and Drop Here
         select_file: Select File
         download_actions_html: '%{span} <span>or</span> %{button}'
-        upload_error: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
         generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number} or via %{email}
         no_payment_amount_error: When 'Versus Payment' is selected, each security must have a settlement amount.
         fed_fifty_m_error: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
@@ -1310,6 +1309,9 @@ en:
       issues: "If there are any issues with your request, you will be contacted by the Securities Department or the Collateral Department."
       contact_html: "If you wish to change your request, please email the <a href=\"%{mailto_url}\">Securities Department</a> or call %{phone_number}."
       make_request: make another request
+    upload_errors:
+      cannot_open: We couldn't open your file. Please verify that you've selected the correct file and try again.
+      generic: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
   reports:
     meta_title: FHLB - Reports
     title: Reports
