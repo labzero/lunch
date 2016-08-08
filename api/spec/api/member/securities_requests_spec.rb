@@ -54,25 +54,18 @@ describe MAPI::ServiceApp do
 
       describe 'when using fake data' do
         names = fake('securities_release_request_details')['names']
-        let(:rng) { instance_double(Random) }
-        let(:status_offset) { rand(0..1) }
-        let(:submit_offset) { rand(0..4) }
-        let(:authorized_offset) { rand(0..2) }
+        let(:rng) { instance_double(Random, rand: 1) }
         let(:request_id) { rand(100000..999999) }
-        let(:form_type) { rand(70..73) }
-        let(:submitted_date) { Time.zone.today - submit_offset.days }
-        let(:authorized_date) { submitted_date + authorized_offset.days }
-        let(:submitted_by_offset) { rand(0..names.length-1) }
-        let(:authorized_by_offset) { rand(0..names.length-1) }
         before do
           allow(securities_request_module).to receive(:should_fake?).and_return(true)
           allow(Random).to receive(:new).and_return(rng)
-          allow(rng).to receive(:rand).and_return(1, request_id, status_offset)
+          allow(securities_request_module).to receive(:fake_request_id).with(rng).and_return(request_id)
+          allow(securities_request_module).to receive(:fake_header_details).and_return({})
         end
 
         it 'constructs a list of request objects' do
           n = rand(1..7)
-          allow(rng).to receive(:rand).with(1..7).and_return(n)
+          allow(rng).to receive(:rand).with(eq(1..7)).and_return(n)
           expect(call_method.length).to eq(n)
         end
         it 'passes the `request_id` to the `fake_header_details` method' do
@@ -84,7 +77,11 @@ describe MAPI::ServiceApp do
           call_method
         end
         it 'passes the `status` to the `fake_header_details` method' do
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, securities_request_module::MAPIRequestStatus::AUTHORIZED[status_offset]).and_return({})
+          status = double('A Status')
+          status_array = double('A Status Array')
+          allow(securities_request_module).to receive(:flat_unique_array).with(securities_request_module::MAPIRequestStatus::AUTHORIZED).and_return(status_array)
+          allow(status_array).to receive(:sample).with(random: rng).and_return(status)
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, status).and_return({})
           call_method
         end
       end
@@ -811,26 +808,26 @@ describe MAPI::ServiceApp do
         end
       end
     end
-    describe 'GET securities/release/%{request_id}' do
+    describe 'GET securities/request/%{request_id}' do
       let(:request_id) { rand(1000..99999) }
       let(:response) { instance_double(Hash, to_json: nil) }
-      let(:call_endpoint) { get "/member/#{member_id}/securities/release/#{request_id}"}
+      let(:call_endpoint) { get "/member/#{member_id}/securities/request/#{request_id}"}
       before do
-        allow(securities_request_module).to receive(:release_details).and_return(response)
+        allow(securities_request_module).to receive(:request_details).and_return(response)
       end
-      it 'calls `MAPI::Services::Member::SecuritiesRequests.release_details` with an instance of the MAPI::Service app' do
-        expect(securities_request_module).to receive(:release_details).with(an_instance_of(MAPI::ServiceApp), any_args)
+      it 'calls `MAPI::Services::Member::SecuritiesRequests.request_details` with an instance of the MAPI::Service app' do
+        expect(securities_request_module).to receive(:request_details).with(an_instance_of(MAPI::ServiceApp), any_args)
         call_endpoint
       end
-      it 'calls `MAPI::Services::Member::SecuritiesRequests.release_details` with the `member_id` param' do
-        expect(securities_request_module).to receive(:release_details).with(anything, member_id, any_args)
+      it 'calls `MAPI::Services::Member::SecuritiesRequests.request_details` with the `member_id` param' do
+        expect(securities_request_module).to receive(:request_details).with(anything, member_id, any_args)
         call_endpoint
       end
-      it 'calls `MAPI::Services::Member::SecuritiesRequests.release_details` with the `request_id` param' do
-        expect(securities_request_module).to receive(:release_details).with(anything, anything, request_id)
+      it 'calls `MAPI::Services::Member::SecuritiesRequests.request_details` with the `request_id` param' do
+        expect(securities_request_module).to receive(:request_details).with(anything, anything, request_id)
         call_endpoint
       end
-      it 'returns the results of `MAPI::Services::Member::SecuritiesRequests.release_details` as JSON' do
+      it 'returns the results of `MAPI::Services::Member::SecuritiesRequests.request_details` as JSON' do
         json_response = SecureRandom.hex
         allow(response).to receive(:to_json).and_return(json_response)
         call_endpoint
@@ -875,7 +872,7 @@ describe MAPI::ServiceApp do
       end
     end
 
-    describe '`MAPI::Services::Member::SecuritiesRequests.release_details`' do
+    describe '`MAPI::Services::Member::SecuritiesRequests.request_details`' do
       let(:request_id) { rand(1000..99999) }
       let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
       let(:header_details) {{
@@ -885,7 +882,7 @@ describe MAPI::ServiceApp do
       }}
       let(:security) { instance_double(Hash) }
       let(:securities) { [security] }
-      let(:call_method) { securities_request_module.release_details(app, member_id, request_id) }
+      let(:call_method) { securities_request_module.request_details(app, member_id, request_id) }
 
       before do
         allow(securities_request_module).to receive(:fake_securities).and_return(securities)
@@ -1263,37 +1260,40 @@ describe MAPI::ServiceApp do
     end
 
     describe '`MAPI::Services::Member::SecuritiesRequests.fake_securities`' do
-      fake_data = fake('securities_release_request_details')
-      let(:request_id) { rand(1000..9999)}
+      let(:request_id) { rand(1000..9999) }
       let(:settlement_type) { securities_request_module::SETTLEMENT_TYPE.values.sample }
-      let(:rng) { instance_double(Random) }
-      let(:original_par) { rand(10000..99999) }
-      let(:cusip_offset) { rand(0..5) }
-      let(:description_offset) { rand(0..5) }
+      let(:rng) { instance_double(Random, rand: 1) }
+      let(:fake_data) { securities_request_module.fake('securities_release_request_details') }
+      let(:original_par) { rand(10000..999999) }
+      let(:cusip) { fake_data['cusips'].sample }
+      let(:description) { fake_data['descriptions'].sample }
 
       let(:call_method) { securities_request_module.fake_securities(request_id, settlement_type) }
       before do
+        allow(securities_request_module).to receive(:fake).with('securities_release_request_details').and_return(fake_data)
         allow(Random).to receive(:new).and_return(rng)
-        allow(rng).to receive(:rand).and_return(1, original_par, cusip_offset, description_offset)
+        allow(rng).to receive(:rand).with(eq(10000..999999)).and_return(original_par)
+        allow(fake_data['cusips']).to receive(:sample).with(random: rng).and_return(cusip)
+        allow(fake_data['descriptions']).to receive(:sample).with(random: rng).and_return(description)
       end
 
       it 'constructs an array of securities' do
         n = rand(1..6)
-        allow(rng).to receive(:rand).with(1..6).and_return(n)
+        allow(rng).to receive(:rand).with(eq(1..6)).and_return(n)
         expect(call_method.length).to eq(n)
       end
       it 'constructs securities with a `CUSIP` value' do
         results = call_method
         expect(results.length).to be > 0
         results.each do |result|
-          expect(result['CUSIP']).to eq(fake_data['cusips'][cusip_offset])
+          expect(result['CUSIP']).to eq(cusip)
         end
       end
       it 'constructs securities with a `DESCRIPTION` value' do
         results = call_method
         expect(results.length).to be > 0
         results.each do |result|
-          expect(result['DESCRIPTION']).to eq(fake_data['descriptions'][description_offset])
+          expect(result['DESCRIPTION']).to eq(description)
         end
       end
       it 'constructs securities with an `ORIGINAL_PAR` value' do
@@ -2515,6 +2515,14 @@ describe MAPI::ServiceApp do
         allow(ActiveRecord::Base.connection).to receive(:execute).with(authorization_query).and_return(0)
         expect(call_method).to be(false)
       end
+    end
+  end
+  describe '`fake_request_id` class method' do
+    it 'returns a random number between 100000 and 999999 using the supplied random number generator' do
+      value = double(Numeric)
+      rng = instance_double(Random)
+      allow(rng).to receive(:rand).with(100000..999999).and_return(value)
+      expect(MAPI::Services::Member::SecuritiesRequests.fake_request_id(rng)).to be(value)
     end
   end
 end

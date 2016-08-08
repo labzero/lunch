@@ -312,7 +312,7 @@ RSpec.describe SecuritiesController, type: :controller do
     allow_policy :security, :authorize?
     let(:request_id) { SecureRandom.hex }
     let(:securities_release_request) { instance_double(SecuritiesReleaseRequest) }
-    let(:service) { instance_double(SecuritiesRequestService, submitted_release: securities_release_request) }
+    let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_release_request) }
     let(:call_action) { get :view_release, request_id: request_id }
 
     before do
@@ -325,7 +325,7 @@ RSpec.describe SecuritiesController, type: :controller do
     it_behaves_like 'an authorization required method', :get, :view_release, :security, :authorize?, request_id: SecureRandom.hex
 
     it 'raises an ActionController::RoutingError if the service object returns nil' do
-      allow(service).to receive(:submitted_release)
+      allow(service).to receive(:submitted_request)
       expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#authorize_release has encountered nil. Check error logs.')
     end
     it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
@@ -336,8 +336,8 @@ RSpec.describe SecuritiesController, type: :controller do
       expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(service)
       call_action
     end
-    it 'calls `submitted_release` on the `SecuritiesRequestService` instance with the `request_id`' do
-      expect(service).to receive(:submitted_release).with(request_id)
+    it 'calls `submitted_request` on the `SecuritiesRequestService` instance with the `request_id`' do
+      expect(service).to receive(:submitted_request).with(request_id)
       call_action
     end
     it 'sets `@securities_release_request` to the result of `SecuritiesRequestService#request_id`' do

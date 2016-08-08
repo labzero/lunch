@@ -8,7 +8,6 @@ module MAPI
         module SSKRequestStatus
           SIGNED = 85
           ACKNOWLEDGED = 86
-          AWAITING_AUTHORIZATION = 87
           SUBMITTED = 90
         end
 
@@ -108,7 +107,7 @@ module MAPI
         end
 
         def self.requests(app, member_id, status = MAPIRequestStatus::AUTHORIZED, settlement_date_range=nil)
-          flat_status = Array.wrap(status).flatten.uniq
+          flat_status = flat_unique_array(status)
           requests = (
             end_date = settlement_date_range.try(:last) || Time.zone.today
             start_date = settlement_date_range.try(:first) || (end_date - 7.days)
@@ -116,8 +115,8 @@ module MAPI
               rng = Random.new(member_id.to_i + end_date.to_time.to_i + start_date.to_time.to_i + status.sum)
               list = []
               rng.rand(1..7).times do
-                request_id = rng.rand(100000..999999)
-                status = flat_status[rng.rand(0..flat_status.length-1)]
+                request_id = fake_request_id(rng)
+                status = flat_status.sample(random: rng)
                 list << fake_header_details(request_id, end_date, status)
               end
               list
@@ -509,7 +508,7 @@ module MAPI
           SQL
         end
 
-        def self.release_details(app, member_id, request_id)
+        def self.request_details(app, member_id, request_id)
           if should_fake?(app)
             header_details = fake_header_details(request_id, Time.zone.today, MAPIRequestStatus::AWAITING_AUTHORIZATION.first)
             securities = fake_securities(request_id, header_details['REQUEST_STATUS'])
@@ -578,9 +577,9 @@ module MAPI
           rng = Random.new(request_id)
           fake_data = fake('securities_release_request_details')
           names = fake_data['names']
-          pledge_type = TRANSACTION_CODE.values[rng.rand(0..1)]
-          request_status = SETTLEMENT_TYPE.values[rng.rand(0..1)]
-          delivery_type = DELIVERY_TYPE.values[rng.rand(0..3)]
+          pledge_type = TRANSACTION_CODE.values.sample(random: rng)
+          request_status = SETTLEMENT_TYPE.values.sample(random: rng)
+          delivery_type = DELIVERY_TYPE.values.sample(random: rng)
           aba_number = rng.rand(10000..99999)
           participant_number = rng.rand(10000..99999)
           account_number = rng.rand(10000..99999)
@@ -614,7 +613,7 @@ module MAPI
             'STATUS' => status,
             'SUBMITTED_DATE' => submitted_date,
             'SUBMITTED_BY' => created_by_name,
-            'AUTHORIZED_BY' => authorized ? names[rng.rand(0..names.length-1)] : nil,
+            'AUTHORIZED_BY' => authorized ? names.sample(random: rng) : nil,
             'AUTHORIZED_DATE' => authorized ? authorized_date : nil
           }
         end
@@ -626,13 +625,17 @@ module MAPI
           rng.rand(1..6).times do
             original_par = rng.rand(10000..999999)
             securities << {
-              'CUSIP' => fake_data['cusips'][rng.rand(0..5)],
-              'DESCRIPTION' => fake_data['descriptions'][rng.rand(0..5)],
+              'CUSIP' => fake_data['cusips'].sample(random: rng),
+              'DESCRIPTION' => fake_data['descriptions'].sample(random: rng),
               'ORIGINAL_PAR' => original_par,
               'PAYMENT_AMOUNT' => (original_par - (original_par/3) if settlement_type == SSKSettlementType::VS_PAYMENT)
             }
           end
           securities
+        end
+
+        def self.fake_request_id(rng)
+          rng.rand(100000..999999)
         end
 
         def self.authorize_request(app, member_id, request_id, user_name, full_name, session_id)

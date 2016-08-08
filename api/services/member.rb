@@ -987,25 +987,25 @@ module MAPI
             end
           end
           api do
-            key :path, '/{id}/securities/release/{header_id}'
+            key :path, '/{id}/securities/request/{header_id}'
             operation do
               key :method, 'GET'
-              key :summary, 'Retrieve the details of the release request and associated securities'
-              key :nickname, 'getSecurityReleaseRequestDetails'
+              key :summary, 'Retrieve the details of the request and associated securities'
+              key :nickname, 'getSecurityRequestDetails'
               key :type, :SecuritiesRelease
               parameter do
                 key :paramType, :path
                 key :name, :id
                 key :required, true
                 key :type, :string
-                key :description, 'The FHLB ID of the member institution requesting securities release'
+                key :description, 'The FHLB ID of the member institution requesting securities changes'
               end
               parameter do
                 key :paramType, :path
                 key :name, :header_id
                 key :required, true
                 key :type, :string
-                key :description, 'The header ID of the security release request'
+                key :description, 'The header ID of the security request'
               end
             end
           end
@@ -1457,8 +1457,8 @@ module MAPI
           end
         end
 
-        relative_get '/:id/securities/release/:request_id' do
-          MAPI::Services::Member::SecuritiesRequests.release_details(self, params[:id].to_i, params[:request_id].to_i).to_json
+        relative_get '/:id/securities/request/:request_id' do
+          MAPI::Services::Member::SecuritiesRequests.request_details(self, params[:id].to_i, params[:request_id].to_i).to_json
         end
 
         relative_put '/:id/securities/authorize' do

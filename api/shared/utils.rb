@@ -133,6 +133,10 @@ module MAPI
         def weekend_or_holiday?(date, holidays)
           date.saturday? || date.sunday? || holidays.include?(date)
         end
+
+        def flat_unique_array(array)
+          Array.wrap(array).flatten.uniq
+        end
       end
     end
   end
