@@ -1311,6 +1311,7 @@ en:
       make_request: make another request
     upload_errors:
       cannot_open: We couldn't open your file. Please verify that you've selected the correct file and try again.
+      unsupported_mime_type: Your file does not appear to be an Excel file. Please verify that you've selected the correct file and try again.
       generic: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
   reports:
     meta_title: FHLB - Reports

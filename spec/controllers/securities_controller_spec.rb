@@ -1460,6 +1460,10 @@ RSpec.describe SecuritiesController, type: :controller do
           error = MAPIService::Error.new(:security_upload, :unable_to_open)
           expect(subject.send(:human_error_messages, [error])).to eq(I18n.t('securities.upload_errors.cannot_open'))
         end
+        it 'returns the proper message when the error_code is `:unsupported_mime_type`' do
+          error = MAPIService::Error.new(:security_upload, :unsupported_mime_type)
+          expect(subject.send(:human_error_messages, [error])).to eq(I18n.t('securities.upload_errors.unsupported_mime_type'))
+        end
         it 'returns a generic upload error when passed an unknown error code' do
           error = MAPIService::Error.new(:security_upload, :foo)
           expect(subject.send(:human_error_messages, [error])).to eq(I18n.t('securities.upload_errors.generic'))

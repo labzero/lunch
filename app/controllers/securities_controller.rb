@@ -494,6 +494,8 @@ class SecuritiesController < ApplicationController
       case security_upload_error.code
         when :unable_to_open
           I18n.t('securities.upload_errors.cannot_open')
+        when :unsupported_mime_type
+          I18n.t('securities.upload_errors.unsupported_mime_type')
         else
           I18n.t('securities.upload_errors.generic')
       end
