@@ -1198,9 +1198,9 @@ en:
         dtc: DTC
         mutual_fund: Mutual Fund
         internal: Internal Transfer
-        delivery_agent: "Delivery Bank/Agent's Name"
+        delivery_agent: "Delivering Bank/Agent's Name"
         agent_name: "Receiving Bank/Agent's Name"
-        agent_address: "Receving Bank/Agent's Address"
+        agent_address: "Receiving Bank/Agent's Address"
         further_credit: For Further Credit to Account No.
         fed_wire_address: "Clearing Agent's Fed Wire Address:"
         aba: ABA No.
