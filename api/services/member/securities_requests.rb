@@ -96,6 +96,16 @@ module MAPI
         FED_AMOUNT_LIMIT = 50000000
         MAX_DATE_RESTRICTION = 3.months.freeze
 
+        module ADXAccountTypeMapping
+          SYMBOL_TO_STRING = { pledged: 'P', unpledged: 'U' }.freeze
+          STRING_TO_SYMBOL = Hash[SYMBOL_TO_STRING.to_a.map {|t| t = t.reverse}]
+          SYMBOL_TO_SQL_COLUMN_NAME = { pledged: 'PLEDGED_ADX_ID', unpledged: 'UNPLEDGED_ADX_ID' }.freeze
+          SYMBOL_TO_SSK_FORM_TYPE = { pledged_intake: SSKFormType::SECURITIES_PLEDGED,
+                                      pledged_release: SSKFormType::SECURITIES_RELEASE,
+                                      unpledged_intake: SSKFormType::SAFEKEPT_DEPOSIT,
+                                      unpledged_release: SSKFormType::SAFEKEPT_RELEASE }
+        end
+
         def self.requests_query(member_id, status_array, date_range)
           quoted_statuses = status_array.collect { |status| quote(status) }.join(',')
           <<-SQL
@@ -156,7 +166,8 @@ module MAPI
           end
         end
 
-        def self.insert_release_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
+        def self.insert_release_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values, adx_type)
+          adx_type_release = "#{adx_type}_release".to_sym
           now = Time.zone.today
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
@@ -174,7 +185,7 @@ module MAPI
                                                          LAST_MODIFIED_BY,
                                                          LAST_MODIFIED_DATE,
                                                          LAST_MODIFIED_BY_NAME,
-                                                         PLEDGED_ADX_ID,
+                                                         #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]},
                                                          #{delivery_columns.join(', ')}
                                                         )
             VALUES (#{quote(header_id)},
@@ -185,7 +196,7 @@ module MAPI
                     #{quote(SETTLEMENT_TYPE[broker_instructions['settlement_type']])},
                     #{quote(broker_instructions['settlement_date'])},
                     #{quote(DELIVERY_TYPE[delivery_type])},
-                    #{quote(SSKFormType::SECURITIES_RELEASE)},
+                    #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[adx_type_release])},
                     #{quote(now)},
                     #{quote(format_username(user_name))},
                     #{quote(full_name)},
@@ -235,7 +246,7 @@ module MAPI
             WHERE ADX.BAT_ID = BAT.BAT_ID
             AND ADX.CP_ID = CP.CP_ID
             AND CP.FHLB_ID = #{quote(member_id)}
-            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = #{quote(type)}
+            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = #{quote(ADXAccountTypeMapping::SYMBOL_TO_STRING[type])}
             AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
             AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
             ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
@@ -369,7 +380,8 @@ module MAPI
           }
         end
 
-        def self.update_request_header_details_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values)
+        def self.update_request_header_details_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values, adx_type)
+          adx_type_release = "#{adx_type}_release".to_sym
           <<-SQL
             UPDATE SAFEKEEPING.SSK_WEB_FORM_HEADER SET
               PLEDGE_TYPE           = #{quote(TRANSACTION_CODE[broker_instructions['transaction_code']])},
@@ -377,11 +389,11 @@ module MAPI
               REQUEST_STATUS        = #{quote(SETTLEMENT_TYPE[broker_instructions['settlement_type']])},
               SETTLE_DATE           = #{quote(broker_instructions['settlement_date'])},
               DELIVER_TO            = #{quote(DELIVERY_TYPE[delivery_type])},
-              FORM_TYPE             = #{quote(SSKFormType::SECURITIES_RELEASE)},
+              FORM_TYPE             = #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[adx_type_release])},
               LAST_MODIFIED_BY      = #{quote(format_modification_by(user_name, session_id))},
               LAST_MODIFIED_DATE    = #{quote(Time.zone.today)},
               LAST_MODIFIED_BY_NAME = #{quote(full_name)},
-              PLEDGED_ADX_ID        = #{quote(adx_id)},
+              #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]} = #{quote(adx_id)},
               #{delivery_columns.each_with_index.collect{|column_name, i| "#{column_name} = #{delivery_values[i]}"}.join(', ') }
             WHERE HEADER_ID = #{quote(header_id)}
             AND FHLB_ID = #{quote(member_id)}
@@ -420,8 +432,12 @@ module MAPI
           unless should_fake?(app)
             header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
             ActiveRecord::Base.transaction do
-              adx_id = execute_sql_single_result(app, adx_query(member_id, securities.first['custody_account_type'].to_s.upcase), "Pledged ADX ID")
-              insert_header_sql = insert_release_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions, processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values])
+              adx_type = ADXAccountTypeMapping::STRING_TO_SYMBOL[securities.first['custody_account_type'].to_s.upcase]
+              adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), "Pledged ADX ID")
+              insert_header_sql = insert_release_header_query(member_id, header_id, user_name, full_name, session_id,
+                                                              adx_id, processed_delivery_instructions[:delivery_columns],
+                                                              broker_instructions, processed_delivery_instructions[:delivery_type],
+                                                              processed_delivery_instructions[:delivery_values], adx_type)
               raise "failed to insert security release request header" unless execute_sql(app.logger, insert_header_sql)
               securities.each do |security|
                 ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
@@ -445,7 +461,8 @@ module MAPI
             ActiveRecord::Base.transaction(isolation: :read_committed) do
               cusips = securities.collect{|x| x['cusip']}
               raise MAPI::Shared::Errors::SQLError, 'Failed to delete old security release request detail by CUSIP' unless execute_sql(app.logger, delete_request_securities_by_cusip_query(request_id, cusips))
-              adx_id = execute_sql_single_result(app, adx_query(member_id, securities.first['custody_account_type'].to_s.upcase), 'Pledged ADX ID')
+              adx_type = get_adx_type_from_security(app, securities.first)
+              adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), 'Get ADX ID from ADX Type')
               existing_securities = format_securities(fetch_hashes(app.logger, release_request_securities_query(request_id)))
               securities.each do |security|
                 existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
@@ -463,7 +480,9 @@ module MAPI
               raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless existing_header
               existing_header = map_hash_values(existing_header, RELEASE_REQUEST_HEADER_MAPPING)
               if header_has_changed(existing_header, broker_instructions, original_delivery_instructions)
-                update_header_sql = update_request_header_details_query(member_id, request_id, user_name, full_name, session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions, processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values])
+                update_header_sql = update_request_header_details_query(member_id, request_id, user_name, full_name,
+                  session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions,
+                  processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values], adx_type)
                 header_update_count = execute_sql(app.logger, update_header_sql).to_i
                 raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless header_update_count == 1
               end
@@ -686,6 +705,20 @@ module MAPI
             end
           end
           header_delete_count > 0
+        end
+
+        def self.get_adx_type_from_security(app, security)
+          raise ArgumentError, 'security must not be nil' unless security
+          if should_fake?(app)
+            ADXAccountTypeMapping::SYMBOL_TO_STRING.keys.sample(random: Random.new(security['cusip'].bytes.inject(0, :+)))
+          else
+            account_type_query = <<-SQL
+              SELECT ACCOUNT_TYPE
+              FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
+              WHERE SSK_CUSIP = #{quote(security['cusip'])}
+            SQL
+            ADXAccountTypeMapping::STRING_TO_SYMBOL[execute_sql_single_result(app, account_type_query, 'Get ADX type for a security')]
+          end
         end
       end
     end
