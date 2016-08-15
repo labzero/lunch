@@ -1991,10 +1991,16 @@ class ReportsController < ApplicationController
       else
         activity[:maturity_date]
       end
+      # We display :termination_par instead of :current_par for Advance Amortized Today. It is a known issue that the column header is mislabeled in this instance.
+      amount = if activity[:instrument_type] == 'ADVANCE' && activity[:status] == 'TERMINATED' && activity[:product] == 'AMORTIZING'
+        activity[:termination_par]
+      else
+        activity[:current_par]
+      end
       rows << {
         columns:[
           {value: activity[:transaction_number]},
-          {type: :number, value: activity[:current_par]},
+          {type: :number, value: amount},
           {type: :index, value: activity[:interest_rate]},
           {type: :date, value: activity[:funding_date]},
           {type: (:date if maturity_date.is_a?(Date)), value: maturity_date},
