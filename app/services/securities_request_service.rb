@@ -36,8 +36,8 @@ class SecuritiesRequestService < MAPIService
     !!request_id
   end
 
-  def submitted_release(request_id)
-    response_hash = get_hash(:submitted_release, "/member/#{member_id}/securities/release/#{request_id}")
+  def submitted_request(request_id)
+    response_hash = get_hash(:submitted_request, "/member/#{member_id}/securities/request/#{request_id}")
     if response_hash
       securities_release_hash = map_response_to_securities_release_hash(response_hash)
       SecuritiesReleaseRequest.from_hash(securities_release_hash)

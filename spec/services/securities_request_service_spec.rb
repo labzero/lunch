@@ -167,37 +167,37 @@ describe SecuritiesRequestService do
     end
   end
 
-  describe '`submitted_release`' do
+  describe '`submitted_request`' do
     let(:request_id) { SecureRandom.hex }
     let(:response_hash) { instance_double(Hash) }
     let(:mapped_hash) { instance_double(Hash) }
-    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest) }
-    let(:call_method) { subject.submitted_release(request_id) }
+    let(:securities_request) { instance_double(SecuritiesReleaseRequest) }
+    let(:call_method) { subject.submitted_request(request_id) }
 
-    it_behaves_like 'a MAPI backed service object method', :submitted_release, SecureRandom.hex
+    it_behaves_like 'a MAPI backed service object method', :submitted_request, SecureRandom.hex
 
     describe 'with MAPI call stubbed' do
       before do
         allow(subject).to receive(:get_hash).and_return(response_hash)
         allow(subject).to receive(:map_response_to_securities_release_hash).and_return(mapped_hash)
-        allow(SecuritiesReleaseRequest).to receive(:from_hash).and_return(securities_release_request)
+        allow(SecuritiesReleaseRequest).to receive(:from_hash).and_return(securities_request)
       end
 
-      it 'calls `get_hash` with `:submitted_release` as an argument' do
-        expect(subject).to receive(:get_hash).with(:submitted_release, any_args).and_return(response_hash)
+      it 'calls `get_hash` with `:submitted_request` as an argument' do
+        expect(subject).to receive(:get_hash).with(:submitted_request, any_args).and_return(response_hash)
         call_method
       end
-      it 'calls `get_hash` with "/member/#{member_id}/securities/release/#{request_id}" as the endpoint argument' do
-        endpoint = "/member/#{member_id}/securities/release/#{request_id}"
+      it 'calls `get_hash` with "/member/#{member_id}/securities/request/#{request_id}" as the endpoint argument' do
+        endpoint = "/member/#{member_id}/securities/request/#{request_id}"
         expect(subject).to receive(:get_hash).with(anything, endpoint).and_return(response_hash)
         call_method
       end
-      it 'calls `map_response_to_securities_release_hash` with the returned securities release request' do
-        expect(subject).to receive(:map_response_to_securities_release_hash).with(response_hash).and_return(securities_release_request)
+      it 'calls `map_response_to_securities_release_hash` with the returned securities request' do
+        expect(subject).to receive(:map_response_to_securities_release_hash).with(response_hash).and_return(securities_request)
         call_method
       end
-      it 'returns the mapped securities release request' do
-        expect(call_method).to eq(securities_release_request)
+      it 'returns the mapped securities request' do
+        expect(call_method).to eq(securities_request)
       end
     end
   end

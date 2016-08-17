@@ -65,6 +65,7 @@ When(/^I enter "([^"]*)" for the (email|email confirmation|first name|last name|
   attribute = attribute_for_user_field(field)
 
   step %{I enter "#{value}" into the "input[name=\"user[#{attribute}]\"]" input field}
+  page.find('.settings-users-overlay h3').click # to change focus
 end
 
 When(/^I submit the edit user form$/) do

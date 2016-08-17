@@ -1416,6 +1416,7 @@ RSpec.describe ReportsController, :type => :controller do
       let(:exercised_advance) { {instrument_type: 'ADVANCE', status: 'EXERCISED', termination_full_partial: double('termination_full_partial'), interest_rate: double('interest_rate')} }
       let(:exercised_lc) { {instrument_type: 'LC', status: 'EXERCISED', termination_full_partial: double('termination_full_partial'), interest_rate: double('interest_rate')} }
       let(:terminated_advance) { {instrument_type: 'ADVANCE', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+      let(:amortizing_advance) { {instrument_type: 'ADVANCE', status: 'TERMINATED', product: 'AMORTIZING', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
       let(:todays_credit_activity) { subject.todays_credit_activity }
       let(:non_exercised_advance) { {instrument_type: 'ADVANCE', sub_product: 'Open VRC'} }
       let(:non_exercised_activity) { {instrument_type: double('instrument_type')} }
@@ -1487,6 +1488,11 @@ RSpec.describe ReportsController, :type => :controller do
           todays_credit
           expect(assigns[:todays_credit][:rows][0][:columns][4][:value]).to eq(I18n.t('global.open'))
           expect(assigns[:todays_credit][:rows][0][:columns][4][:type]).to be_nil
+        end
+        it 'sets the the second value in the @todays_credit row attribue to the `termination_par` if the advance is amortizing today' do
+          allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([amortizing_advance])
+          todays_credit
+          expect(assigns[:todays_credit][:rows][0][:columns][1][:value]).to eq(amortizing_advance[:termination_par])
         end
       end
       describe 'with the report disabled' do

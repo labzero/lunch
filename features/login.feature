@@ -170,7 +170,8 @@ Scenario: User can change institutions via the link in nav header
   And I should see the member bank selector submit button disabled
   When I select the 1st member bank
   Then I should see dashboard modules
-  When I click on the switch link in the nav
+  When I wait for the dashboard to fully load
+  And I click on the switch link in the nav
   Then I should see the member bank selector
 
 @smoke @jira-mem-1401 @flip-on-report-profile

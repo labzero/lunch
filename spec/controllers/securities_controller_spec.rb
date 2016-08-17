@@ -312,7 +312,7 @@ RSpec.describe SecuritiesController, type: :controller do
     allow_policy :security, :authorize?
     let(:request_id) { SecureRandom.hex }
     let(:securities_release_request) { instance_double(SecuritiesReleaseRequest) }
-    let(:service) { instance_double(SecuritiesRequestService, submitted_release: securities_release_request) }
+    let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_release_request) }
     let(:call_action) { get :view_release, request_id: request_id }
 
     before do
@@ -325,7 +325,7 @@ RSpec.describe SecuritiesController, type: :controller do
     it_behaves_like 'an authorization required method', :get, :view_release, :security, :authorize?, request_id: SecureRandom.hex
 
     it 'raises an ActionController::RoutingError if the service object returns nil' do
-      allow(service).to receive(:submitted_release)
+      allow(service).to receive(:submitted_request)
       expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#authorize_release has encountered nil. Check error logs.')
     end
     it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
@@ -336,8 +336,8 @@ RSpec.describe SecuritiesController, type: :controller do
       expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(service)
       call_action
     end
-    it 'calls `submitted_release` on the `SecuritiesRequestService` instance with the `request_id`' do
-      expect(service).to receive(:submitted_release).with(request_id)
+    it 'calls `submitted_request` on the `SecuritiesRequestService` instance with the `request_id`' do
+      expect(service).to receive(:submitted_request).with(request_id)
       call_action
     end
     it 'sets `@securities_release_request` to the result of `SecuritiesRequestService#request_id`' do
@@ -506,6 +506,8 @@ RSpec.describe SecuritiesController, type: :controller do
     let(:description) { SecureRandom.hex }
     let(:original_par) { rand(1000..1000000) }
     let(:payment_amount) { rand(1000..1000000) }
+    let(:error) { instance_double(MAPIService::Error) }
+    let(:error_message) { SecureRandom.hex }
     let(:securities_rows) {[
       ['cusip', 'description', 'original par', 'settlement amount'],
       [cusip, description, original_par, payment_amount]
@@ -522,6 +524,7 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(controller).to receive(:populate_securities_table_data_view_variable)
       allow(controller).to receive(:render_to_string)
       allow(Security).to receive(:from_hash).and_return(security)
+      allow(controller).to receive(:human_error_messages).and_return(error_message)
     end
 
     it_behaves_like 'a user required action', :post, :upload_securities
@@ -583,36 +586,38 @@ RSpec.describe SecuritiesController, type: :controller do
       call_action
       expect(parsed_response_body[:form_data]).to eq(sample_securities_upload_array.to_json)
     end
-    it 'returns a json object with a nil value for `error`' do
+    it 'returns a json object with a nil value for `errors`' do
       call_action
-      expect(parsed_response_body[:error]).to be_nil
+      expect(parsed_response_body[:errors]).to be_nil
     end
     describe 'when the uploaded file does not contain a header row with `CUSIP` as a value' do
       let(:call_action) { post :upload_securities, file: headerless_file, type: :release }
-      it 'returns a 400' do
-        call_action
-        expect(response.status).to eq(400)
-      end
       it 'renders a json object with a nil value for `html`' do
         call_action
         expect(parsed_response_body[:html]).to be_nil
       end
-      it 'renders a json object with an error message' do
+      it 'calls `human_upload_error_message` with a `:no_header_row` security_upload error' do
+        allow(MAPIService::Error).to receive(:new).with(:security_upload, :no_header_row).and_return(error)
+        expect(controller).to receive(:human_error_messages).with([error]).and_return(error_message)
         call_action
-        expect(parsed_response_body[:error]).to eq('No header row found')
+      end
+      it 'renders a json object with a error messages' do
+        call_action
+        expect(parsed_response_body[:errors]).to eq(error_message)
       end
     end
     describe 'when the MIME type of the uploaded file is not in the list of accepted types' do
       let(:incorrect_mime_type) { fixture_file_upload('sample-securities-upload.xlsx', 'text/html') }
       let(:call_action) { post :upload_securities, file: incorrect_mime_type, type: :release }
       let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
-      it 'returns a 415' do
+      it 'calls `human_upload_error_message` with a `:unsupported_mime_type` security_upload error' do
+        allow(MAPIService::Error).to receive(:new).with(:security_upload, :unsupported_mime_type).and_return(error)
+        expect(controller).to receive(:human_error_messages).with([error]).and_return(error_message)
         call_action
-        expect(response.status).to eq(415)
       end
-      it 'renders a json object with an error message' do
+      it 'renders a json object with a error messages' do
         call_action
-        expect(parsed_response_body[:error]).to eq('Uploaded file has unsupported MIME type: text/html')
+        expect(parsed_response_body[:errors]).to eq(error_message)
       end
       it 'renders a json object with a nil value for `html`' do
         call_action
@@ -627,13 +632,14 @@ RSpec.describe SecuritiesController, type: :controller do
       no_securities = excel_fixture_file_upload('sample-empty-securities-upload.xlsx')
       let(:call_action) { post :upload_securities, file: no_securities, type: :release }
       let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
-      it 'returns a 400' do
+      it 'calls `human_upload_error_message` with a `:no_securities` security_upload error' do
+        allow(MAPIService::Error).to receive(:new).with(:security_upload, :no_securities).and_return(error)
+        expect(controller).to receive(:human_error_messages).with([error]).and_return(error_message)
         call_action
-        expect(response.status).to eq(400)
       end
-      it 'renders a json object with an error message' do
+      it 'renders a json object with a error messages' do
         call_action
-        expect(parsed_response_body[:error]).to eq('No securities found')
+        expect(parsed_response_body[:errors]).to eq(error_message)
       end
       it 'renders a json object with a nil value for `html`' do
         call_action
@@ -642,6 +648,29 @@ RSpec.describe SecuritiesController, type: :controller do
       it 'renders a json object with a nil value for `form_data`' do
         call_action
         expect(parsed_response_body[:form_data]).to be_nil
+      end
+    end
+    [ArgumentError, IOError, Zip::ZipError].each do |error_klass|
+      describe "when opening the file raises a `#{error_klass}`" do
+        before { allow(Roo::Spreadsheet).to receive(:open).and_raise(error_klass) }
+
+        it 'calls `human_upload_error_message` with a `:unable_to_open` security_upload error' do
+          allow(MAPIService::Error).to receive(:new).with(:security_upload, :unable_to_open).and_return(error)
+          expect(controller).to receive(:human_error_messages).with([error]).and_return(error_message)
+          call_action
+        end
+        it 'renders a json object with a error messages' do
+          call_action
+          expect(parsed_response_body[:errors]).to eq(error_message)
+        end
+        it 'renders a json object with a nil value for `html`' do
+          call_action
+          expect(parsed_response_body[:html]).to be_nil
+        end
+        it 'renders a json object with a nil value for `form_data`' do
+          call_action
+          expect(parsed_response_body[:form_data]).to be_nil
+        end
       end
     end
   end
@@ -1412,6 +1441,32 @@ RSpec.describe SecuritiesController, type: :controller do
           it 'includes all weekends between the today and the max date' do
             expect(call_method[:invalid_dates]).to include(*weekends)
           end
+        end
+      end
+    end
+
+    describe '`human_error_messages`' do
+      let(:call_method) { subject.send(:human_error_messages, [error]) }
+
+      describe 'when the errors array only contains an unknown error' do
+        let(:error) { MAPIService::Error.new(:foo, :bar) }
+
+        it 'returns a generic error message if passed an empty array' do
+          expect(call_method).to eq(I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text))
+        end
+      end
+      describe 'when the errors array contains a `:security_upload` error' do
+        it 'returns the proper message when the error_code is `:unable_to_open`' do
+          error = MAPIService::Error.new(:security_upload, :unable_to_open)
+          expect(subject.send(:human_error_messages, [error])).to eq(I18n.t('securities.upload_errors.cannot_open'))
+        end
+        it 'returns the proper message when the error_code is `:unsupported_mime_type`' do
+          error = MAPIService::Error.new(:security_upload, :unsupported_mime_type)
+          expect(subject.send(:human_error_messages, [error])).to eq(I18n.t('securities.upload_errors.unsupported_mime_type'))
+        end
+        it 'returns a generic upload error when passed an unknown error code' do
+          error = MAPIService::Error.new(:security_upload, :foo)
+          expect(subject.send(:human_error_messages, [error])).to eq(I18n.t('securities.upload_errors.generic'))
         end
       end
     end

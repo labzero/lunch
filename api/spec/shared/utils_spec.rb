@@ -442,4 +442,19 @@ describe MAPI::Shared::Utils::ClassMethods do
       expect(call_method).to be false
     end
   end
+
+  describe '`flat_unique_array` method' do
+    it 'wraps the argument in an array if its not already an array' do
+      value = double('A Value')
+      expect(subject.flat_unique_array(value)).to eq([value])
+    end
+    it 'flattens the array' do
+      array = [1, [2, 3], [4, 5, [6, 7]]]
+      expect(subject.flat_unique_array(array)).to eq(array.flatten)
+    end
+    it 'removes duplicate entries from the array after flattening' do
+      array = [1, [2, 3], [4, 5, [6, 7, 3, 4]]]
+      expect(subject.flat_unique_array(array)).to eq([1, 2, 3, 4, 5, 6, 7])
+    end
+  end
 end

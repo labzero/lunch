@@ -3,7 +3,11 @@ require 'spec_helper'
 describe MAPI::ServiceApp do
   include MAPI::Shared::Utils
   describe 'Securities Requests' do
+    let(:adx_type) { [:pledged, :unpledged].sample }
+    let(:adx_type_string) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_STRING[adx_type] }
+    let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE["#{adx_type}_release".to_sym] }
     securities_request_module = MAPI::Services::Member::SecuritiesRequests
+
     describe 'GET `/securities/requests`' do
       let(:response) { double('response', to_json: nil) }
       let(:call_endpoint) { get "/member/#{member_id}/securities/requests"}
@@ -54,25 +58,18 @@ describe MAPI::ServiceApp do
 
       describe 'when using fake data' do
         names = fake('securities_release_request_details')['names']
-        let(:rng) { instance_double(Random) }
-        let(:status_offset) { rand(0..1) }
-        let(:submit_offset) { rand(0..4) }
-        let(:authorized_offset) { rand(0..2) }
+        let(:rng) { instance_double(Random, rand: 1) }
         let(:request_id) { rand(100000..999999) }
-        let(:form_type) { rand(70..73) }
-        let(:submitted_date) { Time.zone.today - submit_offset.days }
-        let(:authorized_date) { submitted_date + authorized_offset.days }
-        let(:submitted_by_offset) { rand(0..names.length-1) }
-        let(:authorized_by_offset) { rand(0..names.length-1) }
         before do
           allow(securities_request_module).to receive(:should_fake?).and_return(true)
           allow(Random).to receive(:new).and_return(rng)
-          allow(rng).to receive(:rand).and_return(1, request_id, status_offset)
+          allow(securities_request_module).to receive(:fake_request_id).with(rng).and_return(request_id)
+          allow(securities_request_module).to receive(:fake_header_details).and_return({})
         end
 
         it 'constructs a list of request objects' do
           n = rand(1..7)
-          allow(rng).to receive(:rand).with(1..7).and_return(n)
+          allow(rng).to receive(:rand).with(eq(1..7)).and_return(n)
           expect(call_method.length).to eq(n)
         end
         it 'passes the `request_id` to the `fake_header_details` method' do
@@ -84,7 +81,11 @@ describe MAPI::ServiceApp do
           call_method
         end
         it 'passes the `status` to the `fake_header_details` method' do
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, securities_request_module::MAPIRequestStatus::AUTHORIZED[status_offset]).and_return({})
+          status = double('A Status')
+          status_array = double('A Status Array')
+          allow(securities_request_module).to receive(:flat_unique_array).with(securities_request_module::MAPIRequestStatus::AUTHORIZED).and_return(status_array)
+          allow(status_array).to receive(:sample).with(random: rng).and_return(status)
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, status).and_return({})
           call_method
         end
       end
@@ -185,16 +186,15 @@ describe MAPI::ServiceApp do
                           'description' => SecureRandom.hex,
                           'original_par' => rand(1..40000) + rand.round(2),
                           'payment_amount' => rand(1..100000) + rand.round(2),
-                          'custody_account_type' => ['P', 'U'][rand(0..1)] } }
+                          'custody_account_type' => adx_type_string } }
       let(:required_delivery_keys) { [ 'a', 'b', 'c' ] }
       let(:delivery_columns) { MAPI::Services::Member::SecuritiesRequests.delivery_type_mapping(delivery_type).keys }
       let(:delivery_values) { MAPI::Services::Member::SecuritiesRequests.delivery_type_mapping(delivery_type).values }
-      let(:form_type) { MAPI::Services::Member::SecuritiesRequests::SSKFormType::SECURITIES_RELEASE }
       let(:user_name) {  SecureRandom.hex }
       let(:full_name) { SecureRandom.hex }
       let(:session_id) { SecureRandom.hex }
-      let(:adx_id) { rand(1000..10000) }
-      let(:ssk_id) { rand(1000..10000) }
+      let(:adx_id) { [1000..10000].sample }
+      let(:ssk_id) { [1000..10000].sample }
 
       describe '`delivery_keys_for_delivery_type`' do
         it 'returns the correct delivery types for `SSKDeliverTo::FED`' do
@@ -237,7 +237,8 @@ describe MAPI::ServiceApp do
                                                                                                     delivery_columns,
                                                                                                     broker_instructions,
                                                                                                     delivery_type,
-                                                                                                    delivery_values ) }
+                                                                                                    delivery_values,
+                                                                                                    adx_type ) }
         let(:sentinel) { SecureRandom.hex }
         let(:today) { Time.zone.today }
 
@@ -248,7 +249,7 @@ describe MAPI::ServiceApp do
 
         it 'expands delivery columns into the insert statement' do
           expect(call_method).to match(
-            /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+PLEDGED_ADX_ID,\s+#{delivery_columns.join(',\s+')}/)
+            /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]},\s+#{delivery_columns.join(',\s+')}/)
         end
 
         it 'sets the `header_id`' do
@@ -548,12 +549,11 @@ describe MAPI::ServiceApp do
       end
 
       describe '`adx_query`' do
-        let(:adx_type) { ['P', 'U'].sample }
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.adx_query(member_id, adx_type) }
 
         before do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(member_id).and_return(member_id)
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(adx_type).and_return(adx_type)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(adx_type_string).and_return(adx_type_string)
         end
 
         it 'constructs the appropriate sql' do
@@ -563,7 +563,7 @@ describe MAPI::ServiceApp do
             WHERE ADX.BAT_ID = BAT.BAT_ID
             AND ADX.CP_ID = CP.CP_ID
             AND CP.FHLB_ID = #{member_id}
-            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = #{adx_type}
+            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = #{adx_type_string}
             AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
             AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
             ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
@@ -643,12 +643,11 @@ describe MAPI::ServiceApp do
           MAPI::Services::Member::SecuritiesRequests.delivery_keys_for_delivery_type(delivery_type).map do |key|
             [key, SecureRandom.hex]
           end.to_h.merge('delivery_type' => delivery_type) }
-        let(:adx_type) { ['P', 'U'].sample }
         let(:security) { { 'cusip' => instance_double(String),
                            'description' => instance_double(String),
                            'original_par' => rand(0...50000000),
                            'payment_amount' => instance_double(Numeric),
-                           'custody_account_type' => adx_type } }
+                           'custody_account_type' => adx_type_string } }
         let(:securities) { [ security, security, security ]}
         let(:method_params) { [ app,
                                 member_id,
@@ -747,7 +746,8 @@ describe MAPI::ServiceApp do
                 delivery_columns,
                 broker_instructions,
                 delivery_type,
-                delivery_values)
+                delivery_values,
+                adx_type)
               call_method
             end
 
@@ -773,7 +773,8 @@ describe MAPI::ServiceApp do
                 delivery_columns,
                 broker_instructions,
                 delivery_type,
-                delivery_values).and_return(insert_header_sql)
+                delivery_values,
+                adx_type).and_return(insert_header_sql)
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_security_query).with(next_id,
                 next_id, user_name, session_id, security, ssk_id).exactly(3).times.and_return(insert_security_sql)
             end
@@ -811,26 +812,26 @@ describe MAPI::ServiceApp do
         end
       end
     end
-    describe 'GET securities/release/%{request_id}' do
+    describe 'GET securities/request/%{request_id}' do
       let(:request_id) { rand(1000..99999) }
       let(:response) { instance_double(Hash, to_json: nil) }
-      let(:call_endpoint) { get "/member/#{member_id}/securities/release/#{request_id}"}
+      let(:call_endpoint) { get "/member/#{member_id}/securities/request/#{request_id}"}
       before do
-        allow(securities_request_module).to receive(:release_details).and_return(response)
+        allow(securities_request_module).to receive(:request_details).and_return(response)
       end
-      it 'calls `MAPI::Services::Member::SecuritiesRequests.release_details` with an instance of the MAPI::Service app' do
-        expect(securities_request_module).to receive(:release_details).with(an_instance_of(MAPI::ServiceApp), any_args)
+      it 'calls `MAPI::Services::Member::SecuritiesRequests.request_details` with an instance of the MAPI::Service app' do
+        expect(securities_request_module).to receive(:request_details).with(an_instance_of(MAPI::ServiceApp), any_args)
         call_endpoint
       end
-      it 'calls `MAPI::Services::Member::SecuritiesRequests.release_details` with the `member_id` param' do
-        expect(securities_request_module).to receive(:release_details).with(anything, member_id, any_args)
+      it 'calls `MAPI::Services::Member::SecuritiesRequests.request_details` with the `member_id` param' do
+        expect(securities_request_module).to receive(:request_details).with(anything, member_id, any_args)
         call_endpoint
       end
-      it 'calls `MAPI::Services::Member::SecuritiesRequests.release_details` with the `request_id` param' do
-        expect(securities_request_module).to receive(:release_details).with(anything, anything, request_id)
+      it 'calls `MAPI::Services::Member::SecuritiesRequests.request_details` with the `request_id` param' do
+        expect(securities_request_module).to receive(:request_details).with(anything, anything, request_id)
         call_endpoint
       end
-      it 'returns the results of `MAPI::Services::Member::SecuritiesRequests.release_details` as JSON' do
+      it 'returns the results of `MAPI::Services::Member::SecuritiesRequests.request_details` as JSON' do
         json_response = SecureRandom.hex
         allow(response).to receive(:to_json).and_return(json_response)
         call_endpoint
@@ -875,7 +876,7 @@ describe MAPI::ServiceApp do
       end
     end
 
-    describe '`MAPI::Services::Member::SecuritiesRequests.release_details`' do
+    describe '`MAPI::Services::Member::SecuritiesRequests.request_details`' do
       let(:request_id) { rand(1000..99999) }
       let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
       let(:header_details) {{
@@ -885,7 +886,7 @@ describe MAPI::ServiceApp do
       }}
       let(:security) { instance_double(Hash) }
       let(:securities) { [security] }
-      let(:call_method) { securities_request_module.release_details(app, member_id, request_id) }
+      let(:call_method) { securities_request_module.request_details(app, member_id, request_id) }
 
       before do
         allow(securities_request_module).to receive(:fake_securities).and_return(securities)
@@ -1263,37 +1264,40 @@ describe MAPI::ServiceApp do
     end
 
     describe '`MAPI::Services::Member::SecuritiesRequests.fake_securities`' do
-      fake_data = fake('securities_release_request_details')
-      let(:request_id) { rand(1000..9999)}
+      let(:request_id) { rand(1000..9999) }
       let(:settlement_type) { securities_request_module::SETTLEMENT_TYPE.values.sample }
-      let(:rng) { instance_double(Random) }
-      let(:original_par) { rand(10000..99999) }
-      let(:cusip_offset) { rand(0..5) }
-      let(:description_offset) { rand(0..5) }
+      let(:rng) { instance_double(Random, rand: 1) }
+      let(:fake_data) { securities_request_module.fake('securities_release_request_details') }
+      let(:original_par) { rand(10000..999999) }
+      let(:cusip) { fake_data['cusips'].sample }
+      let(:description) { fake_data['descriptions'].sample }
 
       let(:call_method) { securities_request_module.fake_securities(request_id, settlement_type) }
       before do
+        allow(securities_request_module).to receive(:fake).with('securities_release_request_details').and_return(fake_data)
         allow(Random).to receive(:new).and_return(rng)
-        allow(rng).to receive(:rand).and_return(1, original_par, cusip_offset, description_offset)
+        allow(rng).to receive(:rand).with(eq(10000..999999)).and_return(original_par)
+        allow(fake_data['cusips']).to receive(:sample).with(random: rng).and_return(cusip)
+        allow(fake_data['descriptions']).to receive(:sample).with(random: rng).and_return(description)
       end
 
       it 'constructs an array of securities' do
         n = rand(1..6)
-        allow(rng).to receive(:rand).with(1..6).and_return(n)
+        allow(rng).to receive(:rand).with(eq(1..6)).and_return(n)
         expect(call_method.length).to eq(n)
       end
       it 'constructs securities with a `CUSIP` value' do
         results = call_method
         expect(results.length).to be > 0
         results.each do |result|
-          expect(result['CUSIP']).to eq(fake_data['cusips'][cusip_offset])
+          expect(result['CUSIP']).to eq(cusip)
         end
       end
       it 'constructs securities with a `DESCRIPTION` value' do
         results = call_method
         expect(results.length).to be > 0
         results.each do |result|
-          expect(result['DESCRIPTION']).to eq(fake_data['descriptions'][description_offset])
+          expect(result['DESCRIPTION']).to eq(description)
         end
       end
       it 'constructs securities with an `ORIGINAL_PAR` value' do
@@ -1689,7 +1693,7 @@ describe MAPI::ServiceApp do
       let(:delivery_type) { securities_request_module::DELIVERY_TYPE.to_a.sample(1).to_h }
       let(:sentinel) { SecureRandom.hex }
       let(:today) { Time.zone.today }
-      let(:call_method) { securities_request_module.update_request_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type.keys.first, delivery_values) }
+      let(:call_method) { securities_request_module.update_request_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type.keys.first, delivery_values, adx_type) }
 
       before do
         allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex)
@@ -1725,7 +1729,7 @@ describe MAPI::ServiceApp do
         expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+DELIVER_TO\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
       it 'updates the `FORM_TYPE`' do
-        allow(securities_request_module).to receive(:quote).with(securities_request_module::SSKFormType::SECURITIES_RELEASE).and_return(sentinel)
+        allow(securities_request_module).to receive(:quote).with(form_type).and_return(sentinel)
         expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+FORM_TYPE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
       it 'updates the `LAST_MODIFIED_BY`' do
@@ -1740,9 +1744,9 @@ describe MAPI::ServiceApp do
         allow(securities_request_module).to receive(:quote).with(full_name).and_return(sentinel)
         expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY_NAME\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
-      it 'updates the `PLEDGED_ADX_ID`' do
+      it 'updates the `PLEDGED_ADX_ID` or `UNPLEDGED_ADX_ID` (depending on `adx_type`)' do
         allow(securities_request_module).to receive(:quote).with(adx_id).and_return(sentinel)
-        expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+PLEDGED_ADX_ID\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+        expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]}\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
       describe 'assigning `delivery_columns`' do
         2.times do |i|
@@ -1848,7 +1852,6 @@ describe MAPI::ServiceApp do
       let(:full_name) { instance_double(String) }
       let(:session_id) { instance_double(String) }
       let(:delivery_type) { instance_double(String) }
-      let(:adx_type) { ['P', 'U'].sample }
       let(:delivery_instructions) {{
         'delivery_type' => delivery_type,
         'account_number' => instance_double(String),
@@ -1870,7 +1873,7 @@ describe MAPI::ServiceApp do
         'description' => instance_double(String),
         'original_par' => instance_double(Numeric),
         'payment_amount' => instance_double(Numeric),
-        'custody_account_type' => adx_type
+        'custody_account_type' => adx_type_string
       }}
       let(:securities) { [security] }
       let(:call_method) { securities_request_module.update_release(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities) }
@@ -1959,9 +1962,15 @@ describe MAPI::ServiceApp do
           expect(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
           call_method
         end
+        it 'calls `get_adx_type_from_security` with the appropriate arguments' do
+          expect(securities_request_module).to receive(:get_adx_type_from_security).with(app, security)
+          call_method
+        end
         describe 'the transaction block' do
-          before { allow(ActiveRecord::Base).to receive(:transaction).and_yield }
-
+          before do
+            allow(ActiveRecord::Base).to receive(:transaction).and_yield
+            allow(securities_request_module).to receive(:get_adx_type_from_security).and_return(adx_type)
+          end
           it 'passes the `logger` whenever it calls `execute_sql`' do
             expect(securities_request_module).to receive(:execute_sql).with(app.logger, any_args)
             call_method
@@ -2002,10 +2011,6 @@ describe MAPI::ServiceApp do
             end
             it 'calls `execute_sql_single_result` with the results of `adx_query`' do
               expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, adx_query, any_args)
-              call_method
-            end
-            it 'calls `execute_sql_single_result` with `Pledged ADX ID`' do
-              expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, anything, 'Pledged ADX ID')
               call_method
             end
           end
@@ -2264,7 +2269,7 @@ describe MAPI::ServiceApp do
                   call_method
                 end
                 it 'constructs the `update_request_header_details_query` with the `delivery_values` from the processed delivery_instructions' do
-                  expect(securities_request_module).to receive(:update_request_header_details_query).with(anything, anything, anything, anything, anything, anything, anything, anything, anything, processed_delivery_instructions[:delivery_values])
+                  expect(securities_request_module).to receive(:update_request_header_details_query).with(anything, anything, anything, anything, anything, anything, anything, anything, anything, processed_delivery_instructions[:delivery_values], adx_type)
                   call_method
                 end
                 it 'calls `execute_sql` with the result of `update_request_header_details_query`' do
@@ -2515,6 +2520,82 @@ describe MAPI::ServiceApp do
         allow(ActiveRecord::Base.connection).to receive(:execute).with(authorization_query).and_return(0)
         expect(call_method).to be(false)
       end
+    end
+
+    describe '`get_adx_type_from_security` class method' do
+      let(:connection) { instance_double(ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter, execute: nil) }
+      let(:cusip) { SecureRandom.hex }
+      let(:security) { instance_double(Hash, :[] => cusip) }
+      let(:call_method) { MAPI::Services::Member::SecuritiesRequests.get_adx_type_from_security(app, security) }
+      let(:sql) {
+            <<-SQL
+              SELECT ACCOUNT_TYPE
+              FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
+              WHERE SSK_CUSIP = #{cusip}
+            SQL
+          }
+      let(:adx_type_string) { ['P', 'U'].sample }
+      before do
+        allow(ActiveRecord::Base).to receive(:connection).and_return(connection)
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(cusip)
+      end
+      it 'raises an `ArgumentError` if security is `nil`' do
+        expect { MAPI::Services::Member::SecuritiesRequests.get_adx_type_from_security(app, nil) }.to raise_error(ArgumentError, 'security must not be nil')
+      end
+      describe 'when `should_fake?` returns true' do
+        let(:cusip_bytes) { cusip.bytes }
+        let(:rng) { instance_double(Random) }
+        let(:seed) { cusip.bytes.inject(0, :+) }
+        let(:adx_pledge_types) { [ :pledged, :unpledged ] }
+        adx_mapping = { pledged: 'P', unpledged: 'U' }
+        before do
+          stub_const 'MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_STRING', adx_mapping
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(true)
+        end
+        it 'gets the bytes of the cusip' do
+          allow(security).to receive(:[]).with('cusip').and_return(cusip)
+          expect(cusip).to receive(:bytes).and_return(cusip_bytes)
+          call_method
+        end
+        it 'sums the bytes of the cusip' do
+          allow(cusip).to receive(:bytes).and_return(cusip_bytes)
+          expect(cusip_bytes).to receive(:inject).with(0, :+).and_return(seed)
+          call_method
+        end
+        it 'seeds a random number generator' do
+          allow(cusip_bytes).to receive(:inject).with(0, :+).and_return(seed)
+          expect(Random).to receive(:new).with(seed).and_return(rng)
+          call_method
+        end
+        it 'passes the rng to sample' do
+          allow(Random).to receive(:new).with(seed).and_return(rng)
+          allow(adx_mapping).to receive(:keys).and_return(adx_pledge_types)
+          expect(adx_pledge_types).to receive(:sample).with(random: rng)
+          call_method
+        end
+        it 'returns an random ADX type' do
+          expect(call_method).to eq(:pledged).or(eq(:unpledged))
+        end
+      end
+      describe 'when `should_fake?` returns false' do
+        before { allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(false) }
+        it 'calls `execute_sql_single_result` with the correct SQL' do
+          expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(anything, sql, 'Get ADX type for a security')
+          call_method
+        end
+        it 'returns the appropriate type mapping' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).and_return(adx_type_string)
+          expect(call_method).to eq(MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::STRING_TO_SYMBOL[adx_type_string])
+        end
+      end
+    end
+  end
+  describe '`fake_request_id` class method' do
+    it 'returns a random number between 100000 and 999999 using the supplied random number generator' do
+      value = double(Numeric)
+      rng = instance_double(Random)
+      allow(rng).to receive(:rand).with(100000..999999).and_return(value)
+      expect(MAPI::Services::Member::SecuritiesRequests.fake_request_id(rng)).to be(value)
     end
   end
 end

@@ -217,7 +217,7 @@
     @extend %dashboard-module-advances-icon-dollar;
   }
   .input-field-container {
-    input {
+    input:not([name^=securid]) {
       @extend %dashboard-module-advances-input;
     }
   }
