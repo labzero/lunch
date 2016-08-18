@@ -900,7 +900,7 @@ en:
         website:
           title: Portal Access
           access_manager: Portal Access Manager Set-up
-          securid: eTransact SecurID Token Application
+          securid: SecurID Token Application
       credit:
         title: Credit
         application: 'Credit Application: CIP and ACE'
