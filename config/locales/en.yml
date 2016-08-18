@@ -1180,7 +1180,7 @@ en:
       account_number:
         label: Account No.
       transaction_code:
-        label: Transcation Code
+        label: Transaction Code
         standard: Standard
         repo: Repo
       pledge_type:
