@@ -238,6 +238,10 @@ Then(/^I should see the generic error message for the securities release request
   page.assert_selector('.securities-submit-release-form-errors p', text: I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text), exact: true)
 end
 
+Then(/^I should see the error message for missing securities request information$/) do
+  page.assert_selector('.securities-submit-release-form-errors p', text: /^Missing a required field: /)
+end
+
 Then(/^Account Number should be disabled$/) do
   page.assert_selector('#securities_release_request_account_number[disabled]')
 end

@@ -163,7 +163,7 @@ module MAPI
             when 'physical_securities'
               [ 'delivery_bank_agent', 'receiving_bank_agent_name', 'receiving_bank_agent_address' ]
           else
-            raise MAPI::Shared::Errors::ValidationError.new("delivery_type must be one of the following values: #{DELIVERY_TYPE.keys.join(', ')}", 'invalid_delivery_instructions_delivery_type_key')
+            raise MAPI::Shared::Errors::InvalidFieldError.new("delivery_type must be one of the following values: #{DELIVERY_TYPE.keys.join(', ')}", :delivery_type, DELIVERY_TYPE.keys)
           end
         end
 
@@ -294,7 +294,7 @@ module MAPI
         def self.format_delivery_columns(delivery_type, required_delivery_keys, provided_delivery_keys)
           delivery_type_map = delivery_type_mapping(delivery_type)
           required_delivery_keys.map do |key|
-            raise MAPI::Shared::Errors::ValidationError.new("delivery_instructions must contain #{key}", "missing_delivery_instructions_#{key}_key") unless provided_delivery_keys.include?(key)
+            raise MAPI::Shared::Errors::MissingFieldError.new("delivery_instructions must contain #{key}", key, required_delivery_keys) unless provided_delivery_keys.include?(key)
             "#{delivery_type_map[key]}"
           end
         end
@@ -324,50 +324,51 @@ module MAPI
         end
 
         def self.validate_broker_instructions(broker_instructions, app)
-          raise MAPI::Shared::Errors::ValidationError.new('broker_instructions must be a non-empty hash', 'missing_broker_instructions') unless !broker_instructions.nil? && broker_instructions.is_a?(Hash) && !broker_instructions.empty?
+          raise MAPI::Shared::Errors::MissingFieldError.new('broker_instructions must be a non-empty hash', :broker_instructions) unless !broker_instructions.nil? && broker_instructions.is_a?(Hash) && !broker_instructions.empty?
           BROKER_INSTRUCTIONS_MAPPING.keys.each do |key|
-            raise MAPI::Shared::Errors::ValidationError.new("broker_instructions must contain a value for #{key}", "missing_broker_instructions_#{key}_key") unless broker_instructions[key]
+            raise MAPI::Shared::Errors::MissingFieldError.new("broker_instructions must contain a value for #{key}", key) unless broker_instructions[key]
           end
           { 'transaction_code' => TRANSACTION_CODE, 'settlement_type' => SETTLEMENT_TYPE }.each do |key, allowed_values|
             allowed_values = allowed_values.keys
-            raise MAPI::Shared::Errors::ValidationError.new("#{key.to_s} must be set to one of the following values: #{allowed_values.join(', ')}", "invalid_broker_instructions_#{key}_key") unless allowed_values.include?(broker_instructions[key])
+            raise MAPI::Shared::Errors::InvalidFieldError.new("#{key.to_s} must be set to one of the following values: #{allowed_values.join(', ')}", key, allowed_values) unless allowed_values.include?(broker_instructions[key])
           end
           broker_instructions['trade_date'] = dateify(broker_instructions['trade_date'])
           broker_instructions['settlement_date'] = dateify(broker_instructions['settlement_date'])
           validate_broker_instructions_date(app, broker_instructions['trade_date'], 'trade_date')
           validate_broker_instructions_date(app, broker_instructions['settlement_date'], 'settlement_date')
+          raise MAPI::Shared::Errors::CustomTypedFieldError.new('trade_date must be on or before settlement_date', :before_trade_date, :settlement_date) unless broker_instructions['trade_date'] <= broker_instructions['settlement_date']
         end
 
         def self.validate_broker_instructions_date(app, date, attr_name)
           today = Time.zone.today
           max_date = today + MAX_DATE_RESTRICTION
           holidays = MAPI::Services::Rates::Holidays.holidays(app, today, max_date)
-          raise MAPI::Shared::Errors::ValidationError.new("#{attr_name} must not be set to a weekend date or a bank holiday", "invalid_broker_instructions_#{attr_name}_key") if weekend_or_holiday?(date, holidays)
-          raise MAPI::Shared::Errors::ValidationError.new("#{attr_name} must not occur before today", "invalid_broker_instructions_#{attr_name}_key") unless date >= today
-          raise MAPI::Shared::Errors::ValidationError.new("#{attr_name} must not occur after after the 3 months from today", "invalid_broker_instructions_#{attr_name}_key") unless date <= max_date
+          raise MAPI::Shared::Errors::InvalidFieldError.new("#{attr_name} must not be set to a weekend date or a bank holiday", attr_name, :weekend_holiday) if weekend_or_holiday?(date, holidays)
+          raise MAPI::Shared::Errors::InvalidFieldError.new("#{attr_name} must not occur before today", attr_name, :past_date) unless date >= today
+          raise MAPI::Shared::Errors::InvalidFieldError.new("#{attr_name} must not occur after 3 months from today", attr_name, :future_date) unless date <= max_date
         end
 
         def self.validate_securities(securities, settlement_type, delivery_type)
-          raise MAPI::Shared::Errors::ValidationError.new('securities must be an array containing at least one security', 'missing_securities') unless !securities.nil? && securities.is_a?(Array) && !securities.empty?
+          raise MAPI::Shared::Errors::MissingFieldError.new('securities must be an array containing at least one security', :securities) unless !securities.nil? && securities.is_a?(Array) && !securities.empty?
           required_security_keys = REQUIRED_SECURITY_KEYS
           required_security_keys += ['payment_amount'] if settlement_type == 'vs_payment'
           securities.each do |security|
-            raise MAPI::Shared::Errors::ValidationError.new('each security must be a non-empty hash', 'missing_security') unless !security.nil? && security.is_a?(Hash) && !security.empty?
+            raise MAPI::Shared::Errors::MissingFieldError.new('each security must be a non-empty hash', :securities) unless !security.nil? && security.is_a?(Hash) && !security.empty?
             required_security_keys.each do |key|
-              raise MAPI::Shared::Errors::ValidationError.new("each security must consist of a hash containing a value for #{key}", "missing_security_#{key}_key") unless security[key]
+              raise MAPI::Shared::Errors::CustomTypedFieldError.new("each security must consist of a hash containing a value for #{key}", key, :securities) unless security[key]
             end
           end
           if delivery_type == 'fed'
             securities.each do |security|
-              raise MAPI::Shared::Errors::ValidationError.new("original par must be less than $#{FED_AMOUNT_LIMIT}", 'invalid_security_original_par_key') unless security['original_par'] < FED_AMOUNT_LIMIT
+              raise MAPI::Shared::Errors::CustomTypedFieldError.new("original par must be less than $#{FED_AMOUNT_LIMIT}", :original_par, :securities, FED_AMOUNT_LIMIT) unless security['original_par'] < FED_AMOUNT_LIMIT
             end
           end
         end
 
         def self.validate_delivery_instructions(delivery_instructions)
-          raise MAPI::Shared::Errors::ValidationError.new('delivery_instructions must be a non-empty hash', 'missing_delivery_instructions') unless !delivery_instructions.nil? && delivery_instructions.is_a?(Hash) && !delivery_instructions.empty?
+          raise MAPI::Shared::Errors::MissingFieldError.new('delivery_instructions must be a non-empty hash', :delivery_instructions) unless !delivery_instructions.nil? && delivery_instructions.is_a?(Hash) && !delivery_instructions.empty?
           delivery_type = delivery_instructions['delivery_type']
-          raise MAPI::Shared::Errors::ValidationError.new("delivery_instructions must contain the key delivery_type set to one of #{DELIVERY_TYPE.keys.join(', ')}", 'invalid_delivery_instructions_delivery_type_key') unless DELIVERY_TYPE.keys.include?(delivery_type)
+          raise MAPI::Shared::Errors::InvalidFieldError.new("delivery_instructions must contain the key delivery_type set to one of #{DELIVERY_TYPE.keys.join(', ')}", :delivery_type, DELIVERY_TYPE.keys) unless DELIVERY_TYPE.keys.include?(delivery_type)
         end
 
         def self.process_delivery_instructions(delivery_instructions)

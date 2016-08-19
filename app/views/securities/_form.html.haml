@@ -3,10 +3,9 @@
   = f.hidden_field(:request_id)
   = f.hidden_field(:trade_date)
   = f.hidden_field(:settlement_date)
-  - if @errors
+  - if @error_message
     .securities-submit-release-form-errors
-      - @errors.values.uniq.each do |message|
-        %p= message
+      %p= @error_message
   %section.securities-broker-instructions
     %h2= t('securities.release.broker_instructions')
     - if account_number

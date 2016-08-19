@@ -211,6 +211,24 @@ en:
       input: "As of %{date}"
       end_of: "End of %{date}"
       from_label: As of
+  activemodel:
+    errors:
+      models:
+        securities_release_request:
+          blank: 'Missing a required field: %{attribute}'
+          attributes:
+            base:
+              unknown: We were unable to add your securities request at this time.
+              submission: We were unable to add your securities request at this time.
+              authorization: We were unable to add your securities request at this time.
+            trade_date:
+              invalid: Trade date may not be a weekend or holiday
+            settlement_date:
+              invalid: Trade date may not be a weekend or holiday
+              before_trade_date: Settlement Date must be on or after Trade Date.
+            securities:
+              payment_amount: When 'Versus Payment' is selected, each security must have a settlement amount.
+              original_par: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
   activerecord:
     attributes:
       user:
@@ -1257,6 +1275,7 @@ en:
         generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number} or via %{email}
         no_payment_amount_error: When 'Versus Payment' is selected, each security must have a settlement amount.
         fed_fifty_m_error: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
+        settlement_date_error: Settlement Date must be on or after Trade Date.
     safekeep:
       title: Safekeep Securities
       delete_request:

@@ -142,16 +142,16 @@ class SecuritiesReleaseRequest
 
   def trade_date_must_come_before_settlement_date
     if trade_date && settlement_date
-      errors.add(:trade_date, "must come before 'settlement_date'") unless trade_date <= settlement_date
+      errors.add(:settlement_date, :before_trade_date) unless trade_date <= settlement_date
     end
   end
 
   def trade_date_within_range
-    errors.add(:trade_date, 'must not be a holiday, weekend, or in the past') unless date_within_range(trade_date)
+    errors.add(:trade_date, :invalid) unless !trade_date || date_within_range(trade_date)
   end
 
   def settlement_date_within_range
-    errors.add(:settlement_date, 'must not be a holiday, weekend, or in the past') unless date_within_range(settlement_date)
+    errors.add(:settlement_date, :invalid) unless !settlement_date ||  date_within_range(settlement_date)
   end
 
   def date_within_range(date)
@@ -162,14 +162,15 @@ class SecuritiesReleaseRequest
   end
 
   def securities_must_have_payment_amount
-    securities_clone = securities || []
-    has_payment_amount = !securities_clone.blank?
-    securities_clone.each do |security|
-      if security.payment_amount.blank?
-        has_payment_amount = false
-        break
+    unless securities.blank?
+      has_payment_amount = true
+      securities.each do |security|
+        if security.payment_amount.blank?
+          has_payment_amount = false
+          break
+        end
       end
+      errors.add(:securities, :payment_amount) unless has_payment_amount
     end
-    has_payment_amount
   end
 end

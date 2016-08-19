@@ -230,12 +230,12 @@ describe MAPI::ServiceApp do
             [ 'account_number', 'delivery_bank_agent', 'receiving_bank_agent_name', 'receiving_bank_agent_address' ])
         end
 
-        it 'raises a ValidationError if the `delivery_type` is not recognized' do
+        it 'raises an InvalidFieldError if the `delivery_type` is not recognized' do
           delivery_type = SecureRandom.hex
           expect{MAPI::Services::Member::SecuritiesRequests.delivery_keys_for_delivery_type(delivery_type)}.to raise_error(
-            MAPI::Shared::Errors::ValidationError, "delivery_type must be one of the following values: #{MAPI::Services::Member::SecuritiesRequests::DELIVERY_TYPE.keys.join(', ')}"
+            MAPI::Shared::Errors::InvalidFieldError, "delivery_type must be one of the following values: #{MAPI::Services::Member::SecuritiesRequests::DELIVERY_TYPE.keys.join(', ')}"
           ) do |error|
-            expect(error.code).to eq('invalid_delivery_instructions_delivery_type_key')
+            expect(error.code).to eq(:delivery_type)
           end
         end
       end
@@ -440,8 +440,8 @@ describe MAPI::ServiceApp do
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.format_delivery_columns(delivery_type,
           required_delivery_keys, provided_delivery_keys) }
 
-        it 'raises a `ValidationError` if required keys are missing' do
-          expect { call_method }.to raise_error(MAPI::Shared::Errors::ValidationError, /delivery_instructions must contain \S+/)
+        it 'raises a `MissingFieldError` if required keys are missing' do
+          expect { call_method }.to raise_error(MAPI::Shared::Errors::MissingFieldError, /delivery_instructions must contain \S+/)
         end
 
         context 'maps values correctly' do
@@ -1490,59 +1490,68 @@ describe MAPI::ServiceApp do
         'settlement_type' => securities_request_module::SETTLEMENT_TYPE.keys.sample,
         'settlement_date' => instance_double(String)
       }}
+      let(:today) { Time.zone.today }
       let(:call_method) { securities_request_module.validate_broker_instructions(broker_instructions, app) }
 
       before do
-        allow(securities_request_module).to receive(:dateify)
+        allow(securities_request_module).to receive(:dateify).and_return(today)
         allow(securities_request_module).to receive(:validate_broker_instructions_date)
       end
 
       it 'raises an error if `broker_instructions` is nil' do
-        expect{securities_request_module.validate_broker_instructions(nil, app)}.to raise_error(MAPI::Shared::Errors::ValidationError, "broker_instructions must be a non-empty hash") do |error|
-          expect(error.code).to eq('missing_broker_instructions')
+        expect{securities_request_module.validate_broker_instructions(nil, app)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, "broker_instructions must be a non-empty hash") do |error|
+          expect(error.code).to eq(:broker_instructions)
         end
       end
       it 'raises an error if `broker_instructions` is an empty hash' do
-        expect{securities_request_module.validate_broker_instructions({}, app)}.to raise_error(MAPI::Shared::Errors::ValidationError, "broker_instructions must be a non-empty hash") do |error|
-          expect(error.code).to eq('missing_broker_instructions')
+        expect{securities_request_module.validate_broker_instructions({}, app)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, "broker_instructions must be a non-empty hash") do |error|
+          expect(error.code).to eq(:broker_instructions)
         end
       end
       it 'raises an error if a key is missing' do
         missing_key = broker_instructions.keys[rand(0..3)]
         broker_instructions.delete(missing_key)
-        expect{call_method}.to raise_error(MAPI::Shared::Errors::ValidationError, /broker_instructions must contain a value for \S+/) do |error|
-          expect(error.code).to eq("missing_broker_instructions_#{missing_key}_key")
+        expect{call_method}.to raise_error(MAPI::Shared::Errors::MissingFieldError, /broker_instructions must contain a value for \S+/) do |error|
+          expect(error.code).to eq(missing_key)
         end
       end
       it 'raises an error if `transaction_code` is out of range' do
         broker_instructions['transaction_code'] = SecureRandom.hex
-        expect{call_method}.to raise_error(MAPI::Shared::Errors::ValidationError, /transaction_code must be set to one of the following values: \S/) do |error|
-          expect(error.code).to eq('invalid_broker_instructions_transaction_code_key')
+        expect{call_method}.to raise_error(MAPI::Shared::Errors::InvalidFieldError, /transaction_code must be set to one of the following values: \S/) do |error|
+          expect(error.code).to eq('transaction_code')
         end
       end
       it 'raises an error if `settlement_type` is out of range' do
         broker_instructions['settlement_type'] = SecureRandom.hex
-        expect{call_method}.to raise_error(MAPI::Shared::Errors::ValidationError, /settlement_type must be set to one of the following values: \S/) do |error|
-          expect(error.code).to eq('invalid_broker_instructions_settlement_type_key')
+        expect{call_method}.to raise_error(MAPI::Shared::Errors::InvalidFieldError, /settlement_type must be set to one of the following values: \S/) do |error|
+          expect(error.code).to eq('settlement_type')
         end
       end
       it 'calls `dateify` on `trade_date`' do
-        expect(securities_request_module).to receive(:dateify).with(broker_instructions['trade_date'])
+        expect(securities_request_module).to receive(:dateify).with(broker_instructions['trade_date']).and_return(today)
         call_method
       end
       it 'calls `dateify` on `settlement_date`' do
-        expect(securities_request_module).to receive(:dateify).with(broker_instructions['settlement_date'])
+        expect(securities_request_module).to receive(:dateify).with(broker_instructions['settlement_date']).and_return(today)
         call_method
       end
       it 'calls `validate_broker_instructions_date` with the `trade_date`' do
-        allow(securities_request_module).to receive(:dateify).with(broker_instructions['trade_date']).and_return(broker_instructions['trade_date'])
-        expect(securities_request_module).to receive(:validate_broker_instructions_date).with(app, broker_instructions['trade_date'], 'trade_date')
+        allow(securities_request_module).to receive(:dateify).with(broker_instructions['trade_date']).and_return(today)
+        expect(securities_request_module).to receive(:validate_broker_instructions_date).with(app, today, 'trade_date')
         call_method
       end
       it 'calls `validate_broker_instructions_date` with the `settlement_date`' do
-        allow(securities_request_module).to receive(:dateify).with(broker_instructions['settlement_date']).and_return(broker_instructions['settlement_date'])
-        expect(securities_request_module).to receive(:validate_broker_instructions_date).with(app, broker_instructions['settlement_date'], 'settlement_date')
+        allow(securities_request_module).to receive(:dateify).with(broker_instructions['settlement_date']).and_return(today)
+        expect(securities_request_module).to receive(:validate_broker_instructions_date).with(app, today, 'settlement_date')
         call_method
+      end
+      it 'raises an error if `settlement_date` occurs before the `trade_date`' do
+        allow(securities_request_module).to receive(:dateify).with(broker_instructions['settlement_date']).and_return(today - 1.day)
+        allow(securities_request_module).to receive(:dateify).with(broker_instructions['trade_date']).and_return(today)
+        expect{call_method}.to raise_error(MAPI::Shared::Errors::CustomTypedFieldError, 'trade_date must be on or before settlement_date') do |error|
+          expect(error.code).to eq(:settlement_date)
+          expect(error.type).to eq(:before_trade_date)
+        end
       end
     end
     describe '`validate_broker_instructions_date`' do
@@ -1568,20 +1577,20 @@ describe MAPI::ServiceApp do
       end
       it 'raises an error if the date is a weekend or holiday' do
         allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(true)
-        expect{call_method}.to raise_error(MAPI::Shared::Errors::ValidationError, "#{attr_name} must not be set to a weekend date or a bank holiday") do |error|
-          expect(error.code).to eq("invalid_broker_instructions_#{attr_name}_key")
+        expect{call_method}.to raise_error(MAPI::Shared::Errors::InvalidFieldError, "#{attr_name} must not be set to a weekend date or a bank holiday") do |error|
+          expect(error.code).to eq(attr_name)
         end
       end
       it 'raises an error if the date occurs before today' do
         allow(date).to receive(:>=).with(today).and_return(false)
-        expect{call_method}.to raise_error(MAPI::Shared::Errors::ValidationError, "#{attr_name} must not occur before today") do |error|
-          expect(error.code).to eq("invalid_broker_instructions_#{attr_name}_key")
+        expect{call_method}.to raise_error(MAPI::Shared::Errors::InvalidFieldError, "#{attr_name} must not occur before today") do |error|
+          expect(error.code).to eq(attr_name)
         end
       end
-      it 'raises an error if the date after today plus the MAX_DATE_RESTRICTION' do
+      it 'raises an error if the date occurs after today plus the MAX_DATE_RESTRICTION' do
         allow(date).to receive(:<=).with(max_date).and_return(false)
-        expect{call_method}.to raise_error(MAPI::Shared::Errors::ValidationError, "#{attr_name} must not occur after after the 3 months from today") do |error|
-          expect(error.code).to eq("invalid_broker_instructions_#{attr_name}_key")
+        expect{call_method}.to raise_error(MAPI::Shared::Errors::InvalidFieldError, "#{attr_name} must not occur after 3 months from today") do |error|
+          expect(error.code).to eq(attr_name)
         end
       end
       it 'does not raise an error if the provided date is within range and is not a weekend or holiday' do
@@ -1598,30 +1607,31 @@ describe MAPI::ServiceApp do
       let(:call_method) { securities_request_module.validate_securities([security], settlement_type, delivery_type) }
 
       it 'raises an error if securities is nil' do
-        expect{securities_request_module.validate_securities(nil, settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::ValidationError, 'securities must be an array containing at least one security') do |error|
-          expect(error.code).to eq('missing_securities')
+        expect{securities_request_module.validate_securities(nil, settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'securities must be an array containing at least one security') do |error|
+          expect(error.code).to eq(:securities)
         end
       end
       it 'raises an error if securities is an empty array' do
-        expect{securities_request_module.validate_securities([], settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::ValidationError, 'securities must be an array containing at least one security') do |error|
-          expect(error.code).to eq('missing_securities')
+        expect{securities_request_module.validate_securities([], settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'securities must be an array containing at least one security') do |error|
+          expect(error.code).to eq(:securities)
         end
       end
       it 'raises an error if the securities array contains a nil value' do
-        expect{securities_request_module.validate_securities([security, nil], settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::ValidationError, 'each security must be a non-empty hash') do |error|
-          expect(error.code).to eq('missing_security')
+        expect{securities_request_module.validate_securities([security, nil], settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'each security must be a non-empty hash') do |error|
+          expect(error.code).to eq(:securities)
         end
       end
       it 'raises an error if the securities array contains an empty hash value' do
-        expect{securities_request_module.validate_securities([security, {}], settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::ValidationError, 'each security must be a non-empty hash') do |error|
-          expect(error.code).to eq('missing_security')
+        expect{securities_request_module.validate_securities([security, {}], settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'each security must be a non-empty hash') do |error|
+          expect(error.code).to eq(:securities)
         end
       end
       ['cusip', 'description', 'original_par'].each do |required_key|
         it "raises an error if a security is missing a `#{required_key}` value" do
           security.delete(required_key)
-          expect{call_method}.to raise_error(MAPI::Shared::Errors::ValidationError, "each security must consist of a hash containing a value for #{required_key}") do |error|
-            expect(error.code).to eq("missing_security_#{required_key}_key")
+          expect{call_method}.to raise_error(MAPI::Shared::Errors::CustomTypedFieldError, "each security must consist of a hash containing a value for #{required_key}") do |error|
+            expect(error.code).to eq(:securities)
+            expect(error.type).to eq(required_key)
           end
         end
       end
@@ -1629,15 +1639,17 @@ describe MAPI::ServiceApp do
         let(:call_method) { securities_request_module.validate_securities([security], 'vs_payment', delivery_type) }
         it 'raises an error if a security is missing a `payment_amount` value' do
           security.delete('payment_amount')
-          expect{call_method}.to raise_error(MAPI::Shared::Errors::ValidationError, 'each security must consist of a hash containing a value for payment_amount') do |error|
-            expect(error.code).to eq('missing_security_payment_amount_key')
+          expect{call_method}.to raise_error(MAPI::Shared::Errors::CustomTypedFieldError, 'each security must consist of a hash containing a value for payment_amount') do |error|
+            expect(error.code).to eq(:securities)
+            expect(error.type).to eq('payment_amount')
           end
         end
       end
-      it "raises a `ValidationError` if `delivery_type` is `fed` and `original_par` is greater than #{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}" do
+      it "raises a `CustomTypedFieldError` if `delivery_type` is `fed` and `original_par` is greater than #{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}" do
         security['original_par'] = rand(50000001..99999999)
-        expect{securities_request_module.validate_securities([security], settlement_type, 'fed')}.to raise_error(ValidationError, "original par must be less than $#{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}") do |error|
-          expect(error.code).to eq('invalid_security_original_par_key')
+        expect{securities_request_module.validate_securities([security], settlement_type, 'fed')}.to raise_error(CustomTypedFieldError, "original par must be less than $#{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}") do |error|
+          expect(error.code).to eq(:securities)
+          expect(error.type).to eq(:original_par)
         end
       end
     end
@@ -1647,19 +1659,19 @@ describe MAPI::ServiceApp do
       }}
       let(:call_method) { securities_request_module.validate_delivery_instructions(delivery_instructions) }
       it 'raises an error if `delivery_instructions` is nil' do
-        expect{securities_request_module.validate_delivery_instructions(nil)}.to raise_error(MAPI::Shared::Errors::ValidationError, 'delivery_instructions must be a non-empty hash') do |error|
-          expect(error.code).to eq('missing_delivery_instructions')
+        expect{securities_request_module.validate_delivery_instructions(nil)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'delivery_instructions must be a non-empty hash') do |error|
+          expect(error.code).to eq(:delivery_instructions)
         end
       end
       it 'raises an error if `delivery_instructions` is an empty hash' do
-        expect{securities_request_module.validate_delivery_instructions({})}.to raise_error(MAPI::Shared::Errors::ValidationError, 'delivery_instructions must be a non-empty hash') do |error|
-          expect(error.code).to eq('missing_delivery_instructions')
+        expect{securities_request_module.validate_delivery_instructions({})}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'delivery_instructions must be a non-empty hash') do |error|
+          expect(error.code).to eq(:delivery_instructions)
         end
       end
       it 'raises an error if `delivery_type` is out of range' do
         delivery_instructions['delivery_type'] = SecureRandom.hex
-        expect{ call_method }.to raise_error(MAPI::Shared::Errors::ValidationError, "delivery_instructions must contain the key delivery_type set to one of #{securities_request_module::DELIVERY_TYPE.keys.join(', ')}") do |error|
-          expect(error.code).to eq('invalid_delivery_instructions_delivery_type_key')
+        expect{ call_method }.to raise_error(MAPI::Shared::Errors::InvalidFieldError, "delivery_instructions must contain the key delivery_type set to one of #{securities_request_module::DELIVERY_TYPE.keys.join(', ')}") do |error|
+          expect(error.code).to eq(:delivery_type)
         end
       end
     end

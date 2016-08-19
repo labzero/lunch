@@ -613,7 +613,6 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(controller).to receive(:populate_securities_table_data_view_variable)
       allow(controller).to receive(:render_to_string)
       allow(Security).to receive(:from_hash).and_return(security)
-      allow(controller).to receive(:human_error_messages).and_return(error_message)
     end
 
     it_behaves_like 'a user required action', :post, :upload_securities
@@ -675,9 +674,9 @@ RSpec.describe SecuritiesController, type: :controller do
       call_action
       expect(parsed_response_body[:form_data]).to eq(sample_securities_upload_array.to_json)
     end
-    it 'returns a json object with a nil value for `errors`' do
+    it 'returns a json object with a nil value for `error`' do
       call_action
-      expect(parsed_response_body[:errors]).to be_nil
+      expect(parsed_response_body[:error]).to be_nil
     end
     describe 'when the uploaded file does not contain a header row with `CUSIP` as a value' do
       let(:call_action) { post :upload_securities, file: headerless_file, type: :release }
@@ -685,28 +684,18 @@ RSpec.describe SecuritiesController, type: :controller do
         call_action
         expect(parsed_response_body[:html]).to be_nil
       end
-      it 'calls `human_upload_error_message` with a `:no_header_row` security_upload error' do
-        allow(MAPIService::Error).to receive(:new).with(:security_upload, :no_header_row).and_return(error)
-        expect(controller).to receive(:human_error_messages).with([error]).and_return(error_message)
+      it 'renders a json object with a generic error messages' do
         call_action
-      end
-      it 'renders a json object with a error messages' do
-        call_action
-        expect(parsed_response_body[:errors]).to eq(error_message)
+        expect(parsed_response_body[:error]).to eq(I18n.t('securities.upload_errors.generic'))
       end
     end
     describe 'when the MIME type of the uploaded file is not in the list of accepted types' do
       let(:incorrect_mime_type) { fixture_file_upload('sample-securities-upload.xlsx', 'text/html') }
       let(:call_action) { post :upload_securities, file: incorrect_mime_type, type: :release }
       let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
-      it 'calls `human_upload_error_message` with a `:unsupported_mime_type` security_upload error' do
-        allow(MAPIService::Error).to receive(:new).with(:security_upload, :unsupported_mime_type).and_return(error)
-        expect(controller).to receive(:human_error_messages).with([error]).and_return(error_message)
+      it 'renders a json object with a specific error messages' do
         call_action
-      end
-      it 'renders a json object with a error messages' do
-        call_action
-        expect(parsed_response_body[:errors]).to eq(error_message)
+        expect(parsed_response_body[:error]).to eq(I18n.t('securities.upload_errors.unsupported_mime_type'))
       end
       it 'renders a json object with a nil value for `html`' do
         call_action
@@ -721,14 +710,9 @@ RSpec.describe SecuritiesController, type: :controller do
       no_securities = excel_fixture_file_upload('sample-empty-securities-upload.xlsx')
       let(:call_action) { post :upload_securities, file: no_securities, type: :release }
       let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
-      it 'calls `human_upload_error_message` with a `:no_securities` security_upload error' do
-        allow(MAPIService::Error).to receive(:new).with(:security_upload, :no_securities).and_return(error)
-        expect(controller).to receive(:human_error_messages).with([error]).and_return(error_message)
+      it 'renders a json object with a generic error messages' do
         call_action
-      end
-      it 'renders a json object with a error messages' do
-        call_action
-        expect(parsed_response_body[:errors]).to eq(error_message)
+        expect(parsed_response_body[:error]).to eq(I18n.t('securities.upload_errors.generic'))
       end
       it 'renders a json object with a nil value for `html`' do
         call_action
@@ -743,14 +727,9 @@ RSpec.describe SecuritiesController, type: :controller do
       describe "when opening the file raises a `#{error_klass}`" do
         before { allow(Roo::Spreadsheet).to receive(:open).and_raise(error_klass) }
 
-        it 'calls `human_upload_error_message` with a `:unable_to_open` security_upload error' do
-          allow(MAPIService::Error).to receive(:new).with(:security_upload, :unable_to_open).and_return(error)
-          expect(controller).to receive(:human_error_messages).with([error]).and_return(error_message)
+        it 'renders a json object with a specific error messages' do
           call_action
-        end
-        it 'renders a json object with a error messages' do
-          call_action
-          expect(parsed_response_body[:errors]).to eq(error_message)
+          expect(parsed_response_body[:error]).to eq(I18n.t('securities.upload_errors.cannot_open'))
         end
         it 'renders a json object with a nil value for `html`' do
           call_action
@@ -767,12 +746,15 @@ RSpec.describe SecuritiesController, type: :controller do
   describe 'POST submit_release' do
     let(:securities_release_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
     let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_release_for_authorization: true, authorize_request: true) }
-    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, :valid? => true) }
+    let(:active_model_errors) { instance_double(ActiveModel::Errors, add: nil) }
+    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, :valid? => true, errors: active_model_errors) }
+    let(:error_message) { instance_double(String) }
     let(:call_action) { post :submit_release, securities_release_request: securities_release_request_param }
 
     before do
       allow(controller).to receive(:current_member_id).and_return(member_id)
       allow(controller).to receive(:populate_view_variables)
+      allow(controller).to receive(:prioritized_securities_request_error)
       allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service)
       allow(SecuritiesReleaseRequest).to receive(:from_hash).and_return(securities_release_request)
     end
@@ -802,27 +784,58 @@ RSpec.describe SecuritiesController, type: :controller do
         call_action
       end
       describe 'when the service object returns true' do
-        it 'redirects to the `securities_release_success_url`' do
+        it 'redirects to the `securities_release_success_url` if there are no errors' do
+          allow(active_model_errors).to receive(:present?).and_return(false)
           expect(call_action).to redirect_to(securities_release_success_url)
         end
       end
       describe 'when the service object returns nil' do
-        let(:error_message) { SecureRandom.hex }
-        let(:error_message_body) { double('error_message_body') }
-        let(:error) { instance_double(RestClient::Exception, http_body: error_message_body.to_json) }
+        let(:error_body) {{
+          'error' => {
+            'code' => SecureRandom.hex,
+            'type' => SecureRandom.hex
+          }
+        }}
+        let(:error) { instance_double(RestClient::Exception, http_body: error_body.to_json) }
 
         before do
           allow(securities_request_service).to receive(:submit_release_for_authorization).and_return(nil)
-          allow(JSON).to receive(:parse).and_return(error_message)
+          allow(JSON).to receive(:parse).and_return(error_body)
         end
-        it 'calls `populate_view_variables` with a specific `mapi_endpoint` error when the error handler is invoked' do
-          allow(securities_request_service).to receive(:submit_release_for_authorization).and_yield(error)
-          expect(controller).to receive(:populate_view_variables).with(:release, [:unknown])
+        describe 'when the error handler is invoked' do
+          before { allow(securities_request_service).to receive(:submit_release_for_authorization).and_yield(error) }
+
+          it 'adds an error to the securities_request instance with the given code and type' do
+            expect(active_model_errors).to receive(:add).with(error_body['error']['code'].to_sym, error_body['error']['type'].to_sym)
+            call_action
+          end
+          it 'adds an error to the securities_request instance with an attribute of `:base` when the given code is `unkown`' do
+            error_body['error']['code'] = 'unknown'
+            expect(active_model_errors).to receive(:add).with(:base, error_body['error']['type'].to_sym)
+            call_action
+          end
+          it 'does not add a `:base`, `:submission` error' do
+            expect(active_model_errors).not_to receive(:add).with(:base, :submission)
+            call_action
+          end
+        end
+        it 'adds a `:base`, `:submission` error if there are not yet any errors' do
+          allow(active_model_errors).to receive(:present?).and_return(false)
+          expect(active_model_errors).to receive(:add).with(:base, :submission)
           call_action
         end
-        it 'calls `populate_view_variables` with an `mapi_endpoint` error' do
-          expect(controller).to receive(:populate_view_variables).with(:release, [:unknown])
+        it 'calls `populate_view_variables` with `:release`' do
+          expect(controller).to receive(:populate_view_variables).with(:release)
           call_action
+        end
+        it 'calls `prioritized_securities_request_error` with the securities_request instance' do
+          expect(controller).to receive(:prioritized_securities_request_error).with(securities_release_request)
+          call_action
+        end
+        it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
+          allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
+          call_action
+          expect(assigns[:error_message]).to eq(error_message)
         end
         it 'renders the `edit_release` view' do
           call_action
@@ -839,17 +852,16 @@ RSpec.describe SecuritiesController, type: :controller do
       end
     end
     describe 'when the securities_release_request is invalid' do
-      let(:error_messages) { {double('error key') => double('error message')} }
-      let(:errors) { instance_double(ActiveModel::Errors, messages: error_messages) }
-      before do
-        allow(securities_release_request).to receive(:valid?).and_return(false)
-        allow(securities_release_request).to receive(:errors).and_return(errors)
-        allow(JSON).to receive(:parse).and_return(error_messages)
-      end
+      before { allow(securities_release_request).to receive(:valid?).and_return(false) }
 
-      it 'calls `populate_view_variables` with the securities_release_request validation errors' do
-        expect(controller).to receive(:populate_view_variables).with(:release, error_messages.keys)
+      it 'calls `prioritized_securities_request_error` with the securities_request instance' do
+        expect(controller).to receive(:prioritized_securities_request_error).with(securities_release_request)
         call_action
+      end
+      it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
+        allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
+        call_action
+        expect(assigns[:error_message]).to eq(error_message)
       end
       it 'renders the `edit_release` view' do
         call_action
@@ -871,12 +883,14 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(securities_release_request).to receive(:request_id).and_return(request_id)
       end
       it 'checks the SecurID details if no errors are found in the data' do
+        allow(active_model_errors).to receive(:present?).and_return(false)
         expect(subject).to receive(:securid_perform_check).and_return(:authenticated)
         call_action
       end
-      describe 'when SecurID passes' do
+      describe 'when SecurID passes and there are not yet any errors' do
         before do
           allow(subject).to receive(:session_elevated?).and_return(true)
+          allow(active_model_errors).to receive(:blank?).and_return(true)
         end
         it 'authorizes the request' do
           expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
@@ -889,10 +903,21 @@ RSpec.describe SecuritiesController, type: :controller do
         describe 'when the authorization fails' do
           before do
             allow(securities_request_service).to receive(:authorize_request).and_return(false)
+            allow(active_model_errors).to receive(:present?).and_return(false, false, true)
           end
-          it 'calls `populate_view_variables` with an `authorize_failed` error' do
-            expect(controller).to receive(:populate_view_variables).with(:release, include(:authorize_failed))
+
+          it 'adds an `:base`, `:authorization` error to the securities_request instance' do
+            expect(active_model_errors).to receive(:add).with(:base, :authorization)
             call_action
+          end
+          it 'calls `prioritized_securities_request_error` with the securities_request instance' do
+            expect(controller).to receive(:prioritized_securities_request_error).with(securities_release_request)
+            call_action
+          end
+          it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
+            allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
+            call_action
+            expect(assigns[:error_message]).to eq(error_message)
           end
           it 'renders the `edit_release` view' do
             call_action
@@ -913,12 +938,20 @@ RSpec.describe SecuritiesController, type: :controller do
           call_action
           expect(response.body).to render_template(:edit_release)
         end
-        it 'calls `populate_view_variables` with the SecurID error' do
-          expect(controller).to receive(:populate_view_variables).with(:release, include(securid_error))
+        it 'calls `populate_view_variables` with `:release`' do
+          expect(controller).to receive(:populate_view_variables).with(:release)
           call_action
         end
+        it 'calls `prioritized_securities_request_error` with the securities_request instance' do
+          expect(controller).to receive(:prioritized_securities_request_error).with(securities_release_request)
+          call_action
+        end
+        it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
+          allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
+          call_action
+          expect(assigns[:error_message]).to eq(error_message)
+        end
       end
-
     end
   end
 
@@ -1222,7 +1255,6 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:securities) { [instance_double(Security)] }
       let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, securities: securities, :securities= => nil, trade_date: nil, :trade_date= => nil, settlement_date: nil, :settlement_date= => nil) }
       let(:call_action) { controller.send(:populate_view_variables, :release) }
-      let(:errors) { instance_double(Hash) }
       let(:date_restrictions) { instance_double(Hash) }
 
       before do
@@ -1234,15 +1266,6 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(controller).to receive(:date_restrictions)
       end
 
-      it 'calls `human_submit_release_error_messages` if errors are present' do
-        expect(controller).to receive(:human_submit_release_error_messages).with(errors).and_return(errors)
-        controller.send(:populate_view_variables, :release, errors)
-      end
-      it 'sets `@errors` if errors are passed' do
-        allow(controller).to receive(:human_submit_release_error_messages).and_return(errors)
-        controller.send(:populate_view_variables, :release, errors)
-        expect(assigns[:errors]).to eq(errors)
-      end
       it 'sets `@pledge_type_dropdown`' do
         pledge_type_dropdown = [
           [I18n.t('securities.release.pledge_type.sbc'), SecuritiesReleaseRequest::PLEDGE_TYPES[:sbc]],
@@ -1436,24 +1459,6 @@ RSpec.describe SecuritiesController, type: :controller do
       end
     end
 
-    describe '`human_submit_release_error_messages`' do
-      it 'returns a generic message for errors it is provided with' do
-        errors = ['some error message']
-        human_errors = subject.send(:human_submit_release_error_messages, errors)
-        expect(human_errors['some error message']).to eq(I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text))
-      end
-      it 'return settlement amount error message if `missing_security_payment_amount_key` is in the error parameter' do
-        errors = ['missing_security_payment_amount_key']
-        human_errors = subject.send(:human_submit_release_error_messages, errors)
-        expect(human_errors['missing_security_payment_amount_key']).to eq(I18n.t('securities.release.edit.no_payment_amount_error'))
-      end
-      it 'return original par error message if `invalid_security_original_par_key` is in the error parameter' do
-        errors = ['invalid_security_original_par_key']
-        human_errors = subject.send(:human_submit_release_error_messages, errors)
-        expect(human_errors['invalid_security_original_par_key']).to eq(I18n.t('securities.release.edit.fed_fifty_m_error'))
-      end
-    end
-
     describe '`translated_dropdown_mapping`' do
       let(:translated_string_1) { instance_double(String) }
       let(:translated_string_2) { instance_double(String) }
@@ -1540,28 +1545,57 @@ RSpec.describe SecuritiesController, type: :controller do
       end
     end
 
-    describe '`human_error_messages`' do
-      let(:call_method) { subject.send(:human_error_messages, [error]) }
+    describe '`prioritized_securities_request_error`' do
+      generic_error_message = I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
+      let(:errors) {{
+        foo: [SecureRandom.hex],
+        bar: [SecureRandom.hex],
+        settlement_date: [SecureRandom.hex],
+        securities: [SecureRandom.hex],
+        base: [SecureRandom.hex]
+      }}
+      let(:securities_request) { instance_double(SecuritiesReleaseRequest, errors: errors) }
+      let(:call_method) { subject.send(:prioritized_securities_request_error, securities_request) }
 
-      describe 'when the errors array only contains an unknown error' do
-        let(:error) { MAPIService::Error.new(:foo, :bar) }
-
-        it 'returns a generic error message if passed an empty array' do
-          expect(call_method).to eq(I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text))
+      it 'returns nil if no errors are present on the securities_request' do
+        allow(securities_request).to receive(:errors).and_return({})
+        expect(call_method).to be_nil
+      end
+      describe 'when the error object contains standard error keys' do
+        it 'returns the standard message for the first key it finds' do
+          expect(call_method).to eq(errors[:foo].first)
         end
       end
-      describe 'when the errors array contains a `:security_upload` error' do
-        it 'returns the proper message when the error_code is `:unable_to_open`' do
-          error = MAPIService::Error.new(:security_upload, :unable_to_open)
-          expect(subject.send(:human_error_messages, [error])).to eq(I18n.t('securities.upload_errors.cannot_open'))
+      describe 'when the error object does not contain standard error keys' do
+        let(:errors) {{
+          settlement_date: [SecureRandom.hex],
+          securities: [SecureRandom.hex],
+          base: [SecureRandom.hex]
+        }}
+
+        it 'returns the standard message for the `settlement_date` error' do
+          expect(call_method).to eq(errors[:settlement_date].first)
         end
-        it 'returns the proper message when the error_code is `:unsupported_mime_type`' do
-          error = MAPIService::Error.new(:security_upload, :unsupported_mime_type)
-          expect(subject.send(:human_error_messages, [error])).to eq(I18n.t('securities.upload_errors.unsupported_mime_type'))
+
+        describe 'when there is a `securities` error but no `settlement_date` error' do
+          let(:errors) {{
+            securities: [SecureRandom.hex],
+            base: [SecureRandom.hex]
+          }}
+
+          it 'returns the standard message for the `securities` error' do
+            expect(call_method).to eq(errors[:securities].first)
+          end
         end
-        it 'returns a generic upload error when passed an unknown error code' do
-          error = MAPIService::Error.new(:security_upload, :foo)
-          expect(subject.send(:human_error_messages, [error])).to eq(I18n.t('securities.upload_errors.generic'))
+
+        describe 'when there is a `base` error but no other specific error' do
+          let(:errors) {{
+            base: [SecureRandom.hex]
+          }}
+
+          it 'returns a generic error message' do
+            expect(call_method).to eq(generic_error_message)
+          end
         end
       end
     end

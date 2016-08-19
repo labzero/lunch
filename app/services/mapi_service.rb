@@ -1,16 +1,5 @@
 class MAPIService
 
-  class Error
-    attr_reader :type, :code, :value
-
-    def initialize(type, code, value=nil)
-      @type = type
-      @code = code
-      @value = value
-    end
-
-  end
-
   def initialize(request)
     @request = request
     @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"", :'X-Request-ID' => request_uuid}

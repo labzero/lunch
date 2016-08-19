@@ -52,7 +52,7 @@ describe MAPI::ServiceApp do
           make_request
         end
         it 'returns an error code of `invalid_date_range` in its body' do
-          expect(response_body[:errors]).to include('invalid_date_range')
+          expect(response_body[:error][:code]).to eq('invalid_date_range')
         end
       end
     end

@@ -21,7 +21,7 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
       end
     end
     describe '`trade_date_must_come_before_settlement_date`' do
-      let(:trade_date_errors) { subject.valid?; subject.errors.messages[:trade_date] || [] }
+      let(:call_validation) { subject.send(:trade_date_must_come_before_settlement_date) }
       let(:today) { Time.zone.today }
       it 'is called as a validator' do
         expect(subject).to receive(:trade_date_must_come_before_settlement_date)
@@ -29,26 +29,31 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
       end
       it 'does not add an error if there is no `trade_date`' do
         subject.settlement_date = today
-        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
+        expect(subject.errors).not_to receive(:add)
+        call_validation
       end
       it 'does not add an error if there is no `settlement_date`' do
         subject.trade_date = today
-        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
+        expect(subject.errors).not_to receive(:add)
+        call_validation
       end
       it 'adds an error if the `trade_date` comes after the `settlement_date`' do
         subject.trade_date = today
         subject.settlement_date = today - 2.days
-        expect(trade_date_errors).to include("must come before 'settlement_date'")
+        expect(subject.errors).to receive(:add).with(:settlement_date, :before_trade_date)
+        call_validation
       end
       it 'does not add an error if the `trade_date` comes before the `settlement_date`' do
         subject.trade_date = today - 2.days
         subject.settlement_date = today
-        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
+        expect(subject.errors).not_to receive(:add)
+        call_validation
       end
       it 'does not add an error if the `trade_date` is equal to the `settlement_date`' do
         subject.trade_date = today
         subject.settlement_date = today
-        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
+        expect(subject.errors).not_to receive(:add)
+        call_validation
       end
     end
     [[:trade_date, :trade_date_within_range], [:settlement_date, :settlement_date_within_range]].each do |attr_array|
@@ -70,13 +75,23 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
           expect(subject).to receive(:date_within_range).with(date)
           call_validation
         end
-        it "adds an error for `#{attr}` if `date_within_range` returns false" do
-          allow(subject).to receive(:date_within_range).and_return(false)
-          expect(attr_errors).to include('must not be a holiday, weekend, or in the past')
+        it "does not add an error if there is no value for `#{attr}`" do
+          expect(subject.errors).not_to receive(:add)
+          call_validation
         end
-        it "does not add an error for `#{attr}` if `date_within_range` returns true" do
-          allow(subject).to receive(:date_within_range).and_return(true)
-          expect(attr_errors).to_not include('must not be a holiday, weekend, or in the past')
+        describe "when there is a value for `#{attr}`" do
+          before { subject.send("#{attr}=", instance_double(Date)) }
+
+          it "adds an error for `#{attr}` if `date_within_range` returns false" do
+            allow(subject).to receive(:date_within_range).and_return(false)
+            expect(subject.errors).to receive(:add).with(attr, :invalid)
+            call_validation
+          end
+          it "does not add an error for `#{attr}` if `date_within_range` returns true" do
+            allow(subject).to receive(:date_within_range).and_return(true)
+            expect(subject.errors).not_to receive(:add)
+            call_validation
+          end
         end
       end
     end
@@ -135,20 +150,24 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
           expect(subject).to receive(:securities_must_have_payment_amount)
           subject.valid?
         end
-        it 'returns false if there are no securities' do
-          expect(call_validation).to be(false)
+        it 'does not add an error if there are no securities' do
+          expect(subject.errors).not_to receive(:add)
+          call_validation
         end
-        it 'returns false if `securities` is an empty array' do
+        it 'does not add an error if `securities` is an empty array' do
           subject.securities = []
-          expect(call_validation).to be(false)
+          expect(subject.errors).not_to receive(:add)
+          call_validation
         end
-        it 'returns true if all `securities` have a `payment_amount` value' do
+        it 'does not add an error if all `securities` have a `payment_amount` value' do
           subject.securities = [security_with_payment_amount, security_with_payment_amount]
-          expect(call_validation).to be(true)
+          expect(subject.errors).not_to receive(:add)
+          call_validation
         end
-        it 'returns false if any of the `securities` do not have a `payment_amount` value' do
+        it 'adds an error if any of the `securities` do not have a `payment_amount` value' do
           subject.securities = [security_with_payment_amount, security_without_payment_amount]
-          expect(call_validation).to be(false)
+          expect(subject.errors).to receive(:add).with(:securities, :payment_amount)
+          call_validation
         end
       end
     end

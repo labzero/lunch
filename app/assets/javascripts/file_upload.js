@@ -27,8 +27,8 @@ $(function () {
       var inputName = $target.data('input-name');
       var resultsContainerClass = $target.data('results-container-class');
       if (data.result) {
-        if (data.result.errors) {
-          failUpload(e, data.result.errors); // For IE
+        if (data.result.error) {
+          failUpload(e, data.result.error); // For IE
         } else {
           if (resultsContainerClass) {
             $('.' + resultsContainerClass).html(data.result.html);

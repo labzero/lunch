@@ -291,7 +291,7 @@ describe MAPI::ServiceApp do
           make_request
         end
         it 'returns an error code of `user` in its body' do
-          expect(response_body[:errors]).to include('user')
+          expect(response_body[:error][:code]).to eq('user')
         end
       end
       describe 'when there is no `request_id` in the posted body' do
@@ -305,7 +305,7 @@ describe MAPI::ServiceApp do
           make_request
         end
         it 'returns an error code of `request_id` in its body' do
-          expect(response_body[:errors]).to include('request_id')
+          expect(response_body[:error][:code]).to eq('request_id')
         end
       end
     end
