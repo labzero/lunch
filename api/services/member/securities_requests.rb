@@ -433,7 +433,7 @@ module MAPI
           unless should_fake?(app)
             header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
             ActiveRecord::Base.transaction do
-              adx_type = ADXAccountTypeMapping::STRING_TO_SYMBOL[securities.first['custody_account_type'].to_s.upcase]
+              adx_type = get_adx_type_from_security(app, securities.first)
               adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), "Pledged ADX ID")
               insert_header_sql = insert_release_header_query(member_id, header_id, user_name, full_name, session_id,
                                                               adx_id, processed_delivery_instructions[:delivery_columns],

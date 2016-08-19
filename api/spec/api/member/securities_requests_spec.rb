@@ -199,8 +199,7 @@ describe MAPI::ServiceApp do
       let(:security) { {  'cusip' => SecureRandom.hex,
                           'description' => SecureRandom.hex,
                           'original_par' => rand(1..40000) + rand.round(2),
-                          'payment_amount' => rand(1..100000) + rand.round(2),
-                          'custody_account_type' => adx_type_string } }
+                          'payment_amount' => rand(1..100000) + rand.round(2) } }
       let(:required_delivery_keys) { [ 'a', 'b', 'c' ] }
       let(:delivery_columns) { MAPI::Services::Member::SecuritiesRequests.delivery_type_mapping(delivery_type).keys }
       let(:delivery_values) { MAPI::Services::Member::SecuritiesRequests.delivery_type_mapping(delivery_type).values }
@@ -660,8 +659,7 @@ describe MAPI::ServiceApp do
         let(:security) { { 'cusip' => instance_double(String),
                            'description' => instance_double(String),
                            'original_par' => rand(0...50000000),
-                           'payment_amount' => instance_double(Numeric),
-                           'custody_account_type' => adx_type_string } }
+                           'payment_amount' => instance_double(Numeric) } }
         let(:securities) { [ security, security, security ]}
         let(:method_params) { [ app,
                                 member_id,
@@ -737,6 +735,7 @@ describe MAPI::ServiceApp do
               app,
               ssk_sql,
               "SSK ID").and_return(ssk_id)
+            allow(securities_request_module).to receive(:get_adx_type_from_security).with(anything, securities.first).and_return(adx_type)
           end
 
           it 'returns the inserted request ID' do
@@ -747,6 +746,11 @@ describe MAPI::ServiceApp do
           context 'prepares SQL' do
             before do
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
+            end
+
+            it 'gets the `adx_type` from the first security' do
+              expect(securities_request_module).to receive(:get_adx_type_from_security).with(anything, securities.first).and_return(adx_type)
+              call_method
             end
 
             it 'calls `insert_release_header_query`' do
@@ -1915,8 +1919,7 @@ describe MAPI::ServiceApp do
         'cusip' => instance_double(String),
         'description' => instance_double(String),
         'original_par' => instance_double(Numeric),
-        'payment_amount' => instance_double(Numeric),
-        'custody_account_type' => adx_type_string
+        'payment_amount' => instance_double(Numeric)
       }}
       let(:securities) { [security] }
       let(:call_method) { securities_request_module.update_release(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities) }
