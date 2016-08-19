@@ -251,8 +251,19 @@ Then(/^I should an active state for the Authorize action$/) do
   page.assert_selector('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
 end
 
-When(/^I click to Authorize the first release$/) do
-  page.all('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true).first.click
+When(/^I click to Authorize the first (pledge|release|safekeep)(?: request)?$/) do |type|
+  description = case type
+  when 'pledge'
+    I18n.t('securities.requests.form_descriptions.pledge')
+  when 'release'
+    I18n.t('securities.requests.form_descriptions.release')
+  when 'safekeep'
+    I18n.t('securities.requests.form_descriptions.safekept')
+  else
+    raise ArgumentError, "unknown form type: #{type}"
+  end
+  row = page.all('.securities-request-table td', text: description, exact: true).first.find(:xpath, '..')
+  row.find('.report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true).click
 end
 
 Then(/^I should see "(.*?)" as the selected pledge type$/) do |type|

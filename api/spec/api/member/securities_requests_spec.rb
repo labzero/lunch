@@ -60,16 +60,21 @@ describe MAPI::ServiceApp do
         names = fake('securities_release_request_details')['names']
         let(:rng) { instance_double(Random, rand: 1) }
         let(:request_id) { rand(100000..999999) }
+        let(:form_types) { MAPI::Services::Member::SecuritiesRequests::REQUEST_FORM_TYPE_MAPPING.keys }
+        let(:shuffled_form_types) { instance_double(Array, pop: nil) }
         before do
           allow(securities_request_module).to receive(:should_fake?).and_return(true)
           allow(Random).to receive(:new).and_return(rng)
           allow(securities_request_module).to receive(:fake_request_id).with(rng).and_return(request_id)
           allow(securities_request_module).to receive(:fake_header_details).and_return({})
+          stub_const('MAPI::Services::Member::SecuritiesRequests::REQUEST_FORM_TYPE_MAPPING', MAPI::Services::Member::SecuritiesRequests::REQUEST_FORM_TYPE_MAPPING.dup) # unfreeze
+          allow(securities_request_module::REQUEST_FORM_TYPE_MAPPING).to receive(:keys).and_return(form_types)
+          allow(form_types).to receive(:shuffle).with(random: rng).and_return(shuffled_form_types)
         end
 
         it 'constructs a list of request objects' do
-          n = rand(1..7)
-          allow(rng).to receive(:rand).with(eq(1..7)).and_return(n)
+          n = rand(4..7)
+          allow(rng).to receive(:rand).with(eq(4..7)).and_return(n)
           expect(call_method.length).to eq(n)
         end
         it 'passes the `request_id` to the `fake_header_details` method' do
@@ -85,7 +90,16 @@ describe MAPI::ServiceApp do
           status_array = double('A Status Array')
           allow(securities_request_module).to receive(:flat_unique_array).with(securities_request_module::MAPIRequestStatus::AUTHORIZED).and_return(status_array)
           allow(status_array).to receive(:sample).with(random: rng).and_return(status)
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, status).and_return({})
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, status, anything).and_return({})
+          call_method
+        end
+        it 'generates at least one request for each form type' do
+          allow(rng).to receive(:rand).with(eq(4..7)).and_return(7)
+          allow(shuffled_form_types).to receive(:pop).and_return(*form_types)
+          allow(securities_request_module).to receive(:fake_header_details).with(anything, anything, anything, nil).and_return({})
+          form_types.each do |form_type|
+            expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, anything, form_type).and_return({})
+          end
           call_method
         end
       end
@@ -852,7 +866,7 @@ describe MAPI::ServiceApp do
         expected_sql = <<-SQL
             SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
               MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
-              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID
             FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE HEADER_ID = #{header_id}
             AND FHLB_ID = #{member_id}
@@ -1034,6 +1048,19 @@ describe MAPI::ServiceApp do
         it 'contains a `user` hash with a nil value for `session_id`' do
           expect(call_method[:user][:session_id]).to eq(nil)
         end
+        it 'contains an `account_number` with the `PLEDGED_ADX_ID` if present' do
+          header_details['PLEDGED_ADX_ID'] = SecureRandom.hex
+          expect(call_method[:account_number]).to eq(header_details['PLEDGED_ADX_ID'])
+        end
+        it 'contains an `account_number` with the `UNPLEDGED_ADX_ID` if present' do
+          header_details['UNPLEDGED_ADX_ID'] = SecureRandom.hex
+          expect(call_method[:account_number]).to eq(header_details['UNPLEDGED_ADX_ID'])
+        end
+        it 'returns the `PLEDGED_ADX_ID` if both `PLEDGED_ADX_ID` and `UNPLEDGED_ADX_ID` are present' do
+          header_details['PLEDGED_ADX_ID'] = SecureRandom.hex
+          header_details['UNPLEDGED_ADX_ID'] = SecureRandom.hex
+          expect(call_method[:account_number]).to eq(header_details['PLEDGED_ADX_ID'])
+        end
       end
     end
 
@@ -1163,13 +1190,14 @@ describe MAPI::ServiceApp do
       let(:submitted_date_offset) { rand(0..4) }
       let(:authorized_date_offset) { rand(0..2) }
       let(:created_by_offset) { rand(0..names.length-1) }
-      let(:form_type) { rand(70..73) }
+      let!(:form_type) { rand(70..73) }
       let(:authorized_by_offset) { rand(0..names.length-1) }
 
       let(:call_method) { securities_request_module.fake_header_details(request_id, end_date, status) }
       before do
         allow(Random).to receive(:new).and_return(rng)
-        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date_offset, authorized_date_offset, created_by_offset, form_type, authorized_by_offset)
+        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date_offset, authorized_date_offset, created_by_offset, authorized_by_offset)
+        allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
       end
 
       it 'constructs a hash with a securities with a `REQUEST_ID` value equal to the passed arg' do
@@ -1207,6 +1235,21 @@ describe MAPI::ServiceApp do
       end
       it 'constructs a hash with a `FORM_TYPE` value' do
         expect(call_method['FORM_TYPE']).to eq(form_type)
+      end
+      it 'sets the `FORM_TYPE` to the passed one if provided' do
+        form_type = double('A Form Type')
+        expect(securities_request_module.fake_header_details(request_id, end_date, status, form_type)['FORM_TYPE']).to eq(form_type)
+      end
+      {
+        securities_request_module::SSKFormType::SECURITIES_PLEDGED => 'PLEDGED_ADX_ID',
+        securities_request_module::SSKFormType::SECURITIES_RELEASE => 'PLEDGED_ADX_ID',
+        securities_request_module::SSKFormType::SAFEKEPT_DEPOSIT => 'UNPLEDGED_ADX_ID',
+        securities_request_module::SSKFormType::SAFEKEPT_RELEASE => 'UNPLEDGED_ADX_ID'
+      }.each do |form_type, field|
+        it "constructs a hash with a `#{field}` if the `FORM_TYPE` is `#{form_type}`" do
+          allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
+          expect(call_method[field]).to be_present
+        end
       end
       it 'constructs a hash with a `STATUS` value equal to the passed `status`' do
         expect(call_method['STATUS']).to eq(status)

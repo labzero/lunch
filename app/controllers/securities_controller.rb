@@ -2,7 +2,7 @@ class SecuritiesController < ApplicationController
   include CustomFormattingHelper
   include ContactInformationHelper
 
-  before_action only: [:view_release, :authorize_request] do
+  before_action only: [:view_release, :authorize_request, :view_request] do
     authorize :security, :authorize?
   end
 
@@ -138,7 +138,15 @@ class SecuritiesController < ApplicationController
       ],
       rows: awaiting_authorization_requests.collect do |request|
         request_id = request[:request_id]
-        action_cell_value = policy(:security).authorize? ? [[t('securities.requests.actions.authorize'), securities_release_view_path(request_id) ]] : [t('securities.requests.actions.authorize')]
+        view_path = case request[:form_type]
+        when 'pledge_release', 'safekept_release'
+          securities_release_view_path(request_id)
+        when 'pledge_intake'
+          securities_pledge_view_path(request_id)
+        when 'safekept_intake'
+          securities_safekeep_view_path(request_id)
+        end
+        action_cell_value = policy(:security).authorize? ? [[t('securities.requests.actions.authorize'), view_path ]] : [t('securities.requests.actions.authorize')]
         {
           columns: [
             {value: request_id},
@@ -178,30 +186,45 @@ class SecuritiesController < ApplicationController
 
   def edit_safekeep
     populate_view_variables(:safekeep)
-    @title = t('securities.safekeep.title')
     @securities_release_request.account_number = MembersService.new(request).member(current_member_id)['unpledged_account_number']
   end
 
   def edit_pledge
     populate_view_variables(:pledge)
-    @title = t('securities.pledge.title')
     @securities_release_request.account_number = MembersService.new(request).member(current_member_id)['pledged_account_number']
   end
 
   # POST
   def edit_release
     populate_view_variables(:release)
-    @title = t('securities.release.title')
   end
 
   # GET
   def view_release
     request_id = params[:request_id]
     @securities_release_request = SecuritiesRequestService.new(current_member_id, request).submitted_request(request_id)
-    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#authorize_release has encountered nil. Check error logs.") if @securities_release_request.nil?
+    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#submitted_request has encountered nil. Check error logs.") if @securities_release_request.nil?
     populate_view_variables(:release)
-    @title = t('securities.release.title')
     render :edit_release
+  end
+
+  # GET
+  def view_request
+    request_id = params[:request_id]
+    @securities_release_request = SecuritiesRequestService.new(current_member_id, request).submitted_request(request_id)
+    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#submitted_request has encountered nil. Check error logs.") if @securities_release_request.nil?
+    type = params[:type].try(:to_sym)
+    populate_view_variables(type)
+    case type
+    when :release
+      render :edit_release
+    when :pledge
+      render :edit_pledge
+    when :safekeep
+      render :edit_safekeep
+    else
+      raise ArgumentError, "Unknown request type: #{type}"
+    end
   end
 
   def download_release
@@ -405,7 +428,16 @@ class SecuritiesController < ApplicationController
       [t('securities.release.pledge_type.sbc'), SecuritiesReleaseRequest::PLEDGE_TYPES[:sbc]],
       [t('securities.release.pledge_type.standard'), SecuritiesReleaseRequest::PLEDGE_TYPES[:standard]]
     ]
-    @title = t('securities.release.title')
+
+    case type
+    when :release
+      @title = t('securities.release.title')
+    when :pledge
+      @title = t('securities.pledge.title')
+    when :safekeep      
+      @title = t('securities.safekeep.title')
+    end
+
     @session_elevated = session_elevated?
 
     @securities_release_request ||= SecuritiesReleaseRequest.new

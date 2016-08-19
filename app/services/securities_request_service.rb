@@ -73,6 +73,7 @@ class SecuritiesRequestService < MAPIService
     end
     securities_release[:request_id] = response_hash[:request_id]
     securities_release[:securities] = response_hash[:securities]
+    securities_release[:account_number] = response_hash[:account_number]
     securities_release
   end
 

@@ -83,3 +83,10 @@ Scenario Outline: Member cancels an upload of a securities release file
     | page                |
     | safekeep securities |
     | pledge securities   |
+
+@jira-mem-1669
+Scenario: A signer views a previously submitted safekeep request
+  Given I am logged in as a "quick-advance signer"
+  And I am on the securities request page
+  When I click to Authorize the first safekeep
+  Then I should be on the Safekeep Securities page

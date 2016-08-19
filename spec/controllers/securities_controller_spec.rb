@@ -270,17 +270,49 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(assigns[:awaiting_authorization_requests_table][:rows]).to eq(rows)
       end
       describe 'when the `current_user` can authorize securities' do
+        let(:request_id) { SecureRandom.hex }
         allow_policy :security, :authorize?
-        it "builds rows with a link to view the submitted request for the `:action` cell" do
-          request_id = SecureRandom.hex
+        before do
           allow(subject).to receive(:form_type_to_description)
+        end
+        it "builds rows with a link to view the submitted request for the `:action` cell" do
           awaiting_authorization_requests << {
-            request_id: request_id
+            request_id: request_id,
+            form_type: 'pledge_release'
           }
           call_action
           expect(assigns[:awaiting_authorization_requests_table][:rows].length).to be > 0
           assigns[:awaiting_authorization_requests_table][:rows].each do |row|
             expect(row[:columns].last).to eq({value: [[I18n.t('securities.requests.actions.authorize'), securities_release_view_path(request_id) ]], type: :actions})
+          end
+        end
+        {
+          'pledge_release' => :securities_release_view_path,
+          'safekept_release' => :securities_release_view_path,
+          'pledge_intake' => :securities_pledge_view_path,
+          'safekept_intake' => :securities_safekeep_view_path
+        }.each do |form_type, path_helper|
+          it "sets the authorize action URL to `#{path_helper}` when the `form_type` is `#{form_type}`" do
+            awaiting_authorization_requests << {
+              request_id: request_id,
+              form_type: form_type
+            }
+            call_action
+            expect(assigns[:awaiting_authorization_requests_table][:rows].length).to be > 0
+            assigns[:awaiting_authorization_requests_table][:rows].each do |row|
+              expect(row[:columns].last).to eq({value: [[I18n.t('securities.requests.actions.authorize'), send(path_helper, request_id) ]], type: :actions})
+            end
+          end
+        end
+        it "sets the authorize action URL to nil when the `form_type` is unknown" do
+          awaiting_authorization_requests << {
+            request_id: request_id,
+            form_type: SecureRandom.hex
+          }
+          call_action
+          expect(assigns[:awaiting_authorization_requests_table][:rows].length).to be > 0
+          assigns[:awaiting_authorization_requests_table][:rows].each do |row|
+            expect(row[:columns].last).to eq({value: [[I18n.t('securities.requests.actions.authorize'), nil ]], type: :actions})
           end
         end
       end
@@ -294,10 +326,6 @@ RSpec.describe SecuritiesController, type: :controller do
 
     it_behaves_like 'a user required action', :post, :edit_release
     it_behaves_like 'a controller action with an active nav setting', :edit_release, :securities
-    it 'sets `@title`' do
-      call_action
-      expect(assigns[:title]).to eq(I18n.t('securities.release.title'))
-    end
     it 'renders its view' do
       call_action
       expect(response.body).to render_template('edit_release')
@@ -326,7 +354,54 @@ RSpec.describe SecuritiesController, type: :controller do
 
     it 'raises an ActionController::RoutingError if the service object returns nil' do
       allow(service).to receive(:submitted_request)
-      expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#authorize_release has encountered nil. Check error logs.')
+      expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#submitted_request has encountered nil. Check error logs.')
+    end
+    it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
+      expect(SecuritiesRequestService).to receive(:new).with(member_id, any_args).and_return(service)
+      call_action
+    end
+    it 'creates a new `SecuritiesRequestService` with the `request`' do
+      expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(service)
+      call_action
+    end
+    it 'calls `submitted_request` on the `SecuritiesRequestService` instance with the `request_id`' do
+      expect(service).to receive(:submitted_request).with(request_id)
+      call_action
+    end
+    it 'sets `@securities_release_request` to the result of `SecuritiesRequestService#request_id`' do
+      call_action
+      expect(assigns[:securities_release_request]).to eq(securities_release_request)
+    end
+    it 'calls `populate_view_variables`' do
+      expect(controller).to receive(:populate_view_variables).with(:release)
+      call_action
+    end
+    it 'renders the `edit_release` view' do
+      call_action
+      expect(response.body).to render_template(:edit_release)
+    end
+  end
+
+  describe 'GET view_request' do
+    let(:type) { [:release, :pledge, :safekeep].sample }
+    let(:request_id) { SecureRandom.hex }
+    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest) }
+    let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_release_request) }
+    let(:call_action) { get :view_request, request_id: request_id, type: type }
+    allow_policy :security, :authorize?
+
+    before do
+      allow(SecuritiesRequestService).to receive(:new).and_return(service)
+      allow(controller).to receive(:populate_view_variables)
+    end
+
+    it_behaves_like 'a user required action', :get, :view_request, request_id: SecureRandom.hex, type: :release
+    it_behaves_like 'a controller action with an active nav setting', :view_request, :securities, request_id: SecureRandom.hex, type: :release
+    it_behaves_like 'an authorization required method', :get, :view_request, :security, :authorize?, request_id: SecureRandom.hex, type: :release
+
+    it 'raises an ActionController::RoutingError if the service object returns nil' do
+      allow(service).to receive(:submitted_request)
+      expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#submitted_request has encountered nil. Check error logs.')
     end
     it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
       expect(SecuritiesRequestService).to receive(:new).with(member_id, any_args).and_return(service)
@@ -348,13 +423,27 @@ RSpec.describe SecuritiesController, type: :controller do
       expect(controller).to receive(:populate_view_variables)
       call_action
     end
-    it 'sets `@title`' do
-      call_action
-      expect(assigns[:title]).to eq(I18n.t('securities.release.title'))
+
+    {
+      release: :edit_release,
+      pledge: :edit_pledge,
+      safekeep: :edit_safekeep
+    }.each do |type, view|
+      describe "when the `type` is `#{type}`" do
+        let(:call_action) { get :view_request, request_id: request_id, type: type }
+        it "renders the `#{view}` view" do
+          call_action
+          expect(response.body).to render_template(view)
+        end
+        it 'calls `populate_view_variables`' do
+          expect(controller).to receive(:populate_view_variables).with(type)
+          call_action
+        end
+      end
     end
-    it 'renders the `edit_release` view' do
-      call_action
-      expect(response.body).to render_template(:edit_release)
+
+    it 'raises an ArgumentError if passed an unknown type' do
+      expect{get :view_request, request_id: request_id, type: SecureRandom.hex}.to raise_error(ArgumentError)
     end
   end
 
@@ -388,9 +477,9 @@ RSpec.describe SecuritiesController, type: :controller do
       it_behaves_like 'a user required action', :get, :edit_pledge
       it_behaves_like 'a controller action with an active nav setting', :edit_pledge, :securities
 
-      it 'sets `@title`' do
+      it 'calls `populate_view_variables`' do
+        expect(subject).to receive(:populate_view_variables).with(:pledge)
         call_action
-        expect(assigns[:title]).to eq(I18n.t('securities.pledge.title'))
       end
       it 'gets the `pledged_account_number` from the `MembersService` and assigns to `@securities_release_request.account_number`' do
         expect(securities_release_request).to receive(:account_number=).with(member_details['pledged_account_number'])
@@ -417,9 +506,9 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
       end
 
-      it 'sets `@title`' do
+      it 'calls `populate_view_variables`' do
+        expect(subject).to receive(:populate_view_variables).with(:safekeep)
         call_action
-        expect(assigns[:title]).to eq(I18n.t('securities.safekeep.title'))
       end
       it 'gets the `unpledged_account_number` from the `MembersService` and assigns to `@securities_release_request.account_number`' do
         expect(securities_release_request).to receive(:account_number=).with(member_details['unpledged_account_number'])
@@ -1162,9 +1251,15 @@ RSpec.describe SecuritiesController, type: :controller do
         call_action
         expect(assigns[:pledge_type_dropdown]).to eq(pledge_type_dropdown)
       end
-      it 'sets `@title`' do
-        call_action
-        expect(assigns[:title]).to eq(I18n.t('securities.release.title'))
+      {
+        release: I18n.t('securities.release.title'),
+        pledge: I18n.t('securities.pledge.title'),
+        safekeep: I18n.t('securities.safekeep.title')
+      }.each do |type, title|
+        it "sets `@title` to `#{title}` when the `type` is `#{type}`" do
+          controller.send(:populate_view_variables, type)
+          expect(assigns[:title]).to eq(title)
+        end
       end
       it 'calls `populate_transaction_code_dropdown_variables` with the @securities_release_request' do
         expect(controller).to receive(:populate_transaction_code_dropdown_variables).with(securities_release_request)

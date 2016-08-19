@@ -308,8 +308,9 @@ describe SecuritiesRequestService do
           end
         end
       end
-      [:request_id, :securities].each do |attr|
+      [:request_id, :securities, :account_number].each do |attr|
         it "returns a hash with a `#{attr}` value" do
+          raw_hash[attr] = double('A Value')
           expect(call_method[attr]).to eq(raw_hash[attr])
         end
       end

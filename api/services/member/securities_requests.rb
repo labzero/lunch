@@ -124,10 +124,11 @@ module MAPI
             if should_fake?(app)
               rng = Random.new(member_id.to_i + end_date.to_time.to_i + start_date.to_time.to_i + status.sum)
               list = []
-              rng.rand(1..7).times do
+              form_types = REQUEST_FORM_TYPE_MAPPING.keys.shuffle(random: rng)
+              rng.rand(4..7).times do
                 request_id = fake_request_id(rng)
                 status = flat_status.sample(random: rng)
-                list << fake_header_details(request_id, end_date, status)
+                list << fake_header_details(request_id, end_date, status, form_types.pop)
               end
               list
             else
@@ -512,7 +513,7 @@ module MAPI
           <<-SQL
             SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
               MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
-              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID
             FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE HEADER_ID = #{quote(header_id)}
             AND FHLB_ID = #{quote(member_id)}
@@ -543,6 +544,7 @@ module MAPI
           end
           {
             request_id: request_id,
+            account_number: header_details['PLEDGED_ADX_ID'] || header_details['UNPLEDGED_ADX_ID'],
             broker_instructions: broker_instructions_from_header_details(header_details),
             delivery_instructions: delivery_instructions_from_header_details(header_details),
             securities: format_securities(securities),
@@ -592,7 +594,7 @@ module MAPI
           end
         end
 
-        def self.fake_header_details(request_id, end_date, status)
+        def self.fake_header_details(request_id, end_date, status, form_type = nil)
           rng = Random.new(request_id)
           fake_data = fake('securities_release_request_details')
           names = fake_data['names']
@@ -608,6 +610,7 @@ module MAPI
           created_by_offset = rng.rand(0..names.length-1)
           created_by = fake_data['usernames'][created_by_offset]
           created_by_name = names[created_by_offset]
+          form_type ||= rng.rand(70..73)
           {
             'REQUEST_ID' => request_id,
             'PLEDGE_TYPE' => pledge_type,
@@ -628,12 +631,14 @@ module MAPI
             'TRADE_DATE' => submitted_date,
             'CREATED_BY' => created_by,
             'CREATED_BY_NAME' => created_by_name,
-            'FORM_TYPE' => rng.rand(70..73),
+            'FORM_TYPE' => form_type,
             'STATUS' => status,
             'SUBMITTED_DATE' => submitted_date,
             'SUBMITTED_BY' => created_by_name,
             'AUTHORIZED_BY' => authorized ? names.sample(random: rng) : nil,
-            'AUTHORIZED_DATE' => authorized ? authorized_date : nil
+            'AUTHORIZED_DATE' => authorized ? authorized_date : nil,
+            'PLEDGED_ADX_ID' => [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SECURITIES_RELEASE].include?(form_type) ? rng.rand(1000..9999) : nil,
+            'UNPLEDGED_ADX_ID' => [SSKFormType::SAFEKEPT_DEPOSIT, SSKFormType::SAFEKEPT_RELEASE].include?(form_type) ? rng.rand(1000..9999) : nil
           }
         end
 
