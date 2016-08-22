@@ -1,6 +1,48 @@
 require 'rails_helper'
 
 RSpec.describe Security, :type => :model do
+  describe 'validations' do
+    describe '`cusip_format`' do
+      let(:cusip) { SecureRandom.hex }
+      let(:cusip_validator) { instance_double(SecurityIdentifiers::CUSIP, :valid? => true ) }
+      let(:call_validation) { subject.send(:cusip_format) }
+
+      before { allow(SecurityIdentifiers::CUSIP).to receive(:new).and_return(cusip_validator) }
+
+      it 'is called as a validator' do
+        expect(subject).to receive(:cusip_format)
+        subject.valid?
+      end
+      it 'does not add an error if there is no `cusip`' do
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      describe 'when there is a value for `cusip`' do
+        let(:cusip) { SecureRandom.hex.upcase }
+        before { subject.cusip = cusip }
+
+        it 'creates a new instance of `SecurityIdentifiers::CUSIP` with the provided cusip' do
+          expect(SecurityIdentifiers::CUSIP).to receive(:new).with(cusip).and_return(cusip_validator)
+          call_validation
+        end
+        it 'adds an errorif `SecurityIdentifiers::CUSIP#valid?` returns false' do
+          allow(cusip_validator).to receive(:valid?).and_return(false)
+          expect(subject.errors).to receive(:add).with(:cusip, :invalid)
+          call_validation
+        end
+        it 'does not add an error if `SecurityIdentifiers::CUSIP#valid?` returns true' do
+          allow(cusip_validator).to receive(:valid?).and_return(true)
+          expect(subject.errors).not_to receive(:add)
+          call_validation
+        end
+        it 'adds an error if `SecurityIdentifiers::CUSIP#valid?` raises a `SecurityIdentifiers::InvalidFormat` error' do
+          allow(cusip_validator).to receive(:valid?).and_raise(SecurityIdentifiers::InvalidFormat)
+          expect(subject.errors).to receive(:add).with(:cusip, :invalid)
+          call_validation
+        end
+      end
+    end
+  end
   describe 'class methods' do
     describe '`from_json`' do
       it 'creates a Security from a JSONed hash' do

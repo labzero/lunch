@@ -1,11 +1,15 @@
 class Security
   include ActiveModel::Model
+  include ActiveModel::Validations
+  include SecurityIdentifiers::Validations
 
   RELEASE_REQUEST_PARAMETERS = [:cusip, :description, :original_par, :payment_amount].freeze
   OTHER_PARAMETERS = [:settlement_amount, :custodian_name, :custody_account_number, :custody_account_type, :security_pledge_type, :pool_number, :reg_id, :coupon_rate, :factor, :current_par, :price, :market_value, :maturity_date, :factor_date, :price_date, :eligibility, :authorized_by, :borrowing_capacity].freeze
   ACCESSIBLE_ATTRS = RELEASE_REQUEST_PARAMETERS + OTHER_PARAMETERS
 
   attr_accessor *ACCESSIBLE_ATTRS
+
+  validate :cusip_format
 
   def self.from_json(json)
     from_hash(JSON.parse(json).with_indifferent_access)
@@ -44,6 +48,19 @@ class Security
 
   def cusip=(cusip)
     @cusip = cusip.try(:upcase)
+  end
+
+  private
+
+  def cusip_format
+    if cusip
+      cusip_valid = begin
+        !!SecurityIdentifiers::CUSIP.new(cusip).valid?
+      rescue SecurityIdentifiers::InvalidFormat
+        false
+      end
+      errors.add(:cusip, :invalid) unless cusip_valid
+    end
   end
 
 end

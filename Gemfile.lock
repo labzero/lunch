@@ -435,6 +435,7 @@ GEM
       json (~> 1.7, >= 1.7.7)
       rdoc (~> 4.0)
     securid (0.2.6)
+    security_identifiers (0.1.1)
     selenium-webdriver (2.53.3)
       childprocess (~> 0.5)
       rubyzip (~> 1.0)
@@ -572,6 +573,7 @@ DEPENDENCIES
   savon
   sdoc
   securid
+  security_identifiers
   selenium-webdriver
   shoulda-callback-matchers
   shoulda-matchers

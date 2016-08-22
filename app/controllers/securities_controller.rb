@@ -1,6 +1,7 @@
 class SecuritiesController < ApplicationController
   include CustomFormattingHelper
   include ContactInformationHelper
+  include ActionView::Helpers::TextHelper
 
   before_action only: [:view_release, :authorize_request, :view_request] do
     authorize :security, :authorize?
@@ -252,22 +253,29 @@ class SecuritiesController < ApplicationController
       end
       unless error
         data_start_index = nil
+        invalid_cusips = []
         spreadsheet.each do |row|
           if data_start_index
-            if type == :release
-              securities << Security.from_hash({
-                cusip: row[data_start_index],
+            cusip = row[data_start_index]
+            security = if type == :release
+              Security.from_hash({
+                cusip: cusip,
                 description: row[data_start_index + 1],
                 original_par: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
                 payment_amount: (row[data_start_index + 3].to_i if row[data_start_index + 3])
               })
             elsif type == :pledge || type == :safekeep
-              securities << Security.from_hash({
-                cusip: row[data_start_index],
+              Security.from_hash({
+                cusip: cusip,
                 original_par: (row[data_start_index + 1].to_i if row[data_start_index + 1]),
                 settlement_amount: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
                 custodian_name: (row[data_start_index + 3] if row[data_start_index + 3])
               })
+            end
+            if security.valid?
+              securities << security
+            elsif security.errors[:cusip].present?
+              invalid_cusips << security.cusip
             end
           else
             row.each_with_index do |cell, i|
@@ -277,7 +285,10 @@ class SecuritiesController < ApplicationController
           end
         end
         if data_start_index
-          if securities.empty?
+          invalid_cusips.select!(&:present?)
+          if invalid_cusips.present?
+            error = I18n.t('securities.upload_errors.invalid_cusips', cusips: invalid_cusips.join(', '))
+          elsif securities.empty?
             error = I18n.t('securities.upload_errors.generic')
           else
             populate_securities_table_data_view_variable(type, securities)
@@ -290,7 +301,7 @@ class SecuritiesController < ApplicationController
     else
       error = I18n.t('securities.upload_errors.unsupported_mime_type')
     end
-    render json: {html: html, form_data: (securities.to_json if securities && !securities.empty?), error: (error if error)}, content_type: request.format
+    render json: {html: html, form_data: (securities.to_json if securities && !securities.empty?), error: (simple_format(error) if error)}, content_type: request.format
   end
 
   def download_pledge

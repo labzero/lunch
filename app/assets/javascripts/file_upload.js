@@ -30,6 +30,7 @@ $(function () {
         if (data.result.error) {
           failUpload(e, data.result.error); // For IE
         } else {
+          dropZone.hide();
           if (resultsContainerClass) {
             $('.' + resultsContainerClass).html(data.result.html);
           };
@@ -41,7 +42,6 @@ $(function () {
     },
     always: function(e, data) {
       dropZone.removeClass('file-uploading');
-      dropZone.hide();
       progressBar.css('width', '0%');
       jqXHR = false;
     },
@@ -55,7 +55,7 @@ $(function () {
   function toggleUploadError(errorClass, active, errorMessage) {
     var $errorNode = errorClass ? $('.' + errorClass) : null;
     if ($errorNode && active) {
-      errorMessage ? $errorNode.text(errorMessage) : null;
+      errorMessage ? $errorNode.html(errorMessage) : null;
       $errorNode.show();
     } else if ($errorNode) {
       $errorNode.hide();

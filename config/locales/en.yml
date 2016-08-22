@@ -229,6 +229,10 @@ en:
             securities:
               payment_amount: When 'Versus Payment' is selected, each security must have a settlement amount.
               original_par: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
+        security:
+          attributes:
+            cusip:
+              invalid: 'The following CUSIP is invalid: %{value}.\nPlease update your file with the correct CUSIP.'
   activerecord:
     attributes:
       user:
@@ -1332,6 +1336,7 @@ en:
       cannot_open: We couldn't open your file. Please verify that you've selected the correct file and try again.
       unsupported_mime_type: Your file does not appear to be an Excel file. Please verify that you've selected the correct file and try again.
       generic: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
+      invalid_cusips: "The following CUSIPs are invalid: %{cusips}.\nPlease update your file with the correct CUSIPs."
   reports:
     meta_title: FHLB - Reports
     title: Reports

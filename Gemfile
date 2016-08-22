@@ -92,6 +92,9 @@ gem 'premailer-rails'
 # for profiling
 gem 'ruby-prof', require: false
 
+# for validating CUSIPs
+gem 'security_identifiers'
+
 group :production, :development do
   gem 'newrelic_rpm'
 end

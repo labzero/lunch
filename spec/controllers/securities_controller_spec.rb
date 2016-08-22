@@ -1,6 +1,7 @@
 require 'rails_helper'
 include CustomFormattingHelper
 include ContactInformationHelper
+include ActionView::Helpers::TextHelper
 
 RSpec.describe SecuritiesController, type: :controller do
   login_user
@@ -586,7 +587,8 @@ RSpec.describe SecuritiesController, type: :controller do
   describe 'POST upload_securities' do
     uploaded_file = excel_fixture_file_upload('sample-securities-upload.xlsx')
     headerless_file = excel_fixture_file_upload('sample-securities-upload-headerless.xlsx')
-    let(:security) { instance_double(Security) }
+    let(:security) { instance_double(Security, :valid? => true) }
+    let(:invalid_security) { instance_double(Security, :valid? => false, errors: {}) }
     let(:sample_securities_upload_array) { [security,security,security,security,security] }
     let(:html_response_string) { SecureRandom.hex }
     let(:form_fields_html_response_string) { SecureRandom.hex }
@@ -678,6 +680,30 @@ RSpec.describe SecuritiesController, type: :controller do
       call_action
       expect(parsed_response_body[:error]).to be_nil
     end
+    it 'does not add invalid securities to its `form_data` response' do
+      allow(Security).to receive(:from_hash).and_return(security, invalid_security)
+      expect(parsed_response_body[:form_data]).to eq([security].to_json)
+    end
+    describe 'checking if a CUSIP is valid' do
+      let(:invalid_cusip_1) { SecureRandom.hex }
+      let(:invalid_cusip_2) { SecureRandom.hex }
+
+      before do
+        allow(Security).to receive(:from_hash).and_return(security, invalid_security, invalid_security, security, security)
+        allow(invalid_security).to receive(:errors).and_return({cusip: ['some message']})
+        allow(invalid_security).to receive(:cusip).and_return(invalid_cusip_1, invalid_cusip_2)
+      end
+
+      it 'returns a json object with an error message that enumerates the invalid cusips if they are present' do
+        call_action
+        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.invalid_cusips', cusips: [invalid_cusip_1, invalid_cusip_2].join(', '))))
+      end
+      it 'ignores errors due to a blank CUSIP' do
+        allow(invalid_security).to receive(:cusip).and_return('', invalid_cusip_2)
+        call_action
+        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.invalid_cusips', cusips: [invalid_cusip_2].join(', '))))
+      end
+    end
     describe 'when the uploaded file does not contain a header row with `CUSIP` as a value' do
       let(:call_action) { post :upload_securities, file: headerless_file, type: :release }
       it 'renders a json object with a nil value for `html`' do
@@ -686,7 +712,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'renders a json object with a generic error messages' do
         call_action
-        expect(parsed_response_body[:error]).to eq(I18n.t('securities.upload_errors.generic'))
+        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.generic')))
       end
     end
     describe 'when the MIME type of the uploaded file is not in the list of accepted types' do
@@ -695,7 +721,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
       it 'renders a json object with a specific error messages' do
         call_action
-        expect(parsed_response_body[:error]).to eq(I18n.t('securities.upload_errors.unsupported_mime_type'))
+        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.unsupported_mime_type')))
       end
       it 'renders a json object with a nil value for `html`' do
         call_action
@@ -712,7 +738,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
       it 'renders a json object with a generic error messages' do
         call_action
-        expect(parsed_response_body[:error]).to eq(I18n.t('securities.upload_errors.generic'))
+        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.generic')))
       end
       it 'renders a json object with a nil value for `html`' do
         call_action
@@ -729,7 +755,7 @@ RSpec.describe SecuritiesController, type: :controller do
 
         it 'renders a json object with a specific error messages' do
           call_action
-          expect(parsed_response_body[:error]).to eq(I18n.t('securities.upload_errors.cannot_open'))
+          expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.cannot_open')))
         end
         it 'renders a json object with a nil value for `html`' do
           call_action
