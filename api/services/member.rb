@@ -1420,6 +1420,22 @@ module MAPI
             (start_date..end_date)).to_json
         end
 
+        relative_post '/:id/securities/intake' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            post_body_json = JSON.parse(request.body.read)
+            user = post_body_json['user']
+            request_id = MAPI::Services::Member::SecuritiesRequests.create_intake(self,
+                                                                            params['id'].to_i,
+                                                                            user['username'],
+                                                                            user['full_name'],
+                                                                            user['session_id'],
+                                                                            post_body_json['broker_instructions'] || {},
+                                                                            post_body_json['delivery_instructions'] || {},
+                                                                            post_body_json['securities'] || [])
+            {request_id: request_id}
+          end
+        end
+
         relative_post '/:id/securities/release' do
           MAPI::Services::Member.rescued_json_response(self) do
             post_body_json = JSON.parse(request.body.read)

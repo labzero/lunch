@@ -182,6 +182,38 @@ module MAPI
         end
       end
 
+      swagger_model :SecuritiesIntake do
+        key :required, %i(user broker_instructions delivery_instructions securities)
+
+        property :request_id do
+          key :type, :string
+          key :description, 'The ID of the request'
+        end
+
+        property :user do
+          key :type, :User
+          key :description, 'The user information'
+        end
+
+        property :broker_instructions do
+          key :type, :BrokerInstructions
+          key :description, 'The broker instructions for this intake'
+        end
+
+        property :delivery_instructions do
+          key :type, :DeliveryInstructions
+          key :description, 'The delivery instructions for this intake'
+        end
+
+        property :securities do
+          key :type, :array
+          key :description, 'An array of securities to be included in the intake request.'
+          items do
+            key :'$ref', :Security
+          end
+        end
+      end
+
       swagger_model :SecuritiesRelease do
         key :required, %i(user broker_instructions delivery_instructions securities)
 

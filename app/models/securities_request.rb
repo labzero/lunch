@@ -1,4 +1,4 @@
-class SecuritiesReleaseRequest
+class SecuritiesRequest
   include ActiveModel::Model
 
   TRANSACTION_CODES = {
@@ -37,7 +37,7 @@ class SecuritiesReleaseRequest
     dtc: :dtc_credit_account_number,
     mutual_fund: :mutual_fund_account_number,
     physical_securities: :physical_securities_credit_account_number
-  }
+  }.freeze
 
   OTHER_PARAMETERS = [:request_id,
                       :delivery_type,
@@ -45,9 +45,9 @@ class SecuritiesReleaseRequest
                       :account_number,
                       :pledge_type].freeze
 
-  ACCESSIBLE_ATTRS = BROKER_INSTRUCTION_KEYS + OTHER_PARAMETERS + DELIVERY_INSTRUCTION_KEYS.values.flatten
+  ACCESSIBLE_ATTRS = (BROKER_INSTRUCTION_KEYS + OTHER_PARAMETERS + DELIVERY_INSTRUCTION_KEYS.values.flatten).freeze
 
-  MAX_DATE_RESTRICTION = 3.months.freeze
+  MAX_DATE_RESTRICTION = 3.months
 
   attr_accessor *ACCESSIBLE_ATTRS
   attr_reader :securities
@@ -134,7 +134,7 @@ class SecuritiesReleaseRequest
     if new_value.is_a?(String) || new_value.is_a?(Numeric) || new_value.nil? || new_value.is_a?(FalseClass)
       @request_id = new_value.present? ? new_value : nil
     else
-      raise ArgumentError, '`request_id` must be a string, number or blank' 
+      raise ArgumentError, '`request_id` must be a string, number or blank'
     end
   end
 

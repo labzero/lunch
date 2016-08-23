@@ -340,8 +340,8 @@ RSpec.describe SecuritiesController, type: :controller do
   describe 'GET view_release' do
     allow_policy :security, :authorize?
     let(:request_id) { SecureRandom.hex }
-    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest) }
-    let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_release_request) }
+    let(:securities_request) { instance_double(SecuritiesRequest) }
+    let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_request) }
     let(:call_action) { get :view_release, request_id: request_id }
 
     before do
@@ -369,9 +369,9 @@ RSpec.describe SecuritiesController, type: :controller do
       expect(service).to receive(:submitted_request).with(request_id)
       call_action
     end
-    it 'sets `@securities_release_request` to the result of `SecuritiesRequestService#request_id`' do
+    it 'sets `@securities_request` to the result of `SecuritiesRequestService#request_id`' do
       call_action
-      expect(assigns[:securities_release_request]).to eq(securities_release_request)
+      expect(assigns[:securities_request]).to eq(securities_request)
     end
     it 'calls `populate_view_variables`' do
       expect(controller).to receive(:populate_view_variables).with(:release)
@@ -386,8 +386,8 @@ RSpec.describe SecuritiesController, type: :controller do
   describe 'GET view_request' do
     let(:type) { [:release, :pledge, :safekeep].sample }
     let(:request_id) { SecureRandom.hex }
-    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest) }
-    let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_release_request) }
+    let(:securities_request) { instance_double(SecuritiesRequest) }
+    let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_request) }
     let(:call_action) { get :view_request, request_id: request_id, type: type }
     allow_policy :security, :authorize?
 
@@ -416,9 +416,9 @@ RSpec.describe SecuritiesController, type: :controller do
       expect(service).to receive(:submitted_request).with(request_id)
       call_action
     end
-    it 'sets `@securities_release_request` to the result of `SecuritiesRequestService#request_id`' do
+    it 'sets `@securities_request` to the result of `SecuritiesRequestService#request_id`' do
       call_action
-      expect(assigns[:securities_release_request]).to eq(securities_release_request)
+      expect(assigns[:securities_request]).to eq(securities_request)
     end
     it 'calls `populate_view_variables`' do
       expect(controller).to receive(:populate_view_variables)
@@ -449,20 +449,20 @@ RSpec.describe SecuritiesController, type: :controller do
   end
 
   context 'new securities requests (pledged and safekept)' do
-    let(:securities_release_request) { double(SecuritiesReleaseRequest,
+    let(:securities_request) { double(SecuritiesRequest,
                                               :settlement_date => Time.zone.now,
                                               :trade_date => Time.zone.now,
-                                              :transaction_code => SecuritiesReleaseRequest::TRANSACTION_CODES.values[rand(0..1)],
-                                              :settlement_type => SecuritiesReleaseRequest::SETTLEMENT_TYPES.values[rand(0..1)],
-                                              :delivery_type => SecuritiesReleaseRequest::DELIVERY_TYPES.values[rand(0..3)],
+                                              :transaction_code => SecuritiesRequest::TRANSACTION_CODES.values[rand(0..1)],
+                                              :settlement_type => SecuritiesRequest::SETTLEMENT_TYPES.values[rand(0..1)],
+                                              :delivery_type => SecuritiesRequest::DELIVERY_TYPES.values[rand(0..3)],
                                               :securities => {},
                                               :account_number= => nil ) }
     let(:member_service_instance) { double('MembersService') }
     before do
       allow(MembersService).to receive(:new).with(request).and_return(member_service_instance)
-      allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
+      allow(SecuritiesRequest).to receive(:new).and_return(securities_request)
       allow(controller).to receive(:populate_view_variables) do
-        controller.instance_variable_set(:@securities_release_request, securities_release_request)
+        controller.instance_variable_set(:@securities_request, securities_request)
       end
     end
 
@@ -482,8 +482,8 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(subject).to receive(:populate_view_variables).with(:pledge)
         call_action
       end
-      it 'gets the `pledged_account_number` from the `MembersService` and assigns to `@securities_release_request.account_number`' do
-        expect(securities_release_request).to receive(:account_number=).with(member_details['pledged_account_number'])
+      it 'gets the `pledged_account_number` from the `MembersService` and assigns to `@securities_request.account_number`' do
+        expect(securities_request).to receive(:account_number=).with(member_details['pledged_account_number'])
         call_action
       end
       it 'renders its view' do
@@ -504,15 +504,15 @@ RSpec.describe SecuritiesController, type: :controller do
       before do
         allow(MembersService).to receive(:new).with(request).and_return(member_service_instance)
         allow(member_service_instance).to receive(:member).with(anything).and_return(member_details)
-        allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
+        allow(SecuritiesRequest).to receive(:new).and_return(securities_request)
       end
 
       it 'calls `populate_view_variables`' do
         expect(subject).to receive(:populate_view_variables).with(:safekeep)
         call_action
       end
-      it 'gets the `unpledged_account_number` from the `MembersService` and assigns to `@securities_release_request.account_number`' do
-        expect(securities_release_request).to receive(:account_number=).with(member_details['unpledged_account_number'])
+      it 'gets the `unpledged_account_number` from the `MembersService` and assigns to `@securities_request.account_number`' do
+        expect(securities_request).to receive(:account_number=).with(member_details['unpledged_account_number'])
         call_action
       end
       it 'renders its view' do
@@ -641,18 +641,18 @@ RSpec.describe SecuritiesController, type: :controller do
       call_action
     end
 
-    context 'pledge and safekeep' do
+    context 'intake' do
       let(:settlement_amount) { rand(9999..999999) }
       let(:custodian_name) { SecureRandom.hex }
       let(:call_action) { post :upload_securities, file: uploaded_file, type: [:pledge, :safekeep][rand(0..1)] }
       let(:securities_rows) {[
-        ['cusip', 'original par', 'settlement amount', 'custodian name'],
+        ['cusip', 'original par', 'settlement_amount', 'custodian name'],
         [cusip, original_par, settlement_amount, custodian_name]
       ]}
       let(:securities_rows_padding) {[
         [],
         [],
-        [nil, nil, 'cusip', 'original par', 'settlement amount', 'custodian name'],
+        [nil, nil, 'cusip', 'original par', 'settlement_amount', 'custodian name'],
         [nil, nil, cusip, original_par, settlement_amount, custodian_name]
       ]}
       it 'begins parsing data in the row and cell underneath the `cusip` header cell' do
@@ -770,29 +770,29 @@ RSpec.describe SecuritiesController, type: :controller do
   end
 
   describe 'POST submit_release' do
-    let(:securities_release_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
+    let(:securities_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
     let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_release_for_authorization: true, authorize_request: true) }
     let(:active_model_errors) { instance_double(ActiveModel::Errors, add: nil) }
-    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, :valid? => true, errors: active_model_errors) }
+    let(:securities_request) { instance_double(SecuritiesRequest, :valid? => true, errors: active_model_errors) }
     let(:error_message) { instance_double(String) }
-    let(:call_action) { post :submit_release, securities_release_request: securities_release_request_param }
+    let(:call_action) { post :submit_release, securities_request: securities_request_param }
 
     before do
       allow(controller).to receive(:current_member_id).and_return(member_id)
       allow(controller).to receive(:populate_view_variables)
       allow(controller).to receive(:prioritized_securities_request_error)
       allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service)
-      allow(SecuritiesReleaseRequest).to receive(:from_hash).and_return(securities_release_request)
+      allow(SecuritiesRequest).to receive(:from_hash).and_return(securities_request)
     end
-    it 'builds a SecuritiesReleaseRequest instance with the `securities_release_request` params' do
-      expect(SecuritiesReleaseRequest).to receive(:from_hash).with(securities_release_request_param)
+    it 'builds a SecuritiesRequest instance with the `securities_request` params' do
+      expect(SecuritiesRequest).to receive(:from_hash).with(securities_request_param)
       call_action
     end
-    it 'sets @securities_release_request' do
+    it 'sets @securities_request' do
       call_action
-      expect(assigns[:securities_release_request]).to eq(securities_release_request)
+      expect(assigns[:securities_request]).to eq(securities_request)
     end
-    describe 'when the securities_release_request is valid' do
+    describe 'when the securities_request is valid' do
       it 'creates a new instance of SecuritiesRequestService with the `current_member_id`' do
         expect(SecuritiesRequestService).to receive(:new).with(member_id, anything).and_return(securities_request_service)
         call_action
@@ -801,8 +801,8 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(securities_request_service)
         call_action
       end
-      it 'calls `submit_release_for_authorization` on the SecuritiesRequestService instance with the `securities_release_request`' do
-        expect(securities_request_service).to receive(:submit_release_for_authorization).with(securities_release_request, anything).and_return(true)
+      it 'calls `submit_release_for_authorization` on the SecuritiesRequestService instance with the `securities_request`' do
+        expect(securities_request_service).to receive(:submit_release_for_authorization).with(securities_request, anything).and_return(true)
         call_action
       end
       it 'calls `submit_release_for_authorization` on the SecuritiesRequestService instance with the current_user' do
@@ -855,7 +855,7 @@ RSpec.describe SecuritiesController, type: :controller do
           call_action
         end
         it 'calls `prioritized_securities_request_error` with the securities_request instance' do
-          expect(controller).to receive(:prioritized_securities_request_error).with(securities_release_request)
+          expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
           call_action
         end
         it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
@@ -877,17 +877,12 @@ RSpec.describe SecuritiesController, type: :controller do
         end
       end
     end
-    describe 'when the securities_release_request is invalid' do
-      before { allow(securities_release_request).to receive(:valid?).and_return(false) }
+    describe 'when the securities_request is invalid' do
+      before { allow(securities_request).to receive(:valid?).and_return(false) }
 
       it 'calls `prioritized_securities_request_error` with the securities_request instance' do
-        expect(controller).to receive(:prioritized_securities_request_error).with(securities_release_request)
+        expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
         call_action
-      end
-      it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
-        allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
-        call_action
-        expect(assigns[:error_message]).to eq(error_message)
       end
       it 'renders the `edit_release` view' do
         call_action
@@ -906,7 +901,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:request_id) { double('A Request ID') }
       allow_policy :security, :authorize?
       before do
-        allow(securities_release_request).to receive(:request_id).and_return(request_id)
+        allow(securities_request).to receive(:request_id).and_return(request_id)
       end
       it 'checks the SecurID details if no errors are found in the data' do
         allow(active_model_errors).to receive(:present?).and_return(false)
@@ -937,7 +932,7 @@ RSpec.describe SecuritiesController, type: :controller do
             call_action
           end
           it 'calls `prioritized_securities_request_error` with the securities_request instance' do
-            expect(controller).to receive(:prioritized_securities_request_error).with(securities_release_request)
+            expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
             call_action
           end
           it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
@@ -969,7 +964,7 @@ RSpec.describe SecuritiesController, type: :controller do
           call_action
         end
         it 'calls `prioritized_securities_request_error` with the securities_request instance' do
-          expect(controller).to receive(:prioritized_securities_request_error).with(securities_release_request)
+          expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
           call_action
         end
         it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
@@ -1078,7 +1073,7 @@ RSpec.describe SecuritiesController, type: :controller do
   describe 'POST `authorize_request`' do
     allow_policy :security, :authorize?
     let(:request_id) { SecureRandom.hex }
-    let(:call_action) { post :authorize_request, securities_release_request: {request_id: request_id} }
+    let(:call_action) { post :authorize_request, securities_request: {request_id: request_id} }
     let(:securities_request_service) { instance_double(SecuritiesRequestService, authorize_request: true) }
 
     before do
@@ -1138,18 +1133,18 @@ RSpec.describe SecuritiesController, type: :controller do
 
     describe '`populate_transaction_code_dropdown_variables`' do
       transaction_code_dropdown = [
-        [I18n.t('securities.release.transaction_code.standard'), SecuritiesReleaseRequest::TRANSACTION_CODES[:standard]],
-        [I18n.t('securities.release.transaction_code.repo'), SecuritiesReleaseRequest::TRANSACTION_CODES[:repo]]
+        [I18n.t('securities.release.transaction_code.standard'), SecuritiesRequest::TRANSACTION_CODES[:standard]],
+        [I18n.t('securities.release.transaction_code.repo'), SecuritiesRequest::TRANSACTION_CODES[:repo]]
       ]
-      let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, transaction_code: nil) }
-      let(:call_method) { controller.send(:populate_transaction_code_dropdown_variables, securities_release_request) }
+      let(:securities_request) { instance_double(SecuritiesRequest, transaction_code: nil) }
+      let(:call_method) { controller.send(:populate_transaction_code_dropdown_variables, securities_request) }
       it 'sets `@transaction_code_dropdown`' do
         call_method
         expect(assigns[:transaction_code_dropdown]).to eq(transaction_code_dropdown)
       end
       describe 'setting `@transaction_code_defaults`' do
         describe 'when the `transaction_code` is `:standard`' do
-          before { allow(securities_release_request).to receive(:transaction_code).and_return(:standard) }
+          before { allow(securities_request).to receive(:transaction_code).and_return(:standard) }
           it "has a `text` string of `#{transaction_code_dropdown.first.first}`" do
             call_method
             expect(assigns[:transaction_code_defaults][:text]).to eq(transaction_code_dropdown.first.first)
@@ -1160,7 +1155,7 @@ RSpec.describe SecuritiesController, type: :controller do
           end
         end
         describe 'when the `transaction_code` is `:repo`' do
-          before { allow(securities_release_request).to receive(:transaction_code).and_return(:repo) }
+          before { allow(securities_request).to receive(:transaction_code).and_return(:repo) }
           it "has a `text` string of `#{transaction_code_dropdown.last.first}`" do
             call_method
             expect(assigns[:transaction_code_defaults][:text]).to eq(transaction_code_dropdown.last.first)
@@ -1185,18 +1180,18 @@ RSpec.describe SecuritiesController, type: :controller do
 
     describe '`populate_settlement_type_dropdown_variables`' do
       settlement_type_dropdown = [
-        [I18n.t('securities.release.settlement_type.free'), SecuritiesReleaseRequest::SETTLEMENT_TYPES[:free]],
-        [I18n.t('securities.release.settlement_type.vs_payment'), SecuritiesReleaseRequest::SETTLEMENT_TYPES[:vs_payment]]
+        [I18n.t('securities.release.settlement_type.free'), SecuritiesRequest::SETTLEMENT_TYPES[:free]],
+        [I18n.t('securities.release.settlement_type.vs_payment'), SecuritiesRequest::SETTLEMENT_TYPES[:vs_payment]]
       ]
-      let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, settlement_type: nil) }
-      let(:call_method) { controller.send(:populate_settlement_type_dropdown_variables, securities_release_request) }
+      let(:securities_request) { instance_double(SecuritiesRequest, settlement_type: nil) }
+      let(:call_method) { controller.send(:populate_settlement_type_dropdown_variables, securities_request) }
       it 'sets `@settlement_type_dropdown`' do
         call_method
         expect(assigns[:settlement_type_dropdown]).to eq(settlement_type_dropdown)
       end
       describe 'setting `@settlement_type_defaults`' do
         describe 'when the `settlement_type` is `:free`' do
-          before { allow(securities_release_request).to receive(:settlement_type).and_return(:free) }
+          before { allow(securities_request).to receive(:settlement_type).and_return(:free) }
           it "has a `text` string of `#{settlement_type_dropdown.first.first}`" do
             call_method
             expect(assigns[:settlement_type_defaults][:text]).to eq(settlement_type_dropdown.first.first)
@@ -1207,7 +1202,7 @@ RSpec.describe SecuritiesController, type: :controller do
           end
         end
         describe 'when the `settlement_type` is `:vs_payment`' do
-          before { allow(securities_release_request).to receive(:settlement_type).and_return(:vs_payment) }
+          before { allow(securities_request).to receive(:settlement_type).and_return(:vs_payment) }
           it "has a `text` string of `#{settlement_type_dropdown.last.first}`" do
             call_method
             expect(assigns[:settlement_type_defaults][:text]).to eq(settlement_type_dropdown.last.first)
@@ -1218,7 +1213,7 @@ RSpec.describe SecuritiesController, type: :controller do
           end
         end
         describe 'when the `settlement_type` is neither `:free` nor `:vs_payment`' do
-          before { allow(securities_release_request).to receive(:settlement_type).and_return(:free) }
+          before { allow(securities_request).to receive(:settlement_type).and_return(:free) }
           it "has a `text` string of `#{settlement_type_dropdown.first.first}`" do
             call_method
             expect(assigns[:settlement_type_defaults][:text]).to eq(settlement_type_dropdown.first.first)
@@ -1233,13 +1228,13 @@ RSpec.describe SecuritiesController, type: :controller do
 
     describe '`populate_delivery_instructions_dropdown_variables`' do
       delivery_instructions_dropdown = [
-        [I18n.t('securities.release.delivery_instructions.dtc'), SecuritiesReleaseRequest::DELIVERY_TYPES[:dtc]],
-        [I18n.t('securities.release.delivery_instructions.fed'), SecuritiesReleaseRequest::DELIVERY_TYPES[:fed]],
-        [I18n.t('securities.release.delivery_instructions.mutual_fund'), SecuritiesReleaseRequest::DELIVERY_TYPES[:mutual_fund]],
-        [I18n.t('securities.release.delivery_instructions.physical_securities'), SecuritiesReleaseRequest::DELIVERY_TYPES[:physical_securities]]
+        [I18n.t('securities.release.delivery_instructions.dtc'), SecuritiesRequest::DELIVERY_TYPES[:dtc]],
+        [I18n.t('securities.release.delivery_instructions.fed'), SecuritiesRequest::DELIVERY_TYPES[:fed]],
+        [I18n.t('securities.release.delivery_instructions.mutual_fund'), SecuritiesRequest::DELIVERY_TYPES[:mutual_fund]],
+        [I18n.t('securities.release.delivery_instructions.physical_securities'), SecuritiesRequest::DELIVERY_TYPES[:physical_securities]]
       ]
-      let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, delivery_type: nil) }
-      let(:call_method) { controller.send(:populate_delivery_instructions_dropdown_variables, securities_release_request) }
+      let(:securities_request) { instance_double(SecuritiesRequest, delivery_type: nil) }
+      let(:call_method) { controller.send(:populate_delivery_instructions_dropdown_variables, securities_request) }
       it 'sets `@delivery_instructions_dropdown`' do
         call_method
         expect(assigns[:delivery_instructions_dropdown]).to eq(delivery_instructions_dropdown)
@@ -1247,7 +1242,7 @@ RSpec.describe SecuritiesController, type: :controller do
       describe 'setting `@delivery_instructions_defaults`' do
         [:dtc, :fed, :mutual_fund, :physical_securities].each_with_index do |delivery_type, i|
           describe "when the `delivery_type` is `#{delivery_type}`" do
-            before { allow(securities_release_request).to receive(:delivery_type).and_return(delivery_type) }
+            before { allow(securities_request).to receive(:delivery_type).and_return(delivery_type) }
             it "has a `text` string of `#{delivery_instructions_dropdown[i].first}`" do
               call_method
               expect(assigns[:delivery_instructions_defaults][:text]).to eq(delivery_instructions_dropdown[i].first)
@@ -1258,7 +1253,7 @@ RSpec.describe SecuritiesController, type: :controller do
             end
           end
         end
-        describe "when the `delivery_type` is not one of: `#{SecuritiesReleaseRequest::DELIVERY_TYPES.keys}`" do
+        describe "when the `delivery_type` is not one of: `#{SecuritiesRequest::DELIVERY_TYPES.keys}`" do
           it "has a `text` string of `#{delivery_instructions_dropdown.first.first}`" do
             call_method
             expect(assigns[:delivery_instructions_defaults][:text]).to eq(delivery_instructions_dropdown.first.first)
@@ -1279,12 +1274,12 @@ RSpec.describe SecuritiesController, type: :controller do
         original_par: SecureRandom.hex
       } }
       let(:securities) { [instance_double(Security)] }
-      let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, securities: securities, :securities= => nil, trade_date: nil, :trade_date= => nil, settlement_date: nil, :settlement_date= => nil) }
+      let(:securities_request) { instance_double(SecuritiesRequest, securities: securities, :securities= => nil, trade_date: nil, :trade_date= => nil, settlement_date: nil, :settlement_date= => nil) }
       let(:call_action) { controller.send(:populate_view_variables, :release) }
       let(:date_restrictions) { instance_double(Hash) }
 
       before do
-        allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
+        allow(SecuritiesRequest).to receive(:new).and_return(securities_request)
         allow(controller).to receive(:populate_transaction_code_dropdown_variables)
         allow(controller).to receive(:populate_settlement_type_dropdown_variables)
         allow(controller).to receive(:populate_delivery_instructions_dropdown_variables)
@@ -1294,8 +1289,8 @@ RSpec.describe SecuritiesController, type: :controller do
 
       it 'sets `@pledge_type_dropdown`' do
         pledge_type_dropdown = [
-          [I18n.t('securities.release.pledge_type.sbc'), SecuritiesReleaseRequest::PLEDGE_TYPES[:sbc]],
-          [I18n.t('securities.release.pledge_type.standard'), SecuritiesReleaseRequest::PLEDGE_TYPES[:standard]]
+          [I18n.t('securities.release.pledge_type.sbc'), SecuritiesRequest::PLEDGE_TYPES[:sbc]],
+          [I18n.t('securities.release.pledge_type.standard'), SecuritiesRequest::PLEDGE_TYPES[:standard]]
         ]
         call_action
         expect(assigns[:pledge_type_dropdown]).to eq(pledge_type_dropdown)
@@ -1310,56 +1305,56 @@ RSpec.describe SecuritiesController, type: :controller do
           expect(assigns[:title]).to eq(title)
         end
       end
-      it 'calls `populate_transaction_code_dropdown_variables` with the @securities_release_request' do
-        expect(controller).to receive(:populate_transaction_code_dropdown_variables).with(securities_release_request)
+      it 'calls `populate_transaction_code_dropdown_variables` with the @securities_request' do
+        expect(controller).to receive(:populate_transaction_code_dropdown_variables).with(securities_request)
         call_action
       end
-      it 'calls `populate_settlement_type_dropdown_variables` with the @securities_release_request' do
-        expect(controller).to receive(:populate_settlement_type_dropdown_variables).with(securities_release_request)
+      it 'calls `populate_settlement_type_dropdown_variables` with the @securities_request' do
+        expect(controller).to receive(:populate_settlement_type_dropdown_variables).with(securities_request)
         call_action
       end
-      it 'calls `populate_delivery_instructions_dropdown_variables` with the @securities_release_request' do
-        expect(controller).to receive(:populate_delivery_instructions_dropdown_variables).with(securities_release_request)
+      it 'calls `populate_delivery_instructions_dropdown_variables` with the @securities_request' do
+        expect(controller).to receive(:populate_delivery_instructions_dropdown_variables).with(securities_request)
         call_action
       end
-      it 'sets `@securities_release_request`' do
+      it 'sets `@securities_request`' do
         call_action
-        expect(assigns[:securities_release_request]).to eq(securities_release_request)
+        expect(assigns[:securities_request]).to eq(securities_request)
       end
-      it 'creates a new instance of SecuritiesReleaseRequest if `@securities_release_request` not already set' do
-        expect(SecuritiesReleaseRequest).to receive(:new).and_return(securities_release_request)
-        call_action
-      end
-      it 'does not create a new instance of SecuritiesReleaseRequest if `securities_release_request` is already set' do
-        controller.instance_variable_set(:@securities_release_request, securities_release_request)
-        expect(SecuritiesReleaseRequest).not_to receive(:new)
+      it 'creates a new instance of SecuritiesRequest if `@securities_request` not already set' do
+        expect(SecuritiesRequest).to receive(:new).and_return(securities_request)
         call_action
       end
-      it 'sets `securities_release_request.securities` to the `securities` param if it is present' do
+      it 'does not create a new instance of SecuritiesRequest if `securities_request` is already set' do
+        controller.instance_variable_set(:@securities_request, securities_request)
+        expect(SecuritiesRequest).not_to receive(:new)
+        call_action
+      end
+      it 'sets `securities_request.securities` to the `securities` param if it is present' do
         controller.params = ActionController::Parameters.new({securities: securities})
-        expect(securities_release_request).to receive(:securities=).with(securities)
+        expect(securities_request).to receive(:securities=).with(securities)
         call_action
       end
-      it 'does not set `securities_release_request.securities` if the `securities` param is not present' do
-        expect(securities_release_request).not_to receive(:securities=)
+      it 'does not set `securities_request.securities` if the `securities` param is not present' do
+        expect(securities_request).not_to receive(:securities=)
         call_action
       end
-      it 'sets `securities_release_request.trade_date` to today if there is not already a trade date' do
-        expect(securities_release_request).to receive(:trade_date=).with(Time.zone.today)
+      it 'sets `securities_request.trade_date` to today if there is not already a trade date' do
+        expect(securities_request).to receive(:trade_date=).with(Time.zone.today)
         call_action
       end
-      it 'does not set `securities_release_request.trade_date` if there is already a trade date' do
-        allow(securities_release_request).to receive(:trade_date).and_return(instance_double(Date))
-        expect(securities_release_request).not_to receive(:trade_date=)
+      it 'does not set `securities_request.trade_date` if there is already a trade date' do
+        allow(securities_request).to receive(:trade_date).and_return(instance_double(Date))
+        expect(securities_request).not_to receive(:trade_date=)
         call_action
       end
-      it 'sets `securities_release_request.settlement_date` to today if there is not already a settlement date' do
-        expect(securities_release_request).to receive(:settlement_date=).with(Time.zone.today)
+      it 'sets `securities_request.settlement_date` to today if there is not already a settlement date' do
+        expect(securities_request).to receive(:settlement_date=).with(Time.zone.today)
         call_action
       end
-      it 'does not set `securities_release_request.settlement_date` if there is already a settlment date' do
-        allow(securities_release_request).to receive(:settlement_date).and_return(instance_double(Date))
-        expect(securities_release_request).not_to receive(:settlement_date=)
+      it 'does not set `securities_request.settlement_date` if there is already a settlment date' do
+        allow(securities_request).to receive(:settlement_date).and_return(instance_double(Date))
+        expect(securities_request).not_to receive(:settlement_date=)
         call_action
       end
       it 'calls `populate_securities_table_data_view_variable` with the securities' do
@@ -1520,7 +1515,7 @@ RSpec.describe SecuritiesController, type: :controller do
 
     describe '`date_restrictions`' do
       let(:today) { Time.zone.today }
-      let(:max_date) { today + SecuritiesReleaseRequest::MAX_DATE_RESTRICTION }
+      let(:max_date) { today + SecuritiesRequest::MAX_DATE_RESTRICTION }
       let(:holidays) do
         holidays = []
         rand(2..4).times do
@@ -1557,7 +1552,7 @@ RSpec.describe SecuritiesController, type: :controller do
         it 'has a `min_date` of today' do
           expect(call_method[:min_date]).to eq(today)
         end
-        it 'has a `max_date` of today plus the `SecuritiesReleaseRequest::MAX_DATE_RESTRICTION`' do
+        it 'has a `max_date` of today plus the `SecuritiesRequest::MAX_DATE_RESTRICTION`' do
           expect(call_method[:max_date]).to eq(max_date)
         end
         describe 'the `invalid_dates` array' do
@@ -1580,7 +1575,7 @@ RSpec.describe SecuritiesController, type: :controller do
         securities: [SecureRandom.hex],
         base: [SecureRandom.hex]
       }}
-      let(:securities_request) { instance_double(SecuritiesReleaseRequest, errors: errors) }
+      let(:securities_request) { instance_double(SecuritiesRequest, errors: errors) }
       let(:call_method) { subject.send(:prioritized_securities_request_error, securities_request) }
 
       it 'returns nil if no errors are present on the securities_request' do

@@ -57,7 +57,7 @@ describe MAPI::ServiceApp do
       let(:call_method) { MAPI::Services::Member::SecuritiesRequests.requests(app, member_id) }
 
       describe 'when using fake data' do
-        names = fake('securities_release_request_details')['names']
+        names = fake('securities_requests')['names']
         let(:rng) { instance_double(Random, rand: 1) }
         let(:request_id) { rand(100000..999999) }
         let(:form_types) { MAPI::Services::Member::SecuritiesRequests::REQUEST_FORM_TYPE_MAPPING.keys }
@@ -194,7 +194,6 @@ describe MAPI::ServiceApp do
                                     'settlement_type' => rand(0..1) == 0 ? 'free' : 'vs_payment',
                                     'settlement_date' => settlement_date } }
       let(:delivery_type) { [ 'fed', 'dtc', 'mutual_fund', 'physical_securities' ][rand(0..3)] }
-      let(:delivery_columns) { [ SecureRandom.hex, SecureRandom.hex, SecureRandom.hex ] }
       let(:delivery_values) { [ SecureRandom.hex, SecureRandom.hex, SecureRandom.hex ] }
       let(:security) { {  'cusip' => SecureRandom.hex,
                           'description' => SecureRandom.hex,
@@ -648,7 +647,7 @@ describe MAPI::ServiceApp do
 
       end
 
-      describe '`create_release method`' do
+      describe '`create_release` method' do
         let(:app) { double(MAPI::ServiceApp, logger: double('logger'), settings: nil) }
         let(:member_id) { rand(100000..999999) }
         let(:delivery_type) { MAPI::Services::Member::SecuritiesRequests::DELIVERY_TYPE.keys[rand(0..3)] }
@@ -669,6 +668,7 @@ describe MAPI::ServiceApp do
                                 broker_instructions,
                                 delivery_instructions,
                                 securities ] }
+        let(:adx_type) { [:pledged, :unpledged].sample }
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_release(*method_params) }
 
         before do
@@ -679,11 +679,11 @@ describe MAPI::ServiceApp do
           before { allow(securities_request_module).to receive(:should_fake?).and_return(true) }
 
           it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
-            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything)
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything, :release)
             call_method
           end
           it 'calls `validate_broker_instructions` with the app as an arg' do
-            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app)
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, :release)
             call_method
           end
           it 'calls `validate_delivery_instructions` with the `delivery_instructions` arg' do
@@ -713,6 +713,7 @@ describe MAPI::ServiceApp do
           let(:sequence_result) { double('Sequence Result', to_i: next_id) }
           let(:adx_sql) { double('ADX SQL') }
           let(:ssk_sql) { double('SSK SQL') }
+          let(:adx_type) { [:pledged, :unpledged].sample }
 
           before do
             allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_delivery_columns).and_return(
@@ -730,7 +731,7 @@ describe MAPI::ServiceApp do
             allow(securities_request_module).to receive(:execute_sql_single_result).with(
               app,
               adx_sql,
-              "Pledged ADX ID").and_return(adx_id)
+              "ADX ID").and_return(adx_id)
             allow(securities_request_module).to receive(:execute_sql_single_result).with(
               app,
               ssk_sql,
@@ -1179,7 +1180,7 @@ describe MAPI::ServiceApp do
     end
 
     describe '`MAPI::Services::Member::SecuritiesRequests.fake_header_details`' do
-      fake_data = fake('securities_release_request_details')
+      fake_data = fake('securities_requests')
       names = fake_data['names']
       let(:request_id) { rand(1000..9999)}
       let(:end_date) { Time.zone.today - rand(0..7).days }
@@ -1314,14 +1315,14 @@ describe MAPI::ServiceApp do
       let(:request_id) { rand(1000..9999) }
       let(:settlement_type) { securities_request_module::SETTLEMENT_TYPE.values.sample }
       let(:rng) { instance_double(Random, rand: 1) }
-      let(:fake_data) { securities_request_module.fake('securities_release_request_details') }
+      let(:fake_data) { securities_request_module.fake('securities_requests') }
       let(:original_par) { rand(10000..999999) }
       let(:cusip) { fake_data['cusips'].sample }
       let(:description) { fake_data['descriptions'].sample }
 
       let(:call_method) { securities_request_module.fake_securities(request_id, settlement_type) }
       before do
-        allow(securities_request_module).to receive(:fake).with('securities_release_request_details').and_return(fake_data)
+        allow(securities_request_module).to receive(:fake).with('securities_requests').and_return(fake_data)
         allow(Random).to receive(:new).and_return(rng)
         allow(rng).to receive(:rand).with(eq(10000..999999)).and_return(original_par)
         allow(fake_data['cusips']).to receive(:sample).with(random: rng).and_return(cusip)
@@ -1483,15 +1484,16 @@ describe MAPI::ServiceApp do
       end
     end
     describe '`validate_broker_instructions` class method' do
-      let(:app) { instance_double(MAPI::ServiceApp) }
       let(:broker_instructions) {{
         'transaction_code' => securities_request_module::TRANSACTION_CODE.keys.sample,
         'trade_date' => instance_double(String),
         'settlement_type' => securities_request_module::SETTLEMENT_TYPE.keys.sample,
-        'settlement_date' => instance_double(String)
+        'settlement_date' => instance_double(String),
+        'pledge_type' => securities_request_module::PLEDGE_TYPE.keys.sample
       }}
       let(:today) { Time.zone.today }
-      let(:call_method) { securities_request_module.validate_broker_instructions(broker_instructions, app) }
+      let(:type) { [ :release, :intake ].sample }
+      let(:call_method) { securities_request_module.validate_broker_instructions(broker_instructions, app, type) }
 
       before do
         allow(securities_request_module).to receive(:dateify).and_return(today)
@@ -1499,29 +1501,38 @@ describe MAPI::ServiceApp do
       end
 
       it 'raises an error if `broker_instructions` is nil' do
-        expect{securities_request_module.validate_broker_instructions(nil, app)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, "broker_instructions must be a non-empty hash") do |error|
+        expect{securities_request_module.validate_broker_instructions(nil, app, type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, "broker_instructions must be a non-empty hash") do |error|
           expect(error.code).to eq(:broker_instructions)
         end
       end
       it 'raises an error if `broker_instructions` is an empty hash' do
-        expect{securities_request_module.validate_broker_instructions({}, app)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, "broker_instructions must be a non-empty hash") do |error|
+        expect{securities_request_module.validate_broker_instructions({}, app, type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, "broker_instructions must be a non-empty hash") do |error|
           expect(error.code).to eq(:broker_instructions)
         end
       end
       it 'raises an error if a key is missing' do
-        missing_key = broker_instructions.keys[rand(0..3)]
+        broker_instructions.delete('pledge_type')
+        missing_key = broker_instructions.keys.sample
         broker_instructions.delete(missing_key)
         expect{call_method}.to raise_error(MAPI::Shared::Errors::MissingFieldError, /broker_instructions must contain a value for \S+/) do |error|
           expect(error.code).to eq(missing_key)
         end
       end
+      it 'raises an error if `pledge_type` is missing (for intake only)' do
+        broker_instructions.delete('pledge_type')
+        expect{securities_request_module.validate_broker_instructions(broker_instructions, app, :intake)}.to raise_error(MAPI::Shared::Errors::ValidationError, /broker_instructions must contain a value for \S+/) do |error|
+          expect(error.code).to eq("pledge_type")
+        end
+      end
       it 'raises an error if `transaction_code` is out of range' do
+        type = :release
         broker_instructions['transaction_code'] = SecureRandom.hex
         expect{call_method}.to raise_error(MAPI::Shared::Errors::InvalidFieldError, /transaction_code must be set to one of the following values: \S/) do |error|
           expect(error.code).to eq('transaction_code')
         end
       end
       it 'raises an error if `settlement_type` is out of range' do
+        type = :release
         broker_instructions['settlement_type'] = SecureRandom.hex
         expect{call_method}.to raise_error(MAPI::Shared::Errors::InvalidFieldError, /settlement_type must be set to one of the following values: \S/) do |error|
           expect(error.code).to eq('settlement_type')
@@ -1604,6 +1615,7 @@ describe MAPI::ServiceApp do
                           'description' => instance_double(String),
                           'original_par' => rand(0...50000000),
                           'payment_amount' => instance_double(Numeric) } }
+      let(:adx_type) { [:pledged, :unpledged ].sample }
       let(:call_method) { securities_request_module.validate_securities([security], settlement_type, delivery_type) }
 
       it 'raises an error if securities is nil' do
@@ -1907,6 +1919,8 @@ describe MAPI::ServiceApp do
       let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
       let(:member_id) { rand(9999..99999) }
       let(:request_id) { instance_double(String) }
+      let(:adx_type) { [:pledged, :unpledged].sample }
+      let(:adx_type_string) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_STRING[adx_type] }
       let(:username) { instance_double(String) }
       let(:full_name) { instance_double(String) }
       let(:session_id) { instance_double(String) }
@@ -1928,7 +1942,7 @@ describe MAPI::ServiceApp do
         'settlement_date' => instance_double(String)
       }}
       let(:security) {{
-        'cusip' => instance_double(String),
+        'cusip' => SecureRandom.hex,
         'description' => instance_double(String),
         'original_par' => instance_double(Numeric),
         'payment_amount' => instance_double(Numeric)
@@ -1945,11 +1959,11 @@ describe MAPI::ServiceApp do
       end
 
       it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
-        expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything)
+        expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything, anything)
         call_method
       end
       it 'calls `validate_broker_instructions` with the app as an arg' do
-        expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app)
+        expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, anything)
         call_method
       end
       it 'calls `validate_delivery_instructions` with the `delivery_instructions` arg' do
@@ -2452,6 +2466,328 @@ describe MAPI::ServiceApp do
         end
       end
     end
+
+    describe 'securities intake' do
+      let(:delivery_columns) { [ SecureRandom.hex, SecureRandom.hex, SecureRandom.hex ] }
+      let(:sentinel) { SecureRandom.hex }
+      let(:today) { Time.zone.today }
+      let(:header_id) { rand(9999..99999) }
+      let(:user_name) {  SecureRandom.hex }
+      let(:full_name) { SecureRandom.hex }
+      let(:session_id) { SecureRandom.hex }
+      let(:adx_id) { [1000..10000].sample }
+      let(:trade_date) { (Time.zone.today - rand(1..10).days).strftime }
+      let(:settlement_date) { (Time.zone.today - rand(1..10).days).strftime }
+      let(:broker_instructions) { { 'transaction_code' => rand(0..1) == 0 ? 'standard' : 'repo',
+                                'trade_date' => trade_date,
+                                'settlement_type' => rand(0..1) == 0 ? 'free' : 'vs_payment',
+                                'settlement_date' => settlement_date } }
+      let(:delivery_type) { [ 'fed', 'dtc', 'mutual_fund', 'physical_securities' ][rand(0..3)] }
+      let(:delivery_values) { [ SecureRandom.hex, SecureRandom.hex, SecureRandom.hex ] }
+      let(:adx_type) { [:pledged, :unpledged].sample }
+      let(:adx_type_string) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_STRING[adx_type] }
+      let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE["#{adx_type}_intake".to_sym] }
+      let(:ssk_id) { [1000..10000].sample }
+
+      describe '`insert_intake_header_query' do
+        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.insert_intake_header_query(member_id,
+                                                                                                  header_id,
+                                                                                                  user_name,
+                                                                                                  full_name,
+                                                                                                  session_id,
+                                                                                                  adx_id,
+                                                                                                  delivery_columns,
+                                                                                                  broker_instructions,
+                                                                                                  delivery_type,
+                                                                                                  delivery_values,
+                                                                                                  adx_type ) }
+        before do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
+          allow(Time.zone).to receive(:today).and_return(today)
+        end
+
+        it 'expands delivery columns into the insert statement' do
+          expect(call_method).to match(
+            /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]},\s+PLEDGE_TO,\s+#{delivery_columns.join(',\s+')}/)
+        end
+
+        it 'sets the `header_id`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(header_id).and_return(sentinel)
+          expect(call_method).to match /VALUES\s\(#{sentinel},/
+        end
+
+        it 'sets the `member_id`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(member_id).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){1}#{sentinel},/
+        end
+
+        it 'sets the `status`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SUBMITTED).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){2}#{sentinel},/
+        end
+
+        it 'sets the `transaction_code`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::TRANSACTION_CODE[broker_instructions['transaction_code']]).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){3}#{sentinel},/
+        end
+
+        it 'sets the `trade_date`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(broker_instructions['trade_date']).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){4}#{sentinel},/
+        end
+
+        it 'sets the `settlement_type`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE[broker_instructions['settlement_type']]).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){5}#{sentinel},/
+        end
+
+        it 'sets the `settlement_date`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(broker_instructions['settlement_date']).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){6}#{sentinel},/
+        end
+
+        it 'sets the `delivery_type`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::DELIVERY_TYPE[delivery_type]).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){7}#{sentinel},/
+        end
+
+        it 'sets the `form_type`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(form_type).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){8}#{sentinel},/
+        end
+
+        it 'sets the `created_date`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){9}#{sentinel},/
+        end
+
+        it 'sets the `created_by`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(user_name).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){10}#{sentinel},/
+        end
+
+        it 'sets the `created_by_name`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(full_name).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){11}#{sentinel},/
+        end
+
+        it 'sets the `last_modified_by`' do
+          formatted_modification_by = double('Formatted Modification By')
+          quoted_modification_by = SecureRandom.hex
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).and_return(formatted_modification_by)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(formatted_modification_by).and_return(quoted_modification_by)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){12}#{quoted_modification_by},/
+        end
+
+        it 'sets the `last_modified_date`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(Time.zone.today)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){13}#{Time.zone.today},/
+        end
+
+        it 'sets the `last_modified_by_name`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(full_name)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){14}#{full_name},/
+        end
+
+        it 'sets the `PLEDGED_ADX_ID` or `UNPLEDGED_ADX_ID` (depending on `adx_type`)' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(adx_id)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){15}#{adx_id},/
+        end
+
+        it 'sets the `pledge_to`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){16}#{sentinel}/
+        end
+
+        describe 'delivery values' do
+          before do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(broker_instructions['trade_date'])
+          end
+          it 'sets the `delivery_values`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_delivery_values).and_return(delivery_values.join(', '))
+            expect(call_method).to match /VALUES\s+\((\S+\s+){17}#{delivery_values.join(',\s+')}/
+          end
+        end
+      end
+      describe '`create_intake` method' do
+        let(:app) { double(MAPI::ServiceApp, logger: double('logger'), settings: nil) }
+        let(:member_id) { rand(100000..999999) }
+        let(:adx_type) { [:pledged, :unpledged].sample }
+        let(:adx_type_string) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_STRING[adx_type] }
+        let(:delivery_type) { MAPI::Services::Member::SecuritiesRequests::DELIVERY_TYPE.keys[rand(0..3)] }
+        let(:delivery_instructions) {
+          MAPI::Services::Member::SecuritiesRequests.delivery_keys_for_delivery_type(delivery_type).map do |key|
+            [key, SecureRandom.hex]
+          end.to_h.merge('delivery_type' => delivery_type) }
+        let(:security) { { 'cusip' => SecureRandom.hex,
+                           'description' => instance_double(String),
+                           'original_par' => rand(0...50000000),
+                           'payment_amount' => instance_double(Numeric) } }
+        let(:securities) { [ security, security, security ]}
+        let(:method_params) { [ app,
+                                member_id,
+                                user_name,
+                                full_name,
+                                session_id,
+                                broker_instructions,
+                                delivery_instructions,
+                                securities ] }
+        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_intake(*method_params) }
+
+        before do
+          allow(securities_request_module).to receive(:get_adx_type_from_security).with(app, security).and_return(adx_type)
+          allow(securities_request_module).to receive(:validate_broker_instructions)
+        end
+
+        context 'validations' do
+          before { allow(securities_request_module).to receive(:should_fake?).and_return(true) }
+
+          it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything, :intake)
+            call_method
+          end
+          it 'calls `validate_broker_instructions` with the app as an arg' do
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, :intake)
+            call_method
+          end
+          it 'calls `validate_delivery_instructions` with the `delivery_instructions` arg' do
+            expect(securities_request_module).to receive(:validate_delivery_instructions).with(delivery_instructions)
+            call_method
+          end
+          it 'calls `validate_securities` with the `securities` arg' do
+            expect(securities_request_module).to receive(:validate_securities).with(securities, anything, anything)
+            call_method
+          end
+          it 'calls `validate_securities` with the `settlement_type` arg from the broker instructions' do
+            expect(securities_request_module).to receive(:validate_securities).with(anything, broker_instructions['settlement_type'], anything)
+            call_method
+          end
+          it 'calls `validate_securities` with the `delivery_type` arg from the delivery instructions' do
+            expect(securities_request_module).to receive(:validate_securities).with(anything, anything, delivery_instructions['delivery_type'])
+            call_method
+          end
+          it 'calls `process_delivery_instructions` with the `delivery_instructions` arg' do
+            expect(securities_request_module).to receive(:process_delivery_instructions).with(delivery_instructions)
+            call_method
+          end
+        end
+
+        context 'preparing and executing SQL' do
+          let(:next_id) { double('Next ID') }
+          let(:sequence_result) { double('Sequence Result', to_i: next_id) }
+          let(:adx_sql) { double('ADX SQL') }
+          let(:ssk_sql) { double('SSK SQL') }
+
+          before do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_delivery_columns).and_return(
+              delivery_columns)
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_delivery_values).and_return(
+              delivery_values)
+            allow(securities_request_module).to receive(:should_fake?).and_return(false)
+            allow(securities_request_module).to receive(:adx_query).with(member_id, adx_type).and_return(adx_sql)
+            allow(securities_request_module).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip']).
+              exactly(3).times.and_return(ssk_sql)
+            allow(securities_request_module).to receive(:execute_sql_single_result).with(
+              app,
+              MAPI::Services::Member::SecuritiesRequests::NEXT_ID_SQL,
+              "Next ID Sequence").and_return(sequence_result)
+            allow(securities_request_module).to receive(:execute_sql_single_result).with(
+              app,
+              adx_sql,
+              "ADX ID").and_return(adx_id)
+            allow(securities_request_module).to receive(:execute_sql_single_result).with(
+              app,
+              ssk_sql,
+              "SSK ID").and_return(ssk_id)
+          end
+
+          it 'returns the inserted request ID' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
+            expect(call_method).to be(next_id)
+          end
+
+          context 'prepares SQL' do
+            before do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
+            end
+
+            it 'calls `insert_release_header_query`' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_intake_header_query).with(
+                member_id,
+                next_id,
+                user_name,
+                full_name,
+                session_id,
+                adx_id,
+                delivery_columns,
+                broker_instructions,
+                delivery_type,
+                delivery_values,
+                adx_type)
+              call_method
+            end
+
+            it 'calls `insert_security_query`' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_security_query).with(next_id,
+                next_id, user_name, session_id, security, ssk_id).exactly(3).times
+              call_method
+            end
+          end
+
+          context 'calls `execute_sql`' do
+            let(:insert_header_sql) { double('Insert Header SQL') }
+            let(:insert_security_sql) { double('Insert Security SQL') }
+
+            before do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_intake_header_query).with(
+                member_id,
+                next_id,
+                user_name,
+                full_name,
+                session_id,
+                adx_id,
+                delivery_columns,
+                broker_instructions,
+                delivery_type,
+                delivery_values,
+                adx_type).and_return(insert_header_sql)
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_security_query).with(next_id,
+                next_id, user_name, session_id, security, ssk_id).exactly(3).times.and_return(insert_security_sql)
+            end
+
+            it 'inserts the header' do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                insert_security_sql).exactly(3).times.and_return(true)
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                insert_header_sql).and_return(true)
+              call_method
+            end
+
+            it 'inserts the securities' do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                insert_header_sql).and_return(true)
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                insert_security_sql).exactly(3).times.and_return(true)
+              call_method
+            end
+
+            it 'raises errors for SQL failures on header insert' do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                insert_header_sql).and_return(false)
+              expect { call_method }.to raise_error(Exception)
+            end
+
+            it 'raises errors for SQL failures on securities insert' do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                insert_header_sql).and_return(true)
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                insert_security_sql).and_return(false)
+              expect { call_method }.to raise_error(Exception)
+            end
+          end
+        end
+      end
+    end
   end
 
   describe '`authorize_request_query` class method' do
@@ -2636,7 +2972,10 @@ describe MAPI::ServiceApp do
         end
       end
       describe 'when `should_fake?` returns false' do
-        before { allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(false) }
+        before do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(false)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:adx_type_query).with(cusip).and_return(sql)
+        end
         it 'calls `execute_sql_single_result` with the correct SQL' do
           expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(anything, sql, 'Get ADX type for a security')
           call_method
@@ -2648,6 +2987,7 @@ describe MAPI::ServiceApp do
       end
     end
   end
+
   describe '`fake_request_id` class method' do
     it 'returns a random number between 100000 and 999999 using the supplied random number generator' do
       value = double(Numeric)

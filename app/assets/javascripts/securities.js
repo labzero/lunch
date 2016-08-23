@@ -25,7 +25,7 @@ $(function() {
   });
 
   // Value of data attribute used in CSS to show/hide appropriate 'delivery-instructions-field'
-  $('select[name="securities_release_request[delivery_type]"]').on('change', function(){
+  $('select[name="securities_request[delivery_type]"]').on('change', function(){
     $('.securities-delivery-instructions-fields').attr('data-selected-delivery-instruction', $(this).val());
   });
 
@@ -71,7 +71,7 @@ $(function() {
     var submitReleaseForm = $(this);
     var securitiesFieldsClones = $('input[name="securities"]').clone();
     $.each(securitiesFieldsClones, function(i, input) {
-      $(input).attr('name', 'securities_release_request[securities]');
+      $(input).attr('name', 'securities_request[securities]');
       submitReleaseForm.append(input);
     });
 

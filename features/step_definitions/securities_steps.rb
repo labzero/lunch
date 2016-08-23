@@ -223,7 +223,7 @@ Then(/^I should see the title for the "(.*?)" page$/) do |success_page|
 end
 
 When(/^I fill in the "(.*?)" securities field with "(.*?)"$/) do |field_name, value|
-  page.fill_in("securities_release_request[#{field_name}]", with: value)
+  page.fill_in("securities_request[#{field_name}]", with: value)
 end
 
 When(/^I submit the securities release request for authorization$/) do
@@ -243,7 +243,7 @@ Then(/^I should see the error message for missing securities request information
 end
 
 Then(/^Account Number should be disabled$/) do
-  page.assert_selector('#securities_release_request_account_number[disabled]')
+  page.assert_selector('#securities_request_account_number[disabled]')
 end
 
 Then(/^I should a disabled state for the Authorize action$/) do

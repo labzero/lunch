@@ -55,7 +55,7 @@ describe SecuritiesRequestService do
     let(:call_method) { subject.awaiting_authorization }
 
     it_behaves_like 'a MAPI backed service object method', :awaiting_authorization
-    
+
     it 'calls `get_json` with the securities requests end point' do
       expect(subject).to receive(:get_json).with(:awaiting_authorization, "/member/#{member_id}/securities/requests", anything)
       call_method
@@ -82,15 +82,15 @@ describe SecuritiesRequestService do
     let(:request_id) { SecureRandom.hex }
     let(:session) { instance_double(ActionDispatch::Request::Session, id: session_id) }
     let(:user) { instance_double(User, username: SecureRandom.hex, display_name: SecureRandom.hex) }
-    let(:securities_release_request) { instance_double(SecuritiesReleaseRequest, broker_instructions: broker_instructions, delivery_instructions: delivery_instructions, securities: securities, request_id: nil, 'request_id=': nil) }
-    let(:call_method) { subject.submit_release_for_authorization(securities_release_request, user) }
+    let(:securities_request) { instance_double(SecuritiesRequest, broker_instructions: broker_instructions, delivery_instructions: delivery_instructions, securities: securities, request_id: nil, 'request_id=': nil) }
+    let(:call_method) { subject.submit_release_for_authorization(securities_request, user) }
 
     before do
       allow(request).to receive(:session).and_return(session)
     end
 
     it_behaves_like 'a MAPI backed service object method', :submit_release_for_authorization, nil, :get, false do
-      let(:call_method) { subject.submit_release_for_authorization(securities_release_request, user) }
+      let(:call_method) { subject.submit_release_for_authorization(securities_request, user) }
     end
 
     shared_examples 'release endpoint call' do |method|
@@ -143,7 +143,7 @@ describe SecuritiesRequestService do
         let(:error) { RestClient::Exception.new(nil, status) }
         before { allow_any_instance_of(RestClient::Resource).to receive(method).and_raise(error) }
         it 'calls the error handler with the error if an error handler was supplied' do
-          expect{|error_handler| subject.submit_release_for_authorization(securities_release_request, user, &error_handler)}.to yield_with_args(error)
+          expect{|error_handler| subject.submit_release_for_authorization(securities_request, user, &error_handler)}.to yield_with_args(error)
         end
         it 'returns false' do
           expect(call_method).to be(false)
@@ -153,10 +153,10 @@ describe SecuritiesRequestService do
 
     describe 'when passed an already submitted request' do
       before do
-        allow(securities_release_request).to receive(:request_id).and_return(request_id)
+        allow(securities_request).to receive(:request_id).and_return(request_id)
       end
       include_examples 'release endpoint call', :put
-      it 'calls `put` with a body argument including the `request_id` of the passed SecuritiesReleaseRequest' do
+      it 'calls `put` with a body argument including the `request_id` of the passed SecuritiesRequest' do
         expect(subject).to receive(:put).with(anything, anything, satisfy { |arg| JSON.parse(arg)['request_id'] == request_id }, any_args)
         call_method
       end
@@ -171,7 +171,7 @@ describe SecuritiesRequestService do
     let(:request_id) { SecureRandom.hex }
     let(:response_hash) { instance_double(Hash) }
     let(:mapped_hash) { instance_double(Hash) }
-    let(:securities_request) { instance_double(SecuritiesReleaseRequest) }
+    let(:securities_request) { instance_double(SecuritiesRequest) }
     let(:call_method) { subject.submitted_request(request_id) }
 
     it_behaves_like 'a MAPI backed service object method', :submitted_request, SecureRandom.hex
@@ -180,7 +180,7 @@ describe SecuritiesRequestService do
       before do
         allow(subject).to receive(:get_hash).and_return(response_hash)
         allow(subject).to receive(:map_response_to_securities_release_hash).and_return(mapped_hash)
-        allow(SecuritiesReleaseRequest).to receive(:from_hash).and_return(securities_request)
+        allow(SecuritiesRequest).to receive(:from_hash).and_return(securities_request)
       end
 
       it 'calls `get_hash` with `:submitted_request` as an argument' do
@@ -281,12 +281,12 @@ describe SecuritiesRequestService do
       }}
       let(:call_method) { subject.send(:map_response_to_securities_release_hash, raw_hash) }
 
-      SecuritiesReleaseRequest::BROKER_INSTRUCTION_KEYS.each do |broker_instruction|
+      SecuritiesRequest::BROKER_INSTRUCTION_KEYS.each do |broker_instruction|
         it "returns a hash with a `#{broker_instruction}` value" do
           expect(call_method[broker_instruction]).to eq(raw_hash[:broker_instructions][broker_instruction])
         end
       end
-      SecuritiesReleaseRequest::DELIVERY_TYPES.keys.each do |delivery_type|
+      SecuritiesRequest::DELIVERY_TYPES.keys.each do |delivery_type|
         describe "when the `delivery_type` is `#{delivery_type}`" do
           before do
             raw_hash[:delivery_instructions] = {
@@ -294,9 +294,9 @@ describe SecuritiesRequestService do
               account_number: instance_double(String)
             }
           end
-          SecuritiesReleaseRequest::DELIVERY_INSTRUCTION_KEYS[delivery_type].each do |delivery_key|
-            if SecuritiesReleaseRequest::ACCOUNT_NUMBER_TYPE_MAPPING.values.include?(delivery_key)
-              account_number_key = SecuritiesReleaseRequest::ACCOUNT_NUMBER_TYPE_MAPPING[delivery_type]
+          SecuritiesRequest::DELIVERY_INSTRUCTION_KEYS[delivery_type].each do |delivery_key|
+            if SecuritiesRequest::ACCOUNT_NUMBER_TYPE_MAPPING.values.include?(delivery_key)
+              account_number_key = SecuritiesRequest::ACCOUNT_NUMBER_TYPE_MAPPING[delivery_type]
               it "sets the `account_number` value of the passed hash to the `#{account_number_key}` in the returned hash" do
                 expect(call_method[account_number_key]).to eq(raw_hash[:delivery_instructions][:account_number])
               end
@@ -319,7 +319,7 @@ describe SecuritiesRequestService do
     describe '`process_securities_requests`' do
       let(:requests) { [ double(Hash), double(Hash) ] }
       let(:indifferent_requests) do
-        requests.collect do |request| 
+        requests.collect do |request|
           indifferent = double('An Indifferent Securities Request')
           allow(request).to receive(:with_indifferent_access).and_return(indifferent)
           indifferent

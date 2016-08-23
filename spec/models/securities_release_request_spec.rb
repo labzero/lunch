@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe SecuritiesReleaseRequest, :type => :model do
+RSpec.describe SecuritiesRequest, :type => :model do
   before { allow_any_instance_of(CalendarService).to receive(:holidays).and_return([]) }
   describe 'validations' do
     (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities]).each do |attr|
@@ -175,27 +175,27 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
 
   describe 'class methods' do
     describe '`from_hash`' do
-      it 'creates a SecuritiesReleaseRequest from a hash' do
+      it 'creates a `SecuritiesRequest` from a hash' do
         aba_number = SecureRandom.hex
         securities_request_release = described_class.from_hash({aba_number: aba_number})
         expect(securities_request_release.aba_number).to eq(aba_number)
       end
       describe 'with methods stubbed' do
         let(:hash) { instance_double(Hash) }
-        let(:securities_request_release) { instance_double(SecuritiesReleaseRequest, :attributes= => nil) }
+        let(:securities_request_release) { instance_double(SecuritiesRequest, :attributes= => nil) }
         let(:call_method) { described_class.from_hash(hash) }
         before do
-          allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_request_release)
+          allow(SecuritiesRequest).to receive(:new).and_return(securities_request_release)
         end
-        it 'initializes a new instance of SecuritiesReleaseRequest' do
-          expect(SecuritiesReleaseRequest).to receive(:new).and_return(securities_request_release)
+        it 'initializes a new instance of `SecuritiesRequest`' do
+          expect(SecuritiesRequest).to receive(:new).and_return(securities_request_release)
           call_method
         end
-        it 'calls `attributes=` on the SecuritiesReleaseRequest instance' do
+        it 'calls `attributes=` on the `SecuritiesRequest` instance' do
           expect(securities_request_release).to receive(:attributes=).with(hash)
           call_method
         end
-        it 'returns the SecuritiesReleaseRequest instance' do
+        it 'returns the `SecuritiesRequest` instance' do
           expect(call_method).to eq(securities_request_release)
         end
       end
@@ -240,7 +240,7 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
         hash[:securities] = value
         call_method
       end
-      it 'raises an exception if the hash contains keys that are not SecuritiesReleaseRequest attributes' do
+      it 'raises an exception if the hash contains keys that are not `SecuritiesRequest` attributes' do
         hash[:foo] = 'bar'
         expect{call_method}.to raise_error(ArgumentError, "unknown attribute: 'foo'")
       end

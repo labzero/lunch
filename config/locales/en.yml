@@ -214,7 +214,7 @@ en:
   activemodel:
     errors:
       models:
-        securities_release_request:
+        securities_request:
           blank: 'Missing a required field: %{attribute}'
           attributes:
             base:
