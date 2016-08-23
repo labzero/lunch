@@ -41,16 +41,20 @@ describe RatesService do
     end
   end
 
-  describe "`quick_advance_rates` method", :vcr do
+  describe "`quick_advance_rates` method" do
     let(:quick_advance_rates) {subject.quick_advance_rates(member_id)}
-    let(:advance_request) { double('advance request instance') }
-    let(:rates) { double('rates hash') }
-    it "should return a hash of hashes containing pledged collateral values" do
-      expect(quick_advance_rates.length).to be >= 1
-      expect(quick_advance_rates[:overnight][:whole_loan]).to be_kind_of(Float)
-      expect(quick_advance_rates[:open][:agency]).to be_kind_of(Float)
-      expect(quick_advance_rates["1week"][:aaa]).to be_kind_of(Float)
-      expect(quick_advance_rates["2week"][:aa]).to be_kind_of(Float)
+    let(:funding_date) { Time.zone.today + rand(1..2).days }
+    let(:quick_advance_rates_with_funding_date) {subject.quick_advance_rates(member_id, funding_date)}
+    it 'raises an ArgumentError error if `member_id` is nil' do
+      expect{subject.quick_advance_rates(nil)}.to raise_error(ArgumentError)
+    end
+    it 'calls get_hash with funding_date, if funding_date is not nil' do
+      expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: funding_date.iso8601)
+      quick_advance_rates_with_funding_date
+    end
+    it 'calls get_hash without funding_date, if funding_date is nil' do
+      expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything)
+      quick_advance_rates
     end
   end
 

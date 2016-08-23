@@ -34,6 +34,72 @@ end
 
 describe MAPI::ServiceApp do
   subject { MAPI::Services::Rates }
+
+  RSpec.shared_examples 'a rates summary' do |funding_date=nil|
+    before do
+      allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date).and_return(live_data_xml)
+      allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay', funding_date).and_return(start_of_day_xml)
+    end
+    it "returns Internal Service Error, if calendar service is unavailable" do
+      allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return(nil)
+      if funding_date
+        get '/rates/summary', funding_date: funding_date
+      else
+        get '/rates/summary'
+      end
+      expect(last_response.status).to eq(503)
+    end
+
+    it "returns Internal Service Error, if blackout dates service is unavailable" do
+      allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(nil)
+      if funding_date
+        get '/rates/summary', funding_date: funding_date
+      else
+        get '/rates/summary'
+      end
+      expect(last_response.status).to eq(503)
+    end
+
+    it "returns Internal Service Error, if loan terms service is unavailable" do
+      allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(nil)
+      if funding_date
+        get '/rates/summary', funding_date: funding_date
+      else
+        get '/rates/summary'
+      end
+      expect(last_response.status).to eq(503)
+    end
+
+    it "returns Internal Service Error, if get_market_data soap endpoint is unavailable" do
+      allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date).and_return(nil)
+      if funding_date
+        get '/rates/summary', funding_date: funding_date
+      else
+        get '/rates/summary'
+      end
+      expect(last_response.status).to eq(503)
+    end
+
+    it "returns Internal Service Error, if the hash returned from get_market_data soap endpoint uses string keys instead of symbol keys" do
+      allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data_hash_with_string_keys)
+      expect(logger).to receive(:error).at_least(1).times
+      if funding_date
+        get '/rates/summary', funding_date: funding_date
+      else
+        get '/rates/summary'
+      end
+    end
+
+    it "returns 200 if all the endpoints return valid data" do
+      if funding_date
+        get '/rates/summary', funding_date: funding_date
+      else
+        get '/rates/summary'
+      end
+      expect(last_response.status).to eq(200)
+    end
+  end
+
   describe "historic overnight rates" do
     describe "development" do
       let(:rates) { get '/rates/historic/overnight'; JSON.parse(last_response.body) }
@@ -184,7 +250,7 @@ describe MAPI::ServiceApp do
       get '/rates/summary'
       JSON.parse(last_response.body).with_indifferent_access
     end
-    it "should return rates for default loan_types at default loan_terms" do
+    it "returns rates for default loan_types at default loan_terms" do
       loan_types.each do |loan_type|
         loan_terms.each do |loan_term|
           expect(rate_summary[loan_type][loan_term][:rate]).to be_kind_of(String)
@@ -222,16 +288,16 @@ describe MAPI::ServiceApp do
         end
       end
     end
-    it "should return a timestamp" do
+    it "returns a timestamp" do
       expect(rate_summary[:timestamp]).to be_kind_of(String)
     end
 
-    it "should always call get_maturity_date" do
+    it "always call get_maturity_date" do
       expect(MAPI::Services::Rates).to receive(:get_maturity_date).at_least(48).with(kind_of(Date), kind_of(String), kind_of(Array))
       get '/rates/summary'
     end
 
-    it "should set maturity date to get maturity date" do
+    it "sets maturity date to get maturity date" do
       maturity_date = 'foobar'
       allow(MAPI::Services::Rates).to receive(:get_maturity_date).and_return(maturity_date)
       loan_types.each do |loan_type|
@@ -268,6 +334,8 @@ describe MAPI::ServiceApp do
       let(:rate_bands_hash) { n_level_hash_with_default("10", 2) }
       let(:trade_status){ double('trade_status') }
       let(:display_status){ double('display_status') }
+      today = Time.zone.today
+      funding_date =  today + rand(1..2).days
       let(:loan_terms_hash){ n_level_hash_with_default({ trade_status: trade_status, display_status: display_status }, 2) }
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
@@ -277,46 +345,25 @@ describe MAPI::ServiceApp do
         allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_hash)
         allow(MAPI::Services::Rates::RateBands).to receive(:rate_bands).and_return(rate_bands_hash)
         allow(MAPI::Services::Rates).to receive(:init_mds_connection).and_return(mds_connection)
-        allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live').and_return(live_data_xml)
-        allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay').and_return(start_of_day_xml)
         allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data_hash_with_symbol_keys)
         allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(start_of_day_xml).and_return(start_of_day)
         allow(MAPI::Services::Rates).to receive(:get_maturity_date).with(maturity_date_before, kind_of(String), []).and_return(maturity_date_after)
       end
-
-      it "should return Internal Service Error, if calendar service is unavailable" do
-        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return(nil)
-        get '/rates/summary'
-        expect(last_response.status).to eq(503)
+      describe "funding date is nil" do
+        it_behaves_like 'a rates summary'
       end
+      describe "funding date is not nil" do
+        before do
+          allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date).and_return(live_data_xml)
+          allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay', funding_date).and_return(start_of_day_xml)
+        end
+        it_behaves_like 'a rates summary', funding_date
 
-      it "should return Internal Service Error, if blackout dates service is unavailable" do
-        allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(nil)
-        get '/rates/summary'
-        expect(last_response.status).to eq(503)
-      end
-
-      it "should return Internal Service Error, if loan terms service is unavailable" do
-        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(nil)
-        get '/rates/summary'
-        expect(last_response.status).to eq(503)
-      end
-
-      it "should return Internal Service Error, if get_market_data soap endpoint is unavailable" do
-        allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live').and_return(nil)
-        get '/rates/summary'
-        expect(last_response.status).to eq(503)
-      end
-
-      it "should return Internal Service Error, if the hash returned from get_market_data soap endpoint uses string keys instead of symbol keys" do
-        allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data_hash_with_string_keys)
-        expect(logger).to receive(:error).at_least(1).times
-        get '/rates/summary'
-      end
-
-      it "should return 200 if all the endpoints return valid data" do
-        get '/rates/summary'
-        expect(last_response.status).to eq(200)
+        it "passes funding date to get_market_data_from_soap method, if the date is supplied" do
+          expect(subject).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date)
+          expect(subject).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay', funding_date)
+          get '/rates/summary', funding_date: funding_date
+        end
       end
     end
   end
@@ -689,6 +736,37 @@ describe MAPI::ServiceApp do
         get '/rates/price_indications/current/arc/standard'
         expect(last_response.status).to eq(503)
       end
+    end
+  end
+
+  describe '`market_data_message_for_loan_type` method' do
+    let(:loan_type){ [:whole, :agency, :aaa, :aa].sample }
+    let(:loan_type_result){ MAPI::Shared::Constants::LOAN_MAPPING[loan_type.to_s] }
+    let(:live_or_start_of_day){ double('live_or_start_of_day') }
+    today = Time.zone.today
+    let(:funding_date) { today + rand(1..2).days }
+    let(:call_method) { subject.market_data_message_for_loan_type(loan_type, live_or_start_of_day, funding_date) }
+    let(:call_method_no_funding_date) { subject.market_data_message_for_loan_type(loan_type, live_or_start_of_day, nil) }
+    let(:caller) { double('caller') }
+
+    it 'returns a hash with a `v11:id` inside `v1:caller' do
+      allow(ENV).to receive(:[]).with('MAPI_FHLBSF_ACCOUNT').and_return(caller)
+      expect(call_method['v1:caller']).to include('v11:id'=>caller)
+    end
+    it 'returns hash with `v12:spotDate` inside `v1:marketData`, if the funding date is not nil' do
+      expect(call_method['v1:marketData'].first).to include('v12:spotDate'=>funding_date.iso8601)
+    end
+    it 'returns hash without `v12:spotDate` inside `v1:marketData`, if the funding date is nil' do
+      expect(call_method_no_funding_date['v1:marketData'].first).to_not include('v12:spotDate')
+    end
+    it 'returns a hash with a `v12:name` inside `v1:marketData`' do
+      expect(call_method['v1:marketData'].first).to include('v12:name'=>loan_type_result)
+    end
+    it 'returns a hash with a `v12:data` inside `v1:marketData`' do
+      expect(call_method['v1:marketData'].first).to include('v12:data'=>'')
+    end
+    it 'returns a hash with a `v12:id` inside `v12:pricingGroup`' do
+      expect(call_method['v1:marketData'].first['v12:pricingGroup'].first).to include('v12:id'=>live_or_start_of_day)
     end
   end
 

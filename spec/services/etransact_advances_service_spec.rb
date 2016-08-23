@@ -57,9 +57,10 @@ describe EtransactAdvancesService do
     let(:check_capstock) {true}
     let(:amount) { 100 }
     let(:maturity_date) { "2016-03-11".to_date }
+    let(:funding_date) { Time.zone.today + rand(1..2).days }
     let(:allow_grace_period) { true }
-    let(:call_method) { subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer, maturity_date, allow_grace_period) }
-    
+    let(:call_method) { subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer, maturity_date, allow_grace_period, nil) }
+    let(:call_method_funding_date) { subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer, maturity_date, allow_grace_period, funding_date) }
     before do
       allow(subject).to receive(:calypso_error_handler).and_return(nil)
     end
@@ -68,12 +69,16 @@ describe EtransactAdvancesService do
       expect(call_method).to be_kind_of(Hash)
     end
     it 'calls `get_hash`' do
-      expect(subject).to receive(:get_hash).with(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", allow_grace_period: allow_grace_period)
+      expect(subject).to receive(:get_hash).with(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", allow_grace_period: allow_grace_period, funding_date: nil, )
       call_method
     end
+    it 'calls `get_hash` with funding_date' do
+      expect(subject).to receive(:get_hash).with(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", allow_grace_period: allow_grace_period, funding_date: funding_date.iso8601)
+      call_method_funding_date
+    end
     it 'defaults `allow_grace_period` to false' do
-      expect(subject).to receive(:get_hash).with(:quick_advance_validate, anything, allow_grace_period: false)
-      subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer, maturity_date)
+      expect(subject).to receive(:get_hash).with(:quick_advance_validate, anything, allow_grace_period: false, funding_date: nil)
+      subject.quick_advance_validate(member_id, amount, advance_type, advance_term, advance_rate, check_capstock, signer, maturity_date, false, nil)
     end
     it 'returns the results of `get_hash`' do
       result = double('A Result')
@@ -114,12 +119,13 @@ describe EtransactAdvancesService do
         rate: advance_rate,
         signer: signer,
         maturity_date: iso_date,
-        allow_grace_period: allow_grace_period
+        allow_grace_period: allow_grace_period,
+        funding_date: nil
       }
     }
     let(:post_response) { double('response from post_hash', :[]= => nil) }
     let(:now) { double('now') }
-    let(:call_method) { subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer, maturity_date, allow_grace_period) }
+    let(:call_method) { subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer, maturity_date, allow_grace_period, nil) }
     
     before do
       allow(subject).to receive(:calypso_error_handler)
@@ -140,8 +146,9 @@ describe EtransactAdvancesService do
       end
       it 'defaults `allow_grace_period` to false' do
         post_body[:allow_grace_period] = false
+        post_body[:funding_date] = nil
         expect(subject).to receive(:post_hash).with(anything, anything, post_body)
-        subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer, maturity_date)
+        subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer, maturity_date, false, nil)
       end
     end
     it 'returns the result of the `post_hash` call' do

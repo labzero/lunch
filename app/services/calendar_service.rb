@@ -8,4 +8,12 @@ class CalendarService < MAPIService
     end
   end
 
+  def find_next_business_day(candidate, delta)
+    weekend_or_holiday?(candidate) ? find_next_business_day(candidate + delta, delta) : candidate
+  end
+
+  def weekend_or_holiday?(date)
+    date.saturday? || date.sunday? || holidays(date, date).include?(date)
+  end
+
 end

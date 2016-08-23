@@ -304,6 +304,30 @@ Then(/^I should (see|not see) the borrowing capacity summary$/) do |visible|
   end
 end
 
+Then(/^I should see Funding Date information$/) do
+  page.assert_selector('.advance-funding-date-wrapper')
+end
+
+When(/^I click on Edit Funding Date link$/) do
+  page.find('.advance-alternate-funding-date-edit').click
+end
+
+When(/^I click on the Today radio button$/) do
+  page.find('.advance-alternate-funding-date-wrapper ul li:first-child input[type=radio]').click
+end
+
+When(/^I click on the Next Business Day radio button$/) do
+  page.find('.advance-alternate-funding-date-wrapper ul li:nth-child(2) input[type=radio]').click
+end
+
+When(/^I click on the Skip Business Day radio button$/) do
+  page.find('.advance-alternate-funding-date-wrapper ul li:last-child input[type=radio]').click
+end
+
+Then(/^I should see Set an Alternate Funding Date$/) do
+  page.assert_selector('.advance-alternate-funding-date-wrapper')
+end
+
 Then(/^I should see an Advance Confirmation column in the data table$/) do
   page.assert_selector('.manage-advances-table th', text: I18n.t('advances.confirmation.title'), exact: true)
 end

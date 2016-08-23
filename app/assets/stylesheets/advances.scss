@@ -283,6 +283,7 @@
       }
       &.add-advance-table-loading-cell {
         @extend %typography-default-text;
+        display: none;
         background: $white;
         border-right: 1px solid $light-blue;
         vertical-align: top;
@@ -370,6 +371,14 @@
         &.cell-hovered {
           @include add-advance-cell-hovered;
         }
+      }
+    }
+    &.add-advance-table-loading {
+      .add-advance-table-loading-cell {
+        display: table-cell;
+      }
+      .add-advance-rate-cell {
+        display: none;
       }
     }
   }
@@ -662,4 +671,68 @@
 .advances-filter {
   @extend %table-filter;
   margin-bottom: 10px;
+}
+
+.advance-funding-date-wrapper, .advance-alternate-funding-date-wrapper {
+  @extend %bordered-section;
+  display: none;
+  margin: 25px 15px 0;
+  padding: 10px 20px;
+  border-bottom: 1px solid $light-blue;
+}
+
+.advance-funding-date-wrapper {
+   span {
+     @extend %typography-header-nav;
+     &:first-child {
+       color: $medium-gray;
+     }
+     &:nth-child(2) {
+       margin-left: 40px;
+     }
+     &:last-child {
+       float: right;
+       cursor: pointer;
+       color: $actionable-blue;
+       text-transform: uppercase;
+     }
+   }
+ }
+
+.advance-alternate-funding-date-wrapper {
+  span {
+    &:first-child {
+      @extend %typography-table-heading;
+    }
+    &:nth-child(2) {
+      @extend %typography-header-nav;
+      float: right;
+      cursor: pointer;
+      color: $actionable-blue;
+      text-transform: uppercase;
+    }
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 50px;
+  }
+  li {
+    float: left;
+    width: calc(33% - 20px);
+    position: relative;
+    padding-left: 20px;
+    input {
+      position: absolute;
+      left: 0;
+      top: 3px;
+    }
+    label {
+      padding-left: 0;
+    }
+    label + label {
+      @extend %typography-header-nav;
+      display: block;
+    }
+  }
 }

@@ -57,4 +57,45 @@ describe CalendarService do
       end
     end
   end
+
+  describe 'the `weekend_or_holiday?` method' do
+    let(:call_method_saturday) { subject.weekend_or_holiday?("2016-08-06".to_date) }
+    let(:call_method_sunday) { subject.weekend_or_holiday?("2016-08-07".to_date) }
+    let(:call_method_holiday) { subject.weekend_or_holiday?("2016-08-08".to_date) }
+    let(:call_method) { subject.weekend_or_holiday?("2016-08-09".to_date) }
+    before do
+      allow(subject).to receive(:holidays).with(anything, anything).and_return(["2016-08-08".to_date])
+    end
+    it 'returns `true` if date falls on a Saturday' do
+      expect(call_method_saturday).to eq(true)
+    end
+    it 'returns `true` if date falls on a Sunday' do
+      expect(call_method_sunday).to eq(true)
+    end
+    it 'returns `true` if date falls on a Sunday' do
+      expect(call_method_holiday).to eq(true)
+    end
+    it 'returns `false` if date does not fall on a Saturday, Sunday or a Holiday' do
+      expect(call_method).to eq(false)
+    end
+  end
+
+  describe 'the `find_next_business_day` method' do
+    let(:candidate) { Time.zone.today + rand(1..2).days }
+    let(:delta) { 1 }
+    let(:call_method) { subject.find_next_business_day(candidate, delta) }
+    it 'returns calls weekend_or_holiday?' do
+      expect(subject).to receive(:weekend_or_holiday?).with(candidate)
+      call_method
+    end
+    it 'returns candidate+delta if weekend_or_holiday? is true' do
+      allow(subject).to receive(:weekend_or_holiday?).with(candidate).at_least(1).and_return(true)
+      allow(subject).to receive(:weekend_or_holiday?).with(candidate+delta).at_least(1).and_return(false)
+      expect(call_method).to eq(candidate+delta)
+    end
+    it 'returns candidate if weekend_or_holiday? is false' do
+      allow(subject).to receive(:weekend_or_holiday?).with(candidate).at_least(1).and_return(false)
+      expect(call_method).to eq(candidate)
+    end
+  end
 end

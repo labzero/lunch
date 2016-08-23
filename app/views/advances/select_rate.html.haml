@@ -20,7 +20,29 @@
             .advance-rates-table-toggle
               %span{data: {active_term_type: :vrc}}= t('advances.vrc_rates')
               %span{data: {active_term_type: :frc}}= t('advances.frc_rates')
-            %table.advance-rates-table{data: {fetch_rates_url: advances_fetch_rates_path({advance_request: {id: @advance_request_id}})}}
+            - if feature_enabled?('add-advance-custom-term')
+              .advance-funding-date-wrapper
+                %span= t('advances.funding.funding_date')
+                %span= t('advances.funding.funding_today', date: fhlb_date_standard_numeric(@today))
+                %span.advance-alternate-funding-date-edit= t('advances.funding.edit')
+              .advance-alternate-funding-date-wrapper
+                %span= t('advances.funding.set_alternate')
+                %span.advance-alternate-funding-date-close= t('global.close')
+                %ul
+                  %li
+                    = render 'shared/radio_button', id: 'funding_date_today', name: 'alternate-funding-date', checked: true, text:fhlb_date_standard_numeric(@today), value: @today.iso8601
+                    %label{for: :funding_date_today}
+                      %span= t('global.today')
+                      = t('advances.funding.default')
+                  %li
+                    = render 'shared/radio_button', id: 'funding_date_next', name: 'alternate-funding-date', checked: false, text:fhlb_date_standard_numeric(@next_day), value: @next_day.iso8601
+                    %label{for: :funding_date_next}
+                      %span= t('advances.funding.next_business')
+                  %li
+                    = render 'shared/radio_button', id: 'funding_date_skip', name: 'alternate-funding-date', checked: false, text:fhlb_date_standard_numeric(@skip_day), value: @skip_day.iso8601
+                    %label{for: :funding_date_skip}
+                      %span= t('advances.funding.skip_day')
+            %table.advance-rates-table.add-advance-table-loading{data: {fetch_rates_url: advances_fetch_rates_path({advance_request: {id: @advance_request_id}})}}
               %thead
                 %tr
                   %th

@@ -59,12 +59,16 @@ class RatesService < MAPIService
     end
   end
 
-  def quick_advance_rates(member_id)
+  def quick_advance_rates(member_id, funding_date=nil)
     # we're not doing anything with member id right now, but presumably will need to use it at some point to check if
     # certain rates are available (e.g. member has enough collateral)
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
-    
-    get_hash(:quick_advance_rates, 'rates/summary')
+    funding_date = funding_date.try(:to_date)
+    if funding_date
+      get_hash(:quick_advance_rates, "rates/summary", funding_date: funding_date.iso8601)
+    else
+      get_hash(:quick_advance_rates, "rates/summary")
+    end
   end
 
   def current_price_indications(collateral_type, credit_type)

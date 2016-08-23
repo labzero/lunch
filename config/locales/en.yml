@@ -2033,6 +2033,14 @@ en:
     rate: Rate (%)
     vrc_rates: VRC Rates
     frc_rates: FRC Rates
+    funding:
+      funding_date: Funding Date
+      funding_today: Funds Today on %{date}
+      edit: Edit Funding Date
+      set_alternate: Set an Alternate Funding Date
+      default: (default)
+      next_business: Next Business Day
+      skip_day: Skip Day
     actions:
       review: Review Advance
       submit: Submit Advance

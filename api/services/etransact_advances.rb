@@ -355,6 +355,7 @@ module MAPI
           signer = body[:signer]
           maturity_date = body[:maturity_date].to_date
           allow_grace_period = body[:allow_grace_period] || false
+          funding_date = body[:funding_date].try(:to_date)
 
           begin
             cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term), advance_type)
@@ -364,7 +365,7 @@ module MAPI
           end
 
           begin
-            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'EXECUTE', amount, advance_term, advance_type, rate, check_capstock, signer, cof_data[:markup], cof_data[:blended_cost_of_funds], cof_data[:cost_of_funds], cof_data[:benchmark_rate], maturity_date, allow_grace_period)
+            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'EXECUTE', amount, advance_term, advance_type, rate, check_capstock, signer, cof_data[:markup], cof_data[:blended_cost_of_funds], cof_data[:cost_of_funds], cof_data[:benchmark_rate], maturity_date, allow_grace_period, funding_date)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
@@ -383,6 +384,7 @@ module MAPI
           maturity_date = params[:maturity_date].to_date
           check_capstock = params[:check_capstock] == 'true'
           allow_grace_period = params[:allow_grace_period] == 'true'
+          funding_date = params[:funding_date].try(:to_date)
 
           begin
             cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term), advance_type)
@@ -392,7 +394,7 @@ module MAPI
           end
 
           begin
-            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'VALIDATE', amount, advance_term, advance_type, rate, check_capstock, signer, cof_data[:markup], cof_data[:blended_cost_of_funds], cof_data[:cost_of_funds], cof_data[:benchmark_rate], maturity_date, allow_grace_period)
+            result = MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(self, member_id, 'ADVANCE', 'VALIDATE', amount, advance_term, advance_type, rate, check_capstock, signer, cof_data[:markup], cof_data[:blended_cost_of_funds], cof_data[:cost_of_funds], cof_data[:benchmark_rate], maturity_date, allow_grace_period, funding_date)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
