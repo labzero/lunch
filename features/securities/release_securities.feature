@@ -62,6 +62,20 @@ Scenario: Member cancels an upload of a securities release file
   When I click to cancel the securities release file upload
   Then I should not see an upload progress bar
 
+@jira-mem-1781 @data-unavailable
+Scenario: Member uploads a securities release file that is missing Original Par
+  Given I am on the release securities page
+  And the edit securities section is open
+  When I drag and drop the "securities_missing_original_par.xlsx" file into the edit securities dropzone
+  Then I should see a security required field error
+
+@jira-mem-1781 @data-unavailable
+Scenario: Member uploads a securities release file that is missing a CUSIP
+  Given I am on the release securities page
+  And the edit securities section is open
+  When I drag and drop the "securities_missing_cusip.xlsx" file into the edit securities dropzone
+  Then I should see a security required field error
+
 @jira-mem-1654
 Scenario: Member changes trade and settlement dates
   # This should be flushed out once we have actual date ranges to check

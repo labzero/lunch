@@ -615,6 +615,7 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(controller).to receive(:populate_securities_table_data_view_variable)
       allow(controller).to receive(:render_to_string)
       allow(Security).to receive(:from_hash).and_return(security)
+      allow(controller).to receive(:prioritized_security_error)
     end
 
     it_behaves_like 'a user required action', :post, :upload_securities
@@ -684,24 +685,42 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(Security).to receive(:from_hash).and_return(security, invalid_security)
       expect(parsed_response_body[:form_data]).to eq([security].to_json)
     end
-    describe 'checking if a CUSIP is valid' do
-      let(:invalid_cusip_1) { SecureRandom.hex }
-      let(:invalid_cusip_2) { SecureRandom.hex }
+    describe 'security validations' do
+      describe 'when a security is invalid' do
+        before do
+          allow(Security).to receive(:from_hash).and_return(security, invalid_security, invalid_security, security, security)
+        end
+        describe 'when there is not an invalid CUSIP present' do
+          before { allow(invalid_security).to receive(:errors).and_return({foo: ['some message']}) }
+          it 'calls `prioritized_security_error` with the first invalid security it encounters' do
+            expect(controller).to receive(:prioritized_security_error).with(invalid_security).exactly(:once)
+            call_action
+          end
+          it 'returns a json object with an error message that is the result of calling `prioritized_security_error`' do
+            allow(controller).to receive(:prioritized_security_error).and_return(error_message)
+            call_action
+            expect(parsed_response_body[:error]).to eq(simple_format(error_message))
+          end
+        end
+        describe 'when there is an invalid CUSIP present' do
+          let(:invalid_cusip_1) { SecureRandom.hex }
+          let(:invalid_cusip_2) { SecureRandom.hex }
 
-      before do
-        allow(Security).to receive(:from_hash).and_return(security, invalid_security, invalid_security, security, security)
-        allow(invalid_security).to receive(:errors).and_return({cusip: ['some message']})
-        allow(invalid_security).to receive(:cusip).and_return(invalid_cusip_1, invalid_cusip_2)
-      end
+          before do
+            allow(invalid_security).to receive(:errors).and_return({cusip: ['some message']})
+            allow(invalid_security).to receive(:cusip).and_return(invalid_cusip_1, invalid_cusip_2)
+          end
 
-      it 'returns a json object with an error message that enumerates the invalid cusips if they are present' do
-        call_action
-        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.invalid_cusips', cusips: [invalid_cusip_1, invalid_cusip_2].join(', '))))
-      end
-      it 'ignores errors due to a blank CUSIP' do
-        allow(invalid_security).to receive(:cusip).and_return('', invalid_cusip_2)
-        call_action
-        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.invalid_cusips', cusips: [invalid_cusip_2].join(', '))))
+          it 'returns a json object with an error message that enumerates the invalid cusips if they are present' do
+            call_action
+            expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.invalid_cusips', cusips: [invalid_cusip_1, invalid_cusip_2].join(', '))))
+          end
+          it 'prioritizes blank CUSIP errors over invalid CUSIP errors' do
+            allow(invalid_security).to receive(:cusip).and_return('', invalid_cusip_2)
+            call_action
+            expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('activemodel.errors.models.security.blank')))
+          end
+        end
       end
     end
     describe 'when the uploaded file does not contain a header row with `CUSIP` as a value' do
@@ -1633,6 +1652,24 @@ RSpec.describe SecuritiesController, type: :controller do
             expect(call_method).to eq(generic_error_message)
           end
         end
+      end
+    end
+    describe '`prioritized_security_error`' do
+      let(:security) { instance_double(Security, errors: nil) }
+      let(:error_message) { instance_double(String) }
+      let(:other_error_message) { instance_double(String) }
+      let(:errors) {{
+        foo: [error_message, other_error_message],
+        bar: [other_error_message]
+      }}
+      let(:call_method) { subject.send(:prioritized_security_error, security) }
+
+      it 'returns nil if the passed security contains no errors' do
+        expect(call_method).to be nil
+      end
+      it 'returns the first error message from the security object it is passed' do
+        allow(security).to receive(:errors).and_return(errors)
+        expect(call_method).to eq(error_message)
       end
     end
   end

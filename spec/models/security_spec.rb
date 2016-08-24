@@ -2,6 +2,11 @@ require 'rails_helper'
 
 RSpec.describe Security, :type => :model do
   describe 'validations' do
+    described_class::REQUIRED_ATTRS.each do |attr|
+      it "validates the presence of `#{attr}`" do
+        expect(subject).to validate_presence_of attr
+      end
+    end
     describe '`cusip_format`' do
       let(:cusip) { SecureRandom.hex }
       let(:cusip_validator) { instance_double(SecurityIdentifiers::CUSIP, :valid? => true ) }

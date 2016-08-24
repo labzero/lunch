@@ -276,6 +276,9 @@ class SecuritiesController < ApplicationController
               securities << security
             elsif security.errors[:cusip].present?
               invalid_cusips << security.cusip
+            else
+              error = prioritized_security_error(security)
+              break
             end
           else
             row.each_with_index do |cell, i|
@@ -284,24 +287,31 @@ class SecuritiesController < ApplicationController
             end
           end
         end
-        if data_start_index
+        if data_start_index && error.blank?
+          cusip_error_count = invalid_cusips.length
           invalid_cusips.select!(&:present?)
-          if invalid_cusips.present?
+          if invalid_cusips.present? && cusip_error_count == invalid_cusips.length
+            # Invalid cusip error
             error = I18n.t('securities.upload_errors.invalid_cusips', cusips: invalid_cusips.join(', '))
+          elsif cusip_error_count > 0
+            # Blank cusip error
+            error = I18n.t('activemodel.errors.models.security.blank')
           elsif securities.empty?
+            # No securities found
             error = I18n.t('securities.upload_errors.generic')
           else
             populate_securities_table_data_view_variable(type, securities)
             html = render_to_string(:upload_table, layout: false, locals: { type: type })
           end
-        else
+        elsif error.blank?
+          # No header row found (i.e. data_start_index)
           error = I18n.t('securities.upload_errors.generic')
         end
       end
     else
       error = I18n.t('securities.upload_errors.unsupported_mime_type')
     end
-    render json: {html: html, form_data: (securities.to_json if securities && !securities.empty?), error: (simple_format(error) if error)}, content_type: request.format
+    render json: {html: html, form_data: (securities.to_json if securities && securities.present?), error: (simple_format(error) if error)}, content_type: request.format
   end
 
   def download_pledge
@@ -562,6 +572,14 @@ class SecuritiesController < ApplicationController
       else
         I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
       end
+    end
+  end
+
+  def prioritized_security_error(security)
+    security_errors = security.errors
+    if security_errors.present?
+      error_keys = security_errors.keys
+      security_errors[error_keys.first].first
     end
   end
 

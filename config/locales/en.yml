@@ -230,9 +230,10 @@ en:
               payment_amount: When 'Versus Payment' is selected, each security must have a settlement amount.
               original_par: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
         security:
+          blank: "Each row must contain at least a CUSIP and Original Par.\nPlease modify your file."
           attributes:
             cusip:
-              invalid: 'The following CUSIP is invalid: %{value}.\nPlease update your file with the correct CUSIP.'
+              invalid: "The following CUSIP is invalid: %{value}.\nPlease update your file with the correct CUSIP."
   activerecord:
     attributes:
       user:

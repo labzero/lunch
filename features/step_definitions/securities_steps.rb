@@ -180,6 +180,10 @@ When(/^I drag and drop the "(.*?)" file into the edit securities dropzone$/) do 
   page.execute_script("e = $.Event('drop'); e.originalEvent = {dataTransfer : { files : seleniumUpload.get(0).files } }; $('.securities-download-instructions').trigger(e);")
 end
 
+When(/^I should see a security required field error$/) do
+  page.assert_selector('.securities-release-upload-error p', text: I18n.t('activemodel.errors.models.security.blank').gsub("\n",' '), exact: true)
+end
+
 Then(/^I should see an upload progress bar$/) do
   page.assert_selector('.file-upload-progress .gauge-section', visible: :visible)
 end
