@@ -180,8 +180,16 @@ When(/^I drag and drop the "(.*?)" file into the edit securities dropzone$/) do 
   page.execute_script("e = $.Event('drop'); e.originalEvent = {dataTransfer : { files : seleniumUpload.get(0).files } }; $('.securities-download-instructions').trigger(e);")
 end
 
-When(/^I should see a security required field error$/) do
-  page.assert_selector('.securities-release-upload-error p', text: I18n.t('activemodel.errors.models.security.blank').gsub("\n",' '), exact: true)
+When(/^I should see an? (security required|original par numericality|no securities) field error$/) do |error_type|
+  text = case error_type
+           when 'security required'
+             I18n.t('activemodel.errors.models.security.blank').gsub("\n",' ')
+           when 'original par numericality'
+             I18n.t('activemodel.errors.models.security.not_a_number', attribute: 'Original par')
+           when 'no securities'
+             I18n.t('securities.upload_errors.no_rows')
+         end
+  page.assert_selector('.securities-release-upload-error p', text: text, exact: true)
 end
 
 Then(/^I should see an upload progress bar$/) do
@@ -309,10 +317,6 @@ end
 Given(/^I upload a securities file$/) do
   file_field = page.find('[type=file]', visible: false)
   file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', 'sample-securties-pledge-upload.xlsx')))
-end
-
-Then(/^I should see an upload error for no rows$/) do
-  page.assert_selector('.securities-release-upload-error p', text: I18n.t('securities.upload_errors.no_rows'), exact: true)
 end
 
 def delivery_instructions(text)

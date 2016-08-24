@@ -2,9 +2,21 @@ require 'rails_helper'
 
 RSpec.describe Security, :type => :model do
   describe 'validations' do
-    described_class::REQUIRED_ATTRS.each do |attr|
+    required_attrs = described_class::REQUIRED_ATTRS
+    required_attrs.each do |attr|
       it "validates the presence of `#{attr}`" do
         expect(subject).to validate_presence_of attr
+      end
+    end
+    described_class::CURRENCY_ATTRIBUTES.each do |attr|
+      it "validates the numericality of `#{attr}`" do
+        expect(subject).to validate_numericality_of attr
+      end
+      unless required_attrs.include?(attr)
+        it "does not add a validation error if `#{attr}` is blank" do
+          subject.valid?
+          expect(subject.errors.keys).not_to include(attr)
+        end
       end
     end
     describe '`cusip_format`' do

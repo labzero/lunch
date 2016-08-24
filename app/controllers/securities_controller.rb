@@ -261,20 +261,20 @@ class SecuritiesController < ApplicationController
               Security.from_hash({
                 cusip: cusip,
                 description: row[data_start_index + 1],
-                original_par: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
-                payment_amount: (row[data_start_index + 3].to_i if row[data_start_index + 3])
+                original_par: (row[data_start_index + 2]),
+                payment_amount: (row[data_start_index + 3])
               })
             elsif type == :pledge || type == :safekeep
               Security.from_hash({
                 cusip: cusip,
-                original_par: (row[data_start_index + 1].to_i if row[data_start_index + 1]),
-                settlement_amount: (row[data_start_index + 2].to_i if row[data_start_index + 2]),
-                custodian_name: (row[data_start_index + 3] if row[data_start_index + 3])
+                original_par: (row[data_start_index + 1]),
+                settlement_amount: (row[data_start_index + 2]),
+                custodian_name: (row[data_start_index + 3])
               })
             end
             if security.valid?
               securities << security
-            elsif security.errors[:cusip].present?
+            elsif security.errors.keys.include?(:cusip)
               invalid_cusips << security.cusip
             else
               error = prioritized_security_error(security)
@@ -578,7 +578,9 @@ class SecuritiesController < ApplicationController
     security_errors = security.errors
     if security_errors.present?
       error_keys = security_errors.keys
-      security_errors[error_keys.first].first
+      prioritized_error_keys = error_keys - Security::CURRENCY_ATTRIBUTES
+      error_key = prioritized_error_keys.present? ? prioritized_error_keys.first : error_keys.first
+      security_errors[error_key].first
     end
   end
 

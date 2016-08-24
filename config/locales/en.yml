@@ -232,6 +232,7 @@ en:
               original_par: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
         security:
           blank: "Each row must contain at least a CUSIP and Original Par.\nPlease modify your file."
+          not_a_number: '%{attribute} must be a number.'
           attributes:
             cusip:
               invalid: "The following CUSIP is invalid: %{value}.\nPlease update your file with the correct CUSIP."

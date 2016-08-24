@@ -1671,6 +1671,22 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(security).to receive(:errors).and_return(errors)
         expect(call_method).to eq(error_message)
       end
+      describe 'when the error hash contains Security::CURRENCY_ATTRIBUTES' do
+        let(:currency_attr_error) { instance_double(String) }
+
+        before do
+          errors[Security::CURRENCY_ATTRIBUTES.sample] = [currency_attr_error]
+          allow(security).to receive(:errors).and_return(errors)
+        end
+
+        it 'prioritizes other errors above the Security::CURRENCY_ATTRIBUTES errors' do
+          expect(call_method).to eq(error_message)
+        end
+        it 'returns the first error message of the first Security::CURRENCY_ATTRIBUTES error if no other errors are present' do
+          [:foo, :bar].each {|error| security.errors.delete(error) }
+          expect(call_method).to eq(currency_attr_error)
+        end
+      end
     end
   end
 end

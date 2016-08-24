@@ -81,7 +81,14 @@ Scenario: Member sees an error when uploading a file with no valid rows
   Given I am on the release securities page
   And the edit securities section is open
   When I drag and drop the "securities-no-rows.xlsx" file into the edit securities dropzone
-  Then I should see an upload error for no rows
+  Then I should see a no securities field error
+
+@jira-mem-1783 @data-unavailable
+Scenario: Member uploads a securities release file that has an invalid Original Par
+  Given I am on the release securities page
+  And the edit securities section is open
+  When I drag and drop the "securities_invalid_original_par.xlsx" file into the edit securities dropzone
+  Then I should see an original par numericality field error
 
 @jira-mem-1654
 Scenario: Member changes trade and settlement dates
