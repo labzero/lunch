@@ -101,12 +101,6 @@ Scenario: Member sees success page after submitting releases for authorization
   And I submit the securities release request for authorization
   Then I should see the success page for the securities release request
 
-@jira-mem-1593
-Scenario: Member sees error when submitting release with required information missing
-  Given I am on the release securities page
-  And I submit the securities release request for authorization
-  Then I should see the error message for missing securities request information
-
 @jira-mem-1599
 Scenario: A signer authorizes a previously submittied release request
   Given I am logged in as a "quick-advance signer"
@@ -149,3 +143,11 @@ Scenario: A signer authorizes a request while submitting it
   And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   When I authorize the request
   Then I should see the authorize request success page
+
+@jira-mem-1785
+Scenario: A user cannot submit the form until all required fields have values
+  When I am on the release securities page
+  Then the Submit action is disabled
+  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  Then the Submit action is enabled

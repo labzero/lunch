@@ -291,8 +291,9 @@ Then(/^I should see the authorize request success page$/) do
   page.assert_selector('.securities-authorize-success')
 end
 
-Then(/^the Authorize action is (disabled|enabled)$/) do |state|
-  base = ".securities-actions .primary-button[value=#{I18n.t('securities.release.authorize')}]"
+Then(/^the (Authorize|Submit) action is (disabled|enabled)$/) do |action, state|
+  text = action == 'Authorize' ? I18n.t('securities.release.authorize') : I18n.t('securities.release.submit_authorization')
+  base = ".securities-actions .primary-button[value='#{text}']"
   if state == 'disabled'
     page.assert_selector(base + '[disabled]')
   else

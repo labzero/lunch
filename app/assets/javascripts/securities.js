@@ -4,6 +4,7 @@ $(function() {
   var $submitButton = $form.find('input[type=submit]');
   var $securitiesUploadInstructions = $('.securities-upload-instructions');
   var $securitiesReleaseWrapper = $('.securities-release-table-wrapper');
+  var $securitiesField = $('input[name="securities"]');
   $checkboxes.on('change', function(e){
     // if boxes checked and all values are the same, enable submit
     var status = false;
@@ -85,16 +86,68 @@ $(function() {
   // Validate length of SecurID token and pin
   if ($secureIDPinField.length && $secureIDTokenField.length) {
     $.each([$secureIDPinField, $secureIDTokenField], (function(i, $element){
-      $element.on('keyup', function(){
-        if ($secureIDTokenField.val().length == 6 && $secureIDPinField.val().length == 4) {
-          $submitField.addClass('active');
-          $submitField.attr('disabled', false);
-        } else {
-          $submitField.removeClass('active');
-          $submitField.attr('disabled', true);
-        };
-      });
+      $element.on('keyup', validateSecuritiesRequestFields);
     }));
+  };
+
+  // Validate input fields
+  $securitiesForm.find('input').on('keyup', validateSecuritiesRequestFields);
+  $securitiesForm.find('select').on('change', validateSecuritiesRequestFields);
+  $securitiesField.on('change', validateSecuritiesRequestFields);
+
+  function validateSecuritiesRequestFields() {
+    if (brokerInstructionsValid() && deliveryInstructionsValid() && securitiesValid() && secureIDValid()) {
+      $submitField.addClass('active');
+      $submitField.attr('disabled', false);
+    } else {
+      $submitField.removeClass('active');
+      $submitField.attr('disabled', true);
+    };
+  };
+
+  function secureIDValid() {
+    if ($secureIDPinField.length && $secureIDTokenField.length) {
+      return $secureIDTokenField.val().length == 6 && $secureIDPinField.val().length == 4;
+    } else {
+      return true;
+    };
+  };
+
+  function securitiesValid() {
+    var isValid = $securitiesField.val() ? true : false;
+    return isValid;
+  };
+
+  function brokerInstructionsValid() {
+    var inputFieldNames = ['trade_date', 'settlement_date'];
+    var selectFieldNames = ['pledge_type', 'transaction_code', 'settlement_type'];
+    var brokerInstructionsFields = [];
+    $.each(inputFieldNames, function(i, fieldName) {
+      var field = $('input[name="securities_request[' + fieldName + ']"]');
+      field.length ? brokerInstructionsFields.push(field) : null;
+    });
+    $.each(selectFieldNames, function(i, fieldName) {
+      var field = $('select[name="securities_request[' + fieldName + ']"]');
+      field.length ? brokerInstructionsFields.push(field) : null;
+    });
+    return fieldsValid(brokerInstructionsFields);
+  };
+
+  function deliveryInstructionsValid() {
+    var deliveryInstructionsType = $('.securities-delivery-instructions-fields').attr('data-selected-delivery-instruction');
+    var requiredDeliveryInstructionsFields = $('.securities-delivery-instructions-field[data-delivery-instruction-type="' + deliveryInstructionsType + '"] input');
+    return fieldsValid(requiredDeliveryInstructionsFields);
+  };
+
+  function fieldsValid(fields) {
+    var isValid = true;
+    $.each(fields, function(i, field) {
+      if (!$(field).val()) {
+        isValid = false;
+        return false;
+      };
+    });
+    return isValid;
   };
 
   if ($securitiesForm.length > 0) {
