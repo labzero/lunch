@@ -1633,7 +1633,7 @@ describe MAPI::ServiceApp do
 
       {
         release: ['cusip', 'description', 'original_par'],
-        intake: ['cusip', 'custodian_name', 'original_par']
+        intake: ['cusip', 'original_par']
       }.each do |type, required_fields|
         describe "for `type` #{type}" do
           let(:call_method) { securities_request_module.validate_securities([security], settlement_type, delivery_type, type) }
