@@ -76,6 +76,13 @@ Scenario: Member uploads a securities release file that is missing a CUSIP
   When I drag and drop the "securities_missing_cusip.xlsx" file into the edit securities dropzone
   Then I should see a security required field error
 
+@jira-mem-1779 @data-unavailable
+Scenario: Member sees an error when uploading a file with no valid rows
+  Given I am on the release securities page
+  And the edit securities section is open
+  When I drag and drop the "securities-no-rows.xlsx" file into the edit securities dropzone
+  Then I should see an upload error for no rows
+
 @jira-mem-1654
 Scenario: Member changes trade and settlement dates
   # This should be flushed out once we have actual date ranges to check

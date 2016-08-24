@@ -311,6 +311,10 @@ Given(/^I upload a securities file$/) do
   file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', 'sample-securties-pledge-upload.xlsx')))
 end
 
+Then(/^I should see an upload error for no rows$/) do
+  page.assert_selector('.securities-release-upload-error p', text: I18n.t('securities.upload_errors.no_rows'), exact: true)
+end
+
 def delivery_instructions(text)
   case text
   when 'DTC'

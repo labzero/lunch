@@ -297,8 +297,7 @@ class SecuritiesController < ApplicationController
             # Blank cusip error
             error = I18n.t('activemodel.errors.models.security.blank')
           elsif securities.empty?
-            # No securities found
-            error = I18n.t('securities.upload_errors.generic')
+            error = I18n.t('securities.upload_errors.no_rows')
           else
             populate_securities_table_data_view_variable(type, securities)
             html = render_to_string(:upload_table, layout: false, locals: { type: type })

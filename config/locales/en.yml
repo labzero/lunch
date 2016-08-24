@@ -1343,6 +1343,7 @@ en:
       unsupported_mime_type: Your file does not appear to be an Excel file. Please verify that you've selected the correct file and try again.
       generic: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
       invalid_cusips: "The following CUSIPs are invalid: %{cusips}.\nPlease update your file with the correct CUSIPs."
+      no_rows: Your file contains no valid rows. Please edit your file and try again.
   reports:
     meta_title: FHLB - Reports
     title: Reports

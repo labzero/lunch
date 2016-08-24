@@ -755,9 +755,9 @@ RSpec.describe SecuritiesController, type: :controller do
       no_securities = excel_fixture_file_upload('sample-empty-securities-upload.xlsx')
       let(:call_action) { post :upload_securities, file: no_securities, type: :release }
       let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
-      it 'renders a json object with a generic error messages' do
+      it 'renders a json object with a specific error messages' do
         call_action
-        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.generic')))
+        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.no_rows')))
       end
       it 'renders a json object with a nil value for `html`' do
         call_action
