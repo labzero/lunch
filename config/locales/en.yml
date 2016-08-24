@@ -117,7 +117,8 @@ en:
     attachments: Attachments
     unknown: Unknown
     last_updated: 'Last Updated: %{date}'
-    page_meta_title: 'FHLB - %{title}'
+    page_meta_title: 'FHLBSF - %{title}'
+    page_default_title: FHLBSF
     defined_term: '%{term}:'
     authorizations: Authorizations
     letters_of_credit: Lettters of Credit

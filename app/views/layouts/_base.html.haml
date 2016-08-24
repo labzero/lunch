@@ -9,7 +9,7 @@
   %head
     %meta{charset: "utf-8"}
     %meta{content: "IE=edge,chrome=1", :'http-equiv' => "X-UA-Compatible"}
-    %title= @page_title || 'FHLB Member Portal'
+    %title= @page_title || t('global.page_default_title')
     - if css_manifest
       - if !inline_styles
         = stylesheet_link_tag css_manifest, media: "all"
