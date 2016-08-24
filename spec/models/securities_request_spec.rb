@@ -204,7 +204,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
 
   describe 'instance methods' do
     describe '`attributes=`' do
-      sym_attrs = [:delivery_type, :transaction_code, :settlement_type]
+      sym_attrs = [:delivery_type, :transaction_code, :settlement_type, :form_type]
       date_attrs = [:trade_date, :settlement_date]
       custom_attrs = [:request_id]
       let(:hash) { {} }

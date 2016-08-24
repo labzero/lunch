@@ -1,7 +1,7 @@
 class Security
   include ActiveModel::Model
   include ActiveModel::Validations
-  include SecurityIdentifiers::Validations
+  include ActiveModel::Serializers::JSON
 
   RELEASE_REQUEST_PARAMETERS = [:cusip, :description, :original_par, :payment_amount].freeze
   OTHER_PARAMETERS = [:settlement_amount, :custodian_name, :custody_account_number, :custody_account_type, :security_pledge_type, :pool_number, :reg_id, :coupon_rate, :factor, :current_par, :price, :market_value, :maturity_date, :factor_date, :price_date, :eligibility, :authorized_by, :borrowing_capacity].freeze
@@ -44,6 +44,14 @@ class Security
       end
       send("#{key}=", value)
     end
+  end
+
+  def attributes
+    attrs = {}
+    ACCESSIBLE_ATTRS.each do |key|
+      attrs[key] = nil if send(key)
+    end
+    attrs
   end
 
   def cusip=(cusip)

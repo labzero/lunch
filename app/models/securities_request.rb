@@ -43,7 +43,8 @@ class SecuritiesRequest
                       :delivery_type,
                       :member_id,
                       :account_number,
-                      :pledge_type].freeze
+                      :pledge_type,
+                      :form_type].freeze
 
   ACCESSIBLE_ATTRS = (BROKER_INSTRUCTION_KEYS + OTHER_PARAMETERS + DELIVERY_INSTRUCTION_KEYS.values.flatten).freeze
 
@@ -74,7 +75,7 @@ class SecuritiesRequest
       value = case key
       when :trade_date, :settlement_date
         Time.zone.parse(value)
-      when :delivery_type, :transaction_code, :settlement_type
+      when :delivery_type, :transaction_code, :settlement_type, :form_type
         value.to_sym
       when :securities, *ACCESSIBLE_ATTRS
         value

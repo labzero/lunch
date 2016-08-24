@@ -191,7 +191,7 @@ Rails.application.routes.draw do
         post 'edit' => 'securities#edit_release'
         post 'download' => 'securities#download_release'
         post 'upload' => 'securities#upload_securities', defaults: { type: :release }
-        post 'submit' => 'securities#submit_release'
+        post 'submit' => 'securities#submit_request', defaults: { type: :release }
         post 'authorize' => 'securities#authorize_request'
         get 'success' => 'securities#submit_request_success', defaults: { type: :release }
       end
@@ -200,7 +200,7 @@ Rails.application.routes.draw do
         get 'edit' => 'securities#edit_safekeep'
         get 'download' => 'securities#download_safekeep'
         post 'upload' => 'securities#upload_securities', defaults: { type: :safekeep }
-        post 'submit' => 'error#not_found'
+        post 'submit' => 'securities#submit_request', defaults: { type: :safekeep }
         get 'success' => 'securities#submit_request_success', defaults: { type: :safekeep }
       end
       scope 'pledge', as: :pledge do
@@ -208,7 +208,7 @@ Rails.application.routes.draw do
         get 'edit' => 'securities#edit_pledge'
         get 'download' => 'securities#download_pledge'
         post 'upload' => 'securities#upload_securities', defaults: { type: :pledge }
-        post 'submit' => 'error#not_found'
+        post 'submit' => 'securities#submit_request', defaults: { type: :pledge }
         get 'success' => 'securities#submit_request_success', defaults: { type: :pledge }
       end
     end

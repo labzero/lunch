@@ -65,7 +65,7 @@ RSpec.describe SecuritiesController, type: :controller do
           it 'has a `value` that is a JSON\'d string of the security' do
             call_action
             assigns[:securities_table_data][:rows].each do |row|
-              expect(row[:columns][0][:value]).to eq(security.to_json)
+              expect(JSON.parse(row[:columns][0][:value])).to eq(JSON.parse(security.to_json))
             end
           end
           it 'has `disabled` set to `false` if there is a cusip value' do
@@ -769,166 +769,91 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  describe 'POST submit_release' do
-    let(:securities_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
-    let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_release_for_authorization: true, authorize_request: true) }
-    let(:active_model_errors) { instance_double(ActiveModel::Errors, add: nil) }
-    let(:securities_request) { instance_double(SecuritiesRequest, :valid? => true, errors: active_model_errors) }
-    let(:error_message) { instance_double(String) }
-    let(:call_action) { post :submit_release, securities_request: securities_request_param }
+  {
+    release: [:edit_release, I18n.t('securities.authorize.release.title'), :securities_release_success_url],
+    pledge: [:edit_pledge, I18n.t('securities.authorize.pledge.title'), :securities_pledge_success_url],
+    safekeep: [:edit_safekeep, I18n.t('securities.authorize.safekeep.title'), :securities_safekeep_success_url]
+  }.each do |type, details|
+    template, title, success_path = details
+    describe "POST submit_request for `#{type}`" do
+      let(:securities_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
+      let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_request_for_authorization: true, authorize_request: true) }
+      let(:active_model_errors) { instance_double(ActiveModel::Errors, add: nil) }
+      let(:securities_request) { instance_double(SecuritiesRequest, :valid? => true, errors: active_model_errors) }
+      let(:error_message) { instance_double(String) }
+      let(:call_action) { post :submit_request, securities_request: securities_request_param, type: type }
 
-    before do
-      allow(controller).to receive(:current_member_id).and_return(member_id)
-      allow(controller).to receive(:populate_view_variables)
-      allow(controller).to receive(:prioritized_securities_request_error)
-      allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service)
-      allow(SecuritiesRequest).to receive(:from_hash).and_return(securities_request)
-    end
-    it 'builds a SecuritiesRequest instance with the `securities_request` params' do
-      expect(SecuritiesRequest).to receive(:from_hash).with(securities_request_param)
-      call_action
-    end
-    it 'sets @securities_request' do
-      call_action
-      expect(assigns[:securities_request]).to eq(securities_request)
-    end
-    describe 'when the securities_request is valid' do
-      it 'creates a new instance of SecuritiesRequestService with the `current_member_id`' do
-        expect(SecuritiesRequestService).to receive(:new).with(member_id, anything).and_return(securities_request_service)
-        call_action
-      end
-      it 'creates a new instance of SecuritiesRequestService with the current request' do
-        expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(securities_request_service)
-        call_action
-      end
-      it 'calls `submit_release_for_authorization` on the SecuritiesRequestService instance with the `securities_request`' do
-        expect(securities_request_service).to receive(:submit_release_for_authorization).with(securities_request, anything).and_return(true)
-        call_action
-      end
-      it 'calls `submit_release_for_authorization` on the SecuritiesRequestService instance with the current_user' do
-        expect(securities_request_service).to receive(:submit_release_for_authorization).with(anything, controller.current_user).and_return(true)
-        call_action
-      end
-      describe 'when the service object returns true' do
-        it 'redirects to the `securities_release_success_url` if there are no errors' do
-          allow(active_model_errors).to receive(:present?).and_return(false)
-          expect(call_action).to redirect_to(securities_release_success_url)
-        end
-      end
-      describe 'when the service object returns nil' do
-        let(:error_body) {{
-          'error' => {
-            'code' => SecureRandom.hex,
-            'type' => SecureRandom.hex
-          }
-        }}
-        let(:error) { instance_double(RestClient::Exception, http_body: error_body.to_json) }
-
-        before do
-          allow(securities_request_service).to receive(:submit_release_for_authorization).and_return(nil)
-          allow(JSON).to receive(:parse).and_return(error_body)
-        end
-        describe 'when the error handler is invoked' do
-          before { allow(securities_request_service).to receive(:submit_release_for_authorization).and_yield(error) }
-
-          it 'adds an error to the securities_request instance with the given code and type' do
-            expect(active_model_errors).to receive(:add).with(error_body['error']['code'].to_sym, error_body['error']['type'].to_sym)
-            call_action
-          end
-          it 'adds an error to the securities_request instance with an attribute of `:base` when the given code is `unkown`' do
-            error_body['error']['code'] = 'unknown'
-            expect(active_model_errors).to receive(:add).with(:base, error_body['error']['type'].to_sym)
-            call_action
-          end
-          it 'does not add a `:base`, `:submission` error' do
-            expect(active_model_errors).not_to receive(:add).with(:base, :submission)
-            call_action
-          end
-        end
-        it 'adds a `:base`, `:submission` error if there are not yet any errors' do
-          allow(active_model_errors).to receive(:present?).and_return(false)
-          expect(active_model_errors).to receive(:add).with(:base, :submission)
-          call_action
-        end
-        it 'calls `populate_view_variables` with `:release`' do
-          expect(controller).to receive(:populate_view_variables).with(:release)
-          call_action
-        end
-        it 'calls `prioritized_securities_request_error` with the securities_request instance' do
-          expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
-          call_action
-        end
-        it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
-          allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
-          call_action
-          expect(assigns[:error_message]).to eq(error_message)
-        end
-        it 'renders the `edit_release` view' do
-          call_action
-          expect(response.body).to render_template(:edit_release)
-        end
-
-        describe 'when the user is an authorizer' do
-          allow_policy :security, :authorize?
-          it 'does not check the SecurID details' do
-            expect(subject).to_not receive(:securid_perform_check)
-            call_action
-          end
-        end
-      end
-    end
-    describe 'when the securities_request is invalid' do
-      before { allow(securities_request).to receive(:valid?).and_return(false) }
-
-      it 'calls `prioritized_securities_request_error` with the securities_request instance' do
-        expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
-        call_action
-      end
-      it 'renders the `edit_release` view' do
-        call_action
-        expect(response.body).to render_template(:edit_release)
-      end
-      describe 'when the user is an authorizer' do
-        allow_policy :security, :authorize?
-        it 'does not check the SecurID details' do
-          expect(subject).to_not receive(:securid_perform_check)
-          call_action
-        end
-      end
-    end
-
-    describe 'when the user is an authorizer' do
-      let(:request_id) { double('A Request ID') }
-      allow_policy :security, :authorize?
       before do
-        allow(securities_request).to receive(:request_id).and_return(request_id)
+        allow(controller).to receive(:current_member_id).and_return(member_id)
+        allow(controller).to receive(:populate_view_variables)
+        allow(controller).to receive(:prioritized_securities_request_error)
+        allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service)
+        allow(SecuritiesRequest).to receive(:from_hash).and_return(securities_request)
       end
-      it 'checks the SecurID details if no errors are found in the data' do
-        allow(active_model_errors).to receive(:present?).and_return(false)
-        expect(subject).to receive(:securid_perform_check).and_return(:authenticated)
+      it 'builds a SecuritiesRequest instance with the `securities_request` params' do
+        expect(SecuritiesRequest).to receive(:from_hash).with(securities_request_param)
         call_action
       end
-      describe 'when SecurID passes and there are not yet any errors' do
-        before do
-          allow(subject).to receive(:session_elevated?).and_return(true)
-          allow(active_model_errors).to receive(:blank?).and_return(true)
-        end
-        it 'authorizes the request' do
-          expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
+      it 'sets @securities_request' do
+        call_action
+        expect(assigns[:securities_request]).to eq(securities_request)
+      end
+      describe 'when the securities_request is valid' do
+        it 'creates a new instance of SecuritiesRequestService with the `current_member_id`' do
+          expect(SecuritiesRequestService).to receive(:new).with(member_id, anything).and_return(securities_request_service)
           call_action
         end
-        it 'renders the `authorize_request` view' do
+        it 'creates a new instance of SecuritiesRequestService with the current request' do
+          expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(securities_request_service)
           call_action
-          expect(response.body).to render_template(:authorize_request)
         end
-        describe 'when the authorization fails' do
-          before do
-            allow(securities_request_service).to receive(:authorize_request).and_return(false)
-            allow(active_model_errors).to receive(:present?).and_return(false, false, true)
+        it 'calls `submit_request_for_authorization` on the SecuritiesRequestService instance with the `securities_request`' do
+          expect(securities_request_service).to receive(:submit_request_for_authorization).with(securities_request, anything, type).and_return(true)
+          call_action
+        end
+        describe 'when the service object returns true' do
+          it 'redirects to the `securities_release_success_url` if there are no errors' do
+            allow(active_model_errors).to receive(:present?).and_return(false)
+            expect(call_action).to redirect_to(send(success_path))
           end
+        end
+        describe 'when the service object returns nil' do
+          let(:error_body) {{
+            'error' => {
+              'code' => SecureRandom.hex,
+              'type' => SecureRandom.hex
+            }
+          }}
+          let(:error) { instance_double(RestClient::Exception, http_body: error_body.to_json) }
 
-          it 'adds an `:base`, `:authorization` error to the securities_request instance' do
-            expect(active_model_errors).to receive(:add).with(:base, :authorization)
+          before do
+            allow(securities_request_service).to receive(:submit_request_for_authorization).and_return(nil)
+            allow(JSON).to receive(:parse).and_return(error_body)
+          end
+          describe 'when the error handler is invoked' do
+            before { allow(securities_request_service).to receive(:submit_request_for_authorization).and_yield(error) }
+
+            it 'adds an error to the securities_request instance with the given code and type' do
+              expect(active_model_errors).to receive(:add).with(error_body['error']['code'].to_sym, error_body['error']['type'].to_sym)
+              call_action
+            end
+            it 'adds an error to the securities_request instance with an attribute of `:base` when the given code is `unkown`' do
+              error_body['error']['code'] = 'unknown'
+              expect(active_model_errors).to receive(:add).with(:base, error_body['error']['type'].to_sym)
+              call_action
+            end
+            it 'does not add a `:base`, `:submission` error' do
+              expect(active_model_errors).not_to receive(:add).with(:base, :submission)
+              call_action
+            end
+          end
+          it 'adds a `:base`, `:submission` error if there are not yet any errors' do
+            allow(active_model_errors).to receive(:present?).and_return(false)
+            expect(active_model_errors).to receive(:add).with(:base, :submission)
+            call_action
+          end
+          it "calls `populate_view_variables` with `#{type}`" do
+            expect(controller).to receive(:populate_view_variables).with(type)
             call_action
           end
           it 'calls `prioritized_securities_request_error` with the securities_request instance' do
@@ -940,29 +865,23 @@ RSpec.describe SecuritiesController, type: :controller do
             call_action
             expect(assigns[:error_message]).to eq(error_message)
           end
-          it 'renders the `edit_release` view' do
+          it "renders the `#{template}` view" do
             call_action
-            expect(response.body).to render_template(:edit_release)
+            expect(response.body).to render_template(template)
+          end
+
+          describe 'when the user is an authorizer' do
+            allow_policy :security, :authorize?
+            it 'does not check the SecurID details' do
+              expect(subject).to_not receive(:securid_perform_check)
+              call_action
+            end
           end
         end
       end
-      describe 'when SecurID fails' do
-        let(:securid_error) { double('A SecurID error') }
-        before do
-          allow(subject).to receive(:securid_perform_check).and_return(securid_error)
-        end
-        it 'does not authorize the request' do
-          expect(securities_request_service).to_not receive(:authorize_request)
-          call_action
-        end
-        it 'renders the `edit_release` view' do
-          call_action
-          expect(response.body).to render_template(:edit_release)
-        end
-        it 'calls `populate_view_variables` with `:release`' do
-          expect(controller).to receive(:populate_view_variables).with(:release)
-          call_action
-        end
+      describe 'when the securities_request is invalid' do
+        before { allow(securities_request).to receive(:valid?).and_return(false) }
+
         it 'calls `prioritized_securities_request_error` with the securities_request instance' do
           expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
           call_action
@@ -971,6 +890,102 @@ RSpec.describe SecuritiesController, type: :controller do
           allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
           call_action
           expect(assigns[:error_message]).to eq(error_message)
+        end
+        it "renders the `#{template}` view" do
+          call_action
+          expect(response.body).to render_template(template)
+        end
+        describe 'when the user is an authorizer' do
+          allow_policy :security, :authorize?
+          it 'does not check the SecurID details' do
+            expect(subject).to_not receive(:securid_perform_check)
+            call_action
+          end
+        end
+      end
+
+      describe 'when the user is an authorizer' do
+        let(:request_id) { double('A Request ID') }
+        allow_policy :security, :authorize?
+        it 'checks the SecurID details if no errors are found in the data' do
+          allow(active_model_errors).to receive(:present?).and_return(false)
+          expect(subject).to receive(:securid_perform_check).and_return(:authenticated)
+          call_action
+        end
+        describe 'when SecurID passes and there are not yet any errors' do
+          before do
+            allow(securities_request).to receive(:request_id).and_return(request_id)
+          end
+          it 'checks the SecurID details if no errors are found in the data' do
+            allow(active_model_errors).to receive(:present?).and_return(false)
+            expect(subject).to receive(:securid_perform_check).and_return(:authenticated)
+            call_action
+          end
+          describe 'when SecurID passes and there are not yet any errors' do
+            before do
+              allow(subject).to receive(:session_elevated?).and_return(true)
+              allow(active_model_errors).to receive(:blank?).and_return(true)
+            end
+            it 'authorizes the request' do
+              expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
+              call_action
+            end
+            it 'renders the `authorize_request` view' do
+              call_action
+              expect(response.body).to render_template(:authorize_request)
+            end
+            describe 'when the authorization fails' do
+              before do
+                allow(securities_request_service).to receive(:authorize_request).and_return(false)
+                allow(active_model_errors).to receive(:present?).and_return(false, false, true)
+              end
+
+              it 'adds an `:base`, `:authorization` error to the securities_request instance' do
+                expect(active_model_errors).to receive(:add).with(:base, :authorization)
+                call_action
+              end
+              it 'calls `prioritized_securities_request_error` with the securities_request instance' do
+                expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
+                call_action
+              end
+              it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
+                allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
+                call_action
+                expect(assigns[:error_message]).to eq(error_message)
+              end
+              it "renders the `#{template}` view" do
+                call_action
+                expect(response.body).to render_template(template)
+              end
+            end
+          end
+          describe 'when SecurID fails' do
+            let(:securid_error) { double('A SecurID error') }
+            before do
+              allow(subject).to receive(:securid_perform_check).and_return(securid_error)
+            end
+            it 'does not authorize the request' do
+              expect(securities_request_service).to_not receive(:authorize_request)
+              call_action
+            end
+            it "renders the `#{template}` view" do
+              call_action
+              expect(response.body).to render_template(template)
+            end
+            it "calls `populate_view_variables` with `#{type}`" do
+              expect(controller).to receive(:populate_view_variables).with(type)
+              call_action
+            end
+            it 'calls `prioritized_securities_request_error` with the securities_request instance' do
+              expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
+              call_action
+            end
+            it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
+              allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
+              call_action
+              expect(assigns[:error_message]).to eq(error_message)
+            end
+          end
         end
       end
     end

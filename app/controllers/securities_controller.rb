@@ -317,11 +317,12 @@ class SecuritiesController < ApplicationController
   end
 
   # POST
-  def submit_release
+  def submit_request
+    type = params[:type].try(:to_sym)
     @securities_request = SecuritiesRequest.from_hash(params[:securities_request])
     authorizer = policy(:security).authorize?
-    if @securities_request.valid?
-      response = SecuritiesRequestService.new(current_member_id, request).submit_release_for_authorization(@securities_request, current_user) do |error|
+    if type != :release || @securities_request.valid? # this type switch should be removed when adding error support for intake (and this comment)
+      response = SecuritiesRequestService.new(current_member_id, request).submit_request_for_authorization(@securities_request, current_user, type) do |error|
         error = JSON.parse(error.http_body)['error']
         error['code'] = :base if error['code'] == 'unknown'
         @securities_request.errors.add(error['code'].to_sym, error['type'].to_sym)
@@ -344,14 +345,41 @@ class SecuritiesController < ApplicationController
     end
     if has_errors
       @error_message = prioritized_securities_request_error(@securities_request)
-      populate_view_variables(:release)
-      @title = t('securities.release.title')
-      render :edit_release
+      populate_view_variables(type)
+      case type
+      when :release
+        render :edit_release
+      when :pledge
+        render :edit_pledge
+      when :safekeep
+        render :edit_safekeep
+      else
+        raise ArgumentError, "Unknown request type: #{type}"
+      end
     elsif authorizer
-      @title = t('securities.authorize.release.title')
+      case type
+      when :release
+        @title = t('securities.authorize.release.title')
+      when :pledge
+        @title = t('securities.authorize.pledge.title')
+      when :safekeep
+        @title = t('securities.authorize.safekeep.title')
+      else
+        raise ArgumentError, "Unknown request type: #{type}"
+      end
       render :authorize_request
     else
-      redirect_to securities_release_success_url
+      url = case type
+      when :release
+        securities_release_success_url
+      when :pledge
+        securities_pledge_success_url
+      when :safekeep
+        securities_safekeep_success_url
+      else
+        raise ArgumentError, "Unknown request type: #{type}"
+      end
+      redirect_to url
     end
   end
 

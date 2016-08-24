@@ -69,6 +69,7 @@ module MAPI
           Proc.new { |value| TRANSACTION_CODE.invert[value.to_i] } => ['PLEDGE_TYPE'],
           Proc.new { |value| SETTLEMENT_TYPE.invert[value.to_i] } => ['REQUEST_STATUS'],
           Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO'],
+          Proc.new { |value| REQUEST_FORM_TYPE_MAPPING[value] } => ['FORM_TYPE'],
           to_s: ['BROKER_WIRE_ADDR', 'ABA_NO', 'DTC_AGENT_PARTICIPANT_NO', 'MUTUAL_FUND_COMPANY', 'DELIVERY_BANK_AGENT',
                  'REC_BANK_AGENT_NAME', 'REC_BANK_AGENT_ADDR', 'CREDIT_ACCT_NO1', 'CREDIT_ACCT_NO2', 'MUTUAL_FUND_ACCT_NO',
                  'CREDIT_ACCT_NO3', 'CREATED_BY', 'CREATED_BY_NAME'],
@@ -97,7 +98,8 @@ module MAPI
                                    'dtc' => 'CREDIT_ACCT_NO2',
                                    'mutual_fund' => 'MUTUAL_FUND_ACCT_NO',
                                    'physical_securities' => 'CREDIT_ACCT_NO3' }
-        REQUIRED_SECURITY_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
+        REQUIRED_SECURITY_RELEASE_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
+        REQUIRED_SECURITY_INTAKE_KEYS = [ 'cusip', 'custodian_name', 'original_par' ].freeze
         LAST_MODIFIED_BY_MAX_LENGTH = 30
         BROKER_WIRE_ADDRESS_FIELDS = ['clearing_agent_fed_wire_address_1', 'clearing_agent_fed_wire_address_2'].freeze
         FED_AMOUNT_LIMIT = 50000000
@@ -378,7 +380,7 @@ module MAPI
         def self.validate_broker_instructions(broker_instructions, app, type)
           raise MAPI::Shared::Errors::MissingFieldError.new('broker_instructions must be a non-empty hash', :broker_instructions) unless !broker_instructions.nil? && broker_instructions.is_a?(Hash) && !broker_instructions.empty?
           broker_instructions_mapping = BROKER_INSTRUCTIONS_MAPPING
-          broker_instructions_mapping = broker_instructions_mapping.merge(ADDITIONAL_BROKER_INSTRUCTIONS_MAPPING_FOR_PLEDGING) if type == :intake
+          broker_instructions_mapping = broker_instructions_mapping.merge(ADDITIONAL_BROKER_INSTRUCTIONS_MAPPING_FOR_PLEDGING) if type == :pledge_intake
           broker_instructions_mapping.keys.each do |key|
             raise MAPI::Shared::Errors::MissingFieldError.new("broker_instructions must contain a value for #{key}", key) unless broker_instructions[key]
           end
@@ -402,9 +404,14 @@ module MAPI
           raise MAPI::Shared::Errors::InvalidFieldError.new("#{attr_name} must not occur after 3 months from today", attr_name, :future_date) unless date <= max_date
         end
 
-        def self.validate_securities(securities, settlement_type, delivery_type)
+        def self.validate_securities(securities, settlement_type, delivery_type, type)
           raise MAPI::Shared::Errors::MissingFieldError.new('securities must be an array containing at least one security', :securities) unless !securities.nil? && securities.is_a?(Array) && !securities.empty?
-          required_security_keys = REQUIRED_SECURITY_KEYS
+          required_security_keys = case type
+          when :release
+            REQUIRED_SECURITY_RELEASE_KEYS
+          when :intake
+            REQUIRED_SECURITY_INTAKE_KEYS
+          end
           required_security_keys += ['payment_amount'] if settlement_type == 'vs_payment'
           securities.each do |security|
             raise MAPI::Shared::Errors::MissingFieldError.new('each security must be a non-empty hash', :securities) unless !security.nil? && security.is_a?(Hash) && !security.empty?
@@ -480,10 +487,10 @@ module MAPI
         end
 
         def self.create_intake(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
-          validate_broker_instructions(broker_instructions, app, :intake)
           validate_delivery_instructions(delivery_instructions)
-          validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'])
+          validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :intake)
           adx_type = get_adx_type_from_security(app, securities.first)
+          validate_broker_instructions(broker_instructions, app, :"#{adx_type}_intake")
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           user_name.downcase!
           unless should_fake?(app)
@@ -509,9 +516,10 @@ module MAPI
         end
 
         def self.create_release(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
-          validate_broker_instructions(broker_instructions, app, :release)
           validate_delivery_instructions(delivery_instructions)
-          validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'])
+          validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :release)
+          adx_type = get_adx_type_from_security(app, securities.first)
+          validate_broker_instructions(broker_instructions, app, :"#{adx_type}_release")
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           user_name.downcase!
           unless should_fake?(app)
@@ -545,9 +553,9 @@ module MAPI
 
         def self.update_release(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
           original_delivery_instructions = delivery_instructions.clone # Used to see if header details have changes below
-          validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'])
+          validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :release)
           adx_type = get_adx_type_from_security(app, securities.first)
-          validate_broker_instructions(broker_instructions, app, :release)
+          validate_broker_instructions(broker_instructions, app, :"#{adx_type}_release")
           validate_delivery_instructions(delivery_instructions)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           unless should_fake?(app)
@@ -604,7 +612,7 @@ module MAPI
           <<-SQL
             SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
               MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
-              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE
             FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE HEADER_ID = #{quote(header_id)}
             AND FHLB_ID = #{quote(member_id)}
@@ -636,6 +644,7 @@ module MAPI
           {
             request_id: request_id,
             account_number: header_details['PLEDGED_ADX_ID'] || header_details['UNPLEDGED_ADX_ID'],
+            form_type: header_details['FORM_TYPE'],
             broker_instructions: broker_instructions_from_header_details(header_details),
             delivery_instructions: delivery_instructions_from_header_details(header_details),
             securities: format_securities(securities),

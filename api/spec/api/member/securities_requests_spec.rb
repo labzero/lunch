@@ -672,6 +672,7 @@ describe MAPI::ServiceApp do
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_release(*method_params) }
 
         before do
+          allow(securities_request_module).to receive(:get_adx_type_from_security).with(app, security).and_return(adx_type)
           allow(securities_request_module).to receive(:validate_broker_instructions)
         end
 
@@ -679,11 +680,15 @@ describe MAPI::ServiceApp do
           before { allow(securities_request_module).to receive(:should_fake?).and_return(true) }
 
           it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
-            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything, :release)
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything, anything)
             call_method
           end
           it 'calls `validate_broker_instructions` with the app as an arg' do
-            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, :release)
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, anything)
+            call_method
+          end
+          it 'calls `validate_broker_instructions` with `form_type` as an arg' do
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, anything, :"#{adx_type}_release")
             call_method
           end
           it 'calls `validate_delivery_instructions` with the `delivery_instructions` arg' do
@@ -691,15 +696,19 @@ describe MAPI::ServiceApp do
             call_method
           end
           it 'calls `validate_securities` with the `securities` arg' do
-            expect(securities_request_module).to receive(:validate_securities).with(securities, anything, anything)
+            expect(securities_request_module).to receive(:validate_securities).with(securities, anything, anything, anything)
             call_method
           end
           it 'calls `validate_securities` with the `settlement_type` arg from the broker instructions' do
-            expect(securities_request_module).to receive(:validate_securities).with(anything, broker_instructions['settlement_type'], anything)
+            expect(securities_request_module).to receive(:validate_securities).with(anything, broker_instructions['settlement_type'], anything, anything)
             call_method
           end
           it 'calls `validate_securities` with the `delivery_type` arg from the delivery instructions' do
-            expect(securities_request_module).to receive(:validate_securities).with(anything, anything, delivery_instructions['delivery_type'])
+            expect(securities_request_module).to receive(:validate_securities).with(anything, anything, delivery_instructions['delivery_type'], anything)
+            call_method
+          end
+          it 'calls `validate_securities` with `:release`' do
+            expect(securities_request_module).to receive(:validate_securities).with(securities, anything, anything, :release)
             call_method
           end
           it 'calls `process_delivery_instructions` with the `delivery_instructions` arg' do
@@ -871,7 +880,7 @@ describe MAPI::ServiceApp do
         expected_sql = <<-SQL
             SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
               MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
-              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE
             FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE HEADER_ID = #{header_id}
             AND FHLB_ID = #{member_id}
@@ -1065,6 +1074,10 @@ describe MAPI::ServiceApp do
           header_details['PLEDGED_ADX_ID'] = SecureRandom.hex
           header_details['UNPLEDGED_ADX_ID'] = SecureRandom.hex
           expect(call_method[:account_number]).to eq(header_details['PLEDGED_ADX_ID'])
+        end
+        it 'contains an `form_type` with the `FORM_TYPE`' do
+          header_details['FORM_TYPE'] = SecureRandom.hex
+          expect(call_method[:form_type]).to eq(header_details['FORM_TYPE'])
         end
       end
     end
@@ -1518,9 +1531,9 @@ describe MAPI::ServiceApp do
           expect(error.code).to eq(missing_key)
         end
       end
-      it 'raises an error if `pledge_type` is missing (for intake only)' do
+      it 'raises an error if `pledge_type` is missing (for pledge_intake only)' do
         broker_instructions.delete('pledge_type')
-        expect{securities_request_module.validate_broker_instructions(broker_instructions, app, :intake)}.to raise_error(MAPI::Shared::Errors::ValidationError, /broker_instructions must contain a value for \S+/) do |error|
+        expect{securities_request_module.validate_broker_instructions(broker_instructions, app, :pledge_intake)}.to raise_error(MAPI::Shared::Errors::ValidationError, /broker_instructions must contain a value for \S+/) do |error|
           expect(error.code).to eq("pledge_type")
         end
       end
@@ -1614,54 +1627,62 @@ describe MAPI::ServiceApp do
       let(:security) { {  'cusip' => instance_double(String),
                           'description' => instance_double(String),
                           'original_par' => rand(0...50000000),
-                          'payment_amount' => instance_double(Numeric) } }
+                          'payment_amount' => instance_double(Numeric),
+                          'custodian_name' => instance_double(String) } }
       let(:adx_type) { [:pledged, :unpledged ].sample }
-      let(:call_method) { securities_request_module.validate_securities([security], settlement_type, delivery_type) }
 
-      it 'raises an error if securities is nil' do
-        expect{securities_request_module.validate_securities(nil, settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'securities must be an array containing at least one security') do |error|
-          expect(error.code).to eq(:securities)
-        end
-      end
-      it 'raises an error if securities is an empty array' do
-        expect{securities_request_module.validate_securities([], settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'securities must be an array containing at least one security') do |error|
-          expect(error.code).to eq(:securities)
-        end
-      end
-      it 'raises an error if the securities array contains a nil value' do
-        expect{securities_request_module.validate_securities([security, nil], settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'each security must be a non-empty hash') do |error|
-          expect(error.code).to eq(:securities)
-        end
-      end
-      it 'raises an error if the securities array contains an empty hash value' do
-        expect{securities_request_module.validate_securities([security, {}], settlement_type, delivery_type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'each security must be a non-empty hash') do |error|
-          expect(error.code).to eq(:securities)
-        end
-      end
-      ['cusip', 'description', 'original_par'].each do |required_key|
-        it "raises an error if a security is missing a `#{required_key}` value" do
-          security.delete(required_key)
-          expect{call_method}.to raise_error(MAPI::Shared::Errors::CustomTypedFieldError, "each security must consist of a hash containing a value for #{required_key}") do |error|
-            expect(error.code).to eq(:securities)
-            expect(error.type).to eq(required_key)
+      {
+        release: ['cusip', 'description', 'original_par'],
+        intake: ['cusip', 'custodian_name', 'original_par']
+      }.each do |type, required_fields|
+        describe "for `type` #{type}" do
+          let(:call_method) { securities_request_module.validate_securities([security], settlement_type, delivery_type, type) }
+          it 'raises an error if securities is nil' do
+            expect{securities_request_module.validate_securities(nil, settlement_type, delivery_type, type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'securities must be an array containing at least one security') do |error|
+              expect(error.code).to eq(:securities)
+            end
           end
-        end
-      end
-      describe 'when the `settlement_type` is `vs_payment`' do
-        let(:call_method) { securities_request_module.validate_securities([security], 'vs_payment', delivery_type) }
-        it 'raises an error if a security is missing a `payment_amount` value' do
-          security.delete('payment_amount')
-          expect{call_method}.to raise_error(MAPI::Shared::Errors::CustomTypedFieldError, 'each security must consist of a hash containing a value for payment_amount') do |error|
-            expect(error.code).to eq(:securities)
-            expect(error.type).to eq('payment_amount')
+          it 'raises an error if securities is an empty array' do
+            expect{securities_request_module.validate_securities([], settlement_type, delivery_type, type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'securities must be an array containing at least one security') do |error|
+              expect(error.code).to eq(:securities)
+            end
           end
-        end
-      end
-      it "raises a `CustomTypedFieldError` if `delivery_type` is `fed` and `original_par` is greater than #{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}" do
-        security['original_par'] = rand(50000001..99999999)
-        expect{securities_request_module.validate_securities([security], settlement_type, 'fed')}.to raise_error(CustomTypedFieldError, "original par must be less than $#{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}") do |error|
-          expect(error.code).to eq(:securities)
-          expect(error.type).to eq(:original_par)
+          it 'raises an error if the securities array contains a nil value' do
+            expect{securities_request_module.validate_securities([security, nil], settlement_type, delivery_type, type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'each security must be a non-empty hash') do |error|
+              expect(error.code).to eq(:securities)
+            end
+          end
+          it 'raises an error if the securities array contains an empty hash value' do
+            expect{securities_request_module.validate_securities([security, {}], settlement_type, delivery_type, type)}.to raise_error(MAPI::Shared::Errors::MissingFieldError, 'each security must be a non-empty hash') do |error|
+              expect(error.code).to eq(:securities)
+            end
+          end
+          required_fields.each do |required_key|
+            it "raises an error if a security is missing a `#{required_key}` value" do
+              security.delete(required_key)
+              expect{call_method}.to raise_error(MAPI::Shared::Errors::CustomTypedFieldError, "each security must consist of a hash containing a value for #{required_key}") do |error|
+                expect(error.code).to eq(:securities)
+                expect(error.type).to eq(required_key)
+              end
+            end
+          end
+          describe 'when the `settlement_type` is `vs_payment`' do
+            let(:call_method) { securities_request_module.validate_securities([security], 'vs_payment', delivery_type, type) }
+            it 'raises an error if a security is missing a `payment_amount` value' do
+              security.delete('payment_amount')
+              expect{call_method}.to raise_error(MAPI::Shared::Errors::CustomTypedFieldError, 'each security must consist of a hash containing a value for payment_amount') do |error|
+                expect(error.code).to eq(:securities)
+                expect(error.type).to eq('payment_amount')
+              end
+            end
+          end
+          it "raises a `CustomTypedFieldError` if `delivery_type` is `fed` and `original_par` is greater than #{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}" do
+            security['original_par'] = rand(50000001..99999999)
+            expect{securities_request_module.validate_securities([security], settlement_type, 'fed', type)}.to raise_error(CustomTypedFieldError, "original par must be less than $#{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}") do |error|
+              expect(error.code).to eq(:securities)
+              expect(error.type).to eq(:original_par)
+            end
+          end
         end
       end
     end
@@ -1975,11 +1996,15 @@ describe MAPI::ServiceApp do
         call_method
       end
       it 'calls `validate_securities` with the `settlement_type` arg from the broker instructions' do
-        expect(securities_request_module).to receive(:validate_securities).with(anything, broker_instructions['settlement_type'], anything)
+        expect(securities_request_module).to receive(:validate_securities).with(anything, broker_instructions['settlement_type'], anything, anything)
         call_method
       end
       it 'calls `validate_securities` with the `delivery_type` arg from the delivery instructions' do
-        expect(securities_request_module).to receive(:validate_securities).with(anything, anything, delivery_instructions['delivery_type'])
+        expect(securities_request_module).to receive(:validate_securities).with(anything, anything, delivery_instructions['delivery_type'], anything)
+        call_method
+      end
+      it 'calls `validate_securities` with `:release`' do
+        expect(securities_request_module).to receive(:validate_securities).with(anything, anything, anything, :release)
         call_method
       end
       it 'calls `process_delivery_instructions` with the `delivery_instructions` arg' do
@@ -2622,7 +2647,8 @@ describe MAPI::ServiceApp do
         let(:security) { { 'cusip' => SecureRandom.hex,
                            'description' => instance_double(String),
                            'original_par' => rand(0...50000000),
-                           'payment_amount' => instance_double(Numeric) } }
+                           'payment_amount' => instance_double(Numeric),
+                           'custodian_name' => instance_double(String) } }
         let(:securities) { [ security, security, security ]}
         let(:method_params) { [ app,
                                 member_id,
@@ -2643,11 +2669,11 @@ describe MAPI::ServiceApp do
           before { allow(securities_request_module).to receive(:should_fake?).and_return(true) }
 
           it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
-            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything, :intake)
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything, :"#{adx_type}_intake")
             call_method
           end
           it 'calls `validate_broker_instructions` with the app as an arg' do
-            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, :intake)
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, :"#{adx_type}_intake")
             call_method
           end
           it 'calls `validate_delivery_instructions` with the `delivery_instructions` arg' do
@@ -2655,15 +2681,19 @@ describe MAPI::ServiceApp do
             call_method
           end
           it 'calls `validate_securities` with the `securities` arg' do
-            expect(securities_request_module).to receive(:validate_securities).with(securities, anything, anything)
+            expect(securities_request_module).to receive(:validate_securities).with(securities, anything, anything, anything)
             call_method
           end
           it 'calls `validate_securities` with the `settlement_type` arg from the broker instructions' do
-            expect(securities_request_module).to receive(:validate_securities).with(anything, broker_instructions['settlement_type'], anything)
+            expect(securities_request_module).to receive(:validate_securities).with(anything, broker_instructions['settlement_type'], anything, anything)
             call_method
           end
           it 'calls `validate_securities` with the `delivery_type` arg from the delivery instructions' do
-            expect(securities_request_module).to receive(:validate_securities).with(anything, anything, delivery_instructions['delivery_type'])
+            expect(securities_request_module).to receive(:validate_securities).with(anything, anything, delivery_instructions['delivery_type'], anything)
+            call_method
+          end
+          it 'calls `validate_securities` with `:intake`' do
+            expect(securities_request_module).to receive(:validate_securities).with(anything, anything, anything, :intake)
             call_method
           end
           it 'calls `process_delivery_instructions` with the `delivery_instructions` arg' do

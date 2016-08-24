@@ -3,6 +3,7 @@
   = f.hidden_field(:request_id)
   = f.hidden_field(:trade_date)
   = f.hidden_field(:settlement_date)
+  = f.hidden_field(:account_number)
   - if @error_message
     .securities-submit-release-form-errors
       %p= @error_message

@@ -226,7 +226,7 @@ When(/^I fill in the "(.*?)" securities field with "(.*?)"$/) do |field_name, va
   page.fill_in("securities_request[#{field_name}]", with: value)
 end
 
-When(/^I submit the securities release request for authorization$/) do
+When(/^I submit the securities(?: release)? request for authorization$/) do
   page.find('.securities-submit-release-form input[type=submit]').click
 end
 
@@ -297,8 +297,13 @@ Then(/^the Authorize action is (disabled|enabled)$/) do |state|
 end
 
 When(/^I choose the first available date for (trade|settlement) date$/) do |attr|
-step "I click the #{attr} date datepicker"
-step 'I choose the first available date'
+  step "I click the #{attr} date datepicker"
+  step 'I choose the first available date'
+end
+
+Given(/^I upload a securities file$/) do
+  file_field = page.find('[type=file]', visible: false)
+  file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', 'sample-securties-pledge-upload.xlsx')))
 end
 
 def delivery_instructions(text)

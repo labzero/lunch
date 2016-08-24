@@ -74,7 +74,7 @@ describe SecuritiesRequestService do
     end
   end
 
-  describe '`submit_release_for_authorization`' do
+  describe '`submit_request_for_authorization`' do
     let(:broker_instructions) { SecureRandom.hex }
     let(:delivery_instructions) { SecureRandom.hex }
     let(:securities) { SecureRandom.hex }
@@ -83,87 +83,98 @@ describe SecuritiesRequestService do
     let(:session) { instance_double(ActionDispatch::Request::Session, id: session_id) }
     let(:user) { instance_double(User, username: SecureRandom.hex, display_name: SecureRandom.hex) }
     let(:securities_request) { instance_double(SecuritiesRequest, broker_instructions: broker_instructions, delivery_instructions: delivery_instructions, securities: securities, request_id: nil, 'request_id=': nil) }
-    let(:call_method) { subject.submit_release_for_authorization(securities_request, user) }
 
     before do
       allow(request).to receive(:session).and_return(session)
     end
 
-    it_behaves_like 'a MAPI backed service object method', :submit_release_for_authorization, nil, :get, false do
-      let(:call_method) { subject.submit_release_for_authorization(securities_request, user) }
-    end
+    [:pledge, :release, :safekeep].each do |type|
+      describe "when `type` is #{type}" do
+        let(:call_method) { subject.submit_request_for_authorization(securities_request, user, type) }
+        it_behaves_like 'a MAPI backed service object method', :submit_request_for_authorization, nil, :get, false do
+          let(:call_method) { subject.submit_request_for_authorization(securities_request, user, type) }
+        end
 
-    shared_examples 'release endpoint call' do |method|
-      it "calls `#{method}` with `:securities_submit_release_for_authorization` for the name arg" do
-        expect(subject).to receive(method).with(:securities_submit_release_for_authorization, any_args)
-        call_method
-      end
-      it "calls `#{method}` with `{member_id}/securities/release` for the endpoint arg" do
-        expect(subject).to receive(method).with(anything, "/member/#{member_id}/securities/release", any_args)
-        call_method
-      end
-      it "calls `#{method}` with `application/json` for the content type" do
-        expect(subject).to receive(method).with(anything, anything, anything, 'application/json', any_args)
-        call_method
-      end
-      it "calls `#{method}` with a JSON body argument including the broker instructions from the security_release_request" do
-        expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['broker_instructions'] == broker_instructions }, any_args)
-        call_method
-      end
-      it "calls `#{method}` with a body argument including the delivery instructions from the security_release_request" do
-        expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['delivery_instructions'] == delivery_instructions }, any_args)
-        call_method
-      end
-      it "calls `#{method}` with a body argument including the securities from the security_release_request" do
-        expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['securities'] == securities }, any_args)
-        call_method
-      end
-      it "calls `#{method}` with a body argument including the `username` of the passed user" do
-        expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['username'] == user.username }, any_args)
-        call_method
-      end
-      it "calls `#{method}` with a body argument including the `full_name` of the passed user" do
-        expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['full_name'] == user.display_name }, any_args)
-        call_method
-      end
-      it "calls `#{method}` with a body argument including the `session_id` of the passed user's session" do
-        expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['session_id'] == session_id }, any_args)
-        call_method
-      end
-      describe "when the #{method} to MAPI succeeds" do
-        before do
-          allow_any_instance_of(RestClient::Resource).to receive(method).and_return(instance_double(RestClient::Response, code: 200, body: {request_id: request_id}.to_json))
+        shared_examples 'release endpoint call' do |method|
+          it "calls `#{method}` with `:submit_request_for_authorization` for the name arg" do
+            expect(subject).to receive(method).with(:submit_request_for_authorization, any_args)
+            call_method
+          end
+          if type == :release
+            it "calls `#{method}` with `{member_id}/securities/release` for the endpoint arg" do
+              expect(subject).to receive(method).with(anything, "/member/#{member_id}/securities/release", any_args)
+              call_method
+            end
+          else
+            it "calls `#{method}` with `{member_id}/securities/intake` for the endpoint arg" do
+              expect(subject).to receive(method).with(anything, "/member/#{member_id}/securities/intake", any_args)
+              call_method
+            end
+          end
+          it "calls `#{method}` with `application/json` for the content type" do
+            expect(subject).to receive(method).with(anything, anything, anything, 'application/json', any_args)
+            call_method
+          end
+          it "calls `#{method}` with a JSON body argument including the broker instructions from the security_release_request" do
+            expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['broker_instructions'] == broker_instructions }, any_args)
+            call_method
+          end
+          it "calls `#{method}` with a body argument including the delivery instructions from the security_release_request" do
+            expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['delivery_instructions'] == delivery_instructions }, any_args)
+            call_method
+          end
+          it "calls `#{method}` with a body argument including the securities from the security_release_request" do
+            expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['securities'] == securities }, any_args)
+            call_method
+          end
+          it "calls `#{method}` with a body argument including the `username` of the passed user" do
+            expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['username'] == user.username }, any_args)
+            call_method
+          end
+          it "calls `#{method}` with a body argument including the `full_name` of the passed user" do
+            expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['full_name'] == user.display_name }, any_args)
+            call_method
+          end
+          it "calls `#{method}` with a body argument including the `session_id` of the passed user's session" do
+            expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['session_id'] == session_id }, any_args)
+            call_method
+          end
+          describe "when the #{method} to MAPI succeeds" do
+            before do
+              allow_any_instance_of(RestClient::Resource).to receive(method).and_return(instance_double(RestClient::Response, code: 200, body: {request_id: request_id}.to_json))
+            end
+            it 'returns true' do
+              expect(call_method).to be(true)
+            end
+          end
+          describe 'when there is a RestClient error in the 400 range' do
+            let(:status) { rand(400...500) }
+            let(:error) { RestClient::Exception.new(nil, status) }
+            before { allow_any_instance_of(RestClient::Resource).to receive(method).and_raise(error) }
+            it 'calls the error handler with the error if an error handler was supplied' do
+              expect{|error_handler| subject.submit_request_for_authorization(securities_request, user, type, &error_handler)}.to yield_with_args(error)
+            end
+            it 'returns false' do
+              expect(call_method).to be(false)
+            end
+          end
         end
-        it 'returns true' do
-          expect(call_method).to be(true)
-        end
-      end
-      describe 'when there is a RestClient error in the 400 range' do
-        let(:status) { rand(400...500) }
-        let(:error) { RestClient::Exception.new(nil, status) }
-        before { allow_any_instance_of(RestClient::Resource).to receive(method).and_raise(error) }
-        it 'calls the error handler with the error if an error handler was supplied' do
-          expect{|error_handler| subject.submit_release_for_authorization(securities_request, user, &error_handler)}.to yield_with_args(error)
-        end
-        it 'returns false' do
-          expect(call_method).to be(false)
-        end
-      end
-    end
 
-    describe 'when passed an already submitted request' do
-      before do
-        allow(securities_request).to receive(:request_id).and_return(request_id)
-      end
-      include_examples 'release endpoint call', :put
-      it 'calls `put` with a body argument including the `request_id` of the passed SecuritiesRequest' do
-        expect(subject).to receive(:put).with(anything, anything, satisfy { |arg| JSON.parse(arg)['request_id'] == request_id }, any_args)
-        call_method
-      end
-    end
+        describe 'when passed an already submitted request' do
+          before do
+            allow(securities_request).to receive(:request_id).and_return(request_id)
+          end
+          include_examples 'release endpoint call', :put
+          it 'calls `put` with a body argument including the `request_id` of the passed SecuritiesRequest' do
+            expect(subject).to receive(:put).with(anything, anything, satisfy { |arg| JSON.parse(arg)['request_id'] == request_id }, any_args)
+            call_method
+          end
+        end
 
-    describe 'when passed a new request' do
-      include_examples 'release endpoint call', :post
+        describe 'when passed a new request' do
+          include_examples 'release endpoint call', :post
+        end
+      end
     end
   end
 

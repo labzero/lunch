@@ -10,4 +10,5 @@
       %h2= t('securities.pledge.delete_request.title')
       %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')
       = link_to(t('securities.release.delete_request.delete'), securities_manage_path, class: 'primary-button')
-    =form_tag(securities_pledge_download_path, name: 'securities-release-download')
+    =form_tag(securities_pledge_download_path, name: 'securities-release-download') do
+      = hidden_field_tag('securities', @securities_request.securities.to_json)

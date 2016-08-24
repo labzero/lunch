@@ -120,6 +120,29 @@ RSpec.describe Security, :type => :model do
     end
   end
 
+  describe '`attributes`' do
+    let(:call_method) { subject.attributes }
+    let(:sample_attrs) { (described_class::ACCESSIBLE_ATTRS - [:cusip]).sample(5) }
+
+    before do
+      sample_attrs.each do |attr|
+        subject.send("#{attr}=", double('value'))
+      end
+    end
+
+    it 'returns a hash with keys equal to the ACCESSIBLE_ATTRS it has values for' do
+      expect(call_method.keys.sort).to eq(sample_attrs.sort)
+    end
+    it 'returns a hash whose values are all nil' do
+      expect(call_method.values.length).to be > 0
+      call_method.values.each { |value| expect(value).to be nil }
+    end
+    it 'does not return attributes that are not cleared as ACCESSIBLE_ATTRS' do
+      subject.errors.add(:base, :foo)
+      expect(call_method.keys).not_to include(:errors)
+    end
+  end
+
   describe '`attributes=`' do
     let(:hash) { {} }
     let(:value) { double('some value') }

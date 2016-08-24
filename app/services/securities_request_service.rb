@@ -17,7 +17,8 @@ class SecuritiesRequestService < MAPIService
     process_securities_requests(requests)
   end
 
-  def submit_release_for_authorization(securities_request, user, &error_handler)
+  def submit_request_for_authorization(securities_request, user, type, &error_handler)
+    raise ArgumentError, 'type must be one of: pledge, safekeep, release' unless [:pledge, :safekeep, :release].include?(type)
     body = {
       broker_instructions: securities_request.broker_instructions,
       delivery_instructions: securities_request.delivery_instructions,
@@ -26,7 +27,8 @@ class SecuritiesRequestService < MAPIService
       request_id: securities_request.request_id
     }
     method = body[:request_id] ? :put_hash : :post_hash
-    response = send(method, :securities_submit_release_for_authorization, "/member/#{member_id}/securities/release", body) do |name, msg, err|
+    type = :intake if type != :release
+    response = send(method, :submit_request_for_authorization, "/member/#{member_id}/securities/#{type}", body) do |name, msg, err|
       if err.is_a?(RestClient::Exception) && err.http_code >= 400 && err.http_code < 500 && error_handler
         error_handler.call(err)
       end

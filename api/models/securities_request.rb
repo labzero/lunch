@@ -190,6 +190,12 @@ module MAPI
           key :description, 'The ID of the request'
         end
 
+        property :form_type do
+          key :type, :string
+          key :enum, %i(pledge_intake safekept_intake)
+          key :description, 'What type of form it is'
+        end
+
         property :user do
           key :type, :User
           key :description, 'The user information'
@@ -220,6 +226,12 @@ module MAPI
         property :request_id do
           key :type, :string
           key :description, 'The ID of the request'
+        end
+
+        property :form_type do
+          key :type, :string
+          key :enum, %i(pledge_release safekept_release)
+          key :description, 'What type of form it is'
         end
 
         property :user do

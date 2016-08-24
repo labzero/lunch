@@ -1327,6 +1327,10 @@ en:
     authorize:
       release:
         title: Release Securities Request Sent
+      pledge:
+        title: Pledge Securities Request Sent
+      safekeep:
+        title: Safekeep Securities Request Sent
       confirmation: "We received your securities request at %{date}.\nWe will provide a confirmation to your institution later today."
       timeframe: You will typically see this transaction reflected in your STA within the next 24 hours.
       issues: "If there are any issues with your request, you will be contacted by the Securities Department or the Collateral Department."
