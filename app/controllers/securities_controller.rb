@@ -213,7 +213,7 @@ class SecuritiesController < ApplicationController
   def view_request
     request_id = params[:request_id]
     @securities_request = SecuritiesRequestService.new(current_member_id, request).submitted_request(request_id)
-    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#submitted_request has encountered nil. Check error logs.") if @securities_request.nil?
+    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#view_request has encountered nil. Check error logs.") if @securities_request.nil?
     type = params[:type].try(:to_sym)
     populate_view_variables(type)
     case type

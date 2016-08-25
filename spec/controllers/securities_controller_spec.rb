@@ -402,7 +402,7 @@ RSpec.describe SecuritiesController, type: :controller do
 
     it 'raises an ActionController::RoutingError if the service object returns nil' do
       allow(service).to receive(:submitted_request)
-      expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#submitted_request has encountered nil. Check error logs.')
+      expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#view_request has encountered nil. Check error logs.')
     end
     it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
       expect(SecuritiesRequestService).to receive(:new).with(member_id, any_args).and_return(service)

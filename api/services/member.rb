@@ -1425,14 +1425,35 @@ module MAPI
             post_body_json = JSON.parse(request.body.read)
             user = post_body_json['user']
             request_id = MAPI::Services::Member::SecuritiesRequests.create_intake(self,
-                                                                            params['id'].to_i,
-                                                                            user['username'],
-                                                                            user['full_name'],
-                                                                            user['session_id'],
-                                                                            post_body_json['broker_instructions'] || {},
-                                                                            post_body_json['delivery_instructions'] || {},
-                                                                            post_body_json['securities'] || [])
+                                                                                  params['id'].to_i,
+                                                                                  user['username'],
+                                                                                  user['full_name'],
+                                                                                  user['session_id'],
+                                                                                  post_body_json['broker_instructions'] || {},
+                                                                                  post_body_json['delivery_instructions'] || {},
+                                                                                  post_body_json['securities'] || [])
             {request_id: request_id}
+          end
+        end
+
+        relative_put '/:id/securities/intake' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            post_body_json = JSON.parse(request.body.read)
+            user = post_body_json['user']
+            raise MAPI::Shared::Errors::ValidationError.new('`user` is required', 'user') unless user
+            request_id = body['request_id']
+            raise MAPI::Shared::Errors::ValidationError.new('`request_id` is required', 'request_id') unless request_id
+            {request_id: request_id} if MAPI::Services::Member::SecuritiesRequests.update_intake(
+              self,
+              params['id'].to_i,
+              request_id,
+              user['username'],
+              user['full_name'],
+              user['session_id'],
+              post_body_json['broker_instructions'] || {},
+              post_body_json['delivery_instructions'] || {},
+              post_body_json['securities'] || []
+            )
           end
         end
 
@@ -1441,13 +1462,13 @@ module MAPI
             post_body_json = JSON.parse(request.body.read)
             user = post_body_json['user']
             request_id = MAPI::Services::Member::SecuritiesRequests.create_release(self,
-                                                                            params['id'].to_i,
-                                                                            user['username'],
-                                                                            user['full_name'],
-                                                                            user['session_id'],
-                                                                            post_body_json['broker_instructions'] || {},
-                                                                            post_body_json['delivery_instructions'] || {},
-                                                                            post_body_json['securities'] || [])
+                                                                                   params['id'].to_i,
+                                                                                   user['username'],
+                                                                                   user['full_name'],
+                                                                                   user['session_id'],
+                                                                                   post_body_json['broker_instructions'] || {},
+                                                                                   post_body_json['delivery_instructions'] || {},
+                                                                                   post_body_json['securities'] || [])
             {request_id: request_id}
           end
         end

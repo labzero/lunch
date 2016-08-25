@@ -65,7 +65,7 @@ module MAPI
           to_date: ['SETTLE_DATE', 'SUBMITTED_DATE', 'AUTHORIZED_DATE']
         }.freeze
 
-        RELEASE_REQUEST_HEADER_MAPPING = {
+        REQUEST_HEADER_MAPPING = {
           Proc.new { |value| TRANSACTION_CODE.invert[value.to_i] } => ['PLEDGE_TYPE'],
           Proc.new { |value| SETTLEMENT_TYPE.invert[value.to_i] } => ['REQUEST_STATUS'],
           Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO'],
@@ -107,7 +107,7 @@ module MAPI
 
         module ADXAccountTypeMapping
           SYMBOL_TO_STRING = { pledged: 'P', unpledged: 'U' }.freeze
-          STRING_TO_SYMBOL = Hash[SYMBOL_TO_STRING.to_a.map {|t| t = t.reverse}].freeze
+          STRING_TO_SYMBOL = SYMBOL_TO_STRING.invert.freeze
           SYMBOL_TO_SQL_COLUMN_NAME = { pledged: 'PLEDGED_ADX_ID', unpledged: 'UNPLEDGED_ADX_ID' }.freeze
           SYMBOL_TO_SSK_FORM_TYPE = { pledged_intake: SSKFormType::SECURITIES_PLEDGED,
                                       pledged_release: SSKFormType::SECURITIES_RELEASE,
@@ -515,6 +515,46 @@ module MAPI
           header_id
         end
 
+        def self.update_intake(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
+          original_delivery_instructions = delivery_instructions.clone # Used to see if header details have changes below
+          validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :intake)
+          adx_type = get_adx_type_from_security(app, securities.first)
+          validate_broker_instructions(broker_instructions, app, :"#{adx_type}_intake")
+          validate_delivery_instructions(delivery_instructions)
+          processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
+          unless should_fake?(app)
+            ActiveRecord::Base.transaction(isolation: :read_committed) do
+              cusips = securities.collect{|x| x['cusip']}
+              raise MAPI::Shared::Errors::SQLError, 'Failed to delete old security release request detail by CUSIP' unless execute_sql(app.logger, delete_request_securities_by_cusip_query(request_id, cusips))
+              adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), 'Get ADX ID from ADX Type')
+              existing_securities = format_securities(fetch_hashes(app.logger, release_request_securities_query(request_id)))
+              securities.each do |security|
+                existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
+                if existing_security && security_has_changed(security, existing_security)
+                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security)
+                  raise MAPI::Shared::Errors::SQLError, 'Failed to update security intake request detail' unless execute_sql(app.logger, update_security_sql)
+                elsif !existing_security
+                  ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
+                  detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
+                  insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
+                  raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security intake request detail' unless execute_sql(app.logger, insert_security_sql)
+                end
+              end
+              existing_header = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
+              raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless existing_header
+              existing_header = map_hash_values(existing_header, REQUEST_HEADER_MAPPING)
+              if header_has_changed(existing_header, broker_instructions, original_delivery_instructions)
+                update_header_sql = update_request_header_details_query(member_id, request_id, user_name, full_name,
+                  session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions,
+                  processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values], adx_type)
+                header_update_count = execute_sql(app.logger, update_header_sql).to_i
+                raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless header_update_count == 1
+              end
+            end
+          end
+          true
+        end
+
         def self.create_release(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
           validate_delivery_instructions(delivery_instructions)
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :release)
@@ -576,9 +616,9 @@ module MAPI
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security release request detail' unless execute_sql(app.logger, insert_security_sql)
                 end
               end
-              existing_header = fetch_hash(app.logger, release_request_header_details_query(member_id, request_id))
+              existing_header = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
               raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless existing_header
-              existing_header = map_hash_values(existing_header, RELEASE_REQUEST_HEADER_MAPPING)
+              existing_header = map_hash_values(existing_header, REQUEST_HEADER_MAPPING)
               if header_has_changed(existing_header, broker_instructions, original_delivery_instructions)
                 update_header_sql = update_request_header_details_query(member_id, request_id, user_name, full_name,
                   session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions,
@@ -608,11 +648,11 @@ module MAPI
           !(old_broker_instructions == broker_instructions.with_indifferent_access && old_delivery_instructions == delivery_instructions.with_indifferent_access)
         end
 
-        def self.release_request_header_details_query(member_id, header_id)
+        def self.request_header_details_query(member_id, header_id)
           <<-SQL
             SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
               MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
-              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO
             FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE HEADER_ID = #{quote(header_id)}
             AND FHLB_ID = #{quote(member_id)}
@@ -632,12 +672,12 @@ module MAPI
             header_details = fake_header_details(request_id, Time.zone.today, MAPIRequestStatus::AWAITING_AUTHORIZATION.first)
             securities = fake_securities(request_id, header_details['REQUEST_STATUS'])
           else
-            header_details = fetch_hash(app.logger, release_request_header_details_query(member_id, request_id))
+            header_details = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
             securities = fetch_hashes(app.logger, release_request_securities_query(request_id))
           end
           raise MAPI::Shared::Errors::SQLError, 'No header details found' unless header_details
           raise MAPI::Shared::Errors::SQLError, 'No securities found' unless securities
-          header_details = map_hash_values(header_details, RELEASE_REQUEST_HEADER_MAPPING).with_indifferent_access
+          header_details = map_hash_values(header_details, REQUEST_HEADER_MAPPING).with_indifferent_access
           securities.collect do |security|
             map_hash_values(security, RELEASE_REQUEST_SECURITIES_MAPPING).with_indifferent_access
           end
