@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import { _Restaurant as Restaurant } from './Restaurant';
+import { undecorated as Restaurant } from './Restaurant';
 import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
 import React from 'react';
 import sinon from 'sinon';

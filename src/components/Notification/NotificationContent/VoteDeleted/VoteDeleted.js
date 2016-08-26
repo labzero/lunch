@@ -2,8 +2,15 @@ import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from '../NotificationContent.scss';
 
-const VoteDeleted = ({ loggedIn, user, restaurantName, showMapAndInfoWindow }) => {
-  const restaurantEl = <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurantName}</b>;
+const VoteDeleted = ({
+  loggedIn,
+  user,
+  restaurantName,
+  showMapAndInfoWindow
+}) => {
+  const restaurantEl = (
+    <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurantName}</b>
+  );
   if (loggedIn) {
     return (
       <span>

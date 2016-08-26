@@ -12,7 +12,10 @@ const mapStateToProps = state => {
     items: getMapItems(state),
     center: mapUi.center,
     tempMarker: mapUi.tempMarker,
-    newlyAddedRestaurant: mapUi.newlyAdded ? getRestaurantById(state, mapUi.newlyAdded.id) : undefined,
+    newlyAddedRestaurant: mapUi.newlyAdded ?
+      getRestaurantById(state, mapUi.newlyAdded.id)
+      :
+      undefined,
     newlyAddedUserId: mapUi.newlyAdded ? mapUi.newlyAdded.userId : undefined,
     latLng: state.latLng,
     user: getCurrentUser(state)
@@ -20,10 +23,10 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = dispatch => ({
-  clearCenter() {
+  clearCenter: () => {
     dispatch(clearCenter());
   },
-  mapClicked({ event }) {
+  mapClicked: ({ event }) => {
     if (!event.target.closest('[data-marker]')) {
       dispatch(hideInfoWindow());
     }
@@ -32,7 +35,7 @@ const mapDispatchToProps = dispatch => ({
 });
 
 const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
-  showNewlyAddedInfoWindow() {
+  showNewlyAddedInfoWindow: () => {
     if (stateProps.newlyAddedUserId === stateProps.user.id) {
       dispatchProps.dispatch(showInfoWindow(stateProps.newlyAddedRestaurant));
       dispatchProps.dispatch(clearNewlyAdded());

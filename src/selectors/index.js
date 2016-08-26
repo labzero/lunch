@@ -7,7 +7,8 @@ import { getUserId, getUserById } from './users';
 import { getMapUi } from './mapUi';
 import { createSelector } from 'reselect';
 
-export const getUserByVoteId = (state, voteId) => getUserById(state, getVoteById(state, voteId).user_id);
+export const getUserByVoteId = (state, voteId) =>
+  getUserById(state, getVoteById(state, voteId).user_id);
 
 export const makeGetRestaurantVotesForUser = () =>
   createSelector(

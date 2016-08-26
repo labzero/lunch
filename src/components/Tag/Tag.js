@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Tag.scss';
 
-export const _Tag = ({
+export const Tag = ({
   name,
   showDelete,
   onDeleteClicked,
@@ -23,11 +23,12 @@ export const _Tag = ({
   );
 };
 
-_Tag.propTypes = {
+Tag.propTypes = {
   name: PropTypes.string.isRequired,
   showDelete: PropTypes.bool.isRequired,
   onDeleteClicked: PropTypes.func.isRequired,
   exclude: PropTypes.bool
 };
 
-export default withStyles(s)(_Tag);
+export const undecorated = Tag;
+export default withStyles(s)(Tag);

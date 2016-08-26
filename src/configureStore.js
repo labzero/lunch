@@ -16,26 +16,33 @@ export default function configureStore(initialState) {
     return reducer(state, action);
   };
 
-  initialState.restaurants.items = normalize(initialState.restaurants.items, arrayOf(schemas.restaurant));
-  initialState.tags.items = normalize(initialState.tags.items, arrayOf(schemas.tag));
-  initialState.users.items = normalize(initialState.users.items, arrayOf(schemas.user));
-  initialState.whitelistEmails.items = normalize(initialState.whitelistEmails.items, arrayOf(schemas.whitelistEmail));
-  initialState.restaurants.items.entities.votes = initialState.restaurants.items.entities.votes || {};
+  const normalizedInitialState = Object.assign({}, initialState);
+
+  normalizedInitialState.restaurants.items =
+    normalize(initialState.restaurants.items, arrayOf(schemas.restaurant));
+  normalizedInitialState.tags.items =
+    normalize(initialState.tags.items, arrayOf(schemas.tag));
+  normalizedInitialState.users.items =
+    normalize(initialState.users.items, arrayOf(schemas.user));
+  normalizedInitialState.whitelistEmails.items =
+    normalize(initialState.whitelistEmails.items, arrayOf(schemas.whitelistEmail));
+  normalizedInitialState.restaurants.items.entities.votes =
+    initialState.restaurants.items.entities.votes || {};
 
   const reducers = {};
 
-  for (const name in reducerMaps) {
+  Object.keys(reducerMaps).forEach(name => {
     if (reducerMaps.hasOwnProperty(name)) {
-      reducers[name] = generateReducer(reducerMaps[name], initialState[name] || {});
+      reducers[name] = generateReducer(reducerMaps[name], normalizedInitialState[name] || {});
     }
-  }
+  });
 
   return createStore(
     combineReducers({
       ...reducers,
       routing: routerReducer
     }),
-    initialState,
+    normalizedInitialState,
     applyMiddleware(thunkMiddleware)
   );
 }

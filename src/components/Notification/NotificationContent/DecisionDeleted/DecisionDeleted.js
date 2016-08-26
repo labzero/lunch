@@ -3,7 +3,9 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from '../NotificationContent.scss';
 
 const DecisionDeleted = ({ loggedIn, user, restaurantName, showMapAndInfoWindow }) => {
-  const restaurantEl = <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurantName}</b>;
+  const restaurantEl = (
+    <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurantName}</b>
+  );
   if (loggedIn) {
     return (
       <span>

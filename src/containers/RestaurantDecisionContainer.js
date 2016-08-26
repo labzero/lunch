@@ -18,17 +18,18 @@ const mapDispatchToProps = dispatch => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
-  handleClick() {
-    if (stateProps.loggedIn) {
-      if (stateProps.decided) {
-        dispatchProps.dispatch(removeDecision());
-      } else {
-        dispatchProps.dispatch(decide(ownProps.id));
+const mergeProps = (stateProps, dispatchProps, ownProps) =>
+  Object.assign({}, stateProps, dispatchProps, {
+    handleClick() {
+      if (stateProps.loggedIn) {
+        if (stateProps.decided) {
+          dispatchProps.dispatch(removeDecision());
+        } else {
+          dispatchProps.dispatch(decide(ownProps.id));
+        }
       }
-    }
-  },
-});
+    },
+  });
 
 export default connect(
   mapStateToProps,

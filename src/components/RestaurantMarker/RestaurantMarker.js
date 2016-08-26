@@ -53,7 +53,10 @@ const InnerRestaurantMarker = ({
   );
 
   return (
-    <div className={`${s.root} ${restaurant.votes.length > 0 || decided ? s.voted : ''}`} data-marker>
+    <div
+      className={`${s.root} ${restaurant.votes.length > 0 || decided ? s.voted : ''}`}
+      data-marker
+    >
       {showInfoWindow ? renderInfoWindow() : null}
       <div
         key={index}

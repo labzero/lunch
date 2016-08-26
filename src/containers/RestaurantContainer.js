@@ -13,10 +13,10 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  showAddTagForm() {
+  showAddTagForm: () => {
     dispatch(showAddTagForm(ownProps.id));
   },
-  showMapAndInfoWindow() {
+  showMapAndInfoWindow: () => {
     dispatch(showMapAndInfoWindow(ownProps.id));
   },
   dispatch

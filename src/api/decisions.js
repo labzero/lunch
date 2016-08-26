@@ -23,7 +23,8 @@ router
             const error = { message: 'Could not save decision.' };
             errorCatcher(res, error);
           })
-        ).catch(err => errorCatcher(res, err));
+        )
+        .catch(err => errorCatcher(res, err));
       } catch (err) {
         return errorCatcher(res, err);
       }
@@ -37,7 +38,8 @@ router
       Decision.scope('fromToday').destroy({ where: {} }).then(() => {
         req.wss.broadcast(decisionDeleted(restaurantId, req.user.id));
         res.status(204).send({ error: false });
-      }).catch(err => errorCatcher(res, err));
+      })
+      .catch(err => errorCatcher(res, err));
     }
   );
 

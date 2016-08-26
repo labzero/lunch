@@ -45,20 +45,21 @@ const mapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  expireNotification() {
+  expireNotification: () => {
     dispatch(expireNotification(ownProps.id));
   },
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
-  contentProps: {
-    ...stateProps.contentProps,
-    showMapAndInfoWindow() {
-      dispatchProps.dispatch(showMapAndInfoWindow(ownProps.vals.restaurantId));
+const mergeProps = (stateProps, dispatchProps, ownProps) =>
+  Object.assign({}, stateProps, dispatchProps, {
+    contentProps: {
+      ...stateProps.contentProps,
+      showMapAndInfoWindow: () => {
+        dispatchProps.dispatch(showMapAndInfoWindow(ownProps.vals.restaurantId));
+      }
     }
-  }
-});
+  });
 
 export default connect(
   mapStateToProps,

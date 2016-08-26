@@ -8,4 +8,5 @@ export const getTags = createSelector(
   (tagIds, tagEntities) => tagIds.map(id => tagEntities[id])
 );
 
-export const getTagById = (state, props) => getTagEntities(state)[typeof props === 'object' ? props.tagId : props];
+export const getTagById = (state, props) =>
+  getTagEntities(state)[typeof props === 'object' ? props.tagId : props];

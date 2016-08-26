@@ -7,7 +7,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  setShowUnvoted(event) {
+  setShowUnvoted: event => {
     dispatch(setShowUnvoted(event.target.checked));
   }
 });

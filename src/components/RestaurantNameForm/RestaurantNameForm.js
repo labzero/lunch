@@ -5,7 +5,7 @@ import s from './RestaurantNameForm.scss';
 class RestaurantNameForm extends Component {
   componentDidMount() {
     // React Bootstrap steals focus, grab it back
-    const input = this._input;
+    const input = this.input;
     setTimeout(() => {
       input.focus();
     }, 1);
@@ -20,7 +20,7 @@ class RestaurantNameForm extends Component {
             className="form-control input-sm"
             value={this.props.editNameFormValue}
             onChange={this.props.setEditNameFormValue}
-            ref={i => { this._input = i; }}
+            ref={i => { this.input = i; }}
           />
         </span>
         <button

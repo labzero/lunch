@@ -59,7 +59,8 @@ describe('selectors', () => {
     });
 
     it('omits added tags', () => {
-      expect(getTagList(state, { addedTags: [1, 2, 3, 4, 5], autosuggestValue: '' }).length).to.eq(6);
+      expect(getTagList(state, { addedTags: [1, 2, 3, 4, 5], autosuggestValue: '' }).length)
+        .to.eq(6);
     });
 
     it('filters by query and added tags', () => {

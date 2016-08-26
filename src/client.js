@@ -19,7 +19,7 @@ import history from './core/history';
 import ContextHolder from './core/ContextHolder';
 import ReconnectingWebSocket from 'reconnectingwebsocket';
 
-const initialState = window.__INITIAL_STATE__;
+const initialState = window.__INITIAL_STATE__; // eslint-disable-line no-underscore-dangle
 
 window.ReconnectingWebSocket = ReconnectingWebSocket;
 

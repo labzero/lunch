@@ -15,17 +15,18 @@ const mapStateToProps = () => {
 
 const mapDispatchToProps = null;
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
-  handleClick: () => {
-    if (stateProps.userVotes.length > 0) {
-      stateProps.userVotes.forEach(vote => {
-        dispatchProps.dispatch(removeVote(ownProps.id, vote));
-      });
-    } else {
-      dispatchProps.dispatch(addVote(ownProps.id));
+const mergeProps = (stateProps, dispatchProps, ownProps) =>
+  Object.assign({}, stateProps, dispatchProps, {
+    handleClick: () => {
+      if (stateProps.userVotes.length > 0) {
+        stateProps.userVotes.forEach(vote => {
+          dispatchProps.dispatch(removeVote(ownProps.id, vote));
+        });
+      } else {
+        dispatchProps.dispatch(addVote(ownProps.id));
+      }
     }
-  }
-});
+  });
 
 export default connect(
   mapStateToProps,

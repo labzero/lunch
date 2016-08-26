@@ -5,7 +5,7 @@ import { expireFlash } from '../actions/flash';
 const mapStateToProps = null;
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  expireFlash() {
+  expireFlash: () => {
     dispatch(expireFlash(ownProps.id));
   }
 });

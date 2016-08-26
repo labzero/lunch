@@ -25,18 +25,19 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   decide: () => {
     dispatch(decide(ownProps.id));
   },
-  showMapAndInfoWindow() {
+  showMapAndInfoWindow: () => {
     dispatch(showMapAndInfoWindow(ownProps.id));
   },
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
-  showEditNameForm() {
-    dispatchProps.dispatch(setEditNameFormValue(ownProps.id, stateProps.restaurant.name));
-    dispatchProps.dispatch(showEditNameForm(ownProps.id));
-  }
-});
+const mergeProps = (stateProps, dispatchProps, ownProps) =>
+  Object.assign({}, stateProps, dispatchProps, {
+    showEditNameForm: () => {
+      dispatchProps.dispatch(setEditNameFormValue(ownProps.id, stateProps.restaurant.name));
+      dispatchProps.dispatch(showEditNameForm(ownProps.id));
+    }
+  });
 
 export default connect(
   mapStateToProps,

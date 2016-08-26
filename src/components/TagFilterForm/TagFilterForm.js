@@ -10,7 +10,7 @@ autosuggestTheme.input = 'form-control';
 
 const returnTrue = () => true;
 
-export class _TagFilterForm extends Component {
+export class TagFilterForm extends Component {
   componentDidUpdate(prevProps) {
     if (this.props.tagUiForm.shown !== prevProps.tagUiForm.shown && this.props.tagUiForm.shown) {
       this.autosuggest.input.focus();
@@ -38,19 +38,19 @@ export class _TagFilterForm extends Component {
             shouldRenderSuggestions={returnTrue}
             ref={a => { this.autosuggest = a; }}
           />
-          {this.props.addedTags.map(tag => {
-            const boundRemoveTag = this.props.removeTag.bind(undefined, tag);
-            return (
-              <div className={s.tagContainer} key={this.props.exclude ? `tagExclusion_${tag}` : `tagFilter_${tag}`}>
-                <TagContainer
-                  id={tag}
-                  showDelete
-                  onDeleteClicked={boundRemoveTag}
-                  exclude={this.props.exclude}
-                />
-              </div>
-            );
-          })}
+          {this.props.addedTags.map(tag => (
+            <div
+              className={s.tagContainer}
+              key={this.props.exclude ? `tagExclusion_${tag}` : `tagFilter_${tag}`}
+            >
+              <TagContainer
+                id={tag}
+                showDelete
+                onDeleteClicked={() => this.props.removeTag(tag)}
+                exclude={this.props.exclude}
+              />
+            </div>
+          ))}
           <button
             className="btn btn-default"
             type="button"
@@ -73,7 +73,7 @@ export class _TagFilterForm extends Component {
   }
 }
 
-_TagFilterForm.propTypes = {
+TagFilterForm.propTypes = {
   exclude: PropTypes.bool,
   addByName: PropTypes.func.isRequired,
   handleSuggestionSelected: PropTypes.func.isRequired,
@@ -87,4 +87,5 @@ _TagFilterForm.propTypes = {
   tagUiForm: PropTypes.object.isRequired
 };
 
-export default withStyles(s)(withStyles(autosuggestTheme)(_TagFilterForm));
+export const undecorated = TagFilterForm;
+export default withStyles(s)(withStyles(autosuggestTheme)(TagFilterForm));

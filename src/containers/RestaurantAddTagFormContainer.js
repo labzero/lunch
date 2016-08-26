@@ -23,16 +23,16 @@ const mapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  handleSuggestionSelected(event, { suggestion, method }) {
+  handleSuggestionSelected: (event, { suggestion, method }) => {
     if (method === 'enter') {
       event.preventDefault();
     }
     dispatch(addTagToRestaurant(ownProps.id, suggestion.id));
   },
-  hideAddTagForm() {
+  hideAddTagForm: () => {
     dispatch(hideAddTagForm(ownProps.id));
   },
-  setAddTagAutosuggestValue(event, { newValue, method }) {
+  setAddTagAutosuggestValue: (event, { newValue, method }) => {
     if (method === 'up' || method === 'down') {
       return;
     }
@@ -41,12 +41,13 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
-  addNewTagToRestaurant(event) {
-    event.preventDefault();
-    dispatchProps.dispatch(addNewTagToRestaurant(ownProps.id, stateProps.autosuggestValue));
-  }
-});
+const mergeProps = (stateProps, dispatchProps, ownProps) =>
+  Object.assign({}, stateProps, dispatchProps, {
+    addNewTagToRestaurant: event => {
+      event.preventDefault();
+      dispatchProps.dispatch(addNewTagToRestaurant(ownProps.id, stateProps.autosuggestValue));
+    }
+  });
 
 export default connect(
   mapStateToProps,

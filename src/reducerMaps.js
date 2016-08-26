@@ -174,7 +174,13 @@ export const restaurants = new Map([
           restaurants: {
             [action.restaurantId]: {
               votes: {
-                $splice: [[getRestaurantById({ restaurants: state }, action.restaurantId).votes.indexOf(action.id), 1]]
+                $splice: [[
+                  getRestaurantById(
+                    { restaurants: state },
+                    action.restaurantId
+                  ).votes.indexOf(action.id),
+                  1
+                ]]
               },
               all_vote_count: {
                 $apply: count => parseInt(count, 10) - 1
@@ -234,7 +240,13 @@ export const restaurants = new Map([
           restaurants: {
             [action.restaurantId]: {
               tags: {
-                $splice: [[getRestaurantById({ restaurants: state }, action.restaurantId).tags.indexOf(action.id), 1]]
+                $splice: [[
+                  getRestaurantById(
+                    { restaurants: state },
+                    action.restaurantId
+                  ).tags.indexOf(action.id),
+                  1
+                ]]
               }
             }
           }
@@ -248,14 +260,15 @@ export const restaurants = new Map([
         entities: {
           restaurants: {
             $apply: r => {
-              for (const i in r) {
-                if (r.hasOwnProperty(i) && r[i].tags.indexOf(action.id) > -1) {
-                  r[i].tags = update(r[i].tags, {
-                    $splice: [[r[i].tags.indexOf(action.id), 1]]
+              const changedRestaurants = Object.assign({}, r);
+              Object.keys(changedRestaurants).forEach(i => {
+                if (changedRestaurants[i].tags.indexOf(action.id) > -1) {
+                  changedRestaurants[i].tags = update(changedRestaurants[i].tags, {
+                    $splice: [[changedRestaurants[i].tags.indexOf(action.id), 1]]
                   });
                 }
-              }
-              return r;
+              });
+              return changedRestaurants;
             }
           }
         }
@@ -826,7 +839,12 @@ export const whitelistEmails = new Map([
           $push: [action.whitelistEmail.id]
         },
         entities: {
-          $apply: target => setOrMerge(target, 'whitelistEmails', { [action.whitelistEmail.id]: action.whitelistEmail })
+          $apply: target =>
+            setOrMerge(
+              target,
+              'whitelistEmails',
+              { [action.whitelistEmail.id]: action.whitelistEmail }
+            )
         }
       }
     })

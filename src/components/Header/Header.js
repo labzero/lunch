@@ -16,7 +16,8 @@ import FlashContainer from '../../containers/FlashContainer';
 
 const Header = ({ flashes }) => {
   const flashContainers = flashes.map(
-    (flash, i) => <FlashContainer message={flash.message} type={flash.type} id={i} key={`flash_${i}`} />
+    (flash, i) =>
+      <FlashContainer message={flash.message} type={flash.type} id={i} key={`flash_${i}`} />
   );
 
   return (

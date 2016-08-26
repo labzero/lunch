@@ -24,6 +24,7 @@ describe('DeleteRestaurantModal', () => {
     const wrapper = shallow(
       <DeleteRestaurantModal {...props} />
     );
-    expect(wrapper.find(Modal.Body).render().text()).to.eq('Are you sure you want to delete Food Barn?');
+    expect(wrapper.find(Modal.Body).render().text())
+      .to.eq('Are you sure you want to delete Food Barn?');
   });
 });

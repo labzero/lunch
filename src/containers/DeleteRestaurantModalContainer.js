@@ -12,7 +12,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  hideModal() {
+  hideModal: () => {
     dispatch(hideModal(modalName));
   },
   dispatch
@@ -20,7 +20,7 @@ const mapDispatchToProps = dispatch => ({
 
 const mergeProps = (stateProps, dispatchProps) => Object.assign(stateProps, dispatchProps, {
   restaurantName: stateProps.restaurant.name,
-  deleteRestaurant(event) {
+  deleteRestaurant: event => {
     event.preventDefault();
     dispatchProps.dispatch(removeRestaurant(stateProps.restaurant.id));
   }

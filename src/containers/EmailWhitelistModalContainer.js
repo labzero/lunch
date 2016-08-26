@@ -9,7 +9,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  hideModal() {
+  hideModal: () => {
     dispatch(hideModal(modalName));
   }
 });

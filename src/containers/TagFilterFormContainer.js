@@ -85,19 +85,20 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
-  addByName(event) {
-    event.preventDefault();
-    const tag = stateProps.tags.find(t => t.name === stateProps.autosuggestValue);
-    if (tag !== undefined) {
-      if (ownProps.exclude) {
-        dispatchProps.dispatch(addTagExclusion(tag.id));
-      } else {
-        dispatchProps.dispatch(addTagFilter(tag.id));
+const mergeProps = (stateProps, dispatchProps, ownProps) =>
+  Object.assign({}, stateProps, dispatchProps, {
+    addByName(event) {
+      event.preventDefault();
+      const tag = stateProps.tags.find(t => t.name === stateProps.autosuggestValue);
+      if (tag !== undefined) {
+        if (ownProps.exclude) {
+          dispatchProps.dispatch(addTagExclusion(tag.id));
+        } else {
+          dispatchProps.dispatch(addTagFilter(tag.id));
+        }
       }
     }
-  }
-});
+  });
 
 export default connect(
   mapStateToProps,

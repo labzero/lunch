@@ -114,7 +114,7 @@ wss.broadcast = data => {
 };
 
 app.use((req, res, next) => {
-  req.wss = wss;
+  req.wss = wss; // eslint-disable-line no-param-reassign
   return next();
 });
 

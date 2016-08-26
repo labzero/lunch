@@ -53,7 +53,7 @@ class RestaurantMap extends Component {
   };
 
   componentDidMount() {
-    this._root.addEventListener('touchmove', event => {
+    this.root.addEventListener('touchmove', event => {
       // prevent window from scrolling
       event.preventDefault();
     });
@@ -89,7 +89,7 @@ class RestaurantMap extends Component {
     }
 
     return (
-      <section className={s.root} ref={r => { this._root = r; }}>
+      <section className={s.root} ref={r => { this.root = r; }}>
         <GoogleMap
           defaultZoom={16}
           defaultCenter={this.props.latLng}

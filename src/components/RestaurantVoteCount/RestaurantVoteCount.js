@@ -12,8 +12,8 @@ export class _RestaurantVoteCount extends Component {
   };
 
   componentDidUpdate() {
-    this._el.classList.add(s.updated);
-    this.timeout = setTimeout(() => this._el.classList.remove(s.updated), 100);
+    this.el.classList.add(s.updated);
+    this.timeout = setTimeout(() => this.el.classList.remove(s.updated), 100);
   }
 
   componentWillUnmount() {
@@ -48,7 +48,7 @@ export class _RestaurantVoteCount extends Component {
     }
 
     return (
-      <span ref={e => { this._el = e; }} className={s.root}>
+      <span ref={e => { this.el = e; }} className={s.root}>
         {voteCountContainer}
       </span>
     );

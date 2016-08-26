@@ -9,7 +9,7 @@ import RestaurantDropdownContainer from '../../containers/RestaurantDropdownCont
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Restaurant.scss';
 
-export const _Restaurant = ({
+const Restaurant = ({
   restaurant,
   shouldShowAddTagArea,
   shouldShowDropdown,
@@ -31,7 +31,9 @@ export const _Restaurant = ({
       if (listUiItem.isAddingTags) {
         addTagArea = <RestaurantAddTagFormContainer id={restaurant.id} />;
       } else {
-        addTagArea = <button className="btn btn-sm btn-default" onClick={showAddTagForm}>add tag</button>;
+        addTagArea = (
+          <button className="btn btn-sm btn-default" onClick={showAddTagForm}>add tag</button>
+        );
       }
     }
     if (shouldShowDropdown) {
@@ -69,7 +71,11 @@ export const _Restaurant = ({
         </div>
       </div>
       <div className={s.addressContainer}>
-        <a className={s.addressLink} href={`/api/restaurants/${restaurant.id}/place_url`} target="_blank">
+        <a
+          className={s.addressLink}
+          href={`/api/restaurants/${restaurant.id}/place_url`}
+          target="_blank"
+        >
           {restaurant.address}
         </a>
       </div>
@@ -84,7 +90,7 @@ export const _Restaurant = ({
   );
 };
 
-_Restaurant.propTypes = {
+Restaurant.propTypes = {
   restaurant: PropTypes.object.isRequired,
   loggedIn: PropTypes.bool.isRequired,
   shouldShowAddTagArea: PropTypes.bool,
@@ -94,4 +100,5 @@ _Restaurant.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
-export default withStyles(s)(_Restaurant);
+export const undecorated = Restaurant;
+export default withStyles(s)(Restaurant);

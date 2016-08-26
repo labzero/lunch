@@ -77,7 +77,10 @@ router
     async (req, res) => {
       const id = parseInt(req.params.id, 10);
       const { name } = req.body;
-      Restaurant.update({ name }, { fields: ['name'], where: { id }, returning: true }).spread((count, rows) => {
+      Restaurant.update(
+        { name },
+        { fields: ['name'], where: { id }, returning: true }
+      ).spread((count, rows) => {
         const json = { name: rows[0].toJSON().name };
         req.wss.broadcast(restaurantRenamed(id, json, req.user.id));
         res.status(200).send({ error: false, data: json });

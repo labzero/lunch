@@ -24,6 +24,7 @@ describe('DeleteTagModal', () => {
     const wrapper = shallow(
       <DeleteTagModal {...props} />
     );
-    expect(wrapper.find(Modal.Body).render().text()).to.contain('Are you sure you want to delete the "gross" tag?');
+    expect(wrapper.find(Modal.Body).render().text())
+      .to.contain('Are you sure you want to delete the "gross" tag?');
   });
 });

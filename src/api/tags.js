@@ -9,7 +9,8 @@ router
   .get('/', async (req, res) => {
     Tag.scope('orderedByRestaurant').findAll().then(all => {
       res.status(200).send({ error: false, data: all });
-    }).catch(err => errorCatcher(res, err));
+    })
+    .catch(err => errorCatcher(res, err));
   })
   .delete(
     '/:id',

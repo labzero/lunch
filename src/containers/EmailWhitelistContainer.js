@@ -11,14 +11,14 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  setEmailWhitelistInputValue(event) {
+  setEmailWhitelistInputValue: event => {
     dispatch(setEmailWhitelistInputValue(event.target.value));
   },
   dispatch
 });
 
 const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
-  addWhitelistEmail(event) {
+  addWhitelistEmail: event => {
     event.preventDefault();
     dispatchProps.dispatch(addWhitelistEmail(stateProps.inputValue));
   }

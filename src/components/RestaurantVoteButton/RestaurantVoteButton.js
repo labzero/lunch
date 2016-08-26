@@ -5,7 +5,7 @@ import s from './RestaurantVoteButton.scss';
 export class _RestaurantVoteButton extends Component {
   componentDidUpdate() {
     // if it's focused, page scrolls to its new location once it's sorted
-    this._el.blur();
+    this.el.blur();
   }
 
   render() {
@@ -16,7 +16,7 @@ export class _RestaurantVoteButton extends Component {
 
     return (
       <button
-        ref={r => { this._el = r; }}
+        ref={r => { this.el = r; }}
         onClick={this.props.handleClick}
         className={`${s.root} btn btn-sm ${btnClass}`}
       >

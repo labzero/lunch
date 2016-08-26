@@ -23,6 +23,7 @@ describe('RestaurantAddTagForm', () => {
 
   it('disables add button when autosuggest value is blank', () => {
     const wrapper = shallow(<RestaurantAddTagForm {...props} />);
-    expect(wrapper.render().find('button').first().attr('disabled')).to.eq('disabled');
+    expect(wrapper.render().find('button').first()
+      .attr('disabled')).to.eq('disabled');
   });
 });
