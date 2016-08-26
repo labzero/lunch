@@ -8,18 +8,16 @@
  */
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { match, Router } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 import configureStore from './configureStore';
-import { render } from 'react-dom';
 import FastClick from 'fastclick';
 import makeRoutes from './routes';
 import history from './core/history';
 import ContextHolder from './core/ContextHolder';
-import { addEventListener, removeEventListener } from './core/DOMUtils';
 import ReconnectingWebSocket from 'reconnectingwebsocket';
-import {} from 'element-closest';
 
 const initialState = window.__INITIAL_STATE__;
 
@@ -32,10 +30,24 @@ const syncedHistory = syncHistoryWithStore(history, store);
 
 let cssContainer = document.getElementById('css');
 const appContainer = document.getElementById('app');
+
+import { readState, saveState } from 'history/lib/DOMStateStorage';
+import {
+  addEventListener,
+  removeEventListener,
+  windowScrollX,
+  windowScrollY,
+} from './core/DOMUtils';
+
 const context = {
-  insertCss: styles => styles._insertCss(),
-  onSetTitle: value => (document.title = value),
-  onSetMeta: (name, content) => {
+  insertCss: (...styles) => {
+    const removeCss = styles.map(style => style._insertCss()); // eslint-disable-line no-underscore-dangle, max-len
+    return () => {
+      removeCss.forEach(f => f());
+    };
+  },
+  setTitle: value => (document.title = value),
+  setMeta: (name, content) => {
     // Remove and create a new <meta /> tag in order to make it work
     // with bookmarks in Safari
     const elements = document.getElementsByTagName('meta');
@@ -53,51 +65,64 @@ const context = {
   },
 };
 
-// Google Analytics tracking. Don't send 'pageview' event after the first
-// rendering, as it was already sent by the Html component.
-let trackPageview = () => (trackPageview = () => window.ga('send', 'pageview'));
+// Restore the scroll position if it was saved into the state
+function restoreScrollPosition(state) {
+  if (state && state.scrollY !== undefined) {
+    window.scrollTo(state.scrollX, state.scrollY);
+  } else {
+    window.scrollTo(0, 0);
+  }
+}
+
+let renderComplete = callback => {
+  const elem = document.getElementById('css');
+  if (elem) elem.parentNode.removeChild(elem);
+  callback(true);
+  renderComplete = (s) => {
+    restoreScrollPosition(s);
+
+    // Google Analytics tracking. Don't send 'pageview' event after
+    // the initial rendering, as it was already sent
+    if (window.ga) {
+      window.ga('send', 'pageview');
+    }
+
+    callback(true);
+  };
+};
+
+function render(container, component) {
+  return new Promise((resolve, reject) => {
+    try {
+      ReactDOM.render(
+        component,
+        container,
+        renderComplete.bind(undefined, resolve)
+      );
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
 
 function run() {
-  const scrollOffsets = new Map();
-  let currentScrollOffset = null;
+  let currentLocation = history.getCurrentLocation();
 
   // Make taps on links and buttons work fast on mobiles
   FastClick.attach(document.body);
-
-  const unlisten = history.listen(location => {
-    const locationId = location.pathname + location.search;
-
-    if (!scrollOffsets.get(locationId)) {
-      scrollOffsets.set(locationId, Object.create(null));
-    }
-
-    currentScrollOffset = scrollOffsets.get(locationId);
-
-    // Restore the scroll position if it was saved
-    if (currentScrollOffset.scrollY !== undefined) {
-      window.scrollTo(currentScrollOffset.scrollX, currentScrollOffset.scrollY);
-    } else {
-      window.scrollTo(0, 0);
-    }
-
-    trackPageview();
-  });
-
-  const { pathname, search, hash } = window.location;
-  const location = `${pathname}${search}${hash}`;
 
   const routes = makeRoutes();
 
   match({ routes, location }, (error, redirectLocation, renderProps) => {
     render(
+      appContainer,
       <ContextHolder context={context}>
         <Provider store={store}>
           <Router {...renderProps} history={syncedHistory}>
             {routes}
           </Router>
         </Provider>
-      </ContextHolder>,
-      appContainer
+      </ContextHolder>
     );
 
     // Remove the pre-rendered CSS because it's no longer used
@@ -108,25 +133,37 @@ function run() {
     }
   });
 
-  // Save the page scroll position
-  const supportPageOffset = window.pageXOffset !== undefined;
-  const isCSS1Compat = ((document.compatMode || '') === 'CSS1Compat');
-  const setPageOffset = () => {
-    if (supportPageOffset) {
-      currentScrollOffset.scrollX = window.pageXOffset;
-      currentScrollOffset.scrollY = window.pageYOffset;
-    } else {
-      currentScrollOffset.scrollX = isCSS1Compat ?
-        document.documentElement.scrollLeft : document.body.scrollLeft;
-      currentScrollOffset.scrollY = isCSS1Compat ?
-        document.documentElement.scrollTop : document.body.scrollTop;
+  function onLocationChange(location) {
+    // Save the page scroll position into the current location's state
+    if (currentLocation.key) {
+      saveState(currentLocation.key, {
+        ...readState(currentLocation.key),
+        scrollX: windowScrollX(),
+        scrollY: windowScrollY(),
+      });
     }
-  };
+    currentLocation = location;
+  }
 
-  addEventListener(window, 'scroll', setPageOffset);
-  addEventListener(window, 'pagehide', () => {
-    removeEventListener(window, 'scroll', setPageOffset);
-    unlisten();
+  // Add History API listener and trigger initial change
+  const removeHistoryListener = history.listen(onLocationChange);
+  history.replace(currentLocation);
+
+  // https://developers.google.com/web/updates/2015/09/history-api-scroll-restoration
+  let originalScrollRestoration;
+  if (window.history && 'scrollRestoration' in window.history) {
+    originalScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+  }
+
+  // Prevent listeners collisions during history navigation
+  addEventListener(window, 'pagehide', function onPageHide() {
+    removeEventListener(window, 'pagehide', onPageHide);
+    removeHistoryListener();
+    if (originalScrollRestoration) {
+      window.history.scrollRestoration = originalScrollRestoration;
+      originalScrollRestoration = undefined;
+    }
   });
 }
 

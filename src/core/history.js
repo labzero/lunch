@@ -7,8 +7,10 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import { browserHistory, createMemoryHistory } from 'react-router';
+import createHistory from 'history/lib/createBrowserHistory';
+import createMemoryHistory from 'history/lib/createMemoryHistory';
+import useQueries from 'history/lib/useQueries';
 
-const location = process.env.BROWSER ? browserHistory : createMemoryHistory();
+const history = useQueries(process.env.BROWSER ? createHistory : createMemoryHistory)();
 
-export default location;
+export default history;

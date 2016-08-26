@@ -15,6 +15,7 @@ import FooterContainer from '../../containers/FooterContainer';
 import NotificationListContainer from '../../containers/NotificationListContainer';
 import ModalSectionContainer from '../../containers/ModalSectionContainer';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
+import emptyFunction from 'fbjs/lib/emptyFunction';
 
 class App extends Component {
 
@@ -31,9 +32,24 @@ class App extends Component {
     insertCss: PropTypes.func,
   };
 
+  static childContextTypes = {
+    insertCss: PropTypes.func.isRequired,
+    setTitle: PropTypes.func.isRequired,
+    setMeta: PropTypes.func.isRequired,
+  };
+
+  getChildContext() {
+    const context = this.context;
+    return {
+      insertCss: context.insertCss || emptyFunction,
+      setTitle: context.setTitle || emptyFunction,
+      setMeta: context.setMeta || emptyFunction,
+    };
+  }
+
   componentWillMount() {
-    this.removeAppCss = this.context.insertCss(s);
-    this.removeGlobalCss = this.context.insertCss(globalCss);
+    this.removeCss = this.context.insertCss(s, globalCss);
+
     if (canUseDOM) {
       let host = window.location.host;
       if (this.props.wsPort !== 0 && this.props.wsPort !== window.location.port) {
@@ -61,8 +77,7 @@ class App extends Component {
   }
 
   componentWillUnmount() {
-    this.removeAppCss();
-    this.removeGlobalCss();
+    this.removeCss();
   }
 
   render() {

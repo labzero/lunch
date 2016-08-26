@@ -22,6 +22,9 @@ import jwt from 'jsonwebtoken';
 import React from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom/server';
+import Html from './components/Html';
+import { ErrorPage } from './components/ErrorPage';
+import errorPageStyle from './components/ErrorPage/ErrorPage.scss';
 import PrettyError from 'pretty-error';
 import { match, RouterContext } from 'react-router';
 import configureStore from './configureStore';
@@ -77,9 +80,7 @@ app.use(bodyParser.json());
 app.use(expressJwt({
   secret: auth.jwt.secret,
   credentialsRequired: false,
-  /* jscs:disable requireCamelCaseOrUpperCaseIdentifiers */
   getToken: req => req.cookies.id_token,
-  /* jscs:enable requireCamelCaseOrUpperCaseIdentifiers */
 }));
 app.use(passport.initialize());
 
@@ -204,33 +205,36 @@ app.get('*', async (req, res, next) => {
           }
           const data = {
             apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
+            children: '',
             title: '',
             description: 'An app for groups to decide on nearby lunch options.',
-            css: '',
+            style: '',
             body: '',
             root: `${req.protocol}://${req.get('host')}`,
-            entry: assets.main.js,
+            script: assets.main.js,
             initialState: serialize(initialState)
           };
-          const css = [];
+          const css = new Set();
           const context = {
-            insertCss: styles => css.push(styles._getCss()),
-            onSetTitle: value => (data.title = value),
-            onSetMeta: (key, value) => (data[key] = value),
+            insertCss: (...styles) => {
+              styles.forEach(style => css.add(style._getCss())); // eslint-disable-line no-underscore-dangle, max-len
+            },
+            setTitle: value => (data.title = value),
+            setMeta: (key, value) => (data[key] = value),
             onPageNotFound: () => (statusCode = 404),
           };
           const store = configureStore(initialState);
-          data.body = ReactDOM.renderToString(
+          data.children = ReactDOM.renderToString(
             <ContextHolder context={context}>
               <Provider store={store}>
                 <RouterContext {...renderProps} />
               </Provider>
             </ContextHolder>
           );
-          data.css = css.join('');
-          const template = require('./views/index.jade');
+          data.style = [...css].join('');
+          const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
           res.status(statusCode);
-          res.send(template(data));
+          res.send(`<!doctype html>${html}`);
         }).catch(err => next(err));
     });
   } catch (err) {
@@ -247,13 +251,18 @@ pe.skipPackage('express');
 
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   console.log(pe.render(err)); // eslint-disable-line no-console
-  const template = require('./views/error.jade');
   const statusCode = err.status || 500;
+  const html = ReactDOM.renderToStaticMarkup(
+    <Html
+      title="Internal Server Error"
+      description={err.message}
+      style={errorPageStyle._getCss()} // eslint-disable-line no-underscore-dangle
+    >
+      {ReactDOM.renderToString(<ErrorPage error={err} />)}
+    </Html>
+  );
   res.status(statusCode);
-  res.send(template({
-    message: err.message,
-    stack: /* process.env.NODE_ENV === 'production' ? '' : */ err.stack,
-  }));
+  res.send(`<!doctype html>${html}`);
 });
 
 //
