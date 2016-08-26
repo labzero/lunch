@@ -115,17 +115,6 @@ Scenario: Member sees success page after submitting releases for authorization
   And I submit the securities release request for authorization
   Then I should see the success page for the securities release request
 
-@jira-mem-1599
-Scenario: A signer authorizes a previously submittied release request
-  Given I am logged in as a "quick-advance signer"
-  And I am on the securities request page
-  When I click to Authorize the first release
-  Then I should be on the Securities Release page
-  When I choose the first available date for trade date
-  And I choose the first available date for settlement date
-  And I authorize the request
-  Then I should see the authorize request success page
-
 @jira-mem-1600
 Scenario: A signer uses a SecurID token to authenticate when authorizing
   Given I am logged in as a "quick-advance signer"

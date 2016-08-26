@@ -27,3 +27,19 @@ Scenario: Securities signer navigates to view a release request from the Securit
   Then I should an active state for the Authorize action
   When I click to Authorize the first release
   Then I should be on the Securities Release page
+
+  @jira-mem-1599 @jira-mem-1667
+  Scenario Outline: A signer authorizes a previously submitted request
+    Given I am logged in as a "quick-advance signer"
+    And I am on the securities request page
+    When I click to Authorize the first <request_type>
+    Then I should be on the <page> page
+    When I choose the first available date for trade date
+    And I choose the first available date for settlement date
+    And I authorize the request
+    Then I should see the authorize request success page
+  Examples:
+    | request_type | page                |
+    | release      | Securities Release  |
+    | pledge       | Pledge Securities   |
+    | safekeep     | Safekeep Securities |

@@ -35,7 +35,9 @@ $(function () {
             $('.' + resultsContainerClass).html(data.result.html);
           };
           if (formName && inputName) {
-            $('form[name=' + formName + '] input[name=' + inputName + ']').attr('value', data.result.form_data);
+            var $inputNode = $('form[name=' + formName + '] input[name=' + inputName + ']');
+            $inputNode.attr('value', data.result.form_data);
+            $inputNode.trigger('change');
           };
         };
       };

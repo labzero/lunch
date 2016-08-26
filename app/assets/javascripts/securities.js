@@ -94,6 +94,7 @@ $(function() {
   $securitiesForm.find('input').on('keyup', validateSecuritiesRequestFields);
   $securitiesForm.find('select').on('change', validateSecuritiesRequestFields);
   $securitiesField.on('change', validateSecuritiesRequestFields);
+  validateSecuritiesRequestFields();
 
   function validateSecuritiesRequestFields() {
     if (brokerInstructionsValid() && deliveryInstructionsValid() && securitiesValid() && secureIDValid()) {
@@ -114,7 +115,7 @@ $(function() {
   };
 
   function securitiesValid() {
-    var isValid = $securitiesField.val() ? true : false;
+    var isValid = ($securitiesField.val() && $securitiesField.val() !== 'null') ? true : false;
     return isValid;
   };
 
