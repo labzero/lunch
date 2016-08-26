@@ -11,6 +11,27 @@ if (canUseDOM) {
   google = window.google || google;
 }
 
+const HereMarker = () => (
+  <div className={s.center} title="You are here" />
+);
+
+const TempMarker = () => (
+  <div className={s.tempMarker}>
+    <svg viewBox="-2 -2 19 19" width="19" height="19">
+      <circle
+        className={s.tempMarkerCircle}
+        strokeWidth="2"
+        stroke="#000"
+        fill="transparent"
+        strokeDasharray="2.95, 2.95"
+        r="7.5"
+        cx="7.5"
+        cy="7.5"
+      />
+    </svg>
+  </div>
+);
+
 class RestaurantMap extends Component {
   static contextTypes = {
     insertCss: PropTypes.func.isRequired,
@@ -64,22 +85,7 @@ class RestaurantMap extends Component {
 
     const tempMarkers = [];
     if (this.props.tempMarker !== undefined) {
-      tempMarkers.push(
-        <div className={s.tempMarker} key="tempMarker" {...this.props.tempMarker.latLng}>
-          <svg viewBox="-2 -2 19 19" width="19" height="19">
-            <circle
-              className={s.tempMarkerCircle}
-              strokeWidth="2"
-              stroke="#000"
-              fill="transparent"
-              strokeDasharray="2.95, 2.95"
-              r="7.5"
-              cx="7.5"
-              cy="7.5"
-            />
-          </svg>
-        </div>
-      );
+      tempMarkers.push(<TempMarker key="tempMarker" {...this.props.tempMarker.latLng} />);
     }
 
     return (
@@ -96,12 +102,7 @@ class RestaurantMap extends Component {
           onClick={this.props.mapClicked}
           yesIWantToUseGoogleMapApiInternals
         >
-          <div
-            lat={this.props.latLng.lat}
-            lng={this.props.latLng.lng}
-            className={s.center}
-            title="You are here"
-          />
+          <HereMarker lat={this.props.latLng.lat} lng={this.props.latLng.lng} />
           {tempMarkers}
           {this.props.items.map((item, index) =>
             <RestaurantMarkerContainer

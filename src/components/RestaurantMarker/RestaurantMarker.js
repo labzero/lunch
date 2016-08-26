@@ -56,8 +56,6 @@ const InnerRestaurantMarker = ({
     <div className={`${s.root} ${restaurant.votes.length > 0 || decided ? s.voted : ''}`} data-marker>
       {showInfoWindow ? renderInfoWindow() : null}
       <div
-        lat={restaurant.lat}
-        lng={restaurant.lng}
         key={index}
         title={restaurant.name}
         onClick={handleMarkerClick}
@@ -84,6 +82,7 @@ InnerRestaurantMarker.propTypes = {
 const StyledRestaurantMarker = withStyles(s)(InnerRestaurantMarker);
 
 const RestaurantMarker = ({
+  restaurant,
   ...props
 }) => {
   const context = {
@@ -94,7 +93,12 @@ const RestaurantMarker = ({
   return (
     <ContextHolder context={context}>
       <Provider store={context.store}>
-        <StyledRestaurantMarker {...props} />
+        <StyledRestaurantMarker
+          lat={restaurant.lat}
+          lng={restaurant.lng}
+          restaurant={restaurant}
+          {...props}
+        />
       </Provider>
     </ContextHolder>
   );
@@ -102,7 +106,8 @@ const RestaurantMarker = ({
 
 RestaurantMarker.propTypes = {
   store: PropTypes.object.isRequired,
-  insertCss: PropTypes.func.isRequired
+  insertCss: PropTypes.func.isRequired,
+  restaurant: PropTypes.object.isRequired
 };
 
 export default RestaurantMarker;
