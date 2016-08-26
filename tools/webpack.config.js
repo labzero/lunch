@@ -81,16 +81,16 @@ const config = {
         },
       },
       {
-        test: /\.scss$/,
+        test: /globalCss\.scss$/,
         loaders: [
           'isomorphic-style-loader',
-          `css-loader?${JSON.stringify({ sourceMap: DEBUG, minimize: !DEBUG })}`,
-          'postcss-loader?pack=sass',
+          `css-loader?${DEBUG ? 'sourceMap&' : 'minimize&'}modules&localIdentName=[local]`,
           'sass-loader',
-        ],
+          'postcss-loader?pack=sass'
+        ]
       },
       {
-        test: /^((?!globalCss).)*\.css$/,
+        test: /^((?!globalCss).)*\.(css|scss)$/,
         loaders: [
           'isomorphic-style-loader',
           `css-loader?${JSON.stringify({
@@ -101,7 +101,8 @@ const config = {
             // CSS Nano http://cssnano.co/options/
             minimize: !DEBUG,
           })}`,
-          'postcss-loader?pack=default',
+          'sass-loader',
+          'postcss-loader?pack=sass',
         ],
       },
       {
