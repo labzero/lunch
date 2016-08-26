@@ -127,7 +127,7 @@ function run() {
 
     // Remove the pre-rendered CSS because it's no longer used
     // after the React app is launched
-    if (cssContainer) {
+    if (cssContainer && cssContainer.parentNode) {
       cssContainer.parentNode.removeChild(cssContainer);
       cssContainer = null;
     }

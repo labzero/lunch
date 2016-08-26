@@ -13,7 +13,7 @@ const returnTrue = () => true;
 export class _TagFilterForm extends Component {
   componentDidUpdate(prevProps) {
     if (this.props.tagUiForm.shown !== prevProps.tagUiForm.shown && this.props.tagUiForm.shown) {
-      this._autosuggestInput.focus();
+      this.autosuggest.input.focus();
     }
   }
 
@@ -21,10 +21,6 @@ export class _TagFilterForm extends Component {
     let form;
     let showButton;
     if (this.props.tagUiForm.shown) {
-      const setAutosuggestInput = i => {
-        this._autosuggestInput = i;
-      };
-
       form = (
         <form className={s.form} onSubmit={this.props.addByName}>
           <Autosuggest
@@ -36,11 +32,11 @@ export class _TagFilterForm extends Component {
               placeholder: this.props.exclude ? 'exclude' : 'filter',
               value: this.props.autosuggestValue,
               onChange: this.props.setAutosuggestValue,
-              ref: setAutosuggestInput
             }}
             theme={autosuggestTheme}
             onSuggestionSelected={this.props.handleSuggestionSelected}
             shouldRenderSuggestions={returnTrue}
+            ref={a => { this.autosuggest = a; }}
           />
           {this.props.addedTags.map(tag => {
             const boundRemoveTag = this.props.removeTag.bind(undefined, tag);

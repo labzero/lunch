@@ -11,7 +11,7 @@ autosuggestTheme.input = 'form-control input-sm';
 
 export class _RestaurantAddTagForm extends Component {
   componentDidMount() {
-    this._input.focus();
+    this.autosuggest.input.focus();
   }
 
   render() {
@@ -25,11 +25,11 @@ export class _RestaurantAddTagForm extends Component {
           inputProps={{
             value: this.props.autosuggestValue,
             onChange: this.props.setAddTagAutosuggestValue,
-            ref: i => { this._input = i; }
           }}
           theme={autosuggestTheme}
           onSuggestionSelected={this.props.handleSuggestionSelected}
           shouldRenderSuggestions={returnTrue}
+          ref={a => { this.autosuggest = a; }}
         />
         <button
           className={`btn btn-sm btn-primary ${s.button}`}
