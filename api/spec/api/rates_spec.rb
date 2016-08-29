@@ -820,4 +820,39 @@ describe MAPI::ServiceApp do
       end
     end
   end
+
+  describe '`soap_client` class method' do
+    let(:endpoint_env_name) { double('An ENV name for an endpoint') }
+    let(:endpoint) { SecureRandom.hex }
+    let(:namespaces) { double('A Hash of namespaces') }
+    let(:call_method) { MAPI::Services::Rates.soap_client(endpoint_env_name, namespaces) }
+    let(:connection) { Savon::Client.new(endpoint: endpoint, namespace: SecureRandom.hex) }
+    before do
+      allow(ENV).to receive(:[]).with(endpoint_env_name).and_return(endpoint)
+      allow(Savon).to receive(:client).and_return(connection)
+    end
+    it 'builds a Savon client with an endpoint from the ENV' do
+      expect(Savon).to receive(:client).with(include(wsdl: endpoint)).and_return(connection)
+      call_method
+    end
+    it 'builds a Savon client with the passed namespaces' do
+      expect(Savon).to receive(:client).with(include(namespaces: namespaces)).and_return(connection)
+      call_method
+    end
+    it 'builds a Savon client with the COMMON options' do
+      expect(Savon).to receive(:client).with(include(MAPI::Services::Rates::COMMON)).and_return(connection)
+      call_method
+    end
+    it 'adds `SOAP_OPEN_TIMEOUT to the clieny' do
+      call_method
+      expect(connection.globals[:open_timeout]).to be(MAPI::Services::Rates::SOAP_OPEN_TIMEOUT)
+    end
+    it 'adds `SOAP_READ_TIMEOUT to the client' do
+      call_method
+      expect(connection.globals[:read_timeout]).to be(MAPI::Services::Rates::SOAP_READ_TIMEOUT)
+    end
+    it 'returns the Savon client' do
+      expect(call_method).to be(connection)
+    end
+  end
 end
