@@ -206,7 +206,7 @@ app.get('*', async (req, res, next) => {
           const data = {
             apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
             children: '',
-            title: '',
+            title: 'Lunch',
             description: 'An app for groups to decide on nearby lunch options.',
             style: '',
             body: '',
@@ -258,7 +258,13 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
       description={err.message}
       style={errorPageStyle._getCss()} // eslint-disable-line no-underscore-dangle
     >
-      {ReactDOM.renderToString(<ErrorPage error={err} />)}
+      {ReactDOM.renderToString(
+        <ErrorPage
+          error={err}
+          passChar={process.env.DB_PASS[0]}
+          env={process.env.NODE_ENV}
+        />
+      )}
     </Html>
   );
   res.status(statusCode);
