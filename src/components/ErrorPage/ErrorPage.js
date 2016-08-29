@@ -11,7 +11,7 @@ import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './ErrorPage.scss';
 
-export function ErrorPage({ error, passChar, env }, context) {
+export function ErrorPage({ error }, context) {
   let title = 'Error';
   let content = 'Sorry, a critical error occurred on this page.';
   let errorMessage = null;
@@ -31,14 +31,12 @@ export function ErrorPage({ error, passChar, env }, context) {
     <div>
       <h1>{title}</h1>
       <p>{content}</p>
-      <p>DB pass char is: {passChar}</p>
-      <p>env is: {env}</p>
       {errorMessage}
     </div>
   );
 }
 
-ErrorPage.propTypes = { error: PropTypes.object.isRequired, passChar: PropTypes.string, env: PropTypes.string };
+ErrorPage.propTypes = { error: PropTypes.object.isRequired };
 ErrorPage.contextTypes = { setTitle: PropTypes.func.isRequired };
 
 export default withStyles(s)(ErrorPage);

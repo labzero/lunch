@@ -258,13 +258,7 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
       description={err.message}
       style={errorPageStyle._getCss()} // eslint-disable-line no-underscore-dangle
     >
-      {ReactDOM.renderToString(
-        <ErrorPage
-          error={err}
-          passChar={process.env.DB_PASS[0]}
-          env={process.env.NODE_ENV}
-        />
-      )}
+      {ReactDOM.renderToString(<ErrorPage error={err} />)}
     </Html>
   );
   res.status(statusCode);
