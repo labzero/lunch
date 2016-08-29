@@ -75,11 +75,11 @@ describe MAPI::ServiceApp do
     let(:document) { double('XML Document', remove_namespaces!: nil, xpath: []) }
     let(:response) { double('SOAP Response', doc: document)}
     before do
-      allow(MAPI::Services::Rates).to receive(:init_pi_connection).with(env).and_return(connection)
+      allow(MAPI::Services::Rates).to receive(:init_pi_connection).with(env, false).and_return(connection)
       allow(connection).to receive(:call).and_return(response)
     end
     it 'returns false if the connection could not be created' do
-      allow(MAPI::Services::Rates).to receive(:init_pi_connection).with(env).and_return(nil)
+      allow(MAPI::Services::Rates).to receive(:init_pi_connection).with(env, false).and_return(nil)
       expect(call_method).to eq(false)
     end
     it 'returns false if the request raises a savon error' do
@@ -105,11 +105,11 @@ describe MAPI::ServiceApp do
     let(:document) { double('XML Document', remove_namespaces!: nil, xpath: []) }
     let(:response) { double('SOAP Response', doc: document)}
     before do
-      allow(MAPI::Services::Rates).to receive(:init_mds_connection).with(env).and_return(connection)
+      allow(MAPI::Services::Rates).to receive(:init_mds_connection).with(env, false).and_return(connection)
       allow(connection).to receive(:call).and_return(response)
     end
     it 'returns false if the connection could not be created' do
-      allow(MAPI::Services::Rates).to receive(:init_mds_connection).with(env).and_return(nil)
+      allow(MAPI::Services::Rates).to receive(:init_mds_connection).with(env, false).and_return(nil)
       expect(call_method).to eq(false)
     end
     it 'returns false if the request raises a savon error' do
@@ -136,11 +136,11 @@ describe MAPI::ServiceApp do
     let(:document) { double('XML Document', remove_namespaces!: nil, xpath: []) }
     let(:response) { double('SOAP Response', doc: document)}
     before do
-      allow(MAPI::Services::Rates).to receive(:init_cal_connection).with(env).and_return(connection)
+      allow(MAPI::Services::Rates).to receive(:init_cal_connection).with(env, false).and_return(connection)
       allow(connection).to receive(:call).and_return(response)
     end
     it 'returns false if the connection could not be created' do
-      allow(MAPI::Services::Rates).to receive(:init_cal_connection).with(env).and_return(nil)
+      allow(MAPI::Services::Rates).to receive(:init_cal_connection).with(env, false).and_return(nil)
       expect(call_method).to eq(false)
     end
     it 'returns false if the request raises a savon error' do

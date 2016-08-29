@@ -62,30 +62,45 @@ module MAPI
         Savon.client( COMMON.merge( wsdl: ENV[endpoint], namespaces: namespaces ) )
       end
 
-      def self.init_mds_connection(environment)
-        return @@mds_connection = nil unless environment == :production
-        @@mds_connection ||= MAPI::Services::Rates.soap_client( 'MAPI_MDS_ENDPOINT',
+      @@mds_connection = nil
+      def self.init_mds_connection(environment, cache=true)
+        return nil unless environment == :production
+        connection = @@mds_connection
+        connection = nil unless cache
+        connection ||= MAPI::Services::Rates.soap_client( 'MAPI_MDS_ENDPOINT',
                                                                 { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/marketdata/v1',
                                                                   'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
                                                                   'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1',
                                                                   'xmlns:v12' => 'http://fhlbsf.com/schema/canonical/marketdata/v1',
                                                                   'xmlns:v13' => 'http://fhlbsf.com/schema/canonical/shared/v1'} )
+        @@mds_connection ||= connection if cache
+        connection
       end
 
-      def self.init_cal_connection(environment)
-        return @@cal_connection = nil unless environment == :production
-        @@cal_connection ||= MAPI::Services::Rates.soap_client( 'MAPI_CALENDAR_ENDPOINT',
+      @@cal_connection = nil
+      def self.init_cal_connection(environment, cache=true)
+        return nil unless environment == :production
+        connection = @@cal_connection
+        connection = nil unless cache
+        connection ||= MAPI::Services::Rates.soap_client( 'MAPI_CALENDAR_ENDPOINT',
                                                                 { 'xmlns:v1' => 'http://fhlbsf.com/schema/msg/businessCalendar/v1',
                                                                   'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
                                                                   'xmlns:v11' => 'http://fhlbsf.com/schema/canonical/common/v1'} )
+        @@cal_connection ||= connection if cache
+        connection
       end
 
-      def self.init_pi_connection(environment)
-        return @@pi_connection = nil unless environment == :production
-        @@pi_connection ||= MAPI::Services::Rates.soap_client( 'MAPI_MDS_ENDPOINT',
+      @@pi_connection = nil
+      def self.init_pi_connection(environment, cache=true)
+        return nil unless environment == :production
+        connection = @@pi_connection
+        connection = nil unless cache
+        connection ||= MAPI::Services::Rates.soap_client( 'MAPI_MDS_ENDPOINT',
                                                                { 'xmlns:v1' => 'http://fhlbsf.com/reports/msg/v1',
                                                                  'xmlns:wsse' => 'http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd',
                                                                  'xmlns:v11' => 'http://fhlbsf.com/reports/contract/v1'} )
+        @@pi_connection ||= connection if cache
+        connection
       end
 
       def self.market_data_message_for_loan_type(loan_type, live_or_start_of_day, funding_date=nil)
