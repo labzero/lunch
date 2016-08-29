@@ -692,4 +692,132 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe '`init_mds_connection` class method' do
+    before do
+      MAPI::Services::Rates.class_variable_set(:@@mds_connection, nil)
+    end
+    describe 'in the production environment' do
+      let(:call_method) { MAPI::Services::Rates.init_mds_connection(:production) }
+      let(:client) { instance_double(Savon::Client) }
+      it 'calls `soap_client`' do
+        expect(MAPI::Services::Rates).to receive(:soap_client)
+        call_method
+      end
+      it 'returns the SOAP client' do
+        allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+        expect(call_method).to be(client)
+      end
+      it 'caches the generated SOAP client' do
+        client = call_method
+        expect(call_method).to be(client)
+      end
+      describe 'when called with `cache` = `false`' do
+        let(:call_method) { MAPI::Services::Rates.init_mds_connection(:production, false) }
+        it 'returns a fresh SOAP client' do
+          allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+          expect(call_method).to be(client)
+        end
+        it 'does not cache the client' do
+          client = MAPI::Services::Rates.init_mds_connection(:production, false)
+          expect(MAPI::Services::Rates.init_mds_connection(:production, false)).to_not be(client)
+        end
+      end
+    end
+    describe 'when the environment is not production' do
+      let(:call_method) { MAPI::Services::Rates.init_mds_connection(:foo) }
+      it 'returns nil' do
+        expect(call_method).to be_nil
+      end
+      it 'does not call `soap_client`' do
+        expect(MAPI::Services::Rates).to_not receive(:soap_client)
+        call_method
+      end
+    end
+  end
+
+  describe '`init_cal_connection` class method' do
+    before do
+      MAPI::Services::Rates.class_variable_set(:@@cal_connection, nil)
+    end
+    describe 'in the production environment' do
+      let(:call_method) { MAPI::Services::Rates.init_cal_connection(:production) }
+      let(:client) { instance_double(Savon::Client) }
+      it 'calls `soap_client`' do
+        expect(MAPI::Services::Rates).to receive(:soap_client)
+        call_method
+      end
+      it 'returns the SOAP client' do
+        allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+        expect(call_method).to be(client)
+      end
+      it 'caches the generated SOAP client' do
+        client = call_method
+        expect(call_method).to be(client)
+      end
+      describe 'when called with `cache` = `false`' do
+        let(:call_method) { MAPI::Services::Rates.init_cal_connection(:production, false) }
+        it 'returns a fresh SOAP client' do
+          allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+          expect(call_method).to be(client)
+        end
+        it 'does not cache the client' do
+          client = MAPI::Services::Rates.init_cal_connection(:production, false)
+          expect(MAPI::Services::Rates.init_cal_connection(:production, false)).to_not be(client)
+        end
+      end
+    end
+    describe 'when the environment is not production' do
+      let(:call_method) { MAPI::Services::Rates.init_cal_connection(:foo) }
+      it 'returns nil' do
+        expect(call_method).to be_nil
+      end
+      it 'does not call `soap_client`' do
+        expect(MAPI::Services::Rates).to_not receive(:soap_client)
+        call_method
+      end
+    end
+  end
+
+  describe '`init_pi_connection` class method' do
+    before do
+      MAPI::Services::Rates.class_variable_set(:@@pi_connection, nil)
+    end
+    describe 'in the production environment' do
+      let(:call_method) { MAPI::Services::Rates.init_pi_connection(:production) }
+      let(:client) { instance_double(Savon::Client) }
+      it 'calls `soap_client`' do
+        expect(MAPI::Services::Rates).to receive(:soap_client)
+        call_method
+      end
+      it 'returns the SOAP client' do
+        allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+        expect(call_method).to be(client)
+      end
+      it 'caches the generated SOAP client' do
+        client = call_method
+        expect(call_method).to be(client)
+      end
+      describe 'when called with `cache` = `false`' do
+        let(:call_method) { MAPI::Services::Rates.init_pi_connection(:production, false) }
+        it 'returns a fresh SOAP client' do
+          allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+          expect(call_method).to be(client)
+        end
+        it 'does not cache the client' do
+          client = MAPI::Services::Rates.init_pi_connection(:production, false)
+          expect(MAPI::Services::Rates.init_pi_connection(:production, false)).to_not be(client)
+        end
+      end
+    end
+    describe 'when the environment is not production' do
+      let(:call_method) { MAPI::Services::Rates.init_pi_connection(:foo) }
+      it 'returns nil' do
+        expect(call_method).to be_nil
+      end
+      it 'does not call `soap_client`' do
+        expect(MAPI::Services::Rates).to_not receive(:soap_client)
+        call_method
+      end
+    end
+  end
 end
