@@ -9,7 +9,7 @@ let sequelizeInst;
 if (config.use_env_variable) {
   sequelizeInst = new Sequelize(process.env[config.use_env_variable]);
 } else {
-  sequelizeInst = new Sequelize(config.database, 'foo', config.password, config);
+  sequelizeInst = new Sequelize(config.database, config.username, config.password, config);
 }
 
 export const sequelize = sequelizeInst;
