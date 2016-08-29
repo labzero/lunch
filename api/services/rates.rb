@@ -9,6 +9,9 @@ module MAPI
       include MAPI::Shared::Constants
       include MAPI::Shared::Utils
 
+      SOAP_OPEN_TIMEOUT = 0.2 # seconds
+      SOAP_READ_TIMEOUT = 45 # seconds
+
       def self.types_and_terms_hash
         Hash[LOAN_TYPES.map { |type| [type, Hash[LOAN_TERMS.map{ |term| [term, yield(type, term)] }]] }]
       end
@@ -59,7 +62,10 @@ module MAPI
       end
 
       def self.soap_client(endpoint, namespaces)
-        Savon.client( COMMON.merge( wsdl: ENV[endpoint], namespaces: namespaces ) )
+        client = Savon.client( COMMON.merge( wsdl: ENV[endpoint], namespaces: namespaces ) )
+        client.globals[:open_timeout] = SOAP_OPEN_TIMEOUT
+        client.globals[:read_timeout] = SOAP_READ_TIMEOUT
+        client
       end
 
       @@mds_connection = nil
