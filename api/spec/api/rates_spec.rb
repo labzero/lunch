@@ -692,4 +692,167 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe '`init_mds_connection` class method' do
+    before do
+      MAPI::Services::Rates.class_variable_set(:@@mds_connection, nil)
+    end
+    describe 'in the production environment' do
+      let(:call_method) { MAPI::Services::Rates.init_mds_connection(:production) }
+      let(:client) { instance_double(Savon::Client) }
+      it 'calls `soap_client`' do
+        expect(MAPI::Services::Rates).to receive(:soap_client)
+        call_method
+      end
+      it 'returns the SOAP client' do
+        allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+        expect(call_method).to be(client)
+      end
+      it 'caches the generated SOAP client' do
+        client = call_method
+        expect(call_method).to be(client)
+      end
+      describe 'when called with `cache` = `false`' do
+        let(:call_method) { MAPI::Services::Rates.init_mds_connection(:production, false) }
+        it 'returns a fresh SOAP client' do
+          allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+          expect(call_method).to be(client)
+        end
+        it 'does not cache the client' do
+          client = MAPI::Services::Rates.init_mds_connection(:production, false)
+          expect(MAPI::Services::Rates.init_mds_connection(:production, false)).to_not be(client)
+        end
+      end
+    end
+    describe 'when the environment is not production' do
+      let(:call_method) { MAPI::Services::Rates.init_mds_connection(:foo) }
+      it 'returns nil' do
+        expect(call_method).to be_nil
+      end
+      it 'does not call `soap_client`' do
+        expect(MAPI::Services::Rates).to_not receive(:soap_client)
+        call_method
+      end
+    end
+  end
+
+  describe '`init_cal_connection` class method' do
+    before do
+      MAPI::Services::Rates.class_variable_set(:@@cal_connection, nil)
+    end
+    describe 'in the production environment' do
+      let(:call_method) { MAPI::Services::Rates.init_cal_connection(:production) }
+      let(:client) { instance_double(Savon::Client) }
+      it 'calls `soap_client`' do
+        expect(MAPI::Services::Rates).to receive(:soap_client)
+        call_method
+      end
+      it 'returns the SOAP client' do
+        allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+        expect(call_method).to be(client)
+      end
+      it 'caches the generated SOAP client' do
+        client = call_method
+        expect(call_method).to be(client)
+      end
+      describe 'when called with `cache` = `false`' do
+        let(:call_method) { MAPI::Services::Rates.init_cal_connection(:production, false) }
+        it 'returns a fresh SOAP client' do
+          allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+          expect(call_method).to be(client)
+        end
+        it 'does not cache the client' do
+          client = MAPI::Services::Rates.init_cal_connection(:production, false)
+          expect(MAPI::Services::Rates.init_cal_connection(:production, false)).to_not be(client)
+        end
+      end
+    end
+    describe 'when the environment is not production' do
+      let(:call_method) { MAPI::Services::Rates.init_cal_connection(:foo) }
+      it 'returns nil' do
+        expect(call_method).to be_nil
+      end
+      it 'does not call `soap_client`' do
+        expect(MAPI::Services::Rates).to_not receive(:soap_client)
+        call_method
+      end
+    end
+  end
+
+  describe '`init_pi_connection` class method' do
+    before do
+      MAPI::Services::Rates.class_variable_set(:@@pi_connection, nil)
+    end
+    describe 'in the production environment' do
+      let(:call_method) { MAPI::Services::Rates.init_pi_connection(:production) }
+      let(:client) { instance_double(Savon::Client) }
+      it 'calls `soap_client`' do
+        expect(MAPI::Services::Rates).to receive(:soap_client)
+        call_method
+      end
+      it 'returns the SOAP client' do
+        allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+        expect(call_method).to be(client)
+      end
+      it 'caches the generated SOAP client' do
+        client = call_method
+        expect(call_method).to be(client)
+      end
+      describe 'when called with `cache` = `false`' do
+        let(:call_method) { MAPI::Services::Rates.init_pi_connection(:production, false) }
+        it 'returns a fresh SOAP client' do
+          allow(MAPI::Services::Rates).to receive(:soap_client).and_return(client)
+          expect(call_method).to be(client)
+        end
+        it 'does not cache the client' do
+          client = MAPI::Services::Rates.init_pi_connection(:production, false)
+          expect(MAPI::Services::Rates.init_pi_connection(:production, false)).to_not be(client)
+        end
+      end
+    end
+    describe 'when the environment is not production' do
+      let(:call_method) { MAPI::Services::Rates.init_pi_connection(:foo) }
+      it 'returns nil' do
+        expect(call_method).to be_nil
+      end
+      it 'does not call `soap_client`' do
+        expect(MAPI::Services::Rates).to_not receive(:soap_client)
+        call_method
+      end
+    end
+  end
+
+  describe '`soap_client` class method' do
+    let(:endpoint_env_name) { double('An ENV name for an endpoint') }
+    let(:endpoint) { SecureRandom.hex }
+    let(:namespaces) { double('A Hash of namespaces') }
+    let(:call_method) { MAPI::Services::Rates.soap_client(endpoint_env_name, namespaces) }
+    let(:connection) { Savon::Client.new(endpoint: endpoint, namespace: SecureRandom.hex) }
+    before do
+      allow(ENV).to receive(:[]).with(endpoint_env_name).and_return(endpoint)
+      allow(Savon).to receive(:client).and_return(connection)
+    end
+    it 'builds a Savon client with an endpoint from the ENV' do
+      expect(Savon).to receive(:client).with(include(wsdl: endpoint)).and_return(connection)
+      call_method
+    end
+    it 'builds a Savon client with the passed namespaces' do
+      expect(Savon).to receive(:client).with(include(namespaces: namespaces)).and_return(connection)
+      call_method
+    end
+    it 'builds a Savon client with the COMMON options' do
+      expect(Savon).to receive(:client).with(include(MAPI::Services::Rates::COMMON)).and_return(connection)
+      call_method
+    end
+    it 'adds `SOAP_OPEN_TIMEOUT to the clieny' do
+      call_method
+      expect(connection.globals[:open_timeout]).to be(MAPI::Services::Rates::SOAP_OPEN_TIMEOUT)
+    end
+    it 'adds `SOAP_READ_TIMEOUT to the client' do
+      call_method
+      expect(connection.globals[:read_timeout]).to be(MAPI::Services::Rates::SOAP_READ_TIMEOUT)
+    end
+    it 'returns the Savon client' do
+      expect(call_method).to be(connection)
+    end
+  end
 end

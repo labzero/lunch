@@ -8,7 +8,7 @@ module MAPI
 
       def self.ping_cal_service(environment)
         cal_status = false
-        cal_connection = MAPI::Services::Rates.init_cal_connection(environment)
+        cal_connection = MAPI::Services::Rates.init_cal_connection(environment, false)
         if cal_connection
           message = {'v1:endDate' => '1991-01-01'}
           begin
@@ -26,7 +26,7 @@ module MAPI
 
       def self.ping_pi_service(environment)
         pi_status = false
-        pi_connection = MAPI::Services::Rates.init_pi_connection(environment)
+        pi_connection = MAPI::Services::Rates.init_pi_connection(environment, false)
         if pi_connection
           begin
             add_soap_timeouts(pi_connection)
@@ -42,7 +42,7 @@ module MAPI
 
       def self.ping_mds_service(environment)
         mds_status = false
-        mds_connection = MAPI::Services::Rates.init_mds_connection(environment)
+        mds_connection = MAPI::Services::Rates.init_mds_connection(environment, false)
         if mds_connection
           message = {
             'v11:caller' => [{ 'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
