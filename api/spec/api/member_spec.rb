@@ -350,7 +350,8 @@ describe MAPI::ServiceApp do
         post_body['user']['session_id'],
         post_body['broker_instructions'],
         post_body['delivery_instructions'],
-        post_body['securities']).and_return(request_id)
+        post_body['securities'],
+        post_body['pledged_or_unpledged']).and_return(request_id)
       make_request
       expect(last_response.status).to be(200)
       expect(JSON.parse(last_response.body)['request_id']).to eq(request_id)
@@ -392,7 +393,8 @@ describe MAPI::ServiceApp do
         post_body[:user][:session_id],
         post_body[:broker_instructions],
         post_body[:delivery_instructions],
-        post_body[:securities]
+        post_body[:securities],
+        post_body[:pledged_or_unpledged]
       )
       make_request
     end
@@ -408,7 +410,7 @@ describe MAPI::ServiceApp do
     end
     it 'calls `update_intake` with an empty array for `securities` if they are not included in the posted body' do
       post_body.delete(:securities)
-      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:update_intake).with(anything, anything, anything, anything, anything, anything, anything, anything, [])
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:update_intake).with(anything, anything, anything, anything, anything, anything, anything, anything, [], anything)
       make_request
     end
     describe 'when `update_intake` returns true' do

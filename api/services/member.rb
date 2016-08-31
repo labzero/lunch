@@ -1478,7 +1478,8 @@ module MAPI
                                                                                   user['session_id'],
                                                                                   post_body_json['broker_instructions'] || {},
                                                                                   post_body_json['delivery_instructions'] || {},
-                                                                                  post_body_json['securities'] || [])
+                                                                                  post_body_json['securities'] || [],
+                                                                                  post_body_json['pledged_or_unpledged'])
             {request_id: request_id}
           end
         end
@@ -1499,8 +1500,8 @@ module MAPI
               user['session_id'],
               post_body_json['broker_instructions'] || {},
               post_body_json['delivery_instructions'] || {},
-              post_body_json['securities'] || []
-            )
+              post_body_json['securities'] || [],
+              post_body_json['pledged_or_unpledged'])
           end
         end
 

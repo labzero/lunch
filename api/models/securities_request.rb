@@ -190,6 +190,12 @@ module MAPI
           key :description, 'The ID of the request'
         end
 
+        property :pledged_or_unpledged do
+          key :type, :string
+          key :enum, %i(pledged unpledged)
+          key :description, 'What kind of request it is: pledged or unpledged'
+        end
+
         property :form_type do
           key :type, :string
           key :enum, %i(pledge_release safekept_release pledge_intake safekept_intake)

@@ -486,22 +486,20 @@ module MAPI
           SQL
         end
 
-        def self.create_intake(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
+        def self.create_intake(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities, pledged_or_unpledged)
           validate_delivery_instructions(delivery_instructions)
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :intake)
-          adx_type = get_adx_type_from_security(app, securities.first)
-          validate_broker_instructions(broker_instructions, app, :"#{adx_type}_intake")
+          validate_broker_instructions(broker_instructions, app, :"#{pledged_or_unpledged}_intake")
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           user_name.downcase!
           unless should_fake?(app)
             header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
             ActiveRecord::Base.transaction do
-              adx_type = get_adx_type_from_security(app, securities.first)
-              adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), "ADX ID")
+              adx_id = execute_sql_single_result(app, adx_query(member_id, pledged_or_unpledged), "ADX ID")
               insert_header_sql = insert_intake_header_query( member_id, header_id, user_name, full_name, session_id,
                                                               adx_id, processed_delivery_instructions[:delivery_columns],
                                                               broker_instructions, processed_delivery_instructions[:delivery_type],
-                                                              processed_delivery_instructions[:delivery_values], adx_type)
+                                                              processed_delivery_instructions[:delivery_values], pledged_or_unpledged)
               raise "failed to insert security intake request header" unless execute_sql(app.logger, insert_header_sql)
               securities.each do |security|
                 ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
@@ -515,18 +513,17 @@ module MAPI
           header_id
         end
 
-        def self.update_intake(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
+        def self.update_intake(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities, pledged_or_unpledged)
           original_delivery_instructions = delivery_instructions.clone # Used to see if header details have changes below
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :intake)
-          adx_type = get_adx_type_from_security(app, securities.first)
-          validate_broker_instructions(broker_instructions, app, :"#{adx_type}_intake")
+          validate_broker_instructions(broker_instructions, app, :"#{pledged_or_unpledged}_intake")
           validate_delivery_instructions(delivery_instructions)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           unless should_fake?(app)
             ActiveRecord::Base.transaction(isolation: :read_committed) do
               cusips = securities.collect{|x| x['cusip']}
               raise MAPI::Shared::Errors::SQLError, 'Failed to delete old security release request detail by CUSIP' unless execute_sql(app.logger, delete_request_securities_by_cusip_query(request_id, cusips))
-              adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), 'Get ADX ID from ADX Type')
+              adx_id = execute_sql_single_result(app, adx_query(member_id, pledged_or_unpledged), 'Get ADX ID from ADX Type')
               existing_securities = format_securities(fetch_hashes(app.logger, release_request_securities_query(request_id)))
               securities.each do |security|
                 existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
@@ -546,7 +543,7 @@ module MAPI
               if header_has_changed(existing_header, broker_instructions, original_delivery_instructions)
                 update_header_sql = update_request_header_details_query(member_id, request_id, user_name, full_name,
                   session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions,
-                  processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values], adx_type)
+                  processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values], pledged_or_unpledged)
                 header_update_count = execute_sql(app.logger, update_header_sql).to_i
                 raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless header_update_count == 1
               end
