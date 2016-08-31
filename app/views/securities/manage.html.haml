@@ -8,5 +8,6 @@
         = render 'shared/filter', filter_class: @securities_table_data[:filter][:name], filters: @securities_table_data[:filter][:data]
         = link_to(t('securities.manage.pledge_new'), securities_pledge_edit_path, class: ['pledge', 'primary-button'])
         = link_to(t('securities.manage.safekeep_new'), securities_safekeep_edit_path, class: ['safekeep', 'primary-button'])
-        = submit_tag(t('securities.manage.release'), disabled: true, class: 'primary-button')
+        = link_to(t('securities.manage.transfer'), '#', disabled: true, class: 'primary-button', data: {'manage-securities-form-submit' => securities_transfer_edit_path})
+        = link_to(t('securities.manage.release'), '#', disabled: true, class: 'primary-button', data: {'manage-securities-form-submit' => securities_release_edit_path})
       = render 'reports/reports_table', table_class: 'manage-securities-table', table_data: @securities_table_data, sortable: false

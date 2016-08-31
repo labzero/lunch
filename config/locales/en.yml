@@ -1177,6 +1177,7 @@ en:
       pledged: Pledged
       safekept: Safekept
       release: Release
+      transfer: Transfer
       safekeep_new: Safekeep New
       pledge_new: Pledge New
     requests:

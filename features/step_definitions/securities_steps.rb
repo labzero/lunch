@@ -88,19 +88,21 @@ Then(/^I should see the cusip value from the (\d+)(?:st|nd|rd|th) (Pledged|Safek
   expect(remembered_cusip).to eq(cusip)
 end
 
-Then(/^the release securities button should be (active|inactive)$/) do |active|
+Then(/^the (release|transfer) securities button should be (active|inactive)$/) do |action, active|
   if table_not_empty
+    text = action == 'release' ? I18n.t('securities.manage.release') : I18n.t('securities.manage.transfer')
     if active == 'active'
-      page.assert_selector('.manage-securities-form input[type=submit]')
-      page.assert_no_selector('.manage-securities-form input[type=submit]:disabled')
+      page.assert_selector('.manage-securities-form a[data-manage-securities-form-submit]', text: text.upcase, exact: true)
+      page.assert_no_selector('.manage-securities-form a[data-manage-securities-form-submit][disabled]', text: text.upcase, exact: true)
     else
-      page.assert_selector('.manage-securities-form input[type=submit]:disabled')
+      page.assert_selector('.manage-securities-form a[data-manage-securities-form-submit][disabled]', text: text.upcase, exact: true)
     end
   end
 end
 
-When(/^I click the button to release the securities$/) do
-  page.find('.manage-securities-form input[type=submit]').click
+When(/^I click the button to (release|transfer) the securities$/) do |action|
+  text = action == 'release' ? I18n.t('securities.manage.release') : I18n.t('securities.manage.transfer')
+  page.find('.manage-securities-form a[data-manage-securities-form-submit]', text: text.upcase, exact: true).click
 end
 
 When(/^I click the button to create a new (safekeep|pledge) request$/) do |type|

@@ -23,21 +23,25 @@ Scenario: Member filters securities
   When I filter the securities by Pledged
   Then I should only see Pledged rows in the securities table
 
-@jira-mem-1587
-Scenario: Active state of Release Button
+@jira-mem-1587 @jira-mem-1736
+Scenario Outline: Active state of Submit Button
   When I am on the manage securities page
-  Then the release securities button should be inactive
+  Then the <action> securities button should be inactive
   When I check the 1st Pledged security
-  Then the release securities button should be active
+  Then the <action> securities button should be active
   When I check the 2nd Pledged security
-  Then the release securities button should be active
+  Then the <action> securities button should be active
   When I check the 1st Safekept security
-  Then the release securities button should be inactive
+  Then the <action> securities button should be inactive
   When I uncheck the 1st Safekept security
-  Then the release securities button should be active
+  Then the <action> securities button should be active
   When I check the 1st Safekept security
-  Then the release securities button should be inactive
+  Then the <action> securities button should be inactive
   When I uncheck the 1st Pledged security
-  Then the release securities button should be inactive
+  Then the <action> securities button should be inactive
   When I uncheck the 2nd Pledged security
-  Then the release securities button should be active
+  Then the <action> securities button should be active
+  Examples:
+  | action   |
+  | release  |
+  | transfer |
