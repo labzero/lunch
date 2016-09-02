@@ -3,8 +3,9 @@ require 'rails_helper'
 RSpec.describe SecuritiesRequest, :type => :model do
   before { allow_any_instance_of(CalendarService).to receive(:holidays).and_return([]) }
   describe 'validations' do
-    (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities]).each do |attr|
+    (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities, :kind, :form_type]).each do |attr|
       it "should validate the presence of `#{attr}`" do
+        allow(subject).to receive("#{attr}=")
         expect(subject).to validate_presence_of attr
       end
     end
@@ -203,10 +204,128 @@ RSpec.describe SecuritiesRequest, :type => :model do
   end
 
   describe 'instance methods' do
+    describe '`kind=`' do
+      let(:kind) { described_class::KINDS.sample }
+      let(:call_method) { subject.kind = kind }
+
+      it 'raises an error if the kind is invalid' do
+        expect{subject.kind = SecureRandom.hex}.to raise_error(ArgumentError, "`kind` must be one of: #{described_class::KINDS}")
+      end
+      it 'assigns `@kind` to the passed value' do
+        call_method
+        expect(subject.kind).to eq(kind)
+      end
+      describe 'when `kind` is `:pledge_transfer`' do
+        before { subject.kind = :pledge_transfer }
+        it 'sets `@form_type` to `:pledge_intake`' do
+          expect(subject.form_type).to eq(:pledge_intake)
+        end
+        it 'sets `@delivery_type` to `:transfer`' do
+          expect(subject.delivery_type).to eq(:transfer)
+        end
+      end
+      describe 'when `kind` is `:safekept_transfer`' do
+        before { subject.kind = :safekept_transfer }
+        it 'sets `@form_type` to `:pledge_release`' do
+          expect(subject.form_type).to eq(:pledge_release)
+        end
+        it 'sets `@delivery_type` to `:transfer`' do
+          expect(subject.delivery_type).to eq(:transfer)
+        end
+      end
+      (described_class::KINDS - [:pledge_transfer, :safekept_transfer]).each do |kind|
+        describe "when `kind` is `#{kind}`" do
+          before { subject.kind = kind }
+          it "sets `@form_type` to `#{kind}`" do
+            expect(subject.form_type).to eq(kind)
+          end
+        end
+      end
+    end
+    describe '`form_type=`' do
+      let(:form_type) { described_class::FORM_TYPES.sample }
+      let(:call_method) { subject.form_type = form_type }
+
+      it 'raises an error if the form_type is invalid' do
+        expect{subject.form_type = SecureRandom.hex}.to raise_error(ArgumentError, "`form_type` must be one of: #{described_class::FORM_TYPES}")
+      end
+      it 'assigns `@form_type` to the passed value' do
+        call_method
+        expect(subject.form_type).to eq(form_type)
+      end
+      describe 'assigning `@kind`' do
+        describe 'when `delivery_type` equals `:transfer`' do
+          before { subject.delivery_type = :transfer }
+
+          describe 'when `form_type` is `:pledge_intake`' do
+            it 'sets `@kind` to `:pledge_transfer`' do
+              subject.form_type = :pledge_intake
+              expect(subject.kind).to eq(:pledge_transfer)
+            end
+          end
+          describe 'when `form_type` is `:pledge_release`' do
+            it 'sets `@kind` to `:safekept_transfer`' do
+              subject.form_type = :pledge_release
+              expect(subject.kind).to eq(:safekept_transfer)
+            end
+          end
+          (described_class::FORM_TYPES - [:pledge_intake, :pledge_release]).each do |form_type|
+            describe "when `form_type` is `#{form_type}`" do
+              it 'raises an error' do
+                expect{subject.form_type = form_type}.to raise_error(ArgumentError, '`form_type` must be :pledge_intake or :pledge_release when `delivery_type` is :transfer')
+              end
+            end
+          end
+        end
+        describe 'when `delivery_type` does not equal `:transfer`' do
+          it 'sets `@kind` to `form_type`' do
+            call_method
+            expect(subject.kind).to eq(form_type)
+          end
+        end
+      end
+    end
+    describe '`delivery_type=`' do
+      let(:delivery_type) { described_class::DELIVERY_TYPES.keys.sample }
+      let(:call_method) { subject.delivery_type = delivery_type }
+
+      it 'raises an error if the form_type is invalid' do
+        expect{subject.delivery_type = SecureRandom.hex}.to raise_error(ArgumentError, "`delivery_type` must be one of: #{described_class::DELIVERY_TYPES.keys}")
+      end
+      it 'assigns `@delivery_type` to the passed value' do
+        call_method
+        expect(subject.delivery_type).to eq(delivery_type)
+      end
+      describe 'when `delivery_type` equals `:transfer`' do
+        let(:call_method) { subject.delivery_type = :transfer }
+        it 'does not assign @kind if there is no @form_type' do
+          call_method
+          expect(subject.kind).to be_nil
+        end
+        describe 'when there is a @form_type' do
+          (described_class::FORM_TYPES - [:pledge_intake, :pledge_release]).each do |form_type|
+            it "raises an error if the @form_type is `#{form_type}`" do
+              subject.form_type = form_type
+              expect{call_method}.to raise_error(ArgumentError, '`form_type` must be :pledge_intake or :pledge_release when `delivery_type` is :transfer')
+            end
+          end
+          it 'sets @kind to `:pledge_transfer` when @form_type equals `:pledge_intake`' do
+            subject.form_type = :pledge_intake
+            call_method
+            expect(subject.kind).to eq(:pledge_transfer)
+          end
+          it 'sets @kind to `:safekept_transfer` when @form_type equals `:pledge_release`' do
+            subject.form_type = :pledge_release
+            call_method
+            expect(subject.kind).to eq(:safekept_transfer)
+          end
+        end
+      end
+    end
     describe '`attributes=`' do
-      sym_attrs = [:delivery_type, :transaction_code, :settlement_type, :form_type]
+      sym_attrs = [:transaction_code, :settlement_type]
       date_attrs = [:trade_date, :settlement_date]
-      custom_attrs = [:request_id]
+      custom_attrs = [:request_id, :form_type, :kind, :delivery_type]
       let(:hash) { {} }
       let(:value) { double('some value') }
       let(:call_method) { subject.send(:attributes=, hash) }
@@ -217,6 +336,13 @@ RSpec.describe SecuritiesRequest, :type => :model do
           hash[key.to_s] = value
           call_method
           expect(subject.send(key)).to be(value)
+        end
+      end
+      custom_attrs.each do |key|
+        it "assigns the value found under `#{key}` to the attribute `#{key}`" do
+          expect(subject).to receive(:"#{key}=").with(value)
+          hash[key] = value
+          call_method
         end
       end
       sym_attrs.each do |key|

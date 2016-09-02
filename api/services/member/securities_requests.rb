@@ -131,15 +131,9 @@ module MAPI
             end_date = settlement_date_range.try(:last) || Time.zone.today
             start_date = settlement_date_range.try(:first) || (end_date - 7.days)
             if should_fake?(app)
-              rng = Random.new(member_id.to_i + end_date.to_time.to_i + start_date.to_time.to_i + status.sum)
-              list = []
-              form_types = REQUEST_FORM_TYPE_MAPPING.keys.shuffle(random: rng)
-              rng.rand(4..7).times do
-                request_id = fake_request_id(rng)
-                status = flat_status.sample(random: rng)
-                list << fake_header_details(request_id, end_date, status, form_types.pop)
+              self.fake_header_details_array(member_id.to_i).select do |header_details|
+                flat_status.include?(header_details['STATUS']) && header_details['SUBMITTED_DATE'] >= start_date && header_details['SUBMITTED_DATE'] <= end_date
               end
-              list
             else
               fetch_hashes(app.logger, requests_query(member_id, flat_status, (start_date..end_date)))
             end
@@ -666,7 +660,7 @@ module MAPI
 
         def self.request_details(app, member_id, request_id)
           if should_fake?(app)
-            header_details = fake_header_details(request_id, Time.zone.today, MAPIRequestStatus::AWAITING_AUTHORIZATION.first)
+            header_details = fake_header_details_array(member_id).select{|header| header['REQUEST_ID'] == request_id}.first
             securities = fake_securities(request_id, header_details['REQUEST_STATUS'])
           else
             header_details = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
@@ -729,6 +723,26 @@ module MAPI
               payment_amount: security['PAYMENT_AMOUNT']
             }
           end
+        end
+
+        def self.fake_header_details_array(member_id)
+          rng = Random.new(member_id.to_i + Time.zone.today.to_time.to_i)
+          list = []
+          # require at least one form_type of every type of request
+          form_type_status_combos = []
+          REQUEST_FORM_TYPE_MAPPING.keys.each do |form_type|
+            flat_unique_array(REQUEST_STATUS_MAPPING.values).each do |status|
+              form_type_status_combos << [form_type, status]
+            end
+          end
+          rng.rand(12..15).times do
+            request_id = fake_request_id(rng)
+            combo = form_type_status_combos.pop
+            form_type = combo.try(:first) || REQUEST_FORM_TYPE_MAPPING.keys.sample(random: rng)
+            status = combo.try(:last) || flat_unique_array(REQUEST_STATUS_MAPPING.values).sample(random: rng)
+            list << fake_header_details(request_id, Time.zone.today, status, form_type)
+          end
+          list
         end
 
         def self.fake_header_details(request_id, end_date, status, form_type = nil)

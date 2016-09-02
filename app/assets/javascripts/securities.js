@@ -6,7 +6,7 @@ $(function() {
   var $securitiesReleaseWrapper = $('.securities-release-table-wrapper');
   var $securitiesField = $('input[name="securities"]');
   $checkboxes.on('change', function(e){
-    // if boxes checked and all values are the same, enable submit
+    // if boxes checked and all values are the same, assign `securities_request_kind` and enable submit
     var status = false;
     $form.find('input[type=checkbox]:checked').each(function(){
       var thisStatus = $(this).data('status');
@@ -18,11 +18,7 @@ $(function() {
         return false;
       };
     });
-    if (status) {
-      $submitButtons.attr('disabled', false);
-    } else {
-      $submitButtons.attr('disabled', true);
-    };
+    $submitButtons.attr('disabled', status ? false : true);
   });
 
   $submitButtons.on('click', function(event) {

@@ -52,54 +52,87 @@ describe MAPI::ServiceApp do
       end
     end
 
+    describe '`MAPI::Services::Member::SecuritiesRequests.fake_header_details_array`' do
+      let(:call_method) { MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(member_id) }
+      let(:rng) { instance_double(Random, rand: 1) }
+      let(:request_id) { rand(100000..999999) }
+      before do
+        allow(Random).to receive(:new).and_return(rng)
+        allow(securities_request_module).to receive(:fake_request_id).with(rng).and_return(request_id)
+        allow(securities_request_module).to receive(:fake_header_details).and_return({})
+      end
+
+      it 'constructs a list of request objects' do
+        n = rand(12..15)
+        allow(rng).to receive(:rand).with(eq(12..15)).and_return(n)
+        expect(call_method.length).to eq(n)
+      end
+      it 'passes the `request_id` to the `fake_header_details` method' do
+        expect(securities_request_module).to receive(:fake_header_details).with(request_id, any_args).and_return({})
+        call_method
+      end
+      it 'passes the `end_date` to the `fake_header_details` method' do
+        expect(securities_request_module).to receive(:fake_header_details).with(request_id, Time.zone.today, any_args).and_return({})
+        call_method
+      end
+      it 'generates at least one request for each form type and status combination' do
+        allow(rng).to receive(:rand).with(eq(12..15)).and_return(12)
+        form_type_status_combos = []
+        securities_request_module::REQUEST_FORM_TYPE_MAPPING.keys.each do |form_type|
+          securities_request_module::REQUEST_STATUS_MAPPING.values.flatten.each do |status|
+            form_type_status_combos << [form_type, status]
+          end
+        end
+        expect(form_type_status_combos.length).to eq(12)
+        form_type_status_combos.each do |combo|
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, combo.last, combo.first).and_return({})
+        end
+        call_method
+      end
+    end
+
     describe '`MAPI::Services::Member::SecuritiesRequests.requests`' do
       let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
       let(:call_method) { MAPI::Services::Member::SecuritiesRequests.requests(app, member_id) }
 
       describe 'when using fake data' do
-        names = fake('securities_requests')['names']
-        let(:rng) { instance_double(Random, rand: 1) }
-        let(:request_id) { rand(100000..999999) }
-        let(:form_types) { MAPI::Services::Member::SecuritiesRequests::REQUEST_FORM_TYPE_MAPPING.keys }
-        let(:shuffled_form_types) { instance_double(Array, pop: nil) }
+        let(:today) { Time.zone.today }
+        let(:statuses) { instance_double(Array, :include? => true) }
+        let(:submitted_date) { instance_double(Date, :>= => true, :<= => true) }
+        let(:header_details_array) {[
+          {
+            'SUBMITTED_DATE' => submitted_date,
+            'STATUS' => instance_double(String)
+          }
+        ]}
         before do
           allow(securities_request_module).to receive(:should_fake?).and_return(true)
-          allow(Random).to receive(:new).and_return(rng)
-          allow(securities_request_module).to receive(:fake_request_id).with(rng).and_return(request_id)
-          allow(securities_request_module).to receive(:fake_header_details).and_return({})
-          stub_const('MAPI::Services::Member::SecuritiesRequests::REQUEST_FORM_TYPE_MAPPING', MAPI::Services::Member::SecuritiesRequests::REQUEST_FORM_TYPE_MAPPING.dup) # unfreeze
-          allow(securities_request_module::REQUEST_FORM_TYPE_MAPPING).to receive(:keys).and_return(form_types)
-          allow(form_types).to receive(:shuffle).with(random: rng).and_return(shuffled_form_types)
+          allow(securities_request_module).to receive(:flat_unique_array).and_return(statuses)
+          allow(securities_request_module).to receive(:fake_header_details_array).and_return(header_details_array)
         end
 
-        it 'constructs a list of request objects' do
-          n = rand(4..7)
-          allow(rng).to receive(:rand).with(eq(4..7)).and_return(n)
-          expect(call_method.length).to eq(n)
-        end
-        it 'passes the `request_id` to the `fake_header_details` method' do
-          expect(securities_request_module).to receive(:fake_header_details).with(request_id, any_args).and_return({})
+        it 'calls `fake_header_details_array` with the member_id' do
+          expect(securities_request_module).to receive(:fake_header_details_array).with(member_id).and_return(header_details_array)
           call_method
         end
-        it 'passes the `end_date` to the `fake_header_details` method' do
-          expect(securities_request_module).to receive(:fake_header_details).with(request_id, Time.zone.today, any_args).and_return({})
-          call_method
-        end
-        it 'passes the `status` to the `fake_header_details` method' do
-          status = double('A Status')
-          status_array = double('A Status Array')
-          allow(securities_request_module).to receive(:flat_unique_array).with(securities_request_module::MAPIRequestStatus::AUTHORIZED).and_return(status_array)
-          allow(status_array).to receive(:sample).with(random: rng).and_return(status)
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, status, anything).and_return({})
-          call_method
-        end
-        it 'generates at least one request for each form type' do
-          allow(rng).to receive(:rand).with(eq(4..7)).and_return(7)
-          allow(shuffled_form_types).to receive(:pop).and_return(*form_types)
-          allow(securities_request_module).to receive(:fake_header_details).with(anything, anything, anything, nil).and_return({})
-          form_types.each do |form_type|
-            expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, anything, form_type).and_return({})
+        it 'passes the results of `fake_header_details_array` to `map_hash_values`' do
+          header_details_array.each do |header|
+            expect(securities_request_module).to receive(:map_hash_values).with(header, any_args).and_return({})
+            call_method
           end
+        end
+        it 'returns the results of `fake_header_details_array` that have a status included in the passed status value' do
+          header_details_array.each do |header|
+            expect(statuses).to receive(:include?).with(header['STATUS'])
+            call_method
+          end
+        end
+        it 'returns the results of `fake_header_details_array` that occur on or after the start_date' do
+          expect(submitted_date).to receive(:>=).with(today - 7.days)
+          call_method
+        end
+        it 'returns the results of `fake_header_details_array` that occur on or before the end_date' do
+          expect(submitted_date).to receive(:<=).with(today)
           call_method
         end
       end
@@ -908,6 +941,7 @@ describe MAPI::ServiceApp do
       let(:request_id) { rand(1000..99999) }
       let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
       let(:header_details) {{
+        'REQUEST_ID' => request_id,
         'CREATED_BY' => SecureRandom.hex,
         'CREATED_BY_NAME' => SecureRandom.hex,
         'REQUEST_STATUS' => SecureRandom.hex
@@ -918,7 +952,7 @@ describe MAPI::ServiceApp do
 
       before do
         allow(securities_request_module).to receive(:fake_securities).and_return(securities)
-        allow(securities_request_module).to receive(:fake_header_details).and_return(header_details)
+        allow(securities_request_module).to receive(:fake_header_details_array).and_return([header_details])
         allow(securities_request_module).to receive(:fetch_hashes).and_return(securities)
         allow(securities_request_module).to receive(:fetch_hash).and_return(header_details)
         allow(securities_request_module).to receive(:broker_instructions_from_header_details)
@@ -931,26 +965,32 @@ describe MAPI::ServiceApp do
       end
 
       describe 'when using fake data' do
-        before { allow(securities_request_module).to receive(:should_fake?).and_return(true) }
+        let(:matched_header_details) {{
+          'REQUEST_ID' => request_id,
+          'REQUEST_STATUS' => SecureRandom.hex
+        }}
+        let(:unmatched_header_details) { {'REQUEST_ID' => SecureRandom.hex} }
+        let(:header_details_array) {[matched_header_details, unmatched_header_details]}
+        before do
+          allow(securities_request_module).to receive(:should_fake?).and_return(true)
+          allow(securities_request_module).to receive(:fake_header_details_array).and_return(header_details_array)
+          allow(securities_request_module).to receive(:map_hash_values).and_return({})
+        end
 
         it 'constructs `fake_securities` using the `request_id` as an arg' do
           expect(securities_request_module).to receive(:fake_securities).with(request_id, anything).and_return(securities)
           call_method
         end
         it 'constructs `fake_securities` using the `REQUEST_STATUS` from the `header_details` as an arg' do
-          expect(securities_request_module).to receive(:fake_securities).with(anything, header_details['REQUEST_STATUS']).and_return(securities)
+          expect(securities_request_module).to receive(:fake_securities).with(anything, matched_header_details['REQUEST_STATUS']).and_return(securities)
           call_method
         end
-        it 'constructs `fake_header_details` using the `request_id` as an arg' do
-          expect(securities_request_module).to receive(:fake_header_details).with(request_id, any_args).and_return(header_details)
+        it 'calls `fake_header_details_array` with the member_id' do
+          expect(securities_request_module).to receive(:fake_header_details_array).with(member_id).and_return(header_details_array)
           call_method
         end
-        it 'constructs `fake_header_details` using `Time.zone.today` as an arg' do
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, Time.zone.today, any_args).and_return(header_details)
-          call_method
-        end
-        it 'constructs `fake_header_details` using the status for AWAITING_AUTHORIZATION as an arg' do
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, securities_request_module::MAPIRequestStatus::AWAITING_AUTHORIZATION.first).and_return(header_details)
+        it 'selects the header detail hash that matches the `request_id`' do
+          expect(securities_request_module).to receive(:map_hash_values).with(matched_header_details, any_args).and_return({})
           call_method
         end
       end

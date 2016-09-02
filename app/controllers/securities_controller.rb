@@ -188,33 +188,35 @@ class SecuritiesController < ApplicationController
   def edit_safekeep
     populate_view_variables(:safekeep)
     @securities_request.account_number = MembersService.new(request).member(current_member_id)['unpledged_account_number']
+    @securities_request.kind = :safekept_intake
   end
 
   def edit_pledge
     populate_view_variables(:pledge)
     @securities_request.account_number = MembersService.new(request).member(current_member_id)['pledged_account_number']
+    @securities_request.kind = :pledge_intake
   end
 
   # POST
   def edit_release
     populate_view_variables(:release)
-  end
-
-  # GET
-  def view_release
-    request_id = params[:request_id]
-    @securities_request = SecuritiesRequestService.new(current_member_id, request).submitted_request(request_id)
-    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#submitted_request has encountered nil. Check error logs.") if @securities_request.nil?
-    populate_view_variables(:release)
-    render :edit_release
+    @securities_request.kind = case @securities_request.securities.first.custody_account_type
+    when 'U'
+      :safekept_release
+    when 'P'
+      :pledge_release
+    else
+      raise ArgumentError.new('Unrecognized `custody_account_type` for passed security.')
+    end
   end
 
   # GET
   def view_request
     request_id = params[:request_id]
+    type = params[:type].try(:to_sym)
     @securities_request = SecuritiesRequestService.new(current_member_id, request).submitted_request(request_id)
     raise ActionController::RoutingError.new("There has been an error and SecuritiesController#view_request has encountered nil. Check error logs.") if @securities_request.nil?
-    type = params[:type].try(:to_sym)
+    raise ActionController::RoutingError.new("The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{@securities_request.kind}`") unless type_matches_kind(type, @securities_request.kind)
     populate_view_variables(type)
     case type
     when :release
@@ -319,16 +321,10 @@ class SecuritiesController < ApplicationController
   end
 
   # POST
-  def authorize_request
-    response = SecuritiesRequestService.new(current_member_id, request).authorize_request((params[:securities_request] || {})[:request_id], current_user)
-    raise ActiveRecord::RecordNotFound unless response
-    @title = t('securities.authorize.release.title')
-  end
-
-  # POST
   def submit_request
     type = params[:type].try(:to_sym)
     @securities_request = SecuritiesRequest.from_hash(params[:securities_request])
+    raise ActionController::RoutingError.new("The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{@securities_request.kind}`") unless type_matches_kind(type, @securities_request.kind)
     authorizer = policy(:security).authorize?
     if type != :release || @securities_request.valid? # this type switch should be removed when adding error support for intake (and this comment)
       response = SecuritiesRequestService.new(current_member_id, request).submit_request_for_authorization(@securities_request, current_user, type) do |error|
@@ -581,6 +577,17 @@ class SecuritiesController < ApplicationController
       prioritized_error_keys = error_keys - Security::CURRENCY_ATTRIBUTES
       error_key = prioritized_error_keys.present? ? prioritized_error_keys.first : error_keys.first
       security_errors[error_key].first
+    end
+  end
+
+  def type_matches_kind(type, kind)
+    case type
+      when :release
+        [:pledge_release, :safekept_release].include?(kind)
+      when :safekeep
+        kind == :safekept_intake
+      when :pledge
+        kind == :pledge_intake
     end
   end
 

@@ -288,6 +288,7 @@ describe SecuritiesRequestService do
         },
         delivery_instructions: {},
         request_id: instance_double(String),
+        form_type: instance_double(String),
         securities: instance_double(Array)
       }}
       let(:call_method) { subject.send(:map_response_to_securities_release_hash, raw_hash) }
@@ -319,7 +320,7 @@ describe SecuritiesRequestService do
           end
         end
       end
-      [:request_id, :securities, :account_number].each do |attr|
+      [:request_id, :securities, :account_number, :form_type].each do |attr|
         it "returns a hash with a `#{attr}` value" do
           raw_hash[attr] = double('A Value')
           expect(call_method[attr]).to eq(raw_hash[attr])

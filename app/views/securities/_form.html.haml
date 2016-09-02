@@ -1,6 +1,7 @@
 - authorizer = policy(:security).authorize?
 = form_for(@securities_request, validate: true, url: url, html: {class: 'securities-submit-release-form'}) do |f|
   = f.hidden_field(:request_id)
+  = f.hidden_field(:kind)
   = f.hidden_field(:trade_date)
   = f.hidden_field(:settlement_date)
   = f.hidden_field(:account_number)

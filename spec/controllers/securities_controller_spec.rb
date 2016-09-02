@@ -320,73 +320,10 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  describe 'POST edit_release' do
-    let(:call_action) { post :edit_release }
-
-    before { allow(controller).to receive(:populate_view_variables) }
-
-    it_behaves_like 'a user required action', :post, :edit_release
-    it_behaves_like 'a controller action with an active nav setting', :edit_release, :securities
-    it 'renders its view' do
-      call_action
-      expect(response.body).to render_template('edit_release')
-    end
-    it 'calls `populate_view_variables`' do
-      expect(controller).to receive(:populate_view_variables)
-      call_action
-    end
-  end
-
-  describe 'GET view_release' do
-    allow_policy :security, :authorize?
-    let(:request_id) { SecureRandom.hex }
-    let(:securities_request) { instance_double(SecuritiesRequest) }
-    let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_request) }
-    let(:call_action) { get :view_release, request_id: request_id }
-
-    before do
-      allow(SecuritiesRequestService).to receive(:new).and_return(service)
-      allow(controller).to receive(:populate_view_variables)
-    end
-
-    it_behaves_like 'a user required action', :get, :view_release, request_id: SecureRandom.hex
-    it_behaves_like 'a controller action with an active nav setting', :view_release, :securities, request_id: SecureRandom.hex
-    it_behaves_like 'an authorization required method', :get, :view_release, :security, :authorize?, request_id: SecureRandom.hex
-
-    it 'raises an ActionController::RoutingError if the service object returns nil' do
-      allow(service).to receive(:submitted_request)
-      expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#submitted_request has encountered nil. Check error logs.')
-    end
-    it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
-      expect(SecuritiesRequestService).to receive(:new).with(member_id, any_args).and_return(service)
-      call_action
-    end
-    it 'creates a new `SecuritiesRequestService` with the `request`' do
-      expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(service)
-      call_action
-    end
-    it 'calls `submitted_request` on the `SecuritiesRequestService` instance with the `request_id`' do
-      expect(service).to receive(:submitted_request).with(request_id)
-      call_action
-    end
-    it 'sets `@securities_request` to the result of `SecuritiesRequestService#request_id`' do
-      call_action
-      expect(assigns[:securities_request]).to eq(securities_request)
-    end
-    it 'calls `populate_view_variables`' do
-      expect(controller).to receive(:populate_view_variables).with(:release)
-      call_action
-    end
-    it 'renders the `edit_release` view' do
-      call_action
-      expect(response.body).to render_template(:edit_release)
-    end
-  end
-
   describe 'GET view_request' do
     let(:type) { [:release, :pledge, :safekeep].sample }
     let(:request_id) { SecureRandom.hex }
-    let(:securities_request) { instance_double(SecuritiesRequest) }
+    let(:securities_request) { instance_double(SecuritiesRequest, kind: nil) }
     let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_request) }
     let(:call_action) { get :view_request, request_id: request_id, type: type }
     allow_policy :security, :authorize?
@@ -394,6 +331,7 @@ RSpec.describe SecuritiesController, type: :controller do
     before do
       allow(SecuritiesRequestService).to receive(:new).and_return(service)
       allow(controller).to receive(:populate_view_variables)
+      allow(controller).to receive(:type_matches_kind).and_return(true)
     end
 
     it_behaves_like 'a user required action', :get, :view_request, request_id: SecureRandom.hex, type: :release
@@ -403,6 +341,10 @@ RSpec.describe SecuritiesController, type: :controller do
     it 'raises an ActionController::RoutingError if the service object returns nil' do
       allow(service).to receive(:submitted_request)
       expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#view_request has encountered nil. Check error logs.')
+    end
+    it 'raises an ActionController::RoutingError if the securities request kind does not match the request type param' do
+      allow(controller).to receive(:type_matches_kind).and_return(false)
+      expect{call_action}.to raise_error(ActionController::RoutingError, "The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{securities_request.kind}`")
     end
     it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
       expect(SecuritiesRequestService).to receive(:new).with(member_id, any_args).and_return(service)
@@ -456,7 +398,8 @@ RSpec.describe SecuritiesController, type: :controller do
                                               :settlement_type => SecuritiesRequest::SETTLEMENT_TYPES.values[rand(0..1)],
                                               :delivery_type => SecuritiesRequest::DELIVERY_TYPES.values[rand(0..3)],
                                               :securities => {},
-                                              :account_number= => nil ) }
+                                              :account_number= => nil,
+                                              :kind= => nil) }
     let(:member_service_instance) { double('MembersService') }
     before do
       allow(MembersService).to receive(:new).with(request).and_return(member_service_instance)
@@ -484,6 +427,10 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'gets the `pledged_account_number` from the `MembersService` and assigns to `@securities_request.account_number`' do
         expect(securities_request).to receive(:account_number=).with(member_details['pledged_account_number'])
+        call_action
+      end
+      it 'assigns `@securities_request.kind` a value of `:pledge_intake`' do
+        expect(securities_request).to receive(:kind=).with(:pledge_intake)
         call_action
       end
       it 'renders its view' do
@@ -515,9 +462,54 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(securities_request).to receive(:account_number=).with(member_details['unpledged_account_number'])
         call_action
       end
+      it 'assigns `@securities_request.kind` a value of `:safekept_intake`' do
+        expect(securities_request).to receive(:kind=).with(:safekept_intake)
+        call_action
+      end
       it 'renders its view' do
         call_action
         expect(response.body).to render_template('edit_safekeep')
+      end
+    end
+
+    describe 'POST edit_release' do
+      let(:security) { instance_double(Security, custody_account_type: ['U', 'P'].sample) }
+      let(:call_action) { post :edit_release }
+      before { allow(securities_request).to receive(:securities).and_return([security]) }
+
+      it_behaves_like 'a user required action', :post, :edit_release
+      it_behaves_like 'a controller action with an active nav setting', :edit_release, :securities
+      it 'renders its view' do
+        call_action
+        expect(response.body).to render_template('edit_release')
+      end
+      it 'calls `populate_view_variables`' do
+        expect(controller).to receive(:populate_view_variables)
+        call_action
+      end
+      it 'raises an exception if there are no `securities` for the @security_request' do
+        allow(securities_request).to receive(:securities).and_return(nil)
+        expect{post :edit_release}.to raise_exception
+      end
+      describe 'when the `securities` have a `custody_account_type` of `U`' do
+        before { allow(security).to receive(:custody_account_type).and_return('U') }
+        it 'assigns the `@securities_request.kind` a value of `:safekept_release`' do
+          expect(securities_request).to receive(:kind=).with(:safekept_release)
+          call_action
+        end
+      end
+      describe 'when the `securities_custody_account_type` param is `Pledged`' do
+        before { allow(security).to receive(:custody_account_type).and_return('P') }
+        it 'assigns the `@securities_request.kind` a value of `:pledge_release`' do
+          expect(securities_request).to receive(:kind=).with(:pledge_release)
+          call_action
+        end
+      end
+      describe 'when the `securities_custody_account_type` param is neither `U` nor `P`' do
+        before { allow(security).to receive(:custody_account_type).and_return(SecureRandom.hex) }
+        it 'raises an exception' do
+          expect{call_action}.to raise_error(ArgumentError, 'Unrecognized `custody_account_type` for passed security.')
+        end
       end
     end
   end
@@ -798,7 +790,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:securities_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
       let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_request_for_authorization: true, authorize_request: true) }
       let(:active_model_errors) { instance_double(ActiveModel::Errors, add: nil) }
-      let(:securities_request) { instance_double(SecuritiesRequest, :valid? => true, errors: active_model_errors) }
+      let(:securities_request) { instance_double(SecuritiesRequest, :valid? => true, errors: active_model_errors, kind: nil) }
       let(:error_message) { instance_double(String) }
       let(:call_action) { post :submit_request, securities_request: securities_request_param, type: type }
 
@@ -808,6 +800,11 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(controller).to receive(:prioritized_securities_request_error)
         allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service)
         allow(SecuritiesRequest).to receive(:from_hash).and_return(securities_request)
+        allow(controller).to receive(:type_matches_kind).and_return(true)
+      end
+      it 'raises an ActionController::RoutingError if the securities request kind does not match the request type param' do
+        allow(controller).to receive(:type_matches_kind).and_return(false)
+        expect{call_action}.to raise_error(ActionController::RoutingError, "The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{securities_request.kind}`")
       end
       it 'builds a SecuritiesRequest instance with the `securities_request` params' do
         expect(SecuritiesRequest).to receive(:from_hash).with(securities_request_param)
@@ -1101,50 +1098,6 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(securities_request_service).to receive(:delete_request).and_return(nil)
       call_action
       expect(response.status).to eq(404)
-    end
-  end
-
-  describe 'POST `authorize_request`' do
-    allow_policy :security, :authorize?
-    let(:request_id) { SecureRandom.hex }
-    let(:call_action) { post :authorize_request, securities_request: {request_id: request_id} }
-    let(:securities_request_service) { instance_double(SecuritiesRequestService, authorize_request: true) }
-
-    before do
-      allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service)
-    end
-
-    it_behaves_like 'a user required action', :post, :authorize_request, request_id: SecureRandom.hex
-    it_behaves_like 'an authorization required method', :post, :authorize_request, :security, :authorize?, request_id: SecureRandom.hex
-    it_behaves_like 'a controller action with an active nav setting', :authorize_request, :securities
-
-    it 'constructs a new `SecuritiesRequestService` instance with the current member ID' do
-      expect(SecuritiesRequestService).to receive(:new).with(member_id, anything).and_return(securities_request_service)
-      call_action
-    end
-    it 'constructs a new `SecuritiesRequestService` instance with the current request' do
-      expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(securities_request_service)
-      call_action
-    end
-    it 'calls `authorize_request` on the `SecuritiesRequestService` instance with the `request_id`' do
-      expect(securities_request_service).to receive(:authorize_request).with(request_id, anything)
-      call_action
-    end
-    it 'calls `authorize_request` on the `SecuritiesRequestService` instance with the `current_user`' do
-      expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
-      call_action
-    end
-    it 'raises an `ActiveRecord::RecordNotFound` if `authorize_request` returns `nil`' do
-      allow(securities_request_service).to receive(:authorize_request).and_return(nil)
-      expect{ call_action }.to raise_error(ActiveRecord::RecordNotFound)
-    end
-    it 'renders the view if `authorize_request` returns something truthy' do
-      call_action
-      expect(response.body).to render_template('authorize_request')
-    end
-    it 'sets `@title`' do
-      call_action
-      expect(assigns[:title]).to eq(I18n.t('securities.authorize.release.title'))
     end
   end
 
@@ -1685,6 +1638,56 @@ RSpec.describe SecuritiesController, type: :controller do
         it 'returns the first error message of the first Security::CURRENCY_ATTRIBUTES error if no other errors are present' do
           [:foo, :bar].each {|error| security.errors.delete(error) }
           expect(call_method).to eq(currency_attr_error)
+        end
+      end
+    end
+
+    describe '`type_matches_kind`' do
+      describe 'when `type` is `:release`' do
+        valid_kinds = [:pledge_release, :safekept_release]
+        invalid_kinds = SecuritiesRequest::KINDS - valid_kinds
+        valid_kinds.each do |kind|
+          it "returns true when `kind` is `#{kind}`" do
+            expect(subject.send(:type_matches_kind, :release, kind)).to be true
+          end
+        end
+        invalid_kinds.each do |kind|
+          it "returns false when `kind` is `#{kind}`" do
+            expect(subject.send(:type_matches_kind, :release, kind)).to be false
+          end
+        end
+      end
+      describe 'when `type` is `:safekeep`' do
+        valid_kinds = [:safekept_intake]
+        invalid_kinds = SecuritiesRequest::KINDS - valid_kinds
+        valid_kinds.each do |kind|
+          it "returns true when `kind` is `#{kind}`" do
+            expect(subject.send(:type_matches_kind, :safekeep, kind)).to be true
+          end
+        end
+        invalid_kinds.each do |kind|
+          it "returns false when `kind` is `#{kind}`" do
+            expect(subject.send(:type_matches_kind, :safekeep, kind)).to be false
+          end
+        end
+      end
+      describe 'when `type` is `:pledge`' do
+        valid_kinds = [:pledge_intake]
+        invalid_kinds = SecuritiesRequest::KINDS - valid_kinds
+        valid_kinds.each do |kind|
+          it "returns true when `kind` is `#{kind}`" do
+            expect(subject.send(:type_matches_kind, :pledge, kind)).to be true
+          end
+        end
+        invalid_kinds.each do |kind|
+          it "returns false when `kind` is `#{kind}`" do
+            expect(subject.send(:type_matches_kind, :pledge, kind)).to be false
+          end
+        end
+      end
+      describe 'when `type` is anything other than :release, :safekeep or :pledge' do
+        it 'returns nil' do
+          expect(subject.send(:type_matches_kind, SecureRandom.hex, SecureRandom.hex)).to be nil
         end
       end
     end

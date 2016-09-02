@@ -73,6 +73,7 @@ class SecuritiesRequestService < MAPIService
       key = SecuritiesRequest::ACCOUNT_NUMBER_TYPE_MAPPING[response_hash[:delivery_instructions][:delivery_type].to_sym] if key.to_sym == :account_number
       securities_release[key] = value
     end
+    securities_release[:form_type] = response_hash[:form_type]
     securities_release[:request_id] = response_hash[:request_id]
     securities_release[:securities] = response_hash[:securities]
     securities_release[:account_number] = response_hash[:account_number]

@@ -187,12 +187,11 @@ Rails.application.routes.draw do
       get 'requests' => 'securities#requests'
       delete 'request/:request_id' => 'securities#delete_request', as: 'delete_request'
       scope 'release', as: :release do
-        get 'view/:request_id' => 'securities#view_release', as: 'view'
+        get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :release }
         post 'edit' => 'securities#edit_release'
         post 'download' => 'securities#download_release'
         post 'upload' => 'securities#upload_securities', defaults: { type: :release }
         post 'submit' => 'securities#submit_request', defaults: { type: :release }
-        post 'authorize' => 'securities#authorize_request'
         get 'success' => 'securities#submit_request_success', defaults: { type: :release }
       end
       scope 'safekeep', as: :safekeep do
