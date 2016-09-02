@@ -28,7 +28,7 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release|release success|safekeep success|pledge success|safekeep|pledge) securities page$/) do |page|
+When(/^I am on the (manage|release|release success|safekeep success|pledge success|safekeep|pledge|transfer success) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
@@ -38,6 +38,8 @@ When(/^I am on the (manage|release|release success|safekeep success|pledge succe
     visit '/securities/pledge/success'
   when 'safekeep success'
     visit '/securities/safekeep/success'
+  when 'transfer success'
+    visit '/securities/transfer/success'
   when 'release'
     step 'I am on the manage securities page'
     step 'I check the 1st Pledged security'
@@ -232,6 +234,8 @@ Then(/^I should see the title for the "(.*?)" page$/) do |success_page|
       'securities.safekeep_pledge.success.pledge'
     when 'safekeep success'
       'securities.safekeep_pledge.success.safekeep'
+    when 'transfer success'
+      'securities.transfer.success.title'
   end
   page.assert_selector('.securities-header h1', text: I18n.t(translation), exact: true)
 end

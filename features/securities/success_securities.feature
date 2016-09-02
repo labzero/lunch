@@ -17,3 +17,4 @@ Feature: Securities Requests Success
     | release success  |
     | safekeep success |
     | pledge success   |
+    | transfer success   |

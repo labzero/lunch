@@ -1314,6 +1314,9 @@ en:
       success:
         pledge: Pledge Securities Request Sent
         safekeep: Safekeep Securities Request Sent
+    transfer:
+      success:
+        title: Internal Transfer Request Sent
     success:
       title: Release Securities Request Sent
       request_will_remain: 'This request will remain in the queue for authorization until one of the following occurs:'

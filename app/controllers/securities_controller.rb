@@ -390,12 +390,14 @@ class SecuritiesController < ApplicationController
 
   def submit_request_success
     @title = case params[:type].to_sym
-      when :release
-        t('securities.success.title')
-      when :pledge
-        t('securities.safekeep_pledge.success.pledge')
-      when :safekeep
-        t('securities.safekeep_pledge.success.safekeep')
+    when :release
+      t('securities.success.title')
+    when :pledge
+      t('securities.safekeep_pledge.success.pledge')
+    when :safekeep
+      t('securities.safekeep_pledge.success.safekeep')
+    when :transfer
+      t('securities.transfer.success.title')
     end
     @authorized_user_data = []
     users = MembersService.new(request).signers_and_users(current_member_id) || []

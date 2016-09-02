@@ -1011,7 +1011,8 @@ RSpec.describe SecuritiesController, type: :controller do
     request_type_translations = {
       release: I18n.t('securities.success.title'),
       pledge: I18n.t('securities.safekeep_pledge.success.pledge'),
-      safekeep: I18n.t('securities.safekeep_pledge.success.safekeep')
+      safekeep: I18n.t('securities.safekeep_pledge.success.safekeep'),
+      transfer: I18n.t('securities.transfer.success.title')
     }
     let(:member_service_instance) {double('MembersService')}
     let(:user_no_roles) {{display_name: 'User With No Roles', roles: [], surname: 'With No Roles', given_name: 'User'}}
@@ -1023,36 +1024,41 @@ RSpec.describe SecuritiesController, type: :controller do
     let(:user_e) { {display_name: 'No Given Name', roles: [User::Roles::WIRE_SIGNER], given_name: nil, surname: 'Given'} }
     let(:user_f) { {display_name: 'Entire Authority User', roles: [User::Roles::SIGNER_ENTIRE_AUTHORITY], given_name: 'Entire Authority', surname: 'User'} }
     let(:signers_and_users) {[user_no_roles, user_etransact, user_a, user_b, user_c, user_d, user_e, user_f]}
-    let(:type) { [:release, :safekeep, :pledge].sample }
-    let(:call_action) { get :submit_request_success, type: type }
     before do
       allow(MembersService).to receive(:new).and_return(member_service_instance)
       allow(member_service_instance).to receive(:signers_and_users).and_return(signers_and_users)
     end
 
     it_behaves_like 'a user required action', :get, :submit_request_success
-    request_type_translations.keys.each do |type|
-      it_behaves_like 'a controller action with an active nav setting', :submit_request_success, :securities, type: type
-    end
 
-    it 'renders the `submit_request_success` view' do
-      call_action
-      expect(response.body).to render_template('submit_request_success')
-    end
     request_type_translations.each do |type, title|
+      let(:call_action) { get :submit_request_success, type: type }
+      it_behaves_like 'a controller action with an active nav setting', :submit_request_success, :securities, type: type
+      it 'renders the `submit_request_success` view' do
+        call_action
+        expect(response.body).to render_template('submit_request_success')
+      end
       it "sets `@title` to `#{title}` when the `type` param is `#{type}`" do
         get :submit_request_success, type: type
         expect(assigns[:title]).to eq(title)
       end
-    end
-    it 'sets `@authorized_user_data` to a list of users with securities authority' do
-      call_action
-      expect(assigns[:authorized_user_data]).to eq([user_c])
-    end
-    it 'sets `@authorized_user_data` to [] if no users are found' do
-      allow(member_service_instance).to receive(:signers_and_users).and_return([])
-      call_action
-      expect(assigns[:authorized_user_data]).to eq([])
+      it 'renders the `submit_request_success` view' do
+        call_action
+        expect(response.body).to render_template('submit_request_success')
+      end
+      it "sets `@title` to `#{title}` when the `type` param is `#{type}`" do
+        get :submit_request_success, type: type
+        expect(assigns[:title]).to eq(title)
+      end
+      it 'sets `@authorized_user_data` to a list of users with securities authority' do
+        call_action
+        expect(assigns[:authorized_user_data]).to eq([user_c])
+      end
+      it 'sets `@authorized_user_data` to [] if no users are found' do
+        allow(member_service_instance).to receive(:signers_and_users).and_return([])
+        call_action
+        expect(assigns[:authorized_user_data]).to eq([])
+      end
     end
   end
 

@@ -212,6 +212,7 @@ Rails.application.routes.draw do
       end
       scope 'transfer', as: :transfer do
         post 'edit' => 'error#not_found'
+        get 'success' => 'securities#submit_request_success', defaults: { type: :transfer }
       end
     end
   end
