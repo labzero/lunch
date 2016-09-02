@@ -1835,7 +1835,10 @@ describe MAPI::ServiceApp do
       let(:delivery_type) { securities_request_module::DELIVERY_TYPE.to_a.sample(1).to_h }
       let(:sentinel) { SecureRandom.hex }
       let(:today) { Time.zone.today }
-      let(:call_method) { securities_request_module.update_request_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type.keys.first, delivery_values, adx_type) }
+      let(:intake_or_release) { [ :intake, :release ].sample }
+      let(:kind) { "#{adx_type}_#{intake_or_release}" }
+      let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[kind.to_sym] }
+      let(:call_method) { securities_request_module.update_request_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type.keys.first, delivery_values, adx_type, intake_or_release) }
 
       before do
         allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex)
@@ -1886,9 +1889,73 @@ describe MAPI::ServiceApp do
         allow(securities_request_module).to receive(:quote).with(full_name).and_return(sentinel)
         expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY_NAME\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
-      it 'updates the `PLEDGED_ADX_ID` or `UNPLEDGED_ADX_ID` (depending on `adx_type`)' do
+      it 'updates the `PLEDGED_ADX_ID` for release' do
         allow(securities_request_module).to receive(:quote).with(adx_id).and_return(sentinel)
-        expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]}\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+        expect(securities_request_module.
+          update_request_header_details_query(member_id,
+                                              request_id,
+                                              username,
+                                              full_name,
+                                              session_id,
+                                              adx_id,
+                                              delivery_columns,
+                                              broker_instructions,
+                                              delivery_type.keys.first,
+                                              delivery_values,
+                                              :pledged,
+                                              :release)).to match(
+        /\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[:pledged_release]}\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+      end
+      it 'updates the `PLEDGED_ADX_ID` for intake' do
+        allow(securities_request_module).to receive(:quote).with(adx_id).and_return(sentinel)
+        expect(securities_request_module.
+          update_request_header_details_query(member_id,
+                                              request_id,
+                                              username,
+                                              full_name,
+                                              session_id,
+                                              adx_id,
+                                              delivery_columns,
+                                              broker_instructions,
+                                              delivery_type.keys.first,
+                                              delivery_values,
+                                              :pledged,
+                                              :intake)).to match(
+        /\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[:pledged_intake]}\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+      end
+      it 'updates the `UNPLEDGED_ADX_ID` for release' do
+        allow(securities_request_module).to receive(:quote).with(adx_id).and_return(sentinel)
+        expect(securities_request_module.
+          update_request_header_details_query(member_id,
+                                              request_id,
+                                              username,
+                                              full_name,
+                                              session_id,
+                                              adx_id,
+                                              delivery_columns,
+                                              broker_instructions,
+                                              delivery_type.keys.first,
+                                              delivery_values,
+                                              :unpledged,
+                                              :release)).to match(
+        /\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[:unpledged_release]}\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+      end
+      it 'updates the `UNPLEDGED_ADX_ID` for intake' do
+        allow(securities_request_module).to receive(:quote).with(adx_id).and_return(sentinel)
+        expect(securities_request_module.
+          update_request_header_details_query(member_id,
+                                              request_id,
+                                              username,
+                                              full_name,
+                                              session_id,
+                                              adx_id,
+                                              delivery_columns,
+                                              broker_instructions,
+                                              delivery_type.keys.first,
+                                              delivery_values,
+                                              :unpledged,
+                                              :intake)).to match(
+        /\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[:unpledged_intake]}\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
       describe 'assigning `delivery_columns`' do
         2.times do |i|
@@ -2420,7 +2487,7 @@ describe MAPI::ServiceApp do
                   call_method
                 end
                 it 'constructs the `update_request_header_details_query` with the `delivery_values` from the processed delivery_instructions' do
-                  expect(securities_request_module).to receive(:update_request_header_details_query).with(anything, anything, anything, anything, anything, anything, anything, anything, anything, processed_delivery_instructions[:delivery_values], adx_type)
+                  expect(securities_request_module).to receive(:update_request_header_details_query).with(anything, anything, anything, anything, anything, anything, anything, anything, anything, processed_delivery_instructions[:delivery_values], adx_type, :release)
                   call_method
                 end
                 it 'calls `execute_sql` with the result of `update_request_header_details_query`' do
@@ -2855,7 +2922,7 @@ describe MAPI::ServiceApp do
                   call_method
                 end
                 it 'constructs the `update_request_header_details_query` with the `delivery_values` from the processed delivery_instructions' do
-                  expect(securities_request_module).to receive(:update_request_header_details_query).with(anything, anything, anything, anything, anything, anything, anything, anything, anything, processed_delivery_instructions[:delivery_values], pledged_or_unpledged)
+                  expect(securities_request_module).to receive(:update_request_header_details_query).with(anything, anything, anything, anything, anything, anything, anything, anything, anything, processed_delivery_instructions[:delivery_values], pledged_or_unpledged, :intake)
                   call_method
                 end
                 it 'calls `execute_sql` with the result of `update_request_header_details_query`' do

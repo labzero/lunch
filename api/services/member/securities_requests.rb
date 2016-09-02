@@ -108,7 +108,10 @@ module MAPI
         module ADXAccountTypeMapping
           SYMBOL_TO_STRING = { pledged: 'P', unpledged: 'U' }.freeze
           STRING_TO_SYMBOL = SYMBOL_TO_STRING.invert.freeze
-          SYMBOL_TO_SQL_COLUMN_NAME = { pledged: 'PLEDGED_ADX_ID', unpledged: 'UNPLEDGED_ADX_ID' }.freeze
+          SYMBOL_TO_SQL_COLUMN_NAME = { pledged_intake: 'PLEDGED_ADX_ID',
+                                        pledged_release: 'PLEDGED_ADX_ID',
+                                        unpledged_intake: 'UNPLEDGED_ADX_ID',
+                                        unpledged_release: 'UNPLEDGED_ADX_ID' }.freeze
           SYMBOL_TO_SSK_FORM_TYPE = { pledged_intake: SSKFormType::SECURITIES_PLEDGED,
                                       pledged_release: SSKFormType::SECURITIES_RELEASE,
                                       unpledged_intake: SSKFormType::SAFEKEPT_DEPOSIT,
@@ -441,8 +444,8 @@ module MAPI
           }
         end
 
-        def self.update_request_header_details_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values, adx_type)
-          adx_type_release = "#{adx_type}_release".to_sym
+        def self.update_request_header_details_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values, adx_type, intake_or_release)
+          adx_type = "#{adx_type}_#{intake_or_release}".to_sym
           <<-SQL
             UPDATE SAFEKEEPING.SSK_WEB_FORM_HEADER SET
               PLEDGE_TYPE           = #{quote(TRANSACTION_CODE[broker_instructions['transaction_code']])},
@@ -450,7 +453,7 @@ module MAPI
               REQUEST_STATUS        = #{quote(SETTLEMENT_TYPE[broker_instructions['settlement_type']])},
               SETTLE_DATE           = #{quote(broker_instructions['settlement_date'])},
               DELIVER_TO            = #{quote(DELIVERY_TYPE[delivery_type])},
-              FORM_TYPE             = #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[adx_type_release])},
+              FORM_TYPE             = #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[adx_type])},
               LAST_MODIFIED_BY      = #{quote(format_modification_by(user_name, session_id))},
               LAST_MODIFIED_DATE    = #{quote(Time.zone.today)},
               LAST_MODIFIED_BY_NAME = #{quote(full_name)},
@@ -539,7 +542,7 @@ module MAPI
               if header_has_changed(existing_header, broker_instructions, original_delivery_instructions)
                 update_header_sql = update_request_header_details_query(member_id, request_id, user_name, full_name,
                   session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions,
-                  processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values], pledged_or_unpledged)
+                  processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values], pledged_or_unpledged, :intake)
                 header_update_count = execute_sql(app.logger, update_header_sql).to_i
                 raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless header_update_count == 1
               end
@@ -617,7 +620,7 @@ module MAPI
               if header_has_changed(existing_header, broker_instructions, original_delivery_instructions)
                 update_header_sql = update_request_header_details_query(member_id, request_id, user_name, full_name,
                   session_id, adx_id, processed_delivery_instructions[:delivery_columns], broker_instructions,
-                  processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values], adx_type)
+                  processed_delivery_instructions[:delivery_type], processed_delivery_instructions[:delivery_values], adx_type, :release)
                 header_update_count = execute_sql(app.logger, update_header_sql).to_i
                 raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless header_update_count == 1
               end
