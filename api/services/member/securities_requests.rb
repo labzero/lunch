@@ -401,7 +401,7 @@ module MAPI
           max_date = today + MAX_DATE_RESTRICTION
           holidays = MAPI::Services::Rates::Holidays.holidays(app, today, max_date)
           raise MAPI::Shared::Errors::InvalidFieldError.new("#{attr_name} must not be set to a weekend date or a bank holiday", attr_name, :weekend_holiday) if weekend_or_holiday?(date, holidays)
-          raise MAPI::Shared::Errors::InvalidFieldError.new("#{attr_name} must not occur before today", attr_name, :past_date) unless date >= today
+          raise MAPI::Shared::Errors::InvalidFieldError.new("#{attr_name} must not occur before today", attr_name, :past_date) unless attr_name == 'trade_date' || date >= today
           raise MAPI::Shared::Errors::InvalidFieldError.new("#{attr_name} must not occur after 3 months from today", attr_name, :future_date) unless date <= max_date
         end
 

@@ -489,7 +489,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'raises an exception if there are no `securities` for the @security_request' do
         allow(securities_request).to receive(:securities).and_return(nil)
-        expect{post :edit_release}.to raise_exception
+        expect{post :edit_release}.to raise_exception(ArgumentError, 'Securities cannot be nil')
       end
       describe 'when the `securities` have a `custody_account_type` of `U`' do
         before { allow(security).to receive(:custody_account_type).and_return('U') }

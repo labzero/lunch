@@ -204,18 +204,23 @@ class SecuritiesRequest
   end
 
   def trade_date_within_range
-    errors.add(:trade_date, :invalid) unless !trade_date || date_within_range(trade_date)
+    errors.add(:trade_date, :invalid) unless !trade_date || date_within_range(trade_date, :trade_date)
   end
 
   def settlement_date_within_range
-    errors.add(:settlement_date, :invalid) unless !settlement_date ||  date_within_range(settlement_date)
+    errors.add(:settlement_date, :invalid) unless !settlement_date ||  date_within_range(settlement_date, :settlement_date)
   end
 
-  def date_within_range(date)
+  def date_within_range(date, field)
     today = Time.zone.today
     max_date = today + MAX_DATE_RESTRICTION
     holidays = CalendarService.new(ActionDispatch::TestRequest.new).holidays(today, max_date)
-    !(date.try(:sunday?) || date.try(:saturday?)) && !(holidays.include?(date)) && date.try(:>=, today) && date.try(:<=, max_date)
+    valid = !(date.try(:sunday?) || date.try(:saturday?)) && !(holidays.include?(date)) && date.try(:<=, max_date)
+    if field == :trade_date
+      valid
+    else
+      valid && date.try(:>=, today)
+    end
   end
 
   def securities_must_have_payment_amount

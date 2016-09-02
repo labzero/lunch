@@ -223,7 +223,7 @@ en:
               submission: We were unable to add your securities request at this time.
               authorization: We were unable to add your securities request at this time.
             trade_date:
-              invalid: Trade date may not occur on a weekend, a holiday, or be a date in the past.
+              invalid: Trade date may not occur on a weekend or a holiday.
             settlement_date:
               invalid: Settlement date may not occur on a weekend, a holiday, or be a date in the past.
               before_trade_date: Settlement Date must be on or after Trade Date.

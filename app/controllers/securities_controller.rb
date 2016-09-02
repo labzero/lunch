@@ -200,6 +200,7 @@ class SecuritiesController < ApplicationController
   # POST
   def edit_release
     populate_view_variables(:release)
+    raise ArgumentError.new('Securities cannot be nil') unless @securities_request.securities.present?
     @securities_request.kind = case @securities_request.securities.first.custody_account_type
     when 'U'
       :safekept_release
