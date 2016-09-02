@@ -371,7 +371,9 @@ describe MAPI::Shared::Utils::ClassMethods do
     let(:app) { instance_double(MAPI::ServiceApp, logger: logger, halt: nil) }
     let(:error_message) { SecureRandom.hex }
     let(:error_code) { SecureRandom.hex }
-    let(:validation_error) { MAPI::Shared::Errors::ValidationError.new(error_message, error_code) }
+    let(:error_value) { SecureRandom.hex }
+    let(:error_type) { SecureRandom.hex }
+    let(:validation_error) { MAPI::Shared::Errors::ValidationError.new(error_message, error_code, error_value) }
     let(:error) { StandardError.new(error_message) }
     let(:response) { double('some response', to_json: nil) }
 
@@ -392,8 +394,8 @@ describe MAPI::Shared::Utils::ClassMethods do
         expect(app).to receive(:halt).with(400, anything)
         call_method
       end
-      it 'calls `halt` with a JSONed error code' do
-        expect(app).to receive(:halt).with(anything, {errors: [error_code]}.to_json)
+      it 'calls `halt` with a JSONed error' do
+        expect(app).to receive(:halt).with(anything, {error: {type: :validation, code: error_code, value: error_value}}.to_json)
         call_method
       end
       it 'logs an error message' do
@@ -412,12 +414,8 @@ describe MAPI::Shared::Utils::ClassMethods do
         expect(logger).to receive(:error).with(error)
         call_method
       end
-      it 'calls `halt` with `unknown` in the `errors` array' do
-        expect(app).to receive(:halt).with(anything, include({errors: ['unknown']}.to_json.delete('{}')))
-        call_method
-      end
-      it 'calls `halt` with the error message as the `human_errors` value' do
-        expect(app).to receive(:halt).with(anything, include({human_errors: error_message}.to_json.delete('{}')))
+      it 'calls `halt` with an `unknown` JSONed error' do
+        expect(app).to receive(:halt).with(anything, {error: {type: 'unknown', code: 'unknown', value: error_message}}.to_json)
         call_method
       end
     end

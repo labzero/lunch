@@ -203,7 +203,7 @@ describe MAPI::ServiceApp do
       end
       it 'passes the allow_grace_period flag to `MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade' do
         anythings = Array.new(15, anything)
-        expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade).with(*[*anythings, allow_grace_period])
+        expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade).with(*[*anythings, allow_grace_period, nil])
         make_request
       end
     end
@@ -227,8 +227,8 @@ describe MAPI::ServiceApp do
 
     it 'passes the allow_grace_period flag to `MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade' do
       anythings = Array.new(15, anything)
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade).with(*[*anythings, allow_grace_period])
-      get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", allow_grace_period: allow_grace_period
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade).with(*[*anythings, allow_grace_period, nil])
+      get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", funding_date: nil, allow_grace_period: allow_grace_period
     end
   end
 

@@ -21,7 +21,7 @@ RSpec.shared_examples 'a MAPI endpoint with JSON error handling' do |endpoint, a
       make_request
     end
     it 'returns an error code of in its body' do
-      expect(response_body[:errors]).to include(error_code)
+      expect(response_body[:error][:code]).to eq(error_code)
     end
   end
   describe "when the `#{module_name}.#{module_method}` method returns an error that is not a ValidationError" do
@@ -34,11 +34,14 @@ RSpec.shared_examples 'a MAPI endpoint with JSON error handling' do |endpoint, a
       expect(logger).to receive(:error).with(error)
       make_request
     end
-    it 'returns `unknown` in the `errors` array of its body' do
-      expect(response_body[:errors]).to include('unknown')
+    it 'returns `unknown` as the error `type`' do
+      expect(response_body[:error][:type]).to eq('unknown')
     end
-    it 'returns the error message as the `human_errors` value in its body' do
-      expect(response_body[:human_errors]).to eq(error_message)
+    it 'returns `unknown` as the error `code`' do
+      expect(response_body[:error][:code]).to eq('unknown')
+    end
+    it 'returns the error message as the error `value`' do
+      expect(response_body[:error][:value]).to eq(error_message)
     end
   end
 end

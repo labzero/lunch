@@ -62,6 +62,34 @@ Scenario: Member cancels an upload of a securities release file
   When I click to cancel the securities release file upload
   Then I should not see an upload progress bar
 
+@jira-mem-1781 @data-unavailable
+Scenario: Member uploads a securities release file that is missing Original Par
+  Given I am on the release securities page
+  And the edit securities section is open
+  When I drag and drop the "securities_missing_original_par.xlsx" file into the edit securities dropzone
+  Then I should see a security required field error
+
+@jira-mem-1781 @data-unavailable
+Scenario: Member uploads a securities release file that is missing a CUSIP
+  Given I am on the release securities page
+  And the edit securities section is open
+  When I drag and drop the "securities_missing_cusip.xlsx" file into the edit securities dropzone
+  Then I should see a security required field error
+
+@jira-mem-1779 @data-unavailable
+Scenario: Member sees an error when uploading a file with no valid rows
+  Given I am on the release securities page
+  And the edit securities section is open
+  When I drag and drop the "securities-no-rows.xlsx" file into the edit securities dropzone
+  Then I should see a no securities field error
+
+@jira-mem-1783 @data-unavailable
+Scenario: Member uploads a securities release file that has an invalid Original Par
+  Given I am on the release securities page
+  And the edit securities section is open
+  When I drag and drop the "securities_invalid_original_par.xlsx" file into the edit securities dropzone
+  Then I should see an original par numericality field error
+
 @jira-mem-1654
 Scenario: Member changes trade and settlement dates
   # This should be flushed out once we have actual date ranges to check
@@ -86,23 +114,6 @@ Scenario: Member sees success page after submitting releases for authorization
   And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And I submit the securities release request for authorization
   Then I should see the success page for the securities release request
-
-@jira-mem-1593
-Scenario: Member sees error when submitting release with required information missing
-  Given I am on the release securities page
-  And I submit the securities release request for authorization
-  Then I should see the generic error message for the securities release request
-
-@jira-mem-1599
-Scenario: A signer authorizes a previously submittied release request
-  Given I am logged in as a "quick-advance signer"
-  And I am on the securities request page
-  When I click to Authorize the first release
-  Then I should be on the Securities Release page
-  When I choose the first available date for trade date
-  And I choose the first available date for settlement date
-  And I authorize the request
-  Then I should see the authorize request success page
 
 @jira-mem-1600
 Scenario: A signer uses a SecurID token to authenticate when authorizing
@@ -135,3 +146,11 @@ Scenario: A signer authorizes a request while submitting it
   And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   When I authorize the request
   Then I should see the authorize request success page
+
+@jira-mem-1785
+Scenario: A user cannot submit the form until all required fields have values
+  When I am on the release securities page
+  Then the Submit action is disabled
+  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  Then the Submit action is enabled

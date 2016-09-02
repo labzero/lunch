@@ -376,7 +376,7 @@ describe AdvanceRequest do
         allow(subject).to receive(:notify_if_rate_bands_exceeded)
       end
       it 'fetches the rates from the RatesService' do
-        expect(rate_service).to receive(:quick_advance_rates).with(member_id)
+        expect(rate_service).to receive(:quick_advance_rates).with(member_id, nil)
         call_method
       end
       it 'returns the rates' do
@@ -869,6 +869,7 @@ describe AdvanceRequest do
   describe '`attributes=` method' do
     let(:hash) { {} }
     let(:call_method) { subject.attributes = hash}
+    let(:date) { Time.zone.now + rand(1..2).days }
     it 'assigns the value found under `current_state` in the attribute hash to the state machine `current_state`' do
       hash[:current_state] = double('Some State')
       symbol_state = double('Some State Symbol')
@@ -876,7 +877,7 @@ describe AdvanceRequest do
       call_method
       expect(subject.current_state).to be(symbol_state)
     end
-    it 'processes the keys in the order: rates, term, type, amount, and then the remaining keys' do
+    it 'processes the keys in the order: rates, term, type, amount and then the remaining keys' do
       other_key = described_class::REQUEST_PARAMETERS.sample
       hash[:type] = :aa
       hash[:rates] = double('Some Rates', with_indifferent_access: nil)
@@ -902,6 +903,8 @@ describe AdvanceRequest do
         when :gross_amount, :amount
           value = double('A Value').as_null_object
           allow(value).to receive(:dup).and_return(value)
+        when :funding_date
+          value = date
         when :timestamp
           expected_value = double('A Converted Value')
           value = double('A Value', to_datetime: expected_value)
@@ -1398,6 +1401,7 @@ describe AdvanceRequest do
     let(:maturity_date) { double('maturity_date') }
     let(:call_method) { subject.send(:perform_preview) }
     let(:allow_grace_period) { double('Allow Grace Period') }
+    let(:funding_date) { double('funding_date') }
     let(:response) { double('A Quick Advance Validate Response', each: nil, :[] => []) }
 
     before do
@@ -1409,20 +1413,21 @@ describe AdvanceRequest do
       allow(subject).to receive(:etransact_service).and_return(service_object)
       allow(subject).to receive(:stock_choice_present?).and_return(false)
       allow(subject).to receive(:allow_grace_period).and_return(allow_grace_period)
+      allow(subject).to receive(:funding_date).and_return(funding_date)
       allow(service_object).to receive(:quick_advance_validate).and_return(response)
     end
 
     it 'calls `quick_advance_validate`' do
-      expect(service_object).to receive(:quick_advance_validate).with(member_id, amount, type, term, rate, anything, signer, maturity_date, allow_grace_period)
+      expect(service_object).to receive(:quick_advance_validate).with(member_id, amount, type, term, rate, anything, signer, maturity_date, allow_grace_period, funding_date)
       call_method
     end
     it 'calls `quick_advance_validate` with a check stock value of `true` if `stock_choice_present?` returns false' do
-      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, true, anything, anything, anything)
+      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, true, anything, anything, anything, funding_date)
       call_method
     end
     it 'calls `quick_advance_validate` with a check stock value of `false` if `stock_choice_present?` returns true' do
       allow(subject).to receive(:stock_choice_present?).and_return(true)
-      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, false, anything, anything, anything)
+      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, false, anything, anything, anything, funding_date)
       call_method
     end
     it 'calls `process_trade_errors` with the `quick_advance_validate` response' do
@@ -1545,6 +1550,7 @@ describe AdvanceRequest do
     let(:type) { double('A Type') }
     let(:rate) { double('A Rate') }
     let(:allow_grace_period) { double('Allow Grace Period') }
+    let(:funding_date) { double('funding_date') }
     let(:call_method) { subject.send(:perform_execute) }
     let(:response) { double('A Quick Advance Execute Response', each: nil, :[] => []) }
     let(:mail_message) { double(Mail::Message, deliver_now: nil) }
@@ -1558,22 +1564,23 @@ describe AdvanceRequest do
       allow(subject).to receive(:gross_amount).and_return(gross_amount)
       allow(subject).to receive(:etransact_service).and_return(service_object)
       allow(subject).to receive(:allow_grace_period).and_return(allow_grace_period)
+      allow(subject).to receive(:funding_date).and_return(funding_date)
       allow(service_object).to receive(:quick_advance_execute).and_return(response)
       allow(InternalMailer).to receive(:long_term_advance).and_return(mail_message)
     end
 
     it 'calls `quick_advance_execute`' do
-      expect(service_object).to receive(:quick_advance_execute).with(member_id, anything, type, term, rate, signer, maturity_date, allow_grace_period)
+      expect(service_object).to receive(:quick_advance_execute).with(member_id, anything, type, term, rate, signer, maturity_date, allow_grace_period, funding_date)
       call_method
     end
     it 'calls `quick_advance_execute` with the `amount` if no stock purchase is requested' do
       allow(subject).to receive(:purchase_stock?).and_return(false)
-      expect(service_object).to receive(:quick_advance_execute).with(anything, amount, anything, anything, anything, anything, anything, anything)
+      expect(service_object).to receive(:quick_advance_execute).with(anything, amount, anything, anything, anything, anything, anything, anything, anything)
       call_method
     end
     it 'calls `quick_advance_execute` with the `gross_amount` if stock purchase is requested' do
       allow(subject).to receive(:purchase_stock?).and_return(true)
-      expect(service_object).to receive(:quick_advance_execute).with(anything, gross_amount, anything, anything, anything, anything, anything, anything)
+      expect(service_object).to receive(:quick_advance_execute).with(anything, gross_amount, anything, anything, anything, anything, anything, anything, anything)
       call_method
     end
     it 'calls `process_trade_errors` with the `quick_advance_execute` response' do

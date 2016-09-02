@@ -289,3 +289,49 @@ Scenario: User navigates to the select rate page from the Manage Advances page
   Given I am on the "Manage Advances" advances page
   When I click the Add Advance button
   Then I should see the add advance rate table
+
+@jira-mem-1649 @flip-on-add-advance-custom-term
+Scenario: User clicks on the FRC rates and sees Funding Date then selects today and begins the advance process
+  Given I am on the "Add Advance" advances page
+  And I enter an amount into the add advance amount field
+  When I click to toggle to the frc rates
+  Then I should see Funding Date information
+  When I click on Edit Funding Date link
+  Then I should see Set an Alternate Funding Date
+  When I click on the Today radio button
+  Then I should see the add advance rate table
+  Then I select the rate with a term of "2week" and a type of "whole" on the add advance page
+  When I click on the initiate advance button on the add advance page
+  Then I should not see the add advance rate table
+  And I should see a preview of the advance
+
+@jira-mem-1649 @flip-on-add-advance-custom-term
+Scenario: User clicks on the FRC rates and sees Funding Date then selects next business day and begins the advance process
+  Given I am on the "Add Advance" advances page
+  And I enter an amount into the add advance amount field
+  When I click to toggle to the frc rates
+  Then I should see Funding Date information
+  When I click on Edit Funding Date link
+  Then I should see Set an Alternate Funding Date
+  When I click on the Next Business Day radio button
+  Then I should see the add advance rate table
+  Then I select the rate with a term of "2week" and a type of "whole" on the add advance page
+  When I click on the initiate advance button on the add advance page
+  Then I should not see the add advance rate table
+  And I should see a preview of the advance
+
+@jira-mem-1649 @flip-on-add-advance-custom-term
+Scenario: User clicks on the FRC rates and sees Funding Date then selects skip business day and begins the advance process
+  Given I am on the "Add Advance" advances page
+  And I enter an amount into the add advance amount field
+  When I click to toggle to the frc rates
+  Then I should see Funding Date information
+  When I click on Edit Funding Date link
+  Then I should see Set an Alternate Funding Date
+  When I click on the Skip Business Day radio button
+  Then I should see the add advance rate table
+  Then I select the rate with a term of "2week" and a type of "whole" on the add advance page
+  When I click on the initiate advance button on the add advance page
+  Then I should not see the add advance rate table
+  And I should see a preview of the advance
+

@@ -27,21 +27,23 @@ $(function () {
       var inputName = $target.data('input-name');
       var resultsContainerClass = $target.data('results-container-class');
       if (data.result) {
-        if (data.result.errors) {
-          failUpload(e, data.result.errors); // For IE
+        if (data.result.error) {
+          failUpload(e, data.result.error); // For IE
         } else {
+          dropZone.hide();
           if (resultsContainerClass) {
             $('.' + resultsContainerClass).html(data.result.html);
           };
           if (formName && inputName) {
-            $('form[name=' + formName + '] input[name=' + inputName + ']').attr('value', data.result.form_data);
+            var $inputNode = $('form[name=' + formName + '] input[name=' + inputName + ']');
+            $inputNode.attr('value', data.result.form_data);
+            $inputNode.trigger('change');
           };
         };
       };
     },
     always: function(e, data) {
       dropZone.removeClass('file-uploading');
-      dropZone.hide();
       progressBar.css('width', '0%');
       jqXHR = false;
     },
@@ -55,7 +57,7 @@ $(function () {
   function toggleUploadError(errorClass, active, errorMessage) {
     var $errorNode = errorClass ? $('.' + errorClass) : null;
     if ($errorNode && active) {
-      errorMessage ? $errorNode.text(errorMessage) : null;
+      errorMessage ? $errorNode.html(errorMessage) : null;
       $errorNode.show();
     } else if ($errorNode) {
       $errorNode.hide();

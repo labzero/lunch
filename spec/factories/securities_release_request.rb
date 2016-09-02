@@ -1,5 +1,5 @@
 FactoryGirl.define do
-  factory :securities_release_request do
+  factory :securities_request do
     transaction_code { [:standard, :repo].sample }
     settlement_type { [:free,  :payment].sample }
     trade_date Faker::Date.between(30.days.ago, 15.days.ago)

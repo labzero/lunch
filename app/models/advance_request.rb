@@ -134,10 +134,17 @@ class AdvanceRequest
 
   def rates
     unless @rates
-      @rates = rate_service.quick_advance_rates(member_id)
+      @rates = rate_service.quick_advance_rates(member_id, funding_date)
       notify_if_rate_bands_exceeded
     end
     @rates 
+  end
+
+  def funding_date=(funding_date)
+    if @funding_date != funding_date
+      rates = nil
+      @funding_date = funding_date
+    end
   end
 
   def term=(term)
@@ -486,7 +493,7 @@ class AdvanceRequest
   end
 
   def perform_preview
-    response = etransact_service.quick_advance_validate(member_id, amount, type, term, rate, !stock_choice_present?, signer, maturity_date, allow_grace_period)
+    response = etransact_service.quick_advance_validate(member_id, amount, type, term, rate, !stock_choice_present?, signer, maturity_date, allow_grace_period, funding_date)
     process_trade_errors(:preview, response)
     populate_attributes_from_response(response)
   end
@@ -519,7 +526,7 @@ class AdvanceRequest
   end
 
   def perform_execute
-    response = etransact_service.quick_advance_execute(member_id, total_amount, type, term, rate, signer, maturity_date, allow_grace_period)
+    response = etransact_service.quick_advance_execute(member_id, total_amount, type, term, rate, signer, maturity_date, allow_grace_period, funding_date)
     process_trade_errors(:execute, response)
     populate_attributes_from_response(response)
     if no_errors_present? && LONG_ADVANCE_TERMS.include?(term)

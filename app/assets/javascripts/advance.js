@@ -22,6 +22,10 @@ $(function () {
     $('.add-advance-instructions').hide();
   };
 
+  function showRatesLoadingState() {
+    $rateTable.addClass('add-advance-table-loading');
+  };
+
   function validateForm() {
     if($amountField.val() && $('.add-advance-rate-cell.cell-selected').length > 0) {
       $submitFieldPreview.attr('disabled', false).addClass('active');
@@ -30,10 +34,10 @@ $(function () {
     };
   };
 
-  function getAdvanceRates() {
+  function getAdvanceRates(funding_date) {
     if (!addAdvanceRatesPromise) {
       var fetchRatesUrl = $rateTable.data('fetch-rates-url');
-      addAdvanceRatesPromise = $.get(fetchRatesUrl);
+      addAdvanceRatesPromise = $.get(fetchRatesUrl, {funding_date: funding_date});
       addAdvanceRatesPromise.error(function() {
         addAdvanceRatesPromise = false;
       });
@@ -41,8 +45,8 @@ $(function () {
     return addAdvanceRatesPromise;
   };
 
-  function showAdvanceRates() {
-    getAdvanceRates().success(function(data) {
+  function showAdvanceRates(funding_date) {
+    getAdvanceRates(funding_date).success(function(data) {
       var tbody = $rateTable.find('tbody');
       tbody.children().remove();
       tbody.append($(data.html));
@@ -52,6 +56,7 @@ $(function () {
       addAdvanceRatesPromise = false;
       selectColumnLabelIfRatePreSelected();
       validateForm();
+      $rateTable.removeClass('add-advance-table-loading');
     });
   };
 
@@ -101,7 +106,7 @@ $(function () {
 
   // Get rates only when there is a rate table
   if ($rateTable.length > 0) {
-    showAdvanceRates();
+    showAdvanceRates(null);
   };
 
   // Perform Advance
@@ -141,10 +146,39 @@ $(function () {
   var $rateTableWrapper = $('.advance-rates-table-wrapper');
   $('.advance-rates-table-toggle span').on('click', function(e) {
     var selectedTermType = $(this).data('active-term-type');
+    $('.advance-alternate-funding-date-wrapper').hide();
+    if (selectedTermType == 'frc') {
+      $('.advance-funding-date-wrapper').show();
+    }
+    else {
+      $('.advance-funding-date-wrapper').hide();
+    }
     if ($rateTableWrapper.attr('data-active-term-type') !== selectedTermType) {
       $rateTableWrapper.attr('data-active-term-type', selectedTermType);
       $rateTable.find('td, th').removeClass('cell-selected');
       validateForm();
     };
   });
+
+  // Open Default Funding Date Selector
+  $('.advance-alternate-funding-date-close').on('click', function() {
+    $('.advance-alternate-funding-date-wrapper').hide();
+    $('.advance-funding-date-wrapper').show();
+  });
+
+  // Open Alternate Funding Date Selector
+  $('.advance-alternate-funding-date-edit').on('click', function() {
+    $('.advance-alternate-funding-date-wrapper').show();
+    $('.advance-funding-date-wrapper').hide();
+  });
+
+  // event listener and handler for .confirm-quick-advance button click
+  var $alternateFundingWrapper = $('.advance-alternate-funding-date-wrapper');
+  $('input[name=alternate-funding-date]').on('click', function () {
+    var $funding_date = $alternateFundingWrapper.find('input[name=alternate-funding-date]:checked').val();
+    var tbody = $rateTable.find('tbody');
+    showRatesLoadingState();
+    showAdvanceRates($funding_date);
+  });
+
 });

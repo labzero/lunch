@@ -180,6 +180,18 @@ When(/^I drag and drop the "(.*?)" file into the edit securities dropzone$/) do 
   page.execute_script("e = $.Event('drop'); e.originalEvent = {dataTransfer : { files : seleniumUpload.get(0).files } }; $('.securities-download-instructions').trigger(e);")
 end
 
+When(/^I should see an? (security required|original par numericality|no securities) field error$/) do |error_type|
+  text = case error_type
+           when 'security required'
+             I18n.t('activemodel.errors.models.security.blank').gsub("\n",' ')
+           when 'original par numericality'
+             I18n.t('activemodel.errors.models.security.not_a_number', attribute: 'Original par')
+           when 'no securities'
+             I18n.t('securities.upload_errors.no_rows')
+         end
+  page.assert_selector('.securities-release-upload-error p', text: text, exact: true)
+end
+
 Then(/^I should see an upload progress bar$/) do
   page.assert_selector('.file-upload-progress .gauge-section', visible: :visible)
 end
@@ -223,10 +235,10 @@ Then(/^I should see the title for the "(.*?)" page$/) do |success_page|
 end
 
 When(/^I fill in the "(.*?)" securities field with "(.*?)"$/) do |field_name, value|
-  page.fill_in("securities_release_request[#{field_name}]", with: value)
+  page.fill_in("securities_request[#{field_name}]", with: value)
 end
 
-When(/^I submit the securities release request for authorization$/) do
+When(/^I submit the securities(?: release)? request for authorization$/) do
   page.find('.securities-submit-release-form input[type=submit]').click
 end
 
@@ -238,8 +250,12 @@ Then(/^I should see the generic error message for the securities release request
   page.assert_selector('.securities-submit-release-form-errors p', text: I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text), exact: true)
 end
 
+Then(/^I should see the error message for missing securities request information$/) do
+  page.assert_selector('.securities-submit-release-form-errors p', text: /^Missing a required field: /)
+end
+
 Then(/^Account Number should be disabled$/) do
-  page.assert_selector('#securities_release_request_account_number[disabled]')
+  page.assert_selector('#securities_request_account_number[disabled]')
 end
 
 Then(/^I should a disabled state for the Authorize action$/) do
@@ -251,8 +267,19 @@ Then(/^I should an active state for the Authorize action$/) do
   page.assert_selector('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
 end
 
-When(/^I click to Authorize the first release$/) do
-  page.all('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true).first.click
+When(/^I click to Authorize the first (pledge|release|safekeep)(?: request)?$/) do |type|
+  description = case type
+  when 'pledge'
+    I18n.t('securities.requests.form_descriptions.pledge')
+  when 'release'
+    I18n.t('securities.requests.form_descriptions.release')
+  when 'safekeep'
+    I18n.t('securities.requests.form_descriptions.safekept')
+  else
+    raise ArgumentError, "unknown form type: #{type}"
+  end
+  row = page.all('.securities-request-table td', text: description, exact: true).first.find(:xpath, '..')
+  row.find('.report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true).click
 end
 
 Then(/^I should see "(.*?)" as the selected pledge type$/) do |type|
@@ -272,8 +299,9 @@ Then(/^I should see the authorize request success page$/) do
   page.assert_selector('.securities-authorize-success')
 end
 
-Then(/^the Authorize action is (disabled|enabled)$/) do |state|
-  base = ".securities-actions .primary-button[value=#{I18n.t('securities.release.authorize')}]"
+Then(/^the (Authorize|Submit) action is (disabled|enabled)$/) do |action, state|
+  text = action == 'Authorize' ? I18n.t('securities.release.authorize') : I18n.t('securities.release.submit_authorization')
+  base = ".securities-actions .primary-button[value='#{text}']"
   if state == 'disabled'
     page.assert_selector(base + '[disabled]')
   else
@@ -282,8 +310,13 @@ Then(/^the Authorize action is (disabled|enabled)$/) do |state|
 end
 
 When(/^I choose the first available date for (trade|settlement) date$/) do |attr|
-step "I click the #{attr} date datepicker"
-step 'I choose the first available date'
+  step "I click the #{attr} date datepicker"
+  step 'I choose the first available date'
+end
+
+Given(/^I upload a securities file$/) do
+  file_field = page.find('[type=file]', visible: false)
+  file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', 'sample-securties-pledge-upload.xlsx')))
 end
 
 def delivery_instructions(text)

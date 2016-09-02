@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe SecuritiesReleaseRequest, :type => :model do
+RSpec.describe SecuritiesRequest, :type => :model do
   before { allow_any_instance_of(CalendarService).to receive(:holidays).and_return([]) }
   describe 'validations' do
     (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities]).each do |attr|
@@ -21,7 +21,7 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
       end
     end
     describe '`trade_date_must_come_before_settlement_date`' do
-      let(:trade_date_errors) { subject.valid?; subject.errors.messages[:trade_date] || [] }
+      let(:call_validation) { subject.send(:trade_date_must_come_before_settlement_date) }
       let(:today) { Time.zone.today }
       it 'is called as a validator' do
         expect(subject).to receive(:trade_date_must_come_before_settlement_date)
@@ -29,26 +29,31 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
       end
       it 'does not add an error if there is no `trade_date`' do
         subject.settlement_date = today
-        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
+        expect(subject.errors).not_to receive(:add)
+        call_validation
       end
       it 'does not add an error if there is no `settlement_date`' do
         subject.trade_date = today
-        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
+        expect(subject.errors).not_to receive(:add)
+        call_validation
       end
       it 'adds an error if the `trade_date` comes after the `settlement_date`' do
         subject.trade_date = today
         subject.settlement_date = today - 2.days
-        expect(trade_date_errors).to include("must come before 'settlement_date'")
+        expect(subject.errors).to receive(:add).with(:settlement_date, :before_trade_date)
+        call_validation
       end
       it 'does not add an error if the `trade_date` comes before the `settlement_date`' do
         subject.trade_date = today - 2.days
         subject.settlement_date = today
-        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
+        expect(subject.errors).not_to receive(:add)
+        call_validation
       end
       it 'does not add an error if the `trade_date` is equal to the `settlement_date`' do
         subject.trade_date = today
         subject.settlement_date = today
-        expect(trade_date_errors).not_to include("must come before 'settlement_date'")
+        expect(subject.errors).not_to receive(:add)
+        call_validation
       end
     end
     [[:trade_date, :trade_date_within_range], [:settlement_date, :settlement_date_within_range]].each do |attr_array|
@@ -70,13 +75,23 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
           expect(subject).to receive(:date_within_range).with(date)
           call_validation
         end
-        it "adds an error for `#{attr}` if `date_within_range` returns false" do
-          allow(subject).to receive(:date_within_range).and_return(false)
-          expect(attr_errors).to include('must not be a holiday, weekend, or in the past')
+        it "does not add an error if there is no value for `#{attr}`" do
+          expect(subject.errors).not_to receive(:add)
+          call_validation
         end
-        it "does not add an error for `#{attr}` if `date_within_range` returns true" do
-          allow(subject).to receive(:date_within_range).and_return(true)
-          expect(attr_errors).to_not include('must not be a holiday, weekend, or in the past')
+        describe "when there is a value for `#{attr}`" do
+          before { subject.send("#{attr}=", instance_double(Date)) }
+
+          it "adds an error for `#{attr}` if `date_within_range` returns false" do
+            allow(subject).to receive(:date_within_range).and_return(false)
+            expect(subject.errors).to receive(:add).with(attr, :invalid)
+            call_validation
+          end
+          it "does not add an error for `#{attr}` if `date_within_range` returns true" do
+            allow(subject).to receive(:date_within_range).and_return(true)
+            expect(subject.errors).not_to receive(:add)
+            call_validation
+          end
         end
       end
     end
@@ -135,20 +150,24 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
           expect(subject).to receive(:securities_must_have_payment_amount)
           subject.valid?
         end
-        it 'returns false if there are no securities' do
-          expect(call_validation).to be(false)
+        it 'does not add an error if there are no securities' do
+          expect(subject.errors).not_to receive(:add)
+          call_validation
         end
-        it 'returns false if `securities` is an empty array' do
+        it 'does not add an error if `securities` is an empty array' do
           subject.securities = []
-          expect(call_validation).to be(false)
+          expect(subject.errors).not_to receive(:add)
+          call_validation
         end
-        it 'returns true if all `securities` have a `payment_amount` value' do
+        it 'does not add an error if all `securities` have a `payment_amount` value' do
           subject.securities = [security_with_payment_amount, security_with_payment_amount]
-          expect(call_validation).to be(true)
+          expect(subject.errors).not_to receive(:add)
+          call_validation
         end
-        it 'returns false if any of the `securities` do not have a `payment_amount` value' do
+        it 'adds an error if any of the `securities` do not have a `payment_amount` value' do
           subject.securities = [security_with_payment_amount, security_without_payment_amount]
-          expect(call_validation).to be(false)
+          expect(subject.errors).to receive(:add).with(:securities, :payment_amount)
+          call_validation
         end
       end
     end
@@ -156,27 +175,27 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
 
   describe 'class methods' do
     describe '`from_hash`' do
-      it 'creates a SecuritiesReleaseRequest from a hash' do
+      it 'creates a `SecuritiesRequest` from a hash' do
         aba_number = SecureRandom.hex
         securities_request_release = described_class.from_hash({aba_number: aba_number})
         expect(securities_request_release.aba_number).to eq(aba_number)
       end
       describe 'with methods stubbed' do
         let(:hash) { instance_double(Hash) }
-        let(:securities_request_release) { instance_double(SecuritiesReleaseRequest, :attributes= => nil) }
+        let(:securities_request_release) { instance_double(SecuritiesRequest, :attributes= => nil) }
         let(:call_method) { described_class.from_hash(hash) }
         before do
-          allow(SecuritiesReleaseRequest).to receive(:new).and_return(securities_request_release)
+          allow(SecuritiesRequest).to receive(:new).and_return(securities_request_release)
         end
-        it 'initializes a new instance of SecuritiesReleaseRequest' do
-          expect(SecuritiesReleaseRequest).to receive(:new).and_return(securities_request_release)
+        it 'initializes a new instance of `SecuritiesRequest`' do
+          expect(SecuritiesRequest).to receive(:new).and_return(securities_request_release)
           call_method
         end
-        it 'calls `attributes=` on the SecuritiesReleaseRequest instance' do
+        it 'calls `attributes=` on the `SecuritiesRequest` instance' do
           expect(securities_request_release).to receive(:attributes=).with(hash)
           call_method
         end
-        it 'returns the SecuritiesReleaseRequest instance' do
+        it 'returns the `SecuritiesRequest` instance' do
           expect(call_method).to eq(securities_request_release)
         end
       end
@@ -185,7 +204,7 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
 
   describe 'instance methods' do
     describe '`attributes=`' do
-      sym_attrs = [:delivery_type, :transaction_code, :settlement_type]
+      sym_attrs = [:delivery_type, :transaction_code, :settlement_type, :form_type]
       date_attrs = [:trade_date, :settlement_date]
       custom_attrs = [:request_id]
       let(:hash) { {} }
@@ -221,7 +240,7 @@ RSpec.describe SecuritiesReleaseRequest, :type => :model do
         hash[:securities] = value
         call_method
       end
-      it 'raises an exception if the hash contains keys that are not SecuritiesReleaseRequest attributes' do
+      it 'raises an exception if the hash contains keys that are not `SecuritiesRequest` attributes' do
         hash[:foo] = 'bar'
         expect{call_method}.to raise_error(ArgumentError, "unknown attribute: 'foo'")
       end

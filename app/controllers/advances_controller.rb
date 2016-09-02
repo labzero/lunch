@@ -108,6 +108,12 @@ class AdvancesController < ApplicationController
 
   # GET
   def select_rate
+    if feature_enabled?('add-advance-custom-term')
+      calendar_service = CalendarService.new(request)
+      @today = Time.zone.today
+      @next_day = calendar_service.find_next_business_day(@today+1, 1.day)
+      @skip_day = calendar_service.find_next_business_day(@next_day+1, 1.day)
+    end
     etransact_service = EtransactAdvancesService.new(request)
     @limited_pricing_message = MessageService.new.todays_quick_advance_message
     @etransact_status = etransact_service.etransact_status(current_member_id)
@@ -128,12 +134,15 @@ class AdvancesController < ApplicationController
 
   # GET
   def fetch_rates
+    if feature_enabled?('add-advance-custom-term')
+      funding_date = params[:funding_date]
+      advance_request.funding_date = funding_date if funding_date
+    end
     etransact_service = EtransactAdvancesService.new(request)
     @add_advances_active = etransact_service.etransact_active?
     @rate_data = advance_request.rates
     @selected_type = advance_request.type
     @selected_term = advance_request.term
-
     logger.info { '  Advance Request State: ' + advance_request.inspect }
     logger.info { '  Advance Request Errors: ' + advance_request.errors.inspect }
 

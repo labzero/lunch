@@ -182,12 +182,18 @@ module MAPI
         end
       end
 
-      swagger_model :SecuritiesRelease do
+      swagger_model :SecuritiesRequest do
         key :required, %i(user broker_instructions delivery_instructions securities)
 
         property :request_id do
           key :type, :string
           key :description, 'The ID of the request'
+        end
+
+        property :form_type do
+          key :type, :string
+          key :enum, %i(pledge_release safekept_release pledge_intake safekept_intake)
+          key :description, 'What type of form it is'
         end
 
         property :user do
@@ -229,7 +235,7 @@ module MAPI
         end
       end
 
-      swagger_model :SecuritiesReleaseResponse do
+      swagger_model :SecuritiesRequestResponse do
         property :request_id do
           key :type, :string
           key :required, true

@@ -205,6 +205,8 @@ RSpec.describe AdvancesController, :type => :controller do
       allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
       allow(subject).to receive(:advance_request).and_return(advance_request)
       allow(controller).to receive(:fetch_advance_request)
+      allow(controller).to receive(:feature_enabled?).and_call_original
+      allow(controller).to receive(:feature_enabled?).with('add-advance-custom-term').and_return(false)
     end
 
     it_behaves_like 'a user required action', :get, :select_rate
@@ -283,6 +285,32 @@ RSpec.describe AdvancesController, :type => :controller do
       allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(profile).and_return(profile)
       make_request
       expect(assigns[:profile]).to eq(profile)
+    end
+    describe 'when the `add-advance-custom-term` feature is enabled' do
+      let(:calendar_service_instance) { double('calendar instance') }
+      let(:today) { Time.zone.today }
+      let(:next_day) { today + 1.day }
+      let(:skip_day) { today + 2.day  }
+      before do
+        allow(controller).to receive(:feature_enabled?).and_call_original
+        allow(controller).to receive(:feature_enabled?).with('add-advance-custom-term').and_return(true)
+        allow(CalendarService).to receive(:new).and_return(calendar_service_instance)
+      end
+      it 'assigns @today to Today' do
+        allow(calendar_service_instance).to receive(:find_next_business_day).and_return(today)
+        make_request
+        expect(assigns[:today]).to eq(today)
+      end
+      it 'assigns @next_day to Today + 1 business day' do
+        allow(calendar_service_instance).to receive(:find_next_business_day).and_return(next_day)
+        make_request
+        expect(assigns[:next_day]).to eq(next_day)
+      end
+      it 'assigns @skip_day to Today + 2 business days' do
+        allow(calendar_service_instance).to receive(:find_next_business_day).and_return(skip_day)
+        make_request
+        expect(assigns[:skip_day]).to eq(skip_day)
+      end
     end
   end
 

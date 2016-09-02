@@ -109,25 +109,28 @@ module MAPI
         connection
       end
 
-      def self.market_data_message_for_loan_type(loan_type, live_or_start_of_day)
-        {
+      def self.market_data_message_for_loan_type(loan_type, live_or_start_of_day, funding_date=nil)
+        message = {
             'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
             'v1:marketData' => [{
+                                    'v12:spotDate'     => funding_date.try(:to_date).try(:iso8601),
                                     'v12:name'         => LOAN_MAPPING[loan_type.to_s],
                                     'v12:pricingGroup' => [{'v12:id' => live_or_start_of_day}],
                                     'v12:data'         => ''
                                 }]
         }
+        message['v1:marketData'].first.delete('v12:spotDate') unless funding_date
+        message
       end
 
-      def self.get_market_data_from_soap(logger, live_or_start_of_day)
+      def self.get_market_data_from_soap(logger, live_or_start_of_day, funding_date=nil)
         if !@@mds_connection.nil?
           begin
             @@mds_connection.call(:get_market_data,
                                   message_tag: 'marketDataRequest',
                                   message: {
                                       'v11:caller' => [{'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
-                                      'v1:requests' => [{'v1:fhlbsfMarketDataRequest' => LOAN_TYPES.map { |lt| market_data_message_for_loan_type(lt, live_or_start_of_day) }}]
+                                      'v1:requests' => [{'v1:fhlbsfMarketDataRequest' => LOAN_TYPES.map { |lt| market_data_message_for_loan_type(lt, live_or_start_of_day, funding_date) }}]
                                   },
                                   soap_header: SOAP_HEADER)
           rescue Savon::Error => error
@@ -370,6 +373,13 @@ module MAPI
               key :notes, 'Returns an object containing rate data for each loan term of a given loan type, as well as a timestamp to indicate when the rates were fetched'
               key :type, :SummaryRates
               key :nickname, :SummaryRates
+              parameter do
+                key :paramType, :query
+                key :name, :funding_date
+                key :required, false
+                key :type, :string
+                key :description, 'Funding Date, if in the future, otherwise nil'
+              end
               response_message do
                 key :code, 200
                 key :message, 'OK'
@@ -705,13 +715,14 @@ module MAPI
         end
 
         relative_get "/summary" do
+          funding_date = params[:funding_date].try(:to_date)
           halt 503, 'Internal Service Error' unless holidays       = MAPI::Services::Rates::Holidays.holidays(self)
           halt 503, 'Internal Service Error' unless blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(logger,settings.environment)
           halt 503, 'Internal Service Error' unless loan_terms     = MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment)
           halt 503, 'Internal Service Error' unless rate_bands     = MAPI::Services::Rates::RateBands.rate_bands(logger,settings.environment)
           if MAPI::Services::Rates.init_mds_connection(settings.environment)
-            halt 503, 'Internal Service Error' unless live_data_xml    = MAPI::Services::Rates.get_market_data_from_soap(logger, 'Live')
-            halt 503, 'Internal Service Error' unless start_of_day_xml = MAPI::Services::Rates.get_market_data_from_soap(logger, 'StartOfDay')
+            halt 503, 'Internal Service Error' unless live_data_xml    = MAPI::Services::Rates.get_market_data_from_soap(logger, 'Live', funding_date)
+            halt 503, 'Internal Service Error' unless start_of_day_xml = MAPI::Services::Rates.get_market_data_from_soap(logger, 'StartOfDay', funding_date)
             live_data    = MAPI::Services::Rates.extract_market_data_from_soap_response(live_data_xml)
             start_of_day = MAPI::Services::Rates.extract_market_data_from_soap_response(start_of_day_xml)
           else

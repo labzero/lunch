@@ -1,12 +1,12 @@
 - authorizer = policy(:security).authorize?
-= form_for(@securities_release_request, validate: true, url: url, html: {class: 'securities-submit-release-form'}) do |f|
+= form_for(@securities_request, validate: true, url: url, html: {class: 'securities-submit-release-form'}) do |f|
   = f.hidden_field(:request_id)
   = f.hidden_field(:trade_date)
   = f.hidden_field(:settlement_date)
-  - if @errors
+  = f.hidden_field(:account_number)
+  - if @error_message
     .securities-submit-release-form-errors
-      - @errors.values.uniq.each do |message|
-        %p= message
+      %p= @error_message
   %section.securities-broker-instructions
     %h2= t('securities.release.broker_instructions')
     - if account_number
@@ -15,29 +15,29 @@
       .input-field-container-horizontal.pledge_type
         - if type == :pledge
           %label{for: 'pledge_type'}= t('securities.release.pledge_type.label')
-          = render 'shared/dropdown', dropdown_name: 'securities_release_request[pledge_type]', default_value: @pledge_type_dropdown.first.last, default_text: @pledge_type_dropdown.first.first, dropdown_options: @pledge_type_dropdown
+          = render 'shared/dropdown', dropdown_name: 'securities_request[pledge_type]', default_value: @pledge_type_dropdown.first.last, default_text: @pledge_type_dropdown.first.first, dropdown_options: @pledge_type_dropdown
     .input-field-container-horizontal
       %label{for: 'release_transaction_code'}= t('securities.release.transaction_code.label')
-      = render 'shared/dropdown', dropdown_name: 'securities_release_request[transaction_code]', default_value: @transaction_code_defaults[:value], default_text: @transaction_code_defaults[:text], dropdown_options: @transaction_code_dropdown
+      = render 'shared/dropdown', dropdown_name: 'securities_request[transaction_code]', default_value: @transaction_code_defaults[:value], default_text: @transaction_code_defaults[:text], dropdown_options: @transaction_code_dropdown
     .input-field-container-horizontal
       %label{for: 'release_settlement_type'}= t('securities.release.settlement_type.label')
-      = render 'shared/dropdown', dropdown_name: 'securities_release_request[settlement_type]', default_value: @settlement_type_defaults[:value], default_text: @settlement_type_defaults[:text], dropdown_options: @settlement_type_dropdown
+      = render 'shared/dropdown', dropdown_name: 'securities_request[settlement_type]', default_value: @settlement_type_defaults[:value], default_text: @settlement_type_defaults[:text], dropdown_options: @settlement_type_dropdown
     .input-field-container-horizontal
       %span= t('common_table_headings.trade_date')
-      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_release_request[trade_date]', start_date: @securities_release_request.trade_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates]
+      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_request[trade_date]', start_date: @securities_request.trade_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates]
     .input-field-container-horizontal
       %span= t('common_table_headings.settlement_date')
-      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_release_request[settlement_date]', start_date: @securities_release_request.settlement_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates]
+      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_request[settlement_date]', start_date: @securities_request.settlement_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates]
   %section.securities-delivery-instructions
     %h2= t('securities.release.delivery_instructions.label')
-    = render 'shared/dropdown', dropdown_name: 'securities_release_request[delivery_type]', default_value: @delivery_instructions_defaults[:value], default_text: @delivery_instructions_defaults[:text], dropdown_options: @delivery_instructions_dropdown
+    = render 'shared/dropdown', dropdown_name: 'securities_request[delivery_type]', default_value: @delivery_instructions_defaults[:value], default_text: @delivery_instructions_defaults[:text], dropdown_options: @delivery_instructions_dropdown
     .securities-delivery-instructions-fields{data: {'selected-delivery-instruction' => @delivery_instructions_defaults[:value]}}
-      .securities-delivery-instructions-field.securities-delivery-instructions-field-physical-securities
+      .securities-delivery-instructions-field.securities-delivery-instructions-field-physical-securities{data: {'delivery-instruction-type' => 'physical_securities'}}
         = render 'shared/input_field', form_builder: f, field_name: :delivery_bank_agent, label: t('securities.release.delivery_instructions.delivery_agent'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_name, label: t('securities.release.delivery_instructions.agent_name'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_address, label: t('securities.release.delivery_instructions.agent_address'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :physical_securities_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
-      .securities-delivery-instructions-field.securities-delivery-instructions-field-fed
+      .securities-delivery-instructions-field.securities-delivery-instructions-field-fed{data: {'delivery-instruction-type' => 'fed'}}
         .securities-fed-wire-address-fields
           %p= t('securities.release.clearing_agent')
           = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_fed_wire_address_1
@@ -45,10 +45,10 @@
           = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_fed_wire_address_2
         = render 'shared/input_field', form_builder: f, field_name: :aba_number, label: t('securities.release.delivery_instructions.aba'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :fed_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
-      .securities-delivery-instructions-field.securities-delivery-instructions-field-dtc
+      .securities-delivery-instructions-field.securities-delivery-instructions-field-dtc{data: {'delivery-instruction-type' => 'dtc'}}
         = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_participant_number, label: t('securities.release.delivery_instructions.participant_number'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :dtc_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
-      .securities-delivery-instructions-field.securities-delivery-instructions-field-mutual-fund
+      .securities-delivery-instructions-field.securities-delivery-instructions-field-mutual-fund{data: {'delivery-instruction-type' => 'mutual_fund'}}
         = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_company, label: t('securities.release.delivery_instructions.mutual_fund'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_account_number, label: t('securities.release.delivery_instructions.account_number'), horizontal: true
   %section.securities-display
@@ -57,7 +57,7 @@
       =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), securities_pledge_download_path, class: [ 'securities-download-template', 'safekeep-pledge-download-title' ]
     -else
       %h2= t('securities.title')
-    %p.securities-release-upload-error= t('securities.upload_errors.generic')
+    .securities-release-upload-error= simple_format(t('securities.upload_errors.generic'))
     .securities-release-table-wrapper
       -unless @securities_table_data[:rows].empty?
         = render 'table', locals: { type: type }
@@ -83,4 +83,4 @@
       = render 'shared/securid_module', error: @securid_status
   .securities-actions
     %span.secondary-button.delete-release-trigger= t('global.delete')
-    =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: (authorizer && !@session_elevated))
+    =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true)

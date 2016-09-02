@@ -946,7 +946,7 @@ module MAPI
               key :summary, 'Create a new securities release request'
               key :nickname, 'createSecuritiesReleaseRequest'
               key :consumes, ['application/json']
-              key :type, :SecuritiesReleaseResponse
+              key :type, :SecuritiesRequestResponse
               parameter do
                 key :paramType, :path
                 key :name, :id
@@ -958,7 +958,7 @@ module MAPI
                 key :paramType, :body
                 key :name, :body
                 key :required, true
-                key :type, :SecuritiesRelease
+                key :type, :SecuritiesRequest
                 key :description, "Securities to release and their associated metadata"
               end
             end
@@ -981,7 +981,7 @@ module MAPI
                 key :paramType, :body
                 key :name, :body
                 key :required, true
-                key :type, :SecuritiesRelease
+                key :type, :SecuritiesRequest
                 key :description, "Securities to update and their associated metadata"
               end
             end
@@ -992,7 +992,7 @@ module MAPI
               key :method, 'GET'
               key :summary, 'Retrieve the details of the request and associated securities'
               key :nickname, 'getSecurityRequestDetails'
-              key :type, :SecuritiesRelease
+              key :type, :SecuritiesRequest
               parameter do
                 key :paramType, :path
                 key :name, :id
@@ -1053,6 +1053,53 @@ module MAPI
                 key :required, true
                 key :type, :string
                 key :description, 'The header ID of the security release request to be deleted'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/securities/intake'
+            operation do
+              key :method, 'POST'
+              key :summary, 'Create a new securities intake request'
+              key :nickname, 'createSecuritiesIntakeRequest'
+              key :consumes, ['application/json']
+              key :type, :SecuritiesIntakeResponse
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution requesting securities intake'
+              end
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :SecuritiesRequest
+                key :description, "Securities contained in the intake request and their associated metadata"
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/securities/intake'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Update a securities intake request'
+              key :nickname, 'updateSecuritiesIntakeRequest'
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution requesting the securities intake update'
+              end
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :SecuritiesRequest
+                key :description, "Securities to update and their associated metadata"
               end
             end
           end
@@ -1420,18 +1467,55 @@ module MAPI
             (start_date..end_date)).to_json
         end
 
+        relative_post '/:id/securities/intake' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            post_body_json = JSON.parse(request.body.read)
+            user = post_body_json['user']
+            request_id = MAPI::Services::Member::SecuritiesRequests.create_intake(self,
+                                                                                  params['id'].to_i,
+                                                                                  user['username'],
+                                                                                  user['full_name'],
+                                                                                  user['session_id'],
+                                                                                  post_body_json['broker_instructions'] || {},
+                                                                                  post_body_json['delivery_instructions'] || {},
+                                                                                  post_body_json['securities'] || [])
+            {request_id: request_id}
+          end
+        end
+
+        relative_put '/:id/securities/intake' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            post_body_json = JSON.parse(request.body.read)
+            user = post_body_json['user']
+            raise MAPI::Shared::Errors::ValidationError.new('`user` is required', 'user') unless user
+            request_id = post_body_json['request_id']
+            raise MAPI::Shared::Errors::ValidationError.new('`request_id` is required', 'request_id') unless request_id
+            {request_id: request_id} if MAPI::Services::Member::SecuritiesRequests.update_intake(
+              self,
+              params['id'].to_i,
+              request_id,
+              user['username'],
+              user['full_name'],
+              user['session_id'],
+              post_body_json['broker_instructions'] || {},
+              post_body_json['delivery_instructions'] || {},
+              post_body_json['securities'] || []
+            )
+          end
+        end
+
         relative_post '/:id/securities/release' do
           MAPI::Services::Member.rescued_json_response(self) do
             post_body_json = JSON.parse(request.body.read)
             user = post_body_json['user']
             request_id = MAPI::Services::Member::SecuritiesRequests.create_release(self,
-                                                                            params['id'].to_i,
-                                                                            user['username'],
-                                                                            user['full_name'],
-                                                                            user['session_id'],
-                                                                            post_body_json['broker_instructions'] || {},
-                                                                            post_body_json['delivery_instructions'] || {},
-                                                                            post_body_json['securities'] || [])
+                                                                                   params['id'].to_i,
+                                                                                   user['username'],
+                                                                                   user['full_name'],
+                                                                                   user['session_id'],
+                                                                                   post_body_json['broker_instructions'] || {},
+                                                                                   post_body_json['delivery_instructions'] || {},
+                                                                                   post_body_json['securities'] || [])
             {request_id: request_id}
           end
         end

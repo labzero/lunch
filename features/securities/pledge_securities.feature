@@ -64,3 +64,20 @@ Scenario: Member changes trade and settlement dates
 Scenario: Member cannot click on the account number input
   Given I am on the pledge securities page
   Then Account Number should be disabled
+
+@jira-mem-1669
+Scenario: A signer views a previously submitted pledge request
+  Given I am logged in as a "quick-advance signer"
+  And I am on the securities request page
+  When I click to Authorize the first pledge
+  Then I should be on the Pledge Securities page
+
+@jira-mem-1672 @data-unavailable
+Scenario: A user submits a pledge request for authorization.
+  Given I am on the pledge securities page
+  When I upload a securities file
+  Then I should see a report table with multiple data rows
+  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  And I submit the securities request for authorization
+  Then I should see the title for the "pledge success" page

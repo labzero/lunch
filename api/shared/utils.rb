@@ -123,10 +123,10 @@ module MAPI
             results.to_json if results
           rescue MAPI::Shared::Errors::ValidationError => error
             app.logger.error error.message
-            app.halt 400, {errors: [error.code]}.to_json
+            app.halt 400, {error: {type: error.try(:type), code: error.code, value: error.value}}.to_json
           rescue => error
             app.logger.error error
-            app.halt 400, {errors: ['unknown'], human_errors: error.message}.to_json
+            app.halt 400, {error: {type: :unknown, code: :unknown, value: error.message}}.to_json
           end
         end
 

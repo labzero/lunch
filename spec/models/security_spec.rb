@@ -1,6 +1,65 @@
 require 'rails_helper'
 
 RSpec.describe Security, :type => :model do
+  describe 'validations' do
+    required_attrs = described_class::REQUIRED_ATTRS
+    required_attrs.each do |attr|
+      it "validates the presence of `#{attr}`" do
+        expect(subject).to validate_presence_of attr
+      end
+    end
+    described_class::CURRENCY_ATTRIBUTES.each do |attr|
+      it "validates the numericality of `#{attr}`" do
+        expect(subject).to validate_numericality_of attr
+      end
+      unless required_attrs.include?(attr)
+        it "does not add a validation error if `#{attr}` is blank" do
+          subject.valid?
+          expect(subject.errors.keys).not_to include(attr)
+        end
+      end
+    end
+    describe '`cusip_format`' do
+      let(:cusip) { SecureRandom.hex }
+      let(:cusip_validator) { instance_double(SecurityIdentifiers::CUSIP, :valid? => true ) }
+      let(:call_validation) { subject.send(:cusip_format) }
+
+      before { allow(SecurityIdentifiers::CUSIP).to receive(:new).and_return(cusip_validator) }
+
+      it 'is called as a validator' do
+        expect(subject).to receive(:cusip_format)
+        subject.valid?
+      end
+      it 'does not add an error if there is no `cusip`' do
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      describe 'when there is a value for `cusip`' do
+        let(:cusip) { SecureRandom.hex.upcase }
+        before { subject.cusip = cusip }
+
+        it 'creates a new instance of `SecurityIdentifiers::CUSIP` with the provided cusip' do
+          expect(SecurityIdentifiers::CUSIP).to receive(:new).with(cusip).and_return(cusip_validator)
+          call_validation
+        end
+        it 'adds an errorif `SecurityIdentifiers::CUSIP#valid?` returns false' do
+          allow(cusip_validator).to receive(:valid?).and_return(false)
+          expect(subject.errors).to receive(:add).with(:cusip, :invalid)
+          call_validation
+        end
+        it 'does not add an error if `SecurityIdentifiers::CUSIP#valid?` returns true' do
+          allow(cusip_validator).to receive(:valid?).and_return(true)
+          expect(subject.errors).not_to receive(:add)
+          call_validation
+        end
+        it 'adds an error if `SecurityIdentifiers::CUSIP#valid?` raises a `SecurityIdentifiers::InvalidFormat` error' do
+          allow(cusip_validator).to receive(:valid?).and_raise(SecurityIdentifiers::InvalidFormat)
+          expect(subject.errors).to receive(:add).with(:cusip, :invalid)
+          call_validation
+        end
+      end
+    end
+  end
   describe 'class methods' do
     describe '`from_json`' do
       it 'creates a Security from a JSONed hash' do
@@ -75,6 +134,29 @@ RSpec.describe Security, :type => :model do
           expect(described_class.human_custody_account_type_to_status(custody_account_type)).to eq(I18n.t('global.missing_value'))
         end
       end
+    end
+  end
+
+  describe '`attributes`' do
+    let(:call_method) { subject.attributes }
+    let(:sample_attrs) { (described_class::ACCESSIBLE_ATTRS - [:cusip]).sample(5) }
+
+    before do
+      sample_attrs.each do |attr|
+        subject.send("#{attr}=", double('value'))
+      end
+    end
+
+    it 'returns a hash with keys equal to the ACCESSIBLE_ATTRS it has values for' do
+      expect(call_method.keys.sort).to eq(sample_attrs.sort)
+    end
+    it 'returns a hash whose values are all nil' do
+      expect(call_method.values.length).to be > 0
+      call_method.values.each { |value| expect(value).to be nil }
+    end
+    it 'does not return attributes that are not cleared as ACCESSIBLE_ATTRS' do
+      subject.errors.add(:base, :foo)
+      expect(call_method.keys).not_to include(:errors)
     end
   end
 

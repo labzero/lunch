@@ -1,5 +1,5 @@
 %p.securities-download= t('securities.release.edit.title')
-.securities-download-instructions.fade{data: {dropzone: true}}
+.securities-download-instructions.fade{data: {dropzone: true, hide_on_error: true}}
   %p= t('securities.release.edit.intro')
   %p.securities-download-instructions-step= t('securities.release.edit.step_1.title')
   %p.securities-download-instructions-description{data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}}= t('securities.release.edit.step_1.description')
