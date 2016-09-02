@@ -363,12 +363,16 @@ module MAPI
 
         def self.execute_sql_single_result(app, sql, description)
           cursor = execute_sql(app.logger, sql)
-          raise MAPI::Shared::Errors::SQLError, "#{description} returned nil" unless cursor
-          records = cursor.fetch
-          raise MAPI::Shared::Errors::SQLError, "Calling fetch on the cursor returned nil" unless records
-          sequence = records.first
-          raise MAPI::Shared::Errors::SQLError, "Calling first on the record set returned nil" unless sequence
-          sequence
+          if cursor
+            records = cursor.fetch
+            if records
+              first_record = records.first
+              return first_record if first_record
+            end
+          else
+            raise MAPI::Shared::Errors::SQLError, "#{description} returned `nil` for the cursor"
+          end
+          nil
         end
 
         def self.validate_broker_instructions(broker_instructions, app, type)
@@ -496,8 +500,7 @@ module MAPI
                                                               processed_delivery_instructions[:delivery_values], pledged_or_unpledged)
               raise "failed to insert security intake request header" unless execute_sql(app.logger, insert_header_sql)
               securities.each do |security|
-                ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
-                insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
+                insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, nil)
                 raise "failed to insert security intake request detail" unless execute_sql(app.logger, insert_security_sql)
               end
             end
@@ -525,9 +528,8 @@ module MAPI
                   update_security_sql = update_request_security_query(request_id, user_name, session_id, security)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to update security intake request detail' unless execute_sql(app.logger, update_security_sql)
                 elsif !existing_security
-                  ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
                   detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
-                  insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
+                  insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, nil)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security intake request detail' unless execute_sql(app.logger, insert_security_sql)
                 end
               end
@@ -572,6 +574,7 @@ module MAPI
               raise "failed to insert security release request header" unless execute_sql(app.logger, insert_header_sql)
               securities.each do |security|
                 ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
+                raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
                 insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
                 raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
               end
@@ -602,6 +605,7 @@ module MAPI
                   raise MAPI::Shared::Errors::SQLError, 'Failed to update security release request detail' unless execute_sql(app.logger, update_security_sql)
                 elsif !existing_security
                   ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
+                  raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
                   detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
                   insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security release request detail' unless execute_sql(app.logger, insert_security_sql)

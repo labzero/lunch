@@ -551,9 +551,9 @@ describe MAPI::ServiceApp do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger, sql).and_return(cursor)
         end
 
-        it 'raises an error if sequence call returns nil' do
+        it 'raises an error if SQL query call returns nil' do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger, sql).and_return(nil)
-          expect { call_method }.to raise_error(MAPI::Shared::Errors::SQLError, "#{description} returned nil")
+          expect { call_method }.to raise_error(Exception)
         end
 
         it 'calls `fetch` on the cusor' do
@@ -561,9 +561,9 @@ describe MAPI::ServiceApp do
           call_method
         end
 
-        it 'raises an error if `fetch` returns nil' do
+        it 'does not raise an error if `fetch` returns nil' do
           allow(cursor).to receive(:fetch).and_return(nil)
-          expect { call_method }.to raise_error(MAPI::Shared::Errors::SQLError, "Calling fetch on the cursor returned nil")
+          expect { call_method }.to_not raise_error
         end
 
         context 'handling the results array' do
@@ -576,9 +576,14 @@ describe MAPI::ServiceApp do
             call_method
           end
 
-          it 'raises an error if calling `first` on results returns nil' do
+          it 'does not raise an error if calling `first` on results returns nil' do
             allow(results_array).to receive(:first).and_return(nil)
-            expect { call_method }.to raise_error(MAPI::Shared::Errors::SQLError, "Calling first on the record set returned nil")
+            expect { call_method }.to_not raise_error
+          end
+
+          it 'does not raise an error if calling `first` on results returns nil and `raise_error_if_nil` is false' do
+            allow(results_array).to receive(:first).and_return(nil)
+            expect { call_method }.to_not raise_error
           end
 
           context 'gets the record' do
@@ -854,6 +859,11 @@ describe MAPI::ServiceApp do
               expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                 insert_security_sql).exactly(3).times.and_return(true)
               call_method
+            end
+
+            it 'raises an error if the `SSK_ID` can\'t be found' do
+              allow(securities_request_module).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip']).and_return(nil)
+              expect { call_method }.to raise_error(Exception)
             end
 
             it 'raises errors for SQL failures on header insert' do
@@ -2195,6 +2205,10 @@ describe MAPI::ServiceApp do
                   expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, anything, 'SSK ID')
                   call_method
                 end
+                it 'raises an error if the `SSK_ID` can\'t be found' do
+                  allow(securities_request_module).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip']).and_return(nil)
+                  expect { call_method }.to raise_error(Exception)
+                end
               end
               describe 'fetching the `detail_id`' do
                 it 'calls `execute_sql_single_result` with the `NEXT_ID_SQL` sql query' do
@@ -2528,7 +2542,6 @@ describe MAPI::ServiceApp do
           :adx_query,
           :update_request_security_query,
           :insert_security_query,
-          :ssk_id_query,
           :release_request_securities_query,
           :request_header_details_query,
           :update_request_header_details_query
@@ -2538,7 +2551,6 @@ describe MAPI::ServiceApp do
         end
         let(:adx_id) { instance_double(String) }
         let(:detail_id) { rand(1000..9999) }
-        let(:ssk_id) { rand(1000..9999) }
         let(:existing_header) { instance_double(Hash) }
         let(:old_security) { security.clone.with_indifferent_access }
 
@@ -2548,7 +2560,6 @@ describe MAPI::ServiceApp do
           allow(securities_request_module).to receive(:execute_sql).with(anything, delete_request_securities_by_cusip_query).and_return(true)
           allow(securities_request_module).to receive(:execute_sql_single_result)
           allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, adx_query, any_args).and_return(adx_id)
-          allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, ssk_id_query, any_args).and_return(ssk_id)
           allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, securities_request_module::NEXT_ID_SQL, any_args).and_return(detail_id)
           allow(securities_request_module).to receive(:fetch_hashes)
           allow(securities_request_module).to receive(:fetch_hash).with(anything, request_header_details_query).and_return(existing_header)
@@ -2634,29 +2645,6 @@ describe MAPI::ServiceApp do
                 allow(securities_request_module).to receive(:format_securities).and_return([])
                 allow(securities_request_module).to receive(:execute_sql).with(anything, insert_security_query).and_return(1)
               end
-
-              describe 'fetching the `ssk_id`' do
-                it 'constructs the `ssk_id_query` with the `member_id`' do
-                  expect(securities_request_module).to receive(:ssk_id_query).with(member_id, any_args)
-                  call_method
-                end
-                it 'constructs the `ssk_id_query` with the `adx_id`' do
-                  expect(securities_request_module).to receive(:ssk_id_query).with(anything, adx_id, any_args)
-                  call_method
-                end
-                it 'constructs the `ssk_id_query` with the `cusip` from the security' do
-                  expect(securities_request_module).to receive(:ssk_id_query).with(anything, anything, security['cusip'])
-                  call_method
-                end
-                it 'calls `execute_sql_single_result` with the result of `ssk_id_query`' do
-                  expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, ssk_id_query, any_args)
-                  call_method
-                end
-                it 'calls `execute_sql_single_result` with `SSK ID`' do
-                  expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, anything, 'SSK ID')
-                  call_method
-                end
-              end
               describe 'fetching the `detail_id`' do
                 it 'calls `execute_sql_single_result` with the `NEXT_ID_SQL` sql query' do
                   expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, securities_request_module::NEXT_ID_SQL, any_args)
@@ -2688,8 +2676,8 @@ describe MAPI::ServiceApp do
                   expect(securities_request_module).to receive(:insert_security_query).with(anything, anything, anything, anything, security, any_args)
                   call_method
                 end
-                it 'constructs the `insert_security_query` with the `ssk_id`' do
-                  expect(securities_request_module).to receive(:insert_security_query).with(anything, anything, anything, anything, anything, ssk_id)
+                it 'constructs the `insert_security_query` with nil for the the `ssk_id`' do
+                  expect(securities_request_module).to receive(:insert_security_query).with(anything, anything, anything, anything, anything, nil)
                   call_method
                 end
                 it 'calls `execute_sql` with the result of `insert_security_query`' do
@@ -3013,7 +3001,6 @@ describe MAPI::ServiceApp do
       let(:delivery_values) { [ SecureRandom.hex, SecureRandom.hex, SecureRandom.hex ] }
       let(:pledged_or_unpledged) { [:pledged, :unpledged].sample }
       let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE["#{pledged_or_unpledged}_intake".to_sym] }
-      let(:ssk_id) { [1000..10000].sample }
 
       describe '`insert_intake_header_query' do
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.insert_intake_header_query(member_id,
@@ -3206,7 +3193,6 @@ describe MAPI::ServiceApp do
           let(:next_id) { double('Next ID') }
           let(:sequence_result) { double('Sequence Result', to_i: next_id) }
           let(:adx_sql) { double('ADX SQL') }
-          let(:ssk_sql) { double('SSK SQL') }
 
           before do
             allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_delivery_columns).and_return(
@@ -3215,8 +3201,6 @@ describe MAPI::ServiceApp do
               delivery_values)
             allow(securities_request_module).to receive(:should_fake?).and_return(false)
             allow(securities_request_module).to receive(:adx_query).with(member_id, pledged_or_unpledged).and_return(adx_sql)
-            allow(securities_request_module).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip']).
-              exactly(3).times.and_return(ssk_sql)
             allow(securities_request_module).to receive(:execute_sql_single_result).with(
               app,
               MAPI::Services::Member::SecuritiesRequests::NEXT_ID_SQL,
@@ -3225,10 +3209,6 @@ describe MAPI::ServiceApp do
               app,
               adx_sql,
               "ADX ID").and_return(adx_id)
-            allow(securities_request_module).to receive(:execute_sql_single_result).with(
-              app,
-              ssk_sql,
-              "SSK ID").and_return(ssk_id)
           end
 
           it 'returns the inserted request ID' do
@@ -3259,7 +3239,7 @@ describe MAPI::ServiceApp do
 
             it 'calls `insert_security_query`' do
               expect(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_security_query).with(next_id,
-                next_id, user_name, session_id, security, ssk_id).exactly(3).times
+                next_id, user_name, session_id, security, nil).exactly(3).times
               call_method
             end
           end
@@ -3282,7 +3262,7 @@ describe MAPI::ServiceApp do
                 delivery_values,
                 pledged_or_unpledged).and_return(insert_header_sql)
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_security_query).with(next_id,
-                next_id, user_name, session_id, security, ssk_id).exactly(3).times.and_return(insert_security_sql)
+                next_id, user_name, session_id, security, nil).exactly(3).times.and_return(insert_security_sql)
             end
 
             it 'inserts the header' do
