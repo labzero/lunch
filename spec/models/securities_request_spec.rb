@@ -3,6 +3,14 @@ require 'rails_helper'
 RSpec.describe SecuritiesRequest, :type => :model do
   before { allow_any_instance_of(CalendarService).to receive(:holidays).and_return([]) }
   describe 'validations' do
+    it 'validates the presence of `pledge_type` if the `kind` equals `:pledge_intake`' do
+      subject.kind = :pledge_intake
+      expect(subject).to validate_presence_of :pledge_type
+    end
+    it 'does not validate the presence of `pledge_type` if the `kind` is not `:pledge_intake`' do
+      subject.kind = (described_class::KINDS - [:pledge_intake]).sample
+      expect(subject).not_to validate_presence_of :pledge_type
+    end
     (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities, :kind, :form_type]).each do |attr|
       it "should validate the presence of `#{attr}`" do
         allow(subject).to receive("#{attr}=")

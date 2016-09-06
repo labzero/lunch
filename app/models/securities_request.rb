@@ -61,6 +61,7 @@ class SecuritiesRequest
   attr_reader :securities
 
   validates *(BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities, :kind, :form_type]), presence: true
+  validates :pledge_type, presence: true, if: Proc.new { |request| request.kind && request.kind.to_sym == :pledge_intake }
   validates *DELIVERY_INSTRUCTION_KEYS[:fed], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :fed }
   validates *DELIVERY_INSTRUCTION_KEYS[:dtc], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :dtc }
   validates *DELIVERY_INSTRUCTION_KEYS[:mutual_fund], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :mutual_fund }

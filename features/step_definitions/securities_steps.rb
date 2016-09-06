@@ -328,9 +328,9 @@ When(/^I choose the first available date for (trade|settlement) date$/) do |attr
   step 'I choose the first available date'
 end
 
-Given(/^I upload a securities file$/) do
+Given(/^I upload a securities intake file$/) do
   file_field = page.find('[type=file]', visible: false)
-  file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', 'sample-securties-pledge-upload.xlsx')))
+  file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', 'sample-securties-intake-upload.xlsx')))
 end
 
 def delivery_instructions(text)

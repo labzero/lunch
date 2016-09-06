@@ -345,7 +345,7 @@ class SecuritiesController < ApplicationController
     raise ArgumentError, "Unknown request type: #{type}" unless [:release, :pledge, :safekeep].include?(type)
     raise ActionController::RoutingError.new("The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{@securities_request.kind}`") unless type_matches_kind(type, @securities_request.kind)
     authorizer = policy(:security).authorize?
-    if type != :release || @securities_request.valid? # this type switch should be removed when adding error support for intake (and this comment)
+    if @securities_request.valid?
       response = SecuritiesRequestService.new(current_member_id, request).submit_request_for_authorization(@securities_request, current_user, type) do |error|
         error = JSON.parse(error.http_body)['error']
         error['code'] = :base if error['code'] == 'unknown'
