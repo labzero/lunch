@@ -63,7 +63,7 @@ Scenario: Member changes trade and settlement dates
 @jira-mem-1678
 Scenario: Member cannot click on the account number input
   Given I am on the pledge securities page
-  Then Account Number should be disabled
+  Then the Pledge Account Number should be disabled
 
 @jira-mem-1669
 Scenario: A signer views a previously submitted pledge request

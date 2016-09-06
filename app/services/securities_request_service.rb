@@ -76,7 +76,8 @@ class SecuritiesRequestService < MAPIService
     securities_release[:form_type] = response_hash[:form_type]
     securities_release[:request_id] = response_hash[:request_id]
     securities_release[:securities] = response_hash[:securities]
-    securities_release[:account_number] = response_hash[:account_number]
+    securities_release[:pledged_account] = response_hash[:pledged_account]
+    securities_release[:safekept_account] = response_hash[:safekept_account]
     securities_release
   end
 

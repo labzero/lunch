@@ -4,7 +4,7 @@
     %h1= @title
   .securities-main-body.securities-pledge
     .column-9x3-left
-      = render partial: 'form', locals: { type: :pledge, account_number: @securities_request.account_number, url: securities_pledge_submit_path, accepted_upload_mimetypes: @accepted_upload_mimetypes }
+      = render partial: 'form', locals: { type: :pledge, account_number: @securities_request.pledged_account, url: securities_pledge_submit_path, accepted_upload_mimetypes: @accepted_upload_mimetypes }
       %p.legal-footer= t('securities.pledge.legal_footer')
     .delete-release-flyout
       %h2= t('securities.pledge.delete_request.title')

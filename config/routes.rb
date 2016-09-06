@@ -211,7 +211,8 @@ Rails.application.routes.draw do
         get 'success' => 'securities#submit_request_success', defaults: { type: :pledge }
       end
       scope 'transfer', as: :transfer do
-        post 'edit' => 'error#not_found'
+        post 'edit' => 'securities#edit_transfer'
+        post 'submit' => 'error#not_found', defaults: { type: :transfer }
         get 'success' => 'securities#submit_request_success', defaults: { type: :transfer }
       end
     end

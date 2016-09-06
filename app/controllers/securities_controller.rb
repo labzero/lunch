@@ -187,13 +187,13 @@ class SecuritiesController < ApplicationController
 
   def edit_safekeep
     populate_view_variables(:safekeep)
-    @securities_request.account_number = MembersService.new(request).member(current_member_id)['unpledged_account_number']
+    @securities_request.safekept_account = MembersService.new(request).member(current_member_id)['unpledged_account_number']
     @securities_request.kind = :safekept_intake
   end
 
   def edit_pledge
     populate_view_variables(:pledge)
-    @securities_request.account_number = MembersService.new(request).member(current_member_id)['pledged_account_number']
+    @securities_request.pledged_account = MembersService.new(request).member(current_member_id)['pledged_account_number']
     @securities_request.kind = :pledge_intake
   end
 
@@ -207,7 +207,24 @@ class SecuritiesController < ApplicationController
     when 'P'
       :pledge_release
     else
-      raise ArgumentError.new('Unrecognized `custody_account_type` for passed security.')
+      raise ArgumentError, 'Unrecognized `custody_account_type` for passed security.'
+    end
+  end
+
+  # POST
+  def edit_transfer
+    populate_view_variables(:transfer)
+    @securities_request.safekept_account = MembersService.new(request).member(current_member_id)['unpledged_account_number']
+    @securities_request.pledged_account = MembersService.new(request).member(current_member_id)['pledged_account_number']
+    case @securities_request.securities.first.custody_account_type
+    when 'U'
+      @securities_request.kind = :pledge_transfer
+      @title = t('securities.transfer.pledge.title')
+    when 'P'
+      @securities_request.kind = :safekept_transfer
+      @title = t('securities.transfer.safekeep.title')
+    else
+      raise ArgumentError, 'Unrecognized `custody_account_type` for passed security.'
     end
   end
 
@@ -325,6 +342,7 @@ class SecuritiesController < ApplicationController
   def submit_request
     type = params[:type].try(:to_sym)
     @securities_request = SecuritiesRequest.from_hash(params[:securities_request])
+    raise ArgumentError, "Unknown request type: #{type}" unless [:release, :pledge, :safekeep].include?(type)
     raise ActionController::RoutingError.new("The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{@securities_request.kind}`") unless type_matches_kind(type, @securities_request.kind)
     authorizer = policy(:security).authorize?
     if type != :release || @securities_request.valid? # this type switch should be removed when adding error support for intake (and this comment)
@@ -359,8 +377,6 @@ class SecuritiesController < ApplicationController
         render :edit_pledge
       when :safekeep
         render :edit_safekeep
-      else
-        raise ArgumentError, "Unknown request type: #{type}"
       end
     elsif authorizer
       case type
@@ -370,8 +386,6 @@ class SecuritiesController < ApplicationController
         @title = t('securities.authorize.pledge.title')
       when :safekeep
         @title = t('securities.authorize.safekeep.title')
-      else
-        raise ArgumentError, "Unknown request type: #{type}"
       end
       render :authorize_request
     else
@@ -382,8 +396,6 @@ class SecuritiesController < ApplicationController
         securities_pledge_success_url
       when :safekeep
         securities_safekeep_success_url
-      else
-        raise ArgumentError, "Unknown request type: #{type}"
       end
       redirect_to url
     end
@@ -437,28 +449,40 @@ class SecuritiesController < ApplicationController
   end
 
   def populate_securities_table_data_view_variable(type, securities=[])
-    column_headings = case type
+    column_headings = []
+    rows = []
+    securities ||= []
+    case type
     when :release
-      [ I18n.t('common_table_headings.cusip'),
+      column_headings = [ I18n.t('common_table_headings.cusip'),
         I18n.t('common_table_headings.description'),
         fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
         I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker) ]
-    when :pledge, :safekeep
-      [ I18n.t('common_table_headings.cusip'),
-        fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
-        I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker),
-        I18n.t('securities.safekeep.custodian_name', footnote_marker: fhlb_footnote_marker(1)) ]
-    end
-    securities ||= []
-    rows = securities.collect do |security|
-      if type == :release
+      rows = securities.collect do |security|
         { columns: [
           {value: security.cusip || t('global.missing_value')},
           {value: security.description || t('global.missing_value')},
           {value: security.original_par, type: :number},
           {value: security.payment_amount, type: :number}
         ] }
-      else
+      end
+      when :transfer
+      column_headings = [ I18n.t('common_table_headings.cusip'),
+        I18n.t('common_table_headings.description'),
+        fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$') ]
+      rows = securities.collect do |security|
+        { columns: [
+          {value: security.cusip || t('global.missing_value')},
+          {value: security.description || t('global.missing_value')},
+          {value: security.original_par, type: :number}
+        ] }
+      end
+    when :pledge, :safekeep
+      column_headings = [ I18n.t('common_table_headings.cusip'),
+        fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+        I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker),
+        I18n.t('securities.safekeep.custodian_name', footnote_marker: fhlb_footnote_marker(1)) ]
+      rows = securities.collect do |security|
         { columns: [
           {value: security.cusip || t('global.missing_value')},
           {value: security.original_par, type: :number},
@@ -479,13 +503,13 @@ class SecuritiesController < ApplicationController
       [t('securities.release.pledge_type.standard'), SecuritiesRequest::PLEDGE_TYPES[:standard]]
     ]
 
-    case type
+    @title = case type
     when :release
-      @title = t('securities.release.title')
+      t('securities.release.title')
     when :pledge
-      @title = t('securities.pledge.title')
+      t('securities.pledge.title')
     when :safekeep
-      @title = t('securities.safekeep.title')
+      t('securities.safekeep.title')
     end
 
     @session_elevated = session_elevated?

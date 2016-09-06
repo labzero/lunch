@@ -473,7 +473,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
 
     describe '`broker_instructions`' do
       let(:call_method) { subject.broker_instructions }
-      described_class::BROKER_INSTRUCTION_KEYS.each do |key|
+      (described_class::BROKER_INSTRUCTION_KEYS + [:safekept_account, :pledged_account, :pledge_type]).each do |key|
         it "returns a hash containing the `#{key}`" do
           value = double('some value')
           subject.send( "#{key.to_s}=", value)

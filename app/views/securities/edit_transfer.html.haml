@@ -1,0 +1,43 @@
+- @page_title = t('global.page_meta_title', title: @title)
+- kind = @securities_request.kind
+.securities.row
+  .securities-header
+    %h1= @title
+  .securities-main-body.securities-release
+    .column-9x3-left
+      = form_for(@securities_request, validate: true, url: securities_transfer_submit_path, html: {class: 'securities-submit-release-form'}) do |f|
+        = f.hidden_field(:request_id)
+        = f.hidden_field(:kind)
+        = f.hidden_field(:trade_date)
+        = f.hidden_field(:settlement_date)
+        - if @error_message
+          .securities-submit-release-form-errors
+            %p= @error_message
+        %section.securities-broker-instructions
+          %h2= t('securities.release.broker_instructions')
+          - if kind == :pledge_transfer
+            .input-field-container-horizontal
+              = render 'shared/input_field', form_builder: f, field_name: :pledged_account, label: t('securities.release.account_number.label'), field_class: ['disabled'], html_attributes: { disabled: true }
+            .input-field-container-horizontal.pledge_type
+              %label{for: 'pledge_type'}= t('securities.release.pledge_type.label')
+              = render 'shared/dropdown', dropdown_name: 'securities_request[pledge_type]', default_value: @pledge_type_dropdown.first.last, default_text: @pledge_type_dropdown.first.first, dropdown_options: @pledge_type_dropdown
+          - else
+            .input-field-container-horizontal
+              = render 'shared/input_field', form_builder: f, field_name: :safekept_account, label: t('securities.release.account_number.label'), field_class: ['disabled'], html_attributes: { disabled: true }
+        %section.securities-delivery-instructions
+          %h2= t('securities.release.delivery_instructions.label')
+          - if kind == :pledge_transfer
+            %p= t('securities.transfer.pledge.delivery_instructions', safekept_account: @securities_request.safekept_account, pledged_account: @securities_request.pledged_account)
+          - else
+            %p= t('securities.transfer.safekeep.delivery_instructions', safekept_account: @securities_request.safekept_account, pledged_account: @securities_request.pledged_account)
+        %section.securities-display
+          %h2= t('securities.title')
+          .securities-release-upload-error= simple_format(t('securities.upload_errors.generic'))
+          .securities-release-table-wrapper
+            -unless @securities_table_data[:rows].empty?
+              = render 'table'
+          // TODO - add in the 'download' instructions and dropzone for transfers
+          %p.securities-download= t('securities.release.edit.title')
+      %small= t('securities.transfer.legal')
+    =form_tag(securities_release_download_path, name: 'securities-release-download') do
+      = hidden_field_tag('securities', @securities_request.securities.to_json)

@@ -1303,6 +1303,14 @@ en:
       nontraditional_and_subprime_mortgage_text: Your institution hereby certifies that all residential mortgage loans pledged to the Bank that were originated or acquired by your institution after July 10, 2007, comply at all times with the Interagency Guidance on Nontraditional Mortgage Product Risks dated October 4, 2006, and the Statement on Subprime Mortgage Lending dated July 10, 2007. Your institution represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date on which any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
       and: and
       legal_footer: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
+    transfer:
+      pledge:
+        title: Transfer Securities to Pledged Account
+        delivery_instructions: 'Internal Transfer from Safekept Account No. %{safekept_account} to Pledged Account No. %{pledged_account}'
+      safekeep:
+        title: Transfer Securities to Safekept Account
+        delivery_instructions: 'Internal Transfer from Pledged Account No. %{pledged_account} to Safekept Account No. %{safekept_account}'
+      legal: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
     safekeep_pledge:
       upload_instructions:
         download_template: Download Add Securities Template File

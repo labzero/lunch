@@ -1112,20 +1112,15 @@ describe MAPI::ServiceApp do
         it 'contains a `user` hash with a nil value for `session_id`' do
           expect(call_method[:user][:session_id]).to eq(nil)
         end
-        it 'contains an `account_number` with the `PLEDGED_ADX_ID` if present' do
+        it 'contains a `pledged_account` with the `PLEDGED_ADX_ID`' do
           header_details['PLEDGED_ADX_ID'] = SecureRandom.hex
-          expect(call_method[:account_number]).to eq(header_details['PLEDGED_ADX_ID'])
+          expect(call_method[:pledged_account]).to eq(header_details['PLEDGED_ADX_ID'])
         end
-        it 'contains an `account_number` with the `UNPLEDGED_ADX_ID` if present' do
+        it 'contains a `safekept_account` with the `UNPLEDGED_ADX_ID`' do
           header_details['UNPLEDGED_ADX_ID'] = SecureRandom.hex
-          expect(call_method[:account_number]).to eq(header_details['UNPLEDGED_ADX_ID'])
+          expect(call_method[:safekept_account]).to eq(header_details['UNPLEDGED_ADX_ID'])
         end
-        it 'returns the `PLEDGED_ADX_ID` if both `PLEDGED_ADX_ID` and `UNPLEDGED_ADX_ID` are present' do
-          header_details['PLEDGED_ADX_ID'] = SecureRandom.hex
-          header_details['UNPLEDGED_ADX_ID'] = SecureRandom.hex
-          expect(call_method[:account_number]).to eq(header_details['PLEDGED_ADX_ID'])
-        end
-        it 'contains an `form_type` with the `FORM_TYPE`' do
+        it 'contains a `form_type` with the `FORM_TYPE`' do
           header_details['FORM_TYPE'] = SecureRandom.hex
           expect(call_method[:form_type]).to eq(header_details['FORM_TYPE'])
         end

@@ -58,7 +58,7 @@ Scenario: Member changes trade and settlement dates
 @jira-mem-1679
 Scenario: Member cannot click on the account number input
   Given I am on the safekeep securities page
-  Then Account Number should be disabled
+  Then the Safekeep Account Number should be disabled
 
 @jira-mem-1677
 Scenario Outline: Member views edit securities instructions

@@ -4,7 +4,8 @@
   = f.hidden_field(:kind)
   = f.hidden_field(:trade_date)
   = f.hidden_field(:settlement_date)
-  = f.hidden_field(:account_number)
+  = f.hidden_field(:pledged_account)
+  = f.hidden_field(:safekept_account)
   - if @error_message
     .securities-submit-release-form-errors
       %p= @error_message
@@ -12,7 +13,7 @@
     %h2= t('securities.release.broker_instructions')
     - if account_number
       .input-field-container-horizontal
-        = render 'shared/input_field', form_builder: f, field_name: :account_number, label: t('securities.release.account_number.label'), field_class: ['disabled'], html_attributes: { disabled: true }
+        = render 'shared/input_field', form_builder: f, field_name: (type == :safekeep ? :safekept_account : :pledged_account), label: t('securities.release.account_number.label'), field_class: ['disabled'], html_attributes: { disabled: true }
       .input-field-container-horizontal.pledge_type
         - if type == :pledge
           %label{for: 'pledge_type'}= t('securities.release.pledge_type.label')

@@ -390,7 +390,7 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  context 'new securities requests (pledged and safekept)' do
+  context 'edit securities requests (pledged, safekept, release, transfer)' do
     let(:securities_request) { double(SecuritiesRequest,
                                               :settlement_date => Time.zone.now,
                                               :trade_date => Time.zone.now,
@@ -398,25 +398,25 @@ RSpec.describe SecuritiesController, type: :controller do
                                               :settlement_type => SecuritiesRequest::SETTLEMENT_TYPES.values[rand(0..1)],
                                               :delivery_type => SecuritiesRequest::DELIVERY_TYPES.values[rand(0..3)],
                                               :securities => {},
-                                              :account_number= => nil,
+                                              :pledged_account= => nil,
+                                              :safekept_account= => nil,
                                               :kind= => nil) }
     let(:member_service_instance) { double('MembersService') }
+    let(:member_details) {{
+      'pledged_account_number' => rand(999..9999),
+      'unpledged_account_number' => rand(999..9999)
+    }}
     before do
       allow(MembersService).to receive(:new).with(request).and_return(member_service_instance)
       allow(SecuritiesRequest).to receive(:new).and_return(securities_request)
+      allow(member_service_instance).to receive(:member).with(anything).and_return(member_details)
       allow(controller).to receive(:populate_view_variables) do
         controller.instance_variable_set(:@securities_request, securities_request)
       end
     end
 
     describe 'GET edit_pledge' do
-      let(:pledged_account_number) { rand(999..9999) }
-      let(:member_details) { { 'pledged_account_number' => rand(999..9999) } }
       let(:call_action) { get :edit_pledge }
-
-      before do
-        allow(member_service_instance).to receive(:member).with(anything).and_return(member_details)
-      end
 
       it_behaves_like 'a user required action', :get, :edit_pledge
       it_behaves_like 'a controller action with an active nav setting', :edit_pledge, :securities
@@ -425,8 +425,8 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(subject).to receive(:populate_view_variables).with(:pledge)
         call_action
       end
-      it 'gets the `pledged_account_number` from the `MembersService` and assigns to `@securities_request.account_number`' do
-        expect(securities_request).to receive(:account_number=).with(member_details['pledged_account_number'])
+      it 'gets the `pledged_account_number` from the `MembersService` and assigns to `@securities_request.pledged_account`' do
+        expect(securities_request).to receive(:pledged_account=).with(member_details['pledged_account_number'])
         call_action
       end
       it 'assigns `@securities_request.kind` a value of `:pledge_intake`' do
@@ -440,26 +440,17 @@ RSpec.describe SecuritiesController, type: :controller do
     end
 
     describe 'GET edit_safekeep' do
-      let(:unpledged_account_number) { rand(999..9999) }
-      let(:member_service_instance) { double('MembersService') }
-      let(:member_details) { { 'unpledged_account_number' => rand(999..9999) } }
       let(:call_action) { get :edit_safekeep }
 
       it_behaves_like 'a user required action', :get, :edit_safekeep
       it_behaves_like 'a controller action with an active nav setting', :edit_safekeep, :securities
 
-      before do
-        allow(MembersService).to receive(:new).with(request).and_return(member_service_instance)
-        allow(member_service_instance).to receive(:member).with(anything).and_return(member_details)
-        allow(SecuritiesRequest).to receive(:new).and_return(securities_request)
-      end
-
       it 'calls `populate_view_variables`' do
         expect(subject).to receive(:populate_view_variables).with(:safekeep)
         call_action
       end
-      it 'gets the `unpledged_account_number` from the `MembersService` and assigns to `@securities_request.account_number`' do
-        expect(securities_request).to receive(:account_number=).with(member_details['unpledged_account_number'])
+      it 'gets the `unpledged_account_number` from the `MembersService` and assigns to `@securities_request.safekept_account`' do
+        expect(securities_request).to receive(:safekept_account=).with(member_details['unpledged_account_number'])
         call_action
       end
       it 'assigns `@securities_request.kind` a value of `:safekept_intake`' do
@@ -498,14 +489,71 @@ RSpec.describe SecuritiesController, type: :controller do
           call_action
         end
       end
-      describe 'when the `securities_custody_account_type` param is `Pledged`' do
+      describe 'when the `securities` have a `custody_account_type` of `P`' do
         before { allow(security).to receive(:custody_account_type).and_return('P') }
         it 'assigns the `@securities_request.kind` a value of `:pledge_release`' do
           expect(securities_request).to receive(:kind=).with(:pledge_release)
           call_action
         end
       end
-      describe 'when the `securities_custody_account_type` param is neither `U` nor `P`' do
+      describe 'when the `securities` have a `custody_account_type` that is neither `P` nor `U`' do
+        before { allow(security).to receive(:custody_account_type).and_return(SecureRandom.hex) }
+        it 'raises an exception' do
+          expect{call_action}.to raise_error(ArgumentError, 'Unrecognized `custody_account_type` for passed security.')
+        end
+      end
+    end
+
+    describe 'POST edit_transfer' do
+      let(:security) { instance_double(Security, custody_account_type: ['U', 'P'].sample) }
+      let(:call_action) { post :edit_transfer }
+      before { allow(securities_request).to receive(:securities).and_return([security]) }
+
+      it_behaves_like 'a user required action', :post, :edit_transfer
+      it_behaves_like 'a controller action with an active nav setting', :edit_transfer, :securities
+      it 'renders its view' do
+        call_action
+        expect(response.body).to render_template('edit_transfer')
+      end
+      it 'calls `populate_view_variables`' do
+        expect(controller).to receive(:populate_view_variables)
+        call_action
+      end
+      it 'gets the `pledged_account_number` from the `MembersService` and assigns to `@securities_request.pledged_account`' do
+        expect(securities_request).to receive(:pledged_account=).with(member_details['pledged_account_number'])
+        call_action
+      end
+      it 'gets the `unpledged_account_number` from the `MembersService` and assigns to `@securities_request.safekept_account`' do
+        expect(securities_request).to receive(:safekept_account=).with(member_details['unpledged_account_number'])
+        call_action
+      end
+      it 'raises an exception if there are no `securities` for the @security_request' do
+        allow(securities_request).to receive(:securities).and_return(nil)
+        expect{post :edit_transfer}.to raise_error(NoMethodError)
+      end
+      describe 'when the `securities` have a `custody_account_type` of `U`' do
+        before { allow(security).to receive(:custody_account_type).and_return('U') }
+        it 'assigns the `@securities_request.kind` a value of `:pledge_transfer`' do
+          expect(securities_request).to receive(:kind=).with(:pledge_transfer)
+          call_action
+        end
+        it 'sets the @title appropriately' do
+          call_action
+          expect(assigns[:title]).to eq(I18n.t('securities.transfer.pledge.title'))
+        end
+      end
+      describe 'when the `securities` have a `custody_account_type` of `P`' do
+        before { allow(security).to receive(:custody_account_type).and_return('P') }
+        it 'assigns the `@securities_request.kind` a value of `:safekept_transfer`' do
+          expect(securities_request).to receive(:kind=).with(:safekept_transfer)
+          call_action
+        end
+        it 'sets the @title appropriately' do
+          call_action
+          expect(assigns[:title]).to eq(I18n.t('securities.transfer.safekeep.title'))
+        end
+      end
+      describe 'when the `securities` have a `custody_account_type` that is neither `P` nor `U`' do
         before { allow(security).to receive(:custody_account_type).and_return(SecureRandom.hex) }
         it 'raises an exception' do
           expect{call_action}.to raise_error(ArgumentError, 'Unrecognized `custody_account_type` for passed security.')
@@ -780,6 +828,16 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
+
+  describe "POST submit_request for unknown types" do
+    let(:securities_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
+    let(:type) { SecureRandom.hex }
+    let(:call_action) { post :submit_request, securities_request: securities_request_param, type: type }
+
+    it 'raises an exception' do
+      expect{call_action}.to raise_error(ArgumentError, "Unknown request type: #{type}")
+    end
+  end
   {
     release: [:edit_release, I18n.t('securities.authorize.release.title'), :securities_release_success_url],
     pledge: [:edit_pledge, I18n.t('securities.authorize.pledge.title'), :securities_pledge_success_url],
@@ -1385,6 +1443,11 @@ RSpec.describe SecuritiesController, type: :controller do
         fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
         I18n.t('securities.release.settlement_amount', unit: fhlb_add_unit_to_table_header('', '$'), footnote_marker: fhlb_footnote_marker)
       ]
+      transfer_headings = [
+        I18n.t('common_table_headings.cusip'),
+        I18n.t('common_table_headings.description'),
+        fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$')
+      ]
       safekeep_and_pledge_headings = [
         I18n.t('common_table_headings.cusip'),
         fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
@@ -1394,9 +1457,14 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:securities) { [FactoryGirl.build(:security)] }
       let(:call_method) { controller.send(:populate_securities_table_data_view_variable, :release, securities) }
 
-      it 'sets `column_headings`' do
+      it 'sets `column_headings` for release' do
         call_method
         expect(assigns[:securities_table_data][:column_headings]).to eq(release_headings)
+      end
+
+      it 'sets `column_headings` for transfer' do
+        controller.send(:populate_securities_table_data_view_variable, :transfer, securities)
+        expect(assigns[:securities_table_data][:column_headings]).to eq(transfer_headings)
       end
 
       it 'sets `column_headings` for pledge' do
@@ -1409,67 +1477,142 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(assigns[:securities_table_data][:column_headings]).to eq(safekeep_and_pledge_headings)
       end
 
-      it 'contains rows of columns that have a `cusip` value' do
-        call_method
-        expect(assigns[:securities_table_data][:rows].length).to be > 0
-        assigns[:securities_table_data][:rows].each do |row|
-          expect(row[:columns].first[:value]).to eq(securities.first.cusip)
+      [:transfer, :release].each do |action|
+        describe "when `#{action}` is passed in as the type" do
+          let(:call_method) { controller.send(:populate_securities_table_data_view_variable, action, securities) }
+          it 'contains rows of columns that have a `cusip` value' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns].first[:value]).to eq(securities.first.cusip)
+            end
+          end
+          it "contains rows of columns that have a `cusip` value equal to `#{I18n.t('global.missing_value')}` if the security has no cusip value" do
+            securities = [FactoryGirl.build(:security, cusip: nil)]
+            controller.send(:populate_securities_table_data_view_variable, action, securities)
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns].first[:value]).to eq(I18n.t('global.missing_value'))
+            end
+          end
+          it 'contains rows of columns that have a `description` value' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][1][:value]).to eq(securities.first.description)
+            end
+          end
+          it "contains rows of columns that have a `description` value equal to `#{I18n.t('global.missing_value')}` if the security has no description value" do
+            securities = [FactoryGirl.build(:security, description: nil)]
+            controller.send(:populate_securities_table_data_view_variable, action, securities)
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][1][:value]).to eq(I18n.t('global.missing_value'))
+            end
+          end
+          it 'contains rows of columns that have an `original_par` value' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][2][:value]).to eq(securities.first.original_par)
+            end
+          end
+          it 'contains rows of columns whose `original_par` value has a type of `number`' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][2][:type]).to eq(:number)
+            end
+          end
+          if action == :release
+            it 'contains rows of columns whose last member has a `payment_amount` value' do
+              call_method
+              expect(assigns[:securities_table_data][:rows].length).to be > 0
+              assigns[:securities_table_data][:rows].each do |row|
+                expect(row[:columns].last[:value]).to eq(securities.first.payment_amount)
+              end
+            end
+            it 'contains rows of columns whose last member has a type of `:number`' do
+              call_method
+              expect(assigns[:securities_table_data][:rows].length).to be > 0
+              assigns[:securities_table_data][:rows].each do |row|
+                expect(row[:columns].last[:type]).to eq(:number)
+              end
+            end
+          end
+          it 'contains an empty array for rows if no securities are passed in' do
+            controller.send(:populate_securities_table_data_view_variable, action)
+            expect(assigns[:securities_table_data][:rows]).to eq([])
+          end
         end
       end
-      it "contains rows of columns that have a `cusip` value equal to `#{I18n.t('global.missing_value')}` if the security has no cusip value" do
-        securities = [FactoryGirl.build(:security, cusip: nil)]
-        controller.send(:populate_securities_table_data_view_variable, :release, securities)
-        expect(assigns[:securities_table_data][:rows].length).to be > 0
-        assigns[:securities_table_data][:rows].each do |row|
-          expect(row[:columns].first[:value]).to eq(I18n.t('global.missing_value'))
+
+      [:pledge, :safekeep].each do |action|
+        describe "when `#{action}` is passed in as the type" do
+          let(:call_method) { controller.send(:populate_securities_table_data_view_variable, action, securities) }
+          it 'contains rows of columns that have a `cusip` value' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns].first[:value]).to eq(securities.first.cusip)
+            end
+          end
+          it "contains rows of columns that have a `cusip` value equal to `#{I18n.t('global.missing_value')}` if the security has no cusip value" do
+            securities = [FactoryGirl.build(:security, cusip: nil)]
+            controller.send(:populate_securities_table_data_view_variable, action, securities)
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns].first[:value]).to eq(I18n.t('global.missing_value'))
+            end
+          end
+          it 'contains rows of columns that have an `original_par` value' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][1][:value]).to eq(securities.first.original_par)
+            end
+          end
+          it 'contains rows of columns whose `original_par` value has a type of `number`' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][1][:type]).to eq(:number)
+            end
+          end
+          it 'contains rows of columns that have a `settlement_amount` value' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][2][:value]).to eq(securities.first.settlement_amount)
+            end
+          end
+          it 'contains rows of columns whose `settlement_amount` value has a type of `number`' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][2][:type]).to eq(:number)
+            end
+          end
+          it 'contains rows of columns that have a `custodian_name` value' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][3][:value]).to eq(securities.first.custodian_name)
+            end
+          end
+          it "contains rows of columns that have a `custodian_name` value equal to `#{I18n.t('global.missing_value')}` if the security has no custodian_name value" do
+            securities = [FactoryGirl.build(:security, custodian_name: nil)]
+            controller.send(:populate_securities_table_data_view_variable, action, securities)
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][3][:value]).to eq(I18n.t('global.missing_value'))
+            end
+          end
+          it 'contains an empty array for rows if no securities are passed in' do
+            controller.send(:populate_securities_table_data_view_variable, action)
+            expect(assigns[:securities_table_data][:rows]).to eq([])
+          end
         end
-      end
-      it 'contains rows of columns that have a `description` value' do
-        call_method
-        expect(assigns[:securities_table_data][:rows].length).to be > 0
-        assigns[:securities_table_data][:rows].each do |row|
-          expect(row[:columns][1][:value]).to eq(securities.first.description)
-        end
-      end
-      it "contains rows of columns that have a `description` value equal to `#{I18n.t('global.missing_value')}` if the security has no description value" do
-        securities = [FactoryGirl.build(:security, description: nil)]
-        controller.send(:populate_securities_table_data_view_variable, :release, securities)
-        expect(assigns[:securities_table_data][:rows].length).to be > 0
-        assigns[:securities_table_data][:rows].each do |row|
-          expect(row[:columns][1][:value]).to eq(I18n.t('global.missing_value'))
-        end
-      end
-      it 'contains rows of columns that have an `original_par` value' do
-        call_method
-        expect(assigns[:securities_table_data][:rows].length).to be > 0
-        assigns[:securities_table_data][:rows].each do |row|
-          expect(row[:columns][2][:value]).to eq(securities.first.original_par)
-        end
-      end
-      it 'contains rows of columns whose `original_par` value has a type of `number`' do
-        call_method
-        expect(assigns[:securities_table_data][:rows].length).to be > 0
-        assigns[:securities_table_data][:rows].each do |row|
-          expect(row[:columns][2][:type]).to eq(:number)
-        end
-      end
-      it 'contains rows of columns whose last member has a `payment_amount` value' do
-        call_method
-        expect(assigns[:securities_table_data][:rows].length).to be > 0
-        assigns[:securities_table_data][:rows].each do |row|
-          expect(row[:columns].last[:value]).to eq(securities.first.payment_amount)
-        end
-      end
-      it 'contains rows of columns whose last member has a type of `:number`' do
-        call_method
-        expect(assigns[:securities_table_data][:rows].length).to be > 0
-        assigns[:securities_table_data][:rows].each do |row|
-          expect(row[:columns].last[:type]).to eq(:number)
-        end
-      end
-      it 'contains an empty array for rows if no securities are passed in' do
-        controller.send(:populate_securities_table_data_view_variable, :release)
-        expect(assigns[:securities_table_data][:rows]).to eq([])
       end
     end
 

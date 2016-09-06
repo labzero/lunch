@@ -47,7 +47,8 @@ class SecuritiesRequest
   OTHER_PARAMETERS = [:request_id,
                       :delivery_type,
                       :member_id,
-                      :account_number,
+                      :pledged_account,
+                      :safekept_account,
                       :pledge_type,
                       :form_type,
                       :kind].freeze
@@ -168,7 +169,8 @@ class SecuritiesRequest
       settlement_type: settlement_type,
       trade_date: trade_date,
       settlement_date: settlement_date,
-      account_number: account_number,
+      safekept_account: safekept_account,
+      pledged_account: pledged_account,
       pledge_type: pledge_type
     }
   end

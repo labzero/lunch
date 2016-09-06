@@ -681,7 +681,8 @@ module MAPI
           end
           {
             request_id: request_id,
-            account_number: header_details['PLEDGED_ADX_ID'] || header_details['UNPLEDGED_ADX_ID'],
+            safekept_account: header_details['UNPLEDGED_ADX_ID'],
+            pledged_account: header_details['PLEDGED_ADX_ID'],
             form_type: header_details['FORM_TYPE'],
             broker_instructions: broker_instructions_from_header_details(header_details),
             delivery_instructions: delivery_instructions_from_header_details(header_details),

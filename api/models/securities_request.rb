@@ -190,6 +190,16 @@ module MAPI
           key :description, 'The ID of the request'
         end
 
+        property :safekept_account do
+          key :type, :string
+          key :description, 'Account number of the Safekept Account'
+        end
+
+        property :pledged_account do
+          key :type, :string
+          key :description, 'Account number of the Pledged Account'
+        end
+
         property :pledged_or_unpledged do
           key :type, :string
           key :enum, %i(pledged unpledged)

@@ -2,21 +2,25 @@ When(/^I click on the Securities link in the header$/) do
   page.find('.secondary-nav a', text: I18n.t('securities.title'), exact: true).click
 end
 
-Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities) page$/i) do |page_type|
+Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities|Transfer to Pledged|Transfer to Safekept) page$/i) do |page_type|
   text = case page_type
-    when /\AManage Securities\z/i
-      step 'I should see a report table with multiple data rows'
-      I18n.t('securities.manage.title')
-    when /\ASecurities Requests\z/i
-      step 'I should see a report table with multiple data rows'
-      I18n.t('securities.requests.title')
-    when /\ASecurities Release\z/i
-      step 'I should see a report table with multiple data rows'
-      I18n.t('securities.release.title')
-    when /\ASafekeep Securities\z/i
-      I18n.t('securities.safekeep.title')
-    when /\APledge Securities\z/i
-      I18n.t('securities.pledge.title')
+  when /\AManage Securities\z/i
+    step 'I should see a report table with multiple data rows'
+    I18n.t('securities.manage.title')
+  when /\ASecurities Requests\z/i
+    step 'I should see a report table with multiple data rows'
+    I18n.t('securities.requests.title')
+  when /\ASecurities Release\z/i
+    step 'I should see a report table with multiple data rows'
+    I18n.t('securities.release.title')
+  when /\ASafekeep Securities\z/i
+    I18n.t('securities.safekeep.title')
+  when /\APledge Securities\z/i
+    I18n.t('securities.pledge.title')
+  when /\ATransfer to Pledged\z/i
+    I18n.t('securities.transfer.pledge.title')
+  when /\ATransfer to Safekept\z/i
+    I18n.t('securities.transfer.safekeep.title')
   end
   page.assert_selector('h1', text: text, exact: true)
 end
@@ -260,8 +264,12 @@ Then(/^I should see the error message for missing securities request information
   page.assert_selector('.securities-submit-release-form-errors p', text: /^Missing a required field: /)
 end
 
-Then(/^Account Number should be disabled$/) do
-  page.assert_selector('#securities_request_account_number[disabled]')
+Then(/^the (Pledge|Safekeep) Account Number should be disabled$/) do |action|
+  if action == 'Pledge'
+    page.assert_selector('#securities_request_pledged_account[disabled]')
+  else
+    page.assert_selector('#securities_request_safekept_account[disabled]')
+  end
 end
 
 Then(/^I should a disabled state for the Authorize action$/) do
