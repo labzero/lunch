@@ -254,6 +254,12 @@ class SecuritiesController < ApplicationController
     render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :release }
   end
 
+  def download_transfer
+    securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
+    populate_securities_table_data_view_variable(:transfer, securities)
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :transfer }
+  end
+
   def download_safekeep
     populate_securities_table_data_view_variable(:safekeep)
     render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep }

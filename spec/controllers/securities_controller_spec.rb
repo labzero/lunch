@@ -562,37 +562,40 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  describe 'POST download_release' do
-    let(:security) { instance_double(Security) }
-    let(:security_1) {{
-      "cusip" => SecureRandom.hex,
-      "description" => SecureRandom.hex
-    }}
-    let(:security_2) {{
-      "cusip" => SecureRandom.hex,
-      "description" => SecureRandom.hex
-    }}
-    let(:securities) { [security_1, security_2] }
-    let(:call_action) { post :download_release, securities: securities.to_json }
+  [:release, :transfer].each do |type|
+    action = :"download_#{type}"
+    describe "POST download_#{action}" do
+      let(:security) { instance_double(Security) }
+      let(:security_1) {{
+        "cusip" => SecureRandom.hex,
+        "description" => SecureRandom.hex
+      }}
+      let(:security_2) {{
+        "cusip" => SecureRandom.hex,
+        "description" => SecureRandom.hex
+      }}
+      let(:securities) { [security_1, security_2] }
+      let(:call_action) { post action, securities: securities.to_json }
 
-    before do
-      allow(controller).to receive(:populate_securities_table_data_view_variable)
-    end
+      before do
+        allow(controller).to receive(:populate_securities_table_data_view_variable)
+      end
 
-    it_behaves_like 'a user required action', :post, :download_release
-    it 'builds `Security` instances from the POSTed array of json objects' do
-      expect(Security).to receive(:from_hash).with(securities[0]).ordered
-      expect(Security).to receive(:from_hash).with(securities[1]).ordered
-      call_action
-    end
-    it 'calls `populate_securities_table_data_view_variable` with the securities' do
-      allow(Security).to receive(:from_hash).and_return(security)
-      expect(controller).to receive(:populate_securities_table_data_view_variable).with(:release, [security, security])
-      call_action
-    end
-    it 'responds with an xlsx file' do
-      call_action
-      expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
+      it_behaves_like 'a user required action', :post, action
+      it 'builds `Security` instances from the POSTed array of json objects' do
+        expect(Security).to receive(:from_hash).with(securities[0]).ordered
+        expect(Security).to receive(:from_hash).with(securities[1]).ordered
+        call_action
+      end
+      it "calls `populate_securities_table_data_view_variable` with `#{type}` and the securities array" do
+        allow(Security).to receive(:from_hash).and_return(security)
+        expect(controller).to receive(:populate_securities_table_data_view_variable).with(type, [security, security])
+        call_action
+      end
+      it 'responds with an xlsx file' do
+        call_action
+        expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
+      end
     end
   end
 

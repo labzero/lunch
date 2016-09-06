@@ -23,3 +23,15 @@ Feature: Transfer Securities
   | security_type  | page                 |
   | Pledged        | Transfer to Safekept |
   | Safekept       | Transfer to Pledged  |
+
+  @jira-mem-1715
+  Scenario Outline: Member views edit securities instructions
+    Given I am on the transfer to <page> account securities page
+    When I click on the Edit Securities link
+    Then I should see instructions on how to edit securities
+    When I click on the Edit Securities link
+    Then I should not see instructions on how to edit securities
+  Examples:
+    | page     |
+    | pledged  |
+    | safekept |

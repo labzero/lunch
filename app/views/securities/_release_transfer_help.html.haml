@@ -16,9 +16,10 @@
     .securities-download-instructions-description-term
       %strong= t('securities.release.edit.step_2.description.title')
       %p= t('securities.release.edit.step_2.description.description')
-    .securities-download-instructions-description-term
-      %strong= t('securities.release.edit.step_2.settlement_amount.title_html')
-      %p= t('securities.release.edit.step_2.settlement_amount.description')
+    - if type == :release
+      .securities-download-instructions-description-term
+        %strong= t('securities.release.edit.step_2.settlement_amount.title_html')
+        %p= t('securities.release.edit.step_2.settlement_amount.description')
   %p.securities-download-instructions-step= t('securities.release.edit.step_3.title')
   %p.securities-download-instructions-description= t('securities.release.edit.step_3.description')
   .securities-download-actions
@@ -27,7 +28,7 @@
     - button = capture_haml do
       .input-file-button-wrapper
         %button.secondary-button= t('securities.release.edit.select_file')
-        %input#fileupload{type: "file", name: "file", accept: accepted_upload_mimetypes, data: {url: securities_release_upload_path, 'results-container-class' => 'securities-release-table-wrapper', 'form-name' => 'securities-release-download', 'input-name' => 'securities', 'error-class' => 'securities-release-upload-error'}}
+        %input#fileupload{type: "file", name: "file", accept: accepted_upload_mimetypes, data: {url: upload_url, 'results-container-class' => 'securities-release-table-wrapper', 'form-name' => 'securities-release-download', 'input-name' => 'securities', 'error-class' => 'securities-release-upload-error'}}
     =t('securities.release.edit.download_actions_html', span: span, button: button)
   .file-upload-progress
     %p{data: {cancel_upload: true}}= t('global.cancel_upload')

@@ -32,7 +32,7 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release|release success|safekeep success|pledge success|safekeep|pledge|transfer success) securities page$/) do |page|
+When(/^I am on the (manage|release|release success|safekeep success|pledge success|safekeep|pledge|transfer success|transfer to pledged account|transfer to safekept account) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
@@ -48,6 +48,14 @@ When(/^I am on the (manage|release|release success|safekeep success|pledge succe
     step 'I am on the manage securities page'
     step 'I check the 1st Pledged security'
     step 'I click the button to release the securities'
+  when 'transfer to pledged account'
+    step 'I am on the manage securities page'
+    step 'I check the 1st Safekept security'
+    step 'I click the button to transfer the securities'
+  when 'transfer to safekept account'
+    step 'I am on the manage securities page'
+    step 'I check the 1st Pledged security'
+    step 'I click the button to transfer the securities'
   when 'safekeep'
     visit '/securities/safekeep/edit'
   when 'pledge'

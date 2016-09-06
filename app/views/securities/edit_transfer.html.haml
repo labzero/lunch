@@ -36,8 +36,7 @@
           .securities-release-table-wrapper
             -unless @securities_table_data[:rows].empty?
               = render 'table'
-          // TODO - add in the 'download' instructions and dropzone for transfers
-          %p.securities-download= t('securities.release.edit.title')
+          = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: @accepted_upload_mimetypes, upload_url: securities_transfer_upload_path, type: :transfer}
       %small= t('securities.transfer.legal')
-    =form_tag(securities_release_download_path, name: 'securities-release-download') do
+    =form_tag(securities_transfer_download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_request.securities.to_json)

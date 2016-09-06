@@ -18,12 +18,15 @@ workbook.styles do |styles|
     end
 
     sheet.add_row
-    sheet.add_row [nil, nil, nil, I18n.t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)], style: styles.add_style(sz: 9)
     if type == :pledge || type == :safekeep
+      sheet.add_row [nil, nil, nil, I18n.t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)], style: styles.add_style(sz: 9)
       sheet.add_row [nil, nil, nil, I18n.t('securities.safekeep.custodian_name_footnote', footnote_marker: fhlb_footnote_marker(1))], style: styles.add_style(sz: 9)
-    end
-    3.times do
-      sheet.add_row
+      2.times { sheet.add_row }
+    elsif type == :release
+      sheet.add_row [nil, nil, nil, I18n.t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)], style: styles.add_style(sz: 9)
+      3.times { sheet.add_row }
+    else
+      4.times { sheet.add_row }
     end
     sheet.add_row @securities_table_data[:column_headings], style: header_style
     @securities_table_data[:rows].each_with_index do |row, i|
@@ -31,19 +34,27 @@ workbook.styles do |styles|
       sheet.add_row values, types: [:string, :string, :integer, :integer]
     end
 
-    sheet.add_conditional_formatting('A:D', { :type => :expression,
+    if type == :transfer
+      column_range = 'A:C'
+      column_widths = [18, nil, 15]
+    else
+      column_range = 'A:D'
+      column_widths = [18, nil, 15, 22]
+    end
+
+    sheet.add_conditional_formatting(column_range, { :type => :expression,
                                           :formula => "ROW()>=6",
                                           :dxfId => border,
                                           :priority => 1 })
-    sheet.add_conditional_formatting('A:D', { :type => :expression,
+    sheet.add_conditional_formatting(column_range, { :type => :expression,
                                           :formula => "ROW()>=7",
                                           :dxfId => font_size_9,
                                           :priority => 2 })
-    sheet.add_conditional_formatting('A:D', { :type => :expression,
+    sheet.add_conditional_formatting(column_range, { :type => :expression,
                                           :formula => "AND(ROW()>=7, ISEVEN(ROW()))",
                                           :dxfId => blue,
                                           :priority => 4 })
-    sheet.column_widths(18, nil, 15, 22)
+    sheet.column_widths(*column_widths)
 
   end
 end
