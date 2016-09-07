@@ -72,18 +72,6 @@ Scenario Outline: Member views edit securities instructions
     | safekeep securities |
     | pledge securities   |
 
-@jira-mem-1676 @data-unavailable
-Scenario Outline: Member cancels an upload of a securities release file
-  Given I am on the <page> page
-  When I drag and drop the "upload-test-file.txt" file into the edit securities dropzone
-  Then I should see an upload progress bar
-  When I click to cancel the securities release file upload
-  Then I should not see an upload progress bar
-  Examples:
-    | page                |
-    | safekeep securities |
-    | pledge securities   |
-
 @jira-mem-1669
 Scenario: A signer views a previously submitted safekeep request
   Given I am logged in as a "quick-advance signer"

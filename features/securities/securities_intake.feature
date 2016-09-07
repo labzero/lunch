@@ -21,10 +21,50 @@ Feature: Securities Intake
   @jira-mem-1676 @data-unavailable
   Scenario Outline: Member cancels an upload of a securities intake file
     Given I am on the <page> page
-    When I drag and drop the "upload-test-file.txt" file into the edit securities dropzone
+    When I drag and drop the "upload-test-file.txt" file into the upload securities dropzone
     Then I should see an upload progress bar
     When I click to cancel the securities release file upload
     Then I should not see an upload progress bar
+  Examples:
+    | page                |
+    | safekeep securities |
+    | pledge securities   |
+
+  @jira-mem-1781 @data-unavailable
+  Scenario Outline: Member uploads a securities intake file that is missing Original Par
+    Given I am on the <page> page
+    When I drag and drop the "intake_securities_missing_original_par.xlsx" file into the upload securities dropzone
+    Then I should see a security required field error
+  Examples:
+    | page                |
+    | safekeep securities |
+    | pledge securities   |
+
+  @jira-mem-1781 @data-unavailable
+  Scenario Outline: Member uploads a securities intake file that is missing a CUSIP
+    Given I am on the <page> page
+    When I drag and drop the "intake_securities_missing_cusip.xlsx" file into the upload securities dropzone
+    Then I should see a security required field error
+  Examples:
+    | page                |
+    | safekeep securities |
+    | pledge securities   |
+
+  @jira-mem-1779 @data-unavailable
+  Scenario Outline: Member sees an error when uploading an intake file with no valid rows
+    Given I am on the <page> page
+    When I drag and drop the "intake-securities-no-rows.xlsx" file into the upload securities dropzone
+    Then I should see a no securities field error
+  Examples:
+    | page                |
+    | safekeep securities |
+    | pledge securities   |
+
+  @jira-mem-1783 @data-unavailable
+  Scenario Outline: Member uploads a securities intake file that has an invalid Original Par
+    Given I am on the <page> page
+    When I drag and drop the "intake_securities_invalid_original_par.xlsx" file into the upload securities dropzone
+    Then I should see an original par numericality field error
   Examples:
     | page                |
     | safekeep securities |

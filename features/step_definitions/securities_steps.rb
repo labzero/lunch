@@ -189,11 +189,12 @@ When(/^the edit securities section is open$/) do
   step 'I should see instructions on how to edit securities'
 end
 
-When(/^I drag and drop the "(.*?)" file into the edit securities dropzone$/) do |filename|
+When(/^I drag and drop the "(.*?)" file into the (edit|upload) securities dropzone$/) do |filename, type|
   # Simulate drag and drop of given file
+  dropzone = type == 'edit' ? '.securities-download-instructions' : '.safekeep-pledge-download-area'
   page.execute_script("seleniumUpload = window.$('<input/>').attr({id: 'seleniumUpload', type:'file'}).appendTo('body');")
   attach_file('seleniumUpload', Rails.root + "spec/fixtures/#{filename}")
-  page.execute_script("e = $.Event('drop'); e.originalEvent = {dataTransfer : { files : seleniumUpload.get(0).files } }; $('.securities-download-instructions').trigger(e);")
+  page.execute_script("e = $.Event('drop'); e.originalEvent = {dataTransfer : { files : seleniumUpload.get(0).files } }; $('#{dropzone}').trigger(e);")
 end
 
 When(/^I should see an? (security required|original par numericality|no securities) field error$/) do |error_type|
