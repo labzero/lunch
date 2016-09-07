@@ -342,6 +342,14 @@ Given(/^I upload a securities intake file$/) do
   file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', 'sample-securties-intake-upload.xlsx')))
 end
 
+Then(/^I should (see|not see) the pledge legal copy$/) do |should_see|
+  if should_see == 'see'
+    page.assert_selector('.securities-request-legal')
+  else
+    page.assert_no_selector('.securities-request-legal')
+  end
+end
+
 def delivery_instructions(text)
   case text
   when 'DTC'

@@ -35,3 +35,18 @@ Feature: Transfer Securities
     | page     |
     | pledged  |
     | safekept |
+
+  Scenario: Authorized signer views legal copy for pledge transfers
+    Given I am logged in as a "quick-advance signer"
+    And I am on the manage securities page
+    And I check the 1st Safekept security
+    When I click the button to transfer the securities
+    Then I should see the pledge legal copy
+
+  Scenario: Authorized signer does not view legal copy for safekept transfers
+    Given I am logged in as a "quick-advance signer"
+    And I am on the manage securities page
+    And I check the 1st Pledged security
+    When I click the button to transfer the securities
+    Then I should not see the pledge legal copy
+

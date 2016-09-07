@@ -72,15 +72,8 @@
     - if policy(:security).authorize? && type != :safekeep
       .securities-request-legal
         =simple_format(t("securities.#{type}.legal_copy"))
-      -if type == :pledge
-        =simple_format(t("securities.pledge.additional_certifications"))
-        .additional-legal
-          %h3= t("securities.pledge.anti_preditory_lending_title")
-          =simple_format(t("securities.pledge.anti_preditory_lending_text"))
-          %span= t('securities.pledge.and')
-          %h3= t("securities.pledge.nontraditional_and_subprime_mortgage_title")
-          =simple_format(t("securities.pledge.nontraditional_and_subprime_mortgage_text"))
-        .expanded-legal
+        -if type == :pledge
+          = render 'pledge_legal_copy'
     - unless @session_elevated
       = render 'shared/securid_module', error: @securid_status
   .securities-actions
