@@ -630,196 +630,123 @@ RSpec.describe SecuritiesController, type: :controller do
   end
 
   describe 'POST upload_securities' do
-    uploaded_file = excel_fixture_file_upload('sample-securities-upload.xlsx')
-    headerless_file = excel_fixture_file_upload('sample-securities-upload-headerless.xlsx')
-    let(:security) { instance_double(Security, :valid? => true) }
-    let(:invalid_security) { instance_double(Security, :valid? => false, errors: {}) }
-    let(:sample_securities_upload_array) { [security,security,security,security,security] }
-    let(:html_response_string) { SecureRandom.hex }
-    let(:form_fields_html_response_string) { SecureRandom.hex }
-    let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
-    let(:cusip) { SecureRandom.hex }
-    let(:description) { SecureRandom.hex }
-    let(:original_par) { rand(1000..1000000) }
-    let(:payment_amount) { rand(1000..1000000) }
-    let(:error) { instance_double(MAPIService::Error) }
-    let(:error_message) { SecureRandom.hex }
-    let(:securities_rows) {[
-      ['cusip', 'description', 'original par', 'settlement amount'],
-      [cusip, description, original_par, payment_amount]
-    ]}
-    let(:securities_rows_padding) {[
-      [],
-      [],
-      [nil, nil, 'cusip', 'description', 'original par', 'settlement amount'],
-      [nil, nil, cusip, description, original_par, payment_amount]
-    ]}
-    let(:call_action) { post :upload_securities, file: uploaded_file, type: :release }
-
-    before do
-      allow(controller).to receive(:populate_securities_table_data_view_variable)
-      allow(controller).to receive(:render_to_string)
-      allow(Security).to receive(:from_hash).and_return(security)
-      allow(controller).to receive(:prioritized_security_error)
-    end
-
-    it_behaves_like 'a user required action', :post, :upload_securities
-    it 'succeeds' do
-      call_action
-      expect(response.status).to eq(200)
-    end
-    it 'renders the view to a string with `layout` set to false' do
-      expect(controller).to receive(:render_to_string).with(:upload_table, layout: false, locals: { type: :release})
-      call_action
-    end
-    it 'calls `populate_securities_table_data_view_variable` with the securities' do
-      expect(controller).to receive(:populate_securities_table_data_view_variable).with(:release, sample_securities_upload_array)
-      call_action
-    end
-    it 'begins parsing data in the row and cell underneath the `cusip` header cell' do
-      allow(Roo::Spreadsheet).to receive(:open).and_return(securities_rows_padding)
-      expect(Security).to receive(:from_hash).with({
-        cusip: cusip,
-        description: description,
-        original_par: original_par,
-        payment_amount: payment_amount
-      }).and_return(security)
-      call_action
-    end
-
-    context 'intake' do
+    shared_examples 'an upload_securities action with a type' do |type|
+      uploaded_file = excel_fixture_file_upload('sample-securities-upload.xlsx')
+      headerless_file = excel_fixture_file_upload('sample-securities-upload-headerless.xlsx')
+      let(:security) { instance_double(Security, :valid? => true) }
+      let(:invalid_security) { instance_double(Security, :valid? => false, errors: {}) }
+      let(:sample_securities_upload_array) { [security,security,security,security,security] }
+      let(:html_response_string) { SecureRandom.hex }
+      let(:form_fields_html_response_string) { SecureRandom.hex }
+      let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
+      let(:cusip) { SecureRandom.hex }
+      let(:description) { SecureRandom.hex }
+      let(:original_par) { rand(1000..1000000) }
+      let(:payment_amount) { rand(1000..1000000) }
       let(:settlement_amount) { rand(9999..999999) }
       let(:custodian_name) { SecureRandom.hex }
-      let(:call_action) { post :upload_securities, file: uploaded_file, type: [:pledge, :safekeep][rand(0..1)] }
-      let(:securities_rows) {[
-        ['cusip', 'original par', 'settlement_amount', 'custodian name'],
-        [cusip, original_par, settlement_amount, custodian_name]
-      ]}
-      let(:securities_rows_padding) {[
-        [],
-        [],
-        [nil, nil, 'cusip', 'original par', 'settlement_amount', 'custodian name'],
-        [nil, nil, cusip, original_par, settlement_amount, custodian_name]
-      ]}
+      let(:error) { instance_double(MAPIService::Error) }
+      let(:error_message) { SecureRandom.hex }
+      let(:call_action) { post :upload_securities, file: uploaded_file, type: type }
+
+      before do
+        allow(controller).to receive(:populate_securities_table_data_view_variable)
+        allow(controller).to receive(:render_to_string)
+        allow(Security).to receive(:from_hash).and_return(security)
+        allow(controller).to receive(:prioritized_security_error)
+      end
+
+      it_behaves_like 'a user required action', :post, :upload_securities, type: type
+      it 'succeeds' do
+        call_action
+        expect(response.status).to eq(200)
+      end
+      it 'renders the view to a string with `layout` set to false' do
+        expect(controller).to receive(:render_to_string).with(:upload_table, layout: false, locals: { type: type})
+        call_action
+      end
+      it 'calls `populate_securities_table_data_view_variable` with the securities' do
+        expect(controller).to receive(:populate_securities_table_data_view_variable).with(type, sample_securities_upload_array)
+        call_action
+      end
       it 'begins parsing data in the row and cell underneath the `cusip` header cell' do
         allow(Roo::Spreadsheet).to receive(:open).and_return(securities_rows_padding)
-        expect(Security).to receive(:from_hash).with({
-          cusip: cusip,
-          original_par: original_par,
-          settlement_amount: settlement_amount,
-          custodian_name: custodian_name
-        }).and_return(security)
+        expect(Security).to receive(:from_hash).with(security_hash).and_return(security)
         call_action
       end
-    end
-
-    it 'returns a json object with `html`' do
-      allow(controller).to receive(:render_to_string).with(:upload_table, layout: false, locals: { type: :release}).and_return(html_response_string)
-      call_action
-      expect(parsed_response_body[:html]).to eq(html_response_string)
-    end
-    it 'returns a json object with `form_data` equal to the JSONed securities' do
-      call_action
-      expect(parsed_response_body[:form_data]).to eq(sample_securities_upload_array.to_json)
-    end
-    it 'returns a json object with a nil value for `error`' do
-      call_action
-      expect(parsed_response_body[:error]).to be_nil
-    end
-    it 'does not add invalid securities to its `form_data` response' do
-      allow(Security).to receive(:from_hash).and_return(security, invalid_security)
-      expect(parsed_response_body[:form_data]).to eq([security].to_json)
-    end
-    describe 'security validations' do
-      describe 'when a security is invalid' do
-        before do
-          allow(Security).to receive(:from_hash).and_return(security, invalid_security, invalid_security, security, security)
-        end
-        describe 'when there is not an invalid CUSIP present' do
-          before { allow(invalid_security).to receive(:errors).and_return({foo: ['some message']}) }
-          it 'calls `prioritized_security_error` with the first invalid security it encounters' do
-            expect(controller).to receive(:prioritized_security_error).with(invalid_security).exactly(:once)
-            call_action
-          end
-          it 'returns a json object with an error message that is the result of calling `prioritized_security_error`' do
-            allow(controller).to receive(:prioritized_security_error).and_return(error_message)
-            call_action
-            expect(parsed_response_body[:error]).to eq(simple_format(error_message))
-          end
-        end
-        describe 'when there is an invalid CUSIP present' do
-          let(:invalid_cusip_1) { SecureRandom.hex }
-          let(:invalid_cusip_2) { SecureRandom.hex }
-
+      it 'returns a json object with `html`' do
+        allow(controller).to receive(:render_to_string).with(:upload_table, layout: false, locals: { type: type}).and_return(html_response_string)
+        call_action
+        expect(parsed_response_body[:html]).to eq(html_response_string)
+      end
+      it 'returns a json object with `form_data` equal to the JSONed securities' do
+        call_action
+        expect(parsed_response_body[:form_data]).to eq(sample_securities_upload_array.to_json)
+      end
+      it 'returns a json object with a nil value for `error`' do
+        call_action
+        expect(parsed_response_body[:error]).to be_nil
+      end
+      it 'does not add invalid securities to its `form_data` response' do
+        allow(Security).to receive(:from_hash).and_return(security, invalid_security)
+        expect(parsed_response_body[:form_data]).to eq([security].to_json)
+      end
+      describe 'security validations' do
+        describe 'when a security is invalid' do
           before do
-            allow(invalid_security).to receive(:errors).and_return({cusip: ['some message']})
-            allow(invalid_security).to receive(:cusip).and_return(invalid_cusip_1, invalid_cusip_2)
+            allow(Security).to receive(:from_hash).and_return(security, invalid_security, invalid_security, security, security)
           end
+          describe 'when there is not an invalid CUSIP present' do
+            before { allow(invalid_security).to receive(:errors).and_return({foo: ['some message']}) }
+            it 'calls `prioritized_security_error` with the first invalid security it encounters' do
+              expect(controller).to receive(:prioritized_security_error).with(invalid_security).exactly(:once)
+              call_action
+            end
+            it 'returns a json object with an error message that is the result of calling `prioritized_security_error`' do
+              allow(controller).to receive(:prioritized_security_error).and_return(error_message)
+              call_action
+              expect(parsed_response_body[:error]).to eq(simple_format(error_message))
+            end
+          end
+          describe 'when there is an invalid CUSIP present' do
+            let(:invalid_cusip_1) { SecureRandom.hex }
+            let(:invalid_cusip_2) { SecureRandom.hex }
 
-          it 'returns a json object with an error message that enumerates the invalid cusips if they are present' do
-            call_action
-            expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.invalid_cusips', cusips: [invalid_cusip_1, invalid_cusip_2].join(', '))))
-          end
-          it 'prioritizes blank CUSIP errors over invalid CUSIP errors' do
-            allow(invalid_security).to receive(:cusip).and_return('', invalid_cusip_2)
-            call_action
-            expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('activemodel.errors.models.security.blank')))
+            before do
+              allow(invalid_security).to receive(:errors).and_return({cusip: ['some message']})
+              allow(invalid_security).to receive(:cusip).and_return(invalid_cusip_1, invalid_cusip_2)
+            end
+
+            it 'returns a json object with an error message that enumerates the invalid cusips if they are present' do
+              call_action
+              expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.invalid_cusips', cusips: [invalid_cusip_1, invalid_cusip_2].join(', '))))
+            end
+            it 'prioritizes blank CUSIP errors over invalid CUSIP errors' do
+              allow(invalid_security).to receive(:cusip).and_return('', invalid_cusip_2)
+              call_action
+              expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('activemodel.errors.models.security.blank')))
+            end
           end
         end
       end
-    end
-    describe 'when the uploaded file does not contain a header row with `CUSIP` as a value' do
-      let(:call_action) { post :upload_securities, file: headerless_file, type: :release }
-      it 'renders a json object with a nil value for `html`' do
-        call_action
-        expect(parsed_response_body[:html]).to be_nil
+      describe 'when the uploaded file does not contain a header row with `CUSIP` as a value' do
+        let(:call_action) { post :upload_securities, file: headerless_file, type: type }
+        it 'renders a json object with a nil value for `html`' do
+          call_action
+          expect(parsed_response_body[:html]).to be_nil
+        end
+        it 'renders a json object with a generic error messages' do
+          call_action
+          expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.generic')))
+        end
       end
-      it 'renders a json object with a generic error messages' do
-        call_action
-        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.generic')))
-      end
-    end
-    describe 'when the MIME type of the uploaded file is not in the list of accepted types' do
-      let(:incorrect_mime_type) { fixture_file_upload('sample-securities-upload.xlsx', 'text/html') }
-      let(:call_action) { post :upload_securities, file: incorrect_mime_type, type: :release }
-      let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
-      it 'renders a json object with a specific error messages' do
-        call_action
-        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.unsupported_mime_type')))
-      end
-      it 'renders a json object with a nil value for `html`' do
-        call_action
-        expect(parsed_response_body[:html]).to be_nil
-      end
-      it 'renders a json object with a nil value for `form_data`' do
-        call_action
-        expect(parsed_response_body[:form_data]).to be_nil
-      end
-    end
-    describe 'when the XLS file does not contain any rows of securities' do
-      no_securities = excel_fixture_file_upload('sample-empty-securities-upload.xlsx')
-      let(:call_action) { post :upload_securities, file: no_securities, type: :release }
-      let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
-      it 'renders a json object with a specific error messages' do
-        call_action
-        expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.no_rows')))
-      end
-      it 'renders a json object with a nil value for `html`' do
-        call_action
-        expect(parsed_response_body[:html]).to be_nil
-      end
-      it 'renders a json object with a nil value for `form_data`' do
-        call_action
-        expect(parsed_response_body[:form_data]).to be_nil
-      end
-    end
-    [ArgumentError, IOError, Zip::ZipError].each do |error_klass|
-      describe "when opening the file raises a `#{error_klass}`" do
-        before { allow(Roo::Spreadsheet).to receive(:open).and_raise(error_klass) }
-
+      describe 'when the MIME type of the uploaded file is not in the list of accepted types' do
+        let(:incorrect_mime_type) { fixture_file_upload('sample-securities-upload.xlsx', 'text/html') }
+        let(:call_action) { post :upload_securities, file: incorrect_mime_type, type: type }
+        let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
         it 'renders a json object with a specific error messages' do
           call_action
-          expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.cannot_open')))
+          expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.unsupported_mime_type')))
         end
         it 'renders a json object with a nil value for `html`' do
           call_action
@@ -830,9 +757,104 @@ RSpec.describe SecuritiesController, type: :controller do
           expect(parsed_response_body[:form_data]).to be_nil
         end
       end
+      describe 'when the XLS file does not contain any rows of securities' do
+        no_securities = excel_fixture_file_upload('sample-empty-securities-upload.xlsx')
+        let(:call_action) { post :upload_securities, file: no_securities, type: type }
+        let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
+        it 'renders a json object with a specific error messages' do
+          call_action
+          expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.no_rows')))
+        end
+        it 'renders a json object with a nil value for `html`' do
+          call_action
+          expect(parsed_response_body[:html]).to be_nil
+        end
+        it 'renders a json object with a nil value for `form_data`' do
+          call_action
+          expect(parsed_response_body[:form_data]).to be_nil
+        end
+      end
+      [ArgumentError, IOError, Zip::ZipError].each do |error_klass|
+        describe "when opening the file raises a `#{error_klass}`" do
+          before { allow(Roo::Spreadsheet).to receive(:open).and_raise(error_klass) }
+
+          it 'renders a json object with a specific error messages' do
+            call_action
+            expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.cannot_open')))
+          end
+          it 'renders a json object with a nil value for `html`' do
+            call_action
+            expect(parsed_response_body[:html]).to be_nil
+          end
+          it 'renders a json object with a nil value for `form_data`' do
+            call_action
+            expect(parsed_response_body[:form_data]).to be_nil
+          end
+        end
+      end
+    end
+
+    describe 'when the type param is `release`' do
+      let(:securities_rows) {[
+        ['cusip', 'description', 'original par', 'settlement amount'],
+        [cusip, description, original_par, payment_amount]
+      ]}
+      let(:securities_rows_padding) {[
+        [],
+        [],
+        [nil, nil, 'cusip', 'description', 'original par', 'settlement amount'],
+        [nil, nil, cusip, description, original_par, payment_amount]
+      ]}
+      let(:security_hash) {{
+        cusip: cusip,
+        description: description,
+        original_par: original_par,
+        payment_amount: payment_amount
+      }}
+      it_behaves_like 'an upload_securities action with a type', :release
+    end
+
+    describe 'when the type param is `transfer`' do
+      let(:securities_rows) {[
+        ['cusip', 'description', 'original par'],
+        [cusip, description, original_par]
+      ]}
+      let(:securities_rows_padding) {[
+        [],
+        [],
+        [nil, nil, 'cusip', 'description', 'original par'],
+        [nil, nil, cusip, description, original_par]
+      ]}
+      let(:security_hash) {{
+        cusip: cusip,
+        description: description,
+        original_par: original_par
+      }}
+      it_behaves_like 'an upload_securities action with a type', :transfer
+    end
+
+    [:pledge, :safekeep].each do |type|
+      describe "when the type param is `#{type}`" do
+        let(:securities_rows) {[
+          ['cusip', 'original par', 'settlement_amount', 'custodian name'],
+          [cusip, original_par, settlement_amount, custodian_name]
+        ]}
+        let(:securities_rows_padding) {[
+          [],
+          [],
+          [nil, nil, 'cusip', 'original par', 'settlement_amount', 'custodian name'],
+          [nil, nil, cusip, original_par, settlement_amount, custodian_name]
+        ]}
+        let(:security_hash) {{
+          cusip: cusip,
+          original_par: original_par,
+          settlement_amount: settlement_amount,
+          custodian_name: custodian_name
+        }}
+        it_behaves_like 'an upload_securities action with a type', type
+      end
     end
   end
-
 
   describe "POST submit_request for unknown types" do
     let(:securities_request_param) { {'transaction_code' => "#{instance_double(String)}"} }

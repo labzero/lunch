@@ -82,7 +82,7 @@ Scenario: A signer views a previously submitted safekeep request
 @jira-mem-1672 @data-unavailable
 Scenario: A user submits a safekeep request for authorization.
   Given I am on the safekeep securities page
-  When I upload a securities file
+  When I upload a securities intake file
   Then I should see a report table with multiple data rows
   When I fill in the "clearing_agent_participant_number" securities field with "23454343"
   And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"

@@ -294,6 +294,12 @@ class SecuritiesController < ApplicationController
                 original_par: (row[data_start_index + 2]),
                 payment_amount: (row[data_start_index + 3])
               })
+            elsif type == :transfer
+              Security.from_hash({
+                cusip: cusip,
+                description: row[data_start_index + 1],
+                original_par: (row[data_start_index + 2])
+              })
             elsif type == :pledge || type == :safekeep
               Security.from_hash({
                 cusip: cusip,

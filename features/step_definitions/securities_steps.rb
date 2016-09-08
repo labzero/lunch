@@ -337,9 +337,25 @@ When(/^I choose the first available date for (trade|settlement) date$/) do |attr
   step 'I choose the first available date'
 end
 
-Given(/^I upload a securities intake file$/) do
+Given(/^I upload a securities (intake|transfer) file$/) do |type|
+  filename = case type
+  when 'intake'
+    'sample-securities-intake-upload.xlsx'
+  when 'transfer'
+    'sample-securities-transfer-upload.xlsx'
+  end
   file_field = page.find('[type=file]', visible: false)
-  file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', 'sample-securties-intake-upload.xlsx')))
+  file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', filename)))
+end
+
+When(/^I wait for the securities file to upload$/) do
+  step 'I should not see instructions on how to edit securities'
+  page.assert_no_selector('.file-upload-progress .gauge-section', visible: :visible)
+end
+
+Then(/^I should see an uploaded transfer security with an? (description|original par) of "(.*?)"$/) do |field, value|
+  index = field == 'description' ? 1 : 2
+  expect(page.all('.securities-display table tbody tr:first-child td')[index].text).to eq(value)
 end
 
 Then(/^I should (see|not see) the pledge legal copy$/) do |should_see|

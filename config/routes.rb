@@ -213,7 +213,7 @@ Rails.application.routes.draw do
       scope 'transfer', as: :transfer do
         post 'edit' => 'securities#edit_transfer'
         post 'download' => 'securities#download_transfer'
-        post 'upload' => 'error#not_found', defaults: { type: :transfer }
+        post 'upload' => 'securities#upload_securities', defaults: { type: :transfer }
         post 'submit' => 'error#not_found', defaults: { type: :transfer }
         get 'success' => 'securities#submit_request_success', defaults: { type: :transfer }
         get 'view/:request_id' => 'error#not_found', as: 'view', defaults: { type: :transfer }
