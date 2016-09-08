@@ -4,7 +4,6 @@ FactoryGirl.define do
     description 'some security description'
     custodian_name 'Curious George'
     original_par { rand(10000..999999) }
-    settlement_amount { rand(10000..999999) }
-    payment_amount nil
+    payment_amount { rand(10000..999999) }
   end
 end

@@ -304,7 +304,7 @@ class SecuritiesController < ApplicationController
               Security.from_hash({
                 cusip: cusip,
                 original_par: (row[data_start_index + 1]),
-                settlement_amount: (row[data_start_index + 2]),
+                payment_amount: (row[data_start_index + 2]),
                 custodian_name: (row[data_start_index + 3])
               })
             end
@@ -504,7 +504,7 @@ class SecuritiesController < ApplicationController
         { columns: [
           {value: security.cusip || t('global.missing_value')},
           {value: security.original_par, type: :number},
-          {value: security.settlement_amount, type: :number},
+          {value: security.payment_amount, type: :number},
           {value: security.custodian_name || t('global.missing_value')}
         ] }
       end

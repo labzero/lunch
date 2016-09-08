@@ -338,12 +338,26 @@ When(/^I choose the (first|last) available date for (trade|settlement) date$/) d
   step "I choose the #{position} available date"
 end
 
-Given(/^I upload a securities (intake|transfer) file$/) do |type|
-  filename = case type
-  when 'intake'
-    'sample-securities-intake-upload.xlsx'
-  when 'transfer'
-    'sample-securities-transfer-upload.xlsx'
+Given(/^I upload a securities (release|intake|transfer) file(?: with "(.*?)")?$/) do |action, file_type|
+  filename = if action && file_type
+    if action == 'release' && file_type == 'settlement amounts'
+      'sample-securities-release-upload-with-settlement-amount.xlsx'
+    elsif action == 'release' && file_type == 'no settlement amounts'
+      'sample-securities-release-upload-no-settlement-amount.xlsx'
+    elsif action == 'intake' && file_type == 'settlement amounts'
+      'sample-securities-intake-upload-with-settlement-amount.xlsx'
+    elsif action == 'intake' && file_type == 'no settlement amounts'
+      'sample-securities-intake-upload-no-settlement-amount.xlsx'
+    end
+  else
+    case action
+    when 'release'
+      'sample-securities-release-upload-no-settlement-amount.xlsx'
+    when 'intake'
+      'sample-securities-intake-upload-no-settlement-amount.xlsx'
+    when 'transfer'
+      'sample-securities-transfer-upload.xlsx'
+    end
   end
   file_field = page.find('[type=file]', visible: false)
   file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', filename)))
@@ -371,8 +385,16 @@ Then(/^I should see the "(.*?)" error$/) do |error|
   text = case error
   when 'settlement date before trade date'
     I18n.t('activemodel.errors.models.securities_request.attributes.settlement_date.before_trade_date')
+  when 'settlement amount required'
+    I18n.t('activemodel.errors.models.securities_request.attributes.securities.payment_amount')
   end
   page.assert_selector('.securities-submit-release-form-errors p', text: text, exact: true)
+end
+
+When(/^the settlement type is set to (Vs Payment|Free)$/) do |payment_type|
+  text = payment_type == 'Vs Payment' ? I18n.t('securities.release.settlement_type.vs_payment') : I18n.t('securities.release.settlement_type.free')
+  page.find('label[for=release_settlement_type] + .dropdown').click
+  page.find('label[for=release_settlement_type] + .dropdown li', text: text, exact: true).click
 end
 
 def delivery_instructions(text)

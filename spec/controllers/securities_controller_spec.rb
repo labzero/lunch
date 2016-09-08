@@ -643,7 +643,6 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:description) { SecureRandom.hex }
       let(:original_par) { rand(1000..1000000) }
       let(:payment_amount) { rand(1000..1000000) }
-      let(:settlement_amount) { rand(9999..999999) }
       let(:custodian_name) { SecureRandom.hex }
       let(:error) { instance_double(MAPIService::Error) }
       let(:error_message) { SecureRandom.hex }
@@ -836,19 +835,19 @@ RSpec.describe SecuritiesController, type: :controller do
     [:pledge, :safekeep].each do |type|
       describe "when the type param is `#{type}`" do
         let(:securities_rows) {[
-          ['cusip', 'original par', 'settlement_amount', 'custodian name'],
-          [cusip, original_par, settlement_amount, custodian_name]
+          ['cusip', 'original par', 'payment_amount', 'custodian name'],
+          [cusip, original_par, payment_amount, custodian_name]
         ]}
         let(:securities_rows_padding) {[
           [],
           [],
-          [nil, nil, 'cusip', 'original par', 'settlement_amount', 'custodian name'],
-          [nil, nil, cusip, original_par, settlement_amount, custodian_name]
+          [nil, nil, 'cusip', 'original par', 'payment_amount', 'custodian name'],
+          [nil, nil, cusip, original_par, payment_amount, custodian_name]
         ]}
         let(:security_hash) {{
           cusip: cusip,
           original_par: original_par,
-          settlement_amount: settlement_amount,
+          payment_amount: payment_amount,
           custodian_name: custodian_name
         }}
         it_behaves_like 'an upload_securities action with a type', type
@@ -1606,14 +1605,14 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(row[:columns][1][:type]).to eq(:number)
             end
           end
-          it 'contains rows of columns that have a `settlement_amount` value' do
+          it 'contains rows of columns that have a `payment_amount` value' do
             call_method
             expect(assigns[:securities_table_data][:rows].length).to be > 0
             assigns[:securities_table_data][:rows].each do |row|
-              expect(row[:columns][2][:value]).to eq(securities.first.settlement_amount)
+              expect(row[:columns][2][:value]).to eq(securities.first.payment_amount)
             end
           end
-          it 'contains rows of columns whose `settlement_amount` value has a type of `number`' do
+          it 'contains rows of columns whose `payment_amount` value has a type of `number`' do
             call_method
             expect(assigns[:securities_table_data][:rows].length).to be > 0
             assigns[:securities_table_data][:rows].each do |row|
