@@ -107,6 +107,16 @@ Scenario: Member changes trade and settlement dates
   And I click the datepicker cancel button
   Then I should be on the securities release page
 
+@jira-mem-1786
+Scenario: Member selects a settlement date that occurs before the trade date
+  Given I am on the release securities page
+  And I choose the first available date for settlement date
+  And I choose the last available date for trade date
+  And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  When I click to submit the request
+  Then I should see the "settlement date before trade date" error
+
 @jira-mem-1594 @jira-mem-1595
 Scenario: Member sees success page after submitting releases for authorization
   Given I am on the release securities page

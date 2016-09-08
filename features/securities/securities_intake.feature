@@ -94,3 +94,18 @@ Feature: Securities Intake
     | security_type |
     | safekeep      |
     | pledge        |
+
+  @jira-mem-1786 @data-unavailable
+  Scenario Outline: Member selects a settlement date that occurs before the trade date
+    Given I am on the <security_type> securities page
+    And I choose the first available date for settlement date
+    And I choose the last available date for trade date
+    And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+    And I upload a securities intake file
+    When I click to submit the request
+    Then I should see the "settlement date before trade date" error
+  Examples:
+    | security_type |
+    | safekeep      |
+    | pledge        |

@@ -275,7 +275,7 @@ Then(/^I am not able to enter prohibited characters in the datepicker inputs?$/)
   end
 end
 
-When(/^I choose the first available date$/) do
+When(/^I choose the (first|last) available date$/) do |position|
   available_dates = page.all('td.available:not(.off)', visible: true)
   i = 0
   while available_dates.blank? && i < 12 do
@@ -283,5 +283,5 @@ When(/^I choose the first available date$/) do
     available_dates = page.all('td.available:not(.off)', visible: true)
     i += 1
   end
-  available_dates[0].click unless available_dates.blank?
+  available_dates.send(:"#{position}").click unless available_dates.blank?
 end

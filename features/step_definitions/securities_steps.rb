@@ -314,8 +314,9 @@ When(/^I authorize the request$/) do
   step %{I click to authorize the request}
 end
 
-When(/^I click to authorize the request$/) do
-  page.find(".securities-actions .primary-button[value=#{I18n.t('securities.release.authorize')}]").click
+When(/^I click to (authorize|submit) the request$/) do |action|
+  text = action == 'authorize' ? I18n.t('securities.release.authorize') : I18n.t('securities.release.submit_authorization')
+  page.find(".securities-actions .primary-button[value='#{text}']").click
 end
 
 Then(/^I should see the authorize request success page$/) do
@@ -332,9 +333,9 @@ Then(/^the (Authorize|Submit) action is (disabled|enabled)$/) do |action, state|
   end
 end
 
-When(/^I choose the first available date for (trade|settlement) date$/) do |attr|
+When(/^I choose the (first|last) available date for (trade|settlement) date$/) do |position, attr|
   step "I click the #{attr} date datepicker"
-  step 'I choose the first available date'
+  step "I choose the #{position} available date"
 end
 
 Given(/^I upload a securities (intake|transfer) file$/) do |type|
@@ -364,6 +365,14 @@ Then(/^I should (see|not see) the pledge legal copy$/) do |should_see|
   else
     page.assert_no_selector('.securities-request-legal')
   end
+end
+
+Then(/^I should see the "(.*?)" error$/) do |error|
+  text = case error
+  when 'settlement date before trade date'
+    I18n.t('activemodel.errors.models.securities_request.attributes.settlement_date.before_trade_date')
+  end
+  page.assert_selector('.securities-submit-release-form-errors p', text: text, exact: true)
 end
 
 def delivery_instructions(text)
