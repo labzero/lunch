@@ -1193,6 +1193,7 @@ en:
         pledge: Securities Pledge
         safekept: Securities Safekeeping
         release: Securities Release
+        transfer: Securities Internal Transfer
       pending:
         title: Requests for Authorization
       authorized:

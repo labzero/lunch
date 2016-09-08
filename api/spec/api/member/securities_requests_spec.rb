@@ -60,11 +60,12 @@ describe MAPI::ServiceApp do
         allow(Random).to receive(:new).and_return(rng)
         allow(securities_request_module).to receive(:fake_request_id).with(rng).and_return(request_id)
         allow(securities_request_module).to receive(:fake_header_details).and_return({})
+        allow_any_instance_of(Array).to receive(:shuffle).with(random: rng)
       end
 
       it 'constructs a list of request objects' do
-        n = rand(12..15)
-        allow(rng).to receive(:rand).with(eq(12..15)).and_return(n)
+        n = rand(18..36)
+        allow(rng).to receive(:rand).with(eq(18..36)).and_return(n)
         expect(call_method.length).to eq(n)
       end
       it 'passes the `request_id` to the `fake_header_details` method' do
@@ -76,16 +77,17 @@ describe MAPI::ServiceApp do
         call_method
       end
       it 'generates at least one request for each form type and status combination' do
-        allow(rng).to receive(:rand).with(eq(12..15)).and_return(12)
+        allow(rng).to receive(:rand).with(eq(18..36)).and_return(18)
         form_type_status_combos = []
         securities_request_module::REQUEST_FORM_TYPE_MAPPING.keys.each do |form_type|
           securities_request_module::REQUEST_STATUS_MAPPING.values.flatten.each do |status|
-            form_type_status_combos << [form_type, status]
+            form_type_status_combos << [form_type, nil, status]
+            form_type_status_combos << [form_type, securities_request_module::SSKDeliverTo::INTERNAL_TRANSFER, status] if [securities_request_module::SSKFormType::SECURITIES_PLEDGED, securities_request_module::SSKFormType::SECURITIES_RELEASE].include?(form_type)
           end
         end
-        expect(form_type_status_combos.length).to eq(12)
+        expect(form_type_status_combos.length).to eq(18)
         form_type_status_combos.each do |combo|
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, combo.last, combo.first).and_return({})
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, combo.last, combo.first, combo[1]).and_return({})
         end
         call_method
       end
@@ -94,21 +96,59 @@ describe MAPI::ServiceApp do
     describe '`MAPI::Services::Member::SecuritiesRequests.requests`' do
       let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
       let(:call_method) { MAPI::Services::Member::SecuritiesRequests.requests(app, member_id) }
+      let(:kind) { double('A Kind') }
+
+      shared_examples "common processing" do
+        it 'passes each request to `map_hash_values` with the `REQUEST_VALUE_MAPPING` and an arg of `true` for downcasing' do
+          mapping = MAPI::Services::Member::SecuritiesRequests::REQUEST_VALUE_MAPPING
+          expect(securities_request_module).to receive(:map_hash_values).with(header_details, mapping, true).and_return({})
+          call_method
+        end
+        {
+          'fed' => securities_request_module::SSKDeliverTo::FED,
+          'dtc' => securities_request_module::SSKDeliverTo::DTC,
+          'mutual_fund' => securities_request_module::SSKDeliverTo::MUTUAL_FUND,
+          'physical_securities' => securities_request_module::SSKDeliverTo::PHYSICAL_SECURITIES,
+          'transfer' => securities_request_module::SSKDeliverTo::INTERNAL_TRANSFER
+        }.each do |delivery_type, code|
+          it "converts `RECEIVE_FROM` of `#{code}` to `#{delivery_type}`" do
+            header_details['RECEIVE_FROM'] = code
+            expect(call_method.first['receive_from']).to be(delivery_type)
+          end
+          it "converts `DELIVER_TO` of `#{code}` to `#{delivery_type}`" do
+            header_details['DELIVER_TO'] = code
+            expect(call_method.first['deliver_to']).to be(delivery_type)
+          end
+        end
+        it 'calls `kind_from_details` for each request' do
+          expect(securities_request_module).to receive(:kind_from_details).with(header_details)
+          call_method
+        end
+        it 'assigns the `kind` to each request' do
+          allow(securities_request_module).to receive(:kind_from_details).with(header_details).and_return(kind)
+          results = call_method
+          expect(results.length).to be >= 1
+          results.each do |request|
+            expect(request['kind']).to be(kind)
+          end
+        end
+      end
 
       describe 'when using fake data' do
         let(:today) { Time.zone.today }
         let(:statuses) { instance_double(Array, :include? => true) }
         let(:submitted_date) { instance_double(Date, :>= => true, :<= => true) }
-        let(:header_details_array) {[
-          {
+        let(:kind) { double('A Kind') }
+        let(:header_details) { {
             'SUBMITTED_DATE' => submitted_date,
             'STATUS' => instance_double(String)
-          }
-        ]}
+          } }
+        let(:header_details_array) {[header_details]}
         before do
           allow(securities_request_module).to receive(:should_fake?).and_return(true)
           allow(securities_request_module).to receive(:flat_unique_array).and_return(statuses)
           allow(securities_request_module).to receive(:fake_header_details_array).and_return(header_details_array)
+          allow(securities_request_module).to receive(:kind_from_details).with(header_details_array.first).and_return(kind)
         end
 
         it 'calls `fake_header_details_array` with the member_id' do
@@ -135,13 +175,16 @@ describe MAPI::ServiceApp do
           expect(submitted_date).to receive(:<=).with(today)
           call_method
         end
+        include_examples "common processing"
       end
       describe 'when using real data' do
         let(:request_query) { double('request query') }
+        let(:header_details) { {} }
         before do
           allow(securities_request_module).to receive(:should_fake?).and_return(false)
           allow(securities_request_module).to receive(:requests_query).and_return(request_query)
-          allow(securities_request_module).to receive(:fetch_hashes).and_return([])
+          allow(securities_request_module).to receive(:fetch_hashes).and_return([header_details])
+          allow(securities_request_module).to receive(:kind_from_details).and_return(double('A Kind'))
         end
         it 'calls `fetch_hashes` with the logger' do
           expect(securities_request_module).to receive(:fetch_hashes).with(app.logger, anything).and_return([])
@@ -187,13 +230,7 @@ describe MAPI::ServiceApp do
           allow(securities_request_module).to receive(:map_hash_values).and_return({})
           expect(call_method.length).to eq(n)
         end
-        it 'passes each request to `map_hash_values` with the `REQUEST_VALUE_MAPPING` and an arg of `true` for downcasing' do
-          request = double('request')
-          mapping = MAPI::Services::Member::SecuritiesRequests::REQUEST_VALUE_MAPPING
-          allow(securities_request_module).to receive(:fetch_hashes).and_return([request])
-          expect(securities_request_module).to receive(:map_hash_values).with(request, mapping, true).and_return({})
-          call_method
-        end
+        include_examples "common processing"
       end
     end
 
@@ -206,7 +243,7 @@ describe MAPI::ServiceApp do
         date_range = (start_date..end_date)
 
         sql = <<-SQL
-            SELECT HEADER_ID AS REQUEST_ID, FORM_TYPE, SETTLE_DATE, CREATED_DATE AS SUBMITTED_DATE, CREATED_BY_NAME AS SUBMITTED_BY,
+            SELECT HEADER_ID AS REQUEST_ID, FORM_TYPE, DELIVER_TO, RECEIVE_FROM, SETTLE_DATE, CREATED_DATE AS SUBMITTED_DATE, CREATED_BY_NAME AS SUBMITTED_BY,
             SIGNED_BY_NAME AS AUTHORIZED_BY, SIGNED_DATE AS AUTHORIZED_DATE, STATUS FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE FHLB_ID = #{member_id} AND STATUS IN (#{quoted_statuses}) AND SETTLE_DATE >= TO_DATE('#{start_date}','YYYY-MM-DD HH24:MI:SS')
             AND SETTLE_DATE <= TO_DATE('#{end_date}','YYYY-MM-DD HH24:MI:SS')
@@ -1167,16 +1204,18 @@ describe MAPI::ServiceApp do
       }}
       let(:call_method) { securities_request_module.delivery_instructions_from_header_details(header_details) }
       securities_request_module::DELIVERY_TYPE.keys.each do |delivery_type|
-        describe "when the passed header_details hash has a `DELIVER_TO` value of `#{delivery_type}`" do
-          before { header_details['DELIVER_TO'] = delivery_type }
-          it "returns a hash with a `delivery_type` equal `#{delivery_type}`" do
-            expect(call_method[:delivery_type]).to eq(delivery_type)
-          end
-          securities_request_module.delivery_keys_for_delivery_type(delivery_type).each do |required_key|
-            next if required_key == 'clearing_agent_fed_wire_address'
-            security_key = securities_request_module.delivery_type_mapping(delivery_type)[required_key]
-            it "returns a hash with a `#{required_key}` equal to the `#{security_key}` value of the passed header_details hash" do
-              expect(call_method[required_key]).to eq(header_details[security_key])
+        ['DELIVER_TO', 'RECEIVE_FROM'].each do |delivery_field|
+          describe "when the passed header_details hash has a `#{delivery_field}` value of `#{delivery_type}`" do
+            before { header_details[delivery_field] = delivery_type }
+            it "returns a hash with a `delivery_type` equal `#{delivery_type}`" do
+              expect(call_method[:delivery_type]).to eq(delivery_type)
+            end
+            securities_request_module.delivery_keys_for_delivery_type(delivery_type).each do |required_key|
+              next if required_key == 'clearing_agent_fed_wire_address'
+              security_key = securities_request_module.delivery_type_mapping(delivery_type)[required_key]
+              it "returns a hash with a `#{required_key}` equal to the `#{security_key}` value of the passed header_details hash" do
+                expect(call_method[required_key]).to eq(header_details[security_key])
+              end
             end
           end
         end
@@ -1272,8 +1311,21 @@ describe MAPI::ServiceApp do
       it 'constructs a hash with a `REQUEST_STATUS` value' do
         expect(call_method['REQUEST_STATUS']).to eq(securities_request_module::SETTLEMENT_TYPE.values[request_status_offset])
       end
-      it 'constructs a hash with a `DELIVER_TO` value' do
+      it 'constructs a hash with a `DELIVER_TO` value when the form_type is SSKFormType::SECURITIES_RELEASE' do
+        allow(rng).to receive(:rand).with(eq(70..73)).and_return(securities_request_module::SSKFormType::SECURITIES_RELEASE)
         expect(call_method['DELIVER_TO']).to eq(securities_request_module::DELIVERY_TYPE.values[delivery_type_offset])
+      end
+      it 'constructs a hash with a `DELIVER_TO` value when the form_type is SSKFormType::SAFEKEPT_RELEASE' do
+        allow(rng).to receive(:rand).with(eq(70..73)).and_return(securities_request_module::SSKFormType::SAFEKEPT_RELEASE)
+        expect(call_method['DELIVER_TO']).to eq(securities_request_module::DELIVERY_TYPE.values[delivery_type_offset])
+      end
+      it 'constructs a hash with a `RECEIVE_FROM` value when the form_type is SSKFormType::SAFEKEPT_DEPOSIT' do
+        allow(rng).to receive(:rand).with(eq(70..73)).and_return(securities_request_module::SSKFormType::SAFEKEPT_DEPOSIT)
+        expect(call_method['RECEIVE_FROM']).to eq(securities_request_module::DELIVERY_TYPE.values[delivery_type_offset])
+      end
+      it 'constructs a hash with a `RECEIVE_FROM` value when the form_type is SSKFormType::SECURITIES_PLEDGED' do
+        allow(rng).to receive(:rand).with(eq(70..73)).and_return(securities_request_module::SSKFormType::SECURITIES_PLEDGED)
+        expect(call_method['RECEIVE_FROM']).to eq(securities_request_module::DELIVERY_TYPE.values[delivery_type_offset])
       end
       it 'constructs a hash with an `ABA_NO` value' do
         expect(call_method['ABA_NO']).to eq(aba_number)
@@ -3360,212 +3412,250 @@ describe MAPI::ServiceApp do
         end
       end
     end
-  end
 
-  describe '`authorize_request_query` class method' do
-    let(:request_id) { double('A Request ID') }
-    let(:username) { double('A Username') }
-    let(:full_name) { double('A Full Name') }
-    let(:session_id) { double('A Session ID') }
-    let(:signer_id) { double('A Signer ID') }
-    let(:modification_by) { double('A Modification By') }
-    let(:sentinel) { SecureRandom.hex }
-    let(:today) { Time.zone.today }
-    let(:call_method) { MAPI::Services::Member::SecuritiesRequests.authorize_request_query(member_id, request_id, username, full_name, session_id, signer_id) }
-
-    before do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
-      allow(Time.zone).to receive(:today).and_return(today)
-    end
-
-    it 'returns an UPDATE query' do
-      expect(call_method).to match(/\A\s*UPDATE\s+SAFEKEEPING.SSK_WEB_FORM_HEADER\s+SET\s+/i)
-    end
-    it 'updates the `STATUS`' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SIGNED).and_return(sentinel)
-      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+STATUS\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
-    end
-    it 'updates the `SIGNED_BY`' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(signer_id).and_return(sentinel)
-      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+SIGNED_BY\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
-    end
-    it 'updates the `SIGNED_BY_NAME`' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(full_name).and_return(sentinel)
-      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+SIGNED_BY_NAME\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
-    end
-    it 'updates the `SIGNED_DATE`' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
-      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+SIGNED_DATE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
-    end
-    it 'updates the `LAST_MODIFIED_BY`' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(modification_by).and_return(sentinel)
-      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
-    end
-    it 'updates the `LAST_MODIFIED_DATE`' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
-      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_DATE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
-    end
-    it 'updates the `LAST_MODIFIED_BY_NAME`' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(full_name).and_return(sentinel)
-      expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY_NAME\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
-    end
-    it 'includes the `request_id` in the WHERE clause' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(request_id).and_return(sentinel)
-      expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+HEADER_ID\s+=\s+#{sentinel}(\s+|\z)/)
-    end
-    it 'includes the `member_id` in the WHERE clause' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(member_id).and_return(sentinel)
-      expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+FHLB_ID\s+=\s+#{sentinel}(\s+|\z)/)
-    end
-    it 'restricts the updates to unauthorized queries' do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SUBMITTED).and_return(sentinel)
-      expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+STATUS\s+=\s+#{sentinel}(\s+|\z)/)
-    end
-  end
-
-  describe '`authorize_request` class method' do
-    let(:request_id) { double('A Request ID') }
-    let(:username) { double('A Username') }
-    let(:full_name) { double('A Full Name') }
-    let(:session_id) { double('A Session ID') }
-    let(:signer_id) { double('A Signer ID') }
-    let(:modification_by) { double('A Modification By') }
-    let(:authorization_query) { double('An Authorization Query') }
-    let(:call_method) { MAPI::Services::Member::SecuritiesRequests.authorize_request(app, member_id, request_id, username, full_name, session_id) }
-
-    before do
-      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request_query).and_return(authorization_query)
-    end
-
-    describe '`should_fake?` returns true' do
-      before do
-        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(true)
-      end
-      it 'generates an authorization query using `nil` for the signer ID' do
-        expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request_query).with(member_id, request_id, username, full_name, session_id, nil)
-        call_method
-      end
-      it 'does not execute a query' do
-        expect(ActiveRecord::Base.connection).to_not receive(:execute)
-        call_method
-      end
-      it 'returns true' do
-        expect(call_method).to be(true)
-      end
-    end
-    describe '`should_fake?` returns false' do
+    describe '`authorize_request_query` class method' do
+      let(:request_id) { double('A Request ID') }
+      let(:username) { double('A Username') }
+      let(:full_name) { double('A Full Name') }
+      let(:session_id) { double('A Session ID') }
       let(:signer_id) { double('A Signer ID') }
-      let(:signer_id_query) { double('A Signer ID Query') }
+      let(:modification_by) { double('A Modification By') }
+      let(:sentinel) { SecureRandom.hex }
+      let(:today) { Time.zone.today }
+      let(:call_method) { MAPI::Services::Member::SecuritiesRequests.authorize_request_query(member_id, request_id, username, full_name, session_id, signer_id) }
+
       before do
-        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(false)
-        allow(MAPI::Services::Users).to receive(:signer_id_query).with(username).and_return(signer_id_query)
-        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(app, signer_id_query, 'Signer ID').and_return(signer_id)
-        allow(ActiveRecord::Base.connection).to receive(:execute).with(authorization_query).and_return(1)
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
+        allow(Time.zone).to receive(:today).and_return(today)
       end
-      it 'generates a signer ID query' do
-        expect(MAPI::Services::Users).to receive(:signer_id_query).with(username).and_return(signer_id_query)
-        call_method
+
+      it 'returns an UPDATE query' do
+        expect(call_method).to match(/\A\s*UPDATE\s+SAFEKEEPING.SSK_WEB_FORM_HEADER\s+SET\s+/i)
       end
-      it 'converts the username into a signer ID' do
-        expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(app, signer_id_query, 'Signer ID').and_return(signer_id)
-        call_method
+      it 'updates the `STATUS`' do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SIGNED).and_return(sentinel)
+        expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+STATUS\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
-      it 'raises an error if the signer ID is not found' do
-        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(app, signer_id_query, 'Signer ID').and_raise(MAPI::Shared::Errors::SQLError)
-        expect{call_method}.to raise_error(/signer not found/i)
+      it 'updates the `SIGNED_BY`' do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(signer_id).and_return(sentinel)
+        expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+SIGNED_BY\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
-      it 'generates an authorization query using the signer ID' do
-        expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request_query).with(member_id, request_id, username, full_name, session_id, signer_id).and_return(authorization_query)
-        call_method
+      it 'updates the `SIGNED_BY_NAME`' do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(full_name).and_return(sentinel)
+        expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+SIGNED_BY_NAME\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
-      it 'returns true if executing the query updates one row' do
-        expect(call_method).to be(true)
+      it 'updates the `SIGNED_DATE`' do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
+        expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+SIGNED_DATE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
-      it 'returns false if executing the query updates no rows' do
-        allow(ActiveRecord::Base.connection).to receive(:execute).with(authorization_query).and_return(0)
-        expect(call_method).to be(false)
+      it 'updates the `LAST_MODIFIED_BY`' do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(modification_by).and_return(sentinel)
+        expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+      end
+      it 'updates the `LAST_MODIFIED_DATE`' do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
+        expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_DATE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+      end
+      it 'updates the `LAST_MODIFIED_BY_NAME`' do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(full_name).and_return(sentinel)
+        expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY_NAME\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+      end
+      it 'includes the `request_id` in the WHERE clause' do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(request_id).and_return(sentinel)
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+HEADER_ID\s+=\s+#{sentinel}(\s+|\z)/)
+      end
+      it 'includes the `member_id` in the WHERE clause' do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(member_id).and_return(sentinel)
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+FHLB_ID\s+=\s+#{sentinel}(\s+|\z)/)
+      end
+      it 'restricts the updates to unauthorized queries' do
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SUBMITTED).and_return(sentinel)
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+STATUS\s+=\s+#{sentinel}(\s+|\z)/)
       end
     end
 
-    describe '`get_adx_type_from_security` class method' do
-      let(:connection) { instance_double(ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter, execute: nil) }
-      let(:cusip) { SecureRandom.hex }
-      let(:security) { instance_double(Hash, :[] => cusip) }
-      let(:call_method) { MAPI::Services::Member::SecuritiesRequests.get_adx_type_from_security(app, security) }
-      let(:sql) {
-            <<-SQL
-              SELECT ACCOUNT_TYPE
-              FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
-              WHERE SSK_CUSIP = #{cusip}
-            SQL
-          }
-      let(:adx_type_string) { ['P', 'U'].sample }
+    describe '`authorize_request` class method' do
+      let(:request_id) { double('A Request ID') }
+      let(:username) { double('A Username') }
+      let(:full_name) { double('A Full Name') }
+      let(:session_id) { double('A Session ID') }
+      let(:signer_id) { double('A Signer ID') }
+      let(:modification_by) { double('A Modification By') }
+      let(:authorization_query) { double('An Authorization Query') }
+      let(:call_method) { MAPI::Services::Member::SecuritiesRequests.authorize_request(app, member_id, request_id, username, full_name, session_id) }
+
       before do
-        allow(ActiveRecord::Base).to receive(:connection).and_return(connection)
-        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(cusip)
+        allow(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request_query).and_return(authorization_query)
       end
-      it 'raises an `ArgumentError` if security is `nil`' do
-        expect { MAPI::Services::Member::SecuritiesRequests.get_adx_type_from_security(app, nil) }.to raise_error(ArgumentError, 'security must not be nil')
-      end
-      describe 'when `should_fake?` returns true' do
-        let(:cusip_bytes) { cusip.bytes }
-        let(:rng) { instance_double(Random) }
-        let(:seed) { cusip.bytes.inject(0, :+) }
-        let(:adx_pledge_types) { [ :pledged, :unpledged ] }
-        adx_mapping = { pledged: 'P', unpledged: 'U' }
+
+      describe '`should_fake?` returns true' do
         before do
-          stub_const 'MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_STRING', adx_mapping
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(true)
         end
-        it 'gets the bytes of the cusip' do
-          allow(security).to receive(:[]).with('cusip').and_return(cusip)
-          expect(cusip).to receive(:bytes).and_return(cusip_bytes)
+        it 'generates an authorization query using `nil` for the signer ID' do
+          expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request_query).with(member_id, request_id, username, full_name, session_id, nil)
           call_method
         end
-        it 'sums the bytes of the cusip' do
-          allow(cusip).to receive(:bytes).and_return(cusip_bytes)
-          expect(cusip_bytes).to receive(:inject).with(0, :+).and_return(seed)
+        it 'does not execute a query' do
+          expect(ActiveRecord::Base.connection).to_not receive(:execute)
           call_method
         end
-        it 'seeds a random number generator' do
-          allow(cusip_bytes).to receive(:inject).with(0, :+).and_return(seed)
-          expect(Random).to receive(:new).with(seed).and_return(rng)
-          call_method
-        end
-        it 'passes the rng to sample' do
-          allow(Random).to receive(:new).with(seed).and_return(rng)
-          allow(adx_mapping).to receive(:keys).and_return(adx_pledge_types)
-          expect(adx_pledge_types).to receive(:sample).with(random: rng)
-          call_method
-        end
-        it 'returns an random ADX type' do
-          expect(call_method).to eq(:pledged).or(eq(:unpledged))
+        it 'returns true' do
+          expect(call_method).to be(true)
         end
       end
-      describe 'when `should_fake?` returns false' do
+      describe '`should_fake?` returns false' do
+        let(:signer_id) { double('A Signer ID') }
+        let(:signer_id_query) { double('A Signer ID Query') }
         before do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(false)
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:adx_type_query).with(cusip).and_return(sql)
+          allow(MAPI::Services::Users).to receive(:signer_id_query).with(username).and_return(signer_id_query)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(app, signer_id_query, 'Signer ID').and_return(signer_id)
+          allow(ActiveRecord::Base.connection).to receive(:execute).with(authorization_query).and_return(1)
         end
-        it 'calls `execute_sql_single_result` with the correct SQL' do
-          expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(anything, sql, 'Get ADX type for a security')
+        it 'generates a signer ID query' do
+          expect(MAPI::Services::Users).to receive(:signer_id_query).with(username).and_return(signer_id_query)
           call_method
         end
-        it 'returns the appropriate type mapping' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).and_return(adx_type_string)
-          expect(call_method).to eq(MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::STRING_TO_SYMBOL[adx_type_string])
+        it 'converts the username into a signer ID' do
+          expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(app, signer_id_query, 'Signer ID').and_return(signer_id)
+          call_method
+        end
+        it 'raises an error if the signer ID is not found' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(app, signer_id_query, 'Signer ID').and_raise(MAPI::Shared::Errors::SQLError)
+          expect{call_method}.to raise_error(/signer not found/i)
+        end
+        it 'generates an authorization query using the signer ID' do
+          expect(MAPI::Services::Member::SecuritiesRequests).to receive(:authorize_request_query).with(member_id, request_id, username, full_name, session_id, signer_id).and_return(authorization_query)
+          call_method
+        end
+        it 'returns true if executing the query updates one row' do
+          expect(call_method).to be(true)
+        end
+        it 'returns false if executing the query updates no rows' do
+          allow(ActiveRecord::Base.connection).to receive(:execute).with(authorization_query).and_return(0)
+          expect(call_method).to be(false)
+        end
+      end
+
+      describe '`get_adx_type_from_security` class method' do
+        let(:connection) { instance_double(ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter, execute: nil) }
+        let(:cusip) { SecureRandom.hex }
+        let(:security) { instance_double(Hash, :[] => cusip) }
+        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.get_adx_type_from_security(app, security) }
+        let(:sql) {
+              <<-SQL
+                SELECT ACCOUNT_TYPE
+                FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
+                WHERE SSK_CUSIP = #{cusip}
+              SQL
+            }
+        let(:adx_type_string) { ['P', 'U'].sample }
+        before do
+          allow(ActiveRecord::Base).to receive(:connection).and_return(connection)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(cusip)
+        end
+        it 'raises an `ArgumentError` if security is `nil`' do
+          expect { MAPI::Services::Member::SecuritiesRequests.get_adx_type_from_security(app, nil) }.to raise_error(ArgumentError, 'security must not be nil')
+        end
+        describe 'when `should_fake?` returns true' do
+          let(:cusip_bytes) { cusip.bytes }
+          let(:rng) { instance_double(Random) }
+          let(:seed) { cusip.bytes.inject(0, :+) }
+          let(:adx_pledge_types) { [ :pledged, :unpledged ] }
+          adx_mapping = { pledged: 'P', unpledged: 'U' }
+          before do
+            stub_const 'MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_STRING', adx_mapping
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(true)
+          end
+          it 'gets the bytes of the cusip' do
+            allow(security).to receive(:[]).with('cusip').and_return(cusip)
+            expect(cusip).to receive(:bytes).and_return(cusip_bytes)
+            call_method
+          end
+          it 'sums the bytes of the cusip' do
+            allow(cusip).to receive(:bytes).and_return(cusip_bytes)
+            expect(cusip_bytes).to receive(:inject).with(0, :+).and_return(seed)
+            call_method
+          end
+          it 'seeds a random number generator' do
+            allow(cusip_bytes).to receive(:inject).with(0, :+).and_return(seed)
+            expect(Random).to receive(:new).with(seed).and_return(rng)
+            call_method
+          end
+          it 'passes the rng to sample' do
+            allow(Random).to receive(:new).with(seed).and_return(rng)
+            allow(adx_mapping).to receive(:keys).and_return(adx_pledge_types)
+            expect(adx_pledge_types).to receive(:sample).with(random: rng)
+            call_method
+          end
+          it 'returns an random ADX type' do
+            expect(call_method).to eq(:pledged).or(eq(:unpledged))
+          end
+        end
+        describe 'when `should_fake?` returns false' do
+          before do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(false)
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:adx_type_query).with(cusip).and_return(sql)
+          end
+          it 'calls `execute_sql_single_result` with the correct SQL' do
+            expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(anything, sql, 'Get ADX type for a security')
+            call_method
+          end
+          it 'returns the appropriate type mapping' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).and_return(adx_type_string)
+            expect(call_method).to eq(MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::STRING_TO_SYMBOL[adx_type_string])
+          end
         end
       end
     end
-  end
+    
+    describe '`fake_request_id` class method' do
+      it 'returns a random number between 100000 and 999999 using the supplied random number generator' do
+        value = double(Numeric)
+        rng = instance_double(Random)
+        allow(rng).to receive(:rand).with(100000..999999).and_return(value)
+        expect(MAPI::Services::Member::SecuritiesRequests.fake_request_id(rng)).to be(value)
+      end
+    end
 
-  describe '`fake_request_id` class method' do
-    it 'returns a random number between 100000 and 999999 using the supplied random number generator' do
-      value = double(Numeric)
-      rng = instance_double(Random)
-      allow(rng).to receive(:rand).with(100000..999999).and_return(value)
-      expect(MAPI::Services::Member::SecuritiesRequests.fake_request_id(rng)).to be(value)
+    describe '`kind_from_details` class method' do
+      let(:header_details) { {
+        'FORM_TYPE' => double('A Form Type'),
+        'DELIVER_TO' => nil,
+        'RECEIVE_FROM' => nil
+        } }
+      let(:call_method) { securities_request_module.kind_from_details(header_details) }
+      it 'raises an error if the `FORM_TYPE` is unknown' do
+        expect{call_method}.to raise_error(ArgumentError, /unknown form_type/)
+      end
+      it 'returns `safekept_release` if the `FORM_TYPE` is `SSKFormType::SAFEKEPT_RELEASE`' do
+        header_details['FORM_TYPE'] = securities_request_module::SSKFormType::SAFEKEPT_RELEASE
+        expect(call_method).to be(:safekept_release)
+      end
+      it 'returns `safekept_intake` if the `FORM_TYPE` is `SSKFormType::SAFEKEPT_DEPOSIT`' do
+        header_details['FORM_TYPE'] = securities_request_module::SSKFormType::SAFEKEPT_DEPOSIT
+        expect(call_method).to be(:safekept_intake)
+      end
+      it 'returns `pledge_intake` if the `FORM_TYPE` is `SSKFormType::SECURITIES_PLEDGED` and the `RECEIVE_FROM` is not `SSKDeliverTo::INTERNAL_TRANSFER`' do
+        header_details['FORM_TYPE'] = securities_request_module::SSKFormType::SECURITIES_PLEDGED
+        expect(call_method).to be(:pledge_intake)
+      end
+      it 'returns `pledge_transfer` if the `FORM_TYPE` is `SSKFormType::SECURITIES_PLEDGED` and the `RECEIVE_FROM` is `SSKDeliverTo::INTERNAL_TRANSFER`' do
+        header_details['FORM_TYPE'] = securities_request_module::SSKFormType::SECURITIES_PLEDGED
+        header_details['RECEIVE_FROM'] = securities_request_module::SSKDeliverTo::INTERNAL_TRANSFER
+        expect(call_method).to be(:pledge_transfer)
+      end
+      it 'returns `safekept_transfer` if the `FORM_TYPE` is `SSKFormType::SECURITIES_RELEASE` and the `DELIVER_TO` is `SSKDeliverTo::INTERNAL_TRANSFER`' do
+        header_details['FORM_TYPE'] = securities_request_module::SSKFormType::SECURITIES_RELEASE
+        header_details['DELIVER_TO'] = securities_request_module::SSKDeliverTo::INTERNAL_TRANSFER
+        expect(call_method).to be(:safekept_transfer)
+      end
+      it 'returns `pledge_release` if the `FORM_TYPE` is `SSKFormType::SECURITIES_RELEASE` and the `DELIVER_TO` is not `SSKDeliverTo::INTERNAL_TRANSFER`' do
+        header_details['FORM_TYPE'] = securities_request_module::SSKFormType::SECURITIES_RELEASE
+        expect(call_method).to be(:pledge_release)
+      end
     end
   end
 end

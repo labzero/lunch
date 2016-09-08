@@ -210,12 +210,12 @@ RSpec.describe SecuritiesController, type: :controller do
             authorized_by: double('Authorized By'),
             authorized_date: double('Authorized Date'),
             settle_date: double('Settlement Date'),
-            form_type: double('Form Type')
+            kind: double('Kind')
           }
         end
         rows = authorized_requests.collect do |request|
           description = double('A Description')
-          allow(subject).to receive(:form_type_to_description).with(request[:form_type]).and_return(description)
+          allow(subject).to receive(:kind_to_description).with(request[:kind]).and_return(description)
           {
             columns: [
               {value: request[:request_id]},
@@ -250,12 +250,12 @@ RSpec.describe SecuritiesController, type: :controller do
             submitted_by: double('Submitted By'),
             submitted_date: double('Submitted Date'),
             settle_date: double('Settlement Date'),
-            form_type: double('Form Type')
+            kind: double('Kind')
           }
         end
         rows = awaiting_authorization_requests.collect do |request|
           description = double('A Description')
-          allow(subject).to receive(:form_type_to_description).with(request[:form_type]).and_return(description)
+          allow(subject).to receive(:kind_to_description).with(request[:kind]).and_return(description)
           {
             columns: [
               {value: request[:request_id]},
@@ -274,12 +274,12 @@ RSpec.describe SecuritiesController, type: :controller do
         let(:request_id) { SecureRandom.hex }
         allow_policy :security, :authorize?
         before do
-          allow(subject).to receive(:form_type_to_description)
+          allow(subject).to receive(:kind_to_description)
         end
         it "builds rows with a link to view the submitted request for the `:action` cell" do
           awaiting_authorization_requests << {
             request_id: request_id,
-            form_type: 'pledge_release'
+            kind: 'pledge_release'
           }
           call_action
           expect(assigns[:awaiting_authorization_requests_table][:rows].length).to be > 0
@@ -291,12 +291,14 @@ RSpec.describe SecuritiesController, type: :controller do
           'pledge_release' => :securities_release_view_path,
           'safekept_release' => :securities_release_view_path,
           'pledge_intake' => :securities_pledge_view_path,
-          'safekept_intake' => :securities_safekeep_view_path
-        }.each do |form_type, path_helper|
-          it "sets the authorize action URL to `#{path_helper}` when the `form_type` is `#{form_type}`" do
+          'safekept_intake' => :securities_safekeep_view_path,
+          'safekept_transfer' => :securities_transfer_view_path,
+          'pledge_transfer' => :securities_transfer_view_path
+        }.each do |kind, path_helper|
+          it "sets the authorize action URL to `#{path_helper}` when the `kind` is `#{kind}`" do
             awaiting_authorization_requests << {
               request_id: request_id,
-              form_type: form_type
+              kind: kind
             }
             call_action
             expect(assigns[:awaiting_authorization_requests_table][:rows].length).to be > 0
@@ -305,10 +307,10 @@ RSpec.describe SecuritiesController, type: :controller do
             end
           end
         end
-        it "sets the authorize action URL to nil when the `form_type` is unknown" do
+        it "sets the authorize action URL to nil when the `kind` is unknown" do
           awaiting_authorization_requests << {
             request_id: request_id,
-            form_type: SecureRandom.hex
+            kind: SecureRandom.hex
           }
           call_action
           expect(assigns[:awaiting_authorization_requests_table][:rows].length).to be > 0
@@ -1169,7 +1171,7 @@ RSpec.describe SecuritiesController, type: :controller do
   end
 
   describe 'private methods' do
-    describe '`form_type_to_description`' do
+    describe '`kind_to_description`' do
       {
         'pledge_release' => 'securities.requests.form_descriptions.release',
         'safekept_release' => 'securities.requests.form_descriptions.release',
@@ -1177,11 +1179,11 @@ RSpec.describe SecuritiesController, type: :controller do
         'safekept_intake' => 'securities.requests.form_descriptions.safekept'
       }.each do |form_type, description_key|
         it "returns the localization value for `#{description_key}` when passed `#{form_type}`" do
-          expect(controller.send(:form_type_to_description, form_type)).to eq(I18n.t(description_key))
+          expect(controller.send(:kind_to_description, form_type)).to eq(I18n.t(description_key))
         end
       end
       it 'returns the localization value for `global.missing_value` when passed an unknown form type' do
-        expect(controller.send(:form_type_to_description, double(String))).to eq(I18n.t('global.missing_value'))
+        expect(controller.send(:kind_to_description, double(String))).to eq(I18n.t('global.missing_value'))
       end
     end
 

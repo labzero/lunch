@@ -216,6 +216,7 @@ Rails.application.routes.draw do
         post 'upload' => 'error#not_found', defaults: { type: :transfer }
         post 'submit' => 'error#not_found', defaults: { type: :transfer }
         get 'success' => 'securities#submit_request_success', defaults: { type: :transfer }
+        get 'view/:request_id' => 'error#not_found', as: 'view', defaults: { type: :transfer }
       end
     end
   end

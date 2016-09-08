@@ -138,20 +138,23 @@ class SecuritiesController < ApplicationController
         t('global.actions')
       ],
       rows: awaiting_authorization_requests.collect do |request|
+        kind = request[:kind]
         request_id = request[:request_id]
-        view_path = case request[:form_type]
+        view_path = case kind
         when 'pledge_release', 'safekept_release'
           securities_release_view_path(request_id)
         when 'pledge_intake'
           securities_pledge_view_path(request_id)
         when 'safekept_intake'
           securities_safekeep_view_path(request_id)
+        when 'safekept_transfer', 'pledge_transfer'
+          securities_transfer_view_path(request_id)
         end
         action_cell_value = policy(:security).authorize? ? [[t('securities.requests.actions.authorize'), view_path ]] : [t('securities.requests.actions.authorize')]
         {
           columns: [
             {value: request_id},
-            {value: form_type_to_description(request[:form_type])},
+            {value: kind_to_description(kind)},
             {value: request[:submitted_by]},
             {value: request[:submitted_date], type: :date},
             {value: request[:settle_date], type: :date},
@@ -171,10 +174,11 @@ class SecuritiesController < ApplicationController
         t('global.actions')
       ],
       rows: authorized_requests.collect do |request|
+        kind = request[:kind]
         {
           columns: [
             {value: request[:request_id]},
-            {value: form_type_to_description(request[:form_type])},
+            {value: kind_to_description(kind)},
             {value: request[:authorized_by]},
             {value: request[:authorized_date], type: :date},
             {value: request[:settle_date], type: :date},
@@ -441,14 +445,16 @@ class SecuritiesController < ApplicationController
 
   private
 
-  def form_type_to_description(form_type)
-    case form_type
+  def kind_to_description(kind)
+    case kind
     when 'pledge_intake'
       t('securities.requests.form_descriptions.pledge')
     when 'pledge_release', 'safekept_release'
       t('securities.requests.form_descriptions.release')
     when 'safekept_intake'
       t('securities.requests.form_descriptions.safekept')
+    when 'safekept_transfer', 'pledge_transfer'
+      t('securities.requests.form_descriptions.transfer')
     else
       t('global.missing_value')
     end

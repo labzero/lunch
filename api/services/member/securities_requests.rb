@@ -61,6 +61,7 @@ module MAPI
         REQUEST_VALUE_MAPPING = {
           Proc.new { |value| REQUEST_FORM_TYPE_MAPPING[value] } => ['FORM_TYPE'],
           Proc.new { |value| REQUEST_STATUS_MAPPING[value] } => ['STATUS'],
+          Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO', 'RECEIVE_FROM'],
           to_s: ['REQUEST_ID', 'SUBMITTED_BY', 'AUTHORIZED_BY'],
           to_date: ['SETTLE_DATE', 'SUBMITTED_DATE', 'AUTHORIZED_DATE']
         }.freeze
@@ -68,7 +69,7 @@ module MAPI
         REQUEST_HEADER_MAPPING = {
           Proc.new { |value| TRANSACTION_CODE.invert[value.to_i] } => ['PLEDGE_TYPE'],
           Proc.new { |value| SETTLEMENT_TYPE.invert[value.to_i] } => ['REQUEST_STATUS'],
-          Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO'],
+          Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO', 'RECEIVE_FROM'],
           Proc.new { |value| REQUEST_FORM_TYPE_MAPPING[value] } => ['FORM_TYPE'],
           to_s: ['BROKER_WIRE_ADDR', 'ABA_NO', 'DTC_AGENT_PARTICIPANT_NO', 'MUTUAL_FUND_COMPANY', 'DELIVERY_BANK_AGENT',
                  'REC_BANK_AGENT_NAME', 'REC_BANK_AGENT_ADDR', 'CREDIT_ACCT_NO1', 'CREDIT_ACCT_NO2', 'MUTUAL_FUND_ACCT_NO',
@@ -90,7 +91,8 @@ module MAPI
         DELIVERY_TYPE = { 'fed' => SSKDeliverTo::FED,
                           'dtc' => SSKDeliverTo::DTC,
                           'mutual_fund' => SSKDeliverTo::MUTUAL_FUND,
-                          'physical_securities' => SSKDeliverTo::PHYSICAL_SECURITIES }.freeze
+                          'physical_securities' => SSKDeliverTo::PHYSICAL_SECURITIES,
+                          'transfer' => SSKDeliverTo::INTERNAL_TRANSFER  }.freeze
         PLEDGE_TYPE = { 'standard' => SSKPledgeTo::STANDARD_CREDIT, 'sbc' => SSKPledgeTo::SBC }
         TRANSACTION_CODE = { 'standard' => SSKTransactionCode::STANDARD, 'repo' => SSKTransactionCode::REPO }.freeze
         SETTLEMENT_TYPE = { 'free' => SSKSettlementType::FREE, 'vs_payment' => SSKSettlementType::VS_PAYMENT }.freeze
@@ -121,7 +123,7 @@ module MAPI
         def self.requests_query(member_id, status_array, date_range)
           quoted_statuses = status_array.collect { |status| quote(status) }.join(',')
           <<-SQL
-            SELECT HEADER_ID AS REQUEST_ID, FORM_TYPE, SETTLE_DATE, CREATED_DATE AS SUBMITTED_DATE, CREATED_BY_NAME AS SUBMITTED_BY,
+            SELECT HEADER_ID AS REQUEST_ID, FORM_TYPE, DELIVER_TO, RECEIVE_FROM, SETTLE_DATE, CREATED_DATE AS SUBMITTED_DATE, CREATED_BY_NAME AS SUBMITTED_BY,
             SIGNED_BY_NAME AS AUTHORIZED_BY, SIGNED_DATE AS AUTHORIZED_DATE, STATUS FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE FHLB_ID = #{quote(member_id)} AND STATUS IN (#{quoted_statuses}) AND SETTLE_DATE >= #{quote(date_range.first)}
             AND SETTLE_DATE <= #{quote(date_range.last)}
@@ -142,7 +144,9 @@ module MAPI
             end
           )
           requests.collect do |request|
-            map_hash_values(request, REQUEST_VALUE_MAPPING, true).with_indifferent_access
+            request['KIND'] = kind_from_details(request)
+            mapped_request = map_hash_values(request, REQUEST_VALUE_MAPPING, true).with_indifferent_access
+            mapped_request
           end
         end
 
@@ -168,6 +172,8 @@ module MAPI
               [ 'mutual_fund_company' ]
             when 'physical_securities'
               [ 'delivery_bank_agent', 'receiving_bank_agent_name', 'receiving_bank_agent_address' ]
+            when 'transfer'
+              []
           else
             raise MAPI::Shared::Errors::InvalidFieldError.new("delivery_type must be one of the following values: #{DELIVERY_TYPE.keys.join(', ')}", :delivery_type, DELIVERY_TYPE.keys)
           end
@@ -705,7 +711,7 @@ module MAPI
         end
 
         def self.delivery_instructions_from_header_details(header)
-          delivery_type = header['DELIVER_TO']
+          delivery_type = header['DELIVER_TO'] || header['RECEIVE_FROM']
           delivery_type_mapping = delivery_type_mapping(delivery_type)
           required_delivery_keys = delivery_keys_for_delivery_type(delivery_type)
           delivery_instructions = {
@@ -740,26 +746,33 @@ module MAPI
           form_type_status_combos = []
           REQUEST_FORM_TYPE_MAPPING.keys.each do |form_type|
             flat_unique_array(REQUEST_STATUS_MAPPING.values).each do |status|
-              form_type_status_combos << [form_type, status]
+              form_type_status_combos << [form_type, nil, status]
+              form_type_status_combos << [form_type, SSKDeliverTo::INTERNAL_TRANSFER, status] if [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SECURITIES_RELEASE].include?(form_type)
             end
           end
-          rng.rand(12..15).times do
+          form_type_status_combos.shuffle(random: rng)
+          length = form_type_status_combos.length
+          rng.rand(length..(length*2)).times do
             request_id = fake_request_id(rng)
             combo = form_type_status_combos.pop
             form_type = combo.try(:first) || REQUEST_FORM_TYPE_MAPPING.keys.sample(random: rng)
             status = combo.try(:last) || flat_unique_array(REQUEST_STATUS_MAPPING.values).sample(random: rng)
-            list << fake_header_details(request_id, Time.zone.today, status, form_type)
+            delivery_type = combo.try(:[], 1)
+            list << fake_header_details(request_id, Time.zone.today, status, form_type, delivery_type)
           end
           list
         end
 
-        def self.fake_header_details(request_id, end_date, status, form_type = nil)
+        def self.fake_header_details(request_id, end_date, status, form_type = nil, delivery_type = nil)
           rng = Random.new(request_id)
           fake_data = fake('securities_requests')
           names = fake_data['names']
           pledge_type = TRANSACTION_CODE.values.sample(random: rng)
           request_status = SETTLEMENT_TYPE.values.sample(random: rng)
-          delivery_type = DELIVERY_TYPE.values.sample(random: rng)
+          transfer_form_types = [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SAFEKEPT_DEPOSIT]
+          form_type ||= rng.rand(70..73)
+          delivery_type ||= (DELIVERY_TYPE.values.select {|type| type != SSKDeliverTo::INTERNAL_TRANSFER || transfer_form_types.include?(form_type) } ).sample(random: rng)
+          delivery_field = transfer_form_types.include?(form_type) ? 'RECEIVE_FROM' : 'DELIVER_TO'
           aba_number = rng.rand(10000..99999)
           participant_number = rng.rand(10000..99999)
           account_number = rng.rand(10000..99999)
@@ -769,12 +782,11 @@ module MAPI
           created_by_offset = rng.rand(0..names.length-1)
           created_by = fake_data['usernames'][created_by_offset]
           created_by_name = names[created_by_offset]
-          form_type ||= rng.rand(70..73)
           {
             'REQUEST_ID' => request_id,
             'PLEDGE_TYPE' => pledge_type,
             'REQUEST_STATUS' => request_status,
-            'DELIVER_TO' => delivery_type,
+            delivery_field => delivery_type,
             'BROKER_WIRE_ADDR' => '0541254875/FIRST TENN',
             'ABA_NO' => aba_number,
             'DTC_AGENT_PARTICIPANT_NO' => participant_number,
@@ -885,6 +897,30 @@ module MAPI
             ADXAccountTypeMapping::SYMBOL_TO_STRING.keys.sample(random: Random.new(security['cusip'].bytes.inject(0, :+)))
           else
             ADXAccountTypeMapping::STRING_TO_SYMBOL[execute_sql_single_result(app, adx_type_query(security['cusip']), 'Get ADX type for a security')]
+          end
+        end
+
+        def self.kind_from_details(request_details)
+          form_type = request_details['FORM_TYPE']
+          case form_type
+          when SSKFormType::SECURITIES_PLEDGED
+            if request_details['RECEIVE_FROM'] == SSKDeliverTo::INTERNAL_TRANSFER
+              :pledge_transfer
+            else
+              :pledge_intake
+            end
+          when SSKFormType::SECURITIES_RELEASE
+            if request_details['DELIVER_TO'] == SSKDeliverTo::INTERNAL_TRANSFER
+              :safekept_transfer
+            else
+              :pledge_release
+            end
+          when SSKFormType::SAFEKEPT_RELEASE
+            :safekept_release
+          when SSKFormType::SAFEKEPT_DEPOSIT
+            :safekept_intake
+          else
+            raise ArgumentError, "unknown form_type: #{form_type}"
           end
         end
       end
