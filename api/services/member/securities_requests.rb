@@ -107,6 +107,8 @@ module MAPI
         FED_AMOUNT_LIMIT = 50000000
         MAX_DATE_RESTRICTION = 3.months
 
+        KIND_TRANSFER_KEYS = [ 'pledge_transfer', 'safekept_transfer' ].freeze
+
         module ADXAccountTypeMapping
           SYMBOL_TO_STRING = { pledged: 'P', unpledged: 'U' }.freeze
           STRING_TO_SYMBOL = SYMBOL_TO_STRING.invert.freeze
@@ -263,6 +265,59 @@ module MAPI
                     #{quote(adx_id)},
                     #{quote(PLEDGE_TYPE[broker_instructions['pledge_to']])},
                     #{delivery_values.join(', ')}
+                   )
+          SQL
+        end
+
+        def self.insert_transfer_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, un_adx_id, broker_instructions, kind)
+          now = Time.zone.today
+          if (kind == :pledge_transfer)
+            deliver_receive = 'DELIVER_TO'
+            settlement_type = SSKSettlementType::FREE
+            adx_type = :pledged_intake
+          else
+            deliver_receive = 'RECEIVE_FROM'
+            settlement_type = SSKSettlementType::VS_PAYMENT
+            adx_type = :pledged_release
+          end
+          <<-SQL
+            INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
+                                                         FHLB_ID,
+                                                         STATUS,
+                                                         PLEDGE_TYPE,
+                                                         TRADE_DATE,
+                                                         REQUEST_STATUS,
+                                                         SETTLE_DATE,
+                                                         #{deliver_receive},
+                                                         FORM_TYPE,
+                                                         CREATED_DATE,
+                                                         CREATED_BY,
+                                                         CREATED_BY_NAME,
+                                                         LAST_MODIFIED_BY,
+                                                         LAST_MODIFIED_DATE,
+                                                         LAST_MODIFIED_BY_NAME,
+                                                         PLEDGED_ADX_ID,
+                                                         UNPLEGED_TRANSFER_ADX_ID,
+                                                         PLEDGE_TO
+                                                        )
+            VALUES (#{quote(header_id)},
+                    #{quote(member_id)},
+                    #{quote(SSKRequestStatus::SUBMITTED)},
+                    #{quote(SSKTransactionCode::STANDARD)},
+                    #{quote(broker_instructions['trade_date'])},
+                    #{quote(settlement_type)},
+                    #{quote(broker_instructions['settlement_date'])},
+                    #{quote(SSKDeliverTo::INTERNAL_TRANSFER)},
+                    #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[adx_type])},
+                    #{quote(now)},
+                    #{quote(format_username(user_name))},
+                    #{quote(full_name)},
+                    #{quote(format_modification_by(user_name, session_id))},
+                    #{quote(now)},
+                    #{quote(full_name)},
+                    #{quote(adx_id)},
+                    #{quote(un_adx_id)},
+                    #{quote(PLEDGE_TYPE[broker_instructions['pledge_to']])}
                    )
           SQL
         end
@@ -633,6 +688,39 @@ module MAPI
             end
           end
           true
+        end
+
+        def self.create_transfer(app, member_id, user_name, full_name, session_id, broker_instructions, securities, kind)
+          raise MAPI::Shared::Errors::InvalidFieldError.new("kind must contain the key for transfer set to one of #{KIND_TRANSFER_KEYS}") unless KIND_TRANSFER_KEYS.include?(kind)
+          validate_securities(securities, broker_instructions['settlement_type'], :transfer, :release)
+          validate_broker_instructions(broker_instructions, app, kind.to_sym)
+          user_name.downcase!
+          unless should_fake?(app)
+            header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
+            ActiveRecord::Base.transaction do
+              adx_id = execute_sql_single_result(app, adx_query(member_id, :pledged), "ADX ID")
+              un_adx_id = execute_sql_single_result(app, adx_query(member_id, :unpledged), "ADX ID")
+              insert_header_sql = insert_transfer_header_query(member_id,
+                                                              header_id,
+                                                              user_name,
+                                                              full_name,
+                                                              session_id,
+                                                              adx_id,
+                                                              un_adx_id,
+                                                              broker_instructions,
+                                                              kind.to_sym)
+              raise "failed to insert security release request header" unless execute_sql(app.logger, insert_header_sql)
+              securities.each do |security|
+                ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
+                raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
+                insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
+                raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
+              end
+            end
+          else
+            header_id = rand(100000..999999)
+          end
+          header_id
         end
 
         def self.security_has_changed(new_security, old_security)

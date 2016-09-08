@@ -114,6 +114,64 @@ describe MAPI::ServiceApp do
       expect { make_request }.to_not raise_error
     end
   end
+
+  describe 'POST `securities/transfer`' do
+    let(:security) { {  'cusip' => SecureRandom.hex,
+                        'description' => SecureRandom.hex,
+                        'original_par' => rand(1..100000) + rand.round(2),
+                        'payment_amount' => rand(1..100000) + rand.round(2) } }
+    let(:post_body) { {
+      'kind' => ['pledge_transfer', 'safekept_transfer'].sample,
+      'broker_instructions' => { 'transaction_code' => MAPI::Services::Member::SecuritiesRequests::TRANSACTION_CODE.keys[rand(0..1)],
+                                 'settlement_type' => MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE.keys[rand(0..1)],
+                                 'trade_date' => "2016-06-20T16:28:55-07:00",
+                                 'settlement_date' => "2016-06-20T16:28:55-07:00",
+                                 'pledge_to' => SecureRandom.hex},
+      'securities' => rand(1..5).times.map { security },
+      'user' => {
+        'username' => SecureRandom.hex,
+        'full_name' => SecureRandom.hex,
+        'session_id' => SecureRandom.hex }
+    } }
+    let(:make_transfer) { post("/member/#{member_id}/securities/transfer", post_body.to_json) }
+    let(:exception_message) { SecureRandom.hex }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', "/member/#{rand(1000..99999)}/securities/transfer", :post, MAPI::Services::Member::SecuritiesRequests, :create_transfer, {user:{}}.to_json
+
+    it 'returns 200 and request_id after calling `MAPI::Services::Member::SecuritiesRequests.create_transfer`' do
+      request_id = SecureRandom.hex
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:create_transfer).with(
+                                                             kind_of(app),
+                                                             member_id.to_i,
+                                                             post_body['user']['username'],
+                                                             post_body['user']['full_name'],
+                                                             post_body['user']['session_id'],
+                                                             post_body['broker_instructions'],
+                                                             post_body['securities'],
+                                                             post_body['kind']).and_return(request_id)
+      make_transfer
+      expect(last_response.status).to be(200)
+      expect(JSON.parse(last_response.body)['request_id']).to eq(request_id)
+    end
+
+    it 'calls `MAPI::Services::Member::SecuritiesRequests.create_transfer` with all of the appropriate arguments' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:create_transfer).with(
+                                                            kind_of(app),
+                                                            member_id.to_i,
+                                                            post_body['user']['username'],
+                                                            post_body['user']['full_name'],
+                                                            post_body['user']['session_id'],
+                                                            post_body['broker_instructions'],
+                                                            post_body['securities'],
+                                                            post_body['kind'])
+      make_transfer
+    end
+
+    it 'doesn\'t raise an error' do
+      expect { make_transfer }.to_not raise_error
+    end
+  end
+
   describe 'PUT `securities/authorize`' do
     let(:username) { SecureRandom.hex }
     let(:full_name) { SecureRandom.hex }

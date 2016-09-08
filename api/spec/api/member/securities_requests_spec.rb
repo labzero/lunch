@@ -3096,6 +3096,413 @@ describe MAPI::ServiceApp do
       end
     end
 
+    describe 'securities transfer' do
+      let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
+      let(:member_id) { rand(9999..99999) }
+      let(:header_id) { rand(9999..99999) }
+      let(:detail_id) { rand(9999..99999) }
+      let(:trade_date) { (Time.zone.today - rand(1..10).days).strftime }
+      let(:settlement_date) { (Time.zone.today - rand(1..10).days).strftime }
+      let(:broker_instructions) { { 'transaction_code' => rand(0..1) == 0 ? 'standard' : 'repo',
+                                    'trade_date' => trade_date,
+                                    'settlement_type' => rand(0..1) == 0 ? 'free' : 'vs_payment',
+                                    'settlement_date' => settlement_date,
+                                    'pledge_to' => SecureRandom.hex } }
+      let(:security) { {  'cusip' => SecureRandom.hex,
+                          'description' => SecureRandom.hex,
+                          'original_par' => rand(1..40000) + rand.round(2),
+                          'payment_amount' => rand(1..100000) + rand.round(2) } }
+      let(:user_name) {  SecureRandom.hex }
+      let(:full_name) { SecureRandom.hex }
+      let(:session_id) { SecureRandom.hex }
+      let(:adx_id) { [1000..10000].sample }
+      let(:un_adx_id) { [1000..10000].sample }
+      let(:ssk_id) { [1000..10000].sample }
+      let(:pledge_type) { 50 }
+      let(:kind) {  SecureRandom.hex }
+      let(:delivery_type) {  32 }
+      describe '`insert_transfer_header_query`' do
+        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.insert_transfer_header_query( member_id,
+                                                                                                             header_id,
+                                                                                                             user_name,
+                                                                                                             full_name,
+                                                                                                             session_id,
+                                                                                                             adx_id,
+                                                                                                             un_adx_id,
+                                                                                                             broker_instructions,
+                                                                                                             kind) }
+        let(:call_method_release) { MAPI::Services::Member::SecuritiesRequests.insert_transfer_header_query( member_id,
+                                                                                                     header_id,
+                                                                                                     user_name,
+                                                                                                     full_name,
+                                                                                                     session_id,
+                                                                                                     adx_id,
+                                                                                                     un_adx_id,
+                                                                                                     broker_instructions,
+                                                                                                     :safekept_transfer) }
+        let(:call_method_intake) { MAPI::Services::Member::SecuritiesRequests.insert_transfer_header_query( member_id,
+                                                                                                     header_id,
+                                                                                                     user_name,
+                                                                                                     full_name,
+                                                                                                     session_id,
+                                                                                                     adx_id,
+                                                                                                     un_adx_id,
+                                                                                                     broker_instructions,
+                                                                                                     :pledge_transfer) }
+        let(:sentinel) { SecureRandom.hex }
+        let(:today) { Time.zone.today }
+
+        before do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
+          allow(Time.zone).to receive(:today).and_return(today)
+        end
+
+        it 'sets the `header_id`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(header_id).and_return(sentinel)
+          expect(call_method).to match /VALUES\s\(#{sentinel},/
+        end
+
+        it 'sets the `member_id`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(member_id).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){1}#{sentinel},/
+        end
+
+        it 'sets the `status`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SUBMITTED).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){2}#{sentinel},/
+        end
+
+        it 'sets the `pledge_type`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(pledge_type).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){3}#{sentinel},/
+        end
+
+        it 'sets the `trade_date`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(broker_instructions['trade_date']).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){4}#{sentinel},/
+        end
+
+        it 'sets the `request_status` for pledged_release' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(61).and_return(sentinel)
+          expect(call_method_release).to match /VALUES\s+\((\S+\s+){5}#{sentinel},/
+        end
+
+        it 'sets the `request_status` for pledged_intake' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(60).and_return(sentinel)
+          expect(call_method_intake).to match /VALUES\s+\((\S+\s+){5}#{sentinel},/
+        end
+
+        it 'sets the `settlement_date`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(broker_instructions['settlement_date']).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){6}#{sentinel},/
+        end
+
+        it 'sets the `delivery_type`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(delivery_type).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){7}#{sentinel},/
+        end
+
+        it 'sets the `form_type` for pledged_intake' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKFormType::SECURITIES_PLEDGED).and_return(sentinel)
+          expect(call_method_intake).to match /VALUES\s+\((\S+\s+){8}#{sentinel},/
+        end
+
+        it 'sets the `form_type` for pledged_release' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKFormType::SECURITIES_RELEASE).and_return(sentinel)
+          expect(call_method_release).to match /VALUES\s+\((\S+\s+){8}#{sentinel},/
+        end
+
+        it 'sets the `created_date`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){9}#{sentinel},/
+        end
+
+        it 'sets the `created_by`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(user_name).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){10}#{sentinel},/
+        end
+
+        it 'sets the `created_by_name`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(full_name).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){11}#{sentinel},/
+        end
+
+        it 'sets the `last_modified_by`' do
+          formatted_modification_by = double('Formatted Modification By')
+          quoted_modification_by = SecureRandom.hex
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).and_return(formatted_modification_by)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(formatted_modification_by).and_return(quoted_modification_by)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){12}#{quoted_modification_by}/
+        end
+
+        it 'sets the `last_modified_date`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(Time.zone.today)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){13}#{Time.zone.today}/
+        end
+
+        it 'sets the `last_modified_by_name`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(full_name)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){14}#{full_name}/
+        end
+
+        it 'sets the `adx_id`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(adx_id)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){15}#{adx_id}/
+        end
+
+        it 'sets the `un_adx_id`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(un_adx_id)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){16}#{un_adx_id}/
+        end
+
+      end
+
+      describe '`create_transfer` method' do
+        let(:app) { double(MAPI::ServiceApp, logger: double('logger'), settings: nil) }
+        let(:member_id) { rand(100000..999999) }
+        let(:pledged_or_unpledged) { [:pledged, :unpledged].sample }
+        let(:security) { { 'cusip' => SecureRandom.hex,
+                           'description' => instance_double(String),
+                           'original_par' => rand(0...50000000),
+                           'payment_amount' => instance_double(Numeric),
+                           'custodian_name' => instance_double(String) } }
+        let(:securities) { [ security, security, security ]}
+        let(:method_params) { [ app,
+                                member_id,
+                                user_name,
+                                full_name,
+                                session_id,
+                                broker_instructions,
+                                securities,
+                                kind ] }
+        let(:kind) { ['pledge_transfer', 'safekept_transfer'].sample }
+        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params) }
+
+        before do
+          allow(securities_request_module).to receive(:validate_broker_instructions)
+        end
+
+        context 'validations' do
+          before { allow(securities_request_module).to receive(:should_fake?).and_return(true) }
+
+          it 'raises an error if kind is not one of transfer keys' do
+            method_params[7] = SecureRandom.hex
+            expect { MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)}.to raise_error(MAPI::Shared::Errors::InvalidFieldError, "kind must contain the key for transfer set to one of #{MAPI::Services::Member::SecuritiesRequests::KIND_TRANSFER_KEYS}")
+          end
+
+          it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything, anything)
+            call_method
+          end
+          it 'calls `validate_broker_instructions` with the app as an arg' do
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, anything)
+            call_method
+          end
+          it 'calls `validate_broker_instructions` with the adx_type as an arg for pledged securities' do
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, anything, :pledge_transfer)
+            method_params[7] = 'pledge_transfer'
+            MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
+          end
+          it 'calls `validate_broker_instructions` with the adx_type as an arg for unpledged securities' do
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, anything, :safekept_transfer)
+            method_params[7] = 'safekept_transfer'
+            MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
+          end
+          it 'calls `validate_securities` with the `securities` arg' do
+            expect(securities_request_module).to receive(:validate_securities).with(securities, anything, anything, anything)
+            call_method
+          end
+          it 'calls `validate_securities` with the `settlement_type` arg from the broker instructions' do
+            expect(securities_request_module).to receive(:validate_securities).with(anything, broker_instructions['settlement_type'], anything, anything)
+            call_method
+          end
+          it 'calls `validate_securities` with the `delivery_type` arg from the delivery instructions' do
+            expect(securities_request_module).to receive(:validate_securities).with(anything, anything, :transfer, anything)
+            call_method
+          end
+          it 'calls `validate_securities` with `:release`' do
+            expect(securities_request_module).to receive(:validate_securities).with(anything, anything, anything, :release)
+            call_method
+          end
+        end
+
+        context 'preparing and executing SQL' do
+          let(:next_id) { double('Next ID') }
+          let(:adx_sql) { double('ADX SQL') }
+          let(:un_adx_sql) { double('ADX SQL') }
+          let(:ssk_sql) { double('SSK SQL') }
+          let(:sequence_result) { double('Sequence Result', to_i: next_id) }
+
+          before do
+            allow(securities_request_module).to receive(:should_fake?).and_return(false)
+            allow(securities_request_module).to receive(:adx_query).with(member_id, :pledged).and_return(adx_sql)
+            allow(securities_request_module).to receive(:adx_query).with(member_id, :unpledged).and_return(un_adx_sql)
+            allow(securities_request_module).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip']).
+                                                  exactly(3).times.and_return(ssk_sql)
+            allow(securities_request_module).to receive(:execute_sql_single_result).with(
+                                                  app,
+                                                  MAPI::Services::Member::SecuritiesRequests::NEXT_ID_SQL,
+                                                  "Next ID Sequence").and_return(sequence_result)
+            allow(securities_request_module).to receive(:execute_sql_single_result).with(
+                                                  app,
+                                                  adx_sql,
+                                                  "ADX ID").and_return(adx_id)
+            allow(securities_request_module).to receive(:execute_sql_single_result).with(
+                                                  app,
+                                                  un_adx_sql,
+                                                  "ADX ID").and_return(un_adx_id)
+            allow(securities_request_module).to receive(:execute_sql_single_result).with(
+                                                  app,
+                                                  ssk_sql,
+                                                  "SSK ID").and_return(ssk_id)
+          end
+
+          it 'returns the inserted request ID' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
+            expect(call_method).to be(next_id)
+          end
+
+          context 'prepares SQL' do
+            before do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
+            end
+
+            it 'calls `insert_transfer_header_query` for unpledged securities' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_transfer_header_query).with(
+                                                                      member_id,
+                                                                      next_id,
+                                                                      user_name,
+                                                                      full_name,
+                                                                      session_id,
+                                                                      adx_id,
+                                                                      un_adx_id,
+                                                                      broker_instructions,
+                                                                      :safekept_transfer)
+              method_params[7] = 'safekept_transfer'
+              MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
+            end
+
+            it 'calls `insert_transfer_header_query` for pledged securities' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_transfer_header_query).with(
+                                                                      member_id,
+                                                                      next_id,
+                                                                      user_name,
+                                                                      full_name,
+                                                                      session_id,
+                                                                      adx_id,
+                                                                      un_adx_id,
+                                                                      broker_instructions,
+                                                                      :pledge_transfer)
+              method_params[7] = 'pledge_transfer'
+              MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
+            end
+
+            it 'calls `insert_security_query`' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_security_query).with(next_id,
+                                                                                                         next_id, user_name, session_id, security, ssk_id).exactly(3).times
+              call_method
+            end
+          end
+
+          context 'calls `execute_sql`' do
+            let(:insert_header_sql_release) { double('Insert Header SQL Release') }
+            let(:insert_header_sql_intake) { double('Insert Header SQL Intake') }
+            let(:insert_security_sql) { double('Insert Security SQL') }
+
+            before do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_transfer_header_query).with(
+                                                                     member_id,
+                                                                     next_id,
+                                                                     user_name,
+                                                                     full_name,
+                                                                     session_id,
+                                                                     adx_id,
+                                                                     un_adx_id,
+                                                                     broker_instructions,
+                                                                     :safekept_transfer).and_return(insert_header_sql_release)
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_transfer_header_query).with(
+                                                                     member_id,
+                                                                     next_id,
+                                                                     user_name,
+                                                                     full_name,
+                                                                     session_id,
+                                                                     adx_id,
+                                                                     un_adx_id,
+                                                                     broker_instructions,
+                                                                     :pledge_transfer).and_return(insert_header_sql_intake)
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_security_query).with(next_id,
+                                                                                                        next_id, user_name, session_id, security, ssk_id).exactly(3).times.and_return(insert_security_sql)
+            end
+
+            it 'inserts the header for release' do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                              insert_security_sql).exactly(3).times.and_return(true)
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                               insert_header_sql_release).and_return(true)
+              method_params[7] = 'safekept_transfer'
+              MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
+            end
+
+            it 'inserts the header for intake' do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                              insert_security_sql).exactly(3).times.and_return(true)
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                               insert_header_sql_intake).and_return(true)
+              method_params[7] = 'pledge_transfer'
+              MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
+            end
+
+            it 'inserts the securities for release' do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                              insert_header_sql_release).and_return(true)
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                               insert_security_sql).exactly(3).times.and_return(true)
+              method_params[7] = 'safekept_transfer'
+              MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
+            end
+
+            it 'inserts the securities for intake' do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                              insert_header_sql_intake).and_return(true)
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                               insert_security_sql).exactly(3).times.and_return(true)
+              method_params[7] = 'pledge_transfer'
+              MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
+            end
+
+            it 'raises errors for SQL failures on header insert for release' do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                              insert_header_sql_release).and_return(false)
+              method_params[7] = 'safekept_transfer'
+              expect {  MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params) }.to raise_error(Exception)
+            end
+
+            it 'raises errors for SQL failures on header insert for intake' do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                              insert_header_sql_intake).and_return(false)
+              method_params[7] = 'pledge_transfer'
+              expect {  MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params) }.to raise_error(Exception)
+            end
+
+            it 'raises errors for SQL failures on securities insert for release' do
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                              insert_header_sql_release).and_return(true)
+              allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
+                                                                                              insert_security_sql).and_return(false)
+              method_params[7] = 'safekept_transfer'
+              expect {  MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params) }.to raise_error(Exception)
+            end
+
+            it 'raises an error if the `SSK_ID` can\'t be found' do
+              allow(securities_request_module).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip']).and_return(nil)
+              expect { call_method }.to raise_error(Exception)
+            end
+          end
+        end
+      end
+
+    end
+
     describe 'securities intake' do
       let(:delivery_columns) { [ SecureRandom.hex, SecureRandom.hex, SecureRandom.hex ] }
       let(:sentinel) { SecureRandom.hex }

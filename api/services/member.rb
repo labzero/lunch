@@ -1103,6 +1103,30 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/securities/transfer'
+            operation do
+              key :method, 'POST'
+              key :summary, 'Create a new securities transfer request'
+              key :nickname, 'createSecuritiesTransferRequest'
+              key :consumes, ['application/json']
+              key :type, :SecuritiesTransferResponse
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution requesting securities transfer'
+              end
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :SecuritiesRequest
+                key :description, "Securities to transfer and their associated metadata"
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -1567,6 +1591,22 @@ module MAPI
             ''
           else
             halt 404, 'Resource Not Found'
+          end
+        end
+
+        relative_post '/:id/securities/transfer' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            post_body_json = JSON.parse(request.body.read)
+            user = post_body_json['user']
+            request_id = MAPI::Services::Member::SecuritiesRequests.create_transfer(self,
+                                                                                   params['id'].to_i,
+                                                                                   user['username'],
+                                                                                   user['full_name'],
+                                                                                   user['session_id'],
+                                                                                   post_body_json['broker_instructions'] || {},
+                                                                                   post_body_json['securities'] || [],
+                                                                                   post_body_json['kind'])
+            {request_id: request_id}
           end
         end
       end
