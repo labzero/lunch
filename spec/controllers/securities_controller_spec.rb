@@ -1030,6 +1030,10 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
               call_action
             end
+            it 'emails the internal distro' do
+              expect(InternalMailer).to receive(:securities_request_authorized).with(securities_request)
+              call_action
+            end
             it 'renders the `authorize_request` view' do
               call_action
               expect(response.body).to render_template(:authorize_request)

@@ -198,6 +198,10 @@ class SecuritiesRequest
     end
   end
 
+  def is_collateral?
+    self.kind.in?([:pledge_release, :pledge_intake, :pledge_transfer, :safekept_transfer])
+  end
+
   private
 
   def trade_date_must_come_before_settlement_date

@@ -521,5 +521,21 @@ RSpec.describe SecuritiesRequest, :type => :model do
         end
       end
     end
+
+    describe '`is_collateral?`' do
+      let(:call_method) { subject.is_collateral? }
+
+      [:pledge_release, :pledge_intake, :pledge_transfer, :safekept_transfer].each do |pledged|
+        it 'returns true for #{pledged}' do
+          expect(call_method).to eq(false)
+        end
+      end
+
+      [:safekept_release, :safekept_intake].each do |safekept|
+        it 'returns false for #{safekept}' do
+          expect(call_method).to eq(false)
+        end
+      end
+    end
   end
 end
