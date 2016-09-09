@@ -139,6 +139,34 @@ Feature: Securities Intake
   | safekeep      |
   | pledge        |
 
+  @jira-mem-1791 @data-unavailable
+  Scenario Outline: Member uploads a securities release file that has Settlement Amounts and the request has a settlement type of Free
+    Given I am on the <security_type> securities page
+    And the settlement type is set to Free
+    And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+    And I upload a securities intake file with "settlement amounts"
+    When I click to submit the request
+    Then I should see the "settlement amount present" error
+  Examples:
+    | security_type |
+    | safekeep      |
+    | pledge        |
+
+  @jira-mem-1791 @data-unavailable
+  Scenario Outline: Member uploads a securities release file that has Settlement Amounts and the request has a settlement type of Vs. Payment
+    Given I am on the <security_type> securities page
+    And the settlement type is set to Vs Payment
+    And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+    And I upload a securities intake file with "settlement amounts"
+    When I click to submit the request
+    Then I should see the title for the "<security_type> success" page
+  Examples:
+    | security_type |
+    | safekeep      |
+    | pledge        |
+
   @jira-mem-1792 @data-unavailable
   Scenario Outline: Member uploads a securities release file that has at least one security with an Original Par over the Federal Limit of 50,000,000
     Given I am on the <security_type> securities page

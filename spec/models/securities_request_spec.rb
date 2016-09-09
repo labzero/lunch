@@ -148,41 +148,82 @@ RSpec.describe SecuritiesRequest, :type => :model do
         expect(subject.send(:date_within_range, date, :trade_date)).to be true
       end
     end
-    describe '`securities_must_have_payment_amount`' do
-      let(:call_validation) { subject.send(:securities_must_have_payment_amount) }
+    describe `securities_payment_amount` do
+      let(:security_without_payment_amount) { FactoryGirl.build(:security, payment_amount: nil) }
+      let(:security_with_payment_amount) { FactoryGirl.build(:security, payment_amount: rand(1000.99999)) }
+      let(:call_validation) { subject.send(:valid_securities_payment_amount) }
 
-      it 'is not called as a validator if the `settlement_type` is `:free`' do
-        subject.settlement_type = :free
-        expect(subject).not_to receive(:securities_must_have_payment_amount)
+      it 'is called as a validator' do
+        expect(subject).to receive(:valid_securities_payment_amount)
         subject.valid?
       end
-      describe 'when the `settlement_type` is `:vs_payment`' do
-        let(:security_without_payment_amount) { FactoryGirl.build(:security, payment_amount: nil) }
-        let(:security_with_payment_amount) { FactoryGirl.build(:security, payment_amount: rand(1000.99999)) }
-        before do
+      it 'does not add an error if there are no `securities`' do
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      it 'does not add an error if `securities` is an empty array' do
+        subject.securities = []
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      it 'does not add an error if there are `securities` but no `settlement_type`' do
+        subject.securities = [security_without_payment_amount, security_with_payment_amount]
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      shared_examples 'a validation that ignores transfers' do
+        before { subject.settlement_type = [:free, :vs_payment].sample }
+
+        described_class::TRANSFER_REQUEST_KINDS.each do |kind|
+          it "does not add an error if there are `securities` and a `settlement_type`, but the `kind` is `#{kind}`" do
+            subject.kind = kind
+            expect(subject.errors).not_to receive(:add)
+            call_validation
+          end
+        end
+      end
+      describe 'when all securities have a payment amount' do
+        before {subject.securities = [security_with_payment_amount, security_with_payment_amount]}
+
+        it_behaves_like 'a validation that ignores transfers'
+        it 'adds an error if the `settlement_type` is `:free`' do
+          subject.settlement_type = :free
+          expect(subject.errors).to receive(:add).with(:securities, :payment_amount_present)
+          call_validation
+        end
+        it 'does not add an error if the `settlement_type` is `:vs_payment`' do
           subject.settlement_type = :vs_payment
-        end
-        it 'is called as a validator' do
-          expect(subject).to receive(:securities_must_have_payment_amount)
-          subject.valid?
-        end
-        it 'does not add an error if there are no securities' do
           expect(subject.errors).not_to receive(:add)
           call_validation
         end
-        it 'does not add an error if `securities` is an empty array' do
-          subject.securities = []
+      end
+      describe 'when no securities have a payment amount' do
+        before {subject.securities = [security_without_payment_amount, security_without_payment_amount]}
+
+        it_behaves_like 'a validation that ignores transfers'
+        it 'adds an error if the `settlement_type` is `:vs_payment`' do
+          subject.settlement_type = :vs_payment
+          expect(subject.errors).to receive(:add).with(:securities, :payment_amount_missing)
+          call_validation
+        end
+        it 'does not add an error if the `settlement_type` is `:free`' do
+          subject.settlement_type = :free
           expect(subject.errors).not_to receive(:add)
           call_validation
         end
-        it 'does not add an error if all `securities` have a `payment_amount` value' do
-          subject.securities = [security_with_payment_amount, security_with_payment_amount]
-          expect(subject.errors).not_to receive(:add)
+      end
+      describe 'when some securities have a payment amount and some do not' do
+        before {subject.securities = [security_without_payment_amount, security_with_payment_amount]}
+
+        it_behaves_like 'a validation that ignores transfers'
+        it 'adds an error if the `settlement_type` is `:free`' do
+          subject.settlement_type = :free
+          expect(subject.errors).to receive(:add).with(:securities, :payment_amount_present)
           call_validation
         end
-        it 'adds an error if any of the `securities` do not have a `payment_amount` value' do
-          subject.securities = [security_with_payment_amount, security_without_payment_amount]
-          expect(subject.errors).to receive(:add).with(:securities, :payment_amount)
+        it 'adds an error if the `settlement_type` is `:vs_payment`' do
+          subject.settlement_type = :vs_payment
+          expect(subject.errors).to receive(:add).with(:securities, :payment_amount_missing)
           call_validation
         end
       end
@@ -304,7 +345,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
       let(:delivery_type) { described_class::DELIVERY_TYPES.keys.sample }
       let(:call_method) { subject.delivery_type = delivery_type }
 
-      it 'raises an error if the form_type is invalid' do
+      it 'raises an error if the delivery_type is invalid' do
         expect{subject.delivery_type = SecureRandom.hex}.to raise_error(ArgumentError, "`delivery_type` must be one of: #{described_class::DELIVERY_TYPES.keys}")
       end
       it 'assigns `@delivery_type` to the passed value' do
@@ -337,10 +378,22 @@ RSpec.describe SecuritiesRequest, :type => :model do
         end
       end
     end
+    describe '`settlement_type=`' do
+      let(:settlement_type) { described_class::SETTLEMENT_TYPES.keys.sample }
+      let(:call_method) { subject.settlement_type = settlement_type }
+
+      it 'raises an error if the settlement_type is invalid' do
+        expect{subject.settlement_type = SecureRandom.hex}.to raise_error(ArgumentError, "`settlement_type` must be one of: #{described_class::SETTLEMENT_TYPES.keys}")
+      end
+      it 'assigns `@settlement_type` to the passed value' do
+        call_method
+        expect(subject.settlement_type).to eq(settlement_type)
+      end
+    end
     describe '`attributes=`' do
-      sym_attrs = [:transaction_code, :settlement_type]
+      sym_attrs = [:transaction_code]
       date_attrs = [:trade_date, :settlement_date]
-      custom_attrs = [:request_id, :form_type, :kind, :delivery_type]
+      custom_attrs = [:request_id, :form_type, :kind, :delivery_type, :settlement_type]
       let(:hash) { {} }
       let(:value) { double('some value') }
       let(:call_method) { subject.send(:attributes=, hash) }
@@ -484,6 +537,8 @@ RSpec.describe SecuritiesRequest, :type => :model do
       (described_class::BROKER_INSTRUCTION_KEYS + [:safekept_account, :pledged_account, :pledge_type]).each do |key|
         it "returns a hash containing the `#{key}`" do
           value = double('some value')
+          allow(subject).to receive(:settlement_type=)
+          allow(subject).to receive(:settlement_type).and_return(value)
           subject.send( "#{key.to_s}=", value)
           expect(call_method[key]).to eq(value)
         end

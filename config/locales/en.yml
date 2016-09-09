@@ -228,7 +228,8 @@ en:
               invalid: Settlement date may not occur on a weekend, a holiday, or be a date in the past.
               before_trade_date: Settlement Date must be on or after Trade Date.
             securities:
-              payment_amount: When 'Versus Payment' is selected, each security must have a settlement amount.
+              payment_amount_missing: When 'Versus Payment' is selected, each security must have a settlement amount.
+              payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank. Press Edit Securities to remove Settlement Amount.
               original_par: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
         security:
           blank: "Each row must contain at least a CUSIP and Original Par.\nPlease modify your file."

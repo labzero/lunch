@@ -25,6 +25,7 @@ class SecuritiesRequest
   }.freeze
 
   KINDS = [:pledge_release, :safekept_release, :pledge_intake, :safekept_intake, :pledge_transfer, :safekept_transfer].freeze
+  TRANSFER_REQUEST_KINDS = [:pledge_transfer, :safekept_transfer].freeze
   FORM_TYPES = [:pledge_release, :safekept_release, :pledge_intake, :safekept_intake]
 
   BROKER_INSTRUCTION_KEYS = [:transaction_code, :settlement_type, :trade_date, :settlement_date].freeze
@@ -69,7 +70,7 @@ class SecuritiesRequest
   validate :trade_date_must_come_before_settlement_date
   validate :trade_date_within_range
   validate :settlement_date_within_range
-  validate :securities_must_have_payment_amount, if: Proc.new { |request| request.settlement_type && request.settlement_type.to_sym == :vs_payment }
+  validate :valid_securities_payment_amount
 
   def kind=(kind)
     kind = kind.try(:to_sym)
@@ -121,6 +122,12 @@ class SecuritiesRequest
     @delivery_type = delivery_type
   end
 
+  def settlement_type=(settlement_type)
+    settlement_type = settlement_type.try(:to_sym)
+    raise ArgumentError, "`settlement_type` must be one of: #{SETTLEMENT_TYPES.keys}" unless SETTLEMENT_TYPES.keys.include?(settlement_type)
+    @settlement_type = settlement_type
+  end
+
   def self.from_hash(hash)
     obj = new
     obj.attributes = hash
@@ -133,7 +140,7 @@ class SecuritiesRequest
       value = case key
       when :trade_date, :settlement_date
         Time.zone.parse(value)
-      when :transaction_code, :settlement_type
+      when :transaction_code
         value.to_sym
       when :securities, *ACCESSIBLE_ATTRS
         value
@@ -230,16 +237,21 @@ class SecuritiesRequest
     end
   end
 
-  def securities_must_have_payment_amount
-    unless securities.blank?
-      has_payment_amount = true
-      securities.each do |security|
-        if security.payment_amount.blank?
-          has_payment_amount = false
-          break
-        end
+  def valid_securities_payment_amount
+    unless securities.blank? || settlement_type.blank? || TRANSFER_REQUEST_KINDS.include?(kind)
+      payment_amount_present = securities.map { |security| security.payment_amount.present? }
+
+      if payment_amount_present.uniq.length == 1 && payment_amount_present.first
+        # All securities have a payment_amount
+        errors.add(:securities, :payment_amount_present) if settlement_type == :free
+      elsif payment_amount_present.uniq.length == 1
+        # No securities have a payment_amount
+        errors.add(:securities, :payment_amount_missing) if settlement_type == :vs_payment
+      else
+        # Some securities have a payment_amount and some don't
+        errors.add(:securities, :payment_amount_present) if settlement_type == :free
+        errors.add(:securities, :payment_amount_missing) if settlement_type == :vs_payment
       end
-      errors.add(:securities, :payment_amount) unless has_payment_amount
     end
   end
 end

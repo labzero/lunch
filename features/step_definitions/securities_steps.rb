@@ -390,9 +390,11 @@ Then(/^I should see the "(.*?)" error$/) do |error|
   when 'settlement date before trade date'
     I18n.t('activemodel.errors.models.securities_request.attributes.settlement_date.before_trade_date')
   when 'settlement amount required'
-    I18n.t('activemodel.errors.models.securities_request.attributes.securities.payment_amount')
+    I18n.t('activemodel.errors.models.securities_request.attributes.securities.payment_amount_missing')
   when 'over federal limit'
     I18n.t('activemodel.errors.models.securities_request.attributes.securities.original_par')
+  when 'settlement amount present'
+    I18n.t('activemodel.errors.models.securities_request.attributes.securities.payment_amount_present')
   end
   page.assert_selector('.securities-submit-release-form-errors p', text: text, exact: true)
 end
