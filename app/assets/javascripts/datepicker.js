@@ -19,6 +19,7 @@ $(function () {
       var defaultPreset = -1;
       var maxDate = moment($wrapper.data('date-picker-max-date'));
       var minDate = $wrapper.data('date-picker-min-date') ? moment($wrapper.data('date-picker-min-date')) : false;
+      var disableWeekends = $wrapper.data('date-picker-disable-weekends') || false;
       var filter = $wrapper.data('date-picker-filter');
       var filterOptions = $wrapper.data('date-picker-filter-options');
       var fromLabel = $wrapper.data('date-picker-from-label');
@@ -34,7 +35,8 @@ $(function () {
         filter: filter,
         filterOptions: filterOptions,
         today: today,
-        fromLabel: fromLabel
+        fromLabel: fromLabel,
+        disableWeekends: disableWeekends
       };
       startDate = $wrapper.data('date-picker-start-date');
       endDate = $wrapper.data('date-picker-end-date');
@@ -71,6 +73,7 @@ $(function () {
       initializeDatePicker($datePickerTrigger, $wrapper, options);
       setDatePickerApplyListener($datePickerTrigger, $form, linkedInputField);
       $.isArray(invalidDates) ? disableInvalidDatesForCalendar($datePickerTrigger, $wrapper, invalidDates) : false; // Disable invalid dates if present
+      options.disableWeekends ? disableWeekendsForCalendar($datePickerTrigger, $wrapper) : false;
       setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
       if (filter !== undefined) {
         if (singleDatePicker) {
@@ -284,6 +287,15 @@ $(function () {
       disableNodesByInvalidDates(thisMonthsDateCells, invalidDates, monthYearMoment);
       disableNodesByInvalidDates(lastMonthsDateCells, invalidDates, monthYearMoment.clone().subtract(1, 'month'));
       disableNodesByInvalidDates(nextMonthsDateCells, invalidDates, monthYearMoment.clone().add(1, 'month'));
+    });
+  };
+
+  function disableWeekendsForCalendar($datePickerTrigger, wrapper) {
+    var $wrapper = $(wrapper);
+    $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(e, picker) {
+      $wrapper.find('tbody td:first-child, tbody td:last-child').each(function(i, dateCell) {
+        disableDay($(dateCell));
+      });
     });
   };
 

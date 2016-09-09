@@ -13,6 +13,7 @@
 - from_label ||= single_date_picker ? t('datepicker.single.from_label') : t('datepicker.range.from_label')
 - linked_input_field ||= nil
 - invalid_dates ||= nil
+- disable_weekends ||= false
 - date_picker_data = { |
   :'date-picker-presets' => presets.to_json, |
   :'date-picker-open-direction' => open_direction, |
@@ -26,6 +27,7 @@
   :'date-picker-filter-options' => ReportsController::DATE_PICKER_FILTERS.to_json, |
   :'date-picker-filter' => date_picker_filter, |
   :'date-picker-invalid-dates' => invalid_dates, |
+  :'date-picker-disable-weekends' => disable_weekends.to_s, |
   :'date-picker-linked-input-field' => linked_input_field, |
   :'date-picker-from-label' => from_label }
 

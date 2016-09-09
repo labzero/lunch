@@ -35,7 +35,7 @@ Feature: Transfer Securities
     | page     |
     | pledged  |
     | safekept |
-    
+
   Scenario: Authorized signer views legal copy for pledge transfers
     Given I am logged in as a "quick-advance signer"
     And I am on the manage securities page

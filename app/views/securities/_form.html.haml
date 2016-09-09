@@ -26,7 +26,7 @@
       = render 'shared/dropdown', dropdown_name: 'securities_request[settlement_type]', default_value: @settlement_type_defaults[:value], default_text: @settlement_type_defaults[:text], dropdown_options: @settlement_type_dropdown
     .input-field-container-horizontal
       %span= t('common_table_headings.trade_date')
-      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_request[trade_date]', start_date: @securities_request.trade_date, max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates]
+      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_request[trade_date]', start_date: @securities_request.trade_date, max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates], disable_weekends: true
     .input-field-container-horizontal
       %span= t('common_table_headings.settlement_date')
       = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_request[settlement_date]', start_date: @securities_request.settlement_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates]

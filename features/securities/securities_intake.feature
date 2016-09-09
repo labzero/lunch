@@ -110,6 +110,7 @@ Feature: Securities Intake
     | safekeep      |
     | pledge        |
 
+
   @jira-mem-1790 @data-unavailable
   Scenario Outline: Member uploads a securities release file that is missing Settlement Amount and the request has a settlement type of Free
     Given I am on the <security_type> securities page
@@ -149,6 +150,22 @@ Feature: Securities Intake
     And I fill in the "fed_credit_account_number" securities field with "5683asdfa"
     When I click to submit the request
     Then I should see the "over federal limit" error
+  Examples:
+    | security_type |
+    | safekeep      |
+    | pledge        |
+
+  @jira-mem-1787
+  Scenario Outline: Member changes trade and settlement dates
+    Given I am on the <security_type> securities page
+    When I click the trade date datepicker
+    Then I should see that weekends have been disabled
+    And I click the datepicker cancel button
+    When I click the settlement date datepicker
+    Then I should see that weekends have been disabled
+    And I should see that all past dates have been disabled
+    And I should not be able to see a calendar more than 3 months in the future
+    And I click the datepicker cancel button
   Examples:
     | security_type |
     | safekeep      |
