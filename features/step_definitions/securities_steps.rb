@@ -344,10 +344,14 @@ Given(/^I upload a securities (release|intake|transfer) file(?: with "(.*?)")?$/
       'sample-securities-release-upload-with-settlement-amount.xlsx'
     elsif action == 'release' && file_type == 'no settlement amounts'
       'sample-securities-release-upload-no-settlement-amount.xlsx'
+    elsif action == 'release' && file_type == 'an original par over the federal limit'
+      'sample-securities-release-upload-over-fed-limit.xlsx'
     elsif action == 'intake' && file_type == 'settlement amounts'
       'sample-securities-intake-upload-with-settlement-amount.xlsx'
     elsif action == 'intake' && file_type == 'no settlement amounts'
       'sample-securities-intake-upload-no-settlement-amount.xlsx'
+    elsif action == 'intake' && file_type == 'an original par over the federal limit'
+      'sample-securities-intake-upload-over-fed-limit.xlsx'
     end
   else
     case action
@@ -387,6 +391,8 @@ Then(/^I should see the "(.*?)" error$/) do |error|
     I18n.t('activemodel.errors.models.securities_request.attributes.settlement_date.before_trade_date')
   when 'settlement amount required'
     I18n.t('activemodel.errors.models.securities_request.attributes.securities.payment_amount')
+  when 'over federal limit'
+    I18n.t('activemodel.errors.models.securities_request.attributes.securities.original_par')
   end
   page.assert_selector('.securities-submit-release-form-errors p', text: text, exact: true)
 end

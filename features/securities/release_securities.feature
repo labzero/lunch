@@ -112,6 +112,19 @@ Scenario: Member uploads a securities release file that is missing Settlement Am
   When I click to submit the request
   Then I should see the "settlement amount required" error
 
+@jira-mem-1792 @data-unavailable
+Scenario: Member uploads a securities release file that has at least one security with an Original Par over the Federal Limit of 50,000,000
+  Given I am on the release securities page
+  And the edit securities section is open
+  And I upload a securities release file with "an original par over the federal limit"
+  And I select "Fed" as the release delivery instructions
+  And I fill in the "clearing_agent_fed_wire_address_1" securities field with "23454343"
+  And I fill in the "clearing_agent_fed_wire_address_2" securities field with "5683asdfa"
+  And I fill in the "aba_number" securities field with "5683asdfa"
+  And I fill in the "fed_credit_account_number" securities field with "5683asdfa"
+  When I click to submit the request
+  Then I should see the "over federal limit" error
+
 @jira-mem-1654
 Scenario: Member changes trade and settlement dates
   # This should be flushed out once we have actual date ranges to check

@@ -137,3 +137,19 @@ Feature: Securities Intake
   | security_type |
   | safekeep      |
   | pledge        |
+
+  @jira-mem-1792 @data-unavailable
+  Scenario Outline: Member uploads a securities release file that has at least one security with an Original Par over the Federal Limit of 50,000,000
+    Given I am on the <security_type> securities page
+    And I upload a securities intake file with "an original par over the federal limit"
+    And I select "Fed" as the release delivery instructions
+    And I fill in the "clearing_agent_fed_wire_address_1" securities field with "23454343"
+    And I fill in the "clearing_agent_fed_wire_address_2" securities field with "5683asdfa"
+    And I fill in the "aba_number" securities field with "5683asdfa"
+    And I fill in the "fed_credit_account_number" securities field with "5683asdfa"
+    When I click to submit the request
+    Then I should see the "over federal limit" error
+  Examples:
+    | security_type |
+    | safekeep      |
+    | pledge        |
