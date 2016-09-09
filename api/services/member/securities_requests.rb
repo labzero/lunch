@@ -834,7 +834,7 @@ module MAPI
           form_type_status_combos = []
           REQUEST_FORM_TYPE_MAPPING.keys.each do |form_type|
             flat_unique_array(REQUEST_STATUS_MAPPING.values).each do |status|
-              form_type_status_combos << [form_type, nil, status]
+              form_type_status_combos << [form_type, (DELIVERY_TYPE.values - [SSKDeliverTo::INTERNAL_TRANSFER]).sample(random: rng), status]
               form_type_status_combos << [form_type, SSKDeliverTo::INTERNAL_TRANSFER, status] if [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SECURITIES_RELEASE].include?(form_type)
             end
           end

@@ -81,7 +81,7 @@ describe MAPI::ServiceApp do
         form_type_status_combos = []
         securities_request_module::REQUEST_FORM_TYPE_MAPPING.keys.each do |form_type|
           securities_request_module::REQUEST_STATUS_MAPPING.values.flatten.each do |status|
-            form_type_status_combos << [form_type, nil, status]
+            form_type_status_combos << [form_type, (securities_request_module::DELIVERY_TYPE.values - [securities_request_module::SSKDeliverTo::INTERNAL_TRANSFER]).sample(random: rng), status]
             form_type_status_combos << [form_type, securities_request_module::SSKDeliverTo::INTERNAL_TRANSFER, status] if [securities_request_module::SSKFormType::SECURITIES_PLEDGED, securities_request_module::SSKFormType::SECURITIES_RELEASE].include?(form_type)
           end
         end
