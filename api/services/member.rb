@@ -1503,7 +1503,7 @@ module MAPI
                                                                                   post_body_json['broker_instructions'] || {},
                                                                                   post_body_json['delivery_instructions'] || {},
                                                                                   post_body_json['securities'] || [],
-                                                                                  post_body_json['pledged_or_unpledged'])
+                                                                                  post_body_json['kind'].try(:to_sym))
             {request_id: request_id}
           end
         end
@@ -1525,7 +1525,7 @@ module MAPI
               post_body_json['broker_instructions'] || {},
               post_body_json['delivery_instructions'] || {},
               post_body_json['securities'] || [],
-              post_body_json['pledged_or_unpledged'])
+              post_body_json['kind'].try(:to_sym))
           end
         end
 
@@ -1540,7 +1540,8 @@ module MAPI
                                                                                    user['session_id'],
                                                                                    post_body_json['broker_instructions'] || {},
                                                                                    post_body_json['delivery_instructions'] || {},
-                                                                                   post_body_json['securities'] || [])
+                                                                                   post_body_json['securities'] || [],
+                                                                                   post_body_json['kind'].try(:to_sym))
             {request_id: request_id}
           end
         end
@@ -1561,7 +1562,8 @@ module MAPI
               user['session_id'],
               body['broker_instructions'] || {},
               body['delivery_instructions'] || {},
-              body['securities'] || []
+              body['securities'] || [],
+              body['kind'].try(:to_sym)
             )
           end
         end
@@ -1605,7 +1607,7 @@ module MAPI
                                                                                    user['session_id'],
                                                                                    post_body_json['broker_instructions'] || {},
                                                                                    post_body_json['securities'] || [],
-                                                                                   post_body_json['kind'])
+                                                                                   post_body_json['kind'].try(:to_sym))
             {request_id: request_id}
           end
         end

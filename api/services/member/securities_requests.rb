@@ -107,7 +107,11 @@ module MAPI
         FED_AMOUNT_LIMIT = 50000000
         MAX_DATE_RESTRICTION = 3.months
 
-        KIND_TRANSFER_KEYS = [ 'pledge_transfer', 'safekept_transfer' ].freeze
+        KINDS_FOR_FLOW = {
+          release: [:pledge_release, :safekept_release].freeze,
+          intake: [:pledge_intake, :safekept_intake].freeze,
+          transfer: [:pledge_transfer, :safekept_transfer].freeze
+        }.freeze
 
         module ADXAccountTypeMapping
           SYMBOL_TO_STRING = { pledged: 'P', unpledged: 'U' }.freeze
@@ -439,10 +443,10 @@ module MAPI
           nil
         end
 
-        def self.validate_broker_instructions(broker_instructions, app, type)
+        def self.validate_broker_instructions(broker_instructions, app, kind)
           raise MAPI::Shared::Errors::MissingFieldError.new('broker_instructions must be a non-empty hash', :broker_instructions) unless !broker_instructions.nil? && broker_instructions.is_a?(Hash) && !broker_instructions.empty?
           broker_instructions_mapping = BROKER_INSTRUCTIONS_MAPPING
-          broker_instructions_mapping = broker_instructions_mapping.merge(ADDITIONAL_BROKER_INSTRUCTIONS_MAPPING_FOR_PLEDGING) if type == :pledge_intake
+          broker_instructions_mapping = broker_instructions_mapping.merge(ADDITIONAL_BROKER_INSTRUCTIONS_MAPPING_FOR_PLEDGING) if kind == :pledge_intake
           broker_instructions_mapping.keys.each do |key|
             raise MAPI::Shared::Errors::MissingFieldError.new("broker_instructions must contain a value for #{key}", key) unless broker_instructions[key]
           end
@@ -492,6 +496,12 @@ module MAPI
           raise MAPI::Shared::Errors::MissingFieldError.new('delivery_instructions must be a non-empty hash', :delivery_instructions) unless !delivery_instructions.nil? && delivery_instructions.is_a?(Hash) && !delivery_instructions.empty?
           delivery_type = delivery_instructions['delivery_type']
           raise MAPI::Shared::Errors::InvalidFieldError.new("delivery_instructions must contain the key delivery_type set to one of #{DELIVERY_TYPE.keys.join(', ')}", :delivery_type, DELIVERY_TYPE.keys) unless DELIVERY_TYPE.keys.include?(delivery_type)
+        end
+
+        def self.validate_kind(flow, kind)
+          raise ArgumentError, "unknown flow: #{flow}" unless KINDS_FOR_FLOW.keys.include?(flow)
+          raise ArgumentError, "invalid kind: #{kind}" unless KINDS_FOR_FLOW[flow].include?(kind)
+          true
         end
 
         def self.process_delivery_instructions(delivery_instructions)
@@ -548,10 +558,12 @@ module MAPI
           SQL
         end
 
-        def self.create_intake(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities, pledged_or_unpledged)
+        def self.create_intake(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities, kind)
+          validate_kind(:intake, kind)
+          pledged_or_unpledged = adx_type_for_intake(kind)
           validate_delivery_instructions(delivery_instructions)
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :intake)
-          validate_broker_instructions(broker_instructions, app, :"#{pledged_or_unpledged}_intake")
+          validate_broker_instructions(broker_instructions, app, kind)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           user_name.downcase!
           unless should_fake?(app)
@@ -574,10 +586,12 @@ module MAPI
           header_id
         end
 
-        def self.update_intake(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities, pledged_or_unpledged)
+        def self.update_intake(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities, kind)
+          validate_kind(:intake, kind)
+          pledged_or_unpledged = adx_type_for_intake(kind)
           original_delivery_instructions = delivery_instructions.clone # Used to see if header details have changes below
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :intake)
-          validate_broker_instructions(broker_instructions, app, :"#{pledged_or_unpledged}_intake")
+          validate_broker_instructions(broker_instructions, app, kind)
           validate_delivery_instructions(delivery_instructions)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           unless should_fake?(app)
@@ -612,11 +626,12 @@ module MAPI
           true
         end
 
-        def self.create_release(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
+        def self.create_release(app, member_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities, kind)
+          validate_kind(:release, kind)
           validate_delivery_instructions(delivery_instructions)
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :release)
           adx_type = get_adx_type_from_security(app, securities.first)
-          validate_broker_instructions(broker_instructions, app, :"#{adx_type}_release")
+          validate_broker_instructions(broker_instructions, app, kind)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           user_name.downcase!
           unless should_fake?(app)
@@ -649,11 +664,12 @@ module MAPI
           header_id
         end
 
-        def self.update_release(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities)
+        def self.update_release(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, delivery_instructions, securities, kind)
+          validate_kind(:release, kind)
           original_delivery_instructions = delivery_instructions.clone # Used to see if header details have changes below
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :release)
           adx_type = get_adx_type_from_security(app, securities.first)
-          validate_broker_instructions(broker_instructions, app, :"#{adx_type}_release")
+          validate_broker_instructions(broker_instructions, app, kind)
           validate_delivery_instructions(delivery_instructions)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           unless should_fake?(app)
@@ -691,7 +707,7 @@ module MAPI
         end
 
         def self.create_transfer(app, member_id, user_name, full_name, session_id, broker_instructions, securities, kind)
-          raise MAPI::Shared::Errors::InvalidFieldError.new("kind must contain the key for transfer set to one of #{KIND_TRANSFER_KEYS}") unless KIND_TRANSFER_KEYS.include?(kind)
+          validate_kind(:transfer, kind)
           validate_securities(securities, broker_instructions['settlement_type'], :transfer, :release)
           validate_broker_instructions(broker_instructions, app, kind.to_sym)
           user_name.downcase!
@@ -1010,6 +1026,10 @@ module MAPI
           else
             raise ArgumentError, "unknown form_type: #{form_type}"
           end
+        end
+
+        def self.adx_type_for_intake(kind)
+          kind == :pledge_intake ? :pledged : :unpledged
         end
       end
     end

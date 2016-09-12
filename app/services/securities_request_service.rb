@@ -24,13 +24,17 @@ class SecuritiesRequestService < MAPIService
       delivery_instructions: securities_request.delivery_instructions,
       securities: securities_request.securities,
       user: user_details(user),
-      request_id: securities_request.request_id
+      request_id: securities_request.request_id,
+      kind: securities_request.kind
     }
     method = body[:request_id] ? :put_hash : :post_hash
     type = :intake if type != :release
     response = send(method, :submit_request_for_authorization, "/member/#{member_id}/securities/#{type}", body) do |name, msg, err|
       if err.is_a?(RestClient::Exception) && err.http_code >= 400 && err.http_code < 500 && error_handler
+        Rails.logger.info { "error submitting securities request: #{err.http_body}" }
         error_handler.call(err)
+      else
+        Rails.logger.info { "error submitting securities request: #{err}" }
       end
     end
     request_id = response.try(:[], :request_id)

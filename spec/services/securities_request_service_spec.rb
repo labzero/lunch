@@ -80,9 +80,10 @@ describe SecuritiesRequestService do
     let(:securities) { SecureRandom.hex }
     let(:session_id) { SecureRandom.hex }
     let(:request_id) { SecureRandom.hex }
+    let(:kind) { SecureRandom.hex }
     let(:session) { instance_double(ActionDispatch::Request::Session, id: session_id) }
     let(:user) { instance_double(User, username: SecureRandom.hex, display_name: SecureRandom.hex) }
-    let(:securities_request) { instance_double(SecuritiesRequest, broker_instructions: broker_instructions, delivery_instructions: delivery_instructions, securities: securities, request_id: nil, 'request_id=': nil) }
+    let(:securities_request) { instance_double(SecuritiesRequest, broker_instructions: broker_instructions, delivery_instructions: delivery_instructions, securities: securities, request_id: nil, 'request_id=': nil, kind: kind) }
 
     before do
       allow(request).to receive(:session).and_return(session)
@@ -115,15 +116,15 @@ describe SecuritiesRequestService do
             expect(subject).to receive(method).with(anything, anything, anything, 'application/json', any_args)
             call_method
           end
-          it "calls `#{method}` with a JSON body argument including the broker instructions from the security_release_request" do
+          it "calls `#{method}` with a JSON body argument including the broker instructions from the security_request" do
             expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['broker_instructions'] == broker_instructions }, any_args)
             call_method
           end
-          it "calls `#{method}` with a body argument including the delivery instructions from the security_release_request" do
+          it "calls `#{method}` with a body argument including the delivery instructions from the security_request" do
             expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['delivery_instructions'] == delivery_instructions }, any_args)
             call_method
           end
-          it "calls `#{method}` with a body argument including the securities from the security_release_request" do
+          it "calls `#{method}` with a body argument including the securities from the security_request" do
             expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['securities'] == securities }, any_args)
             call_method
           end
@@ -137,6 +138,10 @@ describe SecuritiesRequestService do
           end
           it "calls `#{method}` with a body argument including the `session_id` of the passed user's session" do
             expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['session_id'] == session_id }, any_args)
+            call_method
+          end
+          it "calls `#{method}` with a body argument including the `kind` of the security_request" do
+            expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['kind'] == kind }, any_args)
             call_method
           end
           describe "when the #{method} to MAPI succeeds" do

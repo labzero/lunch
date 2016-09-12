@@ -6,6 +6,7 @@ describe MAPI::ServiceApp do
     let(:adx_type) { [:pledged, :unpledged].sample }
     let(:adx_type_string) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_STRING[adx_type] }
     let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE["#{adx_type}_release".to_sym] }
+    let(:kind) { double('A Kind') }
     securities_request_module = MAPI::Services::Member::SecuritiesRequests
 
     describe 'GET `/securities/requests`' do
@@ -742,11 +743,13 @@ describe MAPI::ServiceApp do
                                 session_id,
                                 broker_instructions,
                                 delivery_instructions,
-                                securities ] }
+                                securities,
+                                kind ] }
         let(:adx_type) { [:pledged, :unpledged].sample }
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_release(*method_params) }
 
         before do
+          allow(securities_request_module).to receive(:validate_kind).with(:release, kind).and_return(true)
           allow(securities_request_module).to receive(:get_adx_type_from_security).with(app, security).and_return(adx_type)
           allow(securities_request_module).to receive(:validate_broker_instructions)
         end
@@ -762,8 +765,8 @@ describe MAPI::ServiceApp do
             expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, anything)
             call_method
           end
-          it 'calls `validate_broker_instructions` with `form_type` as an arg' do
-            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, anything, :"#{adx_type}_release")
+          it 'calls `validate_broker_instructions` with `kind` as an arg' do
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, anything, kind)
             call_method
           end
           it 'calls `validate_delivery_instructions` with the `delivery_instructions` arg' do
@@ -1880,10 +1883,10 @@ describe MAPI::ServiceApp do
       let(:transaction_code) { securities_request_module::TRANSACTION_CODE.to_a.sample(1).to_h }
       let(:settlement_type) { securities_request_module::SETTLEMENT_TYPE.to_a.sample(1).to_h }
       let(:delivery_type) { securities_request_module::DELIVERY_TYPE.to_a.sample(1).to_h }
+      let(:kind) { "#{adx_type}_#{intake_or_release}" }
       let(:sentinel) { SecureRandom.hex }
       let(:today) { Time.zone.today }
       let(:intake_or_release) { [ :intake, :release ].sample }
-      let(:kind) { "#{adx_type}_#{intake_or_release}" }
       let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[kind.to_sym] }
       let(:call_method) { securities_request_module.update_request_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type.keys.first, delivery_values, adx_type, intake_or_release) }
 
@@ -2133,7 +2136,8 @@ describe MAPI::ServiceApp do
         'payment_amount' => instance_double(Numeric)
       }}
       let(:securities) { [security] }
-      let(:call_method) { securities_request_module.update_release(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities) }
+      let(:kind) { double('A Kind') }
+      let(:call_method) { securities_request_module.update_release(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities, kind) }
 
       before do
         allow(securities_request_module).to receive(:validate_broker_instructions)
@@ -2141,6 +2145,7 @@ describe MAPI::ServiceApp do
         allow(securities_request_module).to receive(:validate_delivery_instructions)
         allow(securities_request_module).to receive(:process_delivery_instructions).and_return(processed_delivery_instructions)
         allow(securities_request_module).to receive(:should_fake?).and_return(true)
+        allow(securities_request_module).to receive(:validate_kind).with(:release, kind).and_return(true)
       end
 
       it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
@@ -2577,7 +2582,7 @@ describe MAPI::ServiceApp do
       let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
       let(:member_id) { rand(9999..99999) }
       let(:request_id) { instance_double(String) }
-      let(:pledged_or_unpledged) { [:pledged, :unpledged].sample }
+      let(:kind) { double('A Kind') }
       let(:username) { instance_double(String) }
       let(:full_name) { instance_double(String) }
       let(:session_id) { instance_double(String) }
@@ -2607,7 +2612,7 @@ describe MAPI::ServiceApp do
       }}
       let(:pledged_or_unpledged) { [ :pledged, :unpledged ].sample }
       let(:securities) { [security] }
-      let(:call_method) { securities_request_module.update_intake(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities, pledged_or_unpledged) }
+      let(:call_method) { securities_request_module.update_intake(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities, kind) }
 
       before do
         allow(securities_request_module).to receive(:validate_broker_instructions)
@@ -2615,6 +2620,7 @@ describe MAPI::ServiceApp do
         allow(securities_request_module).to receive(:validate_delivery_instructions)
         allow(securities_request_module).to receive(:process_delivery_instructions).and_return(processed_delivery_instructions)
         allow(securities_request_module).to receive(:should_fake?).and_return(true)
+        allow(securities_request_module).to receive(:validate_kind).with(:intake, kind).and_return(true)
       end
 
       it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
@@ -2728,8 +2734,22 @@ describe MAPI::ServiceApp do
             end
           end
           describe 'fetching the `adx_id`' do
-            it 'constructs the `adx_query` with the `member_id` and `pledged_or_unpledged`' do
-              expect(securities_request_module).to receive(:adx_query).with(member_id, pledged_or_unpledged)
+
+            describe 'adx account' do
+              before do
+                allow(securities_request_module).to receive(:validate_kind).and_return(true)
+              end
+              it 'constructs the `adx_query` with `pledged` when the kind is `pledge_intake`' do
+                expect(securities_request_module).to receive(:adx_query).with(anything, :pledged)
+                securities_request_module.update_intake(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities, :pledge_intake)
+              end
+              it 'constructs the `adx_query` with `pledged` when the kind is `safekept_intake`' do
+                expect(securities_request_module).to receive(:adx_query).with(anything, :unpledged)
+                securities_request_module.update_intake(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities, :safekept_intake)
+              end
+            end
+            it 'constructs the `adx_query` with the `member_id`' do
+              expect(securities_request_module).to receive(:adx_query).with(member_id, anything)
               call_method
             end
             it 'calls `execute_sql_single_result` with the results of `adx_query`' do
@@ -2878,6 +2898,7 @@ describe MAPI::ServiceApp do
             before do
               allow(securities_request_module).to receive(:format_securities).and_return([old_security])
               allow(securities_request_module).to receive(:security_has_changed).and_return(false)
+              allow(securities_request_module).to receive(:adx_type_for_intake).and_return(adx_type)
             end
 
             describe 'fetching the `existing_header`' do
@@ -2969,7 +2990,7 @@ describe MAPI::ServiceApp do
                   call_method
                 end
                 it 'constructs the `update_request_header_details_query` with the `delivery_values` from the processed delivery_instructions' do
-                  expect(securities_request_module).to receive(:update_request_header_details_query).with(anything, anything, anything, anything, anything, anything, anything, anything, anything, processed_delivery_instructions[:delivery_values], pledged_or_unpledged, :intake)
+                  expect(securities_request_module).to receive(:update_request_header_details_query).with(anything, anything, anything, anything, anything, anything, anything, anything, anything, processed_delivery_instructions[:delivery_values], adx_type, :intake)
                   call_method
                 end
                 it 'calls `execute_sql` with the result of `update_request_header_details_query`' do
@@ -3260,7 +3281,6 @@ describe MAPI::ServiceApp do
       describe '`create_transfer` method' do
         let(:app) { double(MAPI::ServiceApp, logger: double('logger'), settings: nil) }
         let(:member_id) { rand(100000..999999) }
-        let(:pledged_or_unpledged) { [:pledged, :unpledged].sample }
         let(:security) { { 'cusip' => SecureRandom.hex,
                            'description' => instance_double(String),
                            'original_par' => rand(0...50000000),
@@ -3275,10 +3295,12 @@ describe MAPI::ServiceApp do
                                 broker_instructions,
                                 securities,
                                 kind ] }
-        let(:kind) { ['pledge_transfer', 'safekept_transfer'].sample }
+        let(:kind) { double('A Kind') }
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params) }
 
         before do
+          allow(kind).to receive(:to_sym).and_return(kind)
+          allow(securities_request_module).to receive(:validate_kind).with(:transfer, kind).and_return(true)
           allow(securities_request_module).to receive(:validate_broker_instructions)
         end
 
@@ -3287,7 +3309,8 @@ describe MAPI::ServiceApp do
 
           it 'raises an error if kind is not one of transfer keys' do
             method_params[7] = SecureRandom.hex
-            expect { MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)}.to raise_error(MAPI::Shared::Errors::InvalidFieldError, "kind must contain the key for transfer set to one of #{MAPI::Services::Member::SecuritiesRequests::KIND_TRANSFER_KEYS}")
+            allow(securities_request_module).to receive(:validate_kind).and_call_original
+            expect { MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)}.to raise_error(/invalid kind/i)
           end
 
           it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
@@ -3299,13 +3322,15 @@ describe MAPI::ServiceApp do
             call_method
           end
           it 'calls `validate_broker_instructions` with the adx_type as an arg for pledged securities' do
+            allow(securities_request_module).to receive(:validate_kind).and_call_original
             expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, anything, :pledge_transfer)
-            method_params[7] = 'pledge_transfer'
+            method_params[7] = :pledge_transfer
             MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
           end
           it 'calls `validate_broker_instructions` with the adx_type as an arg for unpledged securities' do
+            allow(securities_request_module).to receive(:validate_kind).and_call_original
             expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, anything, :safekept_transfer)
-            method_params[7] = 'safekept_transfer'
+            method_params[7] = :safekept_transfer
             MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
           end
           it 'calls `validate_securities` with the `securities` arg' do
@@ -3365,6 +3390,7 @@ describe MAPI::ServiceApp do
           context 'prepares SQL' do
             before do
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
+              allow(securities_request_module).to receive(:validate_kind).and_return(true)
             end
 
             it 'calls `insert_transfer_header_query` for unpledged securities' do
@@ -3378,7 +3404,7 @@ describe MAPI::ServiceApp do
                                                                       un_adx_id,
                                                                       broker_instructions,
                                                                       :safekept_transfer)
-              method_params[7] = 'safekept_transfer'
+              method_params[7] = :safekept_transfer
               MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
             end
 
@@ -3393,7 +3419,7 @@ describe MAPI::ServiceApp do
                                                                       un_adx_id,
                                                                       broker_instructions,
                                                                       :pledge_transfer)
-              method_params[7] = 'pledge_transfer'
+              method_params[7] = :pledge_transfer
               MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
             end
 
@@ -3432,6 +3458,7 @@ describe MAPI::ServiceApp do
                                                                      :pledge_transfer).and_return(insert_header_sql_intake)
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_security_query).with(next_id,
                                                                                                         next_id, user_name, session_id, security, ssk_id).exactly(3).times.and_return(insert_security_sql)
+              allow(securities_request_module).to receive(:validate_kind).and_call_original
             end
 
             it 'inserts the header for release' do
@@ -3439,7 +3466,7 @@ describe MAPI::ServiceApp do
                                                                                               insert_security_sql).exactly(3).times.and_return(true)
               expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                                                                                                insert_header_sql_release).and_return(true)
-              method_params[7] = 'safekept_transfer'
+              method_params[7] = :safekept_transfer
               MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
             end
 
@@ -3448,7 +3475,7 @@ describe MAPI::ServiceApp do
                                                                                               insert_security_sql).exactly(3).times.and_return(true)
               expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                                                                                                insert_header_sql_intake).and_return(true)
-              method_params[7] = 'pledge_transfer'
+              method_params[7] = :pledge_transfer
               MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
             end
 
@@ -3457,7 +3484,7 @@ describe MAPI::ServiceApp do
                                                                                               insert_header_sql_release).and_return(true)
               expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                                                                                                insert_security_sql).exactly(3).times.and_return(true)
-              method_params[7] = 'safekept_transfer'
+              method_params[7] = :safekept_transfer
               MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
             end
 
@@ -3466,21 +3493,21 @@ describe MAPI::ServiceApp do
                                                                                               insert_header_sql_intake).and_return(true)
               expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                                                                                                insert_security_sql).exactly(3).times.and_return(true)
-              method_params[7] = 'pledge_transfer'
+              method_params[7] = :pledge_transfer
               MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
             end
 
             it 'raises errors for SQL failures on header insert for release' do
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                                                                                               insert_header_sql_release).and_return(false)
-              method_params[7] = 'safekept_transfer'
+              method_params[7] = :safekept_transfer
               expect {  MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params) }.to raise_error(Exception)
             end
 
             it 'raises errors for SQL failures on header insert for intake' do
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                                                                                               insert_header_sql_intake).and_return(false)
-              method_params[7] = 'pledge_transfer'
+              method_params[7] = :pledge_transfer
               expect {  MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params) }.to raise_error(Exception)
             end
 
@@ -3489,7 +3516,7 @@ describe MAPI::ServiceApp do
                                                                                               insert_header_sql_release).and_return(true)
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger,
                                                                                               insert_security_sql).and_return(false)
-              method_params[7] = 'safekept_transfer'
+              method_params[7] = :safekept_transfer
               expect {  MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params) }.to raise_error(Exception)
             end
 
@@ -3646,7 +3673,7 @@ describe MAPI::ServiceApp do
       describe '`create_intake` method' do
         let(:app) { double(MAPI::ServiceApp, logger: double('logger'), settings: nil) }
         let(:member_id) { rand(100000..999999) }
-        let(:pledged_or_unpledged) { [:pledged, :unpledged].sample }
+        let(:kind) { double('A Kind') }
         let(:delivery_type) { MAPI::Services::Member::SecuritiesRequests::DELIVERY_TYPE.keys[rand(0..3)] }
         let(:delivery_instructions) {
           MAPI::Services::Member::SecuritiesRequests.delivery_keys_for_delivery_type(delivery_type).map do |key|
@@ -3666,22 +3693,23 @@ describe MAPI::ServiceApp do
                                 broker_instructions,
                                 delivery_instructions,
                                 securities,
-                                pledged_or_unpledged ] }
+                                kind ] }
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_intake(*method_params) }
 
         before do
           allow(securities_request_module).to receive(:validate_broker_instructions)
+          allow(securities_request_module).to receive(:validate_kind).with(:intake, kind).and_return(true)
         end
 
         context 'validations' do
           before { allow(securities_request_module).to receive(:should_fake?).and_return(true) }
 
           it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
-            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything, :"#{pledged_or_unpledged}_intake")
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything, anything)
             call_method
           end
           it 'calls `validate_broker_instructions` with the app as an arg' do
-            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, :"#{pledged_or_unpledged}_intake")
+            expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, anything)
             call_method
           end
           it 'calls `validate_delivery_instructions` with the `delivery_instructions` arg' do
@@ -3721,7 +3749,7 @@ describe MAPI::ServiceApp do
             allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_delivery_values).and_return(
               delivery_values)
             allow(securities_request_module).to receive(:should_fake?).and_return(false)
-            allow(securities_request_module).to receive(:adx_query).with(member_id, pledged_or_unpledged).and_return(adx_sql)
+            allow(securities_request_module).to receive(:adx_query).with(member_id, adx_type).and_return(adx_sql)
             allow(securities_request_module).to receive(:execute_sql_single_result).with(
               app,
               MAPI::Services::Member::SecuritiesRequests::NEXT_ID_SQL,
@@ -3730,6 +3758,7 @@ describe MAPI::ServiceApp do
               app,
               adx_sql,
               "ADX ID").and_return(adx_id)
+            allow(securities_request_module).to receive(:adx_type_for_intake).and_return(adx_type)
           end
 
           it 'returns the inserted request ID' do
@@ -3754,7 +3783,7 @@ describe MAPI::ServiceApp do
                 broker_instructions,
                 delivery_type,
                 delivery_values,
-                pledged_or_unpledged)
+                adx_type)
               call_method
             end
 
@@ -3770,6 +3799,7 @@ describe MAPI::ServiceApp do
             let(:insert_security_sql) { double('Insert Security SQL') }
 
             before do
+              allow(securities_request_module).to receive(:adx_type_for_intake).and_return(adx_type)
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_intake_header_query).with(
                 member_id,
                 next_id,
@@ -3781,7 +3811,7 @@ describe MAPI::ServiceApp do
                 broker_instructions,
                 delivery_type,
                 delivery_values,
-                pledged_or_unpledged).and_return(insert_header_sql)
+                adx_type).and_return(insert_header_sql)
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_security_query).with(next_id,
                 next_id, user_name, session_id, security, nil).exactly(3).times.and_return(insert_security_sql)
             end
@@ -4062,6 +4092,41 @@ describe MAPI::ServiceApp do
       it 'returns `pledge_release` if the `FORM_TYPE` is `SSKFormType::SECURITIES_RELEASE` and the `DELIVER_TO` is not `SSKDeliverTo::INTERNAL_TRANSFER`' do
         header_details['FORM_TYPE'] = securities_request_module::SSKFormType::SECURITIES_RELEASE
         expect(call_method).to be(:pledge_release)
+      end
+    end
+
+    describe '`validate_kind` class method' do
+      let(:flow) { double('A Flow') }
+      let(:kind) { double('A Kind') }
+      let(:call_method) { securities_request_module.validate_kind(flow, kind) }
+      it 'raises an error if the `flow` is not :release, :intake or :transfer' do
+        expect{call_method}.to raise_error(/unknown flow/i)
+      end
+      {
+        release: [:pledge_release, :safekept_release],
+        intake: [:pledge_intake, :safekept_intake],
+        transfer: [:pledge_transfer, :safekept_transfer]
+      }.each do |flow, kinds|
+        it "it raises an error when the `flow` is `#{flow}` and the kind is not #{kinds}" do
+          expect{securities_request_module.validate_kind(flow, kind)}.to raise_error(/invalid kind/i)
+        end
+        kinds.each do |kind|
+          it "does not raise an error when `flow` is `#{flow}` and the kind is `#{kind}`" do
+            expect{securities_request_module.validate_kind(flow, kind)}.to_not raise_error
+          end
+          it "returns true when `flow` is `#{flow}` and the kind is `#{kind}`" do
+            expect(securities_request_module.validate_kind(flow, kind)).to be(true)
+          end
+        end
+      end
+    end
+
+    describe '`adx_type_for_intake` class method' do
+      it 'returns `unpledged` when `kind` is `safekept_intake`' do
+        expect(securities_request_module.adx_type_for_intake(:safekept_intake)).to be(:unpledged)
+      end
+      it 'returns `pledged` when `kind` is `pledge_intake`' do
+        expect(securities_request_module.adx_type_for_intake(:pledge_intake)).to be(:pledged)
       end
     end
   end

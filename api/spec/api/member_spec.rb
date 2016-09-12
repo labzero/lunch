@@ -78,6 +78,7 @@ describe MAPI::ServiceApp do
         'settlement_date' => "2016-06-20T16:28:55-07:00" },
       'delivery_instructions' => delivery_instructions,
       'securities' => rand(1..5).times.map { security },
+      'kind' => SecureRandom.hex,
       'user' => {
           'username' => SecureRandom.hex,
           'full_name' => SecureRandom.hex,
@@ -104,7 +105,8 @@ describe MAPI::ServiceApp do
         post_body['user']['session_id'],
         post_body['broker_instructions'],
         post_body['delivery_instructions'],
-        post_body['securities']).and_return(request_id)
+        post_body['securities'],
+        post_body['kind'].to_sym).and_return(request_id)
       make_request
       expect(last_response.status).to be(200)
       expect(JSON.parse(last_response.body)['request_id']).to eq(request_id)
@@ -121,13 +123,13 @@ describe MAPI::ServiceApp do
                         'original_par' => rand(1..100000) + rand.round(2),
                         'payment_amount' => rand(1..100000) + rand.round(2) } }
     let(:post_body) { {
-      'kind' => ['pledge_transfer', 'safekept_transfer'].sample,
       'broker_instructions' => { 'transaction_code' => MAPI::Services::Member::SecuritiesRequests::TRANSACTION_CODE.keys[rand(0..1)],
                                  'settlement_type' => MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE.keys[rand(0..1)],
                                  'trade_date' => "2016-06-20T16:28:55-07:00",
                                  'settlement_date' => "2016-06-20T16:28:55-07:00",
                                  'pledge_to' => SecureRandom.hex},
       'securities' => rand(1..5).times.map { security },
+      'kind' => SecureRandom.hex,
       'user' => {
         'username' => SecureRandom.hex,
         'full_name' => SecureRandom.hex,
@@ -148,7 +150,7 @@ describe MAPI::ServiceApp do
                                                              post_body['user']['session_id'],
                                                              post_body['broker_instructions'],
                                                              post_body['securities'],
-                                                             post_body['kind']).and_return(request_id)
+                                                             post_body['kind'].to_sym).and_return(request_id)
       make_transfer
       expect(last_response.status).to be(200)
       expect(JSON.parse(last_response.body)['request_id']).to eq(request_id)
@@ -163,7 +165,7 @@ describe MAPI::ServiceApp do
                                                             post_body['user']['session_id'],
                                                             post_body['broker_instructions'],
                                                             post_body['securities'],
-                                                            post_body['kind'])
+                                                            post_body['kind'].to_sym)
       make_transfer
     end
 
@@ -268,6 +270,7 @@ describe MAPI::ServiceApp do
       broker_instructions: SecureRandom.hex,
       delivery_instructions: SecureRandom.hex,
       securities: SecureRandom.hex,
+      kind: SecureRandom.hex,
       user: {
         username: SecureRandom.hex,
         full_name: SecureRandom.hex,
@@ -293,7 +296,8 @@ describe MAPI::ServiceApp do
         post_body[:user][:session_id],
         post_body[:broker_instructions],
         post_body[:delivery_instructions],
-        post_body[:securities]
+        post_body[:securities],
+        post_body[:kind].to_sym
       )
       make_request
     end
@@ -309,7 +313,7 @@ describe MAPI::ServiceApp do
     end
     it 'calls `update_release` with an empty array for `securities` if they are not included in the posted body' do
       post_body.delete(:securities)
-      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:update_release).with(anything, anything, anything, anything, anything, anything, anything, anything, [])
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:update_release).with(anything, anything, anything, anything, anything, anything, anything, anything, [], anything)
       make_request
     end
     describe 'when `update_release` returns true' do
