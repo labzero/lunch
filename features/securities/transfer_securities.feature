@@ -62,3 +62,13 @@ Feature: Transfer Securities
     | page     |
     | pledged  |
     | safekept |
+
+  @jira-mem-1714
+  Scenario Outline: Member sees success page after submitting transfer for authorization
+    Given I am on the transfer to <page> account securities page
+    When I submit the securities release request for authorization
+    Then I should see the title for the "transfer success" page
+  Examples:
+  | page     |
+  | pledged  |
+  | safekept |

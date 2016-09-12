@@ -89,7 +89,7 @@ describe SecuritiesRequestService do
       allow(request).to receive(:session).and_return(session)
     end
 
-    [:pledge, :release, :safekeep].each do |type|
+    [:pledge, :release, :safekeep, :transfer].each do |type|
       describe "when `type` is #{type}" do
         let(:call_method) { subject.submit_request_for_authorization(securities_request, user, type) }
         it_behaves_like 'a MAPI backed service object method', :submit_request_for_authorization, nil, :get, false do
@@ -101,9 +101,15 @@ describe SecuritiesRequestService do
             expect(subject).to receive(method).with(:submit_request_for_authorization, any_args)
             call_method
           end
-          if type == :release
+          case type
+          when :release
             it "calls `#{method}` with `{member_id}/securities/release` for the endpoint arg" do
               expect(subject).to receive(method).with(anything, "/member/#{member_id}/securities/release", any_args)
+              call_method
+            end
+          when :transfer
+            it "calls `#{method}` with `{member_id}/securities/transfer` for the endpoint arg" do
+              expect(subject).to receive(method).with(anything, "/member/#{member_id}/securities/transfer", any_args)
               call_method
             end
           else

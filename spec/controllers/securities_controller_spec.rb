@@ -867,7 +867,8 @@ RSpec.describe SecuritiesController, type: :controller do
   {
     release: [:edit_release, I18n.t('securities.authorize.release.title'), :securities_release_success_url],
     pledge: [:edit_pledge, I18n.t('securities.authorize.pledge.title'), :securities_pledge_success_url],
-    safekeep: [:edit_safekeep, I18n.t('securities.authorize.safekeep.title'), :securities_safekeep_success_url]
+    safekeep: [:edit_safekeep, I18n.t('securities.authorize.safekeep.title'), :securities_safekeep_success_url],
+    transfer: [:edit_transfer, I18n.t('securities.authorize.transfer.title'), :securities_transfer_success_url]
   }.each do |type, details|
     template, title, success_path = details
     describe "POST submit_request for `#{type}`" do
@@ -1370,8 +1371,8 @@ RSpec.describe SecuritiesController, type: :controller do
 
       it 'sets `@pledge_type_dropdown`' do
         pledge_type_dropdown = [
-          [I18n.t('securities.release.pledge_type.sbc'), SecuritiesRequest::PLEDGE_TYPES[:sbc]],
-          [I18n.t('securities.release.pledge_type.standard'), SecuritiesRequest::PLEDGE_TYPES[:standard]]
+          [I18n.t('securities.release.pledge_type.sbc'), SecuritiesRequest::PLEDGE_TO_VALUES[:sbc]],
+          [I18n.t('securities.release.pledge_type.standard'), SecuritiesRequest::PLEDGE_TO_VALUES[:standard]]
         ]
         call_action
         expect(assigns[:pledge_type_dropdown]).to eq(pledge_type_dropdown)
@@ -1822,49 +1823,25 @@ RSpec.describe SecuritiesController, type: :controller do
     end
 
     describe '`type_matches_kind`' do
-      describe 'when `type` is `:release`' do
-        valid_kinds = [:pledge_release, :safekept_release]
+      {
+        release: [:pledge_release, :safekept_release],
+        transfer: [:pledge_transfer, :safekept_transfer],
+        safekeep: [:safekept_intake],
+        pledge: [:pledge_intake]
+      }.each do |type, valid_kinds|
         invalid_kinds = SecuritiesRequest::KINDS - valid_kinds
         valid_kinds.each do |kind|
           it "returns true when `kind` is `#{kind}`" do
-            expect(subject.send(:type_matches_kind, :release, kind)).to be true
+            expect(subject.send(:type_matches_kind, type, kind)).to be true
           end
         end
         invalid_kinds.each do |kind|
           it "returns false when `kind` is `#{kind}`" do
-            expect(subject.send(:type_matches_kind, :release, kind)).to be false
+            expect(subject.send(:type_matches_kind, type, kind)).to be false
           end
         end
       end
-      describe 'when `type` is `:safekeep`' do
-        valid_kinds = [:safekept_intake]
-        invalid_kinds = SecuritiesRequest::KINDS - valid_kinds
-        valid_kinds.each do |kind|
-          it "returns true when `kind` is `#{kind}`" do
-            expect(subject.send(:type_matches_kind, :safekeep, kind)).to be true
-          end
-        end
-        invalid_kinds.each do |kind|
-          it "returns false when `kind` is `#{kind}`" do
-            expect(subject.send(:type_matches_kind, :safekeep, kind)).to be false
-          end
-        end
-      end
-      describe 'when `type` is `:pledge`' do
-        valid_kinds = [:pledge_intake]
-        invalid_kinds = SecuritiesRequest::KINDS - valid_kinds
-        valid_kinds.each do |kind|
-          it "returns true when `kind` is `#{kind}`" do
-            expect(subject.send(:type_matches_kind, :pledge, kind)).to be true
-          end
-        end
-        invalid_kinds.each do |kind|
-          it "returns false when `kind` is `#{kind}`" do
-            expect(subject.send(:type_matches_kind, :pledge, kind)).to be false
-          end
-        end
-      end
-      describe 'when `type` is anything other than :release, :safekeep or :pledge' do
+      describe 'when `type` is anything other than :release, :transfer :safekeep or :pledge' do
         it 'returns nil' do
           expect(subject.send(:type_matches_kind, SecureRandom.hex, SecureRandom.hex)).to be nil
         end

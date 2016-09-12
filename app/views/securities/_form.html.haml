@@ -16,8 +16,8 @@
         = render 'shared/input_field', form_builder: f, field_name: (type == :safekeep ? :safekept_account : :pledged_account), label: t('securities.release.account_number.label'), field_class: ['disabled'], html_attributes: { disabled: true }
       .input-field-container-horizontal.pledge_type
         - if type == :pledge
-          %label{for: 'pledge_type'}= t('securities.release.pledge_type.label')
-          = render 'shared/dropdown', dropdown_name: 'securities_request[pledge_type]', default_value: @pledge_type_dropdown.first.last, default_text: @pledge_type_dropdown.first.first, dropdown_options: @pledge_type_dropdown
+          %label{for: 'pledge_to'}= t('securities.release.pledge_type.label')
+          = render 'shared/dropdown', dropdown_name: 'securities_request[pledge_to]', default_value: @pledge_type_dropdown.first.last, default_text: @pledge_type_dropdown.first.first, dropdown_options: @pledge_type_dropdown
     .input-field-container-horizontal
       %label{for: 'release_transaction_code'}= t('securities.release.transaction_code.label')
       = render 'shared/dropdown', dropdown_name: 'securities_request[transaction_code]', default_value: @transaction_code_defaults[:value], default_text: @transaction_code_defaults[:text], dropdown_options: @transaction_code_dropdown

@@ -19,7 +19,7 @@ class SecuritiesRequest
     transfer: 'transfer'
   }.freeze
 
-  PLEDGE_TYPES = {
+  PLEDGE_TO_VALUES = {
     sbc: 'sbc',
     standard: 'standard'
   }.freeze
@@ -50,7 +50,7 @@ class SecuritiesRequest
                       :member_id,
                       :pledged_account,
                       :safekept_account,
-                      :pledge_type,
+                      :pledge_to,
                       :form_type,
                       :kind].freeze
 
@@ -61,16 +61,20 @@ class SecuritiesRequest
   attr_accessor *ACCESSIBLE_ATTRS
   attr_reader :securities
 
-  validates *(BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities, :kind, :form_type]), presence: true
-  validates :pledge_type, presence: true, if: Proc.new { |request| request.kind && request.kind.to_sym == :pledge_intake }
+  validates *[:delivery_type, :securities, :kind, :form_type], presence: true
+  validates :pledge_to, presence: true, if: Proc.new { |request| request.kind && request.kind == :pledge_intake || request.kind == :pledge_transfer  }
   validates *DELIVERY_INSTRUCTION_KEYS[:fed], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :fed }
   validates *DELIVERY_INSTRUCTION_KEYS[:dtc], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :dtc }
   validates *DELIVERY_INSTRUCTION_KEYS[:mutual_fund], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :mutual_fund }
   validates *DELIVERY_INSTRUCTION_KEYS[:physical_securities], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :physical_securities }
-  validate :trade_date_must_come_before_settlement_date
-  validate :trade_date_within_range
-  validate :settlement_date_within_range
-  validate :valid_securities_payment_amount
+
+  with_options if: Proc.new { |request| !TRANSFER_REQUEST_KINDS.include?(request.kind) } do
+    validates *BROKER_INSTRUCTION_KEYS, presence: true
+    validate :trade_date_must_come_before_settlement_date
+    validate :trade_date_within_range
+    validate :settlement_date_within_range
+    validate :valid_securities_payment_amount?
+  end
 
   def kind=(kind)
     kind = kind.try(:to_sym)
@@ -179,7 +183,7 @@ class SecuritiesRequest
       settlement_date: settlement_date,
       safekept_account: safekept_account,
       pledged_account: pledged_account,
-      pledge_type: pledge_type
+      pledge_to: pledge_to
     }
   end
 
@@ -237,7 +241,7 @@ class SecuritiesRequest
     end
   end
 
-  def valid_securities_payment_amount
+  def valid_securities_payment_amount?
     unless securities.blank? || settlement_type.blank? || TRANSFER_REQUEST_KINDS.include?(kind)
       payment_amount_present = securities.map { |security| security.payment_amount.present? }
 

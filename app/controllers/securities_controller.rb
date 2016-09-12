@@ -358,7 +358,7 @@ class SecuritiesController < ApplicationController
   def submit_request
     type = params[:type].try(:to_sym)
     @securities_request = SecuritiesRequest.from_hash(params[:securities_request])
-    raise ArgumentError, "Unknown request type: #{type}" unless [:release, :pledge, :safekeep].include?(type)
+    raise ArgumentError, "Unknown request type: #{type}" unless [:release, :pledge, :safekeep, :transfer].include?(type)
     raise ActionController::RoutingError.new("The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{@securities_request.kind}`") unless type_matches_kind(type, @securities_request.kind)
     authorizer = policy(:security).authorize?
     if @securities_request.valid?
@@ -390,6 +390,8 @@ class SecuritiesController < ApplicationController
       case type
       when :release
         render :edit_release
+      when :transfer
+        render :edit_transfer
       when :pledge
         render :edit_pledge
       when :safekeep
@@ -399,6 +401,8 @@ class SecuritiesController < ApplicationController
       case type
       when :release
         @title = t('securities.authorize.release.title')
+      when :transfer
+        @title = t('securities.authorize.transfer.title')
       when :pledge
         @title = t('securities.authorize.pledge.title')
       when :safekeep
@@ -409,6 +413,8 @@ class SecuritiesController < ApplicationController
       url = case type
       when :release
         securities_release_success_url
+      when :transfer
+        securities_transfer_success_url
       when :pledge
         securities_pledge_success_url
       when :safekeep
@@ -518,8 +524,8 @@ class SecuritiesController < ApplicationController
 
   def populate_view_variables(type)
     @pledge_type_dropdown = [
-      [t('securities.release.pledge_type.sbc'), SecuritiesRequest::PLEDGE_TYPES[:sbc]],
-      [t('securities.release.pledge_type.standard'), SecuritiesRequest::PLEDGE_TYPES[:standard]]
+      [t('securities.release.pledge_type.sbc'), SecuritiesRequest::PLEDGE_TO_VALUES[:sbc]],
+      [t('securities.release.pledge_type.standard'), SecuritiesRequest::PLEDGE_TO_VALUES[:standard]]
     ]
 
     @title = case type
@@ -630,6 +636,8 @@ class SecuritiesController < ApplicationController
     case type
       when :release
         [:pledge_release, :safekept_release].include?(kind)
+      when :transfer
+        [:pledge_transfer, :safekept_transfer].include?(kind)
       when :safekeep
         kind == :safekept_intake
       when :pledge

@@ -87,13 +87,13 @@ module MAPI
                                         'settlement_type' => 'REQUEST_STATUS',
                                         'trade_date' => 'TRADE_DATE',
                                         'settlement_date' => 'SETTLE_DATE' }.freeze
-        ADDITIONAL_BROKER_INSTRUCTIONS_MAPPING_FOR_PLEDGING = { 'pledge_type' => 'PLEDGE_TO' }.freeze
+        ADDITIONAL_BROKER_INSTRUCTIONS_MAPPING_FOR_PLEDGING = { 'pledge_to' => 'PLEDGE_TO' }.freeze
         DELIVERY_TYPE = { 'fed' => SSKDeliverTo::FED,
                           'dtc' => SSKDeliverTo::DTC,
                           'mutual_fund' => SSKDeliverTo::MUTUAL_FUND,
                           'physical_securities' => SSKDeliverTo::PHYSICAL_SECURITIES,
                           'transfer' => SSKDeliverTo::INTERNAL_TRANSFER  }.freeze
-        PLEDGE_TYPE = { 'standard' => SSKPledgeTo::STANDARD_CREDIT, 'sbc' => SSKPledgeTo::SBC }
+        PLEDGE_TO = { 'standard' => SSKPledgeTo::STANDARD_CREDIT, 'sbc' => SSKPledgeTo::SBC }
         TRANSACTION_CODE = { 'standard' => SSKTransactionCode::STANDARD, 'repo' => SSKTransactionCode::REPO }.freeze
         SETTLEMENT_TYPE = { 'free' => SSKSettlementType::FREE, 'vs_payment' => SSKSettlementType::VS_PAYMENT }.freeze
         ACCOUNT_NUMBER_MAPPING = { 'fed' => 'CREDIT_ACCT_NO1',
@@ -101,6 +101,7 @@ module MAPI
                                    'mutual_fund' => 'MUTUAL_FUND_ACCT_NO',
                                    'physical_securities' => 'CREDIT_ACCT_NO3' }
         REQUIRED_SECURITY_RELEASE_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
+        REQUIRED_SECURITY_TRANSFER_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
         REQUIRED_SECURITY_INTAKE_KEYS = [ 'cusip', 'original_par' ].freeze
         LAST_MODIFIED_BY_MAX_LENGTH = 30
         BROKER_WIRE_ADDRESS_FIELDS = ['clearing_agent_fed_wire_address_1', 'clearing_agent_fed_wire_address_2'].freeze
@@ -267,7 +268,7 @@ module MAPI
                     #{quote(now)},
                     #{quote(full_name)},
                     #{quote(adx_id)},
-                    #{quote(PLEDGE_TYPE[broker_instructions['pledge_to']])},
+                    #{quote(PLEDGE_TO[broker_instructions['pledge_to']])},
                     #{delivery_values.join(', ')}
                    )
           SQL
@@ -277,11 +278,9 @@ module MAPI
           now = Time.zone.today
           if (kind == :pledge_transfer)
             deliver_receive = 'DELIVER_TO'
-            settlement_type = SSKSettlementType::FREE
             adx_type = :pledged_intake
           else
             deliver_receive = 'RECEIVE_FROM'
-            settlement_type = SSKSettlementType::VS_PAYMENT
             adx_type = :pledged_release
           end
           <<-SQL
@@ -309,7 +308,7 @@ module MAPI
                     #{quote(SSKRequestStatus::SUBMITTED)},
                     #{quote(SSKTransactionCode::STANDARD)},
                     #{quote(broker_instructions['trade_date'])},
-                    #{quote(settlement_type)},
+                    #{quote(SETTLEMENT_TYPE[broker_instructions['settlement_type']])},
                     #{quote(broker_instructions['settlement_date'])},
                     #{quote(SSKDeliverTo::INTERNAL_TRANSFER)},
                     #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[adx_type])},
@@ -321,7 +320,7 @@ module MAPI
                     #{quote(full_name)},
                     #{quote(adx_id)},
                     #{quote(un_adx_id)},
-                    #{quote(PLEDGE_TYPE[broker_instructions['pledge_to']])}
+                    #{quote(PLEDGE_TO[broker_instructions['pledge_to']])}
                    )
           SQL
         end
@@ -446,7 +445,7 @@ module MAPI
         def self.validate_broker_instructions(broker_instructions, app, kind)
           raise MAPI::Shared::Errors::MissingFieldError.new('broker_instructions must be a non-empty hash', :broker_instructions) unless !broker_instructions.nil? && broker_instructions.is_a?(Hash) && !broker_instructions.empty?
           broker_instructions_mapping = BROKER_INSTRUCTIONS_MAPPING
-          broker_instructions_mapping = broker_instructions_mapping.merge(ADDITIONAL_BROKER_INSTRUCTIONS_MAPPING_FOR_PLEDGING) if kind == :pledge_intake
+          broker_instructions_mapping = broker_instructions_mapping.merge(ADDITIONAL_BROKER_INSTRUCTIONS_MAPPING_FOR_PLEDGING) if [:pledge_intake, :pledge_transfer].include?(kind)
           broker_instructions_mapping.keys.each do |key|
             raise MAPI::Shared::Errors::MissingFieldError.new("broker_instructions must contain a value for #{key}", key) unless broker_instructions[key]
           end
@@ -477,8 +476,10 @@ module MAPI
             REQUIRED_SECURITY_RELEASE_KEYS
           when :intake
             REQUIRED_SECURITY_INTAKE_KEYS
+          when :pledge_transfer, :safekept_transfer
+            REQUIRED_SECURITY_TRANSFER_KEYS
           end
-          required_security_keys += ['payment_amount'] if settlement_type == 'vs_payment'
+          required_security_keys += ['payment_amount'] if settlement_type == 'vs_payment' && ![:pledge_transfer, :safekept_transfer].include?(type)
           securities.each do |security|
             raise MAPI::Shared::Errors::MissingFieldError.new('each security must be a non-empty hash', :securities) unless !security.nil? && security.is_a?(Hash) && !security.empty?
             required_security_keys.each do |key|
@@ -706,10 +707,19 @@ module MAPI
           true
         end
 
+        def self.set_broker_instructions_for_transfer(broker_instructions, kind)
+          today = Time.zone.today.iso8601
+          broker_instructions['settlement_type'] ||= kind == :pledge_transfer ? 'free' : 'vs_payment'
+          broker_instructions['trade_date'] ||= today
+          broker_instructions['settlement_date'] ||= today
+          broker_instructions['transaction_code'] ||= 'standard'
+        end
+
         def self.create_transfer(app, member_id, user_name, full_name, session_id, broker_instructions, securities, kind)
           validate_kind(:transfer, kind)
-          validate_securities(securities, broker_instructions['settlement_type'], :transfer, :release)
-          validate_broker_instructions(broker_instructions, app, kind.to_sym)
+          set_broker_instructions_for_transfer(broker_instructions, kind)
+          validate_securities(securities, broker_instructions['settlement_type'], :transfer, kind)
+          validate_broker_instructions(broker_instructions, app, kind)
           user_name.downcase!
           unless should_fake?(app)
             header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
@@ -724,7 +734,7 @@ module MAPI
                                                               adx_id,
                                                               un_adx_id,
                                                               broker_instructions,
-                                                              kind.to_sym)
+                                                              kind)
               raise "failed to insert security release request header" unless execute_sql(app.logger, insert_header_sql)
               securities.each do |security|
                 ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
@@ -810,7 +820,8 @@ module MAPI
             transaction_code: header['PLEDGE_TYPE'],
             settlement_type: header['REQUEST_STATUS'],
             trade_date: header['TRADE_DATE'],
-            settlement_date: header['SETTLE_DATE']
+            settlement_date: header['SETTLE_DATE'],
+            pledge_to: header['PLEDGE_TO']
           }
         end
 
@@ -886,6 +897,7 @@ module MAPI
           created_by_offset = rng.rand(0..names.length-1)
           created_by = fake_data['usernames'][created_by_offset]
           created_by_name = names[created_by_offset]
+          authorized_by_name = names.sample(random: rng)
           {
             'REQUEST_ID' => request_id,
             'PLEDGE_TYPE' => pledge_type,
@@ -910,8 +922,9 @@ module MAPI
             'STATUS' => status,
             'SUBMITTED_DATE' => submitted_date,
             'SUBMITTED_BY' => created_by_name,
-            'AUTHORIZED_BY' => authorized ? names.sample(random: rng) : nil,
+            'AUTHORIZED_BY' => authorized ? authorized_by_name : nil,
             'AUTHORIZED_DATE' => authorized ? authorized_date : nil,
+            'PLEDGE_TO' => PLEDGE_TO.values.sample(random: rng),
             'PLEDGED_ADX_ID' => [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SECURITIES_RELEASE].include?(form_type) ? rng.rand(1000..9999) : nil,
             'UNPLEDGED_ADX_ID' => [SSKFormType::SAFEKEPT_DEPOSIT, SSKFormType::SAFEKEPT_RELEASE].include?(form_type) ? rng.rand(1000..9999) : nil
           }

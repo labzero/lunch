@@ -1172,7 +1172,8 @@ describe MAPI::ServiceApp do
         'PLEDGE_TYPE' => instance_double(String),
         'REQUEST_STATUS' => instance_double(String),
         'TRADE_DATE' => instance_double(Date),
-        'SETTLE_DATE' => instance_double(Date)
+        'SETTLE_DATE' => instance_double(Date),
+        'PLEDGE_TO' => instance_double(String)
       }}
       let(:call_method) { securities_request_module.broker_instructions_from_header_details(header_details) }
 
@@ -1180,7 +1181,8 @@ describe MAPI::ServiceApp do
         transaction_code: 'PLEDGE_TYPE',
         settlement_type: 'REQUEST_STATUS',
         trade_date: 'TRADE_DATE',
-        settlement_date: 'SETTLE_DATE'
+        settlement_date: 'SETTLE_DATE',
+        pledge_to: 'PLEDGE_TO'
       }.each do |key, value|
         it "returns a hash with a `#{key}` equal to the `#{value}` of the passed `header_details`" do
           expect(call_method[key]).to eq(header_details[value])
@@ -1297,11 +1299,12 @@ describe MAPI::ServiceApp do
       let(:created_by_offset) { rand(0..names.length-1) }
       let!(:form_type) { rand(70..73) }
       let(:authorized_by_offset) { rand(0..names.length-1) }
+      let(:pledge_to_offset) { rand(0..1) }
 
       let(:call_method) { securities_request_module.fake_header_details(request_id, end_date, status) }
       before do
         allow(Random).to receive(:new).and_return(rng)
-        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date_offset, authorized_date_offset, created_by_offset, authorized_by_offset)
+        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date_offset, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
         allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
       end
 
@@ -1357,6 +1360,9 @@ describe MAPI::ServiceApp do
       it 'sets the `FORM_TYPE` to the passed one if provided' do
         form_type = double('A Form Type')
         expect(securities_request_module.fake_header_details(request_id, end_date, status, form_type)['FORM_TYPE']).to eq(form_type)
+      end
+      it 'constructs a hash with a `PLEDGE_TO` value' do
+        expect(call_method['PLEDGE_TO']).to eq(securities_request_module::PLEDGE_TO.values[pledge_to_offset])
       end
       {
         securities_request_module::SSKFormType::SECURITIES_PLEDGED => 'PLEDGED_ADX_ID',
@@ -1602,7 +1608,7 @@ describe MAPI::ServiceApp do
         'trade_date' => instance_double(String),
         'settlement_type' => securities_request_module::SETTLEMENT_TYPE.keys.sample,
         'settlement_date' => instance_double(String),
-        'pledge_type' => securities_request_module::PLEDGE_TYPE.keys.sample
+        'pledge_to' => securities_request_module::PLEDGE_TO.keys.sample
       }}
       let(:today) { Time.zone.today }
       let(:type) { [ :release, :intake ].sample }
@@ -1624,17 +1630,19 @@ describe MAPI::ServiceApp do
         end
       end
       it 'raises an error if a key is missing' do
-        broker_instructions.delete('pledge_type')
+        broker_instructions.delete('pledge_to')
         missing_key = broker_instructions.keys.sample
         broker_instructions.delete(missing_key)
         expect{call_method}.to raise_error(MAPI::Shared::Errors::MissingFieldError, /broker_instructions must contain a value for \S+/) do |error|
           expect(error.code).to eq(missing_key)
         end
       end
-      it 'raises an error if `pledge_type` is missing (for pledge_intake only)' do
-        broker_instructions.delete('pledge_type')
-        expect{securities_request_module.validate_broker_instructions(broker_instructions, app, :pledge_intake)}.to raise_error(MAPI::Shared::Errors::ValidationError, /broker_instructions must contain a value for \S+/) do |error|
-          expect(error.code).to eq("pledge_type")
+      [:pledge_intake, :pledge_transfer].each do |pledge_to|
+        it "raises an error if `kind` is `#{pledge_to}` and `pledge_to` is missing" do
+          broker_instructions.delete('pledge_to')
+          expect{securities_request_module.validate_broker_instructions(broker_instructions, app, pledge_to)}.to raise_error(MAPI::Shared::Errors::ValidationError, /broker_instructions must contain a value for \S+/) do |error|
+            expect(error.code).to eq("pledge_to")
+          end
         end
       end
       it 'raises an error if `transaction_code` is out of range' do
@@ -1733,6 +1741,8 @@ describe MAPI::ServiceApp do
 
       {
         release: ['cusip', 'description', 'original_par'],
+        pledge_transfer: ['cusip', 'description', 'original_par'],
+        safekept_transfer: ['cusip', 'description', 'original_par'],
         intake: ['cusip', 'original_par']
       }.each do |type, required_fields|
         describe "for `type` #{type}" do
@@ -1768,11 +1778,18 @@ describe MAPI::ServiceApp do
           end
           describe 'when the `settlement_type` is `vs_payment`' do
             let(:call_method) { securities_request_module.validate_securities([security], 'vs_payment', delivery_type, type) }
-            it 'raises an error if a security is missing a `payment_amount` value' do
-              security.delete('payment_amount')
-              expect{call_method}.to raise_error(MAPI::Shared::Errors::CustomTypedFieldError, 'each security must consist of a hash containing a value for payment_amount') do |error|
-                expect(error.code).to eq(:securities)
-                expect(error.type).to eq('payment_amount')
+            if [:pledge_transfer, :safekept_transfer].include?(type)
+              it 'does not raise an error if a security is missing a `payment_amount` value' do
+                security.delete('payment_amount')
+                expect{call_method}.not_to raise_error
+              end
+            else
+              it 'raises an error if a security is missing a `payment_amount` value' do
+                security.delete('payment_amount')
+                expect{call_method}.to raise_error(MAPI::Shared::Errors::CustomTypedFieldError, 'each security must consist of a hash containing a value for payment_amount') do |error|
+                  expect(error.code).to eq(:securities)
+                  expect(error.type).to eq('payment_amount')
+                end
               end
             end
           end
@@ -3203,14 +3220,9 @@ describe MAPI::ServiceApp do
           expect(call_method).to match /VALUES\s+\((\S+\s+){4}#{sentinel},/
         end
 
-        it 'sets the `request_status` for pledged_release' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(61).and_return(sentinel)
-          expect(call_method_release).to match /VALUES\s+\((\S+\s+){5}#{sentinel},/
-        end
-
-        it 'sets the `request_status` for pledged_intake' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(60).and_return(sentinel)
-          expect(call_method_intake).to match /VALUES\s+\((\S+\s+){5}#{sentinel},/
+        it 'sets the `request_status`' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE[broker_instructions['settlement_type']]).and_return(sentinel)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){5}#{sentinel},/
         end
 
         it 'sets the `settlement_date`' do
@@ -3295,12 +3307,12 @@ describe MAPI::ServiceApp do
                                 broker_instructions,
                                 securities,
                                 kind ] }
-        let(:kind) { double('A Kind') }
+        let(:kind) { instance_double(Symbol) }
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params) }
 
         before do
-          allow(kind).to receive(:to_sym).and_return(kind)
           allow(securities_request_module).to receive(:validate_kind).with(:transfer, kind).and_return(true)
+          allow(securities_request_module).to receive(:validate_securities)
           allow(securities_request_module).to receive(:validate_broker_instructions)
         end
 
@@ -3341,12 +3353,12 @@ describe MAPI::ServiceApp do
             expect(securities_request_module).to receive(:validate_securities).with(anything, broker_instructions['settlement_type'], anything, anything)
             call_method
           end
-          it 'calls `validate_securities` with the `delivery_type` arg from the delivery instructions' do
+          it 'calls `validate_securities` with `:transfer`' do
             expect(securities_request_module).to receive(:validate_securities).with(anything, anything, :transfer, anything)
             call_method
           end
-          it 'calls `validate_securities` with `:release`' do
-            expect(securities_request_module).to receive(:validate_securities).with(anything, anything, anything, :release)
+          it 'calls `validate_securities` with `kind`' do
+            expect(securities_request_module).to receive(:validate_securities).with(anything, anything, anything, kind)
             call_method
           end
         end
@@ -3527,7 +3539,43 @@ describe MAPI::ServiceApp do
           end
         end
       end
+    end
 
+    describe '`set_broker_instructions_for_transfer`' do
+      let(:kind) { [:pledge_transfer, :safekept_transfer].sample }
+      let(:broker_instructions) {{}}
+      let(:today) { Time.zone.today.iso8601 }
+      let(:value) { SecureRandom.hex }
+      let(:call_method) { securities_request_module.set_broker_instructions_for_transfer(broker_instructions, kind) }
+
+      ['settlement_type', 'transaction_code', 'trade_date', 'settlement_date'].each do |attr|
+        it "does not change the value for `#{attr}` if there is a previously existing value" do
+          broker_instructions[attr] = value
+          call_method
+          expect(broker_instructions[attr]).to eq(value)
+        end
+      end
+      describe 'when there are no previously exisiting values for the broker_instructions fields' do
+
+      end
+      ['trade_date', 'settlement_date'].each do |attr|
+        it "sets `#{attr}` to the iso8601 string for today" do
+          call_method
+          expect(broker_instructions[attr]).to eq(today)
+        end
+      end
+      it 'sets `transaction_code` to `standard`' do
+        call_method
+        expect(broker_instructions['transaction_code']).to eq('standard')
+      end
+      it 'sets `settlement_type` to `free` if the kind is `:pledge_transfer`' do
+        securities_request_module.set_broker_instructions_for_transfer(broker_instructions, :pledge_transfer)
+        expect(broker_instructions['settlement_type']).to eq('free')
+      end
+      it 'sets `settlement_type` to `vs_payment` if the kind is `:safekept_transfer`' do
+        securities_request_module.set_broker_instructions_for_transfer(broker_instructions, :safekept_transfer)
+        expect(broker_instructions['settlement_type']).to eq('vs_payment')
+      end
     end
 
     describe 'securities intake' do

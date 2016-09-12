@@ -20,8 +20,8 @@
             .input-field-container-horizontal
               = render 'shared/input_field', form_builder: f, field_name: :pledged_account, label: t('securities.release.account_number.label'), field_class: ['disabled'], html_attributes: { disabled: true }
             .input-field-container-horizontal.pledge_type
-              %label{for: 'pledge_type'}= t('securities.release.pledge_type.label')
-              = render 'shared/dropdown', dropdown_name: 'securities_request[pledge_type]', default_value: @pledge_type_dropdown.first.last, default_text: @pledge_type_dropdown.first.first, dropdown_options: @pledge_type_dropdown
+              %label{for: 'pledge_to'}= t('securities.release.pledge_type.label')
+              = render 'shared/dropdown', dropdown_name: 'securities_request[pledge_to]', default_value: @pledge_type_dropdown.first.last, default_text: @pledge_type_dropdown.first.first, dropdown_options: @pledge_type_dropdown
           - else
             .input-field-container-horizontal
               = render 'shared/input_field', form_builder: f, field_name: :safekept_account, label: t('securities.release.account_number.label'), field_class: ['disabled'], html_attributes: { disabled: true }
@@ -45,6 +45,9 @@
               = render 'pledge_legal_copy'
           - unless @session_elevated
             = render 'shared/securid_module', error: @securid_status
-      %small= t('securities.transfer.legal')
+        %small= t('securities.transfer.legal')
+        .securities-actions
+          %span.secondary-button.delete-release-trigger= t('global.delete')
+          =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true)
     =form_tag(securities_transfer_download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_request.securities.to_json)

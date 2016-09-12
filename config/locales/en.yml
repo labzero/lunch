@@ -1343,6 +1343,8 @@ en:
     authorize:
       release:
         title: Release Securities Request Sent
+      transfer:
+        title: Transfer Securities Request Sent
       pledge:
         title: Pledge Securities Request Sent
       safekeep:

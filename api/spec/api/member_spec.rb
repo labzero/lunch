@@ -123,13 +123,13 @@ describe MAPI::ServiceApp do
                         'original_par' => rand(1..100000) + rand.round(2),
                         'payment_amount' => rand(1..100000) + rand.round(2) } }
     let(:post_body) { {
+      'kind' => SecureRandom.hex,
       'broker_instructions' => { 'transaction_code' => MAPI::Services::Member::SecuritiesRequests::TRANSACTION_CODE.keys[rand(0..1)],
                                  'settlement_type' => MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE.keys[rand(0..1)],
                                  'trade_date' => "2016-06-20T16:28:55-07:00",
                                  'settlement_date' => "2016-06-20T16:28:55-07:00",
                                  'pledge_to' => SecureRandom.hex},
       'securities' => rand(1..5).times.map { security },
-      'kind' => SecureRandom.hex,
       'user' => {
         'username' => SecureRandom.hex,
         'full_name' => SecureRandom.hex,

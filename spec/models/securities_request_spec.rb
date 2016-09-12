@@ -3,16 +3,18 @@ require 'rails_helper'
 RSpec.describe SecuritiesRequest, :type => :model do
   before { allow_any_instance_of(CalendarService).to receive(:holidays).and_return([]) }
   describe 'validations' do
-    it 'validates the presence of `pledge_type` if the `kind` equals `:pledge_intake`' do
-      subject.kind = :pledge_intake
-      expect(subject).to validate_presence_of :pledge_type
+    [:pledge_intake, :pledge_transfer].each do |kind|
+      it "validates the presence of `pledge_to` if the `kind` equals `#{kind}`" do
+        subject.kind = :pledge_intake
+        expect(subject).to validate_presence_of :pledge_to
+      end
     end
-    it 'does not validate the presence of `pledge_type` if the `kind` is not `:pledge_intake`' do
-      subject.kind = (described_class::KINDS - [:pledge_intake]).sample
-      expect(subject).not_to validate_presence_of :pledge_type
+    it 'does not validate the presence of `pledge_to` if the `kind` is not `:pledge_intake`' do
+      subject.kind = (described_class::KINDS - [:pledge_intake, :pledge_transfer]).sample
+      expect(subject).not_to validate_presence_of :pledge_to
     end
     (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities, :kind, :form_type]).each do |attr|
-      it "should validate the presence of `#{attr}`" do
+      it "validates the presence of `#{attr}`" do
         allow(subject).to receive("#{attr}=")
         expect(subject).to validate_presence_of attr
       end
@@ -23,7 +25,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
           subject.delivery_type = delivery_type
         end
         described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type].each do |attr|
-          it "should validate the presence of `#{attr}`" do
+          it "validates the presence of `#{attr}`" do
             expect(subject).to validate_presence_of attr
           end
         end
@@ -148,13 +150,13 @@ RSpec.describe SecuritiesRequest, :type => :model do
         expect(subject.send(:date_within_range, date, :trade_date)).to be true
       end
     end
-    describe `securities_payment_amount` do
+    describe `valid_securities_payment_amount?` do
       let(:security_without_payment_amount) { FactoryGirl.build(:security, payment_amount: nil) }
       let(:security_with_payment_amount) { FactoryGirl.build(:security, payment_amount: rand(1000.99999)) }
-      let(:call_validation) { subject.send(:valid_securities_payment_amount) }
+      let(:call_validation) { subject.send(:valid_securities_payment_amount?) }
 
       it 'is called as a validator' do
-        expect(subject).to receive(:valid_securities_payment_amount)
+        expect(subject).to receive(:valid_securities_payment_amount?)
         subject.valid?
       end
       it 'does not add an error if there are no `securities`' do
@@ -171,21 +173,9 @@ RSpec.describe SecuritiesRequest, :type => :model do
         expect(subject.errors).not_to receive(:add)
         call_validation
       end
-      shared_examples 'a validation that ignores transfers' do
-        before { subject.settlement_type = [:free, :vs_payment].sample }
-
-        described_class::TRANSFER_REQUEST_KINDS.each do |kind|
-          it "does not add an error if there are `securities` and a `settlement_type`, but the `kind` is `#{kind}`" do
-            subject.kind = kind
-            expect(subject.errors).not_to receive(:add)
-            call_validation
-          end
-        end
-      end
       describe 'when all securities have a payment amount' do
         before {subject.securities = [security_with_payment_amount, security_with_payment_amount]}
 
-        it_behaves_like 'a validation that ignores transfers'
         it 'adds an error if the `settlement_type` is `:free`' do
           subject.settlement_type = :free
           expect(subject.errors).to receive(:add).with(:securities, :payment_amount_present)
@@ -200,7 +190,6 @@ RSpec.describe SecuritiesRequest, :type => :model do
       describe 'when no securities have a payment amount' do
         before {subject.securities = [security_without_payment_amount, security_without_payment_amount]}
 
-        it_behaves_like 'a validation that ignores transfers'
         it 'adds an error if the `settlement_type` is `:vs_payment`' do
           subject.settlement_type = :vs_payment
           expect(subject.errors).to receive(:add).with(:securities, :payment_amount_missing)
@@ -215,7 +204,6 @@ RSpec.describe SecuritiesRequest, :type => :model do
       describe 'when some securities have a payment amount and some do not' do
         before {subject.securities = [security_without_payment_amount, security_with_payment_amount]}
 
-        it_behaves_like 'a validation that ignores transfers'
         it 'adds an error if the `settlement_type` is `:free`' do
           subject.settlement_type = :free
           expect(subject.errors).to receive(:add).with(:securities, :payment_amount_present)
@@ -225,6 +213,23 @@ RSpec.describe SecuritiesRequest, :type => :model do
           subject.settlement_type = :vs_payment
           expect(subject.errors).to receive(:add).with(:securities, :payment_amount_missing)
           call_validation
+        end
+      end
+    end
+    described_class::TRANSFER_REQUEST_KINDS.each do |kind|
+      describe "when the kind is `#{kind}`" do
+        before { subject.kind = kind }
+        described_class::BROKER_INSTRUCTION_KEYS.each do |attr|
+          it "does not validate the presence of `#{attr}`" do
+            allow(subject).to receive("#{attr}=")
+            expect(subject).not_to validate_presence_of attr
+          end
+        end
+        [:trade_date_must_come_before_settlement_date, :trade_date_within_range, :settlement_date_within_range, :valid_securities_payment_amount?].each do |method|
+          it "does not call `#{method}` as a validator" do
+            expect(subject).not_to receive(method)
+            subject.valid?
+          end
         end
       end
     end
@@ -534,7 +539,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
 
     describe '`broker_instructions`' do
       let(:call_method) { subject.broker_instructions }
-      (described_class::BROKER_INSTRUCTION_KEYS + [:safekept_account, :pledged_account, :pledge_type]).each do |key|
+      (described_class::BROKER_INSTRUCTION_KEYS + [:safekept_account, :pledged_account, :pledge_to]).each do |key|
         it "returns a hash containing the `#{key}`" do
           value = double('some value')
           allow(subject).to receive(:settlement_type=)
