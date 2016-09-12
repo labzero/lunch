@@ -72,3 +72,14 @@ Feature: Transfer Securities
   | page     |
   | pledged  |
   | safekept |
+
+  @jira-mem-1739
+  Scenario Outline: A signer authorizes a request while submitting it
+    Given I am logged in as a "quick-advance signer"
+    And I am on the transfer to <page> account securities page
+    When I authorize the request
+    Then I should see the authorize request success page
+  Examples:
+  | page     |
+  | pledged  |
+  | safekept |
