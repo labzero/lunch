@@ -143,7 +143,7 @@ module MAPI
             end_date = settlement_date_range.try(:last) || Time.zone.today
             start_date = settlement_date_range.try(:first) || (end_date - 7.days)
             if should_fake?(app)
-              self.fake_header_details_array(member_id.to_i).select do |header_details|
+              self.fake_header_details_array(member_id.to_i, (start_date..end_date)).select do |header_details|
                 flat_status.include?(header_details['STATUS']) && header_details['SUBMITTED_DATE'] >= start_date && header_details['SUBMITTED_DATE'] <= end_date
               end
             else
@@ -854,8 +854,10 @@ module MAPI
           end
         end
 
-        def self.fake_header_details_array(member_id)
-          rng = Random.new(member_id.to_i + Time.zone.today.to_time.to_i)
+        def self.fake_header_details_array(member_id, settlement_date_range = nil)
+          today = Time.zone.today
+          rng = Random.new(member_id.to_i + today.to_time.to_i)
+          settlement_date_range ||= (today..today)
           list = []
           # require at least one form_type of every type of request
           form_type_status_combos = []
@@ -873,12 +875,13 @@ module MAPI
             form_type = combo.try(:first) || REQUEST_FORM_TYPE_MAPPING.keys.sample(random: rng)
             status = combo.try(:last) || flat_unique_array(REQUEST_STATUS_MAPPING.values).sample(random: rng)
             delivery_type = combo.try(:[], 1)
-            list << fake_header_details(request_id, Time.zone.today, status, form_type, delivery_type)
+            list << fake_header_details(request_id, settlement_date_range.last, status, form_type, delivery_type, settlement_date_range.first)
           end
           list
         end
 
-        def self.fake_header_details(request_id, end_date, status, form_type = nil, delivery_type = nil)
+        def self.fake_header_details(request_id, end_date, status, form_type = nil, delivery_type = nil, start_date = nil)
+          start_date ||= end_date
           rng = Random.new(request_id)
           fake_data = fake('securities_requests')
           names = fake_data['names']
@@ -891,7 +894,7 @@ module MAPI
           aba_number = rng.rand(10000..99999)
           participant_number = rng.rand(10000..99999)
           account_number = rng.rand(10000..99999)
-          submitted_date = end_date - rng.rand(0..4).days
+          submitted_date = rng.rand(start_date..end_date)
           authorized = MAPIRequestStatus::AUTHORIZED.include?(status)
           authorized_date = submitted_date + rng.rand(0..2).days
           created_by_offset = rng.rand(0..names.length-1)

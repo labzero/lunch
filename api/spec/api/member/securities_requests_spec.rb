@@ -77,6 +77,16 @@ describe MAPI::ServiceApp do
         expect(securities_request_module).to receive(:fake_header_details).with(request_id, Time.zone.today, any_args).and_return({})
         call_method
       end
+      it 'passes the `start_date` to the `fake_header_details` method' do
+        expect(securities_request_module).to receive(:fake_header_details).with(request_id, anything, anything, anything, anything, Time.zone.today).and_return({})
+        call_method
+      end
+      it 'passes the `end_date` and `start_date` to `fake_header_details` from the supplied range if present' do
+        today = Time.zone.today
+        range = ((today - 3.days)..today)
+        expect(securities_request_module).to receive(:fake_header_details).with(request_id, range.last, anything, anything, anything, range.first).and_return({})
+        MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(member_id, range)
+      end
       it 'generates at least one request for each form type and status combination' do
         allow(rng).to receive(:rand).with(eq(18..36)).and_return(18)
         form_type_status_combos = []
@@ -88,7 +98,7 @@ describe MAPI::ServiceApp do
         end
         expect(form_type_status_combos.length).to eq(18)
         form_type_status_combos.each do |combo|
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, combo.last, combo.first, combo[1]).and_return({})
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, combo.last, combo.first, combo[1], anything).and_return({})
         end
         call_method
       end
@@ -153,7 +163,13 @@ describe MAPI::ServiceApp do
         end
 
         it 'calls `fake_header_details_array` with the member_id' do
-          expect(securities_request_module).to receive(:fake_header_details_array).with(member_id).and_return(header_details_array)
+          expect(securities_request_module).to receive(:fake_header_details_array).with(member_id, anything).and_return(header_details_array)
+          call_method
+        end
+        it 'calls `fake_header_details_array` with the `submitted_date_range`' do
+          today = Time.zone.today
+          allow(Time.zone).to receive(:today).and_return(today)
+          expect(securities_request_module).to receive(:fake_header_details_array).with(anything, ((today - 7.days)..today)).and_return(header_details_array)
           call_method
         end
         it 'passes the results of `fake_header_details_array` to `map_hash_values`' do
@@ -1294,7 +1310,7 @@ describe MAPI::ServiceApp do
       let(:aba_number) { rand(10000..99999) }
       let(:participant_number) { rand(10000..99999) }
       let(:account_number) { rand(10000..99999) }
-      let(:submitted_date_offset) { rand(0..4) }
+      let(:submitted_date) { Time.zone.today }
       let(:authorized_date_offset) { rand(0..2) }
       let(:created_by_offset) { rand(0..names.length-1) }
       let!(:form_type) { rand(70..73) }
@@ -1304,7 +1320,7 @@ describe MAPI::ServiceApp do
       let(:call_method) { securities_request_module.fake_header_details(request_id, end_date, status) }
       before do
         allow(Random).to receive(:new).and_return(rng)
-        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date_offset, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
+        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
         allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
       end
 
@@ -1340,10 +1356,10 @@ describe MAPI::ServiceApp do
         expect(call_method['DTC_AGENT_PARTICIPANT_NO']).to eq(participant_number)
       end
       it 'constructs a hash with a `TRADE_DATE` value' do
-        expect(call_method['TRADE_DATE']).to eq(end_date - (submitted_date_offset).days)
+        expect(call_method['TRADE_DATE']).to eq(submitted_date)
       end
       it 'constructs a hash with a `SUBMITTED_DATE` value' do
-        expect(call_method['SUBMITTED_DATE']).to eq(end_date - (submitted_date_offset).days)
+        expect(call_method['SUBMITTED_DATE']).to eq(submitted_date)
       end
       it 'constructs a hash with a `CREATED_BY` value' do
         expect(call_method['CREATED_BY']).to eq(fake_data['usernames'][created_by_offset])
@@ -1363,6 +1379,13 @@ describe MAPI::ServiceApp do
       end
       it 'constructs a hash with a `PLEDGE_TO` value' do
         expect(call_method['PLEDGE_TO']).to eq(securities_request_module::PLEDGE_TO.values[pledge_to_offset])
+      end
+      it 'selects a `SUBMITTED_DATE` from the `start_date` and `end_date` if both are provided' do
+        start_date = submitted_date
+        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
+        allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
+        expect(rng).to receive(:rand).with((start_date..end_date)).and_return(submitted_date)
+        securities_request_module.fake_header_details(request_id, end_date, status, nil, nil, start_date)
       end
       {
         securities_request_module::SSKFormType::SECURITIES_PLEDGED => 'PLEDGED_ADX_ID',
@@ -1403,11 +1426,10 @@ describe MAPI::ServiceApp do
         let(:status) { securities_request_module::MAPIRequestStatus::AUTHORIZED.sample }
 
         it 'constructs a hash with an `AUTHORIZED_DATE` value that is equal to the `SUBMITTED_DATE` plus an offset' do
-          submitted_date = end_date - (submitted_date_offset).days
           expect(call_method['AUTHORIZED_DATE']).to eq(submitted_date + (authorized_date_offset).days)
         end
         it 'constructs a hash with a `SETTLE_DATE` value equal to the `AUTHORIZED_DATE` plus one day' do
-          authorized_date = end_date - (submitted_date_offset).days + (authorized_date_offset).days
+          authorized_date = submitted_date + (authorized_date_offset).days
           expect(call_method['SETTLE_DATE']).to eq(authorized_date + 1.day)
         end
         it 'constructs a hash with an `AUTHORIZED_BY` value' do
@@ -1421,7 +1443,6 @@ describe MAPI::ServiceApp do
           expect(call_method['AUTHORIZED_DATE']).to be_nil
         end
         it 'constructs a hash with a `SETTLE_DATE` value equal to the `SUBMITTED_DATE` plus one day' do
-          submitted_date = end_date - (submitted_date_offset).days
           expect(call_method['SETTLE_DATE']).to eq(submitted_date + 1.day)
         end
         it 'constructs a hash with a nil value for `AUTHORIZED_BY`' do

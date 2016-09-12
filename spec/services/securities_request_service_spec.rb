@@ -72,6 +72,12 @@ describe SecuritiesRequestService do
       allow(subject).to receive(:process_securities_requests).and_return(processed_requests)
       expect(call_method).to be(processed_requests)
     end
+    it 'calls `get_json` with a parameter `settle_start_date` set to today' do
+      today = Time.zone.today
+      allow(Time.zone).to receive(:today).and_return(today)
+      expect(subject).to receive(:get_json).with(anything, anything, include(settle_start_date: today))
+      call_method
+    end
   end
 
   describe '`submit_request_for_authorization`' do
