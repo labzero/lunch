@@ -73,19 +73,15 @@ describe MAPI::ServiceApp do
         expect(securities_request_module).to receive(:fake_header_details).with(request_id, any_args).and_return({})
         call_method
       end
-      it 'passes the `end_date` to the `fake_header_details` method' do
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, Time.zone.today, any_args).and_return({})
+      it 'passes a default `start_date` of today to the `fake_header_details` method if no start_date is provided' do
+        expect(securities_request_module).to receive(:fake_header_details).with(request_id, anything, anything, anything, Time.zone.today).and_return({})
         call_method
       end
-      it 'passes the `start_date` to the `fake_header_details` method' do
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, anything, anything, anything, anything, Time.zone.today).and_return({})
-        call_method
-      end
-      it 'passes the `end_date` and `start_date` to `fake_header_details` from the supplied range if present' do
+      it 'passes the `start_date` to `fake_header_details` if present' do
         today = Time.zone.today
-        range = ((today - 3.days)..today)
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, range.last, anything, anything, anything, range.first).and_return({})
-        MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(member_id, range)
+        start_date = [(today - 3.days)..today].sample
+        expect(securities_request_module).to receive(:fake_header_details).with(request_id, anything, anything, anything, start_date).and_return({})
+        MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(member_id, start_date)
       end
       it 'generates at least one request for each form type and status combination' do
         allow(rng).to receive(:rand).with(eq(18..36)).and_return(18)
@@ -98,7 +94,7 @@ describe MAPI::ServiceApp do
         end
         expect(form_type_status_combos.length).to eq(18)
         form_type_status_combos.each do |combo|
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, combo.last, combo.first, combo[1], anything).and_return({})
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, combo.last, combo.first, combo[1], anything).and_return({})
         end
         call_method
       end
@@ -188,10 +184,6 @@ describe MAPI::ServiceApp do
           expect(submitted_date).to receive(:>=).with(today - 7.days)
           call_method
         end
-        it 'returns the results of `fake_header_details_array` that occur on or before the end_date' do
-          expect(submitted_date).to receive(:<=).with(today)
-          call_method
-        end
         include_examples "common processing"
       end
       describe 'when using real data' do
@@ -255,17 +247,15 @@ describe MAPI::ServiceApp do
       it 'constructs proper SQL based on the member_id, status array and date range it is passed' do
         status_array = [SecureRandom.hex, SecureRandom.hex, SecureRandom.hex]
         quoted_statuses = status_array.collect { |status| "'#{status}'" }.join(',')
-        end_date = Time.zone.today - rand(1..10).days
-        start_date = end_date - rand(1..10).days
-        date_range = (start_date..end_date)
+        start_date = Time.zone.today - rand(1..10).days
 
         sql = <<-SQL
             SELECT HEADER_ID AS REQUEST_ID, FORM_TYPE, DELIVER_TO, RECEIVE_FROM, SETTLE_DATE, CREATED_DATE AS SUBMITTED_DATE, CREATED_BY_NAME AS SUBMITTED_BY,
             SIGNED_BY_NAME AS AUTHORIZED_BY, SIGNED_DATE AS AUTHORIZED_DATE, STATUS FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE FHLB_ID = #{member_id} AND STATUS IN (#{quoted_statuses}) AND SETTLE_DATE >= TO_DATE('#{start_date}','YYYY-MM-DD HH24:MI:SS')
-            AND SETTLE_DATE <= TO_DATE('#{end_date}','YYYY-MM-DD HH24:MI:SS') AND FORM_TYPE IS NOT NULL
+            AND FORM_TYPE IS NOT NULL
         SQL
-        expect(MAPI::Services::Member::SecuritiesRequests.requests_query(member_id, status_array, date_range)).to eq(sql)
+        expect(MAPI::Services::Member::SecuritiesRequests.requests_query(member_id, status_array, start_date)).to eq(sql)
       end
     end
 
@@ -1301,7 +1291,6 @@ describe MAPI::ServiceApp do
       fake_data = fake('securities_requests')
       names = fake_data['names']
       let(:request_id) { rand(1000..9999)}
-      let(:end_date) { Time.zone.today - rand(0..7).days }
       let(:status) { (securities_request_module::MAPIRequestStatus::AUTHORIZED + securities_request_module::MAPIRequestStatus::AWAITING_AUTHORIZATION).sample }
       let(:rng) { instance_double(Random) }
       let(:pledge_type_offset) { rand(0..1) }
@@ -1317,7 +1306,7 @@ describe MAPI::ServiceApp do
       let(:authorized_by_offset) { rand(0..names.length-1) }
       let(:pledge_to_offset) { rand(0..1) }
 
-      let(:call_method) { securities_request_module.fake_header_details(request_id, end_date, status) }
+      let(:call_method) { securities_request_module.fake_header_details(request_id, status) }
       before do
         allow(Random).to receive(:new).and_return(rng)
         allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
@@ -1375,17 +1364,17 @@ describe MAPI::ServiceApp do
       end
       it 'sets the `FORM_TYPE` to the passed one if provided' do
         form_type = double('A Form Type')
-        expect(securities_request_module.fake_header_details(request_id, end_date, status, form_type)['FORM_TYPE']).to eq(form_type)
+        expect(securities_request_module.fake_header_details(request_id, status, form_type)['FORM_TYPE']).to eq(form_type)
       end
       it 'constructs a hash with a `PLEDGE_TO` value' do
         expect(call_method['PLEDGE_TO']).to eq(securities_request_module::PLEDGE_TO.values[pledge_to_offset])
       end
-      it 'selects a `SUBMITTED_DATE` from the `start_date` and `end_date` if both are provided' do
+      it 'selects a `SUBMITTED_DATE` from the `start_date` and 7 days in the future' do
         start_date = submitted_date
         allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
         allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
-        expect(rng).to receive(:rand).with((start_date..end_date)).and_return(submitted_date)
-        securities_request_module.fake_header_details(request_id, end_date, status, nil, nil, start_date)
+        expect(rng).to receive(:rand).with((start_date..(submitted_date + 7.days))).and_return(submitted_date)
+        securities_request_module.fake_header_details(request_id, status, nil, nil, start_date)
       end
       {
         securities_request_module::SSKFormType::SECURITIES_PLEDGED => 'PLEDGED_ADX_ID',

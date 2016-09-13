@@ -1484,11 +1484,10 @@ module MAPI
 
         relative_get '/:id/securities/requests' do
           id = params[:id].to_i
-          end_date = (params[:settle_end_date] || Time.zone.today).to_date
-          start_date = (params[:settle_start_date] || (end_date - 100.years)).to_date
+          start_date = (params[:settle_start_date] || (Time.zone.today - 100.years)).to_date
           MAPI::Services::Member::SecuritiesRequests.requests(self, id,
             MAPI::Services::Member::SecuritiesRequests::REQUEST_STATUS_MAPPING[params[:status]],
-            (start_date..end_date)).to_json
+            start_date).to_json
         end
 
         relative_post '/:id/securities/intake' do

@@ -127,27 +127,26 @@ module MAPI
                                       unpledged_release: SSKFormType::SAFEKEPT_RELEASE }.freeze
         end
 
-        def self.requests_query(member_id, status_array, date_range)
+        def self.requests_query(member_id, status_array, start_date)
           quoted_statuses = status_array.collect { |status| quote(status) }.join(',')
           <<-SQL
             SELECT HEADER_ID AS REQUEST_ID, FORM_TYPE, DELIVER_TO, RECEIVE_FROM, SETTLE_DATE, CREATED_DATE AS SUBMITTED_DATE, CREATED_BY_NAME AS SUBMITTED_BY,
             SIGNED_BY_NAME AS AUTHORIZED_BY, SIGNED_DATE AS AUTHORIZED_DATE, STATUS FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
-            WHERE FHLB_ID = #{quote(member_id)} AND STATUS IN (#{quoted_statuses}) AND SETTLE_DATE >= #{quote(date_range.first)}
-            AND SETTLE_DATE <= #{quote(date_range.last)} AND FORM_TYPE IS NOT NULL
+            WHERE FHLB_ID = #{quote(member_id)} AND STATUS IN (#{quoted_statuses}) AND SETTLE_DATE >= #{quote(start_date)}
+            AND FORM_TYPE IS NOT NULL
           SQL
         end
 
-        def self.requests(app, member_id, status = MAPIRequestStatus::AUTHORIZED, settlement_date_range=nil)
+        def self.requests(app, member_id, status = MAPIRequestStatus::AUTHORIZED, start_date=nil)
           flat_status = flat_unique_array(status)
           requests = (
-            end_date = settlement_date_range.try(:last) || Time.zone.today
-            start_date = settlement_date_range.try(:first) || (end_date - 7.days)
+            start_date ||= Time.zone.today - 7.days
             if should_fake?(app)
-              self.fake_header_details_array(member_id.to_i, (start_date..end_date)).select do |header_details|
-                flat_status.include?(header_details['STATUS']) && header_details['SUBMITTED_DATE'] >= start_date && header_details['SUBMITTED_DATE'] <= end_date
+              self.fake_header_details_array(member_id.to_i, start_date).select do |header_details|
+                flat_status.include?(header_details['STATUS']) && header_details['SUBMITTED_DATE'] >= start_date
               end
             else
-              fetch_hashes(app.logger, requests_query(member_id, flat_status, (start_date..end_date)))
+              fetch_hashes(app.logger, requests_query(member_id, flat_status, start_date))
             end
           )
           requests.collect do |request|
@@ -854,10 +853,10 @@ module MAPI
           end
         end
 
-        def self.fake_header_details_array(member_id, settlement_date_range = nil)
+        def self.fake_header_details_array(member_id, start_date = nil)
           today = Time.zone.today
           rng = Random.new(member_id.to_i + today.to_time.to_i)
-          settlement_date_range ||= (today..today)
+          start_date ||= today
           list = []
           # require at least one form_type of every type of request
           form_type_status_combos = []
@@ -875,13 +874,14 @@ module MAPI
             form_type = combo.try(:first) || REQUEST_FORM_TYPE_MAPPING.keys.sample(random: rng)
             status = combo.try(:last) || flat_unique_array(REQUEST_STATUS_MAPPING.values).sample(random: rng)
             delivery_type = combo.try(:[], 1)
-            list << fake_header_details(request_id, settlement_date_range.last, status, form_type, delivery_type, settlement_date_range.first)
+            list << fake_header_details(request_id, status, form_type, delivery_type, start_date)
           end
           list
         end
 
-        def self.fake_header_details(request_id, end_date, status, form_type = nil, delivery_type = nil, start_date = nil)
-          start_date ||= end_date
+        def self.fake_header_details(request_id, status, form_type = nil, delivery_type = nil, start_date = nil)
+          start_date ||= Time.zone.today
+          end_date = start_date + 7.days
           rng = Random.new(request_id)
           fake_data = fake('securities_requests')
           names = fake_data['names']
