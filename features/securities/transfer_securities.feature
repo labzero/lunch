@@ -83,3 +83,13 @@ Feature: Transfer Securities
   | page     |
   | pledged  |
   | safekept |
+
+  @jira-mem-1719 @allow-rescue @local-only
+  Scenario Outline: A member submits a request for transfer and there is a general API error
+    Given I am on the transfer to <page> account securities page
+    When I submit the request and the API returns a 500
+    Then I should see the "generic catchall" error
+  Examples:
+    | page     |
+    | pledged  |
+    | safekept |

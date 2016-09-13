@@ -395,6 +395,8 @@ Then(/^I should see the "(.*?)" error$/) do |error|
     I18n.t('activemodel.errors.models.securities_request.attributes.securities.original_par')
   when 'settlement amount present'
     I18n.t('activemodel.errors.models.securities_request.attributes.securities.payment_amount_present')
+  when 'generic catchall'
+    I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
   end
   page.assert_selector('.securities-submit-release-form-errors p', text: text, exact: true)
 end
@@ -403,6 +405,11 @@ When(/^the settlement type is set to (Vs Payment|Free)$/) do |payment_type|
   text = payment_type == 'Vs Payment' ? I18n.t('securities.release.settlement_type.vs_payment') : I18n.t('securities.release.settlement_type.free')
   page.find('label[for=release_settlement_type] + .dropdown').click
   page.find('label[for=release_settlement_type] + .dropdown li', text: text, exact: true).click
+end
+
+When(/^I submit the request and the API returns a (\d+)$/) do |http_code|
+  allow_any_instance_of(SecuritiesRequestService).to receive(:post_hash).with(:submit_request_for_authorization, anything, anything).and_return(RestClient::Exception.new(nil, http_code.to_i))
+  step 'I submit the securities release request for authorization'
 end
 
 def delivery_instructions(text)
