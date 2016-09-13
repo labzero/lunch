@@ -150,7 +150,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
         expect(subject.send(:date_within_range, date, :trade_date)).to be true
       end
     end
-    describe `valid_securities_payment_amount?` do
+    describe '`valid_securities_payment_amount?`' do
       let(:security_without_payment_amount) { FactoryGirl.build(:security, payment_amount: nil) }
       let(:security_with_payment_amount) { FactoryGirl.build(:security, payment_amount: rand(1000.99999)) }
       let(:call_validation) { subject.send(:valid_securities_payment_amount?) }
