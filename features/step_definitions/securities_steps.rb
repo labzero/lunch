@@ -412,6 +412,10 @@ When(/^I submit the request and the API returns a (\d+)$/) do |http_code|
   step 'I submit the securities release request for authorization'
 end
 
+When(/^I check the box to select all displayed securities$/) do
+  page.find('.manage-securities-table input[name="check_all"]').click
+end
+
 def delivery_instructions(text)
   case text
   when 'DTC'

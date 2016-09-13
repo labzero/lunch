@@ -41,6 +41,16 @@ Scenario Outline: Active state of Submit Button
   Then the <action> securities button should be inactive
   When I uncheck the 2nd Pledged security
   Then the <action> securities button should be active
+  When I filter the securities by Safekept
+  Then the <action> securities button should be inactive
+  When I check the box to select all displayed securities
+  Then the <action> securities button should be active
+  When I filter the securities by Pledged
+  Then the <action> securities button should be inactive
+  When I check the box to select all displayed securities
+  Then the <action> securities button should be active
+  When I filter the securities by All
+  Then the <action> securities button should be inactive
   Examples:
   | action   |
   | release  |

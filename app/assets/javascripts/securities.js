@@ -5,7 +5,8 @@ $(function() {
   var $securitiesUploadInstructions = $('.securities-upload-instructions');
   var $securitiesReleaseWrapper = $('.securities-release-table-wrapper');
   var $securitiesField = $('input[name="securities"]');
-  $checkboxes.on('change', function(e){
+
+  function enableSubmitIfSameStatus() {
     // if boxes checked and all values are the same, assign `securities_request_kind` and enable submit
     var status = false;
     $form.find('input[type=checkbox]:checked').each(function(){
@@ -19,7 +20,10 @@ $(function() {
       };
     });
     $submitButtons.attr('disabled', status ? false : true);
-  });
+  };
+
+  $checkboxes.on('change', enableSubmitIfSameStatus);
+  $('.manage-securities-table').on('checkboxes-reset.dt', enableSubmitIfSameStatus);
 
   $submitButtons.on('click', function(event) {
     var actionUrl = $(event.currentTarget).data('manage-securities-form-submit');
