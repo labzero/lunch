@@ -3256,6 +3256,16 @@ describe MAPI::ServiceApp do
           expect(call_method).to match /VALUES\s+\((\S+\s+){7}#{sentinel},/
         end
 
+        it 'sets the `delivery_type` for pledged_intake' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(delivery_type).and_return(sentinel)
+          expect(call_method_intake).to match /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\((\S+,\s*){7}RECEIVE_FROM,?\s*(\S+,\s*)*(\S+)?\s*\)\s+VALUES\s+\((\S+,\s*){7}#{sentinel},/
+        end
+
+        it 'sets the `delivery_type` for pledged_release' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(delivery_type).and_return(sentinel)
+          expect(call_method_release).to match /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\((\S+,\s*){7}DELIVER_TO,?\s*(\S+,\s*)*(\S+)?\s*\)\s+VALUES\s+\((\S+,\s*){7}#{sentinel},/
+        end
+
         it 'sets the `form_type` for pledged_intake' do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKFormType::SECURITIES_PLEDGED).and_return(sentinel)
           expect(call_method_intake).to match /VALUES\s+\((\S+\s+){8}#{sentinel},/

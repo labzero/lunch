@@ -277,10 +277,10 @@ module MAPI
         def self.insert_transfer_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, un_adx_id, broker_instructions, kind)
           now = Time.zone.today
           if (kind == :pledge_transfer)
-            deliver_receive = 'DELIVER_TO'
+            deliver_receive = 'RECEIVE_FROM'
             adx_type = :pledged_intake
           else
-            deliver_receive = 'RECEIVE_FROM'
+            deliver_receive = 'DELIVER_TO'
             adx_type = :pledged_release
           end
           <<-SQL
