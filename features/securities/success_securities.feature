@@ -10,11 +10,13 @@ Feature: Securities Requests Success
   @jira-mem-1595 @jira-mem-1671
   Scenario Outline: Member visits the success page when submitting a securities request
     Given I am on the <page> securities page
-    Then I should see the title for the "<page>" page
+    Then I should see the title for the "<success_type>" success page
     And I should see a list of securities authorized users
   Examples:
-    | page             |
-    | release success  |
-    | safekeep success |
-    | pledge success   |
-    | transfer success   |
+    | page                      | success_type     |
+    | pledge release success    | pledge release   |
+    | safekeep release success  | safekept release |
+    | safekeep success          | safekept intake  |
+    | pledge success            | pledge intake    |
+    | pledge transfer success   | transfer         |
+    | safekeep transfer success | transfer         |

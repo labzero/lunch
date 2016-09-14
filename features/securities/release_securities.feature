@@ -99,7 +99,7 @@ Scenario: Member uploads a securities release file that is missing Settlement Am
   And the edit securities section is open
   And I upload a securities release file with "no settlement amounts"
   When I click to submit the request
-  Then I should see the success page for the securities release request
+  Then I should see the title for the "pledge release" success page
 
 @jira-mem-1790 @data-unavailable
 Scenario: Member uploads a securities release file that is missing Settlement Amount and the request has a settlement type of Vs. Payment
@@ -145,7 +145,7 @@ Scenario: Member uploads a securities release file that has Settlement Amounts a
   And the edit securities section is open
   And I upload a securities release file with "settlement amounts"
   When I click to submit the request
-  Then I should see the success page for the securities release request
+  Then I should see the title for the "pledge release" success page
 
 @jira-mem-1654
 Scenario: Member changes trade and settlement dates
@@ -177,7 +177,7 @@ Scenario: Member sees success page after submitting releases for authorization
   When I fill in the "clearing_agent_participant_number" securities field with "23454343"
   And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And I submit the securities release request for authorization
-  Then I should see the success page for the securities release request
+  Then I should see the title for the "pledge release" success page
 
 @jira-mem-1600
 Scenario: A signer uses a SecurID token to authenticate when authorizing

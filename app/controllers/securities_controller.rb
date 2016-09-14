@@ -361,7 +361,8 @@ class SecuritiesController < ApplicationController
     type = params[:type].try(:to_sym)
     @securities_request = SecuritiesRequest.from_hash(params[:securities_request])
     raise ArgumentError, "Unknown request type: #{type}" unless [:release, :pledge, :safekeep, :transfer].include?(type)
-    raise ActionController::RoutingError.new("The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{@securities_request.kind}`") unless type_matches_kind(type, @securities_request.kind)
+    kind = @securities_request.kind
+    raise ActionController::RoutingError.new("The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{kind}`") unless type_matches_kind(type, kind)
     authorizer = policy(:security).authorize?
     if @securities_request.valid?
       response = SecuritiesRequestService.new(current_member_id, request).submit_request_for_authorization(@securities_request, current_user, type) do |error|
@@ -412,14 +413,18 @@ class SecuritiesController < ApplicationController
       end
       render :authorize_request
     else
-      url = case type
-      when :release
-        securities_release_success_url
-      when :transfer
-        securities_transfer_success_url
-      when :pledge
+      url = case kind
+      when :pledge_release
+        securities_release_pledge_success_url
+      when :safekept_release
+        securities_release_safekeep_success_url
+      when :pledge_transfer
+        securities_transfer_pledge_success_url
+      when :safekept_transfer
+        securities_transfer_safekeep_success_url
+      when :pledge_intake
         securities_pledge_success_url
-      when :safekeep
+      when :safekept_intake
         securities_safekeep_success_url
       end
       redirect_to url
@@ -427,15 +432,17 @@ class SecuritiesController < ApplicationController
   end
 
   def submit_request_success
-    @title = case params[:type].to_sym
-    when :release
-      t('securities.success.title')
-    when :pledge
-      t('securities.safekeep_pledge.success.pledge')
-    when :safekeep
-      t('securities.safekeep_pledge.success.safekeep')
-    when :transfer
-      t('securities.transfer.success.title')
+    @title = case params[:kind].to_sym
+    when :pledge_release
+      t('securities.success.titles.pledge_release')
+    when :safekept_release
+      t('securities.success.titles.safekept_release')
+    when :pledge_intake
+      t('securities.success.titles.pledge_intake')
+    when :safekept_intake
+      t('securities.success.titles.safekept_intake')
+    when :pledge_transfer, :safekept_transfer
+      t('securities.success.titles.transfer')
     end
     @authorized_user_data = []
     users = MembersService.new(request).signers_and_users(current_member_id) || []

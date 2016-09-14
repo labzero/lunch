@@ -32,7 +32,7 @@
     top: 0;
   }
   ul {
-    padding-left: 0;
+    padding-left: 30px;
     list-style-type: decimal;
     list-style-position: inside;
     li {
@@ -45,7 +45,6 @@
   }
   &:first-child {
     position: relative;
-    padding-left: 56px;
     margin-top: 30px;
   }
   p:first-child {
@@ -53,9 +52,15 @@
   }
 }
 
-.securities-success-table
-{
-  width: 350px;
+.securities-success-table {
+  width: 300px;
+  box-sizing: border-box;
+  border: 1px solid #d9e3ed;
+  border-radius: 3px;
+  padding: 15px 15px 20px;
+  thead th {
+    padding-top: 0;
+  }
 }
 
 .manage-securities-table {

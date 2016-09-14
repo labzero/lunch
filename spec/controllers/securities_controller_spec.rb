@@ -873,17 +873,19 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
   {
-    release: [:edit_release, I18n.t('securities.authorize.release.title'), :securities_release_success_url],
-    pledge: [:edit_pledge, I18n.t('securities.authorize.pledge.title'), :securities_pledge_success_url],
-    safekeep: [:edit_safekeep, I18n.t('securities.authorize.safekeep.title'), :securities_safekeep_success_url],
-    transfer: [:edit_transfer, I18n.t('securities.authorize.transfer.title'), :securities_transfer_success_url]
-  }.each do |type, details|
-    template, title, success_path = details
-    describe "POST submit_request for `#{type}`" do
+    pledge_release: [:edit_release, I18n.t('securities.authorize.release.title'), :securities_release_pledge_success_url, :release],
+    safekept_release: [:edit_release, I18n.t('securities.authorize.release.title'), :securities_release_safekeep_success_url, :release],
+    pledge_intake: [:edit_pledge, I18n.t('securities.authorize.pledge.title'), :securities_pledge_success_url, :pledge],
+    safekept_intake: [:edit_safekeep, I18n.t('securities.authorize.safekeep.title'), :securities_safekeep_success_url, :safekeep],
+    pledge_transfer: [:edit_transfer, I18n.t('securities.authorize.transfer.title'), :securities_transfer_pledge_success_url, :transfer],
+    safekept_transfer: [:edit_transfer, I18n.t('securities.authorize.transfer.title'), :securities_transfer_safekeep_success_url, :transfer]
+  }.each do |kind, details|
+    template, title, success_path, type = details
+    describe "POST submit_request for type `#{type}` and kind `#{kind}`" do
       let(:securities_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
       let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_request_for_authorization: true, authorize_request: true) }
       let(:active_model_errors) { instance_double(ActiveModel::Errors, add: nil) }
-      let(:securities_request) { instance_double(SecuritiesRequest, :valid? => true, errors: active_model_errors, kind: nil) }
+      let(:securities_request) { instance_double(SecuritiesRequest, :valid? => true, errors: active_model_errors, kind: kind) }
       let(:error_message) { instance_double(String) }
       let(:call_action) { post :submit_request, securities_request: securities_request_param, type: type }
 
@@ -1105,11 +1107,13 @@ RSpec.describe SecuritiesController, type: :controller do
   end
 
   describe 'GET `submit_request_success`' do
-    request_type_translations = {
-      release: I18n.t('securities.success.title'),
-      pledge: I18n.t('securities.safekeep_pledge.success.pledge'),
-      safekeep: I18n.t('securities.safekeep_pledge.success.safekeep'),
-      transfer: I18n.t('securities.transfer.success.title')
+    request_kind_translations = {
+      pledge_release: I18n.t('securities.success.titles.pledge_release'),
+      safekept_release: I18n.t('securities.success.titles.safekept_release'),
+      pledge_intake: I18n.t('securities.success.titles.pledge_intake'),
+      safekept_intake: I18n.t('securities.success.titles.safekept_intake'),
+      pledge_transfer: I18n.t('securities.success.titles.transfer'),
+      safekept_transfer: I18n.t('securities.success.titles.transfer')
     }
     let(:member_service_instance) {double('MembersService')}
     let(:user_no_roles) {{display_name: 'User With No Roles', roles: [], surname: 'With No Roles', given_name: 'User'}}
@@ -1128,23 +1132,23 @@ RSpec.describe SecuritiesController, type: :controller do
 
     it_behaves_like 'a user required action', :get, :submit_request_success
 
-    request_type_translations.each do |type, title|
-      let(:call_action) { get :submit_request_success, type: type }
-      it_behaves_like 'a controller action with an active nav setting', :submit_request_success, :securities, type: type
+    request_kind_translations.each do |kind, title|
+      let(:call_action) { get :submit_request_success, kind: kind }
+      it_behaves_like 'a controller action with an active nav setting', :submit_request_success, :securities, kind: kind
       it 'renders the `submit_request_success` view' do
         call_action
         expect(response.body).to render_template('submit_request_success')
       end
-      it "sets `@title` to `#{title}` when the `type` param is `#{type}`" do
-        get :submit_request_success, type: type
+      it "sets `@title` to `#{title}` when the `kind` param is `#{kind}`" do
+        get :submit_request_success, kind: kind
         expect(assigns[:title]).to eq(title)
       end
       it 'renders the `submit_request_success` view' do
         call_action
         expect(response.body).to render_template('submit_request_success')
       end
-      it "sets `@title` to `#{title}` when the `type` param is `#{type}`" do
-        get :submit_request_success, type: type
+      it "sets `@title` to `#{title}` when the `type` param is `#{kind}`" do
+        get :submit_request_success, kind: kind
         expect(assigns[:title]).to eq(title)
       end
       it 'sets `@authorized_user_data` to a list of users with securities authority' do

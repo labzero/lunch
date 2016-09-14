@@ -78,13 +78,3 @@ Scenario: A signer views a previously submitted safekeep request
   And I am on the securities request page
   When I click to Authorize the first safekeep
   Then I should be on the Safekeep Securities page
-
-@jira-mem-1672 @data-unavailable
-Scenario: A user submits a safekeep request for authorization.
-  Given I am on the safekeep securities page
-  When I upload a securities intake file
-  Then I should see a report table with multiple data rows
-  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
-  And I submit the securities request for authorization
-  Then I should see the title for the "safekeep success" page

@@ -32,18 +32,22 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release|release success|safekeep success|pledge success|safekeep|pledge|transfer success|transfer to pledged account|transfer to safekept account) securities page$/) do |page|
+When(/^I am on the (manage|release|pledge release success|safekeep release success|safekeep success|pledge success|safekeep|pledge|pledge transfer success|safekeep transfer success|transfer to pledged account|transfer to safekept account) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
-  when 'release success'
-    visit '/securities/release/success'
+  when 'pledge release success'
+    visit '/securities/release/pledge_success'
+  when 'safekeep release success'
+    visit '/securities/release/safekeep_success'
   when 'pledge success'
     visit '/securities/pledge/success'
   when 'safekeep success'
     visit '/securities/safekeep/success'
-  when 'transfer success'
-    visit '/securities/transfer/success'
+  when 'pledge transfer success'
+    visit '/securities/transfer/pledge_success'
+  when 'safekeep transfer success'
+    visit '/securities/transfer/safekeep_success'
   when 'release'
     step 'I am on the manage securities page'
     step 'I check the 1st Pledged security'
@@ -236,19 +240,21 @@ end
 
 Then(/^I should see a list of securities authorized users$/) do
   page.assert_selector('h2', text: /\A#{Regexp.quote(I18n.t('securities.success.authorizers'))}\z/, visible: true)
-  page.assert_selector('.settings-users-table', visible: true)
+  page.assert_selector('.securities-success-table', visible: true)
 end
 
-Then(/^I should see the title for the "(.*?)" page$/) do |success_page|
+Then(/^I should see the title for the "(.*?)" success page$/) do |success_page|
   translation = case success_page
-    when 'release success'
-      'securities.success.title'
-    when 'pledge success'
-      'securities.safekeep_pledge.success.pledge'
-    when 'safekeep success'
-      'securities.safekeep_pledge.success.safekeep'
-    when 'transfer success'
-      'securities.transfer.success.title'
+  when 'pledge release'
+    'securities.success.titles.pledge_release'
+  when 'safekept release'
+    'securities.success.titles.safekept_release'
+  when 'pledge intake'
+    'securities.success.titles.pledge_intake'
+  when 'safekept intake'
+    'securities.success.titles.safekept_intake'
+  when 'transfer'
+    'securities.success.titles.transfer'
   end
   page.assert_selector('.securities-header h1', text: I18n.t(translation), exact: true)
 end
@@ -259,10 +265,6 @@ end
 
 When(/^I submit the securities(?: release)? request for authorization$/) do
   page.find('.securities-submit-release-form input[type=submit]').click
-end
-
-Then(/^I should see the success page for the securities release request$/) do
-  page.assert_selector('.securities h1', text: I18n.t('securities.success.title'))
 end
 
 Then(/^I should see the generic error message for the securities release request$/) do

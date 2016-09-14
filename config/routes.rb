@@ -192,7 +192,8 @@ Rails.application.routes.draw do
         post 'download' => 'securities#download_release'
         post 'upload' => 'securities#upload_securities', defaults: { type: :release }
         post 'submit' => 'securities#submit_request', defaults: { type: :release }
-        get 'success' => 'securities#submit_request_success', defaults: { type: :release }
+        get 'pledge_success' => 'securities#submit_request_success', defaults: { kind: :pledge_release }
+        get 'safekeep_success' => 'securities#submit_request_success', defaults: { kind: :safekept_release }
       end
       scope 'safekeep', as: :safekeep do
         get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :safekeep }
@@ -200,7 +201,7 @@ Rails.application.routes.draw do
         get 'download' => 'securities#download_safekeep'
         post 'upload' => 'securities#upload_securities', defaults: { type: :safekeep }
         post 'submit' => 'securities#submit_request', defaults: { type: :safekeep }
-        get 'success' => 'securities#submit_request_success', defaults: { type: :safekeep }
+        get 'success' => 'securities#submit_request_success', defaults: {kind: :safekept_intake}
       end
       scope 'pledge', as: :pledge do
         get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :pledge }
@@ -208,14 +209,15 @@ Rails.application.routes.draw do
         get 'download' => 'securities#download_pledge'
         post 'upload' => 'securities#upload_securities', defaults: { type: :pledge }
         post 'submit' => 'securities#submit_request', defaults: { type: :pledge }
-        get 'success' => 'securities#submit_request_success', defaults: { type: :pledge }
+        get 'success' => 'securities#submit_request_success', defaults: {kind: :pledge_intake}
       end
       scope 'transfer', as: :transfer do
         post 'edit' => 'securities#edit_transfer'
         post 'download' => 'securities#download_transfer'
         post 'upload' => 'securities#upload_securities', defaults: { type: :transfer }
         post 'submit' => 'securities#submit_request', defaults: { type: :transfer }
-        get 'success' => 'securities#submit_request_success', defaults: { type: :transfer }
+        get 'pledge_success' => 'securities#submit_request_success', defaults: { kind: :pledge_transfer }
+        get 'safekeep_success' => 'securities#submit_request_success', defaults: { kind: :safekept_transfer }
         get 'view/:request_id' => 'error#not_found', as: 'view', defaults: { type: :transfer }
       end
     end

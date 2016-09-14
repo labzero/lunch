@@ -1317,8 +1317,6 @@ en:
         delete_request:
           title: Delete this Safekept Transfer request?
       legal: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
-      success:
-        title: Internal Transfer Request Sent
     safekeep_pledge:
       upload_instructions:
         download_template: Download Add Securities Template File
@@ -1327,16 +1325,19 @@ en:
         step_2:
           enter_securities: In the file, enter one security per line.
       discard_and_upload_again: Discard and Upload Again
-      success:
-        pledge: Pledge Securities Request Sent
-        safekeep: Safekeep Securities Request Sent
     success:
-      title: Release Securities Request Sent
-      request_will_remain: 'This request will remain in the queue for authorization until one of the following occurs:'
-      request_authorized: Request is authorized by an authorized signer
-      request_rejected: Request is rejected or removed
-      request_date_passed: The settlement date for the request has passed
-      authorizers: Your Instution's Authorizers
+      titles:
+        pledge_release: Pledge Release Request Submitted
+        safekept_release: Safekeeping Release Request Submitted
+        pledge_intake: Pledge Request Submitted
+        safekept_intake: Safekeeping Request Submitted
+        transfer: Transfer Request Submitted
+      thank_you: 'Thank you for submitting your request. Authorized signers for this securities request are listed below. Press the Notify Authorizer(s) button to email authorized signers that a request is awaiting authorization.'
+      request_will_remain: 'This request will remain in the queue until one of the following occurs:'
+      request_authorized: The request is authorized.
+      request_rejected: The request is deleted by an authorized signer.
+      request_date_passed: The Settlement Date passes.
+      authorizers: Authorized Signers for Securities
       buttons:
         manage: manage securities
         view: view securities requests

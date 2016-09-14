@@ -14,9 +14,9 @@ Feature: Securities Intake
     When I click on the Learn How link
     Then I should not see instructions on how to upload securities
   Examples:
-    | page                |
-    | safekeep securities |
-    | pledge securities   |
+  | page                |
+  | safekeep securities |
+  | pledge securities   |
 
   @jira-mem-1676 @data-unavailable
   Scenario Outline: Member cancels an upload of a securities intake file
@@ -26,9 +26,9 @@ Feature: Securities Intake
     When I click to cancel the securities release file upload
     Then I should not see an upload progress bar
   Examples:
-    | page                |
-    | safekeep securities |
-    | pledge securities   |
+  | page                |
+  | safekeep securities |
+  | pledge securities   |
 
   @jira-mem-1781 @data-unavailable
   Scenario Outline: Member uploads a securities intake file that is missing Original Par
@@ -36,9 +36,9 @@ Feature: Securities Intake
     When I drag and drop the "intake_securities_missing_original_par.xlsx" file into the upload securities dropzone
     Then I should see a security required field error
   Examples:
-    | page                |
-    | safekeep securities |
-    | pledge securities   |
+  | page                |
+  | safekeep securities |
+  | pledge securities   |
 
   @jira-mem-1781 @data-unavailable
   Scenario Outline: Member uploads a securities intake file that is missing a CUSIP
@@ -46,9 +46,9 @@ Feature: Securities Intake
     When I drag and drop the "intake_securities_missing_cusip.xlsx" file into the upload securities dropzone
     Then I should see a security required field error
   Examples:
-    | page                |
-    | safekeep securities |
-    | pledge securities   |
+  | page                |
+  | safekeep securities |
+  | pledge securities   |
 
   @jira-mem-1779 @data-unavailable
   Scenario Outline: Member sees an error when uploading an intake file with no valid rows
@@ -56,9 +56,9 @@ Feature: Securities Intake
     When I drag and drop the "intake-securities-no-rows.xlsx" file into the upload securities dropzone
     Then I should see a no securities field error
   Examples:
-    | page                |
-    | safekeep securities |
-    | pledge securities   |
+  | page                |
+  | safekeep securities |
+  | pledge securities   |
 
   @jira-mem-1783 @data-unavailable
   Scenario Outline: Member uploads a securities intake file that has an invalid Original Par
@@ -66,9 +66,9 @@ Feature: Securities Intake
     When I drag and drop the "intake_securities_invalid_original_par.xlsx" file into the upload securities dropzone
     Then I should see an original par numericality field error
   Examples:
-    | page                |
-    | safekeep securities |
-    | pledge securities   |
+  | page                |
+  | safekeep securities |
+  | pledge securities   |
 
   @jira-mem-1669
   Scenario Outline: A signer views a previously submitted request
@@ -89,11 +89,11 @@ Feature: Securities Intake
     When I fill in the "clearing_agent_participant_number" securities field with "23454343"
     And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
     And I submit the securities request for authorization
-    Then I should see the title for the "<security_type> success" page
+    Then I should see the title for the "<success_page>" success page
   Examples:
-    | security_type |
-    | safekeep      |
-    | pledge        |
+  | security_type | success_page     |
+  | safekeep      | safekept success |
+  | pledge        | pledge success   |
 
   @jira-mem-1786 @data-unavailable
   Scenario Outline: Member selects a settlement date that occurs before the trade date
@@ -106,9 +106,9 @@ Feature: Securities Intake
     When I click to submit the request
     Then I should see the "settlement date before trade date" error
   Examples:
-    | security_type |
-    | safekeep      |
-    | pledge        |
+  | security_type |
+  | safekeep      |
+  | pledge        |
 
 
   @jira-mem-1790 @data-unavailable
@@ -119,11 +119,11 @@ Feature: Securities Intake
     And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
     And I upload a securities intake file with "no settlement amounts"
     When I click to submit the request
-    Then I should see the title for the "<security_type> success" page
+    Then I should see the title for the "<success_page>" success page
   Examples:
-  | security_type |
-  | safekeep      |
-  | pledge        |
+  | security_type | success_page     |
+  | safekeep      | safekept success |
+  | pledge        | pledge success   |
 
   @jira-mem-1790 @data-unavailable
   Scenario Outline: Member uploads a securities release file that is missing Settlement Amount and the request has a settlement type of Vs. Payment
@@ -149,9 +149,9 @@ Feature: Securities Intake
     When I click to submit the request
     Then I should see the "settlement amount present" error
   Examples:
-    | security_type |
-    | safekeep      |
-    | pledge        |
+  | security_type |
+  | safekeep      |
+  | pledge        |
 
   @jira-mem-1791 @data-unavailable
   Scenario Outline: Member uploads a securities release file that has Settlement Amounts and the request has a settlement type of Vs. Payment
@@ -161,11 +161,11 @@ Feature: Securities Intake
     And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
     And I upload a securities intake file with "settlement amounts"
     When I click to submit the request
-    Then I should see the title for the "<security_type> success" page
+    Then I should see the title for the "<success_page>" success page
   Examples:
-    | security_type |
-    | safekeep      |
-    | pledge        |
+  | security_type | success_page     |
+  | safekeep      | safekept success |
+  | pledge        | pledge success   |
 
   @jira-mem-1792 @data-unavailable
   Scenario Outline: Member uploads a securities release file that has at least one security with an Original Par over the Federal Limit of 50,000,000
@@ -179,9 +179,9 @@ Feature: Securities Intake
     When I click to submit the request
     Then I should see the "over federal limit" error
   Examples:
-    | security_type |
-    | safekeep      |
-    | pledge        |
+  | security_type |
+  | safekeep      |
+  | pledge        |
 
   @jira-mem-1787
   Scenario Outline: Member changes trade and settlement dates
@@ -195,6 +195,6 @@ Feature: Securities Intake
     And I should not be able to see a calendar more than 3 months in the future
     And I click the datepicker cancel button
   Examples:
-    | security_type |
-    | safekeep      |
-    | pledge        |
+  | security_type |
+  | safekeep      |
+  | pledge        |
