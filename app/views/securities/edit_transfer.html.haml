@@ -49,9 +49,6 @@
         .securities-actions
           %span.secondary-button.delete-request-trigger= t('global.delete')
           =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true)
-        .delete-request-flyout
-          %h2= @confirm_delete_text
-          %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')
-          = link_to(t('securities.release.delete_request.delete'), securities_manage_path, class: 'primary-button')
+        = render 'delete_request_flyout', request_id: @securities_request.request_id
     =form_tag(securities_transfer_download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_request.securities.to_json)

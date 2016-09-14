@@ -165,11 +165,11 @@ Then(/^I should not see the delete release flyout dialogue$/) do
 end
 
 When(/^I click on the button to continue with the release$/) do
-  page.find('.delete-request-flyout button', text: I18n.t('securities.release.delete_request.continue').upcase).click
+  page.find('.delete-request-flyout button', text: I18n.t('securities.delete_request.continue').upcase).click
 end
 
 When(/^I confirm that I want to delete the request$/) do
-  page.find('.delete-request-flyout a', text: I18n.t('securities.release.delete_request.delete').upcase).click
+  page.find('.delete-request-flyout a', text: I18n.t('securities.delete_request.delete').upcase).click
 end
 
 When(/^I click on the Edit Securities link$/) do

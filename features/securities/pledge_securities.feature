@@ -33,34 +33,6 @@ Scenario: View the various Delivery Instructions field sets
   And I should see the "Mutual Fund" release instructions fields
 
 @jira-mem-1678
-Scenario: Member interacts with the Delete Release flyout dialogue
-  Given I am on the pledge securities page
-  When I click the button to delete the request
-  Then I should see the delete release flyout dialogue
-  When I click on the button to continue with the release
-  Then I should not see the delete release flyout dialogue
-  When I click the button to delete the request
-  And I confirm that I want to delete the request
-  Then I should be on the Manage Securities page
-
-@jira-mem-1678
-Scenario: Member changes trade and settlement dates
-  # This should be flushed out once we have actual date ranges to check
-  Given I am on the pledge securities page
-  When I click the trade date datepicker
-  And I click the datepicker apply button
-  Then I should be on the pledge securities page
-  When I click the trade date datepicker
-  And I click the datepicker cancel button
-  Then I should be on the pledge securities page
-  When I click the settlement date datepicker
-  And I click the datepicker apply button
-  Then I should be on the pledge securities page
-  When I click the settlement date datepicker
-  And I click the datepicker cancel button
-  Then I should be on the pledge securities page
-
-@jira-mem-1678
 Scenario: Member cannot click on the account number input
   Given I am on the pledge securities page
   Then the Pledge Account Number should be disabled

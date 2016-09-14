@@ -223,11 +223,9 @@ class SecuritiesController < ApplicationController
     case @securities_request.securities.first.custody_account_type
     when 'U'
       @securities_request.kind = :pledge_transfer
-      @confirm_delete_text = t('securities.pledge.delete_request.title')
       @title = t('securities.transfer.pledge.title')
     when 'P'
       @securities_request.kind = :safekept_transfer
-      @confirm_delete_text = t('securities.safekeep.delete_request.title')
       @title = t('securities.transfer.safekeep.title')
     else
       raise ArgumentError, 'Unrecognized `custody_account_type` for passed security.'
@@ -537,13 +535,18 @@ class SecuritiesController < ApplicationController
       [t('securities.release.pledge_type.standard'), SecuritiesRequest::PLEDGE_TO_VALUES[:standard]]
     ]
 
-    @title = case type
+    case type
     when :release
-      t('securities.release.title')
+      @title = t('securities.release.title')
+      @confirm_delete_text = t('securities.delete_request.titles.release')
     when :pledge
-      t('securities.pledge.title')
+      @title = t('securities.pledge.title')
+      @confirm_delete_text = t('securities.delete_request.titles.pledge')
     when :safekeep
-      t('securities.safekeep.title')
+      @title = t('securities.safekeep.title')
+      @confirm_delete_text = t('securities.delete_request.titles.safekeep')
+    when :transfer
+      @confirm_delete_text = t('securities.delete_request.titles.transfer')
     end
 
     @session_elevated = session_elevated?
