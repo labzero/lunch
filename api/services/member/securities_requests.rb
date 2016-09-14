@@ -247,7 +247,7 @@ module MAPI
                                                          LAST_MODIFIED_BY,
                                                          LAST_MODIFIED_DATE,
                                                          LAST_MODIFIED_BY_NAME,
-                                                         #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]},
+                                                         #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type_intake]},
                                                          PLEDGE_TO,
                                                          #{delivery_columns.join(', ')}
                                                         )

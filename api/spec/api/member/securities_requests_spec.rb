@@ -3616,7 +3616,8 @@ describe MAPI::ServiceApp do
       let(:delivery_type) { [ 'fed', 'dtc', 'mutual_fund', 'physical_securities' ][rand(0..3)] }
       let(:delivery_values) { [ SecureRandom.hex, SecureRandom.hex, SecureRandom.hex ] }
       let(:pledged_or_unpledged) { [:pledged, :unpledged].sample }
-      let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE["#{pledged_or_unpledged}_intake".to_sym] }
+      let(:adx_type_intake) { "#{pledged_or_unpledged}_intake".to_sym }
+      let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[adx_type_intake] }
 
       describe '`insert_intake_header_query' do
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.insert_intake_header_query(member_id,
@@ -3637,7 +3638,7 @@ describe MAPI::ServiceApp do
 
         it 'expands delivery columns into the insert statement' do
           expect(call_method).to match(
-            /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[pledged_or_unpledged]},\s+PLEDGE_TO,\s+#{delivery_columns.join(',\s+')}/)
+            /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type_intake]},\s+PLEDGE_TO,\s+#{delivery_columns.join(',\s+')}/)
         end
 
         it 'sets the `header_id`' do
