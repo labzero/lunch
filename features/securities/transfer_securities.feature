@@ -93,3 +93,18 @@ Feature: Transfer Securities
     | page     |
     | pledged  |
     | safekept |
+
+  @jira-mem-1742
+  Scenario Outline: Member interacts with the Delete Request flyout dialogue
+    Given I am on the transfer to <page> account securities page
+    When I click the button to delete the request
+    Then I should see the delete release flyout dialogue
+    When I click on the button to continue with the release
+    Then I should not see the delete release flyout dialogue
+    When I click the button to delete the request
+    And I confirm that I want to delete the request
+    Then I should be on the Manage Securities page
+  Examples:
+    | page     |
+    | pledged  |
+    | safekept |

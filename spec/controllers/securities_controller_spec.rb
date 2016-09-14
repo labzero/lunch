@@ -543,6 +543,10 @@ RSpec.describe SecuritiesController, type: :controller do
           call_action
           expect(assigns[:title]).to eq(I18n.t('securities.transfer.pledge.title'))
         end
+        it 'sets the @confirm_delete_text appropriately' do
+          call_action
+          expect(assigns[:confirm_delete_text]).to eq(I18n.t('securities.pledge.delete_request.title'))
+        end
       end
       describe 'when the `securities` have a `custody_account_type` of `P`' do
         before { allow(security).to receive(:custody_account_type).and_return('P') }
@@ -553,6 +557,10 @@ RSpec.describe SecuritiesController, type: :controller do
         it 'sets the @title appropriately' do
           call_action
           expect(assigns[:title]).to eq(I18n.t('securities.transfer.safekeep.title'))
+        end
+        it 'sets the @confirm_delete_text appropriately' do
+          call_action
+          expect(assigns[:confirm_delete_text]).to eq(I18n.t('securities.safekeep.delete_request.title'))
         end
       end
       describe 'when the `securities` have a `custody_account_type` that is neither `P` nor `U`' do

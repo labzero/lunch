@@ -35,12 +35,12 @@ Scenario: View the various Delivery Instructions field sets
 @jira-mem-1678
 Scenario: Member interacts with the Delete Release flyout dialogue
   Given I am on the pledge securities page
-  When I click the button to delete the release
+  When I click the button to delete the request
   Then I should see the delete release flyout dialogue
   When I click on the button to continue with the release
   Then I should not see the delete release flyout dialogue
-  When I click the button to delete the release
-  And I click on the button to delete the release
+  When I click the button to delete the request
+  And I confirm that I want to delete the request
   Then I should be on the Manage Securities page
 
 @jira-mem-1678

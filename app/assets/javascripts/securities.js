@@ -36,20 +36,20 @@ $(function() {
   });
 
   // Confirm deletion of release
-  $('.delete-release-trigger').on('click', function(e) {
+  $('.delete-request-trigger').on('click', function(e) {
     confirmReleaseDeletion();
   });
 
   function confirmReleaseDeletion() {
     $('body').flyout({
-      topContent: $('.delete-release-flyout').clone(true),
+      topContent: $('.delete-request-flyout').clone(true),
       hideCloseButton: true
     });
     $('.flyout').addClass('flyout-confirmation-dialogue');
   };
 
   // Handle DELETE request
-  $('.delete-release-flyout').on('ajax:success', function(e, data, status, xhr) {
+  $('.delete-request-flyout').on('ajax:success', function(e, data, status, xhr) {
     window.location.href = data['url']
   }).on('ajax:error', function(e, data, status, xhr) {
     var $errorSection = $('.securities-delete-request-error');

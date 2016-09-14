@@ -47,7 +47,11 @@
             = render 'shared/securid_module', error: @securid_status
         %small= t('securities.transfer.legal')
         .securities-actions
-          %span.secondary-button.delete-release-trigger= t('global.delete')
+          %span.secondary-button.delete-request-trigger= t('global.delete')
           =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true)
+        .delete-request-flyout
+          %h2= @confirm_delete_text
+          %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')
+          = link_to(t('securities.release.delete_request.delete'), securities_manage_path, class: 'primary-button')
     =form_tag(securities_transfer_download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_request.securities.to_json)

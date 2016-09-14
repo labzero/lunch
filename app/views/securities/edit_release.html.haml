@@ -6,7 +6,7 @@
   .securities-main-body.securities-release
     .column-9x3-left
       = render partial: 'form', locals: { type: :release, account_number: nil, url: @form_data[:url], accepted_upload_mimetypes: @accepted_upload_mimetypes }
-    .delete-release-flyout
+    .delete-request-flyout
       %h2= t('securities.release.delete_request.title')
       .securities-delete-request-confirmation
         %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')

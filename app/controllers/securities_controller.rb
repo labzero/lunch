@@ -223,9 +223,11 @@ class SecuritiesController < ApplicationController
     case @securities_request.securities.first.custody_account_type
     when 'U'
       @securities_request.kind = :pledge_transfer
+      @confirm_delete_text = t('securities.pledge.delete_request.title')
       @title = t('securities.transfer.pledge.title')
     when 'P'
       @securities_request.kind = :safekept_transfer
+      @confirm_delete_text = t('securities.safekeep.delete_request.title')
       @title = t('securities.transfer.safekeep.title')
     else
       raise ArgumentError, 'Unrecognized `custody_account_type` for passed security.'

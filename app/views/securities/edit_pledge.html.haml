@@ -6,7 +6,7 @@
     .column-9x3-left
       = render partial: 'form', locals: { type: :pledge, account_number: @securities_request.pledged_account, url: securities_pledge_submit_path, accepted_upload_mimetypes: @accepted_upload_mimetypes }
       %p.legal-footer= t('securities.pledge.legal_footer')
-    .delete-release-flyout
+    .delete-request-flyout
       %h2= t('securities.pledge.delete_request.title')
       %button.secondary-button{data: {'flyout-action' => 'close'}}= t('securities.release.delete_request.continue')
       = link_to(t('securities.release.delete_request.delete'), securities_manage_path, class: 'primary-button')
