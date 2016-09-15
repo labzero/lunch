@@ -113,6 +113,37 @@ describe CustomFormattingHelper do
     end
   end
 
+  describe '`fhlb_datetime_long_alpha_with_on` method' do
+    let(:datetime) { instance_double(DateTime, strftime: nil) }
+    let(:call_method) { helper.fhlb_datetime_long_alpha_with_on(datetime) }
+    let(:sentinel) { instance_double(String) }
+    before do
+      allow(datetime).to receive(:to_datetime).and_return(datetime)
+      allow(helper).to receive(:fhlb_date_long_alpha)
+    end
+    it 'returns the I18n value for `missing_value` if passed nil' do
+      expect(helper.fhlb_datetime_long_alpha_with_on(nil)).to eq(I18n.t('global.missing_value'))
+    end
+    it 'interpolates a string with a `time` argument that uses the `%l:%M %P` format' do
+      allow(datetime).to receive(:strftime).with('%l:%M %P').and_return(sentinel)
+      expect(helper).to receive(:t).with(anything, hash_including(time: sentinel))
+      call_method
+    end
+    it 'interpolates a string with a `date` argument that is the result of calling `fhlb_date_long_alpha`' do
+      allow(helper).to receive(:fhlb_date_long_alpha).with(datetime).and_return(sentinel)
+      expect(helper).to receive(:t).with(anything, hash_including(date: sentinel))
+      call_method
+    end
+    it 'interpolates a string using the `global.time_on_date` value' do
+      expect(helper).to receive(:t).with('global.time_on_date', any_args)
+      call_method
+    end
+    it 'returns the interpolated string' do
+      allow(helper).to receive(:t).and_return(sentinel)
+      expect(call_method).to eq(sentinel)
+    end
+  end
+
   describe '`fhlb_date_long_alpha` method' do
     let(:date) {Date.new(2015,1,2)}
     it 'converts a date into an alphanumeric string following the `Month d, YYYY` format' do

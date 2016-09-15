@@ -13,6 +13,11 @@
   @include inline-font('fhlbsf-icons', normal, normal, 'fhlbsf-icons');
 }
 
+$very-small-icon-font-size: 0.8667rem;
+$small-icon-font-size: 1rem;
+$large-icon-font-size: 1.3333rem;
+$extra-large-icon-font-size: 2rem;
+
 %icon-font {
   font-family: 'fhlbsf-icons';
   speak: none;
@@ -29,22 +34,22 @@
 
 %very-small-icon-font {
   @extend %icon-font;
-  font-size: 0.8667rem;;
+  font-size: $very-small-icon-font-size;
 }
 
 %small-icon-font {
   @extend %icon-font;
-  font-size: 1rem;
+  font-size: $small-icon-font-size;
 }
 
 %large-icon-font {
   @extend %icon-font;
-  font-size: 1.3333rem;
+  font-size: $large-icon-font-size;
 }
 
 %extra-large-icon-font {
   @extend %icon-font;
-  font-size: 2rem;
+  font-size: $extra-large-icon-font-size;
 }
 
 $icon-gear: "\e600";

@@ -1338,18 +1338,15 @@ en:
           transfer: FHLBank San Francisco Transfer Request Authorization Required
         body_html: "A securities request is awaiting authorization.\n\nUse the link below to log in to the FHLBank San Francisco Member Portal and view all current securities requests for %{member_name}.\n\n%{url}"
     authorize:
-      release:
-        title: Release Securities Request Sent
-      transfer:
-        title: Transfer Securities Request Sent
-      pledge:
-        title: Pledge Securities Request Sent
-      safekeep:
-        title: Safekeep Securities Request Sent
-      confirmation: "We received your securities request at %{date}.\nWe will provide a confirmation to your institution later today."
-      timeframe: You will typically see this transaction reflected in your STA within the next 24 hours.
-      issues: "If there are any issues with your request, you will be contacted by the Securities Department or the Collateral Department."
-      contact_html: "If you wish to change your request, please email the <a href=\"%{mailto_url}\">Securities Department</a> or call %{phone_number}."
+      titles:
+        pledge_release: Pledge Release Request Received
+        safekept_release: Safekeeping Release Request Received
+        pledge_intake: Pledge Request Received
+        safekept_intake: Safekeeping Request Received
+        transfer: Transfer Request Received
+      confirmation: "We received your securities request at %{date}. If there are any issues with your request, you will be contacted by Collateral Operations or Securities Services. Otherwise, the transaction will be reflected in your Settlement Transaction Account statement on the Settlement Date."
+      pdf: To see a PDF summary of the authorized request, press the View link in the Authorized Requests section of Securities Requests.
+      contact_html: "If you have questions, contact <a href=\"%{mailto_url}\">%{mailto_text}</a> or call %{phone_number}."
       make_request: make another request
     delete_request:
       titles:

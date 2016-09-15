@@ -399,16 +399,7 @@ class SecuritiesController < ApplicationController
         render :edit_safekeep
       end
     elsif authorizer
-      case type
-      when :release
-        @title = t('securities.authorize.release.title')
-      when :transfer
-        @title = t('securities.authorize.transfer.title')
-      when :pledge
-        @title = t('securities.authorize.pledge.title')
-      when :safekeep
-        @title = t('securities.authorize.safekeep.title')
-      end
+      populate_authorize_request_view_variables(kind)
       render :authorize_request
     else
       url = case kind
@@ -662,4 +653,25 @@ class SecuritiesController < ApplicationController
     end
   end
 
+  def populate_authorize_request_view_variables(kind)
+    collateral_contact_info = {email_address: collateral_operations_email, mailto_text: t('contact.collateral_departments.collateral_operations.title'), phone_number: collateral_operations_phone_number}
+    securities_contact_info = {email_address: securities_services_email, mailto_text: t('contact.collateral_departments.securities_services.title'), phone_number: securities_services_phone_number}
+    case kind
+    when :pledge_release
+      @title = t('securities.authorize.titles.pledge_release')
+      @contact = collateral_contact_info
+    when :safekept_release
+      @title = t('securities.authorize.titles.safekept_release')
+      @contact = securities_contact_info
+    when :pledge_intake
+      @title = t('securities.authorize.titles.pledge_intake')
+      @contact = collateral_contact_info
+    when :safekept_intake
+      @title = t('securities.authorize.titles.safekept_intake')
+      @contact = securities_contact_info
+    when :pledge_transfer, :safekept_transfer
+      @title = t('securities.authorize.titles.transfer')
+      @contact = collateral_contact_info
+    end
+  end
 end

@@ -44,13 +44,17 @@ describe ContactInformationHelper, type: :helper do
     it_behaves_like 'an email helper method', :securities_services_email, 'SECURITIES_SERVICES_EMAIL'
   end
 
+  describe '`collateral_operations_email` method' do
+    it_behaves_like 'an email helper method', :collateral_operations_email, 'COLLATERAL_OPERATIONS_EMAIL'
+  end
+
   describe '`securities_services_email_text` method' do
     let(:call_method) { helper.send(:securities_services_email_text) }
     it 'responds to `securities_services_email_text`' do
       expect(helper).to respond_to(:securities_services_email_text)
     end
     it 'returns `SECURITIES_SERVICES_EMAIL`' do
-      expect(call_method).to eq('securities@fhlbsf.com')
+      expect(call_method).to eq(described_class::SECURITIES_SERVICES_EMAIL)
     end
   end
 
@@ -68,7 +72,7 @@ describe ContactInformationHelper, type: :helper do
     end
   end
 
-  %i(web_support_phone_number service_desk_phone_number operations_phone_number mcu_phone_number accounting_phone_number securities_services_phone_number).each do |helper_method|
+  %i(web_support_phone_number service_desk_phone_number operations_phone_number mcu_phone_number accounting_phone_number securities_services_phone_number collateral_operations_phone_number).each do |helper_method|
     describe "`#{helper_method}` method" do
       let(:call_method) {helper.send(helper_method) }
       it "responds to `#{helper_method}`" do

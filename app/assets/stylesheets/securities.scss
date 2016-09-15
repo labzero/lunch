@@ -19,18 +19,10 @@
   @extend %page-main-body;
 }
 
-.securities-success
-{
+.securities-success {
+  width: $column-9-width;
+  box-sizing: border-box;
   margin-bottom: 35px;
-  &:before {
-    @extend %extra-large-icon-font;
-    margin-right: 26px;
-    vertical-align: middle;
-    color: $approval-green;
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
   ul {
     padding-left: 30px;
     list-style-type: decimal;
@@ -39,16 +31,28 @@
       margin-bottom: 5px;
     }
   }
-  .primary-button, .secondary-button {
-    margin-right: 10px;
-    width: 219px;
-  }
   &:first-child {
     position: relative;
     margin-top: 30px;
   }
-  p:first-child {
-    margin-bottom: 30px;
+  &.icon-success-before {
+    padding-left: $extra-large-icon-font-size * 2;
+    &:before {
+      @extend %extra-large-icon-font;
+      vertical-align: middle;
+      color: $approval-green;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+  }
+}
+
+.securities-success-actions {
+  margin-top: 50px;
+  .primary-button, .secondary-button {
+    margin-right: 10px;
+    width: 219px;
   }
 }
 
