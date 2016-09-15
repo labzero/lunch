@@ -34,11 +34,12 @@ Scenario: View the various Delivery Instructions field sets
   Then I should see "Mutual Fund" as the selected release delivery instructions
   And I should see the "Mutual Fund" release instructions fields
 
-@jira-mem-1592
+@jira-mem-1592 @jira-mem-1877
 Scenario: Member interacts with the Delete Release flyout dialogue
   Given I am on the release securities page
   When I click the button to delete the request
   Then I should see the delete release flyout dialogue
+  And I should see release copy for the delete flyout
   When I click on the button to continue with the release
   Then I should not see the delete release flyout dialogue
   When I click the button to delete the request

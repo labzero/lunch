@@ -1352,8 +1352,7 @@ en:
         safekeep: Delete this Safekeeping request?
         pledge: Delete this Pledge request?
         transfer: Delete this Transfer request?
-      delete: Yes, Delete Request
-      continue: No, Continue
+      delete: Delete Request
       error_message: This request cannot be deleted right now.
     upload_errors:
       cannot_open: We couldn't open your file. Please verify that you've selected the correct file and try again.

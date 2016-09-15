@@ -199,11 +199,12 @@ Feature: Securities Intake
   | safekeep      |
   | pledge        |
 
-  @jira-mem-1678
+  @jira-mem-1678 @jira-mem-1875 @jira-mem-1876
   Scenario Outline: Member interacts with the Delete Release flyout dialogue
     Given I am on the <security_type> securities page
     When I click the button to delete the request
     Then I should see the delete release flyout dialogue
+    And I should see <security_type> copy for the delete flyout
     When I click on the button to continue with the release
     Then I should not see the delete release flyout dialogue
     When I click the button to delete the request

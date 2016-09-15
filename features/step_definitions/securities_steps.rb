@@ -160,12 +160,16 @@ Then(/^I should see the delete release flyout dialogue$/) do
   page.assert_selector('.flyout-confirmation-dialogue', visible: 'visible')
 end
 
+Then(/^I should see (safekeep|pledge|transfer|release) copy for the delete flyout$/) do |type|
+  page.assert_selector('.delete-request-flyout h2', text: I18n.t("securities.delete_request.titles.#{type}"), visible: 'visible', exact: true)
+end
+
 Then(/^I should not see the delete release flyout dialogue$/) do
   page.assert_no_selector('.flyout-confirmation-dialogue', visible: 'visible')
 end
 
 When(/^I click on the button to continue with the release$/) do
-  page.find('.delete-request-flyout button', text: I18n.t('securities.delete_request.continue').upcase).click
+  page.find('.delete-request-flyout button', text: I18n.t('global.cancel').upcase).click
 end
 
 When(/^I confirm that I want to delete the request$/) do
