@@ -1100,12 +1100,12 @@ RSpec.describe SecuritiesController, type: :controller do
 
   describe 'GET `submit_request_success`' do
     request_kind_translations = {
-      pledge_release: I18n.t('securities.success.titles.pledge_release'),
-      safekept_release: I18n.t('securities.success.titles.safekept_release'),
-      pledge_intake: I18n.t('securities.success.titles.pledge_intake'),
-      safekept_intake: I18n.t('securities.success.titles.safekept_intake'),
-      pledge_transfer: I18n.t('securities.success.titles.transfer'),
-      safekept_transfer: I18n.t('securities.success.titles.transfer')
+      pledge_release: [I18n.t('securities.success.titles.pledge_release'), I18n.t('securities.success.email.subjects.pledge_release')],
+      safekept_release: [I18n.t('securities.success.titles.safekept_release'), I18n.t('securities.success.email.subjects.safekept_release')],
+      pledge_intake: [I18n.t('securities.success.titles.pledge_intake'), I18n.t('securities.success.email.subjects.pledge_intake')],
+      safekept_intake: [I18n.t('securities.success.titles.safekept_intake'), I18n.t('securities.success.email.subjects.safekept_intake')],
+      pledge_transfer: [I18n.t('securities.success.titles.transfer'), I18n.t('securities.success.email.subjects.transfer')],
+      safekept_transfer: [I18n.t('securities.success.titles.transfer'), I18n.t('securities.success.email.subjects.transfer')]
     }
     let(:member_service_instance) {double('MembersService')}
     let(:user_no_roles) {{display_name: 'User With No Roles', roles: [], surname: 'With No Roles', given_name: 'User'}}
@@ -1124,7 +1124,8 @@ RSpec.describe SecuritiesController, type: :controller do
 
     it_behaves_like 'a user required action', :get, :submit_request_success
 
-    request_kind_translations.each do |kind, title|
+    request_kind_translations.each do |kind, translations|
+      title, email_subject = translations
       let(:call_action) { get :submit_request_success, kind: kind }
       it_behaves_like 'a controller action with an active nav setting', :submit_request_success, :securities, kind: kind
       it 'renders the `submit_request_success` view' do
@@ -1134,6 +1135,10 @@ RSpec.describe SecuritiesController, type: :controller do
       it "sets `@title` to `#{title}` when the `kind` param is `#{kind}`" do
         get :submit_request_success, kind: kind
         expect(assigns[:title]).to eq(title)
+      end
+      it "sets `@email_subject` to `#{email_subject}` when the `kind` param is `#{kind}`" do
+        get :submit_request_success, kind: kind
+        expect(assigns[:email_subject]).to eq(email_subject)
       end
       it 'renders the `submit_request_success` view' do
         call_action

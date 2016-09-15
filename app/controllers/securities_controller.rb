@@ -430,17 +430,22 @@ class SecuritiesController < ApplicationController
   end
 
   def submit_request_success
-    @title = case params[:kind].to_sym
+    case params[:kind].to_sym
     when :pledge_release
-      t('securities.success.titles.pledge_release')
+      @title = t('securities.success.titles.pledge_release')
+      @email_subject = t('securities.success.email.subjects.pledge_release')
     when :safekept_release
-      t('securities.success.titles.safekept_release')
+      @title = t('securities.success.titles.safekept_release')
+      @email_subject = t('securities.success.email.subjects.safekept_release')
     when :pledge_intake
-      t('securities.success.titles.pledge_intake')
+      @title = t('securities.success.titles.pledge_intake')
+      @email_subject = t('securities.success.email.subjects.pledge_intake')
     when :safekept_intake
-      t('securities.success.titles.safekept_intake')
+      @title = t('securities.success.titles.safekept_intake')
+      @email_subject = t('securities.success.email.subjects.safekept_intake')
     when :pledge_transfer, :safekept_transfer
-      t('securities.success.titles.transfer')
+      @title = t('securities.success.titles.transfer')
+      @email_subject = t('securities.success.email.subjects.transfer')
     end
     @authorized_user_data = []
     users = MembersService.new(request).signers_and_users(current_member_id) || []

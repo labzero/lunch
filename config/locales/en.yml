@@ -1330,8 +1330,13 @@ en:
         view: view securities requests
         notify: notify authorizer(s)
       email:
-        subject: FHLBSF Securities Authorization Required
-        body_html: "There is a Securities Request awaiting authorization.\n\n %{url}"
+        subjects:
+          pledge_release: FHLBank San Francisco Pledge Release Request Authorization Required
+          safekept_release: FHLBank San Francisco Safekeeping Release Request Authorization Required
+          pledge_intake: FHLBank San Francisco Pledge Request Authorization Required
+          safekept_intake: FHLBank San Francisco Safekeeping Request Authorization Required
+          transfer: FHLBank San Francisco Transfer Request Authorization Required
+        body_html: "A securities request is awaiting authorization.\n\nUse the link below to log in to the FHLBank San Francisco Member Portal and view all current securities requests for %{member_name}.\n\n%{url}"
     authorize:
       release:
         title: Release Securities Request Sent

@@ -26,4 +26,4 @@
     %section.securities-success
       = link_to(t('securities.success.buttons.manage'), securities_manage_path, class: 'secondary-button')
       = link_to(t('securities.success.buttons.view'), securities_requests_path, class: 'secondary-button')
-      = mail_to('', t('securities.success.buttons.notify'), :class => 'primary-button', :subject => t('securities.success.email.subject'), :body => t('securities.success.email.body_html', url: securities_requests_url))
+      = mail_to('', t('securities.success.buttons.notify'), :class => 'primary-button', :subject => @email_subject, :body => t('securities.success.email.body_html', url: securities_requests_url, member_name: current_member_name))
