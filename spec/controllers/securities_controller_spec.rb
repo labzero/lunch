@@ -591,6 +591,7 @@ RSpec.describe SecuritiesController, type: :controller do
 
       before do
         allow(controller).to receive(:populate_securities_table_data_view_variable)
+        allow(controller).to receive(:render).and_call_original
       end
 
       it_behaves_like 'a user required action', :post, action
@@ -604,6 +605,10 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(controller).to receive(:populate_securities_table_data_view_variable).with(type, [security, security])
         call_action
       end
+      it "renders with a `type` of `#{type}` and the correct `title`" do
+        expect(controller).to receive(:render).with(hash_including(locals: { type: type, title: I18n.t("securities.download.titles.#{type}") }))
+        call_action
+      end
       it 'responds with an xlsx file' do
         call_action
         expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
@@ -611,31 +616,28 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  describe 'GET download_safekeep' do
-    let(:call_action) { post :download_safekeep }
+  [:safekeep, :pledge].each do |type|
+    action = :"download_#{type}"
+    describe "POST download_#{action}" do
+      let(:call_action) { post action }
 
-    it 'calls `populate_securities_table_data_view_variable` without securities' do
-      expect(controller).to receive(:populate_securities_table_data_view_variable).with(:safekeep)
-      call_action
-    end
+      before do
+        allow(controller).to receive(:populate_securities_table_data_view_variable)
+        allow(controller).to receive(:render).and_call_original
+      end
 
-    it 'responds with an xlsx file' do
-      call_action
-      expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
-    end
-  end
-
-  describe 'GET download_pledge' do
-    let(:call_action) { post :download_pledge }
-
-    it 'calls `populate_securities_table_data_view_variable` without securities' do
-      expect(controller).to receive(:populate_securities_table_data_view_variable).with(:pledge)
-      call_action
-    end
-
-    it 'responds with an xlsx file' do
-      call_action
-      expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
+      it "calls `populate_securities_table_data_view_variable` with `#{type}`" do
+        expect(controller).to receive(:populate_securities_table_data_view_variable).with(type)
+        call_action
+      end
+      it "renders with a `type` of `#{type}` and the correct `title`" do
+        expect(controller).to receive(:render).with(hash_including(locals: { type: type, title: I18n.t("securities.download.titles.#{type}") }))
+        call_action
+      end
+      it 'responds with an xlsx file' do
+        call_action
+        expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
+      end
     end
   end
 

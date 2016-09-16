@@ -5,6 +5,7 @@ workbook.styles do |styles|
   border = styles.add_style(:border => { :style => :thin, :color => "FFD9E3ED" }, :type => :dxf)
   blue =  styles.add_style(:bg_color=> 'FFE5EFF9', :type => :dxf)
   header_style = styles.add_style(:b => true, :bg_color=> 'FFEEF1F0')
+  title_style = styles.add_style(sz: 14, b: true, border: { style: :thin, color: 'FF000000', edges: [:bottom] }, alignment: {horizontal: :right} )
 
   workbook.add_worksheet(name: 'release') do |sheet|
     logo_path = File.join(Rails.root, 'app', 'assets', 'images', 'fhlbsf_black_25px-padding.png')
@@ -17,41 +18,52 @@ workbook.styles do |styles|
       image.start_at 0,0
     end
 
-    sheet.add_row
-    if type == :pledge || type == :safekeep
-      sheet.add_row [nil, nil, nil, I18n.t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)], style: styles.add_style(sz: 9)
-      sheet.add_row [nil, nil, nil, I18n.t('securities.safekeep.custodian_name_footnote', footnote_marker: fhlb_footnote_marker(1))], style: styles.add_style(sz: 9)
-      2.times { sheet.add_row }
-    elsif type == :release
-      sheet.add_row [nil, nil, nil, I18n.t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)], style: styles.add_style(sz: 9)
-      3.times { sheet.add_row }
+    3.times { sheet.add_row }
+    if type == :transfer
+      sheet.add_row [nil, nil, title], style: title_style
     else
-      4.times { sheet.add_row }
+      sheet.add_row [nil, nil, nil, title], style: title_style
     end
+    sheet.add_row
+    sheet.add_row [I18n.t('securities.download.fed_limit')], style: styles.add_style(sz: 11)
+    if type == :pledge || type == :safekeep
+      sheet.add_row [I18n.t('securities.download.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)], style: styles.add_style(sz: 11)
+      sheet.add_row [I18n.t('securities.download.custodian_name_footnote', footnote_marker: fhlb_footnote_marker(1))], style: styles.add_style(sz: 11)
+    elsif type == :release
+      sheet.add_row [I18n.t('securities.download.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)], style: styles.add_style(sz: 11)
+    end
+    sheet.add_row
     sheet.add_row @securities_table_data[:column_headings], style: header_style
     @securities_table_data[:rows].each_with_index do |row, i|
       values = row[:columns].collect { |column| column[:value] }
       sheet.add_row values, types: [:string, :string, :integer, :integer]
     end
 
-    if type == :transfer
+    case type
+    when :transfer
       column_range = 'A:C'
-      column_widths = [18, nil, 15]
-    else
+      column_widths = [18, nil, 19]
+      starting_position = 8
+    when :release
       column_range = 'A:D'
       column_widths = [18, nil, 15, 22]
+      starting_position = 9
+    when :safekeep, :pledge
+      column_range = 'A:D'
+      column_widths = [18, nil, 22, 22]
+      starting_position = 10
     end
 
     sheet.add_conditional_formatting(column_range, { :type => :expression,
-                                          :formula => "ROW()>=6",
+                                          :formula => "ROW()>=#{starting_position}",
                                           :dxfId => border,
                                           :priority => 1 })
     sheet.add_conditional_formatting(column_range, { :type => :expression,
-                                          :formula => "ROW()>=7",
+                                          :formula => "ROW()>=#{starting_position + 1}",
                                           :dxfId => font_size_9,
                                           :priority => 2 })
     sheet.add_conditional_formatting(column_range, { :type => :expression,
-                                          :formula => "AND(ROW()>=7, ISEVEN(ROW()))",
+                                          :formula => "AND(ROW()>=#{starting_position + 1}, ISEVEN(ROW()))",
                                           :dxfId => blue,
                                           :priority => 4 })
     sheet.column_widths(*column_widths)

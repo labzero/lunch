@@ -1356,6 +1356,15 @@ en:
         transfer: Delete this Transfer request?
       delete: Delete Request
       error_message: This request cannot be deleted right now.
+    download:
+      titles:
+        release: Release Request
+        safekeep: Safekeeping Request
+        pledge: Pledge Request
+        transfer: Transfer Request
+      fed_limit: Securities with Fed delivery must have Original Par of $50 million or less
+      settlement_amount_footnote: '%{footnote_marker}If Settlement Type is Vs. Payment, each security must have Settlement Amount'
+      custodian_name_footnote: '%{footnote_marker}Custodian Name is required for all non-agency mortgage-backed securities'
     upload_errors:
       cannot_open: We couldn't open your file. Please verify that you've selected the correct file and try again.
       unsupported_mime_type: Your file does not appear to be an Excel file. Please verify that you've selected the correct file and try again.

@@ -260,18 +260,23 @@ class SecuritiesController < ApplicationController
   def download_release
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:release, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :release }
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :release, title: t('securities.download.titles.release') }
   end
 
   def download_transfer
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:transfer, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :transfer }
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :transfer, title: t('securities.download.titles.transfer') }
   end
 
   def download_safekeep
     populate_securities_table_data_view_variable(:safekeep)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep }
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep, title: t('securities.download.titles.safekeep') }
+  end
+
+  def download_pledge
+    populate_securities_table_data_view_variable(:pledge)
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge, title: t('securities.download.titles.pledge') }
   end
 
   def upload_securities
@@ -352,11 +357,6 @@ class SecuritiesController < ApplicationController
       error = I18n.t('securities.upload_errors.unsupported_mime_type')
     end
     render json: {html: html, form_data: (securities.to_json if securities && securities.present?), error: (simple_format(error) if error)}, content_type: request.format
-  end
-
-  def download_pledge
-    populate_securities_table_data_view_variable(:pledge)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge }
   end
 
   # POST
