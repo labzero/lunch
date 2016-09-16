@@ -190,6 +190,7 @@ en:
     coupon_rate: Coupon Rate
     original_par_value: Original Par Value
     original_par: Original Par
+    settlement_amount: Settlement Amount
     price: Price
     price_date: Price Date
     custody_account_number: Custody Account Number
@@ -1200,6 +1201,44 @@ en:
       authorized:
         title: Authorized Requests
         description: Authorized requests are displayed for 7 days after settlement.
+      view:
+        request_id: 'Request ID:'
+        pledge_account: 'Pledge Account:'
+        request_details:
+          title: Request Details
+          request_id: Request ID
+          authorized_by: Authorized By
+          authorization_date: Authorization Date
+        broker_instructions:
+          title: Broker Instructions
+          transaction_code: Transaction Code
+          settlement_type: Settlement Type
+          trade_date: Trade Date
+          settlement_date: Settlement Date
+        delivery_instructions:
+          title: Delivery Instructions
+          delivery_method: Delivery Method
+          clearing_agent: Clearing Agent’s Participant No.
+          further_credit: For Further Credit to Account No.
+        securities:
+          title: Securities
+          cusip: CUSIP
+          description: Description
+          original_par: 'Original Par ($)'
+          settlement_amount: 'Settlement Amount ($)%{footnote_marker}'
+          vs_payment_footnote: '%{footnote_marker}If Vs. Payment'
+          custodian_name_footnote: '%{footnote_marker}The name of the custodian is required for all non-agency mortgage-backed securities (MBS). If the custodian of the note supporting the MBS transaction is the Issuer or a related party and the mortgage notes have not been endorsed to the trustee, the Bank requires that the party that has control over the mortgage notes (as determined by the Bank) have a long-term debt rating of at least BBB.'
+        legal:
+          header: Pursuant to the Advances and Security Agreement between your institution and the Bank, your institution has pledged and granted a security interest to the Bank in the securities listed above.
+          sub_header: By authorizing the pledge of the specific securities listed above, your institution makes the following certifications.
+          additional_certifications: 'By authorizing the pledge of the specific securities listed above, your institution makes the following certifications:'
+          anti_preditory_lending_title: Anti-Predatory Lending Policy Certification
+          anti_preditory_lending_text: Your institution hereby certifies that it is aware of, and will comply with the Bank’s Anti-Predatory Lending Policy (as amended from time to time) at all times and represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date twhich any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
+          nontraditional_and_subprime_mortgage_title: Nontraditional and Subprime Mortgage Lending Certification
+          nontraditional_and_subprime_mortgage_text: Your institution hereby certifies that all residential mortgage loans pledged to the Bank that were originated or acquired by your institution after July 10, 2007, comply at all times with the Interagency Guidance on Nontraditional Mortgage Product Risks dated October 4, 2006, and the Statement on Subprime Mortgage Lending dated July 10, 2007. Your institution represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date on which any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
+          footer: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
+        release:
+          title: Release Securities
     release:
       title: Release Securities
       add_securities: Add Securities

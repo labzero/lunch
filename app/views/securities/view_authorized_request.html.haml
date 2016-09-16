@@ -1,0 +1,45 @@
+- @html_class = 'white-background'
+.view-authorized-request
+  .row
+    %h1= @title
+    %h3= @member[:name]
+    %span= @member[:fhfa_number]
+  .row
+    .column-3
+      %h4= t('securities.requests.view.request_id')
+      %span.account-number= @securities_request.request_id
+    .column-3
+      %h4= t('securities.requests.view.pledge_account')
+      %span.account-number= @member[:pledged_account_number]
+  .row.details
+    .column-3
+      %h4= t('securities.requests.view.request_details.title')
+      %hr
+      =render 'reports/reports_table', table_data: @request_details_table_data, sortable: false
+    .column-3
+      %h4= t('securities.requests.view.broker_instructions.title')
+      %hr
+      =render 'reports/reports_table', table_data: @broker_instructions_table_data, sortable: false
+    .column-3
+      %h4= t('securities.requests.view.delivery_instructions.title')
+      %hr
+      =render 'reports/reports_table', table_data: @delivery_instructions_table_data, sortable: false
+  .row
+    %h2= t('securities.requests.view.securities.title')
+    =render 'reports/reports_table', table_class: 'securities-release-table', table_data: @securities_table_data, sortable: false, disable_auto_width: true
+  .row.legal-footer= t('securities.requests.view.securities.vs_payment_footnote', footnote_marker: fhlb_footnote_marker)
+  .row
+    %p= t('securities.requests.view.legal.header')
+  .row
+    %p= t('securities.requests.view.legal.sub_header')
+  .row
+    %p
+      %span.legal-footer.legal-title= t('securities.requests.view.legal.anti_preditory_lending_title')
+      %span.legal-footer= t('securities.requests.view.legal.anti_preditory_lending_text')
+  .row
+    %p
+      %span.legal-footer.legal-title= t('securities.requests.view.legal.nontraditional_and_subprime_mortgage_title')
+      %span.legal-footer= t('securities.requests.view.legal.nontraditional_and_subprime_mortgage_text')
+  .row
+    %p
+      %span.legal-footer= t('securities.requests.view.legal.footer')

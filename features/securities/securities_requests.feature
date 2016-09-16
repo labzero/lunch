@@ -49,3 +49,9 @@ Examples:
   | release      | Securities Release  |
   | pledge       | Pledge Securities   |
   | safekeep     | Safekeep Securities |
+
+@jira-mem-1685
+Scenario: Download a PDF of an authorized security request
+  Given I am on the securities request page
+  When I request a PDF of an authorized security request
+  Then I should begin downloading a file

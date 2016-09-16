@@ -426,6 +426,11 @@ When(/^I check the box to select all displayed securities$/) do
   page.find('.manage-securities-table input[name="check_all"]').click
 end
 
+When(/^I request a PDF of an authorized security request$/) do
+  jquery_execute("$('body').on('downloadStarted', function(){$('body').addClass('download-started')})")
+  page.find('.securities-request-table a', text: /\A#{I18n.t('global.view').upcase}\z/, match: :first).click
+end
+
 def delivery_instructions(text)
   case text
   when 'DTC'

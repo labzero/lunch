@@ -81,14 +81,14 @@
   cursor: pointer;
 }
 
-.loading-report {
+.loading-flyout {
   display: none;
 }
 
 .flyout-loading-message {
   margin-top: 55px;
   margin-left: 290px;
-  .loading-report {
+  .loading-flyout {
     display: block;
   }
   .flyout-top-section {

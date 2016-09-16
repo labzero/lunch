@@ -184,10 +184,69 @@ class SecuritiesController < ApplicationController
             {value: request[:authorized_by]},
             {value: request[:authorized_date], type: :date},
             {value: request[:settle_date], type: :date},
-            {value: [[t('global.view'), '#']], type: :actions}
+            {value: [[t('global.view'), kind == 'pledge_release' || kind == 'safekept_release' ?
+              securities_release_generate_authorized_request_path(request_id: request[:request_id]) :
+              "#"]], type: :actions}
           ]
         }
       end
+    }
+  end
+
+  def generate_authorized_request
+    job_status = RenderSecuritiesRequestsPDFJob.perform_later(current_member_id, { request_id: params[:request_id] }).job_status
+    job_status.update_attributes!(user_id: current_user.id)
+    render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
+  end
+
+  def view_authorized_request
+    @title = t('securities.requests.view.release.title')
+    @member = MembersService.new(request).member(current_member_id)
+    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#view_authorized_request has encountered nil calling MembersService. Check error logs.") if @member.nil?
+    @member_profile = MemberBalanceService.new(current_member_id, request).profile
+    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#view_authorized_request has encountered nil calling MemberBalanceService. Check error logs.") if @member_profile.nil?
+    @securities_request = SecuritiesRequestService.new(current_member_id, request).submitted_request(params[:request_id])
+    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#view_authorized_request has encountered nil calling SecuritiesRequestService. Check error logs.") if @securities_request.nil?
+    account_number = @securities_request.kind == :pledge_release || @securities_request.kind == :safekept_intake ? @securities_request.pledged_account : @securities_request.safekept_account
+
+    @request_details_table_data = {
+      rows: [ { columns: [ { value: t('securities.requests.view.request_details.request_id') },
+                           { value: @securities_request.request_id } ] },
+              { columns: [ { value: t('securities.requests.view.request_details.authorized_by') },
+                           { value: @securities_request.authorized_by } ] },
+              { columns: [ { value: t('securities.requests.view.request_details.authorization_date') },
+                           { value: @securities_request.authorized_date } ] } ] }
+
+    @broker_instructions_table_data = {
+      rows: [ { columns: [ { value: t('securities.requests.view.broker_instructions.transaction_code') },
+                           { value: @securities_request.transaction_code.to_s.titleize } ] },
+              { columns: [ { value: t('securities.requests.view.broker_instructions.settlement_type') },
+                           { value: @securities_request.settlement_type.to_s.titleize } ] },
+              { columns: [ { value: t('securities.requests.view.broker_instructions.trade_date') },
+                           { value: fhlb_date_standard_numeric(@securities_request.trade_date) } ] },
+              { columns: [ { value: t('securities.requests.view.broker_instructions.settlement_date') },
+                           { value: fhlb_date_standard_numeric(@securities_request.settlement_date) } ] } ] }
+
+    @delivery_instructions_table_data = {
+      rows: [ { columns: [ { value: t('securities.requests.view.delivery_instructions.delivery_method') },
+                           { value: get_delivery_instructions(@securities_request.delivery_type) } ] },
+              { columns: [ { value: t('securities.requests.view.delivery_instructions.clearing_agent') },
+                           { value: @securities_request.clearing_agent_participant_number } ] },
+              { columns: [ { value: t('securities.requests.view.delivery_instructions.further_credit') },
+                           { value: account_number } ] } ] }
+    rows = []
+    @securities_request.securities.each do |security|
+      rows << { columns: [ { value: security.cusip },
+                           { value: security.description },
+                           { value: security.original_par, type: :currency_whole },
+                           { value: security.payment_amount, type: :currency_whole } ] }
+    end
+    @securities_table_data = {
+      column_headings: [ t('common_table_headings.cusip'),
+                         t('common_table_headings.description'),
+                         fhlb_add_unit_to_table_header(t('common_table_headings.original_par'), '$'),
+                         fhlb_add_unit_to_table_header(t('common_table_headings.settlement_amount'), '$') ],
+      rows: rows
     }
   end
 
@@ -678,5 +737,9 @@ class SecuritiesController < ApplicationController
       @title = t('securities.authorize.titles.transfer')
       @contact = collateral_contact_info
     end
+  end
+
+  def get_delivery_instructions(delivery_type)
+    I18n.t(DELIVERY_INSTRUCTIONS_DROPDOWN_MAPPING[delivery_type.to_sym][:text])
   end
 end

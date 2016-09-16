@@ -52,6 +52,8 @@ class SecuritiesRequest
                       :safekept_account,
                       :pledge_to,
                       :form_type,
+                      :authorized_by,
+                      :authorized_date,
                       :kind].freeze
 
   ACCESSIBLE_ATTRS = (BROKER_INSTRUCTION_KEYS + OTHER_PARAMETERS + DELIVERY_INSTRUCTION_KEYS.values.flatten).freeze

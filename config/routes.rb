@@ -186,8 +186,10 @@ Rails.application.routes.draw do
       get 'manage' => 'securities#manage'
       get 'requests' => 'securities#requests'
       delete 'request/:request_id' => 'securities#delete_request', as: 'delete_request'
+
       scope 'release', as: :release do
         get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :release }
+        get 'authorized/:request_id' => 'securities#generate_authorized_request', as: 'generate_authorized_request', defaults: { type: :release }
         post 'edit' => 'securities#edit_release'
         post 'download' => 'securities#download_release'
         post 'upload' => 'securities#upload_securities', defaults: { type: :release }

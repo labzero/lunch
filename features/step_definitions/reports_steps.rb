@@ -351,7 +351,7 @@ When(/^I request a PDF$/) do
 end
 
 Then(/^I should begin downloading a file$/) do
-  page.assert_selector('body.report-download-started', wait: 180)
+  page.assert_selector('body.download-started', wait: 180)
 end
 
 When(/^I request an XLSX$/) do
@@ -360,7 +360,7 @@ end
 
 def export_report(format)
   single_item_dropdown = page.all('.report-header-buttons .dropdown.single-item-dropdown')
-  jquery_execute("$('body').on('reportDownloadStarted', function(){$('body').addClass('report-download-started')})")
+  jquery_execute("$('body').on('downloadStarted', function(){$('body').addClass('download-started')})")
   page.find(".report-header-buttons .dropdown-selection").click
   unless single_item_dropdown.present?
     page.find('.report-header-buttons .dropdown li', text: format, visible: true).click
@@ -468,12 +468,12 @@ Then(/^I should see a security that is indicated as a new transaction$/) do
 end
 
 When(/^I cancel the report download from the flyout$/) do
-  jquery_execute("$('body').on('reportDownloadCanceled', function(){$('body').addClass('report-download-canceled')})")
-  page.find('.cancel-report-download', text: /#{I18n.t('global.cancel_download')}/i).click
+  jquery_execute("$('body').on('downloadCanceled', function(){$('body').addClass('download-canceled')})")
+  page.find('.cancel-download', text: /#{I18n.t('global.cancel_download')}/i).click
 end
 
 Then(/^the report download should be canceled$/) do
-  page.assert_selector('body.report-download-canceled')
+  page.assert_selector('body.download-canceled')
 end
 
 When(/^I select "(.*?)" from the authorizations filter$/) do |text|

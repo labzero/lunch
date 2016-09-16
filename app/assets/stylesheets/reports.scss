@@ -1587,7 +1587,7 @@ td.dataTables_empty {
     }
     .report-profile-data {
       .column-3 {
-        width: 190px;
+        width: $print-column-3-width;
       }
       .column-3-span-2 {
         width: 430px;

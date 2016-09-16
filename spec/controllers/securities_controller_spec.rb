@@ -206,7 +206,7 @@ RSpec.describe SecuritiesController, type: :controller do
       it 'builds a row for each entry in the `authorized` requests' do
         3.times do
           authorized_requests << {
-            request_id: double('Request ID'),
+            request_id: double('Request ID', to_s: SecureRandom.hex),
             authorized_by: double('Authorized By'),
             authorized_date: double('Authorized Date'),
             settle_date: double('Settlement Date'),
@@ -223,7 +223,7 @@ RSpec.describe SecuritiesController, type: :controller do
               {value: request[:authorized_by]},
               {value: request[:authorized_date], type: :date},
               {value: request[:settle_date], type: :date},
-              {value: [[I18n.t('global.view'), '#']], type: :actions}
+              {value: [[I18n.t('global.view'), request[:kind] == 'pledge_release' || request[:kind] == 'safekeep_release' ? "/securities/request/#{request[:request_id]}" : "#"]], type: :actions}
             ]
           }
         end
@@ -1222,6 +1222,163 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
+  describe 'GET `generate_authorized_request`' do
+    let(:job_status) { double('JobStatus', update_attributes!: nil, id: nil, destroy: nil, result_as_string: nil ) }
+    let(:request_id) { rand(0..99999) }
+    let(:user_id) { rand(1000) }
+    let(:active_job) { double('Active Job Instance', job_status: job_status) }
+    let(:call_action) { get :generate_authorized_request, request_id: request_id }
+    let(:current_user) { double('User', id: user_id, :accepted_terms? => true)}
+    let(:member_id) { rand(1000) }
+
+    before do
+      allow(RenderSecuritiesRequestsPDFJob).to receive(:perform_later).and_return(active_job)
+      allow(controller).to receive(:current_user).and_return(current_user)
+      allow(subject).to receive(:current_member_id).and_return(member_id)
+    end
+
+    it "enqueues the render securities request pdf job" do
+      expect(RenderSecuritiesRequestsPDFJob).to receive(:perform_later).with(member_id, any_args).and_return(active_job)
+      call_action
+    end
+    it 'updates the job_status instance with the user_id of the current user' do
+      expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
+      call_action
+    end
+    it 'returns a json response with a `job_status_url`' do
+      call_action
+      expect(JSON.parse(response.body).with_indifferent_access[:job_status_url]).to eq(job_status_url(job_status))
+    end
+    it 'returns a json response with a `job_cancel_url`' do
+      call_action
+      expect(JSON.parse(response.body).with_indifferent_access[:job_cancel_url]).to eq(job_cancel_url(job_status))
+    end
+  end
+
+  describe '`view_authorized_request`' do
+    let(:member_id) { rand(0..9999) }
+    let(:request_id) { rand(0..99999) }
+    let(:controller) { SecuritiesController.new }
+    let(:profile) { double('Member Profile') }
+    let(:member) { double('Member') }
+    let(:authorized_by) { SecureRandom.hex }
+    let(:authorized_date) { Time.zone.today }
+    let(:transaction_code) { double('Transaction Code') }
+    let(:members_service_instance) { double('Members Service', member: member ) }
+    let(:member_balance_service_instance) { double('Member Balance Service', profile: profile) }
+    let(:settlement_type) {  SecureRandom.hex }
+    let(:trade_date) { Time.zone.today }
+    let(:settlement_date) { Time.zone.today }
+    let(:clearing_agent_participant_number) { rand(0..9999) }
+    let(:account_number) { rand(0..9999) }
+    let(:cusip) { SecureRandom.hex }
+    let(:description) { SecureRandom.hex }
+    let(:original_par) { rand(0..9999) }
+    let(:payment_amount) { rand(0..9999) }
+    let(:delivery_type_string) { SecureRandom.hex }
+    let(:security) { double('Security', cusip: cusip,
+                                        description: description,
+                                        original_par: original_par,
+                                        payment_amount: payment_amount) }
+    let(:securities_request) { double('Securities Request', request_id: request_id,
+                                                            authorized_by: authorized_by,
+                                                            authorized_date: authorized_date,
+                                                            transaction_code: transaction_code,
+                                                            settlement_type: settlement_type,
+                                                            trade_date: trade_date,
+                                                            delivery_type: SecureRandom.hex,
+                                                            settlement_date: settlement_date,
+                                                            securities: [ security ],
+                                                            clearing_agent_participant_number: clearing_agent_participant_number,
+                                                            kind: [:pledge_release, :safekept_release],
+                                                            pledged_account: rand(9999..99999),
+                                                            safekept_account: rand(9999..99999), ) }
+    let(:securities_request_service_instance) { double('Securities Request Service', submitted_request: securities_request )}
+    let(:call_action) { subject.public_send(:view_authorized_request) }
+
+    before do
+      subject.params = { request_id: request_id }
+      subject.class_eval { layout 'print' }
+      allow(MembersService).to receive(:new).with(anything).and_return(members_service_instance)
+      allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
+      allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service_instance)
+      allow(subject).to receive(:get_delivery_instructions).with(anything).and_return(delivery_type_string)
+    end
+
+    it 'sets the report name' do
+      call_action
+      expect(subject.instance_variable_get(:@title)).to eq(I18n.t('securities.requests.view.release.title'))
+    end
+    it 'sets the member' do
+      call_action
+      expect(subject.instance_variable_get(:@member)).to eq(member)
+    end
+    it 'raises an error if the `member` is nil' do
+      allow(members_service_instance).to receive(:member).and_return(nil)
+      expect { call_action }.to raise_error(ActionController::RoutingError)
+    end
+    it 'sets the member profile' do
+      call_action
+      expect(subject.instance_variable_get(:@member_profile)).to eq(profile)
+    end
+    it 'raises an error if the `member_profile` is nil' do
+      allow(member_balance_service_instance).to receive(:profile).and_return(nil)
+      expect { call_action }.to raise_error(ActionController::RoutingError)
+    end
+    it 'sets the securities request' do
+      call_action
+      expect(subject.instance_variable_get(:@securities_request)).to eq(securities_request)
+    end
+    it 'raises an error if the `securities_request` is nil' do
+      allow(securities_request_service_instance).to receive(:submitted_request).and_return(nil)
+      expect { call_action }.to raise_error(ActionController::RoutingError)
+    end
+    it 'sets the request details table data' do
+      call_action
+      expect(subject.instance_variable_get(:@request_details_table_data)).to eq( {
+        rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                           { value: securities_request.request_id } ] },
+              { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                           { value: securities_request.authorized_by } ] },
+              { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                           { value: securities_request.authorized_date } ] } ] } )
+    end
+    it 'sets broker instructions table data' do
+      call_action
+      expect(subject.instance_variable_get(:@broker_instructions_table_data)).to eq( {
+        rows: [ { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.transaction_code') },
+                             { value: securities_request.transaction_code.to_s.titleize } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_type') },
+                             { value: securities_request.settlement_type.to_s.titleize } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.trade_date') },
+                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.trade_date) } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_date') },
+                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.settlement_date) } ] } ] } )
+    end
+    it 'sets delivery instructions table data' do
+      call_action
+      expect(subject.instance_variable_get(:@delivery_instructions_table_data)).to eq( {
+        rows: [ { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.delivery_method') },
+                             { value: delivery_type_string } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.clearing_agent') },
+                             { value: securities_request.clearing_agent_participant_number } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.further_credit') },
+                             { value: securities_request.kind == :pledge_release || securities_request.kind == :safekept_release ? securities_request.pledged_account : securities_request.safekept_account } ] } ] } )
+    end
+    it 'sets securities table data' do
+      call_action
+      expect(subject.instance_variable_get(:@securities_table_data)).to eq( {
+        column_headings: [ I18n.t('common_table_headings.cusip'),
+                           I18n.t('common_table_headings.description'),
+                           fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+                           fhlb_add_unit_to_table_header(I18n.t('common_table_headings.settlement_amount'), '$') ],
+        rows: [ { columns: [ { value: security.cusip },
+                           { value: security.description },
+                           { value: security.original_par, type: :currency_whole },
+                           { value: security.payment_amount, type: :currency_whole } ] } ] } )
+    end
+  end
+
   describe 'private methods' do
     describe '`kind_to_description`' do
       {
@@ -1961,6 +2118,13 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(assigns[:contact][:mailto_text]).to eq(I18n.t('contact.collateral_departments.securities_services.title'))
             end
           end
+        end
+      end
+    end
+    describe '`get_delivery_instructions`' do
+      (SecuritiesRequest::DELIVERY_TYPES.keys - [:transfer]).each do |delivery_type|
+        it 'returns the correct string for `delivery_type` `#{delivery_type}`' do
+          expect(subject.send(:get_delivery_instructions, delivery_type)).to eq(I18n.t(SecuritiesController::DELIVERY_INSTRUCTIONS_DROPDOWN_MAPPING[delivery_type.to_sym][:text]))
         end
       end
     end
