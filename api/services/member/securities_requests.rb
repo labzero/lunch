@@ -215,7 +215,7 @@ module MAPI
                                                          LAST_MODIFIED_BY,
                                                          LAST_MODIFIED_DATE,
                                                          LAST_MODIFIED_BY_NAME,
-                                                         #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]},
+                                                         #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type_release]},
                                                          #{delivery_columns.join(', ')}
                                                         )
             VALUES (#{quote(header_id)},
@@ -660,7 +660,6 @@ module MAPI
           unless should_fake?(app)
             header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
             ActiveRecord::Base.transaction do
-              adx_type = get_adx_type_from_security(app, securities.first)
               adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), "ADX ID")
               insert_header_sql = insert_release_header_query(member_id,
                                                               header_id,

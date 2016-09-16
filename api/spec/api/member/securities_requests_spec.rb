@@ -338,7 +338,7 @@ describe MAPI::ServiceApp do
 
         it 'expands delivery columns into the insert statement' do
           expect(call_method).to match(
-            /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]},\s+#{delivery_columns.join(',\s+')}/)
+            /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME["#{adx_type}_release".to_sym]},\s+#{delivery_columns.join(',\s+')}/)
         end
 
         it 'sets the `header_id`' do
