@@ -2934,7 +2934,7 @@ en:
     securities_request:
       authorized:
         subject: 'An authorized %{pledge_or_safekeeping} request has arrived'
-        body: '%{member_name} has submitted an authorized %{pledge_or_safekeeping} Release request. Please log in to the SSK application to acknowledge the transaction.'
+        body: '%{member_name} has submitted an authorized %{pledge_or_safekeeping} request. Please log in to the SSK application to acknowledge the transaction.'
         pledge: Pledge
         safekeeping: Safekeeping
   errors:
