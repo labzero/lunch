@@ -184,4 +184,18 @@ class ApplicationController < ActionController::Base
   def set_default_format
     request.format = :html unless Mime::SET.include?(request.format)
   end
+
+  def self.inherited(subclass)
+    ActiveSupport.run_load_hooks(:"class_#{self.name.underscore}", subclass)
+  end
+
+  def self.method_added(method)
+    @@_seen_methods ||= {}
+    unless @@_seen_methods[method]
+      @@_seen_methods[method] = true
+      ActiveSupport.run_load_hooks("method_#{self.name.underscore}.#{method}".to_sym, self)
+    end
+  end
 end
+
+ActiveSupport.run_load_hooks(:class_application_controller, ApplicationController)

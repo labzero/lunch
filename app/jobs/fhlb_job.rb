@@ -26,8 +26,7 @@ class FhlbJob < ActiveJob::Base
     job_status.completed! unless job_status.completed? || job_status.canceled?
     result # return the result of the job to handle the case where job is executed inline
   rescue => err
-    Rails.logger.warn "#{self.class.name}##{job_id} raised an exception: #{err}"
-    Rails.logger.debug "BACKTRACE: #{err.backtrace.join("\n")}"
+    handle_exception(err)
     job_status.failed!
     nil
   end
@@ -39,4 +38,13 @@ class FhlbJob < ActiveJob::Base
   def self.scheduled(queue, klass, *args)
     klass.constantize.set(queue: queue).perform_later(*args)
   end
+
+  private
+
+  def handle_exception(exception)
+    Rails.logger.warn "#{self.class.name}##{job_id} raised an exception: #{exception}"
+    Rails.logger.debug "BACKTRACE: #{exception.backtrace.join("\n")}"
+  end
 end
+
+ActiveSupport.run_load_hooks(:class_fhlb_job, FhlbJob)

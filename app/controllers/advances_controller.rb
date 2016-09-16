@@ -23,9 +23,7 @@ class AdvancesController < ApplicationController
   end
 
   rescue_from AASM::InvalidTransition, AASM::UnknownStateMachineError, AASM::UndefinedState, AASM::NoDirectAssignmentError do |exception|
-    logger.info { 'Exception: ' + exception.to_s }
-    logger.info { 'Advance Request State at Exception: ' + advance_request.to_json }
-    render :error
+    handle_advance_exception(exception)
   end
 
   ADVANCES_ALL = 'all'.freeze
@@ -326,5 +324,11 @@ class AdvancesController < ApplicationController
         [I18n.t('advances.confirmation.download_date', date: date), path]
       end
     end
+  end
+
+  def handle_advance_exception(exception)
+    logger.info { 'Exception: ' + exception.to_s }
+    logger.info { 'Advance Request State at Exception: ' + advance_request.to_json }
+    render :error
   end
 end
