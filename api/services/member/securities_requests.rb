@@ -928,8 +928,8 @@ module MAPI
             'AUTHORIZED_BY' => authorized ? authorized_by_name : nil,
             'AUTHORIZED_DATE' => authorized ? authorized_date : nil,
             'PLEDGE_TO' => PLEDGE_TO.values.sample(random: rng),
-            'PLEDGED_ADX_ID' => [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SECURITIES_RELEASE].include?(form_type) ? rng.rand(1000..9999) : nil,
-            'UNPLEDGED_ADX_ID' => [SSKFormType::SAFEKEPT_DEPOSIT, SSKFormType::SAFEKEPT_RELEASE].include?(form_type) ? rng.rand(1000..9999) : nil
+            'PLEDGED_ADX_ID' => rng.rand(1000..9999),
+            'UNPLEDGED_ADX_ID' => rng.rand(1000..9999)
           }
         end
 

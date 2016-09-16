@@ -218,7 +218,7 @@ Rails.application.routes.draw do
         post 'submit' => 'securities#submit_request', defaults: { type: :transfer }
         get 'pledge_success' => 'securities#submit_request_success', defaults: { kind: :pledge_transfer }
         get 'safekeep_success' => 'securities#submit_request_success', defaults: { kind: :safekept_transfer }
-        get 'view/:request_id' => 'error#not_found', as: 'view', defaults: { type: :transfer }
+        get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :transfer }
       end
     end
   end

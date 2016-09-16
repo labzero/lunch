@@ -2,7 +2,7 @@ When(/^I click on the Securities link in the header$/) do
   page.find('.secondary-nav a', text: I18n.t('securities.title'), exact: true).click
 end
 
-Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities|Transfer to Pledged|Transfer to Safekept) page$/i) do |page_type|
+Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities|Transfer to Pledged|Transfer to Safekept|Transfer Securities) page$/i) do |page_type|
   text = case page_type
   when /\AManage Securities\z/i
     step 'I should see a report table with multiple data rows'
@@ -21,6 +21,8 @@ Then(/^I should be on the (Manage Securities|Securities Requests|Securities Rele
     I18n.t('securities.transfer.pledge.title')
   when /\ATransfer to Safekept\z/i
     I18n.t('securities.transfer.safekeep.title')
+  when /\ATransfer Securities\z/i
+    /\ATransfer Securities/
   end
   page.assert_selector('h1', text: text, exact: true)
 end
@@ -292,11 +294,11 @@ Then(/^I should a disabled state for the Authorize action$/) do
   page.assert_no_selector('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
 end
 
-Then(/^I should an active state for the Authorize action$/) do
+Then(/^I should see the active state for the Authorize action$/) do
   page.assert_selector('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
 end
 
-When(/^I click to Authorize the first (pledge|release|safekeep)(?: request)?$/) do |type|
+When(/^I click to Authorize the first (pledge|release|safekeep|transfer)(?: request)?$/) do |type|
   description = case type
   when 'pledge'
     I18n.t('securities.requests.form_descriptions.pledge')
@@ -304,6 +306,8 @@ When(/^I click to Authorize the first (pledge|release|safekeep)(?: request)?$/) 
     I18n.t('securities.requests.form_descriptions.release')
   when 'safekeep'
     I18n.t('securities.requests.form_descriptions.safekept')
+  when 'transfer'
+    I18n.t('securities.requests.form_descriptions.transfer')
   else
     raise ArgumentError, "unknown form type: #{type}"
   end

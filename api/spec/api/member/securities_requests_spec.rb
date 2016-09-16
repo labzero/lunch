@@ -1305,11 +1305,13 @@ describe MAPI::ServiceApp do
       let!(:form_type) { rand(70..73) }
       let(:authorized_by_offset) { rand(0..names.length-1) }
       let(:pledge_to_offset) { rand(0..1) }
+      let(:pledged_adx) { rand(1000..9999) }
+      let(:unpledged_adx) { rand(1000..9999) }
 
       let(:call_method) { securities_request_module.fake_header_details(request_id, status) }
       before do
         allow(Random).to receive(:new).and_return(rng)
-        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
+        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset, pledged_adx, unpledged_adx)
         allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
       end
 
@@ -1369,23 +1371,18 @@ describe MAPI::ServiceApp do
       it 'constructs a hash with a `PLEDGE_TO` value' do
         expect(call_method['PLEDGE_TO']).to eq(securities_request_module::PLEDGE_TO.values[pledge_to_offset])
       end
+      it 'constructs a hash with a `PLEDGED_ADX_ID` value' do
+        expect(call_method['PLEDGED_ADX_ID']).to eq(pledged_adx)
+      end
+      it 'constructs a hash with a `UNPLEDGED_ADX_ID` value' do
+        expect(call_method['UNPLEDGED_ADX_ID']).to eq(unpledged_adx)
+      end
       it 'selects a `SUBMITTED_DATE` from the `start_date` and 7 days in the future' do
         start_date = submitted_date
         allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
         allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
         expect(rng).to receive(:rand).with((start_date..(submitted_date + 7.days))).and_return(submitted_date)
         securities_request_module.fake_header_details(request_id, status, nil, nil, start_date)
-      end
-      {
-        securities_request_module::SSKFormType::SECURITIES_PLEDGED => 'PLEDGED_ADX_ID',
-        securities_request_module::SSKFormType::SECURITIES_RELEASE => 'PLEDGED_ADX_ID',
-        securities_request_module::SSKFormType::SAFEKEPT_DEPOSIT => 'UNPLEDGED_ADX_ID',
-        securities_request_module::SSKFormType::SAFEKEPT_RELEASE => 'UNPLEDGED_ADX_ID'
-      }.each do |form_type, field|
-        it "constructs a hash with a `#{field}` if the `FORM_TYPE` is `#{form_type}`" do
-          allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
-          expect(call_method[field]).to be_present
-        end
       end
       it 'constructs a hash with a `STATUS` value equal to the passed `status`' do
         expect(call_method['STATUS']).to eq(status)

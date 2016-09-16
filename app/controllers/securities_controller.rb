@@ -64,6 +64,8 @@ class SecuritiesController < ApplicationController
     }
   }.freeze
 
+  VALID_REQUEST_TYPES = [:release, :pledge, :safekeep, :transfer].freeze
+
   before_action do
     set_active_nav(:securities)
     @html_class ||= 'white-background'
@@ -236,9 +238,11 @@ class SecuritiesController < ApplicationController
   def view_request
     request_id = params[:request_id]
     type = params[:type].try(:to_sym)
+    raise ArgumentError, "Unknown request type: #{type}" unless VALID_REQUEST_TYPES.include?(type)
     @securities_request = SecuritiesRequestService.new(current_member_id, request).submitted_request(request_id)
     raise ActionController::RoutingError.new("There has been an error and SecuritiesController#view_request has encountered nil. Check error logs.") if @securities_request.nil?
-    raise ActionController::RoutingError.new("The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{@securities_request.kind}`") unless type_matches_kind(type, @securities_request.kind)
+    kind = @securities_request.kind
+    raise ActionController::RoutingError.new("The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{kind}`") unless type_matches_kind(type, kind)
     populate_view_variables(type)
     case type
     when :release
@@ -247,8 +251,9 @@ class SecuritiesController < ApplicationController
       render :edit_pledge
     when :safekeep
       render :edit_safekeep
-    else
-      raise ArgumentError, "Unknown request type: #{type}"
+    when :transfer
+      @title = kind == :pledge_transfer ? t('securities.transfer.pledge.title') : t('securities.transfer.safekeep.title')
+      render :edit_transfer
     end
   end
 
@@ -358,7 +363,7 @@ class SecuritiesController < ApplicationController
   def submit_request
     type = params[:type].try(:to_sym)
     @securities_request = SecuritiesRequest.from_hash(params[:securities_request])
-    raise ArgumentError, "Unknown request type: #{type}" unless [:release, :pledge, :safekeep, :transfer].include?(type)
+    raise ArgumentError, "Unknown request type: #{type}" unless VALID_REQUEST_TYPES.include?(type)
     kind = @securities_request.kind
     raise ActionController::RoutingError.new("The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{kind}`") unless type_matches_kind(type, kind)
     authorizer = policy(:security).authorize?

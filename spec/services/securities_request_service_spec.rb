@@ -317,7 +317,7 @@ describe SecuritiesRequestService do
           expect(call_method[broker_instruction]).to eq(raw_hash[:broker_instructions][broker_instruction])
         end
       end
-      SecuritiesRequest::DELIVERY_TYPES.keys.each do |delivery_type|
+      (SecuritiesRequest::DELIVERY_TYPES.keys - [:transfer]).each do |delivery_type|
         describe "when the `delivery_type` is `#{delivery_type}`" do
           before do
             raw_hash[:delivery_instructions] = {
@@ -336,6 +336,20 @@ describe SecuritiesRequestService do
                 expect(call_method[delivery_key]).to eq(raw_hash[:delivery_instructions][delivery_key])
               end
             end
+          end
+        end
+      end
+      describe 'when the delivery type is `:transfer`' do
+        before do
+          raw_hash[:delivery_instructions] = {
+            delivery_type: :transfer,
+            account_number: nil
+          }
+        end
+        it 'does not set an account number' do
+          response = call_method
+          (SecuritiesRequest::ACCOUNT_NUMBER_TYPE_MAPPING.values + [:account_number]).each do |account_number_key|
+            expect(response[account_number_key]).to be_nil
           end
         end
       end

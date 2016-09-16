@@ -323,7 +323,7 @@ RSpec.describe SecuritiesController, type: :controller do
   end
 
   describe 'GET view_request' do
-    let(:type) { [:release, :pledge, :safekeep].sample }
+    let(:type) { SecureRandom.hex }
     let(:request_id) { SecureRandom.hex }
     let(:securities_request) { instance_double(SecuritiesRequest, kind: nil) }
     let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_request) }
@@ -340,42 +340,46 @@ RSpec.describe SecuritiesController, type: :controller do
     it_behaves_like 'a controller action with an active nav setting', :view_request, :securities, request_id: SecureRandom.hex, type: :release
     it_behaves_like 'an authorization required method', :get, :view_request, :security, :authorize?, request_id: SecureRandom.hex, type: :release
 
-    it 'raises an ActionController::RoutingError if the service object returns nil' do
-      allow(service).to receive(:submitted_request)
-      expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#view_request has encountered nil. Check error logs.')
-    end
-    it 'raises an ActionController::RoutingError if the securities request kind does not match the request type param' do
-      allow(controller).to receive(:type_matches_kind).and_return(false)
-      expect{call_action}.to raise_error(ActionController::RoutingError, "The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{securities_request.kind}`")
-    end
-    it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
-      expect(SecuritiesRequestService).to receive(:new).with(member_id, any_args).and_return(service)
-      call_action
-    end
-    it 'creates a new `SecuritiesRequestService` with the `request`' do
-      expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(service)
-      call_action
-    end
-    it 'calls `submitted_request` on the `SecuritiesRequestService` instance with the `request_id`' do
-      expect(service).to receive(:submitted_request).with(request_id)
-      call_action
-    end
-    it 'sets `@securities_request` to the result of `SecuritiesRequestService#request_id`' do
-      call_action
-      expect(assigns[:securities_request]).to eq(securities_request)
-    end
-    it 'calls `populate_view_variables`' do
-      expect(controller).to receive(:populate_view_variables)
-      call_action
+    it 'raises an exception if passed an unknown type' do
+      expect{call_action}.to raise_error(ArgumentError, "Unknown request type: #{type}")
     end
 
     {
       release: :edit_release,
       pledge: :edit_pledge,
-      safekeep: :edit_safekeep
+      safekeep: :edit_safekeep,
+      transfer: :edit_transfer
     }.each do |type, view|
       describe "when the `type` is `#{type}`" do
         let(:call_action) { get :view_request, request_id: request_id, type: type }
+        it 'raises an ActionController::RoutingError if the service object returns nil' do
+          allow(service).to receive(:submitted_request)
+          expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#view_request has encountered nil. Check error logs.')
+        end
+        it 'raises an ActionController::RoutingError if the securities request kind does not match the request type param' do
+          allow(controller).to receive(:type_matches_kind).and_return(false)
+          expect{call_action}.to raise_error(ActionController::RoutingError, "The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{securities_request.kind}`")
+        end
+        it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
+          expect(SecuritiesRequestService).to receive(:new).with(member_id, any_args).and_return(service)
+          call_action
+        end
+        it 'creates a new `SecuritiesRequestService` with the `request`' do
+          expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(service)
+          call_action
+        end
+        it 'calls `submitted_request` on the `SecuritiesRequestService` instance with the `request_id`' do
+          expect(service).to receive(:submitted_request).with(request_id)
+          call_action
+        end
+        it 'sets `@securities_request` to the result of `SecuritiesRequestService#request_id`' do
+          call_action
+          expect(assigns[:securities_request]).to eq(securities_request)
+        end
+        it 'calls `populate_view_variables`' do
+          expect(controller).to receive(:populate_view_variables)
+          call_action
+        end
         it "renders the `#{view}` view" do
           call_action
           expect(response.body).to render_template(view)
@@ -386,9 +390,15 @@ RSpec.describe SecuritiesController, type: :controller do
         end
       end
     end
-
-    it 'raises an ArgumentError if passed an unknown type' do
-      expect{get :view_request, request_id: request_id, type: SecureRandom.hex}.to raise_error(ArgumentError)
+    it 'sets `@title` appropriately when the `type` is `:transfer` and the `kind` is `:pledge_transfer`' do
+      allow(securities_request).to receive(:kind).and_return(:pledge_transfer)
+      get :view_request, request_id: request_id, type: :transfer
+      expect(assigns[:title]).to eq(I18n.t('securities.transfer.pledge.title'))
+    end
+    it 'sets `@title` appropriately when the `type` is `:transfer` and the `kind` is `:safekept_transfer`' do
+      allow(securities_request).to receive(:kind).and_return(:safekept_transfer)
+      get :view_request, request_id: request_id, type: :transfer
+      expect(assigns[:title]).to eq(I18n.t('securities.transfer.safekeep.title'))
     end
   end
 
