@@ -72,6 +72,12 @@ describe SecuritiesRequestService do
       allow(subject).to receive(:process_securities_requests).and_return(processed_requests)
       expect(call_method).to be(processed_requests)
     end
+    it 'calls `get_json` with a parameter `settle_start_date` set to today' do
+      today = Time.zone.today
+      allow(Time.zone).to receive(:today).and_return(today)
+      expect(subject).to receive(:get_json).with(anything, anything, include(settle_start_date: today))
+      call_method
+    end
   end
 
   describe '`submit_request_for_authorization`' do
@@ -80,15 +86,16 @@ describe SecuritiesRequestService do
     let(:securities) { SecureRandom.hex }
     let(:session_id) { SecureRandom.hex }
     let(:request_id) { SecureRandom.hex }
+    let(:kind) { SecureRandom.hex }
     let(:session) { instance_double(ActionDispatch::Request::Session, id: session_id) }
     let(:user) { instance_double(User, username: SecureRandom.hex, display_name: SecureRandom.hex) }
-    let(:securities_request) { instance_double(SecuritiesRequest, broker_instructions: broker_instructions, delivery_instructions: delivery_instructions, securities: securities, request_id: nil, 'request_id=': nil) }
+    let(:securities_request) { instance_double(SecuritiesRequest, broker_instructions: broker_instructions, delivery_instructions: delivery_instructions, securities: securities, request_id: nil, 'request_id=': nil, kind: kind) }
 
     before do
       allow(request).to receive(:session).and_return(session)
     end
 
-    [:pledge, :release, :safekeep].each do |type|
+    [:pledge, :release, :safekeep, :transfer].each do |type|
       describe "when `type` is #{type}" do
         let(:call_method) { subject.submit_request_for_authorization(securities_request, user, type) }
         it_behaves_like 'a MAPI backed service object method', :submit_request_for_authorization, nil, :get, false do
@@ -100,9 +107,15 @@ describe SecuritiesRequestService do
             expect(subject).to receive(method).with(:submit_request_for_authorization, any_args)
             call_method
           end
-          if type == :release
+          case type
+          when :release
             it "calls `#{method}` with `{member_id}/securities/release` for the endpoint arg" do
               expect(subject).to receive(method).with(anything, "/member/#{member_id}/securities/release", any_args)
+              call_method
+            end
+          when :transfer
+            it "calls `#{method}` with `{member_id}/securities/transfer` for the endpoint arg" do
+              expect(subject).to receive(method).with(anything, "/member/#{member_id}/securities/transfer", any_args)
               call_method
             end
           else
@@ -115,15 +128,15 @@ describe SecuritiesRequestService do
             expect(subject).to receive(method).with(anything, anything, anything, 'application/json', any_args)
             call_method
           end
-          it "calls `#{method}` with a JSON body argument including the broker instructions from the security_release_request" do
+          it "calls `#{method}` with a JSON body argument including the broker instructions from the security_request" do
             expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['broker_instructions'] == broker_instructions }, any_args)
             call_method
           end
-          it "calls `#{method}` with a body argument including the delivery instructions from the security_release_request" do
+          it "calls `#{method}` with a body argument including the delivery instructions from the security_request" do
             expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['delivery_instructions'] == delivery_instructions }, any_args)
             call_method
           end
-          it "calls `#{method}` with a body argument including the securities from the security_release_request" do
+          it "calls `#{method}` with a body argument including the securities from the security_request" do
             expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['securities'] == securities }, any_args)
             call_method
           end
@@ -137,6 +150,10 @@ describe SecuritiesRequestService do
           end
           it "calls `#{method}` with a body argument including the `session_id` of the passed user's session" do
             expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['user']['session_id'] == session_id }, any_args)
+            call_method
+          end
+          it "calls `#{method}` with a body argument including the `kind` of the security_request" do
+            expect(subject).to receive(method).with(anything, anything, satisfy { |arg| JSON.parse(arg)['kind'] == kind }, any_args)
             call_method
           end
           describe "when the #{method} to MAPI succeeds" do
@@ -288,7 +305,10 @@ describe SecuritiesRequestService do
         },
         delivery_instructions: {},
         request_id: instance_double(String),
-        securities: instance_double(Array)
+        form_type: instance_double(String),
+        securities: instance_double(Array),
+        pledged_account: instance_double(String),
+        safekept_account: instance_double(String)
       }}
       let(:call_method) { subject.send(:map_response_to_securities_release_hash, raw_hash) }
 
@@ -319,7 +339,7 @@ describe SecuritiesRequestService do
           end
         end
       end
-      [:request_id, :securities, :account_number].each do |attr|
+      [:request_id, :securities, :form_type, :pledged_account, :safekept_account].each do |attr|
         it "returns a hash with a `#{attr}` value" do
           raw_hash[attr] = double('A Value')
           expect(call_method[attr]).to eq(raw_hash[attr])

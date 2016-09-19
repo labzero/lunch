@@ -90,22 +90,86 @@ Scenario: Member uploads a securities release file that has an invalid Original 
   When I drag and drop the "securities_invalid_original_par.xlsx" file into the edit securities dropzone
   Then I should see an original par numericality field error
 
+@jira-mem-1790 @data-unavailable
+Scenario: Member uploads a securities release file that is missing Settlement Amount and the request has a settlement type of Free
+  Given I am on the release securities page
+  And the settlement type is set to Free
+  And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  And the edit securities section is open
+  And I upload a securities release file with "no settlement amounts"
+  When I click to submit the request
+  Then I should see the success page for the securities release request
+
+@jira-mem-1790 @data-unavailable
+Scenario: Member uploads a securities release file that is missing Settlement Amount and the request has a settlement type of Vs. Payment
+  Given I am on the release securities page
+  And the settlement type is set to Vs Payment
+  And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  And the edit securities section is open
+  And I upload a securities release file with "no settlement amounts"
+  When I click to submit the request
+  Then I should see the "settlement amount required" error
+
+@jira-mem-1792 @data-unavailable
+Scenario: Member uploads a securities release file that has at least one security with an Original Par over the Federal Limit of 50,000,000
+  Given I am on the release securities page
+  And the edit securities section is open
+  And I upload a securities release file with "an original par over the federal limit"
+  And I select "Fed" as the release delivery instructions
+  And I fill in the "clearing_agent_fed_wire_address_1" securities field with "23454343"
+  And I fill in the "clearing_agent_fed_wire_address_2" securities field with "5683asdfa"
+  And I fill in the "aba_number" securities field with "5683asdfa"
+  And I fill in the "fed_credit_account_number" securities field with "5683asdfa"
+  When I click to submit the request
+  Then I should see the "over federal limit" error
+
+@jira-mem-1791 @data-unavailable
+Scenario: Member uploads a securities release file that has Settlement Amounts and the request has a settlement type of Free
+  Given I am on the release securities page
+  And the settlement type is set to Free
+  And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  And the edit securities section is open
+  And I upload a securities release file with "settlement amounts"
+  When I click to submit the request
+  Then I should see the "settlement amount present" error
+
+@jira-mem-1791 @data-unavailable
+Scenario: Member uploads a securities release file that has Settlement Amounts and the request has a settlement type of Vs. Payment
+  Given I am on the release securities page
+  And the settlement type is set to Vs Payment
+  And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  And the edit securities section is open
+  And I upload a securities release file with "settlement amounts"
+  When I click to submit the request
+  Then I should see the success page for the securities release request
+
 @jira-mem-1654
 Scenario: Member changes trade and settlement dates
-  # This should be flushed out once we have actual date ranges to check
   Given I am on the release securities page
   When I click the trade date datepicker
-  And I click the datepicker apply button
-  Then I should be on the securities release page
-  When I click the trade date datepicker
+  Then I should see that weekends have been disabled
   And I click the datepicker cancel button
   Then I should be on the securities release page
   When I click the settlement date datepicker
-  And I click the datepicker apply button
-  Then I should be on the securities release page
-  When I click the settlement date datepicker
+  Then I should see that weekends have been disabled
+  And I should see that all past dates have been disabled
+  And I should not be able to see a calendar more than 3 months in the future
   And I click the datepicker cancel button
   Then I should be on the securities release page
+
+@jira-mem-1786
+Scenario: Member selects a settlement date that occurs before the trade date
+  Given I am on the release securities page
+  And I choose the first available date for settlement date
+  And I choose the last available date for trade date
+  And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  When I click to submit the request
+  Then I should see the "settlement date before trade date" error
 
 @jira-mem-1594 @jira-mem-1595
 Scenario: Member sees success page after submitting releases for authorization

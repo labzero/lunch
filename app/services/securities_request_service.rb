@@ -13,24 +13,28 @@ class SecuritiesRequestService < MAPIService
   end
 
   def awaiting_authorization
-    requests = get_json(:awaiting_authorization, "/member/#{member_id}/securities/requests", status: :awaiting_authorization)
+    requests = get_json(:awaiting_authorization, "/member/#{member_id}/securities/requests", status: :awaiting_authorization, settle_start_date: Time.zone.today)
     process_securities_requests(requests)
   end
 
   def submit_request_for_authorization(securities_request, user, type, &error_handler)
-    raise ArgumentError, 'type must be one of: pledge, safekeep, release' unless [:pledge, :safekeep, :release].include?(type)
+    raise ArgumentError, 'type must be one of: pledge, safekeep, release, transfer' unless [:pledge, :safekeep, :release, :transfer].include?(type)
     body = {
       broker_instructions: securities_request.broker_instructions,
       delivery_instructions: securities_request.delivery_instructions,
       securities: securities_request.securities,
       user: user_details(user),
-      request_id: securities_request.request_id
+      request_id: securities_request.request_id,
+      kind: securities_request.kind
     }
     method = body[:request_id] ? :put_hash : :post_hash
-    type = :intake if type != :release
+    type = :intake if type == :pledge || type == :safekeep
     response = send(method, :submit_request_for_authorization, "/member/#{member_id}/securities/#{type}", body) do |name, msg, err|
       if err.is_a?(RestClient::Exception) && err.http_code >= 400 && err.http_code < 500 && error_handler
+        Rails.logger.info { "error submitting securities request: #{err.http_body}" }
         error_handler.call(err)
+      else
+        Rails.logger.info { "error submitting securities request: #{err}" }
       end
     end
     request_id = response.try(:[], :request_id)
@@ -73,9 +77,11 @@ class SecuritiesRequestService < MAPIService
       key = SecuritiesRequest::ACCOUNT_NUMBER_TYPE_MAPPING[response_hash[:delivery_instructions][:delivery_type].to_sym] if key.to_sym == :account_number
       securities_release[key] = value
     end
+    securities_release[:form_type] = response_hash[:form_type]
     securities_release[:request_id] = response_hash[:request_id]
     securities_release[:securities] = response_hash[:securities]
-    securities_release[:account_number] = response_hash[:account_number]
+    securities_release[:pledged_account] = response_hash[:pledged_account]
+    securities_release[:safekept_account] = response_hash[:safekept_account]
     securities_release
   end
 

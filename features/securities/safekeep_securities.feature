@@ -58,7 +58,7 @@ Scenario: Member changes trade and settlement dates
 @jira-mem-1679
 Scenario: Member cannot click on the account number input
   Given I am on the safekeep securities page
-  Then Account Number should be disabled
+  Then the Safekeep Account Number should be disabled
 
 @jira-mem-1677
 Scenario Outline: Member views edit securities instructions
@@ -67,18 +67,6 @@ Scenario Outline: Member views edit securities instructions
   Then I should see instructions on how to upload securities
   When I click on the Learn How link
   Then I should not see instructions on how to upload securities
-  Examples:
-    | page                |
-    | safekeep securities |
-    | pledge securities   |
-
-@jira-mem-1676 @data-unavailable
-Scenario Outline: Member cancels an upload of a securities release file
-  Given I am on the <page> page
-  When I drag and drop the "upload-test-file.txt" file into the edit securities dropzone
-  Then I should see an upload progress bar
-  When I click to cancel the securities release file upload
-  Then I should not see an upload progress bar
   Examples:
     | page                |
     | safekeep securities |
@@ -94,7 +82,7 @@ Scenario: A signer views a previously submitted safekeep request
 @jira-mem-1672 @data-unavailable
 Scenario: A user submits a safekeep request for authorization.
   Given I am on the safekeep securities page
-  When I upload a securities file
+  When I upload a securities intake file
   Then I should see a report table with multiple data rows
   When I fill in the "clearing_agent_participant_number" securities field with "23454343"
   And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"

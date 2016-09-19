@@ -84,6 +84,7 @@ $(function() {
           // Include anything that should be reset when table is filtered (e.g. checkboxes, states, etc.)
           $dataTable.on('draw', function(){
             $this.find('input[type=checkbox]').attr('checked', false);
+            $this.trigger('checkboxes-reset.dt');
           });
         };
       };

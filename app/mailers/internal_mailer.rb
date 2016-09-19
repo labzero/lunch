@@ -4,6 +4,9 @@ class InternalMailer < ActionMailer::Base
   include CustomFormattingHelper
   GENERAL_ALERT_ADDRESS = 'MemberPortalAlert@fhlbsf.com'
   WEB_TRADE_ALERT_ADDRESS = 'WebTrade@fhlbsf.com'
+  WEB_SECURITIES = 'WebSecurities@fhlbsf.com'
+  SECURITIES_SERVICES = 'SecuritiesServices@fhlbsf.com'
+  COLLATERAL_OPERATIONS = 'CollateralOperations@fhlbsf.com'
   layout 'mailer'
   default to: GENERAL_ALERT_ADDRESS, from: GENERAL_ALERT_ADDRESS
 
@@ -64,6 +67,19 @@ class InternalMailer < ActionMailer::Base
     @completed = completed
     @total = total
     mail(subject: I18n.t('emails.quick_report_long_run.subject'))
+  end
+
+  def securities_request_authorized(securities_request)
+    @securities_request = securities_request
+    @member_name = MembersService.new(ActionDispatch::TestRequest.new).member(@securities_request.member_id).try(:[], :name)
+    mail(
+      subject: I18n.t('emails.securities_request.authorized.subject',
+        pledge_or_safekeeping: @securities_request.is_collateral? ?
+          I18n.t('emails.securities_request.authorized.pledge').upcase :
+          I18n.t('emails.securities_request.authorized.safekeeping').upcase),
+      from: WEB_SECURITIES,
+      to: @securities_request.is_collateral? ? COLLATERAL_OPERATIONS : SECURITIES_SERVICES
+    )
   end
 
   protected

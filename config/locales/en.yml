@@ -223,12 +223,13 @@ en:
               submission: We were unable to add your securities request at this time.
               authorization: We were unable to add your securities request at this time.
             trade_date:
-              invalid: Trade date may not be a weekend or holiday
+              invalid: Trade date may not occur on a weekend or a holiday.
             settlement_date:
-              invalid: Trade date may not be a weekend or holiday
+              invalid: Settlement date may not occur on a weekend, a holiday, or be a date in the past.
               before_trade_date: Settlement Date must be on or after Trade Date.
             securities:
-              payment_amount: When 'Versus Payment' is selected, each security must have a settlement amount.
+              payment_amount_missing: When 'Versus Payment' is selected, each security must have a settlement amount.
+              payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank. Press Edit Securities to remove Settlement Amount.
               original_par: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
         security:
           blank: "Each row must contain at least a CUSIP and Original Par.\nPlease modify your file."
@@ -1177,6 +1178,7 @@ en:
       pledged: Pledged
       safekept: Safekept
       release: Release
+      transfer: Transfer
       safekeep_new: Safekeep New
       pledge_new: Pledge New
     requests:
@@ -1192,6 +1194,7 @@ en:
         pledge: Securities Pledge
         safekept: Securities Safekeeping
         release: Securities Release
+        transfer: Securities Internal Transfer
       pending:
         title: Requests for Authorization
       authorized:
@@ -1302,6 +1305,16 @@ en:
       nontraditional_and_subprime_mortgage_text: Your institution hereby certifies that all residential mortgage loans pledged to the Bank that were originated or acquired by your institution after July 10, 2007, comply at all times with the Interagency Guidance on Nontraditional Mortgage Product Risks dated October 4, 2006, and the Statement on Subprime Mortgage Lending dated July 10, 2007. Your institution represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date on which any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
       and: and
       legal_footer: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
+    transfer:
+      pledge:
+        title: Transfer Securities to Pledged Account
+        delivery_instructions: 'Internal Transfer from Safekept Account No. %{safekept_account} to Pledged Account No. %{pledged_account}'
+      safekeep:
+        title: Transfer Securities to Safekept Account
+        delivery_instructions: 'Internal Transfer from Pledged Account No. %{pledged_account} to Safekept Account No. %{safekept_account}'
+      legal: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
+      success:
+        title: Internal Transfer Request Sent
     safekeep_pledge:
       upload_instructions:
         download_template: Download Add Securities Template File
@@ -1330,6 +1343,8 @@ en:
     authorize:
       release:
         title: Release Securities Request Sent
+      transfer:
+        title: Transfer Securities Request Sent
       pledge:
         title: Pledge Securities Request Sent
       safekeep:
@@ -2914,6 +2929,12 @@ en:
       elapsed_time: 'Elapsed time: %{time}'
     quick_report_long_run:
       subject: 'URGENT: Batch reports not finished by midnight!'
+    securities_request:
+      authorized:
+        subject: 'An authorized %{pledge_or_safekeeping} request has arrived'
+        body: '%{member_name} has submitted an authorized %{pledge_or_safekeeping} Release request. Please log in to the SSK application to acknowledge the transaction.'
+        pledge: Pledge
+        safekeeping: Safekeeping
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

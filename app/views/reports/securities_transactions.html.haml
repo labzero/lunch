@@ -27,7 +27,7 @@
     -else
       .report-summary-data
         %h3= report_summary_with_date('reports.pages.securities_transactions.total_net_settled_preliminary', fhlb_date_long_alpha(@start_date))
-        %p= fhlb_formatted_currency_whole(@total_net, force_unit: true)
+        %p= fhlb_formatted_currency(@total_net, force_unit: true)
       .report-summary-data
         %h3= report_summary_with_date('reports.pages.securities_transactions.total_credits_settled_preliminary', fhlb_date_long_alpha(@start_date))
         %p= fhlb_formatted_currency(@total_credits, force_unit: true)

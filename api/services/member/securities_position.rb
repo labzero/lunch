@@ -98,13 +98,14 @@ module MAPI
             fake_data = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'current_securities_position.json'))).with_indifferent_access
             rows = []
             r = Random.new(as_of_date.to_time.to_i + as_of_date.day + report_type.to_s.ord)
-
-            r.rand(3..15).times do |i|
+            r.rand(5..15).times do |i|
+              account_types = ['U', 'U', 'P', 'P'].shuffle(random: r)
+              account_type = account_types.pop || ['P', 'U'].sample(random: r)
               original_par = r.rand(200000..3000000)
               factor = r.rand()
               rows << {
                 SECURITIES_FIELD_MAPPINGS[:fhlb_id][report_type] => member_id,
-                SECURITIES_FIELD_MAPPINGS[:custody_account_type][report_type] => ['P', 'U'][r.rand(0..1)],
+                SECURITIES_FIELD_MAPPINGS[:custody_account_type][report_type] => account_type,
                 SECURITIES_QUERY_MAPPINGS[:as_of_date][report_type] => as_of_date,
                 SECURITIES_FIELD_MAPPINGS[:custody_account_number][report_type] =>  '082131',
                 SECURITIES_FIELD_MAPPINGS[:security_pledge_type][report_type] =>  ['Standard', 'SBC', 'SAFE'][r.rand(0..2)],

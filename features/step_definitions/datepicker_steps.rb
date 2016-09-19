@@ -275,7 +275,7 @@ Then(/^I am not able to enter prohibited characters in the datepicker inputs?$/)
   end
 end
 
-When(/^I choose the first available date$/) do
+When(/^I choose the (first|last) available date$/) do |position|
   available_dates = page.all('td.available:not(.off)', visible: true)
   i = 0
   while available_dates.blank? && i < 12 do
@@ -283,5 +283,31 @@ When(/^I choose the first available date$/) do
     available_dates = page.all('td.available:not(.off)', visible: true)
     i += 1
   end
-  available_dates[0].click unless available_dates.blank?
+  available_dates.send(:"#{position}").click unless available_dates.blank?
+end
+
+Then(/^I should see that weekends have been disabled$/) do
+  page.assert_selector('.calendar tbody td.off.disabled:first-child, .calendar tbody td.off.disabled:last-child', visible: true)
+  page.assert_no_selector('.calendar tbody td.available:first-child, .calendar tbody td.available:last-child', visible: true)
+end
+
+Then(/^I should see that all past dates have been disabled$/) do
+  today = Time.zone.today
+  target_month = today.strftime("%b %Y")
+  calendar = page.find('.daterangepicker .calendar.single', visible: true)
+  while calendar.find('.month').text != target_month
+    calendar.find('.fa-arrow-left').click
+  end
+  page.assert_no_selector('.fa-arrow-left', visible: true)
+  expect(page.all('td.available:not(.off)', visible: true).first.text).to eq(today.day.to_s)
+end
+
+Then(/^I should not be able to see a calendar more than (\d+) months in the future$/) do |count|
+  today = Time.zone.today
+  target_month = (today + count.to_i.months).strftime("%b %Y")
+  calendar = page.find('.daterangepicker .calendar.single', visible: true)
+  while calendar.find('.month').text != target_month
+    calendar.find('.fa-arrow-right').click
+  end
+  page.assert_no_selector('.fa-arrow-right', visible: true)
 end

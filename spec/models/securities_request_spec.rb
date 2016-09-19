@@ -3,8 +3,19 @@ require 'rails_helper'
 RSpec.describe SecuritiesRequest, :type => :model do
   before { allow_any_instance_of(CalendarService).to receive(:holidays).and_return([]) }
   describe 'validations' do
-    (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities]).each do |attr|
-      it "should validate the presence of `#{attr}`" do
+    [:pledge_intake, :pledge_transfer].each do |kind|
+      it "validates the presence of `pledge_to` if the `kind` equals `#{kind}`" do
+        subject.kind = :pledge_intake
+        expect(subject).to validate_presence_of :pledge_to
+      end
+    end
+    it 'does not validate the presence of `pledge_to` if the `kind` is not `:pledge_intake`' do
+      subject.kind = (described_class::KINDS - [:pledge_intake, :pledge_transfer]).sample
+      expect(subject).not_to validate_presence_of :pledge_to
+    end
+    (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities, :kind, :form_type]).each do |attr|
+      it "validates the presence of `#{attr}`" do
+        allow(subject).to receive("#{attr}=")
         expect(subject).to validate_presence_of attr
       end
     end
@@ -14,7 +25,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
           subject.delivery_type = delivery_type
         end
         described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type].each do |attr|
-          it "should validate the presence of `#{attr}`" do
+          it "validates the presence of `#{attr}`" do
             expect(subject).to validate_presence_of attr
           end
         end
@@ -72,7 +83,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
         it "calls `date_within_range` with the `#{attr}` as an arg" do
           date = instance_double(Date)
           subject.send("#{attr}=", date)
-          expect(subject).to receive(:date_within_range).with(date)
+          expect(subject).to receive(:date_within_range).with(date, attr)
           call_validation
         end
         it "does not add an error if there is no value for `#{attr}`" do
@@ -99,75 +110,126 @@ RSpec.describe SecuritiesRequest, :type => :model do
       let(:today) { Time.zone.today }
       let(:max_date) { today + described_class::MAX_DATE_RESTRICTION }
       let(:date) { instance_double(Date, sunday?: false, saturday?: false, :>= => true, :<= => true) }
-      let(:call_method) { subject.send(:date_within_range, date) }
 
-      it 'fetches `holidays` from the CalendarService instance with today and the max_date as args' do
-        expect_any_instance_of(CalendarService).to receive(:holidays).with(today, max_date).and_return([])
-        call_method
+      [:trade_date, :settlement_date].each do |date_type|
+        describe "when `date_type` == #{date_type}" do
+          it 'fetches `holidays` from the CalendarService instance with today and the max_date as args' do
+            expect_any_instance_of(CalendarService).to receive(:holidays).with(today, max_date).and_return([])
+            subject.send(:date_within_range, date, date_type)
+          end
+          it 'returns nil if passed nil' do
+            expect(subject.send(:date_within_range, nil, date_type)).to be_nil
+          end
+          it 'returns false if the provided date is a Saturday' do
+            allow(date).to receive(:saturday?).and_return(true)
+            expect(subject.send(:date_within_range, date, date_type)).to be false
+          end
+          it 'returns false if the provided date is a Sunday' do
+            allow(date).to receive(:sunday?).and_return(true)
+            expect(subject.send(:date_within_range, date, date_type)).to be false
+          end
+          it 'returns false if the provided date is a bank holiday' do
+            allow_any_instance_of(CalendarService).to receive(:holidays).and_return([date])
+            expect(subject.send(:date_within_range, date, date_type)).to be false
+          end
+          it 'returns false if the provided date occurs after today plus the `MAX_DATE_RESTRICTION`' do
+            allow(date).to receive(:<=).with(max_date).and_return(false)
+            expect(subject.send(:date_within_range, date, date_type)).to be false
+          end
+          it 'returns true if all of the above conditions are satisfied' do
+            expect(subject.send(:date_within_range, date, date_type)).to be true
+          end
+        end
       end
-      it 'returns nil if passed nil' do
-        expect(subject.send(:date_within_range, nil)).to be_nil
-      end
-      it 'returns false if the provided date is a Saturday' do
-        allow(date).to receive(:saturday?).and_return(true)
-        expect(call_method).to be false
-      end
-      it 'returns false if the provided date is a Sunday' do
-        allow(date).to receive(:sunday?).and_return(true)
-        expect(call_method).to be false
-      end
-      it 'returns false if the provided date is a bank holiday' do
-        allow_any_instance_of(CalendarService).to receive(:holidays).and_return([date])
-        expect(call_method).to be false
-      end
-      it 'returns false if the provided date occurs before today' do
+      it 'returns false if the provided date occurs before today (for `settlement_date` only)' do
         allow(date).to receive(:>=).with(today).and_return(false)
-        expect(call_method).to be false
+        expect(subject.send(:date_within_range, date, :settlement_date)).to be false
       end
-      it 'returns false if the provided date occurs after today plus the `MAX_DATE_RESTRICTION`' do
-        allow(date).to receive(:<=).with(max_date).and_return(false)
-        expect(call_method).to be false
-      end
-      it 'returns true if all of the above conditions are satisfied' do
-        expect(call_method).to be true
+      it 'returns true if the provided date occurs before today (for `trade_date` only)' do
+        allow(date).to receive(:>=).with(today).and_return(false)
+        expect(subject.send(:date_within_range, date, :trade_date)).to be true
       end
     end
-    describe '`securities_must_have_payment_amount`' do
-      let(:call_validation) { subject.send(:securities_must_have_payment_amount) }
+    describe '`valid_securities_payment_amount?`' do
+      let(:security_without_payment_amount) { FactoryGirl.build(:security, payment_amount: nil) }
+      let(:security_with_payment_amount) { FactoryGirl.build(:security, payment_amount: rand(1000.99999)) }
+      let(:call_validation) { subject.send(:valid_securities_payment_amount?) }
 
-      it 'is not called as a validator if the `settlement_type` is `:free`' do
-        subject.settlement_type = :free
-        expect(subject).not_to receive(:securities_must_have_payment_amount)
+      it 'is called as a validator' do
+        expect(subject).to receive(:valid_securities_payment_amount?)
         subject.valid?
       end
-      describe 'when the `settlement_type` is `:vs_payment`' do
-        let(:security_without_payment_amount) { FactoryGirl.build(:security, payment_amount: nil) }
-        let(:security_with_payment_amount) { FactoryGirl.build(:security, payment_amount: rand(1000.99999)) }
-        before do
+      it 'does not add an error if there are no `securities`' do
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      it 'does not add an error if `securities` is an empty array' do
+        subject.securities = []
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      it 'does not add an error if there are `securities` but no `settlement_type`' do
+        subject.securities = [security_without_payment_amount, security_with_payment_amount]
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      describe 'when all securities have a payment amount' do
+        before {subject.securities = [security_with_payment_amount, security_with_payment_amount]}
+
+        it 'adds an error if the `settlement_type` is `:free`' do
+          subject.settlement_type = :free
+          expect(subject.errors).to receive(:add).with(:securities, :payment_amount_present)
+          call_validation
+        end
+        it 'does not add an error if the `settlement_type` is `:vs_payment`' do
           subject.settlement_type = :vs_payment
-        end
-        it 'is called as a validator' do
-          expect(subject).to receive(:securities_must_have_payment_amount)
-          subject.valid?
-        end
-        it 'does not add an error if there are no securities' do
           expect(subject.errors).not_to receive(:add)
           call_validation
         end
-        it 'does not add an error if `securities` is an empty array' do
-          subject.securities = []
+      end
+      describe 'when no securities have a payment amount' do
+        before {subject.securities = [security_without_payment_amount, security_without_payment_amount]}
+
+        it 'adds an error if the `settlement_type` is `:vs_payment`' do
+          subject.settlement_type = :vs_payment
+          expect(subject.errors).to receive(:add).with(:securities, :payment_amount_missing)
+          call_validation
+        end
+        it 'does not add an error if the `settlement_type` is `:free`' do
+          subject.settlement_type = :free
           expect(subject.errors).not_to receive(:add)
           call_validation
         end
-        it 'does not add an error if all `securities` have a `payment_amount` value' do
-          subject.securities = [security_with_payment_amount, security_with_payment_amount]
-          expect(subject.errors).not_to receive(:add)
+      end
+      describe 'when some securities have a payment amount and some do not' do
+        before {subject.securities = [security_without_payment_amount, security_with_payment_amount]}
+
+        it 'adds an error if the `settlement_type` is `:free`' do
+          subject.settlement_type = :free
+          expect(subject.errors).to receive(:add).with(:securities, :payment_amount_present)
           call_validation
         end
-        it 'adds an error if any of the `securities` do not have a `payment_amount` value' do
-          subject.securities = [security_with_payment_amount, security_without_payment_amount]
-          expect(subject.errors).to receive(:add).with(:securities, :payment_amount)
+        it 'adds an error if the `settlement_type` is `:vs_payment`' do
+          subject.settlement_type = :vs_payment
+          expect(subject.errors).to receive(:add).with(:securities, :payment_amount_missing)
           call_validation
+        end
+      end
+    end
+    described_class::TRANSFER_REQUEST_KINDS.each do |kind|
+      describe "when the kind is `#{kind}`" do
+        before { subject.kind = kind }
+        described_class::BROKER_INSTRUCTION_KEYS.each do |attr|
+          it "does not validate the presence of `#{attr}`" do
+            allow(subject).to receive("#{attr}=")
+            expect(subject).not_to validate_presence_of attr
+          end
+        end
+        [:trade_date_must_come_before_settlement_date, :trade_date_within_range, :settlement_date_within_range, :valid_securities_payment_amount?].each do |method|
+          it "does not call `#{method}` as a validator" do
+            expect(subject).not_to receive(method)
+            subject.valid?
+          end
         end
       end
     end
@@ -203,10 +265,140 @@ RSpec.describe SecuritiesRequest, :type => :model do
   end
 
   describe 'instance methods' do
+    describe '`kind=`' do
+      let(:kind) { described_class::KINDS.sample }
+      let(:call_method) { subject.kind = kind }
+
+      it 'raises an error if the kind is invalid' do
+        expect{subject.kind = SecureRandom.hex}.to raise_error(ArgumentError, "`kind` must be one of: #{described_class::KINDS}")
+      end
+      it 'assigns `@kind` to the passed value' do
+        call_method
+        expect(subject.kind).to eq(kind)
+      end
+      describe 'when `kind` is `:pledge_transfer`' do
+        before { subject.kind = :pledge_transfer }
+        it 'sets `@form_type` to `:pledge_intake`' do
+          expect(subject.form_type).to eq(:pledge_intake)
+        end
+        it 'sets `@delivery_type` to `:transfer`' do
+          expect(subject.delivery_type).to eq(:transfer)
+        end
+      end
+      describe 'when `kind` is `:safekept_transfer`' do
+        before { subject.kind = :safekept_transfer }
+        it 'sets `@form_type` to `:pledge_release`' do
+          expect(subject.form_type).to eq(:pledge_release)
+        end
+        it 'sets `@delivery_type` to `:transfer`' do
+          expect(subject.delivery_type).to eq(:transfer)
+        end
+      end
+      (described_class::KINDS - [:pledge_transfer, :safekept_transfer]).each do |kind|
+        describe "when `kind` is `#{kind}`" do
+          before { subject.kind = kind }
+          it "sets `@form_type` to `#{kind}`" do
+            expect(subject.form_type).to eq(kind)
+          end
+        end
+      end
+    end
+    describe '`form_type=`' do
+      let(:form_type) { described_class::FORM_TYPES.sample }
+      let(:call_method) { subject.form_type = form_type }
+
+      it 'raises an error if the form_type is invalid' do
+        expect{subject.form_type = SecureRandom.hex}.to raise_error(ArgumentError, "`form_type` must be one of: #{described_class::FORM_TYPES}")
+      end
+      it 'assigns `@form_type` to the passed value' do
+        call_method
+        expect(subject.form_type).to eq(form_type)
+      end
+      describe 'assigning `@kind`' do
+        describe 'when `delivery_type` equals `:transfer`' do
+          before { subject.delivery_type = :transfer }
+
+          describe 'when `form_type` is `:pledge_intake`' do
+            it 'sets `@kind` to `:pledge_transfer`' do
+              subject.form_type = :pledge_intake
+              expect(subject.kind).to eq(:pledge_transfer)
+            end
+          end
+          describe 'when `form_type` is `:pledge_release`' do
+            it 'sets `@kind` to `:safekept_transfer`' do
+              subject.form_type = :pledge_release
+              expect(subject.kind).to eq(:safekept_transfer)
+            end
+          end
+          (described_class::FORM_TYPES - [:pledge_intake, :pledge_release]).each do |form_type|
+            describe "when `form_type` is `#{form_type}`" do
+              it 'raises an error' do
+                expect{subject.form_type = form_type}.to raise_error(ArgumentError, '`form_type` must be :pledge_intake or :pledge_release when `delivery_type` is :transfer')
+              end
+            end
+          end
+        end
+        describe 'when `delivery_type` does not equal `:transfer`' do
+          it 'sets `@kind` to `form_type`' do
+            call_method
+            expect(subject.kind).to eq(form_type)
+          end
+        end
+      end
+    end
+    describe '`delivery_type=`' do
+      let(:delivery_type) { described_class::DELIVERY_TYPES.keys.sample }
+      let(:call_method) { subject.delivery_type = delivery_type }
+
+      it 'raises an error if the delivery_type is invalid' do
+        expect{subject.delivery_type = SecureRandom.hex}.to raise_error(ArgumentError, "`delivery_type` must be one of: #{described_class::DELIVERY_TYPES.keys}")
+      end
+      it 'assigns `@delivery_type` to the passed value' do
+        call_method
+        expect(subject.delivery_type).to eq(delivery_type)
+      end
+      describe 'when `delivery_type` equals `:transfer`' do
+        let(:call_method) { subject.delivery_type = :transfer }
+        it 'does not assign @kind if there is no @form_type' do
+          call_method
+          expect(subject.kind).to be_nil
+        end
+        describe 'when there is a @form_type' do
+          (described_class::FORM_TYPES - [:pledge_intake, :pledge_release]).each do |form_type|
+            it "raises an error if the @form_type is `#{form_type}`" do
+              subject.form_type = form_type
+              expect{call_method}.to raise_error(ArgumentError, '`form_type` must be :pledge_intake or :pledge_release when `delivery_type` is :transfer')
+            end
+          end
+          it 'sets @kind to `:pledge_transfer` when @form_type equals `:pledge_intake`' do
+            subject.form_type = :pledge_intake
+            call_method
+            expect(subject.kind).to eq(:pledge_transfer)
+          end
+          it 'sets @kind to `:safekept_transfer` when @form_type equals `:pledge_release`' do
+            subject.form_type = :pledge_release
+            call_method
+            expect(subject.kind).to eq(:safekept_transfer)
+          end
+        end
+      end
+    end
+    describe '`settlement_type=`' do
+      let(:settlement_type) { described_class::SETTLEMENT_TYPES.keys.sample }
+      let(:call_method) { subject.settlement_type = settlement_type }
+
+      it 'raises an error if the settlement_type is invalid' do
+        expect{subject.settlement_type = SecureRandom.hex}.to raise_error(ArgumentError, "`settlement_type` must be one of: #{described_class::SETTLEMENT_TYPES.keys}")
+      end
+      it 'assigns `@settlement_type` to the passed value' do
+        call_method
+        expect(subject.settlement_type).to eq(settlement_type)
+      end
+    end
     describe '`attributes=`' do
-      sym_attrs = [:delivery_type, :transaction_code, :settlement_type, :form_type]
+      sym_attrs = [:transaction_code]
       date_attrs = [:trade_date, :settlement_date]
-      custom_attrs = [:request_id]
+      custom_attrs = [:request_id, :form_type, :kind, :delivery_type, :settlement_type]
       let(:hash) { {} }
       let(:value) { double('some value') }
       let(:call_method) { subject.send(:attributes=, hash) }
@@ -217,6 +409,13 @@ RSpec.describe SecuritiesRequest, :type => :model do
           hash[key.to_s] = value
           call_method
           expect(subject.send(key)).to be(value)
+        end
+      end
+      custom_attrs.each do |key|
+        it "assigns the value found under `#{key}` to the attribute `#{key}`" do
+          expect(subject).to receive(:"#{key}=").with(value)
+          hash[key] = value
+          call_method
         end
       end
       sym_attrs.each do |key|
@@ -340,9 +539,11 @@ RSpec.describe SecuritiesRequest, :type => :model do
 
     describe '`broker_instructions`' do
       let(:call_method) { subject.broker_instructions }
-      described_class::BROKER_INSTRUCTION_KEYS.each do |key|
+      (described_class::BROKER_INSTRUCTION_KEYS + [:safekept_account, :pledged_account, :pledge_to]).each do |key|
         it "returns a hash containing the `#{key}`" do
           value = double('some value')
+          allow(subject).to receive(:settlement_type=)
+          allow(subject).to receive(:settlement_type).and_return(value)
           subject.send( "#{key.to_s}=", value)
           expect(call_method[key]).to eq(value)
         end
@@ -377,6 +578,22 @@ RSpec.describe SecuritiesRequest, :type => :model do
               expect(call_method[attr]).to eq(value)
             end
           end
+        end
+      end
+    end
+
+    describe '`is_collateral?`' do
+      let(:call_method) { subject.is_collateral? }
+
+      [:pledge_release, :pledge_intake, :pledge_transfer, :safekept_transfer].each do |pledged|
+        it 'returns true for #{pledged}' do
+          expect(call_method).to eq(false)
+        end
+      end
+
+      [:safekept_release, :safekept_intake].each do |safekept|
+        it 'returns false for #{safekept}' do
+          expect(call_method).to eq(false)
         end
       end
     end

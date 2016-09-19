@@ -2,21 +2,25 @@ When(/^I click on the Securities link in the header$/) do
   page.find('.secondary-nav a', text: I18n.t('securities.title'), exact: true).click
 end
 
-Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities) page$/i) do |page_type|
+Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities|Transfer to Pledged|Transfer to Safekept) page$/i) do |page_type|
   text = case page_type
-    when /\AManage Securities\z/i
-      step 'I should see a report table with multiple data rows'
-      I18n.t('securities.manage.title')
-    when /\ASecurities Requests\z/i
-      step 'I should see a report table with multiple data rows'
-      I18n.t('securities.requests.title')
-    when /\ASecurities Release\z/i
-      step 'I should see a report table with multiple data rows'
-      I18n.t('securities.release.title')
-    when /\ASafekeep Securities\z/i
-      I18n.t('securities.safekeep.title')
-    when /\APledge Securities\z/i
-      I18n.t('securities.pledge.title')
+  when /\AManage Securities\z/i
+    step 'I should see a report table with multiple data rows'
+    I18n.t('securities.manage.title')
+  when /\ASecurities Requests\z/i
+    step 'I should see a report table with multiple data rows'
+    I18n.t('securities.requests.title')
+  when /\ASecurities Release\z/i
+    step 'I should see a report table with multiple data rows'
+    I18n.t('securities.release.title')
+  when /\ASafekeep Securities\z/i
+    I18n.t('securities.safekeep.title')
+  when /\APledge Securities\z/i
+    I18n.t('securities.pledge.title')
+  when /\ATransfer to Pledged\z/i
+    I18n.t('securities.transfer.pledge.title')
+  when /\ATransfer to Safekept\z/i
+    I18n.t('securities.transfer.safekeep.title')
   end
   page.assert_selector('h1', text: text, exact: true)
 end
@@ -28,7 +32,7 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release|release success|safekeep success|pledge success|safekeep|pledge) securities page$/) do |page|
+When(/^I am on the (manage|release|release success|safekeep success|pledge success|safekeep|pledge|transfer success|transfer to pledged account|transfer to safekept account) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
@@ -38,10 +42,20 @@ When(/^I am on the (manage|release|release success|safekeep success|pledge succe
     visit '/securities/pledge/success'
   when 'safekeep success'
     visit '/securities/safekeep/success'
+  when 'transfer success'
+    visit '/securities/transfer/success'
   when 'release'
     step 'I am on the manage securities page'
     step 'I check the 1st Pledged security'
     step 'I click the button to release the securities'
+  when 'transfer to pledged account'
+    step 'I am on the manage securities page'
+    step 'I check the 1st Safekept security'
+    step 'I click the button to transfer the securities'
+  when 'transfer to safekept account'
+    step 'I am on the manage securities page'
+    step 'I check the 1st Pledged security'
+    step 'I click the button to transfer the securities'
   when 'safekeep'
     visit '/securities/safekeep/edit'
   when 'pledge'
@@ -88,19 +102,21 @@ Then(/^I should see the cusip value from the (\d+)(?:st|nd|rd|th) (Pledged|Safek
   expect(remembered_cusip).to eq(cusip)
 end
 
-Then(/^the release securities button should be (active|inactive)$/) do |active|
+Then(/^the (release|transfer) securities button should be (active|inactive)$/) do |action, active|
   if table_not_empty
+    text = action == 'release' ? I18n.t('securities.manage.release') : I18n.t('securities.manage.transfer')
     if active == 'active'
-      page.assert_selector('.manage-securities-form input[type=submit]')
-      page.assert_no_selector('.manage-securities-form input[type=submit]:disabled')
+      page.assert_selector('.manage-securities-form a[data-manage-securities-form-submit]', text: text.upcase, exact: true)
+      page.assert_no_selector('.manage-securities-form a[data-manage-securities-form-submit][disabled]', text: text.upcase, exact: true)
     else
-      page.assert_selector('.manage-securities-form input[type=submit]:disabled')
+      page.assert_selector('.manage-securities-form a[data-manage-securities-form-submit][disabled]', text: text.upcase, exact: true)
     end
   end
 end
 
-When(/^I click the button to release the securities$/) do
-  page.find('.manage-securities-form input[type=submit]').click
+When(/^I click the button to (release|transfer) the securities$/) do |action|
+  text = action == 'release' ? I18n.t('securities.manage.release') : I18n.t('securities.manage.transfer')
+  page.find('.manage-securities-form a[data-manage-securities-form-submit]', text: text.upcase, exact: true).click
 end
 
 When(/^I click the button to create a new (safekeep|pledge) request$/) do |type|
@@ -173,11 +189,12 @@ When(/^the edit securities section is open$/) do
   step 'I should see instructions on how to edit securities'
 end
 
-When(/^I drag and drop the "(.*?)" file into the edit securities dropzone$/) do |filename|
+When(/^I drag and drop the "(.*?)" file into the (edit|upload) securities dropzone$/) do |filename, type|
   # Simulate drag and drop of given file
+  dropzone = type == 'edit' ? '.securities-download-instructions' : '.safekeep-pledge-download-area'
   page.execute_script("seleniumUpload = window.$('<input/>').attr({id: 'seleniumUpload', type:'file'}).appendTo('body');")
   attach_file('seleniumUpload', Rails.root + "spec/fixtures/#{filename}")
-  page.execute_script("e = $.Event('drop'); e.originalEvent = {dataTransfer : { files : seleniumUpload.get(0).files } }; $('.securities-download-instructions').trigger(e);")
+  page.execute_script("e = $.Event('drop'); e.originalEvent = {dataTransfer : { files : seleniumUpload.get(0).files } }; $('#{dropzone}').trigger(e);")
 end
 
 When(/^I should see an? (security required|original par numericality|no securities) field error$/) do |error_type|
@@ -230,6 +247,8 @@ Then(/^I should see the title for the "(.*?)" page$/) do |success_page|
       'securities.safekeep_pledge.success.pledge'
     when 'safekeep success'
       'securities.safekeep_pledge.success.safekeep'
+    when 'transfer success'
+      'securities.transfer.success.title'
   end
   page.assert_selector('.securities-header h1', text: I18n.t(translation), exact: true)
 end
@@ -254,8 +273,12 @@ Then(/^I should see the error message for missing securities request information
   page.assert_selector('.securities-submit-release-form-errors p', text: /^Missing a required field: /)
 end
 
-Then(/^Account Number should be disabled$/) do
-  page.assert_selector('#securities_request_account_number[disabled]')
+Then(/^the (Pledge|Safekeep) Account Number should be disabled$/) do |action|
+  if action == 'Pledge'
+    page.assert_selector('#securities_request_pledged_account[disabled]')
+  else
+    page.assert_selector('#securities_request_safekept_account[disabled]')
+  end
 end
 
 Then(/^I should a disabled state for the Authorize action$/) do
@@ -291,8 +314,9 @@ When(/^I authorize the request$/) do
   step %{I click to authorize the request}
 end
 
-When(/^I click to authorize the request$/) do
-  page.find(".securities-actions .primary-button[value=#{I18n.t('securities.release.authorize')}]").click
+When(/^I click to (authorize|submit) the request$/) do |action|
+  text = action == 'authorize' ? I18n.t('securities.release.authorize') : I18n.t('securities.release.submit_authorization')
+  page.find(".securities-actions .primary-button[value='#{text}']").click
 end
 
 Then(/^I should see the authorize request success page$/) do
@@ -309,14 +333,87 @@ Then(/^the (Authorize|Submit) action is (disabled|enabled)$/) do |action, state|
   end
 end
 
-When(/^I choose the first available date for (trade|settlement) date$/) do |attr|
+When(/^I choose the (first|last) available date for (trade|settlement) date$/) do |position, attr|
   step "I click the #{attr} date datepicker"
-  step 'I choose the first available date'
+  step "I choose the #{position} available date"
 end
 
-Given(/^I upload a securities file$/) do
+Given(/^I upload a securities (release|intake|transfer) file(?: with "(.*?)")?$/) do |action, file_type|
+  filename = if action && file_type
+    if action == 'release' && file_type == 'settlement amounts'
+      'sample-securities-release-upload-with-settlement-amount.xlsx'
+    elsif action == 'release' && file_type == 'no settlement amounts'
+      'sample-securities-release-upload-no-settlement-amount.xlsx'
+    elsif action == 'release' && file_type == 'an original par over the federal limit'
+      'sample-securities-release-upload-over-fed-limit.xlsx'
+    elsif action == 'intake' && file_type == 'settlement amounts'
+      'sample-securities-intake-upload-with-settlement-amount.xlsx'
+    elsif action == 'intake' && file_type == 'no settlement amounts'
+      'sample-securities-intake-upload-no-settlement-amount.xlsx'
+    elsif action == 'intake' && file_type == 'an original par over the federal limit'
+      'sample-securities-intake-upload-over-fed-limit.xlsx'
+    end
+  else
+    case action
+    when 'release'
+      'sample-securities-release-upload-no-settlement-amount.xlsx'
+    when 'intake'
+      'sample-securities-intake-upload-no-settlement-amount.xlsx'
+    when 'transfer'
+      'sample-securities-transfer-upload.xlsx'
+    end
+  end
   file_field = page.find('[type=file]', visible: false)
-  file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', 'sample-securties-pledge-upload.xlsx')))
+  file_field.set(File.absolute_path(File.join(__dir__, '..', '..', 'spec', 'fixtures', filename)))
+end
+
+When(/^I wait for the securities file to upload$/) do
+  step 'I should not see instructions on how to edit securities'
+  page.assert_no_selector('.file-upload-progress .gauge-section', visible: :visible)
+end
+
+Then(/^I should see an uploaded transfer security with an? (description|original par) of "(.*?)"$/) do |field, value|
+  index = field == 'description' ? 1 : 2
+  expect(page.all('.securities-display table tbody tr:first-child td')[index].text).to eq(value)
+end
+
+Then(/^I should (see|not see) the pledge legal copy$/) do |should_see|
+  if should_see == 'see'
+    page.assert_selector('.securities-request-legal')
+  else
+    page.assert_no_selector('.securities-request-legal')
+  end
+end
+
+Then(/^I should see the "(.*?)" error$/) do |error|
+  text = case error
+  when 'settlement date before trade date'
+    I18n.t('activemodel.errors.models.securities_request.attributes.settlement_date.before_trade_date')
+  when 'settlement amount required'
+    I18n.t('activemodel.errors.models.securities_request.attributes.securities.payment_amount_missing')
+  when 'over federal limit'
+    I18n.t('activemodel.errors.models.securities_request.attributes.securities.original_par')
+  when 'settlement amount present'
+    I18n.t('activemodel.errors.models.securities_request.attributes.securities.payment_amount_present')
+  when 'generic catchall'
+    I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
+  end
+  page.assert_selector('.securities-submit-release-form-errors p', text: text, exact: true)
+end
+
+When(/^the settlement type is set to (Vs Payment|Free)$/) do |payment_type|
+  text = payment_type == 'Vs Payment' ? I18n.t('securities.release.settlement_type.vs_payment') : I18n.t('securities.release.settlement_type.free')
+  page.find('label[for=release_settlement_type] + .dropdown').click
+  page.find('label[for=release_settlement_type] + .dropdown li', text: text, exact: true).click
+end
+
+When(/^I submit the request and the API returns a (\d+)$/) do |http_code|
+  allow_any_instance_of(SecuritiesRequestService).to receive(:post_hash).with(:submit_request_for_authorization, anything, anything).and_return(RestClient::Exception.new(nil, http_code.to_i))
+  step 'I submit the securities release request for authorization'
+end
+
+When(/^I check the box to select all displayed securities$/) do
+  page.find('.manage-securities-table input[name="check_all"]').click
 end
 
 def delivery_instructions(text)

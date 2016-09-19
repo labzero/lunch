@@ -10,10 +10,10 @@ module MAPI
           key :description, 'The ID of the request'
         end
 
-        property :form_type do
+        property :kind do
           key :type, :string
-          key :enum, %i(pledge_intake pledge_release safekept_intake safekept_release)
-          key :description, 'What type of form it is'
+          key :enum, %i(pledge_intake pledge_release safekept_intake safekept_release pledge_transfer safekept_transfer)
+          key :description, 'What kind of form it is'
         end
 
         property :status do
@@ -48,6 +48,18 @@ module MAPI
           key :type, :string
           key :format, :date
           key :description, 'The date the request was settled'
+        end
+
+        property :deliver_to do
+          key :type, :string
+          key :enum, %i(fed dtc mutual_fund physical_securities transfer)
+          key :description, 'Where the securties are delivered, nil for pledge_intake, safekept_intake, and safekept_transfer requests'
+        end
+
+        property :receive_from do
+          key :type, :string
+          key :enum, %i(fed dtc mutual_fund physical_securities transfer)
+          key :description, 'Where the securties are received from, nil for pledge_release, safekept_release, pledge_transfer requests'
         end
       end
 
@@ -188,6 +200,22 @@ module MAPI
         property :request_id do
           key :type, :string
           key :description, 'The ID of the request'
+        end
+
+        property :safekept_account do
+          key :type, :string
+          key :description, 'Account number of the Safekept Account'
+        end
+
+        property :pledged_account do
+          key :type, :string
+          key :description, 'Account number of the Pledged Account'
+        end
+
+        property :pledged_or_unpledged do
+          key :type, :string
+          key :enum, %i(pledged unpledged)
+          key :description, 'What kind of request it is: pledged or unpledged'
         end
 
         property :form_type do

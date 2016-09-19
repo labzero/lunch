@@ -235,6 +235,80 @@ RSpec.describe InternalMailer, :type => :mailer do
     end
   end
 
+  describe '`securities_request_authorized` email' do
+    let(:kind) { SecuritiesRequest::KINDS.sample }
+    let(:member_name) { SecureRandom.hex }
+    let(:securities_request) { double(SecuritiesRequest,
+                                      member_id: rand(9999..99999),
+                                      kind: kind,
+                                      is_collateral?: [true, false].sample ) }
+    let(:member) { double(Member) }
+    let(:members_service) { double(MembersService, member: member) }
+    let(:build_mail) { mail :securities_request_authorized, securities_request }
+
+    before do
+      allow(MembersService).to receive(:new).and_return(members_service)
+      allow(member).to receive(:[]).with(:name).and_return(member_name)
+    end
+
+    it 'assigns `@securites_request` to `securities_request`' do
+      build_mail
+      expect(assigns[:securities_request]).to eq(securities_request)
+    end
+
+    it 'assigns `@member_name`' do
+      build_mail
+      expect(assigns[:member_name]).to eq(member_name)
+    end
+
+    it 'sets the `To:` header to `InternalMailer::COLLATERAL_OPERATIONS` for pledged and transfered securities' do
+      allow(securities_request).to receive(:is_collateral?).and_return(true)
+      build_mail
+      expect(response.to.first).to eq(InternalMailer::COLLATERAL_OPERATIONS)
+    end
+
+    it 'sets the `To:` header to `InternalMailer::SECURITIES_SERVICES` for safekept securities' do
+      allow(securities_request).to receive(:is_collateral?).and_return(false)
+      build_mail
+      expect(response.to.first).to eq(InternalMailer::SECURITIES_SERVICES)
+    end
+
+    it 'sets the `From:` header' do
+      build_mail
+      expect(response.from.first).to eq(InternalMailer::WEB_SECURITIES)
+    end
+
+    it 'sets the `Subject:` header for pledged collateral' do
+      allow(securities_request).to receive(:is_collateral?).and_return(true)
+      build_mail
+      expect(response.subject).to eq(I18n.t('emails.securities_request.authorized.subject',
+        pledge_or_safekeeping: I18n.t('emails.securities_request.authorized.pledge').upcase))
+    end
+
+    it 'sets the `Subject:` header for safekept securities' do
+      allow(securities_request).to receive(:is_collateral?).and_return(false)
+      build_mail
+      expect(response.subject).to eq(I18n.t('emails.securities_request.authorized.subject',
+        pledge_or_safekeeping: I18n.t('emails.securities_request.authorized.safekeeping').upcase))
+    end
+
+    it 'produces the correct body for pledged collateral' do
+      allow(securities_request).to receive(:is_collateral?).and_return(true)
+      build_mail
+      expect(response.body.to_s).to match(I18n.t('emails.securities_request.authorized.body',
+        member_name: member_name,
+        pledge_or_safekeeping: I18n.t('emails.securities_request.authorized.pledge')))
+    end
+
+    it 'produces the correct body for safekept securities' do
+      allow(securities_request).to receive(:is_collateral?).and_return(false)
+      build_mail
+      expect(response.body.to_s).to match(I18n.t('emails.securities_request.authorized.body',
+        member_name: member_name,
+        pledge_or_safekeeping: I18n.t('emails.securities_request.authorized.safekeeping')))
+    end
+  end
+
   describe '`user_name_from_user` protected method' do
     subject { described_class.send :new }
     let(:user) { double('A User', display_name: nil, username: nil)}

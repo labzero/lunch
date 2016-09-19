@@ -1,12 +1,13 @@
 $(function() {
   var $form = $('.manage-securities-form');
   var $checkboxes = $form.find('input[type=checkbox]');
-  var $submitButton = $form.find('input[type=submit]');
+  var $submitButtons = $form.find('a[data-manage-securities-form-submit]');
   var $securitiesUploadInstructions = $('.securities-upload-instructions');
   var $securitiesReleaseWrapper = $('.securities-release-table-wrapper');
   var $securitiesField = $('input[name="securities"]');
-  $checkboxes.on('change', function(e){
-    // if boxes checked and all values are the same, enable submit
+
+  function enableSubmitIfSameStatus() {
+    // if boxes checked and all values are the same, assign `securities_request_kind` and enable submit
     var status = false;
     $form.find('input[type=checkbox]:checked').each(function(){
       var thisStatus = $(this).data('status');
@@ -18,11 +19,15 @@ $(function() {
         return false;
       };
     });
-    if (status) {
-      $submitButton.attr('disabled', false);
-    } else {
-      $submitButton.attr('disabled', true);
-    };
+    $submitButtons.attr('disabled', status ? false : true);
+  };
+
+  $checkboxes.on('change', enableSubmitIfSameStatus);
+  $('.manage-securities-table').on('checkboxes-reset.dt', enableSubmitIfSameStatus);
+
+  $submitButtons.on('click', function(event) {
+    var actionUrl = $(event.currentTarget).data('manage-securities-form-submit');
+    $form.attr('action', actionUrl).submit();
   });
 
   // Value of data attribute used in CSS to show/hide appropriate 'delivery-instructions-field'
