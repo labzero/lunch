@@ -176,6 +176,8 @@ $(function() {
     $securitiesUploadInstructions.hide();
     $('.safekeep-pledge-download-area').show();
     $securitiesReleaseWrapper.empty();
+    $securitiesField.val('null');
+    validateSecuritiesRequestFields();
   });
 
   $('.additional-legal h3').on('click', function(event) {

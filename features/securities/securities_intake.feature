@@ -214,3 +214,18 @@ Feature: Securities Intake
   | security_type |
   | safekeep      |
   | pledge        |
+
+  @jira-mem-1889 @data-unavailable
+  Scenario Outline: A user discards the securities and is not able to submit the form
+    Given I am on the <security_type> securities page
+    When I upload a securities intake file
+    Then I should see a report table with multiple data rows
+    When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+    Then the Submit action is enabled
+    When I discard the uploaded securities
+    Then the Submit action is disabled
+  Examples:
+  | security_type |
+  | safekeep      |
+  | pledge        |

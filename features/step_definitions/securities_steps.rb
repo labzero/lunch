@@ -431,6 +431,10 @@ When(/^I request a PDF of an authorized security request$/) do
   page.find('.securities-request-table a', text: /\A#{I18n.t('global.view').upcase}\z/, match: :first).click
 end
 
+When(/^I discard the uploaded securities$/) do
+  page.find('.safekeep-pledge-upload-again').click
+end
+
 def delivery_instructions(text)
   case text
   when 'DTC'
