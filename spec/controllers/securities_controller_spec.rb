@@ -1737,11 +1737,18 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(row[:columns][2][:value]).to eq(securities.first.original_par)
             end
           end
-          it 'contains rows of columns whose `original_par` value has a type of `number`' do
+          it 'contains rows of columns whose `original_par` value has a type of `currency`' do
             call_method
             expect(assigns[:securities_table_data][:rows].length).to be > 0
             assigns[:securities_table_data][:rows].each do |row|
-              expect(row[:columns][2][:type]).to eq(:number)
+              expect(row[:columns][2][:type]).to eq(:currency)
+            end
+          end
+          it 'contains rows of columns whose `original_par` value have a blank unit in its cell options' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][2][:options]).to include(unit: '')
             end
           end
           if action == :release
@@ -1752,12 +1759,19 @@ RSpec.describe SecuritiesController, type: :controller do
                 expect(row[:columns].last[:value]).to eq(securities.first.payment_amount)
               end
             end
-            it 'contains rows of columns whose last member has a type of `:number`' do
+            it 'contains rows of columns whose last member has a type of `currency`' do
               call_method
               expect(assigns[:securities_table_data][:rows].length).to be > 0
               assigns[:securities_table_data][:rows].each do |row|
-                expect(row[:columns].last[:type]).to eq(:number)
+                expect(row[:columns].last[:type]).to eq(:currency)
               end
+            end
+          end
+          it 'contains rows of columns whose last member have a blank unit in its cell options' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns].last[:options]).to include(unit: '')
             end
           end
           it 'contains an empty array for rows if no securities are passed in' do
@@ -1792,11 +1806,18 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(row[:columns][1][:value]).to eq(securities.first.original_par)
             end
           end
-          it 'contains rows of columns whose `original_par` value has a type of `number`' do
+          it 'contains rows of columns whose `original_par` value has a type of `currency`' do
             call_method
             expect(assigns[:securities_table_data][:rows].length).to be > 0
             assigns[:securities_table_data][:rows].each do |row|
-              expect(row[:columns][1][:type]).to eq(:number)
+              expect(row[:columns][1][:type]).to eq(:currency)
+            end
+          end
+          it 'contains rows of columns whose `original_par` value have a blank unit in its cell options' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][1][:options]).to include(unit: '')
             end
           end
           it 'contains rows of columns that have a `payment_amount` value' do
@@ -1806,11 +1827,18 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(row[:columns][2][:value]).to eq(securities.first.payment_amount)
             end
           end
-          it 'contains rows of columns whose `payment_amount` value has a type of `number`' do
+          it 'contains rows of columns whose `payment_amount` value has a type of `currency`' do
             call_method
             expect(assigns[:securities_table_data][:rows].length).to be > 0
             assigns[:securities_table_data][:rows].each do |row|
-              expect(row[:columns][2][:type]).to eq(:number)
+              expect(row[:columns][2][:type]).to eq(:currency)
+            end
+          end
+          it 'contains rows of columns whose `payment_amount` value have a blank unit in its cell options' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][2][:options]).to include(unit: '')
             end
           end
           it 'contains rows of columns that have a `custodian_name` value' do
