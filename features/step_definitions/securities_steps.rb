@@ -34,7 +34,7 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release|pledge release success|safekeep release success|safekeep success|pledge success|safekeep|pledge|pledge transfer success|safekeep transfer success|transfer to pledged account|transfer to safekept account) securities page$/) do |page|
+When(/^I am on the (manage|release|pledge release|safekeep release|pledge release success|safekeep release success|safekeep success|pledge success|safekeep|pledge|pledge transfer success|safekeep transfer success|transfer to pledged account|transfer to safekept account) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
@@ -53,6 +53,14 @@ When(/^I am on the (manage|release|pledge release success|safekeep release succe
   when 'release'
     step 'I am on the manage securities page'
     step 'I check the 1st Pledged security'
+    step 'I click the button to release the securities'
+  when 'pledge release'
+    step 'I am on the manage securities page'
+    step 'I check the 1st Pledged security'
+    step 'I click the button to release the securities'
+  when 'safekeep release'
+    step 'I am on the manage securities page'
+    step 'I check the 1st Safekept security'
     step 'I click the button to release the securities'
   when 'transfer to pledged account'
     step 'I am on the manage securities page'
@@ -438,6 +446,20 @@ end
 
 When(/^I discard the uploaded securities$/) do
   page.find('.safekeep-pledge-upload-again').click
+end
+
+Then(/^I should see the contact information for (Securities Services|Collateral Operations)$/) do |contact|
+  if contact == 'Securities Services'
+    email_address = securities_services_email
+    mailto_text = I18n.t('contact.collateral_departments.securities_services.title')
+    phone_number = securities_services_phone_number
+  else
+    email_address = collateral_operations_email
+    mailto_text = I18n.t('contact.collateral_departments.collateral_operations.title')
+    phone_number = collateral_operations_phone_number
+  end
+  text = strip_links(I18n.t('securities.release.edit.step_3.description_html', mailto_url: email_address, mailto_text: mailto_text, phone_number: phone_number))
+  page.assert_selector('.securities-download-instructions-description:last-of-type', text: text, exact: true, visible: true)
 end
 
 def delivery_instructions(text)

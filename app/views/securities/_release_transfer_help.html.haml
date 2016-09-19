@@ -6,22 +6,8 @@
   %p.securities-download-instructions-step= t('securities.release.edit.step_2.title')
   .securities-download-instructions-description
     %p= t('securities.release.edit.step_2.make_edits')
-    %p= t('securities.release.edit.step_2.include_information')
-    .securities-download-instructions-description-term
-      %strong= t('securities.release.edit.step_2.cusip.title')
-      %p= t('securities.release.edit.step_2.cusip.description')
-    .securities-download-instructions-description-term
-      %strong= t('securities.release.edit.step_2.original_par.title')
-      %p= t('securities.release.edit.step_2.original_par.description')
-    .securities-download-instructions-description-term
-      %strong= t('securities.release.edit.step_2.description.title')
-      %p= t('securities.release.edit.step_2.description.description')
-    - if type == :release
-      .securities-download-instructions-description-term
-        %strong= t('securities.release.edit.step_2.settlement_amount.title_html')
-        %p= t('securities.release.edit.step_2.settlement_amount.description')
   %p.securities-download-instructions-step= t('securities.release.edit.step_3.title')
-  %p.securities-download-instructions-description= t('securities.release.edit.step_3.description')
+  %p.securities-download-instructions-description= t('securities.release.edit.step_3.description_html', mailto_url: @contact[:email_address], mailto_text: @contact[:mailto_text], phone_number: @contact[:phone_number])
   .securities-download-actions
     - span = capture_haml do
       %span= t('securities.release.edit.drag_drop')

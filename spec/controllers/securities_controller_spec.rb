@@ -8,6 +8,13 @@ RSpec.describe SecuritiesController, type: :controller do
   let(:member_id) { rand(1000..99999) }
   before { allow(controller).to receive(:current_member_id).and_return(member_id) }
 
+  shared_examples 'an action that sets its contact info by kind' do |kind|
+    it "calls `populate_contact_info_by_kind` with `#{kind}`" do
+      expect(controller).to receive(:populate_contact_info_by_kind).with(kind)
+      call_action
+    end
+  end
+
   describe 'requests hitting MemberBalanceService' do
     let(:member_balance_service_instance) { double('MemberBalanceServiceInstance') }
 
@@ -325,7 +332,8 @@ RSpec.describe SecuritiesController, type: :controller do
   describe 'GET view_request' do
     let(:type) { SecureRandom.hex }
     let(:request_id) { SecureRandom.hex }
-    let(:securities_request) { instance_double(SecuritiesRequest, kind: nil) }
+    let(:kind) { instance_double(Symbol) }
+    let(:securities_request) { instance_double(SecuritiesRequest, kind: kind) }
     let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_request) }
     let(:call_action) { get :view_request, request_id: request_id, type: type }
     allow_policy :security, :authorize?
@@ -334,6 +342,7 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(SecuritiesRequestService).to receive(:new).and_return(service)
       allow(controller).to receive(:populate_view_variables)
       allow(controller).to receive(:type_matches_kind).and_return(true)
+      allow(controller).to receive(:populate_contact_info_by_kind)
     end
 
     it_behaves_like 'a user required action', :get, :view_request, request_id: SecureRandom.hex, type: :release
@@ -343,7 +352,6 @@ RSpec.describe SecuritiesController, type: :controller do
     it 'raises an exception if passed an unknown type' do
       expect{call_action}.to raise_error(ArgumentError, "Unknown request type: #{type}")
     end
-
     {
       release: :edit_release,
       pledge: :edit_pledge,
@@ -378,6 +386,10 @@ RSpec.describe SecuritiesController, type: :controller do
         end
         it 'calls `populate_view_variables`' do
           expect(controller).to receive(:populate_view_variables)
+          call_action
+        end
+        it 'calls `populate_contact_info_by_kind` with its `kind`' do
+          expect(controller).to receive(:populate_contact_info_by_kind).with(kind)
           call_action
         end
         it "renders the `#{view}` view" do
@@ -432,6 +444,7 @@ RSpec.describe SecuritiesController, type: :controller do
 
       it_behaves_like 'a user required action', :get, :edit_pledge
       it_behaves_like 'a controller action with an active nav setting', :edit_pledge, :securities
+      it_behaves_like 'an action that sets its contact info by kind', :pledge_intake
 
       it 'calls `populate_view_variables`' do
         expect(subject).to receive(:populate_view_variables).with(:pledge)
@@ -456,6 +469,7 @@ RSpec.describe SecuritiesController, type: :controller do
 
       it_behaves_like 'a user required action', :get, :edit_safekeep
       it_behaves_like 'a controller action with an active nav setting', :edit_safekeep, :securities
+      it_behaves_like 'an action that sets its contact info by kind', :safekept_intake
 
       it 'calls `populate_view_variables`' do
         expect(subject).to receive(:populate_view_variables).with(:safekeep)
@@ -496,6 +510,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       describe 'when the `securities` have a `custody_account_type` of `U`' do
         before { allow(security).to receive(:custody_account_type).and_return('U') }
+        it_behaves_like 'an action that sets its contact info by kind', :safekept_release
         it 'assigns the `@securities_request.kind` a value of `:safekept_release`' do
           expect(securities_request).to receive(:kind=).with(:safekept_release)
           call_action
@@ -503,6 +518,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       describe 'when the `securities` have a `custody_account_type` of `P`' do
         before { allow(security).to receive(:custody_account_type).and_return('P') }
+        it_behaves_like 'an action that sets its contact info by kind', :pledge_release
         it 'assigns the `@securities_request.kind` a value of `:pledge_release`' do
           expect(securities_request).to receive(:kind=).with(:pledge_release)
           call_action
@@ -545,6 +561,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       describe 'when the `securities` have a `custody_account_type` of `U`' do
         before { allow(security).to receive(:custody_account_type).and_return('U') }
+        it_behaves_like 'an action that sets its contact info by kind', :pledge_transfer
         it 'assigns the `@securities_request.kind` a value of `:pledge_transfer`' do
           expect(securities_request).to receive(:kind=).with(:pledge_transfer)
           call_action
@@ -556,6 +573,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       describe 'when the `securities` have a `custody_account_type` of `P`' do
         before { allow(security).to receive(:custody_account_type).and_return('P') }
+        it_behaves_like 'an action that sets its contact info by kind', :safekept_transfer
         it 'assigns the `@securities_request.kind` a value of `:safekept_transfer`' do
           expect(securities_request).to receive(:kind=).with(:safekept_transfer)
           call_action
@@ -902,6 +920,7 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(controller).to receive(:type_matches_kind).and_return(true)
         allow(controller).to receive(:populate_authorize_request_view_variables)
       end
+      it_behaves_like 'an action that sets its contact info by kind', kind
       it 'raises an ActionController::RoutingError if the securities request kind does not match the request type param' do
         allow(controller).to receive(:type_matches_kind).and_return(false)
         expect{call_action}.to raise_error(ActionController::RoutingError, "The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{securities_request.kind}`")
@@ -2066,21 +2085,6 @@ RSpec.describe SecuritiesController, type: :controller do
     end
 
     describe '`populate_authorize_request_view_variables`' do
-      let(:sentinel) { instance_double(String) }
-      before do
-        allow(controller).to receive(:collateral_operations_email)
-        allow(controller).to receive(:securities_services_email)
-        allow(controller).to receive(:collateral_operations_phone_number)
-        allow(controller).to receive(:securities_services_phone_number)
-      end
-
-      shared_examples 'it has a valid title mapping' do
-        it "sets `@title` appropriately" do
-          call_method
-          expect(assigns[:title]).to eq(title)
-        end
-      end
-
       describe 'when passed a kind that is not a valid SecuritiesRequest `kind`' do
         let(:call_method) { controller.send(:populate_authorize_request_view_variables, SecureRandom.hex) }
         it 'does not set `@title`' do
@@ -2092,60 +2096,73 @@ RSpec.describe SecuritiesController, type: :controller do
           expect(assigns[:contact]).to be_nil
         end
       end
-      describe 'collateral kinds' do
-        {
-          pledge_release: I18n.t('securities.authorize.titles.pledge_release'),
-          pledge_intake: I18n.t('securities.authorize.titles.pledge_intake'),
-          pledge_transfer: I18n.t('securities.authorize.titles.transfer'),
-          safekept_transfer: I18n.t('securities.authorize.titles.transfer'),
-        }.each do |kind, title|
-          describe "when the passed `kind` is `#{kind}`" do
-            let(:title) { title }
-            let(:call_method) { controller.send(:populate_authorize_request_view_variables, kind) }
-            it_behaves_like 'it has a valid title mapping'
+      {
+        safekept_release: I18n.t('securities.authorize.titles.safekept_release'),
+        safekept_intake: I18n.t('securities.authorize.titles.safekept_intake'),
+        safekept_transfer: I18n.t('securities.authorize.titles.transfer'),
+        pledge_release: I18n.t('securities.authorize.titles.pledge_release'),
+        pledge_intake: I18n.t('securities.authorize.titles.pledge_intake'),
+        pledge_transfer: I18n.t('securities.authorize.titles.transfer')
+      }.each do |kind, title|
+        describe "when the passed `kind` is `#{kind}`" do
+          let(:title) { title }
+          let(:call_method) { controller.send(:populate_authorize_request_view_variables, kind) }
 
-            it 'sets the `@contact[:email_address]` value to the result of the `collateral_operations_email` helper method' do
-              allow(controller).to receive(:collateral_operations_email).and_return(sentinel)
-              call_method
-              expect(assigns[:contact][:email_address]).to eq(sentinel)
-            end
-            it 'sets the `@contact[:phone_number]` value to the result of the `collateral_operations_phone_number` helper method' do
-              allow(controller).to receive(:collateral_operations_phone_number).and_return(sentinel)
-              call_method
-              expect(assigns[:contact][:phone_number]).to eq(sentinel)
-            end
-            it 'sets the `@contact[:mailto_text]` value to the appropriate string' do
-              call_method
-              expect(assigns[:contact][:mailto_text]).to eq(I18n.t('contact.collateral_departments.collateral_operations.title'))
-            end
+          it "sets `@title` appropriately" do
+            call_method
+            expect(assigns[:title]).to eq(title)
+          end
+          it "calls `populate_contact_info_by_kind` with `#{kind}`" do
+            expect(controller).to receive(:populate_contact_info_by_kind).with(kind)
+            call_method
           end
         end
       end
-      describe 'securities kinds' do
-        {
-          safekept_release: I18n.t('securities.authorize.titles.safekept_release'),
-          safekept_intake: I18n.t('securities.authorize.titles.safekept_intake')
-        }.each do |kind, title|
-          describe "when the passed `kind` is `#{kind}`" do
-            let(:title) { title }
-            let(:call_method) { controller.send(:populate_authorize_request_view_variables, kind) }
-            it_behaves_like 'it has a valid title mapping'
+    end
 
-            it 'sets the `@contact[:email_address]` value to the result of the `securities_services_email` helper method' do
-              allow(controller).to receive(:securities_services_email).and_return(sentinel)
-              call_method
-              expect(assigns[:contact][:email_address]).to eq(sentinel)
-            end
-            it 'sets the `@contact[:phone_number]` value to the result of the `securities_services_phone_number` helper method' do
-              allow(controller).to receive(:securities_services_phone_number).and_return(sentinel)
-              call_method
-              expect(assigns[:contact][:phone_number]).to eq(sentinel)
-            end
-            it 'sets the `@contact[:mailto_text]` value to the appropriate string' do
-              call_method
-              expect(assigns[:contact][:mailto_text]).to eq(I18n.t('contact.collateral_departments.securities_services.title'))
-            end
+    describe '`populate_contact_info_by_kind`' do
+      let(:sentinel) { instance_double(String) }
+
+      it 'does not set @contact when passed an unknown kind' do
+        controller.send(:populate_contact_info_by_kind, SecureRandom.hex)
+        expect(assigns[:contact]).to be_nil
+      end
+      SecuritiesRequest::SECURITIES_KINDS.each do |kind|
+        describe "when passed `#{kind}`" do
+          let(:call_method) { controller.send(:populate_contact_info_by_kind, kind) }
+
+          it 'sets the `@contact[:email_address]` value to the result of the `securities_services_email` helper method' do
+            allow(controller).to receive(:securities_services_email).and_return(sentinel)
+            call_method
+            expect(assigns[:contact][:email_address]).to eq(sentinel)
           end
+          it 'sets the `@contact[:phone_number]` value to the result of the `securities_services_phone_number` helper method' do
+            allow(controller).to receive(:securities_services_phone_number).and_return(sentinel)
+            call_method
+            expect(assigns[:contact][:phone_number]).to eq(sentinel)
+          end
+          it 'sets the `@contact[:mailto_text]` value to the appropriate string' do
+            call_method
+            expect(assigns[:contact][:mailto_text]).to eq(I18n.t('contact.collateral_departments.securities_services.title'))
+          end
+        end
+      end
+      SecuritiesRequest::COLLATERAL_KINDS.each do |kind|
+        let(:call_method) { controller.send(:populate_contact_info_by_kind, kind) }
+
+        it 'sets the `@contact[:email_address]` value to the result of the `collateral_operations_email` helper method' do
+          allow(controller).to receive(:collateral_operations_email).and_return(sentinel)
+          call_method
+          expect(assigns[:contact][:email_address]).to eq(sentinel)
+        end
+        it 'sets the `@contact[:phone_number]` value to the result of the `collateral_operations_phone_number` helper method' do
+          allow(controller).to receive(:collateral_operations_phone_number).and_return(sentinel)
+          call_method
+          expect(assigns[:contact][:phone_number]).to eq(sentinel)
+        end
+        it 'sets the `@contact[:mailto_text]` value to the appropriate string' do
+          call_method
+          expect(assigns[:contact][:mailto_text]).to eq(I18n.t('contact.collateral_departments.collateral_operations.title'))
         end
       end
     end

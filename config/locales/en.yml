@@ -1287,32 +1287,13 @@ en:
         intro: "To edit the listed securities:"
         step_1:
           title: "Step 1."
-          description: Download Securities Excel File
+          description: Download Template
         step_2:
           title: "Step 2."
-          make_edits: In the file, make your edits.
-          include_information: "Each security should include the following information:"
-          cusip:
-            title: CUSIP
-            description: The security's CUSIP identifier.
-          description:
-            title: Description
-            description: The security's description.
-          payment_amount:
-            title_html: "Payment Amount <span>(if needed)</span>"
-            description: "If your Settlement Type is 'vs Payment', add the Payment Amount for each security."
-          original_par:
-            title: Original Par Value
-            description: The security's Original Par Value
-          settlement_amount:
-            title_html: "Settlement Amount <span>(if needed)</span>"
-            description: If your Settlement Type is 'vs Payment', add the Settlement Amount for each security.
-          custodian_name:
-            title_html: "Custodian Name <span>(if needed)</span>"
-            description: "For each security that is not of the type 'Agency', add the Custodian Name at the end of the line."
+          make_edits: Make your edits in the file.
         step_3:
           title: "Step 3."
-          description: Save your file, and then upload it by either dragging it on to this page, or selecting it from your file system.
+          description_html: "Save your file, then upload it by either dragging and dropping it on to this page, or selecting it from your file system. Contact <a href=%{mailto_url}>%{mailto_text}</a> at %{phone_number} with questions."
         drag_drop: Drag and Drop Here
         select_file: Select File
         download_actions_html: '%{span} <span>or</span> %{button}'
@@ -1345,11 +1326,11 @@ en:
       legal: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
     safekeep_pledge:
       upload_instructions:
-        download_template: Download Add Securities Template File
+        download_template: Download Template
         intro: Upload an Excel file containing your securities.
         learn_how: Learn How
         step_2:
-          enter_securities: In the file, enter one security per line.
+          enter_securities: In the file, enter one security per row.
       discard_and_upload_again: Discard and Upload Again
     success:
       titles:

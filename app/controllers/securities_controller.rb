@@ -251,22 +251,26 @@ class SecuritiesController < ApplicationController
   end
 
   def edit_safekeep
+    kind = :safekept_intake
     populate_view_variables(:safekeep)
     @securities_request.safekept_account = MembersService.new(request).member(current_member_id)['unpledged_account_number']
-    @securities_request.kind = :safekept_intake
+    @securities_request.kind = kind
+    populate_contact_info_by_kind(kind)
   end
 
   def edit_pledge
+    kind = :pledge_intake
     populate_view_variables(:pledge)
     @securities_request.pledged_account = MembersService.new(request).member(current_member_id)['pledged_account_number']
-    @securities_request.kind = :pledge_intake
+    @securities_request.kind = kind
+    populate_contact_info_by_kind(kind)
   end
 
   # POST
   def edit_release
     populate_view_variables(:release)
     raise ArgumentError.new('Securities cannot be nil') unless @securities_request.securities.present?
-    @securities_request.kind = case @securities_request.securities.first.custody_account_type
+    kind = case @securities_request.securities.first.custody_account_type
     when 'U'
       :safekept_release
     when 'P'
@@ -274,6 +278,8 @@ class SecuritiesController < ApplicationController
     else
       raise ArgumentError, 'Unrecognized `custody_account_type` for passed security.'
     end
+    @securities_request.kind = kind
+    populate_contact_info_by_kind(kind)
   end
 
   # POST
@@ -283,14 +289,17 @@ class SecuritiesController < ApplicationController
     @securities_request.pledged_account = MembersService.new(request).member(current_member_id)['pledged_account_number']
     case @securities_request.securities.first.custody_account_type
     when 'U'
-      @securities_request.kind = :pledge_transfer
+      kind = :pledge_transfer
+      @securities_request.kind = kind
       @title = t('securities.transfer.pledge.title')
     when 'P'
-      @securities_request.kind = :safekept_transfer
+      kind = :safekept_transfer
+      @securities_request.kind = kind
       @title = t('securities.transfer.safekeep.title')
     else
       raise ArgumentError, 'Unrecognized `custody_account_type` for passed security.'
     end
+    populate_contact_info_by_kind(kind)
   end
 
   # GET
@@ -303,6 +312,7 @@ class SecuritiesController < ApplicationController
     kind = @securities_request.kind
     raise ActionController::RoutingError.new("The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{kind}`") unless type_matches_kind(type, kind)
     populate_view_variables(type)
+    populate_contact_info_by_kind(kind)
     case type
     when :release
       render :edit_release
@@ -452,6 +462,7 @@ class SecuritiesController < ApplicationController
     if has_errors
       @error_message = prioritized_securities_request_error(@securities_request)
       populate_view_variables(type)
+      populate_contact_info_by_kind(kind)
       case type
       when :release
         render :edit_release
@@ -717,25 +728,29 @@ class SecuritiesController < ApplicationController
     end
   end
 
+  def populate_contact_info_by_kind(kind)
+    @contact = if SecuritiesRequest::COLLATERAL_KINDS.include?(kind)
+      {email_address: collateral_operations_email, mailto_text: t('contact.collateral_departments.collateral_operations.title'), phone_number: collateral_operations_phone_number}
+    elsif SecuritiesRequest::SECURITIES_KINDS.include?(kind)
+      {email_address: securities_services_email, mailto_text: t('contact.collateral_departments.securities_services.title'), phone_number: securities_services_phone_number}
+    end
+  end
+
   def populate_authorize_request_view_variables(kind)
-    collateral_contact_info = {email_address: collateral_operations_email, mailto_text: t('contact.collateral_departments.collateral_operations.title'), phone_number: collateral_operations_phone_number}
-    securities_contact_info = {email_address: securities_services_email, mailto_text: t('contact.collateral_departments.securities_services.title'), phone_number: securities_services_phone_number}
+    populate_contact_info_by_kind(kind)
     case kind
     when :pledge_release
       @title = t('securities.authorize.titles.pledge_release')
-      @contact = collateral_contact_info
     when :safekept_release
       @title = t('securities.authorize.titles.safekept_release')
-      @contact = securities_contact_info
     when :pledge_intake
       @title = t('securities.authorize.titles.pledge_intake')
-      @contact = collateral_contact_info
     when :safekept_intake
       @title = t('securities.authorize.titles.safekept_intake')
-      @contact = securities_contact_info
-    when :pledge_transfer, :safekept_transfer
+    when :pledge_transfer
       @title = t('securities.authorize.titles.transfer')
-      @contact = collateral_contact_info
+    when :safekept_transfer
+      @title = t('securities.authorize.titles.transfer')
     end
   end
 

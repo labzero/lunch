@@ -46,13 +46,18 @@ Scenario: Member interacts with the Delete Release flyout dialogue
   And I confirm that I want to delete the request
   Then I should be on the Manage Securities page
 
-@jira-mem-1589
-Scenario: Member views edit securities instructions
-  Given I am on the release securities page
+@jira-mem-1589 @jira-mem-1879
+Scenario Outline: Member views edit securities instructions
+  Given I am on the <page> securities page
   When I click on the Edit Securities link
   Then I should see instructions on how to edit securities
+  And I should see the contact information for <contact>
   When I click on the Edit Securities link
   Then I should not see instructions on how to edit securities
+Examples:
+| page             | contact               |
+| safekeep release | Securities Services   |
+| pledge release   | Collateral Operations |
 
 @jira-mem-1590 @data-unavailable
 Scenario: Member cancels an upload of a securities release file

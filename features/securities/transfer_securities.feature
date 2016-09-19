@@ -24,17 +24,18 @@ Feature: Transfer Securities
   | Pledged        | Transfer to Safekept |
   | Safekept       | Transfer to Pledged  |
 
-  @jira-mem-1715
+  @jira-mem-1715 @jira-mem-1880
   Scenario Outline: Member views edit securities instructions
     Given I am on the transfer to <page> account securities page
     When I click on the Edit Securities link
     Then I should see instructions on how to edit securities
+    And I should see the contact information for <contact>
     When I click on the Edit Securities link
     Then I should not see instructions on how to edit securities
   Examples:
-    | page     |
-    | pledged  |
-    | safekept |
+    | page     | contact               |
+    | safekept | Securities Services   |
+    | pledged  | Collateral Operations |
 
   Scenario: Authorized signer views legal copy for pledge transfers
     Given I am logged in as a "quick-advance signer"
