@@ -55,3 +55,20 @@ Scenario: Download a PDF of an authorized security request
   Given I am on the securities request page
   When I request a PDF of an authorized security request
   Then I should begin downloading a file
+
+@jira-mem-1741 @data-unavailable
+Scenario Outline: Signer deletes a previously submitted request
+  Given I am logged in as a "quick-advance signer"
+  And I am on the securities request page
+  When I click to Authorize the first <request_type> request
+  Then I should be on the <page> page
+  When I click the button to delete the request
+  And I confirm that I want to delete the request
+  Then I should be on the Securities Requests page
+  And I should not see the request ID that I deleted
+Examples:
+  | request_type | page                |
+  | release      | Securities Release  |
+  | pledge       | Pledge Securities   |
+  | safekeep     | Safekeep Securities |
+  | transfer     | Transfer Securities |

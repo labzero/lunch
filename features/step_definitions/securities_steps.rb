@@ -312,7 +312,12 @@ When(/^I click to Authorize the first (pledge|release|safekeep|transfer)(?: requ
     raise ArgumentError, "unknown form type: #{type}"
   end
   row = page.all('.securities-request-table td', text: description, exact: true).first.find(:xpath, '..')
+  @request_id = row.find('td:first-child').text
   row.find('.report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true).click
+end
+
+Then(/^I should not see the request ID that I deleted$/) do
+  page.assert_no_selector('.securities-request-table td', text: @request_id, exact: true)
 end
 
 Then(/^I should see "(.*?)" as the selected pledge type$/) do |type|
