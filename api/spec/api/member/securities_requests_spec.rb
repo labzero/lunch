@@ -969,7 +969,7 @@ describe MAPI::ServiceApp do
         expected_sql = <<-SQL
             SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
               MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
-              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO, UNPLEGED_TRANSFER_ADX_ID
             FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE HEADER_ID = #{header_id}
             AND FHLB_ID = #{member_id}
@@ -1018,6 +1018,7 @@ describe MAPI::ServiceApp do
         allow(securities_request_module).to receive(:map_hash_values).with(header_details, any_args).and_return(header_details)
         allow(securities_request_module).to receive(:map_hash_values).with(security, any_args).and_return(security)
         allow(security).to receive(:with_indifferent_access).and_return(security)
+        allow(securities_request_module).to receive(:kind_from_details)
       end
 
       describe 'when using fake data' do
@@ -1100,6 +1101,10 @@ describe MAPI::ServiceApp do
           end
         end
       end
+      it 'calls `kind_from_details` with the header_details' do
+        expect(securities_request_module).to receive(:kind_from_details).with(header_details)
+        call_method
+      end
       it 'calls `map_hash_values` on the `header_details`' do
         expect(securities_request_module).to receive(:map_hash_values).with(header_details, any_args).and_return(header_details)
         call_method
@@ -1162,13 +1167,25 @@ describe MAPI::ServiceApp do
           header_details['PLEDGED_ADX_ID'] = SecureRandom.hex
           expect(call_method[:pledged_account]).to eq(header_details['PLEDGED_ADX_ID'])
         end
-        it 'contains a `safekept_account` with the `UNPLEDGED_ADX_ID`' do
-          header_details['UNPLEDGED_ADX_ID'] = SecureRandom.hex
-          expect(call_method[:safekept_account]).to eq(header_details['UNPLEDGED_ADX_ID'])
-        end
         it 'contains a `form_type` with the `FORM_TYPE`' do
           header_details['FORM_TYPE'] = SecureRandom.hex
           expect(call_method[:form_type]).to eq(header_details['FORM_TYPE'])
+        end
+        [:pledge_transfer, :safekept_transfer].each do |kind|
+          describe "when the `kind` is `#{kind}`" do
+            before { expect(securities_request_module).to receive(:kind_from_details).and_return(kind) }
+
+            it 'contains a `safekept_account` with the `UNPLEGED_TRANSFER_ADX_ID`' do
+              header_details['UNPLEGED_TRANSFER_ADX_ID'] = SecureRandom.hex
+              expect(call_method[:safekept_account]).to eq(header_details['UNPLEGED_TRANSFER_ADX_ID'])
+            end
+          end
+        end
+        describe 'when the `kind` is not `:pledge_transfer` or `:safekept_transfer`' do
+          it 'contains a `safekept_account` with the `UNPLEDGED_ADX_ID`' do
+            header_details['UNPLEDGED_ADX_ID'] = SecureRandom.hex
+            expect(call_method[:safekept_account]).to eq(header_details['UNPLEDGED_ADX_ID'])
+          end
         end
       end
     end
@@ -1311,7 +1328,7 @@ describe MAPI::ServiceApp do
       let(:call_method) { securities_request_module.fake_header_details(request_id, status) }
       before do
         allow(Random).to receive(:new).and_return(rng)
-        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset, pledged_adx, unpledged_adx)
+        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date, authorized_date_offset, created_by_offset, authorized_by_offset, unpledged_adx, pledge_to_offset, pledged_adx)
         allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
       end
 
@@ -1376,6 +1393,9 @@ describe MAPI::ServiceApp do
       end
       it 'constructs a hash with a `UNPLEDGED_ADX_ID` value' do
         expect(call_method['UNPLEDGED_ADX_ID']).to eq(unpledged_adx)
+      end
+      it 'constructs a hash with a `UNPLEGED_TRANSFER_ADX_ID` value' do
+        expect(call_method['UNPLEGED_TRANSFER_ADX_ID']).to eq(unpledged_adx)
       end
       it 'selects a `SUBMITTED_DATE` from the `start_date` and 7 days in the future' do
         start_date = submitted_date

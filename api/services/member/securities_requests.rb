@@ -841,7 +841,7 @@ module MAPI
           <<-SQL
             SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
               MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
-              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO, UNPLEGED_TRANSFER_ADX_ID
             FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE HEADER_ID = #{quote(header_id)}
             AND FHLB_ID = #{quote(member_id)}
@@ -866,13 +866,15 @@ module MAPI
           end
           raise MAPI::Shared::Errors::SQLError, 'No header details found' unless header_details
           raise MAPI::Shared::Errors::SQLError, 'No securities found' unless securities
+          kind = kind_from_details(header_details)
           header_details = map_hash_values(header_details, REQUEST_HEADER_MAPPING).with_indifferent_access
           securities.collect do |security|
             map_hash_values(security, RELEASE_REQUEST_SECURITIES_MAPPING).with_indifferent_access
           end
+          safekept_account = [:pledge_transfer, :safekept_transfer].include?(kind) ? header_details['UNPLEGED_TRANSFER_ADX_ID'] : header_details['UNPLEDGED_ADX_ID']
           {
             request_id: request_id,
-            safekept_account: header_details['UNPLEDGED_ADX_ID'],
+            safekept_account: safekept_account,
             pledged_account: header_details['PLEDGED_ADX_ID'],
             form_type: header_details['FORM_TYPE'],
             broker_instructions: broker_instructions_from_header_details(header_details),
@@ -973,6 +975,7 @@ module MAPI
           created_by = fake_data['usernames'][created_by_offset]
           created_by_name = names[created_by_offset]
           authorized_by_name = names.sample(random: rng)
+          safekept_account_number = rng.rand(1000..9999)
           {
             'REQUEST_ID' => request_id,
             'PLEDGE_TYPE' => pledge_type,
@@ -1001,7 +1004,8 @@ module MAPI
             'AUTHORIZED_DATE' => authorized ? authorized_date : nil,
             'PLEDGE_TO' => PLEDGE_TO.values.sample(random: rng),
             'PLEDGED_ADX_ID' => rng.rand(1000..9999),
-            'UNPLEDGED_ADX_ID' => rng.rand(1000..9999)
+            'UNPLEDGED_ADX_ID' => safekept_account_number,
+            'UNPLEGED_TRANSFER_ADX_ID' => safekept_account_number
           }
         end
 

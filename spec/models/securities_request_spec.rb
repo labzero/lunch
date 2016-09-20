@@ -5,13 +5,27 @@ RSpec.describe SecuritiesRequest, :type => :model do
   describe 'validations' do
     [:pledge_intake, :pledge_transfer].each do |kind|
       it "validates the presence of `pledge_to` if the `kind` equals `#{kind}`" do
-        subject.kind = :pledge_intake
+        subject.kind = kind
         expect(subject).to validate_presence_of :pledge_to
       end
     end
     it 'does not validate the presence of `pledge_to` if the `kind` is not `:pledge_intake`' do
       subject.kind = (described_class::KINDS - [:pledge_intake, :pledge_transfer]).sample
       expect(subject).not_to validate_presence_of :pledge_to
+    end
+    [:pledged_account, :safekept_account].each do |attr|
+      described_class::TRANSFER_REQUEST_KINDS.each do |kind|
+        it "validates the presence of `#{attr}` if the `kind` equals `#{kind}`" do
+          subject.kind = kind
+          expect(subject).to validate_presence_of attr
+        end
+      end
+      (described_class::KINDS - described_class::TRANSFER_REQUEST_KINDS).each do |kind|
+        it "does not validate the presence of `#{attr}` if the `kind` is `#{kind}`" do
+          subject.kind = kind
+          expect(subject).not_to validate_presence_of attr
+        end
+      end
     end
     (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities, :kind, :form_type]).each do |attr|
       it "validates the presence of `#{attr}`" do

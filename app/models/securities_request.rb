@@ -66,6 +66,7 @@ class SecuritiesRequest
   attr_reader :securities
 
   validates *[:delivery_type, :securities, :kind, :form_type], presence: true
+  validates *[:pledged_account, :safekept_account], presence: true, if: Proc.new { |request| request.kind && TRANSFER_REQUEST_KINDS.include?(request.kind)  }
   validates :pledge_to, presence: true, if: Proc.new { |request| request.kind && request.kind == :pledge_intake || request.kind == :pledge_transfer  }
   validates *DELIVERY_INSTRUCTION_KEYS[:fed], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :fed }
   validates *DELIVERY_INSTRUCTION_KEYS[:dtc], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :dtc }

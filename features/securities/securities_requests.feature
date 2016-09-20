@@ -50,6 +50,15 @@ Examples:
   | pledge       | Pledge Securities   |
   | safekeep     | Safekeep Securities |
 
+@jira-mem-1738
+Scenario: A signer authorizes a previously submitted request
+  Given I am logged in as a "quick-advance signer"
+  And I am on the securities request page
+  When I click to Authorize the first transfer
+  Then I should be on the Transfer Securities page
+  And I authorize the request
+  Then I should see the authorize request success page
+
 @jira-mem-1685
 Scenario: Download a PDF of an authorized security request
   Given I am on the securities request page
