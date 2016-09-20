@@ -1319,10 +1319,10 @@ en:
     transfer:
       pledge:
         title: Transfer Securities to Pledged Account
-        delivery_instructions: 'Internal Transfer from Safekept Account No. %{safekept_account} to Pledged Account No. %{pledged_account}'
+        delivery_instructions: 'Internal Transfer from Safekeeping Account No. %{safekept_account} to Pledged Account No. %{pledged_account}'
       safekeep:
-        title: Transfer Securities to Safekept Account
-        delivery_instructions: 'Internal Transfer from Pledged Account No. %{pledged_account} to Safekept Account No. %{safekept_account}'
+        title: Transfer Securities to Safekeeping Account
+        delivery_instructions: 'Internal Transfer from Pledged Account No. %{pledged_account} to Safekeeping Account No. %{safekept_account}'
       legal: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
     safekeep_pledge:
       upload_instructions:
