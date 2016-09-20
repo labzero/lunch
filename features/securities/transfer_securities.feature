@@ -110,3 +110,15 @@ Feature: Transfer Securities
     | page     | delete_dialogue |
     | pledged  | transfer        |
     | safekept | transfer        |
+
+  @jira-mem-1743 @data-unavailable
+  Scenario: A signer edits a previously submitted request
+    Given I am logged in as a "quick-advance signer"
+    And I am on the securities request page
+    When I click to Authorize the first transfer
+    Then I should be on the Transfer Securities page
+    When I click on the Edit Securities link
+    When I upload a securities transfer file
+    And I wait for the securities file to upload
+    Then I should see an uploaded transfer security with a description of "Zip Zoop Zap"
+    And I should see an uploaded transfer security with an original par of "123,456,789"
