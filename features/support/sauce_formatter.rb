@@ -19,6 +19,7 @@ unless defined? SauceFormatter
         @scenario_start_time = nil
         @scenario = nil
         @last_step_result = nil
+        @scenario_failed = false
         initialize_without_sauce(step_mother, io, options)
       end
 
@@ -42,6 +43,7 @@ unless defined? SauceFormatter
 
       def after_test_step_with_sauce(step, result, &block)
         @last_step_result = result
+        @scenario_failed ||= result.ok?
         after_test_step_without_sauce(step, result, &block)
       end
 
@@ -141,7 +143,7 @@ unless defined? SauceFormatter
           @sauce_job_id ||= ::Capybara.current_session.driver.browser.session_id if sauce_labs?
           unless @last_step_result.nil? || @last_step_result.is_a?(Cucumber::Core::Test::Result::Skipped)
             runtime_range = ((@scenario_start_time - @run_start_time))..((scenario_end_time - @run_start_time))
-            unless @last_step_result.ok?
+            if @scenario_failed
               @failed_scenarios << {scenario: scenario, runtime: runtime_range}
             else
               @passed_scenarios << {scenario: scenario, runtime: runtime_range}
@@ -151,6 +153,7 @@ unless defined? SauceFormatter
           @last_step_result = nil
           @scenario_start_time = nil
           @scenario = nil
+          @scenario_failed = false
         end
       end
 
