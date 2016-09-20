@@ -43,7 +43,7 @@ unless defined? SauceFormatter
 
       def after_test_step_with_sauce(step, result, &block)
         @last_step_result = result
-        @scenario_failed ||= result.ok?
+        @scenario_failed ||= !result.ok?
         after_test_step_without_sauce(step, result, &block)
       end
 
