@@ -35,7 +35,8 @@
             %p= t('securities.transfer.safekeep.delivery_instructions', safekept_account: @securities_request.safekept_account, pledged_account: @securities_request.pledged_account)
         %section.securities-display
           %h2= t('securities.title')
-          .securities-release-upload-error= simple_format(t('securities.upload_errors.generic'))
+          %p.securities-request-upload-success= t('securities.upload_success')
+          .securities-request-upload-error= simple_format(t('securities.upload_errors.generic'))
           .securities-release-table-wrapper
             -unless @securities_table_data[:rows].empty?
               = render 'table'

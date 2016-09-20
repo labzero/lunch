@@ -178,6 +178,7 @@ $(function() {
     $securitiesReleaseWrapper.empty();
     $securitiesField.val('null');
     validateSecuritiesRequestFields();
+    $('.securities-request-upload-success').hide();
   });
 
   $('.additional-legal h3').on('click', function(event) {

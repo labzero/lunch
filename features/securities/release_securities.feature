@@ -224,3 +224,13 @@ Scenario: A user cannot submit the form until all required fields have values
   When I fill in the "clearing_agent_participant_number" securities field with "23454343"
   And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   Then the Submit action is enabled
+
+@jira-mem-1874 @data-unavailable
+Scenario: Member uploads a securities intake file and sees the success message
+  Given I am on the release securities page
+  And the edit securities section is open
+  And I upload a securities release file with "no settlement amounts"
+  Then I should see the securities upload success message
+  When the edit securities section is open
+  And I drag and drop the "securities_invalid_original_par.xlsx" file into the edit securities dropzone
+  Then I should not see the securities upload success message

@@ -51,13 +51,14 @@ Feature: Transfer Securities
     When I click the button to transfer the securities
     Then I should not see the pledge legal copy
 
-  @jira-mem-1716 @data-unavailable
+  @jira-mem-1716 @jira-mem-1874 @data-unavailable
   Scenario Outline: Member uploads an edited securities file that is valid
     Given I am on the transfer to <page> account securities page
     And the edit securities section is open
     When I upload a securities transfer file
     And I wait for the securities file to upload
-    Then I should see an uploaded transfer security with a description of "Zip Zoop Zap"
+    Then I should see the securities upload success message
+    And I should see an uploaded transfer security with a description of "Zip Zoop Zap"
     And I should see an uploaded transfer security with an original par of "123,456,789"
   Examples:
     | page     |

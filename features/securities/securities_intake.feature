@@ -230,3 +230,15 @@ Feature: Securities Intake
   | security_type |
   | safekeep      |
   | pledge        |
+
+  @jira-mem-1874 @data-unavailable
+  Scenario Outline: Member uploads a securities intake file and sees the success message
+    Given I am on the <page> page
+    When I upload a securities intake file with "no settlement amounts"
+    Then I should see the securities upload success message
+    When I discard the uploaded securities
+    Then I should not see the securities upload success message
+  Examples:
+  | page                |
+  | safekeep securities |
+  | pledge securities   |

@@ -1391,6 +1391,7 @@ en:
       generic: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
       invalid_cusips: "The following CUSIPs are invalid: %{cusips}.\nPlease update your file with the correct CUSIPs."
       no_rows: Your file contains no valid rows. Please edit your file and try again.
+    upload_success: 'The following securities from your Excel file were validated and will be included in the securities request:'
   reports:
     meta_title: FHLB - Reports
     title: Reports

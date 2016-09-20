@@ -25,15 +25,15 @@ $(function () {
       var $target = $(e.target);
       var formName = $target.data('form-name');
       var inputName = $target.data('input-name');
+      var successClass = $target.data('success-class');
       var resultsContainerClass = $target.data('results-container-class');
       if (data.result) {
         if (data.result.error) {
           failUpload(e, data.result.error); // For IE
         } else {
           dropZone.hide();
-          if (resultsContainerClass) {
-            $('.' + resultsContainerClass).html(data.result.html);
-          };
+          successClass ? $('.' + successClass).show() : null;
+          resultsContainerClass ? $('.' + resultsContainerClass).html(data.result.html) : null;
           if (formName && inputName) {
             var $inputNode = $('form[name=' + formName + '] input[name=' + inputName + ']');
             $inputNode.attr('value', data.result.form_data);
@@ -51,7 +51,10 @@ $(function () {
   });
 
   function failUpload(e, errorMessage) {
-    toggleUploadError($(e.target).data('error-class'), true, errorMessage);
+    var $target = $(e.target);
+    var successClass = $target.data('success-class');
+    successClass ? $('.' + successClass).hide() : null;
+    toggleUploadError($target.data('error-class'), true, errorMessage);
   }
 
   function toggleUploadError(errorClass, active, errorMessage) {

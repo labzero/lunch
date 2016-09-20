@@ -224,7 +224,12 @@ When(/^I should see an? (security required|original par numericality|no securiti
            when 'no securities'
              I18n.t('securities.upload_errors.no_rows')
          end
-  page.assert_selector('.securities-release-upload-error p', text: text, exact: true)
+  page.assert_selector('.securities-request-upload-error p', text: text, exact: true)
+end
+
+Then(/^I should( not)? see the securities upload success message$/) do |should_not_see|
+  selector = ['.securities-request-upload-success', text: I18n.t('securities.upload_success'), exact: true, visible: true]
+  should_not_see ? page.assert_no_selector(*selector) : page.assert_selector(*selector)
 end
 
 Then(/^I should see an upload progress bar$/) do

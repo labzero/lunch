@@ -399,10 +399,14 @@
   }
 }
 
-.securities-release-upload-error {
+.securities-request-upload-error {
   display: none;
   margin-top: -5px;
   color: $alert-red;
+}
+
+.securities-request-upload-success {
+  display: none;
 }
 
 .securities-submit-release-form-errors {
