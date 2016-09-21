@@ -281,7 +281,7 @@ module MAPI
             end
             address_data = self.fetch_hash(logger, address_sql)
             if address_data
-              member_street = address_data['SHIPPINGSTREET'].read()
+              member_street = address_data['SHIPPINGSTREET'].try(:read)
               member_city = address_data['SHIPPINGCITY']
               member_state = address_data['SHIPPINGSTATE']
               member_postal_code = address_data['SHIPPINGPOSTALCODE']

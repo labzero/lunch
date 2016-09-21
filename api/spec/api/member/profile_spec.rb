@@ -326,6 +326,11 @@ describe MAPI::ServiceApp do
             expect(MAPI::Services::Member::Profile).to receive(:get_account_numbers).with(anything, member_id).and_return(account_numbers)
             make_request
           end
+          it 'does not raise an error if `SHIPPINGSTREET` is nil' do
+            address_data_response['SHIPPINGSTREET'] = nil
+            make_request
+            expect(last_response.status).to be(200)
+          end
         end
         it 'returns the member name' do
           expect(member_details['name']).to eq(member_name)
