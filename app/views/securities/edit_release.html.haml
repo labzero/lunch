@@ -6,5 +6,5 @@
     .column-9x3-left
       = render partial: 'form', locals: { type: :release, account_number: nil, url: @form_data[:url], accepted_upload_mimetypes: @accepted_upload_mimetypes }
     = render 'delete_request_flyout', request_id: @securities_request.request_id
-    =form_tag(securities_release_download_path, name: 'securities-release-download') do
+    =form_tag(@download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_request.securities.to_json)

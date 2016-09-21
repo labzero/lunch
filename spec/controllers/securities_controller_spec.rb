@@ -1594,6 +1594,10 @@ RSpec.describe SecuritiesController, type: :controller do
           controller.send(:populate_view_variables, type)
           expect(assigns[:confirm_delete_text]).to eq(I18n.t("securities.delete_request.titles.#{type}"))
         end
+        it "sets `@download_path` to `securities_#{type.to_s}_download_path`" do
+          controller.send(:populate_view_variables, type)
+          expect(assigns[:download_path]).to eq(controller.send(:"securities_#{type.to_s}_download_path"))
+        end
       end
       it 'calls `populate_transaction_code_dropdown_variables` with the @securities_request' do
         expect(controller).to receive(:populate_transaction_code_dropdown_variables).with(securities_request)

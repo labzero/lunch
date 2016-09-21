@@ -610,14 +610,18 @@ class SecuritiesController < ApplicationController
     when :release
       @title = t('securities.release.title')
       @confirm_delete_text = t('securities.delete_request.titles.release')
+      @download_path = securities_release_download_path
     when :pledge
       @title = t('securities.pledge.title')
       @confirm_delete_text = t('securities.delete_request.titles.pledge')
+      @download_path = securities_pledge_download_path
     when :safekeep
       @title = t('securities.safekeep.title')
       @confirm_delete_text = t('securities.delete_request.titles.safekeep')
+      @download_path = securities_safekeep_download_path
     when :transfer
       @confirm_delete_text = t('securities.delete_request.titles.transfer')
+      @download_path = securities_transfer_download_path
     end
 
     @session_elevated = session_elevated?

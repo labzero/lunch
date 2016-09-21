@@ -56,7 +56,7 @@
   %section.securities-display
     -if type == :safekeep || type == :pledge
       %h2.safekeep-pledge-title= t('securities.title')
-      =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), securities_pledge_download_path, class: [ 'securities-download-template', 'safekeep-pledge-download-title' ]
+      =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), @download_path, class: [ 'securities-download-template', 'safekeep-pledge-download-title' ]
     -else
       %h2= t('securities.title')
     %p.securities-request-upload-success= t('securities.upload_success')
@@ -68,7 +68,7 @@
     -if type == :release
       = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, upload_url: securities_release_upload_path, type: :release}
     -elsif type == :safekeep || type == :pledge
-      = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes}
+      = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, download_path: @download_path}
   - if authorizer
     - if policy(:security).authorize? && type != :safekeep
       .securities-request-legal

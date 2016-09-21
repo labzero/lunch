@@ -53,5 +53,5 @@
           %span.secondary-button.delete-request-trigger= t('global.delete')
           =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true)
         = render 'delete_request_flyout', request_id: @securities_request.request_id
-    =form_tag(securities_transfer_download_path, name: 'securities-release-download') do
+    =form_tag(@download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_request.securities.to_json)

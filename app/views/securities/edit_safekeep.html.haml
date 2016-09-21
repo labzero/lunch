@@ -6,5 +6,5 @@
     .column-9x3-left
       = render partial: 'form', locals: { type: :safekeep, account_number: @securities_request.safekept_account, url: securities_safekeep_submit_path, accepted_upload_mimetypes: @accepted_upload_mimetypes }
     = render 'delete_request_flyout', request_id: @securities_request.request_id
-    =form_tag(securities_safekeep_download_path, name: 'securities-release-download') do
+    =form_tag(@download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_request.securities.to_json)
