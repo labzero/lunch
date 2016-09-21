@@ -985,7 +985,7 @@ describe MAPI::ServiceApp do
 
       it 'constructs the proper SQL' do
         expected_sql = <<-SQL
-            SELECT CUSIP, DESCRIPTION, ORIGINAL_PAR, PAYMENT_AMOUNT
+            SELECT DETAIL_ID, CUSIP, DESCRIPTION, ORIGINAL_PAR, PAYMENT_AMOUNT
             FROM SAFEKEEPING.SSK_WEB_FORM_DETAIL
             WHERE HEADER_ID = #{header_id}
         SQL
@@ -1281,6 +1281,7 @@ describe MAPI::ServiceApp do
 
     describe '`MAPI::Services::Member::SecuritiesRequests.format_securities`' do
       let(:security) {{
+        'DETAIL_ID' => instance_double(String),
         'CUSIP' => instance_double(String),
         'DESCRIPTION' => instance_double(String),
         'ORIGINAL_PAR' => instance_double(Integer),
@@ -1290,6 +1291,7 @@ describe MAPI::ServiceApp do
       let(:call_method) { securities_request_module.format_securities(securities) }
 
       {
+        detail_id: 'DETAIL_ID',
         cusip: 'CUSIP',
         description: 'DESCRIPTION',
         original_par: 'ORIGINAL_PAR',
@@ -1465,6 +1467,7 @@ describe MAPI::ServiceApp do
       let(:original_par) { rand(10000..999999) }
       let(:cusip) { fake_data['cusips'].sample }
       let(:description) { fake_data['descriptions'].sample }
+      let(:detail_id) { fake_data['detail_ids'].sample }
 
       let(:call_method) { securities_request_module.fake_securities(request_id, settlement_type) }
       before do
@@ -1473,6 +1476,7 @@ describe MAPI::ServiceApp do
         allow(rng).to receive(:rand).with(eq(10000..999999)).and_return(original_par)
         allow(fake_data['cusips']).to receive(:sample).with(random: rng).and_return(cusip)
         allow(fake_data['descriptions']).to receive(:sample).with(random: rng).and_return(description)
+        allow(fake_data['detail_ids']).to receive(:sample).with(random: rng).and_return(detail_id)
       end
 
       it 'constructs an array of securities' do
@@ -1499,6 +1503,13 @@ describe MAPI::ServiceApp do
         expect(results.length).to be > 0
         results.each do |result|
           expect(result['ORIGINAL_PAR']).to eq(original_par)
+        end
+      end
+      it 'constructs securities with a `DETAIL_ID` value' do
+        results = call_method
+        expect(results.length).to be > 0
+        results.each do |result|
+          expect(result['DETAIL_ID']).to eq(detail_id)
         end
       end
       describe "when the `settlement_type` is `#{securities_request_module::SSKSettlementType::FREE}`" do
@@ -2075,6 +2086,7 @@ describe MAPI::ServiceApp do
       let(:header_id) { instance_double(String) }
       let(:username) { instance_double(String) }
       let(:session_id) { instance_double(String) }
+      let(:detail_id) { instance_double(String) }
       let(:security) {{
         'cusip' => instance_double(String),
         'description' => instance_double(String),
@@ -2084,7 +2096,7 @@ describe MAPI::ServiceApp do
       let(:modification_by) { instance_double(String) }
       let(:sentinel) { SecureRandom.hex }
       let(:today) { Time.zone.today }
-      let(:call_method) {securities_request_module.update_request_security_query(header_id, username, session_id, security)}
+      let(:call_method) {securities_request_module.update_request_security_query(header_id, username, session_id, security, detail_id)}
 
       before do
         allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex)
@@ -2118,9 +2130,9 @@ describe MAPI::ServiceApp do
         allow(securities_request_module).to receive(:quote).with(modification_by).and_return(sentinel)
         expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
-      it 'includes the `cusip` in the WHERE clause' do
-        allow(securities_request_module).to receive(:quote).with(security['cusip']).and_return(sentinel)
-        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+CUSIP\s+=\s+UPPER\(#{sentinel}\)(\s+|\z)/)
+      it 'includes the `detail_id` in the WHERE clause' do
+        allow(securities_request_module).to receive(:quote).with(detail_id).and_return(sentinel)
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+DETAIL_ID\s+=\s+#{sentinel}(\s+|\z)/)
       end
       it 'includes the `header_id` in the WHERE clause' do
         allow(securities_request_module).to receive(:quote).with(header_id).and_return(sentinel)
@@ -2157,6 +2169,7 @@ describe MAPI::ServiceApp do
       let(:full_name) { instance_double(String) }
       let(:session_id) { instance_double(String) }
       let(:delivery_type) { instance_double(String) }
+      let(:detail_id_security) { SecureRandom.hex }
       let(:delivery_instructions) {{
         'delivery_type' => delivery_type,
         'account_number' => instance_double(String),
@@ -2174,6 +2187,7 @@ describe MAPI::ServiceApp do
         'settlement_date' => instance_double(String)
       }}
       let(:security) {{
+        'detail_id' => detail_id_security,
         'cusip' => SecureRandom.hex,
         'description' => instance_double(String),
         'original_par' => instance_double(Numeric),
@@ -2450,7 +2464,11 @@ describe MAPI::ServiceApp do
                 call_method
               end
               it 'constructs the `update_request_security_query` with the `security`' do
-                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, security)
+                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, security, anything)
+                call_method
+              end
+              it 'constructs the `update_request_security_query` with the `detail_id`' do
+                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, anything, detail_id_security)
                 call_method
               end
               it 'calls `execute_sql` with the result of `update_request_security_query`' do
@@ -2483,6 +2501,81 @@ describe MAPI::ServiceApp do
               it 'does not execute the `update_request_security_query` sql' do
                 expect(securities_request_module).not_to receive(:execute_sql).with(anything, update_request_security_query)
                 call_method
+              end
+            end
+            describe 'deletes security from `existing_securities` after it has been processed with the same CUSIP' do
+              let(:detail_id_security1) { SecureRandom.hex }
+              let(:detail_id_security2) { SecureRandom.hex }
+              let(:detail_id_security3) { SecureRandom.hex }
+              let(:cusip) { SecureRandom.hex }
+              let(:security1) {{
+                'detail_id' => detail_id_security1,
+                'cusip' => cusip,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:security2) {{
+                'detail_id' => detail_id_security2,
+                'cusip' => cusip,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:security3) {{
+                'detail_id' => detail_id_security3,
+                'cusip' => SecureRandom.hex,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:securities_new) { [security1, security2, security3] }
+              let(:call_method_new) { securities_request_module.update_release(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities_new, kind) }
+              let(:old_security1) { cloned_security =  security1.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              let(:old_security2) { cloned_security =  security2.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              let(:old_security3) { cloned_security =  security3.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              describe 'when the passed securities already exist and have changed' do
+                before do
+                  allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                  allow(securities_request_module).to receive(:security_has_changed).and_return(true)
+                  allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from first security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from third security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                  call_method_new
+                end
+              end
+              describe 'when the passed securities already exists but only the second one has changed' do
+                before do
+                  allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security1).and_return(false)
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security2).and_return(true)
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security3).and_return(false)
+                  allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                end
+                it 'does not execute the `update_request_security_query` from first security' do
+                  expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                  call_method_new
+                end
+                it 'does not execute the `update_request_security_query` from third security' do
+                  expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                  call_method_new
+                end
               end
             end
           end
@@ -2631,6 +2724,7 @@ describe MAPI::ServiceApp do
       let(:full_name) { instance_double(String) }
       let(:session_id) { instance_double(String) }
       let(:delivery_type) { instance_double(String) }
+      let(:detail_id_security) { SecureRandom.hex }
       let(:delivery_instructions) {{
         'delivery_type' => delivery_type,
         'account_number' => instance_double(String),
@@ -2648,6 +2742,7 @@ describe MAPI::ServiceApp do
         'settlement_date' => instance_double(String)
       }}
       let(:security) {{
+        'detail_id' => detail_id_security,
         'cusip' => SecureRandom.hex,
         'description' => instance_double(String),
         'original_par' => instance_double(Numeric),
@@ -2900,7 +2995,11 @@ describe MAPI::ServiceApp do
                 call_method
               end
               it 'constructs the `update_request_security_query` with the `security`' do
-                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, security)
+                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, security, anything)
+                call_method
+              end
+              it 'constructs the `update_request_security_query` with the `detail_id`' do
+                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, anything, detail_id_security)
                 call_method
               end
               it 'calls `execute_sql` with the result of `update_request_security_query`' do
@@ -2933,6 +3032,81 @@ describe MAPI::ServiceApp do
               it 'does not execute the `update_request_security_query` sql' do
                 expect(securities_request_module).not_to receive(:execute_sql).with(anything, update_request_security_query)
                 call_method
+              end
+            end
+            describe 'deletes security from `existing_securities` after it has been processed with the same CUSIP' do
+              let(:detail_id_security1) { SecureRandom.hex }
+              let(:detail_id_security2) { SecureRandom.hex }
+              let(:detail_id_security3) { SecureRandom.hex }
+              let(:cusip) { SecureRandom.hex }
+              let(:security1) {{
+                'detail_id' => detail_id_security1,
+                'cusip' => cusip,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:security2) {{
+                'detail_id' => detail_id_security2,
+                'cusip' => cusip,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:security3) {{
+                'detail_id' => detail_id_security3,
+                'cusip' => SecureRandom.hex,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:securities_new) { [security1, security2, security3] }
+              let(:call_method_new) { securities_request_module.update_intake(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities_new, kind) }
+              let(:old_security1) { cloned_security =  security1.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              let(:old_security2) { cloned_security =  security2.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              let(:old_security3) { cloned_security =  security3.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              describe 'when the passed securities already exist and have changed' do
+                before do
+                  allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                  allow(securities_request_module).to receive(:security_has_changed).and_return(true)
+                  allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from first security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from third security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                  call_method_new
+                end
+              end
+              describe 'when the passed securities already exists but only the second one has changed' do
+                before do
+                  allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security1).and_return(false)
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security2).and_return(true)
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security3).and_return(false)
+                  allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                end
+                it 'does not execute the `update_request_security_query` from first security' do
+                  expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                  call_method_new
+                end
+                it 'does not execute the `update_request_security_query` from third security' do
+                  expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                  call_method_new
+                end
               end
             end
           end
@@ -3711,6 +3885,7 @@ describe MAPI::ServiceApp do
         let(:username) { instance_double(String) }
         let(:full_name) { instance_double(String) }
         let(:session_id) { instance_double(String) }
+        let(:detail_id_security) { SecureRandom.hex }
         let(:broker_instructions) {{
           'transaction_code' => securities_request_module::TRANSACTION_CODE.keys.sample,
           'trade_date' => instance_double(String),
@@ -3718,6 +3893,7 @@ describe MAPI::ServiceApp do
           'settlement_date' => instance_double(String)
         }}
         let(:security) {{
+          'detail_id' => detail_id_security,
           'cusip' => SecureRandom.hex,
           'description' => instance_double(String),
           'original_par' => instance_double(Numeric),
@@ -4007,7 +4183,11 @@ describe MAPI::ServiceApp do
                   call_method
                 end
                 it 'constructs the `update_request_security_query` with the `security`' do
-                  expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, security)
+                  expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, security, anything)
+                  call_method
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id`' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, anything, detail_id_security)
                   call_method
                 end
                 it 'calls `execute_sql` with the result of `update_request_security_query`' do
@@ -4040,6 +4220,81 @@ describe MAPI::ServiceApp do
                 it 'does not execute the `update_request_security_query` sql' do
                   expect(securities_request_module).not_to receive(:execute_sql).with(anything, update_request_security_query)
                   call_method
+                end
+              end
+              describe 'deletes security from `existing_securities` after it has been processed with the same CUSIP' do
+                let(:detail_id_security1) { SecureRandom.hex }
+                let(:detail_id_security2) { SecureRandom.hex }
+                let(:detail_id_security3) { SecureRandom.hex }
+                let(:cusip) { SecureRandom.hex }
+                let(:security1) {{
+                  'detail_id' => detail_id_security1,
+                  'cusip' => cusip,
+                  'description' => instance_double(String),
+                  'original_par' => instance_double(Numeric),
+                  'payment_amount' => instance_double(Numeric),
+                  'custody_account_type' => instance_double(String)
+                }}
+                let(:security2) {{
+                  'detail_id' => detail_id_security2,
+                  'cusip' => cusip,
+                  'description' => instance_double(String),
+                  'original_par' => instance_double(Numeric),
+                  'payment_amount' => instance_double(Numeric),
+                  'custody_account_type' => instance_double(String)
+                }}
+                let(:security3) {{
+                  'detail_id' => detail_id_security3,
+                  'cusip' => SecureRandom.hex,
+                  'description' => instance_double(String),
+                  'original_par' => instance_double(Numeric),
+                  'payment_amount' => instance_double(Numeric),
+                  'custody_account_type' => instance_double(String)
+                }}
+                let(:securities_new) { [security1, security2, security3] }
+                let(:call_method_new) { securities_request_module.update_transfer(app, member_id, request_id, username, full_name, session_id, broker_instructions, securities_new, kind) }
+                let(:old_security1) { cloned_security =  security1.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+                let(:old_security2) { cloned_security =  security2.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+                let(:old_security3) { cloned_security =  security3.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+                describe 'when the passed securities already exist and have changed' do
+                  before do
+                    allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                    allow(securities_request_module).to receive(:security_has_changed).and_return(true)
+                    allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                  end
+                  it 'constructs the `update_request_security_query` with the `detail_id` from first security' do
+                    expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                    call_method_new
+                  end
+                  it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                    expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                    call_method_new
+                  end
+                  it 'constructs the `update_request_security_query` with the `detail_id` from third security' do
+                    expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                    call_method_new
+                  end
+                end
+                describe 'when the passed securities already exists but only the second one has changed' do
+                  before do
+                    allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                    allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security1).and_return(false)
+                    allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security2).and_return(true)
+                    allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security3).and_return(false)
+                    allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                  end
+                  it 'does not execute the `update_request_security_query` from first security' do
+                    expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                    call_method_new
+                  end
+                  it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                    expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                    call_method_new
+                  end
+                  it 'does not execute the `update_request_security_query` from third security' do
+                    expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                    call_method_new
+                  end
                 end
               end
             end

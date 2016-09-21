@@ -559,7 +559,7 @@ module MAPI
           SQL
         end
 
-        def self.update_request_security_query(header_id, user_name, session_id, security)
+        def self.update_request_security_query(header_id, user_name, session_id, security, detail_id)
           <<-SQL
             UPDATE SAFEKEEPING.SSK_WEB_FORM_DETAIL SET
               DESCRIPTION        = #{quote(security['description'])},
@@ -567,7 +567,7 @@ module MAPI
               PAYMENT_AMOUNT     = #{quote(nil_to_zero(security['payment_amount']))},
               LAST_MODIFIED_DATE = #{quote(Time.zone.today)},
               LAST_MODIFIED_BY   = #{quote(format_modification_by(user_name, session_id))}
-            WHERE CUSIP = UPPER(#{quote(security['cusip'])})
+            WHERE DETAIL_ID = #{quote(detail_id)}
             AND HEADER_ID = #{quote(header_id)}
           SQL
         end
@@ -626,13 +626,14 @@ module MAPI
               securities.each do |security|
                 existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
                 if existing_security && security_has_changed(security, existing_security)
-                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security)
+                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security, existing_security[:detail_id])
                   raise MAPI::Shared::Errors::SQLError, 'Failed to update security intake request detail' unless execute_sql(app.logger, update_security_sql)
                 elsif !existing_security
                   detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
                   insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, nil)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security intake request detail' unless execute_sql(app.logger, insert_security_sql)
                 end
+                existing_securities.delete(existing_security)
               end
               existing_header = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
               raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless existing_header
@@ -703,7 +704,7 @@ module MAPI
               securities.each do |security|
                 existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
                 if existing_security && security_has_changed(security, existing_security)
-                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security)
+                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security, existing_security[:detail_id])
                   raise MAPI::Shared::Errors::SQLError, 'Failed to update security release request detail' unless execute_sql(app.logger, update_security_sql)
                 elsif !existing_security
                   ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
@@ -712,6 +713,7 @@ module MAPI
                   insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security release request detail' unless execute_sql(app.logger, insert_security_sql)
                 end
+                existing_securities.delete(existing_security)
               end
               existing_header = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
               raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless existing_header
@@ -785,7 +787,7 @@ module MAPI
               securities.each do |security|
                 existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
                 if existing_security && security_has_changed(security, existing_security)
-                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security)
+                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security, existing_security[:detail_id])
                   raise MAPI::Shared::Errors::SQLError, 'Failed to update security transfer request detail' unless execute_sql(app.logger, update_security_sql)
                 elsif !existing_security
                   ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
@@ -794,6 +796,7 @@ module MAPI
                   insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security transfer request detail' unless execute_sql(app.logger, insert_security_sql)
                 end
+                existing_securities.delete(existing_security)
               end
               existing_header = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
               raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless existing_header
@@ -850,7 +853,7 @@ module MAPI
 
         def self.release_request_securities_query(header_id)
           <<-SQL
-            SELECT CUSIP, DESCRIPTION, ORIGINAL_PAR, PAYMENT_AMOUNT
+            SELECT DETAIL_ID, CUSIP, DESCRIPTION, ORIGINAL_PAR, PAYMENT_AMOUNT
             FROM SAFEKEEPING.SSK_WEB_FORM_DETAIL
             WHERE HEADER_ID = #{quote(header_id)}
           SQL
@@ -919,6 +922,7 @@ module MAPI
         def self.format_securities(securities)
           securities.collect do |security|
             {
+              detail_id: security['DETAIL_ID'],
               cusip: security['CUSIP'],
               description: security['DESCRIPTION'],
               original_par: security['ORIGINAL_PAR'],
@@ -1016,6 +1020,7 @@ module MAPI
           rng.rand(1..6).times do
             original_par = rng.rand(10000..999999)
             securities << {
+              'DETAIL_ID' => fake_data['detail_ids'].sample(random: rng),
               'CUSIP' => fake_data['cusips'].sample(random: rng),
               'DESCRIPTION' => fake_data['descriptions'].sample(random: rng),
               'ORIGINAL_PAR' => original_par,
