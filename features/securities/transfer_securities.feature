@@ -58,8 +58,8 @@ Feature: Transfer Securities
     When I upload a securities transfer file
     And I wait for the securities file to upload
     Then I should see the securities upload success message
-    And I should see an uploaded transfer security with a description of "Zip Zoop Zap"
-    And I should see an uploaded transfer security with an original par of "123,456,789"
+    Then I should see an uploaded transfer security with a description of "Zip Zoop Zap"
+    And I should see an uploaded transfer security with an original par of "123,456,789.00"
   Examples:
     | page     |
     | pledged  |
@@ -86,7 +86,7 @@ Feature: Transfer Securities
   | pledged  |
   | safekept |
 
-  @jira-mem-1719 @allow-rescue @local-only
+  @jira-mem-1719 @jira-mem-1894 @allow-rescue @local-only
   Scenario Outline: A member submits a request for transfer and there is a general API error
     Given I am on the transfer to <page> account securities page
     When I submit the request and the API returns a 500
@@ -122,4 +122,4 @@ Feature: Transfer Securities
     When I upload a securities transfer file
     And I wait for the securities file to upload
     Then I should see an uploaded transfer security with a description of "Zip Zoop Zap"
-    And I should see an uploaded transfer security with an original par of "123,456,789"
+    And I should see an uploaded transfer security with an original par of "123,456,789.00"

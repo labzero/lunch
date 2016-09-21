@@ -424,9 +424,9 @@ Then(/^I should see the "(.*?)" error$/) do |error|
   when 'settlement amount present'
     I18n.t('activemodel.errors.models.securities_request.attributes.securities.payment_amount_present')
   when 'generic catchall'
-    I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
+    I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email)
   end
-  page.assert_selector('.securities-submit-release-form-errors p', text: text, exact: true)
+  page.assert_selector('.securities-submit-release-form-errors p', text: strip_links(text), exact: true)
 end
 
 When(/^the settlement type is set to (Vs Payment|Free)$/) do |payment_type|

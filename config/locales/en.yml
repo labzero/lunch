@@ -217,7 +217,7 @@ en:
     errors:
       models:
         securities_request:
-          blank: 'Missing a required field: %{attribute}'
+          blank: 'Missing required field: %{attribute}'
           attributes:
             base:
               unknown: We were unable to add your securities request at this time.
@@ -229,15 +229,15 @@ en:
               invalid: Settlement date may not occur on a weekend, a holiday, or be a date in the past.
               before_trade_date: Settlement Date must be on or after Trade Date.
             securities:
-              payment_amount_missing: When 'Versus Payment' is selected, each security must have a settlement amount.
+              payment_amount_missing: If Settlement Type is Vs. Payment, each security must have a Settlement Amount. Press Edit Securities to add the Settlement Amount.
               payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank. Press Edit Securities to remove Settlement Amount.
-              original_par: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
+              original_par: Securities with Fed delivery must have Original Par of $50 million or less. Press Edit Securities to submit lots of $50 million or less.
         security:
-          blank: "Each row must contain at least a CUSIP and Original Par.\nPlease modify your file."
+          blank: "Each row must contain a CUSIP and an Original Par.\nEdit your file and try again."
           not_a_number: '%{attribute} must be a number.'
           attributes:
             cusip:
-              invalid: "The following CUSIP is invalid: %{value}.\nPlease update your file with the correct CUSIP."
+              invalid: "The following CUSIP is invalid: %{value}.\nEdit your file and try again."
   activerecord:
     attributes:
       user:
@@ -618,9 +618,9 @@ en:
         errors:
           resynchronize: Token is not synchronized.
           change_pin: PIN must be changed.
-          denied: PIN and/or token is invalid.
-          invalid_pin: PIN invalid.
-          invalid_token: Token invalid.
+          denied: Invalid PIN and/or Token Code
+          invalid_pin: Invalid PIN
+          invalid_token: Invalid Token Code
           unknown: An unexpected error has occurred. Please try again.
       capitalstock:
         title: Capital Stock Purchase Required
@@ -1297,7 +1297,7 @@ en:
         drag_drop: Drag and Drop Here
         select_file: Select File
         download_actions_html: '%{span} <span>or</span> %{button}'
-        generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number} or via %{email}
+        generic_error_html: We are unable to process your request at this time. Contact <a href=%{email}>Securities Services</a> at %{phone_number}.
         no_payment_amount_error: When 'Versus Payment' is selected, each security must have a settlement amount.
         fed_fifty_m_error: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
         settlement_date_error: Settlement Date must be on or after Trade Date.
@@ -1386,11 +1386,13 @@ en:
       settlement_amount_footnote: '%{footnote_marker}If Settlement Type is Vs. Payment, each security must have Settlement Amount'
       custodian_name_footnote: '%{footnote_marker}Custodian Name is required for all non-agency mortgage-backed securities'
     upload_errors:
-      cannot_open: We couldn't open your file. Please verify that you've selected the correct file and try again.
-      unsupported_mime_type: Your file does not appear to be an Excel file. Please verify that you've selected the correct file and try again.
+      cannot_open: We can't open your file. Verify that you have selected the correct file and try again.
+      unsupported_mime_type: We can only accept Excel files. Verify that your file is the correct format and try again.
       generic: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
       invalid_cusips: "The following CUSIPs are invalid: %{cusips}.\nPlease update your file with the correct CUSIPs."
       no_rows: Your file contains no valid rows. Please edit your file and try again.
+      invalid_cusips: "The following CUSIPs are invalid: %{cusips}.\nEdit your file and try again."
+      no_rows: Your file contains no valid rows. Edit your file and try again.
     upload_success: 'The following securities from your Excel file were validated and will be included in the securities request:'
   reports:
     meta_title: FHLB - Reports

@@ -79,8 +79,8 @@ Feature: Securities Intake
     Then I should be on the <page> page
   Examples:
   | security_type | page                |
-  | safekeep      | safekeep securities |
-  | pledge        | pledge securities   |
+  | safekeep      | Safekeep Securities |
+  | pledge        | Pledge Securities   |
 
   @jira-mem-1672 @data-unavailable
   Scenario Outline: A user submits a safekeep request for authorization.
@@ -93,8 +93,8 @@ Feature: Securities Intake
     Then I should see the title for the "<success_page>" success page
   Examples:
   | security_type | success_page     |
-  | safekeep      | safekept success |
-  | pledge        | pledge success   |
+  | safekeep      | safekept intake |
+  | pledge        | pledge intake   |
 
   @jira-mem-1786 @data-unavailable
   Scenario Outline: Member selects a settlement date that occurs before the trade date
@@ -123,8 +123,8 @@ Feature: Securities Intake
     Then I should see the title for the "<success_page>" success page
   Examples:
   | security_type | success_page     |
-  | safekeep      | safekept success |
-  | pledge        | pledge success   |
+  | safekeep      | safekept intake |
+  | pledge        | pledge intake   |
 
   @jira-mem-1790 @data-unavailable
   Scenario Outline: Member uploads a securities release file that is missing Settlement Amount and the request has a settlement type of Vs. Payment
@@ -165,8 +165,8 @@ Feature: Securities Intake
     Then I should see the title for the "<success_page>" success page
   Examples:
   | security_type | success_page     |
-  | safekeep      | safekept success |
-  | pledge        | pledge success   |
+  | safekeep      | safekept intake |
+  | pledge        | pledge intake   |
 
   @jira-mem-1792 @data-unavailable
   Scenario Outline: Member uploads a securities release file that has at least one security with an Original Par over the Federal Limit of 50,000,000
@@ -216,7 +216,7 @@ Feature: Securities Intake
   | safekeep      |
   | pledge        |
 
-  @jira-mem-1889 @data-unavailable
+  @jira-mem-1889 @jira-mem-1894 @data-unavailable
   Scenario Outline: A user discards the securities and is not able to submit the form
     Given I am on the <security_type> securities page
     When I upload a securities intake file
@@ -242,3 +242,16 @@ Feature: Securities Intake
   | page                |
   | safekeep securities |
   | pledge securities   |
+
+  @jira-mem-1894 @allow-rescue @local-only @data-unavailable
+  Scenario Outline: A member submits a request for transfer and there is a general API error
+    Given I am on the <page> securities page
+    When I upload a securities intake file
+    And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+    And I submit the request and the API returns a 500
+    Then I should see the "generic catchall" error
+  Examples:
+  | page      |
+  | safekeep  |
+  | pledge    |

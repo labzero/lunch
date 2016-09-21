@@ -230,6 +230,40 @@ RSpec.describe SecuritiesRequest, :type => :model do
         end
       end
     end
+    describe '`original_par_under_fed_limit`' do
+      let(:security_under_fed_limit) { FactoryGirl.build(:security, original_par: (described_class::FED_AMOUNT_LIMIT - rand(100000..10000000))) }
+      let(:security_over_fed_limit) { FactoryGirl.build(:security, original_par: (described_class::FED_AMOUNT_LIMIT + rand(100000..10000000))) }
+      let(:call_validation) { subject.send(:original_par_under_fed_limit) }
+
+      it 'is called as a validator if the `delivery_type` is `:fed`' do
+        subject.delivery_type = :fed
+        expect(subject).to receive(:original_par_under_fed_limit)
+        subject.valid?
+      end
+      it 'is not called as a validator when the `delivery_type` is anything other than `:fed`' do
+        expect(subject).not_to receive(:original_par_under_fed_limit)
+        subject.valid?
+      end
+      it 'does not add an error if there are no `securities`' do
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      it 'does not add an error if `securities` is an empty array' do
+        subject.securities = []
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      it 'does not add an error if the `securities` all have an `original_par` under the federal limit' do
+        subject.securities = [security_under_fed_limit, security_under_fed_limit]
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      it 'adds an error if at least one of the `securities` has an `original_par` that is over the federal limit' do
+        subject.securities = [security_under_fed_limit, security_over_fed_limit]
+        expect(subject.errors).to receive(:add).with(:securities, :original_par)
+        call_validation
+      end
+    end
     described_class::TRANSFER_REQUEST_KINDS.each do |kind|
       describe "when the kind is `#{kind}`" do
         before { subject.kind = kind }

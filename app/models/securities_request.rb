@@ -62,16 +62,19 @@ class SecuritiesRequest
 
   MAX_DATE_RESTRICTION = 3.months
 
+  FED_AMOUNT_LIMIT = 50000000
+
   attr_accessor *ACCESSIBLE_ATTRS
   attr_reader :securities
 
   validates *[:delivery_type, :securities, :kind, :form_type], presence: true
   validates *[:pledged_account, :safekept_account], presence: true, if: Proc.new { |request| request.kind && TRANSFER_REQUEST_KINDS.include?(request.kind)  }
   validates :pledge_to, presence: true, if: Proc.new { |request| request.kind && request.kind == :pledge_intake || request.kind == :pledge_transfer  }
-  validates *DELIVERY_INSTRUCTION_KEYS[:fed], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :fed }
-  validates *DELIVERY_INSTRUCTION_KEYS[:dtc], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :dtc }
-  validates *DELIVERY_INSTRUCTION_KEYS[:mutual_fund], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :mutual_fund }
-  validates *DELIVERY_INSTRUCTION_KEYS[:physical_securities], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type.to_sym == :physical_securities }
+  validates *DELIVERY_INSTRUCTION_KEYS[:fed], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :fed }
+  validates *DELIVERY_INSTRUCTION_KEYS[:dtc], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :dtc }
+  validates *DELIVERY_INSTRUCTION_KEYS[:mutual_fund], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :mutual_fund }
+  validates *DELIVERY_INSTRUCTION_KEYS[:physical_securities], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :physical_securities }
+  validate :original_par_under_fed_limit, if: Proc.new { |request| request.delivery_type && request.delivery_type == :fed }
 
   with_options if: Proc.new { |request| !TRANSFER_REQUEST_KINDS.include?(request.kind) } do
     validates *BROKER_INSTRUCTION_KEYS, presence: true
@@ -261,6 +264,19 @@ class SecuritiesRequest
         errors.add(:securities, :payment_amount_present) if settlement_type == :free
         errors.add(:securities, :payment_amount_missing) if settlement_type == :vs_payment
       end
+    end
+  end
+
+  def original_par_under_fed_limit
+    unless securities.blank?
+      over_fed_limit = false
+      securities.each do |security|
+        if security.original_par > FED_AMOUNT_LIMIT
+          over_fed_limit = true
+          break
+        end
+      end
+      errors.add(:securities, :original_par) if over_fed_limit
     end
   end
 end

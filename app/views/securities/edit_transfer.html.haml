@@ -15,7 +15,7 @@
         = f.hidden_field(:safekept_account)
         - if @error_message
           .securities-submit-release-form-errors
-            %p= @error_message
+            %p= @error_message.html_safe
         %section.securities-broker-instructions
           %h2= t('securities.release.broker_instructions')
           - if kind == :pledge_transfer

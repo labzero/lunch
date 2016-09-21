@@ -1974,7 +1974,7 @@ RSpec.describe SecuritiesController, type: :controller do
     end
 
     describe '`prioritized_securities_request_error`' do
-      generic_error_message = I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
+      generic_error_message = I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email)
       let(:errors) {{
         foo: [SecureRandom.hex],
         bar: [SecureRandom.hex],

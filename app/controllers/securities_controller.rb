@@ -704,7 +704,7 @@ class SecuritiesController < ApplicationController
       elsif securities_request_errors[:securities].present?
         securities_request_errors[:securities].first
       else
-        I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
+        I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email)
       end
     end
   end
