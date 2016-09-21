@@ -124,7 +124,8 @@
 
 .safekeep-pledge-download-title {
   @extend %actionable-text;
-  margin-left: 325px;
+  float: right;
+  margin-top: 5px;
 }
 
 .additional-legal {
