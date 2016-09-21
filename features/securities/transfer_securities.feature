@@ -123,3 +123,47 @@ Feature: Transfer Securities
     And I wait for the securities file to upload
     Then I should see an uploaded transfer security with a description of "Zip Zoop Zap"
     And I should see an uploaded transfer security with an original par of "123,456,789.00"
+
+  @jira-mem-1900 @data-unavailable
+  Scenario Outline: Member uploads a securities transfer file that is missing Original Par
+    Given I am on the transfer to <page> account securities page
+    And the edit securities section is open
+    When I drag and drop the "transfer_securities_missing_original_par.xlsx" file into the edit securities dropzone
+    Then I should see a security required field error
+  Examples:
+    | page     |
+    | pledged  |
+    | safekept |
+
+  @jira-mem-1900 @data-unavailable
+  Scenario Outline: Member uploads a securities transfer file that is missing a CUSIP
+    Given I am on the transfer to <page> account securities page
+    And the edit securities section is open
+    When I drag and drop the "transfer_securities_missing_cusip.xlsx" file into the edit securities dropzone
+    Then I should see a security required field error
+  Examples:
+    | page     |
+    | pledged  |
+    | safekept |
+
+  @jira-mem-1900 @data-unavailable
+  Scenario Outline: Member sees an error when uploading an transfer file with no valid rows
+    Given I am on the transfer to <page> account securities page
+    And the edit securities section is open
+    When I drag and drop the "transfer_securities_no_rows.xlsx" file into the edit securities dropzone
+    Then I should see a no securities field error
+  Examples:
+    | page     |
+    | pledged  |
+    | safekept |
+
+  @jira-mem-1900 @data-unavailable
+  Scenario Outline: Member uploads a securities transfer file that has an invalid Original Par
+    Given I am on the transfer to <page> account securities page
+    And the edit securities section is open
+    When I drag and drop the "transfer_securities_invalid_original_par.xlsx" file into the edit securities dropzone
+    Then I should see an original par numericality field error
+  Examples:
+    | page     |
+    | pledged  |
+    | safekept |
