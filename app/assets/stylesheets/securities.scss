@@ -117,7 +117,6 @@
 }
 
 .safekeep-pledge-upload-again {
-  margin-left: 490px;
   margin-bottom: 0;
   margin-top: 0;
 }
@@ -144,7 +143,8 @@
 }
 
 .legal-footer {
-  @extend %typography-footnote
+  @extend %typography-footnote;
+  width: $column-7-width;
 }
 
 .securities-release, .securities-safekeep, .securities-pledge {

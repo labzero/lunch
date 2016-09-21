@@ -48,10 +48,10 @@
               = render 'pledge_legal_copy'
           - unless @session_elevated
             = render 'shared/securid_module', error: @securid_status
-        %small= t('securities.transfer.legal')
         .securities-actions
           %span.secondary-button.delete-request-trigger= t('global.delete')
           =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true)
+        %p.legal-footer= t('securities.transfer.legal')
         = render 'delete_request_flyout', request_id: @securities_request.request_id
     =form_tag(@download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_request.securities.to_json)
