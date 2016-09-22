@@ -491,7 +491,7 @@ module MAPI
           end
           if delivery_type == 'fed'
             securities.each do |security|
-              raise MAPI::Shared::Errors::CustomTypedFieldError.new("original par must be less than $#{FED_AMOUNT_LIMIT}", :original_par, :securities, FED_AMOUNT_LIMIT) unless security['original_par'] < FED_AMOUNT_LIMIT
+              raise MAPI::Shared::Errors::CustomTypedFieldError.new("original par must be less than $#{FED_AMOUNT_LIMIT}", :original_par, :securities, FED_AMOUNT_LIMIT) unless security['original_par'] <= FED_AMOUNT_LIMIT
             end
           end
         end

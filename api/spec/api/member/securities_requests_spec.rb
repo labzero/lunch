@@ -1838,6 +1838,10 @@ describe MAPI::ServiceApp do
               expect(error.type).to eq(:original_par)
             end
           end
+          it "does not raise a `CustomTypedFieldError` if `delivery_type` is `fed` and `original_par` is exactly #{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}" do
+            security['original_par'] = MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT
+            expect{securities_request_module.validate_securities([security], settlement_type, 'fed', type)}.to_not raise_error
+          end
         end
       end
     end
