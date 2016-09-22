@@ -3607,13 +3607,15 @@ describe MAPI::ServiceApp do
           let(:adx_sql) { double('ADX SQL') }
           let(:un_adx_sql) { double('ADX SQL') }
           let(:ssk_sql) { double('SSK SQL') }
+          let(:adx_id) { SecureRandom.hex }
+          let(:un_adx_id) { SecureRandom.hex }
           let(:sequence_result) { double('Sequence Result', to_i: next_id) }
 
           before do
             allow(securities_request_module).to receive(:should_fake?).and_return(false)
             allow(securities_request_module).to receive(:adx_query).with(member_id, :pledged).and_return(adx_sql)
             allow(securities_request_module).to receive(:adx_query).with(member_id, :unpledged).and_return(un_adx_sql)
-            allow(securities_request_module).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip']).
+            allow(securities_request_module).to receive(:ssk_id_query).with(member_id, anything, security['cusip']).
                                                   exactly(3).times.and_return(ssk_sql)
             allow(securities_request_module).to receive(:execute_sql_single_result).with(
                                                   app,
@@ -3642,6 +3644,18 @@ describe MAPI::ServiceApp do
             before do
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
               allow(securities_request_module).to receive(:validate_kind).and_return(true)
+            end
+
+            it 'calls `ssk_id_query` with adx_id if kind is pledge_transfer' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip'])
+              method_params[7] = :pledge_transfer
+              MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
+            end
+
+            it 'calls `ssk_id_query` with un_adx_id if kind is safekept_transfer' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:ssk_id_query).with(member_id, un_adx_id, security['cusip'])
+              method_params[7] = :safekept_transfer
+              MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
             end
 
             it 'calls `insert_transfer_header_query` for unpledged securities' do

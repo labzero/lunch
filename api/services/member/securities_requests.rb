@@ -760,7 +760,8 @@ module MAPI
                                                               kind)
               raise "failed to insert security release request header" unless execute_sql(app.logger, insert_header_sql)
               securities.each do |security|
-                ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
+                final_adx_id = (kind == :safekept_transfer ? un_adx_id : adx_id)
+                ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, final_adx_id, security['cusip']), "SSK ID")
                 raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
                 insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
                 raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
