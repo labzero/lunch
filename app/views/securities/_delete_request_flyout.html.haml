@@ -3,7 +3,7 @@
   .securities-delete-request-confirmation
     %button.secondary-button{data: {'flyout-action' => 'close'}}= t('global.cancel')
     - if request_id
-      = link_to(t('securities.delete_request.delete'), securities_delete_request_path(request_id: request_id), method: :delete, remote: true, class: 'primary-button')
+      = link_to(t('securities.delete_request.delete'), securities_delete_request_path(request_id: request_id), method: :delete, remote: true, class: 'primary-button', disabled: !policy(:security).delete?)
     - else
       = link_to(t('securities.delete_request.delete'), securities_manage_path, class: 'primary-button')
   .securities-delete-request-error

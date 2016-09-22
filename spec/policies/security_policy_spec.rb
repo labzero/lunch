@@ -17,15 +17,31 @@ RSpec.describe SecurityPolicy, :type => :policy do
   end
 
   describe '`delete?` method' do
-    subject { SecurityPolicy.new(user, :advance) }
+    subject { SecurityPolicy.new(user, :securities_request) }
 
-    context "for a User with the `#{User::Roles::SECURITIES_SIGNER}` role" do
-      before { allow(user).to receive(:roles).and_return([User::Roles::SECURITIES_SIGNER]) }
-      it { should permit_action(:delete) }
+    context 'for an intranet user' do
+      before { allow(user).to receive(:intranet_user?).and_return(true) }
+
+      context "with the `#{User::Roles::SECURITIES_SIGNER}` role" do
+        before { allow(user).to receive(:roles).and_return([User::Roles::SECURITIES_SIGNER]) }
+        it { should_not permit_action(:delete) }
+      end
+      context "without the `#{User::Roles::SECURITIES_SIGNER}` role" do
+        before { allow(user).to receive(:roles).and_return([]) }
+        it { should_not permit_action(:delete) }
+      end
     end
-    context "for a User without the `#{User::Roles::SECURITIES_SIGNER}` role" do
-      before { allow(user).to receive(:roles).and_return([]) }
-      it { should_not permit_action(:delete) }
+    context 'for an extranet user' do
+      before { allow(user).to receive(:intranet_user?).and_return(false) }
+
+      context "with the `#{User::Roles::SECURITIES_SIGNER}` role" do
+        before { allow(user).to receive(:roles).and_return([User::Roles::SECURITIES_SIGNER]) }
+        it { should permit_action(:delete) }
+      end
+      context "without the `#{User::Roles::SECURITIES_SIGNER}` role" do
+        before { allow(user).to receive(:roles).and_return([]) }
+        it { should_not permit_action(:delete) }
+      end
     end
   end
 

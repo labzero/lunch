@@ -4,7 +4,7 @@ class SecurityPolicy < ApplicationPolicy
   end
 
   def delete?
-    user.roles.include?(User::Roles::SECURITIES_SIGNER)
+    !user.intranet_user? && user.roles.include?(User::Roles::SECURITIES_SIGNER)
   end
 
   def submit?

@@ -78,5 +78,5 @@
     - unless @session_elevated
       = render 'shared/securid_module', error: @securid_status
   .securities-actions
-    %span.secondary-button.delete-request-trigger= t('global.delete')
+    %span.secondary-button.delete-request-trigger{disabled: @securities_request.request_id && !policy(:security).delete?}= t('global.delete')
     =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true)
