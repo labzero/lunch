@@ -255,3 +255,17 @@ Feature: Securities Intake
   | page      |
   | safekeep  |
   | pledge    |
+
+  @jira-mem-1897 @data-unavailable
+  Scenario Outline: Intranet users are not allowed to submit an intake request
+    Given I log in as an "intranet user"
+    When I am on the <page> securities page
+    And I upload a securities intake file
+    And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+    When I submit the securities request for authorization
+    Then I should see the "intranet user" error
+  Examples:
+  | page      |
+  | safekeep  |
+  | pledge    |

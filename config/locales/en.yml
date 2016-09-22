@@ -1394,6 +1394,7 @@ en:
       invalid_cusips: "The following CUSIPs are invalid: %{cusips}.\nEdit your file and try again."
       no_rows: Your file contains no valid rows. Edit your file and try again.
     upload_success: 'The following securities from your Excel file were validated and will be included in the securities request:'
+    internal_user_error: This securities request was not completed because Bank employees are not authorized to complete securities requests via the member portal.
   reports:
     meta_title: FHLB - Reports
     title: Reports

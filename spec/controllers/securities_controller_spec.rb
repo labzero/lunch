@@ -904,6 +904,7 @@ RSpec.describe SecuritiesController, type: :controller do
   }.each do |kind, details|
     template, title, success_path, type = details
     describe "POST submit_request for type `#{type}` and kind `#{kind}`" do
+      allow_policy :security, :submit?
       let(:securities_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
       let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_request_for_authorization: true, authorize_request: true) }
       let(:active_model_errors) { instance_double(ActiveModel::Errors, add: nil) }
@@ -1129,6 +1130,28 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(assigns[:error_message]).to eq(error_message)
             end
           end
+        end
+      end
+      describe 'when the user is not a submitter' do
+        deny_policy :security, :submit?
+        it 'still validates the securities request' do
+          expect(securities_request).to receive(:valid?)
+          call_action
+        end
+        it 'calls `prioritized_securities_request_error` with the securities request' do
+          expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
+          call_action
+        end
+        it 'sets `@error_message` to the result of `prioritized_securities_request_error` if it exists' do
+          error_message = instance_double(String)
+          allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
+          call_action
+          expect(assigns[:error_message]).to eq(error_message)
+        end
+        it 'sets `@error_message` to the internal user error if `prioritized_securities_request_error` returns nil' do
+          allow(controller).to receive(:prioritized_securities_request_error).and_return(nil)
+          call_action
+          expect(assigns[:error_message]).to eq(I18n.t('securities.internal_user_error'))
         end
       end
     end

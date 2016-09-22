@@ -28,4 +28,17 @@ RSpec.describe SecurityPolicy, :type => :policy do
       it { should_not permit_action(:delete) }
     end
   end
+
+  describe '`submit?` method' do
+    subject { SecurityPolicy.new(user, :securities_request) }
+
+    context 'for an intranet user' do
+      before { allow(user).to receive(:intranet_user?).and_return(true) }
+      it { should_not permit_action(:submit) }
+    end
+    context 'for an extranet user' do
+      before { allow(user).to receive(:intranet_user?).and_return(false) }
+      it { should permit_action(:submit) }
+    end
+  end
 end

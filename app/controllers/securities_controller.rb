@@ -436,7 +436,8 @@ class SecuritiesController < ApplicationController
     kind = @securities_request.kind
     raise ActionController::RoutingError.new("The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{kind}`") unless type_matches_kind(type, kind)
     authorizer = policy(:security).authorize?
-    if @securities_request.valid?
+    submitter = policy(:security).submit?
+    if @securities_request.valid? && submitter
       response = SecuritiesRequestService.new(current_member_id, request).submit_request_for_authorization(@securities_request, current_user, type) do |error|
         error = JSON.parse(error.http_body)['error']
         error['code'] = :base if error['code'] == 'unknown'
@@ -444,7 +445,7 @@ class SecuritiesController < ApplicationController
       end
       @securities_request.errors.add(:base, :submission) unless response || @securities_request.errors.present?
     end
-    has_errors = @securities_request.errors.present?
+    has_errors = @securities_request.errors.present? || !submitter
     if authorizer
       @securid_status = securid_perform_check unless has_errors
       unless session_elevated?
@@ -460,7 +461,7 @@ class SecuritiesController < ApplicationController
       end
     end
     if has_errors
-      @error_message = prioritized_securities_request_error(@securities_request)
+      @error_message = prioritized_securities_request_error(@securities_request) || I18n.t('securities.internal_user_error')
       populate_view_variables(type)
       populate_contact_info_by_kind(kind)
       case type

@@ -425,6 +425,8 @@ Then(/^I should see the "(.*?)" error$/) do |error|
     I18n.t('activemodel.errors.models.securities_request.attributes.securities.payment_amount_present')
   when 'generic catchall'
     I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email)
+  when 'intranet user'
+    I18n.t('securities.internal_user_error')
   end
   page.assert_selector('.securities-submit-release-form-errors p', text: strip_links(text), exact: true)
 end

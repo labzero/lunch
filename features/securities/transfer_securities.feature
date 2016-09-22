@@ -167,3 +167,14 @@ Feature: Transfer Securities
     | page     |
     | pledged  |
     | safekept |
+
+  @jira-mem-1897
+  Scenario Outline: Intranet users are not allowed to submit an intake request
+    Given I log in as an "intranet user"
+    And I am on the transfer to <page> account securities page
+    When I submit the securities request for authorization
+    Then I should see the "intranet user" error
+  Examples:
+    | page     |
+    | pledged  |
+    | safekept |
