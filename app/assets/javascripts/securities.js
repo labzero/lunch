@@ -145,7 +145,7 @@ $(function() {
 
   function deliveryInstructionsValid() {
     var deliveryInstructionsType = $('.securities-delivery-instructions-fields').attr('data-selected-delivery-instruction');
-    var requiredDeliveryInstructionsFields = $('.securities-delivery-instructions-field[data-delivery-instruction-type="' + deliveryInstructionsType + '"] input');
+    var requiredDeliveryInstructionsFields = $('.securities-delivery-instructions-field[data-delivery-instruction-type="' + deliveryInstructionsType + '"] input:not([data-required=false])');
     return fieldsValid(requiredDeliveryInstructionsFields);
   };
 

@@ -38,9 +38,14 @@ RSpec.describe SecuritiesRequest, :type => :model do
         before do
           subject.delivery_type = delivery_type
         end
-        described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type].each do |attr|
+        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] - [:dtc_credit_account_number, :fed_credit_account_number, :physical_securities_credit_account_number]).each do |attr|
           it "validates the presence of `#{attr}`" do
             expect(subject).to validate_presence_of attr
+          end
+        end
+        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] & [:dtc_credit_account_number, :fed_credit_account_number, :physical_securities_credit_account_number]).each do |attr|
+          it "does not validate the presence of `#{attr}`" do
+            expect(subject).to_not validate_presence_of attr
           end
         end
       end

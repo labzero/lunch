@@ -101,7 +101,6 @@ Scenario: Member uploads a securities release file that is missing Settlement Am
   Given I am on the release securities page
   And the settlement type is set to Free
   And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And the edit securities section is open
   And I upload a securities release file with "no settlement amounts"
   When I click to submit the request
@@ -112,7 +111,6 @@ Scenario: Member uploads a securities release file that is missing Settlement Am
   Given I am on the release securities page
   And the settlement type is set to Vs Payment
   And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And the edit securities section is open
   And I upload a securities release file with "no settlement amounts"
   When I click to submit the request
@@ -127,7 +125,6 @@ Scenario: Member uploads a securities release file that has at least one securit
   And I fill in the "clearing_agent_fed_wire_address_1" securities field with "23454343"
   And I fill in the "clearing_agent_fed_wire_address_2" securities field with "5683asdfa"
   And I fill in the "aba_number" securities field with "5683asdfa"
-  And I fill in the "fed_credit_account_number" securities field with "5683asdfa"
   When I click to submit the request
   Then I should see the "over federal limit" error
 
@@ -136,7 +133,6 @@ Scenario: Member uploads a securities release file that has Settlement Amounts a
   Given I am on the release securities page
   And the settlement type is set to Free
   And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And the edit securities section is open
   And I upload a securities release file with "settlement amounts"
   When I click to submit the request
@@ -147,7 +143,6 @@ Scenario: Member uploads a securities release file that has Settlement Amounts a
   Given I am on the release securities page
   And the settlement type is set to Vs Payment
   And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And the edit securities section is open
   And I upload a securities release file with "settlement amounts"
   When I click to submit the request
@@ -173,7 +168,6 @@ Scenario Outline: Member selects a settlement date that occurs before the trade 
   And I choose the first available date for settlement date
   And I choose the last available date for trade date
   And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   When I click to submit the request
   Then I should see the "settlement date before trade date" error
 Examples:
@@ -185,7 +179,6 @@ Examples:
 Scenario: Member sees success page after submitting releases for authorization
   Given I am on the release securities page
   When I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And I submit the securities release request for authorization
   Then I should see the title for the "pledge release" success page
 
@@ -217,7 +210,6 @@ Scenario: A signer authorizes a request while submitting it
   Given I am logged in as a "quick-advance signer"
   And I am on the release securities page
   When I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   When I authorize the request
   Then I should see the authorize request success page
 
@@ -226,7 +218,6 @@ Scenario Outline: A user cannot submit the form until all required fields have v
   When I am on the <page> securities page
   Then the Submit action is disabled
   When I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   Then the Submit action is enabled
 Examples:
   | page             |
@@ -244,10 +235,9 @@ Scenario: Member uploads a securities intake file and sees the success message
   Then I should not see the securities upload success message
 
 @jira-mem-1894 @allow-rescue @local-only
-Scenario Outline: A member submits a request for transfer and there is a general API error
+Scenario Outline: A member submits a request for release and there is a general API error
   Given I am on the <page> securities page
   When I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And I submit the request and the API returns a 500
   Then I should see the "generic catchall" error
 Examples:

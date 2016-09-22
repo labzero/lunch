@@ -88,7 +88,6 @@ Feature: Securities Intake
     When I upload a securities intake file
     Then I should see a report table with multiple data rows
     When I fill in the "clearing_agent_participant_number" securities field with "23454343"
-    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
     And I submit the securities request for authorization
     Then I should see the title for the "<success_page>" success page
   Examples:
@@ -102,7 +101,6 @@ Feature: Securities Intake
     And I choose the first available date for settlement date
     And I choose the last available date for trade date
     And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
     And I upload a securities intake file
     When I click to submit the request
     Then I should see the "settlement date before trade date" error
@@ -117,7 +115,6 @@ Feature: Securities Intake
     Given I am on the <security_type> securities page
     And the settlement type is set to Free
     And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
     And I upload a securities intake file with "no settlement amounts"
     When I click to submit the request
     Then I should see the title for the "<success_page>" success page
@@ -131,7 +128,6 @@ Feature: Securities Intake
     Given I am on the <security_type> securities page
     And the settlement type is set to Vs Payment
     And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
     And I upload a securities intake file with "no settlement amounts"
     When I click to submit the request
     Then I should see the "settlement amount required" error
@@ -145,7 +141,6 @@ Feature: Securities Intake
     Given I am on the <security_type> securities page
     And the settlement type is set to Free
     And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
     And I upload a securities intake file with "settlement amounts"
     When I click to submit the request
     Then I should see the "settlement amount present" error
@@ -159,7 +154,6 @@ Feature: Securities Intake
     Given I am on the <security_type> securities page
     And the settlement type is set to Vs Payment
     And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
     And I upload a securities intake file with "settlement amounts"
     When I click to submit the request
     Then I should see the title for the "<success_page>" success page
@@ -176,7 +170,6 @@ Feature: Securities Intake
     And I fill in the "clearing_agent_fed_wire_address_1" securities field with "23454343"
     And I fill in the "clearing_agent_fed_wire_address_2" securities field with "5683asdfa"
     And I fill in the "aba_number" securities field with "5683asdfa"
-    And I fill in the "fed_credit_account_number" securities field with "5683asdfa"
     When I click to submit the request
     Then I should see the "over federal limit" error
   Examples:
@@ -222,7 +215,6 @@ Feature: Securities Intake
     When I upload a securities intake file
     Then I should see a report table with multiple data rows
     When I fill in the "clearing_agent_participant_number" securities field with "23454343"
-    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
     Then the Submit action is enabled
     When I discard the uploaded securities
     Then the Submit action is disabled
@@ -244,11 +236,10 @@ Feature: Securities Intake
   | pledge securities   |
 
   @jira-mem-1894 @allow-rescue @local-only @data-unavailable
-  Scenario Outline: A member submits a request for transfer and there is a general API error
+  Scenario Outline: A member submits a request for intake and there is a general API error
     Given I am on the <page> securities page
     When I upload a securities intake file
     And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
     And I submit the request and the API returns a 500
     Then I should see the "generic catchall" error
   Examples:
