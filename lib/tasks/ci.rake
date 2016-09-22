@@ -22,7 +22,7 @@ namespace :ci do
   namespace :cucumber do
     desc 'Runs the cukes in parallel'
     task :parallel do
-      ::Rake::Task['ci:cucumber:parallel:base'].invoke
+      ::Rake::Task['ci:cucumber:parallel:base'].invoke('--format JunitWithPackage --out cucumber.junit')
     end
 
     namespace :parallel do
