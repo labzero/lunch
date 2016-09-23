@@ -3646,14 +3646,14 @@ describe MAPI::ServiceApp do
               allow(securities_request_module).to receive(:validate_kind).and_return(true)
             end
 
-            it 'calls `ssk_id_query` with adx_id if kind is pledge_transfer' do
-              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip'])
+            it 'calls `ssk_id_query` with un_adx_id if kind is pledge_transfer' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:ssk_id_query).with(member_id, un_adx_id, security['cusip'])
               method_params[7] = :pledge_transfer
               MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
             end
 
-            it 'calls `ssk_id_query` with un_adx_id if kind is safekept_transfer' do
-              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:ssk_id_query).with(member_id, un_adx_id, security['cusip'])
+            it 'calls `ssk_id_query` with adx_id if kind is safekept_transfer' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip'])
               method_params[7] = :safekept_transfer
               MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
             end
