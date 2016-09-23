@@ -2,5 +2,5 @@
   %form
     %fieldset
       %legend= t('forgot_password.confirmation.title')
-      = simple_format(t('forgot_password.confirmation.description_html', email: mask_email(@user.email) || t('forgot_password.confirmation.email_mask_failure')))
+      %p= t('forgot_password.confirmation.description')
       = link_to(t('forgot_password.confirmation.no_email'), new_user_password_path)
