@@ -11,7 +11,7 @@ class SecuritiesController < ApplicationController
     authorize :security, :delete?
   end
 
-  before_action only: [ :edit_safekeep, :edit_pledge, :edit_release, :view_release ] do
+  before_action only: [ :edit_safekeep, :edit_pledge, :edit_release, :edit_transfer, :view_release ] do
     @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')
   end
 

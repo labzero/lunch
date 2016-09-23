@@ -439,12 +439,20 @@ RSpec.describe SecuritiesController, type: :controller do
       end
     end
 
+    shared_examples 'an action with allowed mimetypes' do
+      it 'sets `@accepted_upload_mimetypes` appropriately' do
+        call_action
+        expect(assigns[:accepted_upload_mimetypes]).to eq(described_class::ACCEPTED_UPLOAD_MIMETYPES.join(', '))
+      end
+    end
+
     describe 'GET edit_pledge' do
       let(:call_action) { get :edit_pledge }
 
       it_behaves_like 'a user required action', :get, :edit_pledge
       it_behaves_like 'a controller action with an active nav setting', :edit_pledge, :securities
       it_behaves_like 'an action that sets its contact info by kind', :pledge_intake
+      it_behaves_like 'an action with allowed mimetypes'
 
       it 'calls `populate_view_variables`' do
         expect(subject).to receive(:populate_view_variables).with(:pledge)
@@ -470,6 +478,7 @@ RSpec.describe SecuritiesController, type: :controller do
       it_behaves_like 'a user required action', :get, :edit_safekeep
       it_behaves_like 'a controller action with an active nav setting', :edit_safekeep, :securities
       it_behaves_like 'an action that sets its contact info by kind', :safekept_intake
+      it_behaves_like 'an action with allowed mimetypes'
 
       it 'calls `populate_view_variables`' do
         expect(subject).to receive(:populate_view_variables).with(:safekeep)
@@ -496,6 +505,8 @@ RSpec.describe SecuritiesController, type: :controller do
 
       it_behaves_like 'a user required action', :post, :edit_release
       it_behaves_like 'a controller action with an active nav setting', :edit_release, :securities
+      it_behaves_like 'an action with allowed mimetypes'
+
       it 'renders its view' do
         call_action
         expect(response.body).to render_template('edit_release')
@@ -539,6 +550,8 @@ RSpec.describe SecuritiesController, type: :controller do
 
       it_behaves_like 'a user required action', :post, :edit_transfer
       it_behaves_like 'a controller action with an active nav setting', :edit_transfer, :securities
+      it_behaves_like 'an action with allowed mimetypes'
+
       it 'renders its view' do
         call_action
         expect(response.body).to render_template('edit_transfer')
