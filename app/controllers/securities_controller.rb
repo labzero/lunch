@@ -256,6 +256,7 @@ class SecuritiesController < ApplicationController
     @securities_request.safekept_account = MembersService.new(request).member(current_member_id)['unpledged_account_number']
     @securities_request.kind = kind
     populate_contact_info_by_kind(kind)
+    set_edit_title_by_kind(kind)
   end
 
   def edit_pledge
@@ -264,6 +265,7 @@ class SecuritiesController < ApplicationController
     @securities_request.pledged_account = MembersService.new(request).member(current_member_id)['pledged_account_number']
     @securities_request.kind = kind
     populate_contact_info_by_kind(kind)
+    set_edit_title_by_kind(kind)
   end
 
   # POST
@@ -280,6 +282,7 @@ class SecuritiesController < ApplicationController
     end
     @securities_request.kind = kind
     populate_contact_info_by_kind(kind)
+    set_edit_title_by_kind(kind)
   end
 
   # POST
@@ -287,19 +290,17 @@ class SecuritiesController < ApplicationController
     populate_view_variables(:transfer)
     @securities_request.safekept_account = MembersService.new(request).member(current_member_id)['unpledged_account_number']
     @securities_request.pledged_account = MembersService.new(request).member(current_member_id)['pledged_account_number']
-    case @securities_request.securities.first.custody_account_type
+    kind = case @securities_request.securities.first.custody_account_type
     when 'U'
-      kind = :pledge_transfer
-      @securities_request.kind = kind
-      @title = t('securities.transfer.pledge.title')
+      :pledge_transfer
     when 'P'
-      kind = :safekept_transfer
-      @securities_request.kind = kind
-      @title = t('securities.transfer.safekeep.title')
+      :safekept_transfer
     else
       raise ArgumentError, 'Unrecognized `custody_account_type` for passed security.'
     end
+    @securities_request.kind = kind
     populate_contact_info_by_kind(kind)
+    set_edit_title_by_kind(kind)
   end
 
   # GET
@@ -313,6 +314,7 @@ class SecuritiesController < ApplicationController
     raise ActionController::RoutingError.new("The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{kind}`") unless type_matches_kind(type, kind)
     populate_view_variables(type)
     populate_contact_info_by_kind(kind)
+    set_edit_title_by_kind(kind)
     case type
     when :release
       render :edit_release
@@ -321,7 +323,6 @@ class SecuritiesController < ApplicationController
     when :safekeep
       render :edit_safekeep
     when :transfer
-      @title = kind == :pledge_transfer ? t('securities.transfer.pledge.title') : t('securities.transfer.safekeep.title')
       render :edit_transfer
     end
   end
@@ -464,6 +465,7 @@ class SecuritiesController < ApplicationController
       @error_message = prioritized_securities_request_error(@securities_request) || I18n.t('securities.internal_user_error')
       populate_view_variables(type)
       populate_contact_info_by_kind(kind)
+      set_edit_title_by_kind(kind)
       case type
       when :release
         render :edit_release
@@ -609,15 +611,12 @@ class SecuritiesController < ApplicationController
 
     case type
     when :release
-      @title = t('securities.release.title')
       @confirm_delete_text = t('securities.delete_request.titles.release')
       @download_path = securities_release_download_path
     when :pledge
-      @title = t('securities.pledge.title')
       @confirm_delete_text = t('securities.delete_request.titles.pledge')
       @download_path = securities_pledge_download_path
     when :safekeep
-      @title = t('securities.safekeep.title')
       @confirm_delete_text = t('securities.delete_request.titles.safekeep')
       @download_path = securities_safekeep_download_path
     when :transfer
@@ -761,5 +760,20 @@ class SecuritiesController < ApplicationController
 
   def get_delivery_instructions(delivery_type)
     I18n.t(DELIVERY_INSTRUCTIONS_DROPDOWN_MAPPING[delivery_type.to_sym][:text])
+  end
+
+  def set_edit_title_by_kind(kind)
+    @title = case kind.to_sym
+    when :pledge_release, :safekept_release
+      I18n.t('securities.release.title')
+    when :pledge_intake
+      I18n.t('securities.pledge.title')
+    when :safekept_intake
+      I18n.t('securities.safekeep.title')
+    when :pledge_transfer
+      I18n.t('securities.transfer.pledge.title')
+    when :safekept_transfer
+      I18n.t('securities.transfer.safekeep.title')
+    end
   end
 end

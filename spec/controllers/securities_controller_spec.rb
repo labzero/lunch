@@ -14,6 +14,12 @@ RSpec.describe SecuritiesController, type: :controller do
       call_action
     end
   end
+  shared_examples 'an action that sets its title by kind' do |kind|
+    it "calls `set_edit_title_by_kind` with `#{kind}`" do
+      expect(controller).to receive(:set_edit_title_by_kind).with(kind)
+      call_action
+    end
+  end
 
   describe 'requests hitting MemberBalanceService' do
     let(:member_balance_service_instance) { double('MemberBalanceServiceInstance') }
@@ -343,6 +349,7 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(controller).to receive(:populate_view_variables)
       allow(controller).to receive(:type_matches_kind).and_return(true)
       allow(controller).to receive(:populate_contact_info_by_kind)
+      allow(controller).to receive(:set_edit_title_by_kind)
     end
 
     it_behaves_like 'a user required action', :get, :view_request, request_id: SecureRandom.hex, type: :release
@@ -392,6 +399,10 @@ RSpec.describe SecuritiesController, type: :controller do
           expect(controller).to receive(:populate_contact_info_by_kind).with(kind)
           call_action
         end
+        it 'calls `set_edit_title_by_kind` with its `kind`' do
+          expect(controller).to receive(:set_edit_title_by_kind).with(kind)
+          call_action
+        end
         it "renders the `#{view}` view" do
           call_action
           expect(response.body).to render_template(view)
@@ -401,16 +412,6 @@ RSpec.describe SecuritiesController, type: :controller do
           call_action
         end
       end
-    end
-    it 'sets `@title` appropriately when the `type` is `:transfer` and the `kind` is `:pledge_transfer`' do
-      allow(securities_request).to receive(:kind).and_return(:pledge_transfer)
-      get :view_request, request_id: request_id, type: :transfer
-      expect(assigns[:title]).to eq(I18n.t('securities.transfer.pledge.title'))
-    end
-    it 'sets `@title` appropriately when the `type` is `:transfer` and the `kind` is `:safekept_transfer`' do
-      allow(securities_request).to receive(:kind).and_return(:safekept_transfer)
-      get :view_request, request_id: request_id, type: :transfer
-      expect(assigns[:title]).to eq(I18n.t('securities.transfer.safekeep.title'))
     end
   end
 
@@ -452,6 +453,7 @@ RSpec.describe SecuritiesController, type: :controller do
       it_behaves_like 'a user required action', :get, :edit_pledge
       it_behaves_like 'a controller action with an active nav setting', :edit_pledge, :securities
       it_behaves_like 'an action that sets its contact info by kind', :pledge_intake
+      it_behaves_like 'an action that sets its title by kind', :pledge_intake
       it_behaves_like 'an action with allowed mimetypes'
 
       it 'calls `populate_view_variables`' do
@@ -478,6 +480,7 @@ RSpec.describe SecuritiesController, type: :controller do
       it_behaves_like 'a user required action', :get, :edit_safekeep
       it_behaves_like 'a controller action with an active nav setting', :edit_safekeep, :securities
       it_behaves_like 'an action that sets its contact info by kind', :safekept_intake
+      it_behaves_like 'an action that sets its title by kind', :safekept_intake
       it_behaves_like 'an action with allowed mimetypes'
 
       it 'calls `populate_view_variables`' do
@@ -522,6 +525,8 @@ RSpec.describe SecuritiesController, type: :controller do
       describe 'when the `securities` have a `custody_account_type` of `U`' do
         before { allow(security).to receive(:custody_account_type).and_return('U') }
         it_behaves_like 'an action that sets its contact info by kind', :safekept_release
+        it_behaves_like 'an action that sets its title by kind', :safekept_release
+
         it 'assigns the `@securities_request.kind` a value of `:safekept_release`' do
           expect(securities_request).to receive(:kind=).with(:safekept_release)
           call_action
@@ -530,6 +535,8 @@ RSpec.describe SecuritiesController, type: :controller do
       describe 'when the `securities` have a `custody_account_type` of `P`' do
         before { allow(security).to receive(:custody_account_type).and_return('P') }
         it_behaves_like 'an action that sets its contact info by kind', :pledge_release
+        it_behaves_like 'an action that sets its title by kind', :pledge_release
+
         it 'assigns the `@securities_request.kind` a value of `:pledge_release`' do
           expect(securities_request).to receive(:kind=).with(:pledge_release)
           call_action
@@ -575,25 +582,21 @@ RSpec.describe SecuritiesController, type: :controller do
       describe 'when the `securities` have a `custody_account_type` of `U`' do
         before { allow(security).to receive(:custody_account_type).and_return('U') }
         it_behaves_like 'an action that sets its contact info by kind', :pledge_transfer
+        it_behaves_like 'an action that sets its title by kind', :pledge_transfer
+
         it 'assigns the `@securities_request.kind` a value of `:pledge_transfer`' do
           expect(securities_request).to receive(:kind=).with(:pledge_transfer)
           call_action
-        end
-        it 'sets the @title appropriately' do
-          call_action
-          expect(assigns[:title]).to eq(I18n.t('securities.transfer.pledge.title'))
         end
       end
       describe 'when the `securities` have a `custody_account_type` of `P`' do
         before { allow(security).to receive(:custody_account_type).and_return('P') }
         it_behaves_like 'an action that sets its contact info by kind', :safekept_transfer
+        it_behaves_like 'an action that sets its title by kind', :safekept_transfer
+
         it 'assigns the `@securities_request.kind` a value of `:safekept_transfer`' do
           expect(securities_request).to receive(:kind=).with(:safekept_transfer)
           call_action
-        end
-        it 'sets the @title appropriately' do
-          call_action
-          expect(assigns[:title]).to eq(I18n.t('securities.transfer.safekeep.title'))
         end
       end
       describe 'when the `securities` have a `custody_account_type` that is neither `P` nor `U`' do
@@ -933,8 +936,12 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(SecuritiesRequest).to receive(:from_hash).and_return(securities_request)
         allow(controller).to receive(:type_matches_kind).and_return(true)
         allow(controller).to receive(:populate_authorize_request_view_variables)
+        allow(controller).to receive(:set_edit_title_by_kind)
       end
+
       it_behaves_like 'an action that sets its contact info by kind', kind
+      it_behaves_like 'an action that sets its title by kind', kind
+
       it 'raises an ActionController::RoutingError if the securities request kind does not match the request type param' do
         allow(controller).to receive(:type_matches_kind).and_return(false)
         expect{call_action}.to raise_error(ActionController::RoutingError, "The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{securities_request.kind}`")
@@ -1615,16 +1622,6 @@ RSpec.describe SecuritiesController, type: :controller do
         call_action
         expect(assigns[:pledge_type_dropdown]).to eq(pledge_type_dropdown)
       end
-      {
-        release: I18n.t('securities.release.title'),
-        pledge: I18n.t('securities.pledge.title'),
-        safekeep: I18n.t('securities.safekeep.title')
-      }.each do |type, title|
-        it "sets `@title` to `#{title}` when the `type` is `#{type}`" do
-          controller.send(:populate_view_variables, type)
-          expect(assigns[:title]).to eq(title)
-        end
-      end
       [:release, :pledge, :safekeep, :transfer].each do |type|
         it 'sets `@confirm_delete_text` appropriately' do
           controller.send(:populate_view_variables, type)
@@ -2211,6 +2208,29 @@ RSpec.describe SecuritiesController, type: :controller do
         it 'returns the correct string for `delivery_type` `#{delivery_type}`' do
           expect(subject.send(:get_delivery_instructions, delivery_type)).to eq(I18n.t(SecuritiesController::DELIVERY_INSTRUCTIONS_DROPDOWN_MAPPING[delivery_type.to_sym][:text]))
         end
+      end
+    end
+
+    describe '`set_edit_title_by_kind`' do
+      {
+        pledge_release: I18n.t('securities.release.title'),
+        safekept_release: I18n.t('securities.release.title'),
+        pledge_intake: I18n.t('securities.pledge.title'),
+        safekept_intake: I18n.t('securities.safekeep.title'),
+        pledge_transfer: I18n.t('securities.transfer.pledge.title'),
+        safekept_transfer: I18n.t('securities.transfer.safekeep.title')
+      }.each do |kind, title|
+        describe "when the passed kind is `#{kind}`" do
+          let(:call_method) { subject.send(:set_edit_title_by_kind, kind) }
+          it "sets `@title` to `#{title}`" do
+            call_method
+            expect(assigns[:title]).to eq(title)
+          end
+        end
+      end
+      it 'does not assign `@title` if it does not recognize the kind' do
+        subject.send(:set_edit_title_by_kind, SecureRandom.hex)
+        expect(assigns[:title]).to be_nil
       end
     end
   end

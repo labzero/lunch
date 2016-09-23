@@ -428,6 +428,7 @@ Then(/^I should see the "(.*?)" error$/) do |error|
   when 'intranet user'
     I18n.t('securities.internal_user_error')
   end
+  page.assert_selector('.securities-header h1', visible: true)
   page.assert_selector('.securities-submit-release-form-errors p', text: strip_links(text), exact: true)
 end
 
