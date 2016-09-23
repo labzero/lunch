@@ -239,6 +239,12 @@ module MAPI
           key :description, 'The delivery instructions for this release'
         end
 
+        property :authorized_date do
+          key :type, :string
+          key :format, :date
+          key :description, 'The date the form was authorized'
+        end
+
         property :securities do
           key :type, :array
           key :description, 'An array of securities to be included in the release request.'

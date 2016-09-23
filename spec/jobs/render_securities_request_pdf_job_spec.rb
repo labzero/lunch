@@ -17,7 +17,7 @@ RSpec.describe RenderSecuritiesRequestsPDFJob, type: :job do
   let(:user) { double(User) }
   let(:string_io_with_filename) { double('some StringIO instance', :'content_type=' => nil, :'original_filename=' => nil, :rewind => nil) }
   let(:job_status) { double('job status instance', canceled?: false, completed?: false, started!: nil, completed!: nil, failed!: nil, :'result=' => nil, :'status=' => nil, save!: nil, user: user) }
-
+  let(:footer) { double('Footer') }
   before do
     allow(JobStatus).to receive(:find_or_create_by!).and_return(job_status)
     allow(SecuritiesController).to receive(:new).and_return(securities_controller)
@@ -28,6 +28,7 @@ RSpec.describe RenderSecuritiesRequestsPDFJob, type: :job do
     allow(StringIOWithFilename).to receive(:new).and_return(string_io_with_filename)
     allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member)
     allow(securities_controller).to receive(action_name).and_return([html])
+    allow(securities_controller).to receive(:render_to_string).with('authorized_request_pdf_footer', { :layout=>"print_footer" }).and_return(footer)
   end
 
   it 'returns `nil` if the job_status is `canceled`' do
@@ -51,6 +52,12 @@ RSpec.describe RenderSecuritiesRequestsPDFJob, type: :job do
     run_job
   end
 
+  it 'renders the footer' do
+    allow(securities_controller).to receive(:performed?).and_return(true)
+    expect(securities_controller).to receive(:render_to_string).with('authorized_request_pdf_footer', { :layout=>"print_footer" })
+    run_job
+  end
+
   describe 'before calling the securities request action' do
     let(:run_job) do
       expect(securities_controller).to receive(action_name).and_return([html]).ordered
@@ -61,6 +68,10 @@ RSpec.describe RenderSecuritiesRequestsPDFJob, type: :job do
       allow(securities_controller).to receive(:session).and_return(session)
       expect(session).to receive(:[]=).with('member_id', member_id).ordered # technically we should let the order of these two vary, but RSpec doesn't have support for that
       expect(session).to receive(:[]=).with('member_name', member_name).ordered
+      run_job
+    end
+    it 'sets `@member_name` to the member bank\'s name' do
+      expect(securities_controller).to receive(:instance_variable_set).with(:@member_name, member[:name]).ordered
       run_job
     end
     it 'sets @inline_styles to `true`' do
@@ -117,6 +128,10 @@ RSpec.describe RenderSecuritiesRequestsPDFJob, type: :job do
     end
     it 'enables smart shrinking' do
       expect(wicked_pdf).to receive(:pdf_from_string).with(any_args, hash_including(disable_smart_shrinking: false))
+      run_job
+    end
+    it 'includes the footer' do
+      expect(wicked_pdf).to receive(:pdf_from_string).with(any_args, hash_including(footer: { content: footer }))
       run_job
     end
   end

@@ -450,7 +450,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
     end
     describe '`attributes=`' do
       sym_attrs = [:transaction_code]
-      date_attrs = [:trade_date, :settlement_date]
+      date_attrs = [:trade_date, :settlement_date, :authorized_date]
       custom_attrs = [:request_id, :form_type, :kind, :delivery_type, :settlement_type]
       let(:hash) { {} }
       let(:value) { double('some value') }

@@ -150,8 +150,8 @@ class SecuritiesRequest
     hash.each do |key, value|
       key = key.to_sym
       value = case key
-      when :trade_date, :settlement_date
-        Time.zone.parse(value)
+      when :trade_date, :settlement_date, :authorized_date
+        value ? Time.zone.parse(value) : value
       when :transaction_code
         value.to_sym
       when :securities, *ACCESSIBLE_ATTRS

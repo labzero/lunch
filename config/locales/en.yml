@@ -1239,6 +1239,7 @@ en:
           footer: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
         release:
           title: Release Securities
+          footer: Release Securities Request
     release:
       title: Release Securities
       add_securities: Add Securities

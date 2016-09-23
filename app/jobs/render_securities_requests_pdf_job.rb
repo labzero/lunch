@@ -17,6 +17,7 @@ class RenderSecuritiesRequestsPDFJob < FhlbJob
     controller.request.env['warden'] = FhlbMember::WardenProxy.new(job_status.user)
     controller.session[SecuritiesController::SessionKeys::MEMBER_ID] = member_id
     controller.session[SecuritiesController::SessionKeys::MEMBER_NAME] = member[:name]
+    controller.instance_variable_set(:@member_name, member[:name])
     controller.instance_variable_set(:@inline_styles, true)
     controller.instance_variable_set(:@skip_javascript, true)
     controller.instance_variable_set(:@print_layout, true)
@@ -31,6 +32,8 @@ class RenderSecuritiesRequestsPDFJob < FhlbJob
       html = controller.render_to_string(ACTION_NAME)
     end
     return if job_status.canceled?
+    pdf_footer = controller.render_to_string('authorized_request_pdf_footer', layout: 'print_footer')
+    return if job_status.canceled?
     pdf = WickedPdf.new.pdf_from_string(html, page_size: 'Letter',
                                               print_media_type: true,
                                               disable_external_links: true,
@@ -39,7 +42,7 @@ class RenderSecuritiesRequestsPDFJob < FhlbJob
                                                         right: MARGIN,
                                                         bottom: MARGIN },
                                               disable_smart_shrinking: false,
-                                              footer: { content: "" })
+                                              footer: { content: pdf_footer })
     file = StringIOWithFilename.new(pdf)
     file.content_type = 'application/pdf'
     file.original_filename = "authorized_request_#{params[:request_id]}.pdf"
