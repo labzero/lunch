@@ -34,7 +34,7 @@ Feature: Transfer Securities
     Then I should not see instructions on how to edit securities
   Examples:
     | page     | contact               |
-    | safekept | Securities Services   |
+    | safekept | Collateral Operations |
     | pledged  | Collateral Operations |
 
   Scenario: Authorized signer views legal copy for pledge transfers

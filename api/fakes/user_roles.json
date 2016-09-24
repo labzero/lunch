@@ -2,7 +2,9 @@
   "local": ["signer", "signer-advances"],
   "extra": [],
   "local-non-signer": [],
-  "extra-signer": ["signer", "signer-advances", "signer-securities"],
+  "extra-signer": ["signer", "signer-advances", "signer-securities", "signer-collateral"],
+  "extra-collateral-signer": ["signer", "signer-collateral"],
+  "extra-securities-signer": ["signer", "signer-securities"],
   "extra-chaste-access": ["signer", "signer-etransact"],
   "quick-advance-disabled": ["signer", "signer-advances"],
   "dual-signer-required": ["signer", "signer-advances"]

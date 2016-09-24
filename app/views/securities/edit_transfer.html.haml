@@ -1,6 +1,5 @@
 - @page_title = t('global.page_meta_title', title: @title)
 - kind = @securities_request.kind
-- authorizer = policy(:security).authorize?
 .securities.row
   .securities-header
     %h1= @title
@@ -41,8 +40,8 @@
             -unless @securities_table_data[:rows].empty?
               = render 'table'
           = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: @accepted_upload_mimetypes, upload_url: securities_transfer_upload_path, type: :transfer}
-        - if authorizer
-          - if policy(:security).authorize? && kind == :pledge_transfer
+        - if @authorizer
+          - if kind == :pledge_transfer
             .securities-request-legal
               =simple_format(t("securities.pledge.legal_copy"))
               = render 'pledge_legal_copy'

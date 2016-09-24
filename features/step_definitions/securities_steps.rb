@@ -302,13 +302,34 @@ Then(/^the (Pledge|Safekeep) Account Number should be disabled$/) do |action|
   end
 end
 
-Then(/^I should a disabled state for the Authorize action$/) do
+Then(/^I should see a disabled state for the Authorize action$/) do
   page.assert_selector('.securities-request-table .report-cell-actions', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
   page.assert_no_selector('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
 end
 
 Then(/^I should see the active state for the Authorize action$/) do
   page.assert_selector('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
+end
+
+Then(/^I should see the (active|disabled) state for the Authorize action for (pledge|release|safekeep|transfer)$/) do |state, type|
+  description = case type
+  when 'pledge'
+    I18n.t('securities.requests.form_descriptions.pledge')
+  when 'release'
+    I18n.t('securities.requests.form_descriptions.release')
+  when 'safekeep'
+    I18n.t('securities.requests.form_descriptions.safekept')
+  when 'transfer'
+    I18n.t('securities.requests.form_descriptions.transfer')
+  else
+    raise ArgumentError, "unknown form type: #{type}"
+  end
+  row = page.all('.securities-request-table td', text: description, exact: true).first.find(:xpath, '..')
+  if state == 'active'
+    row.assert_selector('.report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
+  else
+    row.assert_no_selector('.report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
+  end
 end
 
 When(/^I click to Authorize the first (pledge|release|safekeep|transfer)(?: request)?$/) do |type|

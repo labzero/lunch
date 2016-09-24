@@ -26,8 +26,8 @@ class SecuritiesRequest
 
   KINDS = [:pledge_release, :safekept_release, :pledge_intake, :safekept_intake, :pledge_transfer, :safekept_transfer].freeze
   TRANSFER_REQUEST_KINDS = [:pledge_transfer, :safekept_transfer].freeze
-  SECURITIES_KINDS = [:safekept_release, :safekept_intake, :safekept_transfer].freeze
-  COLLATERAL_KINDS = [:pledge_release, :pledge_intake, :pledge_transfer].freeze
+  SECURITIES_KINDS = [:safekept_release, :safekept_intake].freeze
+  COLLATERAL_KINDS = [:pledge_release, :pledge_intake, :pledge_transfer, :safekept_transfer].freeze
   FORM_TYPES = [:pledge_release, :safekept_release, :pledge_intake, :safekept_intake]
 
   BROKER_INSTRUCTION_KEYS = [:transaction_code, :settlement_type, :trade_date, :settlement_date].freeze
@@ -218,7 +218,7 @@ class SecuritiesRequest
   end
 
   def is_collateral?
-    self.kind.in?([:pledge_release, :pledge_intake, :pledge_transfer, :safekept_transfer])
+    self.kind.in?(COLLATERAL_KINDS)
   end
 
   private

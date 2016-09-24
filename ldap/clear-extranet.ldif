@@ -37,6 +37,12 @@ changetype: delete
 dn: sAMAccountName=extra-chaste-access-read-only,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 
+dn: sAMAccountName=extra-collateral-signer,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
+dn: sAMAccountName=extra-securities-signer,dc=extranet,dc=fhlbsf,dc=com
+changetype: delete
+
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
 changetype: delete
 

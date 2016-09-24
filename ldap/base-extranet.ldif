@@ -213,6 +213,38 @@ userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: extra-signer@example.com
 
+# extra-collateral-signer
+dn: sAMAccountName=extra-collateral-signer,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet Collateral Signer
+sn: Extranet Collateral Signer
+givenname: Collateral Signer
+displayName: Collateral Signer
+givenName: Extranet Collateral
+sn: Signer
+sAMAccountName: extra-collateral-signer
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: extra-collateral-signer@example.com
+
+# extra-securities-signer
+dn: sAMAccountName=extra-securities-signer,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet Securities Signer
+sn: Extranet Securities Signer
+givenname: Securities Signer
+displayName: Securities Signer
+givenName: Extranet Securities
+sn: Signer
+sAMAccountName: extra-securities-signer
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: extra-securities-signer@example.com
+
 # Chaste Manhatten
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
 cn: FHLB6
@@ -244,6 +276,8 @@ member: sAMAccountName=extra-wells,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-password,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-expired,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-collateral-signer,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-securities-signer,dc=extranet,dc=fhlbsf,dc=com
 
 # The Bank With Disabled Signers
 dn: CN=FHLB13,dc=extranet,dc=fhlbsf,dc=com
@@ -298,3 +332,5 @@ member: sAMAccountName=extra-chaste-first-time,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=dual-signer-required,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-signer,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-access-read-only,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-securities-signer,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-collateral-signer,dc=extranet,dc=fhlbsf,dc=com
