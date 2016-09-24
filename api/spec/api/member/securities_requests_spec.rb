@@ -969,7 +969,7 @@ describe MAPI::ServiceApp do
         expected_sql = <<-SQL
             SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
               MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
-              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO, UNPLEGED_TRANSFER_ADX_ID, AUTHORIZED_DATE
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO, UNPLEGED_TRANSFER_ADX_ID, SIGNED_DATE AS AUTHORIZED_DATE
             FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE HEADER_ID = #{header_id}
             AND FHLB_ID = #{member_id}
@@ -4997,7 +4997,7 @@ describe MAPI::ServiceApp do
         end
       end
     end
-    
+
     describe '`fake_request_id` class method' do
       it 'returns a random number between 100000 and 999999 using the supplied random number generator' do
         value = double(Numeric)
