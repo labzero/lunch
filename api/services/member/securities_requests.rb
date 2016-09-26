@@ -126,8 +126,8 @@ module MAPI
         }.freeze
 
         module ADXAccountTypeMapping
-          SYMBOL_TO_STRING = { pledged: 'P', unpledged: 'U' }.freeze
-          STRING_TO_SYMBOL = SYMBOL_TO_STRING.invert.freeze
+          SYMBOL_TO_STRING = { pledged: 'Pledged', unpledged: 'Unpledged' }.freeze
+          STRING_TO_SYMBOL = {'U' => :unpledged, 'P' => :pledged}.freeze
           SYMBOL_TO_SQL_COLUMN_NAME = { pledged_intake: 'PLEDGED_ADX_ID',
                                         pledged_release: 'PLEDGED_ADX_ID',
                                         unpledged_intake: 'UNPLEDGED_ADX_ID',
@@ -365,9 +365,8 @@ module MAPI
             WHERE ADX.BAT_ID = BAT.BAT_ID
             AND ADX.CP_ID = CP.CP_ID
             AND CP.FHLB_ID = #{quote(member_id)}
-            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = #{quote(ADXAccountTypeMapping::SYMBOL_TO_STRING[type])}
+            AND BAT.BAT_ACCOUNT_TYPE = #{quote(ADXAccountTypeMapping::SYMBOL_TO_STRING[type])}
             AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
-            AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
             ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
           SQL
         end

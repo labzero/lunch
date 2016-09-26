@@ -657,9 +657,8 @@ describe MAPI::ServiceApp do
             WHERE ADX.BAT_ID = BAT.BAT_ID
             AND ADX.CP_ID = CP.CP_ID
             AND CP.FHLB_ID = #{member_id}
-            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = #{adx_type_string}
+            AND BAT.BAT_ACCOUNT_TYPE = #{adx_type_string}
             AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
-            AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
             ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
             SQL
           )
