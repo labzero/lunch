@@ -30,7 +30,7 @@ RSpec.describe 'Redirecting from old URLs', :type => :request do
       '/member/ps/forms' => '/resources/forms',
       '/member/ps/guides' => '/resources/guides',
       '/member/ps' => '/products/summary',
-      '/member/etransact' => '/securities/manage',
+      '/member/etransact' => '/advances/manage',
       '/member/accessmanager' => '/settings/users',
       '/member/reports' => '/reports'
     }.each do |route, redirect|
