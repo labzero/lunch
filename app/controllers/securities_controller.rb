@@ -464,7 +464,7 @@ class SecuritiesController < ApplicationController
       end
       unless has_errors
         if SecuritiesRequestService.new(current_member_id, request).authorize_request(@securities_request.request_id, current_user)
-          InternalMailer.securities_request_authorized(@securities_request)
+          InternalMailer.securities_request_authorized(@securities_request).deliver_now
         else
           @securities_request.errors.add(:base, :authorization)
           has_errors = true

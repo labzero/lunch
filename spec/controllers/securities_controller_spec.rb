@@ -1134,16 +1134,23 @@ RSpec.describe SecuritiesController, type: :controller do
             call_action
           end
           describe 'when SecurID passes and there are not yet any errors' do
+            let(:message) { instance_double(ActionMailer::MessageDelivery) }
             before do
               allow(subject).to receive(:session_elevated?).and_return(true)
               allow(active_model_errors).to receive(:blank?).and_return(true)
+              allow(InternalMailer).to receive(:securities_request_authorized).with(securities_request).and_return(message)
+              allow(message).to receive(:deliver_now)
             end
             it 'authorizes the request' do
               expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
               call_action
             end
-            it 'emails the internal distro' do
+            it 'constructs an email to the internal distro' do
               expect(InternalMailer).to receive(:securities_request_authorized).with(securities_request)
+              call_action
+            end
+            it 'delivers an email to the internal distro' do
+              expect(message).to receive(:deliver_now)
               call_action
             end
             it 'renders the `authorize_request` view' do
