@@ -42,6 +42,7 @@ import whitelistEmailApi from './api/whitelistEmails';
 import { Restaurant, Tag, User, WhitelistEmail, Decision } from './models';
 import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
+import Honeybadger from 'honeybadger';
 
 const app = express();
 
@@ -57,12 +58,6 @@ if (process.env.NODE_ENV === 'production') {
   app.use(forceSSL);
 }
 const routes = makeRoutes();
-
-const Honeybadger = require('honeybadger');
-
-Honeybadger.configure({
-  apiKey: process.env.HONEYBADGER_APIKEY,
-});
 
 //
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
