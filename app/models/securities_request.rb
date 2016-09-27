@@ -154,7 +154,7 @@ class SecuritiesRequest
       when :trade_date, :settlement_date, :authorized_date
         value ? Time.zone.parse(value) : value
       when :transaction_code, :pledge_to
-        value.to_sym
+        value.try(:to_sym)
       when :securities, *ACCESSIBLE_ATTRS
         value
       else

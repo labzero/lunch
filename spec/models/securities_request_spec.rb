@@ -477,6 +477,11 @@ RSpec.describe SecuritiesRequest, :type => :model do
           call_method
           expect(subject.send(key)).to be(value)
         end
+        it "assigns nil if the value found under `#{key}` is nil" do
+          hash[key.to_s] = nil
+          call_method
+          expect(subject.send(key)).to be_nil
+        end
       end
       date_attrs.each do |key|
         it "assigns a datefied value found under `#{key}` to the attribute `#{key}`" do
