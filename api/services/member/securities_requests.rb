@@ -845,7 +845,8 @@ module MAPI
           <<-SQL
             SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
               MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
-              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO, UNPLEGED_TRANSFER_ADX_ID, SIGNED_DATE AS AUTHORIZED_DATE
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO,
+              UNPLEGED_TRANSFER_ADX_ID, SIGNED_DATE AS AUTHORIZED_DATE, SIGNED_BY_NAME AS AUTHORIZED_BY
             FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE HEADER_ID = #{quote(header_id)}
             AND FHLB_ID = #{quote(member_id)}
@@ -1010,7 +1011,6 @@ module MAPI
             'SUBMITTED_BY' => created_by_name,
             'AUTHORIZED_BY' => authorized ? authorized_by_name : nil,
             'AUTHORIZED_DATE' => authorized ? authorized_date : nil,
-            'AUTHORIZED_BY' => authorized ? authorized_by_name : nil,
             'PLEDGE_TO' => pledge_to,
             'PLEDGED_ADX_ID' => rng.rand(1000..9999),
             'UNPLEDGED_ADX_ID' => safekept_account_number,
