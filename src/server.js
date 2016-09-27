@@ -42,7 +42,7 @@ import whitelistEmailApi from './api/whitelistEmails';
 import { Restaurant, Tag, User, WhitelistEmail, Decision } from './models';
 import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
-// import Honeybadger from 'honeybadger';
+import Honeybadger from 'honeybadger';
 
 const app = express();
 
@@ -69,7 +69,7 @@ global.navigator.userAgent = global.navigator.userAgent || 'all';
 //
 // Register Node.js middleware
 // -----------------------------------------------------------------------------
-// app.use(Honeybadger.requestHandler); // Use *before* all other app middleware.
+app.use(Honeybadger.requestHandler); // Use *before* all other app middleware.
 app.use(compression());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
@@ -251,7 +251,7 @@ const pe = new PrettyError();
 pe.skipNodeFiles();
 pe.skipPackage('express');
 
-// app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
+app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
 
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   console.log(pe.render(err)); // eslint-disable-line no-console
