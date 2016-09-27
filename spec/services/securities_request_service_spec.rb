@@ -308,7 +308,8 @@ describe SecuritiesRequestService do
         form_type: instance_double(String),
         securities: instance_double(Array),
         pledged_account: instance_double(String),
-        safekept_account: instance_double(String)
+        safekept_account: instance_double(String),
+        member_id: instance_double(String)
       }}
       let(:call_method) { subject.send(:map_response_to_securities_release_hash, raw_hash) }
 
@@ -353,7 +354,7 @@ describe SecuritiesRequestService do
           end
         end
       end
-      [:request_id, :securities, :form_type, :pledged_account, :safekept_account].each do |attr|
+      [:request_id, :securities, :form_type, :pledged_account, :safekept_account, :member_id].each do |attr|
         it "returns a hash with a `#{attr}` value" do
           raw_hash[attr] = double('A Value')
           expect(call_method[attr]).to eq(raw_hash[attr])

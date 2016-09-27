@@ -878,6 +878,7 @@ module MAPI
           end
           safekept_account = [:pledge_transfer, :safekept_transfer].include?(kind) ? header_details['UNPLEGED_TRANSFER_ADX_ID'] : header_details['UNPLEDGED_ADX_ID']
           {
+            member_id: member_id,
             request_id: request_id,
             safekept_account: safekept_account,
             pledged_account: header_details['PLEDGED_ADX_ID'],

@@ -261,6 +261,12 @@ RSpec.describe InternalMailer, :type => :mailer do
       expect(assigns[:member_name]).to eq(member_name)
     end
 
+    it 'assigns `@member_name` to a description of the member ID if the name could not be found' do
+      allow(member).to receive(:[]).with(:name).and_return(nil)    
+      build_mail
+      expect(assigns[:member_name]).to eq(I18n.t('emails.securities_request.authorized.member_id', member_id: securities_request.member_id))
+    end
+
     it 'sets the `To:` header to `InternalMailer::COLLATERAL_OPERATIONS` for pledged and transfered securities' do
       allow(securities_request).to receive(:is_collateral?).and_return(true)
       build_mail

@@ -1130,6 +1130,9 @@ describe MAPI::ServiceApp do
         it 'contains the `request_id` it was passed' do
           expect(call_method[:request_id]).to eq(request_id)
         end
+        it 'contains the `member_id` it was passed' do
+          expect(call_method[:member_id]).to eq(member_id)
+        end
         it 'passes the `header_details` to `broker_instructions_from_header_details`' do
           expect(securities_request_module).to receive(:broker_instructions_from_header_details).with(header_details)
           call_method

@@ -477,6 +477,7 @@ class SecuritiesController < ApplicationController
   def submit_request
     type = params[:type].try(:to_sym)
     @securities_request = SecuritiesRequest.from_hash(params[:securities_request])
+    @securities_request.member_id = current_member_id
     raise ArgumentError, "Unknown request type: #{type}" unless VALID_REQUEST_TYPES.include?(type)
     kind = @securities_request.kind
     raise ActionController::RoutingError.new("The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{kind}`") unless type_matches_kind(type, kind)

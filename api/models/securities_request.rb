@@ -197,6 +197,11 @@ module MAPI
       swagger_model :SecuritiesRequest do
         key :required, %i(user broker_instructions delivery_instructions securities)
 
+        property :member_id do
+          key :type, :string
+          key :description, 'The ID of the requesting member'
+        end
+
         property :request_id do
           key :type, :string
           key :description, 'The ID of the request'

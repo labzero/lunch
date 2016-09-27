@@ -71,7 +71,8 @@ class InternalMailer < ActionMailer::Base
 
   def securities_request_authorized(securities_request)
     @securities_request = securities_request
-    @member_name = MembersService.new(ActionDispatch::TestRequest.new).member(@securities_request.member_id).try(:[], :name)
+    member_id = @securities_request.member_id
+    @member_name = MembersService.new(ActionDispatch::TestRequest.new).member(member_id).try(:[], :name) || I18n.t('emails.securities_request.authorized.member_id', member_id: member_id)
     mail(
       subject: I18n.t('emails.securities_request.authorized.subject',
         pledge_or_safekeeping: @securities_request.is_collateral? ?

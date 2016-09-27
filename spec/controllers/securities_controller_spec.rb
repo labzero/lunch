@@ -968,7 +968,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:securities_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
       let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_request_for_authorization: true, authorize_request: true) }
       let(:active_model_errors) { instance_double(ActiveModel::Errors, add: nil) }
-      let(:securities_request) { instance_double(SecuritiesRequest, :valid? => true, errors: active_model_errors, kind: kind, is_collateral?: nil) }
+      let(:securities_request) { instance_double(SecuritiesRequest, :valid? => true, errors: active_model_errors, kind: kind, is_collateral?: nil, :'member_id=' => nil) }
       let(:error_message) { instance_double(String) }
       let(:call_action) { post :submit_request, securities_request: securities_request_param, type: type }
 
@@ -992,6 +992,10 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'builds a SecuritiesRequest instance with the `securities_request` params' do
         expect(SecuritiesRequest).to receive(:from_hash).with(securities_request_param)
+        call_action
+      end
+      it 'populates the SecuritiesRequest `member_id` with the `current_member_id`' do
+        expect(securities_request).to receive(:member_id=).with(member_id)
         call_action
       end
       it 'sets @securities_request' do
@@ -1148,11 +1152,17 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
               call_action
             end
-            it 'constructs an email to the internal distro' do
+            it 'builds the SecuritiesRequest before it emails the distribution list' do
+              expect(SecuritiesRequest).to receive(:from_hash).with(securities_request_param).ordered
+              expect(securities_request).to receive(:member_id=).with(member_id).ordered
+              expect(InternalMailer).to receive(:securities_request_authorized).with(securities_request).ordered
+              call_action
+            end
+            it 'constructs an email to the internal distribution list' do
               expect(InternalMailer).to receive(:securities_request_authorized).with(securities_request)
               call_action
             end
-            it 'delivers an email to the internal distro' do
+            it 'delivers an email to the internal distribution list' do
               expect(message).to receive(:deliver_now)
               call_action
             end

@@ -89,6 +89,7 @@ class SecuritiesRequestService < MAPIService
     securities_release[:safekept_account] = response_hash[:safekept_account]
     securities_release[:authorized_date] = response_hash[:authorized_date]
     securities_release[:authorized_by] = response_hash[:authorized_by]
+    securities_release[:member_id] = response_hash[:member_id]
     securities_release
   end
 
