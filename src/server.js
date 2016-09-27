@@ -42,7 +42,7 @@ import whitelistEmailApi from './api/whitelistEmails';
 import { Restaurant, Tag, User, WhitelistEmail, Decision } from './models';
 import { Server as WebSocketServer } from 'ws';
 import serialize from 'serialize-javascript';
-import Honeybadger from 'honeybadger';
+// import Honeybadger from 'honeybadger';
 
 const app = express();
 
