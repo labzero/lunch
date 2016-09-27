@@ -32,6 +32,20 @@ class RenderSecuritiesRequestsPDFJob < FhlbJob
       html = controller.render_to_string(ACTION_NAME)
     end
     return if job_status.canceled?
+    controller.instance_variable_set(:@footer_label, case params[:kind]
+    when 'pledge_release'
+      I18n.t('securities.requests.view.pledge_release.footer')
+    when 'safekept_release'
+      I18n.t('securities.requests.view.safekept_release.footer')
+    when 'pledge_intake'
+      I18n.t('securities.requests.view.pledge_intake.footer')
+    when 'safekept_intake'
+      I18n.t('securities.requests.view.safekept_intake.footer')
+    when 'pledge_transfer'
+      I18n.t('securities.requests.view.pledge_transfer.footer')
+    when 'safekept_transfer'
+      I18n.t('securities.requests.view.safekept_transfer.footer')
+    end)
     pdf_footer = controller.render_to_string('authorized_request_pdf_footer', layout: 'print_footer')
     return if job_status.canceled?
     pdf = WickedPdf.new.pdf_from_string(html, page_size: 'Letter',

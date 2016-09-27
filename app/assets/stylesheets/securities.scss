@@ -457,7 +457,7 @@
       margin-bottom: 0;
       padding-bottom: 0;
     }
-    .account-number {
+    .summary-data {
       @include typography-print-summary-data;
     }
     .securities-release-table {
@@ -470,6 +470,9 @@
     .legal-title {
       font-weight: $bold-weight;
       margin-bottom: 10px;
+    }
+    .column-3-span-2 {
+      width: 70%;
     }
   }
 }

@@ -71,6 +71,7 @@ module MAPI
           Proc.new { |value| SETTLEMENT_TYPE.invert[value.to_i] } => ['REQUEST_STATUS'],
           Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO', 'RECEIVE_FROM'],
           Proc.new { |value| REQUEST_FORM_TYPE_MAPPING[value] } => ['FORM_TYPE'],
+          Proc.new { |value| PLEDGE_TO.invert[value.to_i] } => ['PLEDGE_TO'],
           to_s: ['BROKER_WIRE_ADDR', 'ABA_NO', 'DTC_AGENT_PARTICIPANT_NO', 'MUTUAL_FUND_COMPANY', 'DELIVERY_BANK_AGENT',
                  'REC_BANK_AGENT_NAME', 'REC_BANK_AGENT_ADDR', 'CREDIT_ACCT_NO1', 'CREDIT_ACCT_NO2', 'MUTUAL_FUND_ACCT_NO',
                  'CREDIT_ACCT_NO3', 'CREATED_BY', 'CREATED_BY_NAME'],
@@ -884,6 +885,7 @@ module MAPI
             delivery_instructions: delivery_instructions_from_header_details(header_details),
             securities: format_securities(securities),
             authorized_date: header_details['AUTHORIZED_DATE'],
+            authorized_by: header_details['AUTHORIZED_BY'],
             user: {
               username: header_details['CREATED_BY'],
               full_name: header_details['CREATED_BY_NAME'],
@@ -981,6 +983,7 @@ module MAPI
           created_by_name = names[created_by_offset]
           authorized_by_name = names.sample(random: rng)
           safekept_account_number = rng.rand(1000..9999)
+          pledge_to = PLEDGE_TO.values.sample(random: rng)
           {
             'REQUEST_ID' => request_id,
             'PLEDGE_TYPE' => pledge_type,
@@ -1007,7 +1010,8 @@ module MAPI
             'SUBMITTED_BY' => created_by_name,
             'AUTHORIZED_BY' => authorized ? authorized_by_name : nil,
             'AUTHORIZED_DATE' => authorized ? authorized_date : nil,
-            'PLEDGE_TO' => PLEDGE_TO.values.sample(random: rng),
+            'AUTHORIZED_BY' => authorized ? authorized_by_name : nil,
+            'PLEDGE_TO' => pledge_to,
             'PLEDGED_ADX_ID' => rng.rand(1000..9999),
             'UNPLEDGED_ADX_ID' => safekept_account_number,
             'UNPLEGED_TRANSFER_ADX_ID' => safekept_account_number

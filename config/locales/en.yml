@@ -203,6 +203,7 @@ en:
     unpaid_balance: Unpaid Balance
     status: Status
     authorized_by: Authorized By
+    custodian_name: 'Custodian Name%{footnote_marker}'
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -1203,12 +1204,22 @@ en:
         description: Authorized requests are displayed for 7 days after settlement.
       view:
         request_id: 'Request ID:'
-        pledge_account: 'Pledge Account:'
+        authorization_date: 'Authorization Date:'
+        pledged_account: 'To Pledged Account:'
+        safekeeping_account: 'To Safekeeping Account:'
+        from_pledged_account: 'From Pledged Account:'
+        from_safekeeping_account: 'From Safekeeping Account:'
+        pledge: Pledge
         request_details:
           title: Request Details
           request_id: Request ID
           authorized_by: Authorized By
           authorization_date: Authorization Date
+          pledge_to:
+            pledge_type: Pledge Type
+            types:
+              sbc: SBC
+              standard_credit: Standard
         broker_instructions:
           title: Broker Instructions
           transaction_code: Transaction Code
@@ -1240,6 +1251,30 @@ en:
         release:
           title: Release Securities
           footer: Release Securities Request
+        safekept_intake:
+          title: Safekeeping Securities Request
+          footer: Safekeeping Securities Request
+        pledge_intake:
+          title: Pledge Securities Request
+          footer: Pledge Securities Request
+        pledge_release:
+          title: Release Pledged Securities Request
+          footer: Release Pledged Securities Request
+          legal:
+            notices: By authorizing the release of the specific securities listed above, your institution is requesting the release and redelivery or reassignment of these securities pursuant to the terms of the Advances and Security Agreement between your institution and the Bank. You hereby certify that, as of the date of release of the securities, as requested, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Advances and Security Agreement) that will remain pledged to (and, if your institution is currently required to deliver collateral to the Bank, that will be held by) the Bank immediately after the requested release will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Advances and Security Agreement).
+            reservation_of_rights: All rights, remedies, and obligations of the Bank with respect to the listed securities above shall be in accordance with the Advances and Security Agreement.
+        safekept_release:
+          title: Release Safekept Securities Request
+          footer: Release Safekept Securities Request
+        safekept_transfer:
+          title: Transfer Safekept Securities Request
+          footer: Transfer Safekept Securities Request
+        pledge_transfer:
+          title: Transfer Pledged Securities Request
+          footer: Transfer Pledged Securities Request
+          legal:
+            notices: By authorizing the transfer of the specific securities listed above, your institution is requesting the release and redelivery or reassignment of these securities pursuant to the terms of the Advances and Security Agreement between your institution and the Bank. You hereby certify that, as of the date of transfer of the securities, as requested, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Advances and Security Agreement) that will remain pledged to (and, if your institution is currently required to deliver collateral to the Bank, that will be held by) the Bank immediately after the requested transfer will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Advances and Security Agreement).
+            reservation_of_rights: All rights, remedies, and obligations of the Bank with respect to the listed securities above shall be in accordance with the Advances and Security Agreement.
     release:
       title: Release Securities
       add_securities: Add Securities

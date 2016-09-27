@@ -60,6 +60,11 @@ class SecuritiesController < ApplicationController
     }
   }.freeze
 
+  PLEDGE_TO_MAPPING = {
+    :sbc => I18n.t('securities.requests.view.request_details.pledge_to.types.sbc'),
+    :standard => I18n.t('securities.requests.view.request_details.pledge_to.types.standard_credit')
+  }.freeze
+
   VALID_REQUEST_TYPES = [:release, :pledge, :safekeep, :transfer].freeze
 
   before_action do
@@ -188,9 +193,7 @@ class SecuritiesController < ApplicationController
             {value: request[:authorized_by]},
             {value: request[:authorized_date], type: :date},
             {value: request[:settle_date], type: :date},
-            {value: [[t('global.view'), kind == 'pledge_release' || kind == 'safekept_release' ?
-              securities_release_generate_authorized_request_path(request_id: request[:request_id]) :
-              "#"]], type: :actions}
+            {value: [[t('global.view'), securities_release_generate_authorized_request_path(request_id: request[:request_id], kind: kind)]], type: :actions}
           ]
         }
       end
@@ -198,60 +201,91 @@ class SecuritiesController < ApplicationController
   end
 
   def generate_authorized_request
-    job_status = RenderSecuritiesRequestsPDFJob.perform_later(current_member_id, { request_id: params[:request_id] }).job_status
+    job_status = RenderSecuritiesRequestsPDFJob.perform_later(current_member_id, { request_id: params[:request_id], kind: params[:kind] }).job_status
     job_status.update_attributes!(user_id: current_user.id)
     render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
   end
 
   def view_authorized_request
-    @title = t('securities.requests.view.release.title')
     @member = MembersService.new(request).member(current_member_id)
     raise ActionController::RoutingError.new("There has been an error and SecuritiesController#view_authorized_request has encountered nil calling MembersService. Check error logs.") if @member.nil?
     @member_profile = MemberBalanceService.new(current_member_id, request).profile
     raise ActionController::RoutingError.new("There has been an error and SecuritiesController#view_authorized_request has encountered nil calling MemberBalanceService. Check error logs.") if @member_profile.nil?
     @securities_request = SecuritiesRequestService.new(current_member_id, request).submitted_request(params[:request_id])
     raise ActionController::RoutingError.new("There has been an error retrieving the securities request. Check error logs.") if @securities_request.nil?
-    account_number = @securities_request.kind == :pledge_release || @securities_request.kind == :safekept_intake ? @securities_request.pledged_account : @securities_request.safekept_account
-
+    account_number = case @securities_request.kind
+    when :pledge_release, :pledge_intake
+      @securities_request.pledged_account
+    when :safekept_intake, :safekept_release
+      @securities_request.safekept_account
+    else
+      ArgumentError.new("invalid kind: #{@securities_request.kind}")
+    end
+    @title = case @securities_request.kind
+    when :pledge_release
+      t('securities.requests.view.pledge_release.title')
+    when :safekept_release
+      t('securities.requests.view.safekept_release.title')
+    when :safekept_intake
+      t('securities.requests.view.safekept_intake.title')
+    when :pledge_intake
+      t('securities.requests.view.pledge_intake.title')
+    when :safekept_transfer
+      t('securities.requests.view.safekept_transfer.title')
+    when :pledge_transfer
+      t('securities.requests.view.pledge_transfer.title')
+    end
     @request_details_table_data = {
       rows: [ { columns: [ { value: t('securities.requests.view.request_details.request_id') },
                            { value: @securities_request.request_id } ] },
               { columns: [ { value: t('securities.requests.view.request_details.authorized_by') },
                            { value: @securities_request.authorized_by } ] },
               { columns: [ { value: t('securities.requests.view.request_details.authorization_date') },
-                           { value: @securities_request.authorized_date } ] } ] }
+                           { value: fhlb_date_standard_numeric(@securities_request.authorized_date) } ] } ] }
+    @request_details_table_data[:rows] << { columns: [
+      { value: t('securities.requests.view.request_details.pledge_to.pledge_type') },
+      { value: PLEDGE_TO_MAPPING[@securities_request.pledge_to] } ] } if @securities_request.kind == :safekept_transfer
 
-    @broker_instructions_table_data = {
-      rows: [ { columns: [ { value: t('securities.requests.view.broker_instructions.transaction_code') },
-                           { value: @securities_request.transaction_code.to_s.titleize } ] },
-              { columns: [ { value: t('securities.requests.view.broker_instructions.settlement_type') },
-                           { value: @securities_request.settlement_type.to_s.titleize } ] },
-              { columns: [ { value: t('securities.requests.view.broker_instructions.trade_date') },
-                           { value: fhlb_date_standard_numeric(@securities_request.trade_date) } ] },
-              { columns: [ { value: t('securities.requests.view.broker_instructions.settlement_date') },
-                           { value: fhlb_date_standard_numeric(@securities_request.settlement_date) } ] } ] }
+    unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
+      @broker_instructions_table_data = {
+        rows: [ { columns: [ { value: t('securities.requests.view.broker_instructions.transaction_code') },
+                             { value: @securities_request.transaction_code.to_s.titleize } ] },
+                { columns: [ { value: t('securities.requests.view.broker_instructions.settlement_type') },
+                             { value: @securities_request.settlement_type.to_s.titleize } ] },
+                { columns: [ { value: t('securities.requests.view.broker_instructions.trade_date') },
+                             { value: fhlb_date_standard_numeric(@securities_request.trade_date) } ] },
+                { columns: [ { value: t('securities.requests.view.broker_instructions.settlement_date') },
+                             { value: fhlb_date_standard_numeric(@securities_request.settlement_date) } ] } ] }
 
-    @delivery_instructions_table_data = {
-      rows: [ { columns: [ { value: t('securities.requests.view.delivery_instructions.delivery_method') },
-                           { value: get_delivery_instructions(@securities_request.delivery_type) } ] },
-              { columns: [ { value: t('securities.requests.view.delivery_instructions.clearing_agent') },
-                           { value: @securities_request.clearing_agent_participant_number } ] },
-              { columns: [ { value: t('securities.requests.view.delivery_instructions.further_credit') },
-                           { value: account_number } ] } ] }
+      @delivery_instructions_table_data = {
+        rows: [ { columns: [ { value: t('securities.requests.view.delivery_instructions.delivery_method') },
+                             { value: get_delivery_instructions(@securities_request.delivery_type) } ] },
+                { columns: [ { value: t('securities.requests.view.delivery_instructions.clearing_agent') },
+                             { value: @securities_request.clearing_agent_participant_number } ] },
+                { columns: [ { value: t('securities.requests.view.delivery_instructions.further_credit') },
+                             { value: account_number } ] } ] }
+    end
     rows = []
     @securities_request.securities.each do |security|
       rows << { columns: [ { value: security.cusip },
                            { value: security.description },
-                           { value: security.original_par, type: :currency_whole },
-                           { value: security.payment_amount, type: :currency_whole } ] }
+                           { value: security.original_par, type: :currency_whole } ] }
+      rows.last[:columns] << { value: security.payment_amount, type: :currency_whole } unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
+      rows.last[:columns] << { value: security.custodian_name } if SecuritiesRequest::INTAKE_KINDS.include?(@securities_request.kind)
     end
+
     @securities_table_data = {
       column_headings: [ t('common_table_headings.cusip'),
                          t('common_table_headings.description'),
-                         fhlb_add_unit_to_table_header(t('common_table_headings.original_par'), '$'),
-                         fhlb_add_unit_to_table_header(t('common_table_headings.settlement_amount'), '$') ],
+                         fhlb_add_unit_to_table_header(t('common_table_headings.original_par'), '$') ],
       rows: rows
     }
+    @securities_table_data[:column_headings] <<
+      t('securities.requests.view.securities.settlement_amount',
+        footnote_marker: fhlb_footnote_marker) unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
+    @securities_table_data[:column_headings] <<
+      t('common_table_headings.custodian_name',
+        footnote_marker: fhlb_footnote_marker(1)) if SecuritiesRequest::INTAKE_KINDS.include?(@securities_request.kind)
   end
 
   def edit_safekeep

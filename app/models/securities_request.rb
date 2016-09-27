@@ -25,7 +25,8 @@ class SecuritiesRequest
   }.freeze
 
   KINDS = [:pledge_release, :safekept_release, :pledge_intake, :safekept_intake, :pledge_transfer, :safekept_transfer].freeze
-  TRANSFER_REQUEST_KINDS = [:pledge_transfer, :safekept_transfer].freeze
+  TRANSFER_KINDS = [:pledge_transfer, :safekept_transfer].freeze
+  INTAKE_KINDS = [:pledge_intake, :safekept_intake].freeze
   SECURITIES_KINDS = [:safekept_release, :safekept_intake].freeze
   COLLATERAL_KINDS = [:pledge_release, :pledge_intake, :pledge_transfer, :safekept_transfer].freeze
   FORM_TYPES = [:pledge_release, :safekept_release, :pledge_intake, :safekept_intake]
@@ -68,7 +69,7 @@ class SecuritiesRequest
   attr_reader :securities
 
   validates *[:delivery_type, :securities, :kind, :form_type], presence: true
-  validates *[:pledged_account, :safekept_account], presence: true, if: Proc.new { |request| request.kind && TRANSFER_REQUEST_KINDS.include?(request.kind)  }
+  validates *[:pledged_account, :safekept_account], presence: true, if: Proc.new { |request| request.kind && TRANSFER_KINDS.include?(request.kind)  }
   validates :pledge_to, presence: true, if: Proc.new { |request| request.kind && request.kind == :pledge_intake || request.kind == :pledge_transfer  }
   validates *(DELIVERY_INSTRUCTION_KEYS[:fed] - [:fed_credit_account_number]), presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :fed }
   validates *(DELIVERY_INSTRUCTION_KEYS[:dtc] - [:dtc_credit_account_number]), presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :dtc }
@@ -76,7 +77,7 @@ class SecuritiesRequest
   validates *(DELIVERY_INSTRUCTION_KEYS[:physical_securities] - [:physical_securities_credit_account_number]), presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :physical_securities }
   validate :original_par_under_fed_limit, if: Proc.new { |request| request.delivery_type && request.delivery_type == :fed }
 
-  with_options if: Proc.new { |request| !TRANSFER_REQUEST_KINDS.include?(request.kind) } do
+  with_options if: Proc.new { |request| !TRANSFER_KINDS.include?(request.kind) } do
     validates *BROKER_INSTRUCTION_KEYS, presence: true
     validate :trade_date_must_come_before_settlement_date
     validate :trade_date_within_range
@@ -152,7 +153,7 @@ class SecuritiesRequest
       value = case key
       when :trade_date, :settlement_date, :authorized_date
         value ? Time.zone.parse(value) : value
-      when :transaction_code
+      when :transaction_code, :pledge_to
         value.to_sym
       when :securities, *ACCESSIBLE_ATTRS
         value
@@ -250,7 +251,7 @@ class SecuritiesRequest
   end
 
   def valid_securities_payment_amount?
-    unless securities.blank? || settlement_type.blank? || TRANSFER_REQUEST_KINDS.include?(kind)
+    unless securities.blank? || settlement_type.blank? || TRANSFER_KINDS.include?(kind)
       payment_amount_present = securities.map { |security| security.payment_amount.present? }
 
       if payment_amount_present.uniq.length == 1 && payment_amount_present.first

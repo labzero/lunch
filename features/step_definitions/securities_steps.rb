@@ -468,9 +468,22 @@ When(/^I check the box to select all displayed securities$/) do
   page.find('.manage-securities-table input[name="check_all"]').click
 end
 
-When(/^I request a PDF of an authorized security request$/) do
+When(/^I request a PDF of an authorized (pledge|release|safekeep|transfer) securities request$/) do |type|
+  description = case type
+  when 'pledge'
+    I18n.t('securities.requests.form_descriptions.pledge')
+  when 'release'
+    I18n.t('securities.requests.form_descriptions.release')
+  when 'safekeep'
+    I18n.t('securities.requests.form_descriptions.safekept')
+  when 'transfer'
+    I18n.t('securities.requests.form_descriptions.transfer')
+  else
+    raise ArgumentError, "unknown form type: #{type}"
+  end
+  row = page.all('.authorized-requests td', text: description, exact: true).first.find(:xpath, '..')
   jquery_execute("$('body').on('downloadStarted', function(){$('body').addClass('download-started')})")
-  page.find('.securities-request-table a', text: /\A#{I18n.t('global.view').upcase}\z/, match: :first).click
+  row.find('td:last-child a', text: /\A#{I18n.t('global.view').upcase}\z/, match: :first).click
 end
 
 When(/^I discard the uploaded securities$/) do

@@ -238,7 +238,10 @@ RSpec.describe SecuritiesController, type: :controller do
               {value: request[:authorized_by]},
               {value: request[:authorized_date], type: :date},
               {value: request[:settle_date], type: :date},
-              {value: [[I18n.t('global.view'), request[:kind] == 'pledge_release' || request[:kind] == 'safekeep_release' ? "/securities/request/#{request[:request_id]}" : "#"]], type: :actions}
+              {value: [[I18n.t('global.view'),
+                securities_release_generate_authorized_request_path(request_id: request[:request_id],
+                  kind: request[:kind])]],
+                  type: :actions}
             ]
           }
         end
@@ -1396,12 +1399,12 @@ RSpec.describe SecuritiesController, type: :controller do
     let(:request_id) { rand(0..99999) }
     let(:controller) { SecuritiesController.new }
     let(:profile) { double('Member Profile') }
-    let(:member) { double('Member') }
+    let(:member) { instance_double(Member) }
     let(:authorized_by) { SecureRandom.hex }
     let(:authorized_date) { Time.zone.today }
     let(:transaction_code) { double('Transaction Code') }
-    let(:members_service_instance) { double('Members Service', member: member ) }
-    let(:member_balance_service_instance) { double('Member Balance Service', profile: profile) }
+    let(:members_service_instance) { instance_double(MembersService, member: member ) }
+    let(:member_balance_service_instance) { instance_double(MemberBalanceService, profile: profile) }
     let(:settlement_type) {  SecureRandom.hex }
     let(:trade_date) { Time.zone.today }
     let(:settlement_date) { Time.zone.today }
@@ -1412,11 +1415,15 @@ RSpec.describe SecuritiesController, type: :controller do
     let(:original_par) { rand(0..9999) }
     let(:payment_amount) { rand(0..9999) }
     let(:delivery_type_string) { SecureRandom.hex }
-    let(:security) { double('Security', cusip: cusip,
+    let(:pledge_type) { double('Pledge Type') }
+    let(:security) { instance_double(Security, cusip: cusip,
                                         description: description,
                                         original_par: original_par,
-                                        payment_amount: payment_amount) }
-    let(:securities_request) { double('Securities Request', request_id: request_id,
+                                        payment_amount: payment_amount,
+                                        custodian_name: SecureRandom.hex) }
+    let(:pledged_account) { rand(9999..99999) }
+    let(:safekept_account) { rand(9999..99999) }
+    let(:securities_request) { instance_double(SecuritiesRequest, request_id: request_id,
                                                             authorized_by: authorized_by,
                                                             authorized_date: authorized_date,
                                                             transaction_code: transaction_code,
@@ -1426,12 +1433,13 @@ RSpec.describe SecuritiesController, type: :controller do
                                                             settlement_date: settlement_date,
                                                             securities: [ security ],
                                                             clearing_agent_participant_number: clearing_agent_participant_number,
-                                                            kind: :pledge_release,
-                                                            pledged_account: rand(9999..99999),
-                                                            safekept_account: rand(9999..99999),
+                                                            kind: nil,
+                                                            pledge_to: pledge_type,
+                                                            pledged_account: pledged_account,
+                                                            safekept_account: safekept_account,
                                                             is_collateral?: double('Is Collateral?')) }
-    let(:securities_request_service_instance) { double('Securities Request Service', submitted_request: securities_request )}
-    let(:user) { double('User',
+    let(:securities_request_service_instance) { instance_double(SecuritiesRequestService, submitted_request: securities_request )}
+    let(:user) { instance_double(User,
                         display_name: 'A User',
                         roles: [User::Roles::COLLATERAL_SIGNER],
                         surname: 'User',
@@ -1452,80 +1460,204 @@ RSpec.describe SecuritiesController, type: :controller do
       subject.instance_variable_set(:@securities_request, securities_request)
     end
 
-    it 'sets the report name' do
-      call_action
-      expect(subject.instance_variable_get(:@title)).to eq(I18n.t('securities.requests.view.release.title'))
+    shared_examples 'setting the preconditions for generating a PDF for each `kind` of securities request' do |kind, title|
+      before do
+        allow(securities_request).to receive(:kind).and_return(kind)
+      end
+
+      it 'sets the report name' do
+        call_action
+        expect(subject.instance_variable_get(:@title)).to eq(title)
+      end
+      it 'sets the member' do
+        call_action
+        expect(subject.instance_variable_get(:@member)).to eq(member)
+      end
+      it 'raises an error if the `member` is nil' do
+        allow(members_service_instance).to receive(:member).and_return(nil)
+        expect { call_action }.to raise_error(ActionController::RoutingError)
+      end
+      it 'sets the member profile' do
+        call_action
+        expect(subject.instance_variable_get(:@member_profile)).to eq(profile)
+      end
+      it 'raises an error if the `member_profile` is nil' do
+        allow(member_balance_service_instance).to receive(:profile).and_return(nil)
+        expect { call_action }.to raise_error(ActionController::RoutingError)
+      end
+      it 'sets the securities request' do
+        call_action
+        expect(subject.instance_variable_get(:@securities_request)).to eq(securities_request)
+      end
+      it 'raises an error if the `securities_request` is nil' do
+        allow(securities_request_service_instance).to receive(:submitted_request).and_return(nil)
+        expect { call_action }.to raise_error(ActionController::RoutingError)
+      end
     end
-    it 'sets the member' do
-      call_action
-      expect(subject.instance_variable_get(:@member)).to eq(member)
+
+    shared_examples 'an action that generates a PDF for securities intake' do |kind, account|
+      before do
+        allow(securities_request).to receive(:kind).and_return(kind)
+      end
+      it 'sets the request details table data' do
+        call_action
+        request_details = {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                             { value: securities_request.request_id } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                             { value: securities_request.authorized_by } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] } ] }
+        expect(subject.instance_variable_get(:@request_details_table_data)).to eq(request_details)
+      end
+      it 'sets broker instructions table data' do
+        call_action
+        expect(subject.instance_variable_get(:@broker_instructions_table_data)).to eq( {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.transaction_code') },
+                               { value: securities_request.transaction_code.to_s.titleize } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_type') },
+                               { value: securities_request.settlement_type.to_s.titleize } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.trade_date') },
+                               { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.trade_date) } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_date') },
+                               { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.settlement_date) } ] } ] } )
+      end
+      it 'sets delivery instructions table data' do
+        call_action
+        expect(subject.instance_variable_get(:@delivery_instructions_table_data)).to eq( {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.delivery_method') },
+                               { value: delivery_type_string } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.clearing_agent') },
+                               { value: securities_request.clearing_agent_participant_number } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.further_credit') },
+                               { value: securities_request.public_send(account) } ] } ] } )
+      end
+      it 'sets securities table data' do
+        table_data = {  column_headings: [
+          I18n.t('common_table_headings.cusip'),
+          I18n.t('common_table_headings.description'),
+          fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+          I18n.t('securities.requests.view.securities.settlement_amount', footnote_marker: fhlb_footnote_marker),
+          I18n.t('common_table_headings.custodian_name', footnote_marker: fhlb_footnote_marker(1))],
+          rows: [ { columns: [ { value: security.cusip },
+                               { value: security.description },
+                               { value: security.original_par, type: :currency_whole },
+                               { value: security.payment_amount, type: :currency_whole },
+                               { value: security.custodian_name } ] } ] }
+        call_action
+        expect(subject.instance_variable_get(:@securities_table_data)).to eq(table_data)
+      end
     end
-    it 'raises an error if the `member` is nil' do
-      allow(members_service_instance).to receive(:member).and_return(nil)
-      expect { call_action }.to raise_error(ActionController::RoutingError)
+
+    shared_examples 'an action that generates a PDF for securities release' do |kind, account|
+      before do
+        allow(securities_request).to receive(:kind).and_return(kind)
+      end
+      it 'sets the request details table data' do
+        call_action
+        request_details = {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                             { value: securities_request.request_id } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                             { value: securities_request.authorized_by } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] } ] }
+        expect(subject.instance_variable_get(:@request_details_table_data)).to eq(request_details)
+      end
+      it 'sets broker instructions table data' do
+        call_action
+        expect(subject.instance_variable_get(:@broker_instructions_table_data)).to eq( {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.transaction_code') },
+                               { value: securities_request.transaction_code.to_s.titleize } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_type') },
+                               { value: securities_request.settlement_type.to_s.titleize } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.trade_date') },
+                               { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.trade_date) } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_date') },
+                               { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.settlement_date) } ] } ] } )
+      end
+      it 'sets delivery instructions table data' do
+        call_action
+        expect(subject.instance_variable_get(:@delivery_instructions_table_data)).to eq( {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.delivery_method') },
+                               { value: delivery_type_string } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.clearing_agent') },
+                               { value: securities_request.clearing_agent_participant_number } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.further_credit') },
+                               { value: securities_request.public_send(account) } ] } ] } )
+      end
+      it 'sets securities table data' do
+        table_data = {  column_headings: [ I18n.t('common_table_headings.cusip'),
+                             I18n.t('common_table_headings.description'),
+                             fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+                              I18n.t('securities.requests.view.securities.settlement_amount', footnote_marker: fhlb_footnote_marker) ],
+                        rows: [ { columns: [ { value: security.cusip },
+                                             { value: security.description },
+                                             { value: security.original_par, type: :currency_whole },
+                                             { value: security.payment_amount, type: :currency_whole } ] } ] }
+        call_action
+        expect(subject.instance_variable_get(:@securities_table_data)).to eq(table_data)
+      end
     end
-    it 'sets the member profile' do
-      call_action
-      expect(subject.instance_variable_get(:@member_profile)).to eq(profile)
+
+    {safekept_intake: I18n.t('securities.requests.view.safekept_intake.title'),
+     pledge_intake: I18n.t('securities.requests.view.pledge_intake.title'),
+     safekept_release: I18n.t('securities.requests.view.safekept_release.title'),
+     pledge_release: I18n.t('securities.requests.view.pledge_release.title'),
+     safekept_transfer: I18n.t('securities.requests.view.safekept_transfer.title'),
+     pledge_transfer: I18n.t('securities.requests.view.pledge_transfer.title')}.each do |kind, title|
+      describe "when `kind` is `#{kind}`" do
+        it_behaves_like 'setting the preconditions for generating a PDF for each `kind` of securities request', kind, title
+      end
     end
-    it 'raises an error if the `member_profile` is nil' do
-      allow(member_balance_service_instance).to receive(:profile).and_return(nil)
-      expect { call_action }.to raise_error(ActionController::RoutingError)
+
+    {:safekept_intake => :safekept_account,
+     :pledge_intake => :pledged_account }.each do |kind, account|
+      describe "when `kind` is `#{kind}`" do
+        it_behaves_like 'an action that generates a PDF for securities intake', kind, account
+      end
     end
-    it 'sets the securities request' do
-      call_action
-      expect(subject.instance_variable_get(:@securities_request)).to eq(securities_request)
+
+    {:safekept_release => :safekept_account,
+     :pledge_release => :pledged_account }.each do |kind, account|
+      describe "when `kind` is `#{kind}`" do
+        it_behaves_like 'an action that generates a PDF for securities release', kind, account
+      end
     end
-    it 'raises an error if the `securities_request` is nil' do
-      allow(securities_request_service_instance).to receive(:submitted_request).and_return(nil)
-      expect { call_action }.to raise_error(ActionController::RoutingError)
+
+    context do
+      before do
+        allow(securities_request).to receive(:kind).and_return(:pledged_transfer)
+      end
+      it 'sets the request details table data for `pledged_transfer`' do
+        call_action
+        expect(subject.instance_variable_get(:@request_details_table_data)).to eq({
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                             { value: securities_request.request_id } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                             { value: securities_request.authorized_by } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] } ] })
+      end
     end
-    it 'sets the request details table data' do
-      call_action
-      expect(subject.instance_variable_get(:@request_details_table_data)).to eq( {
-        rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
-                           { value: securities_request.request_id } ] },
-              { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
-                           { value: securities_request.authorized_by } ] },
-              { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
-                           { value: securities_request.authorized_date } ] } ] } )
-    end
-    it 'sets broker instructions table data' do
-      call_action
-      expect(subject.instance_variable_get(:@broker_instructions_table_data)).to eq( {
-        rows: [ { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.transaction_code') },
-                             { value: securities_request.transaction_code.to_s.titleize } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_type') },
-                             { value: securities_request.settlement_type.to_s.titleize } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.trade_date') },
-                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.trade_date) } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_date') },
-                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.settlement_date) } ] } ] } )
-    end
-    it 'sets delivery instructions table data' do
-      call_action
-      expect(subject.instance_variable_get(:@delivery_instructions_table_data)).to eq( {
-        rows: [ { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.delivery_method') },
-                             { value: delivery_type_string } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.clearing_agent') },
-                             { value: securities_request.clearing_agent_participant_number } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.further_credit') },
-                             { value: securities_request.kind == :pledge_release || securities_request.kind == :safekept_release ? securities_request.pledged_account : securities_request.safekept_account } ] } ] } )
-    end
-    it 'sets securities table data' do
-      call_action
-      expect(subject.instance_variable_get(:@securities_table_data)).to eq( {
-        column_headings: [ I18n.t('common_table_headings.cusip'),
-                           I18n.t('common_table_headings.description'),
-                           fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
-                           fhlb_add_unit_to_table_header(I18n.t('common_table_headings.settlement_amount'), '$') ],
-        rows: [ { columns: [ { value: security.cusip },
-                           { value: security.description },
-                           { value: security.original_par, type: :currency_whole },
-                           { value: security.payment_amount, type: :currency_whole } ] } ] } )
+    context do
+      before do
+        allow(securities_request).to receive(:kind).and_return(:safekept_transfer)
+      end
+      it 'sets the request details table data for `safekept_transfer`' do
+        call_action
+        expect(subject.instance_variable_get(:@request_details_table_data)).to eq({ rows: [
+          { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                       { value: securities_request.request_id } ] },
+          { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                       { value: securities_request.authorized_by } ] },
+          { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                       { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] },
+          { columns: [ { value: I18n.t('securities.requests.view.request_details.pledge_to.pledge_type') },
+                       { value: SecuritiesController::PLEDGE_TO_MAPPING[securities_request.pledge_to] } ] } ] })
+      end
     end
   end
-
   describe 'private methods' do
     describe '`kind_to_description`' do
       {

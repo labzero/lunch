@@ -14,13 +14,13 @@ RSpec.describe SecuritiesRequest, :type => :model do
       expect(subject).not_to validate_presence_of :pledge_to
     end
     [:pledged_account, :safekept_account].each do |attr|
-      described_class::TRANSFER_REQUEST_KINDS.each do |kind|
+      described_class::TRANSFER_KINDS.each do |kind|
         it "validates the presence of `#{attr}` if the `kind` equals `#{kind}`" do
           subject.kind = kind
           expect(subject).to validate_presence_of attr
         end
       end
-      (described_class::KINDS - described_class::TRANSFER_REQUEST_KINDS).each do |kind|
+      (described_class::KINDS - described_class::TRANSFER_KINDS).each do |kind|
         it "does not validate the presence of `#{attr}` if the `kind` is `#{kind}`" do
           subject.kind = kind
           expect(subject).not_to validate_presence_of attr
@@ -269,7 +269,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
         call_validation
       end
     end
-    described_class::TRANSFER_REQUEST_KINDS.each do |kind|
+    described_class::TRANSFER_KINDS.each do |kind|
       describe "when the kind is `#{kind}`" do
         before { subject.kind = kind }
         described_class::BROKER_INSTRUCTION_KEYS.each do |attr|
@@ -449,9 +449,9 @@ RSpec.describe SecuritiesRequest, :type => :model do
       end
     end
     describe '`attributes=`' do
-      sym_attrs = [:transaction_code]
+      sym_attrs = [:transaction_code, :pledge_to]
       date_attrs = [:trade_date, :settlement_date, :authorized_date]
-      custom_attrs = [:request_id, :form_type, :kind, :delivery_type, :settlement_type]
+      custom_attrs = [:authorized_by, :request_id, :form_type, :kind, :delivery_type, :settlement_type]
       let(:hash) { {} }
       let(:value) { double('some value') }
       let(:call_method) { subject.send(:attributes=, hash) }

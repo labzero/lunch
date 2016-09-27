@@ -1319,6 +1319,7 @@ describe MAPI::ServiceApp do
       let(:account_number) { rand(10000..99999) }
       let(:submitted_date) { Time.zone.today }
       let(:authorized_date_offset) { rand(0..2) }
+      let(:authorized_by) { SecureRandom.hex }
       let(:created_by_offset) { rand(0..names.length-1) }
       let!(:form_type) { rand(70..73) }
       let(:authorized_by_offset) { rand(0..names.length-1) }

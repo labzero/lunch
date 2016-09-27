@@ -83,10 +83,16 @@ Scenario: A signer authorizes a previously submitted request
   Then I should see the authorize request success page
 
 @jira-mem-1685
-Scenario: Download a PDF of an authorized security request
+Scenario Outline: Download a PDF of an authorized security request
   Given I am on the securities request page
-  When I request a PDF of an authorized security request
+  When I request a PDF of an authorized <type> securities request
   Then I should begin downloading a file
+Examples:
+| type     |
+| pledge   |
+| release  |
+| safekeep |
+| transfer |
 
 @jira-mem-1741 @data-unavailable
 Scenario Outline: Signer deletes a previously submitted request
