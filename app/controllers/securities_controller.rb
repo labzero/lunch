@@ -244,7 +244,7 @@ class SecuritiesController < ApplicationController
                            { value: fhlb_date_standard_numeric(@securities_request.authorized_date) } ] } ] }
     @request_details_table_data[:rows] << { columns: [
       { value: t('securities.requests.view.request_details.pledge_to.pledge_type') },
-      { value: PLEDGE_TO_MAPPING[@securities_request.pledge_to] } ] } if @securities_request.kind == :safekept_transfer
+      { value: PLEDGE_TO_MAPPING[@securities_request.pledge_to] } ] } if @securities_request.kind == :pledge_transfer
 
     unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
       @broker_instructions_table_data = {
