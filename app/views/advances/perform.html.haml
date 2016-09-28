@@ -1,5 +1,5 @@
 = render layout: 'add_advance', locals: { title: t('advances.add_advance.titles.complete') } do
-  .add-advance-confirmation.add-advance-confirmation.row
+  .add-advance-confirmation.row
     .add-advance-body.column-9x3-left
       .add-advance-icon-section.icon-success-before
         %p= t('dashboard.quick_advance.confirmation.intro', date_time: fhlb_datetime_standard_numeric_with_on(@initiated_at))

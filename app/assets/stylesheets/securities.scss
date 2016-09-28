@@ -83,7 +83,7 @@
   text-transform: none;
 }
 
-.manage-securities-form, .securities-submit-release-form {
+.manage-securities-form, .securities-submit-request-form {
   input[type=submit], .primary-button {
     float: right;
     margin-left: 10px;
@@ -410,7 +410,7 @@
   display: none;
 }
 
-.securities-submit-release-form-errors {
+.securities-submit-request-form-errors {
   color: $alert-red;
 }
 

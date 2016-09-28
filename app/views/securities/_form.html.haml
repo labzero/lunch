@@ -1,4 +1,4 @@
-= form_for(@securities_request, validate: true, url: url, html: {class: 'securities-submit-release-form'}) do |f|
+= form_for(@securities_request, validate: true, url: url, html: {class: 'securities-submit-request-form'}) do |f|
   = f.hidden_field(:request_id)
   = f.hidden_field(:kind)
   = f.hidden_field(:trade_date)
@@ -6,7 +6,7 @@
   = f.hidden_field(:pledged_account)
   = f.hidden_field(:safekept_account)
   - if @error_message
-    .securities-submit-release-form-errors
+    .securities-submit-request-form-errors
       %p= @error_message
   %section.securities-broker-instructions
     %h2= t('securities.release.broker_instructions')
@@ -78,4 +78,4 @@
       = render 'shared/securid_module', error: @securid_status
   .securities-actions
     %span.secondary-button.delete-request-trigger{disabled: @securities_request.request_id && !policy(:security).delete?}= t('global.delete')
-    =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true)
+    =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true, data: {authorizer: @authorizer})

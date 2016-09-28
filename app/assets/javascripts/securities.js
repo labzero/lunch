@@ -76,21 +76,26 @@ $(function() {
     $securitiesUploadInstructions.toggle();
   });
 
+  var $securitiesForm = $('.securities-submit-request-form');
+  var $submitField = $securitiesForm.find('input[type=submit]');
+  var $secureIDTokenField = $('#securid_token');
+  var $secureIDPinField = $('#securid_pin');
+
   // Add the securities fields to release form from the download form.  Keeps one source of truth for securities in the DOM.
-  $('.securities-submit-release-form').on('submit', function(e){
+  $('.securities-submit-request-form').on('submit', function(e){
     var submitReleaseForm = $(this);
     var securitiesFieldsClones = $('input[name="securities"]').clone();
     $.each(securitiesFieldsClones, function(i, input) {
       $(input).attr('name', 'securities_request[securities]');
       submitReleaseForm.append(input);
     });
-
+    if ($secureIDTokenField.length > 0 && $secureIDPinField.length > 0 && !Fhlb.Utils.validateSecurID($(this))) {
+      return false;
+    } else {
+      trackRequestFormSubmit();
+      return true;
+    }
   });
-
-  var $securitiesForm = $('.securities-submit-release-form');
-  var $submitField = $securitiesForm.find('input[type=submit]');
-  var $secureIDTokenField = $('#securid_token');
-  var $secureIDPinField = $('#securid_pin');
 
   // Validate length of SecurID token and pin
   if ($secureIDPinField.length && $secureIDTokenField.length) {
@@ -163,14 +168,6 @@ $(function() {
   if ($securitiesForm.length > 0) {
     Fhlb.Utils.findAndDisplaySecurIDErrors($securitiesForm);
   };
-
-  $securitiesForm.on('submit', function(e) {
-    if ($secureIDTokenField.length > 0 && $secureIDPinField.length > 0 && !Fhlb.Utils.validateSecurID($(this))) {
-      return false;
-    } else {
-      return true;
-    }
-  });
 
   $securitiesReleaseWrapper.on('click', '.safekeep-pledge-upload-again', function(e){
     $securitiesUploadInstructions.hide();
@@ -255,4 +252,29 @@ $(function() {
   function downloadError() {
     $('.flyout').addClass('flyout-loading-error');
   };
+
+  // BEGIN - Google Analytics
+  var authorizer = $submitField.data('authorizer');
+  function trackRequestFormSubmit() {
+    if (authorizer) {
+      var hasRequestId = $('input[name="securities_request[request_id]"]').val().length;
+      if (hasRequestId) {
+        Fhlb.Track.securities_authorize_request();
+      } else {
+        Fhlb.Track.securities_submit_request();
+        Fhlb.Track.securities_authorize_request();
+      };
+    } else {
+      Fhlb.Track.securities_submit_request();
+    };
+  };
+
+  if ($('.securities-submit-request-form-errors').length) {
+    authorizer ? Fhlb.Track.securities_authorize_request_failed() : Fhlb.Track.securities_submit_request_failed();
+  };
+
+  $('.securities-submit-request-form').length ? Fhlb.Track.securities_request_form() : null;
+  $('.securities-download-instructions, .safekeep-pledge-download-area').on('file-uploading', Fhlb.Track.securities_file_upload);
+  $('.securities-download-instructions, .safekeep-pledge-download-area').on('upload-failed', Fhlb.Track.securities_file_upload_failed);
+  // END - Google Analytics
 });
