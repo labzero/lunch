@@ -155,7 +155,6 @@ class ResourcesController < ApplicationController
         {
           title: t('resources.forms.authorizations.website.securid'),
           form_number: 2228,
-          pdf_link: resources_download_path(file: :form_2228),
           docusign_link: token
         }
       else
