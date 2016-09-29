@@ -230,9 +230,9 @@ en:
               invalid: Settlement date may not occur on a weekend, a holiday, or be a date in the past.
               before_trade_date: Settlement Date must be on or after Trade Date.
             securities:
-              payment_amount_missing: If Settlement Type is Vs. Payment, each security must have a Settlement Amount. Press Edit Securities to add the Settlement Amount.
-              payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank. Press Edit Securities to remove Settlement Amount.
-              original_par: Securities with Fed delivery must have Original Par of $50 million or less. Press Edit Securities to submit lots of $50 million or less.
+              payment_amount_missing: If Settlement Type is Vs. Payment, each security must have a Settlement Amount.
+              payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank.
+              original_par: Securities with Fed delivery must have Original Par of $50 million or less.
         security:
           blank: "Each row must contain a CUSIP and an Original Par.\nEdit your file and try again."
           not_a_number: '%{attribute} must be a number.'
