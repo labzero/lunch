@@ -23,7 +23,7 @@ class ReportsController < ApplicationController
   MONTHLY_SECURITIES_WEB_FLAGS = [MembersService::MONTHLY_SECURITIES_POSITION]
   FORWARD_COMMITMENTS_WEB_FLAG = [MembersService::ADVANCES_DETAIL_DATA]
   CAPITAL_STOCK_AND_LEVERAGE_WEB_FLAGS = [MembersService::FHLB_STOCK_DATA]
-  ACCOUNT_SUMMARY_WEB_FLAGS = [MembersService::FINANCING_AVAILABLE_DATA, MembersService::CREDIT_OUTSTANDING_DATA, MembersService::COLLATERAL_HIGHLIGHTS_DATA, MembersService::FHLB_STOCK_DATA]
+  ACCOUNT_SUMMARY_WEB_FLAGS = [MembersService::CREDIT_OUTSTANDING_DATA, MembersService::COLLATERAL_HIGHLIGHTS_DATA, MembersService::FHLB_STOCK_DATA]
   INTEREST_RATE_RESETS_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
   TODAYS_CREDIT_ACTIVITY_WEB_FLAGS = [MembersService::TODAYS_CREDIT_ACTIVITY]
   MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
@@ -1725,77 +1725,83 @@ class ReportsController < ApplicationController
     downloadable_report(:pdf, nil, report_download_name) do
       member_balance_service = MemberBalanceService.new(current_member_id, request)
       members_service = MembersService.new(request)
-      member_profile = DEFAULT_MEMBER_PROFILE
-      member_details = {}
-      unless report_disabled?(ACCOUNT_SUMMARY_WEB_FLAGS)
-        member_profile = member_balance_service.profile || DEFAULT_MEMBER_PROFILE
-        member_details = members_service.member(current_member_id) || {}
-      end
+      member_profile = member_balance_service.profile || DEFAULT_MEMBER_PROFILE
+      member_details = members_service.member(current_member_id) || {}
+
 
       @intraday_datetime = @now
       @credit_datetime = @now
+
+      unless report_disabled?(MembersService::FINANCING_AVAILABLE_DATA)
+        @financing_availability = {
+          rows: [
+            {
+              columns: [
+                {value: t('reports.pages.account_summary.financing_availability.asset_percentage')},
+                {value: (member_profile[:financing_percentage] if member_profile[:financing_percentage]), type: :percentage}
+              ]
+            },
+            {
+              columns: [
+                {value: t('reports.pages.account_summary.financing_availability.maximum_term')},
+                {value: member_profile[:maximum_term], type: :months}
+              ]
+            },
+            {
+              columns: [
+                {value: t('reports.pages.account_summary.financing_availability.total_assets')},
+                {value: member_profile[:total_assets], type: :currency_whole}
+              ]
+            },
+            {
+              columns: [
+                {value: t('reports.pages.account_summary.financing_availability.total_financing_availability')},
+                {value: member_profile[:total_financing_available], type: :currency_whole}
+              ]
+            },
+            {
+              columns: [
+                {value: t('reports.pages.account_summary.financing_availability.approved_credit')},
+                {value: member_profile[:approved_long_term_credit], type: :currency_whole}
+              ]
+            },
+            {
+              columns: [
+                {value: t('reports.pages.account_summary.financing_availability.credit_outstanding')},
+                {value: member_profile[:credit_outstanding][:total], type: :currency_whole}
+              ]
+            },
+            {
+              columns: [
+                {value: t('reports.pages.account_summary.financing_availability.forward_commitments')},
+                {value: member_profile[:forward_commitments], type: :currency_whole}
+              ]
+            }
+          ],
+          footer: [
+            {value: t('reports.pages.account_summary.financing_availability.remaining_financing_availability')},
+            {value: member_profile[:remaining_financing_available], type: :currency_whole}
+          ]
+        }
+        if member_profile[:mpf_credit_available].present? && member_profile[:mpf_credit_available] > 0
+          @financing_availability[:rows].insert(-2, {
+                                                    columns: [
+                                                      {value: t('reports.pages.account_summary.financing_availability.mpf_credit_available')},
+                                                      {value: member_profile[:mpf_credit_available], type: :currency_whole}
+                                                    ]
+                                                  })
+        end
+      end
+
+      if report_disabled?(ACCOUNT_SUMMARY_WEB_FLAGS)
+        member_profile = DEFAULT_MEMBER_PROFILE
+        member_details = {}
+      end
+
       @collateral_notice = member_profile[:collateral_delivery_status] == 'Y'
       @sta_number = member_details[:sta_number]
       @fhfa_number = member_details[:fhfa_number]
       @member_name = member_details[:name]
-      @financing_availability = {
-        rows: [
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.financing_availability.asset_percentage')},
-              {value: (member_profile[:financing_percentage] if member_profile[:financing_percentage]), type: :percentage}
-            ]
-          },
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.financing_availability.maximum_term')},
-              {value: member_profile[:maximum_term], type: :months}
-            ]
-          },
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.financing_availability.total_assets')},
-              {value: member_profile[:total_assets], type: :currency_whole}
-            ]
-          },
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.financing_availability.total_financing_availability')},
-              {value: member_profile[:total_financing_available], type: :currency_whole}
-            ]
-          },
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.financing_availability.approved_credit')},
-              {value: member_profile[:approved_long_term_credit], type: :currency_whole}
-            ]
-          },
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.financing_availability.credit_outstanding')},
-              {value: member_profile[:credit_outstanding][:total], type: :currency_whole}
-            ]
-          },
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.financing_availability.forward_commitments')},
-              {value: member_profile[:forward_commitments], type: :currency_whole}
-            ]
-          }
-        ],
-        footer: [
-          {value: t('reports.pages.account_summary.financing_availability.remaining_financing_availability')},
-          {value: member_profile[:remaining_financing_available], type: :currency_whole}
-        ]
-      }
-      if member_profile[:mpf_credit_available].present? && member_profile[:mpf_credit_available] > 0
-        @financing_availability[:rows].insert(-2, {
-                                                  columns: [
-                                                    {value: t('reports.pages.account_summary.financing_availability.mpf_credit_available')},
-                                                    {value: member_profile[:mpf_credit_available], type: :currency_whole}
-                                                  ]
-                                                })
-      end
 
       @credit_outstanding = {
         rows: [
@@ -2097,7 +2103,7 @@ class ReportsController < ApplicationController
 
   def report_disabled?(report_flags)
     member_info = MembersService.new(request)
-    @report_disabled = member_info.report_disabled?(current_member_id, report_flags)
+    @report_disabled = member_info.report_disabled?(current_member_id, Array.wrap(report_flags))
   end
 
   def add_rate_objects_for_all_terms(rates_by_date_array, terms, credit_type)
