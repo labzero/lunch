@@ -10,9 +10,14 @@
 @import '../../styles/_variables.scss';
 
 .root {
-  background: $background-color;
+  background: url('./header-bg.jpg');
+  border-top: $default-border;
   color: #fff;
   padding: 20px 15px;
+
+  &, button {
+    text-shadow: 0 0 5px black, 0 0 10px black, 0 0 20px black;
+  }
 }
 
 .container {
@@ -21,17 +26,8 @@
   text-align: center;
 }
 
-.text {
-  color: rgba(255, 255, 255, .5);
-}
-
-.textMuted {
-  color: rgba(255, 255, 255, .3);
-}
-
 .spacer {
-  border-left: 1px solid rgba(255, 255, 255, .3);
-  color: rgba(255, 255, 255, .3);
+  border-left: 1px solid #fff;
 }
 
 .text,
@@ -45,11 +41,7 @@
 .link:visited {
   background: none;
   border: 0;
-  color: rgba(255, 255, 255, .6);
+  color: #fff;
   outline: none;
   text-decoration: none;
-}
-
-.link:hover {
-  color: rgba(255, 255, 255, 1);
 }

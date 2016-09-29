@@ -11,17 +11,17 @@ body {
 }
 
 a {
-  color: #88e;
+  color: $link-color;
 
   &:hover {
-    color: #66e;
+    color: $link-hover-color;
   }
 }
 
 .geosuggest__input {
   border: $default-border;
   border-radius: 100px;
-  box-shadow: inset 3px 3px 5px rgba(0, 0, 0, .2);
+  box-shadow: inset 5px 5px 0px rgba(128, 0, 0, .1);
   outline: none;
 }
 

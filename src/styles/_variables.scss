@@ -3,6 +3,8 @@
  * ========================================================================== */
 
 $background-color: #333;
+$link-color: #88e;
+$link-hover-color: #66e;
 
 /*
  * Typography
@@ -28,4 +30,5 @@ $screen-lg-min: 1200px; /* Large screen / wide desktop */
 /*
  * Etc.
  * ========================================================================== */
-$default-border: 2px solid #000;
+$default-border-width: 3px;
+$default-border: $default-border-width solid #000;

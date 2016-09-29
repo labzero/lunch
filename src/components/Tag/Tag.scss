@@ -1,7 +1,7 @@
 @import '../../styles/_mixins.scss';
 
 .root {
-  background: #ddd;
+  background: transparentize(pink, .5);
   color: #666;
   font-size: .75em;
   line-height: 1;

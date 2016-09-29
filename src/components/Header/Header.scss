@@ -9,9 +9,17 @@
 
 @import '../../styles/_variables.scss';
 
+@-webkit-keyframes animatedBackground {
+  from {
+    background-position: 0px 0px; }
+
+  to {
+    background-position: 300px -300px; } 
+}
+
 .root {
-  background-image: url('./header-bg.jpg');
-  background-size: cover;
+  animation: animatedBackground infinite 15s linear;
+  background-image: url('./background.svg');
 }
 
 .container {

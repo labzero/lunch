@@ -1,7 +1,9 @@
+@import '../../styles/_variables.scss';
+
 .root {
   background: #e5e3df;
   border: solid black;
-  border-width: 2px 0;
+  border-width: ($default-border-width * 2) 0 $default-border-width;
   height: 500px;
   overflow: hidden;
   position: relative;
