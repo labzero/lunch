@@ -11,10 +11,12 @@
 
 @-webkit-keyframes animatedBackground {
   from {
-    transform: translate3d(0, 0, 0); }
+    transform: translate3d(0, 0, 0);
+  }
 
   to {
-    transform: translate3d(300px, -300px, 0); } 
+    transform: translate3d(300px, -300px, 0);
+  } 
 }
 
 .root {
@@ -24,9 +26,9 @@
 .background {
   animation: animatedBackground infinite 15s linear;
   background-image: url('./background.svg');
+  height: 600px;
   left: -300px;
   position: absolute;
-  height: 600px;
   width: 200%;
   z-index: 0;
 }
