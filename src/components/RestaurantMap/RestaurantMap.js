@@ -96,7 +96,45 @@ class RestaurantMap extends Component {
           center={this.props.center}
           margin={[100, 0, 0, 0]}
           options={{
-            scrollwheel: false
+            scrollwheel: false,
+            styles: [
+              {
+                featureType: 'landscape',
+                elementType: 'geometry',
+                stylers: [
+                  {
+                    color: '#fbd1f6'
+                  }
+                ]
+              },
+              {
+                featureType: 'road',
+                elementType: 'geometry',
+                stylers: [
+                  {
+                    color: '#fbf5fa'
+                  }
+                ]
+              },
+              {
+                featureType: 'poi',
+                elementType: 'geometry.fill',
+                stylers: [
+                  {
+                    color: '#fdc0cb'
+                  }
+                ]
+              },
+              {
+                featureType: 'water',
+                elementType: 'geometry',
+                stylers: [
+                  {
+                    color: '#ff75e3'
+                  }
+                ]
+              }
+            ]
           }}
           onGoogleApiLoaded={setMap}
           onClick={this.props.mapClicked}
