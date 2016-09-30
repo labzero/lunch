@@ -11,21 +11,32 @@
 
 @-webkit-keyframes animatedBackground {
   from {
-    background-position: 0px 0px; }
+    transform: translate3d(0, 0, 0); }
 
   to {
-    background-position: 300px -300px; } 
+    transform: translate3d(300px, -300px, 0); } 
 }
 
 .root {
+  position: relative;
+}
+
+.background {
   animation: animatedBackground infinite 15s linear;
   background-image: url('./background.svg');
+  left: -300px;
+  position: absolute;
+  height: 600px;
+  width: 200%;
+  z-index: 0;
 }
 
 .container {
   margin: 0 auto;
   padding: 10px 0;
+  position: relative;
   max-width: $max-content-width;
+  z-index: 1;
 }
 
 .brand {

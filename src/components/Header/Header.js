@@ -22,6 +22,7 @@ const Header = ({ flashes }) => {
 
   return (
     <div className={s.root}>
+      <div className={s.background} />
       <div className={s.flashes}>
         {flashContainers}
       </div>

@@ -3,6 +3,8 @@
   float: right;
   line-height: 1;
   padding: .5em;
+  position: relative;
+  z-index: 1;
 }
 
 .flexContainer {
