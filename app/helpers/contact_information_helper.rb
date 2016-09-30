@@ -5,13 +5,15 @@ module ContactInformationHelper
   MEMBERSHIP_EMAIL = 'membership@fhlbsf.com'
   OPERATIONS_EMAIL = 'portfoliooperations@fhlbsf.com'
   ACCOUNTING_EMAIL = 'capitalstock@fhlbsf.com'
-  SECURITIES_SERVICES_EMAIL = 'securities@fhlbsf.com'
+  SECURITIES_SERVICES_EMAIL = 'securitiesservices@fhlbsf.com'
+  COLLATERAL_OPERATIONS_EMAIL = 'collateraloperations@fhlbsf.com'
   WEB_SUPPORT_PHONE_NUMBER = '4156162610'
   SERVICE_DESK_PHONE_NUMBER = '8004443452'
   OPERATIONS_PHONE_NUMBER = '4156162559'
   MCU_PHONE_NUMBER = '4156162757'
   ACCOUNTING_PHONE_NUMBER = '4156162620'
   SECURITIES_SERVICES_PHONE_NUMBER = '4156162970'
+  COLLATERAL_OPERATIONS_PHONE_NUMBER = '4156162980'
 
   def web_support_email
     "mailto:#{WEB_SUPPORT_EMAIL}"
@@ -35,6 +37,10 @@ module ContactInformationHelper
 
   def securities_services_email
     "mailto:#{SECURITIES_SERVICES_EMAIL}"
+  end
+
+  def collateral_operations_email
+    "mailto:#{COLLATERAL_OPERATIONS_EMAIL}"
   end
 
   def securities_services_email_text
@@ -63,5 +69,9 @@ module ContactInformationHelper
 
   def securities_services_phone_number
     fhlb_formatted_phone_number(SECURITIES_SERVICES_PHONE_NUMBER)
+  end
+
+  def collateral_operations_phone_number
+    fhlb_formatted_phone_number(COLLATERAL_OPERATIONS_PHONE_NUMBER)
   end
 end

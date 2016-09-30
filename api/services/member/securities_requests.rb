@@ -71,10 +71,11 @@ module MAPI
           Proc.new { |value| SETTLEMENT_TYPE.invert[value.to_i] } => ['REQUEST_STATUS'],
           Proc.new { |value| DELIVERY_TYPE.invert[value.to_i] } => ['DELIVER_TO', 'RECEIVE_FROM'],
           Proc.new { |value| REQUEST_FORM_TYPE_MAPPING[value] } => ['FORM_TYPE'],
+          Proc.new { |value| PLEDGE_TO.invert[value.to_i] } => ['PLEDGE_TO'],
           to_s: ['BROKER_WIRE_ADDR', 'ABA_NO', 'DTC_AGENT_PARTICIPANT_NO', 'MUTUAL_FUND_COMPANY', 'DELIVERY_BANK_AGENT',
                  'REC_BANK_AGENT_NAME', 'REC_BANK_AGENT_ADDR', 'CREDIT_ACCT_NO1', 'CREDIT_ACCT_NO2', 'MUTUAL_FUND_ACCT_NO',
                  'CREDIT_ACCT_NO3', 'CREATED_BY', 'CREATED_BY_NAME'],
-          to_date: ['SETTLE_DATE', 'TRADE_DATE']
+          to_date: ['SETTLE_DATE', 'TRADE_DATE', 'AUTHORIZED_DATE']
         }.freeze
 
         RELEASE_REQUEST_SECURITIES_MAPPING = {
@@ -114,9 +115,20 @@ module MAPI
           transfer: [:pledge_transfer, :safekept_transfer].freeze
         }.freeze
 
+        KIND_TRANSFER_MAPPING = {
+          pledge_transfer: {
+            adx_type: :pledged_intake,
+            account_column_name: 'RECEIVE_FROM'
+          },
+          safekept_transfer: {
+            adx_type: :pledged_release,
+            account_column_name: 'DELIVER_TO'
+          }
+        }.freeze
+
         module ADXAccountTypeMapping
-          SYMBOL_TO_STRING = { pledged: 'P', unpledged: 'U' }.freeze
-          STRING_TO_SYMBOL = SYMBOL_TO_STRING.invert.freeze
+          SYMBOL_TO_STRING = { pledged: 'Pledged', unpledged: 'Unpledged' }.freeze
+          STRING_TO_SYMBOL = {'U' => :unpledged, 'P' => :pledged}.freeze
           SYMBOL_TO_SQL_COLUMN_NAME = { pledged_intake: 'PLEDGED_ADX_ID',
                                         pledged_release: 'PLEDGED_ADX_ID',
                                         unpledged_intake: 'UNPLEDGED_ADX_ID',
@@ -127,27 +139,26 @@ module MAPI
                                       unpledged_release: SSKFormType::SAFEKEPT_RELEASE }.freeze
         end
 
-        def self.requests_query(member_id, status_array, date_range)
+        def self.requests_query(member_id, status_array, start_date)
           quoted_statuses = status_array.collect { |status| quote(status) }.join(',')
           <<-SQL
             SELECT HEADER_ID AS REQUEST_ID, FORM_TYPE, DELIVER_TO, RECEIVE_FROM, SETTLE_DATE, CREATED_DATE AS SUBMITTED_DATE, CREATED_BY_NAME AS SUBMITTED_BY,
             SIGNED_BY_NAME AS AUTHORIZED_BY, SIGNED_DATE AS AUTHORIZED_DATE, STATUS FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
-            WHERE FHLB_ID = #{quote(member_id)} AND STATUS IN (#{quoted_statuses}) AND SETTLE_DATE >= #{quote(date_range.first)}
-            AND SETTLE_DATE <= #{quote(date_range.last)} AND FORM_TYPE IS NOT NULL
+            WHERE FHLB_ID = #{quote(member_id)} AND STATUS IN (#{quoted_statuses}) AND SETTLE_DATE >= #{quote(start_date)}
+            AND FORM_TYPE IS NOT NULL
           SQL
         end
 
-        def self.requests(app, member_id, status = MAPIRequestStatus::AUTHORIZED, settlement_date_range=nil)
+        def self.requests(app, member_id, status = MAPIRequestStatus::AUTHORIZED, start_date=nil)
           flat_status = flat_unique_array(status)
           requests = (
-            end_date = settlement_date_range.try(:last) || Time.zone.today
-            start_date = settlement_date_range.try(:first) || (end_date - 7.days)
+            start_date ||= Time.zone.today - 7.days
             if should_fake?(app)
-              self.fake_header_details_array(member_id.to_i, (start_date..end_date)).select do |header_details|
-                flat_status.include?(header_details['STATUS']) && header_details['SUBMITTED_DATE'] >= start_date && header_details['SUBMITTED_DATE'] <= end_date
+              self.fake_header_details_array(member_id.to_i, start_date).select do |header_details|
+                flat_status.include?(header_details['STATUS']) && header_details['SUBMITTED_DATE'] >= start_date
               end
             else
-              fetch_hashes(app.logger, requests_query(member_id, flat_status, (start_date..end_date)))
+              fetch_hashes(app.logger, requests_query(member_id, flat_status, start_date))
             end
           )
           requests.collect do |request|
@@ -205,7 +216,7 @@ module MAPI
                                                          LAST_MODIFIED_BY,
                                                          LAST_MODIFIED_DATE,
                                                          LAST_MODIFIED_BY_NAME,
-                                                         #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]},
+                                                         #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type_release]},
                                                          #{delivery_columns.join(', ')}
                                                         )
             VALUES (#{quote(header_id)},
@@ -248,7 +259,7 @@ module MAPI
                                                          LAST_MODIFIED_BY,
                                                          LAST_MODIFIED_DATE,
                                                          LAST_MODIFIED_BY_NAME,
-                                                         #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]},
+                                                         #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type_intake]},
                                                          PLEDGE_TO,
                                                          #{delivery_columns.join(', ')}
                                                         )
@@ -276,13 +287,6 @@ module MAPI
 
         def self.insert_transfer_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, un_adx_id, broker_instructions, kind)
           now = Time.zone.today
-          if (kind == :pledge_transfer)
-            deliver_receive = 'RECEIVE_FROM'
-            adx_type = :pledged_intake
-          else
-            deliver_receive = 'DELIVER_TO'
-            adx_type = :pledged_release
-          end
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
                                                          FHLB_ID,
@@ -291,7 +295,7 @@ module MAPI
                                                          TRADE_DATE,
                                                          REQUEST_STATUS,
                                                          SETTLE_DATE,
-                                                         #{deliver_receive},
+                                                         #{KIND_TRANSFER_MAPPING[kind][:account_column_name]},
                                                          FORM_TYPE,
                                                          CREATED_DATE,
                                                          CREATED_BY,
@@ -311,7 +315,7 @@ module MAPI
                     #{quote(SETTLEMENT_TYPE[broker_instructions['settlement_type']])},
                     #{quote(broker_instructions['settlement_date'])},
                     #{quote(SSKDeliverTo::INTERNAL_TRANSFER)},
-                    #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[adx_type])},
+                    #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[KIND_TRANSFER_MAPPING[kind][:adx_type]])},
                     #{quote(now)},
                     #{quote(format_username(user_name))},
                     #{quote(full_name)},
@@ -362,9 +366,8 @@ module MAPI
             WHERE ADX.BAT_ID = BAT.BAT_ID
             AND ADX.CP_ID = CP.CP_ID
             AND CP.FHLB_ID = #{quote(member_id)}
-            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = #{quote(ADXAccountTypeMapping::SYMBOL_TO_STRING[type])}
+            AND BAT.BAT_ACCOUNT_TYPE = #{quote(ADXAccountTypeMapping::SYMBOL_TO_STRING[type])}
             AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
-            AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
             ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
           SQL
         end
@@ -488,7 +491,7 @@ module MAPI
           end
           if delivery_type == 'fed'
             securities.each do |security|
-              raise MAPI::Shared::Errors::CustomTypedFieldError.new("original par must be less than $#{FED_AMOUNT_LIMIT}", :original_par, :securities, FED_AMOUNT_LIMIT) unless security['original_par'] < FED_AMOUNT_LIMIT
+              raise MAPI::Shared::Errors::CustomTypedFieldError.new("original par must be less than $#{FED_AMOUNT_LIMIT}", :original_par, :securities, FED_AMOUNT_LIMIT) unless security['original_par'] <= FED_AMOUNT_LIMIT
             end
           end
         end
@@ -536,8 +539,27 @@ module MAPI
             AND STATUS = #{quote(SSKRequestStatus::SUBMITTED)}
           SQL
         end
+        def self.update_transfer_header_details_query(member_id, header_id, user_name, full_name, session_id, adx_id, un_adx_id, broker_instructions, kind)
+          <<-SQL
+            UPDATE SAFEKEEPING.SSK_WEB_FORM_HEADER SET
+              TRADE_DATE                = #{quote(broker_instructions['trade_date'])},
+              REQUEST_STATUS            = #{quote(SETTLEMENT_TYPE[broker_instructions['settlement_type']])},
+              SETTLE_DATE               = #{quote(broker_instructions['settlement_date'])},
+              #{KIND_TRANSFER_MAPPING[kind][:account_column_name]}        = #{quote(SSKDeliverTo::INTERNAL_TRANSFER)},
+              FORM_TYPE                 = #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[KIND_TRANSFER_MAPPING[kind][:adx_type]])},
+              LAST_MODIFIED_BY          = #{quote(format_modification_by(user_name, session_id))},
+              LAST_MODIFIED_DATE        = #{quote(Time.zone.today)},
+              LAST_MODIFIED_BY_NAME     = #{quote(full_name)},
+              PLEDGED_ADX_ID            = #{quote(adx_id)},
+              UNPLEGED_TRANSFER_ADX_ID  = #{quote(un_adx_id)},
+              PLEDGE_TO                 = #{quote(PLEDGE_TO[broker_instructions['pledge_to']])}
+            WHERE HEADER_ID = #{quote(header_id)}
+            AND FHLB_ID = #{quote(member_id)}
+            AND STATUS = #{quote(SSKRequestStatus::SUBMITTED)}
+          SQL
+        end
 
-        def self.update_request_security_query(header_id, user_name, session_id, security)
+        def self.update_request_security_query(header_id, user_name, session_id, security, detail_id)
           <<-SQL
             UPDATE SAFEKEEPING.SSK_WEB_FORM_DETAIL SET
               DESCRIPTION        = #{quote(security['description'])},
@@ -545,7 +567,7 @@ module MAPI
               PAYMENT_AMOUNT     = #{quote(nil_to_zero(security['payment_amount']))},
               LAST_MODIFIED_DATE = #{quote(Time.zone.today)},
               LAST_MODIFIED_BY   = #{quote(format_modification_by(user_name, session_id))}
-            WHERE CUSIP = UPPER(#{quote(security['cusip'])})
+            WHERE DETAIL_ID = #{quote(detail_id)}
             AND HEADER_ID = #{quote(header_id)}
           SQL
         end
@@ -604,13 +626,14 @@ module MAPI
               securities.each do |security|
                 existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
                 if existing_security && security_has_changed(security, existing_security)
-                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security)
+                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security, existing_security[:detail_id])
                   raise MAPI::Shared::Errors::SQLError, 'Failed to update security intake request detail' unless execute_sql(app.logger, update_security_sql)
                 elsif !existing_security
                   detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
                   insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, nil)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security intake request detail' unless execute_sql(app.logger, insert_security_sql)
                 end
+                existing_securities.delete(existing_security)
               end
               existing_header = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
               raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless existing_header
@@ -638,7 +661,6 @@ module MAPI
           unless should_fake?(app)
             header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
             ActiveRecord::Base.transaction do
-              adx_type = get_adx_type_from_security(app, securities.first)
               adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), "ADX ID")
               insert_header_sql = insert_release_header_query(member_id,
                                                               header_id,
@@ -682,7 +704,7 @@ module MAPI
               securities.each do |security|
                 existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
                 if existing_security && security_has_changed(security, existing_security)
-                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security)
+                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security, existing_security[:detail_id])
                   raise MAPI::Shared::Errors::SQLError, 'Failed to update security release request detail' unless execute_sql(app.logger, update_security_sql)
                 elsif !existing_security
                   ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
@@ -691,6 +713,7 @@ module MAPI
                   insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security release request detail' unless execute_sql(app.logger, insert_security_sql)
                 end
+                existing_securities.delete(existing_security)
               end
               existing_header = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
               raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless existing_header
@@ -737,7 +760,8 @@ module MAPI
                                                               kind)
               raise "failed to insert security release request header" unless execute_sql(app.logger, insert_header_sql)
               securities.each do |security|
-                ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
+                final_adx_id = (kind == :safekept_transfer ? adx_id : un_adx_id)
+                ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, final_adx_id, security['cusip']), "SSK ID")
                 raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
                 insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
                 raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
@@ -747,6 +771,53 @@ module MAPI
             header_id = rand(100000..999999)
           end
           header_id
+        end
+
+        def self.update_transfer(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, securities, kind)
+          validate_kind(:transfer, kind)
+          set_broker_instructions_for_transfer(broker_instructions, kind)
+          validate_securities(securities, broker_instructions['settlement_type'], :transfer, kind)
+          validate_broker_instructions(broker_instructions, app, kind)
+          unless should_fake?(app)
+            ActiveRecord::Base.transaction(isolation: :read_committed) do
+              cusips = securities.collect{|x| x['cusip']}
+              raise MAPI::Shared::Errors::SQLError, 'Failed to delete old security transfer request detail by CUSIP' unless execute_sql(app.logger, delete_request_securities_by_cusip_query(request_id, cusips))
+              adx_id = execute_sql_single_result(app, adx_query(member_id, :pledged), "ADX ID")
+              un_adx_id = execute_sql_single_result(app, adx_query(member_id, :unpledged), "UN_ADX ID")
+              existing_securities = format_securities(fetch_hashes(app.logger, release_request_securities_query(request_id)))
+              securities.each do |security|
+                existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
+                if existing_security && security_has_changed(security, existing_security)
+                  update_security_sql = update_request_security_query(request_id, user_name, session_id, security, existing_security[:detail_id])
+                  raise MAPI::Shared::Errors::SQLError, 'Failed to update security transfer request detail' unless execute_sql(app.logger, update_security_sql)
+                elsif !existing_security
+                  ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
+                  raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
+                  detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
+                  insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
+                  raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security transfer request detail' unless execute_sql(app.logger, insert_security_sql)
+                end
+                existing_securities.delete(existing_security)
+              end
+              existing_header = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
+              raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless existing_header
+              existing_header = map_hash_values(existing_header, REQUEST_HEADER_MAPPING)
+              if header_has_changed(existing_header, broker_instructions)
+                update_header_sql = update_transfer_header_details_query(member_id,
+                                                                        request_id,
+                                                                        user_name,
+                                                                        full_name,
+                                                                        session_id,
+                                                                        adx_id,
+                                                                        un_adx_id,
+                                                                        broker_instructions,
+                                                                        kind)
+                header_update_count = execute_sql(app.logger, update_header_sql).to_i
+                raise MAPI::Shared::Errors::SQLError, 'No header details found to update' unless header_update_count == 1
+              end
+            end
+          end
+          true
         end
 
         def self.security_has_changed(new_security, old_security)
@@ -759,18 +830,23 @@ module MAPI
           new_security != old_security
         end
 
-        def self.header_has_changed(existing_header, broker_instructions, delivery_instructions)
+        def self.header_has_changed(existing_header, broker_instructions, delivery_instructions=nil)
           existing_header = existing_header.with_indifferent_access
           old_broker_instructions = broker_instructions_from_header_details(existing_header).with_indifferent_access
-          old_delivery_instructions = delivery_instructions_from_header_details(existing_header).with_indifferent_access
-          !(old_broker_instructions == broker_instructions.with_indifferent_access && old_delivery_instructions == delivery_instructions.with_indifferent_access)
+          if delivery_instructions
+            old_delivery_instructions = delivery_instructions_from_header_details(existing_header).with_indifferent_access
+            !(old_broker_instructions == broker_instructions.with_indifferent_access && old_delivery_instructions == delivery_instructions.with_indifferent_access)
+          else
+            !(old_broker_instructions == broker_instructions.with_indifferent_access)
+          end
         end
 
         def self.request_header_details_query(member_id, header_id)
           <<-SQL
-            SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
+            SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, RECEIVE_FROM, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
               MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
-              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO,
+              UNPLEGED_TRANSFER_ADX_ID, SIGNED_DATE AS AUTHORIZED_DATE, SIGNED_BY_NAME AS AUTHORIZED_BY
             FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE HEADER_ID = #{quote(header_id)}
             AND FHLB_ID = #{quote(member_id)}
@@ -779,7 +855,7 @@ module MAPI
 
         def self.release_request_securities_query(header_id)
           <<-SQL
-            SELECT CUSIP, DESCRIPTION, ORIGINAL_PAR, PAYMENT_AMOUNT
+            SELECT DETAIL_ID, CUSIP, DESCRIPTION, ORIGINAL_PAR, PAYMENT_AMOUNT
             FROM SAFEKEEPING.SSK_WEB_FORM_DETAIL
             WHERE HEADER_ID = #{quote(header_id)}
           SQL
@@ -795,18 +871,23 @@ module MAPI
           end
           raise MAPI::Shared::Errors::SQLError, 'No header details found' unless header_details
           raise MAPI::Shared::Errors::SQLError, 'No securities found' unless securities
+          kind = kind_from_details(header_details)
           header_details = map_hash_values(header_details, REQUEST_HEADER_MAPPING).with_indifferent_access
           securities.collect do |security|
             map_hash_values(security, RELEASE_REQUEST_SECURITIES_MAPPING).with_indifferent_access
           end
+          safekept_account = [:pledge_transfer, :safekept_transfer].include?(kind) ? header_details['UNPLEGED_TRANSFER_ADX_ID'] : header_details['UNPLEDGED_ADX_ID']
           {
+            member_id: member_id,
             request_id: request_id,
-            safekept_account: header_details['UNPLEDGED_ADX_ID'],
+            safekept_account: safekept_account,
             pledged_account: header_details['PLEDGED_ADX_ID'],
             form_type: header_details['FORM_TYPE'],
             broker_instructions: broker_instructions_from_header_details(header_details),
             delivery_instructions: delivery_instructions_from_header_details(header_details),
             securities: format_securities(securities),
+            authorized_date: header_details['AUTHORIZED_DATE'],
+            authorized_by: header_details['AUTHORIZED_BY'],
             user: {
               username: header_details['CREATED_BY'],
               full_name: header_details['CREATED_BY_NAME'],
@@ -846,6 +927,7 @@ module MAPI
         def self.format_securities(securities)
           securities.collect do |security|
             {
+              detail_id: security['DETAIL_ID'],
               cusip: security['CUSIP'],
               description: security['DESCRIPTION'],
               original_par: security['ORIGINAL_PAR'],
@@ -854,10 +936,10 @@ module MAPI
           end
         end
 
-        def self.fake_header_details_array(member_id, settlement_date_range = nil)
+        def self.fake_header_details_array(member_id, start_date = nil)
           today = Time.zone.today
           rng = Random.new(member_id.to_i + today.to_time.to_i)
-          settlement_date_range ||= (today..today)
+          start_date ||= today
           list = []
           # require at least one form_type of every type of request
           form_type_status_combos = []
@@ -875,13 +957,14 @@ module MAPI
             form_type = combo.try(:first) || REQUEST_FORM_TYPE_MAPPING.keys.sample(random: rng)
             status = combo.try(:last) || flat_unique_array(REQUEST_STATUS_MAPPING.values).sample(random: rng)
             delivery_type = combo.try(:[], 1)
-            list << fake_header_details(request_id, settlement_date_range.last, status, form_type, delivery_type, settlement_date_range.first)
+            list << fake_header_details(request_id, status, form_type, delivery_type, start_date)
           end
           list
         end
 
-        def self.fake_header_details(request_id, end_date, status, form_type = nil, delivery_type = nil, start_date = nil)
-          start_date ||= end_date
+        def self.fake_header_details(request_id, status, form_type = nil, delivery_type = nil, start_date = nil)
+          start_date ||= Time.zone.today
+          end_date = start_date + 7.days
           rng = Random.new(request_id)
           fake_data = fake('securities_requests')
           names = fake_data['names']
@@ -901,6 +984,8 @@ module MAPI
           created_by = fake_data['usernames'][created_by_offset]
           created_by_name = names[created_by_offset]
           authorized_by_name = names.sample(random: rng)
+          safekept_account_number = rng.rand(1000..9999)
+          pledge_to = PLEDGE_TO.values.sample(random: rng)
           {
             'REQUEST_ID' => request_id,
             'PLEDGE_TYPE' => pledge_type,
@@ -927,9 +1012,10 @@ module MAPI
             'SUBMITTED_BY' => created_by_name,
             'AUTHORIZED_BY' => authorized ? authorized_by_name : nil,
             'AUTHORIZED_DATE' => authorized ? authorized_date : nil,
-            'PLEDGE_TO' => PLEDGE_TO.values.sample(random: rng),
-            'PLEDGED_ADX_ID' => [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SECURITIES_RELEASE].include?(form_type) ? rng.rand(1000..9999) : nil,
-            'UNPLEDGED_ADX_ID' => [SSKFormType::SAFEKEPT_DEPOSIT, SSKFormType::SAFEKEPT_RELEASE].include?(form_type) ? rng.rand(1000..9999) : nil
+            'PLEDGE_TO' => pledge_to,
+            'PLEDGED_ADX_ID' => rng.rand(1000..9999),
+            'UNPLEDGED_ADX_ID' => safekept_account_number,
+            'UNPLEGED_TRANSFER_ADX_ID' => safekept_account_number
           }
         end
 
@@ -940,6 +1026,7 @@ module MAPI
           rng.rand(1..6).times do
             original_par = rng.rand(10000..999999)
             securities << {
+              'DETAIL_ID' => fake_data['detail_ids'].sample(random: rng),
               'CUSIP' => fake_data['cusips'].sample(random: rng),
               'DESCRIPTION' => fake_data['descriptions'].sample(random: rng),
               'ORIGINAL_PAR' => original_par,

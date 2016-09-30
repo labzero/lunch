@@ -71,10 +71,15 @@ class SecuritiesRequestService < MAPIService
   def map_response_to_securities_release_hash(response_hash)
     securities_release = {}
     response_hash[:broker_instructions].each do |key, value|
-      securities_release[key] = value
+      securities_release[key.to_sym] = value
     end
     response_hash[:delivery_instructions].each do |key, value|
-      key = SecuritiesRequest::ACCOUNT_NUMBER_TYPE_MAPPING[response_hash[:delivery_instructions][:delivery_type].to_sym] if key.to_sym == :account_number
+      delivery_type = response_hash[:delivery_instructions][:delivery_type].to_sym
+      key = key.to_sym
+      if key == :account_number
+        next if delivery_type == :transfer
+        key = SecuritiesRequest::ACCOUNT_NUMBER_TYPE_MAPPING[delivery_type]
+      end
       securities_release[key] = value
     end
     securities_release[:form_type] = response_hash[:form_type]
@@ -82,6 +87,9 @@ class SecuritiesRequestService < MAPIService
     securities_release[:securities] = response_hash[:securities]
     securities_release[:pledged_account] = response_hash[:pledged_account]
     securities_release[:safekept_account] = response_hash[:safekept_account]
+    securities_release[:authorized_date] = response_hash[:authorized_date]
+    securities_release[:authorized_by] = response_hash[:authorized_by]
+    securities_release[:member_id] = response_hash[:member_id]
     securities_release
   end
 

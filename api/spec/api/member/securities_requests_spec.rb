@@ -73,19 +73,15 @@ describe MAPI::ServiceApp do
         expect(securities_request_module).to receive(:fake_header_details).with(request_id, any_args).and_return({})
         call_method
       end
-      it 'passes the `end_date` to the `fake_header_details` method' do
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, Time.zone.today, any_args).and_return({})
+      it 'passes a default `start_date` of today to the `fake_header_details` method if no start_date is provided' do
+        expect(securities_request_module).to receive(:fake_header_details).with(request_id, anything, anything, anything, Time.zone.today).and_return({})
         call_method
       end
-      it 'passes the `start_date` to the `fake_header_details` method' do
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, anything, anything, anything, anything, Time.zone.today).and_return({})
-        call_method
-      end
-      it 'passes the `end_date` and `start_date` to `fake_header_details` from the supplied range if present' do
+      it 'passes the `start_date` to `fake_header_details` if present' do
         today = Time.zone.today
-        range = ((today - 3.days)..today)
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, range.last, anything, anything, anything, range.first).and_return({})
-        MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(member_id, range)
+        start_date = [(today - 3.days)..today].sample
+        expect(securities_request_module).to receive(:fake_header_details).with(request_id, anything, anything, anything, start_date).and_return({})
+        MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(member_id, start_date)
       end
       it 'generates at least one request for each form type and status combination' do
         allow(rng).to receive(:rand).with(eq(18..36)).and_return(18)
@@ -98,7 +94,7 @@ describe MAPI::ServiceApp do
         end
         expect(form_type_status_combos.length).to eq(18)
         form_type_status_combos.each do |combo|
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, combo.last, combo.first, combo[1], anything).and_return({})
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, combo.last, combo.first, combo[1], anything).and_return({})
         end
         call_method
       end
@@ -188,10 +184,6 @@ describe MAPI::ServiceApp do
           expect(submitted_date).to receive(:>=).with(today - 7.days)
           call_method
         end
-        it 'returns the results of `fake_header_details_array` that occur on or before the end_date' do
-          expect(submitted_date).to receive(:<=).with(today)
-          call_method
-        end
         include_examples "common processing"
       end
       describe 'when using real data' do
@@ -255,17 +247,15 @@ describe MAPI::ServiceApp do
       it 'constructs proper SQL based on the member_id, status array and date range it is passed' do
         status_array = [SecureRandom.hex, SecureRandom.hex, SecureRandom.hex]
         quoted_statuses = status_array.collect { |status| "'#{status}'" }.join(',')
-        end_date = Time.zone.today - rand(1..10).days
-        start_date = end_date - rand(1..10).days
-        date_range = (start_date..end_date)
+        start_date = Time.zone.today - rand(1..10).days
 
         sql = <<-SQL
             SELECT HEADER_ID AS REQUEST_ID, FORM_TYPE, DELIVER_TO, RECEIVE_FROM, SETTLE_DATE, CREATED_DATE AS SUBMITTED_DATE, CREATED_BY_NAME AS SUBMITTED_BY,
             SIGNED_BY_NAME AS AUTHORIZED_BY, SIGNED_DATE AS AUTHORIZED_DATE, STATUS FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE FHLB_ID = #{member_id} AND STATUS IN (#{quoted_statuses}) AND SETTLE_DATE >= TO_DATE('#{start_date}','YYYY-MM-DD HH24:MI:SS')
-            AND SETTLE_DATE <= TO_DATE('#{end_date}','YYYY-MM-DD HH24:MI:SS') AND FORM_TYPE IS NOT NULL
+            AND FORM_TYPE IS NOT NULL
         SQL
-        expect(MAPI::Services::Member::SecuritiesRequests.requests_query(member_id, status_array, date_range)).to eq(sql)
+        expect(MAPI::Services::Member::SecuritiesRequests.requests_query(member_id, status_array, start_date)).to eq(sql)
       end
     end
 
@@ -348,7 +338,7 @@ describe MAPI::ServiceApp do
 
         it 'expands delivery columns into the insert statement' do
           expect(call_method).to match(
-            /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]},\s+#{delivery_columns.join(',\s+')}/)
+            /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME["#{adx_type}_release".to_sym]},\s+#{delivery_columns.join(',\s+')}/)
         end
 
         it 'sets the `header_id`' do
@@ -667,9 +657,8 @@ describe MAPI::ServiceApp do
             WHERE ADX.BAT_ID = BAT.BAT_ID
             AND ADX.CP_ID = CP.CP_ID
             AND CP.FHLB_ID = #{member_id}
-            AND UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) = #{adx_type_string}
+            AND BAT.BAT_ACCOUNT_TYPE = #{adx_type_string}
             AND CONCAT(TRIM(TRANSLATE(ADX.ADX_BTC_ACCOUNT_NUMBER,' 0123456789',' ')), '*') = '*'
-            AND (BAT.BAT_ACCOUNT_TYPE NOT LIKE '%DB%' AND BAT.BAT_ACCOUNT_TYPE NOT LIKE '%REIT%')
             ORDER BY TO_NUMBER(ADX.ADX_BTC_ACCOUNT_NUMBER) ASC
             SQL
           )
@@ -977,9 +966,10 @@ describe MAPI::ServiceApp do
 
       it 'constructs the proper SQL' do
         expected_sql = <<-SQL
-            SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
+            SELECT PLEDGE_TYPE, REQUEST_STATUS, TRADE_DATE, SETTLE_DATE, DELIVER_TO, RECEIVE_FROM, BROKER_WIRE_ADDR, ABA_NO, DTC_AGENT_PARTICIPANT_NO,
               MUTUAL_FUND_COMPANY, DELIVERY_BANK_AGENT, REC_BANK_AGENT_NAME, REC_BANK_AGENT_ADDR, CREDIT_ACCT_NO1, CREDIT_ACCT_NO2,
-              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO
+              MUTUAL_FUND_ACCT_NO, CREDIT_ACCT_NO3, CREATED_BY, CREATED_BY_NAME, PLEDGED_ADX_ID, UNPLEDGED_ADX_ID, FORM_TYPE, PLEDGE_TO,
+              UNPLEGED_TRANSFER_ADX_ID, SIGNED_DATE AS AUTHORIZED_DATE, SIGNED_BY_NAME AS AUTHORIZED_BY
             FROM SAFEKEEPING.SSK_WEB_FORM_HEADER
             WHERE HEADER_ID = #{header_id}
             AND FHLB_ID = #{member_id}
@@ -995,7 +985,7 @@ describe MAPI::ServiceApp do
 
       it 'constructs the proper SQL' do
         expected_sql = <<-SQL
-            SELECT CUSIP, DESCRIPTION, ORIGINAL_PAR, PAYMENT_AMOUNT
+            SELECT DETAIL_ID, CUSIP, DESCRIPTION, ORIGINAL_PAR, PAYMENT_AMOUNT
             FROM SAFEKEEPING.SSK_WEB_FORM_DETAIL
             WHERE HEADER_ID = #{header_id}
         SQL
@@ -1028,6 +1018,7 @@ describe MAPI::ServiceApp do
         allow(securities_request_module).to receive(:map_hash_values).with(header_details, any_args).and_return(header_details)
         allow(securities_request_module).to receive(:map_hash_values).with(security, any_args).and_return(security)
         allow(security).to receive(:with_indifferent_access).and_return(security)
+        allow(securities_request_module).to receive(:kind_from_details)
       end
 
       describe 'when using fake data' do
@@ -1110,6 +1101,10 @@ describe MAPI::ServiceApp do
           end
         end
       end
+      it 'calls `kind_from_details` with the header_details' do
+        expect(securities_request_module).to receive(:kind_from_details).with(header_details)
+        call_method
+      end
       it 'calls `map_hash_values` on the `header_details`' do
         expect(securities_request_module).to receive(:map_hash_values).with(header_details, any_args).and_return(header_details)
         call_method
@@ -1134,6 +1129,9 @@ describe MAPI::ServiceApp do
         let(:formatted_securities) { double(Array) }
         it 'contains the `request_id` it was passed' do
           expect(call_method[:request_id]).to eq(request_id)
+        end
+        it 'contains the `member_id` it was passed' do
+          expect(call_method[:member_id]).to eq(member_id)
         end
         it 'passes the `header_details` to `broker_instructions_from_header_details`' do
           expect(securities_request_module).to receive(:broker_instructions_from_header_details).with(header_details)
@@ -1172,13 +1170,25 @@ describe MAPI::ServiceApp do
           header_details['PLEDGED_ADX_ID'] = SecureRandom.hex
           expect(call_method[:pledged_account]).to eq(header_details['PLEDGED_ADX_ID'])
         end
-        it 'contains a `safekept_account` with the `UNPLEDGED_ADX_ID`' do
-          header_details['UNPLEDGED_ADX_ID'] = SecureRandom.hex
-          expect(call_method[:safekept_account]).to eq(header_details['UNPLEDGED_ADX_ID'])
-        end
         it 'contains a `form_type` with the `FORM_TYPE`' do
           header_details['FORM_TYPE'] = SecureRandom.hex
           expect(call_method[:form_type]).to eq(header_details['FORM_TYPE'])
+        end
+        [:pledge_transfer, :safekept_transfer].each do |kind|
+          describe "when the `kind` is `#{kind}`" do
+            before { expect(securities_request_module).to receive(:kind_from_details).and_return(kind) }
+
+            it 'contains a `safekept_account` with the `UNPLEGED_TRANSFER_ADX_ID`' do
+              header_details['UNPLEGED_TRANSFER_ADX_ID'] = SecureRandom.hex
+              expect(call_method[:safekept_account]).to eq(header_details['UNPLEGED_TRANSFER_ADX_ID'])
+            end
+          end
+        end
+        describe 'when the `kind` is not `:pledge_transfer` or `:safekept_transfer`' do
+          it 'contains a `safekept_account` with the `UNPLEDGED_ADX_ID`' do
+            header_details['UNPLEDGED_ADX_ID'] = SecureRandom.hex
+            expect(call_method[:safekept_account]).to eq(header_details['UNPLEDGED_ADX_ID'])
+          end
         end
       end
     end
@@ -1274,6 +1284,7 @@ describe MAPI::ServiceApp do
 
     describe '`MAPI::Services::Member::SecuritiesRequests.format_securities`' do
       let(:security) {{
+        'DETAIL_ID' => instance_double(String),
         'CUSIP' => instance_double(String),
         'DESCRIPTION' => instance_double(String),
         'ORIGINAL_PAR' => instance_double(Integer),
@@ -1283,6 +1294,7 @@ describe MAPI::ServiceApp do
       let(:call_method) { securities_request_module.format_securities(securities) }
 
       {
+        detail_id: 'DETAIL_ID',
         cusip: 'CUSIP',
         description: 'DESCRIPTION',
         original_par: 'ORIGINAL_PAR',
@@ -1301,7 +1313,6 @@ describe MAPI::ServiceApp do
       fake_data = fake('securities_requests')
       names = fake_data['names']
       let(:request_id) { rand(1000..9999)}
-      let(:end_date) { Time.zone.today - rand(0..7).days }
       let(:status) { (securities_request_module::MAPIRequestStatus::AUTHORIZED + securities_request_module::MAPIRequestStatus::AWAITING_AUTHORIZATION).sample }
       let(:rng) { instance_double(Random) }
       let(:pledge_type_offset) { rand(0..1) }
@@ -1312,15 +1323,18 @@ describe MAPI::ServiceApp do
       let(:account_number) { rand(10000..99999) }
       let(:submitted_date) { Time.zone.today }
       let(:authorized_date_offset) { rand(0..2) }
+      let(:authorized_by) { SecureRandom.hex }
       let(:created_by_offset) { rand(0..names.length-1) }
       let!(:form_type) { rand(70..73) }
       let(:authorized_by_offset) { rand(0..names.length-1) }
       let(:pledge_to_offset) { rand(0..1) }
+      let(:pledged_adx) { rand(1000..9999) }
+      let(:unpledged_adx) { rand(1000..9999) }
 
-      let(:call_method) { securities_request_module.fake_header_details(request_id, end_date, status) }
+      let(:call_method) { securities_request_module.fake_header_details(request_id, status) }
       before do
         allow(Random).to receive(:new).and_return(rng)
-        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
+        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date, authorized_date_offset, created_by_offset, authorized_by_offset, unpledged_adx, pledge_to_offset, pledged_adx)
         allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
       end
 
@@ -1375,28 +1389,26 @@ describe MAPI::ServiceApp do
       end
       it 'sets the `FORM_TYPE` to the passed one if provided' do
         form_type = double('A Form Type')
-        expect(securities_request_module.fake_header_details(request_id, end_date, status, form_type)['FORM_TYPE']).to eq(form_type)
+        expect(securities_request_module.fake_header_details(request_id, status, form_type)['FORM_TYPE']).to eq(form_type)
       end
       it 'constructs a hash with a `PLEDGE_TO` value' do
         expect(call_method['PLEDGE_TO']).to eq(securities_request_module::PLEDGE_TO.values[pledge_to_offset])
       end
-      it 'selects a `SUBMITTED_DATE` from the `start_date` and `end_date` if both are provided' do
+      it 'constructs a hash with a `PLEDGED_ADX_ID` value' do
+        expect(call_method['PLEDGED_ADX_ID']).to eq(pledged_adx)
+      end
+      it 'constructs a hash with a `UNPLEDGED_ADX_ID` value' do
+        expect(call_method['UNPLEDGED_ADX_ID']).to eq(unpledged_adx)
+      end
+      it 'constructs a hash with a `UNPLEGED_TRANSFER_ADX_ID` value' do
+        expect(call_method['UNPLEGED_TRANSFER_ADX_ID']).to eq(unpledged_adx)
+      end
+      it 'selects a `SUBMITTED_DATE` from the `start_date` and 7 days in the future' do
         start_date = submitted_date
         allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
         allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
-        expect(rng).to receive(:rand).with((start_date..end_date)).and_return(submitted_date)
-        securities_request_module.fake_header_details(request_id, end_date, status, nil, nil, start_date)
-      end
-      {
-        securities_request_module::SSKFormType::SECURITIES_PLEDGED => 'PLEDGED_ADX_ID',
-        securities_request_module::SSKFormType::SECURITIES_RELEASE => 'PLEDGED_ADX_ID',
-        securities_request_module::SSKFormType::SAFEKEPT_DEPOSIT => 'UNPLEDGED_ADX_ID',
-        securities_request_module::SSKFormType::SAFEKEPT_RELEASE => 'UNPLEDGED_ADX_ID'
-      }.each do |form_type, field|
-        it "constructs a hash with a `#{field}` if the `FORM_TYPE` is `#{form_type}`" do
-          allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
-          expect(call_method[field]).to be_present
-        end
+        expect(rng).to receive(:rand).with((start_date..(submitted_date + 7.days))).and_return(submitted_date)
+        securities_request_module.fake_header_details(request_id, status, nil, nil, start_date)
       end
       it 'constructs a hash with a `STATUS` value equal to the passed `status`' do
         expect(call_method['STATUS']).to eq(status)
@@ -1459,6 +1471,7 @@ describe MAPI::ServiceApp do
       let(:original_par) { rand(10000..999999) }
       let(:cusip) { fake_data['cusips'].sample }
       let(:description) { fake_data['descriptions'].sample }
+      let(:detail_id) { fake_data['detail_ids'].sample }
 
       let(:call_method) { securities_request_module.fake_securities(request_id, settlement_type) }
       before do
@@ -1467,6 +1480,7 @@ describe MAPI::ServiceApp do
         allow(rng).to receive(:rand).with(eq(10000..999999)).and_return(original_par)
         allow(fake_data['cusips']).to receive(:sample).with(random: rng).and_return(cusip)
         allow(fake_data['descriptions']).to receive(:sample).with(random: rng).and_return(description)
+        allow(fake_data['detail_ids']).to receive(:sample).with(random: rng).and_return(detail_id)
       end
 
       it 'constructs an array of securities' do
@@ -1493,6 +1507,13 @@ describe MAPI::ServiceApp do
         expect(results.length).to be > 0
         results.each do |result|
           expect(result['ORIGINAL_PAR']).to eq(original_par)
+        end
+      end
+      it 'constructs securities with a `DETAIL_ID` value' do
+        results = call_method
+        expect(results.length).to be > 0
+        results.each do |result|
+          expect(result['DETAIL_ID']).to eq(detail_id)
         end
       end
       describe "when the `settlement_type` is `#{securities_request_module::SSKSettlementType::FREE}`" do
@@ -1821,6 +1842,10 @@ describe MAPI::ServiceApp do
               expect(error.type).to eq(:original_par)
             end
           end
+          it "does not raise a `CustomTypedFieldError` if `delivery_type` is `fed` and `original_par` is exactly #{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}" do
+            security['original_par'] = MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT
+            expect{securities_request_module.validate_securities([security], settlement_type, 'fed', type)}.to_not raise_error
+          end
         end
       end
     end
@@ -2069,6 +2094,7 @@ describe MAPI::ServiceApp do
       let(:header_id) { instance_double(String) }
       let(:username) { instance_double(String) }
       let(:session_id) { instance_double(String) }
+      let(:detail_id) { instance_double(String) }
       let(:security) {{
         'cusip' => instance_double(String),
         'description' => instance_double(String),
@@ -2078,7 +2104,7 @@ describe MAPI::ServiceApp do
       let(:modification_by) { instance_double(String) }
       let(:sentinel) { SecureRandom.hex }
       let(:today) { Time.zone.today }
-      let(:call_method) {securities_request_module.update_request_security_query(header_id, username, session_id, security)}
+      let(:call_method) {securities_request_module.update_request_security_query(header_id, username, session_id, security, detail_id)}
 
       before do
         allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex)
@@ -2112,9 +2138,9 @@ describe MAPI::ServiceApp do
         allow(securities_request_module).to receive(:quote).with(modification_by).and_return(sentinel)
         expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
       end
-      it 'includes the `cusip` in the WHERE clause' do
-        allow(securities_request_module).to receive(:quote).with(security['cusip']).and_return(sentinel)
-        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+CUSIP\s+=\s+UPPER\(#{sentinel}\)(\s+|\z)/)
+      it 'includes the `detail_id` in the WHERE clause' do
+        allow(securities_request_module).to receive(:quote).with(detail_id).and_return(sentinel)
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+DETAIL_ID\s+=\s+#{sentinel}(\s+|\z)/)
       end
       it 'includes the `header_id` in the WHERE clause' do
         allow(securities_request_module).to receive(:quote).with(header_id).and_return(sentinel)
@@ -2151,6 +2177,7 @@ describe MAPI::ServiceApp do
       let(:full_name) { instance_double(String) }
       let(:session_id) { instance_double(String) }
       let(:delivery_type) { instance_double(String) }
+      let(:detail_id_security) { SecureRandom.hex }
       let(:delivery_instructions) {{
         'delivery_type' => delivery_type,
         'account_number' => instance_double(String),
@@ -2168,6 +2195,7 @@ describe MAPI::ServiceApp do
         'settlement_date' => instance_double(String)
       }}
       let(:security) {{
+        'detail_id' => detail_id_security,
         'cusip' => SecureRandom.hex,
         'description' => instance_double(String),
         'original_par' => instance_double(Numeric),
@@ -2444,7 +2472,11 @@ describe MAPI::ServiceApp do
                 call_method
               end
               it 'constructs the `update_request_security_query` with the `security`' do
-                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, security)
+                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, security, anything)
+                call_method
+              end
+              it 'constructs the `update_request_security_query` with the `detail_id`' do
+                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, anything, detail_id_security)
                 call_method
               end
               it 'calls `execute_sql` with the result of `update_request_security_query`' do
@@ -2477,6 +2509,81 @@ describe MAPI::ServiceApp do
               it 'does not execute the `update_request_security_query` sql' do
                 expect(securities_request_module).not_to receive(:execute_sql).with(anything, update_request_security_query)
                 call_method
+              end
+            end
+            describe 'deletes security from `existing_securities` after it has been processed with the same CUSIP' do
+              let(:detail_id_security1) { SecureRandom.hex }
+              let(:detail_id_security2) { SecureRandom.hex }
+              let(:detail_id_security3) { SecureRandom.hex }
+              let(:cusip) { SecureRandom.hex }
+              let(:security1) {{
+                'detail_id' => detail_id_security1,
+                'cusip' => cusip,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:security2) {{
+                'detail_id' => detail_id_security2,
+                'cusip' => cusip,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:security3) {{
+                'detail_id' => detail_id_security3,
+                'cusip' => SecureRandom.hex,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:securities_new) { [security1, security2, security3] }
+              let(:call_method_new) { securities_request_module.update_release(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities_new, kind) }
+              let(:old_security1) { cloned_security =  security1.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              let(:old_security2) { cloned_security =  security2.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              let(:old_security3) { cloned_security =  security3.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              describe 'when the passed securities already exist and have changed' do
+                before do
+                  allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                  allow(securities_request_module).to receive(:security_has_changed).and_return(true)
+                  allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from first security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from third security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                  call_method_new
+                end
+              end
+              describe 'when the passed securities already exists but only the second one has changed' do
+                before do
+                  allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security1).and_return(false)
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security2).and_return(true)
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security3).and_return(false)
+                  allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                end
+                it 'does not execute the `update_request_security_query` from first security' do
+                  expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                  call_method_new
+                end
+                it 'does not execute the `update_request_security_query` from third security' do
+                  expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                  call_method_new
+                end
               end
             end
           end
@@ -2625,6 +2732,7 @@ describe MAPI::ServiceApp do
       let(:full_name) { instance_double(String) }
       let(:session_id) { instance_double(String) }
       let(:delivery_type) { instance_double(String) }
+      let(:detail_id_security) { SecureRandom.hex }
       let(:delivery_instructions) {{
         'delivery_type' => delivery_type,
         'account_number' => instance_double(String),
@@ -2642,6 +2750,7 @@ describe MAPI::ServiceApp do
         'settlement_date' => instance_double(String)
       }}
       let(:security) {{
+        'detail_id' => detail_id_security,
         'cusip' => SecureRandom.hex,
         'description' => instance_double(String),
         'original_par' => instance_double(Numeric),
@@ -2894,7 +3003,11 @@ describe MAPI::ServiceApp do
                 call_method
               end
               it 'constructs the `update_request_security_query` with the `security`' do
-                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, security)
+                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, security, anything)
+                call_method
+              end
+              it 'constructs the `update_request_security_query` with the `detail_id`' do
+                expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, anything, detail_id_security)
                 call_method
               end
               it 'calls `execute_sql` with the result of `update_request_security_query`' do
@@ -2927,6 +3040,81 @@ describe MAPI::ServiceApp do
               it 'does not execute the `update_request_security_query` sql' do
                 expect(securities_request_module).not_to receive(:execute_sql).with(anything, update_request_security_query)
                 call_method
+              end
+            end
+            describe 'deletes security from `existing_securities` after it has been processed with the same CUSIP' do
+              let(:detail_id_security1) { SecureRandom.hex }
+              let(:detail_id_security2) { SecureRandom.hex }
+              let(:detail_id_security3) { SecureRandom.hex }
+              let(:cusip) { SecureRandom.hex }
+              let(:security1) {{
+                'detail_id' => detail_id_security1,
+                'cusip' => cusip,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:security2) {{
+                'detail_id' => detail_id_security2,
+                'cusip' => cusip,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:security3) {{
+                'detail_id' => detail_id_security3,
+                'cusip' => SecureRandom.hex,
+                'description' => instance_double(String),
+                'original_par' => instance_double(Numeric),
+                'payment_amount' => instance_double(Numeric),
+                'custody_account_type' => instance_double(String)
+              }}
+              let(:securities_new) { [security1, security2, security3] }
+              let(:call_method_new) { securities_request_module.update_intake(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities_new, kind) }
+              let(:old_security1) { cloned_security =  security1.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              let(:old_security2) { cloned_security =  security2.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              let(:old_security3) { cloned_security =  security3.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+              describe 'when the passed securities already exist and have changed' do
+                before do
+                  allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                  allow(securities_request_module).to receive(:security_has_changed).and_return(true)
+                  allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from first security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from third security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                  call_method_new
+                end
+              end
+              describe 'when the passed securities already exists but only the second one has changed' do
+                before do
+                  allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security1).and_return(false)
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security2).and_return(true)
+                  allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security3).and_return(false)
+                  allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                end
+                it 'does not execute the `update_request_security_query` from first security' do
+                  expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                  call_method_new
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                  call_method_new
+                end
+                it 'does not execute the `update_request_security_query` from third security' do
+                  expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                  call_method_new
+                end
               end
             end
           end
@@ -3109,6 +3297,7 @@ describe MAPI::ServiceApp do
       let(:existing_broker_instructions) { broker_instructions.clone }
       let(:existing_delivery_instructions) { delivery_instructions.clone }
       let(:call_method) {securities_request_module.header_has_changed(existing_header, broker_instructions, delivery_instructions)  }
+      let(:call_method_no_delivery) {securities_request_module.header_has_changed(existing_header, broker_instructions, nil)  }
 
       before do
         allow(existing_header).to receive(:with_indifferent_access).and_return(existing_header)
@@ -3153,6 +3342,16 @@ describe MAPI::ServiceApp do
           expect(call_method).to be true
         end
       end
+      describe 'when the delivery instruction are nil' do
+        before { allow(securities_request_module).to receive(:delivery_instructions_from_header_details).and_return(existing_delivery_instructions) }
+        it 'returns false if the broker instructions also match' do
+          allow(securities_request_module).to receive(:broker_instructions_from_header_details).and_return(existing_broker_instructions)
+          expect(call_method_no_delivery).to be false
+        end
+        it 'returns true if the broker instructions do not match' do
+          expect(call_method_no_delivery).to be true
+        end
+      end
     end
 
     describe 'securities transfer' do
@@ -3180,6 +3379,7 @@ describe MAPI::ServiceApp do
       let(:pledge_type) { 50 }
       let(:kind) {  SecureRandom.hex }
       let(:delivery_type) {  32 }
+
       describe '`insert_transfer_header_query`' do
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.insert_transfer_header_query( member_id,
                                                                                                              header_id,
@@ -3216,109 +3416,119 @@ describe MAPI::ServiceApp do
           allow(Time.zone).to receive(:today).and_return(today)
         end
 
-        it 'sets the `header_id`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(header_id).and_return(sentinel)
-          expect(call_method).to match /VALUES\s\(#{sentinel},/
+        context 'with KIND_TRANSFER_MAPPING stubbed' do
+          before do
+            kind_mapping = { kind => {adx_type: :pledged_intake, account_column_name: 'RECEIVE_FROM'} }
+            stub_const 'MAPI::Services::Member::SecuritiesRequests::KIND_TRANSFER_MAPPING', kind_mapping
+          end
+
+          it 'sets the `header_id`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(header_id).and_return(sentinel)
+            expect(call_method).to match /VALUES\s\(#{sentinel},/
+          end
+
+          it 'sets the `member_id`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(member_id).and_return(sentinel)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){1}#{sentinel},/
+          end
+
+          it 'sets the `status`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SUBMITTED).and_return(sentinel)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){2}#{sentinel},/
+          end
+
+          it 'sets the `pledge_type`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(pledge_type).and_return(sentinel)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){3}#{sentinel},/
+          end
+
+          it 'sets the `trade_date`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(broker_instructions['trade_date']).and_return(sentinel)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){4}#{sentinel},/
+          end
+
+          it 'sets the `request_status`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE[broker_instructions['settlement_type']]).and_return(sentinel)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){5}#{sentinel},/
+          end
+
+          it 'sets the `settlement_date`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(broker_instructions['settlement_date']).and_return(sentinel)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){6}#{sentinel},/
+          end
+
+          it 'sets the `delivery_type`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(delivery_type).and_return(sentinel)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){7}#{sentinel},/
+          end
+
+          it 'sets the `created_date`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){9}#{sentinel},/
+          end
+
+          it 'sets the `created_by`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(user_name).and_return(sentinel)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){10}#{sentinel},/
+          end
+
+          it 'sets the `created_by_name`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(full_name).and_return(sentinel)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){11}#{sentinel},/
+          end
+
+          it 'sets the `last_modified_by`' do
+            formatted_modification_by = double('Formatted Modification By')
+            quoted_modification_by = SecureRandom.hex
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).and_return(formatted_modification_by)
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(formatted_modification_by).and_return(quoted_modification_by)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){12}#{quoted_modification_by}/
+          end
+
+          it 'sets the `last_modified_date`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(Time.zone.today)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){13}#{Time.zone.today}/
+          end
+
+          it 'sets the `last_modified_by_name`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(full_name)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){14}#{full_name}/
+          end
+
+          it 'sets the `adx_id`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(adx_id)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){15}#{adx_id}/
+          end
+
+          it 'sets the `un_adx_id`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(un_adx_id)
+            expect(call_method).to match /VALUES\s+\((\S+\s+){16}#{un_adx_id}/
+          end
         end
 
-        it 'sets the `member_id`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(member_id).and_return(sentinel)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){1}#{sentinel},/
+        describe 'when kind is safekept_transfer' do
+          it 'sets the `delivery_type`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(delivery_type).and_return(sentinel)
+            expect(call_method_release).to match /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\((\S+,\s*){7}DELIVER_TO,?\s*(\S+,\s*)*(\S+)?\s*\)\s+VALUES\s+\((\S+,\s*){7}#{sentinel},/
+          end
+
+          it 'sets the `form_type`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKFormType::SECURITIES_RELEASE).and_return(sentinel)
+            expect(call_method_release).to match /VALUES\s+\((\S+\s+){8}#{sentinel},/
+          end
         end
 
-        it 'sets the `status`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKRequestStatus::SUBMITTED).and_return(sentinel)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){2}#{sentinel},/
-        end
+        describe 'when kind is pledge_transfer' do
+          it 'sets the `delivery_type`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(delivery_type).and_return(sentinel)
+            expect(call_method_intake).to match /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\((\S+,\s*){7}RECEIVE_FROM,?\s*(\S+,\s*)*(\S+)?\s*\)\s+VALUES\s+\((\S+,\s*){7}#{sentinel},/
+          end
 
-        it 'sets the `pledge_type`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(pledge_type).and_return(sentinel)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){3}#{sentinel},/
+          it 'sets the `form_type`' do
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKFormType::SECURITIES_PLEDGED).and_return(sentinel)
+            expect(call_method_intake).to match /VALUES\s+\((\S+\s+){8}#{sentinel},/
+          end
         end
-
-        it 'sets the `trade_date`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(broker_instructions['trade_date']).and_return(sentinel)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){4}#{sentinel},/
-        end
-
-        it 'sets the `request_status`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE[broker_instructions['settlement_type']]).and_return(sentinel)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){5}#{sentinel},/
-        end
-
-        it 'sets the `settlement_date`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(broker_instructions['settlement_date']).and_return(sentinel)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){6}#{sentinel},/
-        end
-
-        it 'sets the `delivery_type`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(delivery_type).and_return(sentinel)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){7}#{sentinel},/
-        end
-
-        it 'sets the `delivery_type` for pledged_intake' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(delivery_type).and_return(sentinel)
-          expect(call_method_intake).to match /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\((\S+,\s*){7}RECEIVE_FROM,?\s*(\S+,\s*)*(\S+)?\s*\)\s+VALUES\s+\((\S+,\s*){7}#{sentinel},/
-        end
-
-        it 'sets the `delivery_type` for pledged_release' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(delivery_type).and_return(sentinel)
-          expect(call_method_release).to match /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\((\S+,\s*){7}DELIVER_TO,?\s*(\S+,\s*)*(\S+)?\s*\)\s+VALUES\s+\((\S+,\s*){7}#{sentinel},/
-        end
-
-        it 'sets the `form_type` for pledged_intake' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKFormType::SECURITIES_PLEDGED).and_return(sentinel)
-          expect(call_method_intake).to match /VALUES\s+\((\S+\s+){8}#{sentinel},/
-        end
-
-        it 'sets the `form_type` for pledged_release' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKFormType::SECURITIES_RELEASE).and_return(sentinel)
-          expect(call_method_release).to match /VALUES\s+\((\S+\s+){8}#{sentinel},/
-        end
-
-        it 'sets the `created_date`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(today).and_return(sentinel)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){9}#{sentinel},/
-        end
-
-        it 'sets the `created_by`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(user_name).and_return(sentinel)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){10}#{sentinel},/
-        end
-
-        it 'sets the `created_by_name`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(full_name).and_return(sentinel)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){11}#{sentinel},/
-        end
-
-        it 'sets the `last_modified_by`' do
-          formatted_modification_by = double('Formatted Modification By')
-          quoted_modification_by = SecureRandom.hex
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).and_return(formatted_modification_by)
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).with(formatted_modification_by).and_return(quoted_modification_by)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){12}#{quoted_modification_by}/
-        end
-
-        it 'sets the `last_modified_date`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(Time.zone.today)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){13}#{Time.zone.today}/
-        end
-
-        it 'sets the `last_modified_by_name`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(full_name)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){14}#{full_name}/
-        end
-
-        it 'sets the `adx_id`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(adx_id)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){15}#{adx_id}/
-        end
-
-        it 'sets the `un_adx_id`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(un_adx_id)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){16}#{un_adx_id}/
-        end
-
       end
 
       describe '`create_transfer` method' do
@@ -3330,6 +3540,7 @@ describe MAPI::ServiceApp do
                            'payment_amount' => instance_double(Numeric),
                            'custodian_name' => instance_double(String) } }
         let(:securities) { [ security, security, security ]}
+        let(:kind) { SecureRandom.hex }
         let(:method_params) { [ app,
                                 member_id,
                                 user_name,
@@ -3338,13 +3549,14 @@ describe MAPI::ServiceApp do
                                 broker_instructions,
                                 securities,
                                 kind ] }
-        let(:kind) { instance_double(Symbol) }
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params) }
+        let(:insert_transfer_header_query_result) { SecureRandom.hex }
 
         before do
           allow(securities_request_module).to receive(:validate_kind).with(:transfer, kind).and_return(true)
           allow(securities_request_module).to receive(:validate_securities)
           allow(securities_request_module).to receive(:validate_broker_instructions)
+          allow(securities_request_module).to receive(:insert_transfer_header_query).and_return(insert_transfer_header_query_result)
         end
 
         context 'validations' do
@@ -3399,13 +3611,15 @@ describe MAPI::ServiceApp do
           let(:adx_sql) { double('ADX SQL') }
           let(:un_adx_sql) { double('ADX SQL') }
           let(:ssk_sql) { double('SSK SQL') }
+          let(:adx_id) { SecureRandom.hex }
+          let(:un_adx_id) { SecureRandom.hex }
           let(:sequence_result) { double('Sequence Result', to_i: next_id) }
 
           before do
             allow(securities_request_module).to receive(:should_fake?).and_return(false)
             allow(securities_request_module).to receive(:adx_query).with(member_id, :pledged).and_return(adx_sql)
             allow(securities_request_module).to receive(:adx_query).with(member_id, :unpledged).and_return(un_adx_sql)
-            allow(securities_request_module).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip']).
+            allow(securities_request_module).to receive(:ssk_id_query).with(member_id, anything, security['cusip']).
                                                   exactly(3).times.and_return(ssk_sql)
             allow(securities_request_module).to receive(:execute_sql_single_result).with(
                                                   app,
@@ -3434,6 +3648,18 @@ describe MAPI::ServiceApp do
             before do
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
               allow(securities_request_module).to receive(:validate_kind).and_return(true)
+            end
+
+            it 'calls `ssk_id_query` with un_adx_id if kind is pledge_transfer' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:ssk_id_query).with(member_id, un_adx_id, security['cusip'])
+              method_params[7] = :pledge_transfer
+              MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
+            end
+
+            it 'calls `ssk_id_query` with adx_id if kind is safekept_transfer' do
+              expect(MAPI::Services::Member::SecuritiesRequests).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip'])
+              method_params[7] = :safekept_transfer
+              MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
             end
 
             it 'calls `insert_transfer_header_query` for unpledged securities' do
@@ -3570,10 +3796,658 @@ describe MAPI::ServiceApp do
           end
         end
       end
+
+      describe '`update_transfer_header_details_query` class method' do
+        let(:request_id) { instance_double(String) }
+        let(:username) { instance_double(String) }
+        let(:full_name) { instance_double(String) }
+        let(:session_id) { instance_double(String) }
+        let(:adx_id) { instance_double(String) }
+        let(:un_adx_id) { instance_double(String) }
+        let(:broker_instructions) { instance_double(Hash, :[] => nil) }
+        let(:modification_by) { instance_double(String) }
+        let(:broker_instruction_value) { instance_double(String) }
+        let(:kind) {  instance_double(Symbol) }
+        let(:sentinel) { SecureRandom.hex }
+        let(:today) { Time.zone.today }
+        let(:call_method) { securities_request_module.update_transfer_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, un_adx_id, broker_instructions, kind) }
+        let(:call_method_safekept_transfer) { securities_request_module.update_transfer_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, un_adx_id, broker_instructions, :safekept_transfer) }
+        let(:call_method_pledge_transfer) { securities_request_module.update_transfer_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, un_adx_id, broker_instructions, :pledge_transfer) }
+
+        before do
+          allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex)
+          allow(securities_request_module).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
+          allow(Time.zone).to receive(:today).and_return(today)
+        end
+
+        context 'with KIND_TRANSFER_MAPPING stubbed' do
+          before do
+            kind_mapping = { kind => {adx_type: :pledged_intake, account_column_name: 'RECEIVE_FROM'} }
+            stub_const 'MAPI::Services::Member::SecuritiesRequests::KIND_TRANSFER_MAPPING', kind_mapping
+          end
+
+          it 'returns an UPDATE query' do
+            expect(call_method).to match(/\A\s*UPDATE\s+SAFEKEEPING.SSK_WEB_FORM_HEADER\s+SET\s+/i)
+          end
+          it 'updates the `TRADE_DATE`' do
+            allow(broker_instructions).to receive(:[]).with('trade_date').and_return(broker_instruction_value)
+            allow(securities_request_module).to receive(:quote).with(broker_instruction_value).and_return(sentinel)
+            expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+TRADE_DATE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+          it 'updates the `SETTLE_DATE`' do
+            allow(broker_instructions).to receive(:[]).with('settlement_date').and_return(broker_instruction_value)
+            allow(securities_request_module).to receive(:quote).with(broker_instruction_value).and_return(sentinel)
+            expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+SETTLE_DATE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+          it 'updates the `LAST_MODIFIED_BY`' do
+            allow(securities_request_module).to receive(:quote).with(modification_by).and_return(sentinel)
+            expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+          it 'updates the `LAST_MODIFIED_DATE`' do
+            allow(securities_request_module).to receive(:quote).with(today).and_return(sentinel)
+            expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_DATE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+          it 'updates the `LAST_MODIFIED_BY_NAME`' do
+            allow(securities_request_module).to receive(:quote).with(full_name).and_return(sentinel)
+            expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+LAST_MODIFIED_BY_NAME\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+          it 'updates the `PLEDGED_ADX_ID`' do
+            allow(securities_request_module).to receive(:quote).with(adx_id).and_return(sentinel)
+            expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+PLEDGED_ADX_ID\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+          it 'updates the `UNPLEGED_TRANSFER_ADX_ID`' do
+            allow(securities_request_module).to receive(:quote).with(un_adx_id).and_return(sentinel)
+            expect(call_method).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+UNPLEGED_TRANSFER_ADX_ID\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+          it 'includes the `request_id` in the WHERE clause' do
+            allow(securities_request_module).to receive(:quote).with(request_id).and_return(sentinel)
+            expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+HEADER_ID\s+=\s+#{sentinel}(\s+|\z)/)
+          end
+          it 'includes the `member_id` in the WHERE clause' do
+            allow(securities_request_module).to receive(:quote).with(member_id).and_return(sentinel)
+            expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+FHLB_ID\s+=\s+#{sentinel}(\s+|\z)/)
+          end
+          it 'restricts the updates to submitted queries' do
+            allow(securities_request_module).to receive(:quote).with(securities_request_module::SSKRequestStatus::SUBMITTED).and_return(sentinel)
+            expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+STATUS\s+=\s+#{sentinel}(\s+|\z)/)
+          end
+        end
+
+        describe 'when kind is safekept_transfer' do
+          it 'updates the `DELIVER_TO`' do
+            allow(securities_request_module).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKDeliverTo::INTERNAL_TRANSFER).and_return(sentinel)
+            expect(call_method_safekept_transfer).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+DELIVER_TO\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+          it 'updates the `FORM_TYPE`' do
+            allow(securities_request_module).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKFormType::SECURITIES_RELEASE).and_return(sentinel)
+            expect(call_method_safekept_transfer).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+FORM_TYPE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+        end
+
+        describe 'when kind is pledge_transfer' do
+          it 'updates the `RECEIVE_FROM`' do
+            allow(securities_request_module).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKDeliverTo::INTERNAL_TRANSFER).and_return(sentinel)
+            expect(call_method_pledge_transfer).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+RECEIVE_FROM\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+          it 'updates the `FORM_TYPE`' do
+            allow(securities_request_module).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SSKFormType::SECURITIES_PLEDGED).and_return(sentinel)
+            expect(call_method_pledge_transfer).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+FORM_TYPE\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+          it 'updates the `REQUEST_STATUS`' do
+            allow(securities_request_module).to receive(:quote).with(MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE[broker_instructions['settlement_type']]).and_return(sentinel)
+            expect(call_method_pledge_transfer).to match(/\sSET(\s+\S+\s+=\s+\S+\s*,)*\s+REQUEST_STATUS\s+=\s+#{sentinel}(,|\s+WHERE\s)/i)
+          end
+        end
+      end
+
+      describe '`update_transfer` class method' do
+        let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
+        let(:member_id) { rand(9999..99999) }
+        let(:request_id) { instance_double(String) }
+        let(:username) { instance_double(String) }
+        let(:full_name) { instance_double(String) }
+        let(:session_id) { instance_double(String) }
+        let(:detail_id_security) { SecureRandom.hex }
+        let(:broker_instructions) {{
+          'transaction_code' => securities_request_module::TRANSACTION_CODE.keys.sample,
+          'trade_date' => instance_double(String),
+          'settlement_type' => securities_request_module::SETTLEMENT_TYPE.keys.sample,
+          'settlement_date' => instance_double(String)
+        }}
+        let(:security) {{
+          'detail_id' => detail_id_security,
+          'cusip' => SecureRandom.hex,
+          'description' => instance_double(String),
+          'original_par' => instance_double(Numeric),
+          'payment_amount' => instance_double(Numeric)
+        }}
+        let(:securities) { [security] }
+        let(:kind) { double('A Kind') }
+        let(:method_params) { [ app,
+                                member_id,
+                                request_id,
+                                username,
+                                full_name,
+                                session_id,
+                                broker_instructions,
+                                securities,
+                                kind ] }
+
+        let(:call_method) { securities_request_module.update_transfer(*method_params) }
+
+        before do
+          allow(securities_request_module).to receive(:validate_broker_instructions)
+          allow(securities_request_module).to receive(:validate_securities)
+          allow(securities_request_module).to receive(:should_fake?).and_return(true)
+          allow(kind).to receive(:to_sym).and_return(kind)
+          allow(securities_request_module).to receive(:validate_kind).with(:transfer, kind).and_return(true)
+        end
+
+        it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
+          expect(securities_request_module).to receive(:validate_broker_instructions).with(broker_instructions, anything, anything)
+          call_method
+        end
+        it 'calls `validate_broker_instructions` with the app as an arg' do
+          expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, app, anything)
+          call_method
+        end
+        it 'calls `validate_broker_instructions` with the kind as an arg for pledge transfer' do
+          allow(securities_request_module).to receive(:validate_kind).and_call_original
+          expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, anything, :pledge_transfer)
+          method_params[8] = :pledge_transfer
+          securities_request_module.update_transfer(*method_params)
+        end
+        it 'calls `validate_broker_instructions` with the kind as an arg for safekept transfer' do
+          allow(securities_request_module).to receive(:validate_kind).and_call_original
+          expect(securities_request_module).to receive(:validate_broker_instructions).with(anything, anything, :safekept_transfer)
+          method_params[8] = :safekept_transfer
+          securities_request_module.update_transfer(*method_params)
+        end
+        it 'calls `validate_securities` with the `securities` arg' do
+          expect(securities_request_module).to receive(:validate_securities).with(securities, any_args)
+          call_method
+        end
+        it 'calls `validate_securities` with the `settlement_type` arg from the broker instructions' do
+          expect(securities_request_module).to receive(:validate_securities).with(anything, broker_instructions['settlement_type'], anything, anything)
+          call_method
+        end
+        it 'calls `validate_securities` with `:transfer`' do
+          expect(securities_request_module).to receive(:validate_securities).with(anything, anything, :transfer, anything)
+          call_method
+        end
+        it 'calls `validate_securities` with kind' do
+          expect(securities_request_module).to receive(:validate_securities).with(anything, anything, anything, kind)
+          call_method
+        end
+        describe 'when `should_fake?` returns true' do
+          it 'returns true' do
+            expect(call_method).to be true
+          end
+        end
+        describe 'when `should_fake` returns false' do
+          queries = [
+            :delete_request_securities_by_cusip_query,
+            :adx_query,
+            :update_request_security_query,
+            :insert_security_query,
+            :ssk_id_query,
+            :release_request_securities_query,
+            :request_header_details_query,
+            :update_transfer_header_details_query
+          ]
+          queries.each do |query|
+            let(query) { instance_double(String) }
+          end
+          let(:adx_sql) { double('ADX SQL') }
+          let(:un_adx_sql) { double('ADX SQL') }
+          let(:ssk_sql) { double('SSK SQL') }
+          let(:adx_id) { instance_double(String) }
+          let(:un_adx_id) { instance_double(String) }
+          let(:detail_id) { rand(1000..9999) }
+          let(:ssk_id) { rand(1000..9999) }
+          let(:existing_header) { instance_double(Hash) }
+          let(:old_security) { security.clone.with_indifferent_access }
+
+          before do
+            allow(securities_request_module).to receive(:should_fake?).and_return(false)
+            allow(securities_request_module).to receive(:execute_sql)
+            allow(securities_request_module).to receive(:execute_sql).with(anything, delete_request_securities_by_cusip_query).and_return(true)
+            allow(securities_request_module).to receive(:execute_sql_single_result)
+            allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, adx_query, "ADX ID").and_return(adx_id)
+            allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, adx_query, "UN_ADX ID").and_return(un_adx_id)
+            allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, ssk_id_query, 'SSK ID').and_return(ssk_id)
+            allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, securities_request_module::NEXT_ID_SQL, any_args).and_return(detail_id)
+            allow(securities_request_module).to receive(:fetch_hashes)
+            allow(securities_request_module).to receive(:fetch_hash).with(anything, request_header_details_query).and_return(existing_header)
+            allow(securities_request_module).to receive(:map_hash_values).and_return(existing_header)
+            allow(securities_request_module).to receive(:header_has_changed)
+            allow(securities_request_module).to receive(:format_securities).and_return([old_security])
+            allow(securities_request_module).to receive(:security_has_changed).and_return(false)
+
+            queries.each do |query|
+              allow(securities_request_module).to receive(query).and_return(send(query))
+            end
+          end
+          it 'executes code within a transaction where the `isolation` has been set to `:read_committed`' do
+            expect(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+            call_method
+          end
+          describe 'the transaction block' do
+            before do
+              allow(ActiveRecord::Base).to receive(:transaction).and_yield
+            end
+            it 'passes the `logger` whenever it calls `execute_sql`' do
+              expect(securities_request_module).to receive(:execute_sql).with(app.logger, any_args)
+              call_method
+            end
+            it 'passes the `logger` whenever it calls `fetch_hashes`' do
+              expect(securities_request_module).to receive(:fetch_hashes).with(app.logger, any_args)
+              call_method
+            end
+            it 'passes the app whenever it calls `execute_sql_single_result`' do
+              expect(securities_request_module).to receive(:execute_sql_single_result).with(app, any_args)
+              call_method
+            end
+            describe 'deleting the old securities associated with the request_id that are not part of the new securities array' do
+              it 'contructs the `delete_request_securities_by_cusip_query` with the `request_id`' do
+                expect(securities_request_module).to receive(:delete_request_securities_by_cusip_query).with(request_id, anything)
+                call_method
+              end
+              it 'contructs the `delete_request_securities_by_cusip_query` with an array of cusips from the passed securities' do
+                expect(securities_request_module).to receive(:delete_request_securities_by_cusip_query).with(anything, [security['cusip']])
+                call_method
+              end
+              it 'executes the SQL with the results of `delete_request_securities_by_cusip_query`' do
+                expect(securities_request_module).to receive(:execute_sql).with(anything, delete_request_securities_by_cusip_query)
+                call_method
+              end
+              describe 'when the SQL execution returns nil' do
+                before { allow(securities_request_module).to receive(:execute_sql).with(anything, delete_request_securities_by_cusip_query).and_return(nil) }
+
+                it 'rolls back the transaction by raising an error' do
+                  expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, 'Failed to delete old security transfer request detail by CUSIP')
+                end
+              end
+            end
+            describe 'fetching the `adx_id`' do
+              it 'constructs the `adx_query` with the `member_id` and `adx_type`' do
+                expect(securities_request_module).to receive(:adx_query).with(member_id, adx_type)
+                call_method
+              end
+              it 'calls `execute_sql_single_result` with the results of `adx_query`' do
+                expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, adx_query, any_args)
+                call_method
+              end
+            end
+            describe 'fetching `existing_securities`' do
+              it 'constructs the `release_request_securities_query` with the `request_id`' do
+                expect(securities_request_module).to receive(:release_request_securities_query).with(request_id)
+                call_method
+              end
+              it 'calls `fetch_hashes` with the results of `release_request_securities_query`' do
+                expect(securities_request_module).to receive(:fetch_hashes).with(anything, release_request_securities_query)
+                call_method
+              end
+              it 'formats the securities that are returned by `fetch_hashes`' do
+                fetched_hashes = instance_double(Array)
+                allow(securities_request_module).to receive(:fetch_hashes).with(anything, release_request_securities_query).and_return(fetched_hashes)
+                expect(securities_request_module).to receive(:format_securities).with(fetched_hashes)
+                call_method
+              end
+            end
+            describe 'handling securities' do
+              describe 'when the passed security is new' do
+                before do
+                  allow(securities_request_module).to receive(:format_securities).and_return([])
+                  allow(securities_request_module).to receive(:execute_sql).with(anything, insert_security_query).and_return(1)
+                end
+
+                describe 'fetching the `ssk_id`' do
+                  it 'constructs the `ssk_id_query` with the `member_id`' do
+                    expect(securities_request_module).to receive(:ssk_id_query).with(member_id, any_args)
+                    call_method
+                  end
+                  it 'constructs the `ssk_id_query` with the `adx_id`' do
+                    expect(securities_request_module).to receive(:ssk_id_query).with(anything, adx_id, any_args)
+                    call_method
+                  end
+                  it 'constructs the `ssk_id_query` with the `cusip` from the security' do
+                    expect(securities_request_module).to receive(:ssk_id_query).with(anything, anything, security['cusip'])
+                    call_method
+                  end
+                  it 'calls `execute_sql_single_result` with the result of `ssk_id_query`' do
+                    expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, ssk_id_query, any_args)
+                    call_method
+                  end
+                  it 'calls `execute_sql_single_result` with `SSK ID`' do
+                    expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, ssk_id_query, 'SSK ID')
+                    call_method
+                  end
+                  it 'raises an error if the `SSK_ID` can\'t be found' do
+                    allow(securities_request_module).to receive(:ssk_id_query).with(member_id, adx_id, security['cusip']).and_return(nil)
+                    expect { call_method }.to raise_error(Exception)
+                  end
+                end
+                describe 'fetching the `detail_id`' do
+                  it 'calls `execute_sql_single_result` with the `NEXT_ID_SQL` sql query' do
+                    expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, securities_request_module::NEXT_ID_SQL, any_args)
+                    call_method
+                  end
+                  it 'calls `execute_sql_single_result` with `Next ID Sequence`' do
+                    expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, anything, 'Next ID Sequence')
+                    call_method
+                  end
+                end
+                describe 'adding the new security to the database' do
+                  it 'constructs the `insert_security_query` with the `request_id`' do
+                    expect(securities_request_module).to receive(:insert_security_query).with(request_id, any_args)
+                    call_method
+                  end
+                  it 'constructs the `insert_security_query` with the `detail_id`' do
+                    expect(securities_request_module).to receive(:insert_security_query).with(anything, detail_id, any_args)
+                    call_method
+                  end
+                  it 'constructs the `insert_security_query` with the `username`' do
+                    expect(securities_request_module).to receive(:insert_security_query).with(anything, anything, username, any_args)
+                    call_method
+                  end
+                  it 'constructs the `insert_security_query` with the `session_id`' do
+                    expect(securities_request_module).to receive(:insert_security_query).with(anything, anything, anything, session_id, any_args)
+                    call_method
+                  end
+                  it 'constructs the `insert_security_query` with the `security`' do
+                    expect(securities_request_module).to receive(:insert_security_query).with(anything, anything, anything, anything, security, any_args)
+                    call_method
+                  end
+                  it 'constructs the `insert_security_query` with the `ssk_id`' do
+                    expect(securities_request_module).to receive(:insert_security_query).with(anything, anything, anything, anything, anything, ssk_id)
+                    call_method
+                  end
+                  it 'calls `execute_sql` with the result of `insert_security_query`' do
+                    expect(securities_request_module).to receive(:execute_sql).with(anything, insert_security_query)
+                    call_method
+                  end
+                  describe 'when the SQL execution returns nil' do
+                    before { allow(securities_request_module).to receive(:execute_sql).with(anything, insert_security_query).and_return(nil) }
+
+                    it 'rolls back the transaction by raising an error' do
+                      expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, 'Failed to insert new security transfer request detail')
+                    end
+                  end
+                end
+              end
+              describe 'when the passed security already exists and has changed' do
+                let(:old_security) { cloned_security =  security.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+
+                before do
+                  allow(securities_request_module).to receive(:format_securities).and_return([old_security])
+                  allow(securities_request_module).to receive(:security_has_changed).and_return(true)
+                  allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                end
+                it 'calls `security_has_changed` with the new security' do
+                  expect(securities_request_module).to receive(:security_has_changed).with(security, any_args).and_return(true)
+                  call_method
+                end
+                it 'calls `security_has_changed` with the old security' do
+                  expect(securities_request_module).to receive(:security_has_changed).with(anything, old_security).and_return(true)
+                  call_method
+                end
+                it 'constructs the `update_request_security_query` with the `request_id`' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(request_id, any_args)
+                  call_method
+                end
+                it 'constructs the `update_request_security_query` with the `username`' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(anything, username, any_args)
+                  call_method
+                end
+                it 'constructs the `update_request_security_query` with the `session_id`' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, session_id, any_args)
+                  call_method
+                end
+                it 'constructs the `update_request_security_query` with the `security`' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, security, anything)
+                  call_method
+                end
+                it 'constructs the `update_request_security_query` with the `detail_id`' do
+                  expect(securities_request_module).to receive(:update_request_security_query).with(anything, anything, anything, anything, detail_id_security)
+                  call_method
+                end
+                it 'calls `execute_sql` with the result of `update_request_security_query`' do
+                  expect(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query)
+                  call_method
+                end
+                describe 'when the SQL execution returns nil' do
+                  before { allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(nil) }
+
+                  it 'rolls back the transaction by raising an error' do
+                    expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, 'Failed to update security transfer request detail')
+                  end
+                end
+              end
+              describe 'when the passed security already exists but has not changed' do
+                let(:old_security) { security.clone.with_indifferent_access }
+
+                before do
+                  allow(securities_request_module).to receive(:format_securities).and_return([old_security])
+                  allow(securities_request_module).to receive(:security_has_changed).and_return(false)
+                end
+                it 'calls `security_has_changed` with the new security' do
+                  expect(securities_request_module).to receive(:security_has_changed).with(security, any_args).and_return(false)
+                  call_method
+                end
+                it 'calls `security_has_changed` with the old security' do
+                  expect(securities_request_module).to receive(:security_has_changed).with(anything, old_security).and_return(false)
+                  call_method
+                end
+                it 'does not execute the `update_request_security_query` sql' do
+                  expect(securities_request_module).not_to receive(:execute_sql).with(anything, update_request_security_query)
+                  call_method
+                end
+              end
+              describe 'deletes security from `existing_securities` after it has been processed with the same CUSIP' do
+                let(:detail_id_security1) { SecureRandom.hex }
+                let(:detail_id_security2) { SecureRandom.hex }
+                let(:detail_id_security3) { SecureRandom.hex }
+                let(:cusip) { SecureRandom.hex }
+                let(:security1) {{
+                  'detail_id' => detail_id_security1,
+                  'cusip' => cusip,
+                  'description' => instance_double(String),
+                  'original_par' => instance_double(Numeric),
+                  'payment_amount' => instance_double(Numeric),
+                  'custody_account_type' => instance_double(String)
+                }}
+                let(:security2) {{
+                  'detail_id' => detail_id_security2,
+                  'cusip' => cusip,
+                  'description' => instance_double(String),
+                  'original_par' => instance_double(Numeric),
+                  'payment_amount' => instance_double(Numeric),
+                  'custody_account_type' => instance_double(String)
+                }}
+                let(:security3) {{
+                  'detail_id' => detail_id_security3,
+                  'cusip' => SecureRandom.hex,
+                  'description' => instance_double(String),
+                  'original_par' => instance_double(Numeric),
+                  'payment_amount' => instance_double(Numeric),
+                  'custody_account_type' => instance_double(String)
+                }}
+                let(:securities_new) { [security1, security2, security3] }
+                let(:call_method_new) { securities_request_module.update_transfer(app, member_id, request_id, username, full_name, session_id, broker_instructions, securities_new, kind) }
+                let(:old_security1) { cloned_security =  security1.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+                let(:old_security2) { cloned_security =  security2.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+                let(:old_security3) { cloned_security =  security3.clone; cloned_security['description'] = SecureRandom.hex; cloned_security.with_indifferent_access }
+                describe 'when the passed securities already exist and have changed' do
+                  before do
+                    allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                    allow(securities_request_module).to receive(:security_has_changed).and_return(true)
+                    allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                  end
+                  it 'constructs the `update_request_security_query` with the `detail_id` from first security' do
+                    expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                    call_method_new
+                  end
+                  it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                    expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                    call_method_new
+                  end
+                  it 'constructs the `update_request_security_query` with the `detail_id` from third security' do
+                    expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                    call_method_new
+                  end
+                end
+                describe 'when the passed securities already exists but only the second one has changed' do
+                  before do
+                    allow(securities_request_module).to receive(:format_securities).and_return([old_security1, old_security2, old_security3])
+                    allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security1).and_return(false)
+                    allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security2).and_return(true)
+                    allow(securities_request_module).to receive(:security_has_changed).with(anything, old_security3).and_return(false)
+                    allow(securities_request_module).to receive(:execute_sql).with(anything, update_request_security_query).and_return(1)
+                  end
+                  it 'does not execute the `update_request_security_query` from first security' do
+                    expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security1, detail_id_security1)
+                    call_method_new
+                  end
+                  it 'constructs the `update_request_security_query` with the `detail_id` from second security' do
+                    expect(securities_request_module).to receive(:update_request_security_query).with(request_id, username, session_id, security2, detail_id_security2)
+                    call_method_new
+                  end
+                  it 'does not execute the `update_request_security_query` from third security' do
+                    expect(securities_request_module).not_to receive(:update_request_security_query).with(request_id, username, session_id, security3, detail_id_security3)
+                    call_method_new
+                  end
+                end
+              end
+            end
+            describe 'handling the header details' do
+              let(:old_security) { security.clone.with_indifferent_access }
+
+              before do
+                allow(securities_request_module).to receive(:format_securities).and_return([old_security])
+                allow(securities_request_module).to receive(:security_has_changed).and_return(false)
+              end
+
+              describe 'fetching the `existing_header`' do
+                it 'constructs the `request_header_details_query` with the `member_id`' do
+                  expect(securities_request_module).to receive(:request_header_details_query).with(member_id, anything)
+                  call_method
+                end
+                it 'constructs the `request_header_details_query` with the `request_id`' do
+                  expect(securities_request_module).to receive(:request_header_details_query).with(anything, request_id)
+                  call_method
+                end
+                it 'calls `fetch_hash` with the `logger`' do
+                  expect(securities_request_module).to receive(:fetch_hash).with(app.logger, any_args)
+                  call_method
+                end
+                it 'calls `fetch_hash` with result of `request_header_details_query`' do
+                  expect(securities_request_module).to receive(:fetch_hash).with(anything, request_header_details_query)
+                  call_method
+                end
+                describe 'when the SQL execution returns nil' do
+                  before do
+                    allow(securities_request_module).to receive(:fetch_hash).with(anything, request_header_details_query).and_return(nil)
+                  end
+
+                  it 'rolls back the transaction by raising an error' do
+                    expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, 'No header details found to update')
+                  end
+                end
+                it 'calls `map_hash_values` with the existing header' do
+                  expect(securities_request_module).to receive(:map_hash_values).with(existing_header, anything)
+                  call_method
+                end
+                it 'calls `map_hash_values` with the `REQUEST_HEADER_MAPPING` mapping' do
+                  expect(securities_request_module).to receive(:map_hash_values).with(anything, securities_request_module::REQUEST_HEADER_MAPPING)
+                  call_method
+                end
+                it 'calls `header_has_changed` with the mapped `existing_header`' do
+                  expect(securities_request_module).to receive(:header_has_changed).with(existing_header, any_args)
+                  call_method
+                end
+                it 'calls `header_has_changed` with the provided `broker_instructions`' do
+                  expect(securities_request_module).to receive(:header_has_changed).with(anything, broker_instructions, any_args)
+                  call_method
+                end
+                describe 'when the header details have changed' do
+                  before do
+                    allow(securities_request_module).to receive(:header_has_changed).and_return(true)
+                    allow(securities_request_module).to receive(:execute_sql).with(anything, update_transfer_header_details_query).and_return(1)
+                  end
+
+                  it 'constructs the `update_transfer_header_details_query` with the `member_id`' do
+                    expect(securities_request_module).to receive(:update_transfer_header_details_query).with(member_id, any_args)
+                    call_method
+                  end
+                  it 'constructs the `update_transfer_header_details_query` with the `request_id`' do
+                    expect(securities_request_module).to receive(:update_transfer_header_details_query).with(anything, request_id, any_args)
+                    call_method
+                  end
+                  it 'constructs the `update_transfer_header_details_query` with the `username`' do
+                    expect(securities_request_module).to receive(:update_transfer_header_details_query).with(anything, anything, username, any_args)
+                    call_method
+                  end
+                  it 'constructs the `update_transfer_header_details_query` with the `full_name`' do
+                    expect(securities_request_module).to receive(:update_transfer_header_details_query).with(anything, anything, anything, full_name, any_args)
+                    call_method
+                  end
+                  it 'constructs the `update_transfer_header_details_query` with the `session_id`' do
+                    expect(securities_request_module).to receive(:update_transfer_header_details_query).with(anything, anything, anything, anything, session_id, any_args)
+                    call_method
+                  end
+                  it 'constructs the `update_transfer_header_details_query` with the `adx_id`' do
+                    expect(securities_request_module).to receive(:update_transfer_header_details_query).with(anything, anything, anything, anything, anything, adx_id, any_args)
+                    call_method
+                  end
+                  it 'constructs the `update_transfer_header_details_query` with the `un_adx_id`' do
+                    expect(securities_request_module).to receive(:update_transfer_header_details_query).with(anything, anything, anything, anything, anything, anything, un_adx_id, any_args)
+                    call_method
+                  end
+                  it 'constructs the `update_transfer_header_details_query` with the `broker_instructions`' do
+                    expect(securities_request_module).to receive(:update_transfer_header_details_query).with(anything, anything, anything, anything, anything, anything, anything, broker_instructions, any_args)
+                    call_method
+                  end
+                  it 'calls `execute_sql` with the result of `update_transfer_header_details_query`' do
+                    expect(securities_request_module).to receive(:execute_sql).with(anything, update_transfer_header_details_query)
+                    call_method
+                  end
+                  describe 'when the SQL execution returns nil' do
+                    before { allow(securities_request_module).to receive(:execute_sql).with(anything, update_transfer_header_details_query).and_return(nil) }
+
+                    it 'rolls back the transaction by raising an error' do
+                      expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, 'No header details found to update')
+                    end
+                  end
+                  describe 'when the SQL execution effects no records' do
+                    before { allow(securities_request_module).to receive(:execute_sql).with(anything, update_transfer_header_details_query).and_return(0) }
+
+                    it 'rolls back the transaction by raising an error' do
+                      expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, 'No header details found to update')
+                    end
+                  end
+                  it 'returns true if the SQL execution effects a record' do
+                    allow(securities_request_module).to receive(:execute_sql).with(anything, update_transfer_header_details_query).and_return(1)
+                    expect(call_method).to be true
+                  end
+                end
+                describe 'when the header details have not changed' do
+                  before { allow(securities_request_module).to receive(:header_has_changed).and_return(false) }
+
+                  it 'returns true' do
+                    expect(call_method).to be true
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+
     end
 
     describe '`set_broker_instructions_for_transfer`' do
-      let(:kind) { [:pledge_transfer, :safekept_transfer].sample }
+      let(:kind) { SecureRandom.hex }
       let(:broker_instructions) {{}}
       let(:today) { Time.zone.today.iso8601 }
       let(:value) { SecureRandom.hex }
@@ -3627,7 +4501,8 @@ describe MAPI::ServiceApp do
       let(:delivery_type) { [ 'fed', 'dtc', 'mutual_fund', 'physical_securities' ][rand(0..3)] }
       let(:delivery_values) { [ SecureRandom.hex, SecureRandom.hex, SecureRandom.hex ] }
       let(:pledged_or_unpledged) { [:pledged, :unpledged].sample }
-      let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE["#{pledged_or_unpledged}_intake".to_sym] }
+      let(:adx_type_intake) { "#{pledged_or_unpledged}_intake".to_sym }
+      let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[adx_type_intake] }
 
       describe '`insert_intake_header_query' do
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.insert_intake_header_query(member_id,
@@ -3648,7 +4523,7 @@ describe MAPI::ServiceApp do
 
         it 'expands delivery columns into the insert statement' do
           expect(call_method).to match(
-            /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[pledged_or_unpledged]},\s+PLEDGE_TO,\s+#{delivery_columns.join(',\s+')}/)
+            /\A\s*INSERT\s+INTO\s+SAFEKEEPING\.SSK_WEB_FORM_HEADER\s+\(HEADER_ID,\s+FHLB_ID,\s+STATUS,\s+PLEDGE_TYPE,\s+TRADE_DATE,\s+REQUEST_STATUS,\s+SETTLE_DATE,\s+DELIVER_TO,\s+FORM_TYPE,\s+CREATED_DATE,\s+CREATED_BY,\s+CREATED_BY_NAME,\s+LAST_MODIFIED_BY,\s+LAST_MODIFIED_DATE,\s+LAST_MODIFIED_BY_NAME,\s+#{MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type_intake]},\s+PLEDGE_TO,\s+#{delivery_columns.join(',\s+')}/)
         end
 
         it 'sets the `header_id`' do
@@ -4126,7 +5001,7 @@ describe MAPI::ServiceApp do
         end
       end
     end
-    
+
     describe '`fake_request_id` class method' do
       it 'returns a random number between 100000 and 999999 using the supplied random number generator' do
         value = double(Numeric)

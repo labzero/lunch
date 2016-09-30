@@ -190,6 +190,7 @@ en:
     coupon_rate: Coupon Rate
     original_par_value: Original Par Value
     original_par: Original Par
+    settlement_amount: Settlement Amount
     price: Price
     price_date: Price Date
     custody_account_number: Custody Account Number
@@ -202,6 +203,7 @@ en:
     unpaid_balance: Unpaid Balance
     status: Status
     authorized_by: Authorized By
+    custodian_name: 'Custodian Name%{footnote_marker}'
   datepicker:
     range:
       date_to_current: "%{date} to date"
@@ -216,7 +218,7 @@ en:
     errors:
       models:
         securities_request:
-          blank: 'Missing a required field: %{attribute}'
+          blank: 'Missing required field: %{attribute}'
           attributes:
             base:
               unknown: We were unable to add your securities request at this time.
@@ -228,15 +230,15 @@ en:
               invalid: Settlement date may not occur on a weekend, a holiday, or be a date in the past.
               before_trade_date: Settlement Date must be on or after Trade Date.
             securities:
-              payment_amount_missing: When 'Versus Payment' is selected, each security must have a settlement amount.
+              payment_amount_missing: If Settlement Type is Vs. Payment, each security must have a Settlement Amount. Press Edit Securities to add the Settlement Amount.
               payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank. Press Edit Securities to remove Settlement Amount.
-              original_par: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
+              original_par: Securities with Fed delivery must have Original Par of $50 million or less. Press Edit Securities to submit lots of $50 million or less.
         security:
-          blank: "Each row must contain at least a CUSIP and Original Par.\nPlease modify your file."
+          blank: "Each row must contain a CUSIP and an Original Par.\nEdit your file and try again."
           not_a_number: '%{attribute} must be a number.'
           attributes:
             cusip:
-              invalid: "The following CUSIP is invalid: %{value}.\nPlease update your file with the correct CUSIP."
+              invalid: "The following CUSIP is invalid: %{value}.\nEdit your file and try again."
   activerecord:
     attributes:
       user:
@@ -474,7 +476,7 @@ en:
     instructions: "Enter your username, and we’ll email you instructions to reset your password."
     confirmation:
       title: Check Your Email
-      description_html: "We sent an email to <strong>%{email}</strong>.\n\nClick the link in the email to reset your password."
+      description: We sent an email to the address we have on file for this account with instructions for how to reset your password.
       no_email: I didn’t receive the email
       email_mask_failure: '*****'
     reset_email:
@@ -617,9 +619,9 @@ en:
         errors:
           resynchronize: Token is not synchronized.
           change_pin: PIN must be changed.
-          denied: PIN and/or token is invalid.
-          invalid_pin: PIN invalid.
-          invalid_token: Token invalid.
+          denied: Invalid PIN and/or Token Code
+          invalid_pin: Invalid PIN
+          invalid_token: Invalid Token Code
           unknown: An unexpected error has occurred. Please try again.
       capitalstock:
         title: Capital Stock Purchase Required
@@ -1200,6 +1202,79 @@ en:
       authorized:
         title: Authorized Requests
         description: Authorized requests are displayed for 7 days after settlement.
+      view:
+        request_id: 'Request ID:'
+        authorization_date: 'Authorization Date:'
+        pledged_account: 'To Pledged Account:'
+        safekeeping_account: 'To Safekeeping Account:'
+        from_pledged_account: 'From Pledged Account:'
+        from_safekeeping_account: 'From Safekeeping Account:'
+        pledge: Pledge
+        request_details:
+          title: Request Details
+          request_id: Request ID
+          authorized_by: Authorized By
+          authorization_date: Authorization Date
+          pledge_to:
+            pledge_type: Pledge Type
+            types:
+              sbc: SBC
+              standard_credit: Standard
+        broker_instructions:
+          title: Broker Instructions
+          transaction_code: Transaction Code
+          settlement_type: Settlement Type
+          trade_date: Trade Date
+          settlement_date: Settlement Date
+        delivery_instructions:
+          title: Delivery Instructions
+          delivery_method: Delivery Method
+          clearing_agent: Clearing Agent’s Participant No.
+          further_credit: For Further Credit to Account No.
+        securities:
+          title: Securities
+          cusip: CUSIP
+          description: Description
+          original_par: 'Original Par ($)'
+          settlement_amount: 'Settlement Amount ($)%{footnote_marker}'
+          vs_payment_footnote: '%{footnote_marker}If Vs. Payment'
+          custodian_name_footnote: '%{footnote_marker}The name of the custodian is required for all non-agency mortgage-backed securities (MBS). If the custodian of the note supporting the MBS transaction is the Issuer or a related party and the mortgage notes have not been endorsed to the trustee, the Bank requires that the party that has control over the mortgage notes (as determined by the Bank) have a long-term debt rating of at least BBB.'
+        legal:
+          header: Pursuant to the Advances and Security Agreement between your institution and the Bank, your institution has pledged and granted a security interest to the Bank in the securities listed above.
+          sub_header: By authorizing the pledge of the specific securities listed above, your institution makes the following certifications.
+          additional_certifications: 'By authorizing the pledge of the specific securities listed above, your institution makes the following certifications:'
+          anti_preditory_lending_title: Anti-Predatory Lending Policy Certification
+          anti_preditory_lending_text: Your institution hereby certifies that it is aware of, and will comply with the Bank’s Anti-Predatory Lending Policy (as amended from time to time) at all times and represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date twhich any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
+          nontraditional_and_subprime_mortgage_title: Nontraditional and Subprime Mortgage Lending Certification
+          nontraditional_and_subprime_mortgage_text: Your institution hereby certifies that all residential mortgage loans pledged to the Bank that were originated or acquired by your institution after July 10, 2007, comply at all times with the Interagency Guidance on Nontraditional Mortgage Product Risks dated October 4, 2006, and the Statement on Subprime Mortgage Lending dated July 10, 2007. Your institution represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date on which any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
+          footer: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
+        release:
+          title: Release Securities
+          footer: Release Securities Request
+        safekept_intake:
+          title: Safekeeping Securities Request
+          footer: Safekeeping Securities Request
+        pledge_intake:
+          title: Pledge Securities Request
+          footer: Pledge Securities Request
+        pledge_release:
+          title: Release Pledged Securities Request
+          footer: Release Pledged Securities Request
+          legal:
+            notices: By authorizing the release of the specific securities listed above, your institution is requesting the release and redelivery or reassignment of these securities pursuant to the terms of the Advances and Security Agreement between your institution and the Bank. You hereby certify that, as of the date of release of the securities, as requested, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Advances and Security Agreement) that will remain pledged to (and, if your institution is currently required to deliver collateral to the Bank, that will be held by) the Bank immediately after the requested release will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Advances and Security Agreement).
+            reservation_of_rights: All rights, remedies, and obligations of the Bank with respect to the listed securities above shall be in accordance with the Advances and Security Agreement.
+        safekept_release:
+          title: Release Safekept Securities Request
+          footer: Release Safekept Securities Request
+        safekept_transfer:
+          title: Transfer Safekept Securities Request
+          footer: Transfer Safekept Securities Request
+        pledge_transfer:
+          title: Transfer Pledged Securities Request
+          footer: Transfer Pledged Securities Request
+          legal:
+            notices: By authorizing the transfer of the specific securities listed above, your institution is requesting the release and redelivery or reassignment of these securities pursuant to the terms of the Advances and Security Agreement between your institution and the Bank. You hereby certify that, as of the date of transfer of the securities, as requested, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Advances and Security Agreement) that will remain pledged to (and, if your institution is currently required to deliver collateral to the Bank, that will be held by) the Bank immediately after the requested transfer will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Advances and Security Agreement).
+            reservation_of_rights: All rights, remedies, and obligations of the Bank with respect to the listed securities above shall be in accordance with the Advances and Security Agreement.
     release:
       title: Release Securities
       add_securities: Add Securities
@@ -1243,60 +1318,32 @@ en:
       submit_authorization: Submit for Authorization
       authorize: Authorize
       legal_copy: "Pursuant to the Advances and Security Agreement (Agreement) between your institution and the Bank, your institution requests the release and redelivery or reassignment of the securities listed above.\n\nBy authorizing the release of these securities, your institution certifies that, as of the date the securities are released, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Agreement) that will remain pledged to the Bank immediately after the requested release will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Agreement)."
-      delete_request:
-        title: Delete this Release Securities request?
-        delete: Yes, Delete Request
-        continue: No, Continue
-        error_message: This request cannot be deleted right now.
       edit:
         title: Edit Securities
         intro: "To edit the listed securities:"
         step_1:
           title: "Step 1."
-          description: Download Securities Excel File
+          description: Download Template
         step_2:
           title: "Step 2."
-          make_edits: In the file, make your edits.
-          include_information: "Each security should include the following information:"
-          cusip:
-            title: CUSIP
-            description: The security's CUSIP identifier.
-          description:
-            title: Description
-            description: The security's description.
-          payment_amount:
-            title_html: "Payment Amount <span>(if needed)</span>"
-            description: "If your Settlement Type is 'vs Payment', add the Payment Amount for each security."
-          original_par:
-            title: Original Par Value
-            description: The security's Original Par Value
-          settlement_amount:
-            title_html: "Settlement Amount <span>(if needed)</span>"
-            description: If your Settlement Type is 'vs Payment', add the Settlement Amount for each security.
-          custodian_name:
-            title_html: "Custodian Name <span>(if needed)</span>"
-            description: "For each security that is not of the type 'Agency', add the Custodian Name at the end of the line."
+          make_edits: Make your edits in the file.
         step_3:
           title: "Step 3."
-          description: Save your file, and then upload it by either dragging it on to this page, or selecting it from your file system.
+          description_html: "Save your file, then upload it by either dragging and dropping it on to this page, or selecting it from your file system. Contact <a href=%{mailto_url}>%{mailto_text}</a> at %{phone_number} with questions."
         drag_drop: Drag and Drop Here
         select_file: Select File
         download_actions_html: '%{span} <span>or</span> %{button}'
-        generic_error: We were unable to add your securities request at this time. Please contact Securities Services at %{phone_number} or via %{email}
+        generic_error_html: We are unable to process your request at this time. Contact <a href=%{email}>Securities Services</a> at %{phone_number}.
         no_payment_amount_error: When 'Versus Payment' is selected, each security must have a settlement amount.
         fed_fifty_m_error: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
         settlement_date_error: Settlement Date must be on or after Trade Date.
     safekeep:
       title: Safekeep Securities
-      delete_request:
-        title: Delete this Safekeep Securities request?
       custodian_name: 'Custodian Name%{footnote_marker}'
       custodian_name_footnote: '%{footnote_marker}If security not type "Agency"'
       download_template: Download Add Securities Template File
     pledge:
       title: Pledge Securities
-      delete_request:
-        title: Delete this Pledge Securities request?
       legal_copy: Pursuant to the Advances and Security Agreement between your institution and the Bank, your institution has pledged and granted a security interest to the Bank in the securities listed above.
       additional_certifications: 'By authorizing the pledge of the specific securities listed above, your institution makes the following certifications:'
       anti_preditory_lending_title: Anti-Predatory Lending Policy Certification
@@ -1308,58 +1355,82 @@ en:
     transfer:
       pledge:
         title: Transfer Securities to Pledged Account
-        delivery_instructions: 'Internal Transfer from Safekept Account No. %{safekept_account} to Pledged Account No. %{pledged_account}'
+        delivery_instructions: 'Internal Transfer from Safekeeping Account No. %{safekept_account} to Pledged Account No. %{pledged_account}'
       safekeep:
-        title: Transfer Securities to Safekept Account
-        delivery_instructions: 'Internal Transfer from Pledged Account No. %{pledged_account} to Safekept Account No. %{safekept_account}'
+        title: Transfer Securities to Safekeeping Account
+        delivery_instructions: 'Internal Transfer from Pledged Account No. %{pledged_account} to Safekeeping Account No. %{safekept_account}'
       legal: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
-      success:
-        title: Internal Transfer Request Sent
     safekeep_pledge:
       upload_instructions:
-        download_template: Download Add Securities Template File
+        download_template: Download Template
         intro: Upload an Excel file containing your securities.
         learn_how: Learn How
         step_2:
-          enter_securities: In the file, enter one security per line.
+          enter_securities: In the file, enter one security per row.
       discard_and_upload_again: Discard and Upload Again
-      success:
-        pledge: Pledge Securities Request Sent
-        safekeep: Safekeep Securities Request Sent
     success:
-      title: Release Securities Request Sent
-      request_will_remain: 'This request will remain in the queue for authorization until one of the following occurs:'
-      request_authorized: Request is authorized by an authorized signer
-      request_rejected: Request is rejected or removed
-      request_date_passed: The settlement date for the request has passed
-      authorizers: Your Instution's Authorizers
+      titles:
+        pledge_release: Pledge Release Request Submitted
+        safekept_release: Safekeeping Release Request Submitted
+        pledge_intake: Pledge Request Submitted
+        safekept_intake: Safekeeping Request Submitted
+        transfer: Transfer Request Submitted
+      thank_you: 'Thank you for submitting your request. Authorized signers for this securities request are listed below. Press the Notify Authorizer(s) button to email authorized signers that a request is awaiting authorization.'
+      request_will_remain: 'This request will remain in the queue until one of the following occurs:'
+      request_authorized: The request is authorized.
+      request_rejected: The request is deleted by an authorized signer.
+      request_date_passed: The Settlement Date passes.
+      authorizers: Authorized Signers for Securities
       buttons:
         manage: manage securities
         view: view securities requests
         notify: notify authorizer(s)
       email:
-        subject: FHLBSF Securities Authorization Required
-        body_html: "There is a Securities Request awaiting authorization.\n\n %{url}"
+        subjects:
+          pledge_release: FHLBank San Francisco Pledge Release Request Authorization Required
+          safekept_release: FHLBank San Francisco Safekeeping Release Request Authorization Required
+          pledge_intake: FHLBank San Francisco Pledge Request Authorization Required
+          safekept_intake: FHLBank San Francisco Safekeeping Request Authorization Required
+          transfer: FHLBank San Francisco Transfer Request Authorization Required
+        body_html: "A securities request is awaiting authorization.\n\nUse the link below to log in to the FHLBank San Francisco Member Portal and view all current securities requests for %{member_name}.\n\n%{url}"
     authorize:
-      release:
-        title: Release Securities Request Sent
-      transfer:
-        title: Transfer Securities Request Sent
-      pledge:
-        title: Pledge Securities Request Sent
-      safekeep:
-        title: Safekeep Securities Request Sent
-      confirmation: "We received your securities request at %{date}.\nWe will provide a confirmation to your institution later today."
-      timeframe: You will typically see this transaction reflected in your STA within the next 24 hours.
-      issues: "If there are any issues with your request, you will be contacted by the Securities Department or the Collateral Department."
-      contact_html: "If you wish to change your request, please email the <a href=\"%{mailto_url}\">Securities Department</a> or call %{phone_number}."
+      titles:
+        pledge_release: Pledge Release Request Received
+        safekept_release: Safekeeping Release Request Received
+        pledge_intake: Pledge Request Received
+        safekept_intake: Safekeeping Request Received
+        transfer: Transfer Request Received
+      confirmation: "We received your securities request at %{date}. If there are any issues with your request, you will be contacted by Collateral Operations or Securities Services. Otherwise, the transaction will be reflected in your Settlement Transaction Account statement on the Settlement Date."
+      pdf: To see a PDF summary of the authorized request, press the View link in the Authorized Requests section of Securities Requests.
+      contact_html: "If you have questions, contact <a href=\"%{mailto_url}\">%{mailto_text}</a> or call %{phone_number}."
       make_request: make another request
+    delete_request:
+      titles:
+        release: Delete this Release request?
+        safekeep: Delete this Safekeeping request?
+        pledge: Delete this Pledge request?
+        transfer: Delete this Transfer request?
+      delete: Delete Request
+      error_message: This request cannot be deleted right now.
+    download:
+      titles:
+        release: Release Request
+        safekeep: Safekeeping Request
+        pledge: Pledge Request
+        transfer: Transfer Request
+      fed_limit: Securities with Fed delivery must have Original Par of $50 million or less
+      settlement_amount_footnote: '%{footnote_marker}If Settlement Type is Vs. Payment, each security must have Settlement Amount'
+      custodian_name_footnote: '%{footnote_marker}Custodian Name is required for all non-agency mortgage-backed securities'
     upload_errors:
-      cannot_open: We couldn't open your file. Please verify that you've selected the correct file and try again.
-      unsupported_mime_type: Your file does not appear to be an Excel file. Please verify that you've selected the correct file and try again.
+      cannot_open: We can't open your file. Verify that you have selected the correct file and try again.
+      unsupported_mime_type: We can only accept Excel files. Verify that your file is the correct format and try again.
       generic: Sorry, we couldn't complete uploading your file. Please try again, or continue with Securities as listed.
       invalid_cusips: "The following CUSIPs are invalid: %{cusips}.\nPlease update your file with the correct CUSIPs."
       no_rows: Your file contains no valid rows. Please edit your file and try again.
+      invalid_cusips: "The following CUSIPs are invalid: %{cusips}.\nEdit your file and try again."
+      no_rows: Your file contains no valid rows. Edit your file and try again.
+    upload_success: 'The following securities from your Excel file were validated and will be included in the securities request:'
+    internal_user_error: This securities request was not completed because Bank employees are not authorized to complete securities requests via the member portal.
   reports:
     meta_title: FHLB - Reports
     title: Reports
@@ -2932,9 +3003,10 @@ en:
     securities_request:
       authorized:
         subject: 'An authorized %{pledge_or_safekeeping} request has arrived'
-        body: '%{member_name} has submitted an authorized %{pledge_or_safekeeping} Release request. Please log in to the SSK application to acknowledge the transaction.'
+        body: '%{member_name} has submitted an authorized %{pledge_or_safekeeping} request. Please log in to the SSK application to acknowledge the transaction.'
         pledge: Pledge
         safekeeping: Safekeeping
+        member_id: FHLB Member ID "%{member_id}"
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

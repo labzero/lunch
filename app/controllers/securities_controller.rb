@@ -3,15 +3,11 @@ class SecuritiesController < ApplicationController
   include ContactInformationHelper
   include ActionView::Helpers::TextHelper
 
-  before_action only: [:view_release, :authorize_request, :view_request] do
-    authorize :security, :authorize?
-  end
-
   before_action only: [:delete_request] do
     authorize :security, :delete?
   end
 
-  before_action only: [ :edit_safekeep, :edit_pledge, :edit_release, :view_release ] do
+  before_action only: [ :edit_safekeep, :edit_pledge, :edit_release, :edit_transfer ] do
     @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')
   end
 
@@ -63,6 +59,13 @@ class SecuritiesController < ApplicationController
       value: SecuritiesRequest::DELIVERY_TYPES[:physical_securities]
     }
   }.freeze
+
+  PLEDGE_TO_MAPPING = {
+    :sbc => I18n.t('securities.requests.view.request_details.pledge_to.types.sbc'),
+    :standard => I18n.t('securities.requests.view.request_details.pledge_to.types.standard_credit')
+  }.freeze
+
+  VALID_REQUEST_TYPES = [:release, :pledge, :safekeep, :transfer].freeze
 
   before_action do
     set_active_nav(:securities)
@@ -128,6 +131,9 @@ class SecuritiesController < ApplicationController
     awaiting_authorization_requests = service.awaiting_authorization
     raise StandardError, "There has been an error and SecuritiesController#requests has encountered nil. Check error logs." if authorized_requests.nil? || awaiting_authorization_requests.nil?
 
+    is_collateral_authorizer = policy(:security).authorize_collateral?
+    is_securities_authorizer = policy(:security).authorize_securities?
+
     @awaiting_authorization_requests_table = {
       column_headings: [
         t('securities.requests.columns.request_id'),
@@ -150,7 +156,12 @@ class SecuritiesController < ApplicationController
         when 'safekept_transfer', 'pledge_transfer'
           securities_transfer_view_path(request_id)
         end
-        action_cell_value = policy(:security).authorize? ? [[t('securities.requests.actions.authorize'), view_path ]] : [t('securities.requests.actions.authorize')]
+        authorize = if kind
+          is_request_collateral?(kind) ? is_collateral_authorizer : is_securities_authorizer
+        else
+          false
+        end
+        action_cell_value = authorize ? [[t('securities.requests.actions.authorize'), view_path ]] : [t('securities.requests.actions.authorize')]
         {
           columns: [
             {value: request_id},
@@ -182,30 +193,126 @@ class SecuritiesController < ApplicationController
             {value: request[:authorized_by]},
             {value: request[:authorized_date], type: :date},
             {value: request[:settle_date], type: :date},
-            {value: [[t('global.view'), '#']], type: :actions}
+            {value: [[t('global.view'), securities_release_generate_authorized_request_path(request_id: request[:request_id], kind: kind)]], type: :actions}
           ]
         }
       end
     }
   end
 
+  def generate_authorized_request
+    job_status = RenderSecuritiesRequestsPDFJob.perform_later(current_member_id, { request_id: params[:request_id], kind: params[:kind] }).job_status
+    job_status.update_attributes!(user_id: current_user.id)
+    render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
+  end
+
+  def view_authorized_request
+    @member = MembersService.new(request).member(current_member_id)
+    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#view_authorized_request has encountered nil calling MembersService. Check error logs.") if @member.nil?
+    @member_profile = MemberBalanceService.new(current_member_id, request).profile
+    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#view_authorized_request has encountered nil calling MemberBalanceService. Check error logs.") if @member_profile.nil?
+    @securities_request = SecuritiesRequestService.new(current_member_id, request).submitted_request(params[:request_id])
+    raise ActionController::RoutingError.new("There has been an error retrieving the securities request. Check error logs.") if @securities_request.nil?
+    account_number = case @securities_request.kind
+    when :pledge_release, :pledge_intake
+      @securities_request.pledged_account
+    when :safekept_intake, :safekept_release
+      @securities_request.safekept_account
+    else
+      ArgumentError.new("invalid kind: #{@securities_request.kind}")
+    end
+    @title = case @securities_request.kind
+    when :pledge_release
+      t('securities.requests.view.pledge_release.title')
+    when :safekept_release
+      t('securities.requests.view.safekept_release.title')
+    when :safekept_intake
+      t('securities.requests.view.safekept_intake.title')
+    when :pledge_intake
+      t('securities.requests.view.pledge_intake.title')
+    when :safekept_transfer
+      t('securities.requests.view.safekept_transfer.title')
+    when :pledge_transfer
+      t('securities.requests.view.pledge_transfer.title')
+    end
+    @request_details_table_data = {
+      rows: [ { columns: [ { value: t('securities.requests.view.request_details.request_id') },
+                           { value: @securities_request.request_id } ] },
+              { columns: [ { value: t('securities.requests.view.request_details.authorized_by') },
+                           { value: @securities_request.authorized_by } ] },
+              { columns: [ { value: t('securities.requests.view.request_details.authorization_date') },
+                           { value: fhlb_date_standard_numeric(@securities_request.authorized_date) } ] } ] }
+    @request_details_table_data[:rows] << { columns: [
+      { value: t('securities.requests.view.request_details.pledge_to.pledge_type') },
+      { value: PLEDGE_TO_MAPPING[@securities_request.pledge_to] } ] } if @securities_request.kind == :safekept_transfer
+
+    unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
+      @broker_instructions_table_data = {
+        rows: [ { columns: [ { value: t('securities.requests.view.broker_instructions.transaction_code') },
+                             { value: @securities_request.transaction_code.to_s.titleize } ] },
+                { columns: [ { value: t('securities.requests.view.broker_instructions.settlement_type') },
+                             { value: @securities_request.settlement_type.to_s.titleize } ] },
+                { columns: [ { value: t('securities.requests.view.broker_instructions.trade_date') },
+                             { value: fhlb_date_standard_numeric(@securities_request.trade_date) } ] },
+                { columns: [ { value: t('securities.requests.view.broker_instructions.settlement_date') },
+                             { value: fhlb_date_standard_numeric(@securities_request.settlement_date) } ] } ] }
+
+      @delivery_instructions_table_data = {
+        rows: [ { columns: [ { value: t('securities.requests.view.delivery_instructions.delivery_method') },
+                             { value: get_delivery_instructions(@securities_request.delivery_type) } ] },
+                { columns: [ { value: t('securities.requests.view.delivery_instructions.clearing_agent') },
+                             { value: @securities_request.clearing_agent_participant_number } ] },
+                { columns: [ { value: t('securities.requests.view.delivery_instructions.further_credit') },
+                             { value: account_number } ] } ] }
+    end
+    rows = []
+    @securities_request.securities.each do |security|
+      rows << { columns: [ { value: security.cusip },
+                           { value: security.description },
+                           { value: security.original_par, type: :currency_whole } ] }
+      rows.last[:columns] << { value: security.payment_amount, type: :currency_whole } unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
+      rows.last[:columns] << { value: security.custodian_name } if SecuritiesRequest::INTAKE_KINDS.include?(@securities_request.kind)
+    end
+
+    @securities_table_data = {
+      column_headings: [ t('common_table_headings.cusip'),
+                         t('common_table_headings.description'),
+                         fhlb_add_unit_to_table_header(t('common_table_headings.original_par'), '$') ],
+      rows: rows
+    }
+    @securities_table_data[:column_headings] <<
+      t('securities.requests.view.securities.settlement_amount',
+        footnote_marker: fhlb_footnote_marker) unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
+    @securities_table_data[:column_headings] <<
+      t('common_table_headings.custodian_name',
+        footnote_marker: fhlb_footnote_marker(1)) if SecuritiesRequest::INTAKE_KINDS.include?(@securities_request.kind)
+  end
+
   def edit_safekeep
+    kind = :safekept_intake
     populate_view_variables(:safekeep)
     @securities_request.safekept_account = MembersService.new(request).member(current_member_id)['unpledged_account_number']
-    @securities_request.kind = :safekept_intake
+    @securities_request.kind = kind
+    populate_form_data_by_kind(kind)
+    populate_contact_info_by_kind(kind)
+    set_edit_title_by_kind(kind)
   end
 
   def edit_pledge
+    kind = :pledge_intake
     populate_view_variables(:pledge)
     @securities_request.pledged_account = MembersService.new(request).member(current_member_id)['pledged_account_number']
-    @securities_request.kind = :pledge_intake
+    @securities_request.kind = kind
+    populate_form_data_by_kind(kind)
+    populate_contact_info_by_kind(kind)
+    set_edit_title_by_kind(kind)
   end
 
   # POST
   def edit_release
     populate_view_variables(:release)
     raise ArgumentError.new('Securities cannot be nil') unless @securities_request.securities.present?
-    @securities_request.kind = case @securities_request.securities.first.custody_account_type
+    kind = case @securities_request.securities.first.custody_account_type
     when 'U'
       :safekept_release
     when 'P'
@@ -213,6 +320,10 @@ class SecuritiesController < ApplicationController
     else
       raise ArgumentError, 'Unrecognized `custody_account_type` for passed security.'
     end
+    @securities_request.kind = kind
+    populate_form_data_by_kind(kind)
+    populate_contact_info_by_kind(kind)
+    set_edit_title_by_kind(kind)
   end
 
   # POST
@@ -220,26 +331,34 @@ class SecuritiesController < ApplicationController
     populate_view_variables(:transfer)
     @securities_request.safekept_account = MembersService.new(request).member(current_member_id)['unpledged_account_number']
     @securities_request.pledged_account = MembersService.new(request).member(current_member_id)['pledged_account_number']
-    case @securities_request.securities.first.custody_account_type
+    kind = case @securities_request.securities.first.custody_account_type
     when 'U'
-      @securities_request.kind = :pledge_transfer
-      @title = t('securities.transfer.pledge.title')
+      :pledge_transfer
     when 'P'
-      @securities_request.kind = :safekept_transfer
-      @title = t('securities.transfer.safekeep.title')
+      :safekept_transfer
     else
       raise ArgumentError, 'Unrecognized `custody_account_type` for passed security.'
     end
+    @securities_request.kind = kind
+    populate_form_data_by_kind(kind)
+    populate_contact_info_by_kind(kind)
+    set_edit_title_by_kind(kind)
   end
 
   # GET
   def view_request
     request_id = params[:request_id]
     type = params[:type].try(:to_sym)
+    raise ArgumentError, "Unknown request type: #{type}" unless VALID_REQUEST_TYPES.include?(type)
     @securities_request = SecuritiesRequestService.new(current_member_id, request).submitted_request(request_id)
-    raise ActionController::RoutingError.new("There has been an error and SecuritiesController#view_request has encountered nil. Check error logs.") if @securities_request.nil?
-    raise ActionController::RoutingError.new("The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{@securities_request.kind}`") unless type_matches_kind(type, @securities_request.kind)
+    raise ActionController::RoutingError.new("There has been an error retrieving the securities request. Check error logs.") if @securities_request.nil?
+    authorize :security, @securities_request.is_collateral? ? :authorize_collateral? : :authorize_securities?
+    kind = @securities_request.kind
+    raise ActionController::RoutingError.new("The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{kind}`") unless type_matches_kind(type, kind)
     populate_view_variables(type)
+    populate_form_data_by_kind(kind)
+    populate_contact_info_by_kind(kind)
+    set_edit_title_by_kind(kind)
     case type
     when :release
       render :edit_release
@@ -247,26 +366,31 @@ class SecuritiesController < ApplicationController
       render :edit_pledge
     when :safekeep
       render :edit_safekeep
-    else
-      raise ArgumentError, "Unknown request type: #{type}"
+    when :transfer
+      render :edit_transfer
     end
   end
 
   def download_release
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:release, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :release }
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :release, title: t('securities.download.titles.release') }
   end
 
   def download_transfer
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:transfer, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :transfer }
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :transfer, title: t('securities.download.titles.transfer') }
   end
 
   def download_safekeep
     populate_securities_table_data_view_variable(:safekeep)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep }
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep, title: t('securities.download.titles.safekeep') }
+  end
+
+  def download_pledge
+    populate_securities_table_data_view_variable(:pledge)
+    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge, title: t('securities.download.titles.pledge') }
   end
 
   def upload_securities
@@ -349,19 +473,17 @@ class SecuritiesController < ApplicationController
     render json: {html: html, form_data: (securities.to_json if securities && securities.present?), error: (simple_format(error) if error)}, content_type: request.format
   end
 
-  def download_pledge
-    populate_securities_table_data_view_variable(:pledge)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge }
-  end
-
   # POST
   def submit_request
     type = params[:type].try(:to_sym)
     @securities_request = SecuritiesRequest.from_hash(params[:securities_request])
-    raise ArgumentError, "Unknown request type: #{type}" unless [:release, :pledge, :safekeep, :transfer].include?(type)
-    raise ActionController::RoutingError.new("The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{@securities_request.kind}`") unless type_matches_kind(type, @securities_request.kind)
-    authorizer = policy(:security).authorize?
-    if @securities_request.valid?
+    @securities_request.member_id = current_member_id
+    raise ArgumentError, "Unknown request type: #{type}" unless VALID_REQUEST_TYPES.include?(type)
+    kind = @securities_request.kind
+    raise ActionController::RoutingError.new("The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{kind}`") unless type_matches_kind(type, kind)
+    authorizer = @securities_request.is_collateral? ? policy(:security).authorize_collateral? : policy(:security).authorize_securities?
+    submitter = policy(:security).submit?
+    if @securities_request.valid? && submitter
       response = SecuritiesRequestService.new(current_member_id, request).submit_request_for_authorization(@securities_request, current_user, type) do |error|
         error = JSON.parse(error.http_body)['error']
         error['code'] = :base if error['code'] == 'unknown'
@@ -369,7 +491,7 @@ class SecuritiesController < ApplicationController
       end
       @securities_request.errors.add(:base, :submission) unless response || @securities_request.errors.present?
     end
-    has_errors = @securities_request.errors.present?
+    has_errors = @securities_request.errors.present? || !submitter
     if authorizer
       @securid_status = securid_perform_check unless has_errors
       unless session_elevated?
@@ -377,7 +499,7 @@ class SecuritiesController < ApplicationController
       end
       unless has_errors
         if SecuritiesRequestService.new(current_member_id, request).authorize_request(@securities_request.request_id, current_user)
-          InternalMailer.securities_request_authorized(@securities_request)
+          InternalMailer.securities_request_authorized(@securities_request).deliver_now
         else
           @securities_request.errors.add(:base, :authorization)
           has_errors = true
@@ -385,8 +507,11 @@ class SecuritiesController < ApplicationController
       end
     end
     if has_errors
-      @error_message = prioritized_securities_request_error(@securities_request)
+      @error_message = prioritized_securities_request_error(@securities_request) || I18n.t('securities.internal_user_error')
       populate_view_variables(type)
+      populate_form_data_by_kind(kind)
+      populate_contact_info_by_kind(kind)
+      set_edit_title_by_kind(kind)
       case type
       when :release
         render :edit_release
@@ -398,26 +523,21 @@ class SecuritiesController < ApplicationController
         render :edit_safekeep
       end
     elsif authorizer
-      case type
-      when :release
-        @title = t('securities.authorize.release.title')
-      when :transfer
-        @title = t('securities.authorize.transfer.title')
-      when :pledge
-        @title = t('securities.authorize.pledge.title')
-      when :safekeep
-        @title = t('securities.authorize.safekeep.title')
-      end
+      populate_authorize_request_view_variables(kind)
       render :authorize_request
     else
-      url = case type
-      when :release
-        securities_release_success_url
-      when :transfer
-        securities_transfer_success_url
-      when :pledge
+      url = case kind
+      when :pledge_release
+        securities_release_pledge_success_url
+      when :safekept_release
+        securities_release_safekeep_success_url
+      when :pledge_transfer
+        securities_transfer_pledge_success_url
+      when :safekept_transfer
+        securities_transfer_safekeep_success_url
+      when :pledge_intake
         securities_pledge_success_url
-      when :safekeep
+      when :safekept_intake
         securities_safekeep_success_url
       end
       redirect_to url
@@ -425,22 +545,32 @@ class SecuritiesController < ApplicationController
   end
 
   def submit_request_success
-    @title = case params[:type].to_sym
-    when :release
-      t('securities.success.title')
-    when :pledge
-      t('securities.safekeep_pledge.success.pledge')
-    when :safekeep
-      t('securities.safekeep_pledge.success.safekeep')
-    when :transfer
-      t('securities.transfer.success.title')
+    kind = params[:kind].to_sym
+    case kind
+    when :pledge_release
+      @title = t('securities.success.titles.pledge_release')
+      @email_subject = t('securities.success.email.subjects.pledge_release')
+    when :safekept_release
+      @title = t('securities.success.titles.safekept_release')
+      @email_subject = t('securities.success.email.subjects.safekept_release')
+    when :pledge_intake
+      @title = t('securities.success.titles.pledge_intake')
+      @email_subject = t('securities.success.email.subjects.pledge_intake')
+    when :safekept_intake
+      @title = t('securities.success.titles.safekept_intake')
+      @email_subject = t('securities.success.email.subjects.safekept_intake')
+    when :pledge_transfer, :safekept_transfer
+      @title = t('securities.success.titles.transfer')
+      @email_subject = t('securities.success.email.subjects.transfer')
     end
+
+    role_needed_to_authorize = is_request_collateral?(kind) ? User::Roles::COLLATERAL_SIGNER : User::Roles::SECURITIES_SIGNER
     @authorized_user_data = []
     users = MembersService.new(request).signers_and_users(current_member_id) || []
     users.sort_by! { |user| [user[:surname] || '', user[:given_name] || ''] }
     users.each do |user|
       user[:roles].each do |role|
-        if role == User::Roles::SECURITIES_SIGNER
+        if role == role_needed_to_authorize
           @authorized_user_data.push(user)
           break
         end
@@ -487,8 +617,8 @@ class SecuritiesController < ApplicationController
         { columns: [
           {value: security.cusip || t('global.missing_value')},
           {value: security.description || t('global.missing_value')},
-          {value: security.original_par, type: :number},
-          {value: security.payment_amount, type: :number}
+          {value: security.original_par, type: :currency, options: {unit: ""}},
+          {value: security.payment_amount, type: :currency, options: {unit: ""}}
         ] }
       end
       when :transfer
@@ -499,7 +629,7 @@ class SecuritiesController < ApplicationController
         { columns: [
           {value: security.cusip || t('global.missing_value')},
           {value: security.description || t('global.missing_value')},
-          {value: security.original_par, type: :number}
+          {value: security.original_par, type: :currency, options: {unit: ""}}
         ] }
       end
     when :pledge, :safekeep
@@ -510,8 +640,8 @@ class SecuritiesController < ApplicationController
       rows = securities.collect do |security|
         { columns: [
           {value: security.cusip || t('global.missing_value')},
-          {value: security.original_par, type: :number},
-          {value: security.payment_amount, type: :number},
+          {value: security.original_par, type: :currency, options: {unit: ""}},
+          {value: security.payment_amount, type: :currency, options: {unit: ""}},
           {value: security.custodian_name || t('global.missing_value')}
         ] }
       end
@@ -528,13 +658,19 @@ class SecuritiesController < ApplicationController
       [t('securities.release.pledge_type.standard'), SecuritiesRequest::PLEDGE_TO_VALUES[:standard]]
     ]
 
-    @title = case type
+    case type
     when :release
-      t('securities.release.title')
+      @confirm_delete_text = t('securities.delete_request.titles.release')
+      @download_path = securities_release_download_path
     when :pledge
-      t('securities.pledge.title')
+      @confirm_delete_text = t('securities.delete_request.titles.pledge')
+      @download_path = securities_pledge_download_path
     when :safekeep
-      t('securities.safekeep.title')
+      @confirm_delete_text = t('securities.delete_request.titles.safekeep')
+      @download_path = securities_safekeep_download_path
+    when :transfer
+      @confirm_delete_text = t('securities.delete_request.titles.transfer')
+      @download_path = securities_transfer_download_path
     end
 
     @session_elevated = session_elevated?
@@ -548,11 +684,6 @@ class SecuritiesController < ApplicationController
     populate_settlement_type_dropdown_variables(@securities_request)
     populate_delivery_instructions_dropdown_variables(@securities_request)
     populate_securities_table_data_view_variable(type, @securities_request.securities)
-
-    @form_data = {
-      url: securities_release_submit_path,
-      submit_text: policy(:security).authorize? ? t('securities.release.authorize') : t('securities.release.submit_authorization')
-    }
     @date_restrictions = date_restrictions
   end
 
@@ -617,7 +748,7 @@ class SecuritiesController < ApplicationController
       elsif securities_request_errors[:securities].present?
         securities_request_errors[:securities].first
       else
-        I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
+        I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email).html_safe
       end
     end
   end
@@ -645,4 +776,67 @@ class SecuritiesController < ApplicationController
     end
   end
 
+  def populate_contact_info_by_kind(kind)
+    @contact = if SecuritiesRequest::COLLATERAL_KINDS.include?(kind)
+      {email_address: collateral_operations_email, mailto_text: t('contact.collateral_departments.collateral_operations.title'), phone_number: collateral_operations_phone_number}
+    elsif SecuritiesRequest::SECURITIES_KINDS.include?(kind)
+      {email_address: securities_services_email, mailto_text: t('contact.collateral_departments.securities_services.title'), phone_number: securities_services_phone_number}
+    end
+  end
+
+  def populate_authorize_request_view_variables(kind)
+    populate_contact_info_by_kind(kind)
+    case kind
+    when :pledge_release
+      @title = t('securities.authorize.titles.pledge_release')
+    when :safekept_release
+      @title = t('securities.authorize.titles.safekept_release')
+    when :pledge_intake
+      @title = t('securities.authorize.titles.pledge_intake')
+    when :safekept_intake
+      @title = t('securities.authorize.titles.safekept_intake')
+    when :pledge_transfer
+      @title = t('securities.authorize.titles.transfer')
+    when :safekept_transfer
+      @title = t('securities.authorize.titles.transfer')
+    end
+  end
+
+  def get_delivery_instructions(delivery_type)
+    I18n.t(DELIVERY_INSTRUCTIONS_DROPDOWN_MAPPING[delivery_type.to_sym][:text])
+  end
+
+  def set_edit_title_by_kind(kind)
+    @title = case kind.to_sym
+    when :pledge_release, :safekept_release
+      I18n.t('securities.release.title')
+    when :pledge_intake
+      I18n.t('securities.pledge.title')
+    when :safekept_intake
+      I18n.t('securities.safekeep.title')
+    when :pledge_transfer
+      I18n.t('securities.transfer.pledge.title')
+    when :safekept_transfer
+      I18n.t('securities.transfer.safekeep.title')
+    end
+  end
+
+  def is_request_collateral?(kind)
+    case kind.to_sym
+    when *SecuritiesRequest::COLLATERAL_KINDS
+      true
+    when *SecuritiesRequest::SECURITIES_KINDS
+      false
+    else
+      raise ArgumentError, "Unsupported securities request kind: #{kind}"
+    end
+  end
+
+  def populate_form_data_by_kind(kind)
+    @authorizer = is_request_collateral?(kind) ? policy(:security).authorize_collateral? : policy(:security).authorize_securities?
+    @form_data = {
+      url: securities_release_submit_path,
+      submit_text: @authorizer ? t('securities.release.authorize') : t('securities.release.submit_authorization')
+    }
+  end
 end

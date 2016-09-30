@@ -186,13 +186,16 @@ Rails.application.routes.draw do
       get 'manage' => 'securities#manage'
       get 'requests' => 'securities#requests'
       delete 'request/:request_id' => 'securities#delete_request', as: 'delete_request'
+
       scope 'release', as: :release do
         get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :release }
+        get 'authorized/:request_id' => 'securities#generate_authorized_request', as: 'generate_authorized_request', defaults: { type: :release }
         post 'edit' => 'securities#edit_release'
         post 'download' => 'securities#download_release'
         post 'upload' => 'securities#upload_securities', defaults: { type: :release }
         post 'submit' => 'securities#submit_request', defaults: { type: :release }
-        get 'success' => 'securities#submit_request_success', defaults: { type: :release }
+        get 'pledge_success' => 'securities#submit_request_success', defaults: { kind: :pledge_release }
+        get 'safekeep_success' => 'securities#submit_request_success', defaults: { kind: :safekept_release }
       end
       scope 'safekeep', as: :safekeep do
         get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :safekeep }
@@ -200,7 +203,7 @@ Rails.application.routes.draw do
         get 'download' => 'securities#download_safekeep'
         post 'upload' => 'securities#upload_securities', defaults: { type: :safekeep }
         post 'submit' => 'securities#submit_request', defaults: { type: :safekeep }
-        get 'success' => 'securities#submit_request_success', defaults: { type: :safekeep }
+        get 'success' => 'securities#submit_request_success', defaults: {kind: :safekept_intake}
       end
       scope 'pledge', as: :pledge do
         get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :pledge }
@@ -208,15 +211,16 @@ Rails.application.routes.draw do
         get 'download' => 'securities#download_pledge'
         post 'upload' => 'securities#upload_securities', defaults: { type: :pledge }
         post 'submit' => 'securities#submit_request', defaults: { type: :pledge }
-        get 'success' => 'securities#submit_request_success', defaults: { type: :pledge }
+        get 'success' => 'securities#submit_request_success', defaults: {kind: :pledge_intake}
       end
       scope 'transfer', as: :transfer do
         post 'edit' => 'securities#edit_transfer'
         post 'download' => 'securities#download_transfer'
         post 'upload' => 'securities#upload_securities', defaults: { type: :transfer }
         post 'submit' => 'securities#submit_request', defaults: { type: :transfer }
-        get 'success' => 'securities#submit_request_success', defaults: { type: :transfer }
-        get 'view/:request_id' => 'error#not_found', as: 'view', defaults: { type: :transfer }
+        get 'pledge_success' => 'securities#submit_request_success', defaults: { kind: :pledge_transfer }
+        get 'safekeep_success' => 'securities#submit_request_success', defaults: { kind: :safekept_transfer }
+        get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :transfer }
       end
     end
   end
@@ -250,6 +254,34 @@ Rails.application.routes.draw do
   get '/error' => 'error#standard_error' unless Rails.env.production?
   get '/maintenance' => 'error#maintenance' unless Rails.env.production?
   get '/not-found' => 'error#not_found' unless Rails.env.production?
+
+  # BEGIN REDIRECT BLOCK- Redirect possibly bookmarked URLs from old member portal
+  get '/Default.aspx' => redirect('/dashboard', status: 302)
+  get '/member/index.aspx' => redirect('/dashboard', status: 302)
+  get '/member/reports/sta/monthly.aspx' => redirect('/reports/settlement-transaction-account', status: 302)
+  get '/member/rates/current/default.aspx' => redirect('/reports/current-price-indications', status: 302)
+  get '/member/reports/securities/transaction.aspx' => redirect('/reports/securities-transactions', status: 302)
+  get '/member/reports/advances/advances.aspx' =>	redirect('/reports/advances', status: 302)
+  get '/member/profile/overview.aspx' => redirect('/reports/account-summary', status: 302)
+  get '/member/profile/collateral/collateral.aspx' => redirect('/reports/borrowing-capacity', status: 302)
+  get '/member/reports/advances/today.aspx' => redirect('/reports/todays-credit', status: 302)
+  get '/member/profile/sta/sta.aspx' => redirect('/reports/settlement-transaction-account', status: 302)
+  get '/accountservices' => redirect('/reports/account-summary', status: 302)
+  get '/accountservices/*all' => redirect('/reports/account-summary', status: 302)
+  get '/member/ps/forms' => redirect('/resources/forms', status: 302)
+  get '/member/ps/forms/*all' => redirect('/resources/forms', status: 302)
+  get '/member/ps/guides' => redirect('/resources/guides', status: 302)
+  get '/member/ps/guides/*all' => redirect('/resources/guides', status: 302)
+  get '/member/ps' => redirect('/products/summary', status: 302)
+  get '/member/ps/*unmatched_route' => redirect('/products/summary', status: 302)
+  get '/member/etransact' => redirect('/advances/manage', status: 302)
+  get '/member/etransact/*all' => redirect('/advances/manage', status: 302)
+  get '/member/accessmanager' => redirect('/settings/users', status: 302)
+  get '/member/accessmanager/*all' => redirect('/settings/users', status: 302)
+  get '/member/reports' => redirect('/reports', status: 302)
+  get '/member/reports/*unmatched_route' => redirect('/reports', status: 302)
+  get '/member/*unmatched_route' => redirect('/dashboard', status: 302)
+  # END REDIRECT BLOCK
 
   # This catchall route MUST be listed here last to avoid catching previously-named routes
   get '*unmatched_route' => 'error#not_found'

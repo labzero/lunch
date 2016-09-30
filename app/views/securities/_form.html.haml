@@ -1,4 +1,3 @@
-- authorizer = policy(:security).authorize?
 = form_for(@securities_request, validate: true, url: url, html: {class: 'securities-submit-release-form'}) do |f|
   = f.hidden_field(:request_id)
   = f.hidden_field(:kind)
@@ -38,7 +37,7 @@
         = render 'shared/input_field', form_builder: f, field_name: :delivery_bank_agent, label: t('securities.release.delivery_instructions.delivery_agent'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_name, label: t('securities.release.delivery_instructions.agent_name'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_address, label: t('securities.release.delivery_instructions.agent_address'), horizontal: true
-        = render 'shared/input_field', form_builder: f, field_name: :physical_securities_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
+        = render 'shared/input_field', form_builder: f, field_name: :physical_securities_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true, field_data: {required: false}
       .securities-delivery-instructions-field.securities-delivery-instructions-field-fed{data: {'delivery-instruction-type' => 'fed'}}
         .securities-fed-wire-address-fields
           %p= t('securities.release.clearing_agent')
@@ -46,20 +45,21 @@
           %span /
           = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_fed_wire_address_2
         = render 'shared/input_field', form_builder: f, field_name: :aba_number, label: t('securities.release.delivery_instructions.aba'), horizontal: true
-        = render 'shared/input_field', form_builder: f, field_name: :fed_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
+        = render 'shared/input_field', form_builder: f, field_name: :fed_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true, field_data: {required: false}
       .securities-delivery-instructions-field.securities-delivery-instructions-field-dtc{data: {'delivery-instruction-type' => 'dtc'}}
         = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_participant_number, label: t('securities.release.delivery_instructions.participant_number'), horizontal: true
-        = render 'shared/input_field', form_builder: f, field_name: :dtc_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true
+        = render 'shared/input_field', form_builder: f, field_name: :dtc_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true, field_data: {required: false}
       .securities-delivery-instructions-field.securities-delivery-instructions-field-mutual-fund{data: {'delivery-instruction-type' => 'mutual_fund'}}
         = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_company, label: t('securities.release.delivery_instructions.mutual_fund'), horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_account_number, label: t('securities.release.delivery_instructions.account_number'), horizontal: true
   %section.securities-display
     -if type == :safekeep || type == :pledge
       %h2.safekeep-pledge-title= t('securities.title')
-      =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), securities_pledge_download_path, class: [ 'securities-download-template', 'safekeep-pledge-download-title' ]
+      =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), @download_path, class: [ 'securities-download-template', 'safekeep-pledge-download-title' ]
     -else
       %h2= t('securities.title')
-    .securities-release-upload-error= simple_format(t('securities.upload_errors.generic'))
+    %p.securities-request-upload-success= t('securities.upload_success')
+    .securities-request-upload-error= simple_format(t('securities.upload_errors.generic'))
     .securities-release-table-wrapper
       -unless @securities_table_data[:rows].empty?
         = render 'table', locals: { type: type }
@@ -67,9 +67,9 @@
     -if type == :release
       = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, upload_url: securities_release_upload_path, type: :release}
     -elsif type == :safekeep || type == :pledge
-      = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes}
-  - if authorizer
-    - if policy(:security).authorize? && type != :safekeep
+      = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, download_path: @download_path}
+  - if @authorizer
+    - if type != :safekeep
       .securities-request-legal
         =simple_format(t("securities.#{type}.legal_copy"))
         -if type == :pledge
@@ -77,5 +77,5 @@
     - unless @session_elevated
       = render 'shared/securid_module', error: @securid_status
   .securities-actions
-    %span.secondary-button.delete-release-trigger= t('global.delete')
+    %span.secondary-button.delete-request-trigger{disabled: @securities_request.request_id && !policy(:security).delete?}= t('global.delete')
     =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true)

@@ -1,6 +1,5 @@
 - @page_title = t('global.page_meta_title', title: @title)
 - kind = @securities_request.kind
-- authorizer = policy(:security).authorize?
 .securities.row
   .securities-header
     %h1= @title
@@ -11,6 +10,8 @@
         = f.hidden_field(:kind)
         = f.hidden_field(:trade_date)
         = f.hidden_field(:settlement_date)
+        = f.hidden_field(:pledged_account)
+        = f.hidden_field(:safekept_account)
         - if @error_message
           .securities-submit-release-form-errors
             %p= @error_message
@@ -33,21 +34,23 @@
             %p= t('securities.transfer.safekeep.delivery_instructions', safekept_account: @securities_request.safekept_account, pledged_account: @securities_request.pledged_account)
         %section.securities-display
           %h2= t('securities.title')
-          .securities-release-upload-error= simple_format(t('securities.upload_errors.generic'))
+          %p.securities-request-upload-success= t('securities.upload_success')
+          .securities-request-upload-error= simple_format(t('securities.upload_errors.generic'))
           .securities-release-table-wrapper
             -unless @securities_table_data[:rows].empty?
               = render 'table'
           = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: @accepted_upload_mimetypes, upload_url: securities_transfer_upload_path, type: :transfer}
-        - if authorizer
-          - if policy(:security).authorize? && kind == :pledge_transfer
+        - if @authorizer
+          - if kind == :pledge_transfer
             .securities-request-legal
               =simple_format(t("securities.pledge.legal_copy"))
               = render 'pledge_legal_copy'
           - unless @session_elevated
             = render 'shared/securid_module', error: @securid_status
-        %small= t('securities.transfer.legal')
         .securities-actions
-          %span.secondary-button.delete-release-trigger= t('global.delete')
+          %span.secondary-button.delete-request-trigger{disabled: @securities_request.request_id && !policy(:security).delete?}= t('global.delete')
           =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true)
-    =form_tag(securities_transfer_download_path, name: 'securities-release-download') do
+        %p.legal-footer= t('securities.transfer.legal')
+        = render 'delete_request_flyout', request_id: @securities_request.request_id
+    =form_tag(@download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_request.securities.to_json)

@@ -174,6 +174,76 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'PUT `securities/transfer`' do
+    let(:request_id) { SecureRandom.hex }
+    let(:security) { {  'cusip' => SecureRandom.hex,
+                        'description' => SecureRandom.hex,
+                        'original_par' => rand(1..100000) + rand.round(2),
+                        'payment_amount' => rand(1..100000) + rand.round(2) } }
+    let(:put_body) { {
+      'request_id' => request_id,
+      'kind' =>  SecureRandom.hex,
+      'broker_instructions' => { 'transaction_code' => MAPI::Services::Member::SecuritiesRequests::TRANSACTION_CODE.keys[rand(0..1)],
+                                 'settlement_type' => MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE.keys[rand(0..1)],
+                                 'trade_date' => "2016-09-20T16:28:55-07:00",
+                                 'settlement_date' => "2016-09-20T16:28:55-07:00",
+                                 'pledge_to' => SecureRandom.hex},
+      'securities' => rand(1..5).times.map { security },
+      'user' => {
+        'username' => SecureRandom.hex,
+        'full_name' => SecureRandom.hex,
+        'session_id' => SecureRandom.hex }
+    } }
+    let(:update_transfer) { put("/member/#{member_id}/securities/transfer", put_body.to_json) }
+    let(:exception_message) { SecureRandom.hex }
+    let(:logger) { double('MAPI logger', error: nil) }
+    let(:response_status) { update_transfer; last_response.status }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', "/member/#{rand(1000..99999)}/securities/transfer", :put, MAPI::Services::Member::SecuritiesRequests, :update_transfer, {user:{}, request_id: SecureRandom.hex}.to_json
+
+    it 'returns 200 and request_id after calling `MAPI::Services::Member::SecuritiesRequests.update_transfer`' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:update_transfer).with(
+                                                             kind_of(app),
+                                                             member_id.to_i,
+                                                             request_id,
+                                                             put_body['user']['username'],
+                                                             put_body['user']['full_name'],
+                                                             put_body['user']['session_id'],
+                                                             put_body['broker_instructions'],
+                                                             put_body['securities'],
+                                                             put_body['kind'].to_sym).and_return(true)
+      update_transfer
+      expect(last_response.status).to be(200)
+      expect(JSON.parse(last_response.body)['request_id']).to eq(request_id)
+    end
+
+    it 'calls `MAPI::Services::Member::SecuritiesRequests.update_transfer` with all of the appropriate arguments' do
+      expect(MAPI::Services::Member::SecuritiesRequests).to receive(:update_transfer).with(
+                                                              kind_of(app),
+                                                              member_id.to_i,
+                                                              request_id,
+                                                              put_body['user']['username'],
+                                                              put_body['user']['full_name'],
+                                                              put_body['user']['session_id'],
+                                                              put_body['broker_instructions'],
+                                                              put_body['securities'],
+                                                              put_body['kind'].to_sym)
+      update_transfer
+    end
+
+    describe 'when there is no `request_id` in the posted body' do
+      before { put_body.delete(:request_id) }
+
+      it 'returns a 400' do
+        expect(response_status).to eq(400)
+      end
+    end
+
+    it 'doesn\'t raise an error' do
+      expect { update_transfer }.to_not raise_error
+    end
+  end
+
   describe 'PUT `securities/authorize`' do
     let(:username) { SecureRandom.hex }
     let(:full_name) { SecureRandom.hex }

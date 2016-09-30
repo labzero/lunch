@@ -8,6 +8,19 @@ RSpec.describe SecuritiesController, type: :controller do
   let(:member_id) { rand(1000..99999) }
   before { allow(controller).to receive(:current_member_id).and_return(member_id) }
 
+  shared_examples 'an action that sets its contact info by kind' do |kind|
+    it "calls `populate_contact_info_by_kind` with `#{kind}`" do
+      expect(controller).to receive(:populate_contact_info_by_kind).with(kind)
+      call_action
+    end
+  end
+  shared_examples 'an action that sets its title by kind' do |kind|
+    it "calls `set_edit_title_by_kind` with `#{kind}`" do
+      expect(controller).to receive(:set_edit_title_by_kind).with(kind)
+      call_action
+    end
+  end
+
   describe 'requests hitting MemberBalanceService' do
     let(:member_balance_service_instance) { double('MemberBalanceServiceInstance') }
 
@@ -164,6 +177,8 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(SecuritiesRequestService).to receive(:new).and_return(securities_requests_service)
     end
 
+    allow_policy :security, :authorize_collateral?
+
     it_behaves_like 'a user required action', :get, :requests
     it_behaves_like 'a controller action with an active nav setting', :requests, :securities
 
@@ -206,7 +221,7 @@ RSpec.describe SecuritiesController, type: :controller do
       it 'builds a row for each entry in the `authorized` requests' do
         3.times do
           authorized_requests << {
-            request_id: double('Request ID'),
+            request_id: double('Request ID', to_s: SecureRandom.hex),
             authorized_by: double('Authorized By'),
             authorized_date: double('Authorized Date'),
             settle_date: double('Settlement Date'),
@@ -223,7 +238,10 @@ RSpec.describe SecuritiesController, type: :controller do
               {value: request[:authorized_by]},
               {value: request[:authorized_date], type: :date},
               {value: request[:settle_date], type: :date},
-              {value: [[I18n.t('global.view'), '#']], type: :actions}
+              {value: [[I18n.t('global.view'),
+                securities_release_generate_authorized_request_path(request_id: request[:request_id],
+                  kind: request[:kind])]],
+                  type: :actions}
             ]
           }
         end
@@ -232,6 +250,11 @@ RSpec.describe SecuritiesController, type: :controller do
       end
     end
     describe '`@awaiting_authorization_requests_table`' do
+      deny_policy :security, :authorize_collateral?
+      deny_policy :security, :authorize_securities?
+      before do
+        allow(subject).to receive(:is_request_collateral?).and_return(true)
+      end
       it 'builds the column headers' do
         call_action
         expect(assigns[:awaiting_authorization_requests_table][:column_headings]).to eq([
@@ -272,20 +295,8 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       describe 'when the `current_user` can authorize securities' do
         let(:request_id) { SecureRandom.hex }
-        allow_policy :security, :authorize?
         before do
           allow(subject).to receive(:kind_to_description)
-        end
-        it "builds rows with a link to view the submitted request for the `:action` cell" do
-          awaiting_authorization_requests << {
-            request_id: request_id,
-            kind: 'pledge_release'
-          }
-          call_action
-          expect(assigns[:awaiting_authorization_requests_table][:rows].length).to be > 0
-          assigns[:awaiting_authorization_requests_table][:rows].each do |row|
-            expect(row[:columns].last).to eq({value: [[I18n.t('securities.requests.actions.authorize'), securities_release_view_path(request_id) ]], type: :actions})
-          end
         end
         {
           'pledge_release' => :securities_release_view_path,
@@ -295,6 +306,11 @@ RSpec.describe SecuritiesController, type: :controller do
           'safekept_transfer' => :securities_transfer_view_path,
           'pledge_transfer' => :securities_transfer_view_path
         }.each do |kind, path_helper|
+          if kind == 'safekept_intake' || kind == 'safekept_release'
+            allow_policy :security, :authorize_securities?
+          else
+            allow_policy :security, :authorize_collateral?
+          end
           it "sets the authorize action URL to `#{path_helper}` when the `kind` is `#{kind}`" do
             awaiting_authorization_requests << {
               request_id: request_id,
@@ -323,59 +339,80 @@ RSpec.describe SecuritiesController, type: :controller do
   end
 
   describe 'GET view_request' do
-    let(:type) { [:release, :pledge, :safekeep].sample }
+    let(:type) { SecureRandom.hex }
     let(:request_id) { SecureRandom.hex }
-    let(:securities_request) { instance_double(SecuritiesRequest, kind: nil) }
+    let(:kind) { instance_double(Symbol) }
+    let(:securities_request) { instance_double(SecuritiesRequest, kind: kind, is_collateral?: true) }
     let(:service) { instance_double(SecuritiesRequestService, submitted_request: securities_request) }
     let(:call_action) { get :view_request, request_id: request_id, type: type }
-    allow_policy :security, :authorize?
+
+    allow_policy :security, :authorize_collateral?
+    allow_policy :security, :authorize_securities?
 
     before do
       allow(SecuritiesRequestService).to receive(:new).and_return(service)
       allow(controller).to receive(:populate_view_variables)
       allow(controller).to receive(:type_matches_kind).and_return(true)
+      allow(controller).to receive(:populate_contact_info_by_kind)
+      allow(controller).to receive(:populate_form_data_by_kind)
+      allow(controller).to receive(:set_edit_title_by_kind)
     end
 
     it_behaves_like 'a user required action', :get, :view_request, request_id: SecureRandom.hex, type: :release
     it_behaves_like 'a controller action with an active nav setting', :view_request, :securities, request_id: SecureRandom.hex, type: :release
-    it_behaves_like 'an authorization required method', :get, :view_request, :security, :authorize?, request_id: SecureRandom.hex, type: :release
+    it_behaves_like 'an authorization required method', :get, :view_request, :security, :authorize_collateral?, request_id: SecureRandom.hex, type: :pledge
 
-    it 'raises an ActionController::RoutingError if the service object returns nil' do
-      allow(service).to receive(:submitted_request)
-      expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error and SecuritiesController#view_request has encountered nil. Check error logs.')
-    end
-    it 'raises an ActionController::RoutingError if the securities request kind does not match the request type param' do
-      allow(controller).to receive(:type_matches_kind).and_return(false)
-      expect{call_action}.to raise_error(ActionController::RoutingError, "The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{securities_request.kind}`")
-    end
-    it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
-      expect(SecuritiesRequestService).to receive(:new).with(member_id, any_args).and_return(service)
-      call_action
-    end
-    it 'creates a new `SecuritiesRequestService` with the `request`' do
-      expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(service)
-      call_action
-    end
-    it 'calls `submitted_request` on the `SecuritiesRequestService` instance with the `request_id`' do
-      expect(service).to receive(:submitted_request).with(request_id)
-      call_action
-    end
-    it 'sets `@securities_request` to the result of `SecuritiesRequestService#request_id`' do
-      call_action
-      expect(assigns[:securities_request]).to eq(securities_request)
-    end
-    it 'calls `populate_view_variables`' do
-      expect(controller).to receive(:populate_view_variables)
-      call_action
+    it 'raises an exception if passed an unknown type' do
+      expect{call_action}.to raise_error(ArgumentError, "Unknown request type: #{type}")
     end
 
     {
       release: :edit_release,
       pledge: :edit_pledge,
-      safekeep: :edit_safekeep
+      safekeep: :edit_safekeep,
+      transfer: :edit_transfer
     }.each do |type, view|
       describe "when the `type` is `#{type}`" do
+        before do
+          allow(service).to receive(:submitted_request).and_return(securities_request)
+        end
         let(:call_action) { get :view_request, request_id: request_id, type: type }
+        it 'raises an ActionController::RoutingError if the service object returns nil' do
+          allow(service).to receive(:submitted_request).and_return(nil)
+          expect{call_action}.to raise_error(ActionController::RoutingError, 'There has been an error retrieving the securities request. Check error logs.')
+        end
+        it 'raises an ActionController::RoutingError if the securities request kind does not match the request type param' do
+          allow(controller).to receive(:type_matches_kind).and_return(false)
+          expect{call_action}.to raise_error(ActionController::RoutingError, "The type specified by the `/securities/view` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{securities_request.kind}`")
+        end
+        it 'creates a new `SecuritiesRequestService` with the `current_member_id`' do
+          expect(SecuritiesRequestService).to receive(:new).with(member_id, any_args).and_return(service)
+          call_action
+        end
+        it 'creates a new `SecuritiesRequestService` with the `request`' do
+          expect(SecuritiesRequestService).to receive(:new).with(anything, request).and_return(service)
+          call_action
+        end
+        it 'calls `submitted_request` on the `SecuritiesRequestService` instance with the `request_id`' do
+          expect(service).to receive(:submitted_request).with(request_id)
+          call_action
+        end
+        it 'sets `@securities_request` to the result of `SecuritiesRequestService#request_id`' do
+          call_action
+          expect(assigns[:securities_request]).to eq(securities_request)
+        end
+        it 'calls `populate_view_variables`' do
+          expect(controller).to receive(:populate_view_variables)
+          call_action
+        end
+        it 'calls `populate_contact_info_by_kind` with its `kind`' do
+          expect(controller).to receive(:populate_contact_info_by_kind).with(kind)
+          call_action
+        end
+        it 'calls `set_edit_title_by_kind` with its `kind`' do
+          expect(controller).to receive(:set_edit_title_by_kind).with(kind)
+          call_action
+        end
         it "renders the `#{view}` view" do
           call_action
           expect(response.body).to render_template(view)
@@ -386,9 +423,39 @@ RSpec.describe SecuritiesController, type: :controller do
         end
       end
     end
+    describe 'when the authorization policies get applied' do
+      let(:call_action) { get :view_request, request_id: SecureRandom.hex, type: :pledge }
 
-    it 'raises an ArgumentError if passed an unknown type' do
-      expect{get :view_request, request_id: request_id, type: SecureRandom.hex}.to raise_error(ArgumentError)
+      context 'when `is_collateral?` returns `true`' do
+        before do
+          allow(securities_request).to receive(:is_collateral?).and_return(true)
+        end
+
+        it 'checks that the user can authorize collateral' do
+          expect(subject).to receive(:authorize).with(:security, :authorize_collateral?)
+          call_action
+        end
+
+        it 'does not check that the user can authorize securities' do
+          expect(subject).not_to receive(:authorize).with(:security, :authorize_securities?)
+          call_action
+        end
+      end
+      context 'when `is_collateral?` returns `false`' do
+        before do
+          allow(securities_request).to receive(:is_collateral?).and_return(false)
+        end
+
+        it 'does not check that the user can authorize collateral' do
+          expect(subject).not_to receive(:authorize).with(:security, :authorize_collateral?)
+          call_action
+        end
+
+        it 'checks that the user can authorize securities' do
+          expect(subject).to receive(:authorize).with(:security, :authorize_securities?)
+          call_action
+        end
+      end
     end
   end
 
@@ -417,11 +484,21 @@ RSpec.describe SecuritiesController, type: :controller do
       end
     end
 
+    shared_examples 'an action with allowed mimetypes' do
+      it 'sets `@accepted_upload_mimetypes` appropriately' do
+        call_action
+        expect(assigns[:accepted_upload_mimetypes]).to eq(described_class::ACCEPTED_UPLOAD_MIMETYPES.join(', '))
+      end
+    end
+
     describe 'GET edit_pledge' do
       let(:call_action) { get :edit_pledge }
 
       it_behaves_like 'a user required action', :get, :edit_pledge
       it_behaves_like 'a controller action with an active nav setting', :edit_pledge, :securities
+      it_behaves_like 'an action that sets its contact info by kind', :pledge_intake
+      it_behaves_like 'an action that sets its title by kind', :pledge_intake
+      it_behaves_like 'an action with allowed mimetypes'
 
       it 'calls `populate_view_variables`' do
         expect(subject).to receive(:populate_view_variables).with(:pledge)
@@ -446,6 +523,9 @@ RSpec.describe SecuritiesController, type: :controller do
 
       it_behaves_like 'a user required action', :get, :edit_safekeep
       it_behaves_like 'a controller action with an active nav setting', :edit_safekeep, :securities
+      it_behaves_like 'an action that sets its contact info by kind', :safekept_intake
+      it_behaves_like 'an action that sets its title by kind', :safekept_intake
+      it_behaves_like 'an action with allowed mimetypes'
 
       it 'calls `populate_view_variables`' do
         expect(subject).to receive(:populate_view_variables).with(:safekeep)
@@ -472,6 +552,8 @@ RSpec.describe SecuritiesController, type: :controller do
 
       it_behaves_like 'a user required action', :post, :edit_release
       it_behaves_like 'a controller action with an active nav setting', :edit_release, :securities
+      it_behaves_like 'an action with allowed mimetypes'
+
       it 'renders its view' do
         call_action
         expect(response.body).to render_template('edit_release')
@@ -486,6 +568,9 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       describe 'when the `securities` have a `custody_account_type` of `U`' do
         before { allow(security).to receive(:custody_account_type).and_return('U') }
+        it_behaves_like 'an action that sets its contact info by kind', :safekept_release
+        it_behaves_like 'an action that sets its title by kind', :safekept_release
+
         it 'assigns the `@securities_request.kind` a value of `:safekept_release`' do
           expect(securities_request).to receive(:kind=).with(:safekept_release)
           call_action
@@ -493,6 +578,9 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       describe 'when the `securities` have a `custody_account_type` of `P`' do
         before { allow(security).to receive(:custody_account_type).and_return('P') }
+        it_behaves_like 'an action that sets its contact info by kind', :pledge_release
+        it_behaves_like 'an action that sets its title by kind', :pledge_release
+
         it 'assigns the `@securities_request.kind` a value of `:pledge_release`' do
           expect(securities_request).to receive(:kind=).with(:pledge_release)
           call_action
@@ -513,6 +601,8 @@ RSpec.describe SecuritiesController, type: :controller do
 
       it_behaves_like 'a user required action', :post, :edit_transfer
       it_behaves_like 'a controller action with an active nav setting', :edit_transfer, :securities
+      it_behaves_like 'an action with allowed mimetypes'
+
       it 'renders its view' do
         call_action
         expect(response.body).to render_template('edit_transfer')
@@ -535,24 +625,22 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       describe 'when the `securities` have a `custody_account_type` of `U`' do
         before { allow(security).to receive(:custody_account_type).and_return('U') }
+        it_behaves_like 'an action that sets its contact info by kind', :pledge_transfer
+        it_behaves_like 'an action that sets its title by kind', :pledge_transfer
+
         it 'assigns the `@securities_request.kind` a value of `:pledge_transfer`' do
           expect(securities_request).to receive(:kind=).with(:pledge_transfer)
           call_action
         end
-        it 'sets the @title appropriately' do
-          call_action
-          expect(assigns[:title]).to eq(I18n.t('securities.transfer.pledge.title'))
-        end
       end
       describe 'when the `securities` have a `custody_account_type` of `P`' do
         before { allow(security).to receive(:custody_account_type).and_return('P') }
+        it_behaves_like 'an action that sets its contact info by kind', :safekept_transfer
+        it_behaves_like 'an action that sets its title by kind', :safekept_transfer
+
         it 'assigns the `@securities_request.kind` a value of `:safekept_transfer`' do
           expect(securities_request).to receive(:kind=).with(:safekept_transfer)
           call_action
-        end
-        it 'sets the @title appropriately' do
-          call_action
-          expect(assigns[:title]).to eq(I18n.t('securities.transfer.safekeep.title'))
         end
       end
       describe 'when the `securities` have a `custody_account_type` that is neither `P` nor `U`' do
@@ -581,6 +669,7 @@ RSpec.describe SecuritiesController, type: :controller do
 
       before do
         allow(controller).to receive(:populate_securities_table_data_view_variable)
+        allow(controller).to receive(:render).and_call_original
       end
 
       it_behaves_like 'a user required action', :post, action
@@ -594,6 +683,10 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(controller).to receive(:populate_securities_table_data_view_variable).with(type, [security, security])
         call_action
       end
+      it "renders with a `type` of `#{type}` and the correct `title`" do
+        expect(controller).to receive(:render).with(hash_including(locals: { type: type, title: I18n.t("securities.download.titles.#{type}") }))
+        call_action
+      end
       it 'responds with an xlsx file' do
         call_action
         expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
@@ -601,31 +694,28 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  describe 'GET download_safekeep' do
-    let(:call_action) { post :download_safekeep }
+  [:safekeep, :pledge].each do |type|
+    action = :"download_#{type}"
+    describe "POST download_#{action}" do
+      let(:call_action) { post action }
 
-    it 'calls `populate_securities_table_data_view_variable` without securities' do
-      expect(controller).to receive(:populate_securities_table_data_view_variable).with(:safekeep)
-      call_action
-    end
+      before do
+        allow(controller).to receive(:populate_securities_table_data_view_variable)
+        allow(controller).to receive(:render).and_call_original
+      end
 
-    it 'responds with an xlsx file' do
-      call_action
-      expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
-    end
-  end
-
-  describe 'GET download_pledge' do
-    let(:call_action) { post :download_pledge }
-
-    it 'calls `populate_securities_table_data_view_variable` without securities' do
-      expect(controller).to receive(:populate_securities_table_data_view_variable).with(:pledge)
-      call_action
-    end
-
-    it 'responds with an xlsx file' do
-      call_action
-      expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
+      it "calls `populate_securities_table_data_view_variable` with `#{type}`" do
+        expect(controller).to receive(:populate_securities_table_data_view_variable).with(type)
+        call_action
+      end
+      it "renders with a `type` of `#{type}` and the correct `title`" do
+        expect(controller).to receive(:render).with(hash_including(locals: { type: type, title: I18n.t("securities.download.titles.#{type}") }))
+        call_action
+      end
+      it 'responds with an xlsx file' do
+        call_action
+        expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
+      end
     end
   end
 
@@ -865,17 +955,20 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
   {
-    release: [:edit_release, I18n.t('securities.authorize.release.title'), :securities_release_success_url],
-    pledge: [:edit_pledge, I18n.t('securities.authorize.pledge.title'), :securities_pledge_success_url],
-    safekeep: [:edit_safekeep, I18n.t('securities.authorize.safekeep.title'), :securities_safekeep_success_url],
-    transfer: [:edit_transfer, I18n.t('securities.authorize.transfer.title'), :securities_transfer_success_url]
-  }.each do |type, details|
-    template, title, success_path = details
-    describe "POST submit_request for `#{type}`" do
+    pledge_release: [:edit_release, I18n.t('securities.authorize.release.title'), :securities_release_pledge_success_url, :release],
+    safekept_release: [:edit_release, I18n.t('securities.authorize.release.title'), :securities_release_safekeep_success_url, :release],
+    pledge_intake: [:edit_pledge, I18n.t('securities.authorize.pledge.title'), :securities_pledge_success_url, :pledge],
+    safekept_intake: [:edit_safekeep, I18n.t('securities.authorize.safekeep.title'), :securities_safekeep_success_url, :safekeep],
+    pledge_transfer: [:edit_transfer, I18n.t('securities.authorize.transfer.title'), :securities_transfer_pledge_success_url, :transfer],
+    safekept_transfer: [:edit_transfer, I18n.t('securities.authorize.transfer.title'), :securities_transfer_safekeep_success_url, :transfer]
+  }.each do |kind, details|
+    template, title, success_path, type = details
+    describe "POST submit_request for type `#{type}` and kind `#{kind}`" do
+      allow_policy :security, :submit?
       let(:securities_request_param) { {'transaction_code' => "#{instance_double(String)}"} }
       let(:securities_request_service) { instance_double(SecuritiesRequestService, submit_request_for_authorization: true, authorize_request: true) }
       let(:active_model_errors) { instance_double(ActiveModel::Errors, add: nil) }
-      let(:securities_request) { instance_double(SecuritiesRequest, :valid? => true, errors: active_model_errors, kind: nil) }
+      let(:securities_request) { instance_double(SecuritiesRequest, :valid? => true, errors: active_model_errors, kind: kind, is_collateral?: nil, :'member_id=' => nil) }
       let(:error_message) { instance_double(String) }
       let(:call_action) { post :submit_request, securities_request: securities_request_param, type: type }
 
@@ -886,13 +979,23 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service)
         allow(SecuritiesRequest).to receive(:from_hash).and_return(securities_request)
         allow(controller).to receive(:type_matches_kind).and_return(true)
+        allow(controller).to receive(:populate_authorize_request_view_variables)
+        allow(controller).to receive(:set_edit_title_by_kind)
       end
+
+      it_behaves_like 'an action that sets its contact info by kind', kind
+      it_behaves_like 'an action that sets its title by kind', kind
+
       it 'raises an ActionController::RoutingError if the securities request kind does not match the request type param' do
         allow(controller).to receive(:type_matches_kind).and_return(false)
         expect{call_action}.to raise_error(ActionController::RoutingError, "The type specified by the `/securities/submit` route does not match the @securities_request.kind. \nType: `#{type}`\nKind: `#{securities_request.kind}`")
       end
       it 'builds a SecuritiesRequest instance with the `securities_request` params' do
         expect(SecuritiesRequest).to receive(:from_hash).with(securities_request_param)
+        call_action
+      end
+      it 'populates the SecuritiesRequest `member_id` with the `current_member_id`' do
+        expect(securities_request).to receive(:member_id=).with(member_id)
         call_action
       end
       it 'sets @securities_request' do
@@ -971,8 +1074,16 @@ RSpec.describe SecuritiesController, type: :controller do
             expect(response.body).to render_template(template)
           end
 
-          describe 'when the user is an authorizer' do
-            allow_policy :security, :authorize?
+          describe 'when the user is an collateral signer' do
+            allow_policy :security, :authorize_collateral?
+            it 'does not check the SecurID details' do
+              expect(subject).to_not receive(:securid_perform_check)
+              call_action
+            end
+          end
+
+          describe 'when the user is an securities signer' do
+            allow_policy :security, :authorize_securities?
             it 'does not check the SecurID details' do
               expect(subject).to_not receive(:securid_perform_check)
               call_action
@@ -996,8 +1107,15 @@ RSpec.describe SecuritiesController, type: :controller do
           call_action
           expect(response.body).to render_template(template)
         end
-        describe 'when the user is an authorizer' do
-          allow_policy :security, :authorize?
+        describe 'when the user is an collateral signer' do
+          allow_policy :security, :authorize_collateral?
+          it 'does not check the SecurID details' do
+            expect(subject).to_not receive(:securid_perform_check)
+            call_action
+          end
+        end
+        describe 'when the user is an securities signer' do
+          allow_policy :security, :authorize_securities?
           it 'does not check the SecurID details' do
             expect(subject).to_not receive(:securid_perform_check)
             call_action
@@ -1007,7 +1125,7 @@ RSpec.describe SecuritiesController, type: :controller do
 
       describe 'when the user is an authorizer' do
         let(:request_id) { double('A Request ID') }
-        allow_policy :security, :authorize?
+        allow_policy :security, :authorize_securities?
         it 'checks the SecurID details if no errors are found in the data' do
           allow(active_model_errors).to receive(:present?).and_return(false)
           expect(subject).to receive(:securid_perform_check).and_return(:authenticated)
@@ -1023,21 +1141,38 @@ RSpec.describe SecuritiesController, type: :controller do
             call_action
           end
           describe 'when SecurID passes and there are not yet any errors' do
+            let(:message) { instance_double(ActionMailer::MessageDelivery) }
             before do
               allow(subject).to receive(:session_elevated?).and_return(true)
               allow(active_model_errors).to receive(:blank?).and_return(true)
+              allow(InternalMailer).to receive(:securities_request_authorized).with(securities_request).and_return(message)
+              allow(message).to receive(:deliver_now)
             end
             it 'authorizes the request' do
               expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
               call_action
             end
-            it 'emails the internal distro' do
+            it 'builds the SecuritiesRequest before it emails the distribution list' do
+              expect(SecuritiesRequest).to receive(:from_hash).with(securities_request_param).ordered
+              expect(securities_request).to receive(:member_id=).with(member_id).ordered
+              expect(InternalMailer).to receive(:securities_request_authorized).with(securities_request).ordered
+              call_action
+            end
+            it 'constructs an email to the internal distribution list' do
               expect(InternalMailer).to receive(:securities_request_authorized).with(securities_request)
+              call_action
+            end
+            it 'delivers an email to the internal distribution list' do
+              expect(message).to receive(:deliver_now)
               call_action
             end
             it 'renders the `authorize_request` view' do
               call_action
               expect(response.body).to render_template(:authorize_request)
+            end
+            it 'calls `populate_authorize_request_view_variables` with the securities request `kind`' do
+              expect(controller).to receive(:populate_authorize_request_view_variables).with(kind)
+              call_action
             end
             describe 'when the authorization fails' do
               before do
@@ -1093,15 +1228,39 @@ RSpec.describe SecuritiesController, type: :controller do
           end
         end
       end
+      describe 'when the user is not a submitter' do
+        deny_policy :security, :submit?
+        it 'still validates the securities request' do
+          expect(securities_request).to receive(:valid?)
+          call_action
+        end
+        it 'calls `prioritized_securities_request_error` with the securities request' do
+          expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
+          call_action
+        end
+        it 'sets `@error_message` to the result of `prioritized_securities_request_error` if it exists' do
+          error_message = instance_double(String)
+          allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
+          call_action
+          expect(assigns[:error_message]).to eq(error_message)
+        end
+        it 'sets `@error_message` to the internal user error if `prioritized_securities_request_error` returns nil' do
+          allow(controller).to receive(:prioritized_securities_request_error).and_return(nil)
+          call_action
+          expect(assigns[:error_message]).to eq(I18n.t('securities.internal_user_error'))
+        end
+      end
     end
   end
 
   describe 'GET `submit_request_success`' do
-    request_type_translations = {
-      release: I18n.t('securities.success.title'),
-      pledge: I18n.t('securities.safekeep_pledge.success.pledge'),
-      safekeep: I18n.t('securities.safekeep_pledge.success.safekeep'),
-      transfer: I18n.t('securities.transfer.success.title')
+    request_kind_translations = {
+      pledge_release: [I18n.t('securities.success.titles.pledge_release'), I18n.t('securities.success.email.subjects.pledge_release')],
+      safekept_release: [I18n.t('securities.success.titles.safekept_release'), I18n.t('securities.success.email.subjects.safekept_release')],
+      pledge_intake: [I18n.t('securities.success.titles.pledge_intake'), I18n.t('securities.success.email.subjects.pledge_intake')],
+      safekept_intake: [I18n.t('securities.success.titles.safekept_intake'), I18n.t('securities.success.email.subjects.safekept_intake')],
+      pledge_transfer: [I18n.t('securities.success.titles.transfer'), I18n.t('securities.success.email.subjects.transfer')],
+      safekept_transfer: [I18n.t('securities.success.titles.transfer'), I18n.t('securities.success.email.subjects.transfer')]
     }
     let(:member_service_instance) {double('MembersService')}
     let(:user_no_roles) {{display_name: 'User With No Roles', roles: [], surname: 'With No Roles', given_name: 'User'}}
@@ -1113,6 +1272,7 @@ RSpec.describe SecuritiesController, type: :controller do
     let(:user_e) { {display_name: 'No Given Name', roles: [User::Roles::WIRE_SIGNER], given_name: nil, surname: 'Given'} }
     let(:user_f) { {display_name: 'Entire Authority User', roles: [User::Roles::SIGNER_ENTIRE_AUTHORITY], given_name: 'Entire Authority', surname: 'User'} }
     let(:signers_and_users) {[user_no_roles, user_etransact, user_a, user_b, user_c, user_d, user_e, user_f]}
+
     before do
       allow(MembersService).to receive(:new).and_return(member_service_instance)
       allow(member_service_instance).to receive(:signers_and_users).and_return(signers_and_users)
@@ -1120,33 +1280,48 @@ RSpec.describe SecuritiesController, type: :controller do
 
     it_behaves_like 'a user required action', :get, :submit_request_success
 
-    request_type_translations.each do |type, title|
-      let(:call_action) { get :submit_request_success, type: type }
-      it_behaves_like 'a controller action with an active nav setting', :submit_request_success, :securities, type: type
-      it 'renders the `submit_request_success` view' do
-        call_action
-        expect(response.body).to render_template('submit_request_success')
+    request_kind_translations.each do |kind, translations|
+      title, email_subject = translations
+      let(:call_action) { get :submit_request_success, kind: kind }
+      it_behaves_like 'a controller action with an active nav setting', :submit_request_success, :securities, kind: kind
+      it "sets `@title` to `#{title}` when the `kind` param is `#{kind}`" do
+        get :submit_request_success, kind: kind
+        expect(assigns[:title]).to eq(title)
       end
-      it "sets `@title` to `#{title}` when the `type` param is `#{type}`" do
-        get :submit_request_success, type: type
+      it "sets `@email_subject` to `#{email_subject}` when the `kind` param is `#{kind}`" do
+        get :submit_request_success, kind: kind
+        expect(assigns[:email_subject]).to eq(email_subject)
+      end
+      it "sets `@title` to `#{title}` when the `type` param is `#{kind}`" do
+        get :submit_request_success, kind: kind
         expect(assigns[:title]).to eq(title)
       end
       it 'renders the `submit_request_success` view' do
         call_action
         expect(response.body).to render_template('submit_request_success')
       end
-      it "sets `@title` to `#{title}` when the `type` param is `#{type}`" do
-        get :submit_request_success, type: type
-        expect(assigns[:title]).to eq(title)
-      end
-      it 'sets `@authorized_user_data` to a list of users with securities authority' do
+      it 'renders the `submit_request_success` view' do
         call_action
-        expect(assigns[:authorized_user_data]).to eq([user_c])
+        expect(response.body).to render_template('submit_request_success')
       end
       it 'sets `@authorized_user_data` to [] if no users are found' do
         allow(member_service_instance).to receive(:signers_and_users).and_return([])
         call_action
         expect(assigns[:authorized_user_data]).to eq([])
+      end
+    end
+
+    SecuritiesRequest::COLLATERAL_KINDS.each do |kind|
+      it 'sets `@authorized_user_data` to a list of users with collateral authority' do
+        get :submit_request_success, kind: kind
+        expect(assigns[:authorized_user_data]).to eq([user_b])
+      end
+    end
+
+    SecuritiesRequest::SECURITIES_KINDS.each do |kind|
+      it 'sets `@authorized_user_data` to a list of users with collateral authority' do
+        get :submit_request_success, kind: kind
+        expect(assigns[:authorized_user_data]).to eq([user_c])
       end
     end
   end
@@ -1196,6 +1371,303 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
+  describe 'GET `generate_authorized_request`' do
+    let(:job_status) { double('JobStatus', update_attributes!: nil, id: nil, destroy: nil, result_as_string: nil ) }
+    let(:request_id) { rand(0..99999) }
+    let(:user_id) { rand(1000) }
+    let(:active_job) { double('Active Job Instance', job_status: job_status) }
+    let(:call_action) { get :generate_authorized_request, request_id: request_id }
+    let(:current_user) { double('User', id: user_id, :accepted_terms? => true)}
+    let(:member_id) { rand(1000) }
+
+    before do
+      allow(RenderSecuritiesRequestsPDFJob).to receive(:perform_later).and_return(active_job)
+      allow(controller).to receive(:current_user).and_return(current_user)
+      allow(subject).to receive(:current_member_id).and_return(member_id)
+    end
+
+    it "enqueues the render securities request pdf job" do
+      expect(RenderSecuritiesRequestsPDFJob).to receive(:perform_later).with(member_id, any_args).and_return(active_job)
+      call_action
+    end
+    it 'updates the job_status instance with the user_id of the current user' do
+      expect(job_status).to receive(:update_attributes!).with({user_id: user_id})
+      call_action
+    end
+    it 'returns a json response with a `job_status_url`' do
+      call_action
+      expect(JSON.parse(response.body).with_indifferent_access[:job_status_url]).to eq(job_status_url(job_status))
+    end
+    it 'returns a json response with a `job_cancel_url`' do
+      call_action
+      expect(JSON.parse(response.body).with_indifferent_access[:job_cancel_url]).to eq(job_cancel_url(job_status))
+    end
+  end
+
+  describe '`view_authorized_request`' do
+    let(:member_id) { rand(0..9999) }
+    let(:request_id) { rand(0..99999) }
+    let(:controller) { SecuritiesController.new }
+    let(:profile) { double('Member Profile') }
+    let(:member) { instance_double(Member) }
+    let(:authorized_by) { SecureRandom.hex }
+    let(:authorized_date) { Time.zone.today }
+    let(:transaction_code) { double('Transaction Code') }
+    let(:members_service_instance) { instance_double(MembersService, member: member ) }
+    let(:member_balance_service_instance) { instance_double(MemberBalanceService, profile: profile) }
+    let(:settlement_type) {  SecureRandom.hex }
+    let(:trade_date) { Time.zone.today }
+    let(:settlement_date) { Time.zone.today }
+    let(:clearing_agent_participant_number) { rand(0..9999) }
+    let(:account_number) { rand(0..9999) }
+    let(:cusip) { SecureRandom.hex }
+    let(:description) { SecureRandom.hex }
+    let(:original_par) { rand(0..9999) }
+    let(:payment_amount) { rand(0..9999) }
+    let(:delivery_type_string) { SecureRandom.hex }
+    let(:pledge_type) { double('Pledge Type') }
+    let(:security) { instance_double(Security, cusip: cusip,
+                                        description: description,
+                                        original_par: original_par,
+                                        payment_amount: payment_amount,
+                                        custodian_name: SecureRandom.hex) }
+    let(:pledged_account) { rand(9999..99999) }
+    let(:safekept_account) { rand(9999..99999) }
+    let(:securities_request) { instance_double(SecuritiesRequest, request_id: request_id,
+                                                            authorized_by: authorized_by,
+                                                            authorized_date: authorized_date,
+                                                            transaction_code: transaction_code,
+                                                            settlement_type: settlement_type,
+                                                            trade_date: trade_date,
+                                                            delivery_type: SecureRandom.hex,
+                                                            settlement_date: settlement_date,
+                                                            securities: [ security ],
+                                                            clearing_agent_participant_number: clearing_agent_participant_number,
+                                                            kind: nil,
+                                                            pledge_to: pledge_type,
+                                                            pledged_account: pledged_account,
+                                                            safekept_account: safekept_account,
+                                                            is_collateral?: double('Is Collateral?')) }
+    let(:securities_request_service_instance) { instance_double(SecuritiesRequestService, submitted_request: securities_request )}
+    let(:user) { instance_double(User,
+                        display_name: 'A User',
+                        roles: [User::Roles::COLLATERAL_SIGNER],
+                        surname: 'User',
+                        given_name: 'A',
+                        'cache_key=': nil,
+                        cache_key: SecureRandom.hex,
+                        intranet_user?: false ) }
+    let(:call_action) { subject.public_send(:view_authorized_request) }
+
+    before do
+      subject.params = { request_id: request_id }
+      subject.class_eval { layout 'print' }
+      allow(MembersService).to receive(:new).with(anything).and_return(members_service_instance)
+      allow(members_service_instance).to receive(:member).and_return(member)
+      allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
+      allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service_instance)
+      allow(subject).to receive(:get_delivery_instructions).with(anything).and_return(delivery_type_string)
+      subject.instance_variable_set(:@securities_request, securities_request)
+    end
+
+    shared_examples 'setting the preconditions for generating a PDF for each `kind` of securities request' do |kind, title|
+      before do
+        allow(securities_request).to receive(:kind).and_return(kind)
+      end
+
+      it 'sets the report name' do
+        call_action
+        expect(subject.instance_variable_get(:@title)).to eq(title)
+      end
+      it 'sets the member' do
+        call_action
+        expect(subject.instance_variable_get(:@member)).to eq(member)
+      end
+      it 'raises an error if the `member` is nil' do
+        allow(members_service_instance).to receive(:member).and_return(nil)
+        expect { call_action }.to raise_error(ActionController::RoutingError)
+      end
+      it 'sets the member profile' do
+        call_action
+        expect(subject.instance_variable_get(:@member_profile)).to eq(profile)
+      end
+      it 'raises an error if the `member_profile` is nil' do
+        allow(member_balance_service_instance).to receive(:profile).and_return(nil)
+        expect { call_action }.to raise_error(ActionController::RoutingError)
+      end
+      it 'sets the securities request' do
+        call_action
+        expect(subject.instance_variable_get(:@securities_request)).to eq(securities_request)
+      end
+      it 'raises an error if the `securities_request` is nil' do
+        allow(securities_request_service_instance).to receive(:submitted_request).and_return(nil)
+        expect { call_action }.to raise_error(ActionController::RoutingError)
+      end
+    end
+
+    shared_examples 'an action that generates a PDF for securities intake' do |kind, account|
+      before do
+        allow(securities_request).to receive(:kind).and_return(kind)
+      end
+      it 'sets the request details table data' do
+        call_action
+        request_details = {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                             { value: securities_request.request_id } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                             { value: securities_request.authorized_by } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] } ] }
+        expect(subject.instance_variable_get(:@request_details_table_data)).to eq(request_details)
+      end
+      it 'sets broker instructions table data' do
+        call_action
+        expect(subject.instance_variable_get(:@broker_instructions_table_data)).to eq( {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.transaction_code') },
+                               { value: securities_request.transaction_code.to_s.titleize } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_type') },
+                               { value: securities_request.settlement_type.to_s.titleize } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.trade_date') },
+                               { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.trade_date) } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_date') },
+                               { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.settlement_date) } ] } ] } )
+      end
+      it 'sets delivery instructions table data' do
+        call_action
+        expect(subject.instance_variable_get(:@delivery_instructions_table_data)).to eq( {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.delivery_method') },
+                               { value: delivery_type_string } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.clearing_agent') },
+                               { value: securities_request.clearing_agent_participant_number } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.further_credit') },
+                               { value: securities_request.public_send(account) } ] } ] } )
+      end
+      it 'sets securities table data' do
+        table_data = {  column_headings: [
+          I18n.t('common_table_headings.cusip'),
+          I18n.t('common_table_headings.description'),
+          fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+          I18n.t('securities.requests.view.securities.settlement_amount', footnote_marker: fhlb_footnote_marker),
+          I18n.t('common_table_headings.custodian_name', footnote_marker: fhlb_footnote_marker(1))],
+          rows: [ { columns: [ { value: security.cusip },
+                               { value: security.description },
+                               { value: security.original_par, type: :currency_whole },
+                               { value: security.payment_amount, type: :currency_whole },
+                               { value: security.custodian_name } ] } ] }
+        call_action
+        expect(subject.instance_variable_get(:@securities_table_data)).to eq(table_data)
+      end
+    end
+
+    shared_examples 'an action that generates a PDF for securities release' do |kind, account|
+      before do
+        allow(securities_request).to receive(:kind).and_return(kind)
+      end
+      it 'sets the request details table data' do
+        call_action
+        request_details = {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                             { value: securities_request.request_id } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                             { value: securities_request.authorized_by } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] } ] }
+        expect(subject.instance_variable_get(:@request_details_table_data)).to eq(request_details)
+      end
+      it 'sets broker instructions table data' do
+        call_action
+        expect(subject.instance_variable_get(:@broker_instructions_table_data)).to eq( {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.transaction_code') },
+                               { value: securities_request.transaction_code.to_s.titleize } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_type') },
+                               { value: securities_request.settlement_type.to_s.titleize } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.trade_date') },
+                               { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.trade_date) } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.broker_instructions.settlement_date') },
+                               { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.settlement_date) } ] } ] } )
+      end
+      it 'sets delivery instructions table data' do
+        call_action
+        expect(subject.instance_variable_get(:@delivery_instructions_table_data)).to eq( {
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.delivery_method') },
+                               { value: delivery_type_string } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.clearing_agent') },
+                               { value: securities_request.clearing_agent_participant_number } ] },
+                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.further_credit') },
+                               { value: securities_request.public_send(account) } ] } ] } )
+      end
+      it 'sets securities table data' do
+        table_data = {  column_headings: [ I18n.t('common_table_headings.cusip'),
+                             I18n.t('common_table_headings.description'),
+                             fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'),
+                              I18n.t('securities.requests.view.securities.settlement_amount', footnote_marker: fhlb_footnote_marker) ],
+                        rows: [ { columns: [ { value: security.cusip },
+                                             { value: security.description },
+                                             { value: security.original_par, type: :currency_whole },
+                                             { value: security.payment_amount, type: :currency_whole } ] } ] }
+        call_action
+        expect(subject.instance_variable_get(:@securities_table_data)).to eq(table_data)
+      end
+    end
+
+    {safekept_intake: I18n.t('securities.requests.view.safekept_intake.title'),
+     pledge_intake: I18n.t('securities.requests.view.pledge_intake.title'),
+     safekept_release: I18n.t('securities.requests.view.safekept_release.title'),
+     pledge_release: I18n.t('securities.requests.view.pledge_release.title'),
+     safekept_transfer: I18n.t('securities.requests.view.safekept_transfer.title'),
+     pledge_transfer: I18n.t('securities.requests.view.pledge_transfer.title')}.each do |kind, title|
+      describe "when `kind` is `#{kind}`" do
+        it_behaves_like 'setting the preconditions for generating a PDF for each `kind` of securities request', kind, title
+      end
+    end
+
+    {:safekept_intake => :safekept_account,
+     :pledge_intake => :pledged_account }.each do |kind, account|
+      describe "when `kind` is `#{kind}`" do
+        it_behaves_like 'an action that generates a PDF for securities intake', kind, account
+      end
+    end
+
+    {:safekept_release => :safekept_account,
+     :pledge_release => :pledged_account }.each do |kind, account|
+      describe "when `kind` is `#{kind}`" do
+        it_behaves_like 'an action that generates a PDF for securities release', kind, account
+      end
+    end
+
+    context do
+      before do
+        allow(securities_request).to receive(:kind).and_return(:pledged_transfer)
+      end
+      it 'sets the request details table data for `pledged_transfer`' do
+        call_action
+        expect(subject.instance_variable_get(:@request_details_table_data)).to eq({
+          rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                             { value: securities_request.request_id } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                             { value: securities_request.authorized_by } ] },
+                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] } ] })
+      end
+    end
+    context do
+      before do
+        allow(securities_request).to receive(:kind).and_return(:safekept_transfer)
+      end
+      it 'sets the request details table data for `safekept_transfer`' do
+        call_action
+        expect(subject.instance_variable_get(:@request_details_table_data)).to eq({ rows: [
+          { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                       { value: securities_request.request_id } ] },
+          { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                       { value: securities_request.authorized_by } ] },
+          { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                       { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] },
+          { columns: [ { value: I18n.t('securities.requests.view.request_details.pledge_to.pledge_type') },
+                       { value: SecuritiesController::PLEDGE_TO_MAPPING[securities_request.pledge_to] } ] } ] })
+      end
+    end
+  end
   describe 'private methods' do
     describe '`kind_to_description`' do
       {
@@ -1315,7 +1787,7 @@ RSpec.describe SecuritiesController, type: :controller do
         [I18n.t('securities.release.delivery_instructions.mutual_fund'), SecuritiesRequest::DELIVERY_TYPES[:mutual_fund]],
         [I18n.t('securities.release.delivery_instructions.physical_securities'), SecuritiesRequest::DELIVERY_TYPES[:physical_securities]]
       ]
-      let(:securities_request) { instance_double(SecuritiesRequest, delivery_type: nil) }
+      let(:securities_request) { instance_double(SecuritiesRequest, delivery_type: nil, is_collateral?: true) }
       let(:call_method) { controller.send(:populate_delivery_instructions_dropdown_variables, securities_request) }
       it 'sets `@delivery_instructions_dropdown`' do
         call_method
@@ -1356,7 +1828,7 @@ RSpec.describe SecuritiesController, type: :controller do
         original_par: SecureRandom.hex
       } }
       let(:securities) { [instance_double(Security)] }
-      let(:securities_request) { instance_double(SecuritiesRequest, securities: securities, :securities= => nil, trade_date: nil, :trade_date= => nil, settlement_date: nil, :settlement_date= => nil) }
+      let(:securities_request) { instance_double(SecuritiesRequest, securities: securities, :securities= => nil, trade_date: nil, :trade_date= => nil, settlement_date: nil, :settlement_date= => nil, is_collateral?: true) }
       let(:call_action) { controller.send(:populate_view_variables, :release) }
       let(:date_restrictions) { instance_double(Hash) }
 
@@ -1377,14 +1849,14 @@ RSpec.describe SecuritiesController, type: :controller do
         call_action
         expect(assigns[:pledge_type_dropdown]).to eq(pledge_type_dropdown)
       end
-      {
-        release: I18n.t('securities.release.title'),
-        pledge: I18n.t('securities.pledge.title'),
-        safekeep: I18n.t('securities.safekeep.title')
-      }.each do |type, title|
-        it "sets `@title` to `#{title}` when the `type` is `#{type}`" do
+      [:release, :pledge, :safekeep, :transfer].each do |type|
+        it 'sets `@confirm_delete_text` appropriately' do
           controller.send(:populate_view_variables, type)
-          expect(assigns[:title]).to eq(title)
+          expect(assigns[:confirm_delete_text]).to eq(I18n.t("securities.delete_request.titles.#{type}"))
+        end
+        it "sets `@download_path` to `securities_#{type.to_s}_download_path`" do
+          controller.send(:populate_view_variables, type)
+          expect(assigns[:download_path]).to eq(controller.send(:"securities_#{type.to_s}_download_path"))
         end
       end
       it 'calls `populate_transaction_code_dropdown_variables` with the @securities_request' do
@@ -1453,17 +1925,6 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(controller).to receive(:date_restrictions).and_return(date_restrictions)
         call_action
         expect(assigns[:date_restrictions]).to eq(date_restrictions)
-      end
-      describe 'when the current user is a securities signer' do
-        allow_policy :security, :authorize?
-        it 'sets the proper @form_data for an authorized securities signer' do
-          form_data = {
-            url: securities_release_submit_path,
-            submit_text: I18n.t('securities.release.authorize')
-          }
-          call_action
-          expect(assigns[:form_data]).to eq(form_data)
-        end
       end
     end
 
@@ -1548,11 +2009,18 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(row[:columns][2][:value]).to eq(securities.first.original_par)
             end
           end
-          it 'contains rows of columns whose `original_par` value has a type of `number`' do
+          it 'contains rows of columns whose `original_par` value has a type of `currency`' do
             call_method
             expect(assigns[:securities_table_data][:rows].length).to be > 0
             assigns[:securities_table_data][:rows].each do |row|
-              expect(row[:columns][2][:type]).to eq(:number)
+              expect(row[:columns][2][:type]).to eq(:currency)
+            end
+          end
+          it 'contains rows of columns whose `original_par` value have a blank unit in its cell options' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][2][:options]).to include(unit: '')
             end
           end
           if action == :release
@@ -1563,12 +2031,19 @@ RSpec.describe SecuritiesController, type: :controller do
                 expect(row[:columns].last[:value]).to eq(securities.first.payment_amount)
               end
             end
-            it 'contains rows of columns whose last member has a type of `:number`' do
+            it 'contains rows of columns whose last member has a type of `currency`' do
               call_method
               expect(assigns[:securities_table_data][:rows].length).to be > 0
               assigns[:securities_table_data][:rows].each do |row|
-                expect(row[:columns].last[:type]).to eq(:number)
+                expect(row[:columns].last[:type]).to eq(:currency)
               end
+            end
+          end
+          it 'contains rows of columns whose last member have a blank unit in its cell options' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns].last[:options]).to include(unit: '')
             end
           end
           it 'contains an empty array for rows if no securities are passed in' do
@@ -1603,11 +2078,18 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(row[:columns][1][:value]).to eq(securities.first.original_par)
             end
           end
-          it 'contains rows of columns whose `original_par` value has a type of `number`' do
+          it 'contains rows of columns whose `original_par` value has a type of `currency`' do
             call_method
             expect(assigns[:securities_table_data][:rows].length).to be > 0
             assigns[:securities_table_data][:rows].each do |row|
-              expect(row[:columns][1][:type]).to eq(:number)
+              expect(row[:columns][1][:type]).to eq(:currency)
+            end
+          end
+          it 'contains rows of columns whose `original_par` value have a blank unit in its cell options' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][1][:options]).to include(unit: '')
             end
           end
           it 'contains rows of columns that have a `payment_amount` value' do
@@ -1617,11 +2099,18 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(row[:columns][2][:value]).to eq(securities.first.payment_amount)
             end
           end
-          it 'contains rows of columns whose `payment_amount` value has a type of `number`' do
+          it 'contains rows of columns whose `payment_amount` value has a type of `currency`' do
             call_method
             expect(assigns[:securities_table_data][:rows].length).to be > 0
             assigns[:securities_table_data][:rows].each do |row|
-              expect(row[:columns][2][:type]).to eq(:number)
+              expect(row[:columns][2][:type]).to eq(:currency)
+            end
+          end
+          it 'contains rows of columns whose `payment_amount` value have a blank unit in its cell options' do
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][2][:options]).to include(unit: '')
             end
           end
           it 'contains rows of columns that have a `custodian_name` value' do
@@ -1734,7 +2223,7 @@ RSpec.describe SecuritiesController, type: :controller do
     end
 
     describe '`prioritized_securities_request_error`' do
-      generic_error_message = I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
+      generic_error_message = I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email)
       let(:errors) {{
         foo: [SecureRandom.hex],
         bar: [SecureRandom.hex],
@@ -1844,6 +2333,166 @@ RSpec.describe SecuritiesController, type: :controller do
       describe 'when `type` is anything other than :release, :transfer :safekeep or :pledge' do
         it 'returns nil' do
           expect(subject.send(:type_matches_kind, SecureRandom.hex, SecureRandom.hex)).to be nil
+        end
+      end
+    end
+
+    describe '`populate_authorize_request_view_variables`' do
+      describe 'when passed a kind that is not a valid SecuritiesRequest `kind`' do
+        let(:call_method) { controller.send(:populate_authorize_request_view_variables, SecureRandom.hex) }
+        it 'does not set `@title`' do
+          call_method
+          expect(assigns[:title]).to be_nil
+        end
+        it 'does not set `@contact`' do
+          call_method
+          expect(assigns[:contact]).to be_nil
+        end
+      end
+      {
+        safekept_release: I18n.t('securities.authorize.titles.safekept_release'),
+        safekept_intake: I18n.t('securities.authorize.titles.safekept_intake'),
+        safekept_transfer: I18n.t('securities.authorize.titles.transfer'),
+        pledge_release: I18n.t('securities.authorize.titles.pledge_release'),
+        pledge_intake: I18n.t('securities.authorize.titles.pledge_intake'),
+        pledge_transfer: I18n.t('securities.authorize.titles.transfer')
+      }.each do |kind, title|
+        describe "when the passed `kind` is `#{kind}`" do
+          let(:title) { title }
+          let(:call_method) { controller.send(:populate_authorize_request_view_variables, kind) }
+
+          it "sets `@title` appropriately" do
+            call_method
+            expect(assigns[:title]).to eq(title)
+          end
+          it "calls `populate_contact_info_by_kind` with `#{kind}`" do
+            expect(controller).to receive(:populate_contact_info_by_kind).with(kind)
+            call_method
+          end
+        end
+      end
+    end
+
+    describe '`populate_contact_info_by_kind`' do
+      let(:sentinel) { instance_double(String) }
+
+      it 'does not set @contact when passed an unknown kind' do
+        controller.send(:populate_contact_info_by_kind, SecureRandom.hex)
+        expect(assigns[:contact]).to be_nil
+      end
+      SecuritiesRequest::SECURITIES_KINDS.each do |kind|
+        describe "when passed `#{kind}`" do
+          let(:call_method) { controller.send(:populate_contact_info_by_kind, kind) }
+
+          it 'sets the `@contact[:email_address]` value to the result of the `securities_services_email` helper method' do
+            allow(controller).to receive(:securities_services_email).and_return(sentinel)
+            call_method
+            expect(assigns[:contact][:email_address]).to eq(sentinel)
+          end
+          it 'sets the `@contact[:phone_number]` value to the result of the `securities_services_phone_number` helper method' do
+            allow(controller).to receive(:securities_services_phone_number).and_return(sentinel)
+            call_method
+            expect(assigns[:contact][:phone_number]).to eq(sentinel)
+          end
+          it 'sets the `@contact[:mailto_text]` value to the appropriate string' do
+            call_method
+            expect(assigns[:contact][:mailto_text]).to eq(I18n.t('contact.collateral_departments.securities_services.title'))
+          end
+        end
+      end
+      SecuritiesRequest::COLLATERAL_KINDS.each do |kind|
+        let(:call_method) { controller.send(:populate_contact_info_by_kind, kind) }
+
+        it 'sets the `@contact[:email_address]` value to the result of the `collateral_operations_email` helper method' do
+          allow(controller).to receive(:collateral_operations_email).and_return(sentinel)
+          call_method
+          expect(assigns[:contact][:email_address]).to eq(sentinel)
+        end
+        it 'sets the `@contact[:phone_number]` value to the result of the `collateral_operations_phone_number` helper method' do
+          allow(controller).to receive(:collateral_operations_phone_number).and_return(sentinel)
+          call_method
+          expect(assigns[:contact][:phone_number]).to eq(sentinel)
+        end
+        it 'sets the `@contact[:mailto_text]` value to the appropriate string' do
+          call_method
+          expect(assigns[:contact][:mailto_text]).to eq(I18n.t('contact.collateral_departments.collateral_operations.title'))
+        end
+      end
+    end
+    describe '`get_delivery_instructions`' do
+      (SecuritiesRequest::DELIVERY_TYPES.keys - [:transfer]).each do |delivery_type|
+        it 'returns the correct string for `delivery_type` `#{delivery_type}`' do
+          expect(subject.send(:get_delivery_instructions, delivery_type)).to eq(I18n.t(SecuritiesController::DELIVERY_INSTRUCTIONS_DROPDOWN_MAPPING[delivery_type.to_sym][:text]))
+        end
+      end
+    end
+    describe '`set_edit_title_by_kind`' do
+      {
+        pledge_release: I18n.t('securities.release.title'),
+        safekept_release: I18n.t('securities.release.title'),
+        pledge_intake: I18n.t('securities.pledge.title'),
+        safekept_intake: I18n.t('securities.safekeep.title'),
+        pledge_transfer: I18n.t('securities.transfer.pledge.title'),
+        safekept_transfer: I18n.t('securities.transfer.safekeep.title')
+      }.each do |kind, title|
+        describe "when the passed kind is `#{kind}`" do
+          let(:call_method) { subject.send(:set_edit_title_by_kind, kind) }
+          it "sets `@title` to `#{title}`" do
+            call_method
+            expect(assigns[:title]).to eq(title)
+          end
+        end
+      end
+      it 'does not assign `@title` if it does not recognize the kind' do
+        subject.send(:set_edit_title_by_kind, SecureRandom.hex)
+        expect(assigns[:title]).to be_nil
+      end
+    end
+    describe '`is_request_collateral?`' do
+      SecuritiesRequest::COLLATERAL_KINDS.each do |kind|
+        it "returns `true` for `#{kind}`" do
+          expect(subject.send(:is_request_collateral?, kind)).to eq(true)
+        end
+      end
+
+      SecuritiesRequest::SECURITIES_KINDS.each do |kind|
+        it "returns `false` for `#{kind}`" do
+          expect(subject.send(:is_request_collateral?, kind)).to eq(false)
+        end
+      end
+
+      it 'raises an error for an unsupported `kind`' do
+        expect { subject.send(:is_request_collateral?, :unsupported_kind) }.to raise_error(ArgumentError)
+      end
+    end
+    describe '`populate_form_data_by_kind`' do
+      let(:securities_request) { instance_double(SecuritiesRequest) }
+      describe 'when the current user is a collateral signer' do
+        before do
+          allow(securities_request).to receive(:is_collateral?).and_return(true)
+        end
+        allow_policy :security, :authorize_collateral?
+        it 'sets the proper @form_data for an authorized collateral signer' do
+          form_data = {
+            url: securities_release_submit_path,
+            submit_text: I18n.t('securities.release.authorize')
+          }
+          subject.send(:populate_form_data_by_kind, :pledge_intake)
+          expect(assigns[:form_data]).to eq(form_data)
+        end
+      end
+      describe 'when the current user is a securities signer' do
+        before do
+          allow(securities_request).to receive(:is_collateral?).and_return(false)
+        end
+        allow_policy :security, :authorize_securities?
+        it 'sets the proper `@form_data` for an authorized securities signer' do
+          form_data = {
+            url: securities_release_submit_path,
+            submit_text: I18n.t('securities.release.authorize')
+          }
+          subject.send(:populate_form_data_by_kind, :safekept_intake)
+          expect(assigns[:form_data]).to eq(form_data)
         end
       end
     end

@@ -11,4 +11,5 @@
       %header
         %h2= t('securities.requests.authorized.title')
         %p= t('securities.requests.authorized.description')
-        = render 'reports/reports_table', table_class: 'securities-request-table', table_data: @authorized_requests_table, sortable: false
+        = render 'reports/reports_table', table_class: ['securities-request-table', 'authorized-requests'], table_data: @authorized_requests_table, sortable: false
+= render 'reports/report_loading_flyout'

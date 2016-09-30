@@ -34,24 +34,30 @@ Scenario: View the various Delivery Instructions field sets
   Then I should see "Mutual Fund" as the selected release delivery instructions
   And I should see the "Mutual Fund" release instructions fields
 
-@jira-mem-1592
+@jira-mem-1592 @jira-mem-1877
 Scenario: Member interacts with the Delete Release flyout dialogue
   Given I am on the release securities page
-  When I click the button to delete the release
+  When I click the button to delete the request
   Then I should see the delete release flyout dialogue
+  And I should see release copy for the delete flyout
   When I click on the button to continue with the release
   Then I should not see the delete release flyout dialogue
-  When I click the button to delete the release
-  And I click on the button to delete the release
+  When I click the button to delete the request
+  And I confirm that I want to delete the request
   Then I should be on the Manage Securities page
 
-@jira-mem-1589
-Scenario: Member views edit securities instructions
-  Given I am on the release securities page
+@jira-mem-1589 @jira-mem-1879
+Scenario Outline: Member views edit securities instructions
+  Given I am on the <page> securities page
   When I click on the Edit Securities link
   Then I should see instructions on how to edit securities
+  And I should see the contact information for <contact>
   When I click on the Edit Securities link
   Then I should not see instructions on how to edit securities
+Examples:
+| page             | contact               |
+| safekeep release | Securities Services   |
+| pledge release   | Collateral Operations |
 
 @jira-mem-1590 @data-unavailable
 Scenario: Member cancels an upload of a securities release file
@@ -90,29 +96,27 @@ Scenario: Member uploads a securities release file that has an invalid Original 
   When I drag and drop the "securities_invalid_original_par.xlsx" file into the edit securities dropzone
   Then I should see an original par numericality field error
 
-@jira-mem-1790 @data-unavailable
+@jira-mem-1790 @jira-mem-1894 @data-unavailable
 Scenario: Member uploads a securities release file that is missing Settlement Amount and the request has a settlement type of Free
   Given I am on the release securities page
   And the settlement type is set to Free
   And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And the edit securities section is open
   And I upload a securities release file with "no settlement amounts"
   When I click to submit the request
-  Then I should see the success page for the securities release request
+  Then I should see the title for the "pledge release" success page
 
-@jira-mem-1790 @data-unavailable
+@jira-mem-1790 @jira-mem-1894 @data-unavailable
 Scenario: Member uploads a securities release file that is missing Settlement Amount and the request has a settlement type of Vs. Payment
   Given I am on the release securities page
   And the settlement type is set to Vs Payment
   And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And the edit securities section is open
   And I upload a securities release file with "no settlement amounts"
   When I click to submit the request
   Then I should see the "settlement amount required" error
 
-@jira-mem-1792 @data-unavailable
+@jira-mem-1792 @jira-mem-1894 @data-unavailable
 Scenario: Member uploads a securities release file that has at least one security with an Original Par over the Federal Limit of 50,000,000
   Given I am on the release securities page
   And the edit securities section is open
@@ -121,31 +125,28 @@ Scenario: Member uploads a securities release file that has at least one securit
   And I fill in the "clearing_agent_fed_wire_address_1" securities field with "23454343"
   And I fill in the "clearing_agent_fed_wire_address_2" securities field with "5683asdfa"
   And I fill in the "aba_number" securities field with "5683asdfa"
-  And I fill in the "fed_credit_account_number" securities field with "5683asdfa"
   When I click to submit the request
   Then I should see the "over federal limit" error
 
-@jira-mem-1791 @data-unavailable
+@jira-mem-1791 @jira-mem-1894 @data-unavailable
 Scenario: Member uploads a securities release file that has Settlement Amounts and the request has a settlement type of Free
   Given I am on the release securities page
   And the settlement type is set to Free
   And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And the edit securities section is open
   And I upload a securities release file with "settlement amounts"
   When I click to submit the request
   Then I should see the "settlement amount present" error
 
-@jira-mem-1791 @data-unavailable
+@jira-mem-1791 @jira-mem-1894 @data-unavailable
 Scenario: Member uploads a securities release file that has Settlement Amounts and the request has a settlement type of Vs. Payment
   Given I am on the release securities page
   And the settlement type is set to Vs Payment
   And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And the edit securities section is open
   And I upload a securities release file with "settlement amounts"
   When I click to submit the request
-  Then I should see the success page for the securities release request
+  Then I should see the title for the "pledge release" success page
 
 @jira-mem-1654
 Scenario: Member changes trade and settlement dates
@@ -162,22 +163,24 @@ Scenario: Member changes trade and settlement dates
   Then I should be on the securities release page
 
 @jira-mem-1786
-Scenario: Member selects a settlement date that occurs before the trade date
-  Given I am on the release securities page
+Scenario Outline: Member selects a settlement date that occurs before the trade date
+  Given I am on the <page> securities page
   And I choose the first available date for settlement date
   And I choose the last available date for trade date
   And I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   When I click to submit the request
   Then I should see the "settlement date before trade date" error
+Examples:
+| page              |
+| safekeep release  |
+| pledge release    |
 
 @jira-mem-1594 @jira-mem-1595
 Scenario: Member sees success page after submitting releases for authorization
   Given I am on the release securities page
   When I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   And I submit the securities release request for authorization
-  Then I should see the success page for the securities release request
+  Then I should see the title for the "pledge release" success page
 
 @jira-mem-1600
 Scenario: A signer uses a SecurID token to authenticate when authorizing
@@ -207,14 +210,50 @@ Scenario: A signer authorizes a request while submitting it
   Given I am logged in as a "quick-advance signer"
   And I am on the release securities page
   When I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   When I authorize the request
   Then I should see the authorize request success page
 
-@jira-mem-1785
-Scenario: A user cannot submit the form until all required fields have values
-  When I am on the release securities page
+@jira-mem-1785 @jira-mem-1894
+Scenario Outline: A user cannot submit the form until all required fields have values
+  When I am on the <page> securities page
   Then the Submit action is disabled
   When I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   Then the Submit action is enabled
+Examples:
+  | page             |
+  | safekeep release |
+  | pledge release   |
+
+@jira-mem-1874 @data-unavailable
+Scenario: Member uploads a securities intake file and sees the success message
+  Given I am on the release securities page
+  And the edit securities section is open
+  And I upload a securities release file with "no settlement amounts"
+  Then I should see the securities upload success message
+  When the edit securities section is open
+  And I drag and drop the "securities_invalid_original_par.xlsx" file into the edit securities dropzone
+  Then I should not see the securities upload success message
+
+@jira-mem-1894 @allow-rescue @local-only
+Scenario Outline: A member submits a request for release and there is a general API error
+  Given I am on the <page> securities page
+  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I submit the request and the API returns a 500
+  Then I should see the "generic catchall" error
+Examples:
+| page              |
+| safekeep release  |
+| pledge release    |
+
+@jira-mem-1897
+Scenario Outline: Intranet users are not allowed to submit an intake request
+  Given I log in as an "intranet user"
+  When I am on the <page> securities page
+  And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+  When I submit the securities request for authorization
+  Then I should see the "intranet user" error
+Examples:
+| page              |
+| safekeep release  |
+| pledge release    |

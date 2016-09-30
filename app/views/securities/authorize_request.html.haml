@@ -4,11 +4,9 @@
     %h1= @title
   .securities-main-body.securities-authorize-success
     %section.securities-success.icon-success-before
-      =simple_format(t('securities.authorize.confirmation', date: fhlb_datetime_standard_numeric_with_on(Time.zone.now)))
-      %p=t('securities.authorize.timeframe')
-      %p=t('securities.authorize.issues')
-      %p=t('securities.authorize.contact_html', mailto_url: securities_services_email, phone_number: securities_services_phone_number)
-    %section.securities-success
+      =simple_format(t('securities.authorize.confirmation', date: fhlb_datetime_long_alpha_with_on(Time.zone.now)))
+      %p=t('securities.authorize.pdf')
+      %p=t('securities.authorize.contact_html', mailto_url: @contact[:email_address], mailto_text: @contact[:mailto_text], phone_number: @contact[:phone_number])
+    %section.securities-success-actions
       = link_to(t('securities.success.buttons.manage'), securities_manage_path, class: 'secondary-button')
       = link_to(t('securities.success.buttons.view'), securities_requests_path, class: 'secondary-button')
-      = link_to(t('securities.authorize.make_request'), securities_manage_path, :class => 'primary-button')

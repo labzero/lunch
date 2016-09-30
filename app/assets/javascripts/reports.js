@@ -31,7 +31,7 @@ $(function () {
       checkDeferredJobStatus($deferredReport, $deferredReport.data('deferred'), $deferredReport.data('deferred-load'));
     };
 
-    $('.cancel-report-download').on('click', function(){
+    $('.cancel-download').on('click', function(){
       cancelDownloadJob();
     });
   };
@@ -39,12 +39,12 @@ $(function () {
   bindReport();
 
   function openLoadingFlyout() {
-    $('body').flyout({topContent: $('.loading-report').clone(true)});
+    $('body').flyout({topContent: $('.loading-flyout').clone(true)});
     $('.flyout').addClass('flyout-loading-message');
   };
 
   function cancelDownloadJob() {
-    $reportForm.trigger('reportDownloadCanceled', {job_cancel_url: jobCancelUrl});
+    $reportForm.trigger('downloadCanceled', {job_cancel_url: jobCancelUrl});
     $.get(jobCancelUrl);
     clearTimeout(jobStatusTimer);
   };
@@ -67,7 +67,7 @@ $(function () {
   };
 
   function downloadJob(url) {
-    $reportForm.trigger('reportDownloadStarted', {download_url: url});
+    $reportForm.trigger('downloadStarted', {download_url: url});
     closeFlyout();
     window.location.href = url;
   };

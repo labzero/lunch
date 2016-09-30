@@ -5,13 +5,27 @@ RSpec.describe SecuritiesRequest, :type => :model do
   describe 'validations' do
     [:pledge_intake, :pledge_transfer].each do |kind|
       it "validates the presence of `pledge_to` if the `kind` equals `#{kind}`" do
-        subject.kind = :pledge_intake
+        subject.kind = kind
         expect(subject).to validate_presence_of :pledge_to
       end
     end
     it 'does not validate the presence of `pledge_to` if the `kind` is not `:pledge_intake`' do
       subject.kind = (described_class::KINDS - [:pledge_intake, :pledge_transfer]).sample
       expect(subject).not_to validate_presence_of :pledge_to
+    end
+    [:pledged_account, :safekept_account].each do |attr|
+      described_class::TRANSFER_KINDS.each do |kind|
+        it "validates the presence of `#{attr}` if the `kind` equals `#{kind}`" do
+          subject.kind = kind
+          expect(subject).to validate_presence_of attr
+        end
+      end
+      (described_class::KINDS - described_class::TRANSFER_KINDS).each do |kind|
+        it "does not validate the presence of `#{attr}` if the `kind` is `#{kind}`" do
+          subject.kind = kind
+          expect(subject).not_to validate_presence_of attr
+        end
+      end
     end
     (described_class::BROKER_INSTRUCTION_KEYS + [:delivery_type, :securities, :kind, :form_type]).each do |attr|
       it "validates the presence of `#{attr}`" do
@@ -24,9 +38,14 @@ RSpec.describe SecuritiesRequest, :type => :model do
         before do
           subject.delivery_type = delivery_type
         end
-        described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type].each do |attr|
+        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] - [:dtc_credit_account_number, :fed_credit_account_number, :physical_securities_credit_account_number]).each do |attr|
           it "validates the presence of `#{attr}`" do
             expect(subject).to validate_presence_of attr
+          end
+        end
+        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] & [:dtc_credit_account_number, :fed_credit_account_number, :physical_securities_credit_account_number]).each do |attr|
+          it "does not validate the presence of `#{attr}`" do
+            expect(subject).to_not validate_presence_of attr
           end
         end
       end
@@ -216,7 +235,41 @@ RSpec.describe SecuritiesRequest, :type => :model do
         end
       end
     end
-    described_class::TRANSFER_REQUEST_KINDS.each do |kind|
+    describe '`original_par_under_fed_limit`' do
+      let(:security_under_fed_limit) { FactoryGirl.build(:security, original_par: (described_class::FED_AMOUNT_LIMIT - rand(100000..10000000))) }
+      let(:security_over_fed_limit) { FactoryGirl.build(:security, original_par: (described_class::FED_AMOUNT_LIMIT + rand(100000..10000000))) }
+      let(:call_validation) { subject.send(:original_par_under_fed_limit) }
+
+      it 'is called as a validator if the `delivery_type` is `:fed`' do
+        subject.delivery_type = :fed
+        expect(subject).to receive(:original_par_under_fed_limit)
+        subject.valid?
+      end
+      it 'is not called as a validator when the `delivery_type` is anything other than `:fed`' do
+        expect(subject).not_to receive(:original_par_under_fed_limit)
+        subject.valid?
+      end
+      it 'does not add an error if there are no `securities`' do
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      it 'does not add an error if `securities` is an empty array' do
+        subject.securities = []
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      it 'does not add an error if the `securities` all have an `original_par` under the federal limit' do
+        subject.securities = [security_under_fed_limit, security_under_fed_limit]
+        expect(subject.errors).not_to receive(:add)
+        call_validation
+      end
+      it 'adds an error if at least one of the `securities` has an `original_par` that is over the federal limit' do
+        subject.securities = [security_under_fed_limit, security_over_fed_limit]
+        expect(subject.errors).to receive(:add).with(:securities, :original_par)
+        call_validation
+      end
+    end
+    described_class::TRANSFER_KINDS.each do |kind|
       describe "when the kind is `#{kind}`" do
         before { subject.kind = kind }
         described_class::BROKER_INSTRUCTION_KEYS.each do |attr|
@@ -396,9 +449,9 @@ RSpec.describe SecuritiesRequest, :type => :model do
       end
     end
     describe '`attributes=`' do
-      sym_attrs = [:transaction_code]
-      date_attrs = [:trade_date, :settlement_date]
-      custom_attrs = [:request_id, :form_type, :kind, :delivery_type, :settlement_type]
+      sym_attrs = [:transaction_code, :pledge_to]
+      date_attrs = [:trade_date, :settlement_date, :authorized_date]
+      custom_attrs = [:authorized_by, :request_id, :form_type, :kind, :delivery_type, :settlement_type]
       let(:hash) { {} }
       let(:value) { double('some value') }
       let(:call_method) { subject.send(:attributes=, hash) }
@@ -423,6 +476,11 @@ RSpec.describe SecuritiesRequest, :type => :model do
           hash[key.to_s] = double('some value', to_sym: value)
           call_method
           expect(subject.send(key)).to be(value)
+        end
+        it "assigns nil if the value found under `#{key}` is nil" do
+          hash[key.to_s] = nil
+          call_method
+          expect(subject.send(key)).to be_nil
         end
       end
       date_attrs.each do |key|

@@ -33,34 +33,6 @@ Scenario: View the various Delivery Instructions field sets
   And I should see the "Mutual Fund" release instructions fields
 
 @jira-mem-1678
-Scenario: Member interacts with the Delete Release flyout dialogue
-  Given I am on the pledge securities page
-  When I click the button to delete the release
-  Then I should see the delete release flyout dialogue
-  When I click on the button to continue with the release
-  Then I should not see the delete release flyout dialogue
-  When I click the button to delete the release
-  And I click on the button to delete the release
-  Then I should be on the Manage Securities page
-
-@jira-mem-1678
-Scenario: Member changes trade and settlement dates
-  # This should be flushed out once we have actual date ranges to check
-  Given I am on the pledge securities page
-  When I click the trade date datepicker
-  And I click the datepicker apply button
-  Then I should be on the pledge securities page
-  When I click the trade date datepicker
-  And I click the datepicker cancel button
-  Then I should be on the pledge securities page
-  When I click the settlement date datepicker
-  And I click the datepicker apply button
-  Then I should be on the pledge securities page
-  When I click the settlement date datepicker
-  And I click the datepicker cancel button
-  Then I should be on the pledge securities page
-
-@jira-mem-1678
 Scenario: Member cannot click on the account number input
   Given I am on the pledge securities page
   Then the Pledge Account Number should be disabled
@@ -71,13 +43,3 @@ Scenario: A signer views a previously submitted pledge request
   And I am on the securities request page
   When I click to Authorize the first pledge
   Then I should be on the Pledge Securities page
-
-@jira-mem-1672 @data-unavailable
-Scenario: A user submits a pledge request for authorization.
-  Given I am on the pledge securities page
-  When I upload a securities intake file
-  Then I should see a report table with multiple data rows
-  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
-  And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
-  And I submit the securities request for authorization
-  Then I should see the title for the "pledge success" page

@@ -1127,6 +1127,30 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/securities/transfer'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Update securities transfer request'
+              key :nickname, 'updateSecuritiesTransferRequest'
+              key :consumes, ['application/json']
+              key :type, :SecuritiesTransferResponse
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution requesting securities transfer'
+              end
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :SecuritiesRequest
+                key :description, "Securities to update for transfer and their associated metadata"
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -1484,11 +1508,10 @@ module MAPI
 
         relative_get '/:id/securities/requests' do
           id = params[:id].to_i
-          end_date = (params[:settle_end_date] || Time.zone.today).to_date
-          start_date = (params[:settle_start_date] || (end_date - 100.years)).to_date
+          start_date = (params[:settle_start_date] || (Time.zone.today - 100.years)).to_date
           MAPI::Services::Member::SecuritiesRequests.requests(self, id,
             MAPI::Services::Member::SecuritiesRequests::REQUEST_STATUS_MAPPING[params[:status]],
-            (start_date..end_date)).to_json
+            start_date).to_json
         end
 
         relative_post '/:id/securities/intake' do
@@ -1609,6 +1632,24 @@ module MAPI
                                                                                    post_body_json['securities'] || [],
                                                                                    post_body_json['kind'].try(:to_sym))
             {request_id: request_id}
+          end
+        end
+
+        relative_put '/:id/securities/transfer' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            post_body_json = JSON.parse(request.body.read)
+            user = post_body_json['user']
+            request_id = post_body_json['request_id']
+            raise MAPI::Shared::Errors::ValidationError.new('`request_id` is required', 'request_id') unless request_id
+            {request_id: request_id} if MAPI::Services::Member::SecuritiesRequests.update_transfer(self,
+                                                                                    params['id'].to_i,
+                                                                                    request_id,
+                                                                                    user['username'],
+                                                                                    user['full_name'],
+                                                                                    user['session_id'],
+                                                                                    post_body_json['broker_instructions'] || {},
+                                                                                    post_body_json['securities'] || [],
+                                                                                    post_body_json['kind'].try(:to_sym))
           end
         end
       end

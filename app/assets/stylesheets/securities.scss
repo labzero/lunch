@@ -19,43 +19,52 @@
   @extend %page-main-body;
 }
 
-.securities-success
-{
+.securities-success {
+  width: $column-9-width;
+  box-sizing: border-box;
   margin-bottom: 35px;
-  &:before {
-    @extend %extra-large-icon-font;
-    margin-right: 26px;
-    vertical-align: middle;
-    color: $approval-green;
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
   ul {
-    padding-left: 0;
+    padding-left: 30px;
     list-style-type: decimal;
     list-style-position: inside;
     li {
       margin-bottom: 5px;
     }
   }
+  &:first-child {
+    position: relative;
+    margin-top: 30px;
+  }
+  &.icon-success-before {
+    padding-left: $extra-large-icon-font-size * 2;
+    &:before {
+      @extend %extra-large-icon-font;
+      vertical-align: middle;
+      color: $approval-green;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+  }
+}
+
+.securities-success-actions {
+  margin-top: 50px;
   .primary-button, .secondary-button {
     margin-right: 10px;
     width: 219px;
   }
-  &:first-child {
-    position: relative;
-    padding-left: 56px;
-    margin-top: 30px;
-  }
-  p:first-child {
-    margin-bottom: 30px;
-  }
 }
 
-.securities-success-table
-{
-  width: 350px;
+.securities-success-table {
+  width: 300px;
+  box-sizing: border-box;
+  border: 1px solid #d9e3ed;
+  border-radius: 3px;
+  padding: 15px 15px 20px;
+  thead th {
+    padding-top: 0;
+  }
 }
 
 .manage-securities-table {
@@ -108,14 +117,14 @@
 }
 
 .safekeep-pledge-upload-again {
-  margin-left: 490px;
   margin-bottom: 0;
   margin-top: 0;
 }
 
 .safekeep-pledge-download-title {
   @extend %actionable-text;
-  margin-left: 325px;
+  float: right;
+  margin-top: 5px;
 }
 
 .additional-legal {
@@ -134,7 +143,8 @@
 }
 
 .legal-footer {
-  @extend %typography-footnote
+  @extend %typography-footnote;
+  width: $column-7-width;
 }
 
 .securities-release, .securities-safekeep, .securities-pledge {
@@ -273,11 +283,11 @@
   }
 }
 
-.delete-release-flyout {
+.delete-request-flyout {
   display: none;
 }
 
-.flyout .delete-release-flyout {
+.flyout .delete-request-flyout {
   display: block;
 }
 
@@ -351,6 +361,12 @@
   margin: 15px 0 0;
 }
 
+.securities-download-instructions-step {
+  &a {
+    text-transform: uppercase;
+  }
+}
+
 .securities-download-actions {
   clear: both;
   text-transform: uppercase;
@@ -384,10 +400,14 @@
   }
 }
 
-.securities-release-upload-error {
+.securities-request-upload-error {
   display: none;
   margin-top: -5px;
   color: $alert-red;
+}
+
+.securities-request-upload-success {
+  display: none;
 }
 
 .securities-submit-release-form-errors {
@@ -410,4 +430,49 @@
 
 .securities-release-table-wrapper {
   margin-top: 20px;
+}
+
+@media print {
+  .view-authorized-request {
+    color: $print-color;
+    .column-3 {
+      width: 32%;
+      margin-left: 0;
+      &:first-child {
+        margin-right: 2.1%;
+      }
+      &:nth-child(3) {
+        float: right;
+      }
+    }
+    .details {
+      td:last-child {
+        text-align: right;
+      }
+    }
+    h1, h2, h3, h4 {
+      font-weight: $normal-weight;
+    }
+    h3, h4 {
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .summary-data {
+      @include typography-print-summary-data;
+    }
+    .securities-release-table {
+      margin-bottom: 30px;
+    }
+    p {
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+    .legal-title {
+      font-weight: $bold-weight;
+      margin-bottom: 10px;
+    }
+    .column-3-span-2 {
+      width: 70%;
+    }
+  }
 }

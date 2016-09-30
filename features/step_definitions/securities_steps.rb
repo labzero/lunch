@@ -2,7 +2,7 @@ When(/^I click on the Securities link in the header$/) do
   page.find('.secondary-nav a', text: I18n.t('securities.title'), exact: true).click
 end
 
-Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities|Transfer to Pledged|Transfer to Safekept) page$/i) do |page_type|
+Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities|Transfer to Pledged|Transfer to Safekept|Transfer Securities) page$/i) do |page_type|
   text = case page_type
   when /\AManage Securities\z/i
     step 'I should see a report table with multiple data rows'
@@ -21,6 +21,8 @@ Then(/^I should be on the (Manage Securities|Securities Requests|Securities Rele
     I18n.t('securities.transfer.pledge.title')
   when /\ATransfer to Safekept\z/i
     I18n.t('securities.transfer.safekeep.title')
+  when /\ATransfer Securities\z/i
+    /\ATransfer Securities/
   end
   page.assert_selector('h1', text: text, exact: true)
 end
@@ -32,21 +34,33 @@ Then(/^I should see two securities requests tables with data rows$/) do
   end
 end
 
-When(/^I am on the (manage|release|release success|safekeep success|pledge success|safekeep|pledge|transfer success|transfer to pledged account|transfer to safekept account) securities page$/) do |page|
+When(/^I am on the (manage|release|pledge release|safekeep release|pledge release success|safekeep release success|safekeep success|pledge success|safekeep|pledge|pledge transfer success|safekeep transfer success|transfer to pledged account|transfer to safekept account) securities page$/) do |page|
   case page
   when 'manage'
     visit '/securities/manage'
-  when 'release success'
-    visit '/securities/release/success'
+  when 'pledge release success'
+    visit '/securities/release/pledge_success'
+  when 'safekeep release success'
+    visit '/securities/release/safekeep_success'
   when 'pledge success'
     visit '/securities/pledge/success'
   when 'safekeep success'
     visit '/securities/safekeep/success'
-  when 'transfer success'
-    visit '/securities/transfer/success'
+  when 'pledge transfer success'
+    visit '/securities/transfer/pledge_success'
+  when 'safekeep transfer success'
+    visit '/securities/transfer/safekeep_success'
   when 'release'
     step 'I am on the manage securities page'
     step 'I check the 1st Pledged security'
+    step 'I click the button to release the securities'
+  when 'pledge release'
+    step 'I am on the manage securities page'
+    step 'I check the 1st Pledged security'
+    step 'I click the button to release the securities'
+  when 'safekeep release'
+    step 'I am on the manage securities page'
+    step 'I check the 1st Safekept security'
     step 'I click the button to release the securities'
   when 'transfer to pledged account'
     step 'I am on the manage securities page'
@@ -148,12 +162,16 @@ When(/^I select "(.*?)" as the release delivery instructions$/) do |instructions
   page.find('.securities-delivery-instructions .dropdown li', text: text, exact: true).click
 end
 
-When(/^I click the button to delete the release$/) do
-  page.find('.delete-release-trigger').click
+When(/^I click the button to delete the request/) do
+  page.find('.delete-request-trigger').click
 end
 
 Then(/^I should see the delete release flyout dialogue$/) do
   page.assert_selector('.flyout-confirmation-dialogue', visible: 'visible')
+end
+
+Then(/^I should see (safekeep|pledge|transfer|release) copy for the delete flyout$/) do |type|
+  page.assert_selector('.delete-request-flyout h2', text: I18n.t("securities.delete_request.titles.#{type}"), visible: 'visible', exact: true)
 end
 
 Then(/^I should not see the delete release flyout dialogue$/) do
@@ -161,11 +179,11 @@ Then(/^I should not see the delete release flyout dialogue$/) do
 end
 
 When(/^I click on the button to continue with the release$/) do
-  page.find('.delete-release-flyout button', text: I18n.t('securities.release.delete_request.continue').upcase).click
+  page.find('.delete-request-flyout button', text: I18n.t('global.cancel').upcase).click
 end
 
-When(/^I click on the button to delete the release$/) do
-  page.find('.delete-release-flyout a', text: I18n.t('securities.release.delete_request.delete').upcase).click
+When(/^I confirm that I want to delete the request$/) do
+  page.find('.delete-request-flyout a', text: I18n.t('securities.delete_request.delete').upcase).click
 end
 
 When(/^I click on the Edit Securities link$/) do
@@ -206,7 +224,12 @@ When(/^I should see an? (security required|original par numericality|no securiti
            when 'no securities'
              I18n.t('securities.upload_errors.no_rows')
          end
-  page.assert_selector('.securities-release-upload-error p', text: text, exact: true)
+  page.assert_selector('.securities-request-upload-error p', text: text, exact: true)
+end
+
+Then(/^I should( not)? see the securities upload success message$/) do |should_not_see|
+  selector = ['.securities-request-upload-success', text: I18n.t('securities.upload_success'), exact: true, visible: true]
+  should_not_see ? page.assert_no_selector(*selector) : page.assert_selector(*selector)
 end
 
 Then(/^I should see an upload progress bar$/) do
@@ -236,19 +259,21 @@ end
 
 Then(/^I should see a list of securities authorized users$/) do
   page.assert_selector('h2', text: /\A#{Regexp.quote(I18n.t('securities.success.authorizers'))}\z/, visible: true)
-  page.assert_selector('.settings-users-table', visible: true)
+  page.assert_selector('.securities-success-table', visible: true)
 end
 
-Then(/^I should see the title for the "(.*?)" page$/) do |success_page|
+Then(/^I should see the title for the "(.*?)" success page$/) do |success_page|
   translation = case success_page
-    when 'release success'
-      'securities.success.title'
-    when 'pledge success'
-      'securities.safekeep_pledge.success.pledge'
-    when 'safekeep success'
-      'securities.safekeep_pledge.success.safekeep'
-    when 'transfer success'
-      'securities.transfer.success.title'
+  when 'pledge release'
+    'securities.success.titles.pledge_release'
+  when 'safekept release'
+    'securities.success.titles.safekept_release'
+  when 'pledge intake'
+    'securities.success.titles.pledge_intake'
+  when 'safekept intake'
+    'securities.success.titles.safekept_intake'
+  when 'transfer'
+    'securities.success.titles.transfer'
   end
   page.assert_selector('.securities-header h1', text: I18n.t(translation), exact: true)
 end
@@ -259,10 +284,6 @@ end
 
 When(/^I submit the securities(?: release)? request for authorization$/) do
   page.find('.securities-submit-release-form input[type=submit]').click
-end
-
-Then(/^I should see the success page for the securities release request$/) do
-  page.assert_selector('.securities h1', text: I18n.t('securities.success.title'))
 end
 
 Then(/^I should see the generic error message for the securities release request$/) do
@@ -281,16 +302,16 @@ Then(/^the (Pledge|Safekeep) Account Number should be disabled$/) do |action|
   end
 end
 
-Then(/^I should a disabled state for the Authorize action$/) do
+Then(/^I should see a disabled state for the Authorize action$/) do
   page.assert_selector('.securities-request-table .report-cell-actions', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
   page.assert_no_selector('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
 end
 
-Then(/^I should an active state for the Authorize action$/) do
+Then(/^I should see the active state for the Authorize action$/) do
   page.assert_selector('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
 end
 
-When(/^I click to Authorize the first (pledge|release|safekeep)(?: request)?$/) do |type|
+Then(/^I should see the (active|disabled) state for the Authorize action for (pledge|release|safekeep|transfer)$/) do |state, type|
   description = case type
   when 'pledge'
     I18n.t('securities.requests.form_descriptions.pledge')
@@ -298,11 +319,39 @@ When(/^I click to Authorize the first (pledge|release|safekeep)(?: request)?$/) 
     I18n.t('securities.requests.form_descriptions.release')
   when 'safekeep'
     I18n.t('securities.requests.form_descriptions.safekept')
+  when 'transfer'
+    I18n.t('securities.requests.form_descriptions.transfer')
   else
     raise ArgumentError, "unknown form type: #{type}"
   end
   row = page.all('.securities-request-table td', text: description, exact: true).first.find(:xpath, '..')
+  if state == 'active'
+    row.assert_selector('.report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
+  else
+    row.assert_no_selector('.report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
+  end
+end
+
+When(/^I click to Authorize the first (pledge|release|safekeep|transfer)(?: request)?$/) do |type|
+  description = case type
+  when 'pledge'
+    I18n.t('securities.requests.form_descriptions.pledge')
+  when 'release'
+    I18n.t('securities.requests.form_descriptions.release')
+  when 'safekeep'
+    I18n.t('securities.requests.form_descriptions.safekept')
+  when 'transfer'
+    I18n.t('securities.requests.form_descriptions.transfer')
+  else
+    raise ArgumentError, "unknown form type: #{type}"
+  end
+  row = page.all('.securities-request-table td', text: description, exact: true).first.find(:xpath, '..')
+  @request_id = row.find('td:first-child').text
   row.find('.report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true).click
+end
+
+Then(/^I should not see the request ID that I deleted$/) do
+  page.assert_no_selector('.securities-request-table td', text: @request_id, exact: true)
 end
 
 Then(/^I should see "(.*?)" as the selected pledge type$/) do |type|
@@ -396,9 +445,12 @@ Then(/^I should see the "(.*?)" error$/) do |error|
   when 'settlement amount present'
     I18n.t('activemodel.errors.models.securities_request.attributes.securities.payment_amount_present')
   when 'generic catchall'
-    I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text)
+    I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email)
+  when 'intranet user'
+    I18n.t('securities.internal_user_error')
   end
-  page.assert_selector('.securities-submit-release-form-errors p', text: text, exact: true)
+  page.assert_selector('.securities-header h1', visible: true)
+  page.assert_selector('.securities-submit-release-form-errors p', text: strip_links(text), exact: true)
 end
 
 When(/^the settlement type is set to (Vs Payment|Free)$/) do |payment_type|
@@ -414,6 +466,42 @@ end
 
 When(/^I check the box to select all displayed securities$/) do
   page.find('.manage-securities-table input[name="check_all"]').click
+end
+
+When(/^I request a PDF of an authorized (pledge|release|safekeep|transfer) securities request$/) do |type|
+  description = case type
+  when 'pledge'
+    I18n.t('securities.requests.form_descriptions.pledge')
+  when 'release'
+    I18n.t('securities.requests.form_descriptions.release')
+  when 'safekeep'
+    I18n.t('securities.requests.form_descriptions.safekept')
+  when 'transfer'
+    I18n.t('securities.requests.form_descriptions.transfer')
+  else
+    raise ArgumentError, "unknown form type: #{type}"
+  end
+  row = page.all('.authorized-requests td', text: description, exact: true).first.find(:xpath, '..')
+  jquery_execute("$('body').on('downloadStarted', function(){$('body').addClass('download-started')})")
+  row.find('td:last-child a', text: /\A#{I18n.t('global.view').upcase}\z/, match: :first).click
+end
+
+When(/^I discard the uploaded securities$/) do
+  page.find('.safekeep-pledge-upload-again').click
+end
+
+Then(/^I should see the contact information for (Securities Services|Collateral Operations)$/) do |contact|
+  if contact == 'Securities Services'
+    email_address = securities_services_email
+    mailto_text = I18n.t('contact.collateral_departments.securities_services.title')
+    phone_number = securities_services_phone_number
+  else
+    email_address = collateral_operations_email
+    mailto_text = I18n.t('contact.collateral_departments.collateral_operations.title')
+    phone_number = collateral_operations_phone_number
+  end
+  text = strip_links(I18n.t('securities.release.edit.step_3.description_html', mailto_url: email_address, mailto_text: mailto_text, phone_number: phone_number))
+  page.assert_selector('.securities-download-instructions-description:last-of-type', text: text, exact: true, visible: true)
 end
 
 def delivery_instructions(text)

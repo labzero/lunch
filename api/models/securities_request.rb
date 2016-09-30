@@ -197,6 +197,11 @@ module MAPI
       swagger_model :SecuritiesRequest do
         key :required, %i(user broker_instructions delivery_instructions securities)
 
+        property :member_id do
+          key :type, :string
+          key :description, 'The ID of the requesting member'
+        end
+
         property :request_id do
           key :type, :string
           key :description, 'The ID of the request'
@@ -237,6 +242,12 @@ module MAPI
         property :delivery_instructions do
           key :type, :DeliveryInstructions
           key :description, 'The delivery instructions for this release'
+        end
+
+        property :authorized_date do
+          key :type, :string
+          key :format, :date
+          key :description, 'The date the form was authorized'
         end
 
         property :securities do

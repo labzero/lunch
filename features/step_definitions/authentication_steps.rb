@@ -328,6 +328,10 @@ def user_for_type(user_type)
     extended_info_user
   when 'securities signer'
     securities_signer
+  when 'collateral signer'
+    collateral_signer
+  when 'extranet signer'
+    extranet_signer
   else
     raise 'unknown user type'
   end
@@ -407,6 +411,14 @@ end
 
 def securities_signer
   CustomConfig.env_config['securities_signer']
+end
+
+def collateral_signer
+  CustomConfig.env_config['collateral_signer']
+end
+
+def extranet_signer
+  CustomConfig.env_config['extranet_signer']
 end
 
 def current_member_name

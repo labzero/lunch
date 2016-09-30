@@ -5,10 +5,14 @@ $row-padding: 10px; // 1 each on outside of row
 
 $column-1-width: ($grid-column-width * 12) + ($gutter-width * 11);
 $column-3-width: ($grid-column-width * 4) + ($gutter-width * 3);
+$column-7-width: ($grid-column-width * 7) + ($gutter-width * 6);
 $column-8-width: ($grid-column-width * 8) + ($gutter-width * 9);
+$column-9-width: ($grid-column-width * 9) + ($gutter-width * 9);
 
 $column-4x8-right-width: ($grid-column-width * 8) + ($gutter-width * 7);
 $column-2x10-right-width: ($grid-column-width * 10) + ($gutter-width * 9.5);
+
+$print-column-3-width: 190px;
 
 $default-border-radius: 3px;
 

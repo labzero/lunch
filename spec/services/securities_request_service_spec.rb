@@ -308,7 +308,8 @@ describe SecuritiesRequestService do
         form_type: instance_double(String),
         securities: instance_double(Array),
         pledged_account: instance_double(String),
-        safekept_account: instance_double(String)
+        safekept_account: instance_double(String),
+        member_id: instance_double(String)
       }}
       let(:call_method) { subject.send(:map_response_to_securities_release_hash, raw_hash) }
 
@@ -317,7 +318,7 @@ describe SecuritiesRequestService do
           expect(call_method[broker_instruction]).to eq(raw_hash[:broker_instructions][broker_instruction])
         end
       end
-      SecuritiesRequest::DELIVERY_TYPES.keys.each do |delivery_type|
+      (SecuritiesRequest::DELIVERY_TYPES.keys - [:transfer]).each do |delivery_type|
         describe "when the `delivery_type` is `#{delivery_type}`" do
           before do
             raw_hash[:delivery_instructions] = {
@@ -339,7 +340,21 @@ describe SecuritiesRequestService do
           end
         end
       end
-      [:request_id, :securities, :form_type, :pledged_account, :safekept_account].each do |attr|
+      describe 'when the delivery type is `:transfer`' do
+        before do
+          raw_hash[:delivery_instructions] = {
+            delivery_type: :transfer,
+            account_number: nil
+          }
+        end
+        it 'does not set an account number' do
+          response = call_method
+          (SecuritiesRequest::ACCOUNT_NUMBER_TYPE_MAPPING.values + [:account_number]).each do |account_number_key|
+            expect(response[account_number_key]).to be_nil
+          end
+        end
+      end
+      [:request_id, :securities, :form_type, :pledged_account, :safekept_account, :member_id].each do |attr|
         it "returns a hash with a `#{attr}` value" do
           raw_hash[attr] = double('A Value')
           expect(call_method[attr]).to eq(raw_hash[attr])

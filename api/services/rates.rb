@@ -729,6 +729,7 @@ module MAPI
             # We have no real data source yet.
             live_data    = MAPI::Services::Rates.fake_hash('market_data_live_rates')
             start_of_day = MAPI::Services::Rates.fake_hash('market_data_start_of_day_rates')
+            holidays.each{ |holiday| holidays.delete(holiday) if MAPI::Services::Rates::BlackoutDates.fake_data_relative_to_today.include?(holiday.to_date) } # Delete holidays that overlap with our self-imposed relative blackout dates of 1 and 3 weeks from today
             # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
               LOAN_TERMS.each do |term|

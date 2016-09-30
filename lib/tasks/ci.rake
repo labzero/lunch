@@ -22,7 +22,7 @@ namespace :ci do
   namespace :cucumber do
     desc 'Runs the cukes in parallel'
     task :parallel do
-      ::Rake::Task['ci:cucumber:parallel:base'].invoke
+      ::Rake::Task['ci:cucumber:parallel:base'].invoke('--format JunitWithPackage --out cucumber.junit')
     end
 
     namespace :parallel do
@@ -42,7 +42,7 @@ namespace :ci do
 
       desc 'Runs the smoke cukes in parallel'
       task :smokes do
-        ::Rake::Task['ci:cucumber:parallel:base'].invoke('--tags @smoke --tags ~@local-only', 'tmp/parallel_runtime_cucumber_smokes.log')
+        ::Rake::Task['ci:cucumber:parallel:base'].invoke('--format JunitWithPackage --out cucumber-smokes.junit --tags @smoke --tags ~@local-only', 'tmp/parallel_runtime_cucumber_smokes.log')
       end
     end
   end

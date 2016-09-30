@@ -1,0 +1,8 @@
+.report-print-footer
+  = t('global.fhlb_full')
+  %span.report-bank-name
+    = @member_name
+  %span.report-as-of
+    = @footer_label
+    = fhlb_date_standard_numeric(@securities_request.authorized_date)
+  %span.page 1

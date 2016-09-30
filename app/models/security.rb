@@ -3,7 +3,7 @@ class Security
   include ActiveModel::Validations
   include ActiveModel::Serializers::JSON
 
-  RELEASE_REQUEST_PARAMETERS = [:cusip, :description, :original_par, :payment_amount].freeze
+  RELEASE_REQUEST_PARAMETERS = [:detail_id, :cusip, :description, :original_par, :payment_amount].freeze
   OTHER_PARAMETERS = [:custodian_name, :custody_account_number, :custody_account_type, :security_pledge_type, :pool_number, :reg_id, :coupon_rate, :factor, :current_par, :price, :market_value, :maturity_date, :factor_date, :price_date, :eligibility, :authorized_by, :borrowing_capacity].freeze
   ACCESSIBLE_ATTRS = RELEASE_REQUEST_PARAMETERS + OTHER_PARAMETERS
   REQUIRED_ATTRS = [:cusip, :original_par]
