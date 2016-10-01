@@ -3,6 +3,7 @@
  * ========================================================================== */
 
 $background-color: #333;
+$border-color: #000;
 $link-color: #66e;
 $link-hover-color: #44e;
 $link-active-color: #22e;
@@ -35,4 +36,4 @@ $screen-lg-min: 1200px; /* Large screen / wide desktop */
  * Etc.
  * ========================================================================== */
 $default-border-width: 3px;
-$default-border: $default-border-width solid #000;
+$default-border: $default-border-width solid $border-color;

@@ -23,6 +23,19 @@ a {
   }
 }
 
+.geosuggest-item {
+  &:hover {
+    background: transparentize(pink, .75);
+  }
+
+  &--active {
+    &, &:hover {
+      background: pink;
+      color: #000;
+    }
+  }
+}
+
 .geosuggest__input {
   border: $default-border;
   border-radius: 100px;
@@ -37,6 +50,7 @@ a {
 }
 
 .geosuggest__suggests {
+  border-color: $border-color;
   margin: 0 20px;
 }
 
@@ -72,14 +86,14 @@ a {
   &:hover,
   &:focus {
     background: $link-hover-color;
-    border-color: $link-hover-color;
+    border-color: $border-color;
   }
 
   &:active,
   &:hover:active,
   &:focus:active {
     background: $link-active-color;
-    border-color: $link-active-color;
+    border-color: $border-color;
   }
 }
 
@@ -89,13 +103,13 @@ a {
   &:hover,
   &:focus {
     background: $danger-hover-color;
-    border-color: $danger-hover-color;
+    border-color: $border-color;
   }
 
   &:active,
   &:hover:active,
   &:focus:active {
     background: $danger-active-color;
-    border-color: $danger-active-color;
+    border-color: $border-color;
   }
 }
