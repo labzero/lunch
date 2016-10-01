@@ -7,7 +7,7 @@
 
 .marker {
   background: pink;
-  border: 2px solid #000;
+  border: $default-border;
   border-radius: 50%;
   cursor: pointer;
   height: 15px;
@@ -45,15 +45,15 @@
   }
 
   &::before {
-    border-width: 40px 8px 0 8px;
+    border-width: 42px 8px 0 8px;
     border-color: black transparent transparent transparent;
     margin-left: -8px;
   }
 
   &::after {
-    border-width: 32px 6px 0 6px;
+    border-width: 32px 5px 0 5px;
     border-color: #fcc transparent transparent transparent;
-    margin-left: -6px;
+    margin-left: -5px;
   }
 }
 
@@ -76,13 +76,13 @@
     }
 
     &::before {
-      border-width: 22px 12px 0 12px;
+      border-width: 23px 12px 0 12px;
       border-color: black transparent transparent transparent;
-      left: -1px;
+      left: -2px;
     }
 
     &::after {
-      border-width: 18px 10px 0 10px;
+      border-width: 18px 9px 0 9px;
       border-color: pink transparent transparent transparent;
       left: 1px;
     }

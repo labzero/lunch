@@ -103,7 +103,7 @@ class RestaurantMap extends Component {
                 elementType: 'geometry',
                 stylers: [
                   {
-                    color: '#fbd1f6'
+                    color: '#fbf5fa'
                   }
                 ]
               },
@@ -112,7 +112,7 @@ class RestaurantMap extends Component {
                 elementType: 'geometry',
                 stylers: [
                   {
-                    color: '#fbf5fa'
+                    color: '#fdc0cb'
                   }
                 ]
               },
@@ -121,7 +121,16 @@ class RestaurantMap extends Component {
                 elementType: 'geometry.fill',
                 stylers: [
                   {
-                    color: '#fdc0cb'
+                    color: '#fbd1f6'
+                  }
+                ]
+              },
+              {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [
+                  {
+                    visibility: 'off'
                   }
                 ]
               },
@@ -130,7 +139,7 @@ class RestaurantMap extends Component {
                 elementType: 'geometry',
                 stylers: [
                   {
-                    color: '#ff75e3'
+                    color: '#fcb3f2'
                   }
                 ]
               }

@@ -13,8 +13,13 @@ body {
 a {
   color: $link-color;
 
-  &:hover {
+  &:hover,
+  &:focus {
     color: $link-hover-color;
+  }
+
+  &:active {
+    color: $link-active-color;
   }
 }
 
@@ -23,6 +28,12 @@ a {
   border-radius: 100px;
   box-shadow: inset 5px 5px 0px rgba(128, 0, 0, .1);
   outline: none;
+  transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+
+  &:focus {
+    // copied from bootstrap
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6)
+  }
 }
 
 .geosuggest__suggests {
@@ -52,5 +63,39 @@ a {
     &-active {
       opacity: 0;
     }
+  }
+}
+
+.btn-primary {
+  background: $link-color;
+
+  &:hover,
+  &:focus {
+    background: $link-hover-color;
+    border-color: $link-hover-color;
+  }
+
+  &:active,
+  &:hover:active,
+  &:focus:active {
+    background: $link-active-color;
+    border-color: $link-active-color;
+  }
+}
+
+.btn-danger {
+  background: $danger-color;
+
+  &:hover,
+  &:focus {
+    background: $danger-hover-color;
+    border-color: $danger-hover-color;
+  }
+
+  &:active,
+  &:hover:active,
+  &:focus:active {
+    background: $danger-active-color;
+    border-color: $danger-active-color;
   }
 }
