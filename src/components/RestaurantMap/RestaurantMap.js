@@ -96,6 +96,7 @@ class RestaurantMap extends Component {
           center={this.props.center}
           margin={[100, 0, 0, 0]}
           options={{
+            backgroundColor: '#fcb3f2',
             scrollwheel: false,
             styles: [
               {

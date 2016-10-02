@@ -40,7 +40,7 @@
 
 .background {
   animation: animatedBackground infinite 15s linear;
-  background-image: url('./background.svg');
+  background: pink url('./background.svg');
   height: 600px;
   left: -300px;
   position: absolute;
