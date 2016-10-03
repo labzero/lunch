@@ -80,7 +80,7 @@ module MAPI
 
         RELEASE_REQUEST_SECURITIES_MAPPING = {
           to_s: ['CUSIP', 'DESCRIPTION'],
-          to_i: ['ORIGINAL_PAR', 'PAYMENT_AMOUNT']
+          to_f: ['ORIGINAL_PAR', 'PAYMENT_AMOUNT']
         }.freeze
 
         NEXT_ID_SQL = 'SELECT SAFEKEEPING.SSK_WEB_FORM_SEQ.NEXTVAL FROM DUAL'.freeze

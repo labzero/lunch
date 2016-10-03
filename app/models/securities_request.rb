@@ -252,7 +252,7 @@ class SecuritiesRequest
 
   def valid_securities_payment_amount?
     unless securities.blank? || settlement_type.blank? || TRANSFER_KINDS.include?(kind)
-      payment_amount_present = securities.map { |security| security.payment_amount.present? && security.payment_amount > 0 }
+      payment_amount_present = securities.map { |security| security.payment_amount.to_f > 0 }
 
       if payment_amount_present.uniq.length == 1 && payment_amount_present.first
         # All securities have a payment_amount

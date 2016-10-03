@@ -2002,6 +2002,14 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(row[:columns][1][:value]).to eq(I18n.t('global.missing_value'))
             end
           end
+          it 'converts nil `original_par` values into 0' do
+            securities.first.original_par = nil
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][2][:value]).to eq(0.0)
+            end
+          end
           it 'contains rows of columns that have an `original_par` value' do
             call_method
             expect(assigns[:securities_table_data][:rows].length).to be > 0
@@ -2024,6 +2032,14 @@ RSpec.describe SecuritiesController, type: :controller do
             end
           end
           if action == :release
+            it 'converts nil `payment_amount` values into 0' do
+              securities.first.payment_amount = nil
+              call_method
+              expect(assigns[:securities_table_data][:rows].length).to be > 0
+              assigns[:securities_table_data][:rows].each do |row|
+                expect(row[:columns].last[:value]).to eq(0.0)
+              end
+            end
             it 'contains rows of columns whose last member has a `payment_amount` value' do
               call_method
               expect(assigns[:securities_table_data][:rows].length).to be > 0
@@ -2071,6 +2087,14 @@ RSpec.describe SecuritiesController, type: :controller do
               expect(row[:columns].first[:value]).to eq(I18n.t('global.missing_value'))
             end
           end
+          it 'converts nil `original_par` values into 0' do
+            securities.first.original_par = nil
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][1][:value]).to eq(0.0)
+            end
+          end
           it 'contains rows of columns that have an `original_par` value' do
             call_method
             expect(assigns[:securities_table_data][:rows].length).to be > 0
@@ -2090,6 +2114,14 @@ RSpec.describe SecuritiesController, type: :controller do
             expect(assigns[:securities_table_data][:rows].length).to be > 0
             assigns[:securities_table_data][:rows].each do |row|
               expect(row[:columns][1][:options]).to include(unit: '')
+            end
+          end
+          it 'converts nil `payment_amount` values into 0' do
+            securities.first.payment_amount = nil
+            call_method
+            expect(assigns[:securities_table_data][:rows].length).to be > 0
+            assigns[:securities_table_data][:rows].each do |row|
+              expect(row[:columns][2][:value]).to eq(0.0)
             end
           end
           it 'contains rows of columns that have a `payment_amount` value' do

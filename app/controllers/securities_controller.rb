@@ -617,8 +617,8 @@ class SecuritiesController < ApplicationController
         { columns: [
           {value: security.cusip || t('global.missing_value')},
           {value: security.description || t('global.missing_value')},
-          {value: security.original_par, type: :currency, options: {unit: ""}},
-          {value: security.payment_amount, type: :currency, options: {unit: ""}}
+          {value: security.original_par.to_f, type: :currency, options: {unit: ""}},
+          {value: security.payment_amount.to_f, type: :currency, options: {unit: ""}}
         ] }
       end
       when :transfer
@@ -629,7 +629,7 @@ class SecuritiesController < ApplicationController
         { columns: [
           {value: security.cusip || t('global.missing_value')},
           {value: security.description || t('global.missing_value')},
-          {value: security.original_par, type: :currency, options: {unit: ""}}
+          {value: security.original_par.to_f, type: :currency, options: {unit: ""}}
         ] }
       end
     when :pledge, :safekeep
@@ -640,8 +640,8 @@ class SecuritiesController < ApplicationController
       rows = securities.collect do |security|
         { columns: [
           {value: security.cusip || t('global.missing_value')},
-          {value: security.original_par, type: :currency, options: {unit: ""}},
-          {value: security.payment_amount, type: :currency, options: {unit: ""}},
+          {value: security.original_par.to_f, type: :currency, options: {unit: ""}},
+          {value: security.payment_amount.to_f, type: :currency, options: {unit: ""}},
           {value: security.custodian_name || t('global.missing_value')}
         ] }
       end

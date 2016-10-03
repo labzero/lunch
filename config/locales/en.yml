@@ -236,6 +236,7 @@ en:
         security:
           blank: "Each row must contain a CUSIP and an Original Par.\nEdit your file and try again."
           not_a_number: '%{attribute} must be a number.'
+          greater_than: '%{attribute} amount must be greater than zero.'
           attributes:
             cusip:
               invalid: "The following CUSIP is invalid: %{value}.\nEdit your file and try again."

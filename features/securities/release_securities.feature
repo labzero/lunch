@@ -73,7 +73,7 @@ Scenario: Member uploads a securities release file that is missing Original Par
   Given I am on the release securities page
   And the edit securities section is open
   When I drag and drop the "securities_missing_original_par.xlsx" file into the edit securities dropzone
-  Then I should see a security required field error
+  Then I should see an original par blank field error
 
 @jira-mem-1781 @data-unavailable
 Scenario: Member uploads a securities release file that is missing a CUSIP

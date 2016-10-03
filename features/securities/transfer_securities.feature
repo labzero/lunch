@@ -129,7 +129,7 @@ Feature: Transfer Securities
     Given I am on the transfer to <page> account securities page
     And the edit securities section is open
     When I drag and drop the "transfer_securities_missing_original_par.xlsx" file into the edit securities dropzone
-    Then I should see a security required field error
+    Then I should see an original par blank field error
   Examples:
     | page     |
     | pledged  |
