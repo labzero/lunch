@@ -1,4 +1,5 @@
 require 'cucumber/formatter/junit'
+require 'active_support/core_ext/module'
 class JunitWithPackage < Cucumber::Formatter::Junit
 
   def initialize_with_package_name(*args, &block)

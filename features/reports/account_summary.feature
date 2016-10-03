@@ -19,9 +19,17 @@ Scenario: The Account Summary has been disabled
   Given I am on the "Account Summary" report page
   When the "Account Summary" report has been disabled
   Then I should see 6 report tables with multiple data rows
+  And I should see the Financing Availablity table 
 
 @jira-mem-826 @resque-backed @smoke
 Scenario: Member downloads a PDF of the Account Summary report
   Given I am on the "Account Summary" report page
   When I request a PDF
   Then I should begin downloading a file
+
+@jira-mem-1771 @data-unavailable
+Scenario: Users don't see Financing Availablity if its disabled
+  Given the Finanancing Availability data source has been disabled
+  When I am on the "Account Summary" report page
+  Then I should not see the Financing Availablity table
+  And I should see 5 report tables with multiple data rows
