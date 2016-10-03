@@ -199,7 +199,7 @@ module MAPI
 
         def self.insert_release_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values, adx_type)
           adx_type_release = "#{adx_type}_release".to_sym
-          now = Time.zone.today
+          now = Time.zone.now
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
                                                          FHLB_ID,
@@ -242,7 +242,7 @@ module MAPI
 
         def self.insert_intake_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values, adx_type)
           adx_type_intake = "#{adx_type}_intake".to_sym
-          now = Time.zone.today
+          now = Time.zone.now
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
                                                          FHLB_ID,
@@ -286,7 +286,7 @@ module MAPI
         end
 
         def self.insert_transfer_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, un_adx_id, broker_instructions, kind)
-          now = Time.zone.today
+          now = Time.zone.now
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
                                                          FHLB_ID,
@@ -330,7 +330,7 @@ module MAPI
         end
 
         def self.insert_security_query(header_id, detail_id, user_name, session_id, security, ssk_id)
-          now = Time.zone.today
+          now = Time.zone.now
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_DETAIL (DETAIL_ID,
                                                          HEADER_ID,
@@ -385,7 +385,7 @@ module MAPI
         end
 
         def self.authorize_request_query(member_id, request_id, user_name, full_name, session_id, signer_id)
-          now = Time.zone.today
+          now = Time.zone.now
           <<-SQL
             UPDATE SAFEKEEPING.SSK_WEB_FORM_HEADER SET
             STATUS = #{quote(SSKRequestStatus::SIGNED)},
@@ -530,7 +530,7 @@ module MAPI
               DELIVER_TO            = #{quote(DELIVERY_TYPE[delivery_type])},
               FORM_TYPE             = #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[adx_type])},
               LAST_MODIFIED_BY      = #{quote(format_modification_by(user_name, session_id))},
-              LAST_MODIFIED_DATE    = #{quote(Time.zone.today)},
+              LAST_MODIFIED_DATE    = #{quote(Time.zone.now)},
               LAST_MODIFIED_BY_NAME = #{quote(full_name)},
               #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]} = #{quote(adx_id)},
               #{delivery_columns.each_with_index.collect{|column_name, i| "#{column_name} = #{delivery_values[i]}"}.join(', ') }
@@ -548,7 +548,7 @@ module MAPI
               #{KIND_TRANSFER_MAPPING[kind][:account_column_name]}        = #{quote(SSKDeliverTo::INTERNAL_TRANSFER)},
               FORM_TYPE                 = #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[KIND_TRANSFER_MAPPING[kind][:adx_type]])},
               LAST_MODIFIED_BY          = #{quote(format_modification_by(user_name, session_id))},
-              LAST_MODIFIED_DATE        = #{quote(Time.zone.today)},
+              LAST_MODIFIED_DATE        = #{quote(Time.zone.now)},
               LAST_MODIFIED_BY_NAME     = #{quote(full_name)},
               PLEDGED_ADX_ID            = #{quote(adx_id)},
               UNPLEGED_TRANSFER_ADX_ID  = #{quote(un_adx_id)},
@@ -565,7 +565,7 @@ module MAPI
               DESCRIPTION        = #{quote(security['description'])},
               ORIGINAL_PAR       = #{quote(nil_to_zero(security['original_par']))},
               PAYMENT_AMOUNT     = #{quote(nil_to_zero(security['payment_amount']))},
-              LAST_MODIFIED_DATE = #{quote(Time.zone.today)},
+              LAST_MODIFIED_DATE = #{quote(Time.zone.now)},
               LAST_MODIFIED_BY   = #{quote(format_modification_by(user_name, session_id))}
             WHERE DETAIL_ID = #{quote(detail_id)}
             AND HEADER_ID = #{quote(header_id)}

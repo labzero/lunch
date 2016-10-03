@@ -329,11 +329,11 @@ describe MAPI::ServiceApp do
                                                                                                     delivery_values,
                                                                                                     adx_type ) }
         let(:sentinel) { SecureRandom.hex }
-        let(:today) { Time.zone.today }
+        let(:today) { Time.zone.now }
 
         before do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
-          allow(Time.zone).to receive(:today).and_return(today)
+          allow(Time.zone).to receive(:now).and_return(today)
         end
 
         it 'expands delivery columns into the insert statement' do
@@ -410,8 +410,9 @@ describe MAPI::ServiceApp do
         end
 
         it 'sets the `last_modified_date`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(Time.zone.today)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){13}#{Time.zone.today}/
+          now = SecureRandom.hex
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(now)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){13}#{now}/
         end
 
         it 'sets the `last_modified_by_name`' do
@@ -438,11 +439,11 @@ describe MAPI::ServiceApp do
       describe '`insert_security_query`' do
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.insert_security_query(header_id, detail_id, user_name, session_id, security, ssk_id) }
         let(:sentinel) { SecureRandom.hex }
-        let(:today) { Time.zone.today }
+        let(:today) { Time.zone.now }
 
         before do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
-          allow(Time.zone).to receive(:today).and_return(today)
+          allow(Time.zone).to receive(:now).and_return(today)
         end
 
         it 'constructs an insert statement with the appropriate column names' do
@@ -1948,7 +1949,7 @@ describe MAPI::ServiceApp do
       let(:delivery_type) { securities_request_module::DELIVERY_TYPE.to_a.sample(1).to_h }
       let(:kind) { "#{adx_type}_#{intake_or_release}" }
       let(:sentinel) { SecureRandom.hex }
-      let(:today) { Time.zone.today }
+      let(:today) { Time.zone.now }
       let(:intake_or_release) { [ :intake, :release ].sample }
       let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[kind.to_sym] }
       let(:call_method) { securities_request_module.update_request_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type.keys.first, delivery_values, adx_type, intake_or_release) }
@@ -1956,7 +1957,7 @@ describe MAPI::ServiceApp do
       before do
         allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex)
         allow(securities_request_module).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
-        allow(Time.zone).to receive(:today).and_return(today)
+        allow(Time.zone).to receive(:now).and_return(today)
       end
 
       it 'returns an UPDATE query' do
@@ -2103,14 +2104,14 @@ describe MAPI::ServiceApp do
       }}
       let(:modification_by) { instance_double(String) }
       let(:sentinel) { SecureRandom.hex }
-      let(:today) { Time.zone.today }
+      let(:today) { Time.zone.now }
       let(:call_method) {securities_request_module.update_request_security_query(header_id, username, session_id, security, detail_id)}
 
       before do
         allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex)
         allow(securities_request_module).to receive(:nil_to_zero).and_return(SecureRandom.hex)
         allow(securities_request_module).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
-        allow(Time.zone).to receive(:today).and_return(today)
+        allow(Time.zone).to receive(:now).and_return(today)
       end
 
       it 'returns an UPDATE query' do
@@ -3409,11 +3410,11 @@ describe MAPI::ServiceApp do
                                                                                                      broker_instructions,
                                                                                                      :pledge_transfer) }
         let(:sentinel) { SecureRandom.hex }
-        let(:today) { Time.zone.today }
+        let(:today) { Time.zone.now }
 
         before do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
-          allow(Time.zone).to receive(:today).and_return(today)
+          allow(Time.zone).to receive(:now).and_return(today)
         end
 
         context 'with KIND_TRANSFER_MAPPING stubbed' do
@@ -3809,7 +3810,7 @@ describe MAPI::ServiceApp do
         let(:broker_instruction_value) { instance_double(String) }
         let(:kind) {  instance_double(Symbol) }
         let(:sentinel) { SecureRandom.hex }
-        let(:today) { Time.zone.today }
+        let(:today) { Time.zone.now }
         let(:call_method) { securities_request_module.update_transfer_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, un_adx_id, broker_instructions, kind) }
         let(:call_method_safekept_transfer) { securities_request_module.update_transfer_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, un_adx_id, broker_instructions, :safekept_transfer) }
         let(:call_method_pledge_transfer) { securities_request_module.update_transfer_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, un_adx_id, broker_instructions, :pledge_transfer) }
@@ -3817,7 +3818,7 @@ describe MAPI::ServiceApp do
         before do
           allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex)
           allow(securities_request_module).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
-          allow(Time.zone).to receive(:today).and_return(today)
+          allow(Time.zone).to receive(:now).and_return(today)
         end
 
         context 'with KIND_TRANSFER_MAPPING stubbed' do
@@ -4486,7 +4487,7 @@ describe MAPI::ServiceApp do
     describe 'securities intake' do
       let(:delivery_columns) { [ SecureRandom.hex, SecureRandom.hex, SecureRandom.hex ] }
       let(:sentinel) { SecureRandom.hex }
-      let(:today) { Time.zone.today }
+      let(:today) { Time.zone.now }
       let(:header_id) { rand(9999..99999) }
       let(:user_name) {  SecureRandom.hex }
       let(:full_name) { SecureRandom.hex }
@@ -4518,7 +4519,7 @@ describe MAPI::ServiceApp do
                                                                                                   pledged_or_unpledged ) }
         before do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
-          allow(Time.zone).to receive(:today).and_return(today)
+          allow(Time.zone).to receive(:now).and_return(today)
         end
 
         it 'expands delivery columns into the insert statement' do
@@ -4812,13 +4813,13 @@ describe MAPI::ServiceApp do
       let(:signer_id) { double('A Signer ID') }
       let(:modification_by) { double('A Modification By') }
       let(:sentinel) { SecureRandom.hex }
-      let(:today) { Time.zone.today }
+      let(:today) { Time.zone.now }
       let(:call_method) { MAPI::Services::Member::SecuritiesRequests.authorize_request_query(member_id, request_id, username, full_name, session_id, signer_id) }
 
       before do
         allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
         allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
-        allow(Time.zone).to receive(:today).and_return(today)
+        allow(Time.zone).to receive(:now).and_return(today)
       end
 
       it 'returns an UPDATE query' do
