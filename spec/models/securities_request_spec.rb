@@ -171,6 +171,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
     end
     describe '`valid_securities_payment_amount?`' do
       let(:security_without_payment_amount) { FactoryGirl.build(:security, payment_amount: nil) }
+      let(:security_with_zero_payment_amount) { FactoryGirl.build(:security, payment_amount: 0) }
       let(:security_with_payment_amount) { FactoryGirl.build(:security, payment_amount: rand(1000.99999)) }
       let(:call_validation) { subject.send(:valid_securities_payment_amount?) }
 
@@ -207,7 +208,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
         end
       end
       describe 'when no securities have a payment amount' do
-        before {subject.securities = [security_without_payment_amount, security_without_payment_amount]}
+        before {subject.securities = [security_without_payment_amount, security_with_zero_payment_amount]}
 
         it 'adds an error if the `settlement_type` is `:vs_payment`' do
           subject.settlement_type = :vs_payment
