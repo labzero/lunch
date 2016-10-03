@@ -22,8 +22,7 @@ Scenario: Requesting a password reset for an unknown user
   Then I should see the forgot password page
   When I enter an invalid username
   And I submit the form
-  Then I should see the forgot password page
-  And I should see an unknown user error flash
+  Then I should see the forgot password confirmation page
 
 @smoke @jira-mem-716
 Scenario: Using an expired/invalid reset password link
@@ -79,5 +78,4 @@ Scenario: Intranet usernames are treated as not-found usernames in the forgot pa
   And I follow the forgot password link
   When I enter my intranet username
   And I submit the form
-  Then I should see the forgot password page
-  And I should see an unknown user error flash
+  Then I should see the forgot password confirmation page

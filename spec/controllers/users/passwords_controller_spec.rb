@@ -34,17 +34,10 @@ RSpec.describe Users::PasswordsController, :type => :controller do
       make_request
     end
 
-    shared_examples 'flash messaging'  do
-      it 'calls `set_flash_message`' do
-        expect(subject).to receive(:set_flash_message).with(:error, :username_not_found)
-        make_request
-      end
-
-      it 'does not call `set_flash_message` if `is_flashing_format?` returns false' do
-        allow(subject).to receive(:is_flashing_format?).and_return(false)
-        expect(subject).to_not receive(:set_flash_message)
-        make_request
-      end
+    it 'discards flash notices' do
+      allow(subject).to receive(:flash).and_return(subject.flash)
+      expect(subject.flash).to receive(:discard).with(:notice)
+      make_request
     end
 
     describe 'with a valid username' do
@@ -67,65 +60,13 @@ RSpec.describe Users::PasswordsController, :type => :controller do
         expect(assigns[:user]).to be(resource)
       end
 
-      it 'calls `successfully_sent?` with the resource' do
-        expect(subject).to receive(:successfully_sent?).with(resource).and_return(true)
-        make_request
-      end
-
-      describe 'if `successfully_sent?` returns false' do
-        before do
-          allow(subject).to receive(:successfully_sent?).with(resource).and_return(false)
-        end
-
-        include_examples 'flash messaging'
-
-        it 'redirects to the `new_password_path`' do
-          path = double('new_password_path')
-          allow(subject).to receive(:new_password_path).with(resource).and_return(path)
-          expect(subject).to receive(:redirect_to).with(path)
-          make_request
-        end
-      end
-
-      describe 'if `successfully_sent?` returns true' do
-        before do
-          allow(subject).to receive(:successfully_sent?).with(resource).and_return(true)
-        end
-
-        it 'renders the `create` template' do
-          make_request
-          expect(response).to render_template('create')
-        end
-
-        it 'does not set a flash' do
-          expect(subject).to_not receive(:set_flash_message)
-          make_request
-        end
-
-        it 'discards flash notices' do
-          allow(subject).to receive(:flash).and_return(subject.flash)
-          expect(subject.flash).to receive(:discard).with(:notice)
-          make_request
-        end
-      end
-
       describe 'for an intranet user' do
         before do
           allow(resource).to receive(:intranet_user?).and_return(true)
         end
-        include_examples 'flash messaging'
+
         it 'does not `send_reset_password_instructions`' do
           expect(resource).not_to receive(:send_reset_password_instructions)
-          make_request
-        end
-        it 'redirects to the `new_password_path`' do
-          path = double('new_password_path')
-          allow(subject).to receive(:new_password_path).with(resource).and_return(path)
-          expect(subject).to receive(:redirect_to).with(path)
-          make_request
-        end
-        it 'does not bother checking if it was `successfully_sent`' do
-          expect(subject).not_to receive(:successfully_sent?)
           make_request
         end
       end
@@ -135,8 +76,6 @@ RSpec.describe Users::PasswordsController, :type => :controller do
       before do
         allow(resource_class).to receive(:find_or_create_if_valid_login).and_return(nil)
       end
-
-      include_examples 'flash messaging'
 
       it 'does not call `send_reset_password_instructions` on the `resource`' do
         expect(resource).to_not receive(:send_reset_password_instructions)
@@ -151,20 +90,6 @@ RSpec.describe Users::PasswordsController, :type => :controller do
       it 'assigns `@user` to nil' do
         make_request
         expect(assigns[:user]).to be(nil)
-      end
-
-      it 'does not call `successfully_sent?`' do
-        expect(subject).to_not receive(:successfully_sent?)
-        make_request
-      end
-
-      it 'redirects to the `new_password_path`' do
-        path = double('new_password_path')
-        new_resource = double('A Resource')
-        allow(resource_class).to receive(:new).and_return(new_resource)
-        allow(subject).to receive(:new_password_path).with(new_resource).and_return(path)
-        expect(subject).to receive(:redirect_to).with(path)
-        make_request
       end
     end
   end
