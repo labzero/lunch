@@ -446,6 +446,11 @@
       width: 32%;
       margin-right: 0;
     }
+    table {
+      td:first-child {
+        @extend %typography-print-table-total;
+      }
+    }
   }
   .report-summary-data, .report-print-details {
     margin-bottom: 30px;
@@ -492,7 +497,7 @@
   .legal-footer {
     width: $column-6-width;
     text-align: justify;
-    p:first-child {
+    > p:first-child {
       margin-bottom: 35px;
     }
     h4 {
