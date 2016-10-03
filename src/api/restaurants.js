@@ -17,24 +17,28 @@ router
   })
   .get('/:id/place_url', async (req, res, next) => {
     Restaurant.findById(parseInt(req.params.id, 10)).then(r => {
-      request(`https://maps.googleapis.com/maps/api/place/details/json?key=${apikey}&placeid=${r.place_id}`,
-        (error, response, body) => {
-          if (!error && response.statusCode === 200) {
-            const json = JSON.parse(body);
-            if (json.status !== 'OK') {
-              next(json);
-            } else {
-              if (json.result && json.result.url) {
-                res.redirect(json.result.url);
+      if (r === null) {
+        res.status(404).send('Restaurant doesn\'t exist.');
+      } else {
+        request(`https://maps.googleapis.com/maps/api/place/details/json?key=${apikey}&placeid=${r.place_id}`,
+          (error, response, body) => {
+            if (!error && response.statusCode === 200) {
+              const json = JSON.parse(body);
+              if (json.status !== 'OK') {
+                next(json);
               } else {
-                res.redirect(`https://www.google.com/maps/place/${r.name}, ${r.address}`);
+                if (json.result && json.result.url) {
+                  res.redirect(json.result.url);
+                } else {
+                  res.redirect(`https://www.google.com/maps/place/${r.name}, ${r.address}`);
+                }
               }
+            } else {
+              next(error);
             }
-          } else {
-            next(error);
           }
-        }
-      );
+        );
+      }
     }).catch(err => {
       next(err);
     });
