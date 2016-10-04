@@ -154,7 +154,7 @@ module MAPI
           requests = (
             start_date ||= Time.zone.today - 7.days
             if should_fake?(app)
-              self.fake_header_details_array(member_id.to_i, start_date).select do |header_details|
+              self.fake_header_details_array(app, member_id.to_i, start_date).select do |header_details|
                 flat_status.include?(header_details['STATUS']) && header_details['SUBMITTED_DATE'] >= start_date
               end
             else
@@ -863,7 +863,7 @@ module MAPI
 
         def self.request_details(app, member_id, request_id)
           if should_fake?(app)
-            header_details = fake_header_details_array(member_id).select{|header| header['REQUEST_ID'] == request_id}.first
+            header_details = fake_header_details_array(app, member_id).select{|header| header['REQUEST_ID'] == request_id}.first
             securities = fake_securities(request_id, header_details['REQUEST_STATUS'])
           else
             header_details = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
@@ -936,7 +936,7 @@ module MAPI
           end
         end
 
-        def self.fake_header_details_array(member_id, start_date = nil)
+        def self.fake_header_details_array(app, member_id, start_date = nil)
           today = Time.zone.today
           rng = Random.new(member_id.to_i + today.to_time.to_i)
           start_date ||= today
@@ -957,66 +957,72 @@ module MAPI
             form_type = combo.try(:first) || REQUEST_FORM_TYPE_MAPPING.keys.sample(random: rng)
             status = combo.try(:last) || flat_unique_array(REQUEST_STATUS_MAPPING.values).sample(random: rng)
             delivery_type = combo.try(:[], 1)
-            list << fake_header_details(request_id, status, form_type, delivery_type, start_date)
+            list << fake_header_details(app, request_id, status, form_type, delivery_type, start_date)
           end
-          list
+          list.compact
         end
 
-        def self.fake_header_details(request_id, status, form_type = nil, delivery_type = nil, start_date = nil)
+        def self.fake_header_details(app, request_id, status, form_type = nil, delivery_type = nil, start_date = nil)
           start_date ||= Time.zone.today
           end_date = start_date + 7.days
-          rng = Random.new(request_id)
-          fake_data = fake('securities_requests')
-          names = fake_data['names']
-          pledge_type = TRANSACTION_CODE.values.sample(random: rng)
-          request_status = SETTLEMENT_TYPE.values.sample(random: rng)
-          transfer_form_types = [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SAFEKEPT_DEPOSIT]
-          form_type ||= rng.rand(70..73)
-          delivery_type ||= (DELIVERY_TYPE.values.select {|type| type != SSKDeliverTo::INTERNAL_TRANSFER || transfer_form_types.include?(form_type) } ).sample(random: rng)
-          delivery_field = transfer_form_types.include?(form_type) ? 'RECEIVE_FROM' : 'DELIVER_TO'
-          aba_number = rng.rand(10000..99999)
-          participant_number = rng.rand(10000..99999)
-          account_number = rng.rand(10000..99999)
-          submitted_date = rng.rand(start_date..end_date)
-          authorized = MAPIRequestStatus::AUTHORIZED.include?(status)
-          authorized_date = submitted_date + rng.rand(0..2).days
-          created_by_offset = rng.rand(0..names.length-1)
-          created_by = fake_data['usernames'][created_by_offset]
-          created_by_name = names[created_by_offset]
-          authorized_by_name = names.sample(random: rng)
-          safekept_account_number = rng.rand(1000..9999)
-          pledge_to = PLEDGE_TO.values.sample(random: rng)
-          {
-            'REQUEST_ID' => request_id,
-            'PLEDGE_TYPE' => pledge_type,
-            'REQUEST_STATUS' => request_status,
-            delivery_field => delivery_type,
-            'BROKER_WIRE_ADDR' => '0541254875/FIRST TENN',
-            'ABA_NO' => aba_number,
-            'DTC_AGENT_PARTICIPANT_NO' => participant_number,
-            'MUTUAL_FUND_COMPANY' => "Mutual Funds R'Us",
-            'DELIVERY_BANK_AGENT' => 'MI6',
-            'REC_BANK_AGENT_NAME' => 'James Bond',
-            'REC_BANK_AGENT_ADDR' => '600 Mulberry Court, Boston, MA, 42893',
-            'CREDIT_ACCT_NO1' => account_number,
-            'CREDIT_ACCT_NO2' => account_number,
-            'MUTUAL_FUND_ACCT_NO' => account_number,
-            'CREDIT_ACCT_NO3' => account_number,
-            'SETTLE_DATE' => (authorized ? authorized_date : submitted_date) + 1.days,
-            'TRADE_DATE' => submitted_date,
-            'CREATED_BY' => created_by,
-            'CREATED_BY_NAME' => created_by_name,
-            'FORM_TYPE' => form_type,
-            'STATUS' => status,
-            'SUBMITTED_DATE' => submitted_date,
-            'SUBMITTED_BY' => created_by_name,
-            'AUTHORIZED_BY' => authorized ? authorized_by_name : nil,
-            'AUTHORIZED_DATE' => authorized ? authorized_date : nil,
-            'PLEDGE_TO' => pledge_to,
-            'PLEDGED_ADX_ID' => rng.rand(1000..9999),
-            'UNPLEDGED_ADX_ID' => safekept_account_number,
-            'UNPLEGED_TRANSFER_ADX_ID' => safekept_account_number
-          }
+          holidays = MAPI::Services::Rates::Holidays.holidays(app, start_date, end_date)
+          available_dates = (start_date..end_date).select{ |date| !weekend_or_holiday?(date, holidays) }
+          if available_dates.present?
+            rng = Random.new(request_id)
+            fake_data = fake('securities_requests')
+            names = fake_data['names']
+            pledge_type = TRANSACTION_CODE.values.sample(random: rng)
+            request_status = SETTLEMENT_TYPE.values.sample(random: rng)
+            transfer_form_types = [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SAFEKEPT_DEPOSIT]
+            form_type ||= rng.rand(70..73)
+            delivery_type ||= (DELIVERY_TYPE.values.select {|type| type != SSKDeliverTo::INTERNAL_TRANSFER || transfer_form_types.include?(form_type) } ).sample(random: rng)
+            delivery_field = transfer_form_types.include?(form_type) ? 'RECEIVE_FROM' : 'DELIVER_TO'
+            aba_number = rng.rand(10000..99999)
+            participant_number = rng.rand(10000..99999)
+            account_number = rng.rand(10000..99999)
+            submitted_date = available_dates.sample(random: rng)
+            authorized = MAPIRequestStatus::AUTHORIZED.include?(status)
+            authorized_date = submitted_date + rng.rand(0..2).days
+            created_by_offset = rng.rand(0..names.length-1)
+            created_by = fake_data['usernames'][created_by_offset]
+            created_by_name = names[created_by_offset]
+            authorized_by_name = names.sample(random: rng)
+            safekept_account_number = rng.rand(1000..9999)
+            pledge_to = PLEDGE_TO.values.sample(random: rng)
+            {
+              'REQUEST_ID' => request_id,
+              'PLEDGE_TYPE' => pledge_type,
+              'REQUEST_STATUS' => request_status,
+              delivery_field => delivery_type,
+              'BROKER_WIRE_ADDR' => '0541254875/FIRST TENN',
+              'ABA_NO' => aba_number,
+              'DTC_AGENT_PARTICIPANT_NO' => participant_number,
+              'MUTUAL_FUND_COMPANY' => "Mutual Funds R'Us",
+              'DELIVERY_BANK_AGENT' => 'MI6',
+              'REC_BANK_AGENT_NAME' => 'James Bond',
+              'REC_BANK_AGENT_ADDR' => '600 Mulberry Court, Boston, MA, 42893',
+              'CREDIT_ACCT_NO1' => account_number,
+              'CREDIT_ACCT_NO2' => account_number,
+              'MUTUAL_FUND_ACCT_NO' => account_number,
+              'CREDIT_ACCT_NO3' => account_number,
+              'SETTLE_DATE' => (authorized ? authorized_date : submitted_date) + 1.days,
+              'TRADE_DATE' => submitted_date,
+              'CREATED_BY' => created_by,
+              'CREATED_BY_NAME' => created_by_name,
+              'FORM_TYPE' => form_type,
+              'STATUS' => status,
+              'SUBMITTED_DATE' => submitted_date,
+              'SUBMITTED_BY' => created_by_name,
+              'AUTHORIZED_BY' => authorized ? authorized_by_name : nil,
+              'AUTHORIZED_DATE' => authorized ? authorized_date : nil,
+              'PLEDGE_TO' => pledge_to,
+              'PLEDGED_ADX_ID' => rng.rand(1000..9999),
+              'UNPLEDGED_ADX_ID' => safekept_account_number,
+              'UNPLEGED_TRANSFER_ADX_ID' => safekept_account_number
+            }
+          else
+            nil
+          end
         end
 
         def self.fake_securities(request_id, settlement_type)

@@ -54,7 +54,8 @@ describe MAPI::ServiceApp do
     end
 
     describe '`MAPI::Services::Member::SecuritiesRequests.fake_header_details_array`' do
-      let(:call_method) { MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(member_id) }
+      let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
+      let(:call_method) { MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(app, member_id) }
       let(:rng) { instance_double(Random, rand: 1) }
       let(:request_id) { rand(100000..999999) }
       before do
@@ -69,19 +70,23 @@ describe MAPI::ServiceApp do
         allow(rng).to receive(:rand).with(eq(18..36)).and_return(n)
         expect(call_method.length).to eq(n)
       end
+      it 'passes the app to the `fake_header_details` method' do
+        expect(securities_request_module).to receive(:fake_header_details).with(app, any_args).and_return({})
+        call_method
+      end
       it 'passes the `request_id` to the `fake_header_details` method' do
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, any_args).and_return({})
+        expect(securities_request_module).to receive(:fake_header_details).with(anything, request_id, any_args).and_return({})
         call_method
       end
       it 'passes a default `start_date` of today to the `fake_header_details` method if no start_date is provided' do
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, anything, anything, anything, Time.zone.today).and_return({})
+        expect(securities_request_module).to receive(:fake_header_details).with(anything, request_id, anything, anything, anything, Time.zone.today).and_return({})
         call_method
       end
       it 'passes the `start_date` to `fake_header_details` if present' do
         today = Time.zone.today
         start_date = [(today - 3.days)..today].sample
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, anything, anything, anything, start_date).and_return({})
-        MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(member_id, start_date)
+        expect(securities_request_module).to receive(:fake_header_details).with(anything, request_id, anything, anything, anything, start_date).and_return({})
+        MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(app, member_id, start_date)
       end
       it 'generates at least one request for each form type and status combination' do
         allow(rng).to receive(:rand).with(eq(18..36)).and_return(18)
@@ -94,9 +99,15 @@ describe MAPI::ServiceApp do
         end
         expect(form_type_status_combos.length).to eq(18)
         form_type_status_combos.each do |combo|
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, combo.last, combo.first, combo[1], anything).and_return({})
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, combo.last, combo.first, combo[1], anything).and_return({})
         end
         call_method
+      end
+      it 'filters out nil results from `fake_header_details`' do
+        n = rand(18..36)
+        allow(rng).to receive(:rand).with(eq(18..36)).and_return(n)
+        allow(securities_request_module).to receive(:fake_header_details).and_return(nil, nil, nil, {})
+        expect(call_method.length).to eq(n - 3)
       end
     end
 
@@ -158,14 +169,18 @@ describe MAPI::ServiceApp do
           allow(securities_request_module).to receive(:kind_from_details).with(header_details_array.first).and_return(kind)
         end
 
+        it 'calls `fake_header_details_array` with the app' do
+          expect(securities_request_module).to receive(:fake_header_details_array).with(app, any_args).and_return(header_details_array)
+          call_method
+        end
         it 'calls `fake_header_details_array` with the member_id' do
-          expect(securities_request_module).to receive(:fake_header_details_array).with(member_id, anything).and_return(header_details_array)
+          expect(securities_request_module).to receive(:fake_header_details_array).with(anything, member_id, anything).and_return(header_details_array)
           call_method
         end
         it 'calls `fake_header_details_array` with the `submitted_date_range`' do
           today = Time.zone.today
           allow(Time.zone).to receive(:today).and_return(today)
-          expect(securities_request_module).to receive(:fake_header_details_array).with(anything, ((today - 7.days)..today)).and_return(header_details_array)
+          expect(securities_request_module).to receive(:fake_header_details_array).with(anything, anything, ((today - 7.days)..today)).and_return(header_details_array)
           call_method
         end
         it 'passes the results of `fake_header_details_array` to `map_hash_values`' do
@@ -1043,8 +1058,12 @@ describe MAPI::ServiceApp do
           expect(securities_request_module).to receive(:fake_securities).with(anything, matched_header_details['REQUEST_STATUS']).and_return(securities)
           call_method
         end
+        it 'calls `fake_header_details_array` with the app' do
+          expect(securities_request_module).to receive(:fake_header_details_array).with(app, any_args).and_return(header_details_array)
+          call_method
+        end
         it 'calls `fake_header_details_array` with the member_id' do
-          expect(securities_request_module).to receive(:fake_header_details_array).with(member_id).and_return(header_details_array)
+          expect(securities_request_module).to receive(:fake_header_details_array).with(anything, member_id).and_return(header_details_array)
           call_method
         end
         it 'selects the header detail hash that matches the `request_id`' do
@@ -1313,6 +1332,7 @@ describe MAPI::ServiceApp do
     describe '`MAPI::Services::Member::SecuritiesRequests.fake_header_details`' do
       fake_data = fake('securities_requests')
       names = fake_data['names']
+      let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
       let(:request_id) { rand(1000..9999)}
       let(:status) { (securities_request_module::MAPIRequestStatus::AUTHORIZED + securities_request_module::MAPIRequestStatus::AWAITING_AUTHORIZATION).sample }
       let(:rng) { instance_double(Random) }
@@ -1322,7 +1342,8 @@ describe MAPI::ServiceApp do
       let(:aba_number) { rand(10000..99999) }
       let(:participant_number) { rand(10000..99999) }
       let(:account_number) { rand(10000..99999) }
-      let(:submitted_date) { Time.zone.today }
+      let(:submitted_date_offset) { rand(0..6) }
+      let(:submitted_date) { (Time.zone.today..(Time.zone.today + 7.days)).to_a[submitted_date_offset] }
       let(:authorized_date_offset) { rand(0..2) }
       let(:authorized_by) { SecureRandom.hex }
       let(:created_by_offset) { rand(0..names.length-1) }
@@ -1332,13 +1353,29 @@ describe MAPI::ServiceApp do
       let(:pledged_adx) { rand(1000..9999) }
       let(:unpledged_adx) { rand(1000..9999) }
 
-      let(:call_method) { securities_request_module.fake_header_details(request_id, status) }
+      let(:call_method) { securities_request_module.fake_header_details(app, request_id, status) }
       before do
         allow(Random).to receive(:new).and_return(rng)
-        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date, authorized_date_offset, created_by_offset, authorized_by_offset, unpledged_adx, pledge_to_offset, pledged_adx)
+        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date_offset, authorized_date_offset, created_by_offset, authorized_by_offset, unpledged_adx, pledge_to_offset, pledged_adx)
         allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
+        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
+        allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(false)
       end
 
+      it 'builds a holidays array with the start and end dates' do
+        start_date = Time.zone.today
+        end_date = start_date + 7.days
+        expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(app, start_date, end_date).and_return([])
+        call_method
+      end
+      it 'checks to make sure that no weekends or holidays are selected for submitted_date' do
+        expect(securities_request_module).to receive(:weekend_or_holiday?).exactly(8)
+        call_method
+      end
+      it 'returns nil if there are no available dates' do
+        allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(true)
+        expect(call_method).to be_nil
+      end
       it 'constructs a hash with a securities with a `REQUEST_ID` value equal to the passed arg' do
         expect(call_method['REQUEST_ID']).to eq(request_id)
       end
@@ -1390,7 +1427,7 @@ describe MAPI::ServiceApp do
       end
       it 'sets the `FORM_TYPE` to the passed one if provided' do
         form_type = double('A Form Type')
-        expect(securities_request_module.fake_header_details(request_id, status, form_type)['FORM_TYPE']).to eq(form_type)
+        expect(securities_request_module.fake_header_details(app, request_id, status, form_type)['FORM_TYPE']).to eq(form_type)
       end
       it 'constructs a hash with a `PLEDGE_TO` value' do
         expect(call_method['PLEDGE_TO']).to eq(securities_request_module::PLEDGE_TO.values[pledge_to_offset])
@@ -1404,12 +1441,12 @@ describe MAPI::ServiceApp do
       it 'constructs a hash with a `UNPLEGED_TRANSFER_ADX_ID` value' do
         expect(call_method['UNPLEGED_TRANSFER_ADX_ID']).to eq(unpledged_adx)
       end
-      it 'selects a `SUBMITTED_DATE` from the `start_date` and 7 days in the future' do
+      it 'selects available dates based on the provided `start_date` and 7 days in the future' do
         start_date = submitted_date
-        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
-        allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
-        expect(rng).to receive(:rand).with((start_date..(submitted_date + 7.days))).and_return(submitted_date)
-        securities_request_module.fake_header_details(request_id, status, nil, nil, start_date)
+        (start_date..(submitted_date + 7.days)).each do |date|
+          expect(securities_request_module).to receive(:weekend_or_holiday?).with(date, [])
+        end
+        securities_request_module.fake_header_details(app, request_id, status, nil, nil, start_date)
       end
       it 'constructs a hash with a `STATUS` value equal to the passed `status`' do
         expect(call_method['STATUS']).to eq(status)
