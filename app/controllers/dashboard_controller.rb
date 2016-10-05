@@ -46,7 +46,8 @@ class DashboardController < ApplicationController
     account_summary: I18n.t('reports.account.account_summary.title'),
     advances_detail: I18n.t('reports.credit.advances_detail.title'),
     borrowing_capacity: I18n.t('reports.collateral.borrowing_capacity.title'),
-    settlement_transaction_account: I18n.t('reports.account.settlement_transaction_account.title')
+    settlement_transaction_account: I18n.t('reports.account.settlement_transaction_account.title'),
+    securities_transactions: I18n.t('reports.securities.transactions.title')
   }.with_indifferent_access.freeze
 
   ACTIVITY_DEFAULT_TRANSACTION_NUMBER = ->(entry, key, controller) { entry[:transaction_number] }
