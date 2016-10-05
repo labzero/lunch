@@ -1345,6 +1345,8 @@ describe MAPI::ServiceApp do
       let(:submitted_date_offset) { rand(0..6) }
       let(:submitted_date) { (Time.zone.today..(Time.zone.today + 7.days)).to_a[submitted_date_offset] }
       let(:authorized_date_offset) { rand(0..2) }
+      let(:authorized_date) { instance_double(Date) }
+      let(:settle_date) { instance_double(Date) }
       let(:authorized_by) { SecureRandom.hex }
       let(:created_by_offset) { rand(0..names.length-1) }
       let!(:form_type) { rand(70..73) }
@@ -1360,6 +1362,7 @@ describe MAPI::ServiceApp do
         allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
         allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
         allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(false)
+        allow(MAPI::Services::Rates).to receive(:find_next_business_day)
       end
 
       it 'builds a holidays array with the start and end dates' do
@@ -1474,13 +1477,16 @@ describe MAPI::ServiceApp do
       end
       describe 'when an `AUTHORIZED` status is passed' do
         let(:status) { securities_request_module::MAPIRequestStatus::AUTHORIZED.sample }
+        let(:generated_authorized_date) { submitted_date + authorized_date_offset.days }
 
-        it 'constructs a hash with an `AUTHORIZED_DATE` value that is equal to the `SUBMITTED_DATE` plus an offset' do
-          expect(call_method['AUTHORIZED_DATE']).to eq(submitted_date + (authorized_date_offset).days)
+        it 'constructs a hash with an `AUTHORIZED_DATE` value that is equal to the next business day after the `SUBMITTED_DATE`' do
+          allow(MAPI::Services::Rates).to receive(:find_next_business_day).with(generated_authorized_date, 1.day, []).and_return(authorized_date)
+          expect(call_method['AUTHORIZED_DATE']).to eq(authorized_date)
         end
-        it 'constructs a hash with a `SETTLE_DATE` value equal to the `AUTHORIZED_DATE` plus one day' do
-          authorized_date = submitted_date + (authorized_date_offset).days
-          expect(call_method['SETTLE_DATE']).to eq(authorized_date + 1.day)
+        it 'constructs a hash with a `SETTLE_DATE` value equal to the next business day after the `AUTHORIZED_DATE`' do
+          allow(MAPI::Services::Rates).to receive(:find_next_business_day).with(generated_authorized_date, 1.day, []).and_return(authorized_date)
+          allow(MAPI::Services::Rates).to receive(:find_next_business_day).with(authorized_date, 1.day, []).and_return(settle_date)
+          expect(call_method['SETTLE_DATE']).to eq(settle_date)
         end
         it 'constructs a hash with an `AUTHORIZED_BY` value' do
           expect(call_method['AUTHORIZED_BY']).to eq(fake_data['names'][authorized_by_offset])
@@ -1492,8 +1498,9 @@ describe MAPI::ServiceApp do
         it 'constructs a hash with a nil value for `AUTHORIZED_DATE`' do
           expect(call_method['AUTHORIZED_DATE']).to be_nil
         end
-        it 'constructs a hash with a `SETTLE_DATE` value equal to the `SUBMITTED_DATE` plus one day' do
-          expect(call_method['SETTLE_DATE']).to eq(submitted_date + 1.day)
+        it 'constructs a hash with a `SETTLE_DATE` value equal to the next business day after `SUBMITTED_DATE`' do
+          allow(MAPI::Services::Rates).to receive(:find_next_business_day).with(submitted_date, 1.day, []).and_return(settle_date)
+          expect(call_method['SETTLE_DATE']).to eq(settle_date)
         end
         it 'constructs a hash with a nil value for `AUTHORIZED_BY`' do
           expect(call_method['AUTHORIZED_BY']).to be_nil
@@ -3595,6 +3602,7 @@ describe MAPI::ServiceApp do
           allow(securities_request_module).to receive(:validate_securities)
           allow(securities_request_module).to receive(:validate_broker_instructions)
           allow(securities_request_module).to receive(:insert_transfer_header_query).and_return(insert_transfer_header_query_result)
+          allow(securities_request_module).to receive(:set_broker_instructions_for_transfer)
         end
 
         context 'validations' do
@@ -3979,6 +3987,7 @@ describe MAPI::ServiceApp do
           allow(securities_request_module).to receive(:should_fake?).and_return(true)
           allow(kind).to receive(:to_sym).and_return(kind)
           allow(securities_request_module).to receive(:validate_kind).with(:transfer, kind).and_return(true)
+          allow(securities_request_module).to receive(:set_broker_instructions_for_transfer)
         end
 
         it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
@@ -4485,12 +4494,21 @@ describe MAPI::ServiceApp do
     end
 
     describe '`set_broker_instructions_for_transfer`' do
+      let(:app) { double(MAPI::ServiceApp, logger: double('logger'), settings: nil) }
       let(:kind) { SecureRandom.hex }
       let(:broker_instructions) {{}}
-      let(:today) { Time.zone.today.iso8601 }
+      let(:today) { Time.zone.today }
       let(:value) { SecureRandom.hex }
-      let(:call_method) { securities_request_module.set_broker_instructions_for_transfer(broker_instructions, kind) }
+      let(:call_method) { securities_request_module.set_broker_instructions_for_transfer(app, broker_instructions, kind) }
+      before do
+        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
+        allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(false)
+      end
 
+      it 'constructs a holidays array' do
+        expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(app).and_return([])
+        call_method
+      end
       ['settlement_type', 'transaction_code', 'trade_date', 'settlement_date'].each do |attr|
         it "does not change the value for `#{attr}` if there is a previously existing value" do
           broker_instructions[attr] = value
@@ -4502,9 +4520,20 @@ describe MAPI::ServiceApp do
 
       end
       ['trade_date', 'settlement_date'].each do |attr|
-        it "sets `#{attr}` to the iso8601 string for today" do
+        let(:next_business_day) { instance_double(Date) }
+        before do
+          allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(true)
+          allow(MAPI::Services::Rates).to receive(:find_next_business_day).and_return(next_business_day)
+          allow(next_business_day).to receive(:iso8601).and_return(next_business_day)
+        end
+
+        it 'calls `MAPI::Services::Rates.find_next_business_day` to find the next business day' do
+          expect(MAPI::Services::Rates).to receive(:find_next_business_day).with(today, 1.day, []).and_return(next_business_day)
           call_method
-          expect(broker_instructions[attr]).to eq(today)
+        end
+        it "sets `#{attr}` to the iso8601 string for the next business day" do
+          call_method
+          expect(broker_instructions[attr]).to eq(next_business_day.iso8601)
         end
       end
       it 'sets `transaction_code` to `standard`' do
@@ -4512,11 +4541,11 @@ describe MAPI::ServiceApp do
         expect(broker_instructions['transaction_code']).to eq('standard')
       end
       it 'sets `settlement_type` to `free` if the kind is `:pledge_transfer`' do
-        securities_request_module.set_broker_instructions_for_transfer(broker_instructions, :pledge_transfer)
+        securities_request_module.set_broker_instructions_for_transfer(app, broker_instructions, :pledge_transfer)
         expect(broker_instructions['settlement_type']).to eq('free')
       end
       it 'sets `settlement_type` to `vs_payment` if the kind is `:safekept_transfer`' do
-        securities_request_module.set_broker_instructions_for_transfer(broker_instructions, :safekept_transfer)
+        securities_request_module.set_broker_instructions_for_transfer(app, broker_instructions, :safekept_transfer)
         expect(broker_instructions['settlement_type']).to eq('vs_payment')
       end
     end
