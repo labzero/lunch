@@ -2214,7 +2214,7 @@ en:
           hedge: Hedge against asset prepayment risk
           risk: Reduce risks associated with declining interest rate environments
           flexibility: Built-in long-term flexibility
-        max_term: 10 years
+        max_term: 15 years
         interest_rate: Fixed for the entire term of the advance
         interest_day_count: Actual/360
         interest_payment_frequency: Quarterly and at repayment
@@ -2349,7 +2349,7 @@ en:
           less_expensive: Generally less expensive than other long-term liabilities
         features:
           term:
-            description: Up to 30 years (for advances with partial prepayment symmetry, 1 to 10 years)
+            description: Up to 30 years (for advances with partial prepayment symmetry, 1 to 15 years)
           interest_rate:
             title: Interest Rate
             description: Fixed for the entire term of the advance. You may request immediate or forward funding.
