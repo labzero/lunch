@@ -20,23 +20,13 @@ class DocusignService
     phone = ''
     title = ''
     company = ''
-    street = ''
-    city = ''
-    state = ''
-    zip = ''
     user = UsersService.new(request).user_details(email)
     if user
       phone = user[:phone]
       title = user[:title]
     end
     member = MembersService.new(request).member(member_id)
-    if member
-      company = member[:name]
-      street = member[:street]
-      city = member[:city]
-      state = member[:state]
-      zip = member[:postal_code]
-    end
+    company = member[:name] if member
     powerform_endpoint = ENV['DOCUSIGN_POWERFORM_ENDPOINT']
     powerform_path = ENV['DOCUSIGN_POWERFORM_PATH']
     powerform_id = POWERFORM_MAPPING[form_name]
@@ -46,10 +36,6 @@ class DocusignService
       :Applicant_UserName => user_name,
       :Applicant_Email => email,
       :UName => user_name,
-      :UAddress => street,
-      :UCity => city,
-      :UState => state,
-      :UZip => zip,
       :UCompany => company,
       :UEmail => email,
       :UPhone => phone,
