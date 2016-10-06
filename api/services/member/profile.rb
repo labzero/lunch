@@ -115,7 +115,7 @@ module MAPI
           end
           capital_stock_and_leverage = MAPI::Services::Member::CapitalStockAndLeverage::capital_stock_and_leverage(app, member_id)
 
-          if capital_stock_and_leverage.nil? || member_sta_hash.nil? || member_position_hash.nil?
+          if capital_stock_and_leverage.nil? || member_position_hash.nil?
             return nil
           end
 
@@ -131,8 +131,8 @@ module MAPI
 
           {
             member_id: member_id.to_i,
-            sta_balance: member_sta_hash['STX_CURRENT_LEDGER_BALANCE'].to_f,
-            sta_update_date: member_sta_hash['STX_UPDATE_DATE'].nil? ? nil : member_sta_hash['STX_UPDATE_DATE'].to_date,
+            sta_balance: member_sta_hash.nil? ? nil : member_sta_hash['STX_CURRENT_LEDGER_BALANCE'].to_f,
+            sta_update_date: member_sta_hash.nil? ? nil : member_sta_hash['STX_UPDATE_DATE'].try(:to_date),
             total_financing_available: total_financing_available,
             remaining_financing_available: remaining_financing_available,
             mpf_credit_available: mpf_credit_available,

@@ -146,10 +146,20 @@ describe MAPI::ServiceApp do
           expect(last_response.status).to be(404)
         end
 
-        it 'should return a 404 if no sta data was found for the member' do
+        it 'returns a 200 if no STA data was found for the member' do
           allow(member_sta_result).to receive(:fetch_hash).and_return(nil)
           make_request
-          expect(last_response.status).to be(404)
+          expect(last_response.status).to be(200)
+        end
+
+        it 'returns a nil for the `sta_balance` if no STA data was found ' do
+          allow(member_sta_result).to receive(:fetch_hash).and_return(nil)
+          expect(member_financial_position['sta_balance']).to be_nil
+        end
+
+        it 'returns a nil for the `sta_update_date` if no STA data was found ' do
+          allow(member_sta_result).to receive(:fetch_hash).and_return(nil)
+          expect(member_financial_position['sta_update_date']).to be_nil
         end
 
     end
