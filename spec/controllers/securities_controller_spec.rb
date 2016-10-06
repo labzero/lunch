@@ -1424,7 +1424,7 @@ RSpec.describe SecuritiesController, type: :controller do
     let(:description) { SecureRandom.hex }
     let(:original_par) { rand(0..9999) }
     let(:payment_amount) { rand(0..9999) }
-    let(:delivery_type_string) { SecureRandom.hex }
+    let(:delivery_instruction_rows) { double('Delivery Instruction Rows') }
     let(:pledge_type) { double('Pledge Type') }
     let(:security) { instance_double(Security, cusip: cusip,
                                         description: description,
@@ -1466,7 +1466,7 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(members_service_instance).to receive(:member).and_return(member)
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
       allow(SecuritiesRequestService).to receive(:new).and_return(securities_request_service_instance)
-      allow(subject).to receive(:get_delivery_instructions).with(anything).and_return(delivery_type_string)
+      allow(subject).to receive(:get_delivery_instruction_rows).with(securities_request).and_return(delivery_instruction_rows)
       subject.instance_variable_set(:@securities_request, securities_request)
     end
 
@@ -1505,7 +1505,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
     end
 
-    shared_examples 'an action that generates a PDF for securities intake' do |kind, account|
+    shared_examples 'an action that generates a PDF for securities intake' do |kind|
       before do
         allow(securities_request).to receive(:kind).and_return(kind)
       end
@@ -1534,13 +1534,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'sets delivery instructions table data' do
         call_action
-        expect(subject.instance_variable_get(:@delivery_instructions_table_data)).to eq( {
-          rows: [ { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.delivery_method') },
-                               { value: delivery_type_string } ] },
-                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.clearing_agent') },
-                               { value: securities_request.clearing_agent_participant_number } ] },
-                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.further_credit') },
-                               { value: securities_request.public_send(account) } ] } ] } )
+        expect(subject.instance_variable_get(:@delivery_instructions_table_data)).to eq(rows: delivery_instruction_rows)
       end
       it 'sets securities table data' do
         table_data = {  column_headings: [
@@ -1559,7 +1553,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
     end
 
-    shared_examples 'an action that generates a PDF for securities release' do |kind, account|
+    shared_examples 'an action that generates a PDF for securities release' do |kind|
       before do
         allow(securities_request).to receive(:kind).and_return(kind)
       end
@@ -1588,13 +1582,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'sets delivery instructions table data' do
         call_action
-        expect(subject.instance_variable_get(:@delivery_instructions_table_data)).to eq( {
-          rows: [ { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.delivery_method') },
-                               { value: delivery_type_string } ] },
-                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.clearing_agent') },
-                               { value: securities_request.clearing_agent_participant_number } ] },
-                  { columns: [ { value: I18n.t('securities.requests.view.delivery_instructions.further_credit') },
-                               { value: securities_request.public_send(account) } ] } ] } )
+        expect(subject.instance_variable_get(:@delivery_instructions_table_data)).to eq(rows: delivery_instruction_rows)
       end
       it 'sets securities table data' do
         table_data = {  column_headings: [ I18n.t('common_table_headings.cusip'),
@@ -1621,17 +1609,15 @@ RSpec.describe SecuritiesController, type: :controller do
       end
     end
 
-    {:safekept_intake => :safekept_account,
-     :pledge_intake => :pledged_account }.each do |kind, account|
+    [:safekept_intake, :pledge_intake ].each do |kind|
       describe "when `kind` is `#{kind}`" do
-        it_behaves_like 'an action that generates a PDF for securities intake', kind, account
+        it_behaves_like 'an action that generates a PDF for securities intake', kind
       end
     end
 
-    {:safekept_release => :safekept_account,
-     :pledge_release => :pledged_account }.each do |kind, account|
+    [:safekept_release, :pledge_release].each do |kind|
       describe "when `kind` is `#{kind}`" do
-        it_behaves_like 'an action that generates a PDF for securities release', kind, account
+        it_behaves_like 'an action that generates a PDF for securities release', kind
       end
     end
 
@@ -2525,6 +2511,63 @@ RSpec.describe SecuritiesController, type: :controller do
           }
           subject.send(:populate_form_data_by_kind, :safekept_intake)
           expect(assigns[:form_data]).to eq(form_data)
+        end
+      end
+    end
+
+    describe '`get_delivery_instruction_rows`' do
+      let(:delivery_type) { double('A Delivery Type') }
+      let(:delivery_instruction_keys) {[]}
+      let(:delivery_instructions) { double('Some Delivery Instructions') }
+      let(:securities_request) { instance_double(SecuritiesRequest, delivery_type: delivery_type) }
+      let(:call_method) { subject.send(:get_delivery_instruction_rows, securities_request) }
+
+      before do
+        allow(subject).to receive(:get_delivery_instructions).with(delivery_type).and_return(delivery_instructions)
+        stub_const('SecuritiesRequest::DELIVERY_INSTRUCTION_KEYS', {delivery_type => delivery_instruction_keys})
+      end
+
+      it 'calls `get_delivery_instructions` with the delivery_type from the SecuritiesRequest' do
+        expect(subject).to receive(:get_delivery_instructions).with(delivery_type)
+        call_method
+      end
+      it 'builds a row for the result of `get_delivery_instructions`' do
+        expect(call_method).to start_with(
+        {
+          columns: [
+            { value: I18n.t('securities.requests.view.delivery_instructions.delivery_method') },
+            { value: delivery_instructions }
+          ]
+        })
+      end
+      describe 'for each attribute in SecuritiesRequest::DELIVERY_INSTRUCTION_KEYS for the `delivery_type` of the SecuritiesRequest' do
+        let(:delivery_instruction_keys) { [:aba_number, :mutual_fund_account_number] }
+        let(:attribute_human_names) { [double('A Human Name for `aba_number`'), double('A Human Name for `mutual_fund_account_number`')] }
+        let(:attribute_values) { [double('A Value for `aba_number`'), double('A Value for `mutual_fund_account_number`')] }
+        before do
+          delivery_instruction_keys.zip(attribute_human_names).each do |pair|
+            allow(SecuritiesRequest).to receive(:human_attribute_name).with(pair.first).and_return(pair.last)
+          end
+          allow(securities_request).to receive_messages(Hash[delivery_instruction_keys.zip(attribute_values)])
+        end
+        it 'builds a row with the first column being the human name of the attribute' do
+          expect(call_method).to include({
+            columns: start_with({value: attribute_human_names.first})
+          },
+          {
+            columns: start_with({value: attribute_human_names.last})
+          })
+        end
+        it 'builds a row with the second column being the value of the attribute' do
+          expect(call_method).to include({
+            columns: end_with({value: attribute_values.first})
+          },
+          {
+            columns: end_with({value: attribute_values.last})
+          })
+        end
+        it 'builds one row per key' do
+          expect(call_method.length).to be(delivery_instruction_keys.length + 1)
         end
       end
     end

@@ -34,24 +34,24 @@
     = render 'shared/dropdown', dropdown_name: 'securities_request[delivery_type]', default_value: @delivery_instructions_defaults[:value], default_text: @delivery_instructions_defaults[:text], dropdown_options: @delivery_instructions_dropdown
     .securities-delivery-instructions-fields{data: {'selected-delivery-instruction' => @delivery_instructions_defaults[:value]}}
       .securities-delivery-instructions-field.securities-delivery-instructions-field-physical-securities{data: {'delivery-instruction-type' => 'physical_securities'}}
-        = render 'shared/input_field', form_builder: f, field_name: :delivery_bank_agent, label: t('securities.release.delivery_instructions.delivery_agent'), horizontal: true
-        = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_name, label: t('securities.release.delivery_instructions.agent_name'), horizontal: true
-        = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_address, label: t('securities.release.delivery_instructions.agent_address'), horizontal: true
-        = render 'shared/input_field', form_builder: f, field_name: :physical_securities_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true, field_data: {required: false}
+        = render 'shared/input_field', form_builder: f, field_name: :delivery_bank_agent, label: true, horizontal: true
+        = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_name, label: true, horizontal: true
+        = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_address, label: true, horizontal: true
+        = render 'shared/input_field', form_builder: f, field_name: :physical_securities_credit_account_number, label: true, horizontal: true, field_data: {required: false}
       .securities-delivery-instructions-field.securities-delivery-instructions-field-fed{data: {'delivery-instruction-type' => 'fed'}}
         .securities-fed-wire-address-fields
           %p= t('securities.release.clearing_agent')
           = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_fed_wire_address_1
           %span /
           = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_fed_wire_address_2
-        = render 'shared/input_field', form_builder: f, field_name: :aba_number, label: t('securities.release.delivery_instructions.aba'), horizontal: true
-        = render 'shared/input_field', form_builder: f, field_name: :fed_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true, field_data: {required: false}
+        = render 'shared/input_field', form_builder: f, field_name: :aba_number, label: true, horizontal: true
+        = render 'shared/input_field', form_builder: f, field_name: :fed_credit_account_number, label: true, horizontal: true, field_data: {required: false}
       .securities-delivery-instructions-field.securities-delivery-instructions-field-dtc{data: {'delivery-instruction-type' => 'dtc'}}
-        = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_participant_number, label: t('securities.release.delivery_instructions.participant_number'), horizontal: true
-        = render 'shared/input_field', form_builder: f, field_name: :dtc_credit_account_number, label: t('securities.release.delivery_instructions.further_credit'), horizontal: true, field_data: {required: false}
+        = render 'shared/input_field', form_builder: f, field_name: :clearing_agent_participant_number, label: true, horizontal: true
+        = render 'shared/input_field', form_builder: f, field_name: :dtc_credit_account_number, label: true, horizontal: true, field_data: {required: false}
       .securities-delivery-instructions-field.securities-delivery-instructions-field-mutual-fund{data: {'delivery-instruction-type' => 'mutual_fund'}}
-        = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_company, label: t('securities.release.delivery_instructions.mutual_fund'), horizontal: true
-        = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_account_number, label: t('securities.release.delivery_instructions.account_number'), horizontal: true
+        = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_company, label: true, horizontal: true
+        = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_account_number, label: true, horizontal: true
   %section.securities-display
     -if type == :safekeep || type == :pledge
       %h2.safekeep-pledge-title= t('securities.title')

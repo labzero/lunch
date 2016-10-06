@@ -240,6 +240,20 @@ en:
           attributes:
             cusip:
               invalid: "The following CUSIP is invalid: %{value}.\nEdit your file and try again."
+    attributes:
+      securities_request:
+        aba_number: ABA No.
+        delivery_bank_agent: "Delivering Bank/Agent’s Name"
+        receiving_bank_agent_name: "Receiving Bank/Agent’s Name"
+        receiving_bank_agent_address: "Receiving Bank/Agent’s Address"
+        physical_securities_credit_account_number: For Further Credit to Account No.
+        clearing_agent_fed_wire_address_1: Clearing Agent’s Fed Wire Account Number
+        clearing_agent_fed_wire_address_2: Clearing Agent’s Fed Wire Bank Name
+        fed_credit_account_number: For Further Credit to Account No.
+        clearing_agent_participant_number: Clearing Agent’s Participant No.
+        dtc_credit_account_number: For Further Credit to Account No.
+        mutual_fund_company: Mutual Fund Company
+        mutual_fund_account_number: Account No.
   activerecord:
     attributes:
       user:
@@ -1301,18 +1315,7 @@ en:
         fed: Fed
         dtc: DTC
         mutual_fund: Mutual Fund
-        internal: Internal Transfer
-        delivery_agent: "Delivering Bank/Agent's Name"
-        agent_name: "Receiving Bank/Agent's Name"
-        agent_address: "Receiving Bank/Agent's Address"
-        further_credit: For Further Credit to Account No.
-        fed_wire_address: "Clearing Agent's Fed Wire Address:"
-        aba: ABA No.
-        participant_number: Clearing Agent's Participant No.
-        mutual_fund: Mutual Fund Company
-        account_number: Account No.
-      clearing_agent: "Clearing Agent's Fed Wire Address:"
-      further_credit: For Further Credit to Account No.
+      clearing_agent: "Clearing Agent’s Fed Wire Address:"
       settlement_amount: 'Settlement Amount%{unit}%{footnote_marker}'
       settlement_amount_footnote: '%{footnote_marker}If Vs. Payment'
       custodian_name_footnote: '%{footnote_marker}The name of the custodian is required for all non-agency mortgage-backed securities (MBS). If the custodian of the note supporting the MBS transaction is the Issuer or a related party and the mortgage notes have not been endorsed to the trustee, the Bank requires that the party that has control over the mortgage notes (as determined by the Bank) have a long-term debt rating of at least BBB.'

@@ -17,7 +17,7 @@
     - label_classes = []
     - label_classes << 'label-error' if error.present?
     - if form_builder
-      = form_builder.label field_name, label, class: label_classes
+      = form_builder.label field_name, (label.equal?(true) ? nil : label), class: label_classes
     - else
       = label_tag field_name, label, for: field_id, class: label_classes
   - classes = []
