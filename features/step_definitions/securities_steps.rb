@@ -428,7 +428,7 @@ Then(/^I should see an uploaded transfer security with an? (description|original
   expect(page.all('.securities-display table tbody tr:first-child td')[index].text).to eq(value)
 end
 
-Then(/^I should (see|not see) the pledge legal copy$/) do |should_see|
+Then(/^I should (see|not see) the securities legal copy$/) do |should_see|
   if should_see == 'see'
     page.assert_selector('.securities-request-legal')
   else

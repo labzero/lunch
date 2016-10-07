@@ -1,3 +1,4 @@
+- kind = @securities_request.kind
 = form_for(@securities_request, validate: true, url: url, html: {class: 'securities-submit-request-form'}) do |f|
   = f.hidden_field(:request_id)
   = f.hidden_field(:kind)
@@ -69,13 +70,16 @@
     -elsif type == :safekeep || type == :pledge
       = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, download_path: @download_path}
   - if @authorizer
-    - if type != :safekeep
+    - if kind == :pledge_release
       .securities-request-legal
-        =simple_format(t("securities.#{type}.legal_copy"))
-        -if type == :pledge
-          = render 'pledge_legal_copy'
+        = simple_format(t('securities.requests.view.pledge_release.legal.notices'))
+        = simple_format(t('securities.requests.view.pledge_release.legal.reservation_of_rights'))
+    - if kind == :pledge_intake
+      .securities-request-legal
+        = render 'pledge_legal_copy'
     - unless @session_elevated
       = render 'shared/securid_module', error: @securid_status
   .securities-actions
     %span.secondary-button.delete-request-trigger{disabled: @securities_request.request_id && !policy(:security).delete?}= t('global.delete')
     =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true, data: {authorizer: @authorizer})
+%p.legal-footer= t('securities.requests.view.legal.footer')

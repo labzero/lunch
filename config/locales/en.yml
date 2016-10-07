@@ -1284,12 +1284,12 @@ en:
         safekept_transfer:
           title: Transfer Pledged Securities Request
           footer: Transfer Pledged Securities Request
-        pledge_transfer:
-          title: Transfer Safekept Securities Request
-          footer: Transfer Safekept Securities Request
           legal:
             notices: By authorizing the transfer of the specific securities listed above, your institution is requesting the release and redelivery or reassignment of these securities pursuant to the terms of the Advances and Security Agreement between your institution and the Bank. You hereby certify that, as of the date of transfer of the securities, as requested, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Advances and Security Agreement) that will remain pledged to (and, if your institution is currently required to deliver collateral to the Bank, that will be held by) the Bank immediately after the requested transfer will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Advances and Security Agreement).
             reservation_of_rights: All rights, remedies, and obligations of the Bank with respect to the listed securities above shall be in accordance with the Advances and Security Agreement.
+        pledge_transfer:
+          title: Transfer Safekept Securities Request
+          footer: Transfer Safekept Securities Request
     release:
       title: Release Securities
       add_securities: Add Securities
@@ -1321,7 +1321,6 @@ en:
       custodian_name_footnote: '%{footnote_marker}The name of the custodian is required for all non-agency mortgage-backed securities (MBS). If the custodian of the note supporting the MBS transaction is the Issuer or a related party and the mortgage notes have not been endorsed to the trustee, the Bank requires that the party that has control over the mortgage notes (as determined by the Bank) have a long-term debt rating of at least BBB.'
       submit_authorization: Submit for Authorization
       authorize: Authorize
-      legal_copy: "Pursuant to the Advances and Security Agreement (Agreement) between your institution and the Bank, your institution requests the release and redelivery or reassignment of the securities listed above.\n\nBy authorizing the release of these securities, your institution certifies that, as of the date the securities are released, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Agreement) that will remain pledged to the Bank immediately after the requested release will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Agreement)."
       edit:
         title: Edit Securities
         intro: "To edit the listed securities:"
@@ -1348,14 +1347,12 @@ en:
       download_template: Download Add Securities Template File
     pledge:
       title: Pledge Securities
-      legal_copy: Pursuant to the Advances and Security Agreement between your institution and the Bank, your institution has pledged and granted a security interest to the Bank in the securities listed above.
       additional_certifications: 'By authorizing the pledge of the specific securities listed above, your institution makes the following certifications:'
       anti_preditory_lending_title: Anti-Predatory Lending Policy Certification
       anti_preditory_lending_text: Your institution hereby certifies that it is aware of, and will comply with the Bank’s Anti-Predatory Lending Policy (as amended from time to time) at all times and represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date twhich any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
       nontraditional_and_subprime_mortgage_title: Nontraditional and Subprime Mortgage Lending Certification
       nontraditional_and_subprime_mortgage_text: Your institution hereby certifies that all residential mortgage loans pledged to the Bank that were originated or acquired by your institution after July 10, 2007, comply at all times with the Interagency Guidance on Nontraditional Mortgage Product Risks dated October 4, 2006, and the Statement on Subprime Mortgage Lending dated July 10, 2007. Your institution represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date on which any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
       and: and
-      legal_footer: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
     transfer:
       pledge:
         title: Transfer Securities to Pledged Account
@@ -1363,7 +1360,6 @@ en:
       safekeep:
         title: Transfer Securities to Safekeeping Account
         delivery_instructions: 'Internal Transfer from Pledged Account No. %{pledged_account} to Safekeeping Account No. %{safekept_account}'
-      legal: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
     safekeep_pledge:
       upload_instructions:
         download_template: Download Template

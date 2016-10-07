@@ -5,7 +5,6 @@
   .securities-main-body.securities-pledge
     .column-9x3-left
       = render partial: 'form', locals: { type: :pledge, account_number: @securities_request.pledged_account, url: securities_pledge_submit_path, accepted_upload_mimetypes: @accepted_upload_mimetypes }
-      %p.legal-footer= t('securities.pledge.legal_footer')
     = render 'delete_request_flyout', request_id: @securities_request.request_id
     =form_tag(@download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_request.securities.to_json)
