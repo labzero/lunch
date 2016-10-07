@@ -11,6 +11,7 @@ $(function () {
       } else {
         toggleUploadError($(e.target).data('error-class'), false, null);
         dropZone.addClass('file-uploading');
+        dropZone.trigger('file-uploading');
         jqXHR = data.submit();
       };
     },
@@ -47,7 +48,10 @@ $(function () {
       progressBar.css('width', '0%');
       jqXHR = false;
     },
-    fail: function(e) {failUpload(e, null)}
+    fail: function(e) {
+      dropZone.trigger('upload-failed');
+      failUpload(e, null);
+    }
   });
 
   function failUpload(e, errorMessage) {

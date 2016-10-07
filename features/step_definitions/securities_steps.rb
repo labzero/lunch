@@ -283,15 +283,15 @@ When(/^I fill in the "(.*?)" securities field with "(.*?)"$/) do |field_name, va
 end
 
 When(/^I submit the securities(?: release)? request for authorization$/) do
-  page.find('.securities-submit-release-form input[type=submit]').click
+  page.find('.securities-submit-request-form input[type=submit]').click
 end
 
 Then(/^I should see the generic error message for the securities release request$/) do
-  page.assert_selector('.securities-submit-release-form-errors p', text: I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text), exact: true)
+  page.assert_selector('.securities-submit-request-form-errors p', text: I18n.t('securities.release.edit.generic_error', phone_number: securities_services_phone_number, email: securities_services_email_text), exact: true)
 end
 
 Then(/^I should see the error message for missing securities request information$/) do
-  page.assert_selector('.securities-submit-release-form-errors p', text: /^Missing a required field: /)
+  page.assert_selector('.securities-submit-request-form-errors p', text: /^Missing a required field: /)
 end
 
 Then(/^the (Pledge|Safekeep) Account Number should be disabled$/) do |action|
@@ -450,7 +450,7 @@ Then(/^I should see the "(.*?)" error$/) do |error|
     I18n.t('securities.internal_user_error')
   end
   page.assert_selector('.securities-header h1', visible: true)
-  page.assert_selector('.securities-submit-release-form-errors p', text: strip_links(text), exact: true)
+  page.assert_selector('.securities-submit-request-form-errors p', text: strip_links(text), exact: true)
 end
 
 When(/^the settlement type is set to (Vs Payment|Free)$/) do |payment_type|

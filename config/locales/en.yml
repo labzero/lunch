@@ -230,9 +230,9 @@ en:
               invalid: Settlement date may not occur on a weekend, a holiday, or be a date in the past.
               before_trade_date: Settlement Date must be on or after Trade Date.
             securities:
-              payment_amount_missing: If Settlement Type is Vs. Payment, each security must have a Settlement Amount. Press Edit Securities to add the Settlement Amount.
-              payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank. Press Edit Securities to remove Settlement Amount.
-              original_par: Securities with Fed delivery must have Original Par of $50 million or less. Press Edit Securities to submit lots of $50 million or less.
+              payment_amount_missing: If Settlement Type is Vs. Payment, each security must have a Settlement Amount.
+              payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank.
+              original_par: Securities with Fed delivery must have Original Par of $50 million or less.
         security:
           blank: "Each row must contain a CUSIP and an Original Par.\nEdit your file and try again."
           not_a_number: '%{attribute} must be a number.'
@@ -461,7 +461,7 @@ en:
         title: Events
         description_html: Invitations to educational and networking meetings and events sponsored for members by the Bank, including conferences, seminars, and webinars.
   welcome:
-    meta_title: FHLB - Welcome
+    meta_title: FHLBSF - Welcome
     title: Welcome!
     intro_html: 'Contact your institution’s Access Manager or <a href="%{url}">Web Support</a> at %{phone_number} if you have questions about access.'
     logo: FHLBank San Francisco
@@ -491,7 +491,7 @@ en:
       password_field: New password
       confirm_field: Re-enter new password
   dashboard:
-    meta_title: FHLB - Dashboard
+    meta_title: FHLBSF - Dashboard
     retrieving_data: We are retrieving this data.
     open: Open
     actions:
@@ -1267,11 +1267,11 @@ en:
           title: Release Safekept Securities Request
           footer: Release Safekept Securities Request
         safekept_transfer:
-          title: Transfer Safekept Securities Request
-          footer: Transfer Safekept Securities Request
-        pledge_transfer:
           title: Transfer Pledged Securities Request
           footer: Transfer Pledged Securities Request
+        pledge_transfer:
+          title: Transfer Safekept Securities Request
+          footer: Transfer Safekept Securities Request
           legal:
             notices: By authorizing the transfer of the specific securities listed above, your institution is requesting the release and redelivery or reassignment of these securities pursuant to the terms of the Advances and Security Agreement between your institution and the Bank. You hereby certify that, as of the date of transfer of the securities, as requested, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Advances and Security Agreement) that will remain pledged to (and, if your institution is currently required to deliver collateral to the Bank, that will be held by) the Bank immediately after the requested transfer will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Advances and Security Agreement).
             reservation_of_rights: All rights, remedies, and obligations of the Bank with respect to the listed securities above shall be in accordance with the Advances and Security Agreement.
@@ -1432,7 +1432,7 @@ en:
     upload_success: 'The following securities from your Excel file were validated and will be included in the securities request:'
     internal_user_error: This securities request was not completed because Bank employees are not authorized to complete securities requests via the member portal.
   reports:
-    meta_title: FHLB - Reports
+    meta_title: FHLBSF - Reports
     title: Reports
     freshness:
       current: This report reflects data as of the current date and time.
@@ -2808,7 +2808,7 @@ en:
         title: Early Termination
         in_the_event: In the event of the early termination of an interest rate swap, cap, or floor, the Bank will calculate the required final payments in accordance with the terms of the Bank’s International Swaps and Derivatives Association (ISDA) Master Agreement and related ISDA Schedule to the Master Agreement between the Bank and the member and with the terms of the Bank confirmation for that transaction.
   messages:
-    meta_title: FHLB - Messages
+    meta_title: FHLBSF - Messages
     description: "Welcome to your Member Portal Inbox.\n\nHere you will find an archive of the Bank’s recent announcements to members.\nYou may filter these announcements by topic using the sidebar menu."
     prior: Newer
     next: Older

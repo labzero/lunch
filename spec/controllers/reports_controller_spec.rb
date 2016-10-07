@@ -3236,6 +3236,7 @@ RSpec.describe ReportsController, :type => :controller do
       collateral_borrowing_capacity: collateral_borrowing_capacity,
       capital_stock: capital_stock,
       remaining_financing_available: remaining_financing_available,
+      collateral_delivery_status: 'Y'
     } }
     let(:member_name) { double('A Name') }
     let(:sta_number) { double('STA Number') }
@@ -3247,6 +3248,7 @@ RSpec.describe ReportsController, :type => :controller do
       allow(Time).to receive_message_chain(:zone, :now).and_return(now)
       allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
       allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile)
+      allow(subject).to receive(:report_disabled?).and_return(false)
     end
 
     it_behaves_like 'a report that can be downloaded', :account_summary, [:pdf]
@@ -3478,9 +3480,10 @@ RSpec.describe ReportsController, :type => :controller do
       make_request
       expect(assigns[:now]).to be(now)
     end
-    describe 'report disabled in web admin' do
+
+    shared_examples 'disabled overall report' do
       before do
-        allow(subject).to receive(:report_disabled?).and_return(true)
+        allow(subject).to receive(:report_disabled?).with(described_class::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
       end
       it 'sets @collateral_notice to false' do
         make_request
@@ -3492,6 +3495,40 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[instance_var]).to be(nil)
         end
       end
+    end
+
+    shared_examples 'disabled financing availability' do
+      before do
+        allow(subject).to receive(:report_disabled?).with(MembersService::FINANCING_AVAILABLE_DATA).and_return(true)
+      end
+      it 'sets @financing_availability to nil' do
+        make_request
+        expect(assigns[:financing_availability]).to be(nil)
+      end
+    end
+
+    describe 'report disabled in web admin' do
+      include_examples 'disabled overall report'
+      it 'sets @financing_availability' do
+        make_request
+        expect(assigns[:financing_availability]).to be_present
+      end
+    end
+    describe 'financing availability is disabled in the web admin' do
+      include_examples 'disabled financing availability'
+      [
+        :collateral_notice, :sta_number, :fhfa_number, :member_name, :credit_outstanding, :standard_collateral,
+        :sbc_collateral, :collateral_totals, :capital_stock_and_leverage
+      ].each do |variable|
+        it "sets @#{variable}" do
+          make_request
+          expect(assigns[variable]).to be_present
+        end
+      end
+    end
+    describe 'when both the financing availability and overall report is disabled' do
+      include_examples 'disabled overall report'
+      include_examples 'disabled financing availability'
     end
     context do
       before { allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile) }
@@ -3577,22 +3614,33 @@ RSpec.describe ReportsController, :type => :controller do
 
   describe 'private methods' do
     describe '`report_disabled?` method' do
-      let(:report_flags) {double('some report flags')}
+      let(:report_flags) {[double('some report flag')]}
       let(:member_service_instance) {instance_double('MembersService')}
       let(:response) {double('some_response')}
-      let(:method_call) {controller.send(:report_disabled?, report_flags)}
+      let(:method_call) { controller.send(:report_disabled?, report_flags) }
 
       before do
         session[described_class::SessionKeys::MEMBER_ID] = 750
+        allow(MembersService).to receive(:new).and_return(member_service_instance)
       end
 
-      it 'passes in the member_id and report_flags to the `report_disabled?` method on a newly created instance of MembersService and returns the response' do
-        expect(MembersService).to receive(:new).and_return(member_service_instance)
-        expect(member_service_instance).to receive(:report_disabled?).with(750, report_flags).and_return(response)
+      it 'converts the passed flag to an array if its not one' do
+        expect(member_service_instance).to receive(:report_disabled?).with(anything, report_flags)
+        controller.send(:report_disabled?, report_flags.first)
+      end
+      it 'passes the report_flags' do
+        expect(member_service_instance).to receive(:report_disabled?).with(anything, report_flags)
+        method_call
+      end
+      it 'passes in the member_id' do
+        expect(member_service_instance).to receive(:report_disabled?).with(750, anything)
+        method_call
+      end
+      it 'returns the response of calling `report_disabled?`' do
+        allow(member_service_instance).to receive(:report_disabled?).and_return(response)
         expect(method_call).to eq(response)
       end
       it "sets the instance variable @report_disabled to true if `report_disabled?` is true" do
-        allow(MembersService).to receive(:new).and_return(member_service_instance)
         allow(member_service_instance).to receive(:report_disabled?).and_return(true)
         method_call
         expect(controller.instance_variable_get(:@report_disabled)).to eq(true)

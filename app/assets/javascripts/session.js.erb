@@ -8,6 +8,7 @@ $(function() {
     var status_url = $('html').data('session-status-path');
     $.get(status_url).always(function(data){
       if(!data.user_signed_in) {
+        Fhlb.Track.session_time_out();
         window.location = data.logged_out_path;
       } else {
         setTimeout(check_session_status, <%=(timeout_duration * 0.05).to_i%>);

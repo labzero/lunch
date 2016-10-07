@@ -251,7 +251,7 @@ module MAPI
                                                          TRADE_DATE,
                                                          REQUEST_STATUS,
                                                          SETTLE_DATE,
-                                                         DELIVER_TO,
+                                                         RECEIVE_FROM,
                                                          FORM_TYPE,
                                                          CREATED_DATE,
                                                          CREATED_BY,

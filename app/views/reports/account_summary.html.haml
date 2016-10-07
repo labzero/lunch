@@ -18,10 +18,11 @@
     %section.account-summary-collateral-notice.icon-info-before
       = t('reports.pages.account_summary.collateral_delivery_required')
   .report-main-body
-    %section
-      %h2= t('reports.pages.account_summary.financing_availability.title')
-      = render 'reports_table', sortable: false, table_data: @financing_availability
-      %small= t('reports.pages.account_summary.financing_availability.footnote')
+    - if @financing_availability
+      %section
+        %h2= t('reports.pages.account_summary.financing_availability.title')
+        = render 'reports_table', sortable: false, table_data: @financing_availability
+        %small= t('reports.pages.account_summary.financing_availability.footnote')
     %section
       %h2= t('reports.pages.account_summary.credit_outstanding.title')
       = render 'reports_table', sortable: false, table_data: @credit_outstanding

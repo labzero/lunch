@@ -949,6 +949,11 @@ RSpec.describe DashboardController, :type => :controller do
           account_overview
           expect(assigns[:account_overview_table_data][:other_remaining]).to eq(other_remaining_array)
         end
+        it 'does not contain the remaining financing availability if financing availability data has been disabled' do
+          allow_any_instance_of(MembersService).to receive(:report_disabled?).with(anything, [MembersService::FINANCING_AVAILABLE_DATA]).and_return(true)
+          account_overview
+          expect(assigns[:account_overview_table_data][:other_remaining]).to_not include([I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available])
+        end
       end
     end
   end

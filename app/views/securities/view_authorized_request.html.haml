@@ -1,92 +1,75 @@
 - @html_class = 'white-background'
-.view-authorized-request
-  .row
+- kind = @securities_request.kind
+.view-authorized-request.row.report
+  .report-header
     %h1= @title
-    %h3= @member[:name]
-    %span= @member[:fhfa_number]
-  .row
-    .column-3
-      %h4= t('securities.requests.view.authorization_date')
-      %span.summary-data= fhlb_date_standard_numeric(@securities_request.authorized_date)
-    .column-3
-      %h4
-        -case @securities_request.kind
-        -when :pledge_intake
-          =t('securities.requests.view.pledged_account')
-        -when :pledge_release, :pledge_transfer
-          =t('securities.requests.view.from_pledged_account')
-        -when :safekept_intake
-          =t('securities.requests.view.safekeeping_account')
-        -when :safekept_release, :safekept_transfer
-          =t('securities.requests.view.from_safekeeping_account')
-      %span.summary-data
-        -case @securities_request.kind
-        -when :pledge_release, :pledge_intake, :pledge_transfer
-          =@member[:pledged_account_number]
-        -when :safekept_release, :safekept_intake, :safekept_transfer
-          =@member[:unpledged_account_number]
-    -if @securities_request.kind == :safekept_transfer
-      .column-3
-        %h4= t('securities.requests.view.pledged_account')
-        %span.summary-data= @member[:pledged_account_number]
-    -if @securities_request.kind == :pledge_transfer
-      .column-3
-        %h4= t('securities.requests.view.safekeeping_account')
-        %span.summary-data= @member[:unpledged_account_number]
-  .row.details
-    .column-3
-      %h4= t('securities.requests.view.request_details.title')
-      %hr
-      =render 'reports/reports_table', table_data: @request_details_table_data, sortable: false
-    -unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
-      .column-3
-        %h4= t('securities.requests.view.broker_instructions.title')
-        %hr
-        =render 'reports/reports_table', table_data: @broker_instructions_table_data, sortable: false
-      .column-3
-        %h4= t('securities.requests.view.delivery_instructions.title')
-        %hr
-        =render 'reports/reports_table', table_data: @delivery_instructions_table_data, sortable: false
-  .row
-    %h2= t('securities.requests.view.securities.title')
-    =render 'reports/reports_table', table_class: 'securities-release-table', table_data: @securities_table_data, sortable: false, disable_auto_width: true
-  -unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
-    .row
-      .column-3-span-2.legal-footer= t('securities.requests.view.securities.vs_payment_footnote', footnote_marker: fhlb_footnote_marker)
-  -if SecuritiesRequest::INTAKE_KINDS.include?(@securities_request.kind)
-    .row
-      .column-3-span-2.legal-footer= t('securities.requests.view.securities.custodian_name_footnote', footnote_marker: fhlb_footnote_marker(1))
-  .row
-    %p.column-3-span-2
-      %span.legal-footer= t('securities.requests.view.legal.footer')
-  -case @securities_request.kind
-  -when :pledge_intake, :safekept_transfer
-    .row
-      %p.column-3-span-2
-        %span.legal-footer.legal-title= t('securities.requests.view.pledge')
-        %br
-        %span.legal-footer= t('securities.requests.view.legal.header')
-        %br
-        %span.legal-footer= t('securities.requests.view.legal.sub_header')
-    .row
-      %p.column-3-span-2
-        %span.legal-footer.legal-title= t('securities.requests.view.legal.anti_preditory_lending_title')
-        %br
-        %span.legal-footer= t('securities.requests.view.legal.anti_preditory_lending_text')
-    .row
-      %p.column-3-span-2
-        %span.legal-footer.legal-title= t('securities.requests.view.legal.nontraditional_and_subprime_mortgage_title')
-        %br
-        %span.legal-footer= t('securities.requests.view.legal.nontraditional_and_subprime_mortgage_text')
-  -when :pledge_release
-    .row
-      %p.column-3-span-2
-        %span.legal-footer=t('securities.requests.view.pledge_release.legal.notices')
-        %br
-        %span.legal-footer= t('securities.requests.view.pledge_release.legal.reservation_of_rights')
-  -when :pledge_transfer
-    .row
-      %p.column-3-span-2
-        %span.legal-footer=t('securities.requests.view.pledge_transfer.legal.notices')
-        %br
-        %span.legal-footer= t('securities.requests.view.pledge_transfer.legal.reservation_of_rights')
+    .report-print-details
+      .report-print-bank= @member[:name]
+      .report-print-sta= @member[:fhfa_number]
+  .report-main-body
+    .request-summary-row
+      .report-summary-data
+        %h3= t('securities.requests.view.authorization_date')
+        %p= fhlb_date_standard_numeric(@securities_request.authorized_date)
+      .report-summary-data
+        %h3
+          -case kind
+          -when :pledge_intake
+            =t('securities.requests.view.pledged_account')
+          -when :pledge_release, :safekept_transfer
+            =t('securities.requests.view.from_pledged_account')
+          -when :safekept_intake
+            =t('securities.requests.view.safekeeping_account')
+          -when :safekept_release, :pledge_transfer
+            =t('securities.requests.view.from_safekeeping_account')
+        %p
+          -case kind
+          -when :pledge_release, :pledge_intake, :safekept_transfer
+            = @securities_request.pledged_account
+          -when :safekept_release, :safekept_intake, :pledge_transfer
+            = @securities_request.safekept_account
+      .report-summary-data
+        -case kind
+        -when :safekept_transfer
+          %h3= t('securities.requests.view.safekeeping_account')
+          %p= @securities_request.safekept_account
+        -when :pledge_transfer
+          %h3= t('securities.requests.view.pledged_account')
+          %p= @securities_request.pledged_account
+    .details.request-summary-row
+      .report-summary-data
+        %h3= t('securities.requests.view.request_details.title')
+        =render 'reports/reports_table', table_data: @request_details_table_data, sortable: false
+      -unless SecuritiesRequest::TRANSFER_KINDS.include?(kind)
+        .report-summary-data
+          %h3= t('securities.requests.view.broker_instructions.title')
+          =render 'reports/reports_table', table_data: @broker_instructions_table_data, sortable: false
+        .report-summary-data
+          %h3= t('securities.requests.view.delivery_instructions.title')
+          =render 'reports/reports_table', table_data: @delivery_instructions_table_data, sortable: false
+  .securities-table-wrapper
+    %h2.report-table-title= t('securities.requests.view.securities.title')
+    =render 'reports/reports_table', table_class: "securities-table-#{kind.to_s.gsub('_', '-')}", table_data: @securities_table_data, sortable: false, disable_auto_width: true
+    -unless SecuritiesRequest::TRANSFER_KINDS.include?(kind)
+      %p= t('securities.requests.view.securities.vs_payment_footnote', footnote_marker: fhlb_footnote_marker)
+    -if SecuritiesRequest::INTAKE_KINDS.include?(kind)
+      %p= t('securities.requests.view.securities.custodian_name_footnote', footnote_marker: fhlb_footnote_marker(1))
+  .legal-footer
+    %p= t('securities.requests.view.legal.footer')
+    -case kind
+    -when :pledge_intake, :safekept_transfer
+      %h4= t('securities.requests.view.pledge')
+      %p= t('securities.requests.view.legal.header')
+      %p= t('securities.requests.view.legal.sub_header')
+      %h4= t('securities.requests.view.legal.anti_preditory_lending_title')
+      %p= t('securities.requests.view.legal.anti_preditory_lending_text')
+      %h4= t('securities.requests.view.legal.nontraditional_and_subprime_mortgage_title')
+      %p= t('securities.requests.view.legal.nontraditional_and_subprime_mortgage_text')
+    -when :pledge_release
+      .legal-pledge-authorization
+        %p=t('securities.requests.view.pledge_release.legal.notices')
+        %p= t('securities.requests.view.pledge_release.legal.reservation_of_rights')
+    -when :pledge_transfer
+      .legal-pledge-authorization
+        %p=t('securities.requests.view.pledge_transfer.legal.notices')
+        %p= t('securities.requests.view.pledge_transfer.legal.reservation_of_rights')

@@ -1637,9 +1637,9 @@ RSpec.describe SecuritiesController, type: :controller do
 
     context do
       before do
-        allow(securities_request).to receive(:kind).and_return(:pledged_transfer)
+        allow(securities_request).to receive(:kind).and_return(:safekept_transfer)
       end
-      it 'sets the request details table data for `pledged_transfer`' do
+      it 'sets the request details table data for `safekept_transfer`' do
         call_action
         expect(subject.instance_variable_get(:@request_details_table_data)).to eq({
           rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
@@ -1652,9 +1652,9 @@ RSpec.describe SecuritiesController, type: :controller do
     end
     context do
       before do
-        allow(securities_request).to receive(:kind).and_return(:safekept_transfer)
+        allow(securities_request).to receive(:kind).and_return(:pledge_transfer)
       end
-      it 'sets the request details table data for `safekept_transfer`' do
+      it 'sets the request details table data for `pledge_transfer`' do
         call_action
         expect(subject.instance_variable_get(:@request_details_table_data)).to eq({ rows: [
           { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },

@@ -83,7 +83,7 @@
   text-transform: none;
 }
 
-.manage-securities-form, .securities-submit-release-form {
+.manage-securities-form, .securities-submit-request-form {
   input[type=submit], .primary-button {
     float: right;
     margin-left: 10px;
@@ -410,7 +410,7 @@
   display: none;
 }
 
-.securities-submit-release-form-errors {
+.securities-submit-request-form-errors {
   color: $alert-red;
 }
 
@@ -432,47 +432,89 @@
   margin-top: 20px;
 }
 
-@media print {
-  .view-authorized-request {
-    color: $print-color;
-    .column-3 {
+.view-authorized-request {
+  .request-summary-row {
+    text-align: justify;
+    &:after {
+      content: '';
+      width: 100%;
+      display: inline-block;
+      font-size: 0;
+      line-height: 0
+    }
+    .report-summary-data {
       width: 32%;
-      margin-left: 0;
-      &:first-child {
-        margin-right: 2.1%;
+      margin-right: 0;
+    }
+  }
+  .report-summary-data, .report-print-details {
+    margin-bottom: 30px;
+  }
+  .securities-table-wrapper {
+    margin-bottom: 35px;
+    p {
+      @extend %typography-footnote;
+      width: $column-6-width;
+    }
+    h2 {
+      @extend %typography-print-subheader;
+    }
+    table {
+      thead {
+        th {
+          border-bottom: 1px solid $medium-gray;
+        }
       }
-      &:nth-child(3) {
-        float: right;
+      tbody {
+        tr:last-child {
+          td {
+            border-bottom: 1px solid $medium-gray;
+          }
+        }
       }
     }
-    .details {
+    .securities-table-safekept-transfer, .securities-table-pledge-transfer {
+      th:nth-child(3) {
+        text-align: right;
+      }
+    }
+    .securities-table-pledge-release, .securities-table-safekept-release {
+      th:nth-child(3), th:nth-child(4) {
+        text-align: right;
+      }
+    }
+    .securities-table-pledge-intake, .securities-table-safekept-intake {
+      th:nth-child(3), th:nth-child(4) {
+        text-align: right;
+      }
+    }
+  }
+  .legal-footer {
+    width: $column-6-width;
+    text-align: justify;
+    p:first-child {
+      margin-bottom: 35px;
+    }
+    h4 {
+      margin: 20px 0 10px;
+    }
+    .legal-pledge-authorization {
+      margin-top: 35px;
+    }
+  }
+  .details {
+    table {
+      border-top: 1px solid $light-gray;
       td:last-child {
         text-align: right;
       }
     }
-    h1, h2, h3, h4 {
-      font-weight: $normal-weight;
-    }
-    h3, h4 {
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-    .summary-data {
-      @include typography-print-summary-data;
-    }
-    .securities-release-table {
-      margin-bottom: 30px;
-    }
-    p {
-      margin-top: 5px;
-      margin-bottom: 5px;
-    }
-    .legal-title {
-      font-weight: $bold-weight;
-      margin-bottom: 10px;
-    }
-    .column-3-span-2 {
-      width: 70%;
+    .report-summary-data {
+      h3 {
+        font-size: 1rem;
+        font-weight: $semibold-weight;
+        margin-bottom: 10px;
+      }
     }
   }
 }

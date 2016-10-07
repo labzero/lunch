@@ -52,7 +52,7 @@ $(function () {
       tbody.append($(data.html));
       bindRateTableCells();
       $idField.val(data.id);
-      Fhlb.Track.quick_advance_rate_table();
+      Fhlb.Track.advance_rate_table();
       addAdvanceRatesPromise = false;
       selectColumnLabelIfRatePreSelected();
       validateForm();
@@ -181,4 +181,9 @@ $(function () {
     showAdvanceRates($funding_date);
   });
 
+  // Google Analytics -
+  $('.add-advance-preview').length ? Fhlb.Track.advance_preview() : null;
+  $('.add-advance-capstock').length ? Fhlb.Track.stock_purchase() : null;
+  $('.add-advance-confirmation').length ? Fhlb.Track.advance_success() : null;
+  $('.add-advance-error').length ? Fhlb.Track.advance_error() : null;
 });
