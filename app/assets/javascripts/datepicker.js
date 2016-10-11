@@ -67,11 +67,12 @@ $(function () {
         options.defaultPreset = defaultPreset;
       }
 
-      options.startDate = startDate;
-      options.endDate = endDate;
+      options.startDate = startDate ? availableDay('next', startDate, invalidDates, options.disableWeekends) : null;
+      options.endDate = endDate ? availableDay('previous', endDate, invalidDates, options.disableWeekends) : null;
 
       initializeDatePicker($datePickerTrigger, $wrapper, options);
       setDatePickerApplyListener($datePickerTrigger, $form, linkedInputField);
+
       $.isArray(invalidDates) ? disableInvalidDatesForCalendar($datePickerTrigger, $wrapper, invalidDates) : false; // Disable invalid dates if present
       options.disableWeekends ? disableWeekendsForCalendar($datePickerTrigger, $wrapper) : false;
       setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
@@ -283,7 +284,6 @@ $(function () {
           nextMonthsDateCells.push(dateCell);
         };
       });
-
       disableNodesByInvalidDates(thisMonthsDateCells, invalidDates, monthYearMoment);
       disableNodesByInvalidDates(lastMonthsDateCells, invalidDates, monthYearMoment.clone().subtract(1, 'month'));
       disableNodesByInvalidDates(nextMonthsDateCells, invalidDates, monthYearMoment.clone().add(1, 'month'));
@@ -453,6 +453,23 @@ $(function () {
     }
   };
 
-
+  function availableDay(direction, currentDate, invalidDates, disableWeekends) {
+    var dateDay = currentDate.day();
+    var dateString = currentDate.format('YYYY-MM-DD');
+    var invalidDatesArray = invalidDates || [];
+    if (disableWeekends) {
+      if (dateDay === 6 || dateDay === 0 || invalidDatesArray.indexOf(dateString) > -1) {
+        direction === 'next' ? availableDay(direction, currentDate.add(1, 'day'), invalidDates, disableWeekends) : availableDay(direction, currentDate.subtract(1, 'day'), invalidDates, disableWeekends);
+      } else {
+        return currentDate;
+      };
+    } else {
+      if (invalidDatesArray.indexOf(dateString) > -1) {
+        direction === 'next' ? availableDay(direction, currentDate.add(1, 'day'), invalidDates, disableWeekends) : availableDay(direction, currentDate.subtract(1, 'day'), invalidDates, disableWeekends);
+      } else {
+        return currentDate;
+      };
+    };
+  };
 
 });

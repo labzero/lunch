@@ -1792,6 +1792,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:securities_request) { instance_double(SecuritiesRequest, securities: securities, :securities= => nil, trade_date: nil, :trade_date= => nil, settlement_date: nil, :settlement_date= => nil, is_collateral?: true) }
       let(:call_action) { controller.send(:populate_view_variables, :release) }
       let(:date_restrictions) { instance_double(Hash) }
+      let(:next_business_day) { instance_double(Date) }
 
       before do
         allow(SecuritiesRequest).to receive(:new).and_return(securities_request)
@@ -1800,6 +1801,7 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(controller).to receive(:populate_delivery_instructions_dropdown_variables)
         allow(controller).to receive(:populate_securities_table_data_view_variable)
         allow(controller).to receive(:date_restrictions)
+        allow_any_instance_of(CalendarService).to receive(:find_next_business_day).and_return(next_business_day)
       end
 
       it 'sets `@pledge_type_dropdown`' do
@@ -1854,8 +1856,12 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(securities_request).not_to receive(:securities=)
         call_action
       end
-      it 'sets `securities_request.trade_date` to today if there is not already a trade date' do
-        expect(securities_request).to receive(:trade_date=).with(Time.zone.today)
+      it 'uses the calendar service to find the next business day' do
+        expect_any_instance_of(CalendarService).to receive(:find_next_business_day).with(Time.zone.today, 1.day)
+        call_action
+      end
+      it 'sets `securities_request.trade_date` to the next available business day if there is not already a trade date' do
+        expect(securities_request).to receive(:trade_date=).with(next_business_day)
         call_action
       end
       it 'does not set `securities_request.trade_date` if there is already a trade date' do
@@ -1863,8 +1869,8 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(securities_request).not_to receive(:trade_date=)
         call_action
       end
-      it 'sets `securities_request.settlement_date` to today if there is not already a settlement date' do
-        expect(securities_request).to receive(:settlement_date=).with(Time.zone.today)
+      it 'sets `securities_request.settlement_date` to the next available business day if there is not already a settlement date' do
+        expect(securities_request).to receive(:settlement_date=).with(next_business_day)
         call_action
       end
       it 'does not set `securities_request.settlement_date` if there is already a settlment date' do
@@ -2168,7 +2174,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:holidays) do
         holidays = []
         rand(2..4).times do
-          holidays << (today + rand(1..70).days).iso8601
+          holidays << (today + rand(1..70).days)
         end
         holidays
       end
@@ -2205,8 +2211,9 @@ RSpec.describe SecuritiesController, type: :controller do
           expect(call_method[:max_date]).to eq(max_date)
         end
         describe 'the `invalid_dates` array' do
-          it 'includes all dates returned from the CalendarService' do
-            expect(call_method[:invalid_dates]).to include(*holidays)
+          it 'includes all dates returned from the CalendarService as iso8601 strings' do
+            holidays_strings = holidays.map{|holiday| holiday.iso8601}
+            expect(call_method[:invalid_dates]).to include(*holidays_strings)
           end
           it 'includes all weekends between the today and the max date' do
             expect(call_method[:invalid_dates]).to include(*weekends)

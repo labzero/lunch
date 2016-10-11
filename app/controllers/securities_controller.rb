@@ -673,8 +673,9 @@ class SecuritiesController < ApplicationController
 
     @securities_request ||= SecuritiesRequest.new
     @securities_request.securities = params[:securities] if params[:securities]
-    @securities_request.trade_date ||= Time.zone.today
-    @securities_request.settlement_date ||= Time.zone.today
+    next_business_day = CalendarService.new(request).find_next_business_day(Time.zone.today, 1.day)
+    @securities_request.trade_date ||= next_business_day
+    @securities_request.settlement_date ||= next_business_day
 
     populate_transaction_code_dropdown_variables(@securities_request)
     populate_settlement_type_dropdown_variables(@securities_request)
@@ -717,7 +718,7 @@ class SecuritiesController < ApplicationController
   def date_restrictions
     today = Time.zone.today
     max_date = today + SecuritiesRequest::MAX_DATE_RESTRICTION
-    holidays =  CalendarService.new(request).holidays(today, max_date)
+    holidays =  CalendarService.new(request).holidays(today, max_date).map{|date| date.iso8601}
     weekends = []
     date_iterator = today.clone
     while date_iterator <= max_date do
