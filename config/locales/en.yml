@@ -233,6 +233,7 @@ en:
               payment_amount_missing: If Settlement Type is Vs. Payment, each security must have a Settlement Amount.
               payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank.
               original_par: Securities with Fed delivery must have Original Par of $50 million or less.
+              original_par_whole_number: If delivery is via Fed or DTC, the Original Par amount must be a whole number (no cents).
         security:
           blank: "Each row must contain a CUSIP and an Original Par.\nEdit your file and try again."
           not_a_number: '%{attribute} must be a number.'

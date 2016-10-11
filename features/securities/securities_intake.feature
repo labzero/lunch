@@ -259,3 +259,45 @@ Feature: Securities Intake
   | page      |
   | safekeep  |
   | pledge    |
+
+  @jira-mem-1934 @data-unavailable
+  Scenario Outline: Member uploads a securities intake file with an original par that is not a whole number and the delivery type is dtc
+    Given I am on the <page> securities page
+    When I upload a securities intake file with "an original par that is not a whole number"
+    And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+    And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
+    When I submit the securities request for authorization
+    Then I should see the "original par whole number" error
+  Examples:
+    | page     |
+    | safekeep |
+    | pledge   |
+
+  @jira-mem-1934 @data-unavailable
+  Scenario Outline: Member uploads a securities intake file with an original par that is not a whole number and the delivery type is fed
+    Given I am on the <page> securities page
+    When I upload a securities intake file with "an original par that is not a whole number"
+    And I select "Fed" as the release delivery instructions
+    And I fill in the "clearing_agent_fed_wire_address_1" securities field with "23454343"
+    And I fill in the "clearing_agent_fed_wire_address_2" securities field with "5683asdfa"
+    And I fill in the "aba_number" securities field with "5683asdfa"
+    When I submit the securities request for authorization
+    Then I should see the "original par whole number" error
+  Examples:
+    | page     |
+    | safekeep |
+    | pledge   |
+
+  @jira-mem-1934 @data-unavailable
+  Scenario Outline: Member uploads a securities intake file with an original par that is not a whole number and the delivery type is mutual fund
+    Given I am on the <page> securities page
+    When I upload a securities intake file with "an original par that is not a whole number"
+    And I select "Mutual Fund" as the release delivery instructions
+    And I fill in the "mutual_fund_company" securities field with "23454343"
+    And I fill in the "mutual_fund_account_number" securities field with "5683asdfa"
+    When I submit the securities request for authorization
+    Then I should see the title for the "<success_page>" success page
+  Examples:
+    | page     | success_page    |
+    | safekeep | safekept intake |
+    | pledge   | pledge intake   |

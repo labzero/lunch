@@ -397,12 +397,16 @@ Given(/^I upload a securities (release|intake|transfer) file(?: with "(.*?)")?$/
       'sample-securities-release-upload-no-settlement-amount.xlsx'
     elsif action == 'release' && file_type == 'an original par over the federal limit'
       'sample-securities-release-upload-over-fed-limit.xlsx'
+    elsif action == 'release' && file_type == 'an original par that is not a whole number'
+      'sample-securities-release-upload-decimal-original-par.xlsx'
     elsif action == 'intake' && file_type == 'settlement amounts'
       'sample-securities-intake-upload-with-settlement-amount.xlsx'
     elsif action == 'intake' && file_type == 'no settlement amounts'
       'sample-securities-intake-upload-no-settlement-amount.xlsx'
     elsif action == 'intake' && file_type == 'an original par over the federal limit'
       'sample-securities-intake-upload-over-fed-limit.xlsx'
+    elsif action == 'intake' && file_type == 'an original par that is not a whole number'
+      'sample-securities-intake-upload-decimal-original-par.xlsx'
     end
   else
     case action
@@ -450,6 +454,8 @@ Then(/^I should see the "(.*?)" error$/) do |error|
     I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email)
   when 'intranet user'
     I18n.t('securities.internal_user_error')
+  when 'original par whole number'
+    I18n.t('activemodel.errors.models.securities_request.attributes.securities.original_par_whole_number')
   end
   page.assert_selector('.securities-header h1', visible: true)
   page.assert_selector('.securities-submit-request-form-errors p', text: strip_links(text), exact: true)

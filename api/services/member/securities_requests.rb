@@ -494,6 +494,13 @@ module MAPI
               raise MAPI::Shared::Errors::CustomTypedFieldError.new("original par must be less than $#{FED_AMOUNT_LIMIT}", :original_par, :securities, FED_AMOUNT_LIMIT) unless security['original_par'] <= FED_AMOUNT_LIMIT
             end
           end
+          if delivery_type == 'fed' || delivery_type == 'dtc'
+            securities.each do |security|
+              original_par = security['original_par']
+              raise MAPI::Shared::Errors::CustomTypedFieldError.new("original par must be a whole number when delivery_type is 'fed' or 'dtc'", :original_par_whole_number, :securities) unless ((original_par * 100).to_i % 100) == 0
+              security['original_par'] = original_par.to_i
+            end
+          end
         end
 
         def self.validate_delivery_instructions(delivery_instructions)

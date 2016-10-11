@@ -1891,6 +1891,40 @@ describe MAPI::ServiceApp do
             security['original_par'] = MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT
             expect{securities_request_module.validate_securities([security], settlement_type, 'fed', type)}.to_not raise_error
           end
+          ['fed', 'dtc'].each do |delivery_type|
+            describe "when the delivery_type is `#{delivery_type}`" do
+              describe 'when the `original_par` is a whole number' do
+                let(:original_par) { rand(0...50000000).to_f }
+                let(:call_method) { securities_request_module.validate_securities([security], settlement_type, delivery_type, type) }
+                before { security['original_par'] = original_par }
+
+                it 'does not raise an error' do
+                  expect{call_method}.not_to raise_error
+                end
+                it 'maintains the whole-number value of `original_par`' do
+                  call_method
+                  expect(security['original_par']).to eq(original_par.to_i)
+                end
+                it 'converts the `original_par` into an integer' do
+                  expect(security['original_par']).to be_a(Float)
+                  call_method
+                  expect(security['original_par']).to be_a(Integer)
+                end
+              end
+              describe 'when the `original_par` is not a whole number' do
+                let(:original_par) { rand(0...50000000) + rand.round(2) }
+                let(:call_method) { securities_request_module.validate_securities([security], settlement_type, delivery_type, type) }
+                before { security['original_par'] = original_par }
+
+                it 'raises a `CustomTypedFieldError`' do
+                  expect{call_method}.to raise_error(CustomTypedFieldError, "original par must be a whole number when delivery_type is 'fed' or 'dtc'") do |error|
+                    expect(error.code).to eq(:securities)
+                    expect(error.type).to eq(:original_par_whole_number)
+                  end
+                end
+              end
+            end
+          end
         end
       end
     end

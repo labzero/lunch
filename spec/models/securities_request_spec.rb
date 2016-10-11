@@ -270,6 +270,40 @@ RSpec.describe SecuritiesRequest, :type => :model do
         call_validation
       end
     end
+    describe '`original_par_is_whole_number`' do
+      let(:call_validation) { subject.send(:original_par_is_whole_number) }
+
+      delivery_types_to_validate = [:fed, :dtc]
+      delivery_types_to_validate.each do |delivery_type|
+        describe "when the `delivery_type` is `#{delivery_type}`" do
+          before { subject.delivery_type = delivery_type }
+
+          it "is called as a validator" do
+            expect(subject).to receive(:original_par_is_whole_number)
+            subject.valid?
+          end
+          it 'adds an error if the `original_par` is not a whole number' do
+            original_par = rand(0..500000) + rand.round(2)
+            subject.securities = [FactoryGirl.build(:security, original_par: original_par)]
+            expect(subject.errors).to receive(:add).with(:securities, :original_par_whole_number)
+            call_validation
+          end
+          it 'does not add an error if the `original_par` is a whole number' do
+            original_par = rand(0..500000)
+            subject.securities = [FactoryGirl.build(:security, original_par: original_par)]
+            expect(subject.errors).not_to receive(:add)
+            call_validation
+          end
+        end
+      end
+      (described_class::DELIVERY_INSTRUCTION_KEYS.keys - delivery_types_to_validate).each do |delivery_type|
+        it "is not called as a validator if the `delivery_type` is `#{delivery_type}" do
+          subject.delivery_type = delivery_type
+          expect(subject).not_to receive(:original_par_is_whole_number)
+          subject.valid?
+        end
+      end
+    end
     described_class::TRANSFER_KINDS.each do |kind|
       describe "when the kind is `#{kind}`" do
         before { subject.kind = kind }
