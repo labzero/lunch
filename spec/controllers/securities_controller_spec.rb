@@ -652,7 +652,7 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  [:release, :transfer].each do |type|
+  [:release, :transfer, :safekeep, :pledge].each do |type|
     action = :"download_#{type}"
     describe "POST download_#{action}" do
       let(:security) { instance_double(Security) }
@@ -681,31 +681,6 @@ RSpec.describe SecuritiesController, type: :controller do
       it "calls `populate_securities_table_data_view_variable` with `#{type}` and the securities array" do
         allow(Security).to receive(:from_hash).and_return(security)
         expect(controller).to receive(:populate_securities_table_data_view_variable).with(type, [security, security])
-        call_action
-      end
-      it "renders with a `type` of `#{type}` and the correct `title`" do
-        expect(controller).to receive(:render).with(hash_including(locals: { type: type, title: I18n.t("securities.download.titles.#{type}") }))
-        call_action
-      end
-      it 'responds with an xlsx file' do
-        call_action
-        expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
-      end
-    end
-  end
-
-  [:safekeep, :pledge].each do |type|
-    action = :"download_#{type}"
-    describe "POST download_#{action}" do
-      let(:call_action) { post action }
-
-      before do
-        allow(controller).to receive(:populate_securities_table_data_view_variable)
-        allow(controller).to receive(:render).and_call_original
-      end
-
-      it "calls `populate_securities_table_data_view_variable` with `#{type}`" do
-        expect(controller).to receive(:populate_securities_table_data_view_variable).with(type)
         call_action
       end
       it "renders with a `type` of `#{type}` and the correct `title`" do

@@ -18,6 +18,8 @@ $(function() {
   $('[data-form-submit-trigger]').on('click', function(e){
     var formName = $(e.currentTarget).data('form-name');
     $('form[name=' + formName + ']').submit();
+    e.stopPropagation();
+    e.preventDefault();
   });
 
 });

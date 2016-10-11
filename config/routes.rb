@@ -200,7 +200,7 @@ Rails.application.routes.draw do
       scope 'safekeep', as: :safekeep do
         get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :safekeep }
         get 'edit' => 'securities#edit_safekeep'
-        get 'download' => 'securities#download_safekeep'
+        post 'download' => 'securities#download_safekeep'
         post 'upload' => 'securities#upload_securities', defaults: { type: :safekeep }
         post 'submit' => 'securities#submit_request', defaults: { type: :safekeep }
         get 'success' => 'securities#submit_request_success', defaults: {kind: :safekept_intake}
@@ -208,7 +208,7 @@ Rails.application.routes.draw do
       scope 'pledge', as: :pledge do
         get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :pledge }
         get 'edit' => 'securities#edit_pledge'
-        get 'download' => 'securities#download_pledge'
+        post 'download' => 'securities#download_pledge'
         post 'upload' => 'securities#upload_securities', defaults: { type: :pledge }
         post 'submit' => 'securities#submit_request', defaults: { type: :pledge }
         get 'success' => 'securities#submit_request_success', defaults: {kind: :pledge_intake}

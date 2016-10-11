@@ -378,12 +378,14 @@ class SecuritiesController < ApplicationController
   end
 
   def download_safekeep
-    populate_securities_table_data_view_variable(:safekeep)
+    securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
+    populate_securities_table_data_view_variable(:safekeep, securities)
     render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep, title: t('securities.download.titles.safekeep') }
   end
 
   def download_pledge
-    populate_securities_table_data_view_variable(:pledge)
+    securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
+    populate_securities_table_data_view_variable(:pledge, securities)
     render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge, title: t('securities.download.titles.pledge') }
   end
 

@@ -565,7 +565,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
             call_method
           rescue
           end
-          expect(subject.securities).to be_nil
+          expect(subject.securities).to eq([])
         end
       end
     end
@@ -638,6 +638,27 @@ RSpec.describe SecuritiesRequest, :type => :model do
             end
           end
         end
+      end
+    end
+
+    describe '`securities`' do
+      let(:call_method) { subject.securities }
+
+      it 'returns an empty array initially' do
+        expect(call_method).to eq([])
+      end
+      it 'returns the value from `@securities`' do
+        value = double('A Value')
+        subject.instance_variable_set(:@securities, value)
+        expect(call_method).to be(value)
+      end
+      it 'returns an empty array when `@securities` is nil' do
+        subject.instance_variable_set(:@securities, nil)
+        expect(call_method).to eq([])
+      end
+      it 'returns an empty array when `@securities` is false' do
+        subject.instance_variable_set(:@securities, false)
+        expect(call_method).to eq([])
       end
     end
 

@@ -7,7 +7,7 @@ workbook.styles do |styles|
   header_style = styles.add_style(:b => true, :bg_color=> 'FFEEF1F0')
   title_style = styles.add_style(sz: 14, b: true, border: { style: :thin, color: 'FF000000', edges: [:bottom] }, alignment: {horizontal: :right} )
 
-  workbook.add_worksheet(name: 'release') do |sheet|
+  workbook.add_worksheet(name: I18n.t('securities.title')) do |sheet|
     logo_path = File.join(Rails.root, 'app', 'assets', 'images', 'fhlbsf_black_25px-padding.png')
     logo_dimensions = Paperclip::Geometry.from_file(logo_path)
     sheet.sheet_view.show_grid_lines = false

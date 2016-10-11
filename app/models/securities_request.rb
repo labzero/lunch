@@ -66,7 +66,6 @@ class SecuritiesRequest
   FED_AMOUNT_LIMIT = 50000000
 
   attr_accessor *ACCESSIBLE_ATTRS
-  attr_reader :securities
 
   validates *[:delivery_type, :securities, :kind, :form_type], presence: true
   validates *[:pledged_account, :safekept_account], presence: true, if: Proc.new { |request| request.kind && TRANSFER_KINDS.include?(request.kind)  }
@@ -182,6 +181,10 @@ class SecuritiesRequest
       end
     end
     @securities = securities
+  end
+
+  def securities
+    @securities || []
   end
 
   def broker_instructions
