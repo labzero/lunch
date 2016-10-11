@@ -251,8 +251,6 @@ const pe = new PrettyError();
 pe.skipNodeFiles();
 pe.skipPackage('express');
 
-app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
-
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   console.log(pe.render(err)); // eslint-disable-line no-console
   const statusCode = err.status || 500;
@@ -268,6 +266,8 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   res.status(statusCode);
   res.send(`<!doctype html>${html}`);
 });
+
+app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
 
 //
 // Launch the server
