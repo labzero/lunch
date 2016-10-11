@@ -1,3 +1,8 @@
+@import '../../../styles/_mixins.scss';
+
 .clickable {
+  @include plain-button;
+
   cursor: pointer;
+  font-weight: bold;
 }

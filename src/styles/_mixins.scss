@@ -3,6 +3,7 @@
   border: 0;
   outline: none;
   padding: 0;
+  text-align: left;
 }
 
 @mixin plain-list {
@@ -28,6 +29,7 @@
 
   ul {
     @include plain-list;
+
     background: #fff;
     border: 1px solid black;
   }

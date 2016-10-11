@@ -1,10 +1,10 @@
 import { Router } from 'express';
+import request from 'request';
 import { Restaurant, Vote, Tag } from '../models';
 import { loggedIn, errorCatcher } from './ApiHelper';
 import { restaurantPosted, restaurantDeleted, restaurantRenamed } from '../actions/restaurants';
 import voteApi from './votes';
 import restaurantTagApi from './restaurantTags';
-import request from 'request';
 
 const router = new Router();
 const apikey = process.env.GOOGLE_SERVER_APIKEY;
@@ -26,12 +26,10 @@ router
               const json = JSON.parse(body);
               if (json.status !== 'OK') {
                 next(json);
+              } else if (json.result && json.result.url) {
+                res.redirect(json.result.url);
               } else {
-                if (json.result && json.result.url) {
-                  res.redirect(json.result.url);
-                } else {
-                  res.redirect(`https://www.google.com/maps/place/${r.name}, ${r.address}`);
-                }
+                res.redirect(`https://www.google.com/maps/place/${r.name}, ${r.address}`);
               }
             } else {
               next(error);

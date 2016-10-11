@@ -1,12 +1,12 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import { undecorated as Restaurant } from './Restaurant';
-import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
 import React from 'react';
 import sinon from 'sinon';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
+import { undecorated as Restaurant } from './Restaurant';
+import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
 
 describe('Restaurant', () => {
   let props;

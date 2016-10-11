@@ -1,11 +1,11 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import { _RestaurantAddTagForm as RestaurantAddTagForm } from './RestaurantAddTagForm';
 import React from 'react';
 import sinon from 'sinon';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
+import { _RestaurantAddTagForm as RestaurantAddTagForm } from './RestaurantAddTagForm';
 
 describe('RestaurantAddTagForm', () => {
   let props;

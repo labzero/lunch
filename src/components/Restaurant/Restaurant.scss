@@ -1,10 +1,11 @@
 @import '../../styles/_variables.scss';
+@import '../../styles/_mixins.scss';
 
 .root {
   background: #fff;
   border: $default-border;
   border-radius: 10px;
-  box-shadow: inset -5px -5px 0px rgba(128, 0, 0, .1);
+  box-shadow: inset -5px -5px 0 rgba(128, 0, 0, .1);
   clear: fix-legacy;
   font-family: $font-family-base;
   margin-bottom: 10px;
@@ -24,6 +25,10 @@
     display: inline-block;
     margin-right: .25em;
   }
+}
+
+.headingButton {
+  @include plain-button;
 }
 
 .restaurantNameFormContainer {

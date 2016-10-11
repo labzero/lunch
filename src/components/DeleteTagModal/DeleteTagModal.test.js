@@ -1,12 +1,12 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import DeleteTagModal from '../DeleteTagModal';
 import { Modal } from 'react-bootstrap';
 import React from 'react';
 import sinon from 'sinon';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
+import DeleteTagModal from './DeleteTagModal';
 
 describe('DeleteTagModal', () => {
   let props;
@@ -25,6 +25,6 @@ describe('DeleteTagModal', () => {
       <DeleteTagModal {...props} />
     );
     expect(wrapper.find(Modal.Body).render().text())
-      .to.contain('Are you sure you want to delete the "gross" tag?');
+      .to.contain('Are you sure you want to delete the “gross” tag?');
   });
 });

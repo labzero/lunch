@@ -1,11 +1,11 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import ModalSection from './ModalSection';
-import DeleteRestaurantModalContainer from '../../containers/DeleteRestaurantModalContainer';
 import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
+import ModalSection from './ModalSection';
+import DeleteRestaurantModalContainer from '../../containers/DeleteRestaurantModalContainer';
 
 const context = { insertCss: () => {} };
 

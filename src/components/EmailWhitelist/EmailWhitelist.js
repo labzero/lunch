@@ -1,6 +1,4 @@
 import React, { PropTypes } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import s from './EmailWhitelist.scss';
 import EmailWhitelistItemContainer from '../../containers/EmailWhitelistItemContainer';
 
 const EmailWhitelist = ({
@@ -9,12 +7,12 @@ const EmailWhitelist = ({
   addWhitelistEmail,
   setEmailWhitelistInputValue
 }) => (
-  <div className={s.root}>
+  <div>
     <form onSubmit={addWhitelistEmail}>
       <input type="email" onChange={setEmailWhitelistInputValue} value={inputValue} />
       <button disabled={inputValue === ''}>add</button>
     </form>
-    <ul className={s.list}>
+    <ul>
       {whitelistEmails.map(id =>
         <EmailWhitelistItemContainer id={id} key={`emailWhitelistItem_${id}`} />
       )}
@@ -29,4 +27,4 @@ EmailWhitelist.propTypes = {
   setEmailWhitelistInputValue: PropTypes.func.isRequired
 };
 
-export default withStyles(s)(EmailWhitelist);
+export default EmailWhitelist;

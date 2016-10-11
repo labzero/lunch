@@ -1,11 +1,11 @@
+import { normalize, arrayOf } from 'normalizr';
+import update from 'react-addons-update';
+import uuid from 'node-uuid';
 import ActionTypes from './constants/ActionTypes';
 import { getRestaurantIds, getRestaurantById } from './selectors/restaurants';
 import { getTagIds, getTagById } from './selectors/tags';
 import { getWhitelistEmailIds } from './selectors/whitelistEmails';
 import * as schemas from './schemas';
-import { normalize, arrayOf } from 'normalizr';
-import update from 'react-addons-update';
-import uuid from 'node-uuid';
 
 const setOrMerge = (target, key, obj) => {
   if (target[key] === undefined) {

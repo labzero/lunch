@@ -22,11 +22,14 @@ import jwt from 'jsonwebtoken';
 import React from 'react';
 import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom/server';
-import Html from './components/Html';
-import { ErrorPage } from './components/ErrorPage';
-import errorPageStyle from './components/ErrorPage/ErrorPage.scss';
-import PrettyError from 'pretty-error';
 import { match, RouterContext } from 'react-router';
+import { Server as WebSocketServer } from 'ws';
+import serialize from 'serialize-javascript';
+import Honeybadger from 'honeybadger';
+import PrettyError from 'pretty-error';
+import Html from './components/Html';
+import { ErrorPageWithoutStyle } from './components/ErrorPage/ErrorPage';
+import errorPageStyle from './components/ErrorPage/ErrorPage.scss';
 import configureStore from './configureStore';
 /* eslint-disable import/no-unresolved */
 import assets from './assets';
@@ -40,9 +43,6 @@ import tagApi from './api/tags';
 import decisionApi from './api/decisions';
 import whitelistEmailApi from './api/whitelistEmails';
 import { Restaurant, Tag, User, WhitelistEmail, Decision } from './models';
-import { Server as WebSocketServer } from 'ws';
-import serialize from 'serialize-javascript';
-import Honeybadger from 'honeybadger';
 
 const app = express();
 
@@ -219,10 +219,9 @@ app.get('*', async (req, res, next) => {
           const css = new Set();
           const context = {
             insertCss: (...styles) => {
-              styles.forEach(style => css.add(style._getCss())); // eslint-disable-line no-underscore-dangle, max-len
+              // eslint-disable-next-line no-underscore-dangle
+              styles.forEach(style => css.add(style._getCss()));
             },
-            setTitle: value => (data.title = value),
-            setMeta: (key, value) => (data[key] = value),
             onPageNotFound: () => (statusCode = 404),
           };
           const store = configureStore(initialState);
@@ -234,6 +233,7 @@ app.get('*', async (req, res, next) => {
             </ContextHolder>
           );
           data.style = [...css].join('');
+          data.script = assets.main.js;
           const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
           res.status(statusCode);
           res.send(`<!doctype html>${html}`);
@@ -253,17 +253,16 @@ pe.skipPackage('express');
 
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   console.log(pe.render(err)); // eslint-disable-line no-console
-  const statusCode = err.status || 500;
   const html = ReactDOM.renderToStaticMarkup(
     <Html
       title="Internal Server Error"
       description={err.message}
       style={errorPageStyle._getCss()} // eslint-disable-line no-underscore-dangle
     >
-      {ReactDOM.renderToString(<ErrorPage error={err} />)}
+      {ReactDOM.renderToString(<ErrorPageWithoutStyle error={err} />)}
     </Html>
   );
-  res.status(statusCode);
+  res.status(err.status || 500);
   res.send(`<!doctype html>${html}`);
 });
 

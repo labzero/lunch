@@ -1,8 +1,8 @@
 import React, { PropTypes, Component } from 'react';
 import Autosuggest from 'react-autosuggest';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import TagContainer from '../../containers/TagContainer';
 import { getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './TagFilterForm.scss';
 import autosuggestTheme from './TagFilterFormAutosuggest.scss';
 
@@ -10,7 +10,7 @@ autosuggestTheme.input = 'form-control';
 
 const returnTrue = () => true;
 
-export class TagFilterForm extends Component {
+class TagFilterForm extends Component {
   componentDidUpdate(prevProps) {
     if (this.props.tagUiForm.shown !== prevProps.tagUiForm.shown && this.props.tagUiForm.shown) {
       this.autosuggest.input.focus();

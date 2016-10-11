@@ -4,8 +4,8 @@ import s from './RestaurantMapSettings.scss';
 
 const RestaurantMapSettings = ({ showUnvoted, setShowUnvoted }) => (
   <div className={`checkbox ${s.root}`}>
-    <label>
-      <input type="checkbox" checked={showUnvoted} onChange={setShowUnvoted} />
+    <label htmlFor="show-unvoted">
+      <input id="show-unvoted" type="checkbox" checked={showUnvoted} onChange={setShowUnvoted} />
       Show Unvoted
     </label>
   </div>

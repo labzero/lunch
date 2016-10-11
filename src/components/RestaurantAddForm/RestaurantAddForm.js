@@ -1,8 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import Geosuggest from 'react-geosuggest';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import s from './RestaurantAddForm.scss';
 
 let google = { maps: { Geocoder: () => ({}), GeocoderStatus: {} } };
 if (canUseDOM) {
@@ -19,23 +17,11 @@ class RestaurantAddForm extends Component {
     latLng: PropTypes.object.isRequired
   };
 
-  static contextTypes = {
-    insertCss: PropTypes.func,
-  };
-
   constructor(props) {
     super(props);
     this.geocoder = new google.maps.Geocoder();
     this.boundHandleSuggestSelect = this.handleSuggestSelect.bind(this);
     this.boundGetCoordsForMarker = this.getCoordsForMarker.bind(this);
-  }
-
-  componentWillMount() {
-    this.removeCss = this.context.insertCss(s);
-  }
-
-  componentWillUnmount() {
-    this.removeCss();
   }
 
   getCoordsForMarker(suggest) {
@@ -74,4 +60,4 @@ class RestaurantAddForm extends Component {
 
 }
 
-export default withStyles(s)(RestaurantAddForm);
+export default RestaurantAddForm;

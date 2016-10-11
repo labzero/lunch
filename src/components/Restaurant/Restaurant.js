@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import RestaurantVoteCountContainer from '../../containers/RestaurantVoteCountContainer';
 import RestaurantVoteButtonContainer from '../../containers/RestaurantVoteButtonContainer';
 import RestaurantDecisionContainer from '../../containers/RestaurantDecisionContainer';
@@ -6,7 +7,6 @@ import RestaurantTagListContainer from '../../containers/RestaurantTagListContai
 import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
 import RestaurantNameFormContainer from '../../containers/RestaurantNameFormContainer';
 import RestaurantDropdownContainer from '../../containers/RestaurantDropdownContainer';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Restaurant.scss';
 
 const Restaurant = ({
@@ -55,7 +55,10 @@ const Restaurant = ({
   } else {
     nameArea = (
       <h2 className={s.heading}>
-        <span onClick={showMapAndInfoWindow}>{restaurant.name}</span>
+        <button onClick={showMapAndInfoWindow} className={s.headingButton}>
+          {restaurant.name}
+        </button>
+        { ' ' }
         <RestaurantDecisionContainer id={restaurant.id} />
       </h2>
     );
@@ -75,6 +78,7 @@ const Restaurant = ({
           className={s.addressLink}
           href={`/api/restaurants/${restaurant.id}/place_url`}
           target="_blank"
+          rel="noopener noreferrer"
         >
           {restaurant.address}
         </a>

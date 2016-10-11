@@ -3,6 +3,7 @@
 .root {
   @include plain-button;
   @include image-replace;
+
   background: url('./checkmark.svg') center no-repeat;
   height: 30px;
   opacity: .15;

@@ -9,10 +9,10 @@
 
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import s from './Header.scss';
 import { IndexLink } from 'react-router';
 import LoginContainer from '../../containers/LoginContainer';
 import FlashContainer from '../../containers/FlashContainer';
+import s from './Header.scss';
 
 const Header = ({ flashes }) => {
   const flashContainers = flashes.map(

@@ -10,12 +10,22 @@ const DeletedTagFromRestaurant = ({
   showMapAndInfoWindow
 }) => {
   const restaurantEl = (
-    <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurantName}</b>
+    <button className={s.clickable} onClick={showMapAndInfoWindow}>
+      {restaurantName}
+    </button>
   );
   if (loggedIn) {
-    return <span><b>{user}</b> removed tag <b>"{tagName}"</b> from {restaurantEl}.</span>;
+    return (
+      <span>
+        <b>{user}</b> removed tag <b>&ldquo;{tagName}&rdquo;</b> from {restaurantEl}.
+      </span>
+    );
   }
-  return <span>Tag <b>"{tagName}"</b> was removed from {restaurantEl}.</span>;
+  return (
+    <span>
+      Tag <b>&ldquo;{tagName}&rdquo;</b> was removed from {restaurantEl}.
+    </span>
+  );
 };
 
 DeletedTagFromRestaurant.propTypes = {

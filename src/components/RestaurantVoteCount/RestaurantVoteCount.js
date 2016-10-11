@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import TooltipUserContainer from '../../containers/TooltipUserContainer';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import TooltipUserContainer from '../../containers/TooltipUserContainer';
 import s from './RestaurantVoteCount.scss';
 
 export class _RestaurantVoteCount extends Component {

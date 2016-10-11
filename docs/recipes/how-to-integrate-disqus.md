@@ -21,7 +21,7 @@ function renderDisqus() {
   }
 }
 
-class DisqusThread {
+class DisqusThread extends React.Component{
 
   static propTypes = {
     id: PropTypes.string.isRequired,
@@ -47,12 +47,10 @@ class DisqusThread {
     let { id, title, path, ...other} = this.props;
 
     if (process.env.BROWSER) {
-      /* eslint-disable camelcase */
       window.disqus_shortname = SHORTNAME;
       window.disqus_identifier = id;
       window.disqus_title = title;
       window.disqus_url = WEBSITE_URL + path;
-      /* eslint-enable camelcase */
     }
 
     return <div {...other} id="disqus_thread" />;
@@ -69,7 +67,7 @@ export default DisqusThread;
 import React from 'react';
 import DisqusThread from './DisqusThread.js';
 
-class MyComponent {
+class MyComponent extends React.Component{
 
   render() {
     return (

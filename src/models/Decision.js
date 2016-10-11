@@ -1,5 +1,5 @@
-import { sequelize, DataTypes } from './db';
 import moment from 'moment';
+import { sequelize, DataTypes } from './db';
 
 const Decision = sequelize.define('decision', {
   restaurant_id: {

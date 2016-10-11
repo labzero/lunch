@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import ActionTypes from '../../constants/ActionTypes';
 import RestaurantPosted from './NotificationContent/RestaurantPosted';
 import RestaurantDeleted from './NotificationContent/RestaurantDeleted';
@@ -11,7 +12,6 @@ import DeletedTagFromRestaurant from './NotificationContent/DeletedTagFromRestau
 import TagDeleted from './NotificationContent/TagDeleted';
 import DecisionPosted from './NotificationContent/DecisionPosted';
 import DecisionDeleted from './NotificationContent/DecisionDeleted';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Notification.scss';
 
 const contentMap = {

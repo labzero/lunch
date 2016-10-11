@@ -254,7 +254,7 @@ const clientConfig = extend(true, {}, config, {
 
   // Choose a developer tool to enhance debugging
   // http://webpack.github.io/docs/configuration.html#devtool
-  devtool: DEBUG ? 'cheap-module-eval-source-map' : false,
+  devtool: DEBUG ? 'source-map' : false,
 });
 
 //
@@ -275,11 +275,7 @@ const serverConfig = extend(true, {}, config, {
 
   externals: [
     /^\.\/assets$/,
-    function filter(context, request, cb) {
-      const isExternal =
-        request.match(/^[@a-z][a-z\/\.\-0-9]*$/i);
-      cb(null, Boolean(isExternal));
-    },
+    /^[@a-z][a-z\/\.\-0-9]*$/i,
   ],
 
   plugins: [

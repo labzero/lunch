@@ -16,7 +16,7 @@
 
   to {
     transform: translate3d(300px, -300px, 0);
-  } 
+  }
 }
 
 @keyframes squashStretch {
@@ -75,7 +75,7 @@
 }
 
 .bannerTitle {
-  animation: squashStretch .25s cubic-bezier(.45,-0.61,.57,1.48);
+  animation: squashStretch .25s cubic-bezier(.45, -.61, .57, 1.48);
   background: url('./lunch.png') no-repeat center;
   background-size: contain;
   font-size: 5em;

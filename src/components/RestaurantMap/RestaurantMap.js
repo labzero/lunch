@@ -1,15 +1,9 @@
 import React, { Component, PropTypes } from 'react';
+import GoogleMap from 'google-map-react';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import RestaurantMarkerContainer from '../../containers/RestaurantMarkerContainer';
 import RestaurantMapSettingsContainer from '../../containers/RestaurantMapSettingsContainer';
-import GoogleMap from 'google-map-react';
-import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantMap.scss';
-
-let google = { maps: { SymbolPath: {} } };
-if (canUseDOM) {
-  google = window.google || google;
-}
 
 const HereMarker = () => (
   <div className={s.center} title="You are here" />

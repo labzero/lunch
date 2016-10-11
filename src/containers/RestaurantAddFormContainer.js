@@ -1,8 +1,8 @@
 import { connect } from 'react-redux';
+import { scroller } from 'react-scroll';
 import { getRestaurants } from '../selectors/restaurants';
 import { addRestaurant } from '../actions/restaurants';
 import { createTempMarker, clearTempMarker } from '../actions/mapUi';
-import { scroller } from 'react-scroll';
 import RestaurantAddForm from '../components/RestaurantAddForm';
 
 // Keep a cache of terms[0] since our geosuggest library doesn't allow us to receive a label

@@ -19,7 +19,7 @@ const RestaurantDecision = ({ id, votes, decided, loggedIn, handleClick }) => {
         ✔
       </button>
     </OverlayTrigger>
-    ) || <div />;
+    );
 };
 
 RestaurantDecision.propTypes = {

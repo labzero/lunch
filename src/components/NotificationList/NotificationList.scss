@@ -2,6 +2,7 @@
 
 .notifications {
   @include plain-list;
+
   bottom: 0;
   position: fixed;
   margin: 1em;

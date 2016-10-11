@@ -1,8 +1,8 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { routerReducer } from 'react-router-redux';
 import { normalize, arrayOf } from 'normalizr';
-import * as schemas from './schemas';
 import thunkMiddleware from 'redux-thunk';
+import * as schemas from './schemas';
 import * as reducerMaps from './reducerMaps';
 
 // Add the reducer to your store on the `routing` key
@@ -32,9 +32,7 @@ export default function configureStore(initialState) {
   const reducers = {};
 
   Object.keys(reducerMaps).forEach(name => {
-    if (reducerMaps.hasOwnProperty(name)) {
-      reducers[name] = generateReducer(reducerMaps[name], normalizedInitialState[name] || {});
-    }
+    reducers[name] = generateReducer(reducerMaps[name], normalizedInitialState[name] || {});
   });
 
   return createStore(

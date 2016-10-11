@@ -1,12 +1,12 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import { _HomePage as HomePage } from './HomePage';
-import RestaurantAddFormContainer from '../../containers/RestaurantAddFormContainer';
 import React from 'react';
 import sinon from 'sinon';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
+import { _HomePage as HomePage } from './HomePage';
+import RestaurantAddFormContainer from '../../containers/RestaurantAddFormContainer';
 
 describe('HomePage', () => {
   let props;

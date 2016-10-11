@@ -1,3 +1,4 @@
+import { createSelector } from 'reselect';
 import { getRestaurantIds, getRestaurantEntities, getRestaurantById } from './restaurants';
 import { getVoteEntities, getVoteById } from './votes';
 import { getTags } from './tags';
@@ -5,7 +6,6 @@ import { getTagFilters } from './tagFilters';
 import { getTagExclusions } from './tagExclusions';
 import { getUserId, getUserById } from './users';
 import { getMapUi } from './mapUi';
-import { createSelector } from 'reselect';
 
 export const getUserByVoteId = (state, voteId) =>
   getUserById(state, getVoteById(state, voteId).user_id);

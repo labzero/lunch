@@ -3,8 +3,12 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from '../NotificationContent.scss';
 
 const RestaurantRenamed = ({ loggedIn, user, restaurantName, newName, showMapAndInfoWindow }) => {
-  const oldNameEl = <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurantName}</b>;
-  const newNameEl = <b className={s.clickable} onClick={showMapAndInfoWindow}>{newName}</b>;
+  const oldNameEl = (
+    <button className={s.clickable} onClick={showMapAndInfoWindow}>{restaurantName}</button>
+  );
+  const newNameEl = (
+    <button className={s.clickable} onClick={showMapAndInfoWindow}>{newName}</button>
+  );
   if (loggedIn) {
     return (
       <span>

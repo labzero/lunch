@@ -8,14 +8,14 @@
  */
 
 import React, { Component, PropTypes } from 'react';
-import s from './App.scss';
-import globalCss from '../../styles/globalCss.scss';
+import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
+import emptyFunction from 'fbjs/lib/emptyFunction';
 import HeaderContainer from '../../containers/HeaderContainer';
 import FooterContainer from '../../containers/FooterContainer';
 import NotificationListContainer from '../../containers/NotificationListContainer';
 import ModalSectionContainer from '../../containers/ModalSectionContainer';
-import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import emptyFunction from 'fbjs/lib/emptyFunction';
+import s from './App.scss';
+import globalCss from '../../styles/globalCss.scss';
 
 class App extends Component {
 
@@ -34,16 +34,12 @@ class App extends Component {
 
   static childContextTypes = {
     insertCss: PropTypes.func.isRequired,
-    setTitle: PropTypes.func.isRequired,
-    setMeta: PropTypes.func.isRequired,
   };
 
   getChildContext() {
     const context = this.context;
     return {
       insertCss: context.insertCss || emptyFunction,
-      setTitle: context.setTitle || emptyFunction,
-      setMeta: context.setMeta || emptyFunction,
     };
   }
 

@@ -3,6 +3,7 @@
 
 .container {
   @include autosuggest-container;
+
   margin-right: .5em;
 
   input {

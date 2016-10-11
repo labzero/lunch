@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
-import EmailWhitelistContainer from '../../containers/EmailWhitelistContainer';
 import { Modal, ModalHeader, ModalTitle, ModalBody } from 'react-bootstrap';
+import EmailWhitelistContainer from '../../containers/EmailWhitelistContainer';
 
 const EmailWhitelistModal = ({ shown, hideModal }) => (
   <Modal show={shown} onHide={hideModal}>

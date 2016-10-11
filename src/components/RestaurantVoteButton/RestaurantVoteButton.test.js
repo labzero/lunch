@@ -1,11 +1,11 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import { _RestaurantVoteButton as RestaurantVoteButton } from './RestaurantVoteButton';
 import React from 'react';
 import sinon from 'sinon';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
+import { _RestaurantVoteButton as RestaurantVoteButton } from './RestaurantVoteButton';
 
 describe('RestaurantVoteButton', () => {
   let props;

@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import { makeGetTagList } from '.';
-import { tag as tagSchema } from '../schemas';
 import { expect } from 'chai';
 import { normalize, arrayOf } from 'normalizr';
+import { makeGetTagList } from '.';
+import { tag as tagSchema } from '../schemas';
 
 describe('selectors', () => {
   describe('makeGetTagList', () => {

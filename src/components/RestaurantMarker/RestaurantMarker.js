@@ -1,9 +1,9 @@
 import React, { PropTypes } from 'react';
-import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import ContextHolder from '../../core/ContextHolder';
 import { Provider } from 'react-redux';
-import RestaurantContainer from '../../containers/RestaurantContainer';
+import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import ContextHolder from '../../core/ContextHolder';
+import RestaurantContainer from '../../containers/RestaurantContainer';
 import s from './RestaurantMarker.scss';
 
 let google = { maps: { Marker: { MAX_ZINDEX: 1000000 } } };
@@ -29,7 +29,7 @@ const InnerRestaurantMarker = ({
   const zIndex =
       google.maps.Marker.MAX_ZINDEX
       + restaurant.votes.length
-      - index
+      + (-index)
       + baseZIndex;
 
   if (restaurant.votes.length > 99 || decided) {
@@ -58,7 +58,7 @@ const InnerRestaurantMarker = ({
       data-marker
     >
       {showInfoWindow ? renderInfoWindow() : null}
-      <div
+      <button
         key={index}
         title={restaurant.name}
         onClick={handleMarkerClick}
@@ -68,7 +68,7 @@ const InnerRestaurantMarker = ({
         <span className={s.label}>
           {label}
         </span>
-      </div>
+      </button>
     </div>
   );
 };

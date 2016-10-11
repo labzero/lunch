@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import Autosuggest from 'react-autosuggest';
-import { getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import { getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
 import s from './RestaurantAddTagForm.scss';
 import autosuggestTheme from './RestaurantAddTagFormAutosuggest.scss';
 

@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import { _RestaurantVoteCount as RestaurantVoteCount } from './RestaurantVoteCount';
 import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
+import { _RestaurantVoteCount as RestaurantVoteCount } from './RestaurantVoteCount';
 
 describe('RestaurantAddTagForm', () => {
   let props;

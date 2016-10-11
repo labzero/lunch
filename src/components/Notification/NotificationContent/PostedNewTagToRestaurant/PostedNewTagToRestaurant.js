@@ -10,12 +10,22 @@ const PostedNewTagToRestaurant = ({
   showMapAndInfoWindow
 }) => {
   const restaurantEl = (
-    <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurantName}</b>
+    <button className={s.clickable} onClick={showMapAndInfoWindow}>
+      {restaurantName}
+    </button>
   );
   if (loggedIn) {
-    return <span><b>{user}</b> added new tag <b>"{tagName}"</b> to {restaurantEl}.</span>;
+    return (
+      <span>
+        <b>{user}</b> added new tag <b>&ldquo;{tagName}&rdquo;</b> to {restaurantEl}.
+      </span>
+    );
   }
-  return <span>New tag <b>"{tagName}"</b> was added to {restaurantEl}.</span>;
+  return (
+    <span>
+      New tag <b>&ldquo;{tagName}&rdquo;</b> was added to {restaurantEl}.
+    </span>
+  );
 };
 
 PostedNewTagToRestaurant.propTypes = {

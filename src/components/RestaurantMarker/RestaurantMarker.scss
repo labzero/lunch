@@ -1,3 +1,4 @@
+@import '../../styles/_mixins.scss';
 @import '../../styles/_variables.scss';
 
 .root {
@@ -6,12 +7,15 @@
 }
 
 .marker {
+  @include plain-button;
+
   background: pink;
   border: $default-border;
   border-radius: 50%;
   cursor: pointer;
   height: 15px;
-  margin: -7.5px;
+  left: -8px;
+  top: -12px;
   position: relative;
   text-align: center;
   width: 15px;
@@ -26,7 +30,7 @@
 
 .infoWindow {
   bottom: 100%;
-  margin-bottom: 37px;
+  margin-bottom: 48px;
   min-width: 300px;
   position: absolute;
   text-align: left;
@@ -45,14 +49,14 @@
   }
 
   &::before {
-    border-width: 42px 8px 0 8px;
-    border-color: black transparent transparent transparent;
+    border-width: 44px 8px 0;
+    border-color: black transparent transparent;
     margin-left: -8px;
   }
 
   &::after {
-    border-width: 32px 5px 0 5px;
-    border-color: #fcc transparent transparent transparent;
+    border-width: 32px 5px 0;
+    border-color: #fcc transparent transparent;
     margin-left: -5px;
   }
 }
@@ -61,7 +65,8 @@
   .marker {
     border-bottom: none;
     height: 26px;
-    margin: -40px -13px;
+    left: -13px;
+    top: -42px;
     width: 26px;
 
     &::before,
@@ -76,23 +81,21 @@
     }
 
     &::before {
-      border-width: 23px 12px 0 12px;
-      border-color: black transparent transparent transparent;
+      border-width: 25px 12px 0;
+      border-color: black transparent transparent;
       left: -2px;
     }
 
     &::after {
-      border-width: 18px 9px 0 9px;
-      border-color: pink transparent transparent transparent;
+      border-width: 18px 9px 0;
+      border-color: pink transparent transparent;
       left: 1px;
     }
   }
 
   .infoWindow {
-    margin-bottom: 5px;
-
     &::before {
-      border-top-width: 16px;
+      border-top-width: 17px;
     }
 
     &::after {

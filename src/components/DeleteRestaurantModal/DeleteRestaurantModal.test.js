@@ -1,12 +1,12 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import DeleteRestaurantModal from './DeleteRestaurantModal';
 import { Modal } from 'react-bootstrap';
 import { expect } from 'chai';
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
+import DeleteRestaurantModal from './DeleteRestaurantModal';
 
 describe('DeleteRestaurantModal', () => {
   let props;

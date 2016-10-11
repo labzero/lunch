@@ -24,19 +24,19 @@ const Footer = ({ user, manageTags, openEmailWhitelist }) => {
         Manage Tags
       </button>
     );
-    manageTagsSpacer = <span className={s.spacer}></span>;
+    manageTagsSpacer = <span className={s.spacer} />;
     emailWhitelistButton = (
       <button className={`${s.link} ${s.text}`} onClick={openEmailWhitelist}>
         Email Whitelist
       </button>
     );
-    emailWhitelistSpacer = <span className={s.spacer}></span>;
+    emailWhitelistSpacer = <span className={s.spacer} />;
     logoutSection = (
       <div className={s.container}>
         <span className={s.text}>
           {user.name}
         </span>
-        <span className={s.spacer}></span>
+        <span className={s.spacer} />
         <a className={s.link} href="/logout">Log Out</a>
       </div>
     );
@@ -50,11 +50,25 @@ const Footer = ({ user, manageTags, openEmailWhitelist }) => {
         {manageTagsSpacer}
         {emailWhitelistButton}
         {emailWhitelistSpacer}
-        <a className={s.link} href="https://github.com/labzero/lunch" target="_blank">GitHub</a>
-        <span className={s.spacer}></span>
+        <a
+          className={s.link}
+          href="https://github.com/labzero/lunch"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
+        </a>
+        <span className={s.spacer} />
         <span className={s.text}>
           ©
-          <a className={s.link} href="https://labzero.com" target="_blank">Lab Zero</a>
+          <a
+            className={s.link}
+            href="https://labzero.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Lab Zero
+          </a>
         </span>
       </div>
     </div>

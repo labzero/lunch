@@ -9,7 +9,9 @@ const RestaurantPosted = ({
   showMapAndInfoWindow
 }) => {
   const restaurantEl = (
-    <b className={s.clickable} onClick={showMapAndInfoWindow}>{restaurantName}</b>
+    <button className={s.clickable} onClick={showMapAndInfoWindow}>
+      {restaurantName}
+    </button>
   );
   if (loggedIn) {
     return <span><b>{user}</b> added {restaurantEl}.</span>;

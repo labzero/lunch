@@ -4,7 +4,7 @@ import { Modal, ModalBody, ModalFooter, Button } from 'react-bootstrap';
 const DeleteTagModal = ({ tagName, shown, hideModal, deleteTag }) => (
   <Modal show={shown} onHide={hideModal}>
     <ModalBody>
-      Are you sure you want to delete the "{tagName}" tag?
+      Are you sure you want to delete the &ldquo;{tagName}&rdquo; tag?
       All restaurants will be untagged.
     </ModalBody>
     <ModalFooter>
