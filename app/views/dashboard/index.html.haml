@@ -23,93 +23,31 @@
         = render 'dashboard/account_overview'
   .column-3
     - if policy(:advance).show?
-      - if feature_enabled?('add-advance')
-        - classes = ['dashboard-module-advances']
-        - classes << 'dashboard-module-advances-closed' if @etransact_status == :closed
-        =render layout: 'dashboard/dashboard_module', locals: {title: t('advances.add_advance.titles.add'), classes: classes} do
-          = form_for(:advance_request, as: :advance_request, url: advances_select_rate_path, html: {method: :get, class: 'dashboard-module-add-advance-form'}) do |f|
-            = f.hidden_field(:type, value: 'whole')
-            = f.hidden_field(:term, value: 'overnight')
-            = render layout: 'shared/etransact_status_message', locals: {etransact_status: @etransact_status} do
-              -# Rendered when the status is :open
-              = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_name: 'advance_request[amount]'
-              .etransact-status-message.etransact-status-message-closed
-                = t('dashboard.quick_advance.advances_desk_closed')
-                = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
-            -# Limited Pricing Message always rendered if present, regardless of etransact_status
-            - if @limited_pricing_message
-              = link_to(t('dashboard.quick_advance.limited_pricing'), advances_select_rate_path, class: 'dashboard-module-limited-pricing-notice')
-            -# Show Overnight VRC rate if desk is :open or :closed
-            - if [:open,:closed].include?(@etransact_status)
-              %p.dashboard-vrc-overnight-message= t('global.standard_vrc_overnight')
-              .dashboard-advances-rate{class: @current_overnight_vrc ? nil : 'dashboard-element-loading'}
-                = @current_overnight_vrc
-                %span<> %
-            -# Include form action and link to Add Advance if etransact_status is :open
-            - if @etransact_status == :open
-              = f.submit({class: ["primary-button"], value: t('global.enter')})
-              = link_to(t('advances.actions.view'), advances_select_rate_path, class: 'dashboard-module-add-advance-link')
-      - else
-        - classes = ['dashboard-module-advances']
-        - classes << 'dashboard-module-advances-closed' if @quick_advance_status == :closed
-        =render layout: 'dashboard/dashboard_module', locals: {title: t('dashboard.quick_advance.title'), classes: classes} do
-          - if @quick_advance_status == :open && @quick_advance_enabled
-            = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_data: {'flyout-trigger' => 'active'}, field_name: :amount
-            %h2.quick-advance-confirmation-subheading{style: 'display: none;'}= t('dashboard.quick_advance.confirmation.title')
-            %h2.quick-advance-preview-subheading{style: 'display: none;'}= t('dashboard.quick_advance.preview.title')
-            %h2.quick-advance-capstock-subheading{style: 'display: none;'}= t('dashboard.quick_advance.capitalstock.title')
-          .quick-advance-desk-closed-message-group
-            %p.quick-advance-disabled-message{style: "#{'display: none;' if @quick_advance_enabled || @quick_advance_status != :open}"}
-              = t('dashboard.quick_advance.advance_desk_unavailable_html', phone_number: service_desk_phone_number)
-              = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
-            %p.quick-advance-desk-closed-message{style: "#{'display: none;' if @quick_advance_status != :closed}"}
+      - classes = ['dashboard-module-advances']
+      - classes << 'dashboard-module-advances-closed' if @etransact_status == :closed
+      =render layout: 'dashboard/dashboard_module', locals: {title: t('advances.add_advance.titles.add'), classes: classes} do
+        = form_for(:advance_request, as: :advance_request, url: advances_select_rate_path, html: {method: :get, class: 'dashboard-module-add-advance-form'}) do |f|
+          = f.hidden_field(:type, value: 'whole')
+          = f.hidden_field(:term, value: 'overnight')
+          = render layout: 'shared/etransact_status_message', locals: {etransact_status: @etransact_status} do
+            -# Rendered when the status is :open
+            = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_name: 'advance_request[amount]'
+            .etransact-status-message.etransact-status-message-closed
               = t('dashboard.quick_advance.advances_desk_closed')
               = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
-            %p.quick-advance-no-terms-message{style: "#{'display: none;' if @quick_advance_status != :no_terms}"}
-              = t('dashboard.quick_advance.advances_desk_no_terms')
-          - if @quick_advance_status == :open && @limited_pricing_message
-            .quick-advance-limited-pricing-notice= t('dashboard.quick_advance.limited_pricing')
-          - if [:open,:closed].include?(@quick_advance_status)
-            %p.dashboard-vrc-overnight-message{style: 'display: none', data: {'flyout-trigger' => (@quick_advance_status == :open)}}= t('global.standard_vrc_overnight')
-            .dashboard-element-loading.dashboard-advances-rate{data: {'flyout-trigger' => (@quick_advance_status == :open)}}
+          -# Limited Pricing Message always rendered if present, regardless of etransact_status
+          - if @limited_pricing_message
+            = link_to(t('dashboard.quick_advance.limited_pricing'), advances_select_rate_path, class: 'dashboard-module-limited-pricing-notice')
+          -# Show Overnight VRC rate if desk is :open or :closed
+          - if [:open,:closed].include?(@etransact_status)
+            %p.dashboard-vrc-overnight-message= t('global.standard_vrc_overnight')
+            .dashboard-advances-rate{class: @current_overnight_vrc ? nil : 'dashboard-element-loading'}
+              = @current_overnight_vrc
               %span<> %
-          .quick-advance-last-updated-message{class: "#{'show-message' unless @quick_advance_status == :open}"}
-            %p= t('dashboard.quick_advance.advance_last_updated', last_updated: @quick_advance_last_updated)
-            %p= t('dashboard.quick_advance.hours_of_operation_html', url: '')
-          - if @quick_advance_status == :open
-            - if @limited_pricing_message
-              = render 'shared/limited_pricing_message', message: @limited_pricing_message, additional_class: 'quick-advance-limited-pricing-message'
-            %p.quick-advance-instruction= t('dashboard.quick_advance.advance_instruction')
-            .quick-advance-rates
-              .quick-advance-rates-body
-                .quick-advance-icon-section
-                  %p.quick-advance-loading-message= t('dashboard.quick_advance.preview.initiate')
-                  %table
-                    %thead
-                      %tr
-                        %th{colspan: 2}
-                        %th
-                          .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.axes_labels.standard')
-                        %th{colspan: 3}
-                          .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.axes_labels.securities_backed')
-                      %tr.quick-advance-column-labels
-                        %th{colspan: 2}
-                          .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.term')
-                        %th
-                          .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.whole_loan')
-                        %th
-                          .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.agency')
-                        %th
-                          .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.aaa')
-                        %th
-                          .quick-advance-cell-wrapper= t('dashboard.quick_advance.table.aa')
-                    %tbody
-                      = render 'rates_table', advance_terms: @advance_terms, advance_types: @advance_types, loading: true
-            = render layout: 'quick_advance_error', locals: {no_display: true, close: true} do
-              %p= t('dashboard.quick_advance.error.advance_unavailable', phone_number: service_desk_phone_number)
-            %button.primary-button.initiate-quick-advance= t('dashboard.quick_advance.buttons.preview')
-            %small
-              %p.rate-advances-footer= t('dashboard.quick_advance.table.footer')
+          -# Include form action and link to Add Advance if etransact_status is :open
+          - if @etransact_status == :open
+            = f.submit({class: ["primary-button"], value: t('global.enter')})
+            = link_to(t('advances.actions.view'), advances_select_rate_path, class: 'dashboard-module-add-advance-link')
     - if feature_enabled?('recent-credit-activity')
       =render layout: 'dashboard/dashboard_module_deferred', locals: {job_status_url: @recent_activity_job_status_url, load_url: @recent_activity_load_url, dashboard_module_locals: {title: t('dashboard.recent_activity.title'), data_available: true, classes: 'dashboard-module-recent-activity'}} do
         =render 'dashboard/dashboard_recent_activity', table_data: @recent_activity_data, deferred: true

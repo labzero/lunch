@@ -4,29 +4,7 @@ class DashboardController < ApplicationController
   include AssetHelper
   include ReportsHelper
 
-  before_action only: [:quick_advance_rates, :quick_advance_preview, :quick_advance_perform, :quick_advance_started] do
-    authorize :advance, :show?
-  end
-
-  before_action only: [:quick_advance_perform, :quick_advance_preview, :quick_advance_started] do
-    advance_request_from_session(params[:id])
-  end
-
-  after_action only: [:quick_advance_rates, :quick_advance_perform, :quick_advance_preview, :quick_advance_started] do
-    advance_request_to_session
-  end
-
-  before_action only: [:quick_advance_rates, :index] do
-    @advance_terms = AdvanceRequest::ADVANCE_TERMS
-    @advance_types = AdvanceRequest::ADVANCE_TYPES
-  end
-
   prepend_around_action :skip_timeout_reset, only: [:current_overnight_vrc]
-
-  rescue_from AASM::InvalidTransition, AASM::UnknownStateMachineError, AASM::UndefinedState, AASM::NoDirectAssignmentError do |exception|
-    logger.info { 'Advance Request State at Exception: ' + advance_request.to_json }
-    raise exception
-  end
 
   # {action_name: [job_klass, path_helper_as_string]}
   DEFERRED_JOBS = {
@@ -248,18 +226,7 @@ class DashboardController < ApplicationController
     @current_overnight_vrc = Rails.cache.fetch(CacheConfiguration.key(:overnight_vrc)).try(:[], :rate)
 
     @limited_pricing_message = MessageService.new.todays_quick_advance_message
-    if feature_enabled?('add-advance')
-      @etransact_status = etransact_service.etransact_status(current_member_id)
-    else
-      @quick_advance_enabled = members_service.quick_advance_enabled_for_member?(current_member_id)
-      etransact_status = etransact_service.status
-      quick_advance_open = etransact_service.etransact_active?(etransact_status)
-      quick_advance_terms = etransact_service.has_terms?(etransact_status)
-      @quick_advance_status = (quick_advance_open ? (quick_advance_terms ? :open : :no_terms) : :closed)
-      # TODO replace this with the timestamp from the cached quick advance rates timestamp
-      date = DateTime.now - 2.hours
-      @quick_advance_last_updated = date.strftime("%d %^b %Y, %l:%M %p")
-    end
+    @etransact_status = etransact_service.etransact_status(current_member_id)
     @contacts = Rails.cache.fetch(CacheConfiguration.key(:member_contacts, current_member_id),
                                   expires_in: CacheConfiguration.expiry(:member_contacts)) do
       members_service.member_contacts(current_member_id)
@@ -288,124 +255,6 @@ class DashboardController < ApplicationController
         end
       end
     end
-  end
-
-  def quick_advance_rates
-    etransact_service = EtransactAdvancesService.new(request)
-    @quick_advances_active = etransact_service.etransact_active?
-    advance_request.allow_grace_period = true if @quick_advances_active
-    @rate_data = advance_request.rates
-
-    logger.info { '  Advance Request State: ' + advance_request.inspect }
-    logger.info { '  Advance Request Errors: ' + advance_request.errors.inspect }
-
-    render json: {html: render_to_string(layout: false), id: advance_request.id}
-  end
-
-  def quick_advance_preview
-    @current_member_name = current_member_name
-    @preview = true
-
-    advance_request.type = params[:advance_type] if params[:advance_type]
-    advance_request.term = params[:advance_term] if params[:advance_term]
-    if params[:amount]
-      advance_request.amount = params[:amount]
-      advance_request.stock_choice = nil
-    end
-    advance_request.stock_choice = params[:stock_choice] if params[:stock_choice]
-
-    advance_request.validate_advance
-    populate_advance_request_view_parameters
-
-    if advance_request.errors.present?
-      limit_error = advance_request.errors.find {|e| e.type == :limits}
-      preview_errors = advance_request.errors.select {|e| e.type == :preview }
-      rate_error = advance_request.errors.find {|e| e.type == :rate}
-      other_errors = advance_request.errors - [limit_error, rate_error, *preview_errors]
-
-      if limit_error.present?
-        preview_success = false
-        preview_error = true
-        @error_message = limit_error.code
-        @error_value = limit_error.value
-      elsif rate_error.present?
-        preview_success = false
-        preview_error = true
-        @error_message = rate_error.code
-      else
-        collateral_error = preview_errors.find {|e| e.code == :collateral }
-        other_preview_error = preview_errors.find {|e| e.code != :capital_stock }
-        if collateral_error
-          preview_success = false
-          preview_error = true
-          @error_message = collateral_error.code
-          @error_value = collateral_error.value
-        elsif other_preview_error
-          preview_success = false
-          preview_error = true
-          @error_message = other_preview_error.code
-          @error_value = other_preview_error.value
-        elsif other_errors.present?
-          preview_success = false
-          preview_error = true
-          @error_message = :unknown
-        else # capital stock error
-          preview_success = false
-          preview_error = false
-          @original_amount = advance_request.amount
-          @net_amount = @original_amount - @net_stock_required
-          response_html = render_to_string :quick_advance_capstock, layout: false
-        end
-      end
-    else
-      preview_success = true
-      preview_error = false
-    end
-
-    if preview_error
-      response_html = render_to_string :quick_advance_error, layout: false
-    elsif !response_html
-      @original_amount = @advance_amount.to_f
-      @stock = advance_request.sta_debit_amount
-      @session_elevated = session_elevated?
-      advance_request.timestamp!
-      response_html = render_to_string layout: false
-    end
-
-    logger.info { '  Advance Request State: ' + advance_request.inspect }
-    logger.info { '  Advance Request Errors: ' + advance_request.errors.inspect }
-    logger.info { '  Preview Results: ' + {preview_success: preview_success, preview_error: preview_error}.inspect }
-
-    render json: {preview_success: preview_success, preview_error: preview_error, html: response_html}
-  end
-
-  def quick_advance_perform
-    securid_status = securid_perform_check
-    advance_success = false
-    response_html = false
-    if session_elevated?
-      expired_rate = advance_request.expired?
-      if expired_rate
-        advance_success = false
-        populate_advance_request_view_parameters
-        @error_message = :rate_expired
-        response_html = render_to_string :quick_advance_error, layout: false
-      else
-        advance_request.execute
-        if advance_request.executed?
-          advance_success = true
-          populate_advance_request_view_parameters
-          @stock = advance_request.sta_debit_amount
-          response_html = render_to_string layout: false
-        end
-      end
-    end
-
-    logger.info { '  Advance Request State: ' + advance_request.inspect }
-    logger.info { '  Advance Request Errors: ' + advance_request.errors.inspect }
-    logger.info { '  Execute Results: ' + {securid: securid_status, advance_success: advance_success}.inspect }
-
-    render json: {securid: securid_status, advance_success: advance_success, html: response_html}
   end
 
   def current_overnight_vrc
@@ -499,57 +348,9 @@ class DashboardController < ApplicationController
 
   private
 
-  def populate_advance_request_view_parameters
-    @authorized_amount = advance_request.authorized_amount
-    @cumulative_stock_required = advance_request.cumulative_stock_required
-    @current_trade_stock_required = advance_request.current_trade_stock_required
-    @pre_trade_stock_required = advance_request.pre_trade_stock_required
-    @net_stock_required = advance_request.net_stock_required
-    @gross_amount = advance_request.gross_amount
-    @gross_cumulative_stock_required = advance_request.gross_cumulative_stock_required
-    @gross_current_trade_stock_required = advance_request.gross_current_trade_stock_required
-    @gross_pre_trade_stock_required = advance_request.gross_pre_trade_stock_required
-    @gross_net_stock_required = advance_request.gross_net_stock_required
-    @advance_amount = advance_request.amount
-    @advance_description = advance_request.term_description
-    @advance_type_raw = advance_request.type
-    @advance_program = advance_request.program_name
-    @advance_type = advance_request.human_type
-    @human_interest_day_count = advance_request.human_interest_day_count
-    @human_payment_on = advance_request.human_payment_on
-    @advance_term = advance_request.human_term
-    @advance_raw_term = advance_request.term
-    @trade_date = advance_request.trade_date
-    @funding_date = advance_request.funding_date
-    @maturity_date = advance_request.maturity_date
-    @advance_rate = advance_request.rate
-    @initiated_at = advance_request.initiated_at
-    @advance_number = advance_request.confirmation_number
-    @collateral_type = advance_request.collateral_type
-    @old_rate = advance_request.old_rate
-    @rate_changed = advance_request.rate_changed?
-    @total_amount = advance_request.total_amount
-  end
-
   def populate_account_overview_view_parameters(data)
     @account_overview_table_data = data[:table_data]
     @borrowing_capacity_gauge = data[:gauge_data]
-  end
-
-  def advance_request_from_session(id)
-    @advance_request = id ? AdvanceRequest.find(id, request) : advance_request
-    authorize @advance_request, :modify?
-    @advance_request
-  end
-
-  def advance_request_to_session
-    @advance_request.save if @advance_request
-  end
-
-  def advance_request
-    @advance_request ||= AdvanceRequest.new(current_member_id, signer_full_name, request)
-    @advance_request.owners.add(current_user.id)
-    @advance_request
   end
 
   def calculate_gauge_percentages(gauge_hash, excluded_keys=[])

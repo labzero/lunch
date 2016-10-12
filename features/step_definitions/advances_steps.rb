@@ -354,3 +354,7 @@ Then(/^I see (only outstanding|all) advances$/) do |type|
     raise ArgumentError.new("unknown advance type: #{type}")
   end
 end
+
+Given(/^I select the continue with advance option$/) do
+  page.find('#continue_transaction').click
+end
