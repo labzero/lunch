@@ -58,7 +58,6 @@ const Restaurant = ({
         <button onClick={showMapAndInfoWindow} className={s.headingButton}>
           {restaurant.name}
         </button>
-        { ' ' }
         <RestaurantDecisionContainer id={restaurant.id} />
       </h2>
     );
