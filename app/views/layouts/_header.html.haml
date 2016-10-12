@@ -25,7 +25,7 @@
             .nav-dropdown-column
               %h2= t('nav.secondary.advances')
               %ul
-                - if feature_enabled?('add-advance') && policy(:advance).show?
+                - if policy(:advance).show?
                   %li= link_to(t('advances.add_advance.nav'), advances_select_rate_path)
                 %li= link_to(t('advances.manage_advances.title'), advances_manage_path)
       - if feature_enabled?('securities')
