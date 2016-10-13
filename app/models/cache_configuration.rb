@@ -34,6 +34,10 @@ unless defined?(CacheConfiguration)
       default: {
         key_prefix: 'default',
         expiry: 24.hours
+      },
+      quick_advance_rates: {
+        key_prefix: "rates#{SEPARATOR}quick_advance",
+        expiry: 30.seconds
       }
     }.freeze
     

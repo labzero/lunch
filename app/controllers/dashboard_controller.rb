@@ -205,6 +205,7 @@ class DashboardController < ApplicationController
     members_service = MembersService.new(request)
     populate_deferred_jobs_view_parameters(DEFERRED_JOBS)
     profile = sanitize_profile_if_endpoints_disabled(member_balances.profile)
+    RatesServiceJob.perform_later('quick_advance_rates', request.uuid, current_member_id) if policy(:advance).show?
 
     market_overview_data = Rails.cache.fetch(CacheConfiguration.key(:market_overview),
                                              expires_in: CacheConfiguration.expiry(:market_overview)) { rate_service.overnight_vrc }

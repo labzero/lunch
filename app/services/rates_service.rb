@@ -63,11 +63,13 @@ class RatesService < MAPIService
     # we're not doing anything with member id right now, but presumably will need to use it at some point to check if
     # certain rates are available (e.g. member has enough collateral)
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
-    funding_date = funding_date.try(:to_date)
-    if funding_date
-      get_hash(:quick_advance_rates, "rates/summary", funding_date: funding_date.iso8601)
-    else
-      get_hash(:quick_advance_rates, "rates/summary")
+    iso8601_funding_date = funding_date.try(:to_date).try(:iso8601)
+    Rails.cache.fetch(CacheConfiguration.key(:quick_advance_rates, member_id, iso8601_funding_date), expires_in: CacheConfiguration.expiry(:quick_advance_rates)) do
+      if iso8601_funding_date
+        get_hash(:quick_advance_rates, "rates/summary", funding_date: iso8601_funding_date)
+      else
+        get_hash(:quick_advance_rates, "rates/summary")
+      end
     end
   end
 

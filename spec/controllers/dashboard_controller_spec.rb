@@ -300,6 +300,27 @@ RSpec.describe DashboardController, :type => :controller do
         end
       end
     end
+    describe 'when the user is an advance signer' do
+      allow_policy :advance, :show?
+      it 'enqueues a rate fetch job' do
+        expect(RatesServiceJob).to receive(:perform_later).with('quick_advance_rates', any_args)
+        make_request 
+      end
+      it 'uses the current_member_id for the rate fetch job' do
+        expect(RatesServiceJob).to receive(:perform_later).with(anything, anything, member_id)
+        make_request 
+      end
+      it 'uses the current request UUID for the rate fetch job' do
+        uuid = SecureRandom.hex
+        allow(request).to receive(:uuid).and_return(uuid)
+        expect(RatesServiceJob).to receive(:perform_later).with(anything, uuid, anything)
+        make_request 
+      end
+    end
+    it 'does not enqueue a rate fetch job if the user can not sign advances' do
+      expect(RatesServiceJob).to_not receive(:perform_later)
+      make_request  
+    end
   end
 
   describe "GET current_overnight_vrc", :vcr do
