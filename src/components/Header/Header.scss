@@ -53,7 +53,7 @@
   padding: 10px 0;
   position: relative;
   max-width: $max-content-width;
-  z-index: 1;
+  z-index: 1; /* above background */
 }
 
 .brand {
@@ -93,7 +93,7 @@
 .flashes {
   position: fixed;
   width: 100%;
-  z-index: 1;
+  z-index: 2; /* above logo */
 }
 
 @media only screen and (max-height: 500px) {
