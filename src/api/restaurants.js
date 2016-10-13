@@ -25,7 +25,8 @@ router
             if (!error && response.statusCode === 200) {
               const json = JSON.parse(body);
               if (json.status !== 'OK') {
-                const newError = { message: 'Could not get info for restaurant.' };
+                const newError = { message: `Could not get info for restaurant. Google might have
+ removed its entry. Try removing it and adding it to Lunch again.` };
                 errorCatcher(res, newError);
               } else if (json.result && json.result.url) {
                 res.redirect(json.result.url);
