@@ -25,7 +25,8 @@ router
             if (!error && response.statusCode === 200) {
               const json = JSON.parse(body);
               if (json.status !== 'OK') {
-                next(json);
+                const newError = { message: 'Could not get info for restaurant.' };
+                errorCatcher(res, newError);
               } else if (json.result && json.result.url) {
                 res.redirect(json.result.url);
               } else {
