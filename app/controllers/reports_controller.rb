@@ -1440,6 +1440,7 @@ class ReportsController < ApplicationController
         securities_transactions = member_balances.securities_transactions(@start_date)
         raise StandardError, "There has been an error and ReportsController#securities_transactions has returned nil. Check error logs." if securities_transactions.blank?
       end
+      @as_of = @start_date # for `reports/pdf_footer.html.haml`
       @picker_presets = date_picker_presets(@start_date, nil, nil, @max_date)
       @total_net = securities_transactions[:total_net]
       @total_credits = securities_transactions[:total_credits]
