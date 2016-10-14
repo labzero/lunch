@@ -263,8 +263,8 @@ class SecuritiesController < ApplicationController
     @securities_request.securities.each do |security|
       rows << { columns: [ { value: security.cusip },
                            { value: security.description },
-                           { value: security.original_par, type: :currency_whole } ] }
-      rows.last[:columns] << { value: security.payment_amount, type: :currency_whole } unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
+                           { value: security.original_par, type: :currency, options: { unit: '' } } ] }
+      rows.last[:columns] << { value: security.payment_amount, type: :currency, options: { unit: '' } } unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
       rows.last[:columns] << { value: security.custodian_name } if SecuritiesRequest::INTAKE_KINDS.include?(@securities_request.kind)
     end
 

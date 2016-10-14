@@ -1520,8 +1520,8 @@ RSpec.describe SecuritiesController, type: :controller do
           I18n.t('common_table_headings.custodian_name', footnote_marker: fhlb_footnote_marker(1))],
           rows: [ { columns: [ { value: security.cusip },
                                { value: security.description },
-                               { value: security.original_par, type: :currency_whole },
-                               { value: security.payment_amount, type: :currency_whole },
+                               { value: security.original_par, type: :currency, options: { unit: '' } },
+                               { value: security.payment_amount, type: :currency, options: { unit: '' } },
                                { value: security.custodian_name } ] } ] }
         call_action
         expect(subject.instance_variable_get(:@securities_table_data)).to eq(table_data)
@@ -1566,8 +1566,8 @@ RSpec.describe SecuritiesController, type: :controller do
                               I18n.t('securities.requests.view.securities.settlement_amount', footnote_marker: fhlb_footnote_marker) ],
                         rows: [ { columns: [ { value: security.cusip },
                                              { value: security.description },
-                                             { value: security.original_par, type: :currency_whole },
-                                             { value: security.payment_amount, type: :currency_whole } ] } ] }
+                                             { value: security.original_par, type: :currency, options: { unit: '' } },
+                                             { value: security.payment_amount, type: :currency, options: { unit: '' } } ] } ] }
         call_action
         expect(subject.instance_variable_get(:@securities_table_data)).to eq(table_data)
       end
