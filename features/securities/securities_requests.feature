@@ -20,19 +20,20 @@ Scenario: Non-securities signer does not see active Authorize links
   When I am on the securities request page
   Then I should see a disabled state for the Authorize action
 
-@jira-mem-1597 @jira-mem-1740
+@jira-mem-1597 @jira-mem-1740 @jira-mem-1937
 Scenario Outline: Securities signer navigates to view a request from the Securities Requests page
   Given I am logged in as a "quick-advance signer"
   When I am on the securities request page
   Then I should see the active state for the Authorize action
   When I click to Authorize the first <security_type>
   Then I should be on the <page> page
+  And I should <legal_copy_visibility> the securities legal copy
 Examples:
-  | security_type | page                |
-  | release       | Securities Release  |
-  | pledge        | Pledge Securities   |
-  | safekeep      | Safekeep Securities |
-  | transfer      | Transfer Securities |
+  | security_type | page                | legal_copy_visibility |
+  | release       | Securities Release  | not see               |
+  | pledge        | Pledge Securities   | see                   |
+  | safekeep      | Safekeep Securities | not see               |
+  | transfer      | Transfer Securities | see                   |
 
 @jira-mem-1870
 Scenario Outline: Signers only see authorize links for matching securities kinds

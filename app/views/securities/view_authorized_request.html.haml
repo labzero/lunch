@@ -57,7 +57,7 @@
   .legal-footer
     %p= t('securities.requests.view.legal.footer')
     -case kind
-    -when :pledge_intake, :safekept_transfer
+    -when :pledge_intake, :pledge_transfer
       %h4= t('securities.requests.view.pledge')
       %p= t('securities.requests.view.legal.header')
       %p= t('securities.requests.view.legal.sub_header')
@@ -69,7 +69,7 @@
       .legal-pledge-authorization
         %p=t('securities.requests.view.pledge_release.legal.notices')
         %p= t('securities.requests.view.pledge_release.legal.reservation_of_rights')
-    -when :pledge_transfer
+    -when :safekept_transfer
       .legal-pledge-authorization
-        %p=t('securities.requests.view.pledge_transfer.legal.notices')
-        %p= t('securities.requests.view.pledge_transfer.legal.reservation_of_rights')
+        %p=t('securities.requests.view.safekept_transfer.legal.notices')
+        %p= t('securities.requests.view.safekept_transfer.legal.reservation_of_rights')

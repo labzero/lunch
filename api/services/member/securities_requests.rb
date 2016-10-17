@@ -80,7 +80,7 @@ module MAPI
 
         RELEASE_REQUEST_SECURITIES_MAPPING = {
           to_s: ['CUSIP', 'DESCRIPTION'],
-          to_i: ['ORIGINAL_PAR', 'PAYMENT_AMOUNT']
+          to_f: ['ORIGINAL_PAR', 'PAYMENT_AMOUNT']
         }.freeze
 
         NEXT_ID_SQL = 'SELECT SAFEKEEPING.SSK_WEB_FORM_SEQ.NEXTVAL FROM DUAL'.freeze
@@ -154,7 +154,7 @@ module MAPI
           requests = (
             start_date ||= Time.zone.today - 7.days
             if should_fake?(app)
-              self.fake_header_details_array(member_id.to_i, start_date).select do |header_details|
+              self.fake_header_details_array(app, member_id.to_i, start_date).select do |header_details|
                 flat_status.include?(header_details['STATUS']) && header_details['SUBMITTED_DATE'] >= start_date
               end
             else
@@ -199,7 +199,7 @@ module MAPI
 
         def self.insert_release_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values, adx_type)
           adx_type_release = "#{adx_type}_release".to_sym
-          now = Time.zone.today
+          now = Time.zone.now
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
                                                          FHLB_ID,
@@ -242,7 +242,7 @@ module MAPI
 
         def self.insert_intake_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type, delivery_values, adx_type)
           adx_type_intake = "#{adx_type}_intake".to_sym
-          now = Time.zone.today
+          now = Time.zone.now
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
                                                          FHLB_ID,
@@ -286,7 +286,7 @@ module MAPI
         end
 
         def self.insert_transfer_header_query(member_id, header_id, user_name, full_name, session_id, adx_id, un_adx_id, broker_instructions, kind)
-          now = Time.zone.today
+          now = Time.zone.now
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_HEADER (HEADER_ID,
                                                          FHLB_ID,
@@ -330,7 +330,7 @@ module MAPI
         end
 
         def self.insert_security_query(header_id, detail_id, user_name, session_id, security, ssk_id)
-          now = Time.zone.today
+          now = Time.zone.now
           <<-SQL
             INSERT INTO SAFEKEEPING.SSK_WEB_FORM_DETAIL (DETAIL_ID,
                                                          HEADER_ID,
@@ -385,7 +385,7 @@ module MAPI
         end
 
         def self.authorize_request_query(member_id, request_id, user_name, full_name, session_id, signer_id)
-          now = Time.zone.today
+          now = Time.zone.now
           <<-SQL
             UPDATE SAFEKEEPING.SSK_WEB_FORM_HEADER SET
             STATUS = #{quote(SSKRequestStatus::SIGNED)},
@@ -530,7 +530,7 @@ module MAPI
               DELIVER_TO            = #{quote(DELIVERY_TYPE[delivery_type])},
               FORM_TYPE             = #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[adx_type])},
               LAST_MODIFIED_BY      = #{quote(format_modification_by(user_name, session_id))},
-              LAST_MODIFIED_DATE    = #{quote(Time.zone.today)},
+              LAST_MODIFIED_DATE    = #{quote(Time.zone.now)},
               LAST_MODIFIED_BY_NAME = #{quote(full_name)},
               #{ADXAccountTypeMapping::SYMBOL_TO_SQL_COLUMN_NAME[adx_type]} = #{quote(adx_id)},
               #{delivery_columns.each_with_index.collect{|column_name, i| "#{column_name} = #{delivery_values[i]}"}.join(', ') }
@@ -548,7 +548,7 @@ module MAPI
               #{KIND_TRANSFER_MAPPING[kind][:account_column_name]}        = #{quote(SSKDeliverTo::INTERNAL_TRANSFER)},
               FORM_TYPE                 = #{quote(ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[KIND_TRANSFER_MAPPING[kind][:adx_type]])},
               LAST_MODIFIED_BY          = #{quote(format_modification_by(user_name, session_id))},
-              LAST_MODIFIED_DATE        = #{quote(Time.zone.today)},
+              LAST_MODIFIED_DATE        = #{quote(Time.zone.now)},
               LAST_MODIFIED_BY_NAME     = #{quote(full_name)},
               PLEDGED_ADX_ID            = #{quote(adx_id)},
               UNPLEGED_TRANSFER_ADX_ID  = #{quote(un_adx_id)},
@@ -565,7 +565,7 @@ module MAPI
               DESCRIPTION        = #{quote(security['description'])},
               ORIGINAL_PAR       = #{quote(nil_to_zero(security['original_par']))},
               PAYMENT_AMOUNT     = #{quote(nil_to_zero(security['payment_amount']))},
-              LAST_MODIFIED_DATE = #{quote(Time.zone.today)},
+              LAST_MODIFIED_DATE = #{quote(Time.zone.now)},
               LAST_MODIFIED_BY   = #{quote(format_modification_by(user_name, session_id))}
             WHERE DETAIL_ID = #{quote(detail_id)}
             AND HEADER_ID = #{quote(header_id)}
@@ -730,17 +730,19 @@ module MAPI
           true
         end
 
-        def self.set_broker_instructions_for_transfer(broker_instructions, kind)
-          today = Time.zone.today.iso8601
+        def self.set_broker_instructions_for_transfer(app, broker_instructions, kind)
+          today = Time.zone.today
+          holidays = MAPI::Services::Rates::Holidays.holidays(app)
+          default_date = MAPI::Services::Rates.find_next_business_day(today, 1.day, holidays)
           broker_instructions['settlement_type'] ||= kind == :pledge_transfer ? 'free' : 'vs_payment'
-          broker_instructions['trade_date'] ||= today
-          broker_instructions['settlement_date'] ||= today
+          broker_instructions['trade_date'] ||= default_date.iso8601
+          broker_instructions['settlement_date'] ||= default_date.iso8601
           broker_instructions['transaction_code'] ||= 'standard'
         end
 
         def self.create_transfer(app, member_id, user_name, full_name, session_id, broker_instructions, securities, kind)
           validate_kind(:transfer, kind)
-          set_broker_instructions_for_transfer(broker_instructions, kind)
+          set_broker_instructions_for_transfer(app, broker_instructions, kind)
           validate_securities(securities, broker_instructions['settlement_type'], :transfer, kind)
           validate_broker_instructions(broker_instructions, app, kind)
           user_name.downcase!
@@ -775,7 +777,7 @@ module MAPI
 
         def self.update_transfer(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, securities, kind)
           validate_kind(:transfer, kind)
-          set_broker_instructions_for_transfer(broker_instructions, kind)
+          set_broker_instructions_for_transfer(app, broker_instructions, kind)
           validate_securities(securities, broker_instructions['settlement_type'], :transfer, kind)
           validate_broker_instructions(broker_instructions, app, kind)
           unless should_fake?(app)
@@ -863,7 +865,7 @@ module MAPI
 
         def self.request_details(app, member_id, request_id)
           if should_fake?(app)
-            header_details = fake_header_details_array(member_id).select{|header| header['REQUEST_ID'] == request_id}.first
+            header_details = fake_header_details_array(app, member_id).select{|header| header['REQUEST_ID'] == request_id}.first
             securities = fake_securities(request_id, header_details['REQUEST_STATUS'])
           else
             header_details = fetch_hash(app.logger, request_header_details_query(member_id, request_id))
@@ -936,7 +938,7 @@ module MAPI
           end
         end
 
-        def self.fake_header_details_array(member_id, start_date = nil)
+        def self.fake_header_details_array(app, member_id, start_date = nil)
           today = Time.zone.today
           rng = Random.new(member_id.to_i + today.to_time.to_i)
           start_date ||= today
@@ -957,66 +959,73 @@ module MAPI
             form_type = combo.try(:first) || REQUEST_FORM_TYPE_MAPPING.keys.sample(random: rng)
             status = combo.try(:last) || flat_unique_array(REQUEST_STATUS_MAPPING.values).sample(random: rng)
             delivery_type = combo.try(:[], 1)
-            list << fake_header_details(request_id, status, form_type, delivery_type, start_date)
+            list << fake_header_details(app, request_id, status, form_type, delivery_type, start_date)
           end
-          list
+          list.compact
         end
 
-        def self.fake_header_details(request_id, status, form_type = nil, delivery_type = nil, start_date = nil)
+        def self.fake_header_details(app, request_id, status, form_type = nil, delivery_type = nil, start_date = nil)
           start_date ||= Time.zone.today
           end_date = start_date + 7.days
-          rng = Random.new(request_id)
-          fake_data = fake('securities_requests')
-          names = fake_data['names']
-          pledge_type = TRANSACTION_CODE.values.sample(random: rng)
-          request_status = SETTLEMENT_TYPE.values.sample(random: rng)
-          transfer_form_types = [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SAFEKEPT_DEPOSIT]
-          form_type ||= rng.rand(70..73)
-          delivery_type ||= (DELIVERY_TYPE.values.select {|type| type != SSKDeliverTo::INTERNAL_TRANSFER || transfer_form_types.include?(form_type) } ).sample(random: rng)
-          delivery_field = transfer_form_types.include?(form_type) ? 'RECEIVE_FROM' : 'DELIVER_TO'
-          aba_number = rng.rand(10000..99999)
-          participant_number = rng.rand(10000..99999)
-          account_number = rng.rand(10000..99999)
-          submitted_date = rng.rand(start_date..end_date)
-          authorized = MAPIRequestStatus::AUTHORIZED.include?(status)
-          authorized_date = submitted_date + rng.rand(0..2).days
-          created_by_offset = rng.rand(0..names.length-1)
-          created_by = fake_data['usernames'][created_by_offset]
-          created_by_name = names[created_by_offset]
-          authorized_by_name = names.sample(random: rng)
-          safekept_account_number = rng.rand(1000..9999)
-          pledge_to = PLEDGE_TO.values.sample(random: rng)
-          {
-            'REQUEST_ID' => request_id,
-            'PLEDGE_TYPE' => pledge_type,
-            'REQUEST_STATUS' => request_status,
-            delivery_field => delivery_type,
-            'BROKER_WIRE_ADDR' => '0541254875/FIRST TENN',
-            'ABA_NO' => aba_number,
-            'DTC_AGENT_PARTICIPANT_NO' => participant_number,
-            'MUTUAL_FUND_COMPANY' => "Mutual Funds R'Us",
-            'DELIVERY_BANK_AGENT' => 'MI6',
-            'REC_BANK_AGENT_NAME' => 'James Bond',
-            'REC_BANK_AGENT_ADDR' => '600 Mulberry Court, Boston, MA, 42893',
-            'CREDIT_ACCT_NO1' => account_number,
-            'CREDIT_ACCT_NO2' => account_number,
-            'MUTUAL_FUND_ACCT_NO' => account_number,
-            'CREDIT_ACCT_NO3' => account_number,
-            'SETTLE_DATE' => (authorized ? authorized_date : submitted_date) + 1.days,
-            'TRADE_DATE' => submitted_date,
-            'CREATED_BY' => created_by,
-            'CREATED_BY_NAME' => created_by_name,
-            'FORM_TYPE' => form_type,
-            'STATUS' => status,
-            'SUBMITTED_DATE' => submitted_date,
-            'SUBMITTED_BY' => created_by_name,
-            'AUTHORIZED_BY' => authorized ? authorized_by_name : nil,
-            'AUTHORIZED_DATE' => authorized ? authorized_date : nil,
-            'PLEDGE_TO' => pledge_to,
-            'PLEDGED_ADX_ID' => rng.rand(1000..9999),
-            'UNPLEDGED_ADX_ID' => safekept_account_number,
-            'UNPLEGED_TRANSFER_ADX_ID' => safekept_account_number
-          }
+          holidays = MAPI::Services::Rates::Holidays.holidays(app, start_date, end_date)
+          available_dates = (start_date..end_date).select{ |date| !weekend_or_holiday?(date, holidays) }
+          if available_dates.present?
+            rng = Random.new(request_id)
+            fake_data = fake('securities_requests')
+            names = fake_data['names']
+            pledge_type = TRANSACTION_CODE.values.sample(random: rng)
+            request_status = SETTLEMENT_TYPE.values.sample(random: rng)
+            transfer_form_types = [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SAFEKEPT_DEPOSIT]
+            form_type ||= rng.rand(70..73)
+            delivery_type ||= (DELIVERY_TYPE.values.select {|type| type != SSKDeliverTo::INTERNAL_TRANSFER || transfer_form_types.include?(form_type) } ).sample(random: rng)
+            delivery_field = transfer_form_types.include?(form_type) ? 'RECEIVE_FROM' : 'DELIVER_TO'
+            aba_number = rng.rand(10000..99999)
+            participant_number = rng.rand(10000..99999)
+            account_number = rng.rand(10000..99999)
+            submitted_date = available_dates.sample(random: rng)
+            authorized = MAPIRequestStatus::AUTHORIZED.include?(status)
+            authorized_date = submitted_date + rng.rand(0..2).days
+            authorized_date = MAPI::Services::Rates.find_next_business_day(authorized_date, 1.day, holidays)
+            created_by_offset = rng.rand(0..names.length-1)
+            created_by = fake_data['usernames'][created_by_offset]
+            created_by_name = names[created_by_offset]
+            authorized_by_name = names.sample(random: rng)
+            safekept_account_number = rng.rand(1000..9999)
+            pledge_to = PLEDGE_TO.values.sample(random: rng)
+            {
+              'REQUEST_ID' => request_id,
+              'PLEDGE_TYPE' => pledge_type,
+              'REQUEST_STATUS' => request_status,
+              delivery_field => delivery_type,
+              'BROKER_WIRE_ADDR' => '0541254875/FIRST TENN',
+              'ABA_NO' => aba_number,
+              'DTC_AGENT_PARTICIPANT_NO' => participant_number,
+              'MUTUAL_FUND_COMPANY' => "Mutual Funds R'Us",
+              'DELIVERY_BANK_AGENT' => 'MI6',
+              'REC_BANK_AGENT_NAME' => 'James Bond',
+              'REC_BANK_AGENT_ADDR' => '600 Mulberry Court, Boston, MA, 42893',
+              'CREDIT_ACCT_NO1' => account_number,
+              'CREDIT_ACCT_NO2' => account_number,
+              'MUTUAL_FUND_ACCT_NO' => account_number,
+              'CREDIT_ACCT_NO3' => account_number,
+              'SETTLE_DATE' => MAPI::Services::Rates.find_next_business_day((authorized ? authorized_date : submitted_date), 1.day, holidays),
+              'TRADE_DATE' => submitted_date,
+              'CREATED_BY' => created_by,
+              'CREATED_BY_NAME' => created_by_name,
+              'FORM_TYPE' => form_type,
+              'STATUS' => status,
+              'SUBMITTED_DATE' => submitted_date,
+              'SUBMITTED_BY' => created_by_name,
+              'AUTHORIZED_BY' => authorized ? authorized_by_name : nil,
+              'AUTHORIZED_DATE' => authorized ? authorized_date : nil,
+              'PLEDGE_TO' => pledge_to,
+              'PLEDGED_ADX_ID' => rng.rand(1000..9999),
+              'UNPLEDGED_ADX_ID' => safekept_account_number,
+              'UNPLEGED_TRANSFER_ADX_ID' => safekept_account_number
+            }
+          else
+            nil
+          end
         end
 
         def self.fake_securities(request_id, settlement_type)

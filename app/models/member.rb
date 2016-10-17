@@ -9,6 +9,9 @@ class Member
     settlement_transaction_account: {
       start_date: :this_month_start,
       end_date: :this_month_end
+    },
+    securities_transactions: {
+      start_date: :this_month_end
     }
   }.with_indifferent_access.freeze
 

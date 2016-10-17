@@ -142,6 +142,10 @@ When(/^I click on the view rate options link in the dashboard module$/) do
   page.find('.dashboard-module-add-advance-link').click
 end
 
+Then(/^I should not see Financing Availablity in the account overview$/) do
+  page.assert_no_selector('.dashboard-account-overview-table td', text: I18n.t('dashboard.your_account.table.remaining.available'), exact: true)
+end
+
 def get_module_by_section(section)
   heading = case section
     when 'recent activities'

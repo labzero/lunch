@@ -11,7 +11,8 @@ class Security
 
   attr_accessor *ACCESSIBLE_ATTRS
 
-  validates *REQUIRED_ATTRS, presence: true
+  validates :cusip, presence: true
+  validates :original_par, numericality: {greater_than: 0}, allow_blank: false
   validates *CURRENCY_ATTRIBUTES, numericality: true, allow_blank: true
   validate :cusip_format
 
@@ -41,10 +42,12 @@ class Security
     hash.each do |key, value|
       key = key.to_sym
       value = case key
-        when *ACCESSIBLE_ATTRS
-          value
-        else
-          raise ArgumentError, "unknown attribute: '#{key}'"
+      when *CURRENCY_ATTRIBUTES
+        (value.is_a?(Numeric) || value.nil?) ? value.to_f : value
+      when *ACCESSIBLE_ATTRS
+        value
+      else
+        raise ArgumentError, "unknown attribute: '#{key}'"
       end
       send("#{key}=", value)
     end

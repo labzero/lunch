@@ -215,10 +215,12 @@ When(/^I drag and drop the "(.*?)" file into the (edit|upload) securities dropzo
   page.execute_script("e = $.Event('drop'); e.originalEvent = {dataTransfer : { files : seleniumUpload.get(0).files } }; $('#{dropzone}').trigger(e);")
 end
 
-When(/^I should see an? (security required|original par numericality|no securities) field error$/) do |error_type|
+When(/^I should see an? (security required|original par numericality|no securities|original par blank) field error$/) do |error_type|
   text = case error_type
            when 'security required'
              I18n.t('activemodel.errors.models.security.blank').gsub("\n",' ')
+           when 'original par blank'
+             I18n.t('activemodel.errors.models.security.attributes.original_par.blank')
            when 'original par numericality'
              I18n.t('activemodel.errors.models.security.not_a_number', attribute: 'Original par')
            when 'no securities'
@@ -426,7 +428,7 @@ Then(/^I should see an uploaded transfer security with an? (description|original
   expect(page.all('.securities-display table tbody tr:first-child td')[index].text).to eq(value)
 end
 
-Then(/^I should (see|not see) the pledge legal copy$/) do |should_see|
+Then(/^I should (see|not see) the securities legal copy$/) do |should_see|
   if should_see == 'see'
     page.assert_selector('.securities-request-legal')
   else

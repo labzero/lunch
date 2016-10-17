@@ -37,19 +37,17 @@ Feature: Transfer Securities
     | safekept | Collateral Operations |
     | pledged  | Collateral Operations |
 
-  Scenario: Authorized signer views legal copy for pledge transfers
+  @jira-mem-1937
+  Scenario Outline: Authorized signer views legal copy for transfers
     Given I am logged in as a "quick-advance signer"
     And I am on the manage securities page
-    And I check the 1st Safekept security
+    And I check the 1st <type> security
     When I click the button to transfer the securities
-    Then I should see the pledge legal copy
-
-  Scenario: Authorized signer does not view legal copy for safekept transfers
-    Given I am logged in as a "quick-advance signer"
-    And I am on the manage securities page
-    And I check the 1st Pledged security
-    When I click the button to transfer the securities
-    Then I should not see the pledge legal copy
+    Then I should see the securities legal copy
+    Examples:
+      | type     |
+      | Pledged  |
+      | Safekept |
 
   @jira-mem-1716 @jira-mem-1874 @data-unavailable
   Scenario Outline: Member uploads an edited securities file that is valid
@@ -129,7 +127,7 @@ Feature: Transfer Securities
     Given I am on the transfer to <page> account securities page
     And the edit securities section is open
     When I drag and drop the "transfer_securities_missing_original_par.xlsx" file into the edit securities dropzone
-    Then I should see a security required field error
+    Then I should see an original par blank field error
   Examples:
     | page     |
     | pledged  |

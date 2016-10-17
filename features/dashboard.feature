@@ -50,3 +50,9 @@ Scenario: Users can download pregenreated reports
   When I visit the dashboard
   Then I should see the "quick reports" section in its loaded state
   And I should see a list of downloadedable quick reports
+
+@jira-mem-1771 @data-unavailable
+Scenario: Users don't see Financing Availablity if its disabled
+  Given the Finanancing Availability data source has been disabled
+  When I visit the dashboard
+  Then I should not see Financing Availablity in the account overview

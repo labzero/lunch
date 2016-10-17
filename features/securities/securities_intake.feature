@@ -35,7 +35,7 @@ Feature: Securities Intake
   Scenario Outline: Member uploads a securities intake file that is missing Original Par
     Given I am on the <page> page
     When I drag and drop the "intake_securities_missing_original_par.xlsx" file into the upload securities dropzone
-    Then I should see a security required field error
+    Then I should see an original par blank field error
   Examples:
   | page                |
   | safekeep securities |
@@ -108,7 +108,6 @@ Feature: Securities Intake
   | security_type |
   | safekeep      |
   | pledge        |
-
 
   @jira-mem-1790 @data-unavailable
   Scenario Outline: Member uploads a securities release file that is missing Settlement Amount and the request has a settlement type of Free

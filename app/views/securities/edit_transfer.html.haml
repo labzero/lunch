@@ -41,16 +41,18 @@
               = render 'table'
           = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: @accepted_upload_mimetypes, upload_url: securities_transfer_upload_path, type: :transfer}
         - if @authorizer
-          - if kind == :pledge_transfer
-            .securities-request-legal
-              =simple_format(t("securities.pledge.legal_copy"))
+          .securities-request-legal
+            - if kind == :pledge_transfer
               = render 'pledge_legal_copy'
+            - if kind == :safekept_transfer
+              = simple_format(t('securities.requests.view.safekept_transfer.legal.notices'))
+              = simple_format(t('securities.requests.view.safekept_transfer.legal.reservation_of_rights'))
           - unless @session_elevated
             = render 'shared/securid_module', error: @securid_status
         .securities-actions
           %span.secondary-button.delete-request-trigger{disabled: @securities_request.request_id && !policy(:security).delete?}= t('global.delete')
           =  submit_tag(@form_data[:submit_text], class: 'primary-button', disabled: true, data: {authorizer: @authorizer})
-        %p.legal-footer= t('securities.transfer.legal')
+        %p.legal-footer= t('securities.requests.view.legal.footer')
         = render 'delete_request_flyout', request_id: @securities_request.request_id
     =form_tag(@download_path, name: 'securities-release-download') do
       = hidden_field_tag('securities', @securities_request.securities.to_json)

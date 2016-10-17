@@ -63,7 +63,7 @@ $(function () {
         return tipPoint;
       },
       formatter: function() {
-        return "<span class=\"graph-tooltip-label\">" + Highcharts.dateFormat('%b %e', Date.parse(this.points[0].key)) + "</span> <span class=\"graph-tooltip-value\">" + this.y + "%</span>";
+        return "<span class=\"graph-tooltip-label\">" + Highcharts.dateFormat('%b %e', Date.parse(this.points[0].key)) + "</span> <span class=\"graph-tooltip-value\">" + this.y.toFixed(2) + "%</span>";
       },
       shape: 'callout',
       shared: true,
@@ -102,7 +102,8 @@ $(function () {
         step: 4,
         style: {
           fontSize: '8px'
-        }
+        },
+        format: '{value:.2f}'
       },
       showLastLabel: false,
       lineWidth: 1,

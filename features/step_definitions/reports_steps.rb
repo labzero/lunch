@@ -39,6 +39,16 @@ When(/^the "(.*?)" report has been disabled$/) do |report|
   # placeholder step for now in case we implement disabling reports during testing
 end
 
+Given(/^the (.+) data source has been disabled$/) do |data_source|
+  # placeholder step for now in case we implement disabling reports during testing
+end
+
+Then(/^I should (not )?see the Financing Availablity table$/) do |missing|
+  present = !missing.present?
+  page.public_send(present ? :assert_selector : :assert_no_selector, '.account-summary-report .report-main-body h2', text: I18n.t('reports.pages.account_summary.financing_availability.title'), exact: true, visible: true)
+end
+
+
 Then(/^I should see report summary data$/) do
   page.assert_selector('.report-summary-data', visible: true)
 end

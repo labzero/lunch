@@ -236,9 +236,24 @@ en:
         security:
           blank: "Each row must contain a CUSIP and an Original Par.\nEdit your file and try again."
           not_a_number: '%{attribute} must be a number.'
+          greater_than: '%{attribute} amount must be greater than zero.'
           attributes:
             cusip:
               invalid: "The following CUSIP is invalid: %{value}.\nEdit your file and try again."
+    attributes:
+      securities_request:
+        aba_number: ABA No.
+        delivery_bank_agent: "Delivering Bank/Agent’s Name"
+        receiving_bank_agent_name: "Receiving Bank/Agent’s Name"
+        receiving_bank_agent_address: "Receiving Bank/Agent’s Address"
+        physical_securities_credit_account_number: For Further Credit to Account No.
+        clearing_agent_fed_wire_address_1: Clearing Agent’s Fed Wire Account Number
+        clearing_agent_fed_wire_address_2: Clearing Agent’s Fed Wire Bank Name
+        fed_credit_account_number: For Further Credit to Account No.
+        clearing_agent_participant_number: Clearing Agent’s Participant No.
+        dtc_credit_account_number: For Further Credit to Account No.
+        mutual_fund_company: Mutual Fund Company
+        mutual_fund_account_number: Account No.
   activerecord:
     attributes:
       user:
@@ -944,7 +959,7 @@ en:
           pledging: Pledging and Reporting Designation
           lending_policy: Anti-Predatory Lending Policy Certification Blanket Lien Summary
           questionnaire_html: 'Commercial Banks, Savings Institutions, and Industrial Loan Companies: <br>Blanket Lien Collateral Eligibility Questionnaire—Summary Reporting'
-          certification: 'Blanket Lien Collateral Certification—Summary Reporting'
+          certification: 'Blanket Lien Collateral Certification—Summary Reporting—Credit Unions'
           notification: 'MCU Notification: Blanket Lien—Detailed Reporting'
         lien_other:
           title: 'Blanket Lien: Small Business, Agribusiness, and Farm Loans'
@@ -1269,12 +1284,12 @@ en:
         safekept_transfer:
           title: Transfer Pledged Securities Request
           footer: Transfer Pledged Securities Request
-        pledge_transfer:
-          title: Transfer Safekept Securities Request
-          footer: Transfer Safekept Securities Request
           legal:
             notices: By authorizing the transfer of the specific securities listed above, your institution is requesting the release and redelivery or reassignment of these securities pursuant to the terms of the Advances and Security Agreement between your institution and the Bank. You hereby certify that, as of the date of transfer of the securities, as requested, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Advances and Security Agreement) that will remain pledged to (and, if your institution is currently required to deliver collateral to the Bank, that will be held by) the Bank immediately after the requested transfer will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Advances and Security Agreement).
             reservation_of_rights: All rights, remedies, and obligations of the Bank with respect to the listed securities above shall be in accordance with the Advances and Security Agreement.
+        pledge_transfer:
+          title: Transfer Safekept Securities Request
+          footer: Transfer Safekept Securities Request
     release:
       title: Release Securities
       add_securities: Add Securities
@@ -1300,24 +1315,12 @@ en:
         fed: Fed
         dtc: DTC
         mutual_fund: Mutual Fund
-        internal: Internal Transfer
-        delivery_agent: "Delivering Bank/Agent's Name"
-        agent_name: "Receiving Bank/Agent's Name"
-        agent_address: "Receiving Bank/Agent's Address"
-        further_credit: For Further Credit to Account No.
-        fed_wire_address: "Clearing Agent's Fed Wire Address:"
-        aba: ABA No.
-        participant_number: Clearing Agent's Participant No.
-        mutual_fund: Mutual Fund Company
-        account_number: Account No.
-      clearing_agent: "Clearing Agent's Fed Wire Address:"
-      further_credit: For Further Credit to Account No.
+      clearing_agent: "Clearing Agent’s Fed Wire Address:"
       settlement_amount: 'Settlement Amount%{unit}%{footnote_marker}'
       settlement_amount_footnote: '%{footnote_marker}If Vs. Payment'
       custodian_name_footnote: '%{footnote_marker}The name of the custodian is required for all non-agency mortgage-backed securities (MBS). If the custodian of the note supporting the MBS transaction is the Issuer or a related party and the mortgage notes have not been endorsed to the trustee, the Bank requires that the party that has control over the mortgage notes (as determined by the Bank) have a long-term debt rating of at least BBB.'
       submit_authorization: Submit for Authorization
       authorize: Authorize
-      legal_copy: "Pursuant to the Advances and Security Agreement (Agreement) between your institution and the Bank, your institution requests the release and redelivery or reassignment of the securities listed above.\n\nBy authorizing the release of these securities, your institution certifies that, as of the date the securities are released, the Borrowing Capacity of the Eligible Collateral (as those terms are defined in the Agreement) that will remain pledged to the Bank immediately after the requested release will equal or exceed your institution’s current Collateral Maintenance Level (as defined in the Agreement)."
       edit:
         title: Edit Securities
         intro: "To edit the listed securities:"
@@ -1344,14 +1347,12 @@ en:
       download_template: Download Add Securities Template File
     pledge:
       title: Pledge Securities
-      legal_copy: Pursuant to the Advances and Security Agreement between your institution and the Bank, your institution has pledged and granted a security interest to the Bank in the securities listed above.
       additional_certifications: 'By authorizing the pledge of the specific securities listed above, your institution makes the following certifications:'
       anti_preditory_lending_title: Anti-Predatory Lending Policy Certification
       anti_preditory_lending_text: Your institution hereby certifies that it is aware of, and will comply with the Bank’s Anti-Predatory Lending Policy (as amended from time to time) at all times and represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date twhich any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
       nontraditional_and_subprime_mortgage_title: Nontraditional and Subprime Mortgage Lending Certification
       nontraditional_and_subprime_mortgage_text: Your institution hereby certifies that all residential mortgage loans pledged to the Bank that were originated or acquired by your institution after July 10, 2007, comply at all times with the Interagency Guidance on Nontraditional Mortgage Product Risks dated October 4, 2006, and the Statement on Subprime Mortgage Lending dated July 10, 2007. Your institution represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date on which any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
       and: and
-      legal_footer: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
     transfer:
       pledge:
         title: Transfer Securities to Pledged Account
@@ -1359,7 +1360,6 @@ en:
       safekeep:
         title: Transfer Securities to Safekeeping Account
         delivery_instructions: 'Internal Transfer from Pledged Account No. %{pledged_account} to Safekeeping Account No. %{safekept_account}'
-      legal: The Bank attempts same day settlement for all DTC and Fed Book Entry securities. These securities may require 24 hours to settle if instructions are received close to the 10:30 am processing deadline. Requests to settle physical securities, private placements, mutual funds share, or large volumes of securities may require more than one day to process.
     safekeep_pledge:
       upload_instructions:
         download_template: Download Template
@@ -2213,7 +2213,7 @@ en:
           hedge: Hedge against asset prepayment risk
           risk: Reduce risks associated with declining interest rate environments
           flexibility: Built-in long-term flexibility
-        max_term: 10 years
+        max_term: 15 years
         interest_rate: Fixed for the entire term of the advance
         interest_day_count: Actual/360
         interest_payment_frequency: Quarterly and at repayment
@@ -2348,7 +2348,7 @@ en:
           less_expensive: Generally less expensive than other long-term liabilities
         features:
           term:
-            description: Up to 30 years (for advances with partial prepayment symmetry, 1 to 10 years)
+            description: Up to 30 years (for advances with partial prepayment symmetry, 1 to 15 years)
           interest_rate:
             title: Interest Rate
             description: Fixed for the entire term of the advance. You may request immediate or forward funding.

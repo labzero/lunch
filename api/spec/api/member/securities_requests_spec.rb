@@ -54,7 +54,8 @@ describe MAPI::ServiceApp do
     end
 
     describe '`MAPI::Services::Member::SecuritiesRequests.fake_header_details_array`' do
-      let(:call_method) { MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(member_id) }
+      let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
+      let(:call_method) { MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(app, member_id) }
       let(:rng) { instance_double(Random, rand: 1) }
       let(:request_id) { rand(100000..999999) }
       before do
@@ -69,19 +70,23 @@ describe MAPI::ServiceApp do
         allow(rng).to receive(:rand).with(eq(18..36)).and_return(n)
         expect(call_method.length).to eq(n)
       end
+      it 'passes the app to the `fake_header_details` method' do
+        expect(securities_request_module).to receive(:fake_header_details).with(app, any_args).and_return({})
+        call_method
+      end
       it 'passes the `request_id` to the `fake_header_details` method' do
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, any_args).and_return({})
+        expect(securities_request_module).to receive(:fake_header_details).with(anything, request_id, any_args).and_return({})
         call_method
       end
       it 'passes a default `start_date` of today to the `fake_header_details` method if no start_date is provided' do
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, anything, anything, anything, Time.zone.today).and_return({})
+        expect(securities_request_module).to receive(:fake_header_details).with(anything, request_id, anything, anything, anything, Time.zone.today).and_return({})
         call_method
       end
       it 'passes the `start_date` to `fake_header_details` if present' do
         today = Time.zone.today
         start_date = [(today - 3.days)..today].sample
-        expect(securities_request_module).to receive(:fake_header_details).with(request_id, anything, anything, anything, start_date).and_return({})
-        MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(member_id, start_date)
+        expect(securities_request_module).to receive(:fake_header_details).with(anything, request_id, anything, anything, anything, start_date).and_return({})
+        MAPI::Services::Member::SecuritiesRequests.fake_header_details_array(app, member_id, start_date)
       end
       it 'generates at least one request for each form type and status combination' do
         allow(rng).to receive(:rand).with(eq(18..36)).and_return(18)
@@ -94,9 +99,15 @@ describe MAPI::ServiceApp do
         end
         expect(form_type_status_combos.length).to eq(18)
         form_type_status_combos.each do |combo|
-          expect(securities_request_module).to receive(:fake_header_details).with(anything, combo.last, combo.first, combo[1], anything).and_return({})
+          expect(securities_request_module).to receive(:fake_header_details).with(anything, anything, combo.last, combo.first, combo[1], anything).and_return({})
         end
         call_method
+      end
+      it 'filters out nil results from `fake_header_details`' do
+        n = rand(18..36)
+        allow(rng).to receive(:rand).with(eq(18..36)).and_return(n)
+        allow(securities_request_module).to receive(:fake_header_details).and_return(nil, nil, nil, {})
+        expect(call_method.length).to eq(n - 3)
       end
     end
 
@@ -158,14 +169,18 @@ describe MAPI::ServiceApp do
           allow(securities_request_module).to receive(:kind_from_details).with(header_details_array.first).and_return(kind)
         end
 
+        it 'calls `fake_header_details_array` with the app' do
+          expect(securities_request_module).to receive(:fake_header_details_array).with(app, any_args).and_return(header_details_array)
+          call_method
+        end
         it 'calls `fake_header_details_array` with the member_id' do
-          expect(securities_request_module).to receive(:fake_header_details_array).with(member_id, anything).and_return(header_details_array)
+          expect(securities_request_module).to receive(:fake_header_details_array).with(anything, member_id, anything).and_return(header_details_array)
           call_method
         end
         it 'calls `fake_header_details_array` with the `submitted_date_range`' do
           today = Time.zone.today
           allow(Time.zone).to receive(:today).and_return(today)
-          expect(securities_request_module).to receive(:fake_header_details_array).with(anything, ((today - 7.days)..today)).and_return(header_details_array)
+          expect(securities_request_module).to receive(:fake_header_details_array).with(anything, anything, ((today - 7.days)..today)).and_return(header_details_array)
           call_method
         end
         it 'passes the results of `fake_header_details_array` to `map_hash_values`' do
@@ -329,11 +344,11 @@ describe MAPI::ServiceApp do
                                                                                                     delivery_values,
                                                                                                     adx_type ) }
         let(:sentinel) { SecureRandom.hex }
-        let(:today) { Time.zone.today }
+        let(:today) { Time.zone.now }
 
         before do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
-          allow(Time.zone).to receive(:today).and_return(today)
+          allow(Time.zone).to receive(:now).and_return(today)
         end
 
         it 'expands delivery columns into the insert statement' do
@@ -410,8 +425,9 @@ describe MAPI::ServiceApp do
         end
 
         it 'sets the `last_modified_date`' do
-          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(Time.zone.today)
-          expect(call_method).to match /VALUES\s+\((\S+\s+){13}#{Time.zone.today}/
+          now = SecureRandom.hex
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(now)
+          expect(call_method).to match /VALUES\s+\((\S+\s+){13}#{now}/
         end
 
         it 'sets the `last_modified_by_name`' do
@@ -438,11 +454,11 @@ describe MAPI::ServiceApp do
       describe '`insert_security_query`' do
         let(:call_method) { MAPI::Services::Member::SecuritiesRequests.insert_security_query(header_id, detail_id, user_name, session_id, security, ssk_id) }
         let(:sentinel) { SecureRandom.hex }
-        let(:today) { Time.zone.today }
+        let(:today) { Time.zone.now }
 
         before do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
-          allow(Time.zone).to receive(:today).and_return(today)
+          allow(Time.zone).to receive(:now).and_return(today)
         end
 
         it 'constructs an insert statement with the appropriate column names' do
@@ -1042,8 +1058,12 @@ describe MAPI::ServiceApp do
           expect(securities_request_module).to receive(:fake_securities).with(anything, matched_header_details['REQUEST_STATUS']).and_return(securities)
           call_method
         end
+        it 'calls `fake_header_details_array` with the app' do
+          expect(securities_request_module).to receive(:fake_header_details_array).with(app, any_args).and_return(header_details_array)
+          call_method
+        end
         it 'calls `fake_header_details_array` with the member_id' do
-          expect(securities_request_module).to receive(:fake_header_details_array).with(member_id).and_return(header_details_array)
+          expect(securities_request_module).to receive(:fake_header_details_array).with(anything, member_id).and_return(header_details_array)
           call_method
         end
         it 'selects the header detail hash that matches the `request_id`' do
@@ -1312,6 +1332,7 @@ describe MAPI::ServiceApp do
     describe '`MAPI::Services::Member::SecuritiesRequests.fake_header_details`' do
       fake_data = fake('securities_requests')
       names = fake_data['names']
+      let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
       let(:request_id) { rand(1000..9999)}
       let(:status) { (securities_request_module::MAPIRequestStatus::AUTHORIZED + securities_request_module::MAPIRequestStatus::AWAITING_AUTHORIZATION).sample }
       let(:rng) { instance_double(Random) }
@@ -1321,8 +1342,11 @@ describe MAPI::ServiceApp do
       let(:aba_number) { rand(10000..99999) }
       let(:participant_number) { rand(10000..99999) }
       let(:account_number) { rand(10000..99999) }
-      let(:submitted_date) { Time.zone.today }
+      let(:submitted_date_offset) { rand(0..6) }
+      let(:submitted_date) { (Time.zone.today..(Time.zone.today + 7.days)).to_a[submitted_date_offset] }
       let(:authorized_date_offset) { rand(0..2) }
+      let(:authorized_date) { instance_double(Date) }
+      let(:settle_date) { instance_double(Date) }
       let(:authorized_by) { SecureRandom.hex }
       let(:created_by_offset) { rand(0..names.length-1) }
       let!(:form_type) { rand(70..73) }
@@ -1331,13 +1355,30 @@ describe MAPI::ServiceApp do
       let(:pledged_adx) { rand(1000..9999) }
       let(:unpledged_adx) { rand(1000..9999) }
 
-      let(:call_method) { securities_request_module.fake_header_details(request_id, status) }
+      let(:call_method) { securities_request_module.fake_header_details(app, request_id, status) }
       before do
         allow(Random).to receive(:new).and_return(rng)
-        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date, authorized_date_offset, created_by_offset, authorized_by_offset, unpledged_adx, pledge_to_offset, pledged_adx)
+        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, submitted_date_offset, authorized_date_offset, created_by_offset, authorized_by_offset, unpledged_adx, pledge_to_offset, pledged_adx)
         allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
+        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
+        allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(false)
+        allow(MAPI::Services::Rates).to receive(:find_next_business_day)
       end
 
+      it 'builds a holidays array with the start and end dates' do
+        start_date = Time.zone.today
+        end_date = start_date + 7.days
+        expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(app, start_date, end_date).and_return([])
+        call_method
+      end
+      it 'checks to make sure that no weekends or holidays are selected for submitted_date' do
+        expect(securities_request_module).to receive(:weekend_or_holiday?).exactly(8)
+        call_method
+      end
+      it 'returns nil if there are no available dates' do
+        allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(true)
+        expect(call_method).to be_nil
+      end
       it 'constructs a hash with a securities with a `REQUEST_ID` value equal to the passed arg' do
         expect(call_method['REQUEST_ID']).to eq(request_id)
       end
@@ -1389,7 +1430,7 @@ describe MAPI::ServiceApp do
       end
       it 'sets the `FORM_TYPE` to the passed one if provided' do
         form_type = double('A Form Type')
-        expect(securities_request_module.fake_header_details(request_id, status, form_type)['FORM_TYPE']).to eq(form_type)
+        expect(securities_request_module.fake_header_details(app, request_id, status, form_type)['FORM_TYPE']).to eq(form_type)
       end
       it 'constructs a hash with a `PLEDGE_TO` value' do
         expect(call_method['PLEDGE_TO']).to eq(securities_request_module::PLEDGE_TO.values[pledge_to_offset])
@@ -1403,12 +1444,12 @@ describe MAPI::ServiceApp do
       it 'constructs a hash with a `UNPLEGED_TRANSFER_ADX_ID` value' do
         expect(call_method['UNPLEGED_TRANSFER_ADX_ID']).to eq(unpledged_adx)
       end
-      it 'selects a `SUBMITTED_DATE` from the `start_date` and 7 days in the future' do
+      it 'selects available dates based on the provided `start_date` and 7 days in the future' do
         start_date = submitted_date
-        allow(rng).to receive(:rand).and_return(pledge_type_offset, request_status_offset, delivery_type_offset, aba_number, participant_number, account_number, authorized_date_offset, created_by_offset, authorized_by_offset, pledge_to_offset)
-        allow(rng).to receive(:rand).with(eq(70..73)).and_return(form_type)
-        expect(rng).to receive(:rand).with((start_date..(submitted_date + 7.days))).and_return(submitted_date)
-        securities_request_module.fake_header_details(request_id, status, nil, nil, start_date)
+        (start_date..(submitted_date + 7.days)).each do |date|
+          expect(securities_request_module).to receive(:weekend_or_holiday?).with(date, [])
+        end
+        securities_request_module.fake_header_details(app, request_id, status, nil, nil, start_date)
       end
       it 'constructs a hash with a `STATUS` value equal to the passed `status`' do
         expect(call_method['STATUS']).to eq(status)
@@ -1436,13 +1477,16 @@ describe MAPI::ServiceApp do
       end
       describe 'when an `AUTHORIZED` status is passed' do
         let(:status) { securities_request_module::MAPIRequestStatus::AUTHORIZED.sample }
+        let(:generated_authorized_date) { submitted_date + authorized_date_offset.days }
 
-        it 'constructs a hash with an `AUTHORIZED_DATE` value that is equal to the `SUBMITTED_DATE` plus an offset' do
-          expect(call_method['AUTHORIZED_DATE']).to eq(submitted_date + (authorized_date_offset).days)
+        it 'constructs a hash with an `AUTHORIZED_DATE` value that is equal to the next business day after the `SUBMITTED_DATE`' do
+          allow(MAPI::Services::Rates).to receive(:find_next_business_day).with(generated_authorized_date, 1.day, []).and_return(authorized_date)
+          expect(call_method['AUTHORIZED_DATE']).to eq(authorized_date)
         end
-        it 'constructs a hash with a `SETTLE_DATE` value equal to the `AUTHORIZED_DATE` plus one day' do
-          authorized_date = submitted_date + (authorized_date_offset).days
-          expect(call_method['SETTLE_DATE']).to eq(authorized_date + 1.day)
+        it 'constructs a hash with a `SETTLE_DATE` value equal to the next business day after the `AUTHORIZED_DATE`' do
+          allow(MAPI::Services::Rates).to receive(:find_next_business_day).with(generated_authorized_date, 1.day, []).and_return(authorized_date)
+          allow(MAPI::Services::Rates).to receive(:find_next_business_day).with(authorized_date, 1.day, []).and_return(settle_date)
+          expect(call_method['SETTLE_DATE']).to eq(settle_date)
         end
         it 'constructs a hash with an `AUTHORIZED_BY` value' do
           expect(call_method['AUTHORIZED_BY']).to eq(fake_data['names'][authorized_by_offset])
@@ -1454,8 +1498,9 @@ describe MAPI::ServiceApp do
         it 'constructs a hash with a nil value for `AUTHORIZED_DATE`' do
           expect(call_method['AUTHORIZED_DATE']).to be_nil
         end
-        it 'constructs a hash with a `SETTLE_DATE` value equal to the `SUBMITTED_DATE` plus one day' do
-          expect(call_method['SETTLE_DATE']).to eq(submitted_date + 1.day)
+        it 'constructs a hash with a `SETTLE_DATE` value equal to the next business day after `SUBMITTED_DATE`' do
+          allow(MAPI::Services::Rates).to receive(:find_next_business_day).with(submitted_date, 1.day, []).and_return(settle_date)
+          expect(call_method['SETTLE_DATE']).to eq(settle_date)
         end
         it 'constructs a hash with a nil value for `AUTHORIZED_BY`' do
           expect(call_method['AUTHORIZED_BY']).to be_nil
@@ -1948,7 +1993,7 @@ describe MAPI::ServiceApp do
       let(:delivery_type) { securities_request_module::DELIVERY_TYPE.to_a.sample(1).to_h }
       let(:kind) { "#{adx_type}_#{intake_or_release}" }
       let(:sentinel) { SecureRandom.hex }
-      let(:today) { Time.zone.today }
+      let(:today) { Time.zone.now }
       let(:intake_or_release) { [ :intake, :release ].sample }
       let(:form_type) { MAPI::Services::Member::SecuritiesRequests::ADXAccountTypeMapping::SYMBOL_TO_SSK_FORM_TYPE[kind.to_sym] }
       let(:call_method) { securities_request_module.update_request_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, delivery_columns, broker_instructions, delivery_type.keys.first, delivery_values, adx_type, intake_or_release) }
@@ -1956,7 +2001,7 @@ describe MAPI::ServiceApp do
       before do
         allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex)
         allow(securities_request_module).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
-        allow(Time.zone).to receive(:today).and_return(today)
+        allow(Time.zone).to receive(:now).and_return(today)
       end
 
       it 'returns an UPDATE query' do
@@ -2103,14 +2148,14 @@ describe MAPI::ServiceApp do
       }}
       let(:modification_by) { instance_double(String) }
       let(:sentinel) { SecureRandom.hex }
-      let(:today) { Time.zone.today }
+      let(:today) { Time.zone.now }
       let(:call_method) {securities_request_module.update_request_security_query(header_id, username, session_id, security, detail_id)}
 
       before do
         allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex)
         allow(securities_request_module).to receive(:nil_to_zero).and_return(SecureRandom.hex)
         allow(securities_request_module).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
-        allow(Time.zone).to receive(:today).and_return(today)
+        allow(Time.zone).to receive(:now).and_return(today)
       end
 
       it 'returns an UPDATE query' do
@@ -3409,11 +3454,11 @@ describe MAPI::ServiceApp do
                                                                                                      broker_instructions,
                                                                                                      :pledge_transfer) }
         let(:sentinel) { SecureRandom.hex }
-        let(:today) { Time.zone.today }
+        let(:today) { Time.zone.now }
 
         before do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
-          allow(Time.zone).to receive(:today).and_return(today)
+          allow(Time.zone).to receive(:now).and_return(today)
         end
 
         context 'with KIND_TRANSFER_MAPPING stubbed' do
@@ -3557,6 +3602,7 @@ describe MAPI::ServiceApp do
           allow(securities_request_module).to receive(:validate_securities)
           allow(securities_request_module).to receive(:validate_broker_instructions)
           allow(securities_request_module).to receive(:insert_transfer_header_query).and_return(insert_transfer_header_query_result)
+          allow(securities_request_module).to receive(:set_broker_instructions_for_transfer)
         end
 
         context 'validations' do
@@ -3809,7 +3855,7 @@ describe MAPI::ServiceApp do
         let(:broker_instruction_value) { instance_double(String) }
         let(:kind) {  instance_double(Symbol) }
         let(:sentinel) { SecureRandom.hex }
-        let(:today) { Time.zone.today }
+        let(:today) { Time.zone.now }
         let(:call_method) { securities_request_module.update_transfer_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, un_adx_id, broker_instructions, kind) }
         let(:call_method_safekept_transfer) { securities_request_module.update_transfer_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, un_adx_id, broker_instructions, :safekept_transfer) }
         let(:call_method_pledge_transfer) { securities_request_module.update_transfer_header_details_query(member_id, request_id, username, full_name, session_id, adx_id, un_adx_id, broker_instructions, :pledge_transfer) }
@@ -3817,7 +3863,7 @@ describe MAPI::ServiceApp do
         before do
           allow(securities_request_module).to receive(:quote).and_return(SecureRandom.hex)
           allow(securities_request_module).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
-          allow(Time.zone).to receive(:today).and_return(today)
+          allow(Time.zone).to receive(:now).and_return(today)
         end
 
         context 'with KIND_TRANSFER_MAPPING stubbed' do
@@ -3941,6 +3987,7 @@ describe MAPI::ServiceApp do
           allow(securities_request_module).to receive(:should_fake?).and_return(true)
           allow(kind).to receive(:to_sym).and_return(kind)
           allow(securities_request_module).to receive(:validate_kind).with(:transfer, kind).and_return(true)
+          allow(securities_request_module).to receive(:set_broker_instructions_for_transfer)
         end
 
         it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
@@ -4447,12 +4494,21 @@ describe MAPI::ServiceApp do
     end
 
     describe '`set_broker_instructions_for_transfer`' do
+      let(:app) { double(MAPI::ServiceApp, logger: double('logger'), settings: nil) }
       let(:kind) { SecureRandom.hex }
       let(:broker_instructions) {{}}
-      let(:today) { Time.zone.today.iso8601 }
+      let(:today) { Time.zone.today }
       let(:value) { SecureRandom.hex }
-      let(:call_method) { securities_request_module.set_broker_instructions_for_transfer(broker_instructions, kind) }
+      let(:call_method) { securities_request_module.set_broker_instructions_for_transfer(app, broker_instructions, kind) }
+      before do
+        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
+        allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(false)
+      end
 
+      it 'constructs a holidays array' do
+        expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(app).and_return([])
+        call_method
+      end
       ['settlement_type', 'transaction_code', 'trade_date', 'settlement_date'].each do |attr|
         it "does not change the value for `#{attr}` if there is a previously existing value" do
           broker_instructions[attr] = value
@@ -4464,9 +4520,20 @@ describe MAPI::ServiceApp do
 
       end
       ['trade_date', 'settlement_date'].each do |attr|
-        it "sets `#{attr}` to the iso8601 string for today" do
+        let(:next_business_day) { instance_double(Date) }
+        before do
+          allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(true)
+          allow(MAPI::Services::Rates).to receive(:find_next_business_day).and_return(next_business_day)
+          allow(next_business_day).to receive(:iso8601).and_return(next_business_day)
+        end
+
+        it 'calls `MAPI::Services::Rates.find_next_business_day` to find the next business day' do
+          expect(MAPI::Services::Rates).to receive(:find_next_business_day).with(today, 1.day, []).and_return(next_business_day)
           call_method
-          expect(broker_instructions[attr]).to eq(today)
+        end
+        it "sets `#{attr}` to the iso8601 string for the next business day" do
+          call_method
+          expect(broker_instructions[attr]).to eq(next_business_day.iso8601)
         end
       end
       it 'sets `transaction_code` to `standard`' do
@@ -4474,11 +4541,11 @@ describe MAPI::ServiceApp do
         expect(broker_instructions['transaction_code']).to eq('standard')
       end
       it 'sets `settlement_type` to `free` if the kind is `:pledge_transfer`' do
-        securities_request_module.set_broker_instructions_for_transfer(broker_instructions, :pledge_transfer)
+        securities_request_module.set_broker_instructions_for_transfer(app, broker_instructions, :pledge_transfer)
         expect(broker_instructions['settlement_type']).to eq('free')
       end
       it 'sets `settlement_type` to `vs_payment` if the kind is `:safekept_transfer`' do
-        securities_request_module.set_broker_instructions_for_transfer(broker_instructions, :safekept_transfer)
+        securities_request_module.set_broker_instructions_for_transfer(app, broker_instructions, :safekept_transfer)
         expect(broker_instructions['settlement_type']).to eq('vs_payment')
       end
     end
@@ -4486,7 +4553,7 @@ describe MAPI::ServiceApp do
     describe 'securities intake' do
       let(:delivery_columns) { [ SecureRandom.hex, SecureRandom.hex, SecureRandom.hex ] }
       let(:sentinel) { SecureRandom.hex }
-      let(:today) { Time.zone.today }
+      let(:today) { Time.zone.now }
       let(:header_id) { rand(9999..99999) }
       let(:user_name) {  SecureRandom.hex }
       let(:full_name) { SecureRandom.hex }
@@ -4518,7 +4585,7 @@ describe MAPI::ServiceApp do
                                                                                                   pledged_or_unpledged ) }
         before do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
-          allow(Time.zone).to receive(:today).and_return(today)
+          allow(Time.zone).to receive(:now).and_return(today)
         end
 
         it 'expands delivery columns into the insert statement' do
@@ -4812,13 +4879,13 @@ describe MAPI::ServiceApp do
       let(:signer_id) { double('A Signer ID') }
       let(:modification_by) { double('A Modification By') }
       let(:sentinel) { SecureRandom.hex }
-      let(:today) { Time.zone.today }
+      let(:today) { Time.zone.now }
       let(:call_method) { MAPI::Services::Member::SecuritiesRequests.authorize_request_query(member_id, request_id, username, full_name, session_id, signer_id) }
 
       before do
         allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(SecureRandom.hex)
         allow(MAPI::Services::Member::SecuritiesRequests).to receive(:format_modification_by).with(username, session_id).and_return(modification_by)
-        allow(Time.zone).to receive(:today).and_return(today)
+        allow(Time.zone).to receive(:now).and_return(today)
       end
 
       it 'returns an UPDATE query' do

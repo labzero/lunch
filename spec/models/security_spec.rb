@@ -3,10 +3,8 @@ require 'rails_helper'
 RSpec.describe Security, :type => :model do
   describe 'validations' do
     required_attrs = described_class::REQUIRED_ATTRS
-    required_attrs.each do |attr|
-      it "validates the presence of `#{attr}`" do
-        expect(subject).to validate_presence_of attr
-      end
+    it "validates the presence of `:cusip`" do
+      expect(subject).to validate_presence_of :cusip
     end
     described_class::CURRENCY_ATTRIBUTES.each do |attr|
       it "validates the numericality of `#{attr}`" do
@@ -18,6 +16,9 @@ RSpec.describe Security, :type => :model do
           expect(subject.errors.keys).not_to include(attr)
         end
       end
+    end
+    it 'checks to see if `:original_par` is greater than 0' do
+      expect(subject).to validate_numericality_of(:original_par).is_greater_than(0)
     end
     describe '`cusip_format`' do
       let(:cusip) { SecureRandom.hex }
@@ -162,14 +163,33 @@ RSpec.describe Security, :type => :model do
 
   describe '`attributes=`' do
     let(:hash) { {} }
-    let(:value) { double('some value') }
+    let(:value) { double('some value', is_a?: nil, nil?: nil) }
     let(:call_method) { subject.send(:attributes=, hash) }
 
-    (described_class::ACCESSIBLE_ATTRS - [:cusip]).each do |key|
+    (described_class::ACCESSIBLE_ATTRS - described_class::CURRENCY_ATTRIBUTES - [:cusip]).each do |key|
       it "assigns the value found under `#{key}` to the attribute `#{key}`" do
         hash[key.to_s] = value
         call_method
         expect(subject.send(key)).to be(value)
+      end
+    end
+    described_class::CURRENCY_ATTRIBUTES.each do |key|
+      it 'calls `to_f` on the value when the value is a Numeric' do
+        hash[key.to_s] = value
+        allow(value).to receive(:is_a?).with(Numeric).and_return(true)
+        expect(value).to receive(:to_f)
+        call_method
+      end
+      it 'calls `to_f` on the value when the value is nil' do
+        hash[key.to_s] = value
+        allow(value).to receive(:nil?).and_return(true)
+        expect(value).to receive(:to_f)
+        call_method
+      end
+      it 'does not call `to_f` if the value is a non-nil, non-Numeric' do
+        hash[key.to_s] = value
+        expect(value).not_to receive(:to_f)
+        call_method
       end
     end
     it 'calls the `cusip=` setter with the value found under `cusip`' do

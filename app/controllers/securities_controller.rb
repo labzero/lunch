@@ -257,13 +257,7 @@ class SecuritiesController < ApplicationController
                 { columns: [ { value: t('securities.requests.view.broker_instructions.settlement_date') },
                              { value: fhlb_date_standard_numeric(@securities_request.settlement_date) } ] } ] }
 
-      @delivery_instructions_table_data = {
-        rows: [ { columns: [ { value: t('securities.requests.view.delivery_instructions.delivery_method') },
-                             { value: get_delivery_instructions(@securities_request.delivery_type) } ] },
-                { columns: [ { value: t('securities.requests.view.delivery_instructions.clearing_agent') },
-                             { value: @securities_request.clearing_agent_participant_number } ] },
-                { columns: [ { value: t('securities.requests.view.delivery_instructions.further_credit') },
-                             { value: account_number } ] } ] }
+      @delivery_instructions_table_data = { rows: get_delivery_instruction_rows(@securities_request) }
     end
     rows = []
     @securities_request.securities.each do |security|
@@ -617,8 +611,8 @@ class SecuritiesController < ApplicationController
         { columns: [
           {value: security.cusip || t('global.missing_value')},
           {value: security.description || t('global.missing_value')},
-          {value: security.original_par, type: :currency, options: {unit: ""}},
-          {value: security.payment_amount, type: :currency, options: {unit: ""}}
+          {value: security.original_par.to_f, type: :currency, options: {unit: ""}},
+          {value: security.payment_amount.to_f, type: :currency, options: {unit: ""}}
         ] }
       end
       when :transfer
@@ -629,7 +623,7 @@ class SecuritiesController < ApplicationController
         { columns: [
           {value: security.cusip || t('global.missing_value')},
           {value: security.description || t('global.missing_value')},
-          {value: security.original_par, type: :currency, options: {unit: ""}}
+          {value: security.original_par.to_f, type: :currency, options: {unit: ""}}
         ] }
       end
     when :pledge, :safekeep
@@ -640,8 +634,8 @@ class SecuritiesController < ApplicationController
       rows = securities.collect do |security|
         { columns: [
           {value: security.cusip || t('global.missing_value')},
-          {value: security.original_par, type: :currency, options: {unit: ""}},
-          {value: security.payment_amount, type: :currency, options: {unit: ""}},
+          {value: security.original_par.to_f, type: :currency, options: {unit: ""}},
+          {value: security.payment_amount.to_f, type: :currency, options: {unit: ""}},
           {value: security.custodian_name || t('global.missing_value')}
         ] }
       end
@@ -804,6 +798,19 @@ class SecuritiesController < ApplicationController
 
   def get_delivery_instructions(delivery_type)
     I18n.t(DELIVERY_INSTRUCTIONS_DROPDOWN_MAPPING[delivery_type.to_sym][:text])
+  end
+
+  def get_delivery_instruction_rows(securities_request)
+    SecuritiesRequest::DELIVERY_INSTRUCTION_KEYS[securities_request.delivery_type].collect do |key|
+      { columns: [ { value: SecuritiesRequest.human_attribute_name(key) },
+                   { value: securities_request.public_send(key) } ] }
+    end.unshift(
+    {
+      columns: [
+        { value: t('securities.requests.view.delivery_instructions.delivery_method') },
+        { value: get_delivery_instructions(securities_request.delivery_type) }
+      ]
+    })
   end
 
   def set_edit_title_by_kind(kind)
