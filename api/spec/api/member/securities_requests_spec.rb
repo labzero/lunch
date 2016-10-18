@@ -1827,9 +1827,9 @@ describe MAPI::ServiceApp do
       let(:adx_type) { [:pledged, :unpledged ].sample }
 
       {
-        release: ['cusip', 'description', 'original_par'],
-        pledge_transfer: ['cusip', 'description', 'original_par'],
-        safekept_transfer: ['cusip', 'description', 'original_par'],
+        release: ['cusip', 'original_par'],
+        pledge_transfer: ['cusip', 'original_par'],
+        safekept_transfer: ['cusip', 'original_par'],
         intake: ['cusip', 'original_par']
       }.each do |type, required_fields|
         describe "for `type` #{type}" do

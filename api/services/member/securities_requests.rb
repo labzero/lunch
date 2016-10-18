@@ -101,8 +101,8 @@ module MAPI
                                    'dtc' => 'CREDIT_ACCT_NO2',
                                    'mutual_fund' => 'MUTUAL_FUND_ACCT_NO',
                                    'physical_securities' => 'CREDIT_ACCT_NO3' }
-        REQUIRED_SECURITY_RELEASE_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
-        REQUIRED_SECURITY_TRANSFER_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
+        REQUIRED_SECURITY_RELEASE_KEYS = [ 'cusip', 'original_par' ].freeze
+        REQUIRED_SECURITY_TRANSFER_KEYS = [ 'cusip', 'original_par' ].freeze
         REQUIRED_SECURITY_INTAKE_KEYS = [ 'cusip', 'original_par' ].freeze
         LAST_MODIFIED_BY_MAX_LENGTH = 30
         BROKER_WIRE_ADDRESS_FIELDS = ['clearing_agent_fed_wire_address_1', 'clearing_agent_fed_wire_address_2'].freeze
