@@ -73,7 +73,7 @@ class SecuritiesRequest
   validates *(DELIVERY_INSTRUCTION_KEYS[:fed] - [:fed_credit_account_number]), presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :fed }
   validates *(DELIVERY_INSTRUCTION_KEYS[:dtc] - [:dtc_credit_account_number]), presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :dtc }
   validates *DELIVERY_INSTRUCTION_KEYS[:mutual_fund], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :mutual_fund }
-  validates *(DELIVERY_INSTRUCTION_KEYS[:physical_securities] - [:physical_securities_credit_account_number]), presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :physical_securities }
+  validates :delivery_bank_agent, presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :physical_securities }
   validate :original_par_under_fed_limit, if: Proc.new { |request| request.delivery_type && request.delivery_type == :fed }
   validate :original_par_is_whole_number, if: Proc.new { |request| request.delivery_type && (request.delivery_type == :fed || request.delivery_type == :dtc) }
 

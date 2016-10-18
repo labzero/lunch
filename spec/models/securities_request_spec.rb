@@ -33,22 +33,26 @@ RSpec.describe SecuritiesRequest, :type => :model do
         expect(subject).to validate_presence_of attr
       end
     end
-    described_class::DELIVERY_TYPES.keys.each do |delivery_type|
+    (described_class::DELIVERY_TYPES.keys - [:physical_securities]).each do |delivery_type|
       describe "when `:delivery_type` is `#{delivery_type}`" do
         before do
           subject.delivery_type = delivery_type
         end
-        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] - [:dtc_credit_account_number, :fed_credit_account_number, :physical_securities_credit_account_number]).each do |attr|
+        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] - [:dtc_credit_account_number, :fed_credit_account_number]).each do |attr|
           it "validates the presence of `#{attr}`" do
             expect(subject).to validate_presence_of attr
           end
         end
-        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] & [:dtc_credit_account_number, :fed_credit_account_number, :physical_securities_credit_account_number]).each do |attr|
+        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] & [:dtc_credit_account_number, :fed_credit_account_number]).each do |attr|
           it "does not validate the presence of `#{attr}`" do
             expect(subject).to_not validate_presence_of attr
           end
         end
       end
+    end
+    it 'validates the presence of `:delivery_bank_agent` when the `delivery_type` is `:physical_securities`' do
+      subject.delivery_type = :physical_securities
+      expect(subject).to validate_presence_of :delivery_bank_agent
     end
     describe '`trade_date_must_come_before_settlement_date`' do
       let(:call_validation) { subject.send(:trade_date_must_come_before_settlement_date) }
