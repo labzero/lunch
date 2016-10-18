@@ -10,7 +10,17 @@ class Users::SessionsController < Devise::SessionsController
   end
 
   def create
-    super
+    begin
+      tries ||= 2
+      super
+    rescue ActiveRecord::RecordNotUnique => e
+      tries -= 1
+      if tries > 0
+        retry
+      else
+        raise e
+      end
+    end
     flash.discard(:notice)
   end
   
