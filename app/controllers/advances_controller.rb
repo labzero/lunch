@@ -175,8 +175,12 @@ class AdvancesController < ApplicationController
       else
         collateral_error = preview_errors.find {|e| e.code == :collateral }
         other_preview_error = preview_errors.find {|e| e.code != :capital_stock }
+        financing_availability_limit_error = preview_errors.find {|e| e.code == :gross_up_exceeds_financing_availability }
         if collateral_error
           error = collateral_error
+        elsif financing_availability_limit_error
+          populate_advance_summary_view_parameters
+          render :financing_availability_limit
         elsif other_preview_error
           error = other_preview_error
         elsif other_errors.present?

@@ -278,6 +278,17 @@ module MAPI
         end
 
         def self.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date=nil, allow_grace_period=false, funding_date=nil)
+          data = MAPI::Services::EtransactAdvances::ExecuteTrade::execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, funding_date)
+          if data['status'].include?('CapitalStockError')
+            credit_check = MAPI::Services::EtransactAdvances::ExecuteTrade::execute_trade_internal(app, member_id, instrument, operation, data['gross_amount'], advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, funding_date)
+            if credit_check['status'].include?('CreditError')
+              data['status'] << 'GrossUpExceedsFinancingAvailabilityError'
+            end
+          end
+          data
+        end
+
+        def self.execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date=nil, allow_grace_period=false, funding_date=nil)
           member_id = member_id.to_i
           # Calculated values
           # True maturity date will be calculated later
@@ -350,6 +361,8 @@ module MAPI
                 response_hash['status'] << 'DisabledProductError'
               elsif (amount.to_i == 100006)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_collateral_capstock_error.json')))
+              elsif (amount.to_i == 100007)
+                response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_gross_up_exceeds_financing_availability_error.json')))
               elsif (amount.to_i < 1000000) || (!check_capstock)
                 response_hash['status'] = ['Success']
                 response_hash['confirmation_number'] = ''

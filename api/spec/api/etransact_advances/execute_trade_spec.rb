@@ -716,7 +716,7 @@ describe MAPI::ServiceApp do
     end
   end
 
-  describe 'the `execute_trade` method' do
+  describe 'the `execute_trade` method validating credit limits for capital stock purchases' do
     let(:app) { double('app', settings: double('settings', environment: nil), logger: nil) }
     let(:today) { Time.zone.today }
     let(:built_message) { [double('message'), {}] }
@@ -728,7 +728,68 @@ describe MAPI::ServiceApp do
     let(:blended_cost_of_funds) { double('blended_cost_of_funds') }
     let(:cost_of_funds) { double('cost_of_funds') }
     let(:benchmark_rate) { double('benchmark_rate') }
-    let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period) }
+    let(:successful_trade_result) { { 'status' => ['Success'] } }
+    let(:gross_amount) { rand(9999..99999) }
+    let(:capital_stock_error) { { 'status' => ['CapitalStockError'], 'gross_amount' => gross_amount } }
+    let(:credit_error) { { 'status' => ['CreditError'] } }
+    let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, instrument,
+      'VALIDATE', amount, advance_term, advance_type, rate, true, signer, markup, blended_cost_of_funds,
+      cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, nil) }
+
+    it 'returns the result of `execute_trade_internal` if the status does not contain a `CapitalStockError`' do
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(
+        app, member_id, instrument, 'VALIDATE', amount, advance_term, advance_type, rate, true,
+        signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period,
+        nil).and_return(successful_trade_result)
+      expect(call_method).to eq(successful_trade_result)
+    end
+
+    context 'capital stock error' do
+      before do
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(app, member_id,
+          instrument, 'VALIDATE', amount, advance_term, advance_type, rate, true, signer, markup, blended_cost_of_funds,
+          cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, nil).and_return(capital_stock_error)
+      end
+
+      it 'validates the trade again if there is a `CapitalStockError`' do
+        expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(app, member_id,
+          instrument, 'VALIDATE', gross_amount, advance_term, advance_type, rate, false, signer, markup,
+          blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period,
+          nil).and_return(successful_trade_result)
+        call_method
+      end
+
+      it 'returns a `GrossUpExceedsFinancingAvailabilityError` if `gross_amount` exceeds credit limit' do
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(app, member_id,
+          instrument, 'VALIDATE', gross_amount, advance_term, advance_type, rate, false, signer, markup,
+          blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period,
+          nil).and_return(credit_error)
+        expect(call_method['status'].include?('GrossUpExceedsFinancingAvailabilityError')).to eq(true)
+      end
+
+      it 'returns the original response if there is a `CapitalStockError` but the `gross_amount` is within the member credit limit' do
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(app, member_id,
+          instrument, 'VALIDATE', gross_amount, advance_term, advance_type, rate, false, signer, markup,
+          blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period,
+          nil).and_return(successful_trade_result)
+        expect(call_method).to eq(capital_stock_error)
+      end
+    end
+  end
+
+  describe 'the `execute_trade_internal` method' do
+    let(:app) { double('app', settings: double('settings', environment: nil), logger: nil) }
+    let(:today) { Time.zone.today }
+    let(:built_message) { [double('message'), {}] }
+    let(:instrument) { double('instrument') }
+    let(:amount) { 234234 }
+    let(:signer) { double('signer') }
+    let(:markup) { double('markup') }
+    let(:day_count) { 'ACT/360' }
+    let(:blended_cost_of_funds) { double('blended_cost_of_funds') }
+    let(:cost_of_funds) { double('cost_of_funds') }
+    let(:benchmark_rate) { double('benchmark_rate') }
+    let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period) }
 
     before do
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:init_execute_trade_connection)

@@ -335,3 +335,16 @@ Scenario: User clicks on the FRC rates and sees Funding Date then selects skip b
   Then I should not see the add advance rate table
   And I should see a preview of the advance
 
+@jira-mem-1521
+Scenario: Member sees messaging that credit limit does not cover gross up stock purchase
+  Given I am on the "Add Advance" advances page
+  And I enter "100007" into the add advance amount field
+  And I click to toggle to the frc rates
+  And I select the rate with a term of "2week" and a type of "whole" on the add advance page
+  When I click on the initiate advance button on the add advance page
+  Then I should be on the financing availability limit screen
+  And I click on the initiate advance button on the add advance page
+  Then I should see a preview of the advance
+  When I enter my SecurID pin and token
+  And I click on the confirm add advance button
+  Then I should see the add advance confirmation page

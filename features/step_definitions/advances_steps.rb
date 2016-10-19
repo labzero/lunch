@@ -160,6 +160,10 @@ Then(/^I should be on the add advance stock purchase screen$/) do
   page.assert_selector('.add-advance-capstock')
 end
 
+Then(/^I should be on the financing availability limit screen$/) do
+  page.assert_selector('.add-advance-financing-availability-limit')
+end
+
 Then(/^I should see the cumulative stock purchase on the add advance preview screen$/) do
   page.assert_selector('.add-advance-preview dt', visible: true, exact: true, text: I18n.t('dashboard.quick_advance.field_headings.cumulative') + ':')
 end
@@ -357,4 +361,12 @@ end
 
 Given(/^I select the continue with advance option$/) do
   page.find('#continue_transaction').click
+end
+
+When(/^I click on the confirm add advance button$/) do
+  page.find('.confirm-add-advance').click
+end
+
+Then(/^I should see the add advance confirmation page$/) do
+  page.assert_selector('.add-advance-confirmation')
 end

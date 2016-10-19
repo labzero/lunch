@@ -557,6 +557,22 @@
   }
 }
 
+.add-advance-financing-availability-limit {
+  .add-advance-body {
+    @extend %bordered-section;
+    dd {
+      text-align: right;
+    }
+    .add-advance-summary {
+      width: 400px;
+      p {
+        font-size: 1rem;
+        font-weight: $semibold-weight;
+      }
+    }
+  }
+}
+
 .advance-rates-table-wrapper {
   @extend %bordered-section;
   padding: 0;

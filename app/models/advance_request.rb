@@ -551,6 +551,8 @@ class AdvanceRequest
             add_error(method, :total_daily_limit)
           when 'DisabledProductError'
             add_error(method, :disabled_product)
+          when 'GrossUpExceedsFinancingAvailabilityError'
+            add_error(method, :gross_up_exceeds_financing_availability)
           else
             add_error(method, :unknown, status)
           end
