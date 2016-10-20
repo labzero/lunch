@@ -476,26 +476,79 @@ RSpec.describe ApplicationController, :type => :controller do
   describe '`signer_full_name` method' do
     let(:signer) { double('A Signer Name') }
     let(:call_method) { subject.send(:signer_full_name) }
-    it 'returns the signer name from the session if present' do
-      session[described_class::SessionKeys::SIGNER_FULL_NAME] = signer
-      expect(call_method).to be(signer)
-    end
-    describe 'with no signer in session' do
-      let(:username) { double('A Username') }
-      before do
-        allow(subject).to receive_message_chain(:current_user, :username).and_return(username)
-        allow_any_instance_of(EtransactAdvancesService).to receive(:signer_full_name).with(username).and_return(signer)
-      end
-      it 'fetches the signer from the eTransact Service' do
-        expect_any_instance_of(EtransactAdvancesService).to receive(:signer_full_name).with(username)
-        call_method
-      end
-      it 'sets the signer name in the session' do
-        call_method
-        expect(session[described_class::SessionKeys::SIGNER_FULL_NAME]).to be(signer)
-      end
-      it 'returns the signer name' do
+
+    describe 'when the current_user is not an intranet user' do
+      before { allow(subject).to receive_message_chain(:current_user, :intranet_user?).and_return(false) }
+      it 'returns the signer name from the session if present' do
+        session[described_class::SessionKeys::SIGNER_FULL_NAME] = signer
         expect(call_method).to be(signer)
+      end
+      describe 'with no signer in session' do
+        let(:username) { double('A Username') }
+        before do
+          allow(subject).to receive_message_chain(:current_user, :username).and_return(username)
+          allow_any_instance_of(EtransactAdvancesService).to receive(:signer_full_name).with(username).and_return(signer)
+        end
+        it 'fetches the signer from the eTransact Service' do
+          expect_any_instance_of(EtransactAdvancesService).to receive(:signer_full_name).with(username)
+          call_method
+        end
+        it 'sets the signer name in the session' do
+          call_method
+          expect(session[described_class::SessionKeys::SIGNER_FULL_NAME]).to be(signer)
+        end
+        it 'returns the signer name' do
+          expect(call_method).to be(signer)
+        end
+      end
+    end
+    describe 'when the current_user is an intranet user' do
+      let(:current_member_id) { instance_double(String) }
+      let(:signer_with_name) { {roles: [User::Roles::ADVANCE_SIGNER], signer_name: instance_double(String)} }
+      let(:signer_without_name) { {roles: [User::Roles::ADVANCE_SIGNER]} }
+      let(:non_signer) { {roles: [User::Roles::MEMBER_USER]} }
+
+      before do
+        allow(subject).to receive(:current_member_id).and_return(current_member_id)
+        allow(subject).to receive_message_chain(:current_user, :intranet_user?).and_return(true)
+      end
+
+      it 'returns the signer name from the session if present' do
+        session[described_class::SessionKeys::SIGNER_FULL_NAME] = signer
+        expect(call_method).to be(signer)
+      end
+      it 'retrieves the `signers_and_users` from the MembersService' do
+        expect_any_instance_of(MembersService).to receive(:signers_and_users).with(current_member_id).and_return([])
+        call_method
+      end
+      it 'does not call `signer_full_name` from the EtransactAdvancesService' do
+        allow_any_instance_of(MembersService).to receive(:signers_and_users).with(current_member_id).and_return([])
+        expect_any_instance_of(EtransactAdvancesService).not_to receive(:signer_full_name)
+        call_method
+      end
+      describe 'when there are advance signers associated with the current bank' do
+        before { allow_any_instance_of(MembersService).to receive(:signers_and_users).and_return([non_signer, signer_with_name]) }
+
+        it 'sets the signer name in the session' do
+          call_method
+          expect(session[described_class::SessionKeys::SIGNER_FULL_NAME]).to be(signer_with_name[:signer_name])
+        end
+      end
+      describe 'when there are advance signers associated with the current bank but they do not have a signer_name associated with them' do
+        before { allow_any_instance_of(MembersService).to receive(:signers_and_users).and_return([non_signer, signer_without_name]) }
+
+        it 'sets the signer name in the session to nil' do
+          call_method
+          expect(session[described_class::SessionKeys::SIGNER_FULL_NAME]).to be_nil
+        end
+      end
+      describe 'when there are no advance signers associated with the current bank' do
+        before { allow_any_instance_of(MembersService).to receive(:signers_and_users).and_return([non_signer]) }
+
+        it 'sets the signer name in the session to nil' do
+          call_method
+          expect(session[described_class::SessionKeys::SIGNER_FULL_NAME]).to be_nil
+        end
       end
     end
   end

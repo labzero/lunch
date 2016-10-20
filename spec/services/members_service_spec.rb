@@ -223,7 +223,7 @@ describe MembersService do
             expect(member).to satisfy { |list| list.find {|e| e[attr] == value }}
           end
         end
-        {display_name: :name, roles: :roles, surname: :last_name, given_name: :first_name, email: :email}.each do |attr, signer_attr|
+        {display_name: :name, roles: :roles, surname: :last_name, given_name: :first_name, email: :email, signer_name: :name}.each do |attr, signer_attr|
           it "contains hashes with a `#{attr}` representing all signers associated with a bank" do
             value = signer[signer_attr]
             value = signer_mapped_roles if attr == :roles
@@ -233,6 +233,13 @@ describe MembersService do
         it 'does not add a signer to the result set if the signer is also a user' do
           allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer, duplicate_signer].to_json))
           expect(member.length).to eq(2)
+        end
+        it 'adds the signer name as `signer_name` to a user if the user is also a signer' do
+          allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: [signer, duplicate_signer].to_json))
+          expect(member.last[:signer_name]).to eq(duplicate_signer[:name])
+        end
+        it 'assigns `signer_name` the `display_name` of the user' do
+          expect(member.last[:signer_name]).to eq(user.display_name)
         end
         describe 'when no signers were found' do
           before do

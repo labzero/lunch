@@ -11,6 +11,8 @@
     %p= t('dashboard.quick_advance.error.advance_unavailable', phone_number: service_desk_phone_number)
   -elsif @error_message == :rate_expired
     %p= t('dashboard.quick_advance.error.rate_expired')
+  -elsif @error_message == :not_authorized
+    %p= t('dashboard.quick_advance.error.not_authorized')
   -else
     %p= t('dashboard.quick_advance.error.advance_unavailable', phone_number: service_desk_phone_number)
   = render 'add_advance_summary', advance_amount: @advance_amount, advance_description: @advance_description, advance_program: @advance_program, advance_type: @advance_type, advance_rate: @advance_rate, human_interest_day_count: @human_interest_day_count, human_payment_on: @human_payment_on, advance_term: @advance_term, advance_raw_term: @advance_raw_term,funding_date: @funding_date, maturity_date: @maturity_date, stock: @stock

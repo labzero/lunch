@@ -241,6 +241,8 @@ Then(/^I should see an? "(.*?)" advance error(?: with amount (\d+) and type "(.*
       /\A#{Regexp.quote(I18n.t('dashboard.quick_advance.error.advance_unavailable', phone_number: service_desk_phone_number))}\z/
     when 'rate expired'
       /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.rate_expired"))}\z/
+    when 'unauthorized'
+      /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.not_authorized"))}\z/
     else
       raise 'Unknown error_type'
   end

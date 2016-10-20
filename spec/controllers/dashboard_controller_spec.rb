@@ -317,9 +317,12 @@ RSpec.describe DashboardController, :type => :controller do
         make_request 
       end
     end
-    it 'does not enqueue a rate fetch job if the user can not sign advances' do
-      expect(RatesServiceJob).to_not receive(:perform_later)
-      make_request  
+    describe 'when the user is not an advance signer' do
+      deny_policy :advance, :show?
+      it 'does not enqueue a rate fetch job if the user can not sign advances' do
+        expect(RatesServiceJob).to_not receive(:perform_later)
+        make_request
+      end
     end
   end
 

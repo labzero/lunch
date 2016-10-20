@@ -334,7 +334,7 @@ Scenario: User clicks on the FRC rates and sees Funding Date then selects skip b
   When I click on the initiate advance button on the add advance page
   Then I should not see the add advance rate table
   And I should see a preview of the advance
-
+  
 @jira-mem-1521
 Scenario: Member sees messaging that credit limit does not cover gross up stock purchase
   Given I am on the "Add Advance" advances page
@@ -348,3 +348,11 @@ Scenario: Member sees messaging that credit limit does not cover gross up stock 
   When I enter my SecurID pin and token
   And I click on the confirm add advance button
   Then I should see the add advance confirmation page
+
+@jira-mem-643
+Scenario: Intranet user walks through the add advance flow
+  Given I am logged in as an "intranet user"
+  When I am on the add advance preview screen
+  Then I shouldn't see the SecurID fields
+  When I click on the add advance confirm button
+  Then I should see a "unauthorized" advance error

@@ -117,7 +117,14 @@ class ApplicationController < ActionController::Base
   end
 
   def signer_full_name
-    session[SessionKeys::SIGNER_FULL_NAME] ||= EtransactAdvancesService.new(request).signer_full_name(current_user.username)
+    # If the user is an intranet user, they will not be a signer and we should use the first advance signer of the bank they are logged in as
+    session[SessionKeys::SIGNER_FULL_NAME] ||= (
+      if current_user.intranet_user?
+        MembersService.new(request).signers_and_users(current_member_id).select{|user| user[:roles].include?(User::Roles::ADVANCE_SIGNER)}.first.try(:[], :signer_name)
+      else
+        EtransactAdvancesService.new(request).signer_full_name(current_user.username)
+      end
+    )
   end
 
   alias_method_chain :authenticate_user!, :authentication_flag

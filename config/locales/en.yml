@@ -667,6 +667,7 @@ en:
         updated_rate: The rate for this advance has changed from %{old_rate} to %{new_rate}.
         advance_unavailable: This advance is unavailable online right now. Call Member Services at %{phone_number} for more information.
         rate_expired: The rate you selected has expired. To initiate this advance, review and select from the current rates.
+        not_authorized: This Advance Request was not completed because Bank employees are not authorized to complete advances via the member portal.
     reports:
       title: Reports
       as_of_yesterday: As of yesterday

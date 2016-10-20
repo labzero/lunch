@@ -203,19 +203,23 @@ class AdvancesController < ApplicationController
 
   # POST
   def perform
-    securid_status = securid_perform_check
+    securid_status = securid_perform_check if policy(:advance).execute?
     advance_success = false
-    if session_elevated?
+    if session_elevated? || !policy(:advance).execute?
       expired_rate = advance_request.expired?
       if expired_rate
         populate_advance_error_view_parameters(error_message: :rate_expired)
       else
-        advance_request.execute
-        if advance_request.executed?
-          advance_success = true
-          populate_advance_summary_view_parameters
+        if policy(:advance).execute?
+          advance_request.execute
+          if advance_request.executed?
+            advance_success = true
+            populate_advance_summary_view_parameters
+          else
+            populate_advance_error_view_parameters
+          end
         else
-          populate_advance_error_view_parameters
+          populate_advance_error_view_parameters(error_message: :not_authorized)
         end
       end
     end
@@ -224,7 +228,7 @@ class AdvancesController < ApplicationController
     logger.info { '  Advance Request Errors: ' + advance_request.errors.inspect }
     logger.info { '  Execute Results: ' + {securid: securid_status, advance_success: advance_success}.inspect }
 
-    if !session_elevated?
+    if !session_elevated? && policy(:advance).execute?
       populate_advance_preview_view_parameters(securid_status: securid_status)
       render :preview
     elsif advance_success != true
