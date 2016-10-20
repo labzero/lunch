@@ -82,8 +82,8 @@ module MAPI
           if date.respond_to?(:strftime)
             date = date.strftime(DATE_FORMAT)
           end
-          parsed = DateTime.strptime(date.to_s + time.to_s + Time.zone.name, DATETIME_FORMAT).in_time_zone
-          parsed - parsed.period.std_offset # since DateTime.strptime does not handle DST when passed a generic time zone name
+          time = time.to_s
+          Time.zone.parse(date.to_s + ' ' + time[0..1] + ':' + time[2..3])
         end
 
         def self.override_end_time(bucket, now)

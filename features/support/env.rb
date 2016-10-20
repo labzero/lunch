@@ -12,7 +12,7 @@ require 'i18n'
 I18n.load_path += Dir.glob('config/locales/*.yml')
 
 require 'active_support/all'
-Time.zone = ENV['TIMEZONE'] || 'Pacific Time (US & Canada)'
+Time.zone = ENV['TIMEZONE'] || 'America/Los_Angeles'
 
 require_relative 'utils'
 

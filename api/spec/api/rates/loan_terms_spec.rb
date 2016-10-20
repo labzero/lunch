@@ -312,27 +312,23 @@ describe MAPI::Services::Rates::LoanTerms do
     end
 
     describe '`parse_time`' do
-      let(:time) { double(Time, to_s: SecureRandom.hex) }
+      let(:time) { double(Time, to_s: SecureRandom.hex, length: 4, :[] => '') }
       let(:date) { double(Date, to_s: SecureRandom.hex) }
-      let(:parsed_datetime) { double(DateTime) }
-      let(:parsed_timewithzone) { double(ActiveSupport::TimeWithZone) }
-      let(:pst) { ActiveSupport::TimeZone.new('Pacific Time (US & Canada)') }
-      let(:est) { ActiveSupport::TimeZone.new('Eastern Time (US & Canada)') }
+      let(:pst) { ActiveSupport::TimeZone.new('America/Los_Angeles') }
+      let(:est) { ActiveSupport::TimeZone.new('America/New_York') }
       let(:other_zone) { Time.zone == pst ? est : pst }
       let(:call_method) { subject.parse_time(date, time) }
       before do
-        allow(parsed_datetime).to receive(:in_time_zone).and_return(parsed_timewithzone)
+        allow(time).to receive(:to_s).and_return(time)
       end
       context 'duck typing' do
-        before do
-          allow(DateTime).to receive(:strptime).and_return(Time.zone.now)
-        end
+        before { allow(Time.zone).to receive(:parse) }
         it 'converts the `date` to a string' do
           expect(date).to receive(:to_s)
           call_method
         end
         it 'converts the `time` to a string' do
-          expect(time).to receive(:to_s)
+          expect(time).to receive(:to_s).and_return(time)
           call_method
         end
         it 'calls `strftime` on the `date` if it responds' do
@@ -343,31 +339,6 @@ describe MAPI::Services::Rates::LoanTerms do
           allow(date).to receive(:respond_to?).with(:strftime).and_return(false)
           expect(date).to_not receive(:strftime)
           call_method
-        end
-      end
-      it 'parses the supplied string according to the DATETIME_FORMAT' do
-        expect(DateTime).to receive(:strptime).with(date.to_s + time.to_s + Time.zone.name, described_class::DATETIME_FORMAT).and_return(Time.zone.now)
-        call_method
-      end
-      context 'DST correction algorithim' do
-        let(:dst_corrected_timewithzone) { double(ActiveSupport::TimeWithZone) }
-        let(:std_offset) { double(Numeric) }
-        let(:period) { double(TZInfo::TimezonePeriod, std_offset: std_offset) }
-        before do
-          allow(parsed_timewithzone).to receive(:period).and_return(period)
-          allow(parsed_timewithzone).to receive(:-).with(std_offset).and_return(dst_corrected_timewithzone)
-          allow(DateTime).to receive(:strptime).and_return(parsed_datetime)
-        end
-        it 'fetches the `std_offset` from the parsed TimeWithZone' do
-          expect(period).to receive(:std_offset)
-          call_method
-        end
-        it 'subtracts the `std_offset` from the parsed TimeWithZone' do
-          expect(parsed_timewithzone).to receive(:-).with(std_offset)
-          call_method
-        end
-        it 'returns the DST shifted TimeWithZone' do
-          expect(call_method).to be(dst_corrected_timewithzone)
         end
       end
       {
@@ -398,6 +369,11 @@ describe MAPI::Services::Rates::LoanTerms do
         time_minute = time.change(sec: 0)
         time_date = time.change(hour: 0, min: 0, sec: 0)
         expect(subject.parse_time(time_date, time.strftime('%H%M'))).to eq(time_minute)
+      end
+      it 'treats the first 2 digits of the time as hours and the last two digits as minutes' do
+        time = rand(0..2400).to_s.rjust(4, '0')
+        expect(Time.zone).to receive(:parse).with(include(time[0..1] + ':' + time[2..3]))
+        subject.parse_time(Time.zone.today, time)
       end
     end
 
