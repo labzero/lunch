@@ -1,5 +1,6 @@
 class ErrorController < ApplicationController
-  skip_before_action :authenticate_user!, :check_terms
+  skip_before_action :authenticate_user!, only: [:standard_error, :maintenance]
+  skip_before_action :check_terms
 
   def standard_error
     raise StandardError
