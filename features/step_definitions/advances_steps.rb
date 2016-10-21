@@ -243,6 +243,10 @@ Then(/^I should see an? "(.*?)" advance error(?: with amount (\d+) and type "(.*
       /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.rate_expired"))}\z/
     when 'unauthorized'
       /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.not_authorized"))}\z/
+    when 'total daily limit'
+      /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.exceeds_daily_limit", limit: fhlb_formatted_currency_whole(100000000, {html: false})))}\z/
+    when 'end time'
+      /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.end_of_day", time: fhlb_formatted_time(Time.zone.now - 5.minutes).strip))}\z/
     else
       raise 'Unknown error_type'
   end

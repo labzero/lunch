@@ -1650,12 +1650,41 @@ describe AdvanceRequest do
         'CapitalStockError' => :capital_stock,
         'CreditError' => :credit,
         'CollateralError' => :collateral,
-        'ExceedsTotalDailyLimitError' => :total_daily_limit,
         'DisabledProductError' => :disabled_product
       }.each do |status, code|
         it "adds an error with a code of `#{code}` if the status contains `#{status}`" do
           allow(response).to receive(:[]).with(:status).and_return([status])
           expect(subject).to receive(:add_error).with(error_type, code)
+          call_method
+        end
+      end
+      describe ' when the status contains `ExceedsTotalDailyLimitError`' do
+        let(:total_daily_limit) { instance_double(String) }
+        before do
+          allow(response).to receive(:[]).with(:status).and_return(['ExceedsTotalDailyLimitError'])
+          allow(response).to receive(:[]).with(:total_daily_limit).and_return(total_daily_limit)
+        end
+        it 'adds an error with a code of `:total_daily_limit`' do
+          expect(subject).to receive(:add_error).with(error_type, :total_daily_limit, anything)
+          call_method
+        end
+        it 'adds an error with a value equal to the `total_daily_limit` value from the response' do
+          expect(subject).to receive(:add_error).with(anything, anything, total_daily_limit)
+          call_method
+        end
+      end
+      describe ' when the status contains `EndOfDayReached`' do
+        let(:end_of_day) { instance_double(String) }
+        before do
+          allow(response).to receive(:[]).with(:status).and_return(['EndOfDayReached'])
+          allow(response).to receive(:[]).with(:end_of_day).and_return(end_of_day)
+        end
+        it 'adds an error with a code of `:end_of_day`' do
+          expect(subject).to receive(:add_error).with(error_type, :end_of_day, anything)
+          call_method
+        end
+        it 'adds an error with a value equal to the `end_of_day` value from the response' do
+          expect(subject).to receive(:add_error).with(anything, anything, end_of_day)
           call_method
         end
       end

@@ -37,7 +37,7 @@ class AdvanceRequest
     :collateral_authorized_amount, :trade_date, :allow_grace_period
   ].freeze
   CORE_PARAMETERS = [:type, :rates, :term, :amount, :rate, :stock_choice].freeze
-  PREVIEW_EXCLUDE_KEYS = [:advance_amount, :advance_rate, :advance_type, :advance_term, :status].freeze
+  PREVIEW_EXCLUDE_KEYS = [:advance_amount, :advance_rate, :advance_type, :advance_term, :status, :total_daily_limit, :end_of_day].freeze
   PARAMETER_ORDER = [:rates, :term, :type, :amount].freeze
   SERIALIZATION_EXCLUDE_ATTRS = [:request].freeze
 
@@ -548,11 +548,13 @@ class AdvanceRequest
           when 'CollateralError'
             add_error(method, :collateral)
           when 'ExceedsTotalDailyLimitError'
-            add_error(method, :total_daily_limit)
+            add_error(method, :total_daily_limit, response[:total_daily_limit])
           when 'DisabledProductError'
             add_error(method, :disabled_product)
           when 'GrossUpExceedsFinancingAvailabilityError'
             add_error(method, :gross_up_exceeds_financing_availability)
+          when 'EndOfDayReached'
+            add_error(method, :end_of_day, response[:end_of_day])
           else
             add_error(method, :unknown, status)
           end

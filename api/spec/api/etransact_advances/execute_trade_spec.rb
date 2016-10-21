@@ -649,7 +649,6 @@ describe MAPI::ServiceApp do
         let(:advance_amount) { rand(100000..9999999)}
         let(:total_daily_limit) { double('total daily limit')}
         let(:settings) { double('settings', :'[]' => nil) }
-        let(:local_total_daily_limit) { MAPI::Services::EtransactAdvances::ExecuteTrade::LOCAL_TOTAL_DAILY_LIMIT }
         let(:check_advance) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(env, advance_amount, response_hash)}
         before do
           allow(MAPI::Services::Member::TradeActivity).to receive(:current_daily_total).and_return( advance_amount )
@@ -662,10 +661,18 @@ describe MAPI::ServiceApp do
           check_advance = MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(app, advance_amount, response_hash)
           expect(check_advance['status']).to include('foo')
         end
-        it 'returns a hash with a `status` array that includes \'ExceedsTotalDailyLimitError\' if the requested advance plus the current daily total exceeds the limit set by FHLB' do
-          daily_limit = 2 * advance_amount - 100
-          allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
-          expect(check_advance['status']).to include('ExceedsTotalDailyLimitError')
+        describe 'when the requested advance plus the current daily total exceeds the limit set by FHLB' do
+          before do
+            daily_limit = 2 * advance_amount - 100
+            allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
+          end
+
+          it 'returns a hash with a `status` array that includes \'ExceedsTotalDailyLimitError\'' do
+            expect(check_advance['status']).to include('ExceedsTotalDailyLimitError')
+          end
+          it 'returns a hash with a `total_daily_limit` value equal to the limit set by FHLB' do
+            expect(check_advance['total_daily_limit']).to eq(total_daily_limit)
+          end
         end
         it 'returns the response_hash it was passed if the requested advance plus the current daily total does not exceed the limit set by FHLB' do
           daily_limit = 2 * advance_amount + 100
@@ -712,6 +719,18 @@ describe MAPI::ServiceApp do
       it 'defaults the allow_grace_period argument to false' do
         expect(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(anything, anything, false)
         MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(logger, environment, type, term, response)
+      end
+      describe 'when the product has a true value for `end_time_reached`' do
+        before { loan_term[:end_time_reached] = true }
+
+        it 'adds a status of `EndOfDayReached`' do
+          expect(call_method['status']).to eq(original_status + ['EndOfDayReached'])
+        end
+        it 'sets the `end_of_day` value to the the `end_time` for the product' do
+          end_time = instance_double(String)
+          loan_term[:end_time] = end_time
+          expect(call_method['end_of_day']).to eq(end_time)
+        end
       end
     end
   end

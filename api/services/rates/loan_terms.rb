@@ -20,25 +20,26 @@ module MAPI
           now[:date] == override_time.try(:to_date) ? override_time : end_time(bucket, now)
         end
 
-        def self.trade_status(bucket, now)
+        def self.before_end_time?(bucket, now)
           end_time = appropriate_end_time(bucket, now)
           end_time ? (now[:time] < end_time) : false
         end
 
-        def self.loan_term(trade_status, display_status, bucket_label)
-          { trade_status: display_status && trade_status, display_status: display_status, bucket_label: bucket_label }.with_indifferent_access
+        def self.loan_term(before_end_time, display_status, bucket_label, end_time)
+          { trade_status: display_status && before_end_time, display_status: display_status, bucket_label: bucket_label, end_time: end_time.try(:iso8601), end_time_reached: !before_end_time }.with_indifferent_access
         end
 
-        def self.hash_for_type(bucket, type, bucket_label, trade_status)
-          loan_term(trade_status, display_status(bucket, type), bucket_label)
+        def self.hash_for_type(bucket, type, bucket_label, before_end_time, now)
+          end_time = appropriate_end_time(bucket, now)
+          loan_term(before_end_time, display_status(bucket, type), bucket_label, end_time)
         end
 
-        def self.hash_for_types(bucket, label, trade_status)
-          hash_from_pairs( LOAN_TYPES.map { |type| [type, hash_for_type(bucket, type, label, trade_status)] } )
+        def self.hash_for_types(bucket, label, before_end_time, now)
+          hash_from_pairs( LOAN_TYPES.map { |type| [type, hash_for_type(bucket, type, label, before_end_time, now)] } )
         end
 
         def self.value_for_term(bucket, now)
-          bucket.nil? ? BLANK_TYPES : hash_for_types(bucket, bucket['TERM_BUCKET_LABEL'], trade_status(bucket, now))
+          bucket.nil? ? BLANK_TYPES : hash_for_types(bucket, bucket['TERM_BUCKET_LABEL'], before_end_time?(bucket, now), now)
         end
 
         def self.display_status(bucket, type)
@@ -49,7 +50,7 @@ module MAPI
           MAPI::Services::EtransactAdvances::TERM_BUCKET_MAPPING[term]
         end
 
-        BLANK=loan_term(false,  false, 'NotFound')
+        BLANK=loan_term(false,  false, 'NotFound', nil)
         BLANK_TYPES=hash_from_pairs( LOAN_TYPES.map{ |type| [type, BLANK] } )
 
         def self.loan_terms(logger, environment, allow_grace_period=false)
