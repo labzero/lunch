@@ -2129,6 +2129,7 @@ en:
       title: Manage Advances
       all: All Advances
       outstanding: Outstanding Advances
+      footnote_rates_html: "* For VRC and ARC Advances, the initial rate is shown. For FRC Advances, the current rate is shown."
       footnote_html: "If you have questions, please email <a href=\"%{mailto_url}\">Operations</a> or call %{phone_number}."
     confirmation:
       title: Advance Confirmation

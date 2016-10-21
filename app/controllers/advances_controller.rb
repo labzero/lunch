@@ -35,7 +35,7 @@ class AdvancesController < ApplicationController
   end
 
   def manage
-    column_headings = [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), t('advances.rate'), t('common_table_headings.current_par') + ' ($)']
+    column_headings = [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), t('global.footnoted_string', string: t('advances.rate')), t('common_table_headings.current_par') + ' ($)']
     column_headings << t('advances.confirmation.title') if feature_enabled?('advance-confirmation')
     outstanding_only = params[:maturity] == ADVANCES_OUTSTANDING || params[:maturity].nil?
     @advances_data_table = {

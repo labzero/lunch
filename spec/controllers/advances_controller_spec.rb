@@ -78,7 +78,7 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:user) { controller.current_user }
     let(:user_id) { user.id }
     let(:member_id) { controller.current_member_id }
-    let(:column_headings) { [I18n.t('common_table_headings.trade_date'), I18n.t('common_table_headings.funding_date'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.advance_number'), I18n.t('common_table_headings.advance_type'), I18n.t('advances.rate'), I18n.t('common_table_headings.current_par') + ' ($)'] }
+    let(:column_headings) { [I18n.t('common_table_headings.trade_date'), I18n.t('common_table_headings.funding_date'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.advance_number'), I18n.t('common_table_headings.advance_type'), I18n.t('global.footnoted_string', string: I18n.t('advances.rate')), I18n.t('common_table_headings.current_par') + ' ($)'] }
     let(:active_advances_response) {[{'trade_date' => trade_date, 'funding_date' => funding_date, 'maturity_date' => maturity_date, 'advance_number' => advance_number, 'advance_type' => advance_type, 'status' => status, 'interest_rate' => interest_rate, 'current_par' => current_par, 'advance_confirmation' => advance_confirmation}]}
     let(:call_action) { get :manage }
 
