@@ -29,7 +29,7 @@
         = form_for(:advance_request, as: :advance_request, url: advances_select_rate_path, html: {method: :get, class: 'dashboard-module-add-advance-form'}) do |f|
           = f.hidden_field(:type, value: 'whole')
           = f.hidden_field(:term, value: 'overnight')
-          = render layout: 'shared/etransact_status_message', locals: {etransact_status: @etransact_status} do
+          = render layout: 'shared/etransact_status_message_dashboard', locals: {etransact_status: @etransact_status } do
             -# Rendered when the status is :open
             = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_name: 'advance_request[amount]'
             .etransact-status-message.etransact-status-message-closed
