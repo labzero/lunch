@@ -1812,14 +1812,34 @@ RSpec.describe SecuritiesController, type: :controller do
         call_action
         expect(assigns[:pledge_type_dropdown]).to eq(pledge_type_dropdown)
       end
-      [:release, :pledge, :safekeep, :transfer].each do |type|
+      {
+        release: {
+          upload_path: :securities_release_upload_path,
+          download_path: :securities_release_download_path
+        },
+        pledge: {
+          upload_path: :securities_pledge_upload_path,
+          download_path: :securities_pledge_download_path
+        }, safekeep: {
+          upload_path: :securities_safekeep_upload_path,
+          download_path: :securities_safekeep_download_path
+        },
+        transfer: {
+          upload_path: :securities_transfer_upload_path,
+          download_path: :securities_transfer_download_path
+        }
+      }.each do |type, details|
         it 'sets `@confirm_delete_text` appropriately' do
           controller.send(:populate_view_variables, type)
           expect(assigns[:confirm_delete_text]).to eq(I18n.t("securities.delete_request.titles.#{type}"))
         end
-        it "sets `@download_path` to `securities_#{type.to_s}_download_path`" do
+        it "sets `@download_path` to `#{details[:download_path]}`" do
           controller.send(:populate_view_variables, type)
-          expect(assigns[:download_path]).to eq(controller.send(:"securities_#{type.to_s}_download_path"))
+          expect(assigns[:download_path]).to eq(controller.send(details[:download_path]))
+        end
+        it "sets `@upload_path` to `#{details[:upload_path]}`" do
+          controller.send(:populate_view_variables, type)
+          expect(assigns[:upload_path]).to eq(controller.send(details[:upload_path]))
         end
       end
       it 'calls `populate_transaction_code_dropdown_variables` with the @securities_request' do

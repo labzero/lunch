@@ -1361,10 +1361,11 @@ en:
       title: Pledge Securities
       additional_certifications: 'By authorizing the pledge of the specific securities listed above, your institution makes the following certifications:'
       anti_preditory_lending_title: Anti-Predatory Lending Policy Certification
-      anti_preditory_lending_text: Your institution hereby certifies that it is aware of, and will comply with the Bank’s Anti-Predatory Lending Policy (as amended from time to time) at all times and represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date twhich any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
+      anti_preditory_lending_text: Your institution hereby certifies that it is aware of, and will comply with the Bank’s Anti-Predatory Lending Policy (as amended from time to time) at all times and represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date on which any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
       nontraditional_and_subprime_mortgage_title: Nontraditional and Subprime Mortgage Lending Certification
       nontraditional_and_subprime_mortgage_text: Your institution hereby certifies that all residential mortgage loans pledged to the Bank that were originated or acquired by your institution after July 10, 2007, comply at all times with the Interagency Guidance on Nontraditional Mortgage Product Risks dated October 4, 2006, and the Statement on Subprime Mortgage Lending dated July 10, 2007. Your institution represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date on which any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
       and: and
+      agreement: All rights, remedies, and obligations of the Bank with respect to the listed securities shall be in accordance with the Advances and Security Agreement.
     transfer:
       pledge:
         title: Transfer Securities to Pledged Account
@@ -1380,6 +1381,7 @@ en:
         step_2:
           enter_securities: In the file, enter one security per row.
       discard_and_upload_again: Discard and Upload Again
+      delivery_acknowledgement: The member has delivered the securities to the Bank’s securities custodian prior to or concurrent with the execution of this securities pledge.
     success:
       titles:
         pledge_release: Pledge Release Request Submitted

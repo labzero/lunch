@@ -66,9 +66,9 @@
         = render 'table', locals: { type: type }
         %p.securities-table-footnote= t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)
     -if type == :release
-      = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, upload_url: securities_release_upload_path, type: :release}
+      = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, upload_path: @upload_path, type: :release}
     -elsif type == :safekeep || type == :pledge
-      = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, download_path: @download_path}
+      = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, download_path: @download_path, upload_path: @upload_path}
   - if @authorizer
     - if kind == :pledge_release
       .securities-request-legal
