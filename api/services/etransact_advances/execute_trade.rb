@@ -278,6 +278,17 @@ module MAPI
         end
 
         def self.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date=nil, allow_grace_period=false, funding_date=nil)
+          data = MAPI::Services::EtransactAdvances::ExecuteTrade::execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, funding_date)
+          if data['status'].include?('CapitalStockError')
+            credit_check = MAPI::Services::EtransactAdvances::ExecuteTrade::execute_trade_internal(app, member_id, instrument, operation, data['gross_amount'], advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, funding_date)
+            if credit_check['status'].include?('CreditError')
+              data['status'] << 'GrossUpExceedsFinancingAvailabilityError'
+            end
+          end
+          data
+        end
+
+        def self.execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date=nil, allow_grace_period=false, funding_date=nil)
           member_id = member_id.to_i
           # Calculated values
           # True maturity date will be calculated later
@@ -350,6 +361,12 @@ module MAPI
                 response_hash['status'] << 'DisabledProductError'
               elsif (amount.to_i == 100006)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_collateral_capstock_error.json')))
+              elsif (amount.to_i == 100007)
+                response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_gross_up_exceeds_financing_availability_error.json')))
+              elsif (amount.to_i == 100008)
+                response_hash['status'] ||= []
+                response_hash['status'] << 'EndOfDayReached'
+                response_hash['end_of_day'] = (Time.zone.now - 5.minutes).iso8601
               elsif (amount.to_i < 1000000) || (!check_capstock)
                 response_hash['status'] = ['Success']
                 response_hash['confirmation_number'] = ''
@@ -452,7 +469,8 @@ module MAPI
 
           if (current_daily_total.to_f + advance_amount.to_f) > total_daily_limit.to_f
             new_hash = {
-              'status' => ['ExceedsTotalDailyLimitError']
+              'status' => ['ExceedsTotalDailyLimitError'],
+              'total_daily_limit' => total_daily_limit
             }
           end
 
@@ -462,10 +480,18 @@ module MAPI
         def self.check_enabled_product(logger, environment, type, term, response_hash, allow_grace_period=false)
           new_hash = {}
           loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(logger, environment, allow_grace_period)
-          unless loan_terms && loan_terms[type][term].with_indifferent_access['trade_status']
-            new_hash = {
-              'status' => ['DisabledProductError']
-            }
+          product = loan_terms[type][term].with_indifferent_access if loan_terms
+          unless loan_terms && product[:trade_status]
+            if product[:end_time_reached]
+              new_hash = {
+                'status' => ['EndOfDayReached'],
+                'end_of_day' => product[:end_time]
+              }
+            else
+              new_hash = {
+                'status' => ['DisabledProductError']
+              }
+            end
           end
           response_hash.merge(new_hash){|key, old, new| old + new }
         end

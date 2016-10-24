@@ -649,7 +649,6 @@ describe MAPI::ServiceApp do
         let(:advance_amount) { rand(100000..9999999)}
         let(:total_daily_limit) { double('total daily limit')}
         let(:settings) { double('settings', :'[]' => nil) }
-        let(:local_total_daily_limit) { MAPI::Services::EtransactAdvances::ExecuteTrade::LOCAL_TOTAL_DAILY_LIMIT }
         let(:check_advance) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(env, advance_amount, response_hash)}
         before do
           allow(MAPI::Services::Member::TradeActivity).to receive(:current_daily_total).and_return( advance_amount )
@@ -662,10 +661,18 @@ describe MAPI::ServiceApp do
           check_advance = MAPI::Services::EtransactAdvances::ExecuteTrade.check_total_daily_limit(app, advance_amount, response_hash)
           expect(check_advance['status']).to include('foo')
         end
-        it 'returns a hash with a `status` array that includes \'ExceedsTotalDailyLimitError\' if the requested advance plus the current daily total exceeds the limit set by FHLB' do
-          daily_limit = 2 * advance_amount - 100
-          allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
-          expect(check_advance['status']).to include('ExceedsTotalDailyLimitError')
+        describe 'when the requested advance plus the current daily total exceeds the limit set by FHLB' do
+          before do
+            daily_limit = 2 * advance_amount - 100
+            allow(total_daily_limit).to receive(:to_f).and_return(daily_limit.to_f)
+          end
+
+          it 'returns a hash with a `status` array that includes \'ExceedsTotalDailyLimitError\'' do
+            expect(check_advance['status']).to include('ExceedsTotalDailyLimitError')
+          end
+          it 'returns a hash with a `total_daily_limit` value equal to the limit set by FHLB' do
+            expect(check_advance['total_daily_limit']).to eq(total_daily_limit)
+          end
         end
         it 'returns the response_hash it was passed if the requested advance plus the current daily total does not exceed the limit set by FHLB' do
           daily_limit = 2 * advance_amount + 100
@@ -713,10 +720,22 @@ describe MAPI::ServiceApp do
         expect(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(anything, anything, false)
         MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(logger, environment, type, term, response)
       end
+      describe 'when the product has a true value for `end_time_reached`' do
+        before { loan_term[:end_time_reached] = true }
+
+        it 'adds a status of `EndOfDayReached`' do
+          expect(call_method['status']).to eq(original_status + ['EndOfDayReached'])
+        end
+        it 'sets the `end_of_day` value to the the `end_time` for the product' do
+          end_time = instance_double(String)
+          loan_term[:end_time] = end_time
+          expect(call_method['end_of_day']).to eq(end_time)
+        end
+      end
     end
   end
 
-  describe 'the `execute_trade` method' do
+  describe 'the `execute_trade` method validating credit limits for capital stock purchases' do
     let(:app) { double('app', settings: double('settings', environment: nil), logger: nil) }
     let(:today) { Time.zone.today }
     let(:built_message) { [double('message'), {}] }
@@ -728,7 +747,68 @@ describe MAPI::ServiceApp do
     let(:blended_cost_of_funds) { double('blended_cost_of_funds') }
     let(:cost_of_funds) { double('cost_of_funds') }
     let(:benchmark_rate) { double('benchmark_rate') }
-    let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period) }
+    let(:successful_trade_result) { { 'status' => ['Success'] } }
+    let(:gross_amount) { rand(9999..99999) }
+    let(:capital_stock_error) { { 'status' => ['CapitalStockError'], 'gross_amount' => gross_amount } }
+    let(:credit_error) { { 'status' => ['CreditError'] } }
+    let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, instrument,
+      'VALIDATE', amount, advance_term, advance_type, rate, true, signer, markup, blended_cost_of_funds,
+      cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, nil) }
+
+    it 'returns the result of `execute_trade_internal` if the status does not contain a `CapitalStockError`' do
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(
+        app, member_id, instrument, 'VALIDATE', amount, advance_term, advance_type, rate, true,
+        signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period,
+        nil).and_return(successful_trade_result)
+      expect(call_method).to eq(successful_trade_result)
+    end
+
+    context 'capital stock error' do
+      before do
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(app, member_id,
+          instrument, 'VALIDATE', amount, advance_term, advance_type, rate, true, signer, markup, blended_cost_of_funds,
+          cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, nil).and_return(capital_stock_error)
+      end
+
+      it 'validates the trade again if there is a `CapitalStockError`' do
+        expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(app, member_id,
+          instrument, 'VALIDATE', gross_amount, advance_term, advance_type, rate, false, signer, markup,
+          blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period,
+          nil).and_return(successful_trade_result)
+        call_method
+      end
+
+      it 'returns a `GrossUpExceedsFinancingAvailabilityError` if `gross_amount` exceeds credit limit' do
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(app, member_id,
+          instrument, 'VALIDATE', gross_amount, advance_term, advance_type, rate, false, signer, markup,
+          blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period,
+          nil).and_return(credit_error)
+        expect(call_method['status'].include?('GrossUpExceedsFinancingAvailabilityError')).to eq(true)
+      end
+
+      it 'returns the original response if there is a `CapitalStockError` but the `gross_amount` is within the member credit limit' do
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(app, member_id,
+          instrument, 'VALIDATE', gross_amount, advance_term, advance_type, rate, false, signer, markup,
+          blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period,
+          nil).and_return(successful_trade_result)
+        expect(call_method).to eq(capital_stock_error)
+      end
+    end
+  end
+
+  describe 'the `execute_trade_internal` method' do
+    let(:app) { double('app', settings: double('settings', environment: nil), logger: nil) }
+    let(:today) { Time.zone.today }
+    let(:built_message) { [double('message'), {}] }
+    let(:instrument) { double('instrument') }
+    let(:amount) { 234234 }
+    let(:signer) { double('signer') }
+    let(:markup) { double('markup') }
+    let(:day_count) { 'ACT/360' }
+    let(:blended_cost_of_funds) { double('blended_cost_of_funds') }
+    let(:cost_of_funds) { double('cost_of_funds') }
+    let(:benchmark_rate) { double('benchmark_rate') }
+    let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period) }
 
     before do
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:init_execute_trade_connection)

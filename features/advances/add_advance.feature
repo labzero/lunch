@@ -1,4 +1,4 @@
-@jira-mem-1353 @flip-on-add-advance
+@jira-mem-1353
 Feature: Adding an Advance
   As a user
   I want to use the Add Advance flow
@@ -133,7 +133,7 @@ Scenario: Users get an error if their requested advance would push FHLB over its
   And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   When I click on the initiate advance button on the add advance page
-  Then I should see an "advance unavailable" advance error with amount 100003 and type "whole"
+  Then I should see an "total daily limit" advance error with amount 100003 and type "whole"
 
 Scenario: User sees collateral limit error if advance causes both collateral and capital stock limits error
   Given I am on the "Add Advance" advances page
@@ -143,13 +143,21 @@ Scenario: User sees collateral limit error if advance causes both collateral and
   When I click on the initiate advance button on the add advance page
   Then I should see an "insufficient collateral" advance error with amount 100006 and type "whole"
 
+Scenario: User sees error if the product is no longer available due to its cutoff trade time being exceeded
+  Given I am on the "Add Advance" advances page
+  When I enter "100008" into the add advance amount field
+  And I click to toggle to the frc rates
+  And I select the rate with a term of "2week" and a type of "whole" on the add advance page
+  When I click on the initiate advance button on the add advance page
+  Then I should see an "end time" advance error
+
 Scenario: Users gets an error if advance causes per-term cumulative amount to exceed limit
   Given I am on the "Add Advance" advances page
   When I enter "1000000000000" into the add advance amount field
   And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
   When I click on the initiate advance button on the add advance page
-  Then I should see an "advance unavailable" advance error with amount 1000000000000 and type "whole"
+  Then I should see an "total daily limit" advance error with amount 1000000000000 and type "whole"
 
 Scenario: Users are informed if they enter an invalid pin or token
   Given I am on the add advance preview screen
@@ -334,4 +342,25 @@ Scenario: User clicks on the FRC rates and sees Funding Date then selects skip b
   When I click on the initiate advance button on the add advance page
   Then I should not see the add advance rate table
   And I should see a preview of the advance
+  
+@jira-mem-1521
+Scenario: Member sees messaging that credit limit does not cover gross up stock purchase
+  Given I am on the "Add Advance" advances page
+  And I enter "100007" into the add advance amount field
+  And I click to toggle to the frc rates
+  And I select the rate with a term of "2week" and a type of "whole" on the add advance page
+  When I click on the initiate advance button on the add advance page
+  Then I should be on the financing availability limit screen
+  And I click on the initiate advance button on the add advance page
+  Then I should see a preview of the advance
+  When I enter my SecurID pin and token
+  And I click on the confirm add advance button
+  Then I should see the add advance confirmation page
 
+@jira-mem-643
+Scenario: Intranet user walks through the add advance flow
+  Given I am logged in as an "intranet user"
+  When I am on the add advance preview screen
+  Then I shouldn't see the SecurID fields
+  When I click on the add advance confirm button
+  Then I should see a "unauthorized" advance error

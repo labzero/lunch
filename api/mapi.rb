@@ -70,7 +70,8 @@ require_relative 'models/calendar_holidays'
 require 'newrelic_rpm'
 NewRelic::Agent.add_instrumentation(File.join(__dir__, '..', 'lib', 'new_relic', 'instrumentation', '**', '*.rb')) if defined?(NewRelic::Agent)
 
-Time.zone = ENV['TIMEZONE'] || 'Pacific Time (US & Canada)'
+ENV['TZ'] ||= ENV['TIMEZONE'] || 'America/Los_Angeles'
+Time.zone = ENV['TIMEZONE'] || 'America/Los_Angeles'
 Time.zone_default = Time.zone
 
 module MAPI
@@ -124,6 +125,7 @@ module MAPI
       use MAPI::Logger, logger
       use MAPI::CommonLogger
       ::ActiveRecord::Base.logger = logger
+      ::ActiveRecord::Base.default_timezone = :local
     end
 
     error do

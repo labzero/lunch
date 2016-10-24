@@ -1,0 +1,14 @@
+- case etransact_status
+  - when :open
+    = yield
+  - when :no_terms
+    .etransact-status-message
+      %p= t('dashboard.quick_advance.advances_desk_no_terms')
+  - when :disabled_for_member
+    .etransact-status-message
+      %p= t('dashboard.quick_advance.advance_desk_unavailable_html', phone_number: service_desk_phone_number)
+      = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
+  - when :closed
+    .etransact-status-message
+      %p= t('dashboard.quick_advance.advances_desk_closed')
+      = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path

@@ -7,11 +7,13 @@ describe CalendarService do
   describe 'the `holidays` method' do
     let(:start_date) { instance_double(Date, iso8601: SecureRandom.hex) }
     let(:end_date) { instance_double(Date, iso8601: SecureRandom.hex) }
-    let(:response) { {holidays: instance_double(Array)} }
+    let(:holiday) { instance_double(String) }
+    let(:response) { {holidays: [holiday]} }
     let(:call_method) { subject.holidays(start_date, end_date) }
+    before { allow(holiday).to receive(:to_date).and_return(holiday) }
 
     it 'fetches the `calendar_holidays` from the Rails cache with the proper key and expiry param' do
-      expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:calendar_holidays), expires_in: CacheConfiguration.expiry(:calendar_holidays)).and_return(response)
+      expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:calendar_holidays), expires_in: CacheConfiguration.expiry(:calendar_holidays)).and_return([holiday])
       call_method
     end
     describe 'when `calendar_holidays` already exists in the Rails cache' do
@@ -51,6 +53,10 @@ describe CalendarService do
       it 'returns the `holidays` array from the results of `get_hash`' do
         expect(call_method).to eq(response[:holidays])
       end
+      it 'converts all of the holidays into dates' do
+        expect(holiday).to receive(:to_date)
+        call_method
+      end
       it 'raises an error when `get_hash` returns nil' do
         allow(subject).to receive(:get_hash).and_return(nil)
         expect{call_method}.to raise_error(StandardError, 'There has been an error and CalendarService#holidays has encountered nil. Check error logs.')
@@ -72,7 +78,7 @@ describe CalendarService do
     it 'returns `true` if date falls on a Sunday' do
       expect(call_method_sunday).to eq(true)
     end
-    it 'returns `true` if date falls on a Sunday' do
+    it 'returns `true` if date falls on a holiday' do
       expect(call_method_holiday).to eq(true)
     end
     it 'returns `false` if date does not fall on a Saturday, Sunday or a Holiday' do

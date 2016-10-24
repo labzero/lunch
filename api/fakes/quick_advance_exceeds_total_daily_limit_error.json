@@ -1,3 +1,4 @@
 {
-  "status": ["ExceedsTotalDailyLimitError"]
+  "status": ["ExceedsTotalDailyLimitError"],
+  "total_daily_limit": 100000000
 }

@@ -35,7 +35,7 @@ class AdvancesController < ApplicationController
   end
 
   def manage
-    column_headings = [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), t('advances.rate'), t('common_table_headings.current_par') + ' ($)']
+    column_headings = [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), t('global.footnoted_string', string: t('advances.rate')), t('common_table_headings.current_par') + ' ($)']
     column_headings << t('advances.confirmation.title') if feature_enabled?('advance-confirmation')
     outstanding_only = params[:maturity] == ADVANCES_OUTSTANDING || params[:maturity].nil?
     @advances_data_table = {
@@ -175,8 +175,12 @@ class AdvancesController < ApplicationController
       else
         collateral_error = preview_errors.find {|e| e.code == :collateral }
         other_preview_error = preview_errors.find {|e| e.code != :capital_stock }
+        financing_availability_limit_error = preview_errors.find {|e| e.code == :gross_up_exceeds_financing_availability }
         if collateral_error
           error = collateral_error
+        elsif financing_availability_limit_error
+          populate_advance_summary_view_parameters
+          render :financing_availability_limit
         elsif other_preview_error
           error = other_preview_error
         elsif other_errors.present?
@@ -199,19 +203,23 @@ class AdvancesController < ApplicationController
 
   # POST
   def perform
-    securid_status = securid_perform_check
+    securid_status = securid_perform_check if policy(:advance).execute?
     advance_success = false
-    if session_elevated?
+    if session_elevated? || !policy(:advance).execute?
       expired_rate = advance_request.expired?
       if expired_rate
         populate_advance_error_view_parameters(error_message: :rate_expired)
       else
-        advance_request.execute
-        if advance_request.executed?
-          advance_success = true
-          populate_advance_summary_view_parameters
+        if policy(:advance).execute?
+          advance_request.execute
+          if advance_request.executed?
+            advance_success = true
+            populate_advance_summary_view_parameters
+          else
+            populate_advance_error_view_parameters
+          end
         else
-          populate_advance_error_view_parameters
+          populate_advance_error_view_parameters(error_message: :not_authorized)
         end
       end
     end
@@ -220,7 +228,7 @@ class AdvancesController < ApplicationController
     logger.info { '  Advance Request Errors: ' + advance_request.errors.inspect }
     logger.info { '  Execute Results: ' + {securid: securid_status, advance_success: advance_success}.inspect }
 
-    if !session_elevated?
+    if !session_elevated? && policy(:advance).execute?
       populate_advance_preview_view_parameters(securid_status: securid_status)
       render :preview
     elsif advance_success != true

@@ -233,6 +233,7 @@ en:
               payment_amount_missing: If Settlement Type is Vs. Payment, each security must have a Settlement Amount.
               payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank.
               original_par: Securities with Fed delivery must have Original Par of $50 million or less.
+              original_par_whole_number: If delivery is via Fed or DTC, the Original Par amount must be a whole number (no cents).
         security:
           blank: "Each row must contain a CUSIP and an Original Par.\nEdit your file and try again."
           not_a_number: '%{attribute} must be a number.'
@@ -650,6 +651,14 @@ en:
         increase_transaction: Increase Amount Requested to cover required stock purchase.
         debit_sta_html: If you select this option, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today.
         footer: Cumulative Stock Purchase Required reflects the total stock purchase for all advances transacted today, including the new advance request. To avoid an overdraft, please ensure your Settlement/Transaction Account (STA) has sufficient funds to cover this amount.
+      financing_availability_limit:
+        intro: This advance will require the purchase of additional stock.
+        details: To avoid an overdraft, please ensure your STA has sufficient funds to cover the stock purchase today.
+        amount_requested: Amount Requested
+        stock: Stock Purchase Required
+        cumulative: Cumulative Stock Purchase Required
+        debit_sta_html: If you submit this advance, the Bank will automatically debit your Settlement/Transaction Account (STA) for %{amount} today.
+        footer: Cumulative Stock Purchase Required reflects the total stock purchase for all advances transacted today, including this new advance request.
       error:
         insufficient_financing_availability_html: The original amount requested of %{amount} is not available based on your remaining financing availability.
         capital_stock_exception: No Net or Gross info returned
@@ -658,6 +667,9 @@ en:
         updated_rate: The rate for this advance has changed from %{old_rate} to %{new_rate}.
         advance_unavailable: This advance is unavailable online right now. Call Member Services at %{phone_number} for more information.
         rate_expired: The rate you selected has expired. To initiate this advance, review and select from the current rates.
+        not_authorized: This Advance Request was not completed because Bank employees are not authorized to complete advances via the member portal.
+        exceeds_daily_limit: This advance is unavailable because it would cause your institution to exceed its cumulative daily limit of %{limit} for this term.
+        end_of_day: This rate is unavailable after %{time}.
     reports:
       title: Reports
       as_of_yesterday: As of yesterday
@@ -943,7 +955,7 @@ en:
         website:
           title: Portal Access
           access_manager: Portal Access Manager Set-up
-          securid: SecurID Token Application
+          securid: SecurID Token Request
       credit:
         title: Credit
         application: 'Credit Application: CIP and ACE'
@@ -1162,7 +1174,7 @@ en:
           title: "Applicant’s Bank Stock Calculation: Insurance Companies (FC 2178)"
           description_html: This worksheet helps you calculate the amount of Bank capital stock your institution must purchase to become a member. Please e-mail %{link} if you want the Bank to prepare an estimate of the Initial Stock Purchase Requirement. The estimate will be based on the most recent financial information available to the Bank, which may lag current data by a quarter.
         id_2228:
-          title: "eTransact: SecurID Token Application (FC 2228)"
+          title: "eTransact: SecurID Token Request (FC 2228)"
           description: "This form must be completed by each individual who needs access to eTransact, the Bank’s secure online transaction service."
         id_2290:
           title: "Authorization to Release Records: Arizona (FC 2290)"
@@ -1337,7 +1349,7 @@ en:
         select_file: Select File
         download_actions_html: '%{span} <span>or</span> %{button}'
         generic_error_html: We are unable to process your request at this time. Contact <a href=%{email}>Securities Services</a> at %{phone_number}.
-        no_payment_amount_error: When 'Versus Payment' is selected, each security must have a settlement amount.
+        no_payment_amount_error: If Settlement Type is Vs. Payment, each security must have a Settlement Amount greater than zero.
         fed_fifty_m_error: Each security released through the Fed must have original par value of $50MM or less. You may break up the securities into lots of $50MM or less each.
         settlement_date_error: Settlement Date must be on or after Trade Date.
     safekeep:
@@ -1349,10 +1361,11 @@ en:
       title: Pledge Securities
       additional_certifications: 'By authorizing the pledge of the specific securities listed above, your institution makes the following certifications:'
       anti_preditory_lending_title: Anti-Predatory Lending Policy Certification
-      anti_preditory_lending_text: Your institution hereby certifies that it is aware of, and will comply with the Bank’s Anti-Predatory Lending Policy (as amended from time to time) at all times and represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date twhich any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
+      anti_preditory_lending_text: Your institution hereby certifies that it is aware of, and will comply with the Bank’s Anti-Predatory Lending Policy (as amended from time to time) at all times and represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date on which any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
       nontraditional_and_subprime_mortgage_title: Nontraditional and Subprime Mortgage Lending Certification
       nontraditional_and_subprime_mortgage_text: Your institution hereby certifies that all residential mortgage loans pledged to the Bank that were originated or acquired by your institution after July 10, 2007, comply at all times with the Interagency Guidance on Nontraditional Mortgage Product Risks dated October 4, 2006, and the Statement on Subprime Mortgage Lending dated July 10, 2007. Your institution represents and warrants that this certification is and will be true and correct as of the date this pledge of securities is authorized and as of each date on which any Eligible Collateral, as defined in the Advances and Security Agreement, is pledged to the Bank.
       and: and
+      agreement: All rights, remedies, and obligations of the Bank with respect to the listed securities shall be in accordance with the Advances and Security Agreement.
     transfer:
       pledge:
         title: Transfer Securities to Pledged Account
@@ -1368,6 +1381,7 @@ en:
         step_2:
           enter_securities: In the file, enter one security per row.
       discard_and_upload_again: Discard and Upload Again
+      delivery_acknowledgement: The member has delivered the securities to the Bank’s securities custodian prior to or concurrent with the execution of this securities pledge.
     success:
       titles:
         pledge_release: Pledge Release Request Submitted
@@ -2117,6 +2131,7 @@ en:
       title: Manage Advances
       all: All Advances
       outstanding: Outstanding Advances
+      footnote_rates_html: "* For VRC and ARC Advances, the initial rate is shown. For FRC Advances, the current rate is shown."
       footnote_html: "If you have questions, please email <a href=\"%{mailto_url}\">Operations</a> or call %{phone_number}."
     confirmation:
       title: Advance Confirmation

@@ -15,6 +15,7 @@ RSpec.describe AdvancesController, :type => :controller do
         allow(subject).to receive(:fetch_advance_request)
         allow(subject).to receive(:select_rate).and_raise(exception.new(*args))
         allow(controller).to receive(:populate_advance_error_view_parameters)
+        allow(controller).to receive(:signer_full_name)
       end
 
       it 'logs at the `info` log level' do
@@ -77,7 +78,7 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:user) { controller.current_user }
     let(:user_id) { user.id }
     let(:member_id) { controller.current_member_id }
-    let(:column_headings) { [I18n.t('common_table_headings.trade_date'), I18n.t('common_table_headings.funding_date'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.advance_number'), I18n.t('common_table_headings.advance_type'), I18n.t('advances.rate'), I18n.t('common_table_headings.current_par') + ' ($)'] }
+    let(:column_headings) { [I18n.t('common_table_headings.trade_date'), I18n.t('common_table_headings.funding_date'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.advance_number'), I18n.t('common_table_headings.advance_type'), I18n.t('global.footnoted_string', string: I18n.t('advances.rate')), I18n.t('common_table_headings.current_par') + ' ($)'] }
     let(:active_advances_response) {[{'trade_date' => trade_date, 'funding_date' => funding_date, 'maturity_date' => maturity_date, 'advance_number' => advance_number, 'advance_type' => advance_type, 'status' => status, 'interest_rate' => interest_rate, 'current_par' => current_par, 'advance_confirmation' => advance_confirmation}]}
     let(:call_action) { get :manage }
 
@@ -550,7 +551,7 @@ RSpec.describe AdvancesController, :type => :controller do
     end
   end
 
-  describe 'POST execute' do
+  describe 'POST perform' do
     allow_policy :advance, :show?
     let(:member_id) {750}
     let(:advance_id) { SecureRandom.uuid }
@@ -574,77 +575,7 @@ RSpec.describe AdvancesController, :type => :controller do
       allow(controller).to receive(:fetch_advance_request).and_return(advance_request)
     end
 
-    it_behaves_like 'a user required action', :post, :perform
-    it_behaves_like 'an authorization required method', :post, :perform, :advance, :show?
-    it { should use_before_filter(:fetch_advance_request) }
-    it { should use_before_filter(:set_html_class) }
-    it { should use_after_filter(:save_advance_request) }
-
-    it 'renders the confirmation view on success' do
-      make_request
-      expect(response.body).to render_template(:perform)
-    end
-    it 'checks if the session has been elevated' do
-      expect(subject).to receive(:session_elevated?).at_least(:once)
-      make_request
-    end
-    it 'calls `securid_perform_check`' do
-      expect(subject).to receive(:securid_perform_check).once
-      make_request
-    end
-    it 'checks if the rate has expired' do
-      expect(advance_request).to receive(:expired?)
-      make_request
-    end
-    it 'populates the advance summary view parameters' do
-      expect(subject).to receive(:populate_advance_summary_view_parameters)
-      make_request
-    end
-    it 'executes the advance' do
-      expect(advance_request).to receive(:execute)
-      make_request
-    end
-    describe 'when the advance cannot be executed' do
-      before { expect(advance_request).to receive(:executed?).and_return(false) }
-      it 'populates the advance error view parameters' do
-        expect(subject).to receive(:populate_advance_error_view_parameters)
-        make_request
-      end
-      it 'renders the error view' do
-        make_request
-        expect(response.body).to render_template(:error)
-      end
-    end
-    describe 'with unelevated session' do
-      before do
-        allow(subject).to receive(:session_elevated?).and_return(false)
-      end
-      it 'populates the preview view parameters with the securid_status, preview set to false and without calculating stock' do
-        status = double('A SecurID Status')
-        allow(subject).to receive(:securid_perform_check).and_return(status)
-        expect(subject).to receive(:populate_advance_preview_view_parameters).with({securid_status: status})
-        make_request
-      end
-      it 'renders the preview view if the securid status is not :authenticated' do
-        make_request
-        expect(response.body).to render_template('preview')
-      end
-      it 'sets securid_status to `invalid_pin` if the pin is malformed' do
-        allow(subject).to receive(:securid_perform_check).and_return(:invalid_pin)
-        expect(subject).to receive(:populate_advance_preview_view_parameters).with(hash_including(securid_status: :invalid_pin))
-        make_request
-      end
-      it 'sets securid_status to `invalid_token` if the token is malformed' do
-        allow(subject).to receive(:securid_perform_check).and_return(:invalid_token)
-        expect(subject).to receive(:populate_advance_preview_view_parameters).with(hash_including(securid_status: :invalid_token))
-        make_request
-      end
-      it 'does not perform the advance if the session is not elevated' do
-        expect(advance_request).to_not receive(:execute)
-        make_request
-      end
-    end
-    describe 'with an expired rate' do
+    shared_examples 'an action that handles expired rates' do
       before do
         allow(advance_request).to receive(:expired?).and_return(true)
       end
@@ -659,6 +590,105 @@ RSpec.describe AdvancesController, :type => :controller do
       it 'does not execute the advance' do
         expect(advance_request).to_not receive(:execute)
         make_request
+      end
+    end
+
+    describe 'when the user is permitted to `execute` the advance' do
+      allow_policy :advance, :execute?
+
+      it_behaves_like 'a user required action', :post, :perform
+      it_behaves_like 'an authorization required method', :post, :perform, :advance, :show?
+      it_behaves_like 'an action that handles expired rates'
+      it { should use_before_filter(:fetch_advance_request) }
+      it { should use_before_filter(:set_html_class) }
+      it { should use_after_filter(:save_advance_request) }
+
+      it 'does calls `securid_perform_check`' do
+        expect(controller).to receive(:securid_perform_check)
+        make_request
+      end
+      it 'renders the confirmation view on success' do
+        make_request
+        expect(response.body).to render_template(:perform)
+      end
+      it 'checks if the session has been elevated' do
+        expect(subject).to receive(:session_elevated?).at_least(:once)
+        make_request
+      end
+      it 'calls `securid_perform_check`' do
+        expect(subject).to receive(:securid_perform_check).once
+        make_request
+      end
+      it 'checks if the rate has expired' do
+        expect(advance_request).to receive(:expired?)
+        make_request
+      end
+      it 'populates the advance summary view parameters' do
+        expect(subject).to receive(:populate_advance_summary_view_parameters)
+        make_request
+      end
+      it 'executes the advance' do
+        expect(advance_request).to receive(:execute)
+        make_request
+      end
+      describe 'when the advance cannot be executed' do
+        before { expect(advance_request).to receive(:executed?).and_return(false) }
+        it 'populates the advance error view parameters' do
+          expect(subject).to receive(:populate_advance_error_view_parameters)
+          make_request
+        end
+        it 'renders the error view' do
+          make_request
+          expect(response.body).to render_template(:error)
+        end
+      end
+      describe 'with unelevated session' do
+        before do
+          allow(subject).to receive(:session_elevated?).and_return(false)
+        end
+        it 'populates the preview view parameters with the securid_status, preview set to false and without calculating stock' do
+          status = double('A SecurID Status')
+          allow(subject).to receive(:securid_perform_check).and_return(status)
+          expect(subject).to receive(:populate_advance_preview_view_parameters).with({securid_status: status})
+          make_request
+        end
+        it 'renders the preview view if the securid status is not :authenticated' do
+          make_request
+          expect(response.body).to render_template('preview')
+        end
+        it 'sets securid_status to `invalid_pin` if the pin is malformed' do
+          allow(subject).to receive(:securid_perform_check).and_return(:invalid_pin)
+          expect(subject).to receive(:populate_advance_preview_view_parameters).with(hash_including(securid_status: :invalid_pin))
+          make_request
+        end
+        it 'sets securid_status to `invalid_token` if the token is malformed' do
+          allow(subject).to receive(:securid_perform_check).and_return(:invalid_token)
+          expect(subject).to receive(:populate_advance_preview_view_parameters).with(hash_including(securid_status: :invalid_token))
+          make_request
+        end
+        it 'does not perform the advance if the session is not elevated' do
+          expect(advance_request).to_not receive(:execute)
+          make_request
+        end
+      end
+    end
+    describe 'when the user is not permitted to `execute` the advance' do
+      before do
+        allow(subject).to receive(:session_elevated?).and_return(false)
+      end
+
+      it_behaves_like 'an action that handles expired rates'
+      it 'does not call `securid_perform_check`' do
+        expect(controller).not_to receive(:securid_perform_check)
+        make_request
+      end
+      it 'calls `populate_advance_error_view_parameters` with an `error_message` of `:not_authorized`' do
+        expect(controller).to receive(:populate_advance_error_view_parameters).with(error_message: :not_authorized)
+        make_request
+      end
+      it 'renders the error view' do
+        make_request
+        expect(response.body).to render_template(:error)
       end
     end
   end
@@ -800,6 +830,7 @@ RSpec.describe AdvancesController, :type => :controller do
     describe '`advance_request`' do
       let(:call_method) { subject.send(:advance_request) }
       let(:advance_request) { double(AdvanceRequest, owners: double(Set, add: nil)) }
+      before { allow(subject).to receive(:signer_full_name) }
       it 'returns a new AdvanceRequest if the controller is lacking one' do
         member_id = double('A Member ID')
         signer = double('A Signer')
@@ -878,33 +909,6 @@ RSpec.describe AdvancesController, :type => :controller do
         it 'saves the AdvanceRequest' do
           expect(advance_request).to receive(:save)
           call_method
-        end
-      end
-    end
-
-    describe '`signer_full_name`' do
-      let(:signer) { double('A Signer Name') }
-      let(:call_method) { subject.send(:signer_full_name) }
-      it 'returns the signer name from the session if present' do
-        session[described_class::SessionKeys::SIGNER_FULL_NAME] = signer
-        expect(call_method).to be(signer)
-      end
-      describe 'with no signer in session' do
-        let(:username) { double('A Username') }
-        before do
-          allow(subject).to receive_message_chain(:current_user, :username).and_return(username)
-          allow_any_instance_of(EtransactAdvancesService).to receive(:signer_full_name).with(username).and_return(signer)
-        end
-        it 'fetches the signer from the eTransact Service' do
-          expect_any_instance_of(EtransactAdvancesService).to receive(:signer_full_name).with(username)
-          call_method
-        end
-        it 'sets the signer name in the session' do
-          call_method
-          expect(session[described_class::SessionKeys::SIGNER_FULL_NAME]).to be(signer)
-        end
-        it 'returns the signer name' do
-          expect(call_method).to be(signer)
         end
       end
     end

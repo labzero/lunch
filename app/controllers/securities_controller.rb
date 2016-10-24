@@ -263,8 +263,8 @@ class SecuritiesController < ApplicationController
     @securities_request.securities.each do |security|
       rows << { columns: [ { value: security.cusip },
                            { value: security.description },
-                           { value: security.original_par, type: :currency_whole } ] }
-      rows.last[:columns] << { value: security.payment_amount, type: :currency_whole } unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
+                           { value: security.original_par, type: :currency, options: { unit: '' } } ] }
+      rows.last[:columns] << { value: security.payment_amount, type: :currency, options: { unit: '' } } unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
       rows.last[:columns] << { value: security.custodian_name } if SecuritiesRequest::INTAKE_KINDS.include?(@securities_request.kind)
     end
 
@@ -378,12 +378,14 @@ class SecuritiesController < ApplicationController
   end
 
   def download_safekeep
-    populate_securities_table_data_view_variable(:safekeep)
+    securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
+    populate_securities_table_data_view_variable(:safekeep, securities)
     render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep, title: t('securities.download.titles.safekeep') }
   end
 
   def download_pledge
-    populate_securities_table_data_view_variable(:pledge)
+    securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
+    populate_securities_table_data_view_variable(:pledge, securities)
     render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge, title: t('securities.download.titles.pledge') }
   end
 
@@ -656,23 +658,28 @@ class SecuritiesController < ApplicationController
     when :release
       @confirm_delete_text = t('securities.delete_request.titles.release')
       @download_path = securities_release_download_path
+      @upload_path = securities_release_upload_path
     when :pledge
       @confirm_delete_text = t('securities.delete_request.titles.pledge')
       @download_path = securities_pledge_download_path
+      @upload_path = securities_pledge_upload_path
     when :safekeep
       @confirm_delete_text = t('securities.delete_request.titles.safekeep')
       @download_path = securities_safekeep_download_path
+      @upload_path = securities_safekeep_upload_path
     when :transfer
       @confirm_delete_text = t('securities.delete_request.titles.transfer')
       @download_path = securities_transfer_download_path
+      @upload_path = securities_transfer_upload_path
     end
 
     @session_elevated = session_elevated?
 
     @securities_request ||= SecuritiesRequest.new
     @securities_request.securities = params[:securities] if params[:securities]
-    @securities_request.trade_date ||= Time.zone.today
-    @securities_request.settlement_date ||= Time.zone.today
+    next_business_day = CalendarService.new(request).find_next_business_day(Time.zone.today, 1.day)
+    @securities_request.trade_date ||= next_business_day
+    @securities_request.settlement_date ||= next_business_day
 
     populate_transaction_code_dropdown_variables(@securities_request)
     populate_settlement_type_dropdown_variables(@securities_request)
@@ -715,7 +722,7 @@ class SecuritiesController < ApplicationController
   def date_restrictions
     today = Time.zone.today
     max_date = today + SecuritiesRequest::MAX_DATE_RESTRICTION
-    holidays =  CalendarService.new(request).holidays(today, max_date)
+    holidays =  CalendarService.new(request).holidays(today, max_date).map{|date| date.iso8601}
     weekends = []
     date_iterator = today.clone
     while date_iterator <= max_date do

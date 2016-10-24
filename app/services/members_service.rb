@@ -89,13 +89,15 @@ class MembersService < MAPIService
         Devise::LDAP::Connection.admin('extranet').open do |ldap|
           users = fetch_ldap_users(ldap, member_id) || []
           usernames = users.blank? ? [] : users.collect(&:username)
+          username_signername_map = {}
           signers.each do |signer|
             roles = signer['roles'].blank? ? [] : signer['roles'].flatten.collect{ |role| User::LDAP_GROUPS_TO_ROLES[role] }.compact
-            signers_and_users << {display_name: signer['name'], roles: roles, given_name: signer['first_name'], surname: signer['last_name']} unless usernames.include?(signer['username'])
+            username_signername_map[signer['username']] = signer['name']
+            signers_and_users << {display_name: signer['name'], roles: roles, given_name: signer['first_name'], surname: signer['last_name'], signer_name: signer['name']} unless usernames.include?(signer['username'])
           end
 
           users.each do |user|
-            signers_and_users << {display_name: user.display_name || user.username, roles: user.roles, surname: user.surname, given_name: user.given_name, email: user.email}
+            signers_and_users << {display_name: user.display_name || user.username, roles: user.roles, surname: user.surname, given_name: user.given_name, email: user.email, signer_name: (username_signername_map[user.username] || user.display_name)}
           end
         end
       end

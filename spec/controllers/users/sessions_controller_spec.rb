@@ -47,5 +47,18 @@ RSpec.describe Users::SessionsController, :type => :controller do
       expect(subject.flash).to receive(:discard).with(:notice)
       make_request
     end
+
+    context 'retrying on ActiveRecord::RecordNotUnique' do
+      before do
+        allow_any_instance_of(Warden::Proxy).to receive(:authenticate!).and_raise(ActiveRecord::RecordNotUnique.new('error'))
+      end
+      it 'retries the `authenticate!` twice on `ActiveRecord::RecordNotUnique`' do
+        expect_any_instance_of(Warden::Proxy).to receive(:authenticate!).twice
+        make_request rescue ActiveRecord::RecordNotUnique
+      end
+      it 'raises `ActiveRecord::RecordNotUnique` if all retries fail' do
+        expect{make_request}.to raise_error(ActiveRecord::RecordNotUnique)
+      end
+    end
   end
 end

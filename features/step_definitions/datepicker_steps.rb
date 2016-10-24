@@ -299,7 +299,7 @@ Then(/^I should see that all past dates have been disabled$/) do
     calendar.find('.fa-arrow-left').click
   end
   page.assert_no_selector('.fa-arrow-left', visible: true)
-  expect(page.all('td.available:not(.off)', visible: true).first.text).to eq(today.day.to_s)
+  expect(page.all('td.available:not(.off)', visible: true).first.text.to_i).to be >= today.day
 end
 
 Then(/^I should not be able to see a calendar more than (\d+) months in the future$/) do |count|

@@ -8,33 +8,84 @@ RSpec.describe AdvancePolicy, :type => :policy do
   describe '`show?` method' do
     subject { AdvancePolicy.new(user, :advance) }
 
-    context 'for a user associated with a member' do
-      before { allow(user).to receive(:member).and_return(member) }
+    context 'for an intranet user' do
+      before { allow(user).to receive(:intranet_user?).and_return(true) }
 
-      context 'when the member requires dual signers' do
-        before { allow(member).to receive(:requires_dual_signers?).and_return(true) }
-        it { should_not permit_action(:show) }
-      end
+      it { should permit_action(:show) }
+    end
+    context 'for a non-intranet user' do
+      before { allow(user).to receive(:intranet_user?).and_return(false) }
 
-      context 'when the member does not require dual signers' do
-        context 'for a signer' do
-          before do
-            allow(user).to receive(:roles).and_return([User::Roles::ADVANCE_SIGNER])
-          end
-          it { should permit_action(:show) }
-        end
+      context 'for a user associated with a member' do
+        before { allow(user).to receive(:member).and_return(member) }
 
-        context 'for a non-signer' do
-          before do
-            allow(user).to receive(:roles).and_return([])
-          end
+        context 'when the member requires dual signers' do
+          before { allow(member).to receive(:requires_dual_signers?).and_return(true) }
           it { should_not permit_action(:show) }
         end
+
+        context 'when the member does not require dual signers' do
+          context 'for a signer' do
+            before do
+              allow(user).to receive(:roles).and_return([User::Roles::ADVANCE_SIGNER])
+            end
+            it { should permit_action(:show) }
+          end
+
+          context 'for a non-signer' do
+            before do
+              allow(user).to receive(:roles).and_return([])
+            end
+            it { should_not permit_action(:show) }
+          end
+        end
+      end
+
+      context 'for a user not associated with a member' do
+        it { should_not permit_action(:show) }
       end
     end
+  end
 
-    context 'for a user not associated with a member' do
-      it { should_not permit_action(:show) }
+  describe '`execute?` method' do
+    subject { AdvancePolicy.new(user, :advance) }
+
+    context 'for an intranet user' do
+      before { allow(user).to receive(:intranet_user?).and_return(true) }
+
+      it { should_not permit_action(:execute) }
+    end
+    context 'for a non-intranet user' do
+      before { allow(user).to receive(:intranet_user?).and_return(false) }
+
+      context 'for a user associated with a member' do
+        before { allow(user).to receive(:member).and_return(member) }
+
+        context 'when the member requires dual signers' do
+          before { allow(member).to receive(:requires_dual_signers?).and_return(true) }
+          it { should_not permit_action(:execute) }
+        end
+
+        context 'when the member does not require dual signers' do
+          context 'for a signer' do
+            before do
+              allow(user).to receive(:roles).and_return([User::Roles::ADVANCE_SIGNER])
+            end
+            it { should permit_action(:execute) }
+          end
+
+          context 'for a non-signer' do
+            before do
+              allow(user).to receive(:roles).and_return([])
+            end
+            it { should_not permit_action(:execute) }
+          end
+        end
+      end
+
+      context 'for a user not associated with a member' do
+        it { should_not permit_action(:execute) }
+      end
     end
   end
 

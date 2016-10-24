@@ -12,14 +12,6 @@ Rails.application.routes.draw do
 
   get '/dashboard' => 'dashboard#index'
 
-  constraints Constraints::FeatureDisabled.new('add-advance') do
-    get '/dashboard/quick_advance_rates' => 'dashboard#quick_advance_rates'
-
-    post '/dashboard/quick_advance_preview' => 'dashboard#quick_advance_preview'
-
-    post '/dashboard/quick_advance_perform' => 'dashboard#quick_advance_perform'
-  end
-
   get '/dashboard/current_overnight_vrc' => 'dashboard#current_overnight_vrc'
 
   constraints Constraints::FeatureEnabled.new('recent-credit-activity') do
@@ -84,12 +76,10 @@ Rails.application.routes.draw do
 
   scope 'advances', as: 'advances' do
     get '/manage' => 'advances#manage'
-    constraints Constraints::FeatureEnabled.new('add-advance') do
-      get '/select-rate' => 'advances#select_rate'
-      get '/fetch-rates' => 'advances#fetch_rates'
-      post  '/preview' => 'advances#preview'
-      post '/perform' => 'advances#perform'
-    end
+    get '/select-rate' => 'advances#select_rate'
+    get '/fetch-rates' => 'advances#fetch_rates'
+    post  '/preview' => 'advances#preview'
+    post '/perform' => 'advances#perform'
     constraints Constraints::FeatureEnabled.new('advance-confirmation') do
       get '/confirmation' => 'advances#confirmation'
     end
@@ -200,7 +190,7 @@ Rails.application.routes.draw do
       scope 'safekeep', as: :safekeep do
         get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :safekeep }
         get 'edit' => 'securities#edit_safekeep'
-        get 'download' => 'securities#download_safekeep'
+        post 'download' => 'securities#download_safekeep'
         post 'upload' => 'securities#upload_securities', defaults: { type: :safekeep }
         post 'submit' => 'securities#submit_request', defaults: { type: :safekeep }
         get 'success' => 'securities#submit_request_success', defaults: {kind: :safekept_intake}
@@ -208,7 +198,7 @@ Rails.application.routes.draw do
       scope 'pledge', as: :pledge do
         get 'view/:request_id' => 'securities#view_request', as: 'view', defaults: { type: :pledge }
         get 'edit' => 'securities#edit_pledge'
-        get 'download' => 'securities#download_pledge'
+        post 'download' => 'securities#download_pledge'
         post 'upload' => 'securities#upload_securities', defaults: { type: :pledge }
         post 'submit' => 'securities#submit_request', defaults: { type: :pledge }
         get 'success' => 'securities#submit_request_success', defaults: {kind: :pledge_intake}

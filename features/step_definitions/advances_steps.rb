@@ -160,6 +160,10 @@ Then(/^I should be on the add advance stock purchase screen$/) do
   page.assert_selector('.add-advance-capstock')
 end
 
+Then(/^I should be on the financing availability limit screen$/) do
+  page.assert_selector('.add-advance-financing-availability-limit')
+end
+
 Then(/^I should see the cumulative stock purchase on the add advance preview screen$/) do
   page.assert_selector('.add-advance-preview dt', visible: true, exact: true, text: I18n.t('dashboard.quick_advance.field_headings.cumulative') + ':')
 end
@@ -237,6 +241,12 @@ Then(/^I should see an? "(.*?)" advance error(?: with amount (\d+) and type "(.*
       /\A#{Regexp.quote(I18n.t('dashboard.quick_advance.error.advance_unavailable', phone_number: service_desk_phone_number))}\z/
     when 'rate expired'
       /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.rate_expired"))}\z/
+    when 'unauthorized'
+      /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.not_authorized"))}\z/
+    when 'total daily limit'
+      /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.exceeds_daily_limit", limit: fhlb_formatted_currency_whole(100000000, {html: false})))}\z/
+    when 'end time'
+      /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.end_of_day", time: fhlb_formatted_time(Time.zone.now - 5.minutes).strip))}\z/
     else
       raise 'Unknown error_type'
   end
@@ -353,4 +363,16 @@ Then(/^I see (only outstanding|all) advances$/) do |type|
   else
     raise ArgumentError.new("unknown advance type: #{type}")
   end
+end
+
+Given(/^I select the continue with advance option$/) do
+  page.find('#continue_transaction').click
+end
+
+When(/^I click on the confirm add advance button$/) do
+  page.find('.confirm-add-advance').click
+end
+
+Then(/^I should see the add advance confirmation page$/) do
+  page.assert_selector('.add-advance-confirmation')
 end

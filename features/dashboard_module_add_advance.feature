@@ -1,4 +1,4 @@
-@jira-mem-1461 @flip-on-add-advance
+@jira-mem-1461
 Feature: Add Advance Module on Dashboard
   As a user
   I want to interact with the Add Advance module on the dashboard

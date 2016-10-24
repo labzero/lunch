@@ -275,11 +275,11 @@ class User < ActiveRecord::Base
     tries ||= 2
     find_or_create_by(*args, &block)
   rescue ActiveRecord::RecordNotUnique => e
-    tries = tries - 1
-    if tries <= 0
-      raise e
-    else
+    tries -= 1
+    if tries > 0
       retry
+    else
+      raise e
     end
   end
 

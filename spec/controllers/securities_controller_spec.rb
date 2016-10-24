@@ -652,7 +652,7 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  [:release, :transfer].each do |type|
+  [:release, :transfer, :safekeep, :pledge].each do |type|
     action = :"download_#{type}"
     describe "POST download_#{action}" do
       let(:security) { instance_double(Security) }
@@ -681,31 +681,6 @@ RSpec.describe SecuritiesController, type: :controller do
       it "calls `populate_securities_table_data_view_variable` with `#{type}` and the securities array" do
         allow(Security).to receive(:from_hash).and_return(security)
         expect(controller).to receive(:populate_securities_table_data_view_variable).with(type, [security, security])
-        call_action
-      end
-      it "renders with a `type` of `#{type}` and the correct `title`" do
-        expect(controller).to receive(:render).with(hash_including(locals: { type: type, title: I18n.t("securities.download.titles.#{type}") }))
-        call_action
-      end
-      it 'responds with an xlsx file' do
-        call_action
-        expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
-      end
-    end
-  end
-
-  [:safekeep, :pledge].each do |type|
-    action = :"download_#{type}"
-    describe "POST download_#{action}" do
-      let(:call_action) { post action }
-
-      before do
-        allow(controller).to receive(:populate_securities_table_data_view_variable)
-        allow(controller).to receive(:render).and_call_original
-      end
-
-      it "calls `populate_securities_table_data_view_variable` with `#{type}`" do
-        expect(controller).to receive(:populate_securities_table_data_view_variable).with(type)
         call_action
       end
       it "renders with a `type` of `#{type}` and the correct `title`" do
@@ -1545,8 +1520,8 @@ RSpec.describe SecuritiesController, type: :controller do
           I18n.t('common_table_headings.custodian_name', footnote_marker: fhlb_footnote_marker(1))],
           rows: [ { columns: [ { value: security.cusip },
                                { value: security.description },
-                               { value: security.original_par, type: :currency_whole },
-                               { value: security.payment_amount, type: :currency_whole },
+                               { value: security.original_par, type: :currency, options: { unit: '' } },
+                               { value: security.payment_amount, type: :currency, options: { unit: '' } },
                                { value: security.custodian_name } ] } ] }
         call_action
         expect(subject.instance_variable_get(:@securities_table_data)).to eq(table_data)
@@ -1591,8 +1566,8 @@ RSpec.describe SecuritiesController, type: :controller do
                               I18n.t('securities.requests.view.securities.settlement_amount', footnote_marker: fhlb_footnote_marker) ],
                         rows: [ { columns: [ { value: security.cusip },
                                              { value: security.description },
-                                             { value: security.original_par, type: :currency_whole },
-                                             { value: security.payment_amount, type: :currency_whole } ] } ] }
+                                             { value: security.original_par, type: :currency, options: { unit: '' } },
+                                             { value: security.payment_amount, type: :currency, options: { unit: '' } } ] } ] }
         call_action
         expect(subject.instance_variable_get(:@securities_table_data)).to eq(table_data)
       end
@@ -1817,6 +1792,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:securities_request) { instance_double(SecuritiesRequest, securities: securities, :securities= => nil, trade_date: nil, :trade_date= => nil, settlement_date: nil, :settlement_date= => nil, is_collateral?: true) }
       let(:call_action) { controller.send(:populate_view_variables, :release) }
       let(:date_restrictions) { instance_double(Hash) }
+      let(:next_business_day) { instance_double(Date) }
 
       before do
         allow(SecuritiesRequest).to receive(:new).and_return(securities_request)
@@ -1825,6 +1801,7 @@ RSpec.describe SecuritiesController, type: :controller do
         allow(controller).to receive(:populate_delivery_instructions_dropdown_variables)
         allow(controller).to receive(:populate_securities_table_data_view_variable)
         allow(controller).to receive(:date_restrictions)
+        allow_any_instance_of(CalendarService).to receive(:find_next_business_day).and_return(next_business_day)
       end
 
       it 'sets `@pledge_type_dropdown`' do
@@ -1835,14 +1812,34 @@ RSpec.describe SecuritiesController, type: :controller do
         call_action
         expect(assigns[:pledge_type_dropdown]).to eq(pledge_type_dropdown)
       end
-      [:release, :pledge, :safekeep, :transfer].each do |type|
+      {
+        release: {
+          upload_path: :securities_release_upload_path,
+          download_path: :securities_release_download_path
+        },
+        pledge: {
+          upload_path: :securities_pledge_upload_path,
+          download_path: :securities_pledge_download_path
+        }, safekeep: {
+          upload_path: :securities_safekeep_upload_path,
+          download_path: :securities_safekeep_download_path
+        },
+        transfer: {
+          upload_path: :securities_transfer_upload_path,
+          download_path: :securities_transfer_download_path
+        }
+      }.each do |type, details|
         it 'sets `@confirm_delete_text` appropriately' do
           controller.send(:populate_view_variables, type)
           expect(assigns[:confirm_delete_text]).to eq(I18n.t("securities.delete_request.titles.#{type}"))
         end
-        it "sets `@download_path` to `securities_#{type.to_s}_download_path`" do
+        it "sets `@download_path` to `#{details[:download_path]}`" do
           controller.send(:populate_view_variables, type)
-          expect(assigns[:download_path]).to eq(controller.send(:"securities_#{type.to_s}_download_path"))
+          expect(assigns[:download_path]).to eq(controller.send(details[:download_path]))
+        end
+        it "sets `@upload_path` to `#{details[:upload_path]}`" do
+          controller.send(:populate_view_variables, type)
+          expect(assigns[:upload_path]).to eq(controller.send(details[:upload_path]))
         end
       end
       it 'calls `populate_transaction_code_dropdown_variables` with the @securities_request' do
@@ -1879,8 +1876,12 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(securities_request).not_to receive(:securities=)
         call_action
       end
-      it 'sets `securities_request.trade_date` to today if there is not already a trade date' do
-        expect(securities_request).to receive(:trade_date=).with(Time.zone.today)
+      it 'uses the calendar service to find the next business day' do
+        expect_any_instance_of(CalendarService).to receive(:find_next_business_day).with(Time.zone.today, 1.day)
+        call_action
+      end
+      it 'sets `securities_request.trade_date` to the next available business day if there is not already a trade date' do
+        expect(securities_request).to receive(:trade_date=).with(next_business_day)
         call_action
       end
       it 'does not set `securities_request.trade_date` if there is already a trade date' do
@@ -1888,8 +1889,8 @@ RSpec.describe SecuritiesController, type: :controller do
         expect(securities_request).not_to receive(:trade_date=)
         call_action
       end
-      it 'sets `securities_request.settlement_date` to today if there is not already a settlement date' do
-        expect(securities_request).to receive(:settlement_date=).with(Time.zone.today)
+      it 'sets `securities_request.settlement_date` to the next available business day if there is not already a settlement date' do
+        expect(securities_request).to receive(:settlement_date=).with(next_business_day)
         call_action
       end
       it 'does not set `securities_request.settlement_date` if there is already a settlment date' do
@@ -2193,7 +2194,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:holidays) do
         holidays = []
         rand(2..4).times do
-          holidays << (today + rand(1..70).days).iso8601
+          holidays << (today + rand(1..70).days)
         end
         holidays
       end
@@ -2230,8 +2231,9 @@ RSpec.describe SecuritiesController, type: :controller do
           expect(call_method[:max_date]).to eq(max_date)
         end
         describe 'the `invalid_dates` array' do
-          it 'includes all dates returned from the CalendarService' do
-            expect(call_method[:invalid_dates]).to include(*holidays)
+          it 'includes all dates returned from the CalendarService as iso8601 strings' do
+            holidays_strings = holidays.map{|holiday| holiday.iso8601}
+            expect(call_method[:invalid_dates]).to include(*holidays_strings)
           end
           it 'includes all weekends between the today and the max date' do
             expect(call_method[:invalid_dates]).to include(*weekends)

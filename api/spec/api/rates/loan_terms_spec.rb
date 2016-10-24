@@ -312,27 +312,23 @@ describe MAPI::Services::Rates::LoanTerms do
     end
 
     describe '`parse_time`' do
-      let(:time) { double(Time, to_s: SecureRandom.hex) }
+      let(:time) { double(Time, to_s: SecureRandom.hex, length: 4, :[] => '') }
       let(:date) { double(Date, to_s: SecureRandom.hex) }
-      let(:parsed_datetime) { double(DateTime) }
-      let(:parsed_timewithzone) { double(ActiveSupport::TimeWithZone) }
-      let(:pst) { ActiveSupport::TimeZone.new('Pacific Time (US & Canada)') }
-      let(:est) { ActiveSupport::TimeZone.new('Eastern Time (US & Canada)') }
+      let(:pst) { ActiveSupport::TimeZone.new('America/Los_Angeles') }
+      let(:est) { ActiveSupport::TimeZone.new('America/New_York') }
       let(:other_zone) { Time.zone == pst ? est : pst }
       let(:call_method) { subject.parse_time(date, time) }
       before do
-        allow(parsed_datetime).to receive(:in_time_zone).and_return(parsed_timewithzone)
+        allow(time).to receive(:to_s).and_return(time)
       end
       context 'duck typing' do
-        before do
-          allow(DateTime).to receive(:strptime).and_return(Time.zone.now)
-        end
+        before { allow(Time.zone).to receive(:parse) }
         it 'converts the `date` to a string' do
           expect(date).to receive(:to_s)
           call_method
         end
         it 'converts the `time` to a string' do
-          expect(time).to receive(:to_s)
+          expect(time).to receive(:to_s).and_return(time)
           call_method
         end
         it 'calls `strftime` on the `date` if it responds' do
@@ -343,31 +339,6 @@ describe MAPI::Services::Rates::LoanTerms do
           allow(date).to receive(:respond_to?).with(:strftime).and_return(false)
           expect(date).to_not receive(:strftime)
           call_method
-        end
-      end
-      it 'parses the supplied string according to the DATETIME_FORMAT' do
-        expect(DateTime).to receive(:strptime).with(date.to_s + time.to_s + Time.zone.name, described_class::DATETIME_FORMAT).and_return(Time.zone.now)
-        call_method
-      end
-      context 'DST correction algorithim' do
-        let(:dst_corrected_timewithzone) { double(ActiveSupport::TimeWithZone) }
-        let(:std_offset) { double(Numeric) }
-        let(:period) { double(TZInfo::TimezonePeriod, std_offset: std_offset) }
-        before do
-          allow(parsed_timewithzone).to receive(:period).and_return(period)
-          allow(parsed_timewithzone).to receive(:-).with(std_offset).and_return(dst_corrected_timewithzone)
-          allow(DateTime).to receive(:strptime).and_return(parsed_datetime)
-        end
-        it 'fetches the `std_offset` from the parsed TimeWithZone' do
-          expect(period).to receive(:std_offset)
-          call_method
-        end
-        it 'subtracts the `std_offset` from the parsed TimeWithZone' do
-          expect(parsed_timewithzone).to receive(:-).with(std_offset)
-          call_method
-        end
-        it 'returns the DST shifted TimeWithZone' do
-          expect(call_method).to be(dst_corrected_timewithzone)
         end
       end
       {
@@ -399,48 +370,58 @@ describe MAPI::Services::Rates::LoanTerms do
         time_date = time.change(hour: 0, min: 0, sec: 0)
         expect(subject.parse_time(time_date, time.strftime('%H%M'))).to eq(time_minute)
       end
+      it 'treats the first 2 digits of the time as hours and the last two digits as minutes' do
+        time = rand(0..2400).to_s.rjust(4, '0')
+        expect(Time.zone).to receive(:parse).with(include(time[0..1] + ':' + time[2..3]))
+        subject.parse_time(Time.zone.today, time)
+      end
     end
 
     describe '`value_for_term`' do
       let(:now_hash) { double('A Now Hash') }
       let(:bucket) { { 'TERM_BUCKET_LABEL' => double('A Bucket Label') } }
       let(:call_method) { subject.value_for_term(bucket, now_hash) }
+      before { allow(subject).to receive(:hash_for_types) }
       it 'returns BLANK_TYPES if the bucket is nil' do
         expect(subject.value_for_term(nil, now_hash)).to be(described_class::BLANK_TYPES)
       end
       describe 'with a bucket' do
-        let(:trade_status) { double('A Trade Status') }
+        let(:before_end_time) { double('before end time') }
         before do
-          allow(subject).to receive(:trade_status).and_return(trade_status)
+          allow(subject).to receive(:before_end_time?).and_return(before_end_time)
         end
-        it 'calls `trade_status` with the bucket' do
-          expect(subject).to receive(:trade_status).with(bucket, anything)
+        it 'calls `before_end_time?` with the bucket' do
+          expect(subject).to receive(:before_end_time?).with(bucket, anything)
           call_method
         end
-        it 'calls `trade_status` with the now_hash' do
-          expect(subject).to receive(:trade_status).with(anything, now_hash)
+        it 'calls `before_end_time?` with the now_hash' do
+          expect(subject).to receive(:before_end_time?).with(anything, now_hash)
           call_method
         end
         it 'calls `hash_for_types` with the bucket' do
-          expect(subject).to receive(:hash_for_types).with(bucket, anything, anything)
+          expect(subject).to receive(:hash_for_types).with(bucket, any_args)
           call_method
         end
         it 'calls `hash_for_types` with the bucket label' do
-          expect(subject).to receive(:hash_for_types).with(anything, bucket['TERM_BUCKET_LABEL'], anything)
+          expect(subject).to receive(:hash_for_types).with(anything, bucket['TERM_BUCKET_LABEL'], any_args)
           call_method
         end
-        it 'calls `hash_for_types` with the `trade_status`' do
-          expect(subject).to receive(:hash_for_types).with(anything, anything, trade_status)
+        it 'calls `hash_for_types` with the result of `before_end_time?`' do
+          expect(subject).to receive(:hash_for_types).with(anything, anything, before_end_time, anything)
+          call_method
+        end
+        it 'calls `hash_for_types` with the now_hash' do
+          expect(subject).to receive(:hash_for_types).with(anything, anything, anything, now_hash)
           call_method
         end
       end
     end
 
-    describe '`trade_status`' do
+    describe '`before_end_time?`' do
       let(:now) { Time.zone.now }
       let(:now_hash) { { time: now } }
       let(:bucket) { double('A Bucket Hash') }
-      let(:call_method) { subject.trade_status(bucket, now_hash) }
+      let(:call_method) { subject.before_end_time?(bucket, now_hash) }
       it 'calls `appropriate_end_time` with the bucket' do
         expect(subject).to receive(:appropriate_end_time).with(bucket, anything)
         call_method
@@ -464,6 +445,81 @@ describe MAPI::Services::Rates::LoanTerms do
       it 'returns false if the now_hash time is equal to the `appropriate_end_time`' do
         allow(subject).to receive(:appropriate_end_time).and_return(now)
         expect(call_method).to be(false)
+      end
+    end
+
+    describe '`hash_for_type`' do
+      let(:bucket) { instance_double(Hash) }
+      let(:bucket_label) { instance_double(String) }
+      let(:type) { instance_double(String) }
+      let(:trade_status) { instance_double(String) }
+      let(:now) { instance_double(Hash) }
+      let(:end_time) { instance_double(DateTime) }
+      let(:display_status) { instance_double(String) }
+      let(:loan_term) { instance_double(Hash) }
+      let(:call_method) { subject.hash_for_type(bucket, type, bucket_label, trade_status, now) }
+      before do
+        allow(subject).to receive(:appropriate_end_time).and_return(end_time)
+        allow(subject).to receive(:display_status).and_return(display_status)
+        allow(subject).to receive(:loan_term).and_return(loan_term)
+      end
+
+      it 'gets the `appropriate_end_time`' do
+        expect(subject).to receive(:appropriate_end_time).with(bucket, now)
+        call_method
+      end
+      it 'gets the `display_status`' do
+        expect(subject).to receive(:display_status).with(bucket, type)
+        call_method
+      end
+      it 'calls `loan_term` with the proper args' do
+        expect(subject).to receive(:loan_term).with(trade_status, display_status, bucket_label, end_time)
+        call_method
+      end
+      it 'returns the result of `loan_term`' do
+        expect(call_method).to eq(loan_term)
+      end
+    end
+
+    describe '`loan_term`' do
+      let(:bucket_label) { instance_double(String) }
+      let(:before_end_time) { instance_double(String) }
+      let(:end_time) { instance_double(DateTime, strftime: nil) }
+      let(:display_status) { instance_double(String) }
+      let(:call_method) { subject.loan_term(before_end_time, display_status, bucket_label, end_time) }
+
+      describe '`trade_status`' do
+        it 'is true if both `display_status` and `before_end_time?` are true' do
+          expect(subject.loan_term(true, true, bucket_label, end_time)[:trade_status]).to be true
+        end
+        it 'is false if `before_end_time?` is false' do
+          expect(subject.loan_term(false, true, bucket_label, end_time)[:trade_status]).to be false
+        end
+        it 'is false if `display_status` is false' do
+          expect(subject.loan_term(true, false, bucket_label, end_time)[:trade_status]).to be false
+        end
+      end
+      describe '`end_time_reached`' do
+        it 'is true if `before_end_time?` is false' do
+          expect(subject.loan_term(false, display_status, bucket_label, end_time)[:end_time_reached]).to be true
+        end
+        it 'is false if `before_end_time?` is true' do
+          expect(subject.loan_term(true, display_status, bucket_label, end_time)[:end_time_reached]).to be false
+        end
+      end
+      it 'sets `display_status` to the display_status it was passed' do
+        expect(call_method[:display_status]).to eq(display_status)
+      end
+      it 'sets `bucket_label` to the bucket_label it was passed' do
+        expect(call_method[:bucket_label]).to eq(bucket_label)
+      end
+      it 'sets `end_time` to an iso8601 formatted string' do
+        formatted_time = instance_double(String)
+        allow(end_time).to receive(:iso8601).and_return(formatted_time)
+        expect(call_method[:end_time]).to eq(formatted_time)
+      end
+      it 'sets `end_time` to nil if the passed end_time is nil' do
+        expect(subject.loan_term(before_end_time, display_status, bucket_label, nil)[:end_time]).to be nil
       end
     end
   end

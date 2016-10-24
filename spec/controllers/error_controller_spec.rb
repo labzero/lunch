@@ -1,10 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe ErrorController, :type => :controller do
-  it { should_not use_before_action(:authenticate_user!) }
   it { should_not use_before_action(:check_terms) }
-  
+
   describe 'GET standard_error' do
+    before do
+      sign_out :user
+    end
+
     it 'should raise an error' do
       expect{get :standard_error}.to raise_error(StandardError)
     end
@@ -29,6 +32,8 @@ RSpec.describe ErrorController, :type => :controller do
   end
 
   describe 'GET not_found' do
+    login_user
+
     it 'should raise an error' do
       expect{get :not_found}.to raise_error(ActionController::RoutingError)
     end
@@ -37,22 +42,34 @@ RSpec.describe ErrorController, :type => :controller do
       before do
         allow(Rails.env).to receive(:production?).and_return(true)
       end
+      it 'issues an authentication challenge to the user' do
+        expect(controller).to receive(:authenticate_user!)
+        get :not_found
+      end
       it 'passes the exception to the `handle_exception` method' do
         expect(controller).to receive(:handle_exception)
         get :not_found
       end
-      it 'returns a 404 for its status' do
-        get :not_found
-        expect(response.status).to be(404)
-      end
-      it 'renders the 404 view' do
-        get :not_found
-        expect(response.body).to render_template('404')
+      context 'user authenticated' do
+        before do
+          allow(controller).to receive(:authenticate_user!).and_return(true)
+        end
+        it 'returns a 404 for its status' do
+          get :not_found
+          expect(response.status).to be(404)
+        end
+        it 'renders the 404 view' do
+          get :not_found
+          expect(response.body).to render_template('404')
+        end
       end
     end
   end
 
   describe 'GET maintenance' do
+    before do
+      sign_out :user
+    end
     it 'renders the maintenance view' do
       get :maintenance
       expect(response.body).to render_template('maintenance')

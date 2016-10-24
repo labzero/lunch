@@ -66,7 +66,6 @@ class SecuritiesRequest
   FED_AMOUNT_LIMIT = 50000000
 
   attr_accessor *ACCESSIBLE_ATTRS
-  attr_reader :securities
 
   validates *[:delivery_type, :securities, :kind, :form_type], presence: true
   validates *[:pledged_account, :safekept_account], presence: true, if: Proc.new { |request| request.kind && TRANSFER_KINDS.include?(request.kind)  }
@@ -74,8 +73,9 @@ class SecuritiesRequest
   validates *(DELIVERY_INSTRUCTION_KEYS[:fed] - [:fed_credit_account_number]), presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :fed }
   validates *(DELIVERY_INSTRUCTION_KEYS[:dtc] - [:dtc_credit_account_number]), presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :dtc }
   validates *DELIVERY_INSTRUCTION_KEYS[:mutual_fund], presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :mutual_fund }
-  validates *(DELIVERY_INSTRUCTION_KEYS[:physical_securities] - [:physical_securities_credit_account_number]), presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :physical_securities }
+  validates :delivery_bank_agent, presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :physical_securities }
   validate :original_par_under_fed_limit, if: Proc.new { |request| request.delivery_type && request.delivery_type == :fed }
+  validate :original_par_is_whole_number, if: Proc.new { |request| request.delivery_type && (request.delivery_type == :fed || request.delivery_type == :dtc) }
 
   with_options if: Proc.new { |request| !TRANSFER_KINDS.include?(request.kind) } do
     validates *BROKER_INSTRUCTION_KEYS, presence: true
@@ -184,6 +184,10 @@ class SecuritiesRequest
     @securities = securities
   end
 
+  def securities
+    @securities || []
+  end
+
   def broker_instructions
     {
       transaction_code: transaction_code,
@@ -278,6 +282,17 @@ class SecuritiesRequest
         end
       end
       errors.add(:securities, :original_par) if over_fed_limit
+    end
+  end
+
+  def original_par_is_whole_number
+    unless securities.blank?
+      whole_number = true
+      securities.each do |security|
+        whole_number = ((security.original_par * 100).to_i % 100) == 0
+        break unless whole_number
+      end
+      errors.add(:securities, :original_par_whole_number) unless whole_number
     end
   end
 end

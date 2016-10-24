@@ -101,8 +101,8 @@ module MAPI
                                    'dtc' => 'CREDIT_ACCT_NO2',
                                    'mutual_fund' => 'MUTUAL_FUND_ACCT_NO',
                                    'physical_securities' => 'CREDIT_ACCT_NO3' }
-        REQUIRED_SECURITY_RELEASE_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
-        REQUIRED_SECURITY_TRANSFER_KEYS = [ 'cusip', 'description', 'original_par' ].freeze
+        REQUIRED_SECURITY_RELEASE_KEYS = [ 'cusip', 'original_par' ].freeze
+        REQUIRED_SECURITY_TRANSFER_KEYS = [ 'cusip', 'original_par' ].freeze
         REQUIRED_SECURITY_INTAKE_KEYS = [ 'cusip', 'original_par' ].freeze
         LAST_MODIFIED_BY_MAX_LENGTH = 30
         BROKER_WIRE_ADDRESS_FIELDS = ['clearing_agent_fed_wire_address_1', 'clearing_agent_fed_wire_address_2'].freeze
@@ -492,6 +492,13 @@ module MAPI
           if delivery_type == 'fed'
             securities.each do |security|
               raise MAPI::Shared::Errors::CustomTypedFieldError.new("original par must be less than $#{FED_AMOUNT_LIMIT}", :original_par, :securities, FED_AMOUNT_LIMIT) unless security['original_par'] <= FED_AMOUNT_LIMIT
+            end
+          end
+          if delivery_type == 'fed' || delivery_type == 'dtc'
+            securities.each do |security|
+              original_par = security['original_par']
+              raise MAPI::Shared::Errors::CustomTypedFieldError.new("original par must be a whole number when delivery_type is 'fed' or 'dtc'", :original_par_whole_number, :securities) unless ((original_par * 100).to_i % 100) == 0
+              security['original_par'] = original_par.to_i
             end
           end
         end

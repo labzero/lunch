@@ -36,8 +36,8 @@
     .securities-delivery-instructions-fields{data: {'selected-delivery-instruction' => @delivery_instructions_defaults[:value]}}
       .securities-delivery-instructions-field.securities-delivery-instructions-field-physical-securities{data: {'delivery-instruction-type' => 'physical_securities'}}
         = render 'shared/input_field', form_builder: f, field_name: :delivery_bank_agent, label: true, horizontal: true
-        = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_name, label: true, horizontal: true
-        = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_address, label: true, horizontal: true
+        = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_name, label: true, horizontal: true, field_data: {required: false}
+        = render 'shared/input_field', form_builder: f, field_name: :receiving_bank_agent_address, label: true, horizontal: true, field_data: {required: false}
         = render 'shared/input_field', form_builder: f, field_name: :physical_securities_credit_account_number, label: true, horizontal: true, field_data: {required: false}
       .securities-delivery-instructions-field.securities-delivery-instructions-field-fed{data: {'delivery-instruction-type' => 'fed'}}
         .securities-fed-wire-address-fields
@@ -56,7 +56,7 @@
   %section.securities-display
     -if type == :safekeep || type == :pledge
       %h2.safekeep-pledge-title= t('securities.title')
-      =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), @download_path, class: [ 'securities-download-template', 'safekeep-pledge-download-title' ]
+      =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), @download_path, class: [ 'securities-download-template', 'safekeep-pledge-download-title' ], data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}
     -else
       %h2= t('securities.title')
     %p.securities-request-upload-success= t('securities.upload_success')
@@ -66,9 +66,9 @@
         = render 'table', locals: { type: type }
         %p.securities-table-footnote= t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)
     -if type == :release
-      = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, upload_url: securities_release_upload_path, type: :release}
+      = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, upload_path: @upload_path, type: :release}
     -elsif type == :safekeep || type == :pledge
-      = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, download_path: @download_path}
+      = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, download_path: @download_path, upload_path: @upload_path}
   - if @authorizer
     - if kind == :pledge_release
       .securities-request-legal

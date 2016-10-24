@@ -2278,6 +2278,10 @@ RSpec.describe ReportsController, :type => :controller do
       get :securities_transactions
       expect(assigns[:total_debits]).to be(total_debits)
     end
+    it 'assigns @as_of to the value for `start_date`' do
+      get :securities_transactions
+      expect(assigns[:as_of]).to eq(start_date)
+    end
   end
 
   describe 'most_recent_business_day' do

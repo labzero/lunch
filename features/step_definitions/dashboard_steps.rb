@@ -146,6 +146,10 @@ Then(/^I should not see Financing Availablity in the account overview$/) do
   page.assert_no_selector('.dashboard-account-overview-table td', text: I18n.t('dashboard.your_account.table.remaining.available'), exact: true)
 end
 
+When(/^I click on the View Recent Price Indications link$/) do
+  page.find('.etransact-status-message a', text: I18n.t('dashboard.quick_advance.advances_desk_closed_link').upcase ).click
+end
+
 def get_module_by_section(section)
   heading = case section
     when 'recent activities'

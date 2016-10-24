@@ -33,22 +33,26 @@ RSpec.describe SecuritiesRequest, :type => :model do
         expect(subject).to validate_presence_of attr
       end
     end
-    described_class::DELIVERY_TYPES.keys.each do |delivery_type|
+    (described_class::DELIVERY_TYPES.keys - [:physical_securities]).each do |delivery_type|
       describe "when `:delivery_type` is `#{delivery_type}`" do
         before do
           subject.delivery_type = delivery_type
         end
-        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] - [:dtc_credit_account_number, :fed_credit_account_number, :physical_securities_credit_account_number]).each do |attr|
+        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] - [:dtc_credit_account_number, :fed_credit_account_number]).each do |attr|
           it "validates the presence of `#{attr}`" do
             expect(subject).to validate_presence_of attr
           end
         end
-        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] & [:dtc_credit_account_number, :fed_credit_account_number, :physical_securities_credit_account_number]).each do |attr|
+        (described_class::DELIVERY_INSTRUCTION_KEYS[delivery_type] & [:dtc_credit_account_number, :fed_credit_account_number]).each do |attr|
           it "does not validate the presence of `#{attr}`" do
             expect(subject).to_not validate_presence_of attr
           end
         end
       end
+    end
+    it 'validates the presence of `:delivery_bank_agent` when the `delivery_type` is `:physical_securities`' do
+      subject.delivery_type = :physical_securities
+      expect(subject).to validate_presence_of :delivery_bank_agent
     end
     describe '`trade_date_must_come_before_settlement_date`' do
       let(:call_validation) { subject.send(:trade_date_must_come_before_settlement_date) }
@@ -268,6 +272,40 @@ RSpec.describe SecuritiesRequest, :type => :model do
         subject.securities = [security_under_fed_limit, security_over_fed_limit]
         expect(subject.errors).to receive(:add).with(:securities, :original_par)
         call_validation
+      end
+    end
+    describe '`original_par_is_whole_number`' do
+      let(:call_validation) { subject.send(:original_par_is_whole_number) }
+
+      delivery_types_to_validate = [:fed, :dtc]
+      delivery_types_to_validate.each do |delivery_type|
+        describe "when the `delivery_type` is `#{delivery_type}`" do
+          before { subject.delivery_type = delivery_type }
+
+          it "is called as a validator" do
+            expect(subject).to receive(:original_par_is_whole_number)
+            subject.valid?
+          end
+          it 'adds an error if the `original_par` is not a whole number' do
+            original_par = rand(0..500000) + rand.round(2)
+            subject.securities = [FactoryGirl.build(:security, original_par: original_par)]
+            expect(subject.errors).to receive(:add).with(:securities, :original_par_whole_number)
+            call_validation
+          end
+          it 'does not add an error if the `original_par` is a whole number' do
+            original_par = rand(0..500000)
+            subject.securities = [FactoryGirl.build(:security, original_par: original_par)]
+            expect(subject.errors).not_to receive(:add)
+            call_validation
+          end
+        end
+      end
+      (described_class::DELIVERY_INSTRUCTION_KEYS.keys - delivery_types_to_validate).each do |delivery_type|
+        it "is not called as a validator if the `delivery_type` is `#{delivery_type}" do
+          subject.delivery_type = delivery_type
+          expect(subject).not_to receive(:original_par_is_whole_number)
+          subject.valid?
+        end
       end
     end
     described_class::TRANSFER_KINDS.each do |kind|
@@ -565,7 +603,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
             call_method
           rescue
           end
-          expect(subject.securities).to be_nil
+          expect(subject.securities).to eq([])
         end
       end
     end
@@ -638,6 +676,27 @@ RSpec.describe SecuritiesRequest, :type => :model do
             end
           end
         end
+      end
+    end
+
+    describe '`securities`' do
+      let(:call_method) { subject.securities }
+
+      it 'returns an empty array initially' do
+        expect(call_method).to eq([])
+      end
+      it 'returns the value from `@securities`' do
+        value = double('A Value')
+        subject.instance_variable_set(:@securities, value)
+        expect(call_method).to be(value)
+      end
+      it 'returns an empty array when `@securities` is nil' do
+        subject.instance_variable_set(:@securities, nil)
+        expect(call_method).to eq([])
+      end
+      it 'returns an empty array when `@securities` is false' do
+        subject.instance_variable_set(:@securities, false)
+        expect(call_method).to eq([])
       end
     end
 
