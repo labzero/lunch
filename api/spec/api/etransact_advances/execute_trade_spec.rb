@@ -751,6 +751,8 @@ describe MAPI::ServiceApp do
     let(:gross_amount) { rand(9999..99999) }
     let(:capital_stock_error) { { 'status' => ['CapitalStockError'], 'gross_amount' => gross_amount } }
     let(:credit_error) { { 'status' => ['CreditError'] } }
+    let(:collateral_error) { { 'status' => ['CollateralError'] } }
+    let(:daily_limit_error) { { 'status' => ['ExceedsTotalDailyLimitError'] } }
     let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade(app, member_id, instrument,
       'VALIDATE', amount, advance_term, advance_type, rate, true, signer, markup, blended_cost_of_funds,
       cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, nil) }
@@ -783,6 +785,22 @@ describe MAPI::ServiceApp do
           instrument, 'VALIDATE', gross_amount, advance_term, advance_type, rate, false, signer, markup,
           blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period,
           nil).and_return(credit_error)
+        expect(call_method['status'].include?('GrossUpExceedsFinancingAvailabilityError')).to eq(true)
+      end
+
+      it 'returns a `GrossUpExceedsFinancingAvailabilityError` if `gross_amount` exceeds collateral limit' do
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(app, member_id,
+          instrument, 'VALIDATE', gross_amount, advance_term, advance_type, rate, false, signer, markup,
+          blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period,
+          nil).and_return(collateral_error)
+        expect(call_method['status'].include?('GrossUpExceedsFinancingAvailabilityError')).to eq(true)
+      end
+
+      it 'returns a `GrossUpExceedsFinancingAvailabilityError` if `gross_amount` exceeds daily limit' do
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade_internal).with(app, member_id,
+          instrument, 'VALIDATE', gross_amount, advance_term, advance_type, rate, false, signer, markup,
+          blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period,
+          nil).and_return(daily_limit_error)
         expect(call_method['status'].include?('GrossUpExceedsFinancingAvailabilityError')).to eq(true)
       end
 

@@ -281,7 +281,9 @@ module MAPI
           data = MAPI::Services::EtransactAdvances::ExecuteTrade::execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capstock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, funding_date)
           if data['status'].include?('CapitalStockError')
             credit_check = MAPI::Services::EtransactAdvances::ExecuteTrade::execute_trade_internal(app, member_id, instrument, operation, data['gross_amount'], advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, funding_date)
-            if credit_check['status'].include?('CreditError')
+            if credit_check['status'].include?('CreditError') ||
+              credit_check['status'].include?('CollateralError') ||
+              credit_check['status'].include?('ExceedsTotalDailyLimitError')
               data['status'] << 'GrossUpExceedsFinancingAvailabilityError'
             end
           end

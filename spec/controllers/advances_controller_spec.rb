@@ -15,7 +15,8 @@ RSpec.describe AdvancesController, :type => :controller do
         allow(subject).to receive(:fetch_advance_request)
         allow(subject).to receive(:select_rate).and_raise(exception.new(*args))
         allow(controller).to receive(:populate_advance_error_view_parameters)
-        allow(controller).to receive(:signer_full_name)
+        allow(controller).to receive(:signer_full_name).and_return(SecureRandom.hex)
+        allow_any_instance_of(RatesService).to receive(:quick_advance_rates)
       end
 
       it 'logs at the `info` log level' do
