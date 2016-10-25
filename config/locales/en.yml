@@ -230,7 +230,7 @@ en:
               invalid: Settlement date may not occur on a weekend, a holiday, or be a date in the past.
               before_trade_date: Settlement Date must be on or after Trade Date.
             securities:
-              payment_amount_missing: If Settlement Type is Vs. Payment, each security must have a Settlement Amount.
+              payment_amount_missing: If Settlement Type is Vs. Payment, each security must have a Settlement Amount greater than zero.
               payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank.
               original_par: Securities with Fed delivery must have Original Par of $50 million or less.
               original_par_whole_number: If delivery is via Fed or DTC, the Original Par amount must be a whole number (no cents).
@@ -1433,7 +1433,7 @@ en:
         pledge: Pledge Request
         transfer: Transfer Request
       fed_limit: Securities with Fed delivery must have Original Par of $50 million or less
-      settlement_amount_footnote: '%{footnote_marker}If Settlement Type is Vs. Payment, each security must have Settlement Amount'
+      settlement_amount_footnote: '%{footnote_marker}If Settlement Type is Vs. Payment, each security must have a Settlement Amount greater than zero.'
       custodian_name_footnote: '%{footnote_marker}Custodian Name is required for all non-agency mortgage-backed securities'
     upload_errors:
       cannot_open: We can't open your file. Verify that you have selected the correct file and try again.
