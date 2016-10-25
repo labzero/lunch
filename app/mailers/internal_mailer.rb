@@ -86,6 +86,7 @@ class InternalMailer < ActionMailer::Base
   protected
 
   def user_name_from_user(user)
+    user ||= I18n.t('global.unknown')
     return user if user.is_a?(String)
 
     begin
