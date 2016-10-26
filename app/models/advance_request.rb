@@ -307,7 +307,7 @@ class AdvanceRequest
   def collateral_type
     case type
     when :whole
-      I18n.t('dashboard.quick_advance.table.mortgage')
+      I18n.t('dashboard.quick_advance.table.whole_loan')
     when :agency
       I18n.t('dashboard.quick_advance.table.agency')
     when :aaa

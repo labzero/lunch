@@ -803,7 +803,7 @@ describe AdvanceRequest do
   describe '`collateral_type` method' do
     let(:call_method) { subject.collateral_type }
     {
-      whole: I18n.t('dashboard.quick_advance.table.mortgage'),
+      whole: I18n.t('dashboard.quick_advance.table.whole_loan'),
       agency: I18n.t('dashboard.quick_advance.table.agency'),
       aa: I18n.t('dashboard.quick_advance.table.aa'),
       aaa: I18n.t('dashboard.quick_advance.table.aaa')
