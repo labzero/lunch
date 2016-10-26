@@ -34,6 +34,13 @@
             %li=link_to t('global.authorizations'), reports_authorizations_path
             %li=link_to t('global.borrowing_capacity'), reports_borrowing_capacity_path
             %li=link_to t('global.letters_of_credit'), reports_letters_of_credit_path
+          -if @member_profile[:credit_exception] || @member_profile[:disabled_reports].first
+            %ul.report-profile-exceptions
+              %li= t('reports.pages.member_profile.notes')
+              -if @member_profile[:credit_exception]
+                %li=link_to t('reports.pages.member_profile.credit_exception'), '#credit_exception'
+              -if @member_profile[:disabled_reports].first
+                %li=link_to t('reports.pages.member_profile.disabled_reports'), '#disabled_reports'
     %section.report-profile-data
       .row
         .column-3-span-2
@@ -82,7 +89,7 @@
               %h2= t('reports.pages.member_profile.advances.title')
               = render 'reports_table', sortable: false, table_data: @advances_table
               = render 'reports_table', sortable: false, table_data: @mpf_table
-              = render 'reports_footer_only_table', table_data: @advances_and_mpf_totals
+              = render 'reports_footer_only_table', table_data: @advances_and_mpf_totals  
         .column-3
           %h2=t('reports.pages.member_profile.credit.title')
           = render 'reports_table', sortable: false, table_data: @credit_tables[0]
@@ -90,6 +97,18 @@
           = render 'reports_table', sortable: false, table_data: @credit_tables[2]
           = render 'reports_footer_only_table', table_data: @total_credit_table
           = render 'reports_footer_only_table', table_data: @total_available_credit_table
-
+      .row
+        .column-3-span-2
+          -if @member_profile[:credit_exception]
+            %a{name: 'credit_exception'}
+            %h2= t('reports.pages.member_profile.credit_exception')
+            %p= @member_profile[:credit_exception]
+          -if @member_profile[:disabled_reports].first
+            %a{name: 'disabled_reports'}
+            %h2= t('reports.pages.member_profile.disabled_reports')
+            %ul.disabled-reports
+              -@member_profile[:disabled_reports].each do |report_name|
+                %li= report_name
+        .column-3
           %h2=t('reports.pages.member_profile.sta.title')
           = render 'reports_table', sortable: false, table_data: @sta_table, table_class: 'report-profile-sta'

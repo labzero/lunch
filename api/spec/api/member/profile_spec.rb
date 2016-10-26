@@ -31,6 +31,8 @@ describe MAPI::ServiceApp do
       expect(collateral_borrowing_capacity['sbc']['remaining_borrowing']).to be_kind_of(Integer)
       expect(collateral_borrowing_capacity['sbc']['total_market']).to be_kind_of(Integer)
       expect(collateral_borrowing_capacity['sbc']['remaining_market']).to be_kind_of(Integer)
+      expect(member_financial_position['credit_exception']).to be_kind_of(String)
+      expect(member_financial_position['disabled_reports']).to be_kind_of(Array)
     end
 
     it 'should call `MAPI::Services::Member::CapitalStockAndLeverage::capital_stock_and_leverage` method and return capital_stock' do
@@ -52,6 +54,13 @@ describe MAPI::ServiceApp do
     describe 'in the production environment' do
         let(:member_position_result) {double('Oracle Result Set', fetch: nil)}
         let(:member_sta_result) {double('Oracle Result Set', fetch: nil)}
+        let(:member_credit_exception_hash) { double('Oracle Result Set', fetch: nil) }
+        let(:disabled_reports_array) { double('Oracle Result Set', fetch: nil) }
+        let(:credit_exception) { { 'EXCEPT_TEXT' => 'This is a credit exception' } }
+        let(:disabled_reports) { [  { 'WEB_FLAG_ID' => 14,
+                                      'WEB_FLAG_NAME' => 'Cash Projections Data' },
+                                    { 'WEB_FLAG_ID' => 29,
+                                      'WEB_FLAG_NAME' => 'Current Securities Position' } ] }
         let(:some_financial_data) do
           data = {}
           %w(RECOM_EXPOSURE_PCT MAX_TERM TOTAL_ASSETS RHFA_ADVANCES_LIMIT REG_ADVANCES_OUTS SBC_ADVANCES_OUTS SWAP_MARKET_OUTS SWAP_NOTIONAL_PRINCIPAL UNSECURED_CREDIT LCS_OUTS MPF_CE_COLLATERAL_REQ STX_LEDGER_BALANCE CREDIT_OUTSTANDING COMMITTED_FUND_LESS_MPF AVAILABLE_CREDIT RECOM_EXPOSURE REG_BORR_CAP SBC_BORR_CAP EXCESS_REG_BORR_CAP EXCESS_SBC_BORR_CAP_AG EXCESS_SBC_BORR_CAP_AAA EXCESS_SBC_BORR_CAP_AA EXCESS_SBC_BORR_CAP SBC_MARKET_VALUE_AG SBC_MARKET_VALUE_AAA SBC_MARKET_VALUE_AA SBC_MARKET_VALUE EXCESS_SBC_MARKET_VALUE ADVANCES_OUTSTANDING MPF_UNPAID_BALANCE TOTAL_CAPITAL_STOCK MRTG_RELATED_ASSETS MRTG_RELATED_ASSETS_round100
@@ -68,9 +77,11 @@ describe MAPI::ServiceApp do
                                "STX_UPDATE_DATE"=> Time.zone.today.to_s }}
         before do
           allow(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
-          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_position_result, member_sta_result)
+          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_position_result, member_sta_result, member_credit_exception_hash, disabled_reports_array)
           allow(member_position_result).to receive(:fetch_hash).and_return(some_financial_data, nil)
           allow(member_sta_result).to receive(:fetch_hash).and_return(some_sta_data, nil)
+          allow(member_credit_exception_hash).to receive(:fetch_hash).and_return(credit_exception)
+          allow(disabled_reports_array).to receive(:fetch_hashes).and_return(disabled_reports)
         end
 
         it 'returns the `financing_percentage` from the `RECOM_EXPOSURE_PCT` field a percentage' do
@@ -140,6 +151,14 @@ describe MAPI::ServiceApp do
           end
         end
 
+        it 'returns the credit exception' do
+          expect(member_financial_position['credit_exception']).to eq(credit_exception['EXCEPT_TEXT'])
+        end
+
+        it 'returns disabled reports' do
+          expect(member_financial_position['disabled_reports']).to eq(disabled_reports.map { |disabled_report| disabled_report['WEB_FLAG_NAME'] } )
+        end
+
         it 'should return a 404 if no position data was found for the member' do
           allow(member_position_result).to receive(:fetch_hash).and_return(nil)
           make_request
@@ -161,10 +180,37 @@ describe MAPI::ServiceApp do
           allow(member_sta_result).to receive(:fetch_hash).and_return(nil)
           expect(member_financial_position['sta_update_date']).to be_nil
         end
+    end
 
+    context 'credit exceptions and disabled reports' do
+      before do
+        allow(MAPI::Services::Member::Profile).to receive(:quote).with(member_id).and_return(member_id)
+      end
+
+      it 'returns the credit exception query' do
+        expect(MAPI::Services::Member::Profile.get_credit_exception_query(member_id)).to eq(
+          <<-SQL
+            SELECT EXCEPT_TEXT
+            FROM CRED_APP.CRED_EXCEPT_REPORT
+            WHERE VALID_FLAG = 'Y'
+            AND EFFECT_DATE <= SYSDATE AND EXCEPT_TEXT IS NOT NULL AND FHLB_ID = #{member_id}
+          SQL
+        )
+      end
+
+      it 'returns the disabled reports query' do
+        expect(MAPI::Services::Member::Profile.get_disabled_reports_query(member_id)).to eq(
+          <<-SQL
+            SELECT  C.WEB_FLAG_ID, P.WEB_FLAG_NAME
+            FROM WEB_ADM.WEB_DATA_FLAGS P,  WEB_ADM.WEB_DATA_FLAGS_BY_INSTITUTIONS C
+            WHERE P.WEB_FLAG_ID = C.WEB_FLAG_ID
+            AND C.WEB_FHLB_ID = #{member_id}
+          SQL
+        )
+      end
     end
   end
-
+  
   context 'account numbers' do
     let(:account_numbers) { { 'P' => rand(999..9999), 'U' => rand(999..9999) } }
     let(:account_numbers_hash_array) { [ { 'ACCOUNT_TYPE' => 'P', 'ADX_ID' => account_numbers['P'] },

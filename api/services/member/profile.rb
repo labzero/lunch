@@ -97,8 +97,7 @@ module MAPI
           SQL
 
           member_sta_cursor_string = <<-SQL
-            SELECT
-            STX_CURRENT_LEDGER_BALANCE, STX_UPDATE_DATE
+            SELECT STX_CURRENT_LEDGER_BALANCE, STX_UPDATE_DATE
             FROM PORTFOLIOS.STA e, PORTFOLIOS.STA_TRANS f
             WHERE e.STA_ACCOUNT_TYPE = 1
             AND  f.STA_ID = e.STA_ID AND e.fhlb_id = #{quote(member_id)}
@@ -109,9 +108,13 @@ module MAPI
           if app.settings.environment == :production
             member_position_hash = ActiveRecord::Base.connection.execute(member_position_connection_string).fetch_hash()
             member_sta_hash = ActiveRecord::Base.connection.execute(member_sta_cursor_string).fetch_hash()
+            member_credit_exception_hash = ActiveRecord::Base.connection.execute(get_credit_exception_query(member_id)).fetch_hash()
+            disabled_reports_array = ActiveRecord::Base.connection.execute(get_disabled_reports_query(member_id)).fetch_hashes()
           else
             member_position_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_financial_position.json'))).sample
             member_sta_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_balances.json'))).sample
+            member_credit_exception_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_credit_exception.json')))
+            disabled_reports_array = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'disabled_reports.json')))
           end
           capital_stock_and_leverage = MAPI::Services::Member::CapitalStockAndLeverage::capital_stock_and_leverage(app, member_id)
 
@@ -210,7 +213,9 @@ module MAPI
               total_mpf: member_position_hash['TOTAL_MPF'].to_i,
               total_advances: member_position_hash['ADVANCES_OUTS'].to_i,
               total_advances_and_mpf: member_position_hash['ADVANCES_OUTS'].to_i + member_position_hash['MPF_ACTIVITY'].to_i + member_position_hash['MPF_UNPAID_BALANCE'].to_i
-            }
+            },
+            credit_exception: member_credit_exception_hash ? member_credit_exception_hash['EXCEPT_TEXT'] : nil,
+            disabled_reports: disabled_reports_array && disabled_reports_array.first ? disabled_reports_array.map { |disabled_report| disabled_report['WEB_FLAG_NAME'] } : []
           }
         end
 
@@ -402,6 +407,24 @@ module MAPI
           end
           account_numbers
         end
+
+        def self.get_credit_exception_query(member_id)
+          <<-SQL
+            SELECT EXCEPT_TEXT
+            FROM CRED_APP.CRED_EXCEPT_REPORT
+            WHERE VALID_FLAG = 'Y'
+            AND EFFECT_DATE <= SYSDATE AND EXCEPT_TEXT IS NOT NULL AND FHLB_ID = #{quote(member_id)}
+          SQL
+        end
+
+        def self.get_disabled_reports_query(member_id) 
+          <<-SQL
+            SELECT  C.WEB_FLAG_ID, P.WEB_FLAG_NAME
+            FROM WEB_ADM.WEB_DATA_FLAGS P,  WEB_ADM.WEB_DATA_FLAGS_BY_INSTITUTIONS C
+            WHERE P.WEB_FLAG_ID = C.WEB_FLAG_ID
+            AND C.WEB_FHLB_ID = #{quote(member_id)}
+          SQL
+        end        
       end
     end
   end

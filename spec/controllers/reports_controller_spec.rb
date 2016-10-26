@@ -3229,6 +3229,8 @@ RSpec.describe ReportsController, :type => :controller do
              remaining_market: double(Float),
              total_borrowing: double(Float),
              remaining_borrowing: double(Float) } } }
+    let(:credit_exception) { double('Credit Exception') }
+    let(:disabled_reports) { double('Disabled Reports') }
     let(:profile) { {
       financing_percentage: financing_percentage,
       maximum_term: maximum_term,
@@ -3240,7 +3242,9 @@ RSpec.describe ReportsController, :type => :controller do
       collateral_borrowing_capacity: collateral_borrowing_capacity,
       capital_stock: capital_stock,
       remaining_financing_available: remaining_financing_available,
-      collateral_delivery_status: 'Y'
+      collateral_delivery_status: 'Y',
+      credit_exception: credit_exception,
+      disabled_reports: disabled_reports
     } }
     let(:member_name) { double('A Name') }
     let(:sta_number) { double('STA Number') }

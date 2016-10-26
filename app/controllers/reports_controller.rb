@@ -398,7 +398,9 @@ class ReportsController < ApplicationController
         },
         capital_stock: {},
         advances: {},
-        rhfa: {}
+        rhfa: {},
+        credit_exception: '',
+        disabled_reports: []
       }
     end
 
