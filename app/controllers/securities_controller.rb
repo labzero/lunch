@@ -407,27 +407,29 @@ class SecuritiesController < ApplicationController
         spreadsheet.each do |row|
           if data_start_index
             cusip = row[data_start_index]
-            security = if type == :release
-              Security.from_hash({
+             security_hash = if type == :release
+              {
                 cusip: cusip,
                 description: row[data_start_index + 1],
                 original_par: (row[data_start_index + 2]),
                 payment_amount: (row[data_start_index + 3])
-              })
+              }
             elsif type == :transfer
-              Security.from_hash({
+              {
                 cusip: cusip,
                 description: row[data_start_index + 1],
                 original_par: (row[data_start_index + 2])
-              })
+              }
             elsif type == :pledge || type == :safekeep
-              Security.from_hash({
+              {
                 cusip: cusip,
                 original_par: (row[data_start_index + 1]),
                 payment_amount: (row[data_start_index + 2]),
                 custodian_name: (row[data_start_index + 3])
-              })
+              }
             end
+            next if security_hash.values.compact.empty?
+            security = Security.from_hash(security_hash)
             if security.valid?
               securities << security
             elsif security.errors.keys.include?(:cusip)

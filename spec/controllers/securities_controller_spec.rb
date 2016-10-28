@@ -698,6 +698,7 @@ RSpec.describe SecuritiesController, type: :controller do
     shared_examples 'an upload_securities action with a type' do |type|
       uploaded_file = excel_fixture_file_upload('sample-securities-upload.xlsx')
       headerless_file = excel_fixture_file_upload('sample-securities-upload-headerless.xlsx')
+      uploaded_with_blanks_file = excel_fixture_file_upload('sample-securities-upload-blanks.xlsx')
       let(:security) { instance_double(Security, :valid? => true) }
       let(:invalid_security) { instance_double(Security, :valid? => false, errors: {}) }
       let(:sample_securities_upload_array) { [security,security,security,security,security] }
@@ -802,6 +803,17 @@ RSpec.describe SecuritiesController, type: :controller do
         it 'renders a json object with a generic error messages' do
           call_action
           expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.generic')))
+        end
+      end
+      describe 'when the uploaded file contains blanks' do
+        let(:call_action) { post :upload_securities, file: uploaded_with_blanks_file, type: type }
+        it 'does not return an error' do
+          call_action
+          expect(parsed_response_body[:error]).to be_nil
+        end
+        it 'calls `populate_securities_table_data_view_variable` with the securities, skiping blank lines' do
+          expect(controller).to receive(:populate_securities_table_data_view_variable).with(type, sample_securities_upload_array)
+          call_action
         end
       end
       describe 'when the MIME type of the uploaded file is not in the list of accepted types' do
