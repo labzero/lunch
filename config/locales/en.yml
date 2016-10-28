@@ -1414,7 +1414,7 @@ en:
         pledge_intake: Pledge Request Received
         safekept_intake: Safekeeping Request Received
         transfer: Transfer Request Received
-      confirmation: "We received your securities request at %{date}. If there are any issues with your request, you will be contacted by Collateral Operations or Securities Services. Otherwise, the transaction will be reflected in your Settlement Transaction Account statement on the Settlement Date."
+      confirmation: "We received your securities request at %{date}. If there are any issues with your request, you will be contacted by Collateral Operations or Securities Services. Otherwise, the transaction will be reflected in your Settlement Transaction Account statement and Securities Transaction report on the Settlement Date."
       pdf: To see a PDF summary of the authorized request, press the View link in the Authorized Requests section of Securities Requests.
       contact_html: "If you have questions, contact <a href=\"%{mailto_url}\">%{mailto_text}</a> or call %{phone_number}."
       make_request: make another request
