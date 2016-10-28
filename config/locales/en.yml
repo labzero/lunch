@@ -248,8 +248,8 @@ en:
         receiving_bank_agent_name: "Receiving Bank/Agent’s Name"
         receiving_bank_agent_address: "Receiving Bank/Agent’s Address"
         physical_securities_credit_account_number: For Further Credit to Account No.
-        clearing_agent_fed_wire_address_1: Clearing Agent’s Fed Wire Account Number
-        clearing_agent_fed_wire_address_2: Clearing Agent’s Fed Wire Bank Name
+        clearing_agent_fed_wire_address_1: Clearing Agent’s Fed Wire Bank Name
+        clearing_agent_fed_wire_address_2: Clearing Agent’s Fed Wire Bank Sub Account
         fed_credit_account_number: For Further Credit to Account No.
         clearing_agent_participant_number: Clearing Agent’s Participant No.
         dtc_credit_account_number: For Further Credit to Account No.
