@@ -1,11 +1,7 @@
 @if ($link-fonts) {
   @font-face {
-    font-family: 'fhlbsf-icons';
-    src:font-url('fhlbsf-icons.eot?-s1srtn');
-    src:font-url('fhlbsf-icons.eot?#iefix-s1srtn') format('embedded-opentype'),
-    font-url('fhlbsf-icons.woff?-s1srtn') format('woff'),
-    font-url('fhlbsf-icons.ttf?-s1srtn') format('truetype'),
-    font-url('fhlbsf-icons.svg?-s1srtn#fhlbsf-icons') format('svg');
+    src:font-url('fhlbsf-icons.woff?-s1srtn') format('woff'),
+    font-url('fhlbsf-icons.ttf?-s1srtn') format('truetype');
     font-weight: normal;
     font-style: normal;
   }
