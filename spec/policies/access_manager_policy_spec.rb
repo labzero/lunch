@@ -1,8 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe AccessManagerPolicy, :type => :policy do
-  let(:user) { double('user', id: 1) }
-  let(:resource) { double('resource user', id: 2) }
+  let(:user) { instance_double(User, id: 1, intranet_user?: false) }
+  let(:resource) { instance_double(User, id: 2) }
   subject { AccessManagerPolicy.new(user, resource) }
 
   describe '`show?` method' do
@@ -19,6 +19,13 @@ RSpec.describe AccessManagerPolicy, :type => :policy do
         allow(user).to receive(:roles).and_return([])
       end
       it { should_not permit_action(:show) }
+
+      context 'for an internal user' do
+        before do
+          allow(user).to receive(:intranet_user?).and_return(true)
+        end
+        it { should permit_action(:show) }
+      end
     end
   end
 
@@ -35,7 +42,14 @@ RSpec.describe AccessManagerPolicy, :type => :policy do
       before do
         allow(user).to receive(:roles).and_return([])
       end
-      it { should_not permit_action(:create) }
+      it {  permit_action(:create) }
+
+      context 'for an internal user' do
+        before do
+          allow(user).to receive(:intranet_user?).and_return(true)
+        end
+        it { should_not permit_action(:create) }
+      end
     end
   end
 
@@ -53,6 +67,13 @@ RSpec.describe AccessManagerPolicy, :type => :policy do
         allow(user).to receive(:roles).and_return([])
       end
       it { should_not permit_action(:reset_password) }
+
+      context 'for an internal user' do
+        before do
+          allow(user).to receive(:intranet_user?).and_return(true)
+        end
+        it { should_not permit_action(:reset_password) }
+      end
     end
   end
 
@@ -70,6 +91,13 @@ RSpec.describe AccessManagerPolicy, :type => :policy do
         allow(user).to receive(:roles).and_return([])
       end
       it { should_not permit_action(:edit) }
+
+      context 'for an internal user' do
+        before do
+          allow(user).to receive(:intranet_user?).and_return(true)
+        end
+        it { should_not permit_action(:edit) }
+      end
     end
   end
 
@@ -93,6 +121,13 @@ RSpec.describe AccessManagerPolicy, :type => :policy do
         allow(user).to receive(:roles).and_return([])
       end
       it { should_not permit_action(:lock) }
+
+      context 'for an internal user' do
+        before do
+          allow(user).to receive(:intranet_user?).and_return(true)
+        end
+        it { should_not permit_action(:lock) }
+      end
     end
   end
 
@@ -116,6 +151,13 @@ RSpec.describe AccessManagerPolicy, :type => :policy do
         allow(user).to receive(:roles).and_return([])
       end
       it { should_not permit_action(:delete) }
+
+      context 'for an internal user' do
+        before do
+          allow(user).to receive(:intranet_user?).and_return(true)
+        end
+        it { should_not permit_action(:delete) }
+      end
     end
   end
 end
