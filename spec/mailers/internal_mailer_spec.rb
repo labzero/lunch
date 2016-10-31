@@ -341,5 +341,8 @@ RSpec.describe InternalMailer, :type => :mailer do
       allow(user).to receive(:username).and_return(username)
       expect(call_method).to be(username)
     end
+    it 'returns the global unknown string if passed nil' do
+      expect(subject.send(:user_name_from_user, nil)).to eq(I18n.t('global.unknown'))
+    end
   end
 end
