@@ -1,5 +1,6 @@
 @if ($link-fonts) {
   @font-face {
+    font-family: 'fhlbsf-icons';
     src:font-url('fhlbsf-icons.woff?-s1srtn') format('woff'),
     font-url('fhlbsf-icons.ttf?-s1srtn') format('truetype');
     font-weight: normal;
