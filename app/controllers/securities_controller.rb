@@ -368,25 +368,25 @@ class SecuritiesController < ApplicationController
   def download_release
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:release, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :release, title: t('securities.download.titles.release') }
+    render xlsx: 'securities', filename: "securities-release.xlsx", formats: [:xlsx], locals: { type: :release, title: t('securities.download.titles.release') }
   end
 
   def download_transfer
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:transfer, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :transfer, title: t('securities.download.titles.transfer') }
+    render xlsx: 'securities', filename: "securities-transfer.xlsx", formats: [:xlsx], locals: { type: :transfer, title: t('securities.download.titles.transfer') }
   end
 
   def download_safekeep
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:safekeep, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep, title: t('securities.download.titles.safekeep') }
+    render xlsx: 'securities', filename: "securities-safekeeping.xlsx", formats: [:xlsx], locals: { type: :safekeep, title: t('securities.download.titles.safekeep') }
   end
 
   def download_pledge
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:pledge, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge, title: t('securities.download.titles.pledge') }
+    render xlsx: 'securities', filename: "securities-pledge.xlsx", formats: [:xlsx], locals: { type: :pledge, title: t('securities.download.titles.pledge') }
   end
 
   def upload_securities

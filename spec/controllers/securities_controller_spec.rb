@@ -652,7 +652,10 @@ RSpec.describe SecuritiesController, type: :controller do
     end
   end
 
-  [:release, :transfer, :safekeep, :pledge].each do |type|
+  { release: 'securities-release.xlsx',
+    transfer: 'securities-transfer.xlsx',
+    safekeep: 'securities-safekeeping.xlsx',
+    pledge: 'securities-pledge.xlsx' }.each do |type, xls_file_name|
     action = :"download_#{type}"
     describe "POST download_#{action}" do
       let(:security) { instance_double(Security) }
@@ -689,7 +692,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'responds with an xlsx file' do
         call_action
-        expect(response.headers['Content-Disposition']).to eq('attachment; filename="securities.xlsx"')
+        expect(response.headers['Content-Disposition']).to eq('attachment; filename="' + xls_file_name + '"')
       end
     end
   end
