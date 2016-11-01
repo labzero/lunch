@@ -124,11 +124,6 @@
         color: $actionable-blue;
       }
     }
-    &:hover {
-      .nav-dropdown {
-        display: block;
-      }
-    }
   }
   a {
     color: $text-color;

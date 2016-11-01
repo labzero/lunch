@@ -10,7 +10,7 @@ Background:
 @smoke
 Scenario: Member sees Settlement Transaction Account Statement in the reports dropdown
 Given I visit the dashboard
-When I hover on the reports link in the header
+When I click on the reports link in the header
 Then I should see "Settlement/Transaction Account (STA)" in the reports dropdown
 
 @smoke
