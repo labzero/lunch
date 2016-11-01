@@ -6,14 +6,11 @@ Feature: Securities Intake
   Background:
     Given I am logged in
 
-  @jira-mem-1677 @jira-mem-1873
+  @jira-mem-1677 @jira-mem-1873 @jira-mem-1986
   Scenario Outline: Member views edit securities instructions
     Given I am on the <page> page
-    When I click on the Learn How link
     Then I should see instructions on how to upload securities
     And I should see the contact information for <contact>
-    When I click on the Learn How link
-    Then I should not see instructions on how to upload securities
   Examples:
   | page                | contact               |
   | safekeep securities | Securities Services   |

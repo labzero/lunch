@@ -100,10 +100,6 @@
   margin-bottom: 15px;
 }
 
-.safekeep-pledge-title {
-  display: inline;
-}
-
 %actionable-text {
   @extend %typography-table-button;
   display: inline-block;
@@ -334,18 +330,6 @@
   }
 }
 
-.securities-upload-instructions {
-  display: none;
-}
-
-.securities-download-safekeep-pledge {
-  @extend %typography-table-button;
-  text-transform: uppercase;
-  color: $actionable-blue;
-  cursor: pointer;
-  margin: 20px 0 0;
-}
-
 .securities-download-instructions-step, .securities-download-instructions strong, .securities-upload-instructions strong {
   @extend %typography-field-value;
   text-transform: uppercase;
@@ -373,9 +357,6 @@
   padding: 30px 0;
   span {
     margin-right: 30px;
-    &:first-child {
-      color: $actionable-blue;
-    }
   }
 }
 

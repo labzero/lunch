@@ -1377,7 +1377,6 @@ en:
       upload_instructions:
         download_template: Download Template
         intro: Upload an Excel file containing your securities.
-        learn_how: Learn How
         step_2:
           enter_securities: In the file, enter one security per row.
       discard_and_upload_again: Discard and Upload Again

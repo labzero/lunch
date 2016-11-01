@@ -54,11 +54,7 @@
         = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_company, label: true, horizontal: true
         = render 'shared/input_field', form_builder: f, field_name: :mutual_fund_account_number, label: true, horizontal: true
   %section.securities-display
-    -if type == :safekeep || type == :pledge
-      %h2.safekeep-pledge-title= t('securities.title')
-      =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), @download_path, class: [ 'securities-download-template', 'safekeep-pledge-download-title' ], data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}
-    -else
-      %h2= t('securities.title')
+    %h2= t('securities.title')
     %p.securities-request-upload-success= t('securities.upload_success')
     .securities-request-upload-error= simple_format(t('securities.upload_errors.generic'))
     .securities-release-table-wrapper
