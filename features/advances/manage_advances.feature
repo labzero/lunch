@@ -29,6 +29,16 @@ Scenario: Members filter the Advances list
   Then I see only outstanding advances
   And  I see the "Outstanding Advances" filter selected
 
+@jira-mem-1962
+Scenario: Members sorts the Advances list
+  Given I am on the "Manage Advances" advances page
+  When I click the "Maturity Date" column heading on the "Manage Advances" table
+  Then I should see the "Maturity Date" column values in "ascending" order
+  When I filter the advances by "All Advances"
+  And I click the "Maturity Date" column heading on the "Manage Advances" table
+  Then I should see the "Maturity Date" column values in "ascending" order
+
+
 @data-unavailable @jira-mem-535 @jira-mem-1053
 Scenario: No data is available to show in the Manage Advances Page
   Given I am on the "Manage Advances" advances page

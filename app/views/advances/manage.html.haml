@@ -9,7 +9,7 @@
   .advances-main-body
     = form_tag(advances_manage_path, method: :get) do
       = render 'shared/filter', filter_class: @advances_data_table[:filter][:name], filters: @advances_data_table[:filter][:data]
-      = render 'reports/reports_table', table_class: 'manage-advances-table', table_data: @advances_data_table, sortable: false
+      = render 'reports/reports_table', table_class: 'manage-advances-table', table_data: @advances_data_table, sortable: true, default_sort: [[0, :desc], [3, :asc]], column_definitions: [{orderData: [0, 3], target: 0}, {orderData: [2, 3], target: 2}, {type: :date, target: [0, 2]}]
       %footer
         = t('advances.manage_advances.footnote_rates_html')
       %footer

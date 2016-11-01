@@ -28,6 +28,7 @@ class AdvancesController < ApplicationController
 
   ADVANCES_ALL = 'all'.freeze
   ADVANCES_OUTSTANDING = 'outstanding'.freeze
+  OPEN_SORT_DATE = 31990723200 # 1000 years in the future
 
   def confirmation
     render nothing: true
@@ -35,9 +36,10 @@ class AdvancesController < ApplicationController
   end
 
   def manage
-    column_headings = [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), t('global.footnoted_string', string: t('advances.rate')), t('common_table_headings.current_par') + ' ($)']
-    column_headings << t('advances.confirmation.title') if feature_enabled?('advance-confirmation')
+    column_headings = [{title: t('common_table_headings.trade_date')}, {title: t('common_table_headings.funding_date')}, {title: t('common_table_headings.maturity_date'), sortable: true}, {title: t('common_table_headings.advance_number')}, {title: t('common_table_headings.advance_type')}, {title: t('global.footnoted_string', string: t('advances.rate'))}, {title: t('common_table_headings.current_par') + ' ($)'}]
+    column_headings << {title: t('advances.confirmation.title')} if feature_enabled?('advance-confirmation')
     outstanding_only = params[:maturity] == ADVANCES_OUTSTANDING || params[:maturity].nil?
+    column_headings.each {|col| col[:sortable] ||= false }
     @advances_data_table = {
       column_headings: column_headings,
       rows: [],
@@ -73,8 +75,12 @@ class AdvancesController < ApplicationController
             columns << {type: :index, value: value}
           elsif key == :current_par
             columns << {type: :number, value: value}
-          elsif key == :trade_date || key == :funding_date || (key == :maturity_date and value != 'Open')
-            columns << {type: :date, value: value}
+          elsif key == :trade_date || key == :funding_date || key == :maturity_date
+            if value == 'Open'
+              columns << {value: value, order: OPEN_SORT_DATE}
+            else
+              columns << {type: :date, value: value, order: value.to_datetime.to_i}
+            end
           elsif key == :advance_confirmation
             if feature_enabled?('advance-confirmation')
               cell_value = advance_confirmation_link_data(row[:trade_date], value)

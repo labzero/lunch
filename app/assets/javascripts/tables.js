@@ -12,6 +12,7 @@ $(function() {
         var $columnHeaders = $this.find('th');
         var $unsortableColumnHeaders = $this.find('th[data-unsortable]');
         var $unsortableColumnIndices = [];
+        var dataColumnDefs = $this.data('column-definitions') || [];
         var missingDataMessage = $this.data('missing-data-message');
         $.each($unsortableColumnHeaders, function(i, header){ $unsortableColumnIndices.push($columnHeaders.index(header)) });
         var dataTableOptions = {
@@ -26,7 +27,7 @@ $(function() {
               targets: 'report-column-nosort',
               orderable: false
             }
-          ],
+          ].concat(dataColumnDefs),
           aoColumnDefs: [
             {
               bSortable: false,

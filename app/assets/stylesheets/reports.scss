@@ -311,13 +311,15 @@
   }
 
   .sorting, .sorting_asc, .sorting_desc {
-    &:hover {
+    &:hover:not([data-unsortable]) {
       text-decoration: underline;
     }
   }
 
   .sorting_asc, .sorting_desc {
-    background-color: $secondary-gray;
+    &:not([data-unsortable]) {
+      background-color: $secondary-gray;      
+    }
   }
 
   .report-detail-cell {
