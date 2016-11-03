@@ -109,7 +109,7 @@ module MAPI
             member_position_hash = ActiveRecord::Base.connection.execute(member_position_connection_string).fetch_hash()
             member_sta_hash = ActiveRecord::Base.connection.execute(member_sta_cursor_string).fetch_hash()
             member_credit_exception_hash = ActiveRecord::Base.connection.execute(get_credit_exception_query(member_id)).fetch_hash()
-            disabled_reports_array = ActiveRecord::Base.connection.execute(get_disabled_reports_query(member_id)).fetch_hashes()
+            disabled_reports_array = self.fetch_hashes(app.logger, get_disabled_reports_query(member_id))
           else
             member_position_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_financial_position.json'))).sample
             member_sta_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_balances.json'))).sample
@@ -417,14 +417,14 @@ module MAPI
           SQL
         end
 
-        def self.get_disabled_reports_query(member_id) 
+        def self.get_disabled_reports_query(member_id)
           <<-SQL
             SELECT  C.WEB_FLAG_ID, P.WEB_FLAG_NAME
             FROM WEB_ADM.WEB_DATA_FLAGS P,  WEB_ADM.WEB_DATA_FLAGS_BY_INSTITUTIONS C
             WHERE P.WEB_FLAG_ID = C.WEB_FLAG_ID
             AND C.WEB_FHLB_ID = #{quote(member_id)}
           SQL
-        end        
+        end
       end
     end
   end

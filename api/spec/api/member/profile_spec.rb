@@ -81,7 +81,7 @@ describe MAPI::ServiceApp do
           allow(member_position_result).to receive(:fetch_hash).and_return(some_financial_data, nil)
           allow(member_sta_result).to receive(:fetch_hash).and_return(some_sta_data, nil)
           allow(member_credit_exception_hash).to receive(:fetch_hash).and_return(credit_exception)
-          allow(disabled_reports_array).to receive(:fetch_hashes).and_return(disabled_reports)
+          allow(MAPI::Services::Member::Profile).to receive(:fetch_hashes).and_return(disabled_reports)
         end
 
         it 'returns the `financing_percentage` from the `RECOM_EXPOSURE_PCT` field a percentage' do
