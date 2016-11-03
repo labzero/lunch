@@ -287,7 +287,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
             subject.valid?
           end
           it 'adds an error if the `original_par` is not a whole number' do
-            original_par = rand(0..500000) + rand.round(2)
+            original_par = rand(0..500000) + rand(0.01..0.99).round(2)
             subject.securities = [FactoryGirl.build(:security, original_par: original_par)]
             expect(subject.errors).to receive(:add).with(:securities, :original_par_whole_number)
             call_validation
