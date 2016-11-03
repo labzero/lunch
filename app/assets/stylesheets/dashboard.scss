@@ -164,6 +164,15 @@ $faded-opacity: 0.4 !default;
       background: none;
     }
   }
+  .feedback {
+    border-top: 1px solid $secondary-gray;
+    padding-top: 15px;
+    span { @extend %typography-subtitle; }
+    p {
+      @extend %typography-header-nav;
+      margin-top: 5px;
+    }
+  }
 }
 
 .dashboard-contact {

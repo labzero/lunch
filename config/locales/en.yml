@@ -542,6 +542,9 @@ en:
         relationship_manager: Relationship Manager
         member_services_desk: Member Services Desk
         collateral_asset_manager: Collateral Asset Manager
+      feedback:
+        is_welcome: Feedback is welcome
+        share_your_thoughts: '<a href="%{url}" target="_blank">Share your thoughts</a> about the Member Portal.'
     quick_reports:
       title: Quick Reports
       description: 'Download monthend reports:'
