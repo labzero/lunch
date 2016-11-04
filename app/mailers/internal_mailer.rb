@@ -73,13 +73,22 @@ class InternalMailer < ActionMailer::Base
     @securities_request = securities_request
     member_id = @securities_request.member_id
     @member_name = MembersService.new(ActionDispatch::TestRequest.new).member(member_id).try(:[], :name) || I18n.t('emails.securities_request.authorized.member_id', member_id: member_id)
-    mail(
-      subject: I18n.t('emails.securities_request.authorized.subject',
-        pledge_or_safekeeping: @securities_request.is_collateral? ?
-          I18n.t('emails.securities_request.authorized.pledge').upcase :
-          I18n.t('emails.securities_request.authorized.safekeeping').upcase),
-      from: WEB_SECURITIES,
-      to: @securities_request.is_collateral? ? COLLATERAL_OPERATIONS : SECURITIES_SERVICES
+    @pledge_or_safekeeping =  case @securities_request.kind
+                              when :pledge_release
+                                I18n.t('emails.securities_request.authorized.pledge_release')
+                              when :safekept_release
+                                I18n.t('emails.securities_request.authorized.safekept_release')
+                              when :pledge_intake
+                                I18n.t('emails.securities_request.authorized.pledge_intake')
+                              when :safekept_intake
+                                I18n.t('emails.securities_request.authorized.safekept_intake')
+                              end
+     mail(subject: I18n.t('emails.securities_request.authorized.subject',
+          pledge_or_safekeeping: @securities_request.is_collateral? ?
+            I18n.t('emails.securities_request.authorized.pledge').upcase :
+            I18n.t('emails.securities_request.authorized.safekeeping').upcase),
+          from: WEB_SECURITIES,
+          to: @securities_request.is_collateral? ? COLLATERAL_OPERATIONS : SECURITIES_SERVICES
     )
   end
 

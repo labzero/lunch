@@ -298,20 +298,25 @@ RSpec.describe InternalMailer, :type => :mailer do
         pledge_or_safekeeping: I18n.t('emails.securities_request.authorized.safekeeping').upcase))
     end
 
-    it 'produces the correct body for pledged collateral' do
-      allow(securities_request).to receive(:is_collateral?).and_return(true)
-      build_mail
-      expect(response.body.to_s).to match(I18n.t('emails.securities_request.authorized.body',
-        member_name: member_name,
-        pledge_or_safekeeping: I18n.t('emails.securities_request.authorized.pledge')))
-    end
+    [ :pledge_release, 
+      :safekept_release, 
+      :pledge_intake, 
+      :safekept_intake ].each do |kind|
+      describe "setting the email body when `kind` is `#{kind}`" do
+        let(:kind) { kind }
 
-    it 'produces the correct body for safekept securities' do
-      allow(securities_request).to receive(:is_collateral?).and_return(false)
-      build_mail
-      expect(response.body.to_s).to match(I18n.t('emails.securities_request.authorized.body',
-        member_name: member_name,
-        pledge_or_safekeeping: I18n.t('emails.securities_request.authorized.safekeeping')))
+        it "assigns `@pledge_or_safekeeping` based on `kind`" do
+          build_mail
+          expect(assigns[:pledge_or_safekeeping]).to eq(I18n.t("emails.securities_request.authorized.#{kind}"))
+        end
+
+        it "produces the correct body for `#{kind}`" do
+          build_mail
+          expect(response.body.to_s).to match(I18n.t('emails.securities_request.authorized.body',
+            member_name: member_name,
+            pledge_or_safekeeping: I18n.t("emails.securities_request.authorized.#{kind}")))
+        end
+      end
     end
   end
 
