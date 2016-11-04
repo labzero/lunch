@@ -10,7 +10,7 @@ Background:
 @smoke @jira-mem-1295
 Scenario: Visit Manage Securities from the header
   Given I visit the dashboard
-  When I hover on the securities link in the header
+  When I click on the securities link in the header
   When I click on the manage securities link in the header
   Then I should be on the Manage Securities page
   Then I should see a report table with multiple data rows

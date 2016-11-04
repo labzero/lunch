@@ -10,12 +10,12 @@ Background:
 Scenario: Cannot navigate to the select rate page if I am not an advance-signer
   Given I am logged in as a "quick-advance non-signer"
   When I visit the dashboard
-  And I hover on the advances link in the header
+  And I click on the advances link in the header
   Then I should not see the link for adding an advance
 
 Scenario: Visit the select rate page if I am an advance-signer
   Given I visit the dashboard
-  When I hover on the advances link in the header
+  When I click on the advances link in the header
   And I click on the add advance link in the header
   Then I should see the add advance rate table
 
@@ -217,7 +217,7 @@ Scenario: User backs out of an advance requiring a capital stock purchase and th
 Scenario: User with signer privileges cannot navigate to the select rate page if their member bank requires dual signers
   Given I am logged in as a "dual-signer"
   When I visit the dashboard
-  And I hover on the advances link in the header
+  And I click on the advances link in the header
   Then I should not see the link for adding an advance
 
 Scenario: Confirm rate from advance preview dialog
