@@ -234,6 +234,12 @@ en:
               payment_amount_present: If Settlement Type is Free, Settlement Amount must be left blank.
               original_par: Securities with Fed delivery must have Original Par of $50 million or less.
               original_par_whole_number: If delivery is via Fed or DTC, the Original Par amount must be a whole number (no cents).
+            clearing_agent_participant_number:
+              too_short: DTC participant code must be 3 or 4 digits.
+              too_long: DTC participant code must be 3 or 4 digits.
+              wrong_length: DTC participant code must be 3 or 4 digits.
+              not_a_number: DTC participant code must be 3 or 4 digits.
+              not_an_integer: DTC participant code must be 3 or 4 digits.
         security:
           blank: "Each row must contain a CUSIP and an Original Par.\nEdit your file and try again."
           not_a_number: '%{attribute} must be a number.'

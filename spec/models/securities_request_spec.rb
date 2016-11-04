@@ -325,6 +325,64 @@ RSpec.describe SecuritiesRequest, :type => :model do
         end
       end
     end
+
+    describe 'dtc code validation' do
+      context 'when delivery type is `dtc`' do
+        before { subject.delivery_type = :dtc }
+
+        it 'does not raise a validation error if the dtc code has three digits' do
+          is_expected.to allow_value('123').for(:clearing_agent_participant_number)
+        end
+
+        it 'does not raise a validation error if the dtc code has four digits' do
+          is_expected.to allow_value('1234').for(:clearing_agent_participant_number)
+        end
+
+        it 'validates that the dtc code is an integer' do
+          is_expected.to validate_numericality_of(:clearing_agent_participant_number).only_integer
+        end
+
+        it 'rejects dtc codes that are more than four digits' do
+          is_expected.not_to allow_value('12345').for(:clearing_agent_participant_number)
+        end
+
+        it 'rejects dtc codes that are fewer than three digits' do
+          is_expected.not_to allow_value('12').for(:clearing_agent_participant_number)
+        end
+
+        it 'rejects dtc codes that are negative' do
+          is_expected.not_to allow_value('-1234').for(:clearing_agent_participant_number)
+        end
+
+        it 'rejects dtc codes that are negative but of the right length' do
+          is_expected.not_to allow_value('-123').for(:clearing_agent_participant_number)
+        end
+      end
+
+      context 'when delivery type is not `dtc`' do
+        before { subject.delivery_type =  [ :fed, :mutual_fund, :physical_securities, :transfer ].sample }
+
+        it 'does not validate that the dtc code is an integer' do
+          is_expected.not_to validate_numericality_of(:clearing_agent_participant_number).only_integer
+        end
+
+        it 'allows dtc codes that are more than four digits' do
+          is_expected.to allow_value('12345').for(:clearing_agent_participant_number)
+        end
+
+        it 'allows dtc codes that are fewer than three digits' do
+          is_expected.to allow_value('12').for(:clearing_agent_participant_number)
+        end
+
+        it 'allows dtc codes that are negative' do
+          is_expected.to allow_value('-1234').for(:clearing_agent_participant_number)
+        end
+
+        it 'allows dtc codes that are negative but of the right length' do
+          is_expected.to allow_value('-123').for(:clearing_agent_participant_number)
+        end
+      end
+    end
   end
 
   describe 'class methods' do

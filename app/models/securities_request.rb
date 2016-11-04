@@ -76,6 +76,8 @@ class SecuritiesRequest
   validates :delivery_bank_agent, presence: true, if: Proc.new { |request| request.delivery_type && request.delivery_type == :physical_securities }
   validate :original_par_under_fed_limit, if: Proc.new { |request| request.delivery_type && request.delivery_type == :fed }
   validate :original_par_is_whole_number, if: Proc.new { |request| request.delivery_type && (request.delivery_type == :fed || request.delivery_type == :dtc) }
+  validates :clearing_agent_participant_number, length: { in: 3..4 }, if: Proc.new { |request| request.delivery_type && request.delivery_type == :dtc }
+  validates :clearing_agent_participant_number, numericality: { greater_than_or_equal_to: 0, only_integer: true }, if: Proc.new { |request| request.delivery_type && request.delivery_type == :dtc }
 
   with_options if: Proc.new { |request| !TRANSFER_KINDS.include?(request.kind) } do
     validates *BROKER_INSTRUCTION_KEYS, presence: true

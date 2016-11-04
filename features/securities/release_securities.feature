@@ -167,7 +167,7 @@ Scenario Outline: Member selects a settlement date that occurs before the trade 
   Given I am on the <page> securities page
   And I choose the first available date for settlement date
   And I choose the last available date for trade date
-  And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "clearing_agent_participant_number" securities field with "2345"
   When I click to submit the request
   Then I should see the "settlement date before trade date" error
 Examples:
@@ -178,7 +178,7 @@ Examples:
 @jira-mem-1594 @jira-mem-1595
 Scenario: Member sees success page after submitting releases for authorization
   Given I am on the release securities page
-  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  When I fill in the "clearing_agent_participant_number" securities field with "2345"
   And I submit the securities release request for authorization
   Then I should see the title for the "pledge release" success page
 
@@ -209,7 +209,7 @@ Scenario: A signer uses a SecurID token to authenticate when authorizing
 Scenario: A signer authorizes a request while submitting it
   Given I am logged in as a "quick-advance signer"
   And I am on the release securities page
-  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  When I fill in the "clearing_agent_participant_number" securities field with "234"
   When I authorize the request
   Then I should see the authorize request success page
 
@@ -217,7 +217,7 @@ Scenario: A signer authorizes a request while submitting it
 Scenario Outline: A user cannot submit the form until all required fields have values
   When I am on the <page> securities page
   Then the Submit action is disabled
-  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  When I fill in the "clearing_agent_participant_number" securities field with "234"
   Then the Submit action is enabled
 Examples:
   | page             |
@@ -237,7 +237,7 @@ Scenario: Member uploads a securities intake file and sees the success message
 @jira-mem-1894 @allow-rescue @local-only
 Scenario Outline: A member submits a request for release and there is a general API error
   Given I am on the <page> securities page
-  When I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  When I fill in the "clearing_agent_participant_number" securities field with "2345"
   And I submit the request and the API returns a 500
   Then I should see the "generic catchall" error
 Examples:
@@ -249,7 +249,7 @@ Examples:
 Scenario Outline: Intranet users are not allowed to submit an intake request
   Given I log in as an "intranet user"
   When I am on the <page> securities page
-  And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "clearing_agent_participant_number" securities field with "2345"
   And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   When I submit the securities request for authorization
   Then I should see the "intranet user" error
@@ -262,7 +262,7 @@ Examples:
 Scenario Outline: Member uploads a securities intake file with an original par that is not a whole number and the delivery type is dtc
   Given I am on the <page> securities page
   When I upload a securities release file with "an original par that is not a whole number"
-  And I fill in the "clearing_agent_participant_number" securities field with "23454343"
+  And I fill in the "clearing_agent_participant_number" securities field with "234"
   And I fill in the "dtc_credit_account_number" securities field with "5683asdfa"
   When I submit the securities request for authorization
   Then I should see the "original par whole number" error
