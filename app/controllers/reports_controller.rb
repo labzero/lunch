@@ -47,7 +47,8 @@ class ReportsController < ApplicationController
     User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
     User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
     User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
-    User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title')
+    User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
+    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact_signer.title')
   }
 
   AUTHORIZATIONS_ROLL_UP = [
@@ -72,6 +73,7 @@ class ReportsController < ApplicationController
     User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
     User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
     User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
+    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact_signer.title'),
     User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title')
   }
 
@@ -81,7 +83,7 @@ class ReportsController < ApplicationController
     User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER,
     User::Roles::ADVANCE_SIGNER, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER,
     User::Roles::DERIVATIVES_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::SECURITIES_SIGNER,
-    User::Roles::ACCESS_MANAGER
+    User::Roles::ETRANSACT_SIGNER, User::Roles::ACCESS_MANAGER
   ]
 
   INCLUSIVE_AUTHORIZATIONS = [AUTHORIZATIONS_MAPPING['signer_manager'], AUTHORIZATIONS_MAPPING['signer_entire_authority']].freeze
@@ -2123,7 +2125,6 @@ class ReportsController < ApplicationController
     if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
       roles = roles - AUTHORIZATIONS_ROLL_UP
     end
-    roles.delete(User::Roles::ETRANSACT_SIGNER)
     roles.sort_by! { |role| AUTHORIZATIONS_ORDER.index(role) || 0 }
     roles.collect! { |role| AUTHORIZATIONS_MAPPING.keys.include?(role) ? role : nil }
     roles.compact!

@@ -342,6 +342,8 @@ en:
       title: Securities Services
       description_title: Securities Services
       description: Individuals authorized to move securities to and from your safekeeping account and to provide instructions regarding the purchase and sale of unpledged securities. This form does not authorize individuals to pledge or depledge securities.
+    etransact_signer:
+      title: Token Holder
   settings:
     title: Settings
     save: Save

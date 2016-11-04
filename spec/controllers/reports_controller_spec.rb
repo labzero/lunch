@@ -2791,8 +2791,8 @@ RSpec.describe ReportsController, :type => :controller do
             it 'contains all users sorted by last name then first name if the authorizations_filter is set to `all`' do
               make_request
               rows = assigns[:authorizations_table_data][:rows]
-              expect(rows.length).to eq(6)
-              rows.zip([user_d, user_e, user_c, user_b, user_f, user_a]).each do |row, user|
+              expect(rows.length).to eq(7)
+              rows.zip([user_d, user_e, user_c, user_b, user_f, user_etransact, user_a]).each do |row, user|
                 expect(row[:columns].first[:value]).to eq(user[:display_name])
               end
             end
@@ -2850,9 +2850,9 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_c[:display_name])
               expect(assigns[:authorizations_table_data][:rows][0][:columns].last[:value]).to eq([I18n.t('user_roles.wire_transfer.title')])
             end
-            it 'ignores users with no role or the eTransact role' do
+            it 'ignores users with no role' do
               make_request
-              expect(assigns[:authorizations_table_data][:rows]).to satisfy { |rows| !rows.find {|row| [user_etransact[:display_name], user_no_roles[:display_name]].include?(row[:columns].first[:value]) } }
+              expect(assigns[:authorizations_table_data][:rows]).to satisfy { |rows| !rows.find {|row| [  user_no_roles[:display_name]].include?(row[:columns].first[:value]) } }
             end
           end
           it 'assigns `@authorizations_table_data[:raw_roles]` to `user_roles`' do
