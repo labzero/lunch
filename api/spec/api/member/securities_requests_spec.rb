@@ -1912,7 +1912,7 @@ describe MAPI::ServiceApp do
                 end
               end
               describe 'when the `original_par` is not a whole number' do
-                let(:original_par) { rand(0...50000000) + rand.round(2) }
+                let(:original_par) { rand(0...50000000) + rand(0.01..0.99).round(2) }
                 let(:call_method) { securities_request_module.validate_securities([security], settlement_type, delivery_type, type) }
                 before { security['original_par'] = original_par }
 
