@@ -527,8 +527,6 @@ module MAPI
             effective_date = fhlbsfresponseblock.at_css('EffectiveDate').content.to_date
             hash = {
               'advance_maturity' => fhlbsfdatapoints[0].at_css('Text').content,
-              'overnight_fed_funds_benchmark' => fhlbsfdatapoints[1].at_css('Text').content,
-              'basis_point_spread_to_benchmark' => fhlbsfdatapoints[2].at_css('Text').content,
               'advance_rate' => fhlbsfdatapoints[3].at_css('Text').content,
               'effective_date' => effective_date
             }
@@ -540,8 +538,6 @@ module MAPI
           end
           hash = {
             'advance_maturity' => data['advance_maturity'].to_s,
-            'overnight_fed_funds_benchmark' => data['overnight_fed_funds_benchmark'].to_f,
-            'basis_point_spread_to_benchmark' => data['basis_point_spread_to_benchmark'].to_i,
             'advance_rate' => data['advance_rate'].to_f,
             'effective_date' => data['effective_date'].to_date
           }
@@ -577,9 +573,6 @@ module MAPI
               result = fhlbsfdatapoint.css('TableCell')
               {
                 'advance_maturity' => result[0].at_css('Text').content,
-                'treasury_benchmark_maturity' => result[1].at_css('Text').content,
-                'nominal_yield_of_benchmark' => result[2].at_css('Text').content,
-                'basis_point_spread_to_benchmark' => result[3].at_css('Text').content,
                 'advance_rate' => result[4].at_css('Text').content,
                 'effective_date' => effective_date
               }
@@ -595,9 +588,6 @@ module MAPI
           data.each do |row|
             hash = {
               'advance_maturity' => row['advance_maturity'].to_s,
-              'treasury_benchmark_maturity' => row['treasury_benchmark_maturity'].to_s,
-              'nominal_yield_of_benchmark' => row['nominal_yield_of_benchmark'].to_f,
-              'basis_point_spread_to_benchmark' => row['basis_point_spread_to_benchmark'].to_i,
               'advance_rate' => row['advance_rate'].to_f,
               'effective_date' => row['effective_date'].to_date
             }

@@ -618,8 +618,6 @@ describe MAPI::ServiceApp do
     let(:price_indications_current_vrc) { get '/rates/price_indications/current/vrc/standard'; JSON.parse(last_response.body).with_indifferent_access }
     it 'should return data relevant to each loan_term' do
       expect(price_indications_current_vrc[:advance_maturity]).to be_kind_of(String)
-      expect(price_indications_current_vrc[:overnight_fed_funds_benchmark]).to be_kind_of(Float)
-      expect(price_indications_current_vrc[:basis_point_spread_to_benchmark]).to be_kind_of(Numeric)
       expect(price_indications_current_vrc[:advance_rate]).to be_kind_of(Float)
       expect(price_indications_current_vrc[:effective_date]).to be_kind_of(String)
       expect(price_indications_current_vrc[:effective_date]).to match(/\d{4}-\d{2}-\d{2}/)
@@ -634,8 +632,6 @@ describe MAPI::ServiceApp do
       end
       it 'should return data relevant to each loan_term', vcr: {cassette_name: 'current_price_indications_vrc'} do
         expect(price_indications_current_vrc[:advance_maturity]).to be_kind_of(String)
-        expect(price_indications_current_vrc[:overnight_fed_funds_benchmark]).to be_kind_of(Float)
-        expect(price_indications_current_vrc[:basis_point_spread_to_benchmark]).to be_kind_of(Numeric)
         expect(price_indications_current_vrc[:advance_rate]).to be_kind_of(Float)
         expect(price_indications_current_vrc[:effective_date]).to be_kind_of(String)
         expect(price_indications_current_vrc[:effective_date]).to match(/\d{4}-\d{2}-\d{2}/)
@@ -652,9 +648,6 @@ describe MAPI::ServiceApp do
     it 'should return data relevant to each loan_term' do
       price_indications_current_frc.each do |frc|
         expect(frc['advance_maturity']).to be_kind_of(String)
-        expect(frc['treasury_benchmark_maturity']).to be_kind_of(String)
-        expect(frc['nominal_yield_of_benchmark']).to be_kind_of(Float)
-        expect(frc['basis_point_spread_to_benchmark']).to be_kind_of(Numeric)
         expect(frc['advance_rate']).to be_kind_of(Float)
         expect(frc['effective_date']).to match(/\d{4}-\d{2}-\d{2}/)
       end
@@ -679,9 +672,6 @@ describe MAPI::ServiceApp do
       it 'should return data relevant to each loan_term', vcr: {cassette_name: 'current_price_indications_frc'} do
         price_indications_current_frc.each do |frc|
           expect(frc['advance_maturity']).to be_kind_of(String)
-          expect(frc['treasury_benchmark_maturity']).to be_kind_of(String)
-          expect(frc['nominal_yield_of_benchmark']).to be_kind_of(Float)
-          expect(frc['basis_point_spread_to_benchmark']).to be_kind_of(Numeric)
           expect(frc['advance_rate']).to be_kind_of(Float)
           expect(frc['effective_date']).to match(/\d{4}-\d{2}-\d{2}/)
         end

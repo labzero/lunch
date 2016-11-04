@@ -855,15 +855,10 @@ class ReportsController < ApplicationController
 
       vrc_column_headings = [
         t('reports.pages.price_indications.current.advance_maturity'),
-        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.overnight_fed_funds_benchmark'), '%'),
-        t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'),
         fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')
       ]
       frc_column_headings = [
         t('reports.pages.price_indications.current.advance_maturity'),
-        t('reports.pages.price_indications.current.treasury_benchmark_maturity'),
-        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.nominal_yield_of_benchmark'), '%'),
-        t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'),
         fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')
       ]
       standard_arc_column_headings = [
@@ -996,10 +991,8 @@ class ReportsController < ApplicationController
         rows = standard_frc_data.collect do |row|
           columns = []
           row.each do |value|
-            if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+            if value[0]=='advance_maturity'
               columns << {value: value[1]}
-            elsif value[0]=='basis_point_spread_to_benchmark'
-              columns << {type: :basis_point, value: value[1]}
             elsif value[0] == 'effective_date'
               next
             else
@@ -1014,10 +1007,8 @@ class ReportsController < ApplicationController
         rows = sbc_frc_data.collect do |row|
           columns = []
           row.each do |value|
-            if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+            if value[0]=='advance_maturity'
               columns << {value: value[1]}
-            elsif value[0]=='basis_point_spread_to_benchmark'
-              columns << {type: :basis_point, value: value[1]}
             elsif value[0] == 'effective_date'
               next
             else
@@ -2060,10 +2051,8 @@ class ReportsController < ApplicationController
   def row_for_vrc_entry(vrc_field, vrc_value)
     if vrc_field != 'effective_date'
       case vrc_field
-      when 'overnight_fed_funds_benchmark', 'advance_rate'
+      when 'advance_rate'
         type = :rate
-      when 'basis_point_spread_to_benchmark'
-        type = :basis_point
       else
         type = nil
       end
