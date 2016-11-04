@@ -23,6 +23,7 @@ userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: extra@example.com
 userAccountControl: 512
+lockoutTime: 0
 
 # extra user with a password we can change
 dn: sAMAccountName=extra-password,dc=extranet,dc=fhlbsf,dc=com
@@ -39,6 +40,7 @@ userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: extra-password@example.com
 userAccountControl: 512
+lockoutTime: 0
 
 # extra user with an expired password
 dn: sAMAccountName=extra-expired,dc=extranet,dc=fhlbsf,dc=com
@@ -55,6 +57,7 @@ userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: extra-expired@example.com
 userAccountControl: 512
+lockoutTime: 0
 passwordExpired: true
 
 # extra-chaste user
@@ -71,6 +74,7 @@ userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: chaste@example.com
 userAccountControl: 512
+lockoutTime: 0
 
 # extra-chaste-access user
 dn: sAMAccountName=extra-chaste-access,dc=extranet,dc=fhlbsf,dc=com
@@ -156,6 +160,7 @@ userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: wells@example.com
 userAccountControl: 512
+lockoutTime: 0
 
 # extra-chaste-norole
 dn: sAMAccountName=extra-chaste-norole,dc=extranet,dc=fhlbsf,dc=com
@@ -170,6 +175,7 @@ sAMAccountName: extra-chaste-norole
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: chaste-norole@example.com
+lockoutTime: 0
 
 # quick-advance-disabled
 dn: sAMAccountName=quick-advance-disabled,dc=extranet,dc=fhlbsf,dc=com
@@ -183,6 +189,7 @@ sAMAccountName: quick-advance-disabled
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: quick-advance-disabled@example.com
+lockoutTime: 0
 
 # dual-signer-required
 dn: sAMAccountName=dual-signer-required,dc=extranet,dc=fhlbsf,dc=com
@@ -196,6 +203,7 @@ sAMAccountName: dual-signer-required
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: dual-signer-required@example.com
+lockoutTime: 0
 
 # extra-signer
 dn: sAMAccountName=extra-signer,dc=extranet,dc=fhlbsf,dc=com
@@ -212,6 +220,7 @@ sAMAccountName: extra-signer
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: extra-signer@example.com
+lockoutTime: 0
 
 # extra-collateral-signer
 dn: sAMAccountName=extra-collateral-signer,dc=extranet,dc=fhlbsf,dc=com
@@ -228,6 +237,7 @@ sAMAccountName: extra-collateral-signer
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: extra-collateral-signer@example.com
+lockoutTime: 0
 
 # extra-securities-signer
 dn: sAMAccountName=extra-securities-signer,dc=extranet,dc=fhlbsf,dc=com
@@ -244,6 +254,7 @@ sAMAccountName: extra-securities-signer
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 mail: extra-securities-signer@example.com
+lockoutTime: 0
 
 # Chaste Manhatten
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
