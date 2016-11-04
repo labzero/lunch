@@ -428,7 +428,7 @@ class SecuritiesController < ApplicationController
                 custodian_name: (row[data_start_index + 3])
               }
             end
-            next if security_hash.values.compact.empty?
+            next if security_hash.values.reject(&:blank?).empty?
             security = Security.from_hash(security_hash)
             if security.valid?
               securities << security
