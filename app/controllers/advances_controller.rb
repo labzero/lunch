@@ -28,7 +28,7 @@ class AdvancesController < ApplicationController
 
   ADVANCES_ALL = 'all'.freeze
   ADVANCES_OUTSTANDING = 'outstanding'.freeze
-  OPEN_SORT_DATE = 31990723200 # 1000 years in the future
+  OPEN_SORT_DATE = (Time.zone.today + 1000.years).beginning_of_day.to_i
 
   def confirmation
     render nothing: true
