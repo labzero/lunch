@@ -83,7 +83,7 @@ en:
     start_date: Start Date
     end_date: End Date
     shares_outstanding: Shares Outstanding
-    prepare_download: Please wait while we prepare your download. This may take up to 60 seconds.
+    prepare_download: Your download is being prepared.
     cancel_download: Cancel Download
     download: Download
     delete: Delete
