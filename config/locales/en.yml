@@ -3036,9 +3036,9 @@ en:
         pledge: Pledge
         safekeeping: Safekeeping
         pledge_intake: Securities Pledge
-        safekeeping_intake: Safekeeping Deposit
+        safekept_intake: Safekeeping Deposit
         pledge_release: Securities Release
-        safekeeping_release: Safekeeping Release
+        safekept_release: Safekeeping Release
         member_id: FHLB Member ID "%{member_id}"
   errors:
     format: '%{message}'
