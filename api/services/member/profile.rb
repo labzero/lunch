@@ -388,7 +388,7 @@ module MAPI
 
         def self.get_account_numbers_query(member_id)
           <<-SQL
-            SELECT UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) AS ACCOUNT_TYPE, ADX.ADX_ID
+            SELECT UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) AS ACCOUNT_TYPE, ADX.ADX_ID, ADX_BTC_ACCOUNT_NUMBER AS ACCOUNT_NUMBER
             FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF ADX, SAFEKEEPING.BTC_ACCOUNT_TYPE BAT, SAFEKEEPING.CUSTOMER_PROFILE CP
             WHERE ADX.BAT_ID = BAT.BAT_ID
             AND ADX.CP_ID = CP.CP_ID
@@ -403,7 +403,7 @@ module MAPI
         def self.get_account_numbers(logger, member_id)
           account_numbers = {}
           fetch_hashes(logger, get_account_numbers_query(member_id)).each do |adx_ids_by_account_type|
-            account_numbers[adx_ids_by_account_type["ACCOUNT_TYPE"]] = adx_ids_by_account_type["ADX_ID"]
+            account_numbers[adx_ids_by_account_type["ACCOUNT_TYPE"]] = adx_ids_by_account_type["ACCOUNT_NUMBER"]
           end
           account_numbers
         end

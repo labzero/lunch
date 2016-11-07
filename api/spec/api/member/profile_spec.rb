@@ -213,14 +213,14 @@ describe MAPI::ServiceApp do
   
   context 'account numbers' do
     let(:account_numbers) { { 'P' => rand(999..9999), 'U' => rand(999..9999) } }
-    let(:account_numbers_hash_array) { [ { 'ACCOUNT_TYPE' => 'P', 'ADX_ID' => account_numbers['P'] },
-                                         { 'ACCOUNT_TYPE' => 'U', 'ADX_ID' => account_numbers['U'] } ] }
+    let(:account_numbers_hash_array) { [ { 'ACCOUNT_TYPE' => 'P', 'ACCOUNT_NUMBER' => account_numbers['P'] },
+                                         { 'ACCOUNT_TYPE' => 'U', 'ACCOUNT_NUMBER' => account_numbers['U'] } ] }
     let(:member_id) { rand(999..9999) }
 
     describe '`get_account_numbers_query`' do
       let(:sql) {
         <<-SQL
-            SELECT UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) AS ACCOUNT_TYPE, ADX.ADX_ID
+            SELECT UPPER(SUBSTR(BAT.BAT_ACCOUNT_TYPE,1,1)) AS ACCOUNT_TYPE, ADX.ADX_ID, ADX_BTC_ACCOUNT_NUMBER AS ACCOUNT_NUMBER
             FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF ADX, SAFEKEEPING.BTC_ACCOUNT_TYPE BAT, SAFEKEEPING.CUSTOMER_PROFILE CP
             WHERE ADX.BAT_ID = BAT.BAT_ID
             AND ADX.CP_ID = CP.CP_ID
