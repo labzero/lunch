@@ -281,7 +281,11 @@ Then(/^I should see the title for the "(.*?)" success page$/) do |success_page|
 end
 
 When(/^I fill in the "(.*?)" securities field with "(.*?)"$/) do |field_name, value|
-  page.fill_in("securities_request[#{field_name}]", with: value)
+  begin
+    page.fill_in("securities_request[#{field_name}]", with: value)
+  rescue Capybara::ElementNotFound
+    #ignore
+  end
 end
 
 When(/^I submit the securities(?: release)? request for authorization$/) do

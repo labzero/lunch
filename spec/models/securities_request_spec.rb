@@ -383,8 +383,78 @@ RSpec.describe SecuritiesRequest, :type => :model do
         end
       end
     end
-  end
 
+    describe 'ABA number is exactly nine digits and must be greater than zero' do  
+      context 'when delivery type is `fed`' do
+        before { subject.delivery_type = :fed }
+
+        it 'does not raise a validation error if the ABA number has exactly nine digits' do
+          is_expected.to allow_value('123456789').for(:aba_number)
+        end
+
+        it 'validates that the ABA number is an integer' do
+          is_expected.to validate_numericality_of(:aba_number).only_integer
+        end
+
+        it 'rejects ABA numbers that are more than nine digits' do
+          is_expected.not_to allow_value('1234567890').for(:aba_number)
+        end
+
+        it 'rejects ABA numbers that are fewer than nine digits' do
+          is_expected.not_to allow_value('12345678').for(:aba_number)
+        end
+
+        it 'rejects ABA numbers that are negative' do
+          is_expected.not_to allow_value('-123456789').for(:aba_number)
+        end
+
+        it 'rejects ABA numbers that are negative but of the right length' do
+          is_expected.not_to allow_value('-00000001').for(:aba_number)
+        end
+
+        it 'rejects ABA numbers that are negative and short of the correct length' do
+          is_expected.not_to allow_value('-0001').for(:aba_number)          
+        end
+
+        it 'allows a padded zero ABA number of the correct length' do
+          is_expected.to allow_value('000000001').for(:aba_number)
+        end
+      end
+
+      context 'when delivery type is not `fed`' do
+        before { subject.delivery_type =  [ :dtc, :mutual_fund, :physical_securities, :transfer ].sample }
+
+        it 'does not validate that the ABA number is a positive integer' do
+          is_expected.not_to validate_numericality_of(:aba_number).only_integer
+        end
+
+        it 'allows numbers that are more than nine digits' do
+          is_expected.to allow_value('1234567890').for(:aba_number)
+        end
+
+        it 'allows numbers that are fewer than nine digits' do
+          is_expected.to allow_value('12345678').for(:aba_number)
+        end
+
+        it 'allows ABA numbers that are negative' do
+          is_expected.to allow_value('-123456789').for(:aba_number)
+        end
+
+        it 'allows ABA numbers that are negative but of the right length' do
+          is_expected.to allow_value('-00000001').for(:aba_number)
+        end
+
+        it 'allows ABA numbers that are negative and short of the correct length' do
+          is_expected.to allow_value('-0001').for(:aba_number)          
+        end
+
+        it 'allows a padded zero ABA number of the correct length' do
+          is_expected.to allow_value('000000001').for(:aba_number)
+        end
+      end        
+    end
+  end
+  
   describe 'class methods' do
     describe '`from_hash`' do
       it 'creates a `SecuritiesRequest` from a hash' do

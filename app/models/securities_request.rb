@@ -78,6 +78,8 @@ class SecuritiesRequest
   validate :original_par_is_whole_number, if: Proc.new { |request| request.delivery_type && (request.delivery_type == :fed || request.delivery_type == :dtc) }
   validates :clearing_agent_participant_number, length: { in: 3..4 }, if: Proc.new { |request| request.delivery_type && request.delivery_type == :dtc }
   validates :clearing_agent_participant_number, numericality: { greater_than_or_equal_to: 0, only_integer: true }, if: Proc.new { |request| request.delivery_type && request.delivery_type == :dtc }
+  validates :aba_number, length: { is: 9 }, if: Proc.new { |request| request.delivery_type && request.delivery_type == :fed }
+  validates :aba_number, numericality: { greater_than_or_equal_to: 0, only_integer: true }, if: Proc.new { |request| request.delivery_type && request.delivery_type == :fed }
 
   with_options if: Proc.new { |request| !TRANSFER_KINDS.include?(request.kind) } do
     validates *BROKER_INSTRUCTION_KEYS, presence: true

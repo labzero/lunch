@@ -66,7 +66,8 @@ Scenario Outline: A signer authorizes a previously submitted request
   When I click to Authorize the first <request_type>
   Then I should be on the <page> page
   When I choose the first available date for trade date
-  And I choose the first available date for settlement date
+  And I choose the last available date for settlement date
+  Then I fill in the "aba_number" securities field with "123456789"
   And I authorize the request
   Then I should see the authorize request success page
 Examples:
