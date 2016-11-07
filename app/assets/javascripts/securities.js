@@ -166,7 +166,7 @@ $(function() {
   $securitiesReleaseWrapper.on('click', '.safekeep-pledge-upload-again', function(e){
     $('.safekeep-pledge-download-area').show();
     $securitiesReleaseWrapper.empty();
-    $securitiesField.val('null');
+    $securitiesField.val('[]');
     validateSecuritiesRequestFields();
     $('.securities-request-upload-success').hide();
   });
