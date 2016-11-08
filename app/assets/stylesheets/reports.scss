@@ -1278,6 +1278,9 @@ td.dataTables_empty {
       font-weight: $normal-weight;
     }
   }
+  .exceptions-body {
+    min-height: 1px;
+  }
   .report-profile-horizontal-axis-label {
     @extend %typography-horizontal-axis-label;
     float: left;
