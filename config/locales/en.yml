@@ -960,7 +960,7 @@ en:
           collateral: Collateral
           interest_rate: Interest Rate Derivatives
           money_market: Money Market Transaction
-          person_securities: Person-Securities Services
+          securities_services: Securities Services
         wire_transfer:
           title: Wire Transfer
           repetitive: Repetitive Wire Instructions
