@@ -1476,6 +1476,8 @@ class ReportsController < ApplicationController
         t('reports.pages.authorizations.sub_title_all_users')
       when User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY
         t('reports.pages.authorizations.sub_title_inclusive_authorizations', filter: mapped_filter)
+      when User::Roles::ETRANSACT_SIGNER
+        t('user_roles.etransact_signer.title')
       else
         t('reports.pages.authorizations.sub_title', filter: mapped_filter)
       end
@@ -1503,7 +1505,7 @@ class ReportsController < ApplicationController
         end.reject{ |_,roles| roles.empty? }
 
         check_for_inclusive_roles = false
-        matching_roles_array = if [User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER, AUTHORIZATIONS_ALL].include?(@authorizations_filter)
+        matching_roles_array = if [User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER, AUTHORIZATIONS_ALL, User::Roles::ETRANSACT_SIGNER].include?(@authorizations_filter)
           [AUTHORIZATIONS_MAPPING[@authorizations_filter]]
         else
           check_for_inclusive_roles = true

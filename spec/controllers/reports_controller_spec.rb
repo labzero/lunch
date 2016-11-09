@@ -2755,6 +2755,13 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
 
+      describe '@authorizations_title' do
+        it 'sets `@authorizations_title` to the title in the drop down when viewiny only ETRANSACT_SIGNERs' do
+          get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER
+          expect(assigns[:authorizations_title]).to eq(described_class::AUTHORIZATIONS_DROPDOWN_MAPPING[User::Roles::ETRANSACT_SIGNER])
+        end
+      end
+
       describe '`@authorizations_table_data`' do
         it 'returns a hash with `column_headings`' do
           get :authorizations
@@ -2807,6 +2814,12 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
               expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_f[:display_name])
               expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.entire_authority.title')])
+            end
+            it 'only contains token holders if authorizations_filter is set to ETRANSACT_SIGNER' do
+              get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER, job_id: job_id
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_etransact[:display_name])
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to include(I18n.t('user_roles.etransact_signer.title'))
             end
             describe 'when the filtered users include a signer manager or a signer with entire authority' do
               before { get :authorizations, :authorizations_filter => User::Roles::COLLATERAL_SIGNER, job_id: job_id }
