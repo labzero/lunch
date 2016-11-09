@@ -8,22 +8,22 @@ Background:
 
 @smoke
 Scenario: Member navigates to the agreements topic on the forms page via the resources dropdown
-  Given I hover on the resources link in the header
+  Given I click on the resources link in the header
   When I click on the agreements link in the header
   Then I should see the forms page focused on the agreements topic
 
 Scenario: Member navigates to the authorizations topic on the forms page via the resources dropdown
-  Given I hover on the resources link in the header
+  Given I click on the resources link in the header
   When I click on the authorizations link in the header
   Then I should see the forms page focused on the authorizations topic
 
 Scenario: Member navigates to the credit topic on the forms page via the resources dropdown
-  Given I hover on the resources link in the header
+  Given I click on the resources link in the header
   When I click on the credit link in the header
   Then I should see the forms page focused on the credit topic
 
 Scenario: Member navigates to the collateral topic on the forms page via the resources dropdown
-  Given I hover on the resources link in the header
+  Given I click on the resources link in the header
   When I click on the collateral link in the header
   Then I should see the forms page focused on the collateral topic
 
@@ -45,13 +45,13 @@ Scenario: Member uses the forms ToC to jump between topics
 
 @jira-mem-1410 @flip-on-resources-token
 Scenario: Member navigates to the authorizations topic and sees sign token form link
-  Given I hover on the resources link in the header
+  Given I click on the resources link in the header
   When I click on the authorizations link in the header
   Then I should see "sign" link
 
 @smoke @jira-mem-1681 @flip-on-resources-token
 Scenario: Member interacts with docusign flyout
-  Given I hover on the resources link in the header
+  Given I click on the resources link in the header
   When I click on the authorizations link in the header
   When I click on the sign link
   Then I should see the docusign flyout
@@ -60,7 +60,7 @@ Scenario: Member interacts with docusign flyout
 
 @jira-mem-1681 @flip-on-resources-token
 Scenario: Member navigates to docusign site
-  Given I hover on the resources link in the header
+  Given I click on the resources link in the header
   When I click on the authorizations link in the header
   When I click on the sign link
   Then I should see the docusign flyout

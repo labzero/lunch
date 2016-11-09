@@ -19,6 +19,7 @@ sAMAccountName: local
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 userAccountControl: 512
+lockoutTime: 0
 mail: local@example.com
 
 # local user without signer permission
@@ -32,6 +33,7 @@ sAMAccountName: local-non-signer
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 userAccountControl: 512
+lockoutTime: 0
 mail: local-non-signer@example.com
 
 # local user with offsite access
@@ -46,6 +48,7 @@ sAMAccountName: local-offsite
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 userAccountControl: 512
+lockoutTime: 0
 mail: local-offsite@example.com
 
 # local user with extended info access
@@ -60,6 +63,7 @@ sAMAccountName: local-extended-info
 userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
 primaryGroupID: 513
 userAccountControl: 512
+lockoutTime: 0
 mail: local-extended-info@example.com
 
 # FCN-MemberSite-AccessManagers-R group

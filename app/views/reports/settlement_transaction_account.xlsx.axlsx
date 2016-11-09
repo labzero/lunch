@@ -35,7 +35,7 @@ workbook.styles do |styles|
         sheet.add_row [
           activity[:trans_date],
           activity[:refnumber],
-          activity[:descr],
+          activity[:descr] == @daily_balance_key ? t('reports.pages.settlement_transaction_account.closing_balance') : activity[:descr],
           activity[:rate],
           activity[:debit],
           activity[:credit],

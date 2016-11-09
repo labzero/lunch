@@ -28,6 +28,7 @@ class AdvancesController < ApplicationController
 
   ADVANCES_ALL = 'all'.freeze
   ADVANCES_OUTSTANDING = 'outstanding'.freeze
+  OPEN_SORT_DATE = (Time.zone.today + 1000.years).beginning_of_day.to_i
 
   def confirmation
     render nothing: true
@@ -35,9 +36,10 @@ class AdvancesController < ApplicationController
   end
 
   def manage
-    column_headings = [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), t('global.footnoted_string', string: t('advances.rate')), t('common_table_headings.current_par') + ' ($)']
-    column_headings << t('advances.confirmation.title') if feature_enabled?('advance-confirmation')
+    column_headings = [{title: t('common_table_headings.trade_date')}, {title: t('common_table_headings.funding_date')}, {title: t('common_table_headings.maturity_date'), sortable: true}, {title: t('common_table_headings.advance_number')}, {title: t('common_table_headings.advance_type')}, {title: t('global.footnoted_string', string: t('advances.rate'))}, {title: t('common_table_headings.current_par') + ' ($)'}]
+    column_headings << {title: t('advances.confirmation.title')} if feature_enabled?('advance-confirmation')
     outstanding_only = params[:maturity] == ADVANCES_OUTSTANDING || params[:maturity].nil?
+    column_headings.each {|col| col[:sortable] ||= false }
     @advances_data_table = {
       column_headings: column_headings,
       rows: [],
@@ -56,7 +58,7 @@ class AdvancesController < ApplicationController
             active: !outstanding_only
           }
         ]
-      }
+      },
     }
     if params[:job_id]
       job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
@@ -65,6 +67,7 @@ class AdvancesController < ApplicationController
       raise StandardError, "There has been an error and AdvancesController#manage_advances has encountered nil. Check error logs." if json.nil?
       active_advances_response = JSON.parse(json).collect! {|o| o.with_indifferent_access}
       job_status.destroy
+      profile = sanitize_profile_if_endpoints_disabled(MemberBalanceService.new(current_member_id, request).profile)
       rows = active_advances_response.collect do |row|
         columns = []
         [:trade_date, :funding_date, :maturity_date, :advance_number, :advance_type, :interest_rate, :current_par, :advance_confirmation].each do |key|
@@ -73,8 +76,12 @@ class AdvancesController < ApplicationController
             columns << {type: :index, value: value}
           elsif key == :current_par
             columns << {type: :number, value: value}
-          elsif key == :trade_date || key == :funding_date || (key == :maturity_date and value != 'Open')
-            columns << {type: :date, value: value}
+          elsif key == :trade_date || key == :funding_date || key == :maturity_date
+            if value == 'Open'
+              columns << {value: value, order: OPEN_SORT_DATE}
+            else
+              columns << {type: :date, value: value, order: value.to_datetime.to_i}
+            end
           elsif key == :advance_confirmation
             if feature_enabled?('advance-confirmation')
               cell_value = advance_confirmation_link_data(row[:trade_date], value)
@@ -90,9 +97,9 @@ class AdvancesController < ApplicationController
         end
         {columns: columns}
       end
-
       @advances_data_table[:rows] = rows
-
+      @advances_data_table[:footer] = [ {value: t('advances.manage_advances.total_current_par'), colspan: 6 },
+                                        { value: profile[:advances][:total_advances], type: :currency_whole } ]
       render layout: false if request.xhr?
     else
       job_method = outstanding_only ? 'active_advances' : 'advances'

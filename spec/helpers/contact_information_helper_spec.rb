@@ -81,4 +81,20 @@ describe ContactInformationHelper, type: :helper do
       include_examples 'phone number contact method', helper_method.to_s.upcase
     end
   end
+
+  describe '`feedback_survey_url` method' do
+    let(:display_name) { SecureRandom.hex }
+    let(:email) { "#{SecureRandom.hex}@#{SecureRandom.hex}.com" }
+    let(:user) { instance_double(User, display_name: display_name, email: email) }
+    let(:member_name) { SecureRandom.hex }
+
+    it 'raises an `ArgumentError` if `user` is `nil`' do
+      expect { helper.send(:feedback_survey_url, nil, member_name) }.to raise_error(ArgumentError, "user parameter must not be nil")
+    end
+
+    it 'constructs an URL from the parameters passed in' do
+      expect(helper.send(:feedback_survey_url, user, member_name)).to eq(
+        "https://www.surveymonkey.com/r/7KYSNVN?#{{member: member_name, name: display_name, email: email}.to_query}")
+    end
+  end
 end

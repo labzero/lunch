@@ -104,6 +104,10 @@
     color: $medium-gray;
     line-height: 15px;
   }
+  tfoot td:first-child {
+    text-align: right;
+    border-right: none;
+  }
 }
 
 .add-advance-form {

@@ -170,7 +170,7 @@ class User < ActiveRecord::Base
   end
 
   def locked?
-    ldap_entry.present? && (ldap_entry[:userAccountControl].try(:first).to_i & LDAP_LOCK_BIT) == LDAP_LOCK_BIT
+    ldap_entry.present? && ((ldap_entry[:userAccountControl].try(:first).to_i & LDAP_LOCK_BIT) == LDAP_LOCK_BIT || ldap_entry[:lockoutTime].try(:first).to_i != 0)
   end
 
   def lock!
@@ -189,7 +189,11 @@ class User < ActiveRecord::Base
     if ldap_entry
       access_flags = ldap_entry[:userAccountControl].try(:first).to_i & (~LDAP_LOCK_BIT)
       reload_ldap_entry
-      Devise::LDAP::Adapter.set_ldap_param(username, :userAccountControl, access_flags.to_s, nil, ldap_domain)
+      attributes = {
+        userAccountControl: access_flags.to_s,
+        lockoutTime: 0.to_s
+      }
+      Devise::LDAP::Adapter.set_ldap_params(username, attributes, nil, ldap_domain)
     else
       false
     end

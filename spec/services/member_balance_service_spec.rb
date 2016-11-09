@@ -300,7 +300,7 @@ describe MemberBalanceService do
     end
   end
 
-  describe 'securities_transactions'do
+  describe 'securities_transactions' do
     let(:as_of_date) { Date.new(2015, 1, 20) }
     let(:securities_transactions) { subject.securities_transactions(as_of_date) } 
     describe 'happy path', :vcr  do
@@ -331,7 +331,9 @@ describe MemberBalanceService do
     describe 'totals' do
       let(:debits) { Array.new(10, nil).collect { rand(-10000..0) } }
       let(:credits) { Array.new(10, nil).collect { rand(0..10000) } }
-      let(:transactions) { (debits + credits).collect { |amount| {payment_or_principal: amount} } }
+      let(:interests) { Array.new(10, nil).collect { rand(0..1000) } + Array.new(10, 0) }
+      let!(:total_interest) { interests.sum }
+      let(:transactions) { (debits + credits).collect { |amount| {payment_or_principal: amount, interest: interests.pop } } }
       before do
         allow(subject).to receive(:get_hash).and_return({
           final: true,
@@ -339,10 +341,10 @@ describe MemberBalanceService do
         })
       end
       it 'sets `total_debits` to the sum of all debit transactions' do
-        expect(securities_transactions[:total_debits]).to be(debits.inject(:+))
+        expect(securities_transactions[:total_debits]).to be(debits.sum)
       end
-      it 'sets `total_credits` to the sum of all credit transactions' do
-        expect(securities_transactions[:total_credits]).to be(credits.inject(:+))
+      it 'sets `total_credits` to the sum of all credit transactions and interest' do
+        expect(securities_transactions[:total_credits]).to be(credits.sum + total_interest)
       end
       it 'handles nils in the `payment_or_principal` data' do
         transactions << {payment_or_principal: nil}

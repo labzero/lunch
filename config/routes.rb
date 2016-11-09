@@ -7,7 +7,6 @@ Rails.application.routes.draw do
   get '/details' => 'welcome#details'
   get '/healthy' => 'welcome#healthy'
   get '/session_status' => 'welcome#session_status'
-  get '/disclaimer-reuters' => 'error#not_found', as: :disclaimer_reuters
   get '/grid_demo' => 'welcome#grid_demo'
 
   get '/dashboard' => 'dashboard#index'

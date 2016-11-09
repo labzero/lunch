@@ -14,7 +14,7 @@ end
 
 When(/^I select "(.*?)" from the reports dropdown$/) do |report|
   step 'I don\'t see the reports dropdown'
-  step 'I hover on the reports link in the header'
+  step 'I click on the reports link in the header'
   page.find('.nav-dropdown').click_link(report)
 end
 

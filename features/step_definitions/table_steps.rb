@@ -18,7 +18,7 @@ Then(/^I should see the "(.*?)" table and "(.*?)" subtables?$/) do |table_type, 
   page.assert_selector("#{parent_selector} .report-sub-table", count: subtable_count)
 end
 
-When(/^I click the "(.*?)" column heading on the "(.*?)" parent table$/) do |heading, table_type|
+When(/^I click the "(.*?)" column heading on the "(.*?)" (?:parent )?table$/) do |heading, table_type|
   parent_selector = get_selector_for_table_section(table_type)
   page.find("#{parent_selector} th", text: heading).click
 end
@@ -31,6 +31,8 @@ def get_selector_for_table_section(table_type)
       selector = ".sbc-borrowing-capacity-tables"
     when 'Dividend Details'
       selector = '.table-dividend-details'
+    when 'Manage Advances'
+      selector = '.manage-advances-table'
     else
       raise 'table title not recognized'
   end

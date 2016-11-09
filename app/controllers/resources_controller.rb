@@ -121,6 +121,11 @@ class ResourcesController < ApplicationController
         title: t('resources.forms.authorizations.signature_cards.money_market'),
         form_number: 2071,
         pdf_link: resources_download_path(file: :form_2071)
+      },
+      {
+        title: t('resources.forms.authorizations.signature_cards.securities_services'),
+        form_number: 2109,
+        pdf_link: resources_download_path(file: :form_2109)
       }
     ]
 

@@ -48,5 +48,5 @@
   %th{class: cell[:classes] || classes, colspan: cell[:colspan]}
     = value
 - else
-  %td{class: cell[:classes] || classes, colspan: cell[:colspan]}
+  %td{class: cell[:classes] || classes, colspan: cell[:colspan], data: {order: cell[:order]}}
     = value

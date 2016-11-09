@@ -1869,8 +1869,8 @@ RSpec.describe ReportsController, :type => :controller do
     end
     describe 'when a job_id param is present' do
       let(:job_status) { double('job status', destroy: nil) }
-      let(:vrc_data) {{'advance_maturity' => 'Overnight/Open','overnight_fed_funds_benchmark' => 0.13,'basis_point_spread_to_benchmark' => 5,'advance_rate' => 0.18, 'effective_date' => '2016-01-01'}}
-      let(:frc_data) {[{'advance_maturity' =>'1 Month','treasury_benchmark_maturity' => '3 Months','nominal_yield_of_benchmark' => 0.01,'basis_point_spread_to_benchmark' => 20,'advance_rate' => 0.21, 'effective_date' => '2016-01-01'}]}
+      let(:vrc_data) {{'advance_maturity' => 'Overnight/Open','advance_rate' => 0.18, 'effective_date' => '2016-01-01'}}
+      let(:frc_data) {[{'advance_maturity' =>'1 Month','advance_rate' => 0.21, 'effective_date' => '2016-01-01'}]}
       let(:arc_data) {[{'advance_maturity' => '1 Year','1_month_libor' => 6,'3_month_libor' => 4,'6_month_libor' => 11,'prime' => -295, 'effective_date' => '2016-01-01'}]}
       let(:sta_data) { {rate: rand(0..99999)} }
       let(:member_id) { rand(1..99999) }
@@ -1903,7 +1903,7 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[vrc_data][:rows]).to eq(
             [
               {columns: [
-                {:value=>"Overnight/Open", :type=>nil}, {:value=>0.13, :type=>:rate}, {:value=>5, :type=>:basis_point}, {:value=>0.18, :type=>:rate}
+                {:value=>"Overnight/Open", :type=>nil}, {:value=>0.18, :type=>:rate}
               ]}
             ]
           )
@@ -1919,7 +1919,7 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[frc_data][:rows]).to eq(
             [
               {columns: [
-                {:value=>"1 Month"}, {:value=>"3 Months"}, {:type=>:rate, :value=>0.01}, {:type=>:basis_point, :value=>20}, {:type=>:rate, :value=>0.21}
+                {:value=>"1 Month"}, {:type=>:rate, :value=>0.21}
               ]}
             ]
           )
@@ -2755,6 +2755,13 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
 
+      describe '@authorizations_title' do
+        it 'sets `@authorizations_title` to the title in the drop down when viewiny only ETRANSACT_SIGNERs' do
+          get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER
+          expect(assigns[:authorizations_title]).to eq(described_class::AUTHORIZATIONS_DROPDOWN_MAPPING[User::Roles::ETRANSACT_SIGNER])
+        end
+      end
+
       describe '`@authorizations_table_data`' do
         it 'returns a hash with `column_headings`' do
           get :authorizations
@@ -2791,8 +2798,8 @@ RSpec.describe ReportsController, :type => :controller do
             it 'contains all users sorted by last name then first name if the authorizations_filter is set to `all`' do
               make_request
               rows = assigns[:authorizations_table_data][:rows]
-              expect(rows.length).to eq(6)
-              rows.zip([user_d, user_e, user_c, user_b, user_f, user_a]).each do |row, user|
+              expect(rows.length).to eq(7)
+              rows.zip([user_d, user_e, user_c, user_b, user_f, user_etransact, user_a]).each do |row, user|
                 expect(row[:columns].first[:value]).to eq(user[:display_name])
               end
             end
@@ -2807,6 +2814,12 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
               expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_f[:display_name])
               expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.entire_authority.title')])
+            end
+            it 'only contains token holders if authorizations_filter is set to ETRANSACT_SIGNER' do
+              get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER, job_id: job_id
+              expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_etransact[:display_name])
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to include(I18n.t('user_roles.etransact_signer.title'))
             end
             describe 'when the filtered users include a signer manager or a signer with entire authority' do
               before { get :authorizations, :authorizations_filter => User::Roles::COLLATERAL_SIGNER, job_id: job_id }
@@ -2850,9 +2863,9 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_c[:display_name])
               expect(assigns[:authorizations_table_data][:rows][0][:columns].last[:value]).to eq([I18n.t('user_roles.wire_transfer.title')])
             end
-            it 'ignores users with no role or the eTransact role' do
+            it 'ignores users with no role' do
               make_request
-              expect(assigns[:authorizations_table_data][:rows]).to satisfy { |rows| !rows.find {|row| [user_etransact[:display_name], user_no_roles[:display_name]].include?(row[:columns].first[:value]) } }
+              expect(assigns[:authorizations_table_data][:rows]).to satisfy { |rows| !rows.find {|row| [  user_no_roles[:display_name]].include?(row[:columns].first[:value]) } }
             end
           end
           it 'assigns `@authorizations_table_data[:raw_roles]` to `user_roles`' do
@@ -3229,6 +3242,8 @@ RSpec.describe ReportsController, :type => :controller do
              remaining_market: double(Float),
              total_borrowing: double(Float),
              remaining_borrowing: double(Float) } } }
+    let(:credit_exception) { double('Credit Exception') }
+    let(:disabled_reports) { double('Disabled Reports') }
     let(:profile) { {
       financing_percentage: financing_percentage,
       maximum_term: maximum_term,
@@ -3240,7 +3255,9 @@ RSpec.describe ReportsController, :type => :controller do
       collateral_borrowing_capacity: collateral_borrowing_capacity,
       capital_stock: capital_stock,
       remaining_financing_available: remaining_financing_available,
-      collateral_delivery_status: 'Y'
+      collateral_delivery_status: 'Y',
+      credit_exception: credit_exception,
+      disabled_reports: disabled_reports
     } }
     let(:member_name) { double('A Name') }
     let(:sta_number) { double('STA Number') }
@@ -4089,7 +4106,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
     describe '`parse_vrc_data` method' do
-      let(:vrc_fixture_data) { {'advance_maturity' => 'Overnight/Open','overnight_fed_funds_benchmark' => 0.13,'basis_point_spread_to_benchmark' => 5,'advance_rate' => 0.18,'effective_date' => '2016-01-01'} }
+      let(:vrc_fixture_data) { {'advance_maturity' => 'Overnight/Open','advance_rate' => 0.18,'effective_date' => '2016-01-01'} }
       let(:vrc_entries_hash) { {
           double('A Field') => double('A Value'),
           double('A Field') => double('A Value'),
@@ -4097,7 +4114,7 @@ RSpec.describe ReportsController, :type => :controller do
       } }
       let(:call_method) { subject.send(:parse_vrc_data, vrc_entries_hash) }
       it 'returns correctly formatted columns' do
-        expect(subject.send(:parse_vrc_data, vrc_fixture_data)).to eq([{:value=>"Overnight/Open", :type=>nil}, {:value=>0.13, :type=>:rate}, {:value=>5, :type=>:basis_point}, {:value=>0.18, :type=>:rate}])
+        expect(subject.send(:parse_vrc_data, vrc_fixture_data)).to eq([{:value=>"Overnight/Open", :type=>nil}, {:value=>0.18, :type=>:rate}])
       end
       it 'calls `row_for_vrc_entry` for each field value pair in the entries hash' do
         expect(vrc_entries_hash).to be_present
@@ -4149,16 +4166,10 @@ RSpec.describe ReportsController, :type => :controller do
       it 'returns nil if the field id `effective_date`' do
         expect(subject.send(:row_for_vrc_entry, 'effective_date', vrc_value)).to eq(nil)
       end
-      it 'returns `type` set to `:rate` if the field is `overnight_fed_funds_benchmark`' do
-        expect(subject.send(:row_for_vrc_entry, 'overnight_fed_funds_benchmark', vrc_value)).to eq({value: vrc_value, type: :rate})
-      end
       it 'returns `type` set to `:rate` if the field is `advance_rate`' do
         expect(subject.send(:row_for_vrc_entry, 'advance_rate', vrc_value)).to eq({value: vrc_value, type: :rate})
       end
-      it 'returns `type` set to `:basis_point` if the field is `basis_point_spread_to_benchmark`' do
-        expect(subject.send(:row_for_vrc_entry, 'basis_point_spread_to_benchmark', vrc_value)).to eq({value: vrc_value, type: :basis_point})
-      end
-      it 'returns `type` set to `nil` if the field is not `basis_point_spread_to_benchmark`, `advance_rate`, `effective_date` or `overnight_fed_funds_benchmark`' do
+      it 'returns `type` set to `nil` if the field is not `advance_rate` or `effective_date`' do
         expect(call_method).to eq({value: vrc_value, type: nil})
       end
     end

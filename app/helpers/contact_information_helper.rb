@@ -14,6 +14,7 @@ module ContactInformationHelper
   ACCOUNTING_PHONE_NUMBER = '4156162620'
   SECURITIES_SERVICES_PHONE_NUMBER = '4156162970'
   COLLATERAL_OPERATIONS_PHONE_NUMBER = '4156162980'
+  FEEDBACK_SURVEY_URL = 'https://www.surveymonkey.com/r/7KYSNVN'
 
   def web_support_email
     "mailto:#{WEB_SUPPORT_EMAIL}"
@@ -73,5 +74,10 @@ module ContactInformationHelper
 
   def collateral_operations_phone_number
     fhlb_formatted_phone_number(COLLATERAL_OPERATIONS_PHONE_NUMBER)
+  end
+
+  def feedback_survey_url(user, member_name)
+    raise ArgumentError, 'user parameter must not be nil' unless user.present?
+    "#{FEEDBACK_SURVEY_URL}?#{{ member: member_name, name: user.display_name, email: user.email }.to_query}"
   end
 end

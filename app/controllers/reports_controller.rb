@@ -47,7 +47,8 @@ class ReportsController < ApplicationController
     User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
     User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
     User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
-    User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title')
+    User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
+    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact_signer.title')
   }
 
   AUTHORIZATIONS_ROLL_UP = [
@@ -72,6 +73,7 @@ class ReportsController < ApplicationController
     User::Roles::DERIVATIVES_SIGNER => I18n.t('user_roles.interest_rate_derivatives.title'),
     User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
     User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
+    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact_signer.title'),
     User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title')
   }
 
@@ -81,7 +83,7 @@ class ReportsController < ApplicationController
     User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER,
     User::Roles::ADVANCE_SIGNER, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER,
     User::Roles::DERIVATIVES_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::SECURITIES_SIGNER,
-    User::Roles::ACCESS_MANAGER
+    User::Roles::ETRANSACT_SIGNER, User::Roles::ACCESS_MANAGER
   ]
 
   INCLUSIVE_AUTHORIZATIONS = [AUTHORIZATIONS_MAPPING['signer_manager'], AUTHORIZATIONS_MAPPING['signer_entire_authority']].freeze
@@ -398,7 +400,9 @@ class ReportsController < ApplicationController
         },
         capital_stock: {},
         advances: {},
-        rhfa: {}
+        rhfa: {},
+        credit_exception: '',
+        disabled_reports: []
       }
     end
 
@@ -853,15 +857,10 @@ class ReportsController < ApplicationController
 
       vrc_column_headings = [
         t('reports.pages.price_indications.current.advance_maturity'),
-        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.overnight_fed_funds_benchmark'), '%'),
-        t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'),
         fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')
       ]
       frc_column_headings = [
         t('reports.pages.price_indications.current.advance_maturity'),
-        t('reports.pages.price_indications.current.treasury_benchmark_maturity'),
-        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.nominal_yield_of_benchmark'), '%'),
-        t('reports.pages.price_indications.current.basis_point_spread_to_benchmark'),
         fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')
       ]
       standard_arc_column_headings = [
@@ -994,10 +993,8 @@ class ReportsController < ApplicationController
         rows = standard_frc_data.collect do |row|
           columns = []
           row.each do |value|
-            if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+            if value[0]=='advance_maturity'
               columns << {value: value[1]}
-            elsif value[0]=='basis_point_spread_to_benchmark'
-              columns << {type: :basis_point, value: value[1]}
             elsif value[0] == 'effective_date'
               next
             else
@@ -1012,10 +1009,8 @@ class ReportsController < ApplicationController
         rows = sbc_frc_data.collect do |row|
           columns = []
           row.each do |value|
-            if value[0]=='advance_maturity' || value[0]=='treasury_benchmark_maturity'
+            if value[0]=='advance_maturity'
               columns << {value: value[1]}
-            elsif value[0]=='basis_point_spread_to_benchmark'
-              columns << {type: :basis_point, value: value[1]}
             elsif value[0] == 'effective_date'
               next
             else
@@ -1481,6 +1476,8 @@ class ReportsController < ApplicationController
         t('reports.pages.authorizations.sub_title_all_users')
       when User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY
         t('reports.pages.authorizations.sub_title_inclusive_authorizations', filter: mapped_filter)
+      when User::Roles::ETRANSACT_SIGNER
+        t('user_roles.etransact_signer.title')
       else
         t('reports.pages.authorizations.sub_title', filter: mapped_filter)
       end
@@ -1508,7 +1505,7 @@ class ReportsController < ApplicationController
         end.reject{ |_,roles| roles.empty? }
 
         check_for_inclusive_roles = false
-        matching_roles_array = if [User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER, AUTHORIZATIONS_ALL].include?(@authorizations_filter)
+        matching_roles_array = if [User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER, AUTHORIZATIONS_ALL, User::Roles::ETRANSACT_SIGNER].include?(@authorizations_filter)
           [AUTHORIZATIONS_MAPPING[@authorizations_filter]]
         else
           check_for_inclusive_roles = true
@@ -2058,10 +2055,8 @@ class ReportsController < ApplicationController
   def row_for_vrc_entry(vrc_field, vrc_value)
     if vrc_field != 'effective_date'
       case vrc_field
-      when 'overnight_fed_funds_benchmark', 'advance_rate'
+      when 'advance_rate'
         type = :rate
-      when 'basis_point_spread_to_benchmark'
-        type = :basis_point
       else
         type = nil
       end
@@ -2132,7 +2127,6 @@ class ReportsController < ApplicationController
     if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
       roles = roles - AUTHORIZATIONS_ROLL_UP
     end
-    roles.delete(User::Roles::ETRANSACT_SIGNER)
     roles.sort_by! { |role| AUTHORIZATIONS_ORDER.index(role) || 0 }
     roles.collect! { |role| AUTHORIZATIONS_MAPPING.keys.include?(role) ? role : nil }
     roles.compact!

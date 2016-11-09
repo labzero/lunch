@@ -311,13 +311,15 @@
   }
 
   .sorting, .sorting_asc, .sorting_desc {
-    &:hover {
+    &:hover:not([data-unsortable]) {
       text-decoration: underline;
     }
   }
 
   .sorting_asc, .sorting_desc {
-    background-color: $secondary-gray;
+    &:not([data-unsortable]) {
+      background-color: $secondary-gray;      
+    }
   }
 
   .report-detail-cell {
@@ -1246,7 +1248,7 @@ td.dataTables_empty {
     float: left;
   }
   dd {
-    margin-left: 20px;
+    margin-left: 5px;
   }
   dt {
     clear: both;
@@ -1262,6 +1264,22 @@ td.dataTables_empty {
   }
   section {
     margin-bottom: 0;
+  }
+  .report-profile-exceptions {
+    li:first-child {
+      @extend %typography-horizontal-axis-label;
+      margin-top: 15px;
+    }
+    margin-bottom: 15px;
+  }
+  .disabled-reports {
+    list-style-type: none;
+    li {
+      font-weight: $normal-weight;
+    }
+  }
+  .exceptions-body {
+    min-height: 1px;
   }
   .report-profile-horizontal-axis-label {
     @extend %typography-horizontal-axis-label;
@@ -1574,7 +1592,7 @@ td.dataTables_empty {
       .report-profile-contact-info {
         margin-left: -80px;
       }
-      .report-profile-navigation {
+      .report-profile-navigation, .report-profile-exceptions {
         display: none;
       }
       .report-profile-cqr {

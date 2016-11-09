@@ -261,6 +261,7 @@ class MemberBalanceService < MAPIService
         else
           total_debits += amount
         end
+        total_credits += transaction[:interest] || 0
       end
       data.merge(
           total_payment_or_principal: lenient_sum(data[:transactions], :payment_or_principal),

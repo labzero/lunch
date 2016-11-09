@@ -70,12 +70,6 @@ $(function() {
     $('.securities-download-instructions').toggle();
   });
 
-
-  // Toggle Edit Securities Instructions for Pledging and Safekeeping New Securities
-  $('.securities-download-safekeep-pledge').on('click', function(){
-    $securitiesUploadInstructions.toggle();
-  });
-
   var $securitiesForm = $('.securities-submit-request-form');
   var $submitField = $securitiesForm.find('input[type=submit]');
   var $secureIDTokenField = $('#securid_token');
@@ -170,10 +164,9 @@ $(function() {
   };
 
   $securitiesReleaseWrapper.on('click', '.safekeep-pledge-upload-again', function(e){
-    $securitiesUploadInstructions.hide();
     $('.safekeep-pledge-download-area').show();
     $securitiesReleaseWrapper.empty();
-    $securitiesField.val('null');
+    $securitiesField.val('[]');
     validateSecuritiesRequestFields();
     $('.securities-request-upload-success').hide();
   });

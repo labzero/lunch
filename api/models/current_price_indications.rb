@@ -7,14 +7,6 @@ module MAPI
           key :type, :string
           key :description, 'Advance Maturity Type'
         end
-        property :overnight_fed_funds_benchmark do
-          key :type, :number
-          key :description, 'Overnight Fed Funds Benchmark'
-        end
-        property :basis_point_spread_to_benchmark do
-          key :type, :number
-          key :description, 'Basis Point Spread To Benchmark'
-        end
         property :advance_rate do
           key :type, :number
           key :description, 'Advance Rate'
@@ -27,18 +19,6 @@ module MAPI
         property :advance_maturity do
           key :type, :string
           key :description, 'Advance Maturity Type'
-        end
-        property :treasury_benchmark_maturity do
-          key :type, :string
-          key :description, 'Treasury Benchmark Maturity Type'
-        end
-        property :nominal_yield_of_benchmark do
-          key :type, :number
-          key :description, 'Nominal Yield of Benchmark'
-        end
-        property :basis_point_spread_to_benchmark do
-          key :type, :number
-          key :description, 'Basis Point Spread To Benchmark'
         end
         property :advance_rate do
           key :type, :number

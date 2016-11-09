@@ -4,16 +4,12 @@ Given(/^I don't see the (reports|resources|products) dropdown$/) do |dropdown|
   report_menu.parent.assert_selector('.nav-dropdown', visible: :hidden)
 end
 
-When(/^I hover on the (advances|products|reports|resources|securities) link in the header$/) do |dropdown|
-  page.find('.nav-menu', text: dropdown_title_regex(dropdown)).hover
-end
-
 Then(/^I should see the (reports|resources|products) dropdown$/) do |dropdown|
   report_menu = page.find('.nav-menu', text: dropdown_title_regex(dropdown))
   report_menu.parent.assert_selector('.nav-dropdown', visible: true)
 end
 
-When(/^I click on the (agreements|amortizing|arc|arc embedded|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance|manage securities|securities requests) link in the header$/) do |link|
+When(/^I click on the (agreements|amortizing|arc|arc embedded|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance|manage securities|securities requests|resources|products|learn more) link in the header$/) do |link|
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
 end
 
@@ -113,6 +109,8 @@ def dropdown_title_regex(dropdown)
     I18n.t('securities.manage.title')
   when 'securities requests'
     I18n.t('securities.requests.title')
+  when 'learn more'
+    'Learn more'
   else
     raise 'unknown dropdown'
   end

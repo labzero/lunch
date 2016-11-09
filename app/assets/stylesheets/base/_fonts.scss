@@ -10,11 +10,8 @@ $loose-line-height: 1.538;
 @mixin link-font($name, $weight, $style, $family: 'SourceSansPro') {
   @font-face {
     font-family: $family;
-    src: font-url("#{$name}.eot");
-    src:font-url("#{$name}") format('embedded-opentype'),
-    font-url("#{$name}.woff") format('woff'),
-    font-url("#{$name}.ttf") format('truetype'),
-    font-url("#{$name}.svg") format('svg');
+    src:font-url("#{$name}.woff") format('woff'),
+    font-url("#{$name}.ttf") format('truetype');
     font-weight: $weight;
     font-style: $style;
   }

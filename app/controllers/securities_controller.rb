@@ -368,25 +368,25 @@ class SecuritiesController < ApplicationController
   def download_release
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:release, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :release, title: t('securities.download.titles.release') }
+    render xlsx: 'securities', filename: "securities-release.xlsx", formats: [:xlsx], locals: { type: :release, title: t('securities.download.titles.release') }
   end
 
   def download_transfer
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:transfer, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :transfer, title: t('securities.download.titles.transfer') }
+    render xlsx: 'securities', filename: "securities-transfer.xlsx", formats: [:xlsx], locals: { type: :transfer, title: t('securities.download.titles.transfer') }
   end
 
   def download_safekeep
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:safekeep, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :safekeep, title: t('securities.download.titles.safekeep') }
+    render xlsx: 'securities', filename: "securities-safekeeping.xlsx", formats: [:xlsx], locals: { type: :safekeep, title: t('securities.download.titles.safekeep') }
   end
 
   def download_pledge
     securities = JSON.parse(params[:securities]).collect! { |security| Security.from_hash(security) }
     populate_securities_table_data_view_variable(:pledge, securities)
-    render xlsx: 'securities', filename: "securities.xlsx", formats: [:xlsx], locals: { type: :pledge, title: t('securities.download.titles.pledge') }
+    render xlsx: 'securities', filename: "securities-pledge.xlsx", formats: [:xlsx], locals: { type: :pledge, title: t('securities.download.titles.pledge') }
   end
 
   def upload_securities
@@ -407,27 +407,29 @@ class SecuritiesController < ApplicationController
         spreadsheet.each do |row|
           if data_start_index
             cusip = row[data_start_index]
-            security = if type == :release
-              Security.from_hash({
+             security_hash = if type == :release
+              {
                 cusip: cusip,
                 description: row[data_start_index + 1],
                 original_par: (row[data_start_index + 2]),
                 payment_amount: (row[data_start_index + 3])
-              })
+              }
             elsif type == :transfer
-              Security.from_hash({
+              {
                 cusip: cusip,
                 description: row[data_start_index + 1],
                 original_par: (row[data_start_index + 2])
-              })
+              }
             elsif type == :pledge || type == :safekeep
-              Security.from_hash({
+              {
                 cusip: cusip,
                 original_par: (row[data_start_index + 1]),
                 payment_amount: (row[data_start_index + 2]),
                 custodian_name: (row[data_start_index + 3])
-              })
+              }
             end
+            next if security_hash.values.reject(&:blank?).empty?
+            security = Security.from_hash(security_hash)
             if security.valid?
               securities << security
             elsif security.errors.keys.include?(:cusip)

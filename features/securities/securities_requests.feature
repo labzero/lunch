@@ -10,7 +10,7 @@ Background:
 @smoke @jira-mem-1596
 Scenario: Visit Securities Requests from the header
   Given I visit the dashboard
-  When I hover on the securities link in the header
+  When I click on the securities link in the header
   When I click on the securities requests link in the header
   Then I should be on the Securities Requests page
   Then I should see two securities requests tables with data rows
@@ -66,7 +66,8 @@ Scenario Outline: A signer authorizes a previously submitted request
   When I click to Authorize the first <request_type>
   Then I should be on the <page> page
   When I choose the first available date for trade date
-  And I choose the first available date for settlement date
+  And I choose the last available date for settlement date
+  Then I fill in the "aba_number" securities field with "123456789"
   And I authorize the request
   Then I should see the authorize request success page
 Examples:

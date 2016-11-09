@@ -155,3 +155,9 @@ Background:
     Then I should see the lock user button disabled
     Then I should see the reset-password user button disabled
     Then I should see the edit user button disabled
+
+  @jira-mem-1993
+  Scenario: Users who are internal users can view the access manager page
+    Given I am logged in as an "intranet user"
+    When I visit the access manager page
+    Then I should see a list of users

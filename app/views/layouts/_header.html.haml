@@ -39,7 +39,7 @@
                   %li= link_to(t('securities.manage.title'), securities_manage_path)
                   %li= link_to(t('securities.requests.title'), securities_requests_path)
       %li{class: ('active-nav-item' if active_nav == :reports)}<>
-        = link_to(t('reports.title'), reports_path, class: 'nav-menu')
+        = link_to(t('reports.title'), '#', class: 'nav-menu')
         .nav-dropdown
           .nav-dropdown-row
             .nav-dropdown-column

@@ -67,9 +67,12 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:job_status) { double('JobStatus', update_attributes!: nil, id: job_id, destroy: nil, result_as_string: nil ) }
     let(:member_balance_service_job_instance) { double('member_balance_service_job_instance', job_status: job_status) }
     let(:response_hash) { double('MemberBalanceServiceHash') }
-    let(:trade_date) { (Time.zone.today + (rand(1..10))).to_s }
-    let(:funding_date) { (Time.zone.today + (rand(1..10))).to_s }
-    let(:maturity_date) { (Time.zone.today - (rand(1..10))).to_s }
+    let(:trade_date_raw) { (Time.zone.today + (rand(1..10))).to_datetime }
+    let(:trade_date) { trade_date_raw.to_date.to_s }
+    let(:funding_date_raw) { (Time.zone.today + (rand(1..10))).to_datetime }
+    let(:funding_date) { funding_date_raw.to_date.to_s }
+    let(:maturity_date_raw) { (Time.zone.today + (rand(1..10))).to_datetime }
+    let(:maturity_date) { maturity_date_raw.to_date.to_s }
     let(:advance_number) { SecureRandom.hex }
     let(:advance_type) { SecureRandom.hex }
     let(:advance_confirmation) { SecureRandom.hex }
@@ -79,8 +82,43 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:user) { controller.current_user }
     let(:user_id) { user.id }
     let(:member_id) { controller.current_member_id }
-    let(:column_headings) { [I18n.t('common_table_headings.trade_date'), I18n.t('common_table_headings.funding_date'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.advance_number'), I18n.t('common_table_headings.advance_type'), I18n.t('global.footnoted_string', string: I18n.t('advances.rate')), I18n.t('common_table_headings.current_par') + ' ($)'] }
-    let(:active_advances_response) {[{'trade_date' => trade_date, 'funding_date' => funding_date, 'maturity_date' => maturity_date, 'advance_number' => advance_number, 'advance_type' => advance_type, 'status' => status, 'interest_rate' => interest_rate, 'current_par' => current_par, 'advance_confirmation' => advance_confirmation}]}
+    let(:profile) { instance_double(Hash) }
+    let(:member_profile) { double('Member Profile') }    
+    let(:total) { instance_double(Hash) }
+    let(:column_headings) { [
+      { title: I18n.t('common_table_headings.trade_date'), sortable: false }, 
+      { title: I18n.t('common_table_headings.funding_date'), sortable: false },
+      { title: I18n.t('common_table_headings.maturity_date'), sortable: true },
+      { title: I18n.t('common_table_headings.advance_number'), sortable: false },
+      { title: I18n.t('common_table_headings.advance_type'), sortable: false },
+      { title: I18n.t('global.footnoted_string', string: I18n.t('advances.rate')), sortable: false },
+      { title: I18n.t('common_table_headings.current_par') + ' ($)', sortable: false }
+    ]}
+    let(:active_advances_response) {[
+      {
+        'trade_date' => trade_date,
+        'funding_date' => funding_date,
+        'maturity_date' => maturity_date,
+        'advance_number' => advance_number,
+        'advance_type' => advance_type,
+        'status' => status,
+        'interest_rate' => interest_rate,
+        'current_par' => current_par,
+        'advance_confirmation' => advance_confirmation
+      },
+      {
+        'trade_date' => trade_date,
+        'funding_date' => funding_date,
+        'maturity_date' => 'Open',
+        'advance_number' => advance_number,
+        'advance_type' => advance_type,
+        'status' => status,
+        'interest_rate' => interest_rate,
+        'current_par' => current_par,
+        'advance_confirmation' => advance_confirmation
+      }
+    ]}
+    let(:member_balance_service_instance) { double('member balance service instance') }
     let(:call_action) { get :manage }
 
     before do
@@ -88,7 +126,13 @@ RSpec.describe AdvancesController, :type => :controller do
       allow(response_hash).to receive(:collect)
       allow(controller).to receive(:advance_confirmation_link_data)
       allow(subject).to receive(:feature_enabled?).with('advance-confirmation').and_return(false)
+      allow(MemberBalanceService).to receive(:new).with(any_args).and_return(member_balance_service_instance)
+      allow(member_balance_service_instance).to receive(:profile).with(no_args).and_return(member_profile)
+      allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(any_args).and_return(profile)
+      allow(profile).to receive(:[]).with(:advances).and_return(total)
+      allow(total).to receive(:[]).with(:total_advances).and_return(rand(9999..99999))
     end
+
     it_behaves_like 'a user required action', :get, :manage
     it_behaves_like 'a controller action with an active nav setting', :manage, :advances
     it { should use_before_filter(:set_html_class) }
@@ -170,7 +214,23 @@ RSpec.describe AdvancesController, :type => :controller do
       end
       it 'sets @advances_data_table to the hash returned from the job status' do
         call_action_with_job_id
-        expect(assigns[:advances_data_table][:rows][0][:columns]).to eq([{:type=>:date, :value=>trade_date}, {:type=>:date, :value=>funding_date}, {:type=>:date, :value=>maturity_date}, {:value=>advance_number}, {:value=>advance_type}, {:type=>:index, :value=>interest_rate}, {:type=>:number, :value=>current_par}])
+        expect(assigns[:advances_data_table][:rows][0][:columns]).to eq([{:type=>:date, :value=>trade_date, order: trade_date_raw.to_i}, {:type=>:date, :value=>funding_date, order: funding_date_raw.to_i}, {:type=>:date, :value=>maturity_date, order: maturity_date_raw.to_i}, {:value=>advance_number}, {:value=>advance_type}, {:type=>:index, :value=>interest_rate}, {:type=>:number, :value=>current_par}])
+      end
+      it 'sets the order of `Open` advances to the far future' do
+        call_action_with_job_id
+        expect(assigns[:advances_data_table][:rows][1][:columns]).to include({value: 'Open', order: described_class::OPEN_SORT_DATE})
+      end
+      it 'creates a new instance of the `MemberBalanceService`' do
+        expect(MemberBalanceService).to receive(:new).with(member_id, request)
+        call_action_with_job_id
+      end
+      it 'gets the `profile` from the `MemberBalanceService`' do
+        expect(member_balance_service_instance).to receive(:profile)
+        call_action_with_job_id
+      end
+      it 'sanitizes the profile' do
+        expect(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(member_profile)
+        call_action_with_job_id
       end
       describe 'when the `advance-confirmation` feature is enabled' do
         let(:advance_confirmation_link) { double('advance confirmation link') }
@@ -182,7 +242,7 @@ RSpec.describe AdvancesController, :type => :controller do
         end
         it "adds #{I18n.t('advances.confirmation.title')} to @advances_data_table[:column_headings]" do
           call_action_with_job_id
-          expect(assigns[:advances_data_table][:column_headings]).to include(I18n.t('advances.confirmation.title'))
+          expect(assigns[:advances_data_table][:column_headings]).to include({ title: I18n.t('advances.confirmation.title'), sortable: false })
         end
       end
     end
