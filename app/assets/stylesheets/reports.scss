@@ -1015,6 +1015,7 @@ td.dataTables_empty {
   }
   .next-day-link{
     @extend %typography-table-cell;
+    margin-top: 5px;
     margin-bottom: 46px;
     display: block;
   }
