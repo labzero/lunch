@@ -245,6 +245,7 @@ en:
               greater_than_or_equal_to: ABA must be nine digits.
               not_an_integer: ABA must be nine digits.
               wrong_length: ABA must be nine digits.
+              not_a_number: ABA must be nine digits.
         security:
           blank: "Each row must contain a CUSIP and an Original Par.\nEdit your file and try again."
           not_a_number: '%{attribute} must be a number.'
