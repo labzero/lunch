@@ -99,7 +99,7 @@ class AdvancesController < ApplicationController
       end
       @advances_data_table[:rows] = rows
       @advances_data_table[:footer] = [ {value: t('advances.manage_advances.total_current_par'), colspan: 6 },
-                                        { value: profile[:advances][:total_advances], type: :currency_whole } ]
+                                        { value: profile.try(:[], :advances).try(:[], :total_advances), type: :currency_whole } ]
       render layout: false if request.xhr?
     else
       job_method = outstanding_only ? 'active_advances' : 'advances'
