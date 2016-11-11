@@ -97,7 +97,7 @@ $(function () {
     }
   }
 
-  var createSelector = '.settings-user-create a';
+  var createSelector = '.settings-user-create';
   $('.settings-users').on('ajax:success', createSelector, function(event, json, status, xhr) {
     var $ele = $(event.target);
 

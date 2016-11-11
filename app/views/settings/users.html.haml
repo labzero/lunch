@@ -3,7 +3,7 @@
     .settings-users-header
       %h1= t('settings.account.title')
       - if policy(current_user).create?
-        .table-button.secondary-button.settings-user-create= link_to( t('settings.account.actions.add_user'), new_user_path, remote: true)
+        = link_to( t('settings.account.actions.add_user'), new_user_path, remote: true, class: 'table-button secondary-button settings-user-create')
     .settings-users-table
       %table
         %thead
