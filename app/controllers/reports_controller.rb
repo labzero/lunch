@@ -801,7 +801,8 @@ class ReportsController < ApplicationController
       end
       @show_ending_balance = false
       if @settlement_transaction_account[:activities] && @settlement_transaction_account[:activities].length > 0
-        @show_ending_balance = @end_date != @settlement_transaction_account[:activities][0][:trans_date].to_date || @settlement_transaction_account[:activities][0][:balance].blank?
+        @show_ending_balance = @end_date >= @settlement_transaction_account[:activities][0][:trans_date].to_date && 
+                               @settlement_transaction_account[:activities][0][:descr] != 'Interest Rate / Daily Balance' 
       end
     end
   end

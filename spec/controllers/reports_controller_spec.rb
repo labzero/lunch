@@ -499,35 +499,82 @@ RSpec.describe ReportsController, :type => :controller do
         before {
           allow(member_balance_service_instance).to receive(:settlement_transaction_account).with(kind_of(Date), kind_of(Date), kind_of(String)).and_return(response_hash)
         }
-        it 'should set @show_ending_balance to false if the date of the first transaction in the activity array is the same as the @end_date' do
+        it 'should set `@show_ending_balance` to true if the date of the first transaction in the activity array is the same as the `@end_date`' do
           activities_array = [
               {  trans_date: end_date,
-                 balance: 55449.6
+                 balance: rand(0..999999),
+                 descr: SecureRandom.hex
               }
           ]
           allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
           make_request_with_dates
-          expect(assigns[:show_ending_balance]).to eq(false)
+          expect(assigns[:show_ending_balance]).to eq(true)
         end
-        it 'should set @show_ending_balance to true if the date of the first transaction in the activity array is different than the @end_date' do
+        it 'should set `@show_ending_balance` to true if the date of the first transaction in the activity array less than the `@end_date`' do
           activities_array = [
-            {  trans_date: end_date + 1.day,
-               balance: 55449.6
+            {  trans_date: end_date - 1.day,
+               balance: rand(0..999999),
+               descr: SecureRandom.hex
             }
           ]
           allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
           make_request_with_dates
           expect(assigns[:show_ending_balance]).to eq(true)
         end
-        it 'should set @show_ending_balance to true if there is no balance given for the first transaction in the activity array, even if the date of the transaction is equal to @end_date' do
+        it 'should set `@show_ending_balance` to false if the first transaction in the activity array is a daily balance' do
           activities_array = [
               {  trans_date: end_date,
-                 balance: nil
+                 balance: rand(0..999999),
+                 descr: 'Interest Rate / Daily Balance'
+              }
+          ]
+          allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
+          make_request_with_dates
+          expect(assigns[:show_ending_balance]).to eq(false)
+        end
+        it 'should set @show_ending_balance to `true` if a transaction that occurred on `end_date` is a daily balance, but it was not the last transaction' do
+          activities_array = [
+              {  trans_date: end_date,
+                 balance: nil,
+                 descr: SecureRandom.hex
+              },
+              {  trans_date: end_date,
+                 balance: rand(0..999999),
+                 descr: 'Interest Rate / Daily Balance'
               }
           ]
           allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
           make_request_with_dates
           expect(assigns[:show_ending_balance]).to eq(true)
+        end
+        it 'should set @show_ending_balance to `true` if the date of the first transaction in the activity array is several days less than the `@end_date`' do
+          activities_array = [
+            {  trans_date: end_date - 3.days,
+               balance: rand(0..999999),
+               descr: SecureRandom.hex
+            }
+          ]
+          allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
+          make_request_with_dates
+          expect(assigns[:show_ending_balance]).to eq(true)
+        end
+        describe 'a weekend scenario' do
+          let(:end_date) { Date.today - ((Date.today.wday - Date.parse('Sunday').wday) % 7) }
+          it 'should set `@show_ending_balance` to `true` if the date of the first transaction in the activity array is a weekend' do
+            activities_array = [
+              {  trans_date: end_date, # last sunday
+                 balance: rand(0..999999),
+                 descr: SecureRandom.hex
+              },
+              {  trans_date: end_date - 2, # the friday before last sunday
+                 balance: rand(0..999999),
+                 descr: 'Interest Rate / Daily Balance'
+              }
+            ]
+            allow(response_hash).to receive(:[]).with(:activities).at_least(:once).and_return(activities_array)
+            make_request_with_dates
+            expect(assigns[:show_ending_balance]).to eq(true)
+          end
         end
       end
       describe 'fetching STA numbers' do
