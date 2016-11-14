@@ -307,7 +307,7 @@
   .report-cell-actions {
     @extend %typography-table-button;
     text-transform: uppercase;
-    color: $secondary-gray;
+    color: $medium-gray;
   }
 
   .sorting, .sorting_asc, .sorting_desc {
