@@ -1663,14 +1663,20 @@ en:
           advances_with_terms_of_more_than: 'Advances with terms of more than 180 days:'
           vrc: Variable Rate Credit (VRC) Advance
           vrc_standard_xlsx: "Standard - VRC"
+          vrc_standard_xlsx_title: "1. Standard - VRC"
           vrc_sbc_xlsx: "SBC - VRC"
+          vrc_sbc_xlsx_title: "4. SBC - VRC"
           frc: Fixed Rate Credit (FRC) Advance
           frc_standard_xlsx: "Standard - FRC"
+          frc_standard_xlsx_title: "2. Standard - FRC"
           frc_sbc_xlsx: "SBC - FRC"
+          frc_sbc_xlsx_title: "5. SBC - FRC"
           arc: Adjustable Rate Credit (ARC) Advance
           basis_point_spread: (Basis Point Spread)
-          arc_standard_xlsx: "Standard - ARC"
+          arc_standard_xlsx: "3. Standard - ARC"
+          arc_standard_xlsx_title: "Standard - ARC"
           arc_sbc_xlsx: "SBC - ARC"
+          arc_sbc_xlsx_title: "6. SBC - ARC"
           1_month_libor: '1-Month LIBOR:'
           3_month_libor: '3-Month LIBOR:'
           6_month_libor: '6-Month LIBOR:'
@@ -1683,6 +1689,17 @@ en:
           sta_rate: Effective Rate for Prior Business Day
           freshness: This report reflects price indications as of 6:00 am PT on the current business day and the STA rate as of the end of the prior business day. For current quotes, call the Member Services Desk at %{phone_number}.
           date_html: "<span>Date:</span> %{date}"
+          sta_xlsx: "STA"
+          sta_xlsx_title: "7. Settlement Transaction Acct"
+          table_of_contents:
+            title: Table of Contents
+            vrc_standard: "1. Standard Credit Program - Variable Rate Credit Advance"
+            frc_standard: "2. Standard Credit Program - Fixed Rate Credit Advance"
+            arc_standard: "3. Standard Credit Program - Adjustable Rate Credit Advance"
+            vrc_sbc: "4. Securities-Backed Credit Program - Variable Rate Credit Advance"
+            frc_sbc: "5. Securities-Backed Credit Program - Fixed Rate Credit Advance"
+            arc_sbc: "6. Securities-Backed Credit Program - Adjustable Rate Credit Advance"
+            sta: "7. Settlement/Transaction Account"
         historical:
           title: Historical Price Indications and STA Rates
           freshness: This report reflects price indications as of 6:00 am PT on the date displayed and the STA rate as of the date displayed.
@@ -1691,7 +1708,6 @@ en:
         standard_credit_program: Standard Credit Program
         sbc_program: Securities-Backed Credit Program
         settlement_transaction_account: Settlement/Transaction Account (STA)
-        sta_xlsx: Settlement Transaction Account
         frc:
           dropdown: Fixed Rate Credit (FRC)
           standard_table_title: FRC (%)
