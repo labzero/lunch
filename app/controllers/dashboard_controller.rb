@@ -9,7 +9,7 @@ class DashboardController < ApplicationController
   # {action_name: [job_klass, path_helper_as_string]}
   DEFERRED_JOBS = {
     recent_activity: {
-      job: MemberBalanceTodaysCreditActivityJob,
+      job: MemberBalanceRecentCreditActivityJob,
       load_helper: :dashboard_recent_activity_url
     },
     account_overview: {
