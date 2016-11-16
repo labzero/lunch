@@ -836,6 +836,32 @@ RSpec.describe User, :type => :model do
     end
   end
 
+  describe '`timeout_in` method' do
+    let(:call_method) { subject.timeout_in }
+    let(:policy) { instance_double(InternalUserPolicy, extended_session?: true ) }
+
+    before do
+      allow(InternalUserPolicy).to receive(:new).and_return(policy)
+    end
+
+    it 'constructs an InternalUserPolicy with this user and no record' do
+      expect(InternalUserPolicy).to receive(:new).with(subject, nil)
+      call_method
+    end
+    it 'checks if the user is allowed an extended session using the InternalUserPolicy' do
+      expect(policy).to receive(:extended_session?)
+      call_method
+    end
+    it 'returns the `Devise.timeout_in` if the user is not allowed an extended session' do
+      allow(policy).to receive(:extended_session?).and_return(false)
+      expect(call_method).to be(Devise.timeout_in)
+    end
+    it 'returns 10 hours if the user is allowed an extended session' do
+      allow(policy).to receive(:extended_session?).and_return(true)
+      expect(call_method).to eq(10.hours)
+    end
+  end
+
   {
     prefixed_cache_key: described_class::CACHE_CONTEXT_METADATA,
     prefixed_roles_cache_key: described_class::CACHE_CONTEXT_ROLES,

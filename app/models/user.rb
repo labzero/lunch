@@ -391,6 +391,10 @@ class User < ActiveRecord::Base
     end
   end
 
+  def timeout_in
+    InternalUserPolicy.new(self, nil).extended_session? ? 10.hours : Devise.timeout_in
+  end
+
   protected
 
   def prefixed_cache_key
