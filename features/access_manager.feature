@@ -122,6 +122,20 @@ Background:
     When I dismiss the overlay
     Then I should see a user with the a last name of "User"
 
+  @jira-mem-565 @local-only @jira-mem-2056
+  Scenario: Access Managers can create a new user with a mixed case username
+    Given I visit the access manager page
+    When I create a new user
+    And I enter "Mixed" for the first name
+    And I enter "Case" for the last name
+    And I enter "MixedCase" for the username
+    And I enter "mixedcase@gmail.com" for the email
+    And I enter "mixedcase@gmail.com" for the email confirmation
+    And I submit the new user form
+    Then I should see a new user success overlay
+    When I dismiss the overlay
+    Then I should see a user with the a last name of "Case"
+
   @jira-mem-564
   Scenario: Access Managers must select a reason why they are deleting a user
     Given I visit the access manager page

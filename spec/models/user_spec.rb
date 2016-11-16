@@ -579,14 +579,6 @@ RSpec.describe User, :type => :model do
     end
   end
 
-  describe 'add_extranet_user' do
-    let(:member_id)    { double('member_id') }
-    let(:creator)      { double('creator') }
-    let(:username)     { double('username') }
-    let(:email)        { double('email') }
-    let(:given_name)   { double('given_name') }
-    let(:surname)      { double('surname') }
-    let(:call_method)  { User.add_extranet_user(member_id, creator, username, email, given_name, surname) }
   describe '`flipper_id` method' do
     let(:call_method) { subject.flipper_id }
     it 'returns the username' do
@@ -594,9 +586,24 @@ RSpec.describe User, :type => :model do
     end
   end
 
-    it 'calls find_or_create_by_with_retry on success' do
+  describe 'add_extranet_user' do
+    let(:member_id)    { double('member_id') }
+    let(:creator)      { double('creator') }
+    let(:username)     { double('username') }
+    let(:downcased_username)     { double('downcased username') }
+    let(:email)        { double('email') }
+    let(:given_name)   { double('given_name') }
+    let(:surname)      { double('surname') }
+    let(:call_method)  { User.add_extranet_user(member_id, creator, username, email, given_name, surname) }
+
+    before do
       allow(User).to receive(:create_ldap_user).with(member_id, creator, username, email, given_name, surname).and_return(true)
-      expect(User).to receive(:find_or_create_by_with_retry).with(username: username, ldap_domain: User::LDAP_EXTRANET_DOMAIN)
+      allow(User).to receive(:find_or_create_by_with_retry)
+      allow(username).to receive(:downcase).and_return(downcased_username)
+    end
+
+    it 'calls find_or_create_by_with_retry on success' do
+      expect(User).to receive(:find_or_create_by_with_retry).with(username: downcased_username, ldap_domain: User::LDAP_EXTRANET_DOMAIN)
       call_method
     end
 
@@ -608,6 +615,11 @@ RSpec.describe User, :type => :model do
     it 'returns nil if add_groups fails' do
       allow(User).to receive(:create_ldap_user).with(member_id, creator, username, email, given_name, surname).and_return(false)
       expect(call_method).to be_nil
+    end
+
+    it 'downcases the username' do
+      expect(username).to receive(:downcase)
+      call_method
     end
   end
 
@@ -1015,7 +1027,8 @@ RSpec.describe User, :type => :model do
   end
 
   describe '`find_or_create_by_ldap_entry` class method' do
-    let(:samaccountname) { double('An Account Username') }
+    let(:samaccountname) { instance_double(String) }
+    let(:downcased_samaccountname) { instance_double(String) }
     let(:ldap_domain) { double('An LDAP Domain') }
     let(:dn) { double('A DN', end_with?: true) }
     let(:ldap_entry) { double('LDAP Entry: User', is_a?: true, dn: dn) }
@@ -1025,9 +1038,10 @@ RSpec.describe User, :type => :model do
       allow(ldap_entry).to receive(:[]).with(:samaccountname).and_return([samaccountname])
       allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
       allow(described_class).to receive(:find_or_create_by).and_return(user)
+      allow(samaccountname).to receive(:downcase).and_return(downcased_samaccountname)
     end
     it 'calls `find_or_create_by_with_retry` with a `username` of the entries `samaccountname`' do
-      expect(described_class).to receive(:find_or_create_by_with_retry).with(hash_including(username: samaccountname))
+      expect(described_class).to receive(:find_or_create_by_with_retry).with(hash_including(username: downcased_samaccountname))
       call_method
     end
     it 'calls `find_or_create_by_with_retry` with a `ldap_domain` of where the Entry was found' do
@@ -1038,18 +1052,24 @@ RSpec.describe User, :type => :model do
       expect(Devise::LDAP::Adapter).to receive(:get_ldap_domain_from_dn).with(dn).and_return(ldap_domain)
       call_method
     end
+    it 'downcases the accout name' do
+      expect(samaccountname).to receive(:downcase)
+      call_method
+    end
   end
 
   describe '`find_or_create_if_valid_login` class method' do
     let(:attributes) { double('Some Attributes', :[] => nil) }
     let(:call_method) { described_class.find_or_create_if_valid_login(attributes) }
     let(:user) { double(described_class) }
-    let(:username)  { double('A Username') }
+    let(:username)  { instance_double(String) }
+    let(:downcased_username) { instance_double(String) }
     let(:ldap_domain) { double('An LDAP Domain') }
 
     before do
       allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain)
       allow(described_class).to receive(:find_or_create_by).and_return(user)
+      allow(username).to receive(:downcase).and_return(downcased_username)
     end
 
     it 'calls `find_by` passing in the supplied attributes' do
@@ -1070,8 +1090,12 @@ RSpec.describe User, :type => :model do
         allow(attributes).to receive(:[]).with(:username).and_return(username)
         allow(Devise::LDAP::Adapter).to receive(:get_ldap_domain).and_return(ldap_domain)
       end
+      it 'downcases the username' do
+        expect(username).to receive(:downcase)
+        call_method
+      end
       it 'looks up the LDAP domain of the username' do
-        expect(Devise::LDAP::Adapter).to receive(:get_ldap_domain).with(username)
+        expect(Devise::LDAP::Adapter).to receive(:get_ldap_domain).with(downcased_username)
         call_method
       end
       it 'returns nil if no LDAP domain was found for the username' do
@@ -1080,7 +1104,7 @@ RSpec.describe User, :type => :model do
       end
       describe 'if an LDAP domain is found for the username' do
         it 'calls `find_or_create_by_with_retry` with the username and LDAP domain' do
-          expect(described_class).to receive(:find_or_create_by_with_retry).with({username: username, ldap_domain: ldap_domain})
+          expect(described_class).to receive(:find_or_create_by_with_retry).with({username: downcased_username, ldap_domain: ldap_domain})
           call_method
         end
         it 'returns the result of the `find_or_create_by_with_retry` call' do
