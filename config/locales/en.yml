@@ -1405,12 +1405,15 @@ en:
         pledge_intake: Pledge Request Submitted
         safekept_intake: Safekeeping Request Submitted
         transfer: Transfer Request Submitted
-      thank_you: 'Thank you for submitting your request. Authorized signers for this securities request are listed below. Press the Notify Authorizer(s) button to email authorized signers that a request is awaiting authorization.'
+      thank_you: We have received your request and it is awaiting authorization by an Authorized Signer from your institution. Requests awaiting authorization may be viewed on the Securities Requests page.
+      next_steps: What do I do next?
+      authorizer_instructions: Press “Notify Authorizer(s)” to create a new email, then enter the email address(es) of the Authorized Signer(s) you wish to alert of this request awaiting authorization.
+      how_long: How long will the request remain in the queue?
       request_will_remain: 'This request will remain in the queue until one of the following occurs:'
       request_authorized: The request is authorized.
       request_rejected: The request is deleted by an authorized signer.
       request_date_passed: The Settlement Date passes.
-      authorizers: Authorized Signers for Securities
+      authorizers: Who can authorize the request?
       buttons:
         manage: manage securities
         view: view securities requests
