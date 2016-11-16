@@ -3066,6 +3066,7 @@ en:
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."
+    dashboard_link: Go to the Dashboard
     "404":
       headline: The page you’re looking for doesn’t exist.
       summary: Please double-check the URL you entered. If you followed a link to get here, let us know and we’ll fix it.
