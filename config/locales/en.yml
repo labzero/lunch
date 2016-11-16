@@ -1218,6 +1218,7 @@ en:
       message: You will be prompted to log in again.
     manage:
       title: Manage Securities
+      instructions: "To release or transfer securities, use the check boxes to select one or more securities, then press the Release or Transfer button. If you are selecting multiple securities, the group must contain all pledged securities, or all safekept securities (not a combination)."
       eligibility: Eligibility
       authorized_by: Authorized by
       all: All

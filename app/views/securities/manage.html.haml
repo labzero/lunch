@@ -2,6 +2,7 @@
 .securities.row
   .securities-header
     %h1= @title
+    %p= t('securities.manage.instructions')
   .securities-main-body
     = form_tag(securities_release_edit_path, class: 'manage-securities-form') do
       .manage-securities-table-actions

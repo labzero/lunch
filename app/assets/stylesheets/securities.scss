@@ -15,6 +15,14 @@
   }
 }
 
+.securities-header {
+  p {
+    @extend %typography-dashboard-account-summary;
+    width: $column-9-width;
+    margin-bottom: 25px;
+  }
+}
+
 .securities-main-body {
   @extend %page-main-body;
 }
