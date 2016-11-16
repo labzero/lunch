@@ -287,8 +287,6 @@ class SettingsController < ApplicationController
     roles = user.roles.collect do |role|
       if role == User::Roles::ACCESS_MANAGER
         t('user_roles.access_manager.title')
-      elsif role == User::Roles::AUTHORIZED_SIGNER
-        t('user_roles.authorized_signer')
       end
     end
     roles.compact!
