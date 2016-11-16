@@ -98,4 +98,13 @@ module ReportConfiguration
       { min: nil, start: nil, end: nil, max: nil }
     end
   end
+
+  def self.pdf_orientation(report_key)
+    case report_key
+    when :advances_detail
+      :landscape
+    else
+      :portrait
+    end
+  end
 end

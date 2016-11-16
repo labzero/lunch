@@ -123,8 +123,7 @@
             %td.report-cell-narrow{colspan: 2}
             %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@advances_detail[:total_accrued_interest], force_unit: true)
             %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@advances_detail[:estimated_next_payment], force_unit: true)
-            - unless @print_layout
-              %td.report-cell-narrow
+            %td.report-cell-narrow
     %small
       %p= t('reports.intraday_processing_notice')
       %p= t('reports.close_of_business_processing_notice')

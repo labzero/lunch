@@ -246,4 +246,13 @@ RSpec.describe ReportConfiguration do
       end
     end
   end
+
+  describe '`pdf_orientation` method' do
+    it 'returns `landscape` for the advance details report' do
+      expect(subject.pdf_orientation(:advances_detail)).to be(:landscape)
+    end
+    it 'returns `portrait` for all other reports' do
+      expect(subject.pdf_orientation(double('A Report'))).to be(:portrait)
+    end
+  end
 end

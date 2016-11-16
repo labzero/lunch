@@ -1327,6 +1327,9 @@ td.dataTables_empty {
 }
 
 @media print {
+  .report {
+    padding: 0 2px;
+  }
   .page-footer {
     display: none;
   }
@@ -1507,13 +1510,11 @@ td.dataTables_empty {
       }
       &:last-child {
         display: table-cell;
-        text-align: left;
-
       }
       br:first-of-type {
         content: ' ';
         &:after {
-          content: "\a\a";
+          content: "\a";
           white-space: pre;
         }
       }
