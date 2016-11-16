@@ -281,6 +281,10 @@ Then(/^I should see a "(.*?)" report as of last business day$/) do |report_type|
   step %{I should see a "#{report_type}" report as of "#{most_recent_business_day(Time.zone.today - 1)}"}
 end
 
+Then(/^I should see a "(.*?)" report as of yesterday$/) do |report_type|
+  step %{I should see a "#{report_type}" report as of "#{Time.zone.today - 1}"}
+end
+
 Then(/^I should see a "(.*?)" report as of the last day of last month relative to today$/) do |report_type|
   date = (@today - 1.month).end_of_month
   step %{I should see a "#{report_type}" report as of "#{date}"}

@@ -1468,6 +1468,7 @@ en:
       current: This report reflects data as of the current date and time.
       prior_day: This report reflects data as of close of business on the prior business day.
       monthend: This report reflects data as of close of business at monthend.
+      previous_day: This report reflects data as of the previous day.
     availability:
       current: Only the current report is available.
       months: Historical data is available for the previous %{months} months.
@@ -1478,6 +1479,7 @@ en:
       daily_morning: '6:00 am daily'
       intraday: Intraday
       daily: Daily, as of the end of the prior business day
+      daily_previous_day: Daily, at the end of the previous day
       monthly: Monthly
       quarterly: Quarterly
     history:
@@ -1810,7 +1812,7 @@ en:
         sta_number_html: "<span>STA No.:</span> %{sta_number}"
         excel_sheet_name: STA Statement
       advances_detail:
-        title: "Advances outstanding as of close of business %{date}"
+        title: "Advances outstanding as of %{date}"
         total_current_par_heading: "Total Current Par as of %{date}"
         total_accrued_interest_heading: "Total Accrued Interest as of %{date}"
         estimated_next_payment_heading: "Estimated Next Interest Payment as of %{date}"

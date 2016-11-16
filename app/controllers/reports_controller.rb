@@ -190,7 +190,7 @@ class ReportsController < ApplicationController
           route: reports_todays_credit_path
         },
         advances_detail: {
-          updated: t('reports.updated.daily'),
+          updated: t('reports.updated.daily_previous_day'),
           available_history: t('reports.history.months', months: 18),
           route: reports_advances_path
         },

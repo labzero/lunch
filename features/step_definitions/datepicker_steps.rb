@@ -95,8 +95,8 @@ Then(/^I should see a report with dates for "(.*?)"$/) do |selector|
   report_dates_in_range?(start_date, end_date)
 end
 
-Then(/^I should not see available dates after the most recent business day not including today/) do
-  max_allowed_date = most_recent_business_day(@today - 1.day)
+Then(/^I should not see available dates after (the most recent business day not including today|yesterday)/) do |day|
+  max_allowed_date = day == 'yesterday' ? @today - 1.day : most_recent_business_day(@today - 1.day)
   if max_allowed_date.month == @today.month
     calendar = page.find(".daterangepicker .calendar.single")
     change_datepicker_to_month(@today, @today.strftime("%b %Y"), calendar)
