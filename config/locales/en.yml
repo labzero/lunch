@@ -1679,8 +1679,8 @@ en:
           frc_sbc_xlsx_title: "5. SBC - FRC"
           arc: Adjustable Rate Credit (ARC) Advance
           basis_point_spread: (Basis Point Spread)
-          arc_standard_xlsx: "3. Standard - ARC"
-          arc_standard_xlsx_title: "Standard - ARC"
+          arc_standard_xlsx: "Standard - ARC"
+          arc_standard_xlsx_title: "3. Standard - ARC"
           arc_sbc_xlsx: "SBC - ARC"
           arc_sbc_xlsx_title: "6. SBC - ARC"
           1_month_libor: '1-Month LIBOR:'
