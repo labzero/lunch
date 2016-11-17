@@ -285,7 +285,6 @@ module MAPI
 
         def self.todays_credit_activity(env, member_id)
           member_id = member_id.to_i
-          credit_activity = []
           today = Time.zone.today
 
           activities = if connection = MAPI::Services::Member::TradeActivity.init_trade_activity_connection(env)
@@ -320,46 +319,7 @@ module MAPI
               activity['fundingDate'], activity['maturityDate'] = [today_string, today_string]
             end
           end
-          activities.each do |activity|
-            instrument_type = activity['instrumentType'].to_s if activity['instrumentType'].present?
-            status = activity['status'].to_s if activity['status'].present?
-            termination_par = activity['terminationPar'].to_f if activity['terminationPar'].present?
-            trade_date = Time.zone.parse(activity['tradeDate']).to_date if activity['tradeDate'].present?
-            funding_date = Time.zone.parse(activity['fundingDate']).to_date if activity['fundingDate'].present?
-            maturity_date = Time.zone.parse(activity['maturityDate']).to_date if activity['maturityDate'].present?
-            transaction_number = activity['tradeID'].to_s if activity['tradeID'].present?
-            current_par = activity['amount'].to_f if activity['amount'].present?
-            interest_rate = activity['rate'].to_f if activity['rate'].present?
-            product_description = activity['productDescription'].to_s if activity['productDescription'].present?
-            termination_fee = activity['terminationFee'].to_f if activity['terminationFee'].present?
-            termination_full_partial = activity['terminationFullPartial'].to_s if activity['terminationFullPartial'].present?
-            product = activity['product'].to_s if activity['product'].present?
-            sub_product = activity['subProduct'].to_s if activity['subProduct'].present?
-            termination_date = DateTime.strptime(activity['terminationDate'], '%m/%d/%Y').to_date if activity['terminationDate'].present?
-
-            # skip the trade if it is an old Advance that is not prepaid, but rather Amended
-            if TODAYS_CREDIT_ARRAY.include?(status) && !(instrument_type == 'ADVANCE' && status != 'EXERCISED' && termination_par.blank? && !funding_date.blank? && funding_date < today)
-              hash = {
-                transaction_number: transaction_number,
-                current_par: current_par,
-                interest_rate: decimal_to_percentage_rate(interest_rate),
-                trade_date: trade_date,
-                funding_date: funding_date,
-                maturity_date: maturity_date,
-                product_description: product_description,
-                instrument_type: instrument_type,
-                status: status,
-                termination_par: termination_par,
-                termination_fee: termination_fee,
-                termination_full_partial: termination_full_partial,
-                termination_date: termination_date,
-                product: product,
-                sub_product: sub_product
-              }
-              credit_activity.push(hash)
-            end
-          end
-          credit_activity
+          process_credit_activities(activities)
         end
 
         def self.historic_advances_query(member_id, after_date, limit=2000)
@@ -422,6 +382,127 @@ module MAPI
           end
 
           rows
+        end
+
+        def self.historic_loc_query(member_id, start_date)
+          <<-SQL
+            select distinct lc.lc_transaction_number, fhlb_id
+            from portfolios.lcs_trans lcx, portfolios.lcs lc
+            where lc.lc_id = lcx.lc_id and fhlb_id = #{quote(member_id)}
+            group by lc.lc_transaction_number, fhlb_id
+            having max(lcx.lcx_update_date) >= #{quote(start_date)}
+          SQL
+        end
+
+        def self.historic_activities_query(member_id, start_date)
+          <<-SQL
+            select unique instrument, calypso_internal_ref
+            from ods.dEAL@ODS_LK
+            where LAST_UPDATE_DATETIME < SYSDATE and LAST_UPDATE_DATETIME >= #{quote(start_date)} and fhlb_id = #{quote(member_id)}
+            group by instrument, calypso_internal_ref
+          SQL
+        end
+
+        def self.historic_credit_activity(app, member_id, start_date)
+          today = Time.zone.today
+          credit_activities = if should_fake?(app)
+            activities = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'credit_activity.json')))
+            rng = Random.new(member_id.to_i + today.to_time.to_i)
+            activities.each do |activity|
+              activity['fundingDate'], activity['maturityDate'] = [(today - rng.rand(1..14).days).to_s, (today + rng.rand(0..7).days).to_s]
+            end
+          else
+            loc_trade_ids = (fetch_hashes(app.logger, historic_loc_query(member_id, start_date), {}, true) || []).map{|activity_hash| activity_hash['lc_transaction_number']}
+            other_instrument_trade_ids = (fetch_hashes(app.logger, historic_activities_query(member_id, start_date), {}, true) || []).map{|activity_hash| activity_hash['calypso_internal_ref']}
+            trade_ids = loc_trade_ids + other_instrument_trade_ids
+            unless trade_ids.blank?
+              trade_id_array = []
+              trade_ids.each do |trade_id|
+                trade_id_array << {'v1:tradeId' => {'v1:tradeId' => trade_id}}
+              end
+              connection = MAPI::Services::Member::TradeActivity.init_trade_activity_connection(app.settings.environment)
+              message = {
+                'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
+                'v1:tradeRequestParameters' => [
+                  {
+                    'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}]
+                  },
+                  {
+                    'v1:arrayOfTradeIds' => trade_id_array
+                  },
+                  # Calypso required `rangeOfSettlementDates`, but they are not actually used as part of the lookup. Just a quirk of the system.
+                  {
+                    'v1:rangeOfSettlementDates' => [
+                      {'v1:startDate' => (today - 100.years).iso8601},
+                      {'v1:endDate' => (today + 100.years).iso8601}
+                    ]
+                  }
+                ]
+              }
+              response = connection.call(:get_trade_activity, message_tag: 'tradeRequest', message: message, :soap_header => {'wsse:Security' => {'wsse:UsernameToken' => {'wsse:Username' => ENV['MAPI_FHLBSF_ACCOUNT'], 'wsse:Password' => ENV['SOAP_SECRET_KEY']}}})
+              response.doc.remove_namespaces!
+              soap_activities_array = []
+              soap_activities = response.doc.xpath('//Envelope//Body//tradeActivityResponse//tradeActivities//tradeActivity')
+              soap_activities.each do |activity|
+                hash = {}
+                TODAYS_CREDIT_KEYS.each do |key|
+                  node = activity.at_css(key)
+                  hash[key] = node.content if node
+                end
+                soap_activities_array.push(hash)
+              end
+              soap_activities_array
+            else
+              # nothing to look up, no reason to make SOAP request
+              []
+            end
+          end
+          process_credit_activities(credit_activities)
+        end
+
+        def self.process_credit_activities(activities)
+          today = Time.zone.today
+          credit_activities = []
+          activities.each do |activity|
+            instrument_type = activity['instrumentType'].to_s if activity['instrumentType'].present?
+            status = activity['status'].to_s if activity['status'].present?
+            termination_par = activity['terminationPar'].to_f if activity['terminationPar'].present?
+            trade_date = Time.zone.parse(activity['tradeDate']).to_date if activity['tradeDate'].present?
+            funding_date = Time.zone.parse(activity['fundingDate']).to_date if activity['fundingDate'].present?
+            maturity_date = Time.zone.parse(activity['maturityDate']).to_date if activity['maturityDate'].present?
+            transaction_number = activity['tradeID'].to_s if activity['tradeID'].present?
+            current_par = activity['amount'].to_f if activity['amount'].present?
+            interest_rate = activity['rate'].to_f if activity['rate'].present?
+            product_description = activity['productDescription'].to_s if activity['productDescription'].present?
+            termination_fee = activity['terminationFee'].to_f if activity['terminationFee'].present?
+            termination_full_partial = activity['terminationFullPartial'].to_s if activity['terminationFullPartial'].present?
+            product = activity['product'].to_s if activity['product'].present?
+            sub_product = activity['subProduct'].to_s if activity['subProduct'].present?
+            termination_date = DateTime.strptime(activity['terminationDate'], '%m/%d/%Y').to_date if activity['terminationDate'].present?
+
+            # skip the trade if it is an old Advance that is not prepaid, but rather Amended
+            if TODAYS_CREDIT_ARRAY.include?(status) && !(instrument_type == 'ADVANCE' && status != 'EXERCISED' && termination_par.blank? && !funding_date.blank? && funding_date < today)
+              hash = {
+                transaction_number: transaction_number,
+                current_par: current_par,
+                interest_rate: decimal_to_percentage_rate(interest_rate),
+                trade_date: trade_date,
+                funding_date: funding_date,
+                maturity_date: maturity_date,
+                product_description: product_description,
+                instrument_type: instrument_type,
+                status: status,
+                termination_par: termination_par,
+                termination_fee: termination_fee,
+                termination_full_partial: termination_full_partial,
+                termination_date: termination_date,
+                product: product,
+                sub_product: sub_product
+              }
+              credit_activities.push(hash)
+            end
+          end
+          credit_activities
         end
       end
     end

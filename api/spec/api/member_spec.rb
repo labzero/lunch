@@ -606,4 +606,30 @@ describe MAPI::ServiceApp do
       end
     end
   end
+  describe 'GET `historic_credit_activity`' do
+    let(:member_id) { rand(1000..9999) }
+    let(:start_date) { (Time.zone.today - rand(1..30).days) }
+    let(:valid_date_form) { start_date.iso8601 }
+    let(:invalid_date_form) { start_date.strftime('%d-%m-%Y') }
+    let(:make_request) { get "/member/#{member_id}/historic_credit_activity/#{valid_date_form}" }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', "/member/#{rand(1000..99999)}/historic_credit_activity/#{Time.zone.today.iso8601}", :get, MAPI::Services::Member::TradeActivity, :historic_credit_activity
+    it 'returns an error code if the start_date is not in iso8601 format' do
+      get "/member/#{member_id}/historic_credit_activity/#{invalid_date_form}"
+      response_body = JSON.parse(last_response.body).with_indifferent_access
+      expect(response_body[:error][:code]).to eq('start_date')
+    end
+    it 'calls `MAPI::Services::Member::TradeActivity.historic_credit_activity` with the app as an argument' do
+      expect(MAPI::Services::Member::TradeActivity).to receive(:historic_credit_activity).with(app, any_args)
+      make_request
+    end
+    it 'calls `MAPI::Services::Member::TradeActivity.historic_credit_activity` with the member_id param' do
+      expect(MAPI::Services::Member::TradeActivity).to receive(:historic_credit_activity).with(anything, member_id, any_args)
+      make_request
+    end
+    it 'calls `MAPI::Services::Member::TradeActivity.historic_credit_activity` with the start_date param as a date' do
+      expect(MAPI::Services::Member::TradeActivity).to receive(:historic_credit_activity).with(anything, anything, start_date)
+      make_request
+    end
+  end
 end

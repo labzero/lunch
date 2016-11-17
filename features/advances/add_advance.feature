@@ -353,6 +353,7 @@ Scenario: Member sees messaging that credit limit does not cover gross up stock 
   Then I should be on the financing availability limit screen
   And I click on the initiate advance button on the add advance page
   Then I should see a preview of the advance
+  And I should see an advance amount of "100007"
   When I enter my SecurID pin and token
   And I click on the confirm add advance button
   Then I should see the add advance confirmation page

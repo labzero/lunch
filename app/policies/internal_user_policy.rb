@@ -10,6 +10,14 @@ class InternalUserPolicy < ApplicationPolicy
     end
   end
 
+  def extended_session?
+    if user.intranet_user?
+      (self.class.cidrs.find { |cidr| cidr.include?(user.current_sign_in_ip) }).present?
+    else
+      false
+    end
+  end
+
   def self.cidrs
     @@cidrs
   end

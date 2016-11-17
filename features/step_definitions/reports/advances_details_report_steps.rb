@@ -1,7 +1,7 @@
 include DatePickerHelper
 
-Then(/^I should see advances details for last business day/) do
-  check_advances_details_for_date(most_recent_business_day(Time.zone.now.to_date - 1.day))
+Then(/^I should see advances details for yesterday/) do
+  check_advances_details_for_date(Time.zone.now.to_date - 1.day)
 end
 
 Then(/^I should see advances details for the (\d+)(?:st|rd|th) of (this|last) month$/) do |day, month|

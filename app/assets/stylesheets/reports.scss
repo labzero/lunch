@@ -307,7 +307,7 @@
   .report-cell-actions {
     @extend %typography-table-button;
     text-transform: uppercase;
-    color: $secondary-gray;
+    color: $medium-gray;
   }
 
   .sorting, .sorting_asc, .sorting_desc {
@@ -663,17 +663,14 @@
 }
 
 .current-price-frc-table {
-  width: 480px;
+  width: auto;
   margin-bottom: 15px;
   th {
+    &:nth-child(1) {
+      min-width: 108px;
+    }
     &:nth-child(2) {
-      min-width: 90px;
-    }
-    &:nth-child(3) {
-      min-width: 110px;
-    }
-    &:nth-child(4) {
-      min-width: 100px;
+      min-width: 150px;
     }
   }
 }
@@ -1015,6 +1012,7 @@ td.dataTables_empty {
   }
   .next-day-link{
     @extend %typography-table-cell;
+    margin-top: 5px;
     margin-bottom: 46px;
     display: block;
   }
@@ -1329,6 +1327,9 @@ td.dataTables_empty {
 }
 
 @media print {
+  .report {
+    padding: 0 2px;
+  }
   .page-footer {
     display: none;
   }
@@ -1509,13 +1510,11 @@ td.dataTables_empty {
       }
       &:last-child {
         display: table-cell;
-        text-align: left;
-
       }
       br:first-of-type {
         content: ' ';
         &:after {
-          content: "\a\a";
+          content: "\a";
           white-space: pre;
         }
       }

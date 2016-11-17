@@ -67,7 +67,10 @@ Scenario Outline: A signer authorizes a previously submitted request
   Then I should be on the <page> page
   When I choose the first available date for trade date
   And I choose the last available date for settlement date
-  Then I fill in the "aba_number" securities field with "123456789"
+  And I select "Fed" as the release delivery instructions
+  And I fill in the "clearing_agent_fed_wire_address_1" securities field with "23454343"
+  And I fill in the "clearing_agent_fed_wire_address_2" securities field with "5683asdfa"
+  And I fill in the "aba_number" securities field with "123456789"
   And I authorize the request
   Then I should see the authorize request success page
 Examples:

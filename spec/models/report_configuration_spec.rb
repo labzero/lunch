@@ -180,20 +180,21 @@ RSpec.describe ReportConfiguration do
 
     describe 'when processing the advances detail report' do
       let(:min_date) { subject.date_restrictions(:advances_detail).ago.to_date }
+      let(:yesterday) { Time.zone.today - 1.day }
 
-      it 'returns the last business day as max date and nil as end date and sets default min and start dates' do
+      it 'returns yesterday as the max date and nil as end date and sets default min and start dates' do
         expect(subject.date_bounds(:advances_detail, nil, nil)).to eq(
-          { min: min_date, start: max_date, end: nil, max: max_date })
+          { min: min_date, start: yesterday, end: nil, max: yesterday })
       end
 
       it 'returns min date for start date when start date comes before min date' do
         expect(subject.date_bounds(:advances_detail, min_date - 1.day, nil)).to eq(
-          { min: min_date, start: min_date, end: nil, max: max_date })
+          { min: min_date, start: min_date, end: nil, max: yesterday })
       end
 
       it 'returns in bounds start date if supplied (happy path)' do
         expect(subject.date_bounds(:advances_detail, min_date + 5.days, nil)).to eq(
-          { min: min_date, start: min_date + 5.days, end: nil, max: max_date })
+          { min: min_date, start: min_date + 5.days, end: nil, max: yesterday })
       end
     end
 
@@ -243,6 +244,15 @@ RSpec.describe ReportConfiguration do
         expect(subject.date_bounds(:monthly_securities_position, min_date - 1.month, nil)).to eq(
           { min: min_date, start: min_date, end: subject.month_restricted_start_date(min_date), max: last_month_end })
       end
+    end
+  end
+
+  describe '`pdf_orientation` method' do
+    it 'returns `landscape` for the advance details report' do
+      expect(subject.pdf_orientation(:advances_detail)).to be(:landscape)
+    end
+    it 'returns `portrait` for all other reports' do
+      expect(subject.pdf_orientation(double('A Report'))).to be(:portrait)
     end
   end
 end

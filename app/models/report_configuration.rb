@@ -77,7 +77,7 @@ module ReportConfiguration
       end_date = (end_date_param || Time.zone.today).to_date
       { min: min_date, start: start_date, end: end_date, max: nil }
     when :advances_detail
-      max_date = most_recent_business_day(Time.zone.today - 1.day)
+      max_date = Time.zone.today - 1.day
       advance_start_date = start_date_param ? [start_date_param.to_date, max_date].min : max_date
       min_date, start_date = min_and_start_dates(date_restrictions(:advances_detail), advance_start_date)
       { min: min_date, start: start_date, end: nil, max: max_date }
@@ -96,6 +96,15 @@ module ReportConfiguration
       { min: min_date, start: start_date, end: end_date, max: default_dates_hash[:last_month_end] }
     else
       { min: nil, start: nil, end: nil, max: nil }
+    end
+  end
+
+  def self.pdf_orientation(report_key)
+    case report_key
+    when :advances_detail
+      :landscape
+    else
+      :portrait
     end
   end
 end

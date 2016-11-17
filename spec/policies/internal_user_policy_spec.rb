@@ -80,5 +80,31 @@ describe InternalUserPolicy, type: :policy do
       end
     end
   end
+
+  describe '`extended_session?` method' do
+    let(:call_method) { subject.extended_session? }
+    before do
+      allow(described_class).to receive(:cidrs).and_return([IPAddr.new('127.0.0.0/24')])
+    end
+    it 'returns false if the user is not in the `intranet` domain' do
+      allow(user).to receive(:intranet_user?).and_return(false)
+      expect(call_method).to be(false)
+    end
+    describe 'when the user is an `intranet` user' do
+      let(:ip) { '127.0.1.0' }
+      before do
+        allow(user).to receive(:intranet_user?).and_return(true)
+        allow(user).to receive(:roles).and_return([])
+        allow(user).to receive(:current_sign_in_ip).and_return(ip)
+      end
+      it 'returns true if the current session origin IP is found in the `cidrs`' do
+        allow(user).to receive(:current_sign_in_ip).and_return('127.0.0.1')
+        expect(call_method).to be(true)
+      end
+      it 'returns false if the users current session origin IP is not in the `cidrs` list' do
+        expect(call_method).to be(false)
+      end
+    end
+  end
   
 end

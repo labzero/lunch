@@ -23,6 +23,7 @@ class RenderReportPDFJob < FhlbJob
     controller.skip_deferred_load = true
     controller.action_name = report_name
     controller.instance_variable_set(:@sta_number, member[:sta_number])
+    controller.instance_variable_set(:@member_name, member[:name])
     controller.params = params
     controller.class_eval { layout 'print' }
     return if job_status.canceled?
@@ -36,7 +37,7 @@ class RenderReportPDFJob < FhlbJob
     return if job_status.canceled?
     footer_html = controller.render_to_string('reports/pdf_footer')
     return if job_status.canceled?
-    pdf = WickedPdf.new.pdf_from_string(html, page_size: 'Letter', print_media_type: true, disable_external_links: true, margin: {top: MARGIN, left: MARGIN, right: MARGIN, bottom: MARGIN}, disable_smart_shrinking: false, footer: { content: footer_html})
+    pdf = WickedPdf.new.pdf_from_string(html, page_size: 'Letter', print_media_type: true, disable_external_links: true, margin: {top: MARGIN, left: MARGIN, right: MARGIN, bottom: MARGIN}, disable_smart_shrinking: false, footer: { content: footer_html}, orientation: ReportConfiguration.pdf_orientation(report_name.to_sym))
     file = StringIOWithFilename.new(pdf)
     file.content_type = 'application/pdf'
     filename ||= controller.report_download_name

@@ -8,7 +8,20 @@ workbook.styles do |styles|
   vrc_styles = [nil, rate_format, benchmark_format, rate_format]
   frc_styles = [nil, nil, rate_format, benchmark_format, rate_format]
 
-  workbook.add_worksheet(name: t('reports.pages.price_indications.current.vrc_standard_xlsx')) do |sheet|
+  workbook.add_worksheet(name: t('reports.pages.price_indications.current.table_of_contents.title')) do |sheet|
+    sheet.add_row [t('reports.pages.price_indications.current.table_of_contents.title')], style: styles.add_style(b: true)
+    sheet.add_row [t('reports.pages.price_indications.current.table_of_contents.vrc_standard')]
+    sheet.add_row [t('reports.pages.price_indications.current.table_of_contents.frc_standard')]
+    sheet.add_row [t('reports.pages.price_indications.current.table_of_contents.arc_standard')]
+    sheet.add_row [t('reports.pages.price_indications.current.table_of_contents.vrc_sbc')]
+    sheet.add_row [t('reports.pages.price_indications.current.table_of_contents.frc_sbc')]
+    sheet.add_row [t('reports.pages.price_indications.current.table_of_contents.arc_sbc')]
+    sheet.add_row [t('reports.pages.price_indications.current.table_of_contents.sta')]
+    sheet.column_widths(60)
+  end
+
+  workbook.add_worksheet(name: t('reports.pages.price_indications.current.vrc_standard_xlsx_title')) do |sheet|
+    sheet.add_row [t('reports.pages.price_indications.current.vrc_standard_xlsx')], style: styles.add_style(b: true)
     sheet.add_row @standard_vrc_table_data[:column_headings]
     @standard_vrc_table_data[:rows].each do |row|
       values = row[:columns].collect { |column| column[:value]}
@@ -16,7 +29,8 @@ workbook.styles do |styles|
     end
   end
 
-  workbook.add_worksheet(name: t('reports.pages.price_indications.current.frc_standard_xlsx')) do |sheet|
+  workbook.add_worksheet(name: t('reports.pages.price_indications.current.frc_standard_xlsx_title')) do |sheet|
+    sheet.add_row [t('reports.pages.price_indications.current.frc_standard_xlsx')], style: styles.add_style(b: true)
     sheet.add_row @standard_frc_table_data[:column_headings]
     @standard_frc_table_data[:rows].each do |row|
       values = row[:columns].collect { |column| column[:value]}
@@ -24,7 +38,8 @@ workbook.styles do |styles|
     end
   end
 
-  workbook.add_worksheet(name: t('reports.pages.price_indications.current.arc_standard_xlsx')) do |sheet|
+  workbook.add_worksheet(name: t('reports.pages.price_indications.current.arc_standard_xlsx_title')) do |sheet|
+    sheet.add_row [t('reports.pages.price_indications.current.arc_standard_xlsx')], style: styles.add_style(b: true)
     sheet.add_row @standard_arc_table_data[:column_headings]
     @standard_arc_table_data[:rows].each do |row|
       values = row[:columns].collect { |column| column[:value]}
@@ -32,7 +47,8 @@ workbook.styles do |styles|
     end
   end
 
-  workbook.add_worksheet(name: t('reports.pages.price_indications.current.vrc_sbc_xlsx')) do |sheet|
+  workbook.add_worksheet(name: t('reports.pages.price_indications.current.vrc_sbc_xlsx_title')) do |sheet|
+    sheet.add_row [t('reports.pages.price_indications.current.vrc_sbc_xlsx')], style: styles.add_style(b: true)
     sheet.add_row @sbc_vrc_table_data[:column_headings]
     @sbc_vrc_table_data[:rows].each do |row|
       values = row[:columns].collect { |column| column[:value]}
@@ -40,7 +56,8 @@ workbook.styles do |styles|
     end
   end
 
-  workbook.add_worksheet(name: t('reports.pages.price_indications.current.frc_sbc_xlsx')) do |sheet|
+  workbook.add_worksheet(name: t('reports.pages.price_indications.current.frc_sbc_xlsx_title')) do |sheet|
+    sheet.add_row [t('reports.pages.price_indications.current.frc_sbc_xlsx')], style: styles.add_style(b: true)
     sheet.add_row @sbc_frc_table_data[:column_headings]
     @sbc_frc_table_data[:rows].each do |row|
       values = row[:columns].collect { |column| column[:value]}
@@ -48,7 +65,8 @@ workbook.styles do |styles|
     end
   end
 
-  workbook.add_worksheet(name: t('reports.pages.price_indications.current.arc_sbc_xlsx')) do |sheet|
+  workbook.add_worksheet(name: t('reports.pages.price_indications.current.arc_sbc_xlsx_title')) do |sheet|
+    sheet.add_row [t('reports.pages.price_indications.current.arc_sbc_xlsx')], style: styles.add_style(b: true)
     sheet.add_row @sbc_arc_table_data[:column_headings]
     @sbc_arc_table_data[:rows].each do |row|
       values = row[:columns].collect { |column| column[:value]}
@@ -56,7 +74,8 @@ workbook.styles do |styles|
     end
   end
 
-  workbook.add_worksheet(name: t('reports.pages.price_indications.sta_xlsx')) do |sheet|
+  workbook.add_worksheet(name: t('reports.pages.price_indications.current.sta_xlsx_title')) do |sheet|
+    sheet.add_row [t('reports.pages.price_indications.current.sta_xlsx')], style: styles.add_style(b: true)
     sheet.add_row [@sta_table_data[:row_name]]
     sheet.add_row [@sta_table_data[:row_value]], style: [index_format]
   end

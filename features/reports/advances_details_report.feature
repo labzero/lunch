@@ -22,7 +22,7 @@ Scenario: Defaults to current advances details
   Given I visit the dashboard
   When I select "Advances" from the reports dropdown
   And I wait for the report to load
-  Then I should see advances details for last business day
+  Then I should see advances details for yesterday
 
 @jira-mem-405
 Scenario: Viewing historic advances details
@@ -51,7 +51,7 @@ Scenario: Member sorts the advances details report by trade date
 Scenario: Member can't select a date in the future
   Given I am on the "Advances Detail" report page
   When I click the datepicker field
-  Then I should not see available dates after the most recent business day not including today
+  Then I should not see available dates after yesterday
 
 @jira-mem-630
 Scenario: Entering text in the datepicker input field
@@ -75,7 +75,7 @@ Scenario: Member enters a date occurring after the maximum allowed date
   When I click the datepicker field
   And I write tomorrow's date in the datepicker start input field
   And I click the datepicker apply button
-  Then I should see a "Advances Detail" report as of last business day
+  Then I should see a "Advances Detail" report as of yesterday
 
 @jira-mem-890 @jira-1232
 Scenario: Member enters a date occurring after the maximum allowed date on the last day of the month
@@ -84,7 +84,7 @@ Scenario: Member enters a date occurring after the maximum allowed date on the l
   When I click the datepicker field
   And I write tomorrow's date in the datepicker start input field
   And I click the datepicker apply button
-  Then I should see a "Advances Detail" report as of last business day
+  Then I should see a "Advances Detail" report as of yesterday
 
 @jira-mem-890 @jira-1232
 Scenario: Member enters a date occurring after the maximum allowed date on the first day of the month
@@ -93,7 +93,7 @@ Scenario: Member enters a date occurring after the maximum allowed date on the f
   When I click the datepicker field
   And I write tomorrow's date in the datepicker start input field
   And I click the datepicker apply button
-  Then I should see a "Advances Detail" report as of last business day
+  Then I should see a "Advances Detail" report as of yesterday
 
 @jira-mem-890 @jira-1232
 Scenario: Member enters a date occurring after the maximum allowed date on the last day of the quarter
@@ -102,7 +102,7 @@ Scenario: Member enters a date occurring after the maximum allowed date on the l
   When I click the datepicker field
   And I write tomorrow's date in the datepicker start input field
   And I click the datepicker apply button
-  Then I should see a "Advances Detail" report as of last business day
+  Then I should see a "Advances Detail" report as of yesterday
 
 @jira-mem-890 @jira-1232
 Scenario: Member enters a date occurring after the maximum allowed date on the first day of this quarter
@@ -111,7 +111,7 @@ Scenario: Member enters a date occurring after the maximum allowed date on the f
   When I click the datepicker field
   And I write tomorrow's date in the datepicker start input field
   And I click the datepicker apply button
-  Then I should see a "Advances Detail" report as of last business day
+  Then I should see a "Advances Detail" report as of yesterday
 
 @data-unavailable @jira-mem-283 @jira-mem-1053
 Scenario: No data is available to show in the Advances Detail Report

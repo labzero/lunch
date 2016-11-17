@@ -1428,6 +1428,30 @@ describe MemberBalanceService do
     end
   end
 
+  describe '`historic_credit_activity`' do
+    it_behaves_like 'a MAPI backed service object method', :historic_credit_activity
+    let(:historic_credit_activity) { subject.historic_credit_activity }
+    let(:non_exercised_activity) { {instrument_type: double('instrument_type')} }
+    let(:terminated_activity_without_status) { {instrument_type: double('some instrument'), termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+    let(:terminated_lc) { {instrument_type: 'LC', termination_par: double('termination_par'), termination_full_partial: double('termination_full_partial')} }
+
+    it 'calls `get_json` with a start date two weeks in the past if none is supplied' do
+      expect(subject).to receive(:get_json).with(:historic_credit_activity, "/member/#{member_id}/historic_credit_activity/#{(Time.zone.today-2.weeks).iso8601}")
+      historic_credit_activity
+    end
+    it 'calls `get_json` with the iso8601 form of the start_date it was passed' do
+      start_date_string = instance_double(String)
+      start_date = instance_double(Date, iso8601: start_date_string)
+      expect(subject).to receive(:get_json).with(:historic_credit_activity, "/member/#{member_id}/historic_credit_activity/#{start_date_string}")
+      subject.historic_credit_activity(start_date)
+    end
+    it 'fixes the :funding_date and :maturity_date for each activity' do
+      allow(subject).to receive(:get_json).and_return([non_exercised_activity, terminated_activity_without_status, terminated_lc])
+      expect(subject).to receive(:fix_date).with(anything, [:funding_date, :maturity_date, :termination_date]).exactly(3)
+      historic_credit_activity
+    end
+  end
+
   # Helper Methods
   def expect_capital_stock_balance_to_receive(date)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with( "member/#{member_id}/capital_stock_balance/#{date}" )

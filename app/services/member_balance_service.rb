@@ -358,6 +358,18 @@ class MemberBalanceService < MAPIService
     end
   end
 
+  def historic_credit_activity(start_date=(Time.zone.today-2.weeks))
+    if data = get_json(:historic_credit_activity, "/member/#{@member_id}/historic_credit_activity/#{start_date.iso8601}")
+      processed_data = []
+      data.each do |activity|
+        activity = activity.with_indifferent_access
+        fix_date(activity, [:funding_date, :maturity_date, :termination_date])
+        processed_data.push(activity)
+      end
+      processed_data
+    end
+  end
+
   def mortgage_collateral_update
     fix_date(get_hash(:mortgage_collateral_update, "/member/#{@member_id}/mortgage_collateral_update"), :date_processed)
   end

@@ -811,6 +811,30 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/historic_credit_activity/{start_date}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve credit activty from a given start date until today'
+              key :nickname, :getHistoricCreditActivityForMember
+              key :type, :MemberTodaysCreditActivity
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :start_date
+                key :required, true
+                key :type, :string
+                key :format, :date
+                key :description, 'The start date (yyyy-mm-dd) to use for the historic credit activities query'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/mortgage_collateral_update'
             operation do
               key :method, 'GET'
@@ -1473,6 +1497,15 @@ module MAPI
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
+          end
+        end
+
+        # Historic Credit Activity
+        relative_get '/:id/historic_credit_activity/:start_date' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            start_date = params[:start_date]
+            raise MAPI::Shared::Errors::InvalidFieldError.new('Invalid Start Date format of yyyy-mm-dd', :start_date) unless start_date.match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
+            MAPI::Services::Member::TradeActivity.historic_credit_activity(self, params[:id].to_i, start_date.to_date)
           end
         end
 

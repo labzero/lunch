@@ -8,7 +8,7 @@
       = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@start_date))
     - else
       = render 'reports_header_buttons', allowed_params: :start_date, download_formats: [:pdf, :xlsx]
-      = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.availability.months', months: 18)
+      = render 'report_details', name: @member_name, freshness: t('reports.freshness.previous_day'), availability: t('reports.availability.months', months: 18)
     .report-inputs
       = render 'reports_date_picker_form', start_date: @start_date, report_url: reports_advances_url, presets: @picker_presets, single_date_picker: true, min_date: @min_date, max_date: @max_date
   .report-main-body
@@ -123,8 +123,7 @@
             %td.report-cell-narrow{colspan: 2}
             %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@advances_detail[:total_accrued_interest], force_unit: true)
             %td.report-cell-narrow.report-cell-right= fhlb_formatted_currency(@advances_detail[:estimated_next_payment], force_unit: true)
-            - unless @print_layout
-              %td.report-cell-narrow
+            %td.report-cell-narrow
     %small
       %p= t('reports.intraday_processing_notice')
       %p= t('reports.close_of_business_processing_notice')

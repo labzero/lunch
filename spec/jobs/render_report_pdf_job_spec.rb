@@ -77,6 +77,14 @@ RSpec.describe RenderReportPDFJob, type: :job do
       expect(reports_controller).to receive(:instance_variable_set).with(:@print_layout, true).ordered
       run_job
     end
+    it 'sets @sta_number to the STA number' do
+      expect(reports_controller).to receive(:instance_variable_set).with(:@sta_number, sta_number).ordered
+      run_job
+    end
+    it 'sets @member_name to the member name' do
+      expect(reports_controller).to receive(:instance_variable_set).with(:@member_name, member_name).ordered
+      run_job
+    end
     it 'sets the `skip_deferred_load` controller attribute to `true`' do
       run_job
       expect(reports_controller.skip_deferred_load).to eq(true)
@@ -138,6 +146,12 @@ RSpec.describe RenderReportPDFJob, type: :job do
     end
     it 'enables smart shrinking' do
       expect(wicked_pdf).to receive(:pdf_from_string).with(any_args, hash_including(disable_smart_shrinking: false))
+      run_job
+    end
+    it 'changes the orientation to match the report configuration' do
+      orientation = double('An Orientation')
+      allow(ReportConfiguration).to receive(:pdf_orientation).with(report_name.to_sym).and_return(orientation)
+      expect(wicked_pdf).to receive(:pdf_from_string).with(any_args, hash_including(orientation: orientation))
       run_job
     end
   end

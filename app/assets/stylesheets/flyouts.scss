@@ -11,15 +11,14 @@
 
 .flyout-row {
   @extend %row;
-  top: $header-height;
+  width: 100%;
   z-index: 100;
-  margin-top: 20px;
   overflow: visible;
   padding-right: 0;
   padding-left: 0;
   position: absolute;
   @media screen and (min-width: $row-width + 1) {
-    @include horizontal-center;
+    @include center-both;
   }
 }
 
@@ -86,8 +85,8 @@
 }
 
 .flyout-loading-message {
-  margin-top: 55px;
-  margin-left: 290px;
+  width: 380px;
+  margin: 0 auto;
   .loading-flyout {
     display: block;
   }
@@ -136,10 +135,8 @@
 }
 
 .flyout-confirmation-dialogue {
-  position: relative;
   width: 500px;
   margin: 0 auto;
-  top: 310px;
   h2 {
     @extend %typography-section-title;
     margin: 0 0 50px;

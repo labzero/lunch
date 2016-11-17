@@ -32,10 +32,10 @@ describe MAPI::ServiceApp do
       let(:cap_stock_member_details_result_set) {double('Oracle Result Set', fetch_hash: nil)}
       let(:cap_stock_member_details) {[
         {
-          TOTAL_CAPITAL_STOCK: rand(90000000),
-          ADVANCES_OUTS: rand(90000000),
-          MPF_UNPAID_BALANCE: rand(90000000),
-          TOT_MPF: rand(90000000),
+          TOTAL_CAPITAL_STOCK: rand(80000000..90000000),
+          ADVANCES_OUTS: rand(1000..10000000),
+          MPF_UNPAID_BALANCE: rand(1000..10000000),
+          TOT_MPF: rand(1000..10000000),
           MORTGAGE_RELATED_ASSETS: rand(90000000)
          }
       ]}
@@ -135,6 +135,10 @@ describe MAPI::ServiceApp do
           describe 'the `surplus_stock` value' do
             it 'is equal to the `total_capital_stock` minus the `minimum_stock_requirement` times the cap_stock_requirements[:SURPLUS_PCT] and rounded up to the nearest 100' do
               expect(capital_stock_and_leverage[:surplus_stock]).to eq( ((cap_stock_member_details.first[:TOTAL_CAPITAL_STOCK]  - (minimum_stock_requirement * cap_stock_requirements.first[:SURPLUS_PCT])) / 100).ceil * 100 )
+            end
+            it 'is equal to the zero when the value would be negative' do
+              cap_stock_member_details.first[:TOTAL_CAPITAL_STOCK] = rand(0..1000)
+              expect(capital_stock_and_leverage[:surplus_stock]).to eq(0)
             end
           end
           describe 'the `required_by_advances` value' do

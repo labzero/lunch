@@ -165,7 +165,7 @@ Feature: Securities Intake
     And I select "Fed" as the release delivery instructions
     And I fill in the "clearing_agent_fed_wire_address_1" securities field with "23454343"
     And I fill in the "clearing_agent_fed_wire_address_2" securities field with "5683asdfa"
-    And I fill in the "aba_number" securities field with "5683asdfa"
+    And I fill in the "aba_number" securities field with "123456789"
     When I click to submit the request
     Then I should see the "over federal limit" error
   Examples:
@@ -277,7 +277,7 @@ Feature: Securities Intake
     And I select "Fed" as the release delivery instructions
     And I fill in the "clearing_agent_fed_wire_address_1" securities field with "23454343"
     And I fill in the "clearing_agent_fed_wire_address_2" securities field with "5683asdfa"
-    And I fill in the "aba_number" securities field with "5683asdfa"
+    And I fill in the "aba_number" securities field with "123456789"
     When I submit the securities request for authorization
     Then I should see the "original par whole number" error
   Examples:

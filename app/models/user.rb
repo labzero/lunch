@@ -219,7 +219,7 @@ class User < ActiveRecord::Base
     attributes = {
         CreatedBy: creator,
         description: "Created by #{creator}",
-        sAMAccountName: username,
+        sAMAccountName: username.try(:downcase),
         mail: email,
         LDAP_PASSWORD_EXPIRATION_ATTRIBUTE => 'true',
         givenname: given_name,
@@ -237,7 +237,7 @@ class User < ActiveRecord::Base
   end
 
   def self.add_extranet_user(member_id, creator, username, email, given_name=nil, surname=nil)
-    find_or_create_by_with_retry(username: username, ldap_domain: LDAP_EXTRANET_DOMAIN) if create_ldap_user(member_id, creator, username, email, given_name, surname)
+    find_or_create_by_with_retry(username: username.try(:downcase), ldap_domain: LDAP_EXTRANET_DOMAIN) if create_ldap_user(member_id, creator, username, email, given_name, surname)
   end
 
   def self.create(*args, &block)
@@ -258,7 +258,7 @@ class User < ActiveRecord::Base
 
   def self.find_or_create_by_ldap_entry(entry)
     record = self.find_or_create_by_with_retry({
-      username: entry[:samaccountname].try(:first),
+      username: entry[:samaccountname].try(:first).try(:downcase),
       ldap_domain: Devise::LDAP::Adapter.get_ldap_domain_from_dn(entry.dn)
     })
     record.instance_variable_set(:@ldap_entry, entry) if record # avoid a second trip to LDAP when possible
@@ -268,7 +268,7 @@ class User < ActiveRecord::Base
   def self.find_or_create_if_valid_login(attributes)
     record = self.find_by(attributes)
     unless record
-      username = attributes[:username]
+      username = attributes[:username].try(:downcase)
       ldap_domain = Devise::LDAP::Adapter.get_ldap_domain(username)
       record = self.find_or_create_by_with_retry(username: username, ldap_domain: ldap_domain) if ldap_domain
     end
@@ -389,6 +389,10 @@ class User < ActiveRecord::Base
     [prefixed_cache_key, prefixed_roles_cache_key, prefixed_groups_cache_key].each do |key|
       Rails.cache.delete(key) if key
     end
+  end
+
+  def timeout_in
+    InternalUserPolicy.new(self, nil).extended_session? ? 10.hours : Devise.timeout_in
   end
 
   protected

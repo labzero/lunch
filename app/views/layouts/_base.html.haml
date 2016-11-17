@@ -23,12 +23,11 @@
     %header.page-header= render header_template
     %main
       = yield
-    .flyout-row
-      .column-1
+    .flyout-background
+      .flyout-row
         .flyout
           .flyout-top-section
             .flyout-close-button.icon-close-before
           .flyout-bottom-section
-    .flyout-background
     %footer.page-footer= render footer_template
     = render 'layouts/tracking'

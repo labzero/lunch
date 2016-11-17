@@ -128,7 +128,8 @@ RSpec.describe AdvancesController, :type => :controller do
       allow(subject).to receive(:feature_enabled?).with('advance-confirmation').and_return(false)
       allow(MemberBalanceService).to receive(:new).with(any_args).and_return(member_balance_service_instance)
       allow(member_balance_service_instance).to receive(:profile).with(no_args).and_return(member_profile)
-      allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(any_args).and_return(profile)
+      allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(member_profile).and_return(profile)
+      allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(nil).and_return(nil)
       allow(profile).to receive(:[]).with(:advances).and_return(total)
       allow(total).to receive(:[]).with(:total_advances).and_return(rand(9999..99999))
     end
@@ -231,6 +232,15 @@ RSpec.describe AdvancesController, :type => :controller do
       it 'sanitizes the profile' do
         expect(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(member_profile)
         call_action_with_job_id
+      end
+      it 'does not return an error when the profile is not retrieved' do
+        allow(member_balance_service_instance).to receive(:profile).and_return(nil)
+        expect{call_action_with_job_id}.to_not raise_error
+      end
+      it 'adds a total footer' do
+        call_action_with_job_id
+        expect(assigns[:advances_data_table][:footer]).to match([{value: I18n.t('advances.manage_advances.total_current_par'), colspan: 6 },
+                                                { value: total[:total_advances], type: :currency_whole }])
       end
       describe 'when the `advance-confirmation` feature is enabled' do
         let(:advance_confirmation_link) { double('advance confirmation link') }

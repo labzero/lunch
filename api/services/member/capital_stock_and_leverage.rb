@@ -64,7 +64,7 @@ module MAPI
 
             # Additional Funding Possible
             additional_advances = advances_percentage > 0 ? (unused_stock / advances_percentage).floor : 0
-            surplus_stock = ((total_capital_stock - (minimum_stock_requirement * cap_stock_requirements[:SURPLUS_PCT].to_f)) / 100).ceil * 100
+            surplus_stock = [((total_capital_stock - (minimum_stock_requirement * cap_stock_requirements[:SURPLUS_PCT].to_f)) / 100).ceil * 100, 0].max
 
             {
               stock_owned: (total_capital_stock.to_i if total_capital_stock),

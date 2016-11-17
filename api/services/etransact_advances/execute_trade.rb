@@ -363,7 +363,7 @@ module MAPI
                 response_hash['status'] << 'DisabledProductError'
               elsif (amount.to_i == 100006)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_collateral_capstock_error.json')))
-              elsif (amount.to_i == 100007)
+              elsif (amount.to_i == 100007 && check_capstock)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_gross_up_exceeds_financing_availability_error.json')))
               elsif (amount.to_i == 100008)
                 response_hash['status'] ||= []
