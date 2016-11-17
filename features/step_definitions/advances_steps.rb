@@ -376,3 +376,7 @@ end
 Then(/^I should see the add advance confirmation page$/) do
   page.assert_selector('.add-advance-confirmation')
 end
+
+Then(/^I should see an advance amount of "([^"]*)"$/) do |amount|
+  page.assert_selector('.add-advance-summary dl:first-child dd:first-of-type', text: fhlb_formatted_currency_whole(amount, html: false), exact: true)
+end
