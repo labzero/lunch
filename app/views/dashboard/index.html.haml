@@ -33,7 +33,7 @@
             -# Rendered when the status is :open
             = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_name: 'advance_request[amount]'
             .etransact-status-message.etransact-status-message-closed
-              = t('dashboard.quick_advance.advances_desk_closed')
+              = t('dashboard.quick_advance.advances_desk_closed', phone_number: service_desk_phone_number)
               = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
           -# Limited Pricing Message always rendered if present, regardless of etransact_status
           - if @limited_pricing_message
