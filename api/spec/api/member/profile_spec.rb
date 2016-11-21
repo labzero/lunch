@@ -180,6 +180,13 @@ describe MAPI::ServiceApp do
           allow(member_sta_result).to receive(:fetch_hash).and_return(nil)
           expect(member_financial_position['sta_update_date']).to be_nil
         end
+
+        it 'flips the sign of the MPF_UNPAID_BALANCE' do
+          expect(member_financial_position['advances']['mpf_loan_balance']).to eq(some_financial_data['MPF_UNPAID_BALANCE'] * -1)
+        end
+        it 'calculates the advance total with MPF correctly' do
+          expect(member_financial_position['advances']['total_advances_and_mpf']).to eq(some_financial_data['ADVANCES_OUTS'].to_i + some_financial_data['MPF_ACTIVITY'].to_i + (some_financial_data['MPF_UNPAID_BALANCE'].to_i * -1))
+        end
     end
 
     context 'credit exceptions and disabled reports' do
