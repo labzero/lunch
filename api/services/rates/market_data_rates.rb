@@ -7,29 +7,39 @@ module MAPI
         include MAPI::Services::Base
         include MAPI::Shared::Constants
 
-        def self.get_market_cof_rates(environment, term)
+        def self.get_market_cof_rates(environment, term, type)
           mds_connection = MAPI::Services::Rates.init_mds_connection(environment)
           if mds_connection
             mds_connection.operations
-            lookup_term = MAPI::Shared::Constants::TERM_MAPPING[term]
-            request = MAPI::Shared::Constants::COF_TYPES.collect do |type|
-            {
-              'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
-              'v1:marketData' => [{
-                'v12:name' => type,
-                'v12:pricingGroup' => [{'v12:id' => 'Live'}],
-                'v12:data' =>  [{
-                  'v12:FhlbsfDataPoint' => [{
-                    'v12:tenor' => [{
-                      'v12:interval' => [{
-                        'v13:frequency' => lookup_term[:frequency],
-                        'v13:frequencyUnit' => lookup_term[:frequency_unit]
-                      }]
+            lookup_term = TERM_MAPPING[term]
+            request = COF_TYPES.collect do |cof_type|
+              lookup_data = {}
+              if (LOAN_MAPPING[type] != 'FRC_WL')
+                lookup_data['v12:dayCountBasis'] = 'ACT/360'
+                lookup_data['v12:paymentFrequency'] = [{
+                  'v13:frequency' => 6,
+                  'v13:frequencyUnit'=> 'M'
+                }]
+                lookup_data['v12:customRollingDay'] = 0
+              else
+                lookup_data['v12:customRollingDay'] = 31
+              end
+              lookup_data['v12:name'] = cof_type
+              lookup_data['v12:pricingGroup'] = [{'v12:id' => 'Live'}]
+              lookup_data['v12:data'] =  [{
+                'v12:FhlbsfDataPoint' => [{
+                  'v12:tenor' => [{
+                    'v12:interval' => [{
+                      'v13:frequency' => lookup_term[:frequency],
+                      'v13:frequencyUnit' => lookup_term[:frequency_unit]
                     }]
                   }]
                 }]
               }]
-            }
+              {
+                'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
+                'v1:marketData' => [lookup_data]
+              }
             end
             message = {
               'v11:caller' => [{ 'v11:id' => ENV['MAPI_COF_ACCOUNT']}],

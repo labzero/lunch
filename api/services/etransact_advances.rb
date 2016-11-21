@@ -358,7 +358,7 @@ module MAPI
           funding_date = body[:funding_date].try(:to_date)
 
           begin
-            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term), advance_type)
+            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term, advance_type), advance_type)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
@@ -387,7 +387,7 @@ module MAPI
           funding_date = params[:funding_date].try(:to_date)
 
           begin
-            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term), advance_type)
+            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term, advance_type), advance_type)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
