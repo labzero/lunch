@@ -193,7 +193,7 @@ describe MAPI::ServiceApp do
 
     context 'grace periods', vcr: {cassette_name: 'execute_trade_service_agency_1week'} do
       before do
-        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
+        allow(subject.settings).to receive(:environment).and_return(:production)
         allow(MAPI::Services::EtransactAdvances).to receive(:cof_data_cleanup).and_return({})
         allow(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).and_return({})
         allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_capital_stock)
@@ -206,11 +206,27 @@ describe MAPI::ServiceApp do
         expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade).with(*[*anythings, allow_grace_period, nil])
         make_request
       end
+      it 'calls `get_market_cof_rates` method with the environment' do
+        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(:production, anything, anything)
+        make_request
+      end
+      it 'calls `get_market_cof_rates` method with the term' do
+        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, advance_term, anything)
+        make_request
+      end
+      it 'calls `get_market_cof_rates` method with the type' do
+        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, advance_type)
+        make_request
+      end
     end
   end
 
   describe 'Validate Trade' do
+    let(:environment) { double('an environment') }
     let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
+    before do
+      allow(subject.settings).to receive(:environment).and_return(environment)
+    end
     it 'should return expected result of validate trade' do
       expect(execute_trade['status']).to be_kind_of(Array)
       expect(execute_trade['confirmation_number']).to be_kind_of(String)
@@ -229,6 +245,18 @@ describe MAPI::ServiceApp do
       anythings = Array.new(15, anything)
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade).with(*[*anythings, allow_grace_period, nil])
       get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", funding_date: nil, allow_grace_period: allow_grace_period
+    end
+    it 'calls `get_market_cof_rates` method with the environment' do
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(environment, anything, anything).and_return({})
+      execute_trade
+    end
+    it 'calls `get_market_cof_rates` method with the term' do
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, advance_term, anything).and_return({})
+      execute_trade
+    end
+    it 'calls `get_market_cof_rates` method with the type' do
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, advance_type).and_return({})
+      execute_trade
     end
   end
 
