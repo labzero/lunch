@@ -567,7 +567,7 @@ en:
       title: Quick Advance
       advance_placeholder: Enter Dollar Amount
       advance_instruction: Select a rate to continue.
-      advances_desk_closed: Add Advance is not available right now. Call the Member Services Desk at <span>%{phone_number}</span> for more information.
+      advances_desk_closed_html: Add Advance is not available right now. Call the Member Services Desk at <span>%{phone_number}</span> for more information.
       advances_desk_closed_link: View recent price indications
       advances_desk_no_terms: There are no terms available right now.
       advance_desk_unavailable_html: Add Advance is not available right now. Call the Member Services Desk at <span>%{phone_number}</span> for more information.
