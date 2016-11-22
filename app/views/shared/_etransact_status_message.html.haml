@@ -13,5 +13,5 @@
   - when :closed
     .advances-add.row
       .column-9x3-left.etransact-status-message
-        %p= t('dashboard.quick_advance.advances_desk_closed', phone_number: service_desk_phone_number)
+        %p= t('dashboard.quick_advance.advances_desk_closed_html', phone_number: service_desk_phone_number)
         = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
