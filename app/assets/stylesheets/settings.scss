@@ -384,9 +384,13 @@
     min-width: 100px;
   }
   .input-field-container:last-of-type {
-    margin-bottom: 20px;
+    margin-bottom: 30px;
   }
   fieldset {
-    margin-top: 10px;
+    margin-top: 5px;
+    p {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
   }
 }

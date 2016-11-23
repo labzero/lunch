@@ -1,22 +1,27 @@
 $(function() {
-  var $form = $('.welcome form');
-  if ($form.length) {
-    var $memberProfileButton = $form.find('.welcome-profile');
-    var $visitProfileField = $form.find('input[name=visit_profile]');
+  var $welcomeForm = $('.welcome form');
+  var $resetPasswordForm = $('.reset-password-form');
+  if ($welcomeForm.length) {
+    var $memberProfileButton = $welcomeForm.find('.welcome-profile');
+    var $visitProfileField = $welcomeForm.find('input[name=visit_profile]');
     $('.welcome form select').change(function() {
-      $form.find('input[type=submit]').removeAttr('disabled');
+      $welcomeForm.find('input[type=submit]').removeAttr('disabled');
       $memberProfileButton.removeAttr('disabled');
     });
     $memberProfileButton.click(function(e) {
       $visitProfileField.removeAttr('disabled');
-      $form.attr('target', '_blank');
+      $welcomeForm.attr('target', '_blank');
     });
-    $form.submit(function(e) {
+    $welcomeForm.submit(function(e) {
       setTimeout(function() {
-        $form.removeAttr('target');
+        $welcomeForm.removeAttr('target');
         $visitProfileField.attr('disabled', 'disabled');
-        $form.get(0).submit();
+        $welcomeForm.get(0).submit();
       }, 1);
     });
   };
+
+  $resetPasswordForm.on('submit', function (e) {
+    $(this).find('input[type="submit"]').prop('disabled', true);
+  });
 });

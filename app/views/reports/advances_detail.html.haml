@@ -54,7 +54,7 @@
               %td.report-cell-narrow.report-cell-right= row[:estimated_next_interest_payment].blank? ? '-' : fhlb_formatted_number(row[:estimated_next_interest_payment], precision: 2)
               - if @print_layout
                 %td.report-cell-narrow.report-cell-right
-                  = fhlb_formatted_number(row[:prepayment_fee_indication], optional_number: true)
+                  = fhlb_formatted_number(row[:prepayment_fee_indication], optional_number: true, precision: 2)
                   = row[:prepayment_fee_indication_notes].html_safe if row[:prepayment_fee_indication_notes]
               - else
                 %td.report-cell-narrow.report-cell-right.detail-view-trigger= t('global.view')

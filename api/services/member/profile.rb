@@ -209,10 +209,10 @@ module MAPI
               funding_today: member_position_hash['AT_ADV_FUNDING'].to_i,
               repay_today: member_position_hash['ADVANCES_REPAYS'].to_i,
               mpf_intraday_activity: member_position_hash['MPF_ACTIVITY'].to_i,
-              mpf_loan_balance: member_position_hash['MPF_UNPAID_BALANCE'].to_i,
+              mpf_loan_balance: member_position_hash['MPF_UNPAID_BALANCE'].to_i * -1,
               total_mpf: member_position_hash['TOTAL_MPF'].to_i,
               total_advances: member_position_hash['ADVANCES_OUTS'].to_i,
-              total_advances_and_mpf: member_position_hash['ADVANCES_OUTS'].to_i + member_position_hash['MPF_ACTIVITY'].to_i + member_position_hash['MPF_UNPAID_BALANCE'].to_i
+              total_advances_and_mpf: member_position_hash['ADVANCES_OUTS'].to_i + member_position_hash['MPF_ACTIVITY'].to_i + (member_position_hash['MPF_UNPAID_BALANCE'].to_i * -1)
             },
             credit_exception: member_credit_exception_hash ? member_credit_exception_hash['EXCEPT_TEXT'] : nil,
             disabled_reports: disabled_reports_array && disabled_reports_array.first ? disabled_reports_array.map { |disabled_report| disabled_report['WEB_FLAG_NAME'] } : []
