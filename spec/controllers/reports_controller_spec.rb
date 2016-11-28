@@ -1580,6 +1580,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
 
       it_behaves_like 'a user required action', :get, :mortgage_collateral_update
+      it_behaves_like 'a report that can be downloaded', :mortgage_collateral_update, [:pdf]
 
       it 'renders the mortgage_collateral_update view' do
         mortgage_collateral_update

@@ -2021,27 +2021,30 @@ class ReportsController < ApplicationController
   end
 
   def mortgage_collateral_update
-    @mcu_data = report_disabled?(MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS) ? {} : MemberBalanceService.new(current_member_id, request).mortgage_collateral_update
-    raise StandardError, "There has been an error and ReportsController#mortgage_collateral_update has encountered nil. Check error logs." if @mcu_data.nil?
+    downloadable_report(:pdf) do
+      @report_name = t('reports.pages.mortgage_collateral_update.title')
+      @mcu_data = report_disabled?(MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS) ? {} : MemberBalanceService.new(current_member_id, request).mortgage_collateral_update
+      raise StandardError, "There has been an error and ReportsController#mortgage_collateral_update has encountered nil. Check error logs." if @mcu_data.nil?
 
-    column_headings = [t('common_table_headings.transaction'), t('common_table_headings.loan_count'), fhlb_add_unit_to_table_header(t('common_table_headings.unpaid_balance'), '$'), fhlb_add_unit_to_table_header(t('global.original_amount'), '$')]
-    # Loans Accepted Table
-    @accepted_loans_table_data = {
-      column_headings: column_headings,
-      rows: mcu_table_rows_for(@mcu_data, %w(updated pledged renumbered)),
-      footer: mcu_table_columns_for(@mcu_data, 'accepted', t('reports.pages.mortgage_collateral_update.total_accepted'))
-    }
-    # Loans Submitted Table
-    @submitted_loans_table_data = {
-      column_headings: column_headings,
-      rows: mcu_table_rows_for(@mcu_data, %w(accepted rejected)),
-      footer: mcu_table_columns_for(@mcu_data, 'total', t('reports.pages.mortgage_collateral_update.total_submitted'))
-    }
-    # Loans Depledged Table
-    @depledged_loans_table_data = {
-      column_headings: column_headings,
-      rows: [ {columns: mcu_table_columns_for(@mcu_data, 'depledged', t('reports.pages.mortgage_collateral_update.loans_depledged'))} ]
-    }
+      column_headings = [t('common_table_headings.transaction'), t('common_table_headings.loan_count'), fhlb_add_unit_to_table_header(t('common_table_headings.unpaid_balance'), '$'), fhlb_add_unit_to_table_header(t('global.original_amount'), '$')]
+      # Loans Accepted Table
+      @accepted_loans_table_data = {
+        column_headings: column_headings,
+        rows: mcu_table_rows_for(@mcu_data, %w(updated pledged renumbered)),
+        footer: mcu_table_columns_for(@mcu_data, 'accepted', t('reports.pages.mortgage_collateral_update.total_accepted'))
+      }
+      # Loans Submitted Table
+      @submitted_loans_table_data = {
+        column_headings: column_headings,
+        rows: mcu_table_rows_for(@mcu_data, %w(accepted rejected)),
+        footer: mcu_table_columns_for(@mcu_data, 'total', t('reports.pages.mortgage_collateral_update.total_submitted'))
+      }
+      # Loans Depledged Table
+      @depledged_loans_table_data = {
+        column_headings: column_headings,
+        rows: [ {columns: mcu_table_columns_for(@mcu_data, 'depledged', t('reports.pages.mortgage_collateral_update.loans_depledged'))} ]
+      }
+    end
   end
 
   private

@@ -2,9 +2,12 @@
 - @page_title = t('reports.meta_title')
 .report.row.report-mcu
   .report-header
-    %h1= t('reports.pages.mortgage_collateral_update.title')
-    = render 'reports_header_buttons'
-    = render 'report_details', name: @member_name, freshness: t('reports.pages.mortgage_collateral_update.report_details')
+    %h1= @report_name
+    - if @print_layout
+      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(Time.zone.today))
+    - else
+      = render 'reports_header_buttons', download_formats: :pdf
+      = render 'report_details', name: @member_name, freshness: t('reports.pages.mortgage_collateral_update.report_details')
   .report-main-body
     %h2.report-table-title= t('reports.pages.mortgage_collateral_update.details')
     %dl.report-mcu-details
