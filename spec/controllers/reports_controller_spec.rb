@@ -868,7 +868,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :letters_of_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :letters_of_credit
       it_behaves_like 'a controller action with an active nav setting', :letters_of_credit, :reports
-      it_behaves_like 'a report that can be downloaded', :letters_of_credit, [:xlsx]
+      it_behaves_like 'a report that can be downloaded', :letters_of_credit, [:xlsx, :pdf]
 
       it 'sorts the letters of credit by lc_number' do
         allow(member_balance_service_instance).to receive(:letters_of_credit).and_return({credits: letters_of_credit})

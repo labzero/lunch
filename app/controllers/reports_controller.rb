@@ -1387,7 +1387,7 @@ class ReportsController < ApplicationController
   end
 
   def letters_of_credit
-    downloadable_report(:xlsx) do
+    downloadable_report([:xlsx, :pdf]) do
       @report_name = ReportConfiguration.report_title(:letters_of_credit)
       if report_disabled?(LETTERS_OF_CREDIT_WEB_FLAGS)
         letters_of_credit = {}
