@@ -636,7 +636,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
 
       it_behaves_like 'a user required action', :get, :cash_projections
-      it_behaves_like 'a report that can be downloaded', :cash_projections, [:xlsx]
+      it_behaves_like 'a report that can be downloaded', :cash_projections, [:xlsx, :pdf]
       it_behaves_like 'a report with instance variables set in a before_filter', :cash_projections
       it_behaves_like 'a controller action with an active nav setting', :cash_projections, :reports
 

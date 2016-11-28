@@ -1243,7 +1243,7 @@ class ReportsController < ApplicationController
 
   def cash_projections
     @report_name = ReportConfiguration.report_title(:cash_projections)
-    downloadable_report(:xlsx) do
+    downloadable_report([:xlsx, :pdf]) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(CASH_PROJECTIONS_WEB_FLAGS)
         @cash_projections = {}
