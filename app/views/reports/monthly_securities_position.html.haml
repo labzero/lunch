@@ -3,8 +3,11 @@
 .report.securities-report.expanding-row-table.row
   .report-header
     %h1= @report_name
-    = render 'reports_header_buttons', allowed_params: [:securities_filter, :start_date], download_formats: [:xlsx]
-    = render 'report_details', name: @member_name, freshness: t('reports.pages.securities_position.freshness'), availability: t('reports.availability.months', months: 18)
+    - if @print_layout
+      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@as_of_date))
+    - else
+      = render 'reports_header_buttons', allowed_params: [:securities_filter, :start_date], download_formats: [:xlsx, :pdf]
+      = render 'report_details', name: @member_name, freshness: t('reports.pages.securities_position.freshness'), availability: t('reports.availability.months', months: 18)
     .report-inputs
       = render layout: 'reports_date_picker_form', locals: {start_date: @month_end_date, report_url: reports_monthly_securities_position_url, presets: @picker_presets, single_date_picker: true, date_picker_filter: @date_picker_filter, min_date: @min_date, max_date: @max_date} do
         .report-filter

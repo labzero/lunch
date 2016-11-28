@@ -1159,7 +1159,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a date restricted report', :monthly_securities_position, :last_month_end
       it_behaves_like 'a report with instance variables set in a before_filter', :monthly_securities_position
       it_behaves_like 'a controller action with an active nav setting', :monthly_securities_position, :reports
-      it_behaves_like 'a report that can be downloaded', :monthly_securities_position, [:xlsx]
+      it_behaves_like 'a report that can be downloaded', :monthly_securities_position, [:xlsx, :pdf]
       describe 'view instance variables' do
         let(:unprocessed_securities) { double('unprocessed securities details', length: nil) }
         let(:processed_securities) { double('processed securities details') }
