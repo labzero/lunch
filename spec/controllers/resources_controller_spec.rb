@@ -32,6 +32,9 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET forms' do
+    before do
+      allow(subject).to receive(:feature_enabled?).and_call_original
+    end
     it_behaves_like 'a controller action with an active nav setting', :forms, :resources
     it_behaves_like 'a user required action', :get, :forms
     it 'should render the guides view' do
@@ -41,13 +44,23 @@ RSpec.describe ResourcesController, type: :controller do
     [
       :agreement_rows, :signature_card_rows, :wire_transfer_rows, :capital_stock_rows,
       :website_access_rows, :credit_rows, :lien_real_estate_rows, :lien_other_rows,
-      :specific_identification_rows, :deposits_rows, :securities_rows, :loan_document_rows,
+      :specific_identification_rows, :deposits_rows, :loan_document_rows,
       :creditor_relationship_rows
       ].each do |var|
         it "should assign `@#{var}`" do
           get :forms
           expect(assigns[var]).to be_present
         end
+      end
+      it 'assigns @securities_rows when the `securities-hide-forms` feature is disabled' do
+        allow(subject).to receive(:feature_enabled?).with('securities-hide-forms').and_return(false)
+        get :forms
+        expect(assigns[:securities_rows]).to be_present
+      end
+      it 'does not assign @securities_rows when the `securities-hide-forms` feature is enabled' do
+        allow(subject).to receive(:feature_enabled?).with('securities-hide-forms').and_return(true)
+        get :forms
+        expect(assigns[:securities_rows]).to_not be_present
       end
   end
 

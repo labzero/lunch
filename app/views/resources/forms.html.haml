@@ -38,8 +38,9 @@
     = render 'form_table', rows: @specific_identification_rows
     %h3= t('resources.forms.collateral.deposits.title')
     = render 'form_table', rows: @deposits_rows
-    %h3= t('resources.forms.collateral.securities.title')
-    = render 'form_table', rows: @securities_rows
+    - unless feature_enabled?('securities-hide-forms')
+      %h3= t('resources.forms.collateral.securities.title')
+      = render 'form_table', rows: @securities_rows
     %h3= t('resources.forms.collateral.loan_document.title')
     = render 'form_table', rows: @loan_document_rows
     %h3= t('resources.forms.collateral.creditor_relationship.title')

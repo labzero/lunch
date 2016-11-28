@@ -270,28 +270,30 @@ class ResourcesController < ApplicationController
       }
     ]
 
-    @securities_rows = [
-      {
-        title: t('resources.forms.collateral.securities.pledge'),
-        form_number: 449,
-        pdf_link: resources_download_path(file: :form_449)
-      },
-      {
-        title: t('resources.forms.collateral.securities.release'),
-        form_number: 1227,
-        pdf_link: resources_download_path(file: :form_1227)
-      },
-      {
-        title: t('resources.forms.collateral.securities.deposit'),
-        form_number: 2143,
-        pdf_link: resources_download_path(file: :form_2143)
-      },
-      {
-        title: t('resources.forms.collateral.securities.safekeeping_release'),
-        form_number: 2194,
-        pdf_link: resources_download_path(file: :form_2194)
-      }
-    ]
+    unless feature_enabled?('securities-hide-forms')
+      @securities_rows = [
+        {
+          title: t('resources.forms.collateral.securities.pledge'),
+          form_number: 449,
+          pdf_link: resources_download_path(file: :form_449)
+        },
+        {
+          title: t('resources.forms.collateral.securities.release'),
+          form_number: 1227,
+          pdf_link: resources_download_path(file: :form_1227)
+        },
+        {
+          title: t('resources.forms.collateral.securities.deposit'),
+          form_number: 2143,
+          pdf_link: resources_download_path(file: :form_2143)
+        },
+        {
+          title: t('resources.forms.collateral.securities.safekeeping_release'),
+          form_number: 2194,
+          pdf_link: resources_download_path(file: :form_2194)
+        }
+      ]
+    end
 
     @loan_document_rows = [
       {
