@@ -1068,7 +1068,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :current_securities_position
       it_behaves_like 'a report with instance variables set in a before_filter', :current_securities_position
       it_behaves_like 'a controller action with an active nav setting', :current_securities_position, :reports
-      it_behaves_like 'a report that can be downloaded', :current_securities_position, [:xlsx]
+      it_behaves_like 'a report that can be downloaded', :current_securities_position, [:xlsx, :pdf]
 
       describe 'view instance variables' do
         let(:unprocessed_securities) { double('unprocessed securities details', length: nil) }
@@ -1126,6 +1126,13 @@ RSpec.describe ReportsController, :type => :controller do
             get :current_securities_position, securities_filter: option.last
             expect(assigns[:securities_filter_text]).to eq(option.first)
           end
+        end
+        it 'sets `@as_of_date` to the `as_of_date` of the returned securities_position data' do
+          as_of_date = instance_double(Date)
+          allow(controller).to receive(:fhlb_date_long_alpha)
+          allow(securities_position_response).to receive(:[]).with(:as_of_date).and_return(as_of_date)
+          get :current_securities_position
+          expect(assigns[:as_of_date]).to eq(as_of_date)
         end
       end
     end
