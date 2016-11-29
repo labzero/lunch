@@ -1511,17 +1511,6 @@ RSpec.describe SecuritiesController, type: :controller do
       before do
         allow(securities_request).to receive(:kind).and_return(kind)
       end
-      it 'sets the request details table data' do
-        call_action
-        request_details = {
-          rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
-                             { value: securities_request.request_id } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
-                             { value: securities_request.authorized_by } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
-                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] } ] }
-        expect(subject.instance_variable_get(:@request_details_table_data)).to eq(request_details)
-      end
       it 'sets broker instructions table data' do
         call_action
         expect(subject.instance_variable_get(:@broker_instructions_table_data)).to eq( {
@@ -1624,35 +1613,41 @@ RSpec.describe SecuritiesController, type: :controller do
     end
 
     context do
-      before do
-        allow(securities_request).to receive(:kind).and_return(:safekept_transfer)
-      end
-      it 'sets the request details table data for `safekept_transfer`' do
-        call_action
-        expect(subject.instance_variable_get(:@request_details_table_data)).to eq({
-          rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
-                             { value: securities_request.request_id } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
-                             { value: securities_request.authorized_by } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
-                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] } ] })
+      [:safekept_transfer, :safekept_intake].each do |kind|
+        before do
+          allow(securities_request).to receive(:kind).and_return(kind)
+        end
+        it "sets the request details table data for `#{kind}`" do
+          call_action
+          expect(subject.instance_variable_get(:@request_details_table_data)).to eq({ rows: [
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                         { value: securities_request.request_id } ] },
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                         { value: securities_request.authorized_by } ] },
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                         { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] },
+          ] })
+        end
       end
     end
     context do
-      before do
-        allow(securities_request).to receive(:kind).and_return(:pledge_transfer)
-      end
-      it 'sets the request details table data for `pledge_transfer`' do
-        call_action
-        expect(subject.instance_variable_get(:@request_details_table_data)).to eq({ rows: [
-          { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
-                       { value: securities_request.request_id } ] },
-          { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
-                       { value: securities_request.authorized_by } ] },
-          { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
-                       { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] },
-          { columns: [ { value: I18n.t('securities.requests.view.request_details.pledge_to.pledge_type') },
-                       { value: SecuritiesController::PLEDGE_TO_MAPPING[securities_request.pledge_to] } ] } ] })
+      [:pledge_transfer, :pledge_intake].each do |kind|
+        before do
+          allow(securities_request).to receive(:kind).and_return(kind)
+        end
+        it "sets the request details table data for `#{kind}`" do
+          call_action
+          expect(subject.instance_variable_get(:@request_details_table_data)).to eq({ rows: [
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                         { value: securities_request.request_id } ] },
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                         { value: securities_request.authorized_by } ] },
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                         { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] },
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.pledge_to.pledge_type') },
+                         { value: SecuritiesController::PLEDGE_TO_MAPPING[securities_request.pledge_to] } ] }
+          ] })
+        end
       end
     end
   end
