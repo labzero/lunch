@@ -22,7 +22,7 @@ end
 Given(/^I don't see the advances dropdown$/) do
   page.find('.logo').hover # make sure the mouse isn't left on top of the reports dropdown from a different test
   advances_menu = page.find('.nav-menu', text: I18n.t('global.advances'))
-  advances_menu.parent.assert_selector('.nav-dropdown', visible: :hidden)
+  advances_menu.find(:xpath, '..').assert_selector('.nav-dropdown', visible: :hidden)
 end
 
 When(/^I click on the advances link in the header$/) do

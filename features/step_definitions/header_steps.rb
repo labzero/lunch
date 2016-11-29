@@ -1,12 +1,12 @@
 Given(/^I don't see the (reports|resources|products) dropdown$/) do |dropdown|
   page.find('.logo').hover # make sure the mouse isn't left on top of the nav bar from a different test
   report_menu = page.find('.nav-menu', text: dropdown_title_regex(dropdown))
-  report_menu.parent.assert_selector('.nav-dropdown', visible: :hidden)
+  report_menu.find(:xpath, '..').assert_selector('.nav-dropdown', visible: :hidden)
 end
 
 Then(/^I should see the (reports|resources|products) dropdown$/) do |dropdown|
   report_menu = page.find('.nav-menu', text: dropdown_title_regex(dropdown))
-  report_menu.parent.assert_selector('.nav-dropdown', visible: true)
+  report_menu.find(:xpath, '..').assert_selector('.nav-dropdown', visible: true)
 end
 
 When(/^I click on the (agreements|amortizing|arc|arc embedded|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance|manage securities|securities requests|resources|products|learn more) link in the header$/) do |link|
