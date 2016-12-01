@@ -177,10 +177,24 @@
 
 .settings-two-factor {
   p {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
   }
   .form-flash-message {
     display: none;
+  }
+  label {
+    margin-bottom: 8px;
+  }
+  ol {
+    margin-bottom: 0;
+  }
+  .settings-new-pin, .settings-reset-pin {
+    ol li:first-child {
+      margin-bottom: 20px;
+    }
+  }
+  .settings-resynchronize-token fieldset:first-child {
+      margin-top: 15px;
   }
 }
 
