@@ -95,7 +95,7 @@ table.table-loading, table.table-error {
     @extend %typography-paragraph;
     background: $white;
     text-align: center;
-    padding: 40px 0px;
+    padding: 40px 10px;
     vertical-align: baseline;
     &:before {
       display: inline-block;
