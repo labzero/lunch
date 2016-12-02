@@ -483,8 +483,9 @@
 }
 
 .cash-projections-report-table {
-  td{
-    vertical-align: top}
+  td {
+    vertical-align: top
+  }
   th {
     &:nth-child(1) {
       min-width: 78px;
@@ -1670,6 +1671,20 @@ td.dataTables_empty {
       }
       .report-profile-borrowing-capacity {
         margin-left: 86px;
+      }
+    }
+  }
+  .cash-projections-report-table {
+    th, td {
+      &:nth-child(9) {
+        padding-right: 12px;
+      }
+    }
+  }
+  .expanding-row-table {
+    th, td {
+      &:last-child, &:nth-last-child(2) {
+        display: none;
       }
     }
   }
