@@ -1300,61 +1300,64 @@ class ReportsController < ApplicationController
 
   def dividend_statement
     @div_id = params[:dividend_transaction_filter]
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    @dividend_statement_details = {
-      column_headings: [
-        {title: t('global.issue_date'), sortable: true},
-        {title: t('global.certificate_sequence'), sortable: true},
-        {title: t('global.start_date'), sortable: true},
-        {title: t('global.end_date'), sortable: true},
-        {title: t('global.shares_outstanding'), sortable: true},
-        {title: t('reports.pages.dividend_statement.headers.days_outstanding'), sortable: true},
-        {title: t('reports.pages.dividend_statement.headers.average_shares'), sortable: true},
-        {title: t('reports.pages.dividend_statement.headers.dividend'), sortable: true}
-      ]
-    }
-    if report_disabled?(DIVIDEND_STATEMENT_WEB_FLAGS)
-      @dividend_statement = {}
-      @dividend_statement_details[:rows] = []
-    else
-      @dividend_statement = member_balances.dividend_statement(DATE_RESTRICTION_MAPPING[:dividend_statement].ago.to_date, @div_id)
-      raise StandardError, "There has been an error and ReportsController#dividend_statement has encountered nil. Check error logs." if @dividend_statement.nil?
-      @dividend_statement_details[:rows] = @dividend_statement[:details].collect do |detail|
-        {
-          columns: [
-            {value: detail[:issue_date], type: :date},
-            {value: detail[:certificate_sequence], type: nil},
-            {value: detail[:start_date], type: :date},
-            {value: detail[:end_date], type: :date},
-            {value: detail[:shares_outstanding], type: :number},
-            {value: detail[:days_outstanding], type: :number},
-            {value: detail[:average_shares_outstanding], type: :shares_fractional},
-            {value: detail[:dividend], type: :currency}
-          ]
-        }
-      end
-      @dividend_statement_details[:footer] = [
-        { value: t('global.totals'), colspan: 6},
-        { value: @dividend_statement[:average_shares_outstanding], type: :shares_fractional},
-        { value: @dividend_statement[:total_dividend], type: :currency}
-      ]
-      @dropdown_options = @dividend_statement[:div_ids].collect do |div_id|
-        label = if %w(1 2 3 4).include?(div_id.last)
-          I18n.t("dates.quarters.#{div_id.last}", year: div_id[0..3])
-        else
-          I18n.t('reports.pages.dividend_statement.special_dividend', year: div_id[0..3])
+    downloadable_report(:pdf, dividend_transaction_filter: @div_id) do
+      @report_name = t('reports.capital_stock.dividend_statement.title')
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      @dividend_statement_details = {
+        column_headings: [
+          {title: t('global.issue_date'), sortable: true},
+          {title: t('global.certificate_sequence'), sortable: true},
+          {title: t('global.start_date'), sortable: true},
+          {title: t('global.end_date'), sortable: true},
+          {title: t('global.shares_outstanding'), sortable: true},
+          {title: t('reports.pages.dividend_statement.headers.days_outstanding'), sortable: true},
+          {title: t('reports.pages.dividend_statement.headers.average_shares'), sortable: true},
+          {title: t('reports.pages.dividend_statement.headers.dividend'), sortable: true}
+        ]
+      }
+      if report_disabled?(DIVIDEND_STATEMENT_WEB_FLAGS)
+        @dividend_statement = {}
+        @dividend_statement_details[:rows] = []
+      else
+        @dividend_statement = member_balances.dividend_statement(DATE_RESTRICTION_MAPPING[:dividend_statement].ago.to_date, @div_id)
+        raise StandardError, "There has been an error and ReportsController#dividend_statement has encountered nil. Check error logs." if @dividend_statement.nil?
+        @dividend_statement_details[:rows] = @dividend_statement[:details].collect do |detail|
+          {
+            columns: [
+              {value: detail[:issue_date], type: :date},
+              {value: detail[:certificate_sequence], type: nil},
+              {value: detail[:start_date], type: :date},
+              {value: detail[:end_date], type: :date},
+              {value: detail[:shares_outstanding], type: :number},
+              {value: detail[:days_outstanding], type: :number},
+              {value: detail[:average_shares_outstanding], type: :shares_fractional},
+              {value: detail[:dividend], type: :currency}
+            ]
+          }
         end
-        [label, div_id]
-      end
-      @dropdown_options.each do |option|
-        if option[1] == @div_id
-          @dropdown_options_text = option[0]
-          break
+        @dividend_statement_details[:footer] = [
+          { value: t('global.totals'), colspan: 6},
+          { value: @dividend_statement[:average_shares_outstanding], type: :shares_fractional},
+          { value: @dividend_statement[:total_dividend], type: :currency}
+        ]
+        @dropdown_options = @dividend_statement[:div_ids].collect do |div_id|
+          label = if %w(1 2 3 4).include?(div_id.last)
+            I18n.t("dates.quarters.#{div_id.last}", year: div_id[0..3])
+          else
+            I18n.t('reports.pages.dividend_statement.special_dividend', year: div_id[0..3])
+          end
+          [label, div_id]
         end
+        @dropdown_options.each do |option|
+          if option[1] == @div_id
+            @dropdown_options_text = option[0]
+            break
+          end
+        end
+        @dropdown_options_text ||= @dropdown_options[0][0]
+        @div_id ||= @dropdown_options[0][1]
+        @show_summary_data = true if %w(1 2 3 4).include?(@div_id.last)
       end
-      @dropdown_options_text ||= @dropdown_options[0][0]
-      @div_id ||= @dropdown_options[0][1]
-      @show_summary_data = true if %w(1 2 3 4).include?(@div_id.last)
     end
   end
 

@@ -2,16 +2,16 @@
 - @page_title = t('reports.meta_title')
 .report.report-dividend-statement.row
   .report-header
-    %h1= t('reports.capital_stock.dividend_statement.title')
+    %h1= @report_name
     - if @print_layout
-      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@start_date))
+      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(Time.zone.today))
     - else
-      = render 'reports_header_buttons', allowed_params: :start_date
+      = render 'reports_header_buttons', allowed_params: :dividend_transaction_filter, download_formats: [:pdf]
       = render 'report_details', name: @member_name, freshness: t('reports.pages.dividend_statement.freshness'), availability: t('reports.availability.months', months: 36)
-    .report-inputs
-      = form_tag(reports_dividend_statement_path, method: 'GET') do
-        .report-filter
-          = render 'shared/dropdown', dropdown_name: 'dividend_transaction_filter', default_value: @div_id, default_text: @dropdown_options_text, dropdown_options: @dropdown_options
+      .report-inputs
+        = form_tag(reports_dividend_statement_path, method: 'GET') do
+          .report-filter
+            = render 'shared/dropdown', dropdown_name: 'dividend_transaction_filter', default_value: @div_id, default_text: @dropdown_options_text, dropdown_options: @dropdown_options
   .report-main-body
     -if @show_summary_data
       .report-summary-data

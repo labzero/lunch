@@ -705,6 +705,12 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :dividend_statement
       it_behaves_like 'a report with instance variables set in a before_filter', :dividend_statement
       it_behaves_like 'a controller action with an active nav setting', :dividend_statement, :reports
+      it_behaves_like 'a report that can be downloaded', :dividend_statement, [:pdf]
+
+      it 'assigns @report_name' do
+        make_request
+        expect(assigns[:report_name]).to eq(I18n.t('reports.capital_stock.dividend_statement.title'))
+      end
       it 'calls MemberBalanceService.dividend_statement with the proper date restriction' do
         expect(member_balance_service_instance).to receive(:dividend_statement).with(ReportsController::DATE_RESTRICTION_MAPPING[:dividend_statement].ago.to_date, anything)
         make_request

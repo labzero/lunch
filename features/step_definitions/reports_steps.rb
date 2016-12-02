@@ -525,7 +525,7 @@ When(/^I should only see users with the "(.*?)" role( or with inclusive roles)?$
 end
 
 When(/^I click on the dividend transaction dropdown selector$/) do
-  page.find('.dropdown-selection').click
+  page.find('.report-filter .dropdown-selection').click
 end
 
 When(/^I click on the securities services monthly statement dropdown selector$/) do
@@ -546,7 +546,7 @@ When(/^I select "(.*?)" from the month year dropdown$/) do |monthyear|
 end
 
 Then(/^I should see a dividend summary for the last option in the dividend transaction dropdown selector$/) do
-  page.find('.dropdown-selection').click
+  page.find('.report-filter .dropdown-selection').click
   text = page.find('.dropdown li:last-child').text
   page.assert_selector('.table-dividend-summary tr:first-child td:last-child', text: text)
 end

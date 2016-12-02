@@ -1352,20 +1352,23 @@ td.dataTables_empty {
         float: none;
       }
     }
-    .report-table:not(.account-summary-collateral-totals) tbody td:first-child {
-      color: $print-color;
-      @include typography-print-table-cell;
-    }
+    
     h2 {
       @include typography-print-subheader;
-    }
-    dt, dd  {
-      @include typography-print-details;
-      color: $print-color;
     }
     tfoot td, .account-summary-collateral-totals tbody td {
       color: $print-color;
       @include typography-print-table-total;
+    }
+  }
+  .account-summary-report, .report-dividend-statement {
+    .report-table:not(.account-summary-collateral-totals) tbody td:first-child {
+      color: $print-color;
+      @include typography-print-table-cell;
+    }
+    dt, dd  {
+      @include typography-print-details;
+      color: $print-color;
     }
   }
   .report {
