@@ -29,8 +29,9 @@
           %p= t('resources.guides.replace', guide: title)
           %ul
             - revision[:details].each do |detail|
-              %li= detail[:description]
-              - if detail[:details].present?
-                %ul
-                  - detail[:details].each do |detail|
-                    %li= detail[:description]
+              %li
+                = detail[:description]
+                - if detail[:details].present?
+                  %ul
+                    - detail[:details].each do |detail|
+                      %li= detail[:description]

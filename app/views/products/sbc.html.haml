@@ -167,11 +167,11 @@
     %p= t('products.advances.sbc.borrowing_market_securities')
     %ul
       %li= t('products.advances.sbc.bms_list.margin_call')
-      %li= t('products.advances.sbc.bms_list.additional_pledge_reason')
-      %ul
-        %li= t('products.advances.sbc.bms_list.falls_below')
-        %li= t('products.advances.sbc.bms_list.sufficient_excess')
-    %ul
+      %li
+        = t('products.advances.sbc.bms_list.additional_pledge_reason')
+        %ul
+          %li= t('products.advances.sbc.bms_list.falls_below')
+          %li= t('products.advances.sbc.bms_list.sufficient_excess')
       %li= t('products.advances.sbc.bms_list.current_borrowing')
       %li= t('products.advances.sbc.bms_list.margin_requirement')
       %li= t('products.advances.sbc.bms_list.not_release')
