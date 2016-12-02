@@ -161,17 +161,36 @@ RSpec.describe ReportConfiguration do
 
     describe 'when processing the settlement transaction account report' do
       let(:min_date) { subject.date_restrictions(:settlement_transaction_account).ago.to_date }
-
-      it 'returns default min, start and end dates if start and end dates are nil' do
-        expect(subject.date_bounds(:settlement_transaction_account, nil, nil)).to eq(
-          { min: min_date, start: this_month_start, end: today, max: nil })
+      context 'when today is the first day of the month' do
+        before { allow(Time.zone).to receive(:today).and_return(today.beginning_of_month) }
+        it 'returns last month\'s start as the default start date' do
+          expect(subject.date_bounds(:settlement_transaction_account, nil, nil)).to include(start: last_month_start)
+        end
+        it 'returns last month\'s end as the default end date' do
+          expect(subject.date_bounds(:settlement_transaction_account, nil, nil)).to include(end: last_month_end)
+        end
       end
-
+      context 'when today is not the first day of the month' do
+        if Time.zone.today.day == 1
+          before { allow(Time.zone).to receive(:today).and_return(today + 1.day) }
+        end
+        it 'returns the beginning of this month as the default start date' do
+          expect(subject.date_bounds(:settlement_transaction_account, nil, nil)).to include(start: this_month_start)
+        end
+        it 'returns today as the default end date' do
+          expect(subject.date_bounds(:settlement_transaction_account, nil, nil)).to include(end: today)
+        end
+      end
+      it 'returns the correct min_date' do
+        expect(subject.date_bounds(:settlement_transaction_account, nil, nil)).to include(min: min_date)
+      end
+      it 'returns nil for the max_date' do
+        expect(subject.date_bounds(:settlement_transaction_account, nil, nil)).to include(max: nil)
+      end
       it 'returns min date for start date when start date comes before min date' do
         expect(subject.date_bounds(:settlement_transaction_account, min_date - 1.day, nil)).to eq(
           { min: min_date, start: min_date, end: today, max: nil })
       end
-
       it 'returns in bounds start and end date if supplied (happy path)' do
         expect(subject.date_bounds(:settlement_transaction_account, today, today + 1.day)).to eq(
           { min: min_date, start: today, end: today + 1.day, max: nil })

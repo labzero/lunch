@@ -55,6 +55,7 @@ module ReportConfiguration
   # returns { min: a, start: b, end: c, max: d }
   # (a,b,c and d will be a Date object or nil)
   def self.date_bounds(report_key, start_date_param = nil, end_date_param = nil)
+    today = Time.zone.today
     start_date_param = start_date_param.to_date if start_date_param
     end_date_param = end_date_param.to_date if end_date_param
     case report_key
@@ -65,16 +66,23 @@ module ReportConfiguration
       { min: min_date, start: start_date, end: end_date, max: nil }
     when :capital_stock_trial_balance
       min_date = Date.new(2002,1,1)
-      max_date = most_recent_business_day(Time.zone.today - 1.day)
+      max_date = most_recent_business_day(today - 1.day)
       start_date = start_date_param ? [start_date_param.to_date, max_date].min : max_date
       start_date = min_date if start_date < min_date
       { min: min_date, start: start_date, end: nil, max: max_date }
     when :borrowing_capacity
       { min: nil, start: nil, end: end_date_param || Time.zone.now.to_date, max: nil }
     when :settlement_transaction_account
-      start_date = (start_date_param || default_dates_hash[:this_month_start]).to_date
+      if today.day == 1
+        start_date_fallback = default_dates_hash[:last_month_start]
+        end_date_fallback = default_dates_hash[:last_month_end]
+      else
+        start_date_fallback = default_dates_hash[:this_month_start]
+        end_date_fallback = today
+      end
+      start_date = (start_date_param || start_date_fallback).to_date
       min_date, start_date = min_and_start_dates(date_restrictions(:settlement_transaction_account), start_date)
-      end_date = (end_date_param || Time.zone.today).to_date
+      end_date = (end_date_param || end_date_fallback).to_date
       { min: min_date, start: start_date, end: end_date, max: nil }
     when :advances_detail
       max_date = Time.zone.today - 1.day
