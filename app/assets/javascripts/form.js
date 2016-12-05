@@ -22,4 +22,7 @@ $(function() {
     e.preventDefault();
   });
 
+  $('form:not([data-remote]) input[type=submit]').parents('form').on('submit', function(e) {
+    $(this).find('input[type="submit"]').prop('disabled', true);
+  });
 });

@@ -1,6 +1,5 @@
 $(function() {
   var $welcomeForm = $('.welcome form');
-  var $disableAfterSubmitForms = $('.reset-password-form, .welcome-login');
   if ($welcomeForm.length) {
     var $memberProfileButton = $welcomeForm.find('.welcome-profile');
     var $visitProfileField = $welcomeForm.find('input[name=visit_profile]');
@@ -20,8 +19,4 @@ $(function() {
       }, 1);
     });
   };
-
-  $disableAfterSubmitForms.on('submit', function(e) {
-    $(this).find('input[type="submit"]').prop('disabled', true);
-  });
 });
