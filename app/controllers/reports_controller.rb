@@ -2045,7 +2045,8 @@ class ReportsController < ApplicationController
       # Loans Depledged Table
       @depledged_loans_table_data = {
         column_headings: column_headings,
-        rows: [ {columns: mcu_table_columns_for(@mcu_data, 'depledged', t('reports.pages.mortgage_collateral_update.loans_depledged'))} ]
+        rows: [],
+        footer: mcu_table_columns_for(@mcu_data, 'depledged', t('reports.pages.mortgage_collateral_update.loans_depledged'))
       }
     end
   end

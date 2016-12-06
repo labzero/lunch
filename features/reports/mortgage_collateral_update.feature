@@ -13,7 +13,7 @@ Scenario: Visit mortgage collateral update report from header link
   When I select "MCU Status" from the reports dropdown
   Then I should see "Mortgage Collateral Update (MCU) Status"
   And I should see a report header with just freshness
-  And I should see 3 report tables with multiple data rows
+  And I should see 3 report tables, 2 of which contain data
 
 @data-unavailable @jira-mem-283 @jira-mem-263
 Scenario: No data is available to show in the mortgage collateral update report

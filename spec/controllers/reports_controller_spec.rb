@@ -1639,10 +1639,14 @@ RSpec.describe ReportsController, :type => :controller do
           expect(subject).to receive(:mcu_table_columns_for).with(mcu_data, 'depledged', I18n.t('reports.pages.mortgage_collateral_update.loans_depledged'))
           mortgage_collateral_update
         end
-        it "has a rows array with a row object containing the result of the `mcu_table_columns_for` private method" do
+        it "has no data rows" do
+          mortgage_collateral_update
+          expect(assigns[:depledged_loans_table_data][:rows]).to eq([])
+        end
+        it "has a footer with a row object containing the result of the `mcu_table_columns_for` private method" do
           expect(subject).to receive(:mcu_table_columns_for).with(mcu_data, 'depledged', I18n.t('reports.pages.mortgage_collateral_update.loans_depledged')).and_return(table_rows)
           mortgage_collateral_update
-          expect(assigns[:depledged_loans_table_data][:rows]).to eq([{columns: table_rows}])
+          expect(assigns[:depledged_loans_table_data][:footer]).to eq(table_rows)
         end
       end
       describe 'with the report disabled' do

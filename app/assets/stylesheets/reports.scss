@@ -1190,11 +1190,8 @@ td.dataTables_empty {
 .report-mcu-table {
   margin-bottom: 35px;
   width: 540px;
-  &.report-mcu-totals-table {
-    margin-bottom: 10px;
-    tbody tr:first-child {
-      @extend %table-footer-cell;
-    }
+  &.report-mcu-totals-table tr.odd {
+    display: none;
   }
   td, th {
     @include table-cell-treatment;

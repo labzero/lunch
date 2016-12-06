@@ -72,6 +72,20 @@ Then(/^I should see (\d+) report tables with multiple data rows$/) do |count|
   end
 end
 
+Then(/^I should see (\d+) report tables, (\d+) of which contain data$/) do |total_count, with_data_count|
+  page.assert_selector('.report-table', count: total_count)
+  tables_with_data = 0
+  page.all('.report-table').each do |table|
+    begin
+      table.assert_selector('tbody tr')
+      tables_with_data += 1
+    rescue Capybara::ExpectationNotMet
+      #no-op
+    end
+  end
+  expect(tables_with_data).to eq(with_data_count.to_i)
+end
+
 Then(/^I should see (\d+) report tables$/) do |count|
   page.assert_selector('.report-table', count: count)
 end
