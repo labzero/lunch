@@ -40,8 +40,5 @@
     %section
       %h2.header-with-action
         %span= t('reports.pages.account_summary.capital_stock.title')
-        - if feature_enabled?('report-capital-stock-position-and-leverage')
-          = link_to(t('global.view_report'), reports_capital_stock_and_leverage_path)
-        - else
-          %a.disabled=t('global.view_report')
+        = link_to(t('global.view_report'), reports_capital_stock_and_leverage_path)
       = render 'reports_table', sortable: false, table_data: @capital_stock_and_leverage

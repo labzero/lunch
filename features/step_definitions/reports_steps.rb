@@ -583,7 +583,7 @@ Then(/^I should see a report for the last entry from the month year dropdown$/) 
   # this logic is not 100% rock solid, but it should work in most cases. Really it should
   # use the debit date from that report's debit_date field, however getting that into the
   # report is tricky.
-  debit_date = most_recent_business_day(element['data-dropdown-value'].to_date + 1.month)
+  debit_date = most_recent_business_day((element['data-dropdown-value'].to_date + 1.month).end_of_month)
   step %{I should see a report for "#{debit_date}"}
 end
 

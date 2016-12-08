@@ -549,14 +549,8 @@ RSpec.describe DashboardController, :type => :controller do
             [I18n.t('dashboard.your_account.table.remaining.available'), remaining_financing_available]
           ]
         }
-        it 'contains the correct data when the capital stock position and leverage report feature is enabled' do
+        it 'contains the correct data' do
           other_remaining_array << [[I18n.t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path], remaining_leverage]
-          account_overview
-          expect(assigns[:account_overview_table_data][:other_remaining]).to eq(other_remaining_array)
-        end
-        it 'contains the correct data when the capital stock position and leverage report feature is disabled' do
-          allow(controller).to receive(:feature_enabled?).with('report-capital-stock-position-and-leverage').and_return(false)
-          other_remaining_array << [I18n.t('dashboard.your_account.table.remaining.leverage'), remaining_leverage]
           account_overview
           expect(assigns[:account_overview_table_data][:other_remaining]).to eq(other_remaining_array)
         end
