@@ -1679,8 +1679,15 @@ td.dataTables_empty {
     }
   }
   .expanding-row-table {
+    tbody, thead {
+      th, td {
+        &:nth-last-child(2) {
+          display: none;
+        }
+      }
+    }
     th, td {
-      &:last-child, &:nth-last-child(2) {
+      &:last-child {
         display: none;
       }
     }
