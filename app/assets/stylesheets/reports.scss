@@ -1552,10 +1552,21 @@ td.dataTables_empty {
     page-break-inside: avoid;
   }
 
-  .report-securities-services-statement {
-    .report-table-vertical-headers td:nth-child(1) {
-      background-color: transparent;
+  .report-table-vertical-headers {
+    tr:first-child td {
+      border-top: 1px solid $light-gray;
     }
+    td:first-child {
+      background-color: transparent;
+      border-right: 1px solid $light-gray;
+      border-bottom: none;
+    }
+    tr:last-child td:first-child {
+      border-bottom: 1px solid $light-gray;
+    }
+  }
+
+  .report-securities-services-statement {
     .report-table td {
       border-left: none;
       border-right: none;
