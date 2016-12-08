@@ -30,11 +30,15 @@ module FhlbMember
     config.log_tags = [
       lambda { |request| "time=#{Time.zone.now.iso8601}" },
       lambda { |request| "request_id=#{request.uuid}" },
+      lambda { |request| original_time = Time.zone.now.to_f; lambda { "delta=#{'%10.9f' % (Time.zone.now.to_f - original_time)}" } },
+      lambda { |request| "server=#{request.host}" },
       lambda { |request| "session_id=#{request.session.id}" },
       lambda { |request| request.session[ApplicationController::SessionKeys::WARDEN_USER].nil? ? "user_id=NONE" : "user_id=#{request.session[ApplicationController::SessionKeys::WARDEN_USER][0][0]}" },
       lambda { |request| "remote_ip=#{request.remote_ip}" }
     ]
-    config.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(Rails.root.join('log', "#{Rails.env}.log"), 'daily'))
+
+    require Rails.root.join('lib', 'fhlb_member', 'tagged_logging')
+    config.logger = FhlbMember::TaggedLogging.new(ActiveSupport::Logger.new(Rails.root.join('log', "#{Rails.env}.log"), 'daily'))
     config.active_job.queue_adapter = :resque
 
     config.active_record.raise_in_transactional_callbacks = true
