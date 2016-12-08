@@ -28,7 +28,7 @@ function Html({ apikey, initialState, title, description, root, style, script, c
         <meta property="twitter:site" content="labzero" />
         <meta property="twitter:image" content={`${root}/tile.png`} />
         <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:300,700" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:400,900" />
         <link rel="apple-touch-icon" href="apple-touch-icon.png" />
         {style && <style id="css" dangerouslySetInnerHTML={{ __html: style }} />}
       </head>
