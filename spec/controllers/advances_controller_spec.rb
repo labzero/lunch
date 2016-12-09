@@ -78,13 +78,9 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:advance_confirmation) { SecureRandom.hex }
     let(:status) { SecureRandom.hex }
     let(:interest_rate) { rand(1..100) / 100.0 }
-    let(:current_par) { rand(10000..99999) }
     let(:user) { controller.current_user }
     let(:user_id) { user.id }
     let(:member_id) { controller.current_member_id }
-    let(:profile) { instance_double(Hash) }
-    let(:member_profile) { double('Member Profile') }    
-    let(:total) { instance_double(Hash) }
     let(:column_headings) { [
       { title: I18n.t('common_table_headings.trade_date'), sortable: false }, 
       { title: I18n.t('common_table_headings.funding_date'), sortable: false },
@@ -103,7 +99,7 @@ RSpec.describe AdvancesController, :type => :controller do
         'advance_type' => advance_type,
         'status' => status,
         'interest_rate' => interest_rate,
-        'current_par' => current_par,
+        'current_par' => rand(10000..99999),
         'advance_confirmation' => advance_confirmation
       },
       {
@@ -114,7 +110,7 @@ RSpec.describe AdvancesController, :type => :controller do
         'advance_type' => advance_type,
         'status' => status,
         'interest_rate' => interest_rate,
-        'current_par' => current_par,
+        'current_par' => rand(10000..99999),
         'advance_confirmation' => advance_confirmation
       }
     ]}
@@ -126,12 +122,6 @@ RSpec.describe AdvancesController, :type => :controller do
       allow(response_hash).to receive(:collect)
       allow(controller).to receive(:advance_confirmation_link_data)
       allow(subject).to receive(:feature_enabled?).with('advance-confirmation').and_return(false)
-      allow(MemberBalanceService).to receive(:new).with(any_args).and_return(member_balance_service_instance)
-      allow(member_balance_service_instance).to receive(:profile).with(no_args).and_return(member_profile)
-      allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(member_profile).and_return(profile)
-      allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(nil).and_return(nil)
-      allow(profile).to receive(:[]).with(:advances).and_return(total)
-      allow(total).to receive(:[]).with(:total_advances).and_return(rand(9999..99999))
     end
 
     it_behaves_like 'a user required action', :get, :manage
@@ -215,32 +205,24 @@ RSpec.describe AdvancesController, :type => :controller do
       end
       it 'sets @advances_data_table to the hash returned from the job status' do
         call_action_with_job_id
-        expect(assigns[:advances_data_table][:rows][0][:columns]).to eq([{:type=>:date, :value=>trade_date, order: trade_date_raw.to_i}, {:type=>:date, :value=>funding_date, order: funding_date_raw.to_i}, {:type=>:date, :value=>maturity_date, order: maturity_date_raw.to_i}, {:value=>advance_number}, {:value=>advance_type}, {:type=>:index, :value=>interest_rate}, {:type=>:number, :value=>current_par}])
+        expect(assigns[:advances_data_table][:rows][0][:columns]).to eq([{:type=>:date, :value=>trade_date, order: trade_date_raw.to_i}, {:type=>:date, :value=>funding_date, order: funding_date_raw.to_i}, {:type=>:date, :value=>maturity_date, order: maturity_date_raw.to_i}, {:value=>advance_number}, {:value=>advance_type}, {:type=>:index, :value=>interest_rate}, {:type=>:number, :value=>active_advances_response[0]['current_par']}])
       end
       it 'sets the order of `Open` advances to the far future' do
         call_action_with_job_id
         expect(assigns[:advances_data_table][:rows][1][:columns]).to include({value: 'Open', order: described_class::OPEN_SORT_DATE})
       end
-      it 'creates a new instance of the `MemberBalanceService`' do
-        expect(MemberBalanceService).to receive(:new).with(member_id, request)
-        call_action_with_job_id
-      end
-      it 'gets the `profile` from the `MemberBalanceService`' do
-        expect(member_balance_service_instance).to receive(:profile)
-        call_action_with_job_id
-      end
-      it 'sanitizes the profile' do
-        expect(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(member_profile)
-        call_action_with_job_id
-      end
-      it 'does not return an error when the profile is not retrieved' do
-        allow(member_balance_service_instance).to receive(:profile).and_return(nil)
-        expect{call_action_with_job_id}.to_not raise_error
-      end
       it 'adds a total footer' do
         call_action_with_job_id
-        expect(assigns[:advances_data_table][:footer]).to match([{value: I18n.t('advances.manage_advances.total_current_par'), colspan: 6 },
-                                                { value: total[:total_advances], type: :currency_whole }])
+        total = active_advances_response[0]['current_par'] + active_advances_response[1]['current_par']
+        expect(assigns[:advances_data_table][:footer].last).to match({ value: total, type: :currency_whole })
+      end
+      it 'ignores nils when calculating the total' do
+        active_advances_response[0]['current_par'] = nil
+        active_advances_response[1]['current_par'] = nil
+        allow(job_status).to receive(:result_as_string).and_return(active_advances_response.to_json)
+        call_action_with_job_id
+        expect(assigns[:advances_data_table][:footer]).to match([{value: I18n.t('global.total'), colspan: 6 },
+                                                { value: 0, type: :currency_whole }])
       end
       describe 'when the `advance-confirmation` feature is enabled' do
         let(:advance_confirmation_link) { double('advance confirmation link') }

@@ -67,7 +67,7 @@ class AdvancesController < ApplicationController
       raise StandardError, "There has been an error and AdvancesController#manage_advances has encountered nil. Check error logs." if json.nil?
       active_advances_response = JSON.parse(json).collect! {|o| o.with_indifferent_access}
       job_status.destroy
-      profile = sanitize_profile_if_endpoints_disabled(MemberBalanceService.new(current_member_id, request).profile)
+      current_par_sum = 0
       rows = active_advances_response.collect do |row|
         columns = []
         [:trade_date, :funding_date, :maturity_date, :advance_number, :advance_type, :interest_rate, :current_par, :advance_confirmation].each do |key|
@@ -75,6 +75,7 @@ class AdvancesController < ApplicationController
           if key == :interest_rate
             columns << {type: :index, value: value}
           elsif key == :current_par
+            current_par_sum += value if value
             columns << {type: :number, value: value}
           elsif key == :trade_date || key == :funding_date || key == :maturity_date
             if value == 'Open'
@@ -98,8 +99,8 @@ class AdvancesController < ApplicationController
         {columns: columns}
       end
       @advances_data_table[:rows] = rows
-      @advances_data_table[:footer] = [ {value: t('advances.manage_advances.total_current_par'), colspan: 6 },
-                                        { value: profile.try(:[], :advances).try(:[], :total_advances), type: :currency_whole } ]
+      @advances_data_table[:footer] = [ {value: t('global.total'), colspan: 6 },
+                                        { value: current_par_sum, type: :currency_whole } ]
       render layout: false if request.xhr?
     else
       job_method = outstanding_only ? 'active_advances' : 'advances'
