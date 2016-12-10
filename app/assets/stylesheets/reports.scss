@@ -1358,8 +1358,7 @@ td.dataTables_empty {
       color: $print-color;
       @include typography-print-table-total;
     }
-  }
-  .account-summary-report, .report-dividend-statement {
+    
     .report-table:not(.account-summary-collateral-totals) tbody td:first-child {
       color: $print-color;
       @include typography-print-table-cell;
@@ -1557,6 +1556,7 @@ td.dataTables_empty {
       border-top: 1px solid $light-gray;
     }
     td:first-child {
+      @include typography-print-table-heading;
       background-color: transparent;
       border-right: 1px solid $light-gray;
       border-bottom: none;
