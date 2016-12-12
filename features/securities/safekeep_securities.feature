@@ -12,6 +12,12 @@ Scenario: View the safekeep securities page
   And I click the button to create a new safekeep request
   Then I should be on the safekeep securities page
 
+@jira-mem-2070
+Scenario: View the safekeep securities page from the nav
+  When I click on the securities link in the header
+  And I click on the safekeep new link in the header
+  Then I should be on the safekeep securities page
+
 @jira-mem-1679
 Scenario: View the various Delivery Instructions field sets
   When I am on the safekeep securities page

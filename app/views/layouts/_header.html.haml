@@ -36,6 +36,8 @@
               .nav-dropdown-column
                 %h2= t('securities.title')
                 %ul
+                  %li= link_to(t('securities.manage.pledge_new'), securities_pledge_edit_path)
+                  %li= link_to(t('securities.manage.safekeep_new'), securities_safekeep_edit_path)
                   %li= link_to(t('securities.manage.title'), securities_manage_path)
                   %li= link_to(t('securities.requests.title'), securities_requests_path)
       %li{class: ('active-nav-item' if active_nav == :reports)}<>

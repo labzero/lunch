@@ -12,6 +12,12 @@ Scenario: View the pledge securities page
   And I click the button to create a new pledge request
   Then I should be on the pledge securities page
 
+@jira-mem-2070
+Scenario: View the pledge securities page from the nav
+  When I click on the securities link in the header
+  And I click on the pledge new link in the header
+  Then I should be on the pledge securities page
+
 @jira-mem-1678
 Scenario: Member views the broker instructions
   When I am on the pledge securities page

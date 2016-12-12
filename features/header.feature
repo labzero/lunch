@@ -50,3 +50,10 @@ Scenario: Member sees active nav state when a subpage is viewed
   When I click on the products link in the header
   And I click on the products summary link in the header
   Then I should see the active state of the products nav item
+
+@flip-on-securities
+Scenario: Member sees securities dropdown
+  Given I visit the dashboard
+  And I don't see the securities dropdown
+  When I click on the securities link in the header
+  Then I should see the securities dropdown
