@@ -6,7 +6,7 @@
         .form-error= flash[:alert]
       - if flash[:notice].present?
         .form-flash-message{data:{type: :success}}= flash[:notice]
-      = render 'shared/input_field', form_builder: f, field_name: :username, label: t('global.username')
-      = render 'shared/input_field', form_builder: f, field_name: :password, field_type: :password_field, label: t('global.password')
-      = link_to(t('welcome.forgot_password'), new_user_password_path)
-      = f.submit t('global.login'), class: 'primary-button'
+      = render 'shared/input_field', form_builder: f, field_name: :username, label: t('global.username'), html_attributes: {autofocus: true, tabindex: 1}
+      = render 'shared/input_field', form_builder: f, field_name: :password, field_type: :password_field, label: t('global.password'), html_attributes: {tabindex: 2}
+      = link_to(t('welcome.forgot_password'), new_user_password_path, tabindex: 4)
+      = f.submit t('global.login'), class: 'primary-button', tabindex: 3
