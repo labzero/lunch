@@ -31,7 +31,7 @@
           = f.hidden_field(:term, value: 'overnight')
           = render layout: 'shared/etransact_status_message_dashboard', locals: {etransact_status: @etransact_status } do
             -# Rendered when the status is :open
-            = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_name: 'advance_request[amount]'
+            = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_name: 'advance_request[amount]', html_attributes: {autofocus: true}
             .etransact-status-message.etransact-status-message-closed
               = t('dashboard.quick_advance.advances_desk_closed_html', phone_number: service_desk_phone_number)
               = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
