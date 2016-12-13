@@ -1,9 +1,9 @@
-= form_for(:advance_request, as: :advance_request, url: advances_preview_path, html: {method: :post, class: 'add-advance-form'}) do |f|
+= form_for(:advance_request, as: :advance_request, url: advances_preview_path, html: {method: :post, class: 'add-advance-form', data: {'prevent-submit-on-enter' => true}}) do |f|
   = render layout: 'add_advance', title: t('advances.add_advance.titles.add') do
     = render layout: 'shared/etransact_status_message', locals: {etransact_status: @etransact_status} do
       .advances-add.row
         .column-9x3-left
-          = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_name: 'advance_request[amount]', field_value: fhlb_formatted_number(@selected_amount, optional_number: true, html: false)
+          = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_name: 'advance_request[amount]', field_value: fhlb_formatted_number(@selected_amount, optional_number: true, html: false), html_attributes: {autofocus: true}
           = f.hidden_field(:type)
           = f.hidden_field(:term)
           = f.hidden_field(:id)
