@@ -1,5 +1,5 @@
 $(function() {
-  var $welcomeForm = $('.welcome form');
+  var $welcomeForm = $('.welcome-member-select');
   if ($welcomeForm.length) {
     var $memberProfileButton = $welcomeForm.find('.welcome-profile');
     var $visitProfileField = $welcomeForm.find('input[name=visit_profile]');
