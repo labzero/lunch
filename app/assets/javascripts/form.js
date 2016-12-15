@@ -26,8 +26,10 @@ $(function() {
     $(this).find('input[type="submit"]').prop('disabled', true);
   });
 
-  $('form input').on('keyup', function(e) {
+  $('form input').on('keydown', function(e) {
     if (e.keyCode == 13) {
+      e.preventDefault();
+      e.stopPropagation();
       var $form = $(e.target).parents('form');
       $form.data('prevent-submit-on-enter') ? null : $form.submit();
     };
