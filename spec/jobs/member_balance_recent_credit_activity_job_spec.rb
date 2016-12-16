@@ -15,6 +15,19 @@ RSpec.describe MemberBalanceRecentCreditActivityJob, type: :job do
 
   it_behaves_like 'a job that makes service calls', MemberBalanceService, [:todays_credit_activity, :historic_credit_activity]
 
+  shared_examples 'fails gracefully' do
+    it 'returns nil' do
+      expect(run_job).to be_nil
+    end
+    it 'marks the job as failed' do
+      run_job
+      expect(subject.job_status).to be_failed
+    end
+    it 'does not raise an error' do
+      expect{run_job}.to_not raise_error
+    end
+  end
+
   before do
     allow(MemberBalanceService).to receive(:new).and_return(service_instance)
   end
@@ -22,17 +35,26 @@ RSpec.describe MemberBalanceRecentCreditActivityJob, type: :job do
   it 'combines the array returned by `MemberBalanceService#todays_credit_activity` with the one returned by `MemberBalanceService#historic_credit_activity`' do
     expect(run_job).to eq(todays_credit_activity + historic_credit_activity)
   end
-  it 'supports a nil `MemberBalanceService#todays_credit_activity`' do
-    allow(service_instance).to receive(:todays_credit_activity).and_return(nil)
-    expect(run_job).to eq(historic_credit_activity)
+
+  describe 'when `MemberBalanceService#todays_credit_activity` returns nil' do
+    before do
+      allow(service_instance).to receive(:todays_credit_activity).and_return(nil)
+    end
+    include_examples 'fails gracefully'
   end
-  it 'supports a nil `MemberBalanceService#historic_credit_activity`' do
-    allow(service_instance).to receive(:historic_credit_activity).and_return(nil)
-    expect(run_job).to eq(todays_credit_activity)
+
+  describe 'when `MemberBalanceService#historic_credit_activity` returns nil' do
+    before do
+      allow(service_instance).to receive(:historic_credit_activity).and_return(nil)
+    end
+    include_examples 'fails gracefully'
   end
-  it 'supports nil for both `MemberBalanceService#todays_credit_activity` and `MemberBalanceService#historic_credit_activity`' do
-    allow(service_instance).to receive(:historic_credit_activity).and_return(nil)
-    allow(service_instance).to receive(:todays_credit_activity).and_return(nil)
-    expect(run_job).to eq([])
+
+  describe 'when `MemberBalanceService#historic_credit_activity` and `MemberBalanceService#todays_credit_activity` both return nil' do
+    before do
+      allow(service_instance).to receive(:historic_credit_activity).and_return(nil)
+      allow(service_instance).to receive(:todays_credit_activity).and_return(nil)
+    end
+    include_examples 'fails gracefully'
   end
 end
