@@ -1707,6 +1707,9 @@ td.dataTables_empty {
     dt, dd  {
       @include typography-print-details;
       color: $print-color;
-    } 
+    }
+  }
+  .securities-position-report-table td:nth-last-child(3) {
+    padding-right: 2px;
   }
 }
