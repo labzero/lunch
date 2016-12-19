@@ -3,12 +3,12 @@ require 'rails_helper'
 RSpec.describe MemberBalanceRecentCreditActivityJob, type: :job do
   let(:member_id) { double('A Member ID') }
   let(:todays_credit_activity) {[
-    instance_double(Hash),
-    instance_double(Hash)
+    instance_double(Hash, :[] => instance_double(String)),
+    instance_double(Hash, :[] => instance_double(String))
   ]}
   let(:historic_credit_activity) {[
-    instance_double(Hash),
-    instance_double(Hash)
+    instance_double(Hash, :[] => instance_double(String)),
+    instance_double(Hash, :[] => instance_double(String))
   ]}
   let(:service_instance) { instance_double(MemberBalanceService, todays_credit_activity: todays_credit_activity, historic_credit_activity: historic_credit_activity) }
   let(:run_job) { subject.perform(member_id) }
@@ -34,6 +34,16 @@ RSpec.describe MemberBalanceRecentCreditActivityJob, type: :job do
 
   it 'combines the array returned by `MemberBalanceService#todays_credit_activity` with the one returned by `MemberBalanceService#historic_credit_activity`' do
     expect(run_job).to eq(todays_credit_activity + historic_credit_activity)
+  end
+
+  it 'removes duplicate activities based on the `transaction_number`' do
+    activity = { 'transaction_number' => SecureRandom.hex }
+    duplicate_activity = { 'transaction_number' => activity['transaction_number'] }
+    unique_activity = { 'transaction_number' => SecureRandom.hex }
+    todays_credit_activity = [activity]
+    historic_credit_activity = [duplicate_activity, unique_activity]
+    allow(MemberBalanceService).to receive(:new).and_return(instance_double(MemberBalanceService, todays_credit_activity: todays_credit_activity, historic_credit_activity: historic_credit_activity))
+    expect(run_job).to eq([activity, unique_activity])
   end
 
   describe 'when `MemberBalanceService#todays_credit_activity` returns nil' do
