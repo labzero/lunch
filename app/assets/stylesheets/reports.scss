@@ -1712,4 +1712,9 @@ td.dataTables_empty {
   .securities-position-report-table td:nth-last-child(3) {
     padding-right: 2px;
   }
+  .letters-of-credit-table {
+    th:nth-child(2) {
+      text-align: right;
+    }
+  }
 }
