@@ -589,6 +589,9 @@
     .advance-rates-table-toggle span[data-active-term-type="vrc"] {
       color: $actionable-blue;
     }
+    .add-advance-table-loading-cell {
+      padding-top: 16px;
+    }
   }
   &[data-active-term-type="frc"] {
     tbody {
