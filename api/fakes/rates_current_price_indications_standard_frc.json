@@ -1,0 +1,93 @@
+[
+  {
+    "advance_maturity": "1 Month",
+    "treasury_benchmark_maturity": "3 Months",
+    "nominal_yield_of_benchmark": 0.01,
+    "basis_point_spread_to_benchmark": 20,
+    "advance_rate": 0.21
+  },
+  {
+    "advance_maturity": "2 Month",
+    "treasury_benchmark_maturity": "2 Months",
+    "nominal_yield_of_benchmark": 0.01,
+    "basis_point_spread_to_benchmark": 20,
+    "advance_rate": 0.21
+  },
+  {
+    "advance_maturity": "3 Month",
+    "treasury_benchmark_maturity": "3 Months",
+    "nominal_yield_of_benchmark": 0.01,
+    "basis_point_spread_to_benchmark": 20,
+    "advance_rate": 0.22
+  },
+  {
+    "advance_maturity": "6 Month",
+    "treasury_benchmark_maturity": "6 Months",
+    "nominal_yield_of_benchmark": 0.09,
+    "basis_point_spread_to_benchmark": 22,
+    "advance_rate": 0.31
+  },
+  {
+    "advance_maturity": "1 Year",
+    "treasury_benchmark_maturity": "2 Years",
+    "nominal_yield_of_benchmark": 0.71,
+    "basis_point_spread_to_benchmark": 24,
+    "advance_rate": 0.47
+  },
+  {
+    "advance_maturity": "2 Years",
+    "treasury_benchmark_maturity": "2 Years",
+    "nominal_yield_of_benchmark": 0.71,
+    "basis_point_spread_to_benchmark": 24,
+    "advance_rate": 0.95
+  },
+  {
+    "advance_maturity": "3 Years",
+    "treasury_benchmark_maturity": "3 Years",
+    "nominal_yield_of_benchmark": 1.11,
+    "basis_point_spread_to_benchmark": 25,
+    "advance_rate": 1.36
+  },
+  {
+    "advance_maturity": "5 Years",
+    "treasury_benchmark_maturity": "5 Years",
+    "nominal_yield_of_benchmark": 1.65,
+    "basis_point_spread_to_benchmark": 27,
+    "advance_rate": 1.92
+  },
+  {
+    "advance_maturity": "7 Years",
+    "treasury_benchmark_maturity": "7 Years",
+    "nominal_yield_of_benchmark": 2.21,
+    "basis_point_spread_to_benchmark": 27,
+    "advance_rate": 2.48
+  },
+  {
+    "advance_maturity": "10 Years",
+    "treasury_benchmark_maturity": "10 Years",
+    "nominal_yield_of_benchmark": 2.68,
+    "basis_point_spread_to_benchmark": 30,
+    "advance_rate": 2.98
+  },
+  {
+    "advance_maturity": "15 Years",
+    "treasury_benchmark_maturity": "15 Years",
+    "nominal_yield_of_benchmark": 3.07,
+    "basis_point_spread_to_benchmark": 31,
+    "advance_rate": 3.38
+  },
+  {
+    "advance_maturity": "20 Years",
+    "treasury_benchmark_maturity": "20 Years",
+    "nominal_yield_of_benchmark": 3.29,
+    "basis_point_spread_to_benchmark": 35,
+    "advance_rate": 3.64
+  },
+  {
+    "advance_maturity": "30 Years",
+    "treasury_benchmark_maturity": "30 Years",
+    "nominal_yield_of_benchmark": 3.48,
+    "basis_point_spread_to_benchmark": 37,
+    "advance_rate": 3.85
+  }
+]

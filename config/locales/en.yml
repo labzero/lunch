@@ -1706,6 +1706,12 @@ en:
             frc_sbc: "5. Securities-Backed Credit Program - Fixed Rate Credit Advance"
             arc_sbc: "6. Securities-Backed Credit Program - Adjustable Rate Credit Advance"
             sta: "7. Settlement/Transaction Account"
+          pdf:
+            title: Current Price Indications
+            date_html: "<span>Date:</span> %{date} at 6:00am"
+            vrc: Variable Rate Credit (VRC)
+            frc: Fixed Rate Credit (FRC)
+            arc: Adjustable Rate Credit (ARC)
         historical:
           title: Historical Price Indications and STA Rates
           freshness: This report reflects price indications as of 6:00 am PT on the date displayed and the STA rate as of the date displayed.

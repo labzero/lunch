@@ -1,7 +1,7 @@
 class RenderReportExcelJob < FhlbJob
   queue_as :high_priority
 
-  def perform(member_id, report_name, filename, params={})
+  def perform(member_id, report_name, filename, params={}, report_view=nil)
     controller = ReportsController.new
     controller.request = ActionDispatch::TestRequest.new
     controller.response = ActionDispatch::TestResponse.new

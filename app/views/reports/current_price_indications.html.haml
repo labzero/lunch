@@ -4,7 +4,7 @@
   .report-header
     %h1= @report_name
     - unless @whole_report_disabled
-      = render 'reports_header_buttons', download_formats: [:xlsx]
+      = render 'reports_header_buttons', download_formats: [:xlsx, :pdf]
     = render 'report_details', name: @member_name, freshness: t('reports.pages.price_indications.current.freshness', phone_number: service_desk_phone_number)
     - unless @whole_report_disabled
       %p.report-date= t('reports.pages.price_indications.current.date_html', date: fhlb_date_long_alpha(@vrc_date))

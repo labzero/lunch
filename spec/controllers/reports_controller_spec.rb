@@ -1891,7 +1891,7 @@ RSpec.describe ReportsController, :type => :controller do
     let(:current_price_indications) { get :current_price_indications }
 
     it_behaves_like 'a user required action', :get, :current_price_indications
-    it_behaves_like 'a report that can be downloaded', :current_price_indications, [:xlsx]
+    it_behaves_like 'a report that can be downloaded', :current_price_indications, [:xlsx, :pdf]
     it_behaves_like 'a report with instance variables set in a before_filter', :current_price_indications
     it_behaves_like 'a controller action with an active nav setting', :current_price_indications, :reports
     it_behaves_like 'a controller action with quick advance messaging', :current_price_indications
@@ -2081,6 +2081,20 @@ RSpec.describe ReportsController, :type => :controller do
             current_price_indications
             expect(assigns[:vrc_date]).to be_nil
           end
+        end
+      end
+      context 'when `@print_layout` is true' do
+        before do
+          controller.instance_variable_set(:@print_layout, true)
+          allow(controller).to receive(:populate_pdf_view_variables)
+        end
+        it 'calls `populate_pdf_view_variables`' do
+          expect(controller).to receive(:populate_pdf_view_variables)
+          current_price_indications
+        end
+        it 'renders the `current_price_indications_pdf` view' do
+          current_price_indications
+          expect(response.body).to render_template('current_price_indications_pdf')
         end
       end
     end
@@ -3861,6 +3875,7 @@ RSpec.describe ReportsController, :type => :controller do
       let(:report_download_params) { double('report_download_params') }
       let(:job_status_url) { double('job_status_url') }
       let(:job_cancel_url) { double('job_cancel_url') }
+      let(:report_view) { instance_double(String) }
       describe 'when there is not an `export_format` parameter' do
         it 'yields a code block' do
           expect{|x| subject.send(:downloadable_report, &x) }.to yield_with_no_args
@@ -3888,16 +3903,24 @@ RSpec.describe ReportsController, :type => :controller do
             end
             it "calls `perform_later` on #{format.last} with the current_member_id and action_name" do
               allow(subject).to receive(:current_member_id).and_return(id)
-              expect(format.last).to receive(:perform_later).with(id, action_name, anything, anything).and_return(job)
+              expect(format.last).to receive(:perform_later).with(id, action_name, anything, anything, anything).and_return(job)
               call_method
             end
             it "passes the `report_download_name` to the `perform_later` method" do
-              expect(format.last).to receive(:perform_later).with( anything, anything, report_download_name, anything).and_return(job)
+              expect(format.last).to receive(:perform_later).with( anything, anything, report_download_name, anything, anything).and_return(job)
               subject.send(:downloadable_report, nil, nil, report_download_name)
             end
             it "passes the `report_download_params` to the `perform_later method`" do
-              expect(format.last).to receive(:perform_later).with( anything, anything, anything, report_download_params).and_return(job)
+              expect(format.last).to receive(:perform_later).with( anything, anything, anything, report_download_params, anything).and_return(job)
               subject.send(:downloadable_report, nil, report_download_params)
+            end
+            it "passes `nil` as the `report_view` argument to the `perform_later method` if report_view is provided" do
+              expect(format.last).to receive(:perform_later).with( anything, anything, anything, anything, nil).and_return(job)
+              call_method
+            end
+            it "passes the `report_view` to the `perform_later method` if provided" do
+              expect(format.last).to receive(:perform_later).with( anything, anything, anything, anything, report_view).and_return(job)
+              subject.send(:downloadable_report, nil, nil, nil, report_view)
             end
             it 'updates the job_status with the current_user_id' do
               allow(subject).to receive(:current_user).and_return(double('User', id: id))
@@ -4203,6 +4226,85 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'returns `type` set to `nil` if the field is not `advance_rate` or `effective_date`' do
         expect(call_method).to eq({value: vrc_value, type: nil})
+      end
+    end
+    describe '`populate_pdf_view_variables` method' do
+      let(:interest_day_count_key) { I18n.t('reports.pages.price_indications.current.interest_day_count') }
+      let(:interest_rate_reset_key) { I18n.t('reports.pages.price_indications.current.interest_rate_reset') }
+      let(:payment_frequency_key) { I18n.t('reports.pages.price_indications.current.payment_frequency') }
+      let(:arc_table_data) {{
+        notes: {
+          interest_day_count_key => instance_double(String),
+          interest_rate_reset_key => instance_double(Array),
+          payment_frequency_key => instance_double(Array)
+        }
+      }}
+      let(:standard_frc_table_data) {{
+        rows: [
+          instance_double(Hash),
+          instance_double(Hash),
+          instance_double(Hash),
+          instance_double(Hash),
+          instance_double(Hash)
+        ]
+      }}
+      let(:sbc_frc_table_data) {{
+        rows: [
+          instance_double(Hash),
+          instance_double(Hash),
+          instance_double(Hash),
+          instance_double(Hash)
+        ]
+      }}
+      let(:call_method) { controller.send(:populate_pdf_view_variables) }
+      before do
+        controller.instance_variable_set(:@standard_arc_table_data, arc_table_data)
+        controller.instance_variable_set(:@sbc_arc_table_data, arc_table_data)
+        controller.instance_variable_set(:@standard_frc_table_data, standard_frc_table_data)
+        controller.instance_variable_set(:@sbc_frc_table_data, sbc_frc_table_data)
+      end
+
+      it 'sets `@standard_arc_table_data[:notes_1]` to @standard_arc_table_data[:notes] minus the `payment_frequency` key-value pair' do
+        call_method
+        expect(assigns[:standard_arc_table_data][:notes_1]).to eq({
+          interest_day_count_key => arc_table_data[:notes][interest_day_count_key],
+          interest_rate_reset_key => arc_table_data[:notes][interest_rate_reset_key]
+        })
+      end
+      it 'sets `@standard_arc_table_data[:notes_2]` to the to @standard_arc_table_data[:notes] `payment_frequency` key-value pair' do
+        call_method
+        expect(assigns[:standard_arc_table_data][:notes_2]).to eq({
+          payment_frequency_key => arc_table_data[:notes][payment_frequency_key]
+        })
+      end
+      it 'sets `@sbc_arc_table_data[:notes_1]` to @sbc_arc_table_data[:notes] minus the `payment_frequency` key-value pair' do
+        call_method
+        expect(assigns[:sbc_arc_table_data][:notes_1]).to eq({
+          interest_day_count_key => arc_table_data[:notes][interest_day_count_key],
+          interest_rate_reset_key => arc_table_data[:notes][interest_rate_reset_key]
+        })
+      end
+      it 'sets `@sbc_arc_table_data[:notes_2]` to the to @sbc_arc_table_data[:notes] `payment_frequency` key-value pair' do
+        call_method
+        expect(assigns[:sbc_arc_table_data][:notes_2]).to eq({
+          payment_frequency_key => arc_table_data[:notes][payment_frequency_key]
+        })
+      end
+      it 'sets `@standard_frc_table_data_1[:rows]` to the first half of the @standard_frc_table_data[:rows] array' do
+        call_method
+        expect(assigns[:standard_frc_table_data_1][:rows]).to eq(standard_frc_table_data[:rows][0..2])
+      end
+      it 'sets `@standard_frc_table_data_2[:rows]` to the second half of the @standard_frc_table_data[:rows] array' do
+        call_method
+        expect(assigns[:standard_frc_table_data_2][:rows]).to eq(standard_frc_table_data[:rows][3..4])
+      end
+      it 'sets `@sbc_frc_table_data_1[:rows]` to the first half of the @sbc_frc_table_data[:rows] array' do
+        call_method
+        expect(assigns[:sbc_frc_table_data_1][:rows]).to eq(sbc_frc_table_data[:rows][0..1])
+      end
+      it 'sets `@sbc_frc_table_data_2[:rows]` to the second half of the @sbc_frc_table_data[:rows] array' do
+        call_method
+        expect(assigns[:sbc_frc_table_data_2][:rows]).to eq(sbc_frc_table_data[:rows][2..3])
       end
     end
   end

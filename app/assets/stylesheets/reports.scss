@@ -1350,7 +1350,6 @@ td.dataTables_empty {
         float: none;
       }
     }
-    
     h2 {
       @include typography-print-subheader;
     }
@@ -1715,6 +1714,142 @@ td.dataTables_empty {
   .letters-of-credit-table {
     th:nth-child(2) {
       text-align: right;
+    }
+  }
+  .report-current-price-indications-pdf {
+    padding: 0;
+    &.report {
+      h1 {
+        margin-top: 18px;
+      }
+    }
+    .pdf-header {
+      position: relative;
+      h2 {
+        @include typography-print-subheader;
+        margin-bottom: 0;
+        margin-top: 8px;
+      }
+    }
+    .header-details {
+      & > p {
+        @include typography-print-details;
+        margin: 0;
+      }
+    }
+    .report-main-body {
+      h2, h3 {
+        @include typography-print-section-heading;
+      }
+      h2 {
+        border-bottom: 1px solid $light-gray;
+        text-transform: uppercase;
+      }
+      h3 span {
+        @include typography-print-footer;
+      }
+      .general-info {
+        float: right;
+        width: 55%;
+        p {
+          @include typography-print-footer;
+        }
+      }
+    }
+    .column {
+      float: left;
+      margin-right: 3%;
+      &:last-of-type {
+        margin-right: 0;
+      }
+    }
+    dl {
+      @include typography-print-footer;
+      clear: both;
+    }
+    dd dl {
+      margin-left: 5px;
+    }
+    .standard-credit-program, .sbc-program {
+      .column:nth-of-type(1) {
+        width: 20%;
+      }
+      .column:nth-of-type(2) {
+        width: 30%;
+      }
+      .column:nth-of-type(3) {
+        width: auto;
+        & > dl {
+          display: inline-block;
+          &:first-of-type {
+            width: 110px;
+          }
+          &:last-of-type {
+            width: 170px;
+          }
+        }
+      }
+    }
+    .standard-credit-program {
+      .current-price-arc-table-pdf {
+        width: 260px;
+        thead th:last-child {
+          text-align: right;
+        }
+      }
+    }
+    .sbc-program {
+      .current-price-arc-table-pdf {
+        width: 205px;
+      }
+    }
+    .current-price-arc-table-pdf {
+      thead th:nth-child(1) {
+        width: 50px;
+      }
+    }
+    .divided-table {
+      width: 48%;
+      &:first-of-type {
+        float: left;
+      }
+      &:last-of-type {
+        float: right;
+      }
+    }
+    .standard-credit-program {
+      margin-top: 32px;
+    }
+    .sbc-program, .sta-rate, .general-info {
+      margin-top: 0px;
+    }
+    .availability-details {
+      @include typography-print-table-cell;
+    }
+    .standard-credit-program, .sbc-program {
+      @include clearfix;
+    }
+    .sta-rate {
+      float: left;
+      width: 40%;
+    }
+    .sta-rate-table {
+      width: 100%;
+      tbody td {
+        @include typography-print-table-cell;
+        border: none;
+        border-bottom: 1px solid $light-gray;
+      }
+    }
+    .report-table {
+      thead th, tbody td {
+        padding: 4px;
+      }
+    }
+    .report-disabled {
+      table {
+        width: 100%;
+      }
     }
   }
 }

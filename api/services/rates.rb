@@ -579,7 +579,8 @@ module MAPI
             end
             hash
           else
-            MAPI::Services::Rates.fake('rates_current_price_indications_frc').collect do |rate|
+            rates_file_name = params[:collateral].to_sym == :standard ? 'rates_current_price_indications_standard_frc' : 'rates_current_price_indications_sbc_frc'
+            MAPI::Services::Rates.fake(rates_file_name).collect do |rate|
               rate['effective_date'] = Time.zone.today
               rate
             end

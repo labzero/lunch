@@ -14,13 +14,6 @@
     "prime": -286
   },
   {
-    "advance_maturity": "2 Years",
-    "1_month_libor": 11,
-    "3_month_libor": 0,
-    "6_month_libor": -6,
-    "prime": -286
-  },
-  {
     "advance_maturity": "3 Years",
     "1_month_libor": 6,
     "3_month_libor": 4,

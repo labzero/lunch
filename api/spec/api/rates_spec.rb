@@ -707,32 +707,76 @@ describe MAPI::ServiceApp do
         expect(last_response.status).to eq(503)
       end
     end
+    describe 'when using fake data' do
+      before do
+        allow(MAPI::Services::Rates).to receive(:init_pi_connection).and_return(false)
+        allow(MAPI::Services::Rates).to receive(:is_limited_pricing_day?).and_return(false)
+      end
+      it 'uses `rates_current_price_indications_standard_frc` as the fake data when the collateral type is `:standard`' do
+        expect(MAPI::Services::Rates).to receive(:fake).with('rates_current_price_indications_standard_frc').and_return([{}])
+        get '/rates/price_indications/current/frc/standard'
+      end
+      it 'uses `rates_current_price_indications_sbc_frc` as the fake data when the collateral type is `:sbc`' do
+        expect(MAPI::Services::Rates).to receive(:fake).with('rates_current_price_indications_sbc_frc').and_return([{}])
+        get '/rates/price_indications/current/frc/sbc'
+      end
+    end
   end
 
   describe 'price_indications_current_arc' do
     let(:price_indications_current_arc) { get '/rates/price_indications/current/arc/standard'; JSON.parse(last_response.body) }
-    it 'should return data relevant to each loan_term' do
-      price_indications_current_arc.each do |arc|
-        expect(arc['advance_maturity']).to be_kind_of(String)
-        expect(arc['1_month_libor']).to be_kind_of(Numeric)
-        expect(arc['3_month_libor']).to be_kind_of(Numeric)
-        expect(arc['6_month_libor']).to be_kind_of(Numeric)
-        expect(arc['prime']).to be_kind_of(Numeric)
-        expect(arc['effective_date']).to match(/\d{4}-\d{2}-\d{2}/)
-      end
+    let(:rates) {[
+      {
+        'advance_maturity' => instance_double(String, to_s: nil),
+        '1_month_libor' => instance_double(Integer, to_i: nil),
+        '3_month_libor' => instance_double(Integer, to_i: nil),
+        '6_month_libor' => instance_double(Integer, to_i: nil),
+        'prime' => instance_double(Integer, to_i: nil)
+      }
+    ]}
+    let(:sentinel) { SecureRandom.hex }
+    before do
+      allow(MAPI::Services::Rates).to receive(:fake).and_return(rates)
+      allow(subject).to receive(:is_limited_pricing_day?)
     end
-    it 'invalid collateral should result in 404 error message' do
+
+    it 'returns a 404 if passed an invalid collateral type' do
       get '/rates/price_indications/current/arc/foo'
       expect(last_response.status).to eq(404)
     end
+    it 'returns rates with an `advance_maturity`' do
+      allow(rates.first['advance_maturity']).to receive(:to_s).and_return(sentinel)
+      expect(price_indications_current_arc.length).to be > 0
+      price_indications_current_arc.each do |rate|
+        expect(rate['advance_maturity']).to eq(sentinel)
+      end
+    end
+    %w(1_month_libor 3_month_libor 6_month_libor prime).each do |key|
+      it "returns rates with an `#{key}`" do
+        allow(rates.first[key]).to receive(:to_i).and_return(sentinel)
+        expect(price_indications_current_arc.length).to be > 0
+        price_indications_current_arc.each do |rate|
+          expect(rate[key]).to eq(sentinel)
+        end
+      end
+    end
+    it 'sets the `effective_date` of all rates to today in the non-production environment' do
+      today_string = Time.zone.today.iso8601
+      expect(price_indications_current_arc.length).to be > 0
+      price_indications_current_arc.each do |rate|
+        expect(rate['effective_date']).to eq(today_string)
+      end
+    end
     it 'checks if the effective_date is a limited pricing day' do
-      today = Time.zone.today
-      expect(subject).to receive(:is_limited_pricing_day?).with(anything, today).exactly(7)
+      today = instance_double(Date)
+      allow(today).to receive(:to_date).and_return(today)
+      allow(Time.zone).to receive(:today).and_return(today)
+      expect(subject).to receive(:is_limited_pricing_day?).with(anything, today)
       price_indications_current_arc
     end
     it 'does not return rates for products whose effective_date is a limited pricing day' do
-      allow(subject).to receive(:is_limited_pricing_day?).and_return(true, false, true, false, true, true, true, true)
-      expect(price_indications_current_arc.length).to be(2)
+      allow(subject).to receive(:is_limited_pricing_day?).and_return(true)
+      expect(price_indications_current_arc.length).to eq(0)
     end
     describe 'in the production environment' do
       before do

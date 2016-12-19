@@ -840,8 +840,9 @@ class ReportsController < ApplicationController
 
   def current_price_indications
     @report_name = ReportConfiguration.report_title(:current_price_indications)
+    pdf_view = 'current_price_indications_pdf'
     @limited_pricing_message = MessageService.new.todays_quick_advance_message # Should this be deferred as well?  Right now it takes no time, but if it's ever rigged up to an external service, it might.
-    downloadable_report(:xlsx) do
+    downloadable_report([:xlsx, :pdf], nil, nil, pdf_view) do
 
       vrc_column_headings = [
         t('reports.pages.price_indications.current.advance_maturity'),
@@ -1039,7 +1040,12 @@ class ReportsController < ApplicationController
           {columns: columns}
         end
         @sbc_arc_table_data[:rows] = rows
-        render layout: false if request.try(:xhr?)
+        if @print_layout
+          populate_pdf_view_variables
+          render pdf_view
+        elsif request.try(:xhr?)
+          render layout: false
+        end
       else
         job_status = ReportCurrentPriceIndicationsJob.perform_later(current_member_id).job_status
         job_status.update_attributes!(user_id: current_user.id)
@@ -2162,7 +2168,7 @@ class ReportsController < ApplicationController
     ]
   end
 
-  def downloadable_report(formats = DOWNLOAD_FORMATS, report_download_params = {}, report_download_name = nil)
+  def downloadable_report(formats = DOWNLOAD_FORMATS, report_download_params = {}, report_download_name = nil, report_view = nil)
     export_format = params[:export_format]
     self.report_download_name ||= report_download_name
     self.report_download_name ||= "#{action_name.to_s.gsub('_','-')}-#{fhlb_report_date_numeric(Time.zone.today)}" if action_name
@@ -2178,7 +2184,7 @@ class ReportsController < ApplicationController
                     else
                       raise ArgumentError, 'Report format not recognized'
                   end
-      job_status = job_klass.perform_later(current_member_id, action_name, self.report_download_name, report_download_params).job_status
+      job_status = job_klass.perform_later(current_member_id, action_name, self.report_download_name, report_download_params, report_view).job_status
       job_status.update_attributes!(user_id: current_user.id)
       render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
     else
@@ -2309,5 +2315,20 @@ class ReportsController < ApplicationController
     @start_date = date_bounds[:start]
     @end_date = date_bounds[:end]
     @max_date = date_bounds[:max]
+  end
+
+  def populate_pdf_view_variables
+    @standard_arc_table_data[:notes_1] = @standard_arc_table_data[:notes].except(t('reports.pages.price_indications.current.payment_frequency'))
+    @standard_arc_table_data[:notes_2] = @standard_arc_table_data[:notes].slice(t('reports.pages.price_indications.current.payment_frequency'))
+    @sbc_arc_table_data[:notes_1] = @sbc_arc_table_data[:notes].except(t('reports.pages.price_indications.current.payment_frequency'))
+    @sbc_arc_table_data[:notes_2] = @sbc_arc_table_data[:notes].slice(t('reports.pages.price_indications.current.payment_frequency'))
+    @standard_frc_table_data_1, @standard_frc_table_data_2 = @standard_frc_table_data.clone, @standard_frc_table_data.clone
+    rows = @standard_frc_table_data[:rows].in_groups(2, false).to_a
+    @standard_frc_table_data_1[:rows] = rows.first
+    @standard_frc_table_data_2[:rows] = rows.last
+    @sbc_frc_table_data_1, @sbc_frc_table_data_2 = @sbc_frc_table_data.clone, @sbc_frc_table_data.clone
+    rows = @sbc_frc_table_data[:rows].in_groups(2, false).to_a
+    @sbc_frc_table_data_1[:rows] = rows.first
+    @sbc_frc_table_data_2[:rows] = rows.last
   end
 end
