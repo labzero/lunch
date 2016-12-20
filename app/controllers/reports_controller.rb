@@ -1905,19 +1905,15 @@ class ReportsController < ApplicationController
       }
 
       @collateral_totals = {
-        rows: [
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.totals.total')},
-              {value: member_profile[:collateral_borrowing_capacity][:total], type: :currency_whole}
-            ]
-          },
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.totals.remaining')},
-              {value: member_profile[:collateral_borrowing_capacity][:remaining], type: :currency_whole}
-            ]
-          }
+        footer: [
+          [
+            {value: t('reports.pages.account_summary.collateral_borrowing_capacity.totals.total')},
+            {value: member_profile[:collateral_borrowing_capacity][:total], type: :currency_whole}
+          ],
+          [
+            {value: t('reports.pages.account_summary.collateral_borrowing_capacity.totals.remaining')},
+            {value: member_profile[:collateral_borrowing_capacity][:remaining], type: :currency_whole}
+          ]
         ]
       }
 

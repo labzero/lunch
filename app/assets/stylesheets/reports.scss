@@ -85,6 +85,15 @@
   }
 }
 
+.report-table-footer-only {
+  td:first-child {
+    border-left-width: 1px;
+  }
+  td:last-child {
+    border-right-width: 1px;
+  }
+}
+
 .report-header-buttons {
   float: right;
   margin-top: 32px;
@@ -711,9 +720,10 @@
 
 .report-table-vertical-headers {
   td {
-    &:nth-child(1) {
+    &:first-child {
       @extend %typography-table-heading;
       background-color: $light-gray;
+      border-right: none;
     }
   }
 }
@@ -1017,16 +1027,9 @@ td.dataTables_empty {
 .account-summary-report {
   .report-table {
     margin-bottom: 10px;
-    &:not(.account-summary-collateral-totals) tbody {
-      td:first-child {
-        @extend %typography-table-heading;
-        background-color: $light-gray;
-      }
-    }
     tfoot td {
-      @extend %typography-table-heading;
       &:first-child {
-        border-right: none;
+        background-color: transparent;
       }
       &:last-child {
         border-left: none;
@@ -1096,14 +1099,6 @@ td.dataTables_empty {
   dd {
     clear: right;
     margin-left: 0;
-  }
-}
-
-.account-summary-collateral-totals {
-  tbody td {
-    @extend %table-footer-cell;
-    border-left: none;
-    border-right: none;
   }
 }
 
@@ -1333,10 +1328,9 @@ td.dataTables_empty {
     background: transparent;
   }
   .account-summary-collateral-notice {
-    padding-left: 0;
     border-color: $print-color;
     &:before {
-      display: none;
+      color: $print-color;
     }
   }
   .account-summary-report {
@@ -1356,15 +1350,15 @@ td.dataTables_empty {
     tfoot td, .account-summary-collateral-totals tbody td {
       color: $print-color;
       @include typography-print-table-total;
+      border-bottom: 1px solid $light-gray;
     }
     
-    .report-table:not(.account-summary-collateral-totals) tbody td:first-child {
-      color: $print-color;
-      @include typography-print-table-cell;
-    }
     dt, dd  {
       @include typography-print-details;
       color: $print-color;
+    }
+    table {
+      page-break-inside: avoid;
     }
   }
   .report {
@@ -1560,8 +1554,28 @@ td.dataTables_empty {
       border-right: 1px solid $light-gray;
       border-bottom: none;
     }
-    tr:last-child td:first-child {
+    tbody tr:last-child td:first-child {
       border-bottom: 1px solid $light-gray;
+    }
+    tfoot {
+      td {
+        border-bottom: none;
+        &:first-child {
+          border-right: none;
+        }
+      }
+    }
+  }
+
+  .report-table-footer-only {
+    tfoot td {
+      &:first-child, & {
+        border-top: 1px solid $light-gray;
+        border-bottom: 1px solid $light-gray;
+      }
+      &:first-child {
+        border-right: 1px solid $light-gray;
+      }
     }
   }
 

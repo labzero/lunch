@@ -3501,19 +3501,19 @@ RSpec.describe ReportsController, :type => :controller do
     context 'collateral totals' do
       it 'assigns `@collateral_totals`' do
         make_request
-        expect(assigns[:collateral_totals]).to include(:rows)
+        expect(assigns[:collateral_totals]).to include(:footer)
       end
       [ I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.totals.total'),
         I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.totals.remaining')].each_with_index do |column_label, row_index|
         it "assigns the column label for row #{row_index}" do
           make_request
-          expect(assigns[:collateral_totals][:rows][row_index][:columns][0][:value]).to eq(column_label)
+          expect(assigns[:collateral_totals][:footer][row_index][0][:value]).to eq(column_label)
         end
       end
       it 'assigns values in column' do
         make_request
         [ :total, :remaining ].each_with_index do |value, row_index|
-          expect(assigns[:collateral_totals][:rows][row_index][:columns][1][:value]).to eq(
+          expect(assigns[:collateral_totals][:footer][row_index][1][:value]).to eq(
             collateral_borrowing_capacity[value])
         end
       end
@@ -3657,11 +3657,16 @@ RSpec.describe ReportsController, :type => :controller do
           allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
           make_request
         end
-        %w(financing_availability credit_outstanding standard_collateral sbc_collateral collateral_totals capital_stock_and_leverage).each do |instance_var|
+        %w(financing_availability credit_outstanding standard_collateral sbc_collateral capital_stock_and_leverage).each do |instance_var|
           it "should assign nil values to all columns found in @#{instance_var}" do
             assigns[instance_var.to_sym][:rows].each do |row|
               expect(row[:columns].last[:value]).to be_nil
             end
+          end
+        end
+        it "should assign nil values to all columns found in @collateral_totals" do
+          assigns[:collateral_totals][:footer].each do |row|
+            expect(row.last[:value]).to be_nil
           end
         end
       end

@@ -68,7 +68,7 @@ end
 Then(/^I should see (\d+) report tables with multiple data rows$/) do |count|
   page.assert_selector('.report-table', count: count)
   page.all('.report-table').each do |table|
-    table.assert_selector('tbody tr')
+    table.assert_selector(':not(.report-table-footer-only) tbody tr, .report-table-footer-only tfoot tr')
   end
 end
 
