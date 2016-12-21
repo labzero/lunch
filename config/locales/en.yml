@@ -687,6 +687,14 @@ en:
         not_authorized: This Advance Request was not completed because Bank employees are not authorized to complete advances via the member portal.
         exceeds_daily_limit: This advance is unavailable because it would cause your institution to exceed its cumulative daily limit of %{limit} for this term.
         end_of_day: This rate is unavailable after %{time}.
+        exceeds_maximum_term_day:
+          one: Your institution has a maximum term for advances of %{count} day. See your Account Summary for more details.
+          other: Your institution has a maximum term for advances of %{count} days. See your Account Summary for more details.
+        exceeds_maximum_term_month:
+          one: Your institution has a maximum term for advances of %{count} month. See your Account Summary for more details.
+          other: Your institution has a maximum term for advances of %{count} months. See your Account Summary for more details.
+        day_unit: day
+        month_unit: month
     reports:
       title: Reports
       as_of_yesterday: As of yesterday

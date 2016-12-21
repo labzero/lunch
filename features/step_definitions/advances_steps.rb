@@ -247,6 +247,8 @@ Then(/^I should see an? "(.*?)" advance error(?: with amount (\d+) and type "(.*
       /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.exceeds_daily_limit", limit: fhlb_formatted_currency_whole(100000000, {html: false})))}\z/
     when 'end time'
       /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.end_of_day", time: fhlb_formatted_time(Time.zone.now - 5.minutes).strip))}\z/
+    when 'exceeds maximum term'
+      /\A#{Regexp.quote(I18n.t("dashboard.quick_advance.error.exceeds_maximum_term_#{type}", count: amount))}\z/
     else
       raise 'Unknown error_type'
   end
