@@ -590,12 +590,16 @@ class SecuritiesController < ApplicationController
     case kind
     when 'pledge_intake'
       t('securities.requests.form_descriptions.pledge')
-    when 'pledge_release', 'safekept_release'
-      t('securities.requests.form_descriptions.release')
+    when 'pledge_release'
+      t('securities.requests.form_descriptions.release_pledged')
+    when 'safekept_release'
+      t('securities.requests.form_descriptions.release_safekept')
     when 'safekept_intake'
       t('securities.requests.form_descriptions.safekept')
-    when 'safekept_transfer', 'pledge_transfer'
-      t('securities.requests.form_descriptions.transfer')
+    when 'safekept_transfer'
+      t('securities.requests.form_descriptions.transfer_safekept')
+    when 'pledge_transfer'
+      t('securities.requests.form_descriptions.transfer_pledged')
     else
       t('global.missing_value')
     end

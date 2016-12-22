@@ -317,16 +317,20 @@ Then(/^I should see the active state for the Authorize action$/) do
   page.assert_selector('.securities-request-table .report-cell-actions a', text: I18n.t('securities.requests.actions.authorize').upcase, exact: true)
 end
 
-Then(/^I should see the (active|disabled) state for the Authorize action for (pledge|release|safekeep|transfer)$/) do |state, type|
+Then(/^I should see the (active|disabled) state for the Authorize action for (pledge intake|safekept intake|pledge release|safekept release|safekept transfer|pledge transfer)$/) do |state, type|
   description = case type
-  when 'pledge'
+  when 'pledge intake'
     I18n.t('securities.requests.form_descriptions.pledge')
-  when 'release'
-    I18n.t('securities.requests.form_descriptions.release')
-  when 'safekeep'
+  when 'pledge release'
+    I18n.t('securities.requests.form_descriptions.release_pledged')
+  when 'safekept release'
+    I18n.t('securities.requests.form_descriptions.release_safekept')
+  when 'safekept intake'
     I18n.t('securities.requests.form_descriptions.safekept')
-  when 'transfer'
-    I18n.t('securities.requests.form_descriptions.transfer')
+  when 'safekept transfer'
+    I18n.t('securities.requests.form_descriptions.transfer_safekept')
+  when 'pledge transfer'
+    I18n.t('securities.requests.form_descriptions.transfer_pledged')
   else
     raise ArgumentError, "unknown form type: #{type}"
   end
@@ -338,16 +342,20 @@ Then(/^I should see the (active|disabled) state for the Authorize action for (pl
   end
 end
 
-When(/^I click to Authorize the first (pledge|release|safekeep|transfer)(?: request)?$/) do |type|
+When(/^I click to Authorize the first (pledge intake|pledge release|safekept release|safekept intake|safekept transfer|pledge transfer)(?: request)?$/) do |type|
   description = case type
-  when 'pledge'
+  when 'pledge intake'
     I18n.t('securities.requests.form_descriptions.pledge')
-  when 'release'
-    I18n.t('securities.requests.form_descriptions.release')
-  when 'safekeep'
+  when 'pledge release'
+    I18n.t('securities.requests.form_descriptions.release_pledged')
+  when 'safekept release'
+    I18n.t('securities.requests.form_descriptions.release_safekept')
+  when 'safekept intake'
     I18n.t('securities.requests.form_descriptions.safekept')
-  when 'transfer'
-    I18n.t('securities.requests.form_descriptions.transfer')
+  when 'safekept transfer'
+    I18n.t('securities.requests.form_descriptions.transfer_safekept')
+  when 'pledge transfer'
+    I18n.t('securities.requests.form_descriptions.transfer_pledged')
   else
     raise ArgumentError, "unknown form type: #{type}"
   end
@@ -480,19 +488,23 @@ When(/^I check the box to select all displayed securities$/) do
   page.find('.manage-securities-table input[name="check_all"]').click
 end
 
-When(/^I request a PDF of an authorized (pledge|release|safekeep|transfer) securities request$/) do |type|
+When(/^I request a PDF of an authorized (pledge intake|pledge release|safekept release|safekept intake|safekept transfer|pledge transfer) securities request$/) do |type|
   description = case type
-  when 'pledge'
-    I18n.t('securities.requests.form_descriptions.pledge')
-  when 'release'
-    I18n.t('securities.requests.form_descriptions.release')
-  when 'safekeep'
-    I18n.t('securities.requests.form_descriptions.safekept')
-  when 'transfer'
-    I18n.t('securities.requests.form_descriptions.transfer')
-  else
-    raise ArgumentError, "unknown form type: #{type}"
-  end
+    when 'pledge intake'
+      I18n.t('securities.requests.form_descriptions.pledge')
+    when 'pledge release'
+      I18n.t('securities.requests.form_descriptions.release_pledged')
+    when 'safekept release'
+      I18n.t('securities.requests.form_descriptions.release_safekept')
+    when 'safekept intake'
+      I18n.t('securities.requests.form_descriptions.safekept')
+    when 'safekept transfer'
+      I18n.t('securities.requests.form_descriptions.transfer_safekept')
+    when 'pledge transfer'
+      I18n.t('securities.requests.form_descriptions.transfer_pledged')
+    else
+      raise ArgumentError, "unknown form type: #{type}"
+    end
   row = page.all('.authorized-requests td', text: description, exact: true).first.find(:xpath, '..')
   jquery_execute("$('body').on('downloadStarted', function(){$('body').addClass('download-started')})")
   row.find('td:last-child a', text: /\A#{I18n.t('global.view').upcase}\z/, match: :first).click

@@ -1654,10 +1654,12 @@ RSpec.describe SecuritiesController, type: :controller do
   describe 'private methods' do
     describe '`kind_to_description`' do
       {
-        'pledge_release' => 'securities.requests.form_descriptions.release',
-        'safekept_release' => 'securities.requests.form_descriptions.release',
+        'pledge_release' => 'securities.requests.form_descriptions.release_pledged',
+        'safekept_release' => 'securities.requests.form_descriptions.release_safekept',
         'pledge_intake' => 'securities.requests.form_descriptions.pledge',
-        'safekept_intake' => 'securities.requests.form_descriptions.safekept'
+        'safekept_intake' => 'securities.requests.form_descriptions.safekept',
+        'pledge_transfer' => 'securities.requests.form_descriptions.transfer_pledged',
+        'safekept_transfer' => 'securities.requests.form_descriptions.transfer_safekept'
       }.each do |form_type, description_key|
         it "returns the localization value for `#{description_key}` when passed `#{form_type}`" do
           expect(controller.send(:kind_to_description, form_type)).to eq(I18n.t(description_key))

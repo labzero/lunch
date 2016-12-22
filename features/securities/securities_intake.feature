@@ -75,9 +75,9 @@ Feature: Securities Intake
     When I click to Authorize the first <security_type>
     Then I should be on the <page> page
   Examples:
-  | security_type | page                |
-  | safekeep      | Safekeep Securities |
-  | pledge        | Pledge Securities   |
+  | security_type   | page                |
+  | safekept intake | Safekeep Securities |
+  | pledge intake   | Pledge Securities   |
 
   @jira-mem-1672 @data-unavailable
   Scenario Outline: A user submits a safekeep request for authorization.

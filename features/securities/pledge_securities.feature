@@ -47,5 +47,5 @@ Scenario: Member cannot click on the account number input
 Scenario: A signer views a previously submitted pledge request
   Given I am logged in as a "quick-advance signer"
   And I am on the securities request page
-  When I click to Authorize the first pledge
+  When I click to Authorize the first pledge intake
   Then I should be on the Pledge Securities page

@@ -1248,8 +1248,10 @@ en:
       form_descriptions:
         pledge: Securities Pledge
         safekept: Securities Safekeeping
-        release: Securities Release
-        transfer: Securities Internal Transfer
+        release_pledged: Release Pledged Securities
+        release_safekept: Release Safekept Securities
+        transfer_pledged: Transfer Pledged Securities
+        transfer_safekept: Transfer Safekept Securities
       pending:
         title: Requests for Authorization
       authorized:
