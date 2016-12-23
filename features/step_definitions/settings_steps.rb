@@ -1,5 +1,5 @@
-When(/^I click on the gear icon in the header$/) do
-  page.find('.main-nav a.icon-gear-after').click
+When(/^I click on the settings link in the header$/) do
+  page.find('.nav-settings a').click
 end
 
 Then(/^I should see "(.*?)" as the sidebar title$/) do |title|
