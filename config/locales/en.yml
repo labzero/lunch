@@ -309,7 +309,7 @@ en:
     access_manager:
       title: Access Manager
       description_title: Access Manager
-      description: Your institution’s Access Manager(s), who may add and delete portal users, reset passwords, and lock or unlock portal access for individuals.
+      description: Individuals authorized to add and delete portal users, reset passwords, and lock and unlock portal access for users.
     resolution:
       dropdown: Resolution and Authorization
       title: 'Resolution and Authorization: Member Transactions'
@@ -335,7 +335,7 @@ en:
     collateral:
       title: Collateral
       description_title: Collateral
-      description: Individuals authorized to pledge and depledge securities. This form does not authorize individuals to move securities held in safekeeping except to pledge those securities.
+      description: Individuals authorized to pledge and depledge securities. This does not authorize individuals to move securities held in safekeeping except to pledge those securities.
     interest_rate_derivatives:
       title: Interest Rate Derivatives
       description_title: Interest Rate Derivatives
@@ -347,9 +347,11 @@ en:
     securities:
       title: Securities Services
       description_title: Securities Services
-      description: Individuals authorized to move securities to and from your safekeeping account and to provide instructions regarding the purchase and sale of unpledged securities. This form does not authorize individuals to pledge or depledge securities.
+      description: Individuals authorized to move securities to and from your safekeeping account and to provide instructions regarding the purchase and sale of unpledged securities. This does not authorize individuals to pledge or depledge securities.
     etransact_signer:
       title: Token Holder
+      description_title: SecurID Token
+      description: Two-factor authentication security method issued to authorized individuals for the purpose of conducting advances, securities transactions, or wire transfers.
   settings:
     title: Settings
     save: Save
