@@ -806,7 +806,7 @@ en:
             - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
-              date: '2016-04-07'
+              date: '2016-04-27'
               details:
                 -
                   description: "Incorporated certain changes to the Bank’s capital stock requirements that were announced in Bulletin No. 1480 on June 16, 2015 (page 7)."
@@ -844,7 +844,7 @@ en:
             - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
-              date: '2016-04-07'
+              date: '2016-04-27'
               details:
                 -
                   description: "Added information on eligible members and what types of collateral they can pledge (pages 6-7)."
