@@ -3784,6 +3784,62 @@ RSpec.describe ReportsController, :type => :controller do
         user = {:roles => roles}
         expect(subject.send(:roles_for_signers, user)).to match_array([User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER])
       end
+      describe 'if the signer has a SecurID Token' do
+        let(:roles) { [User::Roles::ETRANSACT_SIGNER] }
+        let(:call_method) { subject.send(:roles_for_signers, {roles: roles}) }
+        describe 'and the signer is a WIRE_SIGNER' do
+          before do
+            roles << User::Roles::WIRE_SIGNER
+          end
+          it 'adds the TOKEN_WIRES role' do
+            expect(call_method).to include(described_class::TOKEN_WIRES)
+          end
+          it 'removes the ETRANSACT_SIGNER role' do
+            expect(call_method).to_not include(User::Roles::ETRANSACT_SIGNER)
+          end
+        end
+        describe 'and the signer is an ADVANCE_SIGNER' do
+          before do
+            roles << User::Roles::ADVANCE_SIGNER
+          end
+          it 'adds the TOKEN_ADVANCES role' do
+            expect(call_method).to include(described_class::TOKEN_ADVANCES)
+          end
+          it 'removes the ETRANSACT_SIGNER role' do
+            expect(call_method).to_not include(User::Roles::ETRANSACT_SIGNER)
+          end
+        end
+        describe 'and the signer is an SECURITIES_SIGNER' do
+          before do
+            roles << User::Roles::SECURITIES_SIGNER
+          end
+          it 'adds the TOKEN_SECURITIES role' do
+            expect(call_method).to include(described_class::TOKEN_SECURITIES)
+          end
+          it 'removes the ETRANSACT_SIGNER role' do
+            expect(call_method).to_not include(User::Roles::ETRANSACT_SIGNER)
+          end
+        end
+        describe 'and the signer is an COLLATERAL_SIGNER' do
+          before do
+            roles << User::Roles::COLLATERAL_SIGNER
+          end
+          it 'adds the TOKEN_SECURITIES role' do
+            expect(call_method).to include(described_class::TOKEN_SECURITIES)
+          end
+          it 'removes the ETRANSACT_SIGNER role' do
+            expect(call_method).to_not include(User::Roles::ETRANSACT_SIGNER)
+          end
+        end
+        it 'removes duplicate roles' do
+          roles << User::Roles::COLLATERAL_SIGNER << User::Roles::SECURITIES_SIGNER << User::Roles::WIRE_SIGNER
+          result = call_method
+          expect(result).to eq(result.uniq)
+        end
+        it 'does not remove the ETRANSACT_SIGNER role if no other token roles are present' do
+          expect(call_method).to include(User::Roles::ETRANSACT_SIGNER)
+        end
+      end
     end
 
     describe 'min_and_start_dates' do

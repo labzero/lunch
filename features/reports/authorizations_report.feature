@@ -36,8 +36,8 @@ Scenario: Filtering the authorization report
   Then I should only see users with the "Securities Services" role or with inclusive roles
   When I select "Wire Transfer Services" from the authorizations filter
   Then I should only see users with the "Wire Transfer Services" role or with inclusive roles
-  When I select "Token Holder" from the authorizations filter
-  Then I should only see users with the "Token Holder" role or with inclusive roles
+  When I select "SecurID Token" from the authorizations filter
+  Then I should only see users with the "SecurID Token" role or with inclusive roles
   When I select "Access Manager" from the authorizations filter
   Then I should only see users with the "Access Manager" role or with inclusive roles
 

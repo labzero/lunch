@@ -37,6 +37,10 @@ class ReportsController < ApplicationController
     sbc_vrc_data: [MembersService::RATE_CURRENT_SBC_VRC]
   }.freeze
 
+  TOKEN_ADVANCES = 'token_advances'.freeze
+  TOKEN_SECURITIES = 'token_securities'.freeze
+  TOKEN_WIRES = 'token_wires'.freeze
+
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
     User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.title'),
@@ -48,7 +52,10 @@ class ReportsController < ApplicationController
     User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
     User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
     User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
-    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact_signer.title')
+    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact_signer.title'),
+    TOKEN_ADVANCES => I18n.t('user_roles.advances.token_holder'),
+    TOKEN_SECURITIES => I18n.t('user_roles.securities.token_holder'),
+    TOKEN_WIRES => I18n.t('user_roles.wire_transfer.token_holder')
   }
 
   AUTHORIZATIONS_ROLL_UP = [
@@ -83,7 +90,7 @@ class ReportsController < ApplicationController
     User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER,
     User::Roles::ADVANCE_SIGNER, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER,
     User::Roles::DERIVATIVES_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::SECURITIES_SIGNER,
-    User::Roles::ETRANSACT_SIGNER, User::Roles::ACCESS_MANAGER
+    User::Roles::ETRANSACT_SIGNER, TOKEN_ADVANCES, TOKEN_SECURITIES, TOKEN_WIRES, User::Roles::ACCESS_MANAGER
   ]
 
   INCLUSIVE_AUTHORIZATIONS = [AUTHORIZATIONS_MAPPING['signer_manager'], AUTHORIZATIONS_MAPPING['signer_entire_authority']].freeze
@@ -1502,8 +1509,10 @@ class ReportsController < ApplicationController
         end.reject{ |_,roles| roles.empty? }
 
         check_for_inclusive_roles = false
-        matching_roles_array = if [User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER, AUTHORIZATIONS_ALL, User::Roles::ETRANSACT_SIGNER].include?(@authorizations_filter)
+        matching_roles_array = if [User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER, AUTHORIZATIONS_ALL].include?(@authorizations_filter)
           [AUTHORIZATIONS_MAPPING[@authorizations_filter]]
+        elsif @authorizations_filter == User::Roles::ETRANSACT_SIGNER
+          [User::Roles::ETRANSACT_SIGNER, TOKEN_ADVANCES, TOKEN_SECURITIES, TOKEN_WIRES].collect { |r| AUTHORIZATIONS_MAPPING[r] }
         else
           check_for_inclusive_roles = true
           [AUTHORIZATIONS_MAPPING[@authorizations_filter], INCLUSIVE_AUTHORIZATIONS].flatten
@@ -1513,6 +1522,7 @@ class ReportsController < ApplicationController
         else
           user_roles.select{ |_,roles| (roles & matching_roles_array).any? }
         end
+
         if check_for_inclusive_roles
           filtered_user_roles.each do |_, roles|
             roles.collect! do |role|
@@ -2123,6 +2133,22 @@ class ReportsController < ApplicationController
     roles = signer[:roles]
     if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
       roles = roles - AUTHORIZATIONS_ROLL_UP
+    end
+    if roles.include?(User::Roles::ETRANSACT_SIGNER)
+      roles.collect! do |role|
+        case role
+        when User::Roles::ADVANCE_SIGNER
+          [role, TOKEN_ADVANCES]
+        when User::Roles::SECURITIES_SIGNER, User::Roles::COLLATERAL_SIGNER
+          [role, TOKEN_SECURITIES]
+        when User::Roles::WIRE_SIGNER
+          [role, TOKEN_WIRES]
+        else
+          role
+        end
+      end.flatten!
+      roles.uniq!
+      roles -= [User::Roles::ETRANSACT_SIGNER] if (roles & [TOKEN_SECURITIES, TOKEN_ADVANCES, TOKEN_WIRES]).any?
     end
     roles.sort_by! { |role| AUTHORIZATIONS_ORDER.index(role) || 0 }
     roles.collect! { |role| AUTHORIZATIONS_MAPPING.keys.include?(role) ? role : nil }

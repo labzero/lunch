@@ -325,10 +325,12 @@ en:
       title: Wire Transfer Services
       description_title: Wire Transfer Services
       description: Individuals authorized to conduct offline funds transfer transactions by telephone.
+      token_holder: 'SecurID Token: Wire Transfers'
     advances:
       title: Advances
       description_title: Advances
       description: Individuals authorized to conduct credit transactions, including advances, letters of credit, lines of credit, and other similar extensions of credit.
+      token_holder: 'SecurID Token: Advances'
     affordable_housing:
       title: Affordable Housing Program
       description_title: Affordable Housing Program
@@ -349,8 +351,9 @@ en:
       title: Securities Services
       description_title: Securities Services
       description: Individuals authorized to move securities to and from your safekeeping account and to provide instructions regarding the purchase and sale of unpledged securities. This does not authorize individuals to pledge or depledge securities.
+      token_holder: 'SecurID Token: Securities'
     etransact_signer:
-      title: Token Holder
+      title: SecurID Token
       description_title: SecurID Token
       description: Two-factor authentication security method issued to authorized individuals for the purpose of conducting advances, securities transactions, or wire transfers.
   settings:
