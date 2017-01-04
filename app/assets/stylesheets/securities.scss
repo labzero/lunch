@@ -511,3 +511,9 @@
     }
   }
 }
+
+.securities-request-table {
+  td:nth-child(2) {
+    white-space: nowrap;
+  }
+}
