@@ -32,6 +32,7 @@ Scenario: Members filter the Advances list
 @jira-mem-1962
 Scenario: Members sorts the Advances list
   Given I am on the "Manage Advances" advances page
+  And I wait for the report to load
   When I click the "Maturity Date" column heading on the "Manage Advances" table
   Then I should see the "Maturity Date" column values in "ascending" order
   When I filter the advances by "All Advances"
