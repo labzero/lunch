@@ -492,7 +492,7 @@ describe MAPI::ServiceApp do
     end
 
     describe 'Todays Credit Activity' do
-      string_attributes = [['instrument_type','instrumentType'], ['status', 'status'], ['transaction_number', 'tradeID'], ['product_description', 'productDescription'], ['termination_full_partial', 'terminationFullPartial'], ['product', 'product'], ['sub_product', 'subProduct']]
+      string_attributes = [['instrument_type','instrumentType'], ['status', 'status'], ['transaction_number', 'tradeID'], ['product_description', 'productDescription'], ['termination_full_partial', 'terminationFullPartial'], ['product', 'product'], ['sub_product', 'subProduct'], ['life_cycle_event', 'lifeCycleEvent']]
       float_attributes = [['termination_par', 'terminationPar'], ['current_par', 'amount'], ['interest_rate', 'rate'], ['termination_fee', 'terminationFee']]
       date_attributes = [[['trade_date', 'tradeDate'], 'funding_date', 'fundingDate'], ['maturity_date', 'maturityDate']]
 
@@ -523,6 +523,7 @@ describe MAPI::ServiceApp do
         expect(activity[:termination_date]).to be_nil
         expect(activity[:product]).to eq('LC')
         expect(activity[:sub_product]).to eq('LC')
+        expect(activity[:life_cycle_event]).to eq('Cancellation')
       end
       it 'should return Internal Service Error, if service is unavailable', vcr: {cassette_name: 'todays_credit_activity_service_unavailable'} do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)

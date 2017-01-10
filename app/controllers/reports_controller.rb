@@ -2014,8 +2014,10 @@ class ReportsController < ApplicationController
           {value: financial_instrument_standardize(activity[:product_description])}
         ]
       }
+      rows.last[:columns].push({value: activity[:life_cycle_event]}) if feature_enabled?('report-todays-credit-activity-description')
     end
     column_headings = [t('common_table_headings.transaction_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.product_type')]
+    column_headings << t('common_table_headings.description') if feature_enabled?('report-todays-credit-activity-description')
     @todays_credit = {
       column_headings: column_headings,
       rows: rows

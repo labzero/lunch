@@ -94,7 +94,7 @@ http_interactions:
       Date:
       - Tue, 15 Sep 2015 21:09:34 GMT
       Content-Length:
-      - '1700'
+      - '1749'
     body:
       encoding: UTF-8
       string: <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><s:Header><o:Security
@@ -105,7 +105,7 @@ http_interactions:
         xmlns="http://fhlbsf.com/schema/canonical/common/v1">0001-01-01T00:00:00</requestTime><transactionResult
         xmlns="http://fhlbsf.com/schema/canonical/common/v1">Success</transactionResult><tradeActivities
         xmlns:a="http://fhlbsf.com/schema/canonical/tradeservice/v1" xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><a:tradeActivity><a:fhlbid>51</a:fhlbid><a:lastUpdate>2015-09-15T02:21:12</a:lastUpdate><a:tradeDate>2013-03-19-07:00</a:tradeDate><a:status>VERIFIED</a:status><a:remark/><a:instrumentType>LC</a:instrumentType><a:tradeID>318614</a:tradeID><a:product>LC</a:product><a:subProduct>LC</a:subProduct><a:collateralType/><a:amount>10600000</a:amount><a:maturityDate>2015-09-14-07:00</a:maturityDate><a:fundingDate>2013-03-19-07:00</a:fundingDate><a:rate/><a:productDescription>LC
-        LC LC</a:productDescription><a:terminationPar/><a:terminationFee/><a:terminationFullPartial/><a:terminationDate/><a:terminationNotificationDate/><a:scid/></a:tradeActivity></tradeActivities></tradeActivityResponse></s:Body></s:Envelope>
+        LC LC</a:productDescription><a:terminationPar/><a:terminationFee/><a:terminationFullPartial/><a:terminationDate/><a:terminationNotificationDate/><a:scid/><a:lifeCycleEvent>Cancellation</a:lifeCycleEvent></a:tradeActivity></tradeActivities></tradeActivityResponse></s:Body></s:Envelope>
     http_version:
   recorded_at: Tue, 15 Sep 2015 21:09:35 GMT
 recorded_with: VCR 2.9.3

@@ -1430,11 +1430,12 @@ RSpec.describe ReportsController, :type => :controller do
     end
     describe 'GET todays_credit' do
       let(:todays_credit) { get :todays_credit }
-      let(:credit_activity) { {transaction_number: double('transaction_number'), current_par: double('current_par'), interest_rate: double('interest_rate'), funding_date: double('funding_date'), maturity_date: double('maturity_date', is_a?: true), product_description: double('product_description')} }
+      let(:credit_activity) { {transaction_number: double('transaction_number'), current_par: double('current_par'), interest_rate: double('interest_rate'), funding_date: double('funding_date'), maturity_date: double('maturity_date', is_a?: true), product_description: double('product_description'), life_cycle_event: double('A Life Cycle Event')} }
       let(:credit_activity_advance) { {instrument_type: 'ADVANCE'} }
       let(:todays_credit_response) { [credit_activity] }
       before do
         allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return(todays_credit_response)
+        allow(controller).to receive(:feature_enabled?).with('report-todays-credit-activity-description').and_return(false)
       end
       it_behaves_like 'a user required action', :get, :todays_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :todays_credit
@@ -1520,6 +1521,21 @@ RSpec.describe ReportsController, :type => :controller do
           allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([amortizing_advance])
           todays_credit
           expect(assigns[:todays_credit][:rows][0][:columns][1][:value]).to eq(amortizing_advance[:termination_par])
+        end
+        describe 'when life cycle events are enabled' do
+          before do
+            allow(controller).to receive(:feature_enabled?).with('report-todays-credit-activity-description').and_return(true)
+          end
+
+          it 'includes the life cycle event as the last column in each row' do
+            todays_credit
+            expect(assigns[:todays_credit][:rows].first[:columns].last).to eq({value: credit_activity[:life_cycle_event]})
+          end
+
+          it 'sets the @todays_credit column_headings attribute to include a description column' do
+            todays_credit
+            expect(assigns[:todays_credit][:column_headings].last).to eq(I18n.t('common_table_headings.description'))
+          end
         end
       end
       describe 'with the report disabled' do

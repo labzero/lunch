@@ -600,3 +600,15 @@ Then(/^I should be on the "(.*?)" report page$/) do |report|
   end
   page.assert_selector('.report h1', text: text, exact: true)
 end
+
+Then(/^I see a "([^"]*)" report column with data$/) do |column|
+  column = page.find('.report-table th', text: column, exact: true)
+  table = column.find(:xpath, 'ancestor::table')
+  siblings = table.all('th')
+  i = 1
+  siblings.each do |node|
+    break if node == column
+    i += 1
+  end
+  table.assert_selector("td:nth-child(#{i})", text: /\S+/, visible: true)
+end

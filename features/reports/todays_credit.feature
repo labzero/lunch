@@ -24,3 +24,8 @@ Feature: Visiting Today's Credit Report
     Given I am on the "Today’s Credit" report page
     When the "Today’s Credit" report has been disabled
     Then I should see an empty report table with Data Unavailable messaging
+
+  @jira-mem-1815 @flip-on-report-todays-credit-activity-description
+  Scenario: See transaction description on Today's Credit report
+    When I am on the "Today's Credit" report page
+    Then I see a "Description" report column with data 

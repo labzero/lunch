@@ -75,6 +75,10 @@ module MAPI
           key :type, :string
           key :description, 'The sub-product type of the activity'
         end
+        property :life_cycle_event do
+          key :type, :string
+          key :description, 'The associated life cycle event (letter of credit only)'
+        end
       end
     end
   end
