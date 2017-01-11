@@ -897,6 +897,23 @@ module MAPI
           SQL
         end
 
+        def self.account_number_query(adx_id)
+          <<-SQL
+            SELECT ADX_BTC_ACCOUNT_NUMBER AS ACCOUNT_NUMBER
+            FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF
+            WHERE ADX_ID = #{quote(adx_id)}
+          SQL
+        end
+
+        def self.get_account_number(app, adx_id)
+          raise ArgumentError, 'adx_id must not be nil' unless adx_id
+          if should_fake?(app)
+            Random.new(adx_id.to_s.bytes.inject(0, :+)).rand(1000000..9999999)
+          else
+            execute_sql_single_result(app, account_number_query(adx_id), 'Get account number for ADX_ID')
+          end
+        end
+
         def self.request_details(app, member_id, request_id)
           if should_fake?(app)
             header_details = fake_header_details_array(app, member_id).select{|header| header['REQUEST_ID'] == request_id}.first
@@ -912,12 +929,14 @@ module MAPI
           securities.collect do |security|
             map_hash_values(security, RELEASE_REQUEST_SECURITIES_MAPPING).with_indifferent_access
           end
-          safekept_account = [:pledge_transfer, :safekept_transfer].include?(kind) ? header_details['UNPLEGED_TRANSFER_ADX_ID'] : header_details['UNPLEDGED_ADX_ID']
+          safekept_adx_id = [:pledge_transfer, :safekept_transfer].include?(kind) ? header_details['UNPLEGED_TRANSFER_ADX_ID'] : header_details['UNPLEDGED_ADX_ID']
+          safekept_account = get_account_number(app, safekept_adx_id) if safekept_adx_id
+          pledged_account = get_account_number(app, header_details['PLEDGED_ADX_ID']) if header_details['PLEDGED_ADX_ID']
           {
             member_id: member_id,
             request_id: request_id,
             safekept_account: safekept_account,
-            pledged_account: header_details['PLEDGED_ADX_ID'],
+            pledged_account: pledged_account,
             form_type: header_details['FORM_TYPE'],
             broker_instructions: broker_instructions_from_header_details(header_details),
             delivery_instructions: delivery_instructions_from_header_details(header_details),

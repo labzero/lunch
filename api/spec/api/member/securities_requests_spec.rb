@@ -1176,6 +1176,8 @@ describe MAPI::ServiceApp do
         let(:broker_instructions) { double(Hash) }
         let(:delivery_instructions) { double(Hash) }
         let(:formatted_securities) { double(Array) }
+        let(:account_number) { double('An Account Number') }
+
         it 'contains the `request_id` it was passed' do
           expect(call_method[:request_id]).to eq(request_id)
         end
@@ -1215,9 +1217,15 @@ describe MAPI::ServiceApp do
         it 'contains a `user` hash with a nil value for `session_id`' do
           expect(call_method[:user][:session_id]).to eq(nil)
         end
-        it 'contains a `pledged_account` with the `PLEDGED_ADX_ID`' do
+        it 'contains a `pledged_account` with the account number corresponding to the `PLEDGED_ADX_ID`' do
           header_details['PLEDGED_ADX_ID'] = SecureRandom.hex
-          expect(call_method[:pledged_account]).to eq(header_details['PLEDGED_ADX_ID'])
+          allow(securities_request_module).to receive(:get_account_number).with(app, header_details['PLEDGED_ADX_ID']).and_return(account_number)
+          expect(call_method[:pledged_account]).to eq(account_number)
+        end
+        it 'calls `get_account_number` with `PLEDGED_ADX_ID`' do
+          header_details['PLEDGED_ADX_ID'] = SecureRandom.hex
+          expect(securities_request_module).to receive(:get_account_number).with(app, header_details['PLEDGED_ADX_ID'])
+          call_method
         end
         it 'contains a `form_type` with the `FORM_TYPE`' do
           header_details['FORM_TYPE'] = SecureRandom.hex
@@ -1227,16 +1235,30 @@ describe MAPI::ServiceApp do
           describe "when the `kind` is `#{kind}`" do
             before { expect(securities_request_module).to receive(:kind_from_details).and_return(kind) }
 
-            it 'contains a `safekept_account` with the `UNPLEGED_TRANSFER_ADX_ID`' do
+            it 'contains a `safekept_account` with the account number corresponding to the `UNPLEGED_TRANSFER_ADX_ID`' do
               header_details['UNPLEGED_TRANSFER_ADX_ID'] = SecureRandom.hex
-              expect(call_method[:safekept_account]).to eq(header_details['UNPLEGED_TRANSFER_ADX_ID'])
+              allow(securities_request_module).to receive(:get_account_number).with(app, header_details['UNPLEGED_TRANSFER_ADX_ID']).and_return(account_number)
+              expect(call_method[:safekept_account]).to eq(account_number)
+            end
+
+            it 'calls `get_account_number` with `UNPLEGED_TRANSFER_ADX_ID`' do
+              header_details['UNPLEGED_TRANSFER_ADX_ID'] = SecureRandom.hex
+              expect(securities_request_module).to receive(:get_account_number).with(app, header_details['UNPLEGED_TRANSFER_ADX_ID'])
+              call_method
             end
           end
         end
         describe 'when the `kind` is not `:pledge_transfer` or `:safekept_transfer`' do
-          it 'contains a `safekept_account` with the `UNPLEDGED_ADX_ID`' do
+          it 'contains a `safekept_account` with the account number corresponding to the `UNPLEDGED_ADX_ID`' do
             header_details['UNPLEDGED_ADX_ID'] = SecureRandom.hex
-            expect(call_method[:safekept_account]).to eq(header_details['UNPLEDGED_ADX_ID'])
+            allow(securities_request_module).to receive(:get_account_number).with(app, header_details['UNPLEDGED_ADX_ID']).and_return(account_number)
+            expect(call_method[:safekept_account]).to eq(account_number)
+          end
+
+          it 'calls `get_account_number` with `UNPLEDGED_ADX_ID`' do
+            header_details['UNPLEDGED_ADX_ID'] = SecureRandom.hex
+            expect(securities_request_module).to receive(:get_account_number).with(app, header_details['UNPLEDGED_ADX_ID'])
+            call_method
           end
         end
       end
@@ -5310,30 +5332,102 @@ describe MAPI::ServiceApp do
         expect(limit_query).to match(/\A\s*SELECT\s+\*\s+FROM\s+\(.+\)\s+WHERE\s+ROWNUM\s+=\s+1\s*\z/mi)
       end
       it 'fetches the issue date from the `SSK` table' do
-        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK.SSK_ISSUE_DATE\s+AS\s+ISSUE_DATE((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING.SSK\s+SSK\s+/mi)
+        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK\.SSK_ISSUE_DATE\s+AS\s+ISSUE_DATE((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.SSK\s+SSK\s+/mi)
       end
       it 'fetches the maturity date from the `SSK` table' do
-        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK.SSK_MATURITY_DATE\s+AS\s+MATURITY_DATE((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING.SSK\s+SSK\s+/mi)
+        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK\.SSK_MATURITY_DATE\s+AS\s+MATURITY_DATE((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.SSK\s+SSK\s+/mi)
       end
       it 'fetches the pool number from the `SSK` table' do
-        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK.SSK_POOL_NUMBER\s+AS\s+POOL_NUMBER((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING.SSK\s+SSK\s+/mi)
+        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK\.SSK_POOL_NUMBER\s+AS\s+POOL_NUMBER((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.SSK\s+SSK\s+/mi)
       end
       it 'fetches the description from the `SSK` table' do
-        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK.SSK_DESC1\s+AS\s+DESCRIPTION((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING.SSK\s+SSK\s+/mi)
+        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK\.SSK_DESC1\s+AS\s+DESCRIPTION((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.SSK\s+SSK\s+/mi)
       end
       it 'fetches the coupon rate from the `SSK_TRANS` table' do
-        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSKT.SSX_COUPON_RATE\s+AS\s+COUPON_RATE((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING.SSK\s+SSK\s+/mi)
+        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSKT.SSX_COUPON_RATE\s+AS\s+COUPON_RATE((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.SSK\s+SSK\s+/mi)
       end
       it 'joins the `SSK_TRANS` table on the `SSK` table' do
-        expect(inner_query).to match(/\s+FROM\s+SAFEKEEPING.SSK\s+SSK\s+LEFT\s+OUTER\s+JOIN\s+SAFEKEEPING.SSK_TRANS\s+SSKT\s+ON\s+SSKT.SSK_ID\s+=\s+SSK.SSK_ID\s+WHERE\s+/mi)
+        expect(inner_query).to match(/\s+FROM\s+SAFEKEEPING\.SSK\s+SSK\s+LEFT\s+OUTER\s+JOIN\s+SAFEKEEPING\.SSK_TRANS\s+SSKT\s+ON\s+SSKT.SSK_ID\s+=\s+SSK\.SSK_ID\s+WHERE\s+/mi)
       end
       it 'orders the results by transaction update date, then SSK update date, then `SSK_ID`, all descending' do
-        expect(inner_query).to match(/\s+ORDER\s+BY\s+SSKT.SSX_RECORD_DATE_UPDATED\s+DESC,\s+SSK.SSK_RECORD_DATE_UPDATED\s+DESC,\s+SSK.SSK_ID\s+DESC\s+\z/mi)
+        expect(inner_query).to match(/\s+ORDER\s+BY\s+SSKT.SSX_RECORD_DATE_UPDATED\s+DESC,\s+SSK\.SSK_RECORD_DATE_UPDATED\s+DESC,\s+SSK\.SSK_ID\s+DESC\s+\z/mi)
       end
       it 'finds the rows that match the provided CUSIP' do
         quoted_cusip = SecureRandom.hex
-        allow(securities_request_module).to receive(:quote).and_return(quoted_cusip)
-        expect(inner_query).to match(/\s+WHERE\s+UPPER\(SSK.SSK_CUSIP\)\s+=\s+UPPER\(#{quoted_cusip}\)\s+/)
+        allow(securities_request_module).to receive(:quote).with(cusip).and_return(quoted_cusip)
+        expect(inner_query).to match(/\s+WHERE\s+UPPER\(SSK\.SSK_CUSIP\)\s+=\s+UPPER\(#{quoted_cusip}\)\s+/)
+      end
+    end
+
+    describe '`account_number_query` class method' do
+      let(:adx_id) { SecureRandom.hex }
+      let(:call_method) { securities_request_module.account_number_query(adx_id) }
+      it 'fetches the account number from the `ACCOUNT_DOCKET_XREF` table' do
+        expect(call_method).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*ADX_BTC_ACCOUNT_NUMBER\s+AS\s+ACCOUNT_NUMBER((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.ACCOUNT_DOCKET_XREF\s+WHERE\s+/mi)
+      end
+      it 'finds the rows that match the provided ADX_ID' do
+        quoted_adx_id = SecureRandom.hex
+        allow(securities_request_module).to receive(:quote).with(adx_id).and_return(quoted_adx_id)
+        expect(call_method).to match(/\s+WHERE\s+ADX_ID\s+=\s+#{quoted_adx_id}\s*\z/)
+      end
+    end
+
+    describe '`get_account_number` class method' do
+      let(:connection) { instance_double(ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter, execute: nil) }
+      let(:adx_id) { double('An ADX ID', to_s: adx_id_string) }
+      let(:adx_id_string) { SecureRandom.hex }
+      let(:call_method) { MAPI::Services::Member::SecuritiesRequests.get_account_number(app, adx_id) }
+      let(:sql) { double('A Query') }
+      let(:account_number) { double('An Account Number') }
+      before do
+        allow(ActiveRecord::Base).to receive(:connection).and_return(connection)
+      end
+      it 'raises an `ArgumentError` if adx_id is `nil`' do
+        expect { MAPI::Services::Member::SecuritiesRequests.get_account_number(app, nil) }.to raise_error(ArgumentError, 'adx_id must not be nil')
+      end
+      describe 'when `should_fake?` returns true' do
+        let(:adx_id_bytes) { adx_id_string.bytes }
+        let(:rng) { instance_double(Random, rand: account_number) }
+        let(:seed) { adx_id_bytes.inject(0, :+) }
+        before do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(true)
+          allow(Random).to receive(:new).with(seed).and_return(rng)
+        end
+        it 'converts the adx_id to a string' do
+          expect(adx_id).to receive(:to_s).and_return(adx_id_string)
+          call_method
+        end
+        it 'gets the bytes of the cusip' do
+          expect(adx_id_string).to receive(:bytes).and_return(adx_id_bytes)
+          call_method
+        end
+        it 'sums the bytes of the adx_id' do
+          allow(adx_id_string).to receive(:bytes).and_return(adx_id_bytes)
+          expect(adx_id_bytes).to receive(:inject).with(0, :+).and_return(seed)
+          call_method
+        end
+        it 'seeds a random number generator' do
+          allow(adx_id_bytes).to receive(:inject).with(0, :+).and_return(seed)
+          expect(Random).to receive(:new).with(seed).and_return(rng)
+          call_method
+        end
+        it 'returns an random account_number' do
+          expect(call_method).to eq(account_number)
+        end
+      end
+      describe 'when `should_fake?` returns false' do
+        before do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(false)
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:account_number_query).with(adx_id).and_return(sql)
+        end
+        it 'calls `execute_sql_single_result` with the correct SQL' do
+          expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(anything, sql, 'Get account number for ADX_ID')
+          call_method
+        end
+        it 'returns the account_number' do
+          allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).and_return(account_number)
+          expect(call_method).to eq(account_number)
+        end
       end
     end
   end
