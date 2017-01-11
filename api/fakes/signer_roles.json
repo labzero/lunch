@@ -20,6 +20,13 @@
       "roles": ["signer", "signer-manager"],
       "first_name": "Ronald",
       "last_name": "Ruck"
+    },
+    {
+      "name": "Duffy Ruck",
+      "username": null,
+      "roles": ["signer-wiretransfers"],
+      "first_name": "Duffy",
+      "last_name": "Ruck"
     }
   ]
 }

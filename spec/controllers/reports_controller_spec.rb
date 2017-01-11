@@ -2877,11 +2877,30 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_f[:display_name])
               expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.entire_authority.title')])
             end
-            it 'only contains token holders if authorizations_filter is set to ETRANSACT_SIGNER' do
+            it 'contains token holders if authorizations_filter is set to ETRANSACT_SIGNER' do
               get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER, job_id: job_id
-              expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_etransact[:display_name])
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to include(I18n.t('user_roles.etransact_signer.title'))
+              expect(assigns[:authorizations_table_data][:rows]).to match([
+                include(columns: [
+                  include(value: user_d[:display_name]),
+                  include(value: include(I18n.t('user_roles.wire_transfer.token_holder')))
+                ]),
+                include(columns: [
+                  include(value: user_e[:display_name]),
+                  include(value: include(I18n.t('user_roles.wire_transfer.token_holder')))
+                ]),
+                include(columns: [
+                  include(value: user_c[:display_name]),
+                  include(value: include(I18n.t('user_roles.wire_transfer.token_holder')))
+                ]),
+                include(columns: [
+                  include(value: user_etransact[:display_name]),
+                  include(value: include(I18n.t('user_roles.etransact_signer.title')))
+                ])
+               ])
+            end
+            it 'contains token holders if authorizations_filter is set to WIRE_SIGNER' do
+              get :authorizations, :authorizations_filter => User::Roles::WIRE_SIGNER, job_id: job_id
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to include(I18n.t('user_roles.wire_transfer.token_holder'))
             end
             describe 'when the filtered users include a signer manager or a signer with entire authority' do
               before { get :authorizations, :authorizations_filter => User::Roles::COLLATERAL_SIGNER, job_id: job_id }
@@ -2923,7 +2942,7 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows][0][:columns].first[:value]).to eq(user_d[:display_name])
               expect(assigns[:authorizations_table_data][:rows][1][:columns].first[:value]).to eq(user_e[:display_name])
               expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_c[:display_name])
-              expect(assigns[:authorizations_table_data][:rows][0][:columns].last[:value]).to eq([I18n.t('user_roles.wire_transfer.title')])
+              expect(assigns[:authorizations_table_data][:rows][0][:columns].last[:value]).to eq([I18n.t('user_roles.wire_transfer.title'), I18n.t('user_roles.wire_transfer.token_holder')])
             end
             it 'ignores users with no role' do
               make_request
@@ -3790,7 +3809,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
       it 'sorts the roles based on the `AUTHORIZATIONS_ORDER`' do
-        roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER]
+        roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::ADVANCE_SIGNER, User::Roles::ACCESS_MANAGER]
         sorted_roles = roles.sort_by {|role| described_class::AUTHORIZATIONS_ORDER.index(role)}
         user = {:roles => roles}
         expect(subject.send(:roles_for_signers, user)).to eq(sorted_roles.collect {|role| role})
@@ -3798,7 +3817,18 @@ RSpec.describe ReportsController, :type => :controller do
       it 'hides roles that are implied by a higher role' do
         roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER]
         user = {:roles => roles}
-        expect(subject.send(:roles_for_signers, user)).to match_array([User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER])
+        expect(subject.send(:roles_for_signers, user)).to match_array([described_class::TOKEN_WIRES, User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER])
+      end
+      describe 'if the user has a WIRE_SIGNER role' do
+        let(:roles) { [User::Roles::WIRE_SIGNER, User::Roles::COLLATERAL_SIGNER] }
+        let(:call_method) { subject.send(:roles_for_signers, {roles: roles}) }
+        it 'includes TOKEN_WIRES' do
+          expect(call_method).to include(described_class::TOKEN_WIRES)
+        end
+        it 'sorts the expanded roles based on the `AUTHORIZATIONS_ORDER`' do
+          sorted_roles = [*roles, described_class::TOKEN_WIRES].sort_by {|role| described_class::AUTHORIZATIONS_ORDER.index(role)}
+          expect(call_method).to eq(sorted_roles.collect {|role| role})
+        end
       end
       describe 'if the signer has a SecurID Token' do
         let(:roles) { [User::Roles::ETRANSACT_SIGNER] }

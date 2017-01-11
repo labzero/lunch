@@ -2133,6 +2133,9 @@ class ReportsController < ApplicationController
 
   def roles_for_signers(signer)
     roles = signer[:roles]
+    if roles.include?(User::Roles::WIRE_SIGNER)
+      roles = roles.push(TOKEN_WIRES)
+    end
     if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
       roles = roles - AUTHORIZATIONS_ROLL_UP
     end
@@ -2143,8 +2146,6 @@ class ReportsController < ApplicationController
           [role, TOKEN_ADVANCES]
         when User::Roles::SECURITIES_SIGNER, User::Roles::COLLATERAL_SIGNER
           [role, TOKEN_SECURITIES]
-        when User::Roles::WIRE_SIGNER
-          [role, TOKEN_WIRES]
         else
           role
         end
