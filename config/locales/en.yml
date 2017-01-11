@@ -126,6 +126,7 @@ en:
     enter: Enter
     uploading: 'Uploading...'
     cancel_upload: Cancel Upload
+    optional_field: (optional)
     dates:
       1_day: 1 day
       1_month: 1 mo

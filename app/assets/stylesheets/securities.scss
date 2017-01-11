@@ -172,6 +172,13 @@
       line-height: 30px;
       vertical-align: top;
       margin-right: 20px;
+      &.label-optional {
+        margin-right: 0;
+        & + span {
+          font-style: italic;
+          margin-right: 20px;
+        }
+      }
     }
   }
   .input-field-container {
@@ -219,7 +226,6 @@
 }
 
 .securities-delivery-instructions-fields {
-  width: 420px;
   float: right;
   text-align: right;
   &[data-selected-delivery-instruction="dtc"] {
@@ -258,6 +264,8 @@
   margin-bottom: 6px;
   p {
     text-align: left;
+    margin-top: 5px;
+    margin-left: 62px;
   }
   span:nth-of-type(2) {
     line-height: 30px;
