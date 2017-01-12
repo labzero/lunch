@@ -43,28 +43,40 @@ Scenario: Member uses the forms ToC to jump between topics
   When I click on the collateral link in the ToC
   Then I should see the forms page focused on the collateral topic
 
-@jira-mem-1410 @flip-on-resources-token
-Scenario: Member navigates to the authorizations topic and sees sign token form link
+@jira-mem-1410 @jira-mem-2005 @flip-on-resources-token @flip-on-resources-access-manager
+Scenario Outline: Member navigates to the authorizations topic and sees sign token form link
   Given I click on the resources link in the header
   When I click on the authorizations link in the header
-  Then I should see "sign" link
+  Then I should see the sign link for the "<form>" form
+Examples:
+  | form           |
+  | secureid token |
+  | access manager |
 
-@smoke @jira-mem-1681 @flip-on-resources-token
-Scenario: Member interacts with docusign flyout
+@smoke @jira-mem-1681 @jira-mem-2005 @flip-on-resources-token @flip-on-resources-access-manager
+Scenario Outline: Member interacts with docusign flyout
   Given I click on the resources link in the header
   When I click on the authorizations link in the header
-  When I click on the sign link
+  When I click on the sign link for the "<form>" form
   Then I should see the docusign flyout
   When I cancel the docusign flyout
   Then I should not see the docusign flyout
+Examples:
+  | form           |
+  | secureid token |
+  | access manager |
 
-@jira-mem-1681 @flip-on-resources-token
-Scenario: Member navigates to docusign site
+@jira-mem-1681 @jira-mem-2005 @flip-on-resources-token @flip-on-resources-access-manager
+Scenario Outline: Member navigates to docusign site
   Given I click on the resources link in the header
   When I click on the authorizations link in the header
-  When I click on the sign link
+  When I click on the sign link for the "<form>" form
   Then I should see the docusign flyout
   When I click on the Sign with Docusign button
   Then I should see Docusign website and close it
   And I should not see the docusign flyout
+Examples:
+| form           |
+| secureid token |
+| access manager |
 

@@ -32,8 +32,12 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET forms' do
+    let(:link) { double(String) }
+    let(:call_action) { get :forms }
     before do
       allow(subject).to receive(:feature_enabled?).and_call_original
+      allow(subject).to receive(:docusign_link)
+      allow(subject).to receive(:resources_download_path)
     end
     it_behaves_like 'a controller action with an active nav setting', :forms, :resources
     it_behaves_like 'a user required action', :get, :forms
@@ -41,27 +45,79 @@ RSpec.describe ResourcesController, type: :controller do
       get :forms
       expect(response.body).to render_template('forms')
     end
-    [
-      :agreement_rows, :signature_card_rows, :wire_transfer_rows, :capital_stock_rows,
-      :website_access_rows, :credit_rows, :lien_real_estate_rows, :lien_other_rows,
-      :specific_identification_rows, :deposits_rows, :loan_document_rows,
-      :creditor_relationship_rows
-      ].each do |var|
-        it "should assign `@#{var}`" do
-          get :forms
-          expect(assigns[var]).to be_present
+    [:agreement_rows, :signature_card_rows, :wire_transfer_rows, :capital_stock_rows,
+    :website_access_rows, :credit_rows, :lien_real_estate_rows, :lien_other_rows,
+    :specific_identification_rows, :deposits_rows, :loan_document_rows,
+    :creditor_relationship_rows
+    ].each do |var|
+      it "should assign `@#{var}`" do
+        call_action
+        expect(assigns[var]).to be_present
+      end
+    end
+    it 'assigns @securities_rows when the `securities-hide-forms` feature is disabled' do
+      allow(subject).to receive(:feature_enabled?).with('securities-hide-forms').and_return(false)
+      call_action
+      expect(assigns[:securities_rows]).to be_present
+    end
+    it 'does not assign @securities_rows when the `securities-hide-forms` feature is enabled' do
+      allow(subject).to receive(:feature_enabled?).with('securities-hide-forms').and_return(true)
+      call_action
+      expect(assigns[:securities_rows]).to_not be_present
+    end
+    describe '@website_access_rows' do
+      [
+        {
+          title: I18n.t('resources.forms.authorizations.website.access_manager'),
+          form_number: 2160,
+          feature: 'resources-access-manager',
+          docusign_link_key: :member_access_manager,
+          pdf_link_key: :form_2160
+        },
+        {
+          title: I18n.t('resources.forms.authorizations.website.securid'),
+          form_number: 2228,
+          feature: 'resources-token',
+          docusign_link_key: :member_token_request,
+          pdf_link_key: :form_2228
+        }
+      ].each_with_index do |form, i|
+        describe "the `#{form[:title]}` form" do
+          it 'has the correct title' do
+            call_action
+            expect(assigns[:website_access_rows][i][:title]).to eq(form[:title])
+          end
+          it "has a form_number of `#{form[:form_number]}`" do
+            call_action
+            expect(assigns[:website_access_rows][i][:form_number]).to eq(form[:form_number])
+          end
+          describe "when the `#{form[:feature]}` feature is enabled" do
+            before { allow(subject).to receive(:feature_enabled?).with(form[:feature]).and_return(true) }
+            it 'has an access manager form with the correct `docusign_link`' do
+              allow(subject).to receive(:docusign_link).with(form[:docusign_link_key]).and_return(link)
+              call_action
+              expect(assigns[:website_access_rows][i][:docusign_link]).to eq(link)
+            end
+            it 'does not have a `pdf_link`' do
+              call_action
+              expect(assigns[:website_access_rows][i].keys).not_to include(:pdf_link)
+            end
+          end
+          describe "when the `#{form[:feature]}` feature is disabled" do
+            before { allow(subject).to receive(:feature_enabled?).with(form[:feature]).and_return(false) }
+            it 'has an access manager form with the correct `pdf_link`' do
+              allow(subject).to receive(:resources_download_path).with(file: form[:pdf_link_key]).and_return(link)
+              call_action
+              expect(assigns[:website_access_rows][i][:pdf_link]).to eq(link)
+            end
+            it 'does not have a `docusign_link`' do
+              call_action
+              expect(assigns[:website_access_rows][i].keys).not_to include(:docusign_link)
+            end
+          end
         end
       end
-      it 'assigns @securities_rows when the `securities-hide-forms` feature is disabled' do
-        allow(subject).to receive(:feature_enabled?).with('securities-hide-forms').and_return(false)
-        get :forms
-        expect(assigns[:securities_rows]).to be_present
-      end
-      it 'does not assign @securities_rows when the `securities-hide-forms` feature is enabled' do
-        allow(subject).to receive(:feature_enabled?).with('securities-hide-forms').and_return(true)
-        get :forms
-        expect(assigns[:securities_rows]).to_not be_present
-      end
+    end
   end
 
   describe 'GET download' do
@@ -541,8 +597,11 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'private methods' do
-    describe 'GET token' do
-      let(:make_request) { subject.send(:token) }
+    describe 'docusign_link' do
+      let(:form) { double('form name', to_s: nil) }
+      let(:user) { instance_double(User) }
+      let(:member_id) { instance_double(Numeric) }
+      let(:make_request) { subject.send(:docusign_link, form) }
       let(:docusign_service_link_subhash) { double(Hash, :[] => nil) }
       let(:docusign_service_link) { double(Hash, :[] => docusign_service_link_subhash) }
       let(:docusign_service) { double(DocusignService) }
@@ -550,8 +609,26 @@ RSpec.describe ResourcesController, type: :controller do
         allow(DocusignService).to receive(:new).and_return(docusign_service)
         allow(docusign_service).to receive(:get_url).and_return(docusign_service_link)
       end
-      it_behaves_like 'a user required action', :get, :token
-      it 'gets link info from the DocusignService' do
+      it 'converts the form name to a string' do
+        expect(form).to receive(:to_s)
+        make_request
+      end
+      it 'calls `get_url` on the DocusignService instance with the form name as a string' do
+        allow(form).to receive(:to_s).and_return(form)
+        expect(docusign_service).to receive(:get_url).with(form, any_args)
+        make_request
+      end
+      it 'calls `get_url` on the DocusignService instance with the current user' do
+        allow(subject).to receive(:current_user).and_return(user)
+        expect(docusign_service).to receive(:get_url).with(anything, user, anything)
+        make_request
+      end
+      it 'calls `get_url` on the DocusignService instance with the member id' do
+        allow(subject).to receive(:current_member_id).and_return(member_id)
+        expect(docusign_service).to receive(:get_url).with(anything, anything, member_id)
+        make_request
+      end
+      it 'returns link info from the DocusignService' do
         make_request
         expect(make_request).to eq(docusign_service_link_subhash.to_s)
       end

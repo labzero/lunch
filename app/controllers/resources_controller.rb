@@ -150,26 +150,18 @@ class ResourcesController < ApplicationController
       }
     ]
 
-    @website_access_rows = [
-      {
-        title: t('resources.forms.authorizations.website.access_manager'),
-        form_number: 2160,
-        pdf_link: resources_download_path(file: :form_2160)
-      },
-      if feature_enabled?('resources-token')
-        {
-          title: t('resources.forms.authorizations.website.securid'),
-          form_number: 2228,
-          docusign_link: token
-        }
-      else
-        {
-          title: t('resources.forms.authorizations.website.securid'),
-          form_number: 2228,
-          pdf_link: resources_download_path(file: :form_2228)
-        }
-      end
-    ]
+    access_manager_form = {
+      title: t('resources.forms.authorizations.website.access_manager'),
+      form_number: 2160
+    }
+    feature_enabled?('resources-access-manager') ? access_manager_form[:docusign_link] = docusign_link(:member_access_manager) : access_manager_form[:pdf_link] = resources_download_path(file: :form_2160)
+    resource_token_form = {
+      title: t('resources.forms.authorizations.website.securid'),
+      form_number: 2228,
+    }
+    feature_enabled?('resources-token') ? resource_token_form[:docusign_link] = docusign_link(:member_token_request) : resource_token_form[:pdf_link] = resources_download_path(file: :form_2228)
+    @website_access_rows = [access_manager_form, resource_token_form]
+
     @credit_rows = [
       {
         title: t('resources.forms.credit.application'),
@@ -535,9 +527,10 @@ class ResourcesController < ApplicationController
 
   private
 
-  def token
-    docusign = DocusignService.new(request).get_url('member_token_request', current_user, current_member_id)
-    raise StandardError, "There has been an error and ResourcesController#token has encountered nil. Check error logs." if docusign.nil?
+  def docusign_link(form)
+    form = form.to_s
+    docusign = DocusignService.new(request).get_url(form, current_user, current_member_id)
+    raise StandardError, "There has been an error and ResourcesController##{form} has encountered nil. Check error logs." if docusign.nil?
     docusign[:link].to_s
   end
 
