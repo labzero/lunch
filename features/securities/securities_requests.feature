@@ -113,9 +113,26 @@ Examples:
 | pledge transfer   |
 | safekept transfer |
 
-@jira-mem-1741 @data-unavailable
+@jira-mem-1741 @jira-mem-2126
+Scenario Outline: Signer starts to delete a previously submitted request
+  Given I am logged in as a "<user>"
+  And I am on the securities request page
+  When I click to Authorize the first <request_type> request
+  Then I should be on the <page> page
+  When I click the button to delete the request
+  Then I should see the delete request flyout dialogue
+Examples:
+  | request_type      | page                | user              |
+  | pledge release    | Securities Release  | collateral signer |
+  | safekept release  | Securities Release  | securities signer |
+  | pledge intake     | Pledge Securities   | collateral signer |
+  | safekept intake   | Safekeep Securities | securities signer |
+  | pledge transfer   | Transfer Securities | collateral signer |
+  | safekept transfer | Transfer Securities | collateral signer |
+
+@jira-mem-1741 @jira-mem-2126 @data-unavailable
 Scenario Outline: Signer deletes a previously submitted request
-  Given I am logged in as a "quick-advance signer"
+  Given I am logged in as a "<user>"
   And I am on the securities request page
   When I click to Authorize the first <request_type> request
   Then I should be on the <page> page
@@ -124,10 +141,10 @@ Scenario Outline: Signer deletes a previously submitted request
   Then I should be on the Securities Requests page
   And I should not see the request ID that I deleted
 Examples:
-  | request_type      | page                |
-  | pledge release    | Securities Release  |
-  | safekept release  | Securities Release  |
-  | pledge intake     | Pledge Securities   |
-  | safekept intake   | Safekeep Securities |
-  | pledge transfer   | Transfer Securities |
-  | safekept transfer | Transfer Securities |
+  | request_type      | page                | user              |
+  | pledge release    | Securities Release  | collateral signer |
+  | safekept release  | Securities Release  | securities signer |
+  | pledge intake     | Pledge Securities   | collateral signer |
+  | safekept intake   | Safekeep Securities | securities signer |
+  | pledge transfer   | Transfer Securities | collateral signer |
+  | safekept transfer | Transfer Securities | collateral signer |
