@@ -791,7 +791,7 @@ describe MAPI::ServiceApp do
 
         before do
           allow(securities_request_module).to receive(:validate_kind).with(:release, kind).and_return(true)
-          allow(securities_request_module).to receive(:get_adx_type_from_security).with(app, security).and_return(adx_type)
+          allow(securities_request_module).to receive(:get_adx_type_from_security).with(app, member_id, security).and_return(adx_type)
           allow(securities_request_module).to receive(:validate_broker_instructions)
           allow(securities_request_module).to receive(:populate_security_metadata).with(app, security).and_return(security)
         end
@@ -865,7 +865,7 @@ describe MAPI::ServiceApp do
               app,
               ssk_sql,
               "SSK ID").and_return(ssk_id)
-            allow(securities_request_module).to receive(:get_adx_type_from_security).with(anything, securities.first).and_return(adx_type)
+            allow(securities_request_module).to receive(:get_adx_type_from_security).with(anything, member_id, securities.first).and_return(adx_type)
           end
 
           it 'returns the inserted request ID' do
@@ -879,7 +879,7 @@ describe MAPI::ServiceApp do
             end
 
             it 'gets the `adx_type` from the first security' do
-              expect(securities_request_module).to receive(:get_adx_type_from_security).with(anything, securities.first).and_return(adx_type)
+              expect(securities_request_module).to receive(:get_adx_type_from_security).with(anything, member_id, securities.first).and_return(adx_type)
               call_method
             end
 
@@ -2426,7 +2426,7 @@ describe MAPI::ServiceApp do
           call_method
         end
         it 'calls `get_adx_type_from_security` with the appropriate arguments' do
-          expect(securities_request_module).to receive(:get_adx_type_from_security).with(app, security)
+          expect(securities_request_module).to receive(:get_adx_type_from_security).with(app, member_id, security)
           call_method
         end
         describe 'the transaction block' do
@@ -5115,7 +5115,7 @@ describe MAPI::ServiceApp do
         let(:connection) { instance_double(ActiveRecord::ConnectionAdapters::OracleEnhancedAdapter, execute: nil) }
         let(:cusip) { SecureRandom.hex }
         let(:security) { instance_double(Hash, :[] => cusip) }
-        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.get_adx_type_from_security(app, security) }
+        let(:call_method) { MAPI::Services::Member::SecuritiesRequests.get_adx_type_from_security(app, member_id, security) }
         let(:sql) {
               <<-SQL
                 SELECT ACCOUNT_TYPE
@@ -5129,7 +5129,10 @@ describe MAPI::ServiceApp do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:quote).and_return(cusip)
         end
         it 'raises an `ArgumentError` if security is `nil`' do
-          expect { MAPI::Services::Member::SecuritiesRequests.get_adx_type_from_security(app, nil) }.to raise_error(ArgumentError, 'security must not be nil')
+          expect { MAPI::Services::Member::SecuritiesRequests.get_adx_type_from_security(app, member_id, nil) }.to raise_error(ArgumentError, 'security must not be nil')
+        end
+        it 'raises an `ArgumentError` if member_id is `nil`' do
+          expect { MAPI::Services::Member::SecuritiesRequests.get_adx_type_from_security(app, nil, cusip) }.to raise_error(ArgumentError, 'member_id must not be nil')
         end
         describe 'when `should_fake?` returns true' do
           let(:cusip_bytes) { cusip.bytes }
@@ -5169,7 +5172,7 @@ describe MAPI::ServiceApp do
         describe 'when `should_fake?` returns false' do
           before do
             allow(MAPI::Services::Member::SecuritiesRequests).to receive(:should_fake?).and_return(false)
-            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:adx_type_query).with(cusip).and_return(sql)
+            allow(MAPI::Services::Member::SecuritiesRequests).to receive(:adx_type_query).with(member_id, cusip).and_return(sql)
           end
           it 'calls `execute_sql_single_result` with the correct SQL' do
             expect(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).with(anything, sql, 'Get ADX type for a security')
@@ -5428,6 +5431,22 @@ describe MAPI::ServiceApp do
           allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql_single_result).and_return(account_number)
           expect(call_method).to eq(account_number)
         end
+      end
+    end
+
+    describe '`adx_type_query` class method' do
+      let(:cusip) { SecureRandom.hex }
+      let(:call_method) { securities_request_module.adx_type_query(member_id, cusip) }
+      it 'fetches the account type from the `SSK_INTRADAY_SEC_POSITION` table' do
+        expect(call_method).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*ACCOUNT_TYPE((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.SSK_INTRADAY_SEC_POSITION\s+WHERE\s+/mi)
+      end
+      it 'includes the `cusip` in the WHERE clause' do
+        quoted_cusip = SecureRandom.hex
+        allow(securities_request_module).to receive(:quote).and_return(quoted_cusip)
+        expect(call_method).to match(/\s+WHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+UPPER\(SSK_CUSIP\)\s+=\s+UPPER\(#{quoted_cusip}\)\s+/)
+      end
+      it 'includes the `member_id` in the WHERE clause' do
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+FHLB_ID\s+=\s+#{member_id}\s+/)
       end
     end
   end

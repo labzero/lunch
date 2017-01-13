@@ -684,7 +684,7 @@ module MAPI
           validate_kind(:release, kind)
           validate_delivery_instructions(delivery_instructions)
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :release)
-          adx_type = get_adx_type_from_security(app, securities.first)
+          adx_type = get_adx_type_from_security(app, member_id, securities.first)
           validate_broker_instructions(broker_instructions, app, kind)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           user_name.downcase!
@@ -722,7 +722,7 @@ module MAPI
           validate_kind(:release, kind)
           original_delivery_instructions = delivery_instructions.clone # Used to see if header details have changes below
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :release)
-          adx_type = get_adx_type_from_security(app, securities.first)
+          adx_type = get_adx_type_from_security(app, member_id, securities.first)
           validate_broker_instructions(broker_instructions, app, kind)
           validate_delivery_instructions(delivery_instructions)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
@@ -1152,20 +1152,22 @@ module MAPI
           header_delete_count > 0
         end
 
-        def self.adx_type_query(cusip)
+        def self.adx_type_query(member_id, cusip)
           <<-SQL
             SELECT ACCOUNT_TYPE
             FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
-            WHERE SSK_CUSIP = #{quote(cusip)}
+            WHERE UPPER(SSK_CUSIP) = UPPER(#{quote(cusip)})
+            AND FHLB_ID = #{quote(member_id)}
           SQL
         end
 
-        def self.get_adx_type_from_security(app, security)
+        def self.get_adx_type_from_security(app, member_id, security)
           raise ArgumentError, 'security must not be nil' unless security
+          raise ArgumentError, 'member_id must not be nil' unless member_id
           if should_fake?(app)
             ADXAccountTypeMapping::SYMBOL_TO_STRING.keys.sample(random: Random.new(security['cusip'].bytes.inject(0, :+)))
           else
-            ADXAccountTypeMapping::STRING_TO_SYMBOL[execute_sql_single_result(app, adx_type_query(security['cusip']), 'Get ADX type for a security')]
+            ADXAccountTypeMapping::STRING_TO_SYMBOL[execute_sql_single_result(app, adx_type_query(member_id, security['cusip']), 'Get ADX type for a security')]
           end
         end
 
