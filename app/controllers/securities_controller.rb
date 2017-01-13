@@ -505,7 +505,9 @@ class SecuritiesController < ApplicationController
       end
     end
     if has_errors
-      @error_message = prioritized_securities_request_error(@securities_request) || I18n.t('securities.internal_user_error')
+      unless !@securid_status.nil? && @securid_status != RSA::SecurID::Session::AUTHENTICATED
+        @error_message = prioritized_securities_request_error(@securities_request) || I18n.t('securities.internal_user_error')
+      end
       populate_view_variables(type)
       populate_form_data_by_kind(kind)
       populate_contact_info_by_kind(kind)
