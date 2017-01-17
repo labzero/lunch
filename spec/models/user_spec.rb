@@ -594,32 +594,53 @@ RSpec.describe User, :type => :model do
     let(:email)        { double('email') }
     let(:given_name)   { double('given_name') }
     let(:surname)      { double('surname') }
-    let(:call_method)  { User.add_extranet_user(member_id, creator, username, email, given_name, surname) }
+    let(:call_method)  { described_class.add_extranet_user(member_id, creator, username, email, given_name, surname) }
+    let(:user)         { instance_double(described_class, unlock!: true) }
 
     before do
-      allow(User).to receive(:create_ldap_user).with(member_id, creator, username, email, given_name, surname).and_return(true)
-      allow(User).to receive(:find_or_create_by_with_retry)
+      allow(described_class).to receive(:create_ldap_user).with(member_id, creator, username, email, given_name, surname).and_return(true)
+      allow(described_class).to receive(:find_or_create_by_with_retry).and_return(user)
       allow(username).to receive(:downcase).and_return(downcased_username)
     end
 
     it 'calls find_or_create_by_with_retry on success' do
-      expect(User).to receive(:find_or_create_by_with_retry).with(username: downcased_username, ldap_domain: User::LDAP_EXTRANET_DOMAIN)
+      expect(described_class).to receive(:find_or_create_by_with_retry).with(username: downcased_username, ldap_domain: described_class::LDAP_EXTRANET_DOMAIN)
       call_method
     end
 
     it 'calls create_ldap_user on success' do
-      expect(User).to receive(:create_ldap_user).with(member_id, creator, username, email, given_name, surname)
+      expect(described_class).to receive(:create_ldap_user).with(member_id, creator, username, email, given_name, surname)
       call_method
     end
 
-    it 'returns nil if add_groups fails' do
-      allow(User).to receive(:create_ldap_user).with(member_id, creator, username, email, given_name, surname).and_return(false)
+    it 'returns nil if create_ldap_user fails' do
+      allow(described_class).to receive(:create_ldap_user).and_return(false)
+      expect(call_method).to be_nil
+    end
+
+    it 'returns nil if find_or_create_by_with_retry fails' do
+      allow(described_class).to receive(:find_or_create_by_with_retry).and_return(nil)
       expect(call_method).to be_nil
     end
 
     it 'downcases the username' do
       expect(username).to receive(:downcase)
       call_method
+    end
+
+    it 'does not unlock the user if creation failed' do
+      allow(described_class).to receive(:create_ldap_user).and_return(false)
+      expect(user).to_not receive(:unlock!)
+      call_method
+    end
+
+    it 'unlocks the user' do
+      expect(user).to receive(:unlock!)
+      call_method
+    end
+
+    it 'returns the new user' do
+      expect(call_method).to be(user)
     end
   end
 
