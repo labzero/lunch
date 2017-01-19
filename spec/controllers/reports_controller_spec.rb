@@ -4245,28 +4245,6 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
-    describe '`sort_report_data`' do
-      let(:item_1) { {foo: 5} }
-      let(:item_2) { {foo: 1} }
-      let(:item_3) { {foo: 15} }
-      let(:data) { [item_1, item_2, item_3] }
-      it 'returns nil if passed no data' do
-        expect(controller.send(:sort_report_data, nil, :foo)).to eq(nil)
-      end
-      it 'returns an empty array if it is passed an empty array as the first argument' do
-        expect(controller.send(:sort_report_data, [], :foo)).to eq([])
-      end
-      describe 'default behavior' do
-        it 'sorts the given data by the given field in ascending order' do
-          expect(controller.send(:sort_report_data, data, :foo)).to eq([item_2, item_1, item_3])
-        end
-      end
-      describe 'when passed a third argument that is not `asc`' do
-        it 'sorts the given data by the given field in descending order' do
-          expect(controller.send(:sort_report_data, data, :foo, 'desc')).to eq([item_3, item_1, item_2])
-        end
-      end
-    end
     describe '`parse_vrc_data` method' do
       let(:vrc_fixture_data) { {'advance_maturity' => 'Overnight/Open','advance_rate' => 0.18,'effective_date' => '2016-01-01'} }
       let(:vrc_entries_hash) { {

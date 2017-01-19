@@ -9,7 +9,7 @@ Then(/^I should see the (reports|resources|products|securities) dropdown$/) do |
   report_menu.find(:xpath, '..').assert_selector('.nav-dropdown', visible: true)
 end
 
-When(/^I click on the (agreements|amortizing|arc|arc embedded|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance|manage securities|securities requests|resources|products|learn more|securities|safekeep new|pledge new) link in the header$/) do |link|
+When(/^I click on the (agreements|amortizing|arc|arc embedded|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance|manage securities|securities requests|resources|products|learn more|securities|safekeep new|pledge new|letters of credit|manage letters of credit) link in the header$/) do |link|
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
 end
 
@@ -115,6 +115,10 @@ def dropdown_title_regex(dropdown)
     I18n.t('securities.manage.pledge_new')
   when 'learn more'
     'Learn more'
+  when 'letters of credit'
+    I18n.t('letters_of_credit.title')
+  when 'manage letters of credit'
+    I18n.t('letters_of_credit.manage.title')
   else
     raise 'unknown dropdown'
   end

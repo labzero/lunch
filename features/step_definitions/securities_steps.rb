@@ -2,7 +2,7 @@ When(/^I click on the Securities link in the header$/) do
   page.find('.secondary-nav a', text: I18n.t('securities.title'), exact: true).click
 end
 
-Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities|Transfer to Pledged|Transfer to Safekept|Transfer Securities) page$/i) do |page_type|
+Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities|Transfer to Pledged|Transfer to Safekept|Transfer Securities|Manage Letters of Credit) page$/i) do |page_type|
   text = case page_type
   when /\AManage Securities\z/i
     step 'I should see a report table with multiple data rows'
@@ -23,6 +23,9 @@ Then(/^I should be on the (Manage Securities|Securities Requests|Securities Rele
     I18n.t('securities.transfer.safekeep.title')
   when /\ATransfer Securities\z/i
     /\ATransfer Securities/
+  when /\AManage Letters of Credit\z/i
+    step 'I should see a report table with multiple data rows'
+    I18n.t('letters_of_credit.manage.title')
   end
   page.assert_selector('h1', text: text, exact: true)
 end

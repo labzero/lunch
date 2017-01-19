@@ -28,6 +28,15 @@
                 - if policy(:advance).show?
                   %li= link_to(t('advances.add_advance.nav'), advances_select_rate_path)
                 %li= link_to(t('advances.manage_advances.title'), advances_manage_path)
+      - if feature_enabled?('letters-of-credit')
+        %li{class: ('active-nav-item' if active_nav == :letters_of_credit)}<>
+          = link_to(t('letters_of_credit.title'), '#', class: 'nav-menu')
+          .nav-dropdown
+            .nav-dropdown-row
+              .nav-dropdown-column
+                %h2= t('letters_of_credit.title')
+                %ul
+                  %li= link_to(t('letters_of_credit.manage.title'), letters_of_credit_manage_path)
       - if feature_enabled?('securities')
         %li{class: ('active-nav-item' if active_nav == :securities)}<>
           = link_to(t('securities.title'), '#', class: 'nav-menu')

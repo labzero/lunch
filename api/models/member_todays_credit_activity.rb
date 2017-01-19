@@ -79,6 +79,19 @@ module MAPI
           key :type, :string
           key :description, 'The associated life cycle event (letter of credit only)'
         end
+        property :lc_number do
+          key :type, :string
+          key :description, 'The letter of credit number (letter of credit only)'
+        end
+        property :maintenance_fee do
+          key :type, :number
+          key :format, :float
+          key :description, 'The annual maintenance fee expressed as basis point spread (letter of credit only)'
+        end
+        property :beneficiary do
+          key :type, :string
+          key :description, 'The beneficiary for a given letter of credit (letter of credit only)'
+        end
       end
     end
   end

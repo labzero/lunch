@@ -43,6 +43,12 @@ module ReportsHelper
     profile
   end
 
+  def sort_report_data(data, sort_field, sort_order='asc')
+    return data unless data
+    data = data.sort{|a,b| a[sort_field] <=> b[sort_field]}
+    sort_order == 'asc' ? data : data.reverse
+  end
+
   private
 
   def translation_with_span(i18n, span_key, span_value, klass, substitutions, missing_data_message)

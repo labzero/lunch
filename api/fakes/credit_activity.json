@@ -46,7 +46,10 @@
     "terminationFee": null,
     "terminationFullPartial": null,
     "product": "LC",
-    "subProduct": "LC"
+    "subProduct": "LC",
+    "maintenanceFee": "0.001",
+    "lcNumber": "2016-053",
+    "beneficiary": "State of California"
   },
   {
     "tradeID": 348993,
@@ -63,7 +66,10 @@
     "terminationFullPartial": null,
     "product": "LC",
     "subProduct": "LC",
-    "lifeCycleEvent": "Amended"
+    "lifeCycleEvent": "Amended",
+    "maintenanceFee": "0.001",
+    "lcNumber": "2016-054",
+    "beneficiary": "City of San Francisco"
   },
   {
     "tradeID": 348994,
@@ -80,7 +86,10 @@
     "terminationFullPartial": null,
     "product": "LC",
     "subProduct": "LC",
-    "lifeCycleEvent": "Canceled"
+    "lifeCycleEvent": "Canceled",
+    "maintenanceFee": "0.0013",
+    "lcNumber": "2016-055",
+    "beneficiary": "Yolo County"
   },
   {
     "tradeID": 387183,

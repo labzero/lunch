@@ -1,0 +1,17 @@
+.letters-of-credit {
+  @extend %page-header;
+}
+
+.letters-of-credit-manage {
+  button {
+    @extend %typography-table-button;
+    float: right;
+    margin-bottom: 10px;
+  }
+  table {
+    td:last-child {
+      text-transform: uppercase;
+      color: $medium-gray;
+    }
+  }
+}

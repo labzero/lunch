@@ -492,7 +492,7 @@ describe MAPI::ServiceApp do
     end
 
     describe 'Todays Credit Activity' do
-      string_attributes = [['instrument_type','instrumentType'], ['status', 'status'], ['transaction_number', 'tradeID'], ['product_description', 'productDescription'], ['termination_full_partial', 'terminationFullPartial'], ['product', 'product'], ['sub_product', 'subProduct'], ['life_cycle_event', 'lifeCycleEvent']]
+      string_attributes = [['instrument_type','instrumentType'], ['status', 'status'], ['transaction_number', 'tradeID'], ['product_description', 'productDescription'], ['termination_full_partial', 'terminationFullPartial'], ['product', 'product'], ['sub_product', 'subProduct'], ['life_cycle_event', 'lifeCycleEvent'], ['lc_number', 'lcNumber'], ['beneficiary', 'beneficiary']]
       float_attributes = [['termination_par', 'terminationPar'], ['current_par', 'amount'], ['interest_rate', 'rate'], ['termination_fee', 'terminationFee']]
       date_attributes = [[['trade_date', 'tradeDate'], 'funding_date', 'fundingDate'], ['maturity_date', 'maturityDate']]
 
@@ -524,6 +524,9 @@ describe MAPI::ServiceApp do
         expect(activity[:product]).to eq('LC')
         expect(activity[:sub_product]).to eq('LC')
         expect(activity[:life_cycle_event]).to eq('Cancellation')
+        expect(activity[:lc_number]).to eq('2016-78')
+        expect(activity[:maintenance_charge]).to eq(10.0)
+        expect(activity[:beneficiary]).to eq('State of California')
       end
       it 'should return Internal Service Error, if service is unavailable', vcr: {cassette_name: 'todays_credit_activity_service_unavailable'} do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
@@ -585,14 +588,14 @@ describe MAPI::ServiceApp do
             end
           end
           float_attributes.each do |float_attribute|
-            it "formats the `#{float_attribute.first}` as a string" do
+            it "formats the `#{float_attribute.first}` as a float" do
               expect(attribute).to receive(:to_f)
               allow(activity).to receive(:[]).with(float_attribute.last).and_return(attribute)
               todays_credit_activity
             end
           end
           date_attributes.each do |date_attribute|
-            it "formats the `#{date_attribute.first}` as a string" do
+            it "formats the `#{date_attribute.first}` as a date" do
               allow(attribute).to receive(:[]=).and_return(attribute)
               expect(Time.zone).to receive(:parse).with(attribute).and_return(double('time object', :to_date => nil))
               allow(activity).to receive(:[]).with(date_attribute.last).and_return(attribute)
@@ -603,6 +606,21 @@ describe MAPI::ServiceApp do
             allow(activity).to receive(:[]).with('terminationDate').and_return(attribute)
             expect(DateTime).to receive(:strptime).with(attribute, '%m/%d/%Y').and_return(double(DateTime, to_date: nil))
             todays_credit_activity
+          end
+          it 'parses the `maintenance_charge` into a float' do
+            allow(activity).to receive(:[]).with('maintenanceFee').and_return(attribute)
+            expect(attribute).to receive(:to_f).and_return(0.0)
+            todays_credit_activity
+          end
+          it 'multiples the `maintenance_charge` by 10000' do
+            original_charge = rand
+            allow(activity).to receive(:[]).with('status').and_return(MAPI::Services::Member::TradeActivity::TODAYS_CREDIT_ARRAY.first)
+            allow(activity).to receive(:[]).with('maintenanceFee').and_return(attribute)
+            allow(attribute).to receive(:to_f).and_return(original_charge)
+            expect(todays_credit_activity.length).to be > 0
+            todays_credit_activity.each do |activity|
+              expect(activity[:maintenance_charge]).to eq(original_charge * 10000)
+            end
           end
           it 'includes the parsed terminationDate in the activity response' do
             value = double(Date)
@@ -671,14 +689,14 @@ describe MAPI::ServiceApp do
             end
           end
           float_attributes.each do |float_attribute|
-            it "formats the `#{float_attribute.first}` as a string" do
+            it "formats the `#{float_attribute.first}` as a float" do
               expect(attribute).to receive(:to_f)
               allow(activity).to receive(:at_css).with(float_attribute.last).and_return(double('xml node', content: attribute))
               todays_credit_activity
             end
           end
           date_attributes.each do |date_attribute|
-            it "formats the `#{date_attribute.first}` as a string" do
+            it "formats the `#{date_attribute.first}` as a date" do
               expect(Time.zone).to receive(:parse).with(attribute).and_return(double('time object', :to_date => nil))
               allow(activity).to receive(:at_css).with(date_attribute.last).and_return(double('xml node', content: attribute))
               todays_credit_activity

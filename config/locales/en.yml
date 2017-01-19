@@ -1482,6 +1482,13 @@ en:
       no_rows: Your file contains no valid rows. Edit your file and try again.
     upload_success: 'The following securities from your Excel file were validated and will be included in the securities request:'
     internal_user_error: This securities request was not completed because Bank employees are not authorized to complete securities requests via the member portal.
+  letters_of_credit:
+    title: Letters of Credit
+    manage:
+      title: Manage Letters of Credit
+      request: Request letter of credit
+      expiration_date: Expiration Date
+      maintenance_fee: Annual Maintenance Fee (bps)
   reports:
     meta_title: FHLBSF - Reports
     title: Reports

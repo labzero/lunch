@@ -2328,12 +2328,6 @@ class ReportsController < ApplicationController
     securities
   end
 
-  def sort_report_data(data, sort_field, sort_order='asc')
-    return data unless data
-    data = data.sort{|a,b| a[sort_field] <=> b[sort_field]}
-    sort_order == 'asc' ? data : data.reverse
-  end
-
   def initialize_dates(report, start_date = nil, end_date = nil)
     date_bounds = ReportConfiguration.date_bounds(report, start_date, end_date)
     @min_date = date_bounds[:min]
