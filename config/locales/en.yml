@@ -1257,8 +1257,8 @@ en:
         safekept: Securities Safekeeping
         release_pledged: Release Pledged Securities
         release_safekept: Release Safekept Securities
-        transfer_pledged: Transfer Pledged Securities
-        transfer_safekept: Transfer Safekept Securities
+        transfer_pledged: Transfer Safekept Securities
+        transfer_safekept: Transfer Pledged Securities
       pending:
         title: Requests for Authorization
       authorized:
