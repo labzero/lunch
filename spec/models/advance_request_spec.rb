@@ -1650,7 +1650,8 @@ describe AdvanceRequest do
         'CapitalStockError' => :capital_stock,
         'CreditError' => :credit,
         'CollateralError' => :collateral,
-        'DisabledProductError' => :disabled_product
+        'DisabledProductError' => :disabled_product,
+        'GrossUpExceedsFinancingAvailabilityError' => :gross_up_exceeds_financing_availability
       }.each do |status, code|
         it "adds an error with a code of `#{code}` if the status contains `#{status}`" do
           allow(response).to receive(:[]).with(:status).and_return([status])
@@ -1658,7 +1659,7 @@ describe AdvanceRequest do
           call_method
         end
       end
-      describe ' when the status contains `ExceedsTotalDailyLimitError`' do
+      describe 'when the status contains `ExceedsTotalDailyLimitError`' do
         let(:total_daily_limit) { instance_double(String) }
         before do
           allow(response).to receive(:[]).with(:status).and_return(['ExceedsTotalDailyLimitError'])
@@ -1673,7 +1674,7 @@ describe AdvanceRequest do
           call_method
         end
       end
-      describe ' when the status contains `EndOfDayReached`' do
+      describe 'when the status contains `EndOfDayReached`' do
         let(:end_of_day) { instance_double(String) }
         before do
           allow(response).to receive(:[]).with(:status).and_return(['EndOfDayReached'])
@@ -1685,6 +1686,19 @@ describe AdvanceRequest do
         end
         it 'adds an error with a value equal to the `end_of_day` value from the response' do
           expect(subject).to receive(:add_error).with(anything, anything, end_of_day)
+          call_method
+        end
+      end
+      describe 'when the status contains `ExceedsMaximumTerm`' do
+        let(:maximum_term)      { double('Maximum Term') }
+        let(:maximum_term_unit) { double('Maximum Term Unit') }
+        before do
+          allow(response).to receive(:[]).with(:status).and_return(['ExceedsMaximumTerm'])
+          allow(response).to receive(:[]).with(:maximum_term).and_return( maximum_term)
+          allow(response).to receive(:[]).with(:maximum_term_unit).and_return( maximum_term_unit)
+        end
+        it 'adds an error with hash containing the values of `maximum_term` and `maximum_term_unit` from the response' do
+          expect(subject).to receive(:add_error).with(error_type, :exceeds_maximum_term, { maximum_term: maximum_term, maximum_term_unit: maximum_term_unit } )
           call_method
         end
       end
