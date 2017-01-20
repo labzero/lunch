@@ -39,6 +39,7 @@ RSpec.describe QuickReportsController, type: :controller do
   describe '`pundit_user` instance method' do
     let(:call_method) { controller.pundit_user }
     it 'returns the `current_user` if there is no `current_member_id`' do
+      allow(controller).to receive(:current_member_id).and_return(nil)
       expect(call_method).to be(controller.current_user)
     end
     describe 'if `current_member_id` is present' do

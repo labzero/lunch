@@ -127,6 +127,7 @@ en:
     uploading: 'Uploading...'
     cancel_upload: Cancel Upload
     optional_field: (optional)
+    member_portal: Member Portal
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -3093,6 +3094,18 @@ en:
         pledge_release: Securities Release
         safekept_release: Safekeeping Release
         member_id: FHLB Member ID "%{member_id}"
+  admin:
+    title: Member Portal Admin
+    nav:
+      secondary:
+        users: Users
+        institutions: Institutions
+        trade_rules: Trade/Credit Rules
+        data_visibility: Data Visibility
+        features: Test Features
+    features:
+      flipper:
+        title: Flipper
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

@@ -221,7 +221,8 @@ Rails.application.routes.draw do
   root 'users/sessions#new'
 
   constraints Constraints::WebAdmin.new do
-    mount Flipper::UI.app(Rails.application.flipper) => '/admin'
+    get '/admin' => 'admin/dashboard#index', as: :dashboard_admin
+    mount Flipper::UI.app(Rails.application.flipper) => '/admin/features', as: :features_admin
   end
 
   get '/error' => 'error#standard_error' unless Rails.env.production?

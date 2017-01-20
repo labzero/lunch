@@ -6,6 +6,7 @@ RSpec.describe WelcomeController, :type => :controller do
   it { should use_around_filter(:skip_timeout_reset) }
   it { should_not use_before_action(:authenticate_user!) }
   it { should_not use_before_action(:check_terms) }
+  it { should_not use_before_action(:require_member) }
   
   describe "GET details" do
     let(:make_request) { get :details }

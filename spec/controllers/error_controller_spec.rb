@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe ErrorController, :type => :controller do
   it { should_not use_before_action(:check_terms) }
+  it { should_not use_before_action(:require_member) }
 
   describe 'GET standard_error' do
     before do

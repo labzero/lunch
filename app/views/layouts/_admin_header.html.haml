@@ -1,0 +1,32 @@
+.main-nav
+  .row
+    = link_to(t('welcome.logo'), dashboard_admin_path, class: 'logo')
+    %ul
+      %li= t('nav.primary.welcome', name: current_user.given_name || current_user.username)
+      %li.header-member-name= link_to(t('global.member_portal'), dashboard_path)
+      %li.nav-logout= link_to(t('nav.primary.logout'), destroy_user_session_path, method: :delete)
+    %h1= t('admin.title')
+
+.secondary-nav
+  %nav.row
+    %ul<>
+      %li<>
+        = link_to(t('admin.nav.secondary.users'), '#', class: 'nav-menu')
+        .nav-dropdown
+      %li<>
+        = link_to(t('admin.nav.secondary.institutions'), '#', class: 'nav-menu')
+        .nav-dropdown
+      %li<>
+        = link_to(t('admin.nav.secondary.trade_rules'), '#', class: 'nav-menu')
+        .nav-dropdown
+      %li<>
+        = link_to(t('admin.nav.secondary.data_visibility'), '#', class: 'nav-menu')
+        .nav-dropdown
+      %li<>
+        = link_to(t('admin.nav.secondary.features'), '#', class: 'nav-menu')
+        .nav-dropdown
+          .nav-dropdown-row
+            .nav-dropdown-column
+              %h2= t('admin.nav.secondary.features')
+              %ul
+                %li= link_to(t('admin.features.flipper.title'), features_admin_path)

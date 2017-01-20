@@ -48,6 +48,7 @@ RSpec.describe ReportsController, :type => :controller do
 
   before do
     allow(controller).to receive(:date_picker_presets).and_return(date_picker_presets)
+    allow(controller).to receive(:report_disabled?).and_return(false)
     allow(controller).to receive(:fhlb_report_date_numeric)
     allow(ReportConfiguration).to receive(:date_bounds).with(any_args)
       .and_return({ min: min_date, start: start_date, end: end_date, max: max_date })
@@ -548,24 +549,27 @@ RSpec.describe ReportsController, :type => :controller do
         let(:sta_number) { double('An STA Number') }
         let(:member_id) { double('A Member ID') }
         let(:members_service) { double(MembersService, report_disabled?: false) }
+        let(:sta_hash) { {sta_number: sta_number}.with_indifferent_access }
         before do
           allow(MembersService).to receive(:new).and_return(members_service)
-          allow(members_service).to receive(:member).and_return({sta_number: sta_number}.with_indifferent_access)
+          allow(members_service).to receive(:member).and_return(sta_hash)
           allow(controller).to receive(:current_member_id).and_return(member_id)
         end
-         it 'calls MembersService.member with the current_member_id' do
-           expect(members_service).to receive(:member).with(member_id)
-           make_request
-         end
-         it 'populates @sta_number with the STA number' do
-           make_request
-           expect(assigns[:sta_number]).to be(sta_number)
-         end
-         it 'does not populate @sta_number if its already set' do
-           controller.instance_variable_set(:@sta_number, sta_number)
-           expect(members_service).to receive(:member).exactly(:once)
-           make_request
-         end
+        it 'calls MembersService.member with the current_member_id' do
+          expect(members_service).to receive(:member).with(member_id)
+          make_request
+        end
+        it 'populates @sta_number with the STA number' do
+          make_request
+          expect(assigns[:sta_number]).to be(sta_number)
+        end
+        it 'does not populate @sta_number if its already set' do
+          other_sta_number = double('A Different STA Number')
+          controller.instance_variable_set(:@sta_number, sta_number)
+          sta_hash[:sta_number] = other_sta_number
+          make_request
+          expect(assigns[:sta_number]).to be(sta_number)
+        end
       end
     end
 
@@ -2983,7 +2987,7 @@ RSpec.describe ReportsController, :type => :controller do
     let(:member_profile_response) { {collateral_delivery_status: 'Y', rhfa: rhfa, approved_long_term_credit: approved_long_term_credit, advances: advances, credit_outstanding: credit_outstanding} }
     before do
       allow(subject).to receive(:current_member_id).and_return(member_id)
-      allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
+      allow(subject).to receive(:current_member_name).and_return(member_name)
       allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(contacts)
       allow(contacts).to receive(:[]).with(:cam).and_return({username: cam_username})
       allow(contacts).to receive(:[]).with(:rm).and_return({username: rm_username})
@@ -3002,6 +3006,10 @@ RSpec.describe ReportsController, :type => :controller do
     it 'assigns `@member_name`' do
       make_request
       expect(assigns[:member_name]).to be(member_name)
+    end
+    it 'does not assign @member_name if nil' do
+      allow(subject).to receive(:current_member_name).and_return(nil)
+      expect(assigns[:member_name]).to be_nil
     end
     it 'sets `@collateral_table` to the hash returned from MemberBalanceServiceJob' do
       make_request
@@ -3245,6 +3253,7 @@ RSpec.describe ReportsController, :type => :controller do
       describe 'the member profile could not be found' do
         before do
           allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
+          allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
           make_request
         end
         %w(rhfa_table advances_table advances_and_mpf_totals mpf_table total_credit_table total_available_credit_table sta_table).each do |instance_var|
@@ -3279,9 +3288,6 @@ RSpec.describe ReportsController, :type => :controller do
         before do
           allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
           make_request
-        end
-        it 'does not assign @member_name' do
-          expect(assigns[:member_name]).to be_nil
         end
       end
       describe 'the member contacts could not be found' do
@@ -3727,6 +3733,7 @@ RSpec.describe ReportsController, :type => :controller do
       let(:method_call) { controller.send(:report_disabled?, report_flags) }
 
       before do
+        allow(controller).to receive(:report_disabled?).and_call_original
         session[described_class::SessionKeys::MEMBER_ID] = 750
         allow(MembersService).to receive(:new).and_return(member_service_instance)
       end

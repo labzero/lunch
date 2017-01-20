@@ -1,7 +1,7 @@
 class Users::SessionsController < Devise::SessionsController
   layout 'external'
 
-  skip_before_action :check_password_change, :check_terms
+  skip_before_action :check_password_change, :check_terms, :require_member
 
   def destroy
     current_user.clear_cache

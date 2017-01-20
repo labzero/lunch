@@ -5,6 +5,7 @@ RSpec.describe ApplicationController, :type => :controller do
   it { should use_before_action(:save_render_time) }
   it { should use_before_action(:check_terms) }
   it { should use_before_action(:set_default_format) }
+  it { should use_before_action(:require_member) }
 
   describe '`handle_exception` method' do
     let(:backtrace) {%w(some backtrace array returned by the error)}
@@ -79,7 +80,8 @@ RSpec.describe ApplicationController, :type => :controller do
   describe '`after_sign_in_path_for(resource)` method' do
     let(:member_id) { rand(9999) }
     let(:user) { double('User', member_id: nil, accepted_terms?: nil, password_expired?: false, intranet_user?: true) }
-    let(:call_method) { controller.send(:after_sign_in_path_for, 'some resource') }
+    let(:resource) { 'some resource' }
+    let(:call_method) { controller.send(:after_sign_in_path_for, resource) }
     before do
       allow(controller).to receive(:current_user).and_return(user)
     end
@@ -98,12 +100,12 @@ RSpec.describe ApplicationController, :type => :controller do
           session[described_class::SessionKeys::MEMBER_ID] = 750
         end
         it 'redirects to the stored location for the resource if it exists' do
-          expect(controller).to receive(:stored_location_for).with('some resource')
+          expect(controller).to receive(:stored_location_for).with(resource)
           call_method
         end
         it 'redirects to the dashboard_path if there is no stored location for the resource' do
           expect(controller).to receive(:dashboard_path)
-          expect(controller).to receive(:stored_location_for).with('some resource').and_return(nil)
+          expect(controller).to receive(:stored_location_for).with(resource).and_return(nil)
           call_method
         end
       end
@@ -112,10 +114,18 @@ RSpec.describe ApplicationController, :type => :controller do
         call_method
         expect(session[described_class::SessionKeys::MEMBER_ID]).to eq(member_id)
       end
-      it 'redirects to Members#select_member if the user is an intranet user' do
-        allow(user).to receive(:intranet_user?).and_return(true)
-        expect(controller).to receive(:members_select_member_path)
-        call_method
+      describe 'if the user is an intranet user' do
+        before do
+          allow(user).to receive(:intranet_user?).and_return(true)
+        end
+        it 'redirects to Members#select_member if they do not have a stored redirect locaiton' do
+          expect(call_method).to eq(controller.members_select_member_path)
+        end
+        it 'redirects to the stored redirect locaiton if present' do
+          location = double('A Location')
+          allow(controller).to receive(:stored_location_for).with(resource).and_return(location)
+          expect(call_method).to be(location)
+        end
       end
       it 'raises an error if there is no member_id in the session and the current user is not an intranet user' do
         allow(user).to receive(:intranet_user?).and_return(false)
@@ -611,6 +621,29 @@ RSpec.describe ApplicationController, :type => :controller do
       request.format = 'Accept: */*'
       call_method
       expect(request.format.html?).to be(true)
+    end
+  end
+
+  describe '`require_member` private method' do
+    let(:call_method) { controller.send(:require_member) }
+    before do
+      allow(controller).to receive(:redirect_to)
+    end
+    describe 'if no member ID is set in the session' do
+      it 'redirects the user to the member selector' do
+        expect(controller).to receive(:redirect_to).with(members_select_member_path)
+        call_method
+      end
+      it 'stores the current request path' do
+        allow(request).to receive(:path).and_return(double('A Path'))
+        expect(controller).to receive(:store_location_for).with(:user, request.path)
+        call_method
+      end
+    end
+    it 'does not redirect if a member ID is in the session' do
+      session[described_class::SessionKeys::MEMBER_ID] = double('A Member ID')
+      expect(controller).to_not receive(:redirect_to)
+      call_method
     end
   end
 
