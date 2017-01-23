@@ -9,5 +9,7 @@
   "resources-token",
   "resources-access-manager",
   "report-todays-credit-activity-description",
+  "report-pdf-dividend-transaction",
+  "report-pdf-current-securities-position",
   "letters-of-credit"
 ]

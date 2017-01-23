@@ -6,7 +6,8 @@
     - if @print_layout
       = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@as_of_date))
     - else
-      = render 'reports_header_buttons', allowed_params: :securities_filter, download_formats: [:xlsx, :pdf]
+      - formats = feature_enabled?('report-pdf-current-securities-position') ? [:xlsx, :pdf] : [:xlsx]
+      = render 'reports_header_buttons', allowed_params: :securities_filter, download_formats: formats
       = render 'report_details', name: @member_name, freshness: t('reports.freshness.current'), availability: t('reports.availability.current')
     .report-inputs
       = form_tag(reports_current_securities_position_url, method: 'GET') do

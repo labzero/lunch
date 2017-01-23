@@ -45,6 +45,12 @@ Feature: Visiting the Current Securities Position Report Page
     When I request an XLSX
     Then I should begin downloading a file
 
+  @resque-backed @smoke @jira-mem-818 @flip-on-report-pdf-current-securities-position
+  Scenario: Member downloads an PDF of the current securities position report
+    Given I am on the "Current Securities Position" report page
+    When I request a PDF
+    Then I should begin downloading a file
+
   @data-unavailable @jira-mem-283 @jira-mem-1053
   Scenario: No data is available to show in the current securities position report
     Given I am on the "Current Securities Position" report page
