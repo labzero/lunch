@@ -9,7 +9,7 @@
     margin-bottom: 10px;
   }
   table {
-    td:last-child {
+    td:last-child:not(.dataTables_empty) {
       text-transform: uppercase;
       color: $medium-gray;
     }
