@@ -1,4 +1,4 @@
-@jira-mem-69 @flip-on-report-current-securities-positions
+@jira-mem-69
 Feature: Visiting the Current Securities Position Report Page
   As a user
   I want to use visit the current securities position report page for the FHLB Member Portal
@@ -43,6 +43,12 @@ Feature: Visiting the Current Securities Position Report Page
   Scenario: Member downloads an XLSX of the current securities position report
     Given I am on the "Current Securities Position" report page
     When I request an XLSX
+    Then I should begin downloading a file
+
+  @resque-backed @smoke @jira-mem-818 @flip-on-report-pdf-current-securities-position
+  Scenario: Member downloads an PDF of the current securities position report
+    Given I am on the "Current Securities Position" report page
+    When I request a PDF
     Then I should begin downloading a file
 
   @data-unavailable @jira-mem-283 @jira-mem-1053

@@ -34,7 +34,7 @@ class AdvanceRequest
     :gross_pre_trade_stock_required, :gross_net_stock_required,
     :interest_day_count, :payment_on, :funding_date, :maturity_date, :initiated_at,
     :confirmation_number, :authorized_amount, :credit_max_amount, :collateral_max_amount,
-    :collateral_authorized_amount, :trade_date, :allow_grace_period
+    :collateral_authorized_amount, :trade_date, :allow_grace_period, :maximum_term, :maximum_term_unit
   ].freeze
   CORE_PARAMETERS = [:type, :rates, :term, :amount, :rate, :stock_choice].freeze
   PREVIEW_EXCLUDE_KEYS = [:advance_amount, :advance_rate, :advance_type, :advance_term, :status, :total_daily_limit, :end_of_day].freeze
@@ -555,6 +555,8 @@ class AdvanceRequest
             add_error(method, :gross_up_exceeds_financing_availability)
           when 'EndOfDayReached'
             add_error(method, :end_of_day, response[:end_of_day])
+          when 'ExceedsMaximumTerm'
+            add_error(method, :exceeds_maximum_term, { maximum_term: response[:maximum_term], maximum_term_unit: response[:maximum_term_unit] } )
           else
             add_error(method, :unknown, status)
           end

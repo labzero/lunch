@@ -332,6 +332,7 @@ module MAPI
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_credit(fhlbsfresponse, response, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_collateral(fhlbsfresponse, response, response_hash) unless funding_date
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_enabled_product(app.logger, app.settings.environment, advance_term, advance_type, response_hash, allow_grace_period)
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_max_term_limit(app, member_id, response_hash)
 
                 # passed all checks
                 if response_hash['status'].blank?
@@ -352,6 +353,7 @@ module MAPI
                 response_hash['confirmation_number'] = rand(100000..999999).to_s
               end
             else
+              response_hash['status'] ||= []
               if (amount.to_i == 100001)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_credit_error.json')))
               elsif (amount.to_i == 100002) || (amount.to_i == 1000121 && !check_capstock)
@@ -359,16 +361,22 @@ module MAPI
               elsif (amount.to_i == 100003)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_exceeds_total_daily_limit_error.json')))
               elsif (amount.to_i == 100004)
-                response_hash['status'] ||= []
                 response_hash['status'] << 'DisabledProductError'
               elsif (amount.to_i == 100006)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_collateral_capstock_error.json')))
               elsif (amount.to_i == 100007 && check_capstock)
                 response_hash.merge! JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_gross_up_exceeds_financing_availability_error.json')))
               elsif (amount.to_i == 100008)
-                response_hash['status'] ||= []
                 response_hash['status'] << 'EndOfDayReached'
                 response_hash['end_of_day'] = (Time.zone.now - 5.minutes).iso8601
+              elsif (amount.to_i == 100009)
+                response_hash['status'] << 'ExceedsMaximumTerm'
+                response_hash['maximum_term'] = 120
+                response_hash['maximum_term_unit'] = :day
+              elsif (amount.to_i == 100010)
+                response_hash['status'] << 'ExceedsMaximumTerm'
+                response_hash['maximum_term'] = 4
+                response_hash['maximum_term_unit'] = :month
               elsif (amount.to_i < 1000000) || (!check_capstock)
                 response_hash['status'] = ['Success']
                 response_hash['confirmation_number'] = ''
@@ -492,6 +500,34 @@ module MAPI
             else
               new_hash = {
                 'status' => ['DisabledProductError']
+              }
+            end
+          end
+          response_hash.merge(new_hash){|key, old, new| old + new }
+        end
+
+        def self.check_max_term_limit(app, member_id, response_hash)
+          new_hash = {}
+          funding_date = response_hash['funding_date'].to_date
+          maturity_date = response_hash['maturity_date'].to_date
+          settings = MAPI::Services::EtransactAdvances::Settings.settings(app.settings.environment)
+          raise 'MAPI::Services::EtransactAdvances::Settings.settings returned nil' unless settings.present?
+          maximum_online_term_days = settings['maximum_online_term_days']
+          if maturity_date - funding_date > maximum_online_term_days
+            new_hash = {
+              'status' => ['ExceedsMaximumTerm'],
+              'maximum_term' => maximum_online_term_days,
+              'maximum_term_unit' => :day
+            }
+          else
+            profile = MAPI::Services::Member::Profile.member_profile(app, member_id)
+            raise 'MAPI::Services::Member::Profile.member_profile returned nil' unless profile.present?
+            profile_maximum_term = profile[:maximum_term].months
+            if funding_date + profile_maximum_term < maturity_date
+              new_hash = {
+                'status' => ['ExceedsMaximumTerm'],
+                'maximum_term' => profile_maximum_term,
+                'maximum_term_unit' => :month
               }
             end
           end

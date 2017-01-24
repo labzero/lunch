@@ -5,7 +5,7 @@ class RenderReportPDFJob < FhlbJob
 
   # TODO create base class, inherit, super perform_later
 
-  def perform(member_id, report_name, filename=nil, params={})
+  def perform(member_id, report_name, filename=nil, params={}, report_view=nil)
     controller = ReportsController.new
     controller.request = ActionDispatch::TestRequest.new
     controller.response = ActionDispatch::TestResponse.new
@@ -31,7 +31,7 @@ class RenderReportPDFJob < FhlbJob
     if controller.performed?
       html = response.first
     else
-      html = controller.render_to_string("reports/#{report_name}")
+      html = controller.render_to_string("reports/#{report_view || report_name}")
     end
     controller.class_eval { layout 'print_footer' }
     return if job_status.canceled?

@@ -12,7 +12,9 @@ RSpec.describe RenderReportPDFJob, type: :job do
   let(:pdf) { double('A PDF') }
   let(:filename) { 'my_awesome_filename' }
   let(:params) { {start_date: start_date} }
+  let(:report_view) { SecureRandom.hex }
   let(:run_job) { subject.perform(member_id, report_name, filename, params) }
+  let(:run_job_with_report_view) { subject.perform(member_id, report_name, filename, params, report_view) }
   let(:reports_controller) { ReportsController.new }
   let(:wicked_pdf) { double('wicked pdf instance', pdf_from_string: pdf) }
   let(:user) { double(User) }
@@ -51,6 +53,12 @@ RSpec.describe RenderReportPDFJob, type: :job do
     allow(reports_controller).to receive(:performed?).and_return(false)
     expect(reports_controller).to receive(:render_to_string).with("reports/#{report_name}").and_return(report_html)
     run_job
+  end
+
+  it 'renders the report vith the supplied report_view arg if the controller action didn\'t' do
+    allow(reports_controller).to receive(:performed?).and_return(false)
+    expect(reports_controller).to receive(:render_to_string).with("reports/#{report_view}").and_return(report_html)
+    run_job_with_report_view
   end
 
   describe 'before calling the report action' do

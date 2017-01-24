@@ -12,6 +12,12 @@ Scenario: View the pledge securities page
   And I click the button to create a new pledge request
   Then I should be on the pledge securities page
 
+@jira-mem-2070
+Scenario: View the pledge securities page from the nav
+  When I click on the securities link in the header
+  And I click on the pledge new link in the header
+  Then I should be on the pledge securities page
+
 @jira-mem-1678
 Scenario: Member views the broker instructions
   When I am on the pledge securities page
@@ -41,5 +47,5 @@ Scenario: Member cannot click on the account number input
 Scenario: A signer views a previously submitted pledge request
   Given I am logged in as a "quick-advance signer"
   And I am on the securities request page
-  When I click to Authorize the first pledge
+  When I click to Authorize the first pledge intake
   Then I should be on the Pledge Securities page

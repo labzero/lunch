@@ -126,6 +126,8 @@ en:
     enter: Enter
     uploading: 'Uploading...'
     cancel_upload: Cancel Upload
+    optional_field: (optional)
+    member_portal: Member Portal
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -168,6 +170,7 @@ en:
       logout: Logout
       switch: Switch
       search: Search
+      settings: Settings
     secondary:
       advances: Advances
       letters_of_credit: Letters of Credit
@@ -309,7 +312,7 @@ en:
     access_manager:
       title: Access Manager
       description_title: Access Manager
-      description: Your institution’s Access Manager(s), who may add and delete portal users, reset passwords, and lock or unlock portal access for individuals.
+      description: Individuals authorized to add and delete portal users, reset passwords, and lock and unlock portal access for users.
     resolution:
       dropdown: Resolution and Authorization
       title: 'Resolution and Authorization: Member Transactions'
@@ -324,10 +327,12 @@ en:
       title: Wire Transfer Services
       description_title: Wire Transfer Services
       description: Individuals authorized to conduct offline funds transfer transactions by telephone.
+      token_holder: 'SecurID Token: Wire Transfers'
     advances:
       title: Advances
       description_title: Advances
       description: Individuals authorized to conduct credit transactions, including advances, letters of credit, lines of credit, and other similar extensions of credit.
+      token_holder: 'SecurID Token: Advances'
     affordable_housing:
       title: Affordable Housing Program
       description_title: Affordable Housing Program
@@ -335,7 +340,7 @@ en:
     collateral:
       title: Collateral
       description_title: Collateral
-      description: Individuals authorized to pledge and depledge securities. This form does not authorize individuals to move securities held in safekeeping except to pledge those securities.
+      description: Individuals authorized to pledge and depledge securities. This does not authorize individuals to move securities held in safekeeping except to pledge those securities.
     interest_rate_derivatives:
       title: Interest Rate Derivatives
       description_title: Interest Rate Derivatives
@@ -347,9 +352,12 @@ en:
     securities:
       title: Securities Services
       description_title: Securities Services
-      description: Individuals authorized to move securities to and from your safekeeping account and to provide instructions regarding the purchase and sale of unpledged securities. This form does not authorize individuals to pledge or depledge securities.
+      description: Individuals authorized to move securities to and from your safekeeping account and to provide instructions regarding the purchase and sale of unpledged securities. This does not authorize individuals to pledge or depledge securities.
+      token_holder: 'SecurID Token: Securities'
     etransact_signer:
-      title: Token Holder
+      title: SecurID Token
+      description_title: SecurID Token
+      description: Two-factor authentication security method issued to authorized individuals for the purpose of conducting advances, securities transactions, or wire transfers.
   settings:
     title: Settings
     save: Save
@@ -687,6 +695,14 @@ en:
         not_authorized: This Advance Request was not completed because Bank employees are not authorized to complete advances via the member portal.
         exceeds_daily_limit: This advance is unavailable because it would cause your institution to exceed its cumulative daily limit of %{limit} for this term.
         end_of_day: This rate is unavailable after %{time}.
+        exceeds_maximum_term_day:
+          one: Your institution has a maximum term for advances of %{count} day. See your Account Summary for more details.
+          other: Your institution has a maximum term for advances of %{count} days. See your Account Summary for more details.
+        exceeds_maximum_term_month:
+          one: Your institution has a maximum term for advances of %{count} month. See your Account Summary for more details.
+          other: Your institution has a maximum term for advances of %{count} months. See your Account Summary for more details.
+        day_unit: day
+        month_unit: month
     reports:
       title: Reports
       as_of_yesterday: As of yesterday
@@ -795,7 +811,7 @@ en:
             - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
-              date: '2016-04-07'
+              date: '2016-04-27'
               details:
                 -
                   description: "Incorporated certain changes to the Bank’s capital stock requirements that were announced in Bulletin No. 1480 on June 16, 2015 (page 7)."
@@ -833,7 +849,7 @@ en:
             - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
-              date: '2016-04-07'
+              date: '2016-04-27'
               details:
                 -
                   description: "Added information on eligible members and what types of collateral they can pledge (pages 6-7)."
@@ -1240,8 +1256,10 @@ en:
       form_descriptions:
         pledge: Securities Pledge
         safekept: Securities Safekeeping
-        release: Securities Release
-        transfer: Securities Internal Transfer
+        release_pledged: Release Pledged Securities
+        release_safekept: Release Safekept Securities
+        transfer_pledged: Transfer Safekept Securities
+        transfer_safekept: Transfer Pledged Securities
       pending:
         title: Requests for Authorization
       authorized:
@@ -1465,6 +1483,13 @@ en:
       no_rows: Your file contains no valid rows. Edit your file and try again.
     upload_success: 'The following securities from your Excel file were validated and will be included in the securities request:'
     internal_user_error: This securities request was not completed because Bank employees are not authorized to complete securities requests via the member portal.
+  letters_of_credit:
+    title: Letters of Credit
+    manage:
+      title: Manage Letters of Credit
+      request: Request letter of credit
+      expiration_date: Expiration Date
+      maintenance_fee: Annual Maintenance Fee (bps)
   reports:
     meta_title: FHLBSF - Reports
     title: Reports
@@ -1706,6 +1731,12 @@ en:
             frc_sbc: "5. Securities-Backed Credit Program - Fixed Rate Credit Advance"
             arc_sbc: "6. Securities-Backed Credit Program - Adjustable Rate Credit Advance"
             sta: "7. Settlement/Transaction Account"
+          pdf:
+            title: Current Price Indications
+            date_html: "<span>Date:</span> %{date} at 6:00am"
+            vrc: Variable Rate Credit (VRC)
+            frc: Fixed Rate Credit (FRC)
+            arc: Adjustable Rate Credit (ARC)
         historical:
           title: Historical Price Indications and STA Rates
           freshness: This report reflects price indications as of 6:00 am PT on the date displayed and the STA rate as of the date displayed.
@@ -3063,6 +3094,18 @@ en:
         pledge_release: Securities Release
         safekept_release: Safekeeping Release
         member_id: FHLB Member ID "%{member_id}"
+  admin:
+    title: Member Portal Admin
+    nav:
+      secondary:
+        users: Users
+        institutions: Institutions
+        trade_rules: Trade/Credit Rules
+        data_visibility: Data Visibility
+        features: Test Features
+    features:
+      flipper:
+        title: Flipper
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

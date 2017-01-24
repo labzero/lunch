@@ -48,6 +48,7 @@ RSpec.describe ReportsController, :type => :controller do
 
   before do
     allow(controller).to receive(:date_picker_presets).and_return(date_picker_presets)
+    allow(controller).to receive(:report_disabled?).and_return(false)
     allow(controller).to receive(:fhlb_report_date_numeric)
     allow(ReportConfiguration).to receive(:date_bounds).with(any_args)
       .and_return({ min: min_date, start: start_date, end: end_date, max: max_date })
@@ -60,39 +61,6 @@ RSpec.describe ReportsController, :type => :controller do
     it 'should render the index view' do
       get :index
       expect(response.body).to render_template('index')
-    end
-    describe 'flipped reports' do
-      {
-        securities: {
-          transactions: 'report-securities-transaction',
-          cash_projections: 'report-cash-projections',
-          current: 'report-current-securities-positions',
-          monthly: 'report-monthly-securities-positions',
-          services_monthly: 'report-securities-services-monthly-statement'
-        },
-        capital_stock: {
-          activity: 'report-capital-stock-activity-statement',
-          trial_balance: 'report-capital-stock-trial-balance',
-          capital_stock_and_leverage: 'report-capital-stock-position-and-leverage',
-          dividend_statement: 'report-dividened-transaction-statement'
-        },
-        account: {
-          authorizations: 'report-authorizations'
-        }
-      }.each do |section, reports|
-        reports.each do |report, feature|
-          it "marks the report `#{section}.#{report}` as disabled if the feature `#{feature}` is disabled" do
-            allow(controller).to receive(:feature_enabled?).and_call_original
-            allow(controller).to receive(:feature_enabled?).with(feature).and_return(false)
-            get :index
-            expect(assigns[:reports][section][report][:disabled]).to be(true)
-          end
-          it "does not mark the report `#{section}.#{report}` as disabled if its feature `#{feature}` is enabled" do
-            get :index
-            expect(assigns[:reports][section][report]).to_not have_key(:disabled)
-          end
-        end
-      end
     end
   end
 
@@ -581,24 +549,27 @@ RSpec.describe ReportsController, :type => :controller do
         let(:sta_number) { double('An STA Number') }
         let(:member_id) { double('A Member ID') }
         let(:members_service) { double(MembersService, report_disabled?: false) }
+        let(:sta_hash) { {sta_number: sta_number}.with_indifferent_access }
         before do
           allow(MembersService).to receive(:new).and_return(members_service)
-          allow(members_service).to receive(:member).and_return({sta_number: sta_number}.with_indifferent_access)
+          allow(members_service).to receive(:member).and_return(sta_hash)
           allow(controller).to receive(:current_member_id).and_return(member_id)
         end
-         it 'calls MembersService.member with the current_member_id' do
-           expect(members_service).to receive(:member).with(member_id)
-           make_request
-         end
-         it 'populates @sta_number with the STA number' do
-           make_request
-           expect(assigns[:sta_number]).to be(sta_number)
-         end
-         it 'does not populate @sta_number if its already set' do
-           controller.instance_variable_set(:@sta_number, sta_number)
-           expect(members_service).to receive(:member).exactly(:once)
-           make_request
-         end
+        it 'calls MembersService.member with the current_member_id' do
+          expect(members_service).to receive(:member).with(member_id)
+          make_request
+        end
+        it 'populates @sta_number with the STA number' do
+          make_request
+          expect(assigns[:sta_number]).to be(sta_number)
+        end
+        it 'does not populate @sta_number if its already set' do
+          other_sta_number = double('A Different STA Number')
+          controller.instance_variable_set(:@sta_number, sta_number)
+          sta_hash[:sta_number] = other_sta_number
+          make_request
+          expect(assigns[:sta_number]).to be(sta_number)
+        end
       end
     end
 
@@ -636,7 +607,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
 
       it_behaves_like 'a user required action', :get, :cash_projections
-      it_behaves_like 'a report that can be downloaded', :cash_projections, [:xlsx]
+      it_behaves_like 'a report that can be downloaded', :cash_projections, [:xlsx, :pdf]
       it_behaves_like 'a report with instance variables set in a before_filter', :cash_projections
       it_behaves_like 'a controller action with an active nav setting', :cash_projections, :reports
 
@@ -705,6 +676,12 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :dividend_statement
       it_behaves_like 'a report with instance variables set in a before_filter', :dividend_statement
       it_behaves_like 'a controller action with an active nav setting', :dividend_statement, :reports
+      it_behaves_like 'a report that can be downloaded', :dividend_statement, [:pdf]
+
+      it 'assigns @report_name' do
+        make_request
+        expect(assigns[:report_name]).to eq(I18n.t('reports.capital_stock.dividend_statement.title'))
+      end
       it 'calls MemberBalanceService.dividend_statement with the proper date restriction' do
         expect(member_balance_service_instance).to receive(:dividend_statement).with(ReportsController::DATE_RESTRICTION_MAPPING[:dividend_statement].ago.to_date, anything)
         make_request
@@ -868,7 +845,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :letters_of_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :letters_of_credit
       it_behaves_like 'a controller action with an active nav setting', :letters_of_credit, :reports
-      it_behaves_like 'a report that can be downloaded', :letters_of_credit, [:xlsx]
+      it_behaves_like 'a report that can be downloaded', :letters_of_credit, [:xlsx, :pdf]
 
       it 'sorts the letters of credit by lc_number' do
         allow(member_balance_service_instance).to receive(:letters_of_credit).and_return({credits: letters_of_credit})
@@ -1068,7 +1045,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :current_securities_position
       it_behaves_like 'a report with instance variables set in a before_filter', :current_securities_position
       it_behaves_like 'a controller action with an active nav setting', :current_securities_position, :reports
-      it_behaves_like 'a report that can be downloaded', :current_securities_position, [:xlsx]
+      it_behaves_like 'a report that can be downloaded', :current_securities_position, [:xlsx, :pdf]
 
       describe 'view instance variables' do
         let(:unprocessed_securities) { double('unprocessed securities details', length: nil) }
@@ -1127,6 +1104,13 @@ RSpec.describe ReportsController, :type => :controller do
             expect(assigns[:securities_filter_text]).to eq(option.first)
           end
         end
+        it 'sets `@as_of_date` to the `as_of_date` of the returned securities_position data' do
+          as_of_date = instance_double(Date)
+          allow(controller).to receive(:fhlb_date_long_alpha)
+          allow(securities_position_response).to receive(:[]).with(:as_of_date).and_return(as_of_date)
+          get :current_securities_position
+          expect(assigns[:as_of_date]).to eq(as_of_date)
+        end
       end
     end
     describe 'GET monthly_securities_position' do
@@ -1152,7 +1136,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a date restricted report', :monthly_securities_position, :last_month_end
       it_behaves_like 'a report with instance variables set in a before_filter', :monthly_securities_position
       it_behaves_like 'a controller action with an active nav setting', :monthly_securities_position, :reports
-      it_behaves_like 'a report that can be downloaded', :monthly_securities_position, [:xlsx]
+      it_behaves_like 'a report that can be downloaded', :monthly_securities_position, [:xlsx, :pdf]
       describe 'view instance variables' do
         let(:unprocessed_securities) { double('unprocessed securities details', length: nil) }
         let(:processed_securities) { double('processed securities details') }
@@ -1450,11 +1434,12 @@ RSpec.describe ReportsController, :type => :controller do
     end
     describe 'GET todays_credit' do
       let(:todays_credit) { get :todays_credit }
-      let(:credit_activity) { {transaction_number: double('transaction_number'), current_par: double('current_par'), interest_rate: double('interest_rate'), funding_date: double('funding_date'), maturity_date: double('maturity_date', is_a?: true), product_description: double('product_description')} }
+      let(:credit_activity) { {transaction_number: double('transaction_number'), current_par: double('current_par'), interest_rate: double('interest_rate'), funding_date: double('funding_date'), maturity_date: double('maturity_date', is_a?: true), product_description: double('product_description'), life_cycle_event: double('A Life Cycle Event')} }
       let(:credit_activity_advance) { {instrument_type: 'ADVANCE'} }
       let(:todays_credit_response) { [credit_activity] }
       before do
         allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return(todays_credit_response)
+        allow(controller).to receive(:feature_enabled?).with('report-todays-credit-activity-description').and_return(false)
       end
       it_behaves_like 'a user required action', :get, :todays_credit
       it_behaves_like 'a report with instance variables set in a before_filter', :todays_credit
@@ -1541,6 +1526,21 @@ RSpec.describe ReportsController, :type => :controller do
           todays_credit
           expect(assigns[:todays_credit][:rows][0][:columns][1][:value]).to eq(amortizing_advance[:termination_par])
         end
+        describe 'when life cycle events are enabled' do
+          before do
+            allow(controller).to receive(:feature_enabled?).with('report-todays-credit-activity-description').and_return(true)
+          end
+
+          it 'includes the life cycle event as the last column in each row' do
+            todays_credit
+            expect(assigns[:todays_credit][:rows].first[:columns].last).to eq({value: credit_activity[:life_cycle_event]})
+          end
+
+          it 'sets the @todays_credit column_headings attribute to include a description column' do
+            todays_credit
+            expect(assigns[:todays_credit][:column_headings].last).to eq(I18n.t('common_table_headings.description'))
+          end
+        end
       end
       describe 'with the report disabled' do
         before do
@@ -1580,6 +1580,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
 
       it_behaves_like 'a user required action', :get, :mortgage_collateral_update
+      it_behaves_like 'a report that can be downloaded', :mortgage_collateral_update, [:pdf]
 
       it 'renders the mortgage_collateral_update view' do
         mortgage_collateral_update
@@ -1625,10 +1626,14 @@ RSpec.describe ReportsController, :type => :controller do
           expect(subject).to receive(:mcu_table_columns_for).with(mcu_data, 'depledged', I18n.t('reports.pages.mortgage_collateral_update.loans_depledged'))
           mortgage_collateral_update
         end
-        it "has a rows array with a row object containing the result of the `mcu_table_columns_for` private method" do
+        it "has no data rows" do
+          mortgage_collateral_update
+          expect(assigns[:depledged_loans_table_data][:rows]).to eq([])
+        end
+        it "has a footer with a row object containing the result of the `mcu_table_columns_for` private method" do
           expect(subject).to receive(:mcu_table_columns_for).with(mcu_data, 'depledged', I18n.t('reports.pages.mortgage_collateral_update.loans_depledged')).and_return(table_rows)
           mortgage_collateral_update
-          expect(assigns[:depledged_loans_table_data][:rows]).to eq([{columns: table_rows}])
+          expect(assigns[:depledged_loans_table_data][:footer]).to eq(table_rows)
         end
       end
       describe 'with the report disabled' do
@@ -1906,7 +1911,7 @@ RSpec.describe ReportsController, :type => :controller do
     let(:current_price_indications) { get :current_price_indications }
 
     it_behaves_like 'a user required action', :get, :current_price_indications
-    it_behaves_like 'a report that can be downloaded', :current_price_indications, [:xlsx]
+    it_behaves_like 'a report that can be downloaded', :current_price_indications, [:xlsx, :pdf]
     it_behaves_like 'a report with instance variables set in a before_filter', :current_price_indications
     it_behaves_like 'a controller action with an active nav setting', :current_price_indications, :reports
     it_behaves_like 'a controller action with quick advance messaging', :current_price_indications
@@ -2096,6 +2101,20 @@ RSpec.describe ReportsController, :type => :controller do
             current_price_indications
             expect(assigns[:vrc_date]).to be_nil
           end
+        end
+      end
+      context 'when `@print_layout` is true' do
+        before do
+          controller.instance_variable_set(:@print_layout, true)
+          allow(controller).to receive(:populate_pdf_view_variables)
+        end
+        it 'calls `populate_pdf_view_variables`' do
+          expect(controller).to receive(:populate_pdf_view_variables)
+          current_price_indications
+        end
+        it 'renders the `current_price_indications_pdf` view' do
+          current_price_indications
+          expect(response.body).to render_template('current_price_indications_pdf')
         end
       end
     end
@@ -2862,11 +2881,30 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_f[:display_name])
               expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to eq([I18n.t('user_roles.entire_authority.title')])
             end
-            it 'only contains token holders if authorizations_filter is set to ETRANSACT_SIGNER' do
+            it 'contains token holders if authorizations_filter is set to ETRANSACT_SIGNER' do
               get :authorizations, :authorizations_filter => User::Roles::ETRANSACT_SIGNER, job_id: job_id
-              expect(assigns[:authorizations_table_data][:rows].length).to eq(1)
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].first[:value]).to eq(user_etransact[:display_name])
-              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to include(I18n.t('user_roles.etransact_signer.title'))
+              expect(assigns[:authorizations_table_data][:rows]).to match([
+                include(columns: [
+                  include(value: user_d[:display_name]),
+                  include(value: include(I18n.t('user_roles.wire_transfer.token_holder')))
+                ]),
+                include(columns: [
+                  include(value: user_e[:display_name]),
+                  include(value: include(I18n.t('user_roles.wire_transfer.token_holder')))
+                ]),
+                include(columns: [
+                  include(value: user_c[:display_name]),
+                  include(value: include(I18n.t('user_roles.wire_transfer.token_holder')))
+                ]),
+                include(columns: [
+                  include(value: user_etransact[:display_name]),
+                  include(value: include(I18n.t('user_roles.etransact_signer.title')))
+                ])
+               ])
+            end
+            it 'contains token holders if authorizations_filter is set to WIRE_SIGNER' do
+              get :authorizations, :authorizations_filter => User::Roles::WIRE_SIGNER, job_id: job_id
+              expect(assigns[:authorizations_table_data][:rows].first[:columns].last[:value]).to include(I18n.t('user_roles.wire_transfer.token_holder'))
             end
             describe 'when the filtered users include a signer manager or a signer with entire authority' do
               before { get :authorizations, :authorizations_filter => User::Roles::COLLATERAL_SIGNER, job_id: job_id }
@@ -2908,7 +2946,7 @@ RSpec.describe ReportsController, :type => :controller do
               expect(assigns[:authorizations_table_data][:rows][0][:columns].first[:value]).to eq(user_d[:display_name])
               expect(assigns[:authorizations_table_data][:rows][1][:columns].first[:value]).to eq(user_e[:display_name])
               expect(assigns[:authorizations_table_data][:rows][2][:columns].first[:value]).to eq(user_c[:display_name])
-              expect(assigns[:authorizations_table_data][:rows][0][:columns].last[:value]).to eq([I18n.t('user_roles.wire_transfer.title')])
+              expect(assigns[:authorizations_table_data][:rows][0][:columns].last[:value]).to eq([I18n.t('user_roles.wire_transfer.title'), I18n.t('user_roles.wire_transfer.token_holder')])
             end
             it 'ignores users with no role' do
               make_request
@@ -2949,7 +2987,7 @@ RSpec.describe ReportsController, :type => :controller do
     let(:member_profile_response) { {collateral_delivery_status: 'Y', rhfa: rhfa, approved_long_term_credit: approved_long_term_credit, advances: advances, credit_outstanding: credit_outstanding} }
     before do
       allow(subject).to receive(:current_member_id).and_return(member_id)
-      allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
+      allow(subject).to receive(:current_member_name).and_return(member_name)
       allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(contacts)
       allow(contacts).to receive(:[]).with(:cam).and_return({username: cam_username})
       allow(contacts).to receive(:[]).with(:rm).and_return({username: rm_username})
@@ -2968,6 +3006,10 @@ RSpec.describe ReportsController, :type => :controller do
     it 'assigns `@member_name`' do
       make_request
       expect(assigns[:member_name]).to be(member_name)
+    end
+    it 'does not assign @member_name if nil' do
+      allow(subject).to receive(:current_member_name).and_return(nil)
+      expect(assigns[:member_name]).to be_nil
     end
     it 'sets `@collateral_table` to the hash returned from MemberBalanceServiceJob' do
       make_request
@@ -3211,6 +3253,7 @@ RSpec.describe ReportsController, :type => :controller do
       describe 'the member profile could not be found' do
         before do
           allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
+          allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
           make_request
         end
         %w(rhfa_table advances_table advances_and_mpf_totals mpf_table total_credit_table total_available_credit_table sta_table).each do |instance_var|
@@ -3245,9 +3288,6 @@ RSpec.describe ReportsController, :type => :controller do
         before do
           allow_any_instance_of(MembersService).to receive(:member).and_return(nil)
           make_request
-        end
-        it 'does not assign @member_name' do
-          expect(assigns[:member_name]).to be_nil
         end
       end
       describe 'the member contacts could not be found' do
@@ -3502,19 +3542,19 @@ RSpec.describe ReportsController, :type => :controller do
     context 'collateral totals' do
       it 'assigns `@collateral_totals`' do
         make_request
-        expect(assigns[:collateral_totals]).to include(:rows)
+        expect(assigns[:collateral_totals]).to include(:footer)
       end
       [ I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.totals.total'),
         I18n.t('reports.pages.account_summary.collateral_borrowing_capacity.totals.remaining')].each_with_index do |column_label, row_index|
         it "assigns the column label for row #{row_index}" do
           make_request
-          expect(assigns[:collateral_totals][:rows][row_index][:columns][0][:value]).to eq(column_label)
+          expect(assigns[:collateral_totals][:footer][row_index][0][:value]).to eq(column_label)
         end
       end
       it 'assigns values in column' do
         make_request
         [ :total, :remaining ].each_with_index do |value, row_index|
-          expect(assigns[:collateral_totals][:rows][row_index][:columns][1][:value]).to eq(
+          expect(assigns[:collateral_totals][:footer][row_index][1][:value]).to eq(
             collateral_borrowing_capacity[value])
         end
       end
@@ -3658,11 +3698,16 @@ RSpec.describe ReportsController, :type => :controller do
           allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(nil)
           make_request
         end
-        %w(financing_availability credit_outstanding standard_collateral sbc_collateral collateral_totals capital_stock_and_leverage).each do |instance_var|
+        %w(financing_availability credit_outstanding standard_collateral sbc_collateral capital_stock_and_leverage).each do |instance_var|
           it "should assign nil values to all columns found in @#{instance_var}" do
             assigns[instance_var.to_sym][:rows].each do |row|
               expect(row[:columns].last[:value]).to be_nil
             end
+          end
+        end
+        it "should assign nil values to all columns found in @collateral_totals" do
+          assigns[:collateral_totals][:footer].each do |row|
+            expect(row.last[:value]).to be_nil
           end
         end
       end
@@ -3688,6 +3733,7 @@ RSpec.describe ReportsController, :type => :controller do
       let(:method_call) { controller.send(:report_disabled?, report_flags) }
 
       before do
+        allow(controller).to receive(:report_disabled?).and_call_original
         session[described_class::SessionKeys::MEMBER_ID] = 750
         allow(MembersService).to receive(:new).and_return(member_service_instance)
       end
@@ -3770,7 +3816,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
       it 'sorts the roles based on the `AUTHORIZATIONS_ORDER`' do
-        roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::ACCESS_MANAGER]
+        roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::ADVANCE_SIGNER, User::Roles::ACCESS_MANAGER]
         sorted_roles = roles.sort_by {|role| described_class::AUTHORIZATIONS_ORDER.index(role)}
         user = {:roles => roles}
         expect(subject.send(:roles_for_signers, user)).to eq(sorted_roles.collect {|role| role})
@@ -3778,7 +3824,74 @@ RSpec.describe ReportsController, :type => :controller do
       it 'hides roles that are implied by a higher role' do
         roles = [User::Roles::COLLATERAL_SIGNER, User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER]
         user = {:roles => roles}
-        expect(subject.send(:roles_for_signers, user)).to match_array([User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER])
+        expect(subject.send(:roles_for_signers, user)).to match_array([described_class::TOKEN_WIRES, User::Roles::WIRE_SIGNER, User::Roles::SIGNER_MANAGER])
+      end
+      describe 'if the user has a WIRE_SIGNER role' do
+        let(:roles) { [User::Roles::WIRE_SIGNER, User::Roles::COLLATERAL_SIGNER] }
+        let(:call_method) { subject.send(:roles_for_signers, {roles: roles}) }
+        it 'includes TOKEN_WIRES' do
+          expect(call_method).to include(described_class::TOKEN_WIRES)
+        end
+        it 'sorts the expanded roles based on the `AUTHORIZATIONS_ORDER`' do
+          sorted_roles = [*roles, described_class::TOKEN_WIRES].sort_by {|role| described_class::AUTHORIZATIONS_ORDER.index(role)}
+          expect(call_method).to eq(sorted_roles.collect {|role| role})
+        end
+      end
+      describe 'if the signer has a SecurID Token' do
+        let(:roles) { [User::Roles::ETRANSACT_SIGNER] }
+        let(:call_method) { subject.send(:roles_for_signers, {roles: roles}) }
+        describe 'and the signer is a WIRE_SIGNER' do
+          before do
+            roles << User::Roles::WIRE_SIGNER
+          end
+          it 'adds the TOKEN_WIRES role' do
+            expect(call_method).to include(described_class::TOKEN_WIRES)
+          end
+          it 'removes the ETRANSACT_SIGNER role' do
+            expect(call_method).to_not include(User::Roles::ETRANSACT_SIGNER)
+          end
+        end
+        describe 'and the signer is an ADVANCE_SIGNER' do
+          before do
+            roles << User::Roles::ADVANCE_SIGNER
+          end
+          it 'adds the TOKEN_ADVANCES role' do
+            expect(call_method).to include(described_class::TOKEN_ADVANCES)
+          end
+          it 'removes the ETRANSACT_SIGNER role' do
+            expect(call_method).to_not include(User::Roles::ETRANSACT_SIGNER)
+          end
+        end
+        describe 'and the signer is an SECURITIES_SIGNER' do
+          before do
+            roles << User::Roles::SECURITIES_SIGNER
+          end
+          it 'adds the TOKEN_SECURITIES role' do
+            expect(call_method).to include(described_class::TOKEN_SECURITIES)
+          end
+          it 'removes the ETRANSACT_SIGNER role' do
+            expect(call_method).to_not include(User::Roles::ETRANSACT_SIGNER)
+          end
+        end
+        describe 'and the signer is an COLLATERAL_SIGNER' do
+          before do
+            roles << User::Roles::COLLATERAL_SIGNER
+          end
+          it 'adds the TOKEN_SECURITIES role' do
+            expect(call_method).to include(described_class::TOKEN_SECURITIES)
+          end
+          it 'removes the ETRANSACT_SIGNER role' do
+            expect(call_method).to_not include(User::Roles::ETRANSACT_SIGNER)
+          end
+        end
+        it 'removes duplicate roles' do
+          roles << User::Roles::COLLATERAL_SIGNER << User::Roles::SECURITIES_SIGNER << User::Roles::WIRE_SIGNER
+          result = call_method
+          expect(result).to eq(result.uniq)
+        end
+        it 'does not remove the ETRANSACT_SIGNER role if no other token roles are present' do
+          expect(call_method).to include(User::Roles::ETRANSACT_SIGNER)
+        end
       end
     end
 
@@ -3876,6 +3989,7 @@ RSpec.describe ReportsController, :type => :controller do
       let(:report_download_params) { double('report_download_params') }
       let(:job_status_url) { double('job_status_url') }
       let(:job_cancel_url) { double('job_cancel_url') }
+      let(:report_view) { instance_double(String) }
       describe 'when there is not an `export_format` parameter' do
         it 'yields a code block' do
           expect{|x| subject.send(:downloadable_report, &x) }.to yield_with_no_args
@@ -3903,16 +4017,24 @@ RSpec.describe ReportsController, :type => :controller do
             end
             it "calls `perform_later` on #{format.last} with the current_member_id and action_name" do
               allow(subject).to receive(:current_member_id).and_return(id)
-              expect(format.last).to receive(:perform_later).with(id, action_name, anything, anything).and_return(job)
+              expect(format.last).to receive(:perform_later).with(id, action_name, anything, anything, anything).and_return(job)
               call_method
             end
             it "passes the `report_download_name` to the `perform_later` method" do
-              expect(format.last).to receive(:perform_later).with( anything, anything, report_download_name, anything).and_return(job)
+              expect(format.last).to receive(:perform_later).with( anything, anything, report_download_name, anything, anything).and_return(job)
               subject.send(:downloadable_report, nil, nil, report_download_name)
             end
             it "passes the `report_download_params` to the `perform_later method`" do
-              expect(format.last).to receive(:perform_later).with( anything, anything, anything, report_download_params).and_return(job)
+              expect(format.last).to receive(:perform_later).with( anything, anything, anything, report_download_params, anything).and_return(job)
               subject.send(:downloadable_report, nil, report_download_params)
+            end
+            it "passes `nil` as the `report_view` argument to the `perform_later method` if report_view is provided" do
+              expect(format.last).to receive(:perform_later).with( anything, anything, anything, anything, nil).and_return(job)
+              call_method
+            end
+            it "passes the `report_view` to the `perform_later method` if provided" do
+              expect(format.last).to receive(:perform_later).with( anything, anything, anything, anything, report_view).and_return(job)
+              subject.send(:downloadable_report, nil, nil, nil, report_view)
             end
             it 'updates the job_status with the current_user_id' do
               allow(subject).to receive(:current_user).and_return(double('User', id: id))
@@ -4130,28 +4252,6 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
     end
-    describe '`sort_report_data`' do
-      let(:item_1) { {foo: 5} }
-      let(:item_2) { {foo: 1} }
-      let(:item_3) { {foo: 15} }
-      let(:data) { [item_1, item_2, item_3] }
-      it 'returns nil if passed no data' do
-        expect(controller.send(:sort_report_data, nil, :foo)).to eq(nil)
-      end
-      it 'returns an empty array if it is passed an empty array as the first argument' do
-        expect(controller.send(:sort_report_data, [], :foo)).to eq([])
-      end
-      describe 'default behavior' do
-        it 'sorts the given data by the given field in ascending order' do
-          expect(controller.send(:sort_report_data, data, :foo)).to eq([item_2, item_1, item_3])
-        end
-      end
-      describe 'when passed a third argument that is not `asc`' do
-        it 'sorts the given data by the given field in descending order' do
-          expect(controller.send(:sort_report_data, data, :foo, 'desc')).to eq([item_3, item_1, item_2])
-        end
-      end
-    end
     describe '`parse_vrc_data` method' do
       let(:vrc_fixture_data) { {'advance_maturity' => 'Overnight/Open','advance_rate' => 0.18,'effective_date' => '2016-01-01'} }
       let(:vrc_entries_hash) { {
@@ -4218,6 +4318,85 @@ RSpec.describe ReportsController, :type => :controller do
       end
       it 'returns `type` set to `nil` if the field is not `advance_rate` or `effective_date`' do
         expect(call_method).to eq({value: vrc_value, type: nil})
+      end
+    end
+    describe '`populate_pdf_view_variables` method' do
+      let(:interest_day_count_key) { I18n.t('reports.pages.price_indications.current.interest_day_count') }
+      let(:interest_rate_reset_key) { I18n.t('reports.pages.price_indications.current.interest_rate_reset') }
+      let(:payment_frequency_key) { I18n.t('reports.pages.price_indications.current.payment_frequency') }
+      let(:arc_table_data) {{
+        notes: {
+          interest_day_count_key => instance_double(String),
+          interest_rate_reset_key => instance_double(Array),
+          payment_frequency_key => instance_double(Array)
+        }
+      }}
+      let(:standard_frc_table_data) {{
+        rows: [
+          instance_double(Hash),
+          instance_double(Hash),
+          instance_double(Hash),
+          instance_double(Hash),
+          instance_double(Hash)
+        ]
+      }}
+      let(:sbc_frc_table_data) {{
+        rows: [
+          instance_double(Hash),
+          instance_double(Hash),
+          instance_double(Hash),
+          instance_double(Hash)
+        ]
+      }}
+      let(:call_method) { controller.send(:populate_pdf_view_variables) }
+      before do
+        controller.instance_variable_set(:@standard_arc_table_data, arc_table_data)
+        controller.instance_variable_set(:@sbc_arc_table_data, arc_table_data)
+        controller.instance_variable_set(:@standard_frc_table_data, standard_frc_table_data)
+        controller.instance_variable_set(:@sbc_frc_table_data, sbc_frc_table_data)
+      end
+
+      it 'sets `@standard_arc_table_data[:notes_1]` to @standard_arc_table_data[:notes] minus the `payment_frequency` key-value pair' do
+        call_method
+        expect(assigns[:standard_arc_table_data][:notes_1]).to eq({
+          interest_day_count_key => arc_table_data[:notes][interest_day_count_key],
+          interest_rate_reset_key => arc_table_data[:notes][interest_rate_reset_key]
+        })
+      end
+      it 'sets `@standard_arc_table_data[:notes_2]` to the to @standard_arc_table_data[:notes] `payment_frequency` key-value pair' do
+        call_method
+        expect(assigns[:standard_arc_table_data][:notes_2]).to eq({
+          payment_frequency_key => arc_table_data[:notes][payment_frequency_key]
+        })
+      end
+      it 'sets `@sbc_arc_table_data[:notes_1]` to @sbc_arc_table_data[:notes] minus the `payment_frequency` key-value pair' do
+        call_method
+        expect(assigns[:sbc_arc_table_data][:notes_1]).to eq({
+          interest_day_count_key => arc_table_data[:notes][interest_day_count_key],
+          interest_rate_reset_key => arc_table_data[:notes][interest_rate_reset_key]
+        })
+      end
+      it 'sets `@sbc_arc_table_data[:notes_2]` to the to @sbc_arc_table_data[:notes] `payment_frequency` key-value pair' do
+        call_method
+        expect(assigns[:sbc_arc_table_data][:notes_2]).to eq({
+          payment_frequency_key => arc_table_data[:notes][payment_frequency_key]
+        })
+      end
+      it 'sets `@standard_frc_table_data_1[:rows]` to the first half of the @standard_frc_table_data[:rows] array' do
+        call_method
+        expect(assigns[:standard_frc_table_data_1][:rows]).to eq(standard_frc_table_data[:rows][0..2])
+      end
+      it 'sets `@standard_frc_table_data_2[:rows]` to the second half of the @standard_frc_table_data[:rows] array' do
+        call_method
+        expect(assigns[:standard_frc_table_data_2][:rows]).to eq(standard_frc_table_data[:rows][3..4])
+      end
+      it 'sets `@sbc_frc_table_data_1[:rows]` to the first half of the @sbc_frc_table_data[:rows] array' do
+        call_method
+        expect(assigns[:sbc_frc_table_data_1][:rows]).to eq(sbc_frc_table_data[:rows][0..1])
+      end
+      it 'sets `@sbc_frc_table_data_2[:rows]` to the second half of the @sbc_frc_table_data[:rows] array' do
+        call_method
+        expect(assigns[:sbc_frc_table_data_2][:rows]).to eq(sbc_frc_table_data[:rows][2..3])
       end
     end
   end

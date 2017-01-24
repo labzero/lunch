@@ -19,7 +19,7 @@
       %small.inclusive-role-note= t('reports.pages.authorizations.table_footnote', role: @footnote_role)
     =render 'reports/reports_table', table_class: 'authorizations-table', table_data: @authorizations_table_data, sortable: false
     %section
-      - [[:resolution, :entire_authority, :wire_transfer, :advances, :affordable_housing], [:collateral, :interest_rate_derivatives, :money_market, :securities, :access_manager]].each do |column|
+      - [[:resolution, :entire_authority, :wire_transfer, :advances, :affordable_housing, :collateral], [:interest_rate_derivatives, :money_market, :securities, :etransact_signer, :access_manager]].each do |column|
         .column-3
           - column.each do |role|
             %small

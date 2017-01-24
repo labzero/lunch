@@ -324,16 +324,11 @@ class DashboardController < ApplicationController
       end
 
       # Remaining Financing Availability and Stock Leverage Sub-Table
-      leverage_title = if feature_enabled?('report-capital-stock-position-and-leverage')
-        [t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path]
-      else
-        t('dashboard.your_account.table.remaining.leverage')
-      end
       other_remaining = [ {title: t('dashboard.your_account.table.remaining.title')} ]
       unless members_service.report_disabled?(current_member_id, [MembersService::FINANCING_AVAILABLE_DATA])
         other_remaining << [t('dashboard.your_account.table.remaining.available'), profile[:remaining_financing_available]]
       end
-      other_remaining << [leverage_title, (profile[:capital_stock] || {})[:remaining_leverage]]
+      other_remaining << [[t('dashboard.your_account.table.remaining.leverage'), reports_capital_stock_and_leverage_path], (profile[:capital_stock] || {})[:remaining_leverage]]
 
       account_overview_table_data = {credit_outstanding: credit_outstanding, sta_balance: sta_balance, remaining_borrowing_capacity: remaining_borrowing_capacity, other_remaining: other_remaining}
       {

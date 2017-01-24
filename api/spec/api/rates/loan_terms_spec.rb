@@ -522,5 +522,87 @@ describe MAPI::Services::Rates::LoanTerms do
         expect(subject.loan_term(before_end_time, display_status, bucket_label, nil)[:end_time]).to be nil
       end
     end
+    describe '`disable_term_sql` method' do
+      let(:term_id) { double('A Term ID') }
+      let(:quoted_term_id) { SecureRandom.hex }
+      let(:call_method) { MAPI::Services::Rates::LoanTerms.disable_term_sql(term_id) }
+      before do
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:quote).with(term_id).and_return(quoted_term_id)
+      end
+      it 'updates the `WEB_ADM.AO_TERM_BUCKETS`' do
+        expect(call_method).to match(/^\s*UPDATE\s+WEB_ADM.AO_TERM_BUCKETS\s+SET/i)
+      end
+      it 'sets `WHOLE_LOAN_ENABLED` to `N`' do
+        expect(call_method).to match(/\s+SET\s+(\S+\s*=\s*\S+\s+)*WHOLE_LOAN_ENABLED\s*=\s*'N'((,\s+(\S+\s*=\s*\S+\s+)*)|\s+)WHERE/i)
+      end
+      it 'sets `SBC_AGENCY_ENABLED` to `N`' do
+        expect(call_method).to match(/\s+SET\s+(\S+\s*=\s*\S+\s+)*SBC_AGENCY_ENABLED\s*=\s*'N'((,\s+(\S+\s*=\s*\S+\s+)*)|\s+)WHERE/i)
+      end
+      it 'sets `SBC_AAA_ENABLED` to `N`' do
+        expect(call_method).to match(/\s+SET\s+(\S+\s*=\s*\S+\s+)*SBC_AAA_ENABLED\s*=\s*'N'((,\s+(\S+\s*=\s*\S+\s+)*)|\s+)WHERE/i)
+      end
+      it 'sets `SBC_AA_ENABLED` to `N`' do
+        expect(call_method).to match(/\s+SET\s+(\S+\s*=\s*\S+\s+)*SBC_AA_ENABLED\s*=\s*'N'((,\s+(\S+\s*=\s*\S+\s+)*)|\s+)WHERE/i)
+      end
+      it 'limits the update to the quoted `term_id`' do
+        expect(call_method).to match(/WHERE\s+AO_TERM_BUCKET_ID\s+=\s+#{quoted_term_id}\s*$/)
+      end
+    end
+    describe '`disable_term` method' do
+      let(:term) { double('A Term') }
+      let(:term_id) { double('A Term ID') }
+      let(:logger) { double('A Logger') }
+      let(:settings) { double('App Settings', environment: double('An Environment')) }
+      let(:app) { instance_double(MAPI::ServiceApp, logger: logger, settings: settings) }
+      let(:disable_term_sql) { double('Disable Term SQL') }
+      let(:call_method) { MAPI::Services::Rates::LoanTerms.disable_term(app, term) }
+      before do
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:term_to_id).with(term).and_return(term_id)
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:execute_sql)
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:disable_term_sql).with(term_id).and_return(disable_term_sql)
+      end
+      it 'converts the passed term to an ID' do
+        expect(MAPI::Services::Rates::LoanTerms).to receive(:term_to_id).with(term)
+        call_method
+      end
+      describe 'in the production environment' do
+        before do
+          allow(app.settings).to receive(:environment).and_return(:production)
+        end
+        it 'constructs disable term SQL' do
+          expect(MAPI::Services::Rates::LoanTerms).to receive(:disable_term_sql).with(term_id)
+          call_method
+        end
+        it 'executes the disable term SQL' do
+          expect(MAPI::Services::Rates::LoanTerms).to receive(:execute_sql).with(logger, disable_term_sql)
+          call_method
+        end
+        it 'returns true if one row was updated' do
+          allow(MAPI::Services::Rates::LoanTerms).to receive(:execute_sql).and_return(1)
+          expect(call_method).to be(true)
+        end
+        it 'returns false if no rows were updated' do
+          allow(MAPI::Services::Rates::LoanTerms).to receive(:execute_sql).and_return(0)
+          expect(call_method).to be(false)
+        end
+        it 'returns false if more than one row was updated' do
+          allow(MAPI::Services::Rates::LoanTerms).to receive(:execute_sql).and_return(2)
+          expect(call_method).to be(false)
+        end
+        it 'returns false if an error occured' do
+          allow(MAPI::Services::Rates::LoanTerms).to receive(:execute_sql).and_return(nil)
+          expect(call_method).to be(false)
+        end
+      end
+      describe 'in other environments' do
+        it 'does not execute any SQL' do
+          expect(MAPI::Services::Rates::LoanTerms).to_not receive(:execute_sql)
+          call_method
+        end
+        it 'returns true' do
+          expect(call_method).to be(true)
+        end
+      end
+    end
   end
 end

@@ -1128,94 +1128,56 @@ RSpec.describe SecuritiesController, type: :controller do
       describe 'when the user is an authorizer' do
         let(:request_id) { double('A Request ID') }
         allow_policy :security, :authorize_securities?
+        before do
+          allow(securities_request).to receive(:request_id).and_return(request_id)
+        end
         it 'checks the SecurID details if no errors are found in the data' do
-          allow(active_model_errors).to receive(:present?).and_return(false)
+          allow(active_model_errors).to receive(:blank?).and_return(true)
           expect(subject).to receive(:securid_perform_check).and_return(:authenticated)
           call_action
         end
         describe 'when SecurID passes and there are not yet any errors' do
+          let(:message) { instance_double(ActionMailer::MessageDelivery) }
           before do
-            allow(securities_request).to receive(:request_id).and_return(request_id)
+            allow(subject).to receive(:session_elevated?).and_return(true)
+            allow(active_model_errors).to receive(:blank?).and_return(true)
+            allow(InternalMailer).to receive(:securities_request_authorized).with(securities_request).and_return(message)
+            allow(message).to receive(:deliver_now)
           end
-          it 'checks the SecurID details if no errors are found in the data' do
-            allow(active_model_errors).to receive(:present?).and_return(false)
-            expect(subject).to receive(:securid_perform_check).and_return(:authenticated)
+          it 'authorizes the request' do
+            expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
             call_action
           end
-          describe 'when SecurID passes and there are not yet any errors' do
-            let(:message) { instance_double(ActionMailer::MessageDelivery) }
-            before do
-              allow(subject).to receive(:session_elevated?).and_return(true)
-              allow(active_model_errors).to receive(:blank?).and_return(true)
-              allow(InternalMailer).to receive(:securities_request_authorized).with(securities_request).and_return(message)
-              allow(message).to receive(:deliver_now)
-            end
-            it 'authorizes the request' do
-              expect(securities_request_service).to receive(:authorize_request).with(request_id, controller.current_user)
-              call_action
-            end
-            it 'builds the SecuritiesRequest before it emails the distribution list' do
-              expect(SecuritiesRequest).to receive(:from_hash).with(securities_request_param).ordered
-              expect(securities_request).to receive(:member_id=).with(member_id).ordered
-              expect(InternalMailer).to receive(:securities_request_authorized).with(securities_request).ordered
-              call_action
-            end
-            it 'constructs an email to the internal distribution list' do
-              expect(InternalMailer).to receive(:securities_request_authorized).with(securities_request)
-              call_action
-            end
-            it 'delivers an email to the internal distribution list' do
-              expect(message).to receive(:deliver_now)
-              call_action
-            end
-            it 'renders the `authorize_request` view' do
-              call_action
-              expect(response.body).to render_template(:authorize_request)
-            end
-            it 'calls `populate_authorize_request_view_variables` with the securities request `kind`' do
-              expect(controller).to receive(:populate_authorize_request_view_variables).with(kind)
-              call_action
-            end
-            describe 'when the authorization fails' do
-              before do
-                allow(securities_request_service).to receive(:authorize_request).and_return(false)
-                allow(active_model_errors).to receive(:present?).and_return(false, false, true)
-              end
-
-              it 'adds an `:base`, `:authorization` error to the securities_request instance' do
-                expect(active_model_errors).to receive(:add).with(:base, :authorization)
-                call_action
-              end
-              it 'calls `prioritized_securities_request_error` with the securities_request instance' do
-                expect(controller).to receive(:prioritized_securities_request_error).with(securities_request)
-                call_action
-              end
-              it 'sets `@error_message` to the result of `prioritized_securities_request_error`' do
-                allow(controller).to receive(:prioritized_securities_request_error).and_return(error_message)
-                call_action
-                expect(assigns[:error_message]).to eq(error_message)
-              end
-              it "renders the `#{template}` view" do
-                call_action
-                expect(response.body).to render_template(template)
-              end
-            end
+          it 'builds the SecuritiesRequest before it emails the distribution list' do
+            expect(SecuritiesRequest).to receive(:from_hash).with(securities_request_param).ordered
+            expect(securities_request).to receive(:member_id=).with(member_id).ordered
+            expect(InternalMailer).to receive(:securities_request_authorized).with(securities_request).ordered
+            call_action
           end
-          describe 'when SecurID fails' do
-            let(:securid_error) { double('A SecurID error') }
+          it 'constructs an email to the internal distribution list' do
+            expect(InternalMailer).to receive(:securities_request_authorized).with(securities_request)
+            call_action
+          end
+          it 'delivers an email to the internal distribution list' do
+            expect(message).to receive(:deliver_now)
+            call_action
+          end
+          it 'renders the `authorize_request` view' do
+            call_action
+            expect(response.body).to render_template(:authorize_request)
+          end
+          it 'calls `populate_authorize_request_view_variables` with the securities request `kind`' do
+            expect(controller).to receive(:populate_authorize_request_view_variables).with(kind)
+            call_action
+          end
+          describe 'when the authorization fails' do
             before do
-              allow(subject).to receive(:securid_perform_check).and_return(securid_error)
+              allow(securities_request_service).to receive(:authorize_request).and_return(false)
+              allow(active_model_errors).to receive(:present?).and_return(false, false, true)
             end
-            it 'does not authorize the request' do
-              expect(securities_request_service).to_not receive(:authorize_request)
-              call_action
-            end
-            it "renders the `#{template}` view" do
-              call_action
-              expect(response.body).to render_template(template)
-            end
-            it "calls `populate_view_variables` with `#{type}`" do
-              expect(controller).to receive(:populate_view_variables).with(type)
+
+            it 'adds an `:base`, `:authorization` error to the securities_request instance' do
+              expect(active_model_errors).to receive(:add).with(:base, :authorization)
               call_action
             end
             it 'calls `prioritized_securities_request_error` with the securities_request instance' do
@@ -1227,6 +1189,37 @@ RSpec.describe SecuritiesController, type: :controller do
               call_action
               expect(assigns[:error_message]).to eq(error_message)
             end
+            it "renders the `#{template}` view" do
+              call_action
+              expect(response.body).to render_template(template)
+            end
+          end
+        end
+        describe 'when SecurID fails' do
+          let(:securid_error) { double('A SecurID error') }
+          before do
+            allow(active_model_errors).to receive(:blank?).and_return(true)
+            allow(subject).to receive(:securid_perform_check).and_return(securid_error)
+          end
+          it 'does not authorize the request' do
+            expect(securities_request_service).to_not receive(:authorize_request)
+            call_action
+          end
+          it "renders the `#{template}` view" do
+            call_action
+            expect(response.body).to render_template(template)
+          end
+          it "calls `populate_view_variables` with `#{type}`" do
+            expect(controller).to receive(:populate_view_variables).with(type)
+            call_action
+          end
+          it 'does not call `prioritized_securities_request_error`' do
+            expect(controller).to_not receive(:prioritized_securities_request_error)
+            call_action
+          end
+          it 'does not set `@error_message`' do
+            call_action
+            expect(assigns[:error_message]).to be_nil
           end
         end
       end
@@ -1511,17 +1504,6 @@ RSpec.describe SecuritiesController, type: :controller do
       before do
         allow(securities_request).to receive(:kind).and_return(kind)
       end
-      it 'sets the request details table data' do
-        call_action
-        request_details = {
-          rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
-                             { value: securities_request.request_id } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
-                             { value: securities_request.authorized_by } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
-                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] } ] }
-        expect(subject.instance_variable_get(:@request_details_table_data)).to eq(request_details)
-      end
       it 'sets broker instructions table data' do
         call_action
         expect(subject.instance_variable_get(:@broker_instructions_table_data)).to eq( {
@@ -1624,45 +1606,53 @@ RSpec.describe SecuritiesController, type: :controller do
     end
 
     context do
-      before do
-        allow(securities_request).to receive(:kind).and_return(:safekept_transfer)
-      end
-      it 'sets the request details table data for `safekept_transfer`' do
-        call_action
-        expect(subject.instance_variable_get(:@request_details_table_data)).to eq({
-          rows: [ { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
-                             { value: securities_request.request_id } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
-                             { value: securities_request.authorized_by } ] },
-                { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
-                             { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] } ] })
+      [:safekept_transfer, :safekept_intake].each do |kind|
+        before do
+          allow(securities_request).to receive(:kind).and_return(kind)
+        end
+        it "sets the request details table data for `#{kind}`" do
+          call_action
+          expect(subject.instance_variable_get(:@request_details_table_data)).to eq({ rows: [
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                         { value: securities_request.request_id } ] },
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                         { value: securities_request.authorized_by } ] },
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                         { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] },
+          ] })
+        end
       end
     end
     context do
-      before do
-        allow(securities_request).to receive(:kind).and_return(:pledge_transfer)
-      end
-      it 'sets the request details table data for `pledge_transfer`' do
-        call_action
-        expect(subject.instance_variable_get(:@request_details_table_data)).to eq({ rows: [
-          { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
-                       { value: securities_request.request_id } ] },
-          { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
-                       { value: securities_request.authorized_by } ] },
-          { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
-                       { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] },
-          { columns: [ { value: I18n.t('securities.requests.view.request_details.pledge_to.pledge_type') },
-                       { value: SecuritiesController::PLEDGE_TO_MAPPING[securities_request.pledge_to] } ] } ] })
+      [:pledge_transfer, :pledge_intake].each do |kind|
+        before do
+          allow(securities_request).to receive(:kind).and_return(kind)
+        end
+        it "sets the request details table data for `#{kind}`" do
+          call_action
+          expect(subject.instance_variable_get(:@request_details_table_data)).to eq({ rows: [
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.request_id') },
+                         { value: securities_request.request_id } ] },
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.authorized_by') },
+                         { value: securities_request.authorized_by } ] },
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.authorization_date') },
+                         { value: CustomFormattingHelper::fhlb_date_standard_numeric(securities_request.authorized_date) } ] },
+            { columns: [ { value: I18n.t('securities.requests.view.request_details.pledge_to.pledge_type') },
+                         { value: SecuritiesController::PLEDGE_TO_MAPPING[securities_request.pledge_to] } ] }
+          ] })
+        end
       end
     end
   end
   describe 'private methods' do
     describe '`kind_to_description`' do
       {
-        'pledge_release' => 'securities.requests.form_descriptions.release',
-        'safekept_release' => 'securities.requests.form_descriptions.release',
+        'pledge_release' => 'securities.requests.form_descriptions.release_pledged',
+        'safekept_release' => 'securities.requests.form_descriptions.release_safekept',
         'pledge_intake' => 'securities.requests.form_descriptions.pledge',
-        'safekept_intake' => 'securities.requests.form_descriptions.safekept'
+        'safekept_intake' => 'securities.requests.form_descriptions.safekept',
+        'pledge_transfer' => 'securities.requests.form_descriptions.transfer_pledged',
+        'safekept_transfer' => 'securities.requests.form_descriptions.transfer_safekept'
       }.each do |form_type, description_key|
         it "returns the localization value for `#{description_key}` when passed `#{form_type}`" do
           expect(controller.send(:kind_to_description, form_type)).to eq(I18n.t(description_key))

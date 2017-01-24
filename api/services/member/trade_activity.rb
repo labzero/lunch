@@ -11,7 +11,7 @@ module MAPI
         TODAYS_ADVANCES_ARRAY = %w(VERIFIED OPS_REVIEW OPS_VERIFIED SEC_REVIEWED SEC_REVIEW COLLATERAL_AUTH AUTH_TERM PEND_TERM)
         ACTIVE_ADVANCES_ARRAY = %w(VERIFIED OPS_REVIEW OPS_VERIFIED COLLATERAL_AUTH AUTH_TERM PEND_TERM)
         TODAYS_CREDIT_ARRAY = TODAYS_ADVANCES_ARRAY + %w(TERMINATED EXERCISED MATURED)
-        TODAYS_CREDIT_KEYS = %w(instrumentType status terminationPar tradeDate fundingDate maturityDate tradeID amount rate productDescription terminationFee terminationFullPartial product subProduct terminationDate)
+        TODAYS_CREDIT_KEYS = %w(instrumentType status terminationPar tradeDate fundingDate maturityDate tradeID amount rate productDescription terminationFee terminationFullPartial product subProduct terminationDate lifeCycleEvent lcNumber maintenanceFee beneficiary)
 
         def self.init_trade_connection(environment)
           if environment == :production
@@ -479,6 +479,10 @@ module MAPI
             product = activity['product'].to_s if activity['product'].present?
             sub_product = activity['subProduct'].to_s if activity['subProduct'].present?
             termination_date = DateTime.strptime(activity['terminationDate'], '%m/%d/%Y').to_date if activity['terminationDate'].present?
+            life_cycle_event = activity['lifeCycleEvent'].to_s if activity['lifeCycleEvent'].present?
+            lc_number = activity['lcNumber'].to_s if activity['lcNumber'].present?
+            maintenance_fee = (activity['maintenanceFee'].to_f * 10000) if activity['maintenanceFee'].present?
+            beneficiary = activity['beneficiary'].to_s if activity['beneficiary'].present?
 
             # skip the trade if it is an old Advance that is not prepaid, but rather Amended
             if TODAYS_CREDIT_ARRAY.include?(status) && !(instrument_type == 'ADVANCE' && status != 'EXERCISED' && termination_par.blank? && !funding_date.blank? && funding_date < today)
@@ -497,7 +501,11 @@ module MAPI
                 termination_full_partial: termination_full_partial,
                 termination_date: termination_date,
                 product: product,
-                sub_product: sub_product
+                sub_product: sub_product,
+                life_cycle_event: life_cycle_event,
+                lc_number: lc_number,
+                maintenance_charge: maintenance_fee,
+                beneficiary: beneficiary
               }
               credit_activities.push(hash)
             end

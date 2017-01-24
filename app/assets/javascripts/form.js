@@ -25,4 +25,13 @@ $(function() {
   $('form:not([data-remote]) input[type=submit]').parents('form').on('submit', function(e) {
     $(this).find('input[type="submit"]').prop('disabled', true);
   });
+
+  $('form input').on('keydown', function(e) {
+    if (e.keyCode == 13) {
+      e.preventDefault();
+      e.stopPropagation();
+      var $form = $(e.target).parents('form');
+      $form.data('prevent-submit-on-enter') ? null : $form.submit();
+    };
+  });
 });

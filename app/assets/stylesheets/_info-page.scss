@@ -23,6 +23,10 @@
   ul {
     padding-left: 30px;
     margin-top: 0;
+    ul {
+      list-style: disc;
+      margin: 5px 0 5px;
+    }
   }
   small {
     @extend %typography-paragraph;

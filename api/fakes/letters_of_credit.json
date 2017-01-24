@@ -3,7 +3,7 @@
   "total_current_par": 500100000,
   "credits": [
     {
-    "lc_number": "2015028",
+    "lc_number": "2015-028",
     "current_par": 110000000,
     "maintenance_charge": 10,
     "trade_date": "2015-03-13",
@@ -12,7 +12,7 @@
     "description": "LC"
     },
     {
-    "lc_number": "2015022",
+    "lc_number": "2015-022",
     "current_par": 242600000,
     "maintenance_charge": 10,
     "trade_date": "2015-03-04",
@@ -21,7 +21,7 @@
     "description": "LC"
     },
     {
-    "lc_number": "2014011",
+    "lc_number": "2014-011",
     "current_par": 147500000,
     "maintenance_charge": 10,
     "trade_date": "2014-01-29",

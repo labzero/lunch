@@ -38,6 +38,7 @@ class SettingsController < ApplicationController
 
   skip_before_action :check_password_change, only: [:expired_password, :update_expired_password]
   skip_before_action :check_terms, only: [:expired_password, :update_expired_password]
+  skip_before_action :require_member, only: [:expired_password, :update_expired_password]
 
   def index
     @email_options = ['reports'] + CorporateCommunication::VALID_CATEGORIES

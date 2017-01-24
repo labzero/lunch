@@ -200,6 +200,7 @@ describe MAPI::ServiceApp do
         allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_credit)
         allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_collateral)
         allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit)
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_max_term_limit)
       end
       it 'passes the allow_grace_period flag to `MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade' do
         anythings = Array.new(15, anything)
@@ -313,6 +314,14 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'Validate Trade With Max Term Limit Error' do
+    let(:amount) {'100009'}
+    let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
+    it 'should return expected result of validate trade' do
+      expect(execute_trade['status']).to eq(['ExceedsMaximumTerm'])
+    end
+  end
+
   describe 'Validate Trade With Capital Stock Gross Up Exception' do
     let(:amount)  {'2000000'}
     let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
@@ -358,7 +367,9 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit) {|env, amount, hash| hash }
       allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_enabled_product) {|logger, env, type, term, hash, allow_grace_period| hash }
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_max_term_limit) {|app, member_id, hash| hash }
     end
+
     describe 'agency for 1 week' do
       let(:advance_type)  {'agency'}
       let(:advance_term)  {'1week'}
@@ -761,6 +772,63 @@ describe MAPI::ServiceApp do
         end
       end
     end
+
+    describe '`check_max_term_limit` method' do
+      let(:app) { double('app', settings: double('settings', environment: nil)) }
+      let(:funding_date) { Time.zone.today }
+      let(:maturity_date) { funding_date + 120.days }
+      let(:member_id) { double('Member Id') }
+      let(:response_hash) { { 'status' => [double('A Status')],
+                              'funding_date' => funding_date,
+                              'maturity_date' => maturity_date } }
+      let!(:original_status) { response_hash['status'] }
+      let(:profile) { { maximum_term: 4 } }
+      let(:settings) { { 'maximum_online_term_days' => 3650 } }
+      let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_max_term_limit(app, member_id, response_hash) }
+      before do
+        allow(MAPI::Services::Member::Profile).to receive(:member_profile).with(app, member_id).and_return(profile)
+        allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).with(app.settings.environment).and_return(settings)
+      end
+      it 'leaves status unchanged if term is in bounds' do
+        expect(call_method['status']).to eq(original_status)
+      end
+      it 'raises an error if the `EtransactAdvances::Settings.settings` service returns `nil`' do
+        allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).with(app.settings.environment).and_return(nil)
+        expect { call_method }.to raise_error('MAPI::Services::EtransactAdvances::Settings.settings returned nil')
+      end
+      describe 'when the term exceeds the system limit' do
+        before do
+          response_hash['maturity_date'] = funding_date + rand(3651..3999).days
+        end
+        it 'returns `ExceedsMaximumTerm` for the status' do
+          expect(call_method['status']).to eq(original_status + ['ExceedsMaximumTerm'] )
+        end
+        it 'returns the exceeded maximum' do
+          expect(call_method['maximum_term']).to eq(settings['maximum_online_term_days'])
+        end
+        it 'returns `:day` for the unit' do
+          expect(call_method['maximum_term_unit']).to eq(:day)
+        end
+      end
+      describe 'when the term exceeds the member limit' do
+        before do
+          response_hash['maturity_date'] = funding_date + rand(5..12).months
+        end
+        it 'raises an error if `Member::Profile.member_profile` returns `nil`' do
+          allow(MAPI::Services::Member::Profile).to receive(:member_profile).with(app, member_id).and_return(nil)
+          expect { call_method }.to raise_error('MAPI::Services::Member::Profile.member_profile returned nil')
+        end
+        it 'returns `ExceedsMaximumTerm` for the status when term exceeds member limit' do
+          expect(call_method['status']).to eq(original_status + ['ExceedsMaximumTerm'])
+        end
+        it 'returns the exceeded maximum when term exceeds member limit' do
+          expect(call_method['maximum_term']).to eq(profile[:maximum_term].months)
+        end
+        it 'returns `:month` for the unit' do
+          expect(call_method['maximum_term_unit']).to eq(:month)
+        end
+      end
+    end
   end
 
   describe 'the `execute_trade` method validating credit limits for capital stock purchases' do
@@ -892,6 +960,7 @@ describe MAPI::ServiceApp do
         allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_credit).and_return({})
         allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_collateral).and_return({})
         allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit).and_return({})
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_max_term_limit).and_return({})
       end
       it 'calls `check_enabled_product` with the allow_grace_period flag' do
         allow_any_instance_of(Savon::Response).to receive(:success?).and_return(true)

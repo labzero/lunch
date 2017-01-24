@@ -336,6 +336,10 @@ module MAPI
                                                          HEADER_ID,
                                                          CUSIP,
                                                          DESCRIPTION,
+                                                         ISSUE_DATE,
+                                                         MATURITY_DATE,
+                                                         COUPON_RATE,
+                                                         POOL_NUMBER,
                                                          ORIGINAL_PAR,
                                                          PAYMENT_AMOUNT,
                                                          CREATED_DATE,
@@ -348,6 +352,10 @@ module MAPI
                     #{quote(header_id)},
                     UPPER(#{quote(security['cusip'])}),
                     #{quote(security['description'])},
+                    #{quote(security['issue_date'])},
+                    #{quote(security['maturity_date'])},
+                    #{quote(security['coupon_rate'])},
+                    #{quote(security['pool_number'])},
                     #{quote(nil_to_zero(security['original_par']))},
                     #{quote(nil_to_zero(security['payment_amount']))},
                     #{quote(now)},
@@ -381,6 +389,21 @@ module MAPI
             AND SSK.ADX_ID = #{quote(adx_id)}
             AND SSKT.SSK_ID = SSK.SSK_ID
             AND SSKT.SSX_BTC_DATE = (SELECT MAX(SSX_BTC_DATE) FROM SAFEKEEPING.SSK_TRANS)
+          SQL
+        end
+
+        def self.cusip_metadata_query(cusip)
+          <<-SQL
+            SELECT * FROM (
+              SELECT SSK.SSK_ISSUE_DATE AS ISSUE_DATE, SSK.SSK_MATURITY_DATE AS MATURITY_DATE,
+              SSK.SSK_POOL_NUMBER AS POOL_NUMBER, SSKT.SSX_COUPON_RATE AS COUPON_RATE,
+              SSK.SSK_DESC1 AS DESCRIPTION
+              FROM SAFEKEEPING.SSK SSK
+              LEFT OUTER JOIN SAFEKEEPING.SSK_TRANS SSKT
+              ON SSKT.SSK_ID = SSK.SSK_ID
+              WHERE UPPER(SSK.SSK_CUSIP) = UPPER(#{quote(cusip)})
+              ORDER BY SSKT.SSX_RECORD_DATE_UPDATED DESC, SSK.SSK_RECORD_DATE_UPDATED DESC, SSK.SSK_ID DESC
+              ) WHERE ROWNUM = 1
           SQL
         end
 
@@ -661,7 +684,7 @@ module MAPI
           validate_kind(:release, kind)
           validate_delivery_instructions(delivery_instructions)
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :release)
-          adx_type = get_adx_type_from_security(app, securities.first)
+          adx_type = get_adx_type_from_security(app, member_id, securities.first)
           validate_broker_instructions(broker_instructions, app, kind)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
           user_name.downcase!
@@ -684,6 +707,7 @@ module MAPI
               securities.each do |security|
                 ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
                 raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
+                populate_security_metadata(app, security)
                 insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
                 raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
               end
@@ -698,7 +722,7 @@ module MAPI
           validate_kind(:release, kind)
           original_delivery_instructions = delivery_instructions.clone # Used to see if header details have changes below
           validate_securities(securities, broker_instructions['settlement_type'], delivery_instructions['delivery_type'], :release)
-          adx_type = get_adx_type_from_security(app, securities.first)
+          adx_type = get_adx_type_from_security(app, member_id, securities.first)
           validate_broker_instructions(broker_instructions, app, kind)
           validate_delivery_instructions(delivery_instructions)
           processed_delivery_instructions = process_delivery_instructions(delivery_instructions)
@@ -716,6 +740,7 @@ module MAPI
                 elsif !existing_security
                   ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
                   raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
+                  populate_security_metadata(app, security)
                   detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
                   insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security release request detail' unless execute_sql(app.logger, insert_security_sql)
@@ -772,6 +797,7 @@ module MAPI
                 final_adx_id = (kind == :safekept_transfer ? adx_id : un_adx_id)
                 ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, final_adx_id, security['cusip']), "SSK ID")
                 raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
+                populate_security_metadata(app, security)
                 insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
                 raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
               end
@@ -802,6 +828,7 @@ module MAPI
                 elsif !existing_security
                   ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
                   raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
+                  populate_security_metadata(app, security)
                   detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
                   insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security transfer request detail' unless execute_sql(app.logger, insert_security_sql)
@@ -870,6 +897,23 @@ module MAPI
           SQL
         end
 
+        def self.account_number_query(adx_id)
+          <<-SQL
+            SELECT ADX_BTC_ACCOUNT_NUMBER AS ACCOUNT_NUMBER
+            FROM SAFEKEEPING.ACCOUNT_DOCKET_XREF
+            WHERE ADX_ID = #{quote(adx_id)}
+          SQL
+        end
+
+        def self.get_account_number(app, adx_id)
+          raise ArgumentError, 'adx_id must not be nil' unless adx_id
+          if should_fake?(app)
+            Random.new(adx_id.to_s.bytes.inject(0, :+)).rand(1000000..9999999)
+          else
+            execute_sql_single_result(app, account_number_query(adx_id), 'Get account number for ADX_ID')
+          end
+        end
+
         def self.request_details(app, member_id, request_id)
           if should_fake?(app)
             header_details = fake_header_details_array(app, member_id).select{|header| header['REQUEST_ID'] == request_id}.first
@@ -885,12 +929,14 @@ module MAPI
           securities.collect do |security|
             map_hash_values(security, RELEASE_REQUEST_SECURITIES_MAPPING).with_indifferent_access
           end
-          safekept_account = [:pledge_transfer, :safekept_transfer].include?(kind) ? header_details['UNPLEGED_TRANSFER_ADX_ID'] : header_details['UNPLEDGED_ADX_ID']
+          safekept_adx_id = [:pledge_transfer, :safekept_transfer].include?(kind) ? header_details['UNPLEGED_TRANSFER_ADX_ID'] : header_details['UNPLEDGED_ADX_ID']
+          safekept_account = get_account_number(app, safekept_adx_id) if safekept_adx_id
+          pledged_account = get_account_number(app, header_details['PLEDGED_ADX_ID']) if header_details['PLEDGED_ADX_ID']
           {
             member_id: member_id,
             request_id: request_id,
             safekept_account: safekept_account,
-            pledged_account: header_details['PLEDGED_ADX_ID'],
+            pledged_account: pledged_account,
             form_type: header_details['FORM_TYPE'],
             broker_instructions: broker_instructions_from_header_details(header_details),
             delivery_instructions: delivery_instructions_from_header_details(header_details),
@@ -1106,20 +1152,22 @@ module MAPI
           header_delete_count > 0
         end
 
-        def self.adx_type_query(cusip)
+        def self.adx_type_query(member_id, cusip)
           <<-SQL
             SELECT ACCOUNT_TYPE
             FROM SAFEKEEPING.SSK_INTRADAY_SEC_POSITION
-            WHERE SSK_CUSIP = #{quote(cusip)}
+            WHERE UPPER(SSK_CUSIP) = UPPER(#{quote(cusip)})
+            AND FHLB_ID = #{quote(member_id)}
           SQL
         end
 
-        def self.get_adx_type_from_security(app, security)
+        def self.get_adx_type_from_security(app, member_id, security)
           raise ArgumentError, 'security must not be nil' unless security
+          raise ArgumentError, 'member_id must not be nil' unless member_id
           if should_fake?(app)
             ADXAccountTypeMapping::SYMBOL_TO_STRING.keys.sample(random: Random.new(security['cusip'].bytes.inject(0, :+)))
           else
-            ADXAccountTypeMapping::STRING_TO_SYMBOL[execute_sql_single_result(app, adx_type_query(security['cusip']), 'Get ADX type for a security')]
+            ADXAccountTypeMapping::STRING_TO_SYMBOL[execute_sql_single_result(app, adx_type_query(member_id, security['cusip']), 'Get ADX type for a security')]
           end
         end
 
@@ -1149,6 +1197,16 @@ module MAPI
 
         def self.adx_type_for_intake(kind)
           kind == :pledge_intake ? :pledged : :unpledged
+        end
+
+        def self.populate_security_metadata(app, security)
+          metadata = fetch_hash(app, cusip_metadata_query(security['cusip'])) || {}
+          security['description'] ||= metadata['DESCRIPTION'] 
+          security['issue_date'] ||= metadata['ISSUE_DATE'] 
+          security['maturity_date'] ||= metadata['MATURITY_DATE']
+          security['coupon_rate'] ||= metadata['COUPON_RATE']
+          security['pool_number'] ||= metadata['POOL_NUMBER']  
+          security
         end
       end
     end

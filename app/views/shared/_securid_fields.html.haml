@@ -4,8 +4,9 @@
 - error ||= nil
 - error = error.to_sym if error
 - display_style = 'display: block'
+- autofocus ||= false
 - if fields.include?(:pin)
-  = render 'shared/input_field', field_name: 'securid_pin', field_type: :password, label: t('global.pin'), html_attributes: {maxlength: 4, autocomplete: :off}, horizontal: true, field_class: 'securid-field-pin'
+  = render 'shared/input_field', field_name: 'securid_pin', field_type: :password, label: t('global.pin'), html_attributes: {maxlength: 4, autocomplete: :off, autofocus: autofocus}, horizontal: true, field_class: 'securid-field-pin'
 - if fields.include?(:token)
   = render 'shared/input_field', field_name: 'securid_token', label: token_label, html_attributes: {maxlength: 6, autocomplete: :off}, horizontal: true, field_class: 'securid-field-token'
 %p.form-error{data: {'error-type' => :invalid_pin}, style: (error == :invalid_pin ? display_style : nil)}= t('dashboard.quick_advance.securid.errors.invalid_pin')

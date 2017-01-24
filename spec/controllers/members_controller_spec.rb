@@ -2,8 +2,9 @@ require 'rails_helper'
 
 RSpec.describe MembersController, type: :controller do
   it { should_not use_before_action(:check_terms) }
+  it { should_not use_before_action(:require_member) }
 
-  login_user
+  login_user(no_member: true)
 
   describe 'GET select_member' do
     let(:make_request) { get :select_member }

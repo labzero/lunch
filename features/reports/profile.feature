@@ -7,7 +7,7 @@ Feature: Visiting the Profile Report Page
 Background:
   Given I am logged in as a "extended info user"
 
-@smoke @jira-mem-1400 @flip-on-report-profile
+@smoke @jira-mem-1400
 Scenario: Visit profile report page page from the url
   Given I visit the dashboard
   When I am on the "Profile" report page

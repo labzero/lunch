@@ -4,7 +4,7 @@ class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :exception
-  before_action :authenticate_user!, :check_password_change, :check_terms, :save_render_time, :set_default_format
+  before_action :authenticate_user!, :require_member, :check_password_change, :check_terms, :save_render_time, :set_default_format
   helper_method :current_member_name, :current_member_id, :new_announcements_count, :set_active_nav, :get_active_nav
 
   HTTP_404_ERRORS = [ActionController::RoutingError, ActionController::UnknownController, ::AbstractController::ActionNotFound, ActiveRecord::RecordNotFound]
@@ -150,7 +150,7 @@ class ApplicationController < ActionController::Base
         if session[SessionKeys::MEMBER_ID].present?
           stored_location_for(resource) || dashboard_path
         elsif user && user.intranet_user?
-          members_select_member_path
+          stored_location_for(resource) || members_select_member_path
         else
           raise 'Sign in error: Only intranet users can select a bank.  The current_user is not an intranet user but is also not associated with a member bank.'
         end
@@ -201,6 +201,13 @@ class ApplicationController < ActionController::Base
     unless @@_seen_methods[method]
       @@_seen_methods[method] = true
       ActiveSupport.run_load_hooks("method_#{self.name.underscore}.#{method}".to_sym, self)
+    end
+  end
+
+  def require_member
+    unless session[SessionKeys::MEMBER_ID].present?
+      store_location_for(:user, request.path)
+      redirect_to(members_select_member_path)
     end
   end
 end

@@ -1,5 +1,13 @@
-When(/^I click on the gear icon in the header$/) do
-  page.find('.main-nav a.icon-gear-after').click
+Given(/^I visit the settings page$/) do
+  visit('/settings/password')
+end
+
+Then(/^I see the settings page$/) do
+  step %{I should see "Settings" as the sidebar title}
+end
+
+When(/^I click on the settings link in the header$/) do
+  page.find('.nav-settings a').click
 end
 
 Then(/^I should see "(.*?)" as the sidebar title$/) do |title|

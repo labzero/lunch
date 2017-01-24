@@ -26,12 +26,12 @@
           %th.report-cell-narrow= t('common_table_headings.advance_number')
           %th.report-cell-narrow= t('common_table_headings.advance_type')
           %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$')
-          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%')
+          %th.report-cell-narrow{class: ('report-cell-right' if @print_layout)}= fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%')
           %th.report-cell-narrow= t('reports.pages.advances_detail.next_interest_payment_date')
-          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.accrued_interest_heading'), '$')
-          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.estimated_next_payment_table_heading'), '$')
+          %th.report-cell-narrow{class: ('report-cell-right' if @print_layout)}= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.accrued_interest_heading'), '$')
+          %th.report-cell-narrow{class: ('report-cell-right' if @print_layout)}= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.estimated_next_payment_table_heading'), '$')
           - if @print_layout
-            %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.prepayment_fee_indication'), '$')
+            %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.prepayment_fee_indication'), '$')
           - else
             %th.report-cell-narrow{data: {unsortable: true}}= t('global.details')
             %th

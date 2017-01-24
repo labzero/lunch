@@ -687,7 +687,7 @@ RSpec.describe SettingsController, :type => :controller do
   describe 'GET expired_password' do
     let(:make_request) { get :expired_password }
     it_behaves_like 'a user required action', :get, :expired_password
-    %w(check_password_change check_terms).each do |action|
+    %w(check_password_change check_terms require_member).each do |action|
       it "skips the `#{action}` before action" do
         expect(subject).to_not receive(action.to_sym)
         make_request
@@ -739,7 +739,7 @@ RSpec.describe SettingsController, :type => :controller do
 
     it_behaves_like 'a user required action', :put, :update_expired_password
 
-    %w(check_password_change check_terms).each do |action|
+    %w(check_password_change check_terms require_member).each do |action|
       it "skips the `#{action}` before action" do
         expect(subject).to_not receive(action.to_sym)
         make_request

@@ -37,6 +37,10 @@ class ReportsController < ApplicationController
     sbc_vrc_data: [MembersService::RATE_CURRENT_SBC_VRC]
   }.freeze
 
+  TOKEN_ADVANCES = 'token_advances'.freeze
+  TOKEN_SECURITIES = 'token_securities'.freeze
+  TOKEN_WIRES = 'token_wires'.freeze
+
   AUTHORIZATIONS_MAPPING = {
     User::Roles::SIGNER_MANAGER => I18n.t('user_roles.resolution.title'),
     User::Roles::SIGNER_ENTIRE_AUTHORITY => I18n.t('user_roles.entire_authority.title'),
@@ -48,7 +52,10 @@ class ReportsController < ApplicationController
     User::Roles::SECURITIES_SIGNER => I18n.t('user_roles.securities.title'),
     User::Roles::WIRE_SIGNER => I18n.t('user_roles.wire_transfer.title'),
     User::Roles::ACCESS_MANAGER => I18n.t('user_roles.access_manager.title'),
-    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact_signer.title')
+    User::Roles::ETRANSACT_SIGNER => I18n.t('user_roles.etransact_signer.title'),
+    TOKEN_ADVANCES => I18n.t('user_roles.advances.token_holder'),
+    TOKEN_SECURITIES => I18n.t('user_roles.securities.token_holder'),
+    TOKEN_WIRES => I18n.t('user_roles.wire_transfer.token_holder')
   }
 
   AUTHORIZATIONS_ROLL_UP = [
@@ -83,7 +90,7 @@ class ReportsController < ApplicationController
     User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER,
     User::Roles::ADVANCE_SIGNER, User::Roles::AFFORDABILITY_SIGNER, User::Roles::COLLATERAL_SIGNER,
     User::Roles::DERIVATIVES_SIGNER, User::Roles::MONEYMARKET_SIGNER, User::Roles::SECURITIES_SIGNER,
-    User::Roles::ETRANSACT_SIGNER, User::Roles::ACCESS_MANAGER
+    User::Roles::ETRANSACT_SIGNER, TOKEN_ADVANCES, TOKEN_SECURITIES, TOKEN_WIRES, User::Roles::ACCESS_MANAGER
   ]
 
   INCLUSIVE_AUTHORIZATIONS = [AUTHORIZATIONS_MAPPING['signer_manager'], AUTHORIZATIONS_MAPPING['signer_entire_authority']].freeze
@@ -294,19 +301,6 @@ class ReportsController < ApplicationController
         }
       }
     }
-
-    @reports[:securities][:transactions][:disabled] = true unless feature_enabled?('report-securities-transaction')
-    @reports[:securities][:cash_projections][:disabled] = true unless feature_enabled?('report-cash-projections')
-    @reports[:securities][:current][:disabled] = true unless feature_enabled?('report-current-securities-positions')
-    @reports[:securities][:monthly][:disabled] = true unless feature_enabled?('report-monthly-securities-positions')
-    @reports[:securities][:services_monthly][:disabled] = true unless feature_enabled?('report-securities-services-monthly-statement')
-
-    @reports[:capital_stock][:activity][:disabled] = true unless feature_enabled?('report-capital-stock-activity-statement')
-    @reports[:capital_stock][:trial_balance][:disabled] = true unless feature_enabled?('report-capital-stock-trial-balance')
-    @reports[:capital_stock][:capital_stock_and_leverage][:disabled] = true unless feature_enabled?('report-capital-stock-position-and-leverage')
-    @reports[:capital_stock][:dividend_statement][:disabled] = true unless feature_enabled?('report-dividened-transaction-statement')
-
-    @reports[:account][:authorizations][:disabled] = true unless feature_enabled?('report-authorizations')
   end
 
   def capital_stock_activity
@@ -853,8 +847,9 @@ class ReportsController < ApplicationController
 
   def current_price_indications
     @report_name = ReportConfiguration.report_title(:current_price_indications)
+    pdf_view = 'current_price_indications_pdf'
     @limited_pricing_message = MessageService.new.todays_quick_advance_message # Should this be deferred as well?  Right now it takes no time, but if it's ever rigged up to an external service, it might.
-    downloadable_report(:xlsx) do
+    downloadable_report([:xlsx, :pdf], nil, nil, pdf_view) do
 
       vrc_column_headings = [
         t('reports.pages.price_indications.current.advance_maturity'),
@@ -1052,7 +1047,12 @@ class ReportsController < ApplicationController
           {columns: columns}
         end
         @sbc_arc_table_data[:rows] = rows
-        render layout: false if request.try(:xhr?)
+        if @print_layout
+          populate_pdf_view_variables
+          render pdf_view
+        elsif request.try(:xhr?)
+          render layout: false
+        end
       else
         job_status = ReportCurrentPriceIndicationsJob.perform_later(current_member_id).job_status
         job_status.update_attributes!(user_id: current_user.id)
@@ -1243,7 +1243,7 @@ class ReportsController < ApplicationController
 
   def cash_projections
     @report_name = ReportConfiguration.report_title(:cash_projections)
-    downloadable_report(:xlsx) do
+    downloadable_report([:xlsx, :pdf]) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(CASH_PROJECTIONS_WEB_FLAGS)
         @cash_projections = {}
@@ -1300,61 +1300,64 @@ class ReportsController < ApplicationController
 
   def dividend_statement
     @div_id = params[:dividend_transaction_filter]
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    @dividend_statement_details = {
-      column_headings: [
-        {title: t('global.issue_date'), sortable: true},
-        {title: t('global.certificate_sequence'), sortable: true},
-        {title: t('global.start_date'), sortable: true},
-        {title: t('global.end_date'), sortable: true},
-        {title: t('global.shares_outstanding'), sortable: true},
-        {title: t('reports.pages.dividend_statement.headers.days_outstanding'), sortable: true},
-        {title: t('reports.pages.dividend_statement.headers.average_shares'), sortable: true},
-        {title: t('reports.pages.dividend_statement.headers.dividend'), sortable: true}
-      ]
-    }
-    if report_disabled?(DIVIDEND_STATEMENT_WEB_FLAGS)
-      @dividend_statement = {}
-      @dividend_statement_details[:rows] = []
-    else
-      @dividend_statement = member_balances.dividend_statement(DATE_RESTRICTION_MAPPING[:dividend_statement].ago.to_date, @div_id)
-      raise StandardError, "There has been an error and ReportsController#dividend_statement has encountered nil. Check error logs." if @dividend_statement.nil?
-      @dividend_statement_details[:rows] = @dividend_statement[:details].collect do |detail|
-        {
-          columns: [
-            {value: detail[:issue_date], type: :date},
-            {value: detail[:certificate_sequence], type: nil},
-            {value: detail[:start_date], type: :date},
-            {value: detail[:end_date], type: :date},
-            {value: detail[:shares_outstanding], type: :number},
-            {value: detail[:days_outstanding], type: :number},
-            {value: detail[:average_shares_outstanding], type: :shares_fractional},
-            {value: detail[:dividend], type: :currency}
-          ]
-        }
-      end
-      @dividend_statement_details[:footer] = [
-        { value: t('global.totals'), colspan: 6},
-        { value: @dividend_statement[:average_shares_outstanding], type: :shares_fractional},
-        { value: @dividend_statement[:total_dividend], type: :currency}
-      ]
-      @dropdown_options = @dividend_statement[:div_ids].collect do |div_id|
-        label = if %w(1 2 3 4).include?(div_id.last)
-          I18n.t("dates.quarters.#{div_id.last}", year: div_id[0..3])
-        else
-          I18n.t('reports.pages.dividend_statement.special_dividend', year: div_id[0..3])
+    downloadable_report(:pdf, dividend_transaction_filter: @div_id) do
+      @report_name = t('reports.capital_stock.dividend_statement.title')
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      @dividend_statement_details = {
+        column_headings: [
+          {title: t('global.issue_date'), sortable: true},
+          {title: t('global.certificate_sequence'), sortable: true},
+          {title: t('global.start_date'), sortable: true},
+          {title: t('global.end_date'), sortable: true},
+          {title: t('global.shares_outstanding'), sortable: true},
+          {title: t('reports.pages.dividend_statement.headers.days_outstanding'), sortable: true},
+          {title: t('reports.pages.dividend_statement.headers.average_shares'), sortable: true},
+          {title: t('reports.pages.dividend_statement.headers.dividend'), sortable: true}
+        ]
+      }
+      if report_disabled?(DIVIDEND_STATEMENT_WEB_FLAGS)
+        @dividend_statement = {}
+        @dividend_statement_details[:rows] = []
+      else
+        @dividend_statement = member_balances.dividend_statement(DATE_RESTRICTION_MAPPING[:dividend_statement].ago.to_date, @div_id)
+        raise StandardError, "There has been an error and ReportsController#dividend_statement has encountered nil. Check error logs." if @dividend_statement.nil?
+        @dividend_statement_details[:rows] = @dividend_statement[:details].collect do |detail|
+          {
+            columns: [
+              {value: detail[:issue_date], type: :date},
+              {value: detail[:certificate_sequence], type: nil},
+              {value: detail[:start_date], type: :date},
+              {value: detail[:end_date], type: :date},
+              {value: detail[:shares_outstanding], type: :number},
+              {value: detail[:days_outstanding], type: :number},
+              {value: detail[:average_shares_outstanding], type: :shares_fractional},
+              {value: detail[:dividend], type: :currency}
+            ]
+          }
         end
-        [label, div_id]
-      end
-      @dropdown_options.each do |option|
-        if option[1] == @div_id
-          @dropdown_options_text = option[0]
-          break
+        @dividend_statement_details[:footer] = [
+          { value: t('global.totals'), colspan: 6},
+          { value: @dividend_statement[:average_shares_outstanding], type: :shares_fractional},
+          { value: @dividend_statement[:total_dividend], type: :currency}
+        ]
+        @dropdown_options = @dividend_statement[:div_ids].collect do |div_id|
+          label = if %w(1 2 3 4).include?(div_id.last)
+            I18n.t("dates.quarters.#{div_id.last}", year: div_id[0..3])
+          else
+            I18n.t('reports.pages.dividend_statement.special_dividend', year: div_id[0..3])
+          end
+          [label, div_id]
         end
+        @dropdown_options.each do |option|
+          if option[1] == @div_id
+            @dropdown_options_text = option[0]
+            break
+          end
+        end
+        @dropdown_options_text ||= @dropdown_options[0][0]
+        @div_id ||= @dropdown_options[0][1]
+        @show_summary_data = true if %w(1 2 3 4).include?(@div_id.last)
       end
-      @dropdown_options_text ||= @dropdown_options[0][0]
-      @div_id ||= @dropdown_options[0][1]
-      @show_summary_data = true if %w(1 2 3 4).include?(@div_id.last)
     end
   end
 
@@ -1387,7 +1390,7 @@ class ReportsController < ApplicationController
   end
 
   def letters_of_credit
-    downloadable_report(:xlsx) do
+    downloadable_report([:xlsx, :pdf]) do
       @report_name = ReportConfiguration.report_title(:letters_of_credit)
       if report_disabled?(LETTERS_OF_CREDIT_WEB_FLAGS)
         letters_of_credit = {}
@@ -1506,8 +1509,10 @@ class ReportsController < ApplicationController
         end.reject{ |_,roles| roles.empty? }
 
         check_for_inclusive_roles = false
-        matching_roles_array = if [User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER, AUTHORIZATIONS_ALL, User::Roles::ETRANSACT_SIGNER].include?(@authorizations_filter)
+        matching_roles_array = if [User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY, User::Roles::WIRE_SIGNER, AUTHORIZATIONS_ALL].include?(@authorizations_filter)
           [AUTHORIZATIONS_MAPPING[@authorizations_filter]]
+        elsif @authorizations_filter == User::Roles::ETRANSACT_SIGNER
+          [User::Roles::ETRANSACT_SIGNER, TOKEN_ADVANCES, TOKEN_SECURITIES, TOKEN_WIRES].collect { |r| AUTHORIZATIONS_MAPPING[r] }
         else
           check_for_inclusive_roles = true
           [AUTHORIZATIONS_MAPPING[@authorizations_filter], INCLUSIVE_AUTHORIZATIONS].flatten
@@ -1517,6 +1522,7 @@ class ReportsController < ApplicationController
         else
           user_roles.select{ |_,roles| (roles & matching_roles_array).any? }
         end
+
         if check_for_inclusive_roles
           filtered_user_roles.each do |_, roles|
             roles.collect! do |role|
@@ -1582,7 +1588,7 @@ class ReportsController < ApplicationController
 
     @securities_filter = params['securities_filter'] || 'all'
     report_download_name = "current-securities-position-#{@securities_filter}"
-    downloadable_report(:xlsx, {securities_filter: params['securities_filter']}, report_download_name) do
+    downloadable_report([:xlsx, :pdf], {securities_filter: params['securities_filter']}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(CURRENT_SECURITIES_POSITION_WEB_FLAG)
         @current_securities_position = {securities:[]}
@@ -1601,7 +1607,7 @@ class ReportsController < ApplicationController
     @report_name = ReportConfiguration.report_title(:monthly_securities_position)
     @month_end_date = month_restricted_start_date(@start_date)
     report_download_name = "monthly-securities-position-#{@securities_filter}-#{@month_end_date}"
-    downloadable_report(:xlsx, {securities_filter: params['securities_filter'], start_date: params['start_date']}, report_download_name) do
+    downloadable_report([:xlsx, :pdf], {securities_filter: params['securities_filter'], start_date: params['start_date']}, report_download_name) do
       @date_picker_filter = DATE_PICKER_FILTERS[:end_of_month]
       @picker_presets = date_picker_presets(@month_end_date, nil, ReportConfiguration.date_restrictions(:monthly_securities_position), nil, [:today])
       member_balances = MemberBalanceService.new(current_member_id, request)
@@ -1909,19 +1915,15 @@ class ReportsController < ApplicationController
       }
 
       @collateral_totals = {
-        rows: [
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.totals.total')},
-              {value: member_profile[:collateral_borrowing_capacity][:total], type: :currency_whole}
-            ]
-          },
-          {
-            columns: [
-              {value: t('reports.pages.account_summary.collateral_borrowing_capacity.totals.remaining')},
-              {value: member_profile[:collateral_borrowing_capacity][:remaining], type: :currency_whole}
-            ]
-          }
+        footer: [
+          [
+            {value: t('reports.pages.account_summary.collateral_borrowing_capacity.totals.total')},
+            {value: member_profile[:collateral_borrowing_capacity][:total], type: :currency_whole}
+          ],
+          [
+            {value: t('reports.pages.account_summary.collateral_borrowing_capacity.totals.remaining')},
+            {value: member_profile[:collateral_borrowing_capacity][:remaining], type: :currency_whole}
+          ]
         ]
       }
 
@@ -2012,8 +2014,10 @@ class ReportsController < ApplicationController
           {value: financial_instrument_standardize(activity[:product_description])}
         ]
       }
+      rows.last[:columns].push({value: activity[:life_cycle_event]}) if feature_enabled?('report-todays-credit-activity-description')
     end
     column_headings = [t('common_table_headings.transaction_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.product_type')]
+    column_headings << t('common_table_headings.description') if feature_enabled?('report-todays-credit-activity-description')
     @todays_credit = {
       column_headings: column_headings,
       rows: rows
@@ -2021,27 +2025,31 @@ class ReportsController < ApplicationController
   end
 
   def mortgage_collateral_update
-    @mcu_data = report_disabled?(MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS) ? {} : MemberBalanceService.new(current_member_id, request).mortgage_collateral_update
-    raise StandardError, "There has been an error and ReportsController#mortgage_collateral_update has encountered nil. Check error logs." if @mcu_data.nil?
+    downloadable_report(:pdf) do
+      @report_name = t('reports.pages.mortgage_collateral_update.title')
+      @mcu_data = report_disabled?(MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS) ? {} : MemberBalanceService.new(current_member_id, request).mortgage_collateral_update
+      raise StandardError, "There has been an error and ReportsController#mortgage_collateral_update has encountered nil. Check error logs." if @mcu_data.nil?
 
-    column_headings = [t('common_table_headings.transaction'), t('common_table_headings.loan_count'), fhlb_add_unit_to_table_header(t('common_table_headings.unpaid_balance'), '$'), fhlb_add_unit_to_table_header(t('global.original_amount'), '$')]
-    # Loans Accepted Table
-    @accepted_loans_table_data = {
-      column_headings: column_headings,
-      rows: mcu_table_rows_for(@mcu_data, %w(updated pledged renumbered)),
-      footer: mcu_table_columns_for(@mcu_data, 'accepted', t('reports.pages.mortgage_collateral_update.total_accepted'))
-    }
-    # Loans Submitted Table
-    @submitted_loans_table_data = {
-      column_headings: column_headings,
-      rows: mcu_table_rows_for(@mcu_data, %w(accepted rejected)),
-      footer: mcu_table_columns_for(@mcu_data, 'total', t('reports.pages.mortgage_collateral_update.total_submitted'))
-    }
-    # Loans Depledged Table
-    @depledged_loans_table_data = {
-      column_headings: column_headings,
-      rows: [ {columns: mcu_table_columns_for(@mcu_data, 'depledged', t('reports.pages.mortgage_collateral_update.loans_depledged'))} ]
-    }
+      column_headings = [t('common_table_headings.transaction'), t('common_table_headings.loan_count'), fhlb_add_unit_to_table_header(t('common_table_headings.unpaid_balance'), '$'), fhlb_add_unit_to_table_header(t('global.original_amount'), '$')]
+      # Loans Accepted Table
+      @accepted_loans_table_data = {
+        column_headings: column_headings,
+        rows: mcu_table_rows_for(@mcu_data, %w(updated pledged renumbered)),
+        footer: mcu_table_columns_for(@mcu_data, 'accepted', t('reports.pages.mortgage_collateral_update.total_accepted'))
+      }
+      # Loans Submitted Table
+      @submitted_loans_table_data = {
+        column_headings: column_headings,
+        rows: mcu_table_rows_for(@mcu_data, %w(accepted rejected)),
+        footer: mcu_table_columns_for(@mcu_data, 'total', t('reports.pages.mortgage_collateral_update.total_submitted'))
+      }
+      # Loans Depledged Table
+      @depledged_loans_table_data = {
+        column_headings: column_headings,
+        rows: [],
+        footer: mcu_table_columns_for(@mcu_data, 'depledged', t('reports.pages.mortgage_collateral_update.loans_depledged'))
+      }
+    end
   end
 
   private
@@ -2068,15 +2076,15 @@ class ReportsController < ApplicationController
   end
 
   def securities_instance_variables(securities_position, filter)
-    as_of_date = securities_position[:as_of_date]
+    @as_of_date = securities_position[:as_of_date]
     @headings = {
 
-      total_original_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_original_par_heading", fhlb_date_long_alpha(as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_original_par_heading_without_data"),
-      total_current_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_current_par_heading", fhlb_date_long_alpha(as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_current_par_heading_without_data"),
-      total_market_value: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_market_value_heading", fhlb_date_long_alpha(as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_market_value_heading_without_data"),
+      total_original_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_original_par_heading", fhlb_date_long_alpha(@as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_original_par_heading_without_data"),
+      total_current_par: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_current_par_heading", fhlb_date_long_alpha(@as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_current_par_heading_without_data"),
+      total_market_value: report_summary_with_date("reports.pages.securities_position.#{filter}_securities.total_market_value_heading", fhlb_date_long_alpha(@as_of_date), missing_data_message: "reports.pages.securities_position.#{filter}_securities.total_market_value_heading_without_data"),
       footer_total: t("reports.pages.securities_position.#{filter}_securities.total")
     }
-    @headings[:table_heading] = as_of_date ? t("reports.pages.securities_position.#{filter}_securities.table_heading", n: securities_position[:securities].length, date: fhlb_date_long_alpha(as_of_date)) : ""
+    @headings[:table_heading] = @as_of_date ? t("reports.pages.securities_position.#{filter}_securities.table_heading", n: securities_position[:securities].length, date: fhlb_date_long_alpha(@as_of_date)) : ""
     @securities_filter_options = [
       [t('reports.pages.securities_position.filter.all'), 'all'],
       [t('reports.pages.securities_position.filter.pledged'), 'pledged'],
@@ -2125,8 +2133,25 @@ class ReportsController < ApplicationController
 
   def roles_for_signers(signer)
     roles = signer[:roles]
+    if roles.include?(User::Roles::WIRE_SIGNER)
+      roles = roles.push(TOKEN_WIRES)
+    end
     if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
       roles = roles - AUTHORIZATIONS_ROLL_UP
+    end
+    if roles.include?(User::Roles::ETRANSACT_SIGNER)
+      roles.collect! do |role|
+        case role
+        when User::Roles::ADVANCE_SIGNER
+          [role, TOKEN_ADVANCES]
+        when User::Roles::SECURITIES_SIGNER, User::Roles::COLLATERAL_SIGNER
+          [role, TOKEN_SECURITIES]
+        else
+          role
+        end
+      end.flatten!
+      roles.uniq!
+      roles -= [User::Roles::ETRANSACT_SIGNER] if (roles & [TOKEN_SECURITIES, TOKEN_ADVANCES, TOKEN_WIRES]).any?
     end
     roles.sort_by! { |role| AUTHORIZATIONS_ORDER.index(role) || 0 }
     roles.collect! { |role| AUTHORIZATIONS_MAPPING.keys.include?(role) ? role : nil }
@@ -2168,7 +2193,7 @@ class ReportsController < ApplicationController
     ]
   end
 
-  def downloadable_report(formats = DOWNLOAD_FORMATS, report_download_params = {}, report_download_name = nil)
+  def downloadable_report(formats = DOWNLOAD_FORMATS, report_download_params = {}, report_download_name = nil, report_view = nil)
     export_format = params[:export_format]
     self.report_download_name ||= report_download_name
     self.report_download_name ||= "#{action_name.to_s.gsub('_','-')}-#{fhlb_report_date_numeric(Time.zone.today)}" if action_name
@@ -2184,7 +2209,7 @@ class ReportsController < ApplicationController
                     else
                       raise ArgumentError, 'Report format not recognized'
                   end
-      job_status = job_klass.perform_later(current_member_id, action_name, self.report_download_name, report_download_params).job_status
+      job_status = job_klass.perform_later(current_member_id, action_name, self.report_download_name, report_download_params, report_view).job_status
       job_status.update_attributes!(user_id: current_user.id)
       render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
     else
@@ -2303,17 +2328,26 @@ class ReportsController < ApplicationController
     securities
   end
 
-  def sort_report_data(data, sort_field, sort_order='asc')
-    return data unless data
-    data = data.sort{|a,b| a[sort_field] <=> b[sort_field]}
-    sort_order == 'asc' ? data : data.reverse
-  end
-
   def initialize_dates(report, start_date = nil, end_date = nil)
     date_bounds = ReportConfiguration.date_bounds(report, start_date, end_date)
     @min_date = date_bounds[:min]
     @start_date = date_bounds[:start]
     @end_date = date_bounds[:end]
     @max_date = date_bounds[:max]
+  end
+
+  def populate_pdf_view_variables
+    @standard_arc_table_data[:notes_1] = @standard_arc_table_data[:notes].except(t('reports.pages.price_indications.current.payment_frequency'))
+    @standard_arc_table_data[:notes_2] = @standard_arc_table_data[:notes].slice(t('reports.pages.price_indications.current.payment_frequency'))
+    @sbc_arc_table_data[:notes_1] = @sbc_arc_table_data[:notes].except(t('reports.pages.price_indications.current.payment_frequency'))
+    @sbc_arc_table_data[:notes_2] = @sbc_arc_table_data[:notes].slice(t('reports.pages.price_indications.current.payment_frequency'))
+    @standard_frc_table_data_1, @standard_frc_table_data_2 = @standard_frc_table_data.clone, @standard_frc_table_data.clone
+    rows = @standard_frc_table_data[:rows].in_groups(2, false).to_a
+    @standard_frc_table_data_1[:rows] = rows.first
+    @standard_frc_table_data_2[:rows] = rows.last
+    @sbc_frc_table_data_1, @sbc_frc_table_data_2 = @sbc_frc_table_data.clone, @sbc_frc_table_data.clone
+    rows = @sbc_frc_table_data[:rows].in_groups(2, false).to_a
+    @sbc_frc_table_data_1[:rows] = rows.first
+    @sbc_frc_table_data_2[:rows] = rows.last
   end
 end

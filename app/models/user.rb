@@ -237,7 +237,9 @@ class User < ActiveRecord::Base
   end
 
   def self.add_extranet_user(member_id, creator, username, email, given_name=nil, surname=nil)
-    find_or_create_by_with_retry(username: username.try(:downcase), ldap_domain: LDAP_EXTRANET_DOMAIN) if create_ldap_user(member_id, creator, username, email, given_name, surname)
+    user = find_or_create_by_with_retry(username: username.try(:downcase), ldap_domain: LDAP_EXTRANET_DOMAIN) if create_ldap_user(member_id, creator, username, email, given_name, surname)
+    user.unlock! if user
+    user
   end
 
   def self.create(*args, &block)

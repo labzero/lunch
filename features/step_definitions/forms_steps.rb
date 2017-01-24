@@ -19,12 +19,12 @@ When(/^I click on the (agreements|authorizations|credit|collateral) link in the 
   click_link(I18n.t("resources.forms.#{topic}.title"))
 end
 
-Then(/^I should see "([^"]*)" link$/) do |arg1|
-  page.assert_selector('.resource-form-table a', text: /\A#{Regexp.quote(I18n.t('global.sign'))}\z/i, minimum: 1)
+Then(/^I should see the sign link for the "(.*?)" form$/) do |form|
+  page.find('td', text: docusign_link(form) , exact: true).find(:xpath, "..").assert_selector('td a', text: /\A#{Regexp.quote(I18n.t('global.sign'))}\z/i)
 end
 
-When(/^I click on the sign link$/) do
-  click_link(I18n.t('global.sign'))
+When(/^I click on the sign link for the "(.*?)" form$/) do |form|
+  page.find('td', text: docusign_link(form) , exact: true).find(:xpath, "..").find('td a', text: /\A#{Regexp.quote(I18n.t('global.sign'))}\z/i).click
 end
 
 Then(/^I should see the docusign flyout$/) do
@@ -53,5 +53,13 @@ Then(/^I should see Docusign website and close it$/) do
   end
   page.driver.window_handles.each do |handle|
     page.driver.close_window(handle) unless handle == @current_window
+  end
+end
+
+def docusign_link(form)
+  if form == 'access manager'
+    I18n.t('resources.forms.authorizations.website.access_manager')
+  elsif form == 'secureid token'
+    I18n.t('resources.forms.authorizations.website.securid')
   end
 end

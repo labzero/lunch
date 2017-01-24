@@ -1,5 +1,5 @@
 class MembersController < ApplicationController
-  skip_before_action :check_terms
+  skip_before_action :check_terms, :require_member
   skip_before_action :authenticate_user!, only: [:logged_out]
 
   before_filter only: [:select_member, :set_member] do

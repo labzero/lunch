@@ -42,8 +42,12 @@
   @include center-both;
 }
 
-%clearfix {
+@mixin clearfix {
   overflow: hidden;
+}
+
+%clearfix {
+  @include clearfix;
 }
 
 %pseudoelement-clearfix {

@@ -81,9 +81,17 @@ RSpec.describe SecurityPolicy, :type => :policy do
         before { allow(user).to receive(:roles).and_return([User::Roles::SECURITIES_SIGNER]) }
         it { should permit_action(:delete) }
       end
-      context "without the `#{User::Roles::SECURITIES_SIGNER}` role" do
+      context "with the `#{User::Roles::COLLATERAL_SIGNER}` role" do
+        before { allow(user).to receive(:roles).and_return([User::Roles::COLLATERAL_SIGNER]) }
+        it { should permit_action(:delete) }
+      end
+      context "without the `#{User::Roles::SECURITIES_SIGNER}` or `#{User::Roles::COLLATERAL_SIGNER}` role" do
         before { allow(user).to receive(:roles).and_return([]) }
         it { should_not permit_action(:delete) }
+      end
+      context "with both the `#{User::Roles::SECURITIES_SIGNER}` and `#{User::Roles::COLLATERAL_SIGNER}` role" do
+        before { allow(user).to receive(:roles).and_return([User::Roles::SECURITIES_SIGNER, User::Roles::COLLATERAL_SIGNER]) }
+        it { should permit_action(:delete) }
       end
     end
   end

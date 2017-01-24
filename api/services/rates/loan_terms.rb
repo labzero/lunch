@@ -50,6 +50,22 @@ module MAPI
           MAPI::Services::EtransactAdvances::TERM_BUCKET_MAPPING[term]
         end
 
+        def self.disable_term_sql(term_id)
+          <<-SQL
+              UPDATE WEB_ADM.AO_TERM_BUCKETS SET WHOLE_LOAN_ENABLED = 'N', SBC_AGENCY_ENABLED = 'N',
+              SBC_AAA_ENABLED = 'N', SBC_AA_ENABLED = 'N' WHERE AO_TERM_BUCKET_ID = #{quote(term_id)}
+          SQL
+        end
+
+        def self.disable_term(app, term)
+          term_id = term_to_id(term)
+          if app.settings.environment == :production
+            execute_sql(app.logger, disable_term_sql(term_id)) == 1
+          else
+            true
+          end
+        end
+
         BLANK=loan_term(false,  false, 'NotFound', nil)
         BLANK_TYPES=hash_from_pairs( LOAN_TYPES.map{ |type| [type, BLANK] } )
 

@@ -1,6 +1,6 @@
 class WelcomeController < ApplicationController
 
-  skip_before_action :authenticate_user!, :check_terms
+  skip_before_action :authenticate_user!, :check_terms, :require_member
   around_action :skip_timeout_reset, only: [:session_status]
 
   layout 'external'

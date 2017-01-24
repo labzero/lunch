@@ -186,7 +186,7 @@ Scenario: Member sees success page after submitting releases for authorization
 Scenario: A signer uses a SecurID token to authenticate when authorizing
   Given I am logged in as a "quick-advance signer"
   And I am on the securities request page
-  When I click to Authorize the first release
+  When I click to Authorize the first pledge release
   Then I should be on the Securities Release page
   And the Authorize action is disabled
   When I enter "123" for my SecurID pin

@@ -1,7 +1,7 @@
 class Users::PasswordsController < Devise::PasswordsController
   layout 'external'
   
-  skip_before_action :check_terms
+  skip_before_action :check_terms, :require_member
 
   def create
     self.resource = resource_class.find_or_create_if_valid_login(resource_params)

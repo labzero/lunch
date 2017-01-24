@@ -9,40 +9,40 @@ Background:
 @smoke
 Scenario: Navigate to settings page
   Given I visit the dashboard
-  When I click on the gear icon in the header
+  When I click on the settings link in the header
   Then I should see "Settings" as the sidebar title
 
 @wip @smoke
 Scenario: Email Settings
   Given I visit the dashboard
-    And I click on the gear icon in the header
-   When I click on "Emails" in the sidebar nav
-   Then I should be on the email settings page
+  And I click on the settings link in the header
+  When I click on "Emails" in the sidebar nav
+  Then I should be on the email settings page
 
 @wip
 Scenario: Changing Email Settings
   Given I am on the email settings page
-    And I see the unselected state for the "reports" option
-   When I check the box for the "reports" option
-   Then I should see the selected state for the "reports" option
-    And I should see the auto-save message for the email settings page
+  And I see the unselected state for the "reports" option
+  When I check the box for the "reports" option
+  Then I should see the selected state for the "reports" option
+  And I should see the auto-save message for the email settings page
 
 @wip
 Scenario: Remembering Email Settings
   Given I am on the email settings page
-    And I see the unselected state for the "reports" option
-    And I check the box for the "reports" option
-    And I should see the selected state for the "reports" option
-    And I should see the auto-save message for the email settings page
+  And I see the unselected state for the "reports" option
+  And I check the box for the "reports" option
+  And I should see the selected state for the "reports" option
+  And I should see the auto-save message for the email settings page
   When I visit the dashboard
-    And I click on the gear icon in the header
-    And I click on "Emails" in the sidebar nav
+  And I click on the settings link in the header
+  And I click on "Emails" in the sidebar nav
   Then I should see the selected state for the "reports" option
 
 @smoke @jira-mem-599
 Scenario: Users can view Two Factor settings
   Given I visit the dashboard
-  And I click on the gear icon in the header
+  And I click on the settings link in the header
   When I click on "Manage Token" in the sidebar nav
   Then I should be on the two factor settings page
   And I should not see any success or failure messages
@@ -132,7 +132,7 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
   @smoke @jira-mem-561
   Scenario: Users who are not Access Managers can't view the access manager page
     Given I visit the dashboard
-    When I click on the gear icon in the header
+    When I click on the settings link in the header
     Then I should not see "Access Manager" in the sidebar nav
 
   @jira-mem-920 @jiram-mem-1021
@@ -178,6 +178,6 @@ Scenario: Users are informed if they have entered bad details on the reset PIN f
   @jira-mem-1033
   Scenario: Intranet users cannot reset their passwords from the settings page
     Given I am logged in as an "intranet user"
-    When I click on the gear icon in the header
+    When I click on the settings link in the header
     Then I should see a message letting me know I cannot change my password
     And I should not see the change password form

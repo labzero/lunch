@@ -7,7 +7,7 @@
           = flash[:error]
       = devise_error_messages!
       %p= t('forgot_password.instructions')
-      = render 'shared/input_field', form_builder: f, field_name: :username, label: t('global.username')
+      = render 'shared/input_field', form_builder: f, field_name: :username, label: t('global.username'), html_attributes: {autofocus: true, tabindex: 1}
       .form-actions
-        = link_to(t('global.cancel'), new_user_session_path, class: 'secondary-button')
-        = f.submit t('global.continue'), class: 'primary-button'
+        = link_to(t('global.cancel'), new_user_session_path, class: 'secondary-button', tabindex: 3)
+        = f.submit t('global.continue'), class: 'primary-button', tabindex: 2

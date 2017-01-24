@@ -68,8 +68,22 @@ end
 Then(/^I should see (\d+) report tables with multiple data rows$/) do |count|
   page.assert_selector('.report-table', count: count)
   page.all('.report-table').each do |table|
-    table.assert_selector('tbody tr')
+    table.assert_selector(':not(.report-table-footer-only) tbody tr, .report-table-footer-only tfoot tr')
   end
+end
+
+Then(/^I should see (\d+) report tables, (\d+) of which contain data$/) do |total_count, with_data_count|
+  page.assert_selector('.report-table', count: total_count)
+  tables_with_data = 0
+  page.all('.report-table').each do |table|
+    begin
+      table.assert_selector('tbody tr')
+      tables_with_data += 1
+    rescue Capybara::ExpectationNotMet
+      #no-op
+    end
+  end
+  expect(tables_with_data).to eq(with_data_count.to_i)
 end
 
 Then(/^I should see (\d+) report tables$/) do |count|
@@ -525,7 +539,7 @@ When(/^I should only see users with the "(.*?)" role( or with inclusive roles)?$
 end
 
 When(/^I click on the dividend transaction dropdown selector$/) do
-  page.find('.dropdown-selection').click
+  page.find('.report-filter .dropdown-selection').click
 end
 
 When(/^I click on the securities services monthly statement dropdown selector$/) do
@@ -546,7 +560,7 @@ When(/^I select "(.*?)" from the month year dropdown$/) do |monthyear|
 end
 
 Then(/^I should see a dividend summary for the last option in the dividend transaction dropdown selector$/) do
-  page.find('.dropdown-selection').click
+  page.find('.report-filter .dropdown-selection').click
   text = page.find('.dropdown li:last-child').text
   page.assert_selector('.table-dividend-summary tr:first-child td:last-child', text: text)
 end
@@ -569,7 +583,7 @@ Then(/^I should see a report for the last entry from the month year dropdown$/) 
   # this logic is not 100% rock solid, but it should work in most cases. Really it should
   # use the debit date from that report's debit_date field, however getting that into the
   # report is tricky.
-  debit_date = most_recent_business_day(element['data-dropdown-value'].to_date + 1.month)
+  debit_date = most_recent_business_day((element['data-dropdown-value'].to_date + 1.month).end_of_month)
   step %{I should see a report for "#{debit_date}"}
 end
 
@@ -585,4 +599,16 @@ Then(/^I should be on the "(.*?)" report page$/) do |report|
       I18n.t('reports.pages.account_summary.title')
   end
   page.assert_selector('.report h1', text: text, exact: true)
+end
+
+Then(/^I see a "([^"]*)" report column with data$/) do |column|
+  column = page.find('.report-table th', text: column, exact: true)
+  table = column.find(:xpath, 'ancestor::table')
+  siblings = table.all('th')
+  i = 1
+  siblings.each do |node|
+    break if node == column
+    i += 1
+  end
+  table.assert_selector("td:nth-child(#{i})", text: /\S+/, visible: true)
 end

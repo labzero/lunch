@@ -47,19 +47,19 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .nav-member-switch, .nav-logout, .header-member-name {
+  .nav-member-switch, .nav-logout, .header-member-name, .nav-settings {
     @include navigation-separator;
     a:hover {
       text-decoration: underline;
     }
   }
-  .nav-settings, .nav-mail {
+  .nav-mail {
     font-size: 1.25rem;
     a:after {
       vertical-align: middle;
     }
   }
-  .nav-logout, .nav-settings, .nav-mail {
+  .nav-logout, .nav-mail {
     margin-right: 30px;
   }
   .nav-search {

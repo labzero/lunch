@@ -24,6 +24,10 @@ Given(/^I fill in and submit the login form with a user not associated with a ba
   step %{I fill in and submit the login form with username "#{primary_user['username']}" and password "#{primary_user['password']}"}
 end
 
+Given(/^I fill in and submit the login form with an admin user$/) do
+  step %{I fill in and submit the login form with username "#{admin_user['username']}" and password "#{admin_user['password']}"}
+end
+
 Given(/^I am logged in as "(.*?)" with password "(.*?)"$/) do |user, password|
   step %{I am logged out}
   step %{I visit the root path}
@@ -419,6 +423,10 @@ end
 
 def extranet_signer
   CustomConfig.env_config['extranet_signer']
+end
+
+def admin_user
+  CustomConfig.env_config['intranet_user']
 end
 
 def current_member_name

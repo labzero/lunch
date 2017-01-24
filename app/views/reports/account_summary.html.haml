@@ -21,27 +21,24 @@
     - if @financing_availability
       %section
         %h2= t('reports.pages.account_summary.financing_availability.title')
-        = render 'reports_table', sortable: false, table_data: @financing_availability
+        = render 'reports_table', sortable: false, table_data: @financing_availability, table_class: 'report-table-vertical-headers'
         %small= t('reports.pages.account_summary.financing_availability.footnote')
     %section
       %h2= t('reports.pages.account_summary.credit_outstanding.title')
-      = render 'reports_table', sortable: false, table_data: @credit_outstanding
+      = render 'reports_table', sortable: false, table_data: @credit_outstanding, table_class: 'report-table-vertical-headers'
     %section
       %h2.header-with-action
         %span= t('reports.pages.account_summary.collateral_borrowing_capacity.title')
         = link_to(t('global.view_report'), reports_borrowing_capacity_path)
       %h3= t('reports.pages.account_summary.collateral_borrowing_capacity.standard.title')
-      = render 'reports_table', sortable: false, table_data: @standard_collateral
+      = render 'reports_table', sortable: false, table_data: @standard_collateral, table_class: 'report-table-vertical-headers'
       %h3= t('reports.pages.account_summary.collateral_borrowing_capacity.sbc.title')
-      = render 'reports_table', sortable: false, table_data: @sbc_collateral
+      = render 'reports_table', sortable: false, table_data: @sbc_collateral, table_class: 'report-table-vertical-headers'
       %h3= t('reports.pages.account_summary.collateral_borrowing_capacity.totals.title')
-      = render 'reports_table', sortable: false, table_data: @collateral_totals, table_class: 'account-summary-collateral-totals'
+      = render 'reports_footer_only_table', table_data: @collateral_totals, table_class: ['account-summary-collateral-totals','report-table-vertical-headers']
       %small= t('reports.pages.account_summary.collateral_borrowing_capacity.footnote', phone_number: service_desk_phone_number)
     %section
       %h2.header-with-action
         %span= t('reports.pages.account_summary.capital_stock.title')
-        - if feature_enabled?('report-capital-stock-position-and-leverage')
-          = link_to(t('global.view_report'), reports_capital_stock_and_leverage_path)
-        - else
-          %a.disabled=t('global.view_report')
-      = render 'reports_table', sortable: false, table_data: @capital_stock_and_leverage
+        = link_to(t('global.view_report'), reports_capital_stock_and_leverage_path)
+      = render 'reports_table', sortable: false, table_data: @capital_stock_and_leverage, table_class: 'report-table-vertical-headers'

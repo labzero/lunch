@@ -151,6 +151,23 @@ Scenario: User sees error if the product is no longer available due to its cutof
   When I click on the initiate advance button on the add advance page
   Then I should see an "end time" advance error
 
+@jira-mem-2074
+Scenario: Users get an error if their requested advance's term is over the system's maximum allowed term
+  Given I am on the "Add Advance" advances page
+  When I enter "100009" into the add advance amount field
+  And I click to toggle to the frc rates
+  And I select the rate with a term of "2week" and a type of "whole" on the add advance page
+  When I click on the initiate advance button on the add advance page
+  Then I should see an "exceeds maximum term" advance error with amount 120 and type "day"
+
+Scenario: Users get an error if their requested advance's term is over the member's maximum allowed term
+  Given I am on the "Add Advance" advances page
+  When I enter "100010" into the add advance amount field
+  And I click to toggle to the frc rates
+  And I select the rate with a term of "2week" and a type of "whole" on the add advance page
+  When I click on the initiate advance button on the add advance page
+  Then I should see an "exceeds maximum term" advance error with amount 4 and type "month"
+
 Scenario: Users gets an error if advance causes per-term cumulative amount to exceed limit
   Given I am on the "Add Advance" advances page
   When I enter "1000000000000" into the add advance amount field

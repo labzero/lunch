@@ -1,17 +1,19 @@
 - @html_class = 'white-background'
 - @page_title = t('reports.meta_title')
+- @print_layout ||= false
 .report.report-dividend-statement.row
   .report-header
-    %h1= t('reports.capital_stock.dividend_statement.title')
+    %h1= @report_name
     - if @print_layout
-      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@start_date))
+      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(Time.zone.today))
     - else
-      = render 'reports_header_buttons', allowed_params: :start_date
+      - formats = feature_enabled?('report-pdf-dividend-transaction') ? [:pdf] : []
+      = render 'reports_header_buttons', allowed_params: :dividend_transaction_filter, download_formats: formats
       = render 'report_details', name: @member_name, freshness: t('reports.pages.dividend_statement.freshness'), availability: t('reports.availability.months', months: 36)
-    .report-inputs
-      = form_tag(reports_dividend_statement_path, method: 'GET') do
-        .report-filter
-          = render 'shared/dropdown', dropdown_name: 'dividend_transaction_filter', default_value: @div_id, default_text: @dropdown_options_text, dropdown_options: @dropdown_options
+      .report-inputs
+        = form_tag(reports_dividend_statement_path, method: 'GET') do
+          .report-filter
+            = render 'shared/dropdown', dropdown_name: 'dividend_transaction_filter', default_value: @div_id, default_text: @dropdown_options_text, dropdown_options: @dropdown_options
   .report-main-body
     -if @show_summary_data
       .report-summary-data
@@ -49,5 +51,5 @@
           %td.report-cell-expanding= t('reports.pages.dividend_statement.headers.total_dividend')
           %td.report-cell-right= fhlb_formatted_currency(@dividend_statement[:total_dividend])
     %h2.report-table-title= t('reports.pages.dividend_statement.details')
-    = render 'reports/reports_table', table_data: @dividend_statement_details, table_class: 'table-dividend-details', no_wrapping: true
+    = render 'reports/reports_table', table_data: @dividend_statement_details, table_class: 'table-dividend-details', no_wrapping: !@print_layout, sortable: !@print_layout
     %small= t('reports.accuracy_notice_html', url: accounting_email, phone_number: accounting_phone_number)

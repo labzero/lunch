@@ -244,7 +244,7 @@ class SecuritiesController < ApplicationController
                            { value: fhlb_date_standard_numeric(@securities_request.authorized_date) } ] } ] }
     @request_details_table_data[:rows] << { columns: [
       { value: t('securities.requests.view.request_details.pledge_to.pledge_type') },
-      { value: PLEDGE_TO_MAPPING[@securities_request.pledge_to] } ] } if @securities_request.kind == :pledge_transfer
+      { value: PLEDGE_TO_MAPPING[@securities_request.pledge_to] } ] } if [:pledge_transfer, :pledge_intake].include?(@securities_request.kind)
 
     unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
       @broker_instructions_table_data = {
@@ -505,7 +505,9 @@ class SecuritiesController < ApplicationController
       end
     end
     if has_errors
-      @error_message = prioritized_securities_request_error(@securities_request) || I18n.t('securities.internal_user_error')
+      unless !@securid_status.nil? && @securid_status != RSA::SecurID::Session::AUTHENTICATED
+        @error_message = prioritized_securities_request_error(@securities_request) || I18n.t('securities.internal_user_error')
+      end
       populate_view_variables(type)
       populate_form_data_by_kind(kind)
       populate_contact_info_by_kind(kind)
@@ -590,12 +592,16 @@ class SecuritiesController < ApplicationController
     case kind
     when 'pledge_intake'
       t('securities.requests.form_descriptions.pledge')
-    when 'pledge_release', 'safekept_release'
-      t('securities.requests.form_descriptions.release')
+    when 'pledge_release'
+      t('securities.requests.form_descriptions.release_pledged')
+    when 'safekept_release'
+      t('securities.requests.form_descriptions.release_safekept')
     when 'safekept_intake'
       t('securities.requests.form_descriptions.safekept')
-    when 'safekept_transfer', 'pledge_transfer'
-      t('securities.requests.form_descriptions.transfer')
+    when 'safekept_transfer'
+      t('securities.requests.form_descriptions.transfer_safekept')
+    when 'pledge_transfer'
+      t('securities.requests.form_descriptions.transfer_pledged')
     else
       t('global.missing_value')
     end

@@ -197,6 +197,12 @@
   font-weight: $normal-weight;
 }
 
+@mixin typography-print-section-heading {
+  @include print-font;
+  font-size: 8pt;
+  font-weight: $bold-weight;
+}
+
 @mixin typography-print-table-heading {
   @include print-font;
   font-size: 7.5pt;

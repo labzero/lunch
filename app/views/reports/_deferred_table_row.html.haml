@@ -1,4 +1,5 @@
 - colspan ||= false
 %tr
-  %td.table-loading-cell{colspan: (colspan if colspan)}= t('global.prepare_table')
+  %td.table-loading-cell{colspan: (colspan if colspan)}
+    %span= t('global.prepare_table')
   %td.table-error-cell.icon-alert-before{colspan: (colspan if colspan)}= t('errors.error_occurred')
