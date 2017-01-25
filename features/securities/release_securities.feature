@@ -157,7 +157,6 @@ Scenario: Member changes trade and settlement dates
   Then I should be on the securities release page
   When I click the settlement date datepicker
   Then I should see that weekends have been disabled
-  And I should see that all past dates have been disabled
   And I should not be able to see a calendar more than 3 months in the future
   And I click the datepicker cancel button
   Then I should be on the securities release page

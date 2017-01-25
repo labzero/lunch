@@ -738,7 +738,6 @@ class SecuritiesController < ApplicationController
       date_iterator += 1.day
     end
     {
-      min_date: today,
       max_date: max_date,
       invalid_dates: holidays + weekends
     }

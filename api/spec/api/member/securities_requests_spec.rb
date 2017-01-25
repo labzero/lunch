@@ -1851,12 +1851,6 @@ describe MAPI::ServiceApp do
           expect(error.code).to eq(attr_name)
         end
       end
-      it 'raises an error if the date occurs before today' do
-        allow(date).to receive(:>=).with(today).and_return(false)
-        expect{call_method}.to raise_error(MAPI::Shared::Errors::InvalidFieldError, "#{attr_name} must not occur before today") do |error|
-          expect(error.code).to eq(attr_name)
-        end
-      end
       it 'raises an error if the date occurs after today plus the MAX_DATE_RESTRICTION' do
         allow(date).to receive(:<=).with(max_date).and_return(false)
         expect{call_method}.to raise_error(MAPI::Shared::Errors::InvalidFieldError, "#{attr_name} must not occur after 3 months from today") do |error|
@@ -4629,9 +4623,6 @@ describe MAPI::ServiceApp do
           call_method
           expect(broker_instructions[attr]).to eq(value)
         end
-      end
-      describe 'when there are no previously exisiting values for the broker_instructions fields' do
-
       end
       ['trade_date', 'settlement_date'].each do |attr|
         let(:next_business_day) { instance_double(Date) }

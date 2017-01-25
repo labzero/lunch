@@ -2241,9 +2241,6 @@ RSpec.describe SecuritiesController, type: :controller do
         call_method
       end
       describe 'the returned hash' do
-        it 'has a `min_date` of today' do
-          expect(call_method[:min_date]).to eq(today)
-        end
         it 'has a `max_date` of today plus the `SecuritiesRequest::MAX_DATE_RESTRICTION`' do
           expect(call_method[:max_date]).to eq(max_date)
         end
