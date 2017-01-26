@@ -1,0 +1,3 @@
+.row
+  %h1= t('admin.features.index.title')
+  = render 'reports/reports_table', table_data: @features_table, sortable: true, disable_auto_width: true, no_wrapping: true, table_class: 'admin-features-table', default_sort: [1, 'asc']

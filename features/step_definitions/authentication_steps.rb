@@ -38,6 +38,11 @@ Given(/^I am logged in$/) do
   step %{I am logged in as an "extranet user"}
 end
 
+Given(/^I am logged into the admin panel$/) do
+  step %{I am logged in as an "admin user"}
+  step %{I visit the admin dashboard}
+end
+
 Given(/^I am logged in to a bank with data for the "([^"]*)" report$/) do |report|
   user_type = case report
   when 'Securities Services Monthly Statement'
@@ -336,6 +341,8 @@ def user_for_type(user_type)
     collateral_signer
   when 'extranet signer'
     extranet_signer
+  when 'admin user'
+    admin_user
   else
     raise 'unknown user type'
   end

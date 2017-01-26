@@ -3104,8 +3104,15 @@ en:
         data_visibility: Data Visibility
         features: Test Features
     features:
+      title: Features
       flipper:
         title: Flipper
+      index:
+        title: Test Features
+        columns:
+          feature_name: Features
+        actions:
+          edit: View/Edit
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

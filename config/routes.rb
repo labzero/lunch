@@ -222,7 +222,10 @@ Rails.application.routes.draw do
 
   constraints Constraints::WebAdmin.new do
     get '/admin' => 'admin/dashboard#index', as: :dashboard_admin
-    mount Flipper::UI.app(Rails.application.flipper) => '/admin/features', as: :features_admin
+    scope :admin do
+      get '/features' => 'admin/features#index', as: :features_admin
+      mount Flipper::UI.app(Rails.application.flipper) => '/flipper-features', as: :flipper_features_admin
+    end
   end
 
   get '/error' => 'error#standard_error' unless Rails.env.production?
