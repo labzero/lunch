@@ -1244,6 +1244,7 @@ en:
       transfer: Transfer
       safekeep_new: Safekeep New
       pledge_new: Pledge New
+      delivery: Delivery Method
     requests:
       title: Securities Requests
       actions:

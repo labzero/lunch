@@ -67,6 +67,11 @@ class SecuritiesController < ApplicationController
 
   VALID_REQUEST_TYPES = [:release, :pledge, :safekeep, :transfer].freeze
 
+  DELIVER_TO_MAPPING = {
+    '88'=> 'FED',
+    '89'=> 'DTC'
+  }
+
   before_action do
     set_active_nav(:securities)
     @html_class ||= 'white-background'
@@ -83,22 +88,25 @@ class SecuritiesController < ApplicationController
     securities.each do |security|
       cusip = security.cusip
       status = Security.human_custody_account_type_to_status(security.custody_account_type)
+      columns = [
+        {value: security.to_json, type: :checkbox, name: "securities[]", disabled: cusip.blank?, data: {status: status}},
+        {value: cusip || t('global.missing_value')},
+        {value: security.description || t('global.missing_value')},
+        {value: status},
+        {value: security.eligibility || t('global.missing_value')},
+        {value: security.maturity_date, type: :date},
+        {value: security.authorized_by || t('global.missing_value')},
+        {value: security.current_par, type: :number},
+        {value: security.borrowing_capacity, type: :number}
+      ]
+      columns.insert(4, {value: DELIVER_TO_MAPPING[security.reg_id] || t('global.missing_value')}) if feature_enabled?('securities-delivery-method')
       rows << {
         filter_data: status,
-        columns:[
-          {value: security.to_json, type: :checkbox, name: "securities[]", disabled: cusip.blank?, data: {status: status}},
-          {value: cusip || t('global.missing_value')},
-          {value: security.description || t('global.missing_value')},
-          {value: status},
-          {value: security.eligibility || t('global.missing_value')},
-          {value: security.maturity_date, type: :date},
-          {value: security.authorized_by || t('global.missing_value')},
-          {value: security.current_par, type: :number},
-          {value: security.borrowing_capacity, type: :number}
-        ]
+        columns: columns
       }
     end
-
+    column_headings = [{value: 'check_all', type: :checkbox, name: 'check_all'}, t('common_table_headings.cusip'), t('common_table_headings.description'), t('common_table_headings.status'), t('securities.manage.eligibility'), t('common_table_headings.maturity_date'), t('common_table_headings.authorized_by'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('global.borrowing_capacity'), '$')]
+    column_headings.insert(4, t('securities.manage.delivery')) if feature_enabled?('securities-delivery-method')
     @securities_table_data = {
       filter: {
         name: 'securities-status-filter',
@@ -118,7 +126,7 @@ class SecuritiesController < ApplicationController
           }
         ]
       },
-      column_headings: [{value: 'check_all', type: :checkbox, name: 'check_all'}, t('common_table_headings.cusip'), t('common_table_headings.description'), t('common_table_headings.status'), t('securities.manage.eligibility'), t('common_table_headings.maturity_date'), t('common_table_headings.authorized_by'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('global.borrowing_capacity'), '$')],
+      column_headings: column_headings,
       rows: rows
     }
 

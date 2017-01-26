@@ -97,7 +97,7 @@ module MAPI
           def self.fake_securities(member_id, as_of_date, report_type, custody_account_type)
             fake_data = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'current_securities_position.json'))).with_indifferent_access
             rows = []
-            r = Random.new(as_of_date.to_time.to_i + as_of_date.day + report_type.to_s.ord)
+            r = Random.new((member_id.to_s + as_of_date.to_time.to_i.to_s + report_type.to_s.ord.to_s).to_i)
             r.rand(5..15).times do |i|
               account_types = ['U', 'U', 'P', 'P'].shuffle(random: r)
               account_type = account_types.pop || ['P', 'U'].sample(random: r)
@@ -111,7 +111,7 @@ module MAPI
                 SECURITIES_FIELD_MAPPINGS[:security_pledge_type][report_type] =>  ['Standard', 'SBC', 'SAFE'][r.rand(0..2)],
                 SECURITIES_FIELD_MAPPINGS[:cusip][report_type] =>  fake_data[:cusips][r.rand(0..(fake_data[:cusips].length - 1))],
                 SECURITIES_FIELD_MAPPINGS[:description][report_type] =>  fake_data[:descriptions][r.rand(0..(fake_data[:descriptions].length - 1))],
-                SECURITIES_FIELD_MAPPINGS[:reg_id][report_type] =>  '88',
+                SECURITIES_FIELD_MAPPINGS[:reg_id][report_type] =>  ['88','89','100'].sample(random: r),
                 SECURITIES_FIELD_MAPPINGS[:pool_number][report_type] =>  fake_data[:pools][r.rand(0..(fake_data[:pools].length - 1))],
                 SECURITIES_FIELD_MAPPINGS[:coupon_rate][report_type] =>  r.rand(0..6) + r.rand.round(3),
                 SECURITIES_FIELD_MAPPINGS[:maturity_date][report_type] =>  as_of_date + r.rand(30..2000).days,

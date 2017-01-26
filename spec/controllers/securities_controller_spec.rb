@@ -34,14 +34,20 @@ RSpec.describe SecuritiesController, type: :controller do
         [:cusip, :description, :custody_account_type, :eligibility, :maturity_date, :authorized_by, :current_par, :borrowing_capacity].each do |attr|
           security[attr] = double(attr.to_s, upcase: nil)
         end
+        security[:reg_id] = reg_id
         security
       end
       let(:call_action) { get :manage }
       let(:securities) { [security] }
       let(:status) { double('status') }
+      let(:reg_id) { double('reg_id') }
+      let(:deliver_to) { double('deliver_to') }
       before do
         allow(member_balance_service_instance).to receive(:managed_securities).and_return(securities)
         allow(security[:cusip]).to receive(:upcase).and_return(security[:cusip])
+        allow(controller).to receive(:feature_enabled?).and_call_original
+        allow(controller).to receive(:feature_enabled?).with('securities-delivery-method').and_return(false)
+        stub_const('SecuritiesController::DELIVER_TO_MAPPING', { reg_id => deliver_to })
       end
       it_behaves_like 'a user required action', :get, :manage
       it_behaves_like 'a controller action with an active nav setting', :manage, :securities
@@ -164,6 +170,30 @@ RSpec.describe SecuritiesController, type: :controller do
         }
         call_action
         expect(assigns[:securities_table_data][:filter]).to eq(filter)
+      end
+      describe 'when the `securities-delivery-method` feature is enabled' do
+        before do
+          allow(controller).to receive(:feature_enabled?).and_call_original
+          allow(controller).to receive(:feature_enabled?).with('securities-delivery-method').and_return(true)
+        end
+        it 'assigns @securities_table_data the correct column_headings' do
+          call_action
+          expect(assigns[:securities_table_data][:column_headings]).to eq([{value: 'check_all', type: :checkbox, name: 'check_all'}, I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.description'), I18n.t('common_table_headings.status'), I18n.t('securities.manage.delivery'), I18n.t('securities.manage.eligibility'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.authorized_by'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(I18n.t('global.borrowing_capacity'), '$')])
+        end
+        it 'contains an object at the 4 index with the correct value for delivery method' do
+          call_action
+          assigns[:securities_table_data][:rows].each do |row|
+            expect(row[:columns][4][:value]).to eq(deliver_to)
+          end
+        end
+        it "contains an object at the 4 index with a value of '#{I18n.t('global.missing_value')}' when the given security has no value for delivery method" do
+          security[:reg_id] = nil
+          allow(member_balance_service_instance).to receive(:managed_securities).and_return([security])
+          call_action
+          assigns[:securities_table_data][:rows].each do |row|
+            expect(row[:columns][4][:value]).to eq(I18n.t('global.missing_value'))
+          end
+        end
       end
     end
   end
