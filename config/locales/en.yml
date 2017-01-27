@@ -1375,12 +1375,10 @@ en:
         intro: "To edit the listed securities:"
         step_1:
           title: "Step 1."
-          description: Download Template
+          description_html: "Make edits to the listed securities in %{link}"
+          link_title: this file.
         step_2:
           title: "Step 2."
-          make_edits: Make your edits in the file.
-        step_3:
-          title: "Step 3."
           description_html: "Save your file, then upload it by either dragging and dropping it on to this page, or selecting it from your file system. Contact <a href=%{mailto_url}>%{mailto_text}</a> at %{phone_number} with questions."
         drag_drop: Drag and Drop Here
         select_file: Select File
@@ -1414,8 +1412,14 @@ en:
       upload_instructions:
         download_template: Download Template
         intro: Upload an Excel file containing your securities.
+        step_1:
+          title: "Step 1."
+          description: Download Template
         step_2:
           enter_securities: In the file, enter one security per row.
+        step_3:
+          title: "Step 3."
+          description_html: "Save your file, then upload it by either dragging and dropping it on to this page, or selecting it from your file system. Contact <a href=%{mailto_url}>%{mailto_text}</a> at %{phone_number} with questions."
       discard_and_upload_again: Discard and Upload Again
       delivery_acknowledgement: The member has delivered the securities to the Bank’s securities custodian prior to or concurrent with the execution of this securities pledge.
     success:

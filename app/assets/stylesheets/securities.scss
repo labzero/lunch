@@ -344,6 +344,9 @@
   span {
     @extend %typography-field-value;
   }
+  .securities-release-download {
+    text-transform: inherit;
+  }
 }
 
 .securities-download-instructions-description-term {

@@ -2,13 +2,13 @@
   %p
     =t('securities.safekeep_pledge.upload_instructions.intro')
   .securities-upload-instructions
-    %p.securities-download-instructions-step= t('securities.release.edit.step_1.title')
-    =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), download_path, class: [ 'securities-download-instructions-description', 'safekeep-pledge-download' ], data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}
+    %p.securities-download-instructions-step= t('securities.safekeep_pledge.upload_instructions.step_1.title')
+    =link_to t('securities.safekeep_pledge.upload_instructions.download_template'), download_path, class: [ 'securities-download-instructions-description','safekeep-pledge-download' ], data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}
     %p.securities-download-instructions-step= t('securities.release.edit.step_2.title')
     .securities-download-instructions-description
       %p= t('securities.safekeep_pledge.upload_instructions.step_2.enter_securities')
-    %p.securities-download-instructions-step= t('securities.release.edit.step_3.title')
-    %p.securities-download-instructions-description= t('securities.release.edit.step_3.description_html', mailto_url: @contact[:email_address], mailto_text: @contact[:mailto_text], phone_number: @contact[:phone_number])
+    %p.securities-download-instructions-step= t('securities.safekeep_pledge.upload_instructions.step_3.title')
+    %p.securities-download-instructions-description= t('securities.safekeep_pledge.upload_instructions.step_3.description_html', mailto_url: @contact[:email_address], mailto_text: @contact[:mailto_text], phone_number: @contact[:phone_number])
   .securities-download-actions
     - span = capture_haml do
       %span= t('securities.release.edit.drag_drop')

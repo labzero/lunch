@@ -529,7 +529,7 @@ Then(/^I should see the contact information for (Securities Services|Collateral 
     mailto_text = I18n.t('contact.collateral_departments.collateral_operations.title')
     phone_number = collateral_operations_phone_number
   end
-  text = strip_links(I18n.t('securities.release.edit.step_3.description_html', mailto_url: email_address, mailto_text: mailto_text, phone_number: phone_number))
+  text = strip_links(I18n.t('securities.release.edit.step_2.description_html', mailto_url: email_address, mailto_text: mailto_text, phone_number: phone_number))
   page.assert_selector('.securities-download-instructions-description:last-of-type', text: text, exact: true, visible: true)
 end
 
