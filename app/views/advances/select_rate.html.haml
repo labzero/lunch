@@ -15,7 +15,7 @@
           .add-advance-instructions
             %p= t('dashboard.quick_advance.advance_instruction')
       .advances-add.row
-        .column-9x3-left
+        = content_with_sidebar({name: 'borrowing_capacity', locals: {profile: @profile}}) do
           .advance-rates-table-wrapper{data: {active_term_type: @active_term_type}}
             .advance-rates-table-toggle
               %span{data: {active_term_type: :vrc}}= t('advances.vrc_rates')
@@ -65,4 +65,3 @@
             = f.submit({disabled: true, class: ["primary-button initiate-add-advance"], value: t('advances.actions.review')})
           %small
             %p.add-advances-footer= t('advances.add_advance.terms')
-        = render 'borrowing_capacity', profile: @profile

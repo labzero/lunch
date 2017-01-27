@@ -1,5 +1,4 @@
-- @page_title = t('global.page_meta_title', title: @title)
 .letters-of-credit.letters-of-credit-manage.row
   %h1= @title
-  %button.secondary-button= t('letters_of_credit.manage.request')
+  =link_to(t('letters_of_credit.manage.request'), letters_of_credit_request_path, {class: 'secondary-button'}) if policy(:letters_of_credit).request?
   = render 'reports/reports_table', table_data: @table_data, sortable: false

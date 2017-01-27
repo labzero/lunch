@@ -92,6 +92,22 @@ label {
   }
 }
 
+%horizontal-label-styling {
+  label, span {
+    color: $medium-gray;
+    line-height: 30px;
+    vertical-align: top;
+    margin-right: 20px;
+    &.label-optional {
+      margin-right: 0;
+      & + span {
+        font-style: italic;
+        margin-right: 20px;
+      }
+    }
+  }
+}
+
 .label-radio {
   @extend %typography-subtitle;
   padding-left: 7px;
@@ -114,6 +130,44 @@ label {
   margin-right: 10px;
   .input-field-container {
     width: auto;
+  }
+}
+
+$horizontal-field-input-width: 180px;
+.form-fields-section-column-2 {
+  .input-field-container-horizontal {
+    @extend %horizontal-label-styling;
+    display: block;
+    float: none;
+    margin: 0 0 6px;
+  }
+  &.form-fields-section-column-2-multirow .input-field-container-horizontal {
+    @extend %pseudoelement-clearfix;
+    width: 50%;
+    float: left;
+    text-align: right;
+    &:nth-of-type(odd) {
+      .input-field-container {
+        margin-right: 10px;
+      }
+    }
+    &:nth-of-type(even) {
+      .input-field-container {
+        margin-right: 0;
+      }
+    }
+    &:last-of-type, &:last-of-type(2) {
+      margin-bottom: 0;
+    }
+    .input-field-container {
+      text-align: left;
+    }
+  }
+  .input-field-container {
+    width: $horizontal-field-input-width;
+    .dropdown-selection {
+      max-width: $horizontal-field-input-width;
+    }
   }
 }
 

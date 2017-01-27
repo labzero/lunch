@@ -1486,11 +1486,24 @@ en:
     internal_user_error: This securities request was not completed because Bank employees are not authorized to complete securities requests via the member portal.
   letters_of_credit:
     title: Letters of Credit
+    contact: 'If you need assistance or wish to request a different type of letter of credit, call or email:'
     manage:
       title: Manage Letters of Credit
       request: Request letter of credit
       expiration_date: Expiration Date
       maintenance_fee: Annual Maintenance Fee (bps)
+    request:
+      title: Request Letter of Credit
+      support_html: "The portal only supports requests for Public Unit Deposit letters of credit. For other requests, contact your Relationship Manager: %{rm_email}, %{rm_phone_number}."
+      public_unit: Public Unit Deposit Request
+      beneficiary: Beneficiary
+      amount: Amount
+      fees:
+        title: Fees
+        explanation: 'Based on the request details input above, the following fees will be applied:'
+        issuance_fee: Issuance Fee
+        maintenance_fee: Annual Maintenance Fee
+      preview: Preview Request
   reports:
     meta_title: FHLBSF - Reports
     title: Reports

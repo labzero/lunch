@@ -301,13 +301,13 @@ Scenario: User switches between VRC and FRC rates on the rate table
   And I should not see any rates selected
 
 @jira-mem-1541
-Scenario: User sees borrowing capacity summary module in the right column for add advances (and not elsewhere)
+Scenario: User sees borrowing capacity sidebar for add advances (and not elsewhere)
   Given I am on the "Add Advance" advances page
-  Then I should see the borrowing capacity summary
+  Then I should see the borrowing capacity sidebar
   Given I am on the add advance preview screen
-  Then I should not see the borrowing capacity summary
+  Then I should not see the borrowing capacity sidebar
   Given I am on the add advance stock purchase screen
-  Then I should not see the borrowing capacity summary
+  Then I should not see the borrowing capacity sidebar
 
 @jira-mem-1577
 Scenario: User navigates to the select rate page from the Manage Advances page

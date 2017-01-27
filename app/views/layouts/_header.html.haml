@@ -36,6 +36,8 @@
               .nav-dropdown-column
                 %h2= t('letters_of_credit.title')
                 %ul
+                  - if policy(:letters_of_credit).request?
+                    %li= link_to(t('letters_of_credit.request.title'), letters_of_credit_request_path)
                   %li= link_to(t('letters_of_credit.manage.title'), letters_of_credit_manage_path)
       - if feature_enabled?('securities')
         %li{class: ('active-nav-item' if active_nav == :securities)}<>

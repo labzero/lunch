@@ -1,0 +1,5 @@
+.sidebar.sidebar-contact
+  %p= text
+  = mail_to(relationship_manager[:email], relationship_manager[:full_name])
+  %p= t('dashboard.contacts.type.relationship_manager')
+  %p= fhlb_formatted_phone_number(relationship_manager[:phone_number])

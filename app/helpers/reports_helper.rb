@@ -43,6 +43,11 @@ module ReportsHelper
     profile
   end
 
+  def sanitized_profile(request_obj: request, member_id: current_member_id, member_balance_service: nil)
+    member_balance_service ||= MemberBalanceService.new(member_id, request_obj)
+    sanitize_profile_if_endpoints_disabled(member_balance_service.profile)
+  end
+
   def sort_report_data(data, sort_field, sort_order='asc')
     return data unless data
     data = data.sort{|a,b| a[sort_field] <=> b[sort_field]}

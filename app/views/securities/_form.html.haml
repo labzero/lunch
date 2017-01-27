@@ -9,7 +9,7 @@
   - if @error_message
     .securities-submit-request-form-errors
       %p= @error_message
-  %section.securities-broker-instructions
+  %section.securities-broker-instructions.form-fields-section-column-2.form-fields-section-column-2-multirow
     %h2= t('securities.release.broker_instructions')
     - if account_number
       .input-field-container-horizontal
@@ -30,7 +30,7 @@
     .input-field-container-horizontal
       %span= t('common_table_headings.settlement_date')
       = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_request[settlement_date]', start_date: @securities_request.settlement_date, max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates], disable_weekends: true
-  %section.securities-delivery-instructions
+  %section.securities-delivery-instructions.form-fields-section-column-2
     %h2= t('securities.release.delivery_instructions.label')
     = render 'shared/dropdown', dropdown_name: 'securities_request[delivery_type]', default_value: @delivery_instructions_defaults[:value], default_text: @delivery_instructions_defaults[:text], dropdown_options: @delivery_instructions_dropdown
     .securities-delivery-instructions-fields{data: {'selected-delivery-instruction' => @delivery_instructions_defaults[:value]}}

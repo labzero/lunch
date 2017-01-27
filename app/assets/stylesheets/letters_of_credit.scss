@@ -1,9 +1,13 @@
 .letters-of-credit {
   @extend %page-header;
+  h2 {
+    @extend %typography-section-title;
+    margin-bottom: 20px;
+  }
 }
 
 .letters-of-credit-manage {
-  button {
+  .secondary-button {
     @extend %typography-table-button;
     float: right;
     margin-bottom: 10px;
@@ -13,5 +17,48 @@
       text-transform: uppercase;
       color: $medium-gray;
     }
+  }
+}
+
+.letters-of-credit-request {
+  section:not(.report-summary-data) {
+    @extend %bordered-section;
+    @extend %pseudoelement-clearfix;
+    .amount-field {
+      height: 34px;
+    }
+  }
+}
+
+.letters-of-credit-fees-section {
+  .input-field-container-horizontal {
+    @extend %horizontal-label-styling;
+    text-align: right;
+    float: none;
+    margin-right: 0;
+    &:first-of-type {
+      margin-bottom: 10px;
+    }
+    .input-field-container {
+      width: 180px;
+      margin-right: 0;
+    }
+  }
+  .icon-dollar-before {
+    input {
+      padding-left: 15px;
+    }
+    &:before {
+      color: $medium-gray;
+    }
+  }
+}
+
+.letters-of-credit-request-actions {
+  .primary-button, .secondary-button {
+    width: 215px;
+  }
+  .primary-button {
+    float: right;
   }
 }

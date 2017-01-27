@@ -193,8 +193,10 @@ Rails.application.routes.draw do
   end
 
   constraints Constraints::FeatureEnabled.new('letters-of-credit') do
-    scope 'letters-of-credit' do
-      get 'manage' => 'letters_of_credit#manage', as: :letters_of_credit_manage
+    scope 'letters-of-credit', as: :letters_of_credit do
+      get 'manage' => 'letters_of_credit#manage'
+      get 'request' => 'letters_of_credit#new'
+      post 'preview' => 'error#not_found'
     end
   end
 

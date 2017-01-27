@@ -36,7 +36,7 @@ RSpec.describe DashboardController, :type => :controller do
   describe "GET index", :vcr do
     let(:member_id) {750}
     let(:empty_financing_availability_gauge) {{total: {amount: 0, display_percentage: 100, percentage: 0}}}
-    let(:profile) { double('profile') }
+    let(:profile) { {} }
     let(:service) { double('a service object', profile: profile) }
     let(:make_request) { get :index }
     let(:etransact_status) { double('some status') }
@@ -59,6 +59,7 @@ RSpec.describe DashboardController, :type => :controller do
       allow_any_instance_of(MembersService).to receive(:member_contacts)
       allow(MessageService).to receive(:new).and_return(double('service instance', todays_quick_advance_message: nil))
       allow(QuickReportSet).to receive_message_chain(:for_member, :latest_with_reports).and_return(nil)
+      allow(controller).to receive(:sanitized_profile).and_return(profile)
     end
 
     it_behaves_like 'a user required action', :get, :index
@@ -73,7 +74,7 @@ RSpec.describe DashboardController, :type => :controller do
     end
     it 'checks the profile for disabled endpoints' do
       allow(MemberBalanceService).to receive(:new).and_return(service)
-      expect(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(profile).and_return({})
+      expect(subject).to receive(:sanitized_profile).with(member_balance_service: service).and_return({})
       get :index
     end
     describe 'market overview' do
@@ -132,19 +133,52 @@ RSpec.describe DashboardController, :type => :controller do
       get :index
       expect(assigns[:etransact_status]).to eq(etransact_status)
     end
-    it 'should assign @financing_availability_gauge' do
-      get :index
-      expect(assigns[:financing_availability_gauge]).to be_kind_of(Hash)
-      expect(assigns[:financing_availability_gauge][:used]).to be_kind_of(Hash)
-      expect(assigns[:financing_availability_gauge][:used][:amount]).to be_kind_of(Numeric)
-      expect(assigns[:financing_availability_gauge][:used][:percentage]).to be_kind_of(Numeric)
-      expect(assigns[:financing_availability_gauge][:used][:display_percentage]).to be_kind_of(Numeric)
-      expect(assigns[:financing_availability_gauge][:unused][:amount]).to be_kind_of(Numeric)
-      expect(assigns[:financing_availability_gauge][:unused][:percentage]).to be_kind_of(Numeric)
-      expect(assigns[:financing_availability_gauge][:unused][:display_percentage]).to be_kind_of(Numeric)
-      expect(assigns[:financing_availability_gauge][:uncollateralized][:amount]).to be_kind_of(Numeric)
-      expect(assigns[:financing_availability_gauge][:uncollateralized][:percentage]).to be_kind_of(Numeric)
-      expect(assigns[:financing_availability_gauge][:uncollateralized][:display_percentage]).to be_kind_of(Numeric)
+    describe '`@financing_availability_gauge`' do
+      let(:calculated_gauge_percentages) { double('guage percentages') }
+
+      it 'sets `@financing_availability_gauge` to the result of `calculate_gauge_percentages`' do
+        allow(controller).to receive(:calculate_gauge_percentages).and_return(calculated_gauge_percentages)
+        get :index
+        expect(assigns[:financing_availability_gauge]).to eq(calculated_gauge_percentages)
+      end
+      describe 'when the `profile` does not include `total_financing_available`' do
+        it 'calls `calculate_gauge_percentages` with `{total: 0}`' do
+          expect(controller).to receive(:calculate_gauge_percentages).with({total: 0})
+          get :index
+        end
+      end
+      describe 'when the `profile` does includes `total_financing_available`' do
+        let(:profile) {{
+          total_financing_available: SecureRandom.hex,
+          used_financing_availability: SecureRandom.hex,
+          collateral_borrowing_capacity: {remaining: SecureRandom.hex},
+          uncollateralized_financing_availability: SecureRandom.hex
+        }}
+
+        before do
+          allow(controller).to receive(:sanitized_profile).and_return(profile)
+        end
+        it 'calls `calculate_gauge_percentages` with a hash containing the `total_financing_available`' do
+          expect(controller).to receive(:calculate_gauge_percentages).with(hash_including(total: profile[:total_financing_available]), anything)
+          get :index
+        end
+        it 'calls `calculate_gauge_percentages` with a hash containing the `used_financing_availability`' do
+          expect(controller).to receive(:calculate_gauge_percentages).with(hash_including(used: profile[:used_financing_availability]), anything)
+          get :index
+        end
+        it 'calls `calculate_gauge_percentages` with a hash containing the `remaining collateral_borrowing_capacity`' do
+          expect(controller).to receive(:calculate_gauge_percentages).with(hash_including(unused: profile[:collateral_borrowing_capacity][:remaining]), anything)
+          get :index
+        end
+        it 'calls `calculate_gauge_percentages` with a hash containing the `uncollateralized_financing_availability`' do
+          expect(controller).to receive(:calculate_gauge_percentages).with(hash_including(uncollateralized: profile[:uncollateralized_financing_availability]), anything)
+          get :index
+        end
+        it 'calls `calculate_gauge_percentages` with `:total` as the second arg' do
+          expect(controller).to receive(:calculate_gauge_percentages).with(anything, :total)
+          get :index
+        end
+      end
     end
     describe 'the @contacts instance variable' do
       let(:contacts) { double('some contact') }
@@ -152,21 +186,18 @@ RSpec.describe DashboardController, :type => :controller do
       let(:rm_username) { 'rm' }
       let(:uppercase_username) { 'ALLCAPSNAME' }
       before do
-        allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(contacts)
+        allow(controller).to receive(:member_contacts).and_return(contacts)
         allow(contacts).to receive(:[]).with(:cam).and_return({username: cam_username})
         allow(contacts).to receive(:[]).with(:rm).and_return({username: rm_username})
         allow(subject).to receive(:find_asset)
       end
-      it 'is the result of the `members_service.member_contacts` method' do
+      it 'calls `member_contacts`' do
+        expect(controller).to receive(:member_contacts).and_return(contacts)
+        get :index
+      end
+      it 'sets `@contacts` to the result of `member_contacts`' do
         get :index
         expect(assigns[:contacts]).to eq(contacts)
-      end
-      it 'caches the call to the service' do
-        cached_contacts = instance_double(Hash, :[] => nil)
-        allow(Rails.cache).to receive(:fetch).and_call_original
-        allow(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:member_contacts, member_id), expires_in: CacheConfiguration.expiry(:member_contacts)).and_return(cached_contacts)
-        get :index
-        expect(assigns[:contacts]).to be(cached_contacts)
       end
       it 'contains an `image_url` for the cam' do
         allow(subject).to receive(:find_asset).with("#{cam_username}.jpg").and_return(true)
@@ -195,11 +226,6 @@ RSpec.describe DashboardController, :type => :controller do
         get :index
         expect(assigns[:contacts][:rm][:image_url]).to eq('placeholder-usericon.svg')
         expect(assigns[:contacts][:cam][:image_url]).to eq('placeholder-usericon.svg')
-      end
-      it 'returns {} if nil is returned from the service object' do
-        allow_any_instance_of(MembersService).to receive(:member_contacts).and_return(nil)
-        get :index
-        expect(assigns[:contacts]).to eq({})
       end
     end
     describe "MemberBalanceService failures" do

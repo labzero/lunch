@@ -651,46 +651,6 @@
   }
 }
 
-.add-advance-borrowing-capacity {
-  padding: 20px 18px;
-  @extend %bordered-section;
-  .add-advance-borrowing-capacity-label {
-    @extend %typography-module-tiny-data-label;
-    margin: 0;
-    color: $medium-gray;
-  }
-  .remaining {
-    margin-top: 15px;
-  }
-  .report-summary-data {
-    margin-bottom: 0;
-    p {
-      @extend %typography-module-summary-data;
-      margin-bottom: 10px;
-    }
-  }
-  table {
-    width: 100%;
-    tr {
-      td, td:first-child {
-        background: $white;
-        text-align: left;
-        border: 0;
-        padding: 0;
-        height: 10px;
-        line-height: 20px;
-        width: 50%;
-      }
-      td:first-child {
-        color: $medium-gray;
-      }
-    }
-    .value {
-      text-align: right;
-    }
-  }
-}
-
 .advances-filter {
   @extend %table-filter;
   margin-bottom: 10px;

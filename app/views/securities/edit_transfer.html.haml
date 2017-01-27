@@ -15,7 +15,7 @@
         - if @error_message
           .securities-submit-request-form-errors
             %p= @error_message
-        %section.securities-broker-instructions
+        %section.securities-broker-instructions.form-fields-section-column-2
           %h2= t('securities.release.broker_instructions')
           - if kind == :pledge_transfer
             .input-field-container-horizontal
