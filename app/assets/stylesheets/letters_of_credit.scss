@@ -4,6 +4,14 @@
     @extend %typography-section-title;
     margin-bottom: 20px;
   }
+  .input-field-container {
+    input:not([type=submit]) {
+      background-color: $white;
+      &:disabled {
+        background-color: $white;
+      }
+    }
+  }
 }
 
 .letters-of-credit-manage {
@@ -24,8 +32,11 @@
   section:not(.report-summary-data) {
     @extend %bordered-section;
     @extend %pseudoelement-clearfix;
+    h2 {
+      margin-top: 0;
+    }
     .amount-field {
-      height: 34px;
+      height: 35px;
     }
   }
 }
@@ -44,7 +55,7 @@
       margin-right: 0;
     }
   }
-  .icon-dollar-before {
+  .input-field-container.icon-dollar-before {
     input {
       padding-left: 15px;
     }

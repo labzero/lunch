@@ -19,7 +19,7 @@
       %tr
         %td.label=t('advances.add_advance.borrowing_capacity.sbc_aa')
         %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:sbc][:aa][:remaining])
-  %h3=t('advances.add_advance.borrowing_capacity.remaining')
+  %h3.sidebar-borrowing-capacity-remaining=t('advances.add_advance.borrowing_capacity.remaining')
   %table
     %tbody
       %tr

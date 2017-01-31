@@ -9,7 +9,7 @@
     margin: 0;
     color: $medium-gray;
   }
-  .remaining {
+  .sidebar-borrowing-capacity-remaining {
     margin-top: 15px;
   }
   .report-summary-data {
@@ -21,6 +21,9 @@
   }
   table {
     width: 100%;
+    td {
+      @extend %typography-table-cell;
+    }
     tr {
       td, td:first-child {
         background: $white;
