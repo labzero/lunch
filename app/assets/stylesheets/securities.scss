@@ -274,10 +274,6 @@
   display: none;
   margin-top: 20px;
   padding: 20px;
-  & > p:first-child {
-    @extend %typography-default-text;
-    margin: 0 0 5px;
-  }
   [data-form-submit-trigger] {
     color: $actionable-blue;
     cursor: pointer;

@@ -1372,7 +1372,6 @@ en:
       authorize: Authorize
       edit:
         title: Edit Securities
-        intro: "To edit the listed securities:"
         step_1:
           title: "Step 1."
           description_html: "Make edits to the listed securities in %{link}"
