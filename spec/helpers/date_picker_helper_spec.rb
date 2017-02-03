@@ -280,4 +280,69 @@ describe DatePickerHelper do
     end
   end
 
+  describe '`weekends_and_holidays`' do
+    let(:start_date) { Time.zone.today + rand(0..7).days }
+    let(:end_date) { start_date + rand(100..300).days }
+    let(:request) { double('request') }
+    let(:holidays) do
+      holidays = []
+      rand(2..4).times do
+        holidays << (start_date + rand(1..70).days)
+      end
+      holidays
+    end
+    let(:weekends) do
+      weekends = []
+      date_iterator = start_date.clone
+      while date_iterator <= end_date do
+        weekends << date_iterator.iso8601 if (date_iterator.sunday? || date_iterator.saturday?)
+        date_iterator += 1.day
+      end
+      weekends
+    end
+    let(:calendar_service) { instance_double(CalendarService, holidays: holidays) }
+    let(:call_method) { helper.weekends_and_holidays(start_date: start_date, end_date: end_date) }
+
+    before { allow(CalendarService).to receive(:new).and_return(calendar_service) }
+
+    describe 'when there is a `calendar_service` arg passed in' do
+      let(:call_method) { helper.weekends_and_holidays(start_date: start_date, end_date: end_date, calendar_service: calendar_service) }
+      it 'does not create a new instance of the CalendarService' do
+        expect(CalendarService).not_to receive(:new)
+        call_method
+      end
+    end
+    describe 'when the `calendar_service` arg is nil' do
+      describe 'when the `request` arg is nil' do
+        it 'creates an instance of ActionDispatch::TestRequest' do
+          expect(ActionDispatch::TestRequest).to receive(:new)
+          call_method
+        end
+        it 'creates an instance of CalendarService with the test request' do
+          allow(ActionDispatch::TestRequest).to receive(:new).and_return(request)
+          expect(CalendarService).to receive(:new).with(request)
+          call_method
+        end
+      end
+      describe 'when there is a `request` arg passed in' do
+        let(:call_method) { helper.weekends_and_holidays(start_date: start_date, end_date: end_date, request: request) }
+        it 'does not create an instance of ActionDispatch::TestRequest' do
+          expect(ActionDispatch::TestRequest).not_to receive(:new)
+          call_method
+        end
+        it 'creates an instance of the CalendarService with the passed request' do
+          expect(CalendarService).to receive(:new).with(request)
+          call_method
+        end
+      end
+    end
+    it 'calls `holidays` on the service instance with the start_date and end_date as args' do
+      expect(calendar_service).to receive(:holidays).with(start_date, end_date).and_return(holidays)
+      call_method
+    end
+    it 'returns the weekends and holidays as iso8601 strings' do
+      expect(call_method).to eq(weekends + holidays.map{|holiday| holiday.iso8601})
+    end
+  end
+
 end

@@ -196,7 +196,7 @@ Rails.application.routes.draw do
     scope 'letters-of-credit', as: :letters_of_credit do
       get 'manage' => 'letters_of_credit#manage'
       get 'request' => 'letters_of_credit#new'
-      post 'preview' => 'error#not_found'
+      post 'preview' => 'letters_of_credit#preview'
     end
   end
 

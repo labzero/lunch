@@ -60,7 +60,7 @@
                     .add-advance-cell-wrapper= t('dashboard.quick_advance.table.aa')
               %tbody
                 = render 'rates_table', advance_terms: @advance_terms, advance_types: @advance_types, loading: true, selected_type: @selected_type, selected_term: @selected_term
-          .advances-actions
+          .request-form-actions
             = link_to(t('global.cancel'), advances_manage_path, class: 'secondary-button cancel-advance')
             = f.submit({disabled: true, class: ["primary-button initiate-add-advance"], value: t('advances.actions.review')})
           %small

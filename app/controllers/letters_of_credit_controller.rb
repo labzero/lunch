@@ -3,6 +3,7 @@ class LettersOfCreditController < ApplicationController
   include CustomFormattingHelper
   include ContactInformationHelper
   include SidebarHelper
+  include DatePickerHelper
 
   LC_INSTRUMENT_TYPE = 'LC'.freeze
 
@@ -11,7 +12,7 @@ class LettersOfCreditController < ApplicationController
     @html_class ||= 'white-background'
   end
 
-  before_action only: [:new] do
+  before_action only: [:new, :preview] do
     authorize :letters_of_credit, :request?
   end
 
@@ -20,6 +21,7 @@ class LettersOfCreditController < ApplicationController
     @contacts = member_contacts
   end
 
+  # GET
   def manage
     set_titles(t('letters_of_credit.manage.title'))
     member_balances = MemberBalanceService.new(current_member_id, request)
@@ -52,10 +54,22 @@ class LettersOfCreditController < ApplicationController
     }
   end
 
+  # GET
   def new
+    populate_new_request_view_variables
+  end
+
+  # POST
+  def preview
     set_titles(t('letters_of_credit.request.title'))
-    @letter_of_credit = LetterOfCredit.new
-    @beneficiary_dropdown_options = BeneficiariesService.new.all.collect{|beneficiary| [beneficiary[:name], beneficiary[:name]] }
+    loc_params = params[:letter_of_credit]
+    @letter_of_credit = LetterOfCredit.from_hash(loc_params)
+    @session_elevated = session_elevated?
+    unless @letter_of_credit.valid?
+      @error_message = @letter_of_credit.errors.first.last
+      populate_new_request_view_variables
+      render :new
+    end
   end
 
   private
@@ -75,6 +89,25 @@ class LettersOfCreditController < ApplicationController
       end
     end
     deduped_locs.values
+  end
+
+  def date_restrictions
+    today = Time.zone.today
+    calendar_service = CalendarService.new(request)
+    expiration_max_date = today + LetterOfCredit::EXPIRATION_MAX_DATE_RESTRICTION
+    {
+      min_date: calendar_service.find_next_business_day(today, 1.day),
+      invalid_dates: weekends_and_holidays(start_date: today, end_date: expiration_max_date, calendar_service: calendar_service),
+      expiration_max_date: expiration_max_date,
+      issue_max_date: today + LetterOfCredit::ISSUE_MAX_DATE_RESTRICTION
+    }
+  end
+
+  def populate_new_request_view_variables
+    set_titles(t('letters_of_credit.request.title'))
+    @letter_of_credit ||= LetterOfCredit.new(request)
+    @beneficiary_dropdown_options = BeneficiariesService.new(request).all.collect{|beneficiary| [beneficiary[:name], beneficiary[:name]] }
+    @date_restrictions = date_restrictions
   end
 
 end

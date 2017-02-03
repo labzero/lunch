@@ -218,7 +218,7 @@ $faded-opacity: 0.4 !default;
   .dashboard-module-content {
     color: $actionable-blue;
   }
-  table, .initiate-quick-advance, .rate-advances-footer, .quick-advance-rates {
+  table, .rate-advances-footer {
     display: none;
   }
   .etransact-status-message {
@@ -243,20 +243,7 @@ $faded-opacity: 0.4 !default;
   }
 }
 
-.quick-advance-desk-closed-message-group {
-  p {
-    margin-bottom: 0;
-    a {
-      display: block;
-      text-transform: uppercase;
-    }
-    span {
-      white-space: nowrap;
-    }
-  }
-}
-
-.quick-advance-limited-pricing-notice, .dashboard-module-limited-pricing-notice {
+.dashboard-module-limited-pricing-notice {
   @extend %typography-dashboard-gauge-label;
   @extend %link-style;
   margin-top: 10px;
@@ -264,12 +251,8 @@ $faded-opacity: 0.4 !default;
   display: inline-block;
 }
 
-.quick-advance-limited-pricing-notice, .dashboard-vrc-overnight-message[data-flyout-trigger], .dashboard-advances-rate[data-flyout-trigger] {
+.dashboard-vrc-overnight-message[data-flyout-trigger], .dashboard-advances-rate[data-flyout-trigger] {
   cursor: pointer;
-}
-
-.quick-advance-last-updated-message {
-  display: none;
 }
 
 .dashboard-vrc-overnight-message[data-flyout-trigger], .dashboard-advances-rate[data-flyout-trigger] {
@@ -657,51 +640,6 @@ $breakdown-table-currency-width: 10px;
   background: $white;
   text-align: center;
   padding: 13px 0;
-}
-
-.quick-advance-rates-body {
-  .quick-advance-icon-section {
-    @extend %clearfix;
-    overflow: visible;
-    position: relative;
-    &:before {
-      position: absolute;
-      top: 1rem;
-      left: 0;
-      font-size: 30px;
-      color: $alert-red;
-      .quick-advance-confirmation & {
-        color: $approval-green;
-      }
-    }
-  }
-  .quick-advance-loading-message {
-    display: none;
-  }
-  .loading & {
-    p {
-      display: none;
-    }
-    .quick-advance-icon-section {
-      &:before {
-        @include icon-loading;
-        content: '';
-      }
-    }
-    .quick-advance-loading-message {
-      padding-left: 60px;
-      display: block;
-    }
-    .quick-advance-summary {
-      opacity: $faded-opacity;
-    }
-    .label-radio {
-      opacity: $faded-opacity;
-    }
-    table {
-      opacity: $faded-opacity;
-    }
-  }
 }
 
 .dashboard-module-loading {

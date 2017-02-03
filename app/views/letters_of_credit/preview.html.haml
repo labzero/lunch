@@ -1,0 +1,47 @@
+- relationship_manager = @contacts[:rm] || {}
+- walkthrough_mode = !policy(:letters_of_credit).execute?
+.letters-of-credit.letters-of-credit-preview
+  .row
+    .column-9x3-left
+      %h1= @title
+  .row
+    = content_with_sidebar([{name: 'borrowing_capacity', locals: {profile: @profile}}, {name: 'contact', locals: {relationship_manager: relationship_manager, text: t('letters_of_credit.contact')}}]) do
+      = form_for(@letter_of_credit, url: letters_of_credit_preview_path, html: {class: 'letter-of-credit-request-form', data: {'prevent-submit-on-enter' => true}}) do |f|
+        = f.hidden_field(:beneficiary_name)
+        = f.hidden_field(:beneficiary_address)
+        = f.hidden_field(:amount)
+        = f.hidden_field(:issue_date)
+        = f.hidden_field(:expiration_date)
+        = f.hidden_field(:issuance_fee)
+        = f.hidden_field(:maintenance_fee)
+        .form-summary-data
+          %dl
+            %dt= t('global.defined_term', term: t('letters_of_credit.request.beneficiary'))
+            %dd= @letter_of_credit.beneficiary_name
+          %dl
+            %dt= t('global.defined_term', term: t('letters_of_credit.preview.beneficiary_address'))
+            %dd= simple_format(@letter_of_credit.beneficiary_address)
+          %dl
+            %dt= t('global.defined_term', term: t('letters_of_credit.request.amount'))
+            %dd= fhlb_formatted_currency_whole(@letter_of_credit.amount)
+          %dl
+            %dt= t('global.defined_term', term: t('letters_of_credit.preview.issue_date'))
+            %dd= fhlb_date_standard_numeric(@letter_of_credit.issue_date)
+            %dt= t('global.defined_term', term: t('letters_of_credit.manage.expiration_date'))
+            %dd= fhlb_date_standard_numeric(@letter_of_credit.expiration_date)
+          %dl
+            %dt= t('global.defined_term', term: t('letters_of_credit.request.fees.issuance_fee'))
+            %dd= fhlb_formatted_currency_whole(@letter_of_credit.issuance_fee)
+            %dt= t('global.defined_term', term: t('letters_of_credit.request.fees.maintenance_fee'))
+            %dd= @letter_of_credit.maintenance_fee
+        .letters-of-credit-legal-copy=simple_format(t'letters_of_credit.preview.legal')
+        - if @session_elevated
+          %p= t('letters_of_credit.preview.review_details_elevated')
+        - else
+          %p= t('letters_of_credit.preview.review_details')
+        - unless @session_elevated || walkthrough_mode
+          = render 'shared/securid_module', autofocus: true
+        .request-form-actions
+          = link_to(t('global.cancel'), letters_of_credit_manage_path, class: 'secondary-button')
+          = link_to(t('letters_of_credit.preview.edit'), '#', class: 'secondary-button')
+          = f.submit({class: ["primary-button perform-advance-form #{'active' if @session_elevated}"], value: t('letters_of_credit.preview.authorize'), disabled: (!@session_elevated && !walkthrough_mode)})

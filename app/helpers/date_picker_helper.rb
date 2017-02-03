@@ -163,4 +163,16 @@ module DatePickerHelper
       start_date.end_of_month
     end
   end
+
+  def weekends_and_holidays(start_date:, end_date:, calendar_service: nil, request: ActionDispatch::TestRequest.new)
+    calendar_service ||= CalendarService.new(request)
+    holidays =  calendar_service.holidays(start_date, end_date).map{|date| date.iso8601}
+    weekends = []
+    date_iterator = start_date.clone
+    while date_iterator <= end_date do
+      weekends << date_iterator.iso8601 if (date_iterator.sunday? || date_iterator.saturday?)
+      date_iterator += 1.day
+    end
+    weekends + holidays
+  end
 end

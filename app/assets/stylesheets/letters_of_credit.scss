@@ -60,6 +60,7 @@
       padding-left: 15px;
     }
     &:before {
+      z-index: 0;
       color: $medium-gray;
     }
   }

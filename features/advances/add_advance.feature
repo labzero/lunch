@@ -181,11 +181,11 @@ Scenario: Users are informed if they enter an invalid pin or token
   When I enter "12ab" for my SecurID pin
   And I enter my SecurID token
   And I click on the add advance confirm button
-  Then I should see SecurID errors on the preview page
+  Then I should see SecurID errors on the Add Advance preview page
   When I enter my SecurID pin
   And I enter "12ab34" for my SecurID token
   And I click on the add advance confirm button
-  Then I should see SecurID errors on the preview page
+  Then I should see SecurID errors on the Add Advance preview page
 
 Scenario: Users aren't required to enter a SecurID token a second time
   Given I am on the add advance preview screen

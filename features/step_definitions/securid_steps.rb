@@ -24,3 +24,12 @@ Then(/^I should see SecurID errors$/) do
   page.assert_selector('.securid-form .form-error', visible: true)
   page.assert_selector('.securid-form input.input-field-error', visible: true)
 end
+
+Then(/^I (should|should not) see the SecureID fields$/) do |permission|
+  selector = '.securid-form'
+  if permission == 'should'
+    page.assert_selector(selector, visible: true)
+  else
+    page.assert_no_selector(selector)
+  end
+end

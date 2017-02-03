@@ -1,4 +1,4 @@
-class BeneficiariesService
+class BeneficiariesService < MAPIService
   BENEFICIARIES = (ENV['LC_BENEFICIARIES'].present? ? JSON.parse(ENV['LC_BENEFICIARIES']) : []).freeze
 
   def all

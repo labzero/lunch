@@ -256,6 +256,21 @@ en:
           attributes:
             cusip:
               invalid: "The following CUSIP is invalid: %{value}.\nEdit your file and try again."
+        letter_of_credit:
+          blank: 'Missing required field: %{attribute}'
+          attributes:
+            issue_date:
+              invalid: Issue date may not occur on a weekend, a holiday or more than 1 week from today.
+            expiration_date:
+              invalid: Expiration date may not occur on a weekend, a holiday or more than 15 years from the issue date.
+              before_issue_date: Expiration date must be after issue date.
+            amount:
+              invalid: Amount must be a positive number with no fractional cents.
+              not_a_number: Amount must be a positive number with no fractional cents.
+              not_an_integer: Amount must be a positive number with no fractional cents.
+              greater_than: Amount must be a positive number with no fractional cents.
+            beneficiary_name:
+              invalid: Please choose a valid beneficiary.
     attributes:
       securities_request:
         aba_number: ABA No.
@@ -1506,7 +1521,16 @@ en:
         explanation: 'Based on the request details input above, the following fees will be applied:'
         issuance_fee: Issuance Fee
         maintenance_fee: Annual Maintenance Fee
-      preview: Preview Request
+    preview:
+      action: Preview Request
+      review_details: If you agree with the above, including the requested Letter of Credit terms, enter your SecurID credentials below and press “Authorize Request.” If not, press “Edit Request” or “Cancel.”
+      review_details_elevated: If you agree with the above, including the requested Letter of Credit terms, press “Authorize Request.” If not, press “Edit Request” or “Cancel.”
+      legal: "The issuance of the requested Letter of Credit is subject to your institution’s continuing compliance with the Bank’s Advances and Security Agreement and other applicable agreements, as well as with the Bank’s Credit Program and specific eligibility or documentation requirements and policies applicable to specific Bank products. Also, statutory or regulatory conditions (including regulatory limits on Bank credit to capital-deficient savings institutions) may apply.\n\nThe requested Letter of Credit will be issued pursuant to the Letter of Credit Reimbursement Agreement between the Bank and the Member, which will govern the rights and obligations of the Bank and the Member with respect to each other in regard to the Letter of Credit. Your institution covenants with and represents and warrants to the Bank that the above terms are valid and are those by which your institution agrees to be bound.\n\nWhen issued, the Letter of Credit is irrevocable and, except with the written consent of the Bank, nontransferable except as specifically set forth in the Letter of Credit. Your institution is required, and agrees, to reimburse the Bank for any attorneys’ fees, accountants’ fees, or other outofpocket costs associated with the Bank’s issuance, amendment, or maintenance of the requested Letter of Credit."
+      edit: Edit Request
+      authorize: Authorize Request
+      lc_number: LC Number
+      beneficiary_address: Beneficiary Address
+      issue_date: Issue Date
   reports:
     meta_title: FHLBSF - Reports
     title: Reports

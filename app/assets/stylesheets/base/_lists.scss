@@ -1,0 +1,30 @@
+%list-summary-data {
+  @extend %bordered-section;
+  dl {
+    margin: 0.5rem 0 1rem;
+  }
+  .large_dl {
+    width: 400px;
+    dt {
+      width: auto;
+      margin-right: 10px;
+    }
+  }
+  dt {
+    @extend %typography-graph-data;
+    color: $medium-gray;
+    float: left;
+    text-align: left;
+    width: 220px;
+    overflow: hidden;
+    clear: left;
+  }
+  dd {
+    @extend %typography-graph-data;
+    @extend %clearfix;
+    text-align: left;
+    p {
+      margin: 0;
+    }
+  }
+}
