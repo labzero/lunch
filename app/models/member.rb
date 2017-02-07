@@ -1,5 +1,7 @@
 class Member
 
+  FLIPPER_PREFIX = 'FHLB-'.freeze
+
   DEFAULT_REPORT_LIST = {
     account_summary: {},
     advances_detail: {
@@ -24,7 +26,7 @@ class Member
   end
 
   def flipper_id
-    "FHLB-#{id}" if id
+    "#{FLIPPER_PREFIX}#{id}" if id
   end
 
   def latest_report_set
@@ -46,6 +48,11 @@ class Member
   def requires_dual_signers?(request=nil)
     fetch_details(request) unless @member_details.present?
     @member_details[:dual_signers_required]
+  end
+
+  def name(request=nil)
+    fetch_details(request) unless @member_details.present?
+    @member_details[:name]
   end
 
   protected

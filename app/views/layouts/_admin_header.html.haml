@@ -1,3 +1,4 @@
+- active_nav = get_active_nav
 .main-nav
   .row
     = link_to(t('welcome.logo'), dashboard_admin_path, class: 'logo')
@@ -22,7 +23,7 @@
       %li<>
         = link_to(t('admin.nav.secondary.data_visibility'), '#', class: 'nav-menu')
         .nav-dropdown
-      %li<>
+      %li{class: ('active-nav-item' if active_nav == :features)}<>
         = link_to(t('admin.nav.secondary.features'), '#', class: 'nav-menu')
         .nav-dropdown
           .nav-dropdown-row

@@ -3154,6 +3154,9 @@ en:
           feature_name: Features
         actions:
           edit: View/Edit
+      edit:
+        members: Institutions where all users are enabled for this feature
+        users: Individual users who are enabled for this feature
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

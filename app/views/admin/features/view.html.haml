@@ -1,0 +1,17 @@
+%section.row.admin-feature-edit
+  %h1
+    %span{class: "admin-#{@feature_status}-icon"}<> &nbsp;
+    %span=@feature_name
+%section.row.row-elements-equal-height.admin-feature-edit
+  %section.column-2.column-bordered
+    %h2= t('admin.features.edit.members')
+    %table
+      - @enabled_members.each do |member|
+        %tr
+          %td= member
+  %section.column-2.column-bordered
+    %h2= t('admin.features.edit.users')
+    %table
+      - @enabled_users.each do |user|
+        %tr
+          %td= user

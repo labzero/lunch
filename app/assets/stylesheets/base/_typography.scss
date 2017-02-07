@@ -14,6 +14,12 @@
   line-height: $tight-line-height;
 }
 
+@mixin typography-admin-subtitle {
+  font-size: 1rem;
+  font-weight: $bold-weight;
+  line-height: $tight-line-height;
+}
+
 @mixin typography-paragraph {
   font-size: 1rem;
   font-weight: $normal-weight;
@@ -332,6 +338,10 @@
 
 %typography-subtitle {
   @include typography-subtitle;
+}
+
+%typography-admin-subtitle {
+  @include typography-admin-subtitle;
 }
 
 %typography-field-placeholder {

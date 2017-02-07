@@ -29,6 +29,11 @@
   width: $column-1-width;
 }
 
+.column-2 {
+  @extend %column;
+  width: $column-2-width;
+}
+
 .column-3 {
   @extend %column;
   width: $column-3-width;
