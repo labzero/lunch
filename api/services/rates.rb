@@ -736,8 +736,8 @@ module MAPI
               live[:maturity_date]     = MAPI::Services::Rates.get_maturity_date(live[:maturity_date], TERM_MAPPING[term][:frequency_unit], holidays)
               live[:disabled]          = MAPI::Services::Rates.disabled?(live, loan_terms[term][type], blackout_dates)
               live[:end_of_day]        = !loan_terms[term][type][:trade_status]
-              if live[:rate_band_info][:min_threshold_exceeded] || live[:rate_band_info][:max_threshold_exceeded]
-                logger.error("Rate band threshold exceeded: type=#{type}, term=#{term}, details=#{live.to_json}")
+              if !live[:end_of_day] && (live[:rate_band_info][:min_threshold_exceeded] || live[:rate_band_info][:max_threshold_exceeded])
+                raise "failed to disable term: #{term}" unless MAPI::Services::Rates::LoanTerms.disable_term(self, term)
               end
             end
           end
