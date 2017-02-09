@@ -1,0 +1,58 @@
+.sidebar-section {
+  padding: 20px 18px;
+  @extend %bordered-section;
+}
+
+.sidebar-borrowing-capacity {
+  h3 {
+    @extend %typography-module-tiny-data-label;
+    margin: 0;
+    color: $medium-gray;
+  }
+  .sidebar-borrowing-capacity-remaining {
+    margin-top: 15px;
+  }
+  .report-summary-data {
+    margin-bottom: 0;
+    p {
+      @extend %typography-module-summary-data;
+      margin-bottom: 10px;
+    }
+  }
+  table {
+    width: 100%;
+    td {
+      @extend %typography-table-cell;
+    }
+    tr {
+      td, td:first-child {
+        background: $white;
+        text-align: left;
+        border: 0;
+        padding: 0;
+        height: 10px;
+        line-height: 20px;
+        width: 50%;
+      }
+      td:first-child {
+        color: $medium-gray;
+      }
+    }
+    .value {
+      text-align: right;
+    }
+  }
+}
+
+.sidebar-contact {
+  p {
+    margin: 0;
+    &:first-child {
+      @extend %typography-dashboard-gauge-label;
+    }
+  }
+  a {
+    display: block;
+    margin-top: 10px;
+  }
+}

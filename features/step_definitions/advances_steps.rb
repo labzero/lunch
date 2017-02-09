@@ -255,9 +255,15 @@ Then(/^I should see an? "(.*?)" advance error(?: with amount (\d+) and type "(.*
   page.assert_selector('.add-advance-icon-section.icon-error-before p', visible: true, text: text)
 end
 
-Then(/^I should see SecurID errors on the preview page$/) do
-  page.assert_selector('.add-advance-preview .form-error', visible: true)
-  page.assert_selector('.add-advance-preview input.input-field-error', visible: true)
+Then(/^I should see SecurID errors on the (Add Advance|Letter of Credit) preview page$/) do |request_type|
+  css_selector = case request_type
+  when 'Add Advance'
+    '.add-advance-preview'
+  when 'Letter of Credit'
+    '.letters-of-credit-preview'
+  end
+  page.assert_selector("#{css_selector} .form-error", visible: true)
+  page.assert_selector("#{css_selector} input.input-field-error", visible: true)
 end
 
 When(/^I click on the add advance confirm button$/) do
@@ -308,11 +314,11 @@ Then(/^I should not see any rates selected$/) do
   page.assert_no_selector('.advance-rates-table .rate-selected')
 end
 
-Then(/^I should (see|not see) the borrowing capacity summary$/) do |visible|
+Then(/^I should (see|not see) the borrowing capacity sidebar/) do |visible|
   if visible == 'see'
-    page.assert_selector('.add-advance-borrowing-capacity')
+    page.assert_selector('.sidebar-borrowing-capacity')
   elsif visible == 'not see'
-    page.assert_no_selector('.add-advance-borrowing-capacity')
+    page.assert_no_selector('.sidebar-borrowing-capacity')
   end
 end
 

@@ -275,12 +275,28 @@ Then(/^I am not able to enter prohibited characters in the datepicker inputs?$/)
   end
 end
 
+When(/^I choose the (first|last) possible date$/) do |position|
+  calendar = page.find('.calendar', visible: true)
+  selector = if position == 'first'
+    '.fa-arrow-left'
+  else
+    '.fa-arrow-right'
+  end
+  i = 0
+  while  calendar.has_selector?(selector, visible: true) && i < 300 do # avoid runaway loop when step used improperly
+    calendar.find(selector, visible: true).click
+    i += 1
+  end
+  step "I choose the #{position} available date"
+end
+
 When(/^I choose the (first|last) available date$/) do |position|
-  available_dates = page.all('td.available', visible: true)
+  calendar = page.find('.calendar', visible: true)
+  available_dates = calendar.all('td.available', visible: true)
   i = 0
   while available_dates.blank? && i < 12 do
-    page.find('.fa-arrow-right', visible: true).click
-    available_dates = page.all('td.available', visible: true)
+    calendar.find('.fa-arrow-right', visible: true).click
+    available_dates = calendar.all('td.available', visible: true)
     i += 1
   end
   available_dates.send(:"#{position}").click unless available_dates.blank?
@@ -289,17 +305,6 @@ end
 Then(/^I should see that weekends have been disabled$/) do
   page.assert_selector('.calendar tbody td.off.disabled:first-child, .calendar tbody td.off.disabled:last-child', visible: true)
   page.assert_no_selector('.calendar tbody td.available:first-child, .calendar tbody td.available:last-child', visible: true)
-end
-
-Then(/^I should see that all past dates have been disabled$/) do
-  today = Time.zone.today
-  target_month = today.strftime("%b %Y")
-  calendar = page.find('.daterangepicker .calendar.single', visible: true)
-  while calendar.find('.month').text != target_month
-    calendar.find('.fa-arrow-left').click
-  end
-  page.assert_no_selector('.fa-arrow-left', visible: true)
-  expect(page.all('td.available', visible: true).first.text.to_i).to be >= today.day
 end
 
 Then(/^I should not be able to see a calendar more than (\d+) months in the future$/) do |count|

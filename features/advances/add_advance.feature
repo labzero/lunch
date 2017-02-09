@@ -181,11 +181,11 @@ Scenario: Users are informed if they enter an invalid pin or token
   When I enter "12ab" for my SecurID pin
   And I enter my SecurID token
   And I click on the add advance confirm button
-  Then I should see SecurID errors on the preview page
+  Then I should see SecurID errors on the Add Advance preview page
   When I enter my SecurID pin
   And I enter "12ab34" for my SecurID token
   And I click on the add advance confirm button
-  Then I should see SecurID errors on the preview page
+  Then I should see SecurID errors on the Add Advance preview page
 
 Scenario: Users aren't required to enter a SecurID token a second time
   Given I am on the add advance preview screen
@@ -301,13 +301,13 @@ Scenario: User switches between VRC and FRC rates on the rate table
   And I should not see any rates selected
 
 @jira-mem-1541
-Scenario: User sees borrowing capacity summary module in the right column for add advances (and not elsewhere)
+Scenario: User sees borrowing capacity sidebar for add advances (and not elsewhere)
   Given I am on the "Add Advance" advances page
-  Then I should see the borrowing capacity summary
+  Then I should see the borrowing capacity sidebar
   Given I am on the add advance preview screen
-  Then I should not see the borrowing capacity summary
+  Then I should not see the borrowing capacity sidebar
   Given I am on the add advance stock purchase screen
-  Then I should not see the borrowing capacity summary
+  Then I should not see the borrowing capacity sidebar
 
 @jira-mem-1577
 Scenario: User navigates to the select rate page from the Manage Advances page

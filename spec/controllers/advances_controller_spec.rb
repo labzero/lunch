@@ -17,6 +17,7 @@ RSpec.describe AdvancesController, :type => :controller do
         allow(controller).to receive(:populate_advance_error_view_parameters)
         allow(controller).to receive(:signer_full_name).and_return(SecureRandom.hex)
         allow_any_instance_of(RatesService).to receive(:quick_advance_rates)
+        allow(controller).to receive(:sanitized_profile)
       end
 
       it 'logs at the `info` log level' do
@@ -334,9 +335,13 @@ RSpec.describe AdvancesController, :type => :controller do
         get :select_rate, advance_request: {amount: advance_amount}
       end
     end
-    it 'sets `@profile`' do
-      allow(MemberBalanceService).to receive(:new).and_return(member_balance_service_instance)
-      allow(subject).to receive(:sanitize_profile_if_endpoints_disabled).with(profile).and_return(profile)
+    it 'calls `sanitized_profile`' do
+      expect(controller).to receive(:sanitized_profile)
+      make_request
+    end
+    it 'sets `@profile` to the result of calling `sanitized_profile`' do
+      profile = double('member profile')
+      allow(controller).to receive(:sanitized_profile).and_return(profile)
       make_request
       expect(assigns[:profile]).to eq(profile)
     end

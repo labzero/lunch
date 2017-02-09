@@ -200,7 +200,12 @@ if !custom_host
   resque_stderr.close
   puts 'resque-pool Started.'
 
-
+  # ensure we have at least one feature
+  feature_name = SecureRandom.hex
+  at_exit do
+    Rails.application.flipper[feature_name].remove
+  end
+  Rails.application.flipper[feature_name].disable
 else
   Capybara.app_host = custom_host
 end

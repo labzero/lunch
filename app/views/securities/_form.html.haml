@@ -1,5 +1,5 @@
 - kind = @securities_request.kind
-= form_for(@securities_request, validate: true, url: url, html: {class: 'securities-submit-request-form'}) do |f|
+= form_for(@securities_request, url: url, html: {class: 'securities-submit-request-form'}) do |f|
   = f.hidden_field(:request_id)
   = f.hidden_field(:kind)
   = f.hidden_field(:trade_date)
@@ -9,7 +9,7 @@
   - if @error_message
     .securities-submit-request-form-errors
       %p= @error_message
-  %section.securities-broker-instructions
+  %section.securities-broker-instructions.form-fields-section-column-2.form-fields-section-column-2-multirow
     %h2= t('securities.release.broker_instructions')
     - if account_number
       .input-field-container-horizontal
@@ -29,8 +29,8 @@
       = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_request[trade_date]', start_date: @securities_request.trade_date, max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates], disable_weekends: true
     .input-field-container-horizontal
       %span= t('common_table_headings.settlement_date')
-      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_request[settlement_date]', start_date: @securities_request.settlement_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates]
-  %section.securities-delivery-instructions
+      = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_request[settlement_date]', start_date: @securities_request.settlement_date, max_date: @date_restrictions[:max_date], invalid_dates: @date_restrictions[:invalid_dates], disable_weekends: true
+  %section.securities-delivery-instructions.form-fields-section-column-2
     %h2= t('securities.release.delivery_instructions.label')
     = render 'shared/dropdown', dropdown_name: 'securities_request[delivery_type]', default_value: @delivery_instructions_defaults[:value], default_text: @delivery_instructions_defaults[:text], dropdown_options: @delivery_instructions_dropdown
     .securities-delivery-instructions-fields{data: {'selected-delivery-instruction' => @delivery_instructions_defaults[:value]}}
@@ -62,7 +62,7 @@
         = render 'table', locals: { type: type }
         %p.securities-table-footnote= t('securities.release.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)
     -if type == :release
-      = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, upload_path: @upload_path, type: :release}
+      = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, download_path: @download_path, upload_path: @upload_path, type: :release}
     -elsif type == :safekeep || type == :pledge
       = render partial: "safekeep_pledge_help", locals: { accepted_upload_mimetypes: accepted_upload_mimetypes, download_path: @download_path, upload_path: @upload_path}
   - if @authorizer

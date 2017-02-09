@@ -1,5 +1,5 @@
 module AuthenticationHelpers
-  def login_user(no_member: false)
+  def login_user(no_member: false, admin: false)
     let(:warden_user) { warden.authenticate(scope: :user) }
     let(:member_id) { 6 } unless respond_to?(:member_id)
     before(:each) do
@@ -12,5 +12,6 @@ module AuthenticationHelpers
         session[ApplicationController::SessionKeys::MEMBER_NAME] = SecureRandom.hex unless session[ApplicationController::SessionKeys::MEMBER_NAME]
       end
     end
+    allow_policy :web_admin, :show? if admin
   end
 end

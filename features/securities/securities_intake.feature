@@ -181,7 +181,6 @@ Feature: Securities Intake
     And I click the datepicker cancel button
     When I click the settlement date datepicker
     Then I should see that weekends have been disabled
-    And I should see that all past dates have been disabled
     And I should not be able to see a calendar more than 3 months in the future
     And I click the datepicker cancel button
   Examples:

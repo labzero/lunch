@@ -97,4 +97,65 @@ describe ContactInformationHelper, type: :helper do
         "https://www.surveymonkey.com/r/7KYSNVN?#{{member: member_name, name: display_name, email: email}.to_query}")
     end
   end
+
+  describe 'the `member_contacts` method' do
+    let(:helper_instance) { mock_context(described_class, [:current_member_id, :request]) }
+    let(:request_obj) { double('request') }
+    let(:member_id) { double('member id') }
+    let(:member_service) { instance_double(MembersService, member_contacts: nil) }
+    let(:cached_contacts) { double('contacts') }
+    let(:call_method) { helper_instance.member_contacts(request_obj: request_obj, member_id: member_id) }
+    before do
+      allow(helper_instance).to receive(:current_member_id).and_return(member_id)
+      allow(helper_instance).to receive(:request).and_return(request_obj)
+      allow(MembersService).to receive(:new).and_return(member_service)
+    end
+
+    it 'uses the `request` method to populate the `request` arg if none is provided' do
+      expect(helper_instance).to receive(:request).and_return(request_obj)
+      helper_instance.member_contacts(member_id: member_id)
+    end
+    it 'uses the `current_member_id` method to populate the `member_id` arg if none is provided' do
+      expect(helper_instance).to receive(:current_member_id).and_return(member_id)
+      helper_instance.member_contacts(request_obj: request_obj)
+    end
+    it 'fetches the value from the cache with the correct key' do
+      expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:member_contacts, member_id), anything)
+      call_method
+    end
+    it 'fetches the value from the cache with the correct expiration' do
+      expect(Rails.cache).to receive(:fetch).with(anything, expires_in: CacheConfiguration.expiry(:member_contacts))
+      call_method
+    end
+    it 'returns the result of accessing the cache' do
+      allow(Rails.cache).to receive(:fetch).and_return(cached_contacts)
+      expect(call_method).to eq(cached_contacts)
+    end
+    it 'returns an empty hash if calling the cache returns nil' do
+      allow(Rails.cache).to receive(:fetch).and_return(nil)
+      expect(call_method).to eq({})
+    end
+    describe 'when there is a cached value' do
+      it 'does not create a new instance of MembersService' do
+        call_method
+        expect(MembersService).not_to receive(:new)
+        call_method
+      end
+    end
+    describe 'when there is no cached value' do
+      it 'creates a new instance of MemberService with the request' do
+        expect(MembersService).to receive(:new).with(request_obj).and_return(member_service)
+        call_method
+      end
+      it 'calls `MemberService#member_contacts` with the `current_member_id`' do
+        expect(member_service).to receive(:member_contacts).with(member_id)
+        call_method
+      end
+      it 'caches the call to the service' do
+        expect(member_service).to receive(:member_contacts).exactly(:once).and_return(cached_contacts)
+        call_method
+        call_method
+      end
+    end
+  end
 end

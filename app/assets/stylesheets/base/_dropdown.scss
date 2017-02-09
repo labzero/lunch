@@ -69,6 +69,7 @@
   width: (3 * $grid-column-width) + (2 * $gutter-width);
   padding-right: 35px;
   cursor: default;
+  text-align: left;
   .single-item-dropdown & {
     padding-right: 10px;
   }

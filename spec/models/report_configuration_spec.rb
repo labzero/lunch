@@ -171,9 +171,8 @@ RSpec.describe ReportConfiguration do
         end
       end
       context 'when today is not the first day of the month' do
-        if Time.zone.today.day == 1
-          before { allow(Time.zone).to receive(:today).and_return(today + 1.day) }
-        end
+        let(:today) { Time.zone.today.beginning_of_month + rand(1..20).days }
+        before { allow(Time.zone).to receive(:today).and_return(today) }
         it 'returns the beginning of this month as the default start date' do
           expect(subject.date_bounds(:settlement_transaction_account, nil, nil)).to include(start: this_month_start)
         end
@@ -188,8 +187,7 @@ RSpec.describe ReportConfiguration do
         expect(subject.date_bounds(:settlement_transaction_account, nil, nil)).to include(max: nil)
       end
       it 'returns min date for start date when start date comes before min date' do
-        expect(subject.date_bounds(:settlement_transaction_account, min_date - 1.day, nil)).to eq(
-          { min: min_date, start: min_date, end: today, max: nil })
+        expect(subject.date_bounds(:settlement_transaction_account, min_date - 1.day, nil)).to include(start: min_date)
       end
       it 'returns in bounds start and end date if supplied (happy path)' do
         expect(subject.date_bounds(:settlement_transaction_account, today, today + 1.day)).to eq(

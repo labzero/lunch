@@ -233,4 +233,52 @@ describe ReportsHelper do
       end
     end
   end
+
+  describe 'the `sanitized_profile` method' do
+    let(:helper_instance) { mock_context(described_class, [:current_member_id, :request]) }
+    let(:member_id) { double('member id') }
+    let(:request_obj) { double('request') }
+    let(:profile) { double('member profile') }
+    let(:sanitized_profile) { double('a sanitized profile') }
+    let(:member_balance_service) { instance_double(MemberBalanceService, profile: nil) }
+    let(:call_method) { helper_instance.sanitized_profile(request_obj: request_obj, member_id: member_id) }
+
+    before do
+      allow(helper_instance).to receive(:current_member_id).and_return(member_id)
+      allow(helper_instance).to receive(:request).and_return(request_obj)
+      allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
+      allow(helper_instance).to receive(:sanitize_profile_if_endpoints_disabled)
+    end
+
+    it 'uses the `request` method to populate the `request` arg if none is provided' do
+      expect(helper_instance).to receive(:request).and_return(request_obj)
+      helper_instance.sanitized_profile(member_id: member_id)
+    end
+    it 'uses the `current_member_id` method to populate the `member_id` arg if none is provided' do
+      expect(helper_instance).to receive(:current_member_id).and_return(member_id)
+      helper_instance.sanitized_profile(request_obj: request_obj)
+    end
+    it 'uses the passed instance of `MemberBalanceService` if one is provided' do
+      passed_service = instance_double(MemberBalanceService)
+      expect(passed_service).to receive(:profile)
+      helper_instance.sanitized_profile(member_balance_service: passed_service)
+    end
+    it 'creates a new instance of `MemberBalanceService` if one is not provided' do
+      expect(MemberBalanceService).to receive(:new).with(member_id, request_obj).and_return(member_balance_service)
+      call_method
+    end
+    it 'calls `MemberBalanceService#profile`' do
+      expect(member_balance_service).to receive(:profile)
+      call_method
+    end
+    it 'passes the results of `MemberBalanceService#profile` to the `sanitize_profile_if_endpoints_disabled` method' do
+      allow(member_balance_service).to receive(:profile).and_return(profile)
+      expect(helper_instance).to receive(:sanitize_profile_if_endpoints_disabled).with(profile)
+      call_method
+    end
+    it 'returns the result of `sanitize_profile_if_endpoints_disabled`' do
+      allow(helper_instance).to receive(:sanitize_profile_if_endpoints_disabled).and_return(sanitized_profile)
+      expect(call_method).to eq(sanitized_profile)
+    end
+  end
 end

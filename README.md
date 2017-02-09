@@ -138,6 +138,7 @@ This is a summary of the options supported in our .env files:
 * `DOCUSIGN_POWERFORM_ENDPOINT`: Docusign website
 * `DOCUSIGN_POWERFORM_PATH`: Docusign Powerform Path
 * `DOCUSIGN_POWERFORMS`: Hash of Docusign Powerform IDs
+* `LC_BENEFICIARIES`: A JSON blob containing an array of hashes, each of which contains the name and address of a Letter of Credit beneficiary
 
 
 ## Running the Tests

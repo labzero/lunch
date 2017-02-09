@@ -1,0 +1,13 @@
+  .admin-features-table {
+    th:last-child {
+      text-align: right;
+    }
+    td:first-child {
+      text-align: center;
+    }
+    th, td {
+      &:nth-child(2) {
+        width: 100%;
+      }
+    }
+  }

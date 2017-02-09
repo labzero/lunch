@@ -256,6 +256,21 @@ en:
           attributes:
             cusip:
               invalid: "The following CUSIP is invalid: %{value}.\nEdit your file and try again."
+        letter_of_credit:
+          blank: 'Missing required field: %{attribute}'
+          attributes:
+            issue_date:
+              invalid: Issue date may not occur on a weekend, a holiday or more than 1 week from today.
+            expiration_date:
+              invalid: Expiration date may not occur on a weekend, a holiday or more than 15 years from the issue date.
+              before_issue_date: Expiration date must be after issue date.
+            amount:
+              invalid: Amount must be a positive number with no fractional cents.
+              not_a_number: Amount must be a positive number with no fractional cents.
+              not_an_integer: Amount must be a positive number with no fractional cents.
+              greater_than: Amount must be a positive number with no fractional cents.
+            beneficiary_name:
+              invalid: Please choose a valid beneficiary.
     attributes:
       securities_request:
         aba_number: ABA No.
@@ -1244,6 +1259,7 @@ en:
       transfer: Transfer
       safekeep_new: Safekeep New
       pledge_new: Pledge New
+      delivery: Delivery Method
     requests:
       title: Securities Requests
       actions:
@@ -1371,15 +1387,12 @@ en:
       authorize: Authorize
       edit:
         title: Edit Securities
-        intro: "To edit the listed securities:"
         step_1:
           title: "Step 1."
-          description: Download Template
+          description_html: "Make edits to the listed securities in %{link}"
+          link_title: this file.
         step_2:
           title: "Step 2."
-          make_edits: Make your edits in the file.
-        step_3:
-          title: "Step 3."
           description_html: "Save your file, then upload it by either dragging and dropping it on to this page, or selecting it from your file system. Contact <a href=%{mailto_url}>%{mailto_text}</a> at %{phone_number} with questions."
         drag_drop: Drag and Drop Here
         select_file: Select File
@@ -1413,8 +1426,14 @@ en:
       upload_instructions:
         download_template: Download Template
         intro: Upload an Excel file containing your securities.
+        step_1:
+          title: "Step 1."
+          description: Download Template
         step_2:
           enter_securities: In the file, enter one security per row.
+        step_3:
+          title: "Step 3."
+          description_html: "Save your file, then upload it by either dragging and dropping it on to this page, or selecting it from your file system. Contact <a href=%{mailto_url}>%{mailto_text}</a> at %{phone_number} with questions."
       discard_and_upload_again: Discard and Upload Again
       delivery_acknowledgement: The member has delivered the securities to the Bank’s securities custodian prior to or concurrent with the execution of this securities pledge.
     success:
@@ -1485,11 +1504,33 @@ en:
     internal_user_error: This securities request was not completed because Bank employees are not authorized to complete securities requests via the member portal.
   letters_of_credit:
     title: Letters of Credit
+    contact: 'If you need assistance or wish to request a different type of letter of credit, call or email:'
     manage:
       title: Manage Letters of Credit
       request: Request letter of credit
       expiration_date: Expiration Date
       maintenance_fee: Annual Maintenance Fee (bps)
+    request:
+      title: Request Letter of Credit
+      support_html: "The portal only supports requests for Public Unit Deposit letters of credit. For other requests, contact your Relationship Manager: %{rm_email}, %{rm_phone_number}."
+      public_unit: Public Unit Deposit Request
+      beneficiary: Beneficiary
+      amount: Amount
+      fees:
+        title: Fees
+        explanation: 'Based on the request details input above, the following fees will be applied:'
+        issuance_fee: Issuance Fee
+        maintenance_fee: Annual Maintenance Fee
+    preview:
+      action: Preview Request
+      review_details: If you agree with the above, including the requested Letter of Credit terms, enter your SecurID credentials below and press “Authorize Request.” If not, press “Edit Request” or “Cancel.”
+      review_details_elevated: If you agree with the above, including the requested Letter of Credit terms, press “Authorize Request.” If not, press “Edit Request” or “Cancel.”
+      legal: "The issuance of the requested Letter of Credit is subject to your institution’s continuing compliance with the Bank’s Advances and Security Agreement and other applicable agreements, as well as with the Bank’s Credit Program and specific eligibility or documentation requirements and policies applicable to specific Bank products. Also, statutory or regulatory conditions (including regulatory limits on Bank credit to capital-deficient savings institutions) may apply.\n\nThe requested Letter of Credit will be issued pursuant to the Letter of Credit Reimbursement Agreement between the Bank and the Member, which will govern the rights and obligations of the Bank and the Member with respect to each other in regard to the Letter of Credit. Your institution covenants with and represents and warrants to the Bank that the above terms are valid and are those by which your institution agrees to be bound.\n\nWhen issued, the Letter of Credit is irrevocable and, except with the written consent of the Bank, nontransferable except as specifically set forth in the Letter of Credit. Your institution is required, and agrees, to reimburse the Bank for any attorneys’ fees, accountants’ fees, or other outofpocket costs associated with the Bank’s issuance, amendment, or maintenance of the requested Letter of Credit."
+      edit: Edit Request
+      authorize: Authorize Request
+      lc_number: LC Number
+      beneficiary_address: Beneficiary Address
+      issue_date: Issue Date
   reports:
     meta_title: FHLBSF - Reports
     title: Reports
@@ -3104,8 +3145,15 @@ en:
         data_visibility: Data Visibility
         features: Test Features
     features:
+      title: Features
       flipper:
         title: Flipper
+      index:
+        title: Test Features
+        columns:
+          feature_name: Features
+        actions:
+          edit: View/Edit
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

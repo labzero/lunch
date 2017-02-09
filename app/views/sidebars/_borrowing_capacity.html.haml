@@ -1,9 +1,9 @@
-.add-advance-borrowing-capacity.column-9x3-right
+.sidebar-section.sidebar-borrowing-capacity
   %section.report-summary-data
-    %h3.add-advance-borrowing-capacity-label=t('advances.add_advance.borrowing_capacity.total_borrowing_capacity')
+    %h3=t('advances.add_advance.borrowing_capacity.total_borrowing_capacity')
     %p
       %span.number-positive= fhlb_formatted_currency_whole(profile[:collateral_borrowing_capacity][:total])
-    %h6.add-advance-borrowing-capacity-label=t('advances.add_advance.borrowing_capacity.remaining_borrowing_capacity')
+    %h3=t('advances.add_advance.borrowing_capacity.remaining_borrowing_capacity')
     %p= fhlb_formatted_currency_whole(profile[:collateral_borrowing_capacity][:remaining])
   %table
     %tbody
@@ -19,7 +19,7 @@
       %tr
         %td.label=t('advances.add_advance.borrowing_capacity.sbc_aa')
         %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:sbc][:aa][:remaining])
-  %h3.add-advance-borrowing-capacity-label.remaining=t('advances.add_advance.borrowing_capacity.remaining')
+  %h3.sidebar-borrowing-capacity-remaining=t('advances.add_advance.borrowing_capacity.remaining')
   %table
     %tbody
       %tr

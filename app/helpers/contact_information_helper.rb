@@ -80,4 +80,11 @@ module ContactInformationHelper
     raise ArgumentError, 'user parameter must not be nil' unless user.present?
     "#{FEEDBACK_SURVEY_URL}?#{{ member: member_name, name: user.display_name, email: user.email }.to_query}"
   end
+
+  def member_contacts(request_obj: request, member_id: current_member_id)
+    Rails.cache.fetch(CacheConfiguration.key(:member_contacts, member_id),
+                                  expires_in: CacheConfiguration.expiry(:member_contacts)) do
+      MembersService.new(request_obj).member_contacts(member_id)
+    end || {}
+  end
 end

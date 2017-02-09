@@ -41,6 +41,10 @@
 - when :actions
   - value = cell[:value].collect {|action| action.is_a?(Array) ? link_to(action.first, action.last) : action}.join(' ').html_safe
   - classes = [:'report-cell-actions', :'report-cell-narrow']
+- when :feature_status
+  - cell[:order] ||= cell[:value]
+  - value = capture_haml do
+    %span{class: ["admin-#{cell[:value]}-icon"]}
 - else
   - value = cell[:value]
   - classes = [:'report-cell-narrow']

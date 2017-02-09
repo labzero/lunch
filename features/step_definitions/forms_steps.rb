@@ -56,6 +56,14 @@ Then(/^I should see Docusign website and close it$/) do
   end
 end
 
+Then(/^I should see the "(.*?)" form error$/) do |error_type|
+  text = case error_type
+  when 'expiration date before issue date'
+    I18n.t('activemodel.errors.models.letter_of_credit.attributes.expiration_date.before_issue_date')
+  end
+  page.assert_selector('.form-error-section p', text: text, exact: true)
+end
+
 def docusign_link(form)
   if form == 'access manager'
     I18n.t('resources.forms.authorizations.website.access_manager')

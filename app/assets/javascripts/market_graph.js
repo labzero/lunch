@@ -10,6 +10,8 @@ $(function () {
       graphBiggestY = Math.max(v[1], graphBiggestY);
     });
   };
+  var graphRange = graphBiggestY - graphSmallestY;
+  var numTicks =  6;
 
   graphElement.highcharts({
     chart: {
@@ -99,7 +101,7 @@ $(function () {
       labels: {
         x: -5,
         y: -3,
-        step: 4,
+        step: numTicks - 2,
         style: {
           fontSize: '8px'
         },
@@ -111,8 +113,8 @@ $(function () {
       gridLineColor: '#eef1f0',
       lineColor: '#eef1f0',
       min: graphSmallestY,
-      tickAmount: 6,
-      tickInterval: 0.01,
+      tickAmount: numTicks,
+      tickInterval: graphRange/numTicks,
       tickLength: 0
     },
     series: graphData,

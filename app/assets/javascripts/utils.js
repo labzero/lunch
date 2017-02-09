@@ -49,6 +49,24 @@ if (typeof Fhlb.Utils === 'undefined') {
       };
       return valid;
     },
+    bindFormSubmitStateToSecureIDFields: function($form, $secureIDPinField, $secureIDTokenField) {
+      var $submitFieldPerform = $form.find('input[type=submit]');
+
+      // Validate length of SecurID token and pin
+      if ($secureIDPinField.length && $secureIDTokenField.length) {
+        $.each([$secureIDPinField, $secureIDTokenField], (function(i, $element){
+          $element.on('keyup', function(){
+            if ($secureIDTokenField.val().length == 6 && $secureIDPinField.val().length == 4) {
+              $submitFieldPerform.addClass('active');
+              $submitFieldPerform.attr('disabled', false);
+            } else {
+              $submitFieldPerform.removeClass('active');
+              $submitFieldPerform.attr('disabled', true);
+            };
+          });
+        }));
+      };
+    },
     findAndDisplaySecurIDErrors: function($form) {
       var errorType = $form.data('securid-status');
       var $pin = $form.find('input.securid-field-pin');

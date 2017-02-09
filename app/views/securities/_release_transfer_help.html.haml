@@ -1,13 +1,10 @@
 %p.securities-download= t('securities.release.edit.title')
 .securities-download-instructions.fade{data: {dropzone: true, hide_on_error: true}}
-  %p= t('securities.release.edit.intro')
   %p.securities-download-instructions-step= t('securities.release.edit.step_1.title')
-  %p.securities-download-instructions-description{data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}}= t('securities.release.edit.step_1.description')
+  - download_link = link_to t('securities.release.edit.step_1.link_title'), download_path, class: [ 'securities-release-download' ], data: {'form-submit-trigger' => true, 'form-name' => 'securities-release-download'}
+  %p.securities-download-instructions-description= t('securities.release.edit.step_1.description_html', link: download_link )
   %p.securities-download-instructions-step= t('securities.release.edit.step_2.title')
-  .securities-download-instructions-description
-    %p= t('securities.release.edit.step_2.make_edits')
-  %p.securities-download-instructions-step= t('securities.release.edit.step_3.title')
-  %p.securities-download-instructions-description= t('securities.release.edit.step_3.description_html', mailto_url: @contact[:email_address], mailto_text: @contact[:mailto_text], phone_number: @contact[:phone_number])
+  %p.securities-download-instructions-description= t('securities.release.edit.step_2.description_html', mailto_url: @contact[:email_address], mailto_text: @contact[:mailto_text], phone_number: @contact[:phone_number])
   .securities-download-actions
     - span = capture_haml do
       %span= t('securities.release.edit.drag_drop')

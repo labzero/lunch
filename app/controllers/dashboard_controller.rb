@@ -3,6 +3,7 @@ class DashboardController < ApplicationController
   include DashboardHelper
   include AssetHelper
   include ReportsHelper
+  include ContactInformationHelper
 
   prepend_around_action :skip_timeout_reset, only: [:current_overnight_vrc]
 
@@ -204,7 +205,7 @@ class DashboardController < ApplicationController
     member_balances = MemberBalanceService.new(current_member_id, request)
     members_service = MembersService.new(request)
     populate_deferred_jobs_view_parameters(DEFERRED_JOBS)
-    profile = sanitize_profile_if_endpoints_disabled(member_balances.profile)
+    profile = sanitized_profile(member_balance_service: member_balances)
     RatesServiceJob.perform_later('quick_advance_rates', request.uuid, current_member_id) if policy(:advance).show?
 
     market_overview_data = Rails.cache.fetch(CacheConfiguration.key(:market_overview),
@@ -228,10 +229,7 @@ class DashboardController < ApplicationController
 
     @limited_pricing_message = MessageService.new.todays_quick_advance_message
     @etransact_status = etransact_service.etransact_status(current_member_id)
-    @contacts = Rails.cache.fetch(CacheConfiguration.key(:member_contacts, current_member_id),
-                                  expires_in: CacheConfiguration.expiry(:member_contacts)) do
-      members_service.member_contacts(current_member_id)
-    end || {}
+    @contacts = member_contacts
     default_image_path = 'placeholder-usericon.svg'
     if @contacts[:rm] && @contacts[:rm][:username]
       rm_image_path = "#{@contacts[:rm][:username].downcase}.jpg"

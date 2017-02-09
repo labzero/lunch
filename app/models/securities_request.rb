@@ -251,11 +251,6 @@ class SecuritiesRequest
     max_date = today + MAX_DATE_RESTRICTION
     holidays = CalendarService.new(ActionDispatch::TestRequest.new).holidays(today, max_date)
     valid = !(date.try(:sunday?) || date.try(:saturday?)) && !(holidays.include?(date)) && date.try(:<=, max_date)
-    if field == :trade_date
-      valid
-    else
-      valid && date.try(:>=, today)
-    end
   end
 
   def valid_securities_payment_amount?

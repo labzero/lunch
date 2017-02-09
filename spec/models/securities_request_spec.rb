@@ -162,15 +162,11 @@ RSpec.describe SecuritiesRequest, :type => :model do
           it 'returns true if all of the above conditions are satisfied' do
             expect(subject.send(:date_within_range, date, date_type)).to be true
           end
+          it 'returns true if the provided date occurs before today' do
+            allow(date).to receive(:>=).with(today).and_return(false)
+            expect(subject.send(:date_within_range, date, date_type)).to be true
+          end
         end
-      end
-      it 'returns false if the provided date occurs before today (for `settlement_date` only)' do
-        allow(date).to receive(:>=).with(today).and_return(false)
-        expect(subject.send(:date_within_range, date, :settlement_date)).to be false
-      end
-      it 'returns true if the provided date occurs before today (for `trade_date` only)' do
-        allow(date).to receive(:>=).with(today).and_return(false)
-        expect(subject.send(:date_within_range, date, :trade_date)).to be true
       end
     end
     describe '`valid_securities_payment_amount?`' do

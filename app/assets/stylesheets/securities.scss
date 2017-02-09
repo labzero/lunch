@@ -162,53 +162,12 @@
   }
 }
 
-.securities-delivery-instructions, .securities-broker-instructions {
-  .input-field-container-horizontal {
-    display: block;
-    float: none;
-    margin: 0 0 6px;
-    label, span {
-      color: $medium-gray;
-      line-height: 30px;
-      vertical-align: top;
-      margin-right: 20px;
-      &.label-optional {
-        margin-right: 0;
-        & + span {
-          font-style: italic;
-          margin-right: 20px;
-        }
-      }
-    }
-  }
-  .input-field-container {
-    width: 180px;
-  }
-}
-
 .securities-broker-instructions {
   @extend %pseudoelement-clearfix;
   .input-field-container-horizontal {
-    @extend %pseudoelement-clearfix;
     width: 50%;
     float: left;
     text-align: right;
-    &:nth-of-type(odd) {
-      .input-field-container {
-        margin-right: 10px;
-      }
-    }
-    &:nth-of-type(even) {
-      .input-field-container {
-        margin-right: 0;
-      }
-    }
-    &:last-of-type, &:last-of-type(2) {
-      margin-bottom: 0;
-    }
-    .input-field-container {
-      text-align: left;
-    }
   }
   .pledge_type {
     height: 34px;
@@ -315,10 +274,6 @@
   display: none;
   margin-top: 20px;
   padding: 20px;
-  & > p:first-child {
-    @extend %typography-default-text;
-    margin: 0 0 5px;
-  }
   [data-form-submit-trigger] {
     color: $actionable-blue;
     cursor: pointer;
@@ -384,6 +339,9 @@
   }
   span {
     @extend %typography-field-value;
+  }
+  .securities-release-download {
+    text-transform: inherit;
   }
 }
 

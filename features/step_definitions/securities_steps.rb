@@ -2,7 +2,7 @@ When(/^I click on the Securities link in the header$/) do
   page.find('.secondary-nav a', text: I18n.t('securities.title'), exact: true).click
 end
 
-Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities|Transfer to Pledged|Transfer to Safekept|Transfer Securities|Manage Letters of Credit) page$/i) do |page_type|
+Then(/^I should be on the (Manage Securities|Securities Requests|Securities Release|Safekeep Securities|Pledge Securities|Transfer to Pledged|Transfer to Safekept|Transfer Securities|Manage Letters of Credit|New Letter of Credit Request|Preview Letter of Credit Request) page$/i) do |page_type|
   text = case page_type
   when /\AManage Securities\z/i
     step 'I should see a report table with multiple data rows'
@@ -26,6 +26,10 @@ Then(/^I should be on the (Manage Securities|Securities Requests|Securities Rele
   when /\AManage Letters of Credit\z/i
     step 'I should see a report table with multiple data rows'
     I18n.t('letters_of_credit.manage.title')
+  when /\ANew Letter of Credit Request\z/i
+    I18n.t('letters_of_credit.request.title')
+  when /\APreview Letter of Credit Request\z/i
+    I18n.t('letters_of_credit.request.title')
   end
   page.assert_selector('h1', text: text, exact: true)
 end
@@ -249,7 +253,7 @@ Then(/^I should not see an upload progress bar$/) do
   page.assert_selector('.file-upload-progress .gauge-section', visible: :hidden)
 end
 
-When(/^I click the (trade|settlement) date datepicker$/) do |field|
+When(/^I click the (trade|settlement|issue|expiration) date datepicker$/) do |field|
   text = case field
   when 'trade'
     I18n.t('common_table_headings.trade_date')
@@ -527,7 +531,7 @@ Then(/^I should see the contact information for (Securities Services|Collateral 
     mailto_text = I18n.t('contact.collateral_departments.collateral_operations.title')
     phone_number = collateral_operations_phone_number
   end
-  text = strip_links(I18n.t('securities.release.edit.step_3.description_html', mailto_url: email_address, mailto_text: mailto_text, phone_number: phone_number))
+  text = strip_links(I18n.t('securities.release.edit.step_2.description_html', mailto_url: email_address, mailto_text: mailto_text, phone_number: phone_number))
   page.assert_selector('.securities-download-instructions-description:last-of-type', text: text, exact: true, visible: true)
 end
 

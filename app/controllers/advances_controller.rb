@@ -2,6 +2,7 @@ class AdvancesController < ApplicationController
   include ReportsHelper
   include StreamingHelper
   include CustomFormattingHelper
+  include SidebarHelper
 
   before_action do
     set_active_nav(:advances)
@@ -135,7 +136,7 @@ class AdvancesController < ApplicationController
     @selected_term = advance_request.term
     @active_term_type = advance_request.term_type || :vrc
     advance_request.allow_grace_period = true if etransact_service.etransact_active?
-    @profile = sanitize_profile_if_endpoints_disabled(MemberBalanceService.new(current_member_id, request).profile)
+    @profile = sanitized_profile
   end
 
   # GET

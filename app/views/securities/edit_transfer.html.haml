@@ -15,7 +15,7 @@
         - if @error_message
           .securities-submit-request-form-errors
             %p= @error_message
-        %section.securities-broker-instructions
+        %section.securities-broker-instructions.form-fields-section-column-2
           %h2= t('securities.release.broker_instructions')
           - if kind == :pledge_transfer
             .input-field-container-horizontal
@@ -39,7 +39,7 @@
           .securities-release-table-wrapper
             -unless @securities_table_data[:rows].empty?
               = render 'table'
-          = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: @accepted_upload_mimetypes, upload_path: @upload_path, type: :transfer}
+          = render partial: "release_transfer_help", locals: { accepted_upload_mimetypes: @accepted_upload_mimetypes, upload_path: @upload_path, download_path: @download_path, type: :transfer}
         - if @authorizer
           .securities-request-legal
             - if kind == :pledge_transfer
