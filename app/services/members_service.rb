@@ -41,7 +41,9 @@ class MembersService < MAPIService
   end
 
   def member(member_id)
-    get_hash(:member, "member/#{member_id}/")
+    Rails.cache.fetch(CacheConfiguration.key(:member_data, member_id), expires_in: CacheConfiguration.expiry(:member_data)) do
+      get_hash(:member, "member/#{member_id}/")
+    end
   end
 
   def member_contacts(member_id)

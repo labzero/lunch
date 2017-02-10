@@ -295,7 +295,7 @@ RSpec.describe ApplicationController, :type => :controller do
       session[described_class::SessionKeys::MEMBER_NAME] = member_name
       expect(controller.current_member_name).to eq(member_name)
     end
-    it 'does not fecth the member details if `SessionKeys::MEMBER_NAME` is in the session' do
+    it 'does not fetch the member details if `SessionKeys::MEMBER_NAME` is in the session' do
       session[described_class::SessionKeys::MEMBER_NAME] = member_name
       expect_any_instance_of(MembersService).to_not receive(:member)
       controller.current_member_name
