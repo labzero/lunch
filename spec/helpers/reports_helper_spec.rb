@@ -235,7 +235,7 @@ describe ReportsHelper do
   end
 
   describe 'the `sanitized_profile` method' do
-    let(:helper_instance) { mock_context(described_class, [:current_member_id, :request]) }
+    let(:helper_instance) { mock_context(klass: described_class, instance_methods: [:current_member_id, :request]) }
     let(:member_id) { double('member id') }
     let(:request_obj) { double('request') }
     let(:profile) { double('member profile') }

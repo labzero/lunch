@@ -15,7 +15,7 @@ class AdvanceRequest
   end
 
   include ActiveModel::Model
-  include ActiveModel::Serializers::JSON
+  include RedisBackedObject
   include AASM
 
   STOCK_CHOICES = [:continue, :purchase].freeze
@@ -42,7 +42,7 @@ class AdvanceRequest
   SERIALIZATION_EXCLUDE_ATTRS = [:request].freeze
 
   VALID_AMOUNT = /\A[0-9,]+(\.0?0?)?\z/i.freeze
-  LOG_PREFIX = "  \e[36m\033[1mREDIS\e[0m ".freeze
+  REDIS_EXPIRATION_KEY_PATH =  'advance_request.key_expiration'
 
   attr_accessor *CORE_PARAMETERS
   attr_accessor *REQUEST_PARAMETERS
@@ -364,13 +364,6 @@ class AdvanceRequest
     attrs
   end
 
-  def save
-    save_result = !!redis_value.set(to_json)
-    save_result = !!(redis_value.expire(Rails.configuration.x.advance_request.key_expiration)) if save_result
-    log{"AdvanceRequest:#{id} #{save_result ? 'saved' : 'save failed'}."}
-    save_result
-  end
-
   def ttl
     redis_value.ttl
   end
@@ -393,36 +386,7 @@ class AdvanceRequest
     obj
   end
 
-  def self.find(id, request=nil)
-    value = redis_value(id)
-    raise ActiveRecord::RecordNotFound if value.nil?
-    obj = from_json(value.value, request)
-    value.expire(Rails.configuration.x.advance_request.key_expiration)
-    log{"AdvanceRequest.find(#{id}) #{obj ? 'succeded' : 'failed'}."}
-    obj
-  end
-
-  def self.redis_key(id)
-    "#{self.name}:#{id}"
-  end
-
-  def self.redis_value(id)
-    Redis::Value.new(redis_key(id))
-  end
-
-  def self.log(level = :info, &message_block)
-    Rails.logger.send(level) { LOG_PREFIX + message_block.call.to_s }
-  end
-
   protected
-
-  def log(level = :info, &message_block)
-    self.class.log(level, &message_block)
-  end
-
-  def redis_value
-    @redis_value ||= self.class.redis_value(id)
-  end
 
   def notify_if_rate_bands_exceeded
     return unless @rates

@@ -256,7 +256,7 @@ en:
           attributes:
             cusip:
               invalid: "The following CUSIP is invalid: %{value}.\nEdit your file and try again."
-        letter_of_credit:
+        letter_of_credit_request:
           blank: 'Missing required field: %{attribute}'
           attributes:
             issue_date:
@@ -1531,6 +1531,16 @@ en:
       lc_number: LC Number
       beneficiary_address: Beneficiary Address
       issue_date: Issue Date
+    success:
+      title: Letter of Credit Request Sent
+      confirmation: We received your Letter of Credit request at %{datetime}. We will process your request on the Issue Date. Once processed, the original Letter of Credit will be sent to the beneficiary on the Issue Date. If there are any issues with your request, you will be contacted by the Bank.
+      email: 'An email containing the details of your request will be sent to this address:'
+      questions: If you have questions, call the Member Services Desk at %{phone_number}.
+      download_pdf: Download a pdf of request
+      new_request: Make a new request
+    errors:
+      not_authorized: This Letter of Credit Request was not completed because Bank employees are not authorized to request letters of credit via the member portal.
+      generic_html: "We are unable to process your request at this time. Contact your Relationship Manager: %{rm_email}, %{rm_phone_number}."
   reports:
     meta_title: FHLBSF - Reports
     title: Reports

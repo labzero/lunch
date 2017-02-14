@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe LetterOfCredit, :type => :model do
+RSpec.describe LetterOfCreditRequest, :type => :model do
   let(:today) { Time.zone.today }
   let(:calendar_service) { instance_double(CalendarService, holidays: [], find_next_business_day: today) }
 
@@ -116,35 +116,13 @@ RSpec.describe LetterOfCredit, :type => :model do
     end
   end
 
-  describe 'attributes' do
-    let(:attr_value) { double('some value') }
-    before do
-      allow(attr_value).to receive(:gsub).and_return(attr_value)
-      allow(attr_value).to receive(:to_i).and_return(attr_value)
-    end
-    [:lc_number, :beneficiary_name, :beneficiary_address, :amount, :issue_date, :expiration_date].each do |attr|
-      it "has an accessible `#{attr}` attribute" do
-        subject.send(:"#{attr}=", attr_value)
-        expect(subject.send(attr)).to eq(attr_value)
-      end
-    end
-    [:issuance_fee, :maintenance_fee].each do |attr|
-      it "has a `#{attr}` attribute that can be read" do
-        expect(subject.send(attr)).not_to be nil
-      end
-      it "has a `#{attr}` attribute that cannot be written" do
-        expect(subject.respond_to?(:"#{attr}=")).to be false
-      end
-    end
-  end
-
   describe 'initialization' do
     let(:issue_date) { today + rand(0..7).days }
-    let(:new_loc) { LetterOfCredit.new }
+    let(:new_loc) { LetterOfCreditRequest.new }
     let(:request) { double('request') }
 
     describe 'when a request arg is passed' do
-      let(:new_loc) { LetterOfCredit.new(request) }
+      let(:new_loc) { LetterOfCreditRequest.new(request) }
       subject { described_class.new(request) }
       it 'sets `request` to the passed arg' do
         expect(new_loc.request).to eq(request)
@@ -199,37 +177,94 @@ RSpec.describe LetterOfCredit, :type => :model do
   end
 
   describe 'class methods' do
-    describe '`from_hash`' do
-      let(:hash) { instance_double(Hash) }
-      let(:loc) { instance_double(LetterOfCredit, :attributes= => nil) }
-      let(:call_method) { LetterOfCredit.from_hash(hash) }
+    describe '`from_json`' do
+      let(:json) { double('some JSON') }
+      let(:request) { double('request') }
+      let(:loc) { instance_double(LetterOfCreditRequest, from_json: nil) }
+      let(:call_method) { LetterOfCreditRequest.from_json(json, request) }
 
-      it 'creates a new `LetterOfCredit`' do
-        expect(LetterOfCredit).to receive(:new).and_return(loc)
+      before { allow(LetterOfCreditRequest).to receive(:new).and_return(loc) }
+
+      it 'creates a new `LetterOfCreditRequest`' do
+        expect(LetterOfCreditRequest).to receive(:new).and_return(loc)
         call_method
       end
-      it 'calls `attributes=` with the passed hash' do
-        allow(LetterOfCredit).to receive(:new).and_return(loc)
-        expect(loc).to receive(:attributes=).with(hash)
+      it 'calls `from_json` with the passed json' do
+        expect(loc).to receive(:from_json).with(json)
         call_method
       end
-      it 'returns the `LetterOfCredit`' do
-        expect(LetterOfCredit.from_hash({})).to be_a(LetterOfCredit)
+      it 'returns the `LetterOfCreditRequest`' do
+        allow(loc).to receive(:from_json).and_return(loc)
+        expect(call_method).to eq(loc)
+      end
+    end
+
+    describe '`policy_class`' do
+      it 'returns the LettersOfCreditPolicy class' do
+        expect(described_class.policy_class).to eq(LettersOfCreditPolicy)
       end
     end
   end
 
   describe 'instance methods' do
+    describe 'the `id` getter' do
+      let(:id) { SecureRandom.hex }
+      context 'when the attribute already exists' do
+        before { subject.instance_variable_set(:@id, id) }
+        it 'returns the attribute' do
+          expect(subject.id).to eq(id)
+        end
+      end
+      context 'when the attribute does not yet exist' do
+        it 'sets the attribute to the result of calling `SecureRandom.uuid`' do
+          allow(SecureRandom).to receive(:uuid).and_return(id)
+          expect(subject.id).to be(id)
+        end
+      end
+    end
+
+    describe '`attributes`' do
+      let(:call_method) { subject.attributes }
+      persisted_attributes = described_class::READ_ONLY_ATTRS + described_class::ACCESSIBLE_ATTRS - described_class::SERIALIZATION_EXCLUDE_ATTRS
+
+      before do
+        persisted_attributes.each { |attr| allow(subject).to receive(attr) }
+      end
+
+      it 'returns a hash of attribute values' do
+        expect(call_method).to be_kind_of(Hash)
+      end
+
+      (persisted_attributes).each do |attr|
+        it "includes the key `#{attr}` with a value of nil if the attribute is present" do
+          value = double('A Value')
+          allow(subject).to receive(attr).and_return(value)
+          expect(call_method).to have_key(attr)
+        end
+        it "does not include `#{attr}` if the attribute is nil" do
+          allow(subject).to receive(attr).and_return(nil)
+          expect(call_method).to_not have_key(attr)
+        end
+      end
+
+      described_class::SERIALIZATION_EXCLUDE_ATTRS.each do |attr|
+        it "does not include `#{attr}`" do
+          allow(subject).to receive(attr).and_return(double('A Value'))
+          expect(call_method).to_not have_key(attr)
+        end
+      end
+    end
+
     describe '`attributes=`' do
-      read_only_attrs = [:issuance_fee, :maintenance_fee]
-      date_attrs = [:issue_date, :expiration_date]
+      read_only_attrs = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id]
+      date_attrs = [:issue_date, :expiration_date, :created_at]
       custom_attrs = [:amount, :beneficiary_name]
       serialization_exclude_attrs = [:request]
       let(:hash) { {} }
       let(:value) { double('some value') }
       let(:call_method) { subject.send(:attributes=, hash) }
 
-      (described_class::ACCESSIBLE_ATTRS - date_attrs - read_only_attrs - custom_attrs - serialization_exclude_attrs).each do |key|
+      (described_class::ACCESSIBLE_ATTRS + read_only_attrs - date_attrs - custom_attrs - serialization_exclude_attrs).each do |key|
         it "assigns the value found under `#{key}` to the attribute `#{key}`" do
           hash[key.to_s] = value
           call_method
@@ -251,12 +286,10 @@ RSpec.describe LetterOfCredit, :type => :model do
           call_method
           expect(subject.send(key)).to be(datefied_value)
         end
-      end
-      read_only_attrs.each do |key|
-        it "ignores the `#{key}` read-only attribute if it is in the passed hash" do
-          hash[key.to_s] = value
+        it "assigns nil to the attribute `#{key}` if the value is nil" do
+          hash[key.to_s] = nil
           call_method
-          expect(subject.send(key)).not_to be(value)
+          expect(subject.send(key)).to be(nil)
         end
       end
       serialization_exclude_attrs.each do |attr|
@@ -264,6 +297,13 @@ RSpec.describe LetterOfCredit, :type => :model do
           hash[attr] = double('A Value')
           expect{call_method}.to raise_error(ArgumentError, "illegal attribute: #{attr}")
         end
+      end
+      it 'assigns the `owners` attribute after calling `to_set` on the value' do
+        expected_value = double('Set of Owners')
+        value = double('A Value', to_set: expected_value)
+        hash[:owners] = value
+        call_method
+        expect(subject.owners).to eq(expected_value)
       end
       it 'raises an exception if the hash contains keys that are not `LetterOfRequest` attributes' do
         hash[:foo] = 'bar'
@@ -349,6 +389,45 @@ RSpec.describe LetterOfCredit, :type => :model do
         expect(subject.beneficiary_name).to eq(beneficiary_name)
       end
     end
+
+    describe '`execute`' do
+      let(:requester_name) { SecureRandom.hex }
+      let(:call_method) { subject.execute(requester_name) }
+      before { allow(subject).to receive(:set_lc_number) }
+
+      it 'sets `created_by` to the passed requester name' do
+        call_method
+        expect(subject.created_by).to eq(requester_name)
+      end
+      it 'sets `created_at` to Time.zone.now' do
+        now = instance_double(DateTime)
+        allow(Time.zone).to receive(:now).and_return(now)
+        call_method
+        expect(subject.created_at).to eq(now)
+      end
+      it 'calls `set_lc_number`' do
+        expect(subject).to receive(:set_lc_number)
+        call_method
+      end
+      it 'returns true if `set_lc_number` raises no errors' do
+        expect(call_method).to be true
+      end
+      it 'returns false if `set_lc_number` raises an error' do
+        allow(subject).to receive(:set_lc_number).and_raise(StandardError)
+        expect(call_method).to be false
+      end
+    end
+
+    describe '`owners` method' do
+      let(:call_method) { subject.owners }
+      it 'returns a Set' do
+        expect(call_method).to be_kind_of(Set)
+      end
+      it 'returns the same object on each call' do
+        set = call_method
+        expect(call_method).to be(set)
+      end
+    end
   end
 
   describe 'private methods' do
@@ -410,6 +489,181 @@ RSpec.describe LetterOfCredit, :type => :model do
             end
           end
         end
+      end
+    end
+
+    describe '`sequence_name`' do
+      it 'returns "LC_" and the current year' do
+        today = instance_double(DateTime, year: SecureRandom.hex)
+        allow(Time.zone).to receive(:today).and_return(today)
+        expect(subject.send(:sequence_name)).to eq("LC_#{today.year}")
+      end
+    end
+
+    describe '`next_in_sequence`' do
+      let(:sequence_name) { SecureRandom.hex }
+      let(:sequence) { double('sequence', to_i: nil) }
+      let(:cursor) { double('cursor', fetch: [sequence]) }
+      let(:call_method) { subject.send(:next_in_sequence) }
+      before do
+        allow(ActiveRecord::Base.connection).to receive(:execute).and_return(cursor)
+        allow(subject).to receive(:sequence_name).and_return(sequence_name)
+        allow(ActiveRecord::Base.connection).to receive(:quote_table_name).and_return(sequence_name)
+      end
+
+      it 'fetches the `sequence_name`' do
+        expect(subject).to receive(:sequence_name)
+        call_method
+      end
+      it 'calls `quote_table_name` with the `sequence_name`' do
+        expect(ActiveRecord::Base.connection).to receive(:quote_table_name).with(sequence_name)
+        call_method
+      end
+      it 'calls execute on the ActiveRecord::Base.connection with the proper SQL' do
+        sql = "SELECT #{sequence_name}.nextval FROM dual"
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(sql).and_return(cursor)
+        call_method
+      end
+      it 'calls `fetch` on the returned cursor' do
+        expect(cursor).to receive(:fetch).and_return([sequence])
+        call_method
+      end
+      it 'calls `to_i` on the first fetched value' do
+        expect(sequence).to receive(:to_i)
+        call_method
+      end
+      it 'returns the integer value of the first fetched value' do
+        allow(sequence).to receive(:to_i).and_return(sequence)
+        expect(call_method).to eq(sequence)
+      end
+    end
+
+    describe '`create_sequence`' do
+      let(:sequence_name) { SecureRandom.hex }
+      let(:call_method) { subject.send(:create_sequence) }
+      before do
+        allow(subject).to receive(:sequence_name).and_return(sequence_name)
+        allow(ActiveRecord::Base.connection).to receive(:execute)
+        allow(ActiveRecord::Base.connection).to receive(:quote_table_name).and_return(sequence_name)
+      end
+      describe 'the SQL statement' do
+        let(:ensure_order_regexp) { '(?:\A\s*CREATE\s+SEQUENCE\s+\w+\s+)(?:.*)' }
+        it 'fetches the `sequence_name`' do
+          expect(subject).to receive(:sequence_name)
+          call_method
+        end
+        it 'calls `quote_table_name` with the `sequence_name`' do
+          expect(ActiveRecord::Base.connection).to receive(:quote_table_name).with(sequence_name)
+          call_method
+        end
+        it 'creates a sequence with the sequence name' do
+          matcher = Regexp.new(/\A\s*CREATE\s+SEQUENCE\s+#{sequence_name}\s+/i)
+          expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher)
+          call_method
+        end
+        it 'starts incrementing the sequence at 1000' do
+          matcher = Regexp.new(/#{ensure_order_regexp}START\s+WITH\s+1000\s*/im)
+          expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher)
+          call_method
+        end
+        it 'increments by 1' do
+          matcher = Regexp.new(/#{ensure_order_regexp}INCREMENT\s+BY\s+1\s*/im)
+          expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher)
+          call_method
+        end
+        it 'does not cache' do
+          matcher = Regexp.new(/#{ensure_order_regexp}NOCACHE\s+/im)
+          expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher)
+          call_method
+        end
+      end
+      it 'executes the SQL' do
+        expect(ActiveRecord::Base.connection).to receive(:execute)
+        call_method
+      end
+      it 'returns the result of the execution' do
+        result = double('some SQL result')
+        allow(ActiveRecord::Base.connection).to receive(:execute).and_return(result)
+        expect(call_method).to eq(result)
+      end
+    end
+
+    describe '`set_lc_number`' do
+      let(:lc_number) { double('lc number') }
+      let(:sequence) { SecureRandom.hex }
+      let(:call_method) { subject.send(:set_lc_number) }
+
+      shared_examples 'an `lc_number` setter' do
+        it 'sets `lc_number` to a string including the year and the result of `next_in_sequence`' do
+          call_method
+          expect(subject.lc_number).to eq("#{Time.zone.today.year}-#{sequence}")
+        end
+        it 'returns the `lc_number`' do
+          expect(call_method).to eq("#{Time.zone.today.year}-#{sequence}")
+        end
+      end
+
+      context 'when the `lc_number` attribute already exists' do
+        before { subject.instance_variable_set(:@lc_number, lc_number) }
+
+        it 'returns the lc_number' do
+          expect(call_method).to eq(lc_number)
+        end
+      end
+      context 'when the `lc_number` attribute does not yet exist' do
+        it 'calls `next_in_sequence`' do
+          expect(subject).to receive(:next_in_sequence)
+          call_method
+        end
+        context 'when `next_in_sequence` does not raise an error' do
+          before { allow(subject).to receive(:next_in_sequence).and_return(sequence) }
+          it_behaves_like 'an `lc_number` setter'
+        end
+        context 'when `next_in_sequence` raises an ActiveRecord::StatementInvalid error' do
+          before { allow(subject).to receive(:next_in_sequence).and_raise(ActiveRecord::StatementInvalid, 'message') }
+
+          it 'calls `next_in_new_sequence`' do
+            expect(subject).to receive(:next_in_new_sequence)
+            call_method
+          end
+          context 'when `next_in_new_sequence` does not raise an error' do
+            before { allow(subject).to receive(:next_in_new_sequence).and_return(sequence) }
+            it_behaves_like 'an `lc_number` setter'
+          end
+          it 'raises an error if `next_in_new_sequence` raises an error' do
+            error = ActiveRecord::StatementInvalid.new('message')
+            allow(subject).to receive(:next_in_new_sequence).and_raise(error)
+            expect{call_method}.to raise_error(error)
+          end
+        end
+      end
+    end
+
+    describe '`next_in_new_sequence`' do
+      let(:sequence) { SecureRandom.hex }
+      let(:error) { ActiveRecord::StatementInvalid.new('message') }
+      let(:call_method) { subject.send(:next_in_new_sequence) }
+      before { allow(subject).to receive(:next_in_sequence) }
+
+      it 'calls `create_sequence`' do
+        expect(subject).to receive(:create_sequence)
+        call_method
+      end
+      it 'catches `ActiveRecord::StatementInvalid` errors raised by `create_sequence`' do
+        allow(subject).to receive(:create_sequence).and_raise(error)
+        expect{call_method}.not_to raise_error
+      end
+      it 'calls `next_in_sequence`' do
+        expect(subject).to receive(:next_in_sequence)
+        call_method
+      end
+      it 'returns the result of `next_in_sequence`' do
+        allow(subject).to receive(:next_in_sequence).and_return(sequence)
+        expect(call_method).to eq(sequence)
+      end
+      it 'raises an error if `next_in_sequence` raises an error' do
+        allow(subject).to receive(:next_in_sequence).and_raise(error)
+        expect{call_method}.to raise_error(error)
       end
     end
   end

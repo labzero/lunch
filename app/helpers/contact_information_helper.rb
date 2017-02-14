@@ -15,6 +15,7 @@ module ContactInformationHelper
   SECURITIES_SERVICES_PHONE_NUMBER = '4156162970'
   COLLATERAL_OPERATIONS_PHONE_NUMBER = '4156162980'
   FEEDBACK_SURVEY_URL = 'https://www.surveymonkey.com/r/7KYSNVN'
+  MEMBER_SERVICES_PHONE_NUMBER = '4156162500'
 
   def web_support_email
     "mailto:#{WEB_SUPPORT_EMAIL}"
@@ -74,6 +75,10 @@ module ContactInformationHelper
 
   def collateral_operations_phone_number
     fhlb_formatted_phone_number(COLLATERAL_OPERATIONS_PHONE_NUMBER)
+  end
+
+  def member_services_phone_number
+    fhlb_formatted_phone_number(MEMBER_SERVICES_PHONE_NUMBER)
   end
 
   def feedback_survey_url(user, member_name)

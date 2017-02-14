@@ -42,3 +42,13 @@ Feature: Requesting a New Letter of Credit
     And I enter 1234567 in the letter of credit amount field
     When I click the Preview Request button
     Then I should see the "expiration date before issue date" form error
+
+  Scenario: Letter of credit amount input field does not allow letters or symbols
+    Given I visit the Request Letter of Credit page
+    When I try to enter "asdf#*@&!asdf" in the letter of credit amount field
+    Then the letter of credit amount field should be blank
+
+  Scenario: Letter of credit amount input field adds commas to input field
+    Given I visit the Request Letter of Credit page
+    When I enter 7894561235 in the letter of credit amount field
+    Then the letter of credit amount field should show "7,894,561,235"
