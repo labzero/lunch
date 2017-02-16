@@ -286,40 +286,6 @@ describe MAPI::ServiceApp do
           expect(r[:start_of_day_rate]).to eq(start_of_day_rate)
           expect(r[:rate_band_info]).to eq(MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term]))
         end
-        describe 'disabling the term' do
-          let(:rate_band_hash) {MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term])}
-          before do
-            rate_band_hash[:max_threshold_exceeded] = false
-            rate_band_hash[:min_threshold_exceeded] = false
-            loan_terms_hash[loan_term][loan_type][:trade_status] = true
-            allow(MAPI::Services::Rates).to receive(:rate_band_info).and_call_original
-            allow(MAPI::Services::Rates).to receive(:rate_band_info).with(live_hash[loan_type][loan_term], rate_bands_hash[loan_term]).and_return(rate_band_hash)
-            allow(MAPI::Services::Rates::LoanTerms).to receive(:disable_term).and_return(true)
-          end
-          it 'disables the term if the rate high threshold is exceeded' do
-            rate_band_hash[:max_threshold_exceeded] = true
-            expect(MAPI::Services::Rates::LoanTerms).to receive(:disable_term).with(kind_of(app), loan_term)
-            get '/rates/summary'
-          end
-          it 'disables the term if the rate low threshold is exceeded' do
-            rate_band_hash[:min_threshold_exceeded] = true
-            expect(MAPI::Services::Rates::LoanTerms).to receive(:disable_term).with(kind_of(app), loan_term)
-            get '/rates/summary'
-          end
-          it 'raises an error if disabling the term fails' do
-            rate_band_hash[:max_threshold_exceeded] = true
-            rate_band_hash[:min_threshold_exceeded] = true
-            allow(MAPI::Services::Rates::LoanTerms).to receive(:disable_term).with(kind_of(app), loan_term).and_return(false)
-            expect{ get '/rates/summary' }.to raise_error(/failed to disable term: #{loan_term}/i)
-          end
-          it "does not disable the #{loan_type}, #{loan_term} rate if its passed the end-of-day" do
-            rate_band_hash[:max_threshold_exceeded] = true
-            rate_band_hash[:min_threshold_exceeded] = true
-            loan_terms_hash[loan_term][loan_type][:trade_status] = false
-            expect(MAPI::Services::Rates::LoanTerms).to_not receive(:disable_term).with(kind_of(app), loan_term)
-            get '/rates/summary'
-          end
-        end
       end
     end
     it "returns a timestamp" do
