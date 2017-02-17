@@ -303,16 +303,10 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       it_behaves_like 'a LettersOfCreditController action that fetches a letter of credit request'
       it_behaves_like 'a LettersOfCreditController action that saves a letter of credit request'
 
-      it 'performs a securid check' do
-        expect(controller).to receive(:securid_perform_check)
-        call_action
-      end
-      context 'when the requester is not permitted to execute the letter of credit' do
-        deny_policy :letters_of_credit, :execute?
-
-        it 'sets `@error_message` to the not-authorized message' do
+      shared_examples 'an unsuccessful execution' do
+        it 'calls `set_titles` with the Preview title' do
+          expect(controller).to receive(:set_titles).with(I18n.t('letters_of_credit.request.title'))
           call_action
-          expect(assigns[:error_message]).to eq(I18n.t('letters_of_credit.errors.not_authorized'))
         end
         it 'renders the `preview` view' do
           call_action
@@ -320,32 +314,41 @@ RSpec.describe LettersOfCreditController, :type => :controller do
         end
       end
 
+      context 'when the requester is not permitted to execute the letter of credit' do
+        deny_policy :letters_of_credit, :execute?
+
+        it_behaves_like 'an unsuccessful execution'
+        it 'sets `@error_message` to the not-authorized message' do
+          call_action
+          expect(assigns[:error_message]).to eq(I18n.t('letters_of_credit.errors.not_authorized'))
+        end
+      end
+
       context 'when the requester is permitted to execute the letter of credit' do
         allow_policy :letters_of_credit, :execute?
 
+        it 'performs a securid check' do
+          expect(controller).to receive(:securid_perform_check)
+          call_action
+        end
         context 'when the session is not elevated' do
           before { allow(controller).to receive(:session_elevated?).and_return(false) }
 
+          it_behaves_like 'an unsuccessful execution'
           it 'sets `@securid_status` to the result of `securid_perform_check`' do
             call_action
             expect(assigns[:securid_status]).to eq(securid_status)
-          end
-          it 'renders the `preview` view' do
-            call_action
-            expect(response.body).to render_template(:preview)
           end
         end
         context 'when the session is elevated' do
           before { allow(controller).to receive(:session_elevated?).and_return(true) }
 
           shared_examples 'a letter of credit request with a generic error' do
+
+            it_behaves_like 'an unsuccessful execution'
             it 'sets `@error_message` to the generic error message' do
               call_action
               expect(assigns[:error_message]).to eq(I18n.t('letters_of_credit.errors.generic_html', rm_email: rm[:email], rm_phone_number: rm[:phone_number]))
-            end
-            it 'renders the `preview` view' do
-              call_action
-              expect(response.body).to render_template(:preview)
             end
           end
 

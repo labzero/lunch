@@ -73,11 +73,13 @@ class LettersOfCreditController < ApplicationController
 
   # POST
   def execute
-    securid_status = securid_perform_check
     request_succeeded = false
     if !policy(:letters_of_credit).execute?
       @error_message = t('letters_of_credit.errors.not_authorized')
-    elsif !session_elevated?
+    else
+      securid_status = securid_perform_check
+    end
+    if !session_elevated?
       @securid_status = securid_status
     elsif letter_of_credit_request.valid? && letter_of_credit_request.execute(current_user.display_name)
       set_titles(t('letters_of_credit.success.title'))
@@ -85,7 +87,10 @@ class LettersOfCreditController < ApplicationController
     else
       @error_message = t('letters_of_credit.errors.generic_html', rm_email: @contacts[:rm][:email], rm_phone_number: @contacts[:rm][:phone_number])
     end
-    render :preview unless request_succeeded
+    unless request_succeeded
+      set_titles(t('letters_of_credit.request.title'))
+      render :preview
+    end
   end
 
   private

@@ -26,3 +26,11 @@ Feature: Executing a New Letter of Credit Request
     Given I visit the Letter of Credit Success page
     When I click the Make a New Request button
     Then I should be on the New Letter of Credit Request page
+
+  @jira-mem-2146
+  Scenario: Internal user attempts to execute a New Letter of Credit Request
+    Given I am logged in as an "intranet user"
+    When I visit the Preview Letter of Credit page
+    And I click the Authorize Request button
+    Then I should be on the Preview Letter of Credit Request page
+    And I should see the "internal user not authorized" form error
