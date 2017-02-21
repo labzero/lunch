@@ -1,7 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe LettersOfCreditPolicy, :type => :policy do
-  let(:user) { double(User, id: double('User ID'), member: nil) }
+  let(:user) { instance_double(User, id: double('User ID'), member: nil) }
+  let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest) }
 
   describe '`request?` method' do
     subject { LettersOfCreditPolicy.new(user, :letter_of_credit) }
@@ -54,6 +55,20 @@ RSpec.describe LettersOfCreditPolicy, :type => :policy do
         end
         it { should_not permit_action(:execute) }
       end
+    end
+  end
+
+  describe '`modify?` method' do
+    subject { LettersOfCreditPolicy.new(user, letter_of_credit_request) }
+    before do
+      allow(letter_of_credit_request).to receive(:owners).and_return(Set.new)
+    end
+    it 'returns true if the user is an owner of the letter of credit request' do
+      letter_of_credit_request.owners.add(user.id)
+      expect(subject).to permit_action(:modify)
+    end
+    it 'returns false if the user is not an owner of the letter of credit request' do
+      expect(subject).to_not permit_action(:modify)
     end
   end
 end

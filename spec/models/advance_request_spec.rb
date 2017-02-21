@@ -944,44 +944,6 @@ describe AdvanceRequest do
     end
   end
 
-  describe '`save` method' do
-    let(:redis_value) { double(Redis::Value, :set => true, :expire => true) }
-    let(:json) { double('Some JSON') }
-    let(:call_method) { subject.save }
-    before do
-      allow(subject).to receive(:redis_value).and_return(redis_value)
-      allow(subject).to receive(:to_json).and_return(json)
-    end
-    it 'calls `set` on the `redis_value` with the JSON repersentation' do
-      expect(redis_value).to receive(:set).with(json)
-      call_method
-    end
-    it 'sets an expiration on the `redis_value`' do
-      expect(redis_value).to receive(:expire).with(Rails.configuration.x.advance_request.key_expiration)
-      call_method
-    end
-    it 'logs the save' do
-      expect(subject).to receive(:log)
-      call_method
-    end
-    it 'does not set the expiration if the save fails' do
-      allow(redis_value).to receive(:set).and_return(false)
-      expect(redis_value).to_not receive(:expire)
-      call_method
-    end
-    it 'returns true on success' do
-      expect(call_method).to be(true)
-    end
-    it 'returns false if the save fails' do
-      allow(redis_value).to receive(:set).and_return(false)
-      expect(call_method).to be(false)
-    end
-    it 'returns false if the expiration update fails' do
-      allow(redis_value).to receive(:expire).and_return(false)
-      expect(call_method).to be(false)
-    end
-  end
-
   describe '`ttl` method' do
     let(:redis_value) { double(Redis::Value) }
     it 'returns the `ttl` value from Redis' do
@@ -1049,129 +1011,11 @@ describe AdvanceRequest do
     end
   end
 
-  describe '`find` class method' do
-    let(:id) { double('An ID') }
-    let(:value) { subject.to_json }
-    let(:redis_value) { double(Redis::Value, nil?: false, value: value, expire: true) }
-    let(:call_method) { described_class.find(id, request) }
-
-    before do
-      allow(described_class).to receive(:redis_value).with(id).and_return(redis_value)
-    end
-
-    it 'call `redis_value`' do
-      expect(described_class).to receive(:redis_value).with(id)
-      call_method
-    end
-    it 'raises an `ActiveRecord::RecordNotFound` if the key is not found' do
-      allow(redis_value).to receive(:nil?).and_return(true)
-      expect{call_method}.to raise_error(ActiveRecord::RecordNotFound)
-    end
-    describe 'with a found key' do
-      it "converts the JSON to an `#{described_class}` instance" do
-        expect(described_class).to receive(:from_json).with(value, anything)
-        call_method
-      end
-      it 'gives the new instance the supplied request if one is present' do
-        expect(described_class).to receive(:from_json).with(anything, request)
-        call_method
-      end
-      it 'updates the expiration on the key in Redis' do
-        expect(redis_value).to receive(:expire).with(Rails.configuration.x.advance_request.key_expiration)
-        call_method
-      end
-      it 'logs the find' do
-        expect(described_class).to receive(:log)
-        call_method
-      end
-      it 'returns the new instance' do
-        instance = double(described_class)
-        allow(described_class).to receive(:from_json).and_return(instance)
-        expect(call_method).to be(instance)
-      end
-    end
-  end
-
-  describe '`redis_key` class method' do
-    it 'joins the class name and the supplied `id`' do
-      id = SecureRandom.uuid
-      expect(described_class.redis_key(id)).to eq(described_class.name + ':' + id)
-    end
-  end
-
-  describe '`redis_value` class method' do
-    let(:id) { SecureRandom.uuid }
-    let(:call_method) { described_class.redis_value(id) }
-    it 'contrcuts a new `Redis::Value` using the key from `redis_key`' do
-      key = double('A Redis Key')
-      allow(described_class).to receive(:redis_key).and_return(key)
-      expect(Redis::Value).to receive(:new).with(key)
-      call_method
-    end
-    it 'returns the new instance' do
-      value = double(Redis::Value)
-      allow(Redis::Value).to receive(:new).and_return(value)
-      expect(call_method).to be(value)
-    end
-  end
-
-  describe '`log` class method' do
-    let(:level) { double('A Log Level') }
-    let(:message)  { double('A Message', to_s: SecureRandom.hex) }
-    let(:block) { Proc.new { message } }
-    let(:call_method) { described_class.log(level, &block) }
-
-    it 'calls the Rails logger with the supplied level' do
-      expect(Rails.logger).to receive(:send).with(level)
-      call_method
-    end
-    it 'uses level `info` if none is provided' do
-      expect(Rails.logger).to receive(:info)
-      described_class.log
-    end
-    it 'the Rails logger block calls the supplied block and prepends the `LOG_PREFIX` to its results' do
-      allow(Rails.logger).to receive(:send).with(level) do |*args, &block|
-        expect(block.call).to eq(described_class::LOG_PREFIX + message.to_s)
-      end
-      call_method
-    end
-  end
-
   describe '`policy_class` class method' do
     it 'returns the AdvancePolicy class' do
       expect(described_class.policy_class).to eq(AdvancePolicy)
     end
   end
-
-  describe '`log` protected method' do
-    let(:level) { double('A Log Level') }
-    let(:block) { Proc.new {} }
-    it 'calls `log` on the class with the supplied level and block' do
-      expect(described_class).to receive(:log).with(level) do |*args, &proc|
-        expect(proc).to be(block)
-      end
-      subject.send(:log, level, &block)
-    end
-    it 'uses `info` if no level has been provided' do
-      expect(described_class).to receive(:log).with(:info)
-      subject.send(:log)
-    end
-  end
-
-  describe '`redis_value` protected method' do
-    let(:value) { double(Redis::Value) }
-    let(:call_method) { subject.send(:redis_value) }
-
-    it 'returns the result of calling `redis_value` on the class' do
-      allow(described_class).to receive(:redis_value).with(subject.id).and_return(value)
-      expect(call_method).to be(value)
-    end
-    it 'returns the same instance on subsequent calls' do
-      value = call_method
-      expect(call_method).to be(value)
-    end
-  end
-
 
   describe '`notify_if_rate_bands_exceeded` protected method' do
     let(:request_uuid) { double('Some UUID') }

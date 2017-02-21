@@ -72,7 +72,7 @@ describe ContactInformationHelper, type: :helper do
     end
   end
 
-  %i(web_support_phone_number service_desk_phone_number operations_phone_number mcu_phone_number accounting_phone_number securities_services_phone_number collateral_operations_phone_number).each do |helper_method|
+  %i(web_support_phone_number service_desk_phone_number operations_phone_number mcu_phone_number accounting_phone_number securities_services_phone_number collateral_operations_phone_number member_services_phone_number).each do |helper_method|
     describe "`#{helper_method}` method" do
       let(:call_method) {helper.send(helper_method) }
       it "responds to `#{helper_method}`" do
@@ -99,7 +99,7 @@ describe ContactInformationHelper, type: :helper do
   end
 
   describe 'the `member_contacts` method' do
-    let(:helper_instance) { mock_context(described_class, [:current_member_id, :request]) }
+    let(:helper_instance) { mock_context(klass: described_class, instance_methods: [:current_member_id, :request]) }
     let(:request_obj) { double('request') }
     let(:member_id) { double('member id') }
     let(:member_service) { instance_double(MembersService, member_contacts: nil) }

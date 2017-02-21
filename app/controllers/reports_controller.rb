@@ -1357,6 +1357,7 @@ class ReportsController < ApplicationController
         @dropdown_options_text ||= @dropdown_options[0][0]
         @div_id ||= @dropdown_options[0][1]
         @show_summary_data = true if %w(1 2 3 4).include?(@div_id.last)
+        @as_of = @dropdown_options_text
       end
     end
   end

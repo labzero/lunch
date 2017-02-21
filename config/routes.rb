@@ -197,6 +197,7 @@ Rails.application.routes.draw do
       get 'manage' => 'letters_of_credit#manage'
       get 'request' => 'letters_of_credit#new'
       post 'preview' => 'letters_of_credit#preview'
+      post 'execute' => 'letters_of_credit#execute'
     end
   end
 
@@ -223,9 +224,10 @@ Rails.application.routes.draw do
   root 'users/sessions#new'
 
   constraints Constraints::WebAdmin.new do
-    get '/admin' => 'admin/dashboard#index', as: :dashboard_admin
     scope :admin do
+      get '/' => 'admin/dashboard#index', as: :dashboard_admin
       get '/features' => 'admin/features#index', as: :features_admin
+      get '/features/:feature' => 'admin/features#view', as: :feature_admin
       mount Flipper::UI.app(Rails.application.flipper) => '/flipper-features', as: :flipper_features_admin
     end
   end

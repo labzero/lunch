@@ -208,7 +208,6 @@ describe MAPI::ServiceApp do
 
   describe "rate summary" do
     before do
-      allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
       allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
       allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_dates)
       allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_hash)
@@ -217,7 +216,6 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Rates).to receive(:fake).with('market_data_live_rates').and_return(live_hash)
       allow(MAPI::Services::Rates).to receive(:fake).with('market_data_start_of_day_rates').and_return(start_of_day_hash)
     end
-    let(:logger) { instance_double(Logger, error: nil)}
     let(:today) { Time.zone.today }
     let(:one_week_away) { today + 1.week }
     let(:three_weeks_away) { today + 3.week }
@@ -287,26 +285,6 @@ describe MAPI::ServiceApp do
           expect(r[:end_of_day]).to be(cutoff)
           expect(r[:start_of_day_rate]).to eq(start_of_day_rate)
           expect(r[:rate_band_info]).to eq(MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term]))
-        end
-        describe 'logging the rate band violation' do
-          let(:rate_band_hash) {MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term])}
-          before do
-            rate_band_hash[:max_threshold_exceeded] = false
-            rate_band_hash[:min_threshold_exceeded] = false
-            allow(MAPI::Services::Rates).to receive(:rate_band_info).and_call_original
-            allow(MAPI::Services::Rates).to receive(:rate_band_info).with(live_hash[loan_type][loan_term], rate_bands_hash[loan_term]).and_return(rate_band_hash)
-            allow(MAPI::Services::Rates::LoanTerms).to receive(:disable_term).and_return(true)
-          end
-          it 'if the term if the rate high threshold is exceeded' do
-            rate_band_hash[:max_threshold_exceeded] = true
-            expect(logger).to receive(:error).with(match(/type=#{loan_type}, term=#{loan_term}, details=#{Regexp.quote(rate_summary[loan_type][loan_term].to_json)}/))
-            get '/rates/summary'
-          end
-          it 'if the term if the rate low threshold is exceeded' do
-            rate_band_hash[:min_threshold_exceeded] = true
-            expect(logger).to receive(:error).with(match(/type=#{loan_type}, term=#{loan_term}, details=#{Regexp.quote(rate_summary[loan_type][loan_term].to_json)}/))
-            get '/rates/summary'
-          end
         end
       end
     end

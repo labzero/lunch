@@ -7,6 +7,10 @@ $partial-enabled-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3
 .admin {
   h1 {
     @extend %typography-page-title;
+    span {
+      vertical-align: middle;
+      line-height: 1;
+    }
   }
 
   .main-nav {
@@ -28,22 +32,34 @@ $partial-enabled-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3
       line-height: $admin-logo-height;
     }
   }
+}
 
-  .admin-off-icon, .admin-on-icon, .admin-conditional-icon {
-    width: 18px;
-    height: 18px;
-    background-size: 14px 14px;
-    background-position: center center;
-    background-repeat: no-repeat;
-    display: inline-block;
+.admin-off-icon, .admin-on-icon, .admin-conditional-icon {
+  width: 18px;
+  height: 18px;
+  background-size: 14px 14px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  display: inline-block;
+  h1 & {
+    width: 22px;
+    height: auto;
+    background-size: 20px 20px;
+    margin-right: 20px;
   }
-  .admin-off-icon {
-    background-image: $disabled-icon;
-  }
-  .admin-on-icon {
-    background-image: $enabled-icon;
-  }
-  .admin-conditional-icon {
-    background-image: $partial-enabled-icon;
-  }
+}
+.admin-off-icon {
+  background-image: $disabled-icon;
+}
+.admin-on-icon {
+  background-image: $enabled-icon;
+}
+.admin-conditional-icon {
+  background-image: $partial-enabled-icon;
+}
+.column-bordered {
+  @extend %bordered-section;
+}
+.row-elements-equal-height {
+  display: flex;
 }

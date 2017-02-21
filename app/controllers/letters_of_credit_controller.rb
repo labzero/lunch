@@ -12,14 +12,14 @@ class LettersOfCreditController < ApplicationController
     @html_class ||= 'white-background'
   end
 
-  before_action only: [:new, :preview] do
-    authorize :letters_of_credit, :request?
-  end
-
   before_action except: [:manage] do
     @profile = sanitized_profile
     @contacts = member_contacts
+    authorize :letters_of_credit, :request?
   end
+
+  before_action :fetch_letter_of_credit_request, except: [:manage]
+  after_action :save_letter_of_credit_request, except: [:manage]
 
   # GET
   def manage
@@ -62,14 +62,30 @@ class LettersOfCreditController < ApplicationController
   # POST
   def preview
     set_titles(t('letters_of_credit.request.title'))
-    loc_params = params[:letter_of_credit]
-    @letter_of_credit = LetterOfCredit.from_hash(loc_params)
+    letter_of_credit_request.attributes = params[:letter_of_credit_request]
     @session_elevated = session_elevated?
-    unless @letter_of_credit.valid?
-      @error_message = @letter_of_credit.errors.first.last
+    unless @letter_of_credit_request.valid?
+      @error_message = @letter_of_credit_request.errors.first.last
       populate_new_request_view_variables
       render :new
     end
+  end
+
+  # POST
+  def execute
+    securid_status = securid_perform_check
+    request_succeeded = false
+    if !policy(:letters_of_credit).execute?
+      @error_message = t('letters_of_credit.errors.not_authorized')
+    elsif !session_elevated?
+      @securid_status = securid_status
+    elsif letter_of_credit_request.valid? && letter_of_credit_request.execute(current_user.display_name)
+      set_titles(t('letters_of_credit.success.title'))
+      request_succeeded = true
+    else
+      @error_message = t('letters_of_credit.errors.generic_html', rm_email: @contacts[:rm][:email], rm_phone_number: @contacts[:rm][:phone_number])
+    end
+    render :preview unless request_succeeded
   end
 
   private
@@ -94,20 +110,38 @@ class LettersOfCreditController < ApplicationController
   def date_restrictions
     today = Time.zone.today
     calendar_service = CalendarService.new(request)
-    expiration_max_date = today + LetterOfCredit::EXPIRATION_MAX_DATE_RESTRICTION
+    expiration_max_date = today + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION
     {
       min_date: calendar_service.find_next_business_day(today, 1.day),
       invalid_dates: weekends_and_holidays(start_date: today, end_date: expiration_max_date, calendar_service: calendar_service),
       expiration_max_date: expiration_max_date,
-      issue_max_date: today + LetterOfCredit::ISSUE_MAX_DATE_RESTRICTION
+      issue_max_date: today + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION
     }
   end
 
   def populate_new_request_view_variables
     set_titles(t('letters_of_credit.request.title'))
-    @letter_of_credit ||= LetterOfCredit.new(request)
     @beneficiary_dropdown_options = BeneficiariesService.new(request).all.collect{|beneficiary| [beneficiary[:name], beneficiary[:name]] }
+    @beneficiary_dropdown_default = letter_of_credit_request.beneficiary_name || @beneficiary_dropdown_options.first.try(:last)
     @date_restrictions = date_restrictions
+  end
+
+  def letter_of_credit_request
+    @letter_of_credit_request ||= LetterOfCreditRequest.new(request)
+    @letter_of_credit_request.owners.add(current_user.id)
+    @letter_of_credit_request
+  end
+
+  def fetch_letter_of_credit_request
+    letter_of_credit_params = request.params[:letter_of_credit_request] || {}
+    id = letter_of_credit_params[:id]
+    @letter_of_credit_request = id ? LetterOfCreditRequest.find(id, request) : letter_of_credit_request
+    authorize @letter_of_credit_request, :modify?
+    @letter_of_credit_request
+  end
+
+  def save_letter_of_credit_request
+    @letter_of_credit_request.save if @letter_of_credit_request
   end
 
 end

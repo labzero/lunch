@@ -256,7 +256,7 @@ en:
           attributes:
             cusip:
               invalid: "The following CUSIP is invalid: %{value}.\nEdit your file and try again."
-        letter_of_credit:
+        letter_of_credit_request:
           blank: 'Missing required field: %{attribute}'
           attributes:
             issue_date:
@@ -1531,6 +1531,16 @@ en:
       lc_number: LC Number
       beneficiary_address: Beneficiary Address
       issue_date: Issue Date
+    success:
+      title: Letter of Credit Request Sent
+      confirmation: We received your Letter of Credit request at %{datetime}. We will process your request on the Issue Date. Once processed, the original Letter of Credit will be sent to the beneficiary on the Issue Date. If there are any issues with your request, you will be contacted by the Bank.
+      email: 'An email containing the details of your request will be sent to this address:'
+      questions: If you have questions, call the Member Services Desk at %{phone_number}.
+      download_pdf: Download a pdf of request
+      new_request: Make a new request
+    errors:
+      not_authorized: This Letter of Credit Request was not completed because Bank employees are not authorized to request letters of credit via the member portal.
+      generic_html: "We are unable to process your request at this time. Contact your Relationship Manager: %{rm_email}, %{rm_phone_number}."
   reports:
     meta_title: FHLBSF - Reports
     title: Reports
@@ -2446,13 +2456,18 @@ en:
           flexibility: Built-in long-term flexibility
           maturities: Wide range of maturities
           termination: Built-in termination option may help in managing compliance with Basel and regulatory liquidity standards
-        minimum_term: 2 years
+        minimum_term: 3 months
         maximum_term: 10 years
-        interest_rate: "The interest rate may be indexed to 1-month or 3-month LIBOR.\n\nAt the time the advance is made, the interest rate index, spread, and rate reset interval are established. At the specified interval, the interest rate is determined by adding the established spread to the new index value.\n\nIf a specified index is unavailable or is fundamentally altered, the Bank will designate a replacement index that is based upon comparable information, as determined by the Bank in its sole discretion."
+        interest_rate: "The interest rate may be indexed to 1-month or 3-month LIBOR.\n\nAt the time the advance is made, the interest rate index, spread, and rate reset interval are established. At the specified interval, the interest rate is determined by adding the established spread to the new index value.\n\nIf a specified index is unavailable or is fundamentally altered, the Bank will designate a replacement index that is based on comparable information, as determined by the Bank in its sole discretion."
         interest_day_count: Actual/360
         interest_payment_frequency: Same as repricing index
-        termination_option: The advance may be repaid on the termination option date without a prepayment fee, provided that the Bank receives proper notice. The Bank will charge a prepayment fee if proper notice is not received by the Bank or for prepayment on a date other than the designated termination option date.
-        termination_option_date: The termination option date will be one year prior to the maturity date of the advance.
+        termination_option: The advance may be repaid on the specified termination option date without a prepayment fee, provided that the Bank receives proper notice. The Bank will charge a prepayment fee if proper notice is not received by the Bank or for prepayment on a date other than the designated termination option date.
+        termination_option_date: "The termination option date must be within one year of the scheduled maturity date of the advance. The termination option date is subject to the following:"
+        termination_option_date_requirements:
+          increments: Termination dates must be in full month increments from the final maturity date; no stubs are allowed.
+          repricing: The termination date must conform to the repricing cycle associated with the index. For example, the termination date for an advance indexed to 3-month LIBOR must be 3, 6, 9, or 12 months prior to the maturity date.
+          advance_less_term: For an advance with a term to maturity of less than one year, the repricing index must be 1-month LIBOR and the termination date must be one month prior to the scheduled maturity date.
+          advance_greater_term: The termination date for an advance with a term to maturity greater than one year but less than two years must be within three months of the scheduled maturity date.
         termination_option_notice: At least 5 business days
         minimum_interest_rate_convention: The Bank will not be obligated to pay the borrower any amount relating to the application of a negative interest rate to the remaining principal amount of the advance.
         prepayment_features: The prepayment fee will be determined using the Bank’s standard prepayment formula.
@@ -3154,6 +3169,9 @@ en:
           feature_name: Features
         actions:
           edit: View/Edit
+      edit:
+        members: Institutions where all users are enabled for this feature
+        users: Individual users who are enabled for this feature
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

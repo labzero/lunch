@@ -2,7 +2,7 @@
   = form_tag members_set_member_path, method: :post, class: 'welcome-member-select' do
     %fieldset
       %legend= t('welcome.choose_member')
-    = select_tag(:member_id, options_for_select(@members.unshift([t('welcome.select_bank'), t('welcome.select_bank')]), {selected: t('welcome.select_bank'), disabled: t('welcome.select_bank')} ))
+    = select_tag(:member_id, options_for_select(@members.unshift([t('welcome.select_bank'), t('welcome.select_bank')]), {selected: t('welcome.select_bank'), disabled: t('welcome.select_bank')} ), autofocus: true)
     = link_to(t('nav.primary.logout'), destroy_user_session_url, method: :delete, class: 'secondary-button logout-link')
     = submit_tag t('global.continue'), class: 'primary-button', disabled: true
     - if policy(:member_profile).show?

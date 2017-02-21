@@ -4,6 +4,7 @@ $gutter-width: 20px; // 11 gutters
 $row-padding: 10px; // 1 each on outside of row
 
 $column-1-width: ($grid-column-width * 12) + ($gutter-width * 11);
+$column-2-width: ($grid-column-width * 6) + ($gutter-width * 5);
 $column-3-width: ($grid-column-width * 4) + ($gutter-width * 3);
 $column-6-width: ($grid-column-width * 6) + ($gutter-width * 5);
 $column-7-width: ($grid-column-width * 7) + ($gutter-width * 6);
@@ -16,6 +17,7 @@ $column-2x10-right-width: ($grid-column-width * 10) + ($gutter-width * 9.5);
 $print-column-3-width: 190px;
 
 $default-border-radius: 3px;
+
 
 $header-main-nav-height: 60px;
 $header-secondary-nav-height: 30px;

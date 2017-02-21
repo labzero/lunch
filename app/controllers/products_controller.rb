@@ -26,7 +26,7 @@ class ProductsController < ApplicationController
 
   # GET
   def choice_libor
-    @last_modified = Date.new(2015, 4, 1)
+    @last_modified = Date.new(2017, 2, 1)
   end
 
   # GET

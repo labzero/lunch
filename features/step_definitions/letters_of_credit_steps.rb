@@ -9,7 +9,7 @@ Then(/^I (should|should not) see the letters of credit dropdown for Request Lett
   end
 end
 
-When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Letter of Credit) page$/) do |page|
+When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Letter of Credit|Letter of Credit Success) page$/) do |page|
   case page
   when 'Manage Letters of Credit'
     visit '/letters-of-credit/manage'
@@ -19,6 +19,11 @@ When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Le
     visit '/letters-of-credit/request'
     step 'I enter 1234567 in the letter of credit amount field'
     step 'I click the Preview Request button'
+  when 'Letter of Credit Success'
+    step 'I visit the Preview Letter of Credit page'
+    step 'I enter my SecurID pin'
+    step 'I enter my SecurID token'
+    step 'I click the Authorize Request button'
   end
 end
 
@@ -40,7 +45,11 @@ Then(/^I should see the Preview Request button in its (enabled|disabled) state$/
 end
 
 When(/^I enter (\d+) in the letter of credit amount field$/) do |amount|
-  page.find('input[name="letter_of_credit[amount]"]').set(amount)
+  page.find('input[name="letter_of_credit_request[amount]"]').set(amount)
+end
+
+When(/^I try to enter "(.*?)" in the letter of credit amount field$/) do |amount|
+  page.find('input[name="letter_of_credit_request[amount]"]').set(amount)
 end
 
 Then(/^I should see that the amount in the preview is (\d+)/) do |amount|
@@ -66,16 +75,32 @@ When(/^I click the (issue|expiration) date letter of credit datepicker$/) do |fi
   field_container.find('.datepicker-trigger').click
 end
 
-When(/^I click the (Preview Request|Authorize Request) button$/) do |button|
+When(/^I click the (Preview Request|Authorize Request|Make a New Request|Manage Letters of Credit) button$/) do |button|
   text = case button
   when 'Preview Request'
     I18n.t('letters_of_credit.preview.action')
   when 'Authorize Request'
     I18n.t('letters_of_credit.preview.authorize')
+  when 'Make a New Request'
+    I18n.t('letters_of_credit.success.new_request')
+  when 'Manage Letters of Credit'
+    I18n.t('letters_of_credit.manage.title')
   end
-  page.find("input[type=submit][value='#{text}']").click
+  if ['Preview Request', 'Authorize Request'].include?(button)
+    page.find("input[type=submit][value='#{text}']").click
+  else
+    page.find('.letters-of-credit a', text: /\A#{text}\z/i).click
+  end
 end
 
 Then(/^I should see summary data for the letter of credit$/) do
   page.assert_selector('.letter-of-credit-request-form .form-summary-data', visible: true)
+end
+
+Then(/^the letter of credit amount field should be blank$/) do
+  expect(page.find('input[name="letter_of_credit_request[amount]"]').value).to eq('')
+end
+
+Then(/^the letter of credit amount field should show "(.*?)"/) do |text|
+  expect(page.find("input[name='letter_of_credit_request[amount]'").value).to eq(text)
 end

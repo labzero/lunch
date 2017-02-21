@@ -11,3 +11,21 @@
       }
     }
   }
+
+  .admin-feature-edit {
+    h1 {
+      margin-bottom: 60px;
+    }
+    h2 {
+      @extend %typography-admin-subtitle;
+      margin: 0 0 15px 0;
+    }
+    table {
+      @extend %table-report;
+      border: none;
+      margin-bottom: 0;
+      td, th {
+        border: none;
+      }
+    }
+  }
