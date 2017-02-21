@@ -62,6 +62,7 @@ class SecuritiesRequest
   ACCESSIBLE_ATTRS = (BROKER_INSTRUCTION_KEYS + OTHER_PARAMETERS + DELIVERY_INSTRUCTION_KEYS.values.flatten).freeze
 
   MAX_DATE_RESTRICTION = 3.months
+  MIN_DATE_RESTRICTION = 14.days
 
   FED_AMOUNT_LIMIT = 50000000
 
@@ -249,8 +250,9 @@ class SecuritiesRequest
   def date_within_range(date, field)
     today = Time.zone.today
     max_date = today + MAX_DATE_RESTRICTION
+    min_date = today - MIN_DATE_RESTRICTION
     holidays = CalendarService.new(ActionDispatch::TestRequest.new).holidays(today, max_date)
-    valid = !(date.try(:sunday?) || date.try(:saturday?)) && !(holidays.include?(date)) && date.try(:<=, max_date)
+    valid = !(date.try(:sunday?) || date.try(:saturday?)) && !(holidays.include?(date)) && date.try(:>=, min_date) && date.try(:<=, max_date)
   end
 
   def valid_securities_payment_amount?

@@ -132,39 +132,41 @@ RSpec.describe SecuritiesRequest, :type => :model do
     describe '`date_within_range`' do
       let(:today) { Time.zone.today }
       let(:max_date) { today + described_class::MAX_DATE_RESTRICTION }
+      let(:min_date) { today - described_class::MIN_DATE_RESTRICTION }
       let(:date) { instance_double(Date, sunday?: false, saturday?: false, :>= => true, :<= => true) }
 
       [:trade_date, :settlement_date].each do |date_type|
         describe "when `date_type` == #{date_type}" do
+          let(:call_method) { subject.send(:date_within_range, date, date_type) }
           it 'fetches `holidays` from the CalendarService instance with today and the max_date as args' do
             expect_any_instance_of(CalendarService).to receive(:holidays).with(today, max_date).and_return([])
-            subject.send(:date_within_range, date, date_type)
+            call_method
           end
           it 'returns nil if passed nil' do
             expect(subject.send(:date_within_range, nil, date_type)).to be_nil
           end
           it 'returns false if the provided date is a Saturday' do
             allow(date).to receive(:saturday?).and_return(true)
-            expect(subject.send(:date_within_range, date, date_type)).to be false
+            expect(call_method).to be false
           end
           it 'returns false if the provided date is a Sunday' do
             allow(date).to receive(:sunday?).and_return(true)
-            expect(subject.send(:date_within_range, date, date_type)).to be false
+            expect(call_method).to be false
           end
           it 'returns false if the provided date is a bank holiday' do
             allow_any_instance_of(CalendarService).to receive(:holidays).and_return([date])
-            expect(subject.send(:date_within_range, date, date_type)).to be false
+            expect(call_method).to be false
           end
           it 'returns false if the provided date occurs after today plus the `MAX_DATE_RESTRICTION`' do
             allow(date).to receive(:<=).with(max_date).and_return(false)
-            expect(subject.send(:date_within_range, date, date_type)).to be false
+            expect(call_method).to be false
+          end
+          it 'returns false if the provided date occurs before today minus the `MIN_DATE_RESTRICTION`' do
+            allow(date).to receive(:>=).with(min_date).and_return(false)
+            expect(call_method).to be false
           end
           it 'returns true if all of the above conditions are satisfied' do
-            expect(subject.send(:date_within_range, date, date_type)).to be true
-          end
-          it 'returns true if the provided date occurs before today' do
-            allow(date).to receive(:>=).with(today).and_return(false)
-            expect(subject.send(:date_within_range, date, date_type)).to be true
+            expect(call_method).to be true
           end
         end
       end

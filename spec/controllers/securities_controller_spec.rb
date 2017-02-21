@@ -2238,6 +2238,7 @@ RSpec.describe SecuritiesController, type: :controller do
     describe '`date_restrictions`' do
       let(:today) { Time.zone.today }
       let(:max_date) { today + SecuritiesRequest::MAX_DATE_RESTRICTION }
+      let(:min_date) { today - described_class::MIN_DATE_SELECTOR }
       let(:holidays) do
         holidays = []
         rand(2..4).times do
@@ -2273,6 +2274,9 @@ RSpec.describe SecuritiesController, type: :controller do
       describe 'the returned hash' do
         it 'has a `max_date` of today plus the `SecuritiesRequest::MAX_DATE_RESTRICTION`' do
           expect(call_method[:max_date]).to eq(max_date)
+        end
+        it 'has a `min_date` of today minus the `MIN_DATE_SELECTOR`' do
+          expect(call_method[:min_date]).to eq(min_date)
         end
         describe 'the `invalid_dates` array' do
           it 'includes all dates returned from the CalendarService as iso8601 strings' do
