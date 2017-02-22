@@ -6,7 +6,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
   login_user
 
   let(:member_id) { double('A Member ID') }
-  let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest, save: nil, :attributes= => nil, beneficiary_name: nil, owners: instance_double(Set, add: nil)) }
+  let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest, save: nil, :attributes= => nil, beneficiary_name: nil, owners: instance_double(Set, add: nil), lc_number: nil, id: nil) }
   before do
     allow(controller).to receive(:current_member_id).and_return(member_id)
     allow(controller).to receive(:sanitized_profile)
@@ -187,6 +187,107 @@ RSpec.describe LettersOfCreditController, :type => :controller do
             end
           end
         end
+      end
+    end
+  end
+
+  describe 'GET view' do
+    let(:id) { SecureRandom.hex }
+    let(:member) {{
+      name: double('name'),
+      fhla_number: double('fhla number')
+    }}
+    let(:members_service) { instance_double(MembersService, member: member) }
+    let(:call_action) { get :view, letter_of_credit_request: {id: id} }
+
+    before do
+      allow(LetterOfCreditRequest).to receive(:find).and_return(letter_of_credit_request)
+      allow(MembersService).to receive(:new).and_return(members_service)
+    end
+
+    allow_policy :letters_of_credit, :request?
+
+    it_behaves_like 'a user required action', :get, :view
+    it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
+    it 'finds the LetterOfCreditRequest based on the id param and the request' do
+      expect(LetterOfCreditRequest).to receive(:find).with(id, request).and_return(letter_of_credit_request)
+      call_action
+    end
+    it 'sets the `@letter_of_credit_request` instance variable to the result `LetterOfCreditRequest.find`' do
+      call_action
+      expect(assigns[:letter_of_credit_request]).to eq(letter_of_credit_request)
+    end
+    describe 'when there is an `export_format` param that is `pdf`' do
+      let(:job_status) { double('job_status', :update_attributes! => nil) }
+      let(:performed_job) { double('performed job', job_status: job_status) }
+      let(:call_action) { get :view, {letter_of_credit_request: {id: id}, export_format: 'pdf'} }
+
+      before do
+        allow(RenderLetterOfCreditPDFJob).to receive(:perform_later).and_return(performed_job)
+      end
+
+      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with the current_member_id' do
+        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(member_id, any_args).and_return(performed_job)
+        call_action
+      end
+      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with the current action name' do
+        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(anything, 'view', any_args).and_return(performed_job)
+        call_action
+      end
+      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with a pdf name that includes the lc_number of the letter of credit request' do
+        lc_number = SecureRandom.hex
+        allow(letter_of_credit_request).to receive(:lc_number).and_return(lc_number)
+        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(anything, anything, "letter_of_credit_request_#{lc_number}.pdf", any_args).and_return(performed_job)
+        call_action
+      end
+      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with the letter_of_credit_request id' do
+        allow(letter_of_credit_request).to receive(:id).and_return(id)
+        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(anything, anything, anything, {letter_of_credit_request: {id: id}}).and_return(performed_job)
+        call_action
+      end
+      it 'calls `job_status` on the result of `perform_later`' do
+        expect(performed_job).to receive(:job_status).and_return(job_status)
+        call_action
+      end
+      it 'updates the `job_status` with the current user id' do
+        user = instance_double(User, id: SecureRandom.hex, accepted_terms?: true)
+        allow(controller).to receive(:current_user).and_return(user)
+        expect(job_status).to receive(:update_attributes!).with(user_id: user.id)
+        call_action
+      end
+      it 'renders JSON with a `job_status_url`' do
+        call_action
+        expect(JSON.parse(response.body)['job_status_url']).to eq(job_status_url(job_status))
+      end
+      it 'renders JSON with a `job_cancel_url`' do
+        call_action
+        expect(JSON.parse(response.body)['job_cancel_url']).to eq(job_cancel_url(job_status))
+      end
+    end
+    describe 'when there is no `export_format` param' do
+      it 'creates a new instance of MembersService with the request' do
+        expect(MembersService).to receive(:new).with(request).and_return(members_service)
+        call_action
+      end
+      it 'calls `member` on the instance of MembersService with the current_member_id' do
+        expect(members_service).to receive(:member).with(member_id).and_return(member)
+        call_action
+      end
+      it 'raises an error if no member is found' do
+        allow(members_service).to receive(:member)
+        expect{call_action}.to raise_error(ActionController::RoutingError)
+      end
+      it 'sets `@member_name` to the name value of the member hash' do
+        call_action
+        expect(assigns[:member_name]).to eq(member[:name])
+      end
+      it 'sets `@member_fhla` to the fhla_number value of the member hash' do
+        call_action
+        expect(assigns[:member_fhla]).to eq(member[:fhla_number])
+      end
+      it 'renders its view' do
+        call_action
+        expect(response.body).to render_template(:view)
       end
     end
   end

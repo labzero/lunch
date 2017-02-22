@@ -111,3 +111,41 @@
     float: right;
   }
 }
+
+@media print {
+  .letters-of-credit {
+    color: $print-color;
+    h1 {
+      @include typography-print-header;
+      float: none;
+      margin-bottom: 0px;
+    }
+    h2 {
+      @include typography-print-subheader;
+    }
+    dt, dd {
+      @include typography-print-details;
+      color: $print-color;
+    }
+    .row {
+      width: auto;
+      padding: 0;
+      margin: 0;
+    }
+    .report-print-details {
+      margin-bottom: 30px;
+    }
+    .form-summary-data {
+      padding: 0;
+      margin: 0;
+      border: none;
+      dt {
+        width: 160px;
+      }
+    }
+  }
+  .letters-of-credit-legal-copy {
+    @include typography-print-details;
+    margin-top: 45px;
+  }
+}

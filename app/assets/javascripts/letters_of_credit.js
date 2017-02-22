@@ -37,4 +37,75 @@ $(function() {
   if ($letterOfCreditRequestForm.length > 0) {
     Fhlb.Utils.findAndDisplaySecurIDErrors($letterOfCreditRequestForm);
   };
+
+  function bindControls(targetControl, targetEvent, targetUrl, method) {
+    $targetControl = $(targetControl);
+    $loadingFlyout = $('.loading-flyout');
+    $targetControl.on(targetEvent, function(event){
+      event.stopPropagation();
+      event.preventDefault();
+      openLoadingFlyout();
+      $.ajax({
+        url     : $(this).attr(targetUrl),
+        method  : method,
+        dataType: 'json',
+        data    : $(this).serialize(),
+        success : function( data, status, xhr ) {
+          $jobCancelUrl = data.job_cancel_url;
+          checkDownloadJobStatus(data.job_status_url);
+        },
+        error   : function( xhr, status, err ) {
+          downloadError();
+        }
+      });
+    });
+
+    $('.cancel-download').on('click', function(){
+      cancelDownloadJob();
+    });
+  };
+
+  bindControls('.letters-of-credit-download-pdf', 'click', 'href', 'GET');
+
+  function openLoadingFlyout() {
+    $('body').flyout({topContent: $($loadingFlyout).clone(true)});
+    $('.flyout').addClass('flyout-loading-message');
+  };
+
+  function cancelDownloadJob() {
+    $targetControl.trigger('downloadCanceled', {job_cancel_url: $jobCancelUrl});
+    $.get($jobCancelUrl);
+    clearTimeout($jobStatusTimer);
+  };
+
+  function checkDownloadJobStatus(url) {
+    $.get(url)
+      .done(function(data) {
+        var job_status = data.job_status;
+        if (job_status == 'completed') {
+          downloadJob(data.download_url);
+        } else if(job_status == 'failed') {
+          downloadError();
+        } else {
+          $jobStatusTimer = setTimeout(function(){checkDownloadJobStatus(url)}, 1000);
+        };
+      })
+      .fail(function(data) {
+        downloadError();
+      });
+  };
+
+  function downloadJob(url) {
+    $targetControl.trigger('downloadStarted', {download_url: url});
+    closeFlyout();
+    window.location.href = url;
+  };
+
+  function closeFlyout() {
+    $('.flyout').trigger('flyout-close');
+  };
+
+  function downloadError() {
+    $('.flyout').addClass('flyout-loading-error');
+  };
 });

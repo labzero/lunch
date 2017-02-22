@@ -123,6 +123,7 @@ en:
     authorizations: Authorizations
     letters_of_credit: Lettters of Credit
     time_on_date: '%{time} on %{date}'
+    date_at_time: '%{date} at %{time}'
     enter: Enter
     uploading: 'Uploading...'
     cancel_upload: Cancel Upload
@@ -1541,6 +1542,10 @@ en:
     errors:
       not_authorized: This Letter of Credit Request was not completed because Bank employees are not authorized to request letters of credit via the member portal.
       generic_html: "We are unable to process your request at this time. Contact your Relationship Manager: %{rm_email}, %{rm_phone_number}."
+    pdf:
+      requested: Letter of Credit Request
+      request_date: Request Date/Time
+      requested_by: Request Made By
   reports:
     meta_title: FHLBSF - Reports
     title: Reports

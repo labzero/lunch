@@ -198,6 +198,7 @@ Rails.application.routes.draw do
       get 'request' => 'letters_of_credit#new'
       post 'preview' => 'letters_of_credit#preview'
       post 'execute' => 'letters_of_credit#execute'
+      get 'view' => 'letters_of_credit#view'
     end
   end
 

@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe RedisBackedObject do
-  subject { mock_context(klass: RedisBackedObject, instance_methods: [:id], klass_methods: [:from_json, :name]) }
+  subject { mock_context(RedisBackedObject, instance_methods: [:id], class_methods: [:from_json, :name]) }
   let(:described_class) { subject.class }
   let(:id) { SecureRandom.hex }
   let(:key_path) { SecureRandom.hex }

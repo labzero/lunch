@@ -113,6 +113,16 @@ describe CustomFormattingHelper do
     end
   end
 
+  describe '`fhlb_datetime_standard_numeric_with_at` method' do
+    let(:date) {DateTime.new(2015,1,2, 10, 12, 13)}
+    it 'converts a datetime into a string following the `MM/DD/YYYY at Time` format' do
+      expect(helper.fhlb_datetime_standard_numeric_with_at(date)).to eq('01/02/2015 at 10:12 am')
+    end
+    it 'returns the I18n value for `missing_value` if passed nil' do
+      expect(helper.fhlb_datetime_standard_numeric_with_at(nil)).to eq(I18n.t('global.missing_value'))
+    end
+  end
+
   describe '`fhlb_datetime_long_alpha_with_on` method' do
     let(:datetime) { instance_double(DateTime, strftime: nil) }
     let(:call_method) { helper.fhlb_datetime_long_alpha_with_on(datetime) }

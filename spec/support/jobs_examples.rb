@@ -100,3 +100,19 @@ RSpec.shared_examples 'a job that makes service calls' do |service, methods|
     run_job
   end
 end
+
+RSpec.shared_examples 'a job that initializes a controller' do |report_class|
+  let(:call_method) { subject.initialize_controller }
+
+  it 'has the method `initialize_controller`' do
+    expect(subject).to respond_to(:initialize_controller)
+  end
+  it "creates a new instance of the `#{report_class}`" do
+    expect(report_class).to receive(:new)
+    call_method
+  end
+  it "sets `@controller` to the newly created instance of `#{report_class}`" do
+    call_method
+    expect(subject.controller).to be_a(report_class)
+  end
+end

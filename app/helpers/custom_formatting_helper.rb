@@ -79,6 +79,11 @@ module CustomFormattingHelper
     t('global.time_on_date', time: datetime.to_datetime.strftime('%l:%M %P'), date: datetime.to_datetime.strftime('%m/%d/%Y'))
   end
 
+  def fhlb_datetime_standard_numeric_with_at(datetime)
+    return t('global.missing_value') if datetime.nil?
+    t('global.date_at_time', time: datetime.to_datetime.strftime('%l:%M %P'), date: datetime.to_datetime.strftime('%m/%d/%Y'))
+  end
+
   def fhlb_datetime_long_alpha_with_on(datetime)
     return t('global.missing_value') if datetime.nil?
     t('global.time_on_date', time: datetime.to_datetime.strftime('%l:%M %P'), date: fhlb_date_long_alpha(datetime.to_datetime))

@@ -19,6 +19,7 @@ When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Le
     visit '/letters-of-credit/request'
     step 'I enter 1234567 in the letter of credit amount field'
     step 'I click the Preview Request button'
+    step 'I should be on the Preview Letter of Credit Request page'
   when 'Letter of Credit Success'
     step 'I visit the Preview Letter of Credit page'
     step 'I enter my SecurID pin'
@@ -75,7 +76,7 @@ When(/^I click the (issue|expiration) date letter of credit datepicker$/) do |fi
   field_container.find('.datepicker-trigger').click
 end
 
-When(/^I click the (Preview Request|Authorize Request|Make a New Request|Manage Letters of Credit) button$/) do |button|
+When(/^I click the (Preview Request|Authorize Request|Make a New Request|Manage Letters of Credit|Download Letter of Credit Request) button$/) do |button|
   text = case button
   when 'Preview Request'
     I18n.t('letters_of_credit.preview.action')
@@ -85,6 +86,9 @@ When(/^I click the (Preview Request|Authorize Request|Make a New Request|Manage 
     I18n.t('letters_of_credit.success.new_request')
   when 'Manage Letters of Credit'
     I18n.t('letters_of_credit.manage.title')
+  when 'Download Letter of Credit Request'
+    jquery_execute("$('body').on('downloadStarted', function(){$('body').addClass('download-started')})")
+    I18n.t('letters_of_credit.success.download_pdf')
   end
   if ['Preview Request', 'Authorize Request'].include?(button)
     page.find("input[type=submit][value='#{text}']").click
