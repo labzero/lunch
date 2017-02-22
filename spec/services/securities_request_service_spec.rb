@@ -174,6 +174,14 @@ describe SecuritiesRequestService do
               expect(call_method).to be(false)
             end
           end
+          describe 'when there is a RestClient error is nil' do
+            let(:status) { nil }
+            let(:error) { RestClient::Exception.new(nil, status) }
+            before { allow_any_instance_of(RestClient::Resource).to receive(method).and_raise(error) }
+            it 'returns false' do
+              expect(call_method).to be(false)
+            end
+          end
         end
 
         describe 'when passed an already submitted request' do
