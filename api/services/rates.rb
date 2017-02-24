@@ -109,28 +109,47 @@ module MAPI
         connection
       end
 
-      def self.market_data_message_for_loan_type(loan_type, live_or_start_of_day, funding_date=nil)
+      def self.market_data_message_for_loan_type(loan_type, live_or_start_of_day, funding_date=nil, maturity_date=nil)
+        data = if maturity_date
+          frequency = (maturity_date.to_date - (funding_date || Time.zone.today).to_date).to_i.to_s
+          [{
+            'v12:FhlbsfDataPoint' => [{
+              'v12:tenor' => [{
+                'v12:interval' => [{
+                  'v13:frequency' => frequency,
+                  'v13:frequencyUnit' => 'D'
+                }]
+              }]
+            }]
+          }]
+        else
+          ''
+        end
         message = {
             'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
             'v1:marketData' => [{
                                     'v12:spotDate'     => funding_date.try(:to_date).try(:iso8601),
                                     'v12:name'         => LOAN_MAPPING[loan_type.to_s],
                                     'v12:pricingGroup' => [{'v12:id' => live_or_start_of_day}],
-                                    'v12:data'         => ''
+                                    'v12:data'         => data
                                 }]
         }
         message['v1:marketData'].first.delete('v12:spotDate') unless funding_date
         message
       end
 
-      def self.get_market_data_from_soap(logger, live_or_start_of_day, funding_date=nil)
+      def self.get_market_data_from_soap(logger, live_or_start_of_day, funding_date=nil, maturity_date=nil)
+        requests = [{'v1:fhlbsfMarketDataRequest' => LOAN_TYPES.map { |lt| market_data_message_for_loan_type(lt, live_or_start_of_day, funding_date) }}]
+        if maturity_date
+          requests.first['v1:fhlbsfMarketDataRequest'].push(*LOAN_TYPES.map { |lt| market_data_message_for_loan_type(lt, live_or_start_of_day, funding_date, maturity_date) })
+        end
         if !@@mds_connection.nil?
           begin
             @@mds_connection.call(:get_market_data,
                                   message_tag: 'marketDataRequest',
                                   message: {
                                       'v11:caller' => [{'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
-                                      'v1:requests' => [{'v1:fhlbsfMarketDataRequest' => LOAN_TYPES.map { |lt| market_data_message_for_loan_type(lt, live_or_start_of_day, funding_date) }}]
+                                      'v1:requests' => requests
                                   },
                                   soap_header: SOAP_HEADER)
           rescue Savon::Error => error
@@ -145,6 +164,7 @@ module MAPI
           term_data:       'marketData FhlbsfMarketData data FhlbsfDataPoint',
           day_count_basis: 'marketData FhlbsfMarketData dayCountBasis',
           type_long:       'marketData FhlbsfMarketData name',
+          spot_date:       'marketData FhlbsfMarketData spotDate',
           frequency:       'tenor interval frequency',
           unit:            'tenor interval frequencyUnit',
           maturity_string: 'tenor maturityDate',
@@ -169,26 +189,50 @@ module MAPI
           day_count_basis = extract_text(type_data, :day_count_basis)
           type_long       = extract_text(type_data, :type_long)
           type            = LOAN_MAPPING_INVERTED[type_long]
-          hash[type]      = {}
+          is_custom = !!hash[type]
           type_data.css(PATHS[:term_data]).each do |term_data|
-            frequency       = extract_text(term_data, :frequency)
-            unit            = extract_text(term_data, :unit)
-            rate            = extract_text(term_data, :rate)
-            maturity_string = extract_text(term_data, :maturity_string)
-            period          = "#{frequency}#{unit}"
-            term            = PERIOD_TO_TERM[period]
-            if term
-              hash[type][term] = {
-                  rate: rate,
-                  maturity_date: Time.zone.parse(maturity_string).to_date,
-                  payment_on: 'Maturity',
-                  interest_day_count: day_count_basis
+            term_data_result = MAPI::Services::Rates.get_term_data(type_data, term_data, is_custom)
+            if term_data_result
+              hash[type] ||= {}
+              hash[type][term_data_result[:term].to_sym] = {
+                rate: term_data_result[:rate],
+                maturity_date: Time.zone.parse(term_data_result[:maturity_string]).to_date,
+                payment_on: 'Maturity',
+                interest_day_count: day_count_basis
               }
             end
-            hash[type][:open] = hash[type][:overnight].clone
           end
+          hash[type][:open] = hash[type][:overnight].clone if !is_custom && hash[type] && hash[type][:overnight]
         end
         hash
+      end
+
+      def self.days_to_maturity(maturity_date, funding_date=nil)
+        today = Time.zone.today
+        days_to_maturity = (maturity_date.to_date - (funding_date || today).to_date).to_i
+        {
+          days: days_to_maturity,
+          term: days_to_maturity.to_s + 'day'
+        }
+      end
+
+      def self.get_term_data(type_data, term_data, is_custom)
+        rate            = extract_text(term_data, :rate)
+        maturity_string = extract_text(term_data, :maturity_string)
+        if is_custom
+          funding_date    = extract_text(type_data, :spot_date)
+          term            = MAPI::Services::Rates.days_to_maturity(maturity_string, funding_date)[:term]
+        else
+          frequency       = extract_text(term_data, :frequency)
+          unit            = extract_text(term_data, :unit)
+          period          = "#{frequency}#{unit}"
+          term            = PERIOD_TO_TERM[period]
+        end
+        {
+          rate: rate,
+          maturity_string: maturity_string,
+          term: term
+        }
       end
 
       def self.is_limited_pricing_day?(app, date)
@@ -347,6 +391,20 @@ module MAPI
                 key :type, :string
                 key :description, 'The type of the loan.'
               end
+              parameter do
+                key :paramType, :query
+                key :name, :funding_date
+                key :required, false
+                key :type, :string
+                key :description, 'Funding Date, if in the future, otherwise nil'
+              end
+              parameter do
+                key :paramType, :query
+                key :name, :maturity_date
+                key :required, false
+                key :type, :string
+                key :description, 'Maturity Date, if custom, otherwise nil'
+              end
               response_message do
                 key :code, 200
                 key :message, 'OK'
@@ -379,6 +437,13 @@ module MAPI
                 key :required, false
                 key :type, :string
                 key :description, 'Funding Date, if in the future, otherwise nil'
+              end
+              parameter do
+                key :paramType, :query
+                key :name, :maturity_date
+                key :required, false
+                key :type, :string
+                key :description, 'Maturity Date, if custom, otherwise nil'
               end
               response_message do
                 key :code, 200
@@ -659,23 +724,31 @@ module MAPI
 
         relative_get '/:loan/:term/?:type?' do
           halt 404, 'Loan Not Found' unless LOAN_MAPPING[params[:loan]]
-          halt 404, 'Term Not Found' unless TERM_MAPPING[params[:term]]
+          halt 404, 'Term Not Found' unless (TERM_MAPPING[params[:term]] || params[:term]=~CUSTOM_TERM)
           type = params[:type] ? params[:type] : 'Live'
-
+          funding_date = params[:funding_date].try(:to_date)
           data = if MAPI::Services::Rates.init_mds_connection(settings.environment)
             @@mds_connection.operations
-            lookup_term = TERM_MAPPING[params[:term]]
+            if matched_term = params[:term].match(CUSTOM_TERM)
+              lookup_term = {
+                frequency: (matched_term[1]).to_i.to_s,
+                frequency_unit: 'D'
+              }
+            else
+              lookup_term = TERM_MAPPING[params[:term]]
+            end
             message = {
               'v11:caller' => [{ 'v11:id' => ENV['MAPI_COF_ACCOUNT']}],
-                'v1:requests' => [{
-                  'v1:fhlbsfMarketDataRequest' => [{
-                    'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
-                    'v1:marketData' =>  [{
-                      'v12:customRollingDay' => '0',
-                      'v12:name' => LOAN_MAPPING[params[:loan]],
-                      'v12:pricingGroup' => [{'v12:id' => type}],
-                      'v12:data' => [{
-                        'v12:FhlbsfDataPoint' => [{
+              'v1:requests' => [{
+                'v1:fhlbsfMarketDataRequest' => [{
+                  'v1:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
+                  'v1:marketData' =>  [{
+                    'v12:spotDate'     => funding_date.try(:to_date).try(:iso8601),
+                    'v12:customRollingDay' => '0',
+                    'v12:name' => LOAN_MAPPING[params[:loan]],
+                    'v12:pricingGroup' => [{'v12:id' => type}],
+                    'v12:data' => [{
+                      'v12:FhlbsfDataPoint' => [{
                         'v12:tenor' => [{
                           'v12:interval' => [{
                             'v13:frequency' => lookup_term[:frequency],
@@ -688,6 +761,7 @@ module MAPI
                 }]
               }]
             }
+            message['v1:requests'].first['v1:fhlbsfMarketDataRequest'].first['v1:marketData'].first.delete('v12:spotDate') unless funding_date
             response = @@mds_connection.call(:get_market_data, message_tag: 'marketDataRequest', message: message, soap_header: SOAP_HEADER )
             namespaces = {'a' => 'http://fhlbsf.com/schema/canonical/marketdata/v1', 'xmlns' => 'http://fhlbsf.com/schema/msg/marketdata/v1'}
             if response.success? && response.doc.search('//xmlns:transactionResult', namespaces).text != 'Error'
@@ -707,13 +781,18 @@ module MAPI
 
         relative_get "/summary" do
           funding_date = params[:funding_date].try(:to_date)
+          maturity_date = params[:maturity_date].try(:to_date)
           halt 503, 'Internal Service Error' unless holidays       = MAPI::Services::Rates::Holidays.holidays(self)
           halt 503, 'Internal Service Error' unless blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(logger,settings.environment)
           halt 503, 'Internal Service Error' unless loan_terms     = MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment)
           halt 503, 'Internal Service Error' unless rate_bands     = MAPI::Services::Rates::RateBands.rate_bands(logger,settings.environment)
+          if maturity_date
+            days_to_maturity = MAPI::Services::Rates.days_to_maturity(maturity_date, funding_date)
+            custom_term = days_to_maturity[:term].to_sym
+          end
           if MAPI::Services::Rates.init_mds_connection(settings.environment)
-            halt 503, 'Internal Service Error' unless live_data_xml    = MAPI::Services::Rates.get_market_data_from_soap(logger, 'Live', funding_date)
-            halt 503, 'Internal Service Error' unless start_of_day_xml = MAPI::Services::Rates.get_market_data_from_soap(logger, 'StartOfDay', funding_date)
+            halt 503, 'Internal Service Error' unless live_data_xml    = MAPI::Services::Rates.get_market_data_from_soap(logger, 'Live', funding_date, maturity_date)
+            halt 503, 'Internal Service Error' unless start_of_day_xml = MAPI::Services::Rates.get_market_data_from_soap(logger, 'StartOfDay', funding_date, maturity_date)
             live_data    = MAPI::Services::Rates.extract_market_data_from_soap_response(live_data_xml)
             start_of_day = MAPI::Services::Rates.extract_market_data_from_soap_response(start_of_day_xml)
           else
@@ -721,8 +800,15 @@ module MAPI
             live_data    = MAPI::Services::Rates.fake_hash('market_data_live_rates')
             start_of_day = MAPI::Services::Rates.fake_hash('market_data_start_of_day_rates')
             holidays.each{ |holiday| holidays.delete(holiday) if MAPI::Services::Rates::BlackoutDates.fake_data_relative_to_today.include?(holiday.to_date) } # Delete holidays that overlap with our self-imposed relative blackout dates of 1 and 3 weeks from today
-            # The maturity_date property might end up being calculated in the service object and not here. TBD once we know more.
             LOAN_TYPES.each do |type|
+              if maturity_date
+                live_data[type][custom_term] = {}
+                live_data[type][custom_term][:payment_on] = 'Maturity'
+                live_data[type][custom_term][:interest_day_count] = 'ACT/ACT'
+                live_data[type][custom_term][:days_to_maturity] = days_to_maturity[:days]
+                live_data[type][custom_term][:rate] = rand(0.1..1)
+                live_data[type][custom_term][:maturity_date] =  maturity_date
+              end
               LOAN_TERMS.each do |term|
                 live_data[type][term][:maturity_date] = Time.zone.today + TERM_MAPPING[term][:time]
               end
@@ -731,11 +817,16 @@ module MAPI
           LOAN_TYPES.each do |type|
             LOAN_TERMS.each do |term|
               live                     = live_data[type][term]
-              live[:start_of_day_rate] = start_of_day[type][term][:rate].to_f              
+              live[:start_of_day_rate] = start_of_day[type][term][:rate].to_f
               live[:rate_band_info]    = MAPI::Services::Rates.rate_band_info(live, rate_bands[term])
               live[:maturity_date]     = MAPI::Services::Rates.get_maturity_date(live[:maturity_date], TERM_MAPPING[term][:frequency_unit], holidays)
               live[:disabled]          = MAPI::Services::Rates.disabled?(live, loan_terms[term][type], blackout_dates)
               live[:end_of_day]        = !loan_terms[term][type][:trade_status]
+            end
+            if maturity_date
+              live                     = live_data[type][custom_term]
+              live[:start_of_day_rate] = live_data[type][custom_term][:rate].to_f
+              live[:maturity_date]     = maturity_date
             end
           end
           live_data.merge( timestamp: Time.zone.now ).to_json

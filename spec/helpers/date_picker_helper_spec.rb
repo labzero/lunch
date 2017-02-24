@@ -278,6 +278,65 @@ describe DatePickerHelper do
         end
       end
     end
+
+    describe '`date_restrictions`' do
+      let(:request) { double('request') }
+      let(:today) { Time.zone.today + 2.days }
+      let(:length) { 3.years }
+      let(:max_date) { today + 3.years }
+      let(:call_method) { helper.date_restrictions(request, length, nil, nil) }
+      let(:call_method_with_min_date) { helper.date_restrictions(request, length, nil, true) }
+      let(:weekends_and_holidays) { instance_double(Array) }
+      let(:calendar_service_instance) { double('calendar instance') }
+
+      before do
+        allow(CalendarService).to receive(:new).and_return(calendar_service_instance)
+        allow(calendar_service_instance).to receive(:find_next_business_day).and_return(today)
+        allow(helper).to receive(:weekends_and_holidays)
+      end
+      describe 'the returned hash' do
+        it 'has a `max_date` of today plus the `SecuritiesRequest::MAX_DATE_RESTRICTION`' do
+          expect(call_method[:max_date]).to eq(max_date)
+        end
+        describe 'the `invalid_dates` array' do
+          it 'calls `weekends_and_holidays` with today as the start_date arg' do
+            expect(helper).to receive(:weekends_and_holidays).with(start_date: today, end_date: anything, calendar_service: anything, request: anything)
+            call_method
+          end
+          it 'calls `weekends_and_holidays` with max_date as the end_date arg' do
+            expect(helper).to receive(:weekends_and_holidays).with(start_date: anything, end_date: max_date, calendar_service: anything, request: anything)
+            call_method
+          end
+          it 'calls `weekends_and_holidays` with the calendar_service as the calendar_service arg' do
+            expect(helper).to receive(:weekends_and_holidays).with(start_date: anything, end_date: anything, calendar_service: calendar_service_instance, request: anything)
+            call_method
+          end
+          it 'calls `weekends_and_holidays` with the request as the request arg' do
+            expect(helper).to receive(:weekends_and_holidays).with(start_date: anything, end_date: anything, calendar_service: anything, request: request)
+            call_method
+          end
+          it 'has a value equal to the result of calling `weekends_and_holidays`' do
+            allow(helper).to receive(:weekends_and_holidays).and_return(weekends_and_holidays)
+            expect(call_method[:invalid_dates]).to eq(weekends_and_holidays)
+          end
+        end
+      end
+      describe 'with funding_date' do
+        let(:funding_date) { today + rand(1..2).days }
+        let(:call_method_with_funding_date) { helper.date_restrictions(request, length, funding_date, true) }
+        let(:today_funding_date) { funding_date + 2.days }
+        let(:max_date_funding_date) { today_funding_date + 3.years }
+        before do
+          allow(calendar_service_instance).to receive(:find_next_business_day).and_return(today_funding_date)
+        end
+        it 'has a `min_date` of today' do
+          expect(call_method_with_funding_date[:min_date]).to eq(today_funding_date)
+        end
+        it 'has a `max_date` of today plus the `SecuritiesRequest::MAX_DATE_RESTRICTION`' do
+          expect(call_method_with_funding_date[:max_date]).to eq(max_date_funding_date)
+        end
+      end
+    end
   end
 
   describe '`weekends_and_holidays`' do

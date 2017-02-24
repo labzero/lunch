@@ -2,6 +2,7 @@ class SecuritiesController < ApplicationController
   include CustomFormattingHelper
   include ContactInformationHelper
   include ActionView::Helpers::TextHelper
+  include DatePickerHelper
 
   before_action only: [:delete_request] do
     authorize :security, :delete?

@@ -376,7 +376,7 @@ describe AdvanceRequest do
         allow(subject).to receive(:notify_if_rate_bands_exceeded)
       end
       it 'fetches the rates from the RatesService' do
-        expect(rate_service).to receive(:quick_advance_rates).with(member_id, nil)
+        expect(rate_service).to receive(:quick_advance_rates).with(member_id, nil, nil)
         call_method
       end
       it 'returns the rates' do
@@ -1204,17 +1204,19 @@ describe AdvanceRequest do
     let(:service_object) { double(EtransactAdvancesService) }
     let(:amount) { double('An Amount') }
     let(:term) { double('A Term') }
+    let(:custom_maturity_date) { double('A Custom Maturity Date') }
     let(:call_method) { subject.send(:perform_limit_check) }
 
     before do
       allow(subject).to receive(:term).and_return(term)
       allow(subject).to receive(:amount).and_return(amount)
+      allow(subject).to receive(:custom_maturity_date).and_return(custom_maturity_date)
       allow(subject).to receive(:etransact_service).and_return(service_object)
       allow(service_object).to receive(:check_limits)
     end
 
     it 'calls `check_limits` on the `etransact_service` object' do
-      expect(service_object).to receive(:check_limits).with(member_id, amount, term)
+      expect(service_object).to receive(:check_limits).with(member_id, amount, term, custom_maturity_date)
       call_method
     end
     it 'adds an error of type `:limits` and code `:unknown` if the limit check fails' do
@@ -1266,12 +1268,12 @@ describe AdvanceRequest do
       call_method
     end
     it 'calls `quick_advance_validate` with a check stock value of `true` if `stock_choice_present?` returns false' do
-      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, true, anything, anything, anything, funding_date)
+      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, true, anything, anything, anything, anything)
       call_method
     end
     it 'calls `quick_advance_validate` with a check stock value of `false` if `stock_choice_present?` returns true' do
       allow(subject).to receive(:stock_choice_present?).and_return(true)
-      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, false, anything, anything, anything, funding_date)
+      expect(service_object).to receive(:quick_advance_validate).with(anything, anything, anything, anything, anything, false, anything, anything, anything, anything)
       call_method
     end
     it 'calls `process_trade_errors` with the `quick_advance_validate` response' do

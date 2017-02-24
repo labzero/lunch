@@ -135,7 +135,7 @@ module MAPI
               'v13:initialRate' => transformed_interest,
               'v13:floatingRateSchedule' => {
                 'v13:floatingPeriod' => {
-                  'v13:startDate' => Time.zone.today,
+                  'v13:startDate' => settlement_date,
                   'v13:rateIndices' => {
                     'v13:rateIndex' => {
                       'v13:index' => '',
@@ -193,6 +193,16 @@ module MAPI
                   'v13:frequencyUnit' => 'D'
               }
             }
+          elsif matched_term = term.match(CUSTOM_TERM)
+            advance_product_info = {
+              'v14:product' => 'FX CONSTANT',
+              'v14:subProduct' => 'FRC',
+              'v14:term' => {
+                'v13:frequency' => (matched_term[1]).to_i,
+                'v13:frequencyUnit' => 'D'
+              },
+              'v14:maturityDate' => maturity_date
+            }
           else
             advance_product_info = {
               'v14:product' => 'FX CONSTANT',
@@ -228,7 +238,7 @@ module MAPI
             'v14:prepaymentModelCode' => 1,
             'v14:coupon' => {
               'v13:paymentDates' => {
-                'v13:firstPaymentDate' => Time.zone.today,
+                'v13:firstPaymentDate' => settlement_date,
                 'v13:paymentFrequency' => payment_info[:advance_payment_frequency],
                 'v13:paymentConvention' => {
                   'v13:businessDayAdjustment' => (advance_term.to_s == 'open' ? 'MODFOLLOWING' : 'FOLLOWING'),
@@ -261,8 +271,8 @@ module MAPI
                    {'v13:partyId' => member_id}]
                 },
                 'v12:instrument' => instrument,
-                'v12:tradeDate' => Time.zone.today,
-                'v12:settlementDate' => Time.zone.today,
+                'v12:tradeDate' => settlement_date,
+                'v12:settlementDate' => settlement_date,
                 'v12:openDateMaturity' => advance_term == 'open'
               },
               'v12:advance' => {},
@@ -294,7 +304,7 @@ module MAPI
           member_id = member_id.to_i
           # Calculated values
           # True maturity date will be calculated later
-          settlement_date = funding_date || Time.zone.today # currently both `trade_date` and `funding_date` are set to today, as we only allow same-day funding/trading at this time
+          settlement_date = funding_date || Time.zone.today
           day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/ACT' : 'ACT/360'
 
           message, payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
@@ -331,7 +341,7 @@ module MAPI
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_capital_stock(fhlbsfresponse, response, response_hash) if check_capstock unless funding_date
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_credit(fhlbsfresponse, response, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_collateral(fhlbsfresponse, response, response_hash) unless funding_date
-                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_enabled_product(app.logger, app.settings.environment, advance_term, advance_type, response_hash, allow_grace_period)
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_enabled_product(app.logger, app.settings.environment, advance_type, advance_term, response_hash, allow_grace_period)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_max_term_limit(app, member_id, response_hash)
 
                 # passed all checks
@@ -488,21 +498,27 @@ module MAPI
         end
 
         def self.check_enabled_product(logger, environment, type, term, response_hash, allow_grace_period=false)
-          new_hash = {}
+          new_hash = {'status' => []}
           loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(logger, environment, allow_grace_period)
-          product = loan_terms[type][term].with_indifferent_access if loan_terms
-          unless loan_terms && product[:trade_status]
+          raise 'MAPI::Services::Rates::LoanTerms.loan_terms returned nil' unless loan_terms
+          product = (if term =~ CUSTOM_TERM
+                      (loan_terms.find {|t, types| !['open', 'overnight'].include?(t) && !types[type][:trade_status] }).try(:last).try(:[], type)
+                    else
+                      loan_terms[term][type]
+                    end).try(:with_indifferent_access)
+          if product && !product[:trade_status]
             if product[:end_time_reached]
+              new_hash['status'] << 'EndOfDayReached'
+              new_hash['end_of_day'] = product[:end_time]
               new_hash = {
                 'status' => ['EndOfDayReached'],
                 'end_of_day' => product[:end_time]
               }
             else
-              new_hash = {
-                'status' => ['DisabledProductError']
-              }
+              new_hash['status'] << 'DisabledProductError'
             end
           end
+
           response_hash.merge(new_hash){|key, old, new| old + new }
         end
 

@@ -1,7 +1,9 @@
 $(function () {
   var $formPreview = $('.add-advance-form');
   var $rateTable = $('.advance-rates-table');
+  var $rateCustomTable = $('.advance-rates-custom-table');
   var addAdvanceRatesPromise;
+  var addAdvanceCustomRatesPromise;
   var $amountField = $('input[name="advance_request[amount]"]');
   var $typeField = $('input[name="advance_request[type]"]');
   var $termField = $('input[name="advance_request[term]"]');
@@ -22,8 +24,8 @@ $(function () {
     $('.add-advance-instructions').hide();
   };
 
-  function showRatesLoadingState() {
-    $rateTable.addClass('add-advance-table-loading');
+  function showRatesLoadingState(table) {
+    table.addClass('add-advance-table-loading');
   };
 
   function validateForm() {
@@ -34,41 +36,75 @@ $(function () {
     };
   };
 
-  function getAdvanceRates(funding_date) {
+  function showTableErrorState($table) {
+    $table.removeClass('add-advance-table-loading');
+    $table.addClass('add-advance-table-error');
+  }
+
+  function getAdvanceRates(funding_date, maturity_date) {
     if (!addAdvanceRatesPromise) {
       var fetchRatesUrl = $rateTable.data('fetch-rates-url');
-      addAdvanceRatesPromise = $.get(fetchRatesUrl, {funding_date: funding_date});
+      addAdvanceRatesPromise = $.get(fetchRatesUrl, {funding_date: funding_date, maturity_date: maturity_date});
       addAdvanceRatesPromise.error(function() {
+        showTableErrorState($rateTable);
+      }).always(function() {
         addAdvanceRatesPromise = false;
       });
     };
     return addAdvanceRatesPromise;
   };
 
-  function showAdvanceRates(funding_date) {
-    getAdvanceRates(funding_date).success(function(data) {
+  function getCustomAdvanceRates(funding_date, maturity_date) {
+    if (!addAdvanceCustomRatesPromise) {
+      var fetchRatesUrl = $rateCustomTable.data('fetch-custom-rates-url');
+      addAdvanceCustomRatesPromise = $.get(fetchRatesUrl, {funding_date: funding_date, maturity_date: maturity_date});
+      addAdvanceCustomRatesPromise.error(function() {
+        showTableErrorState($rateCustomTable);
+      }).always(function() {
+        addAdvanceCustomRatesPromise = false;
+      });
+    };
+    return addAdvanceCustomRatesPromise;
+  };
+
+  function showAdvanceRates(funding_date, maturity_date) {
+    if (maturity_date) {
+      getCustomAdvanceRates(funding_date, maturity_date).success(function (data) {
+        $rateCustomTable.children().remove();
+        $rateCustomTable.append($(data.html));
+        bindApplyHandler();
+        bindRateTableCells($rateCustomTable);
+        $idField.val(data.id);
+        selectColumnLabelIfRatePreSelected($rateCustomTable);
+        $rateCustomTable.removeClass('add-advance-table-loading');
+        var $calendarEle = $formPreview.find('.advance-custom-date-maturity-calendar-partial');
+        $('.add-advance-form').find('.datepicker-trigger').find('input').val(moment(maturity_date).format('L'));
+        $calendarEle.trigger('datepicker-rebind');
+      });
+    }
+    getAdvanceRates(funding_date, maturity_date).success(function (data) {
       var tbody = $rateTable.find('tbody');
       tbody.children().remove();
       tbody.append($(data.html));
-      bindRateTableCells();
+      bindApplyHandler();
+      bindRateTableCells($rateTable);
       $idField.val(data.id);
       Fhlb.Track.advance_rate_table();
-      addAdvanceRatesPromise = false;
-      selectColumnLabelIfRatePreSelected();
+      selectColumnLabelIfRatePreSelected($rateTable);
       validateForm();
       $rateTable.removeClass('add-advance-table-loading');
     });
   };
 
-  function bindRateTableCells() {
-    var $rateTableCells = $rateTable.find('td.selectable-cell');
+  function bindRateTableCells(table) {
+    var $rateTableCells = table.find('td.selectable-cell');
     $rateTableCells.on('click', function(){
       var $this = $(this);
       if (!$this.hasClass('disabled-cell')) {
         $('.advance-rates-table td, .advance-rates-table th').removeClass('cell-selected cell-hovered');
-        var col = $this.index();
+        $('.advance-rates-custom-table td, .advance-rates-custom-table th').removeClass('cell-selected cell-hovered');
         $this.addClass('cell-selected').closest('tr').find('td.row-label').addClass('cell-selected');
-        $($rateTable.find('tr.add-advance-column-labels th')[col]).addClass('cell-selected');
+        $($rateTable.find('tr.add-advance-column-labels th')[$this.index()]).addClass('cell-selected');
       };
       validateForm();
     });
@@ -76,19 +112,18 @@ $(function () {
     // Hover behavior
     $rateTableCells.hover( function(){
       var $this = $(this);
-      var col = $this.index();
       if (!$this.hasClass('cell-selected') && $this.hasClass('selectable-cell')) {
         $this.toggleClass('cell-hovered').closest('tr').find('td.row-label').toggleClass('cell-hovered');
-        $($rateTable.find('tr.add-advance-column-labels th')[col]).toggleClass('cell-hovered');
+        $($rateTable.find('tr.add-advance-column-labels th')[$this.index()]).toggleClass('cell-hovered');
       };
     });
   };
 
-  function selectColumnLabelIfRatePreSelected() {
-    var $selectedCell = $rateTable.find('td.cell-selected.selectable-cell');
+  function selectColumnLabelIfRatePreSelected(table) {
+    var $selectedCell = table.find('td.cell-selected.selectable-cell');
     if ($selectedCell.length) {
       var col = $selectedCell.index();
-      $($rateTable.find('tr.add-advance-column-labels th')[col]).addClass('cell-selected');
+      $(table.find('tr.add-advance-column-labels th')[col]).addClass('cell-selected');
     };
   };
 
@@ -99,14 +134,20 @@ $(function () {
 
   $formPreview.on('submit', function(){
     var $selectedCell = $($rateTable.find('.cell-selected.add-advance-rate-cell'));
-    setRateFromElementData($selectedCell);
+    if ($selectedCell.length > 0) {
+      setRateFromElementData($selectedCell);
+    }
+    else {
+      $selectedCell = $($rateCustomTable.find('.cell-selected.add-advance-rate-cell'));
+      setRateFromElementData($selectedCell);
+    }
     showAddAdvanceLoadingState();
     $submitFieldPreview.attr('disabled', true); // Backup to prevent resubmission, as page is already covered by overlay and inaccessible.
   });
 
   // Get rates only when there is a rate table
   if ($rateTable.length > 0) {
-    showAdvanceRates(null);
+    showAdvanceRates(null, null);
   };
 
   // Perform Advance
@@ -147,38 +188,113 @@ $(function () {
   $('.advance-rates-table-toggle span').on('click', function(e) {
     var selectedTermType = $(this).data('active-term-type');
     $('.advance-alternate-funding-date-wrapper').hide();
+    $('.advance-create-custom-date-wrapper').hide();
     if (selectedTermType == 'frc') {
       $('.advance-funding-date-wrapper').show();
+      $('.advance-custom-date-wrapper').show();
     }
     else {
       $('.advance-funding-date-wrapper').hide();
+      $('.advance-custom-date-wrapper').hide();
+      $('.advance-create-custom-date-wrapper').hide();
+      $('.advance-select-custom-date-wrapper').hide();
     }
     if ($rateTableWrapper.attr('data-active-term-type') !== selectedTermType) {
       $rateTableWrapper.attr('data-active-term-type', selectedTermType);
       $rateTable.find('td, th').removeClass('cell-selected');
+      $rateCustomTable.find('td, th').removeClass('cell-selected');
       validateForm();
     };
   });
 
   // Open Default Funding Date Selector
-  $('.advance-alternate-funding-date-close').on('click', function() {
+  $('.advance-alternate-funding-date-close').on('click', function(e) {
     $('.advance-alternate-funding-date-wrapper').hide();
     $('.advance-funding-date-wrapper').show();
+    e.stopPropagation();
+    e.preventDefault();
   });
 
   // Open Alternate Funding Date Selector
-  $('.advance-alternate-funding-date-edit').on('click', function() {
+  $('.advance-alternate-funding-date-edit').on('click', function(e) {
     $('.advance-alternate-funding-date-wrapper').show();
     $('.advance-funding-date-wrapper').hide();
+    e.stopPropagation();
+    e.preventDefault();
   });
 
-  // event listener and handler for .confirm-quick-advance button click
+  // Open Custom Date Selector
+  $('.advance-custom-date-add').on('click', function(e) {
+    $('.advance-custom-date-wrapper').hide();
+    $('.advance-select-custom-date-wrapper').hide();
+    $('.advance-create-custom-date-wrapper').show();
+    e.stopPropagation();
+    e.preventDefault();
+  });
+
+  // Cancel Custom Date Selector
+  $('.advance-custom-date-cancel').on('click', function(e) {
+    if ($rateCustomTable.hasClass('add-advance-table-loading')) {
+      $('.advance-custom-date-wrapper').show();
+      $('.advance-create-custom-date-wrapper').hide();
+      $('.advance-select-custom-date-wrapper').hide();
+    }
+    else {
+      $('.advance-custom-date-wrapper').hide();
+      $('.advance-create-custom-date-wrapper').hide();
+      $('.advance-select-custom-date-wrapper').show();
+    };
+    e.stopPropagation();
+    e.preventDefault();
+  });
+
+
+  //event listener and handler for .btn-success button click
+  function bindApplyHandler() {
+    $formPreview.find('.datepicker-trigger').on('apply.daterangepicker', function() {
+      var $viewCustomRates = $('.view-custom-rates');
+      $viewCustomRates.addClass('active');
+      $viewCustomRates.attr('disabled', false);
+    });
+
+    // Edit Custom Date Selector
+    $('.advance-custom-date-edit').on('click', function(e) {
+      $('.advance-custom-date-wrapper').hide();
+      $('.advance-select-custom-date-wrapper').hide();
+      $('.advance-create-custom-date-wrapper').show();
+      e.stopPropagation();
+      e.preventDefault();
+    });
+  }
+  bindApplyHandler();
+
+  // event listener and handler for alternate funding date button click
   var $alternateFundingWrapper = $('.advance-alternate-funding-date-wrapper');
   $('input[name=alternate-funding-date]').on('click', function () {
     var $funding_date = $alternateFundingWrapper.find('input[name=alternate-funding-date]:checked').val();
-    var tbody = $rateTable.find('tbody');
-    showRatesLoadingState();
-    showAdvanceRates($funding_date);
+    $('.advance-custom-date-wrapper').show();
+    $('.advance-create-custom-date-wrapper').hide();
+    $('.advance-select-custom-date-wrapper').hide();
+    showRatesLoadingState($rateTable);
+    showAdvanceRates($funding_date, null);
+  });
+
+  // event listener and handler for custom date button click
+  $('.view-custom-rates').on('click', function (e) {
+    $('.advance-custom-date-wrapper').hide();
+    $('.advance-create-custom-date-wrapper').hide();
+    $('.advance-select-custom-date-wrapper').show();
+    var $viewCustomRates = $('.view-custom-rates');
+    $viewCustomRates.removeClass('active');
+    $viewCustomRates.attr('disabled', true);
+    var $datePickerTrigger = $($formPreview.find('.datepicker-trigger'));
+    var $maturityDate = $datePickerTrigger.find('input').val();
+    var $funding_date = $alternateFundingWrapper.find('input[name=alternate-funding-date]:checked').val();
+    showRatesLoadingState($rateTable);
+    showRatesLoadingState($rateCustomTable);
+    showAdvanceRates($funding_date, moment($maturityDate).format('YYYY-MM-DD'));
+    e.stopPropagation();
+    e.preventDefault();
   });
 
   // Google Analytics -

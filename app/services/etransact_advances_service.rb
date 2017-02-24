@@ -74,10 +74,10 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
-  def check_limits(member_id, amount, advance_term)
+  def check_limits(member_id, amount, advance_term, custom_maturity_date=nil)
     return nil if amount.nil? || advance_term.nil?
     if limits = get_json(:check_limits, 'etransact_advances/limits')
-      days_to_maturity = get_days_to_maturity(advance_term)
+      days_to_maturity = get_days_to_maturity(advance_term, custom_maturity_date)
       min_amount = 0
       max_amount = 0
       low_days = 0
@@ -149,7 +149,7 @@ class EtransactAdvancesService < MAPIService
     (date - Time.zone.today).to_i
   end
 
-  def get_days_to_maturity (term)
+  def get_days_to_maturity (term, custom_maturity_date=nil)
     today = Time.zone.today
     case term
     when /\Aovernight|open\z/i
@@ -160,6 +160,8 @@ class EtransactAdvancesService < MAPIService
         days_until(today + $1.to_i.month)
     when /\A(\d+)y/i
         days_until(today + $1.to_i.year)
+    when /\A(\d+)day\z/i
+        (custom_maturity_date.to_date - today.to_date).to_i
     end
   end
 

@@ -7,11 +7,18 @@ module MAPI
         include MAPI::Services::Base
         include MAPI::Shared::Constants
 
-        def self.get_market_cof_rates(environment, term, type)
+        def self.get_market_cof_rates(environment, term, type, funding_date=nil, maturity_date=nil)
           mds_connection = MAPI::Services::Rates.init_mds_connection(environment)
           if mds_connection
             mds_connection.operations
-            lookup_term = TERM_MAPPING[term]
+            if term=~CUSTOM_TERM
+              lookup_term = {
+                frequency: MAPI::Services::Rates.days_to_maturity(maturity_date, funding_date)[:days].to_s,
+                frequency_unit: 'D'
+              }
+            else
+              lookup_term = TERM_MAPPING[term]
+            end
             request = COF_TYPES.collect do |cof_type|
               lookup_data = {}
               if (LOAN_MAPPING[type] != 'FRC_WL')

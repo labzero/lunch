@@ -2303,6 +2303,7 @@ RSpec.describe SecuritiesController, type: :controller do
       end
     end
 
+
     describe '`prioritized_securities_request_error`' do
       generic_error_message = I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email)
       let(:errors) {{

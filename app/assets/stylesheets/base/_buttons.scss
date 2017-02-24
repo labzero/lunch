@@ -158,3 +158,19 @@ $split-button-height:   27px;
     padding-top: $button-vertical-padding - 1px;
   }
 }
+
+.text-only-button {
+  @extend %typography-header-nav;
+  @extend %link-style;
+  border: none;
+  background: none;
+  outline:none;
+  cursor: pointer;
+  &:disabled {
+    color: $medium-gray;
+    &:hover {
+      text-decoration: none;
+      cursor: default;
+    }
+  }
+}

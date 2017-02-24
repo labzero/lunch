@@ -2274,6 +2274,16 @@ en:
       default: (default)
       next_business: Next Business Day
       skip_day: Skip Day
+    custom_term:
+      title: Custom Term
+      add: Add Custom Term
+      create: Create a Custom Term
+      set: Set Term Maturity Date
+      view_rates: View Rates For This Term
+      instructions: Placeholder for Instructions
+      edit: Edit Custom Term
+      matures_on: Matures in %{days} days on %{date}
+      in_days: "%{days} days"
     actions:
       review: Review Advance
       submit: Submit Advance
@@ -2281,6 +2291,7 @@ en:
       view: View rate options
     messages:
       completing_advance: Please wait while we complete your advance. This may take about 30 seconds.
+      no_rates: There are no rates to display.
   products:
     products_summary:
       nav_title: Products Summary

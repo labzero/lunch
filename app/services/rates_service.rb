@@ -45,8 +45,8 @@ class RatesService < MAPIService
     end
   end
 
-  def rate(loan, term, type='Live') # type=Live|StartOfDay
-    if data = get_hash(:rate, "rates/#{loan}/#{term}/#{type}")
+  def rate(loan, term, type='Live', funding_date=nil) # type=Live|StartOfDay
+    if data = get_hash(:rate, "rates/#{loan}/#{term}/#{type}", funding_date: funding_date)
       data[:rate] = data[:rate].to_f if data[:rate]
       data[:updated_at] = DateTime.parse(data[:updated_at]) if data[:updated_at]
       data
@@ -59,17 +59,14 @@ class RatesService < MAPIService
     end
   end
 
-  def quick_advance_rates(member_id, funding_date=nil)
+  def quick_advance_rates(member_id, funding_date=nil, maturity_date=nil)
     # we're not doing anything with member id right now, but presumably will need to use it at some point to check if
     # certain rates are available (e.g. member has enough collateral)
     raise ArgumentError, 'member_id must not be blank' if member_id.blank?
     iso8601_funding_date = funding_date.try(:to_date).try(:iso8601)
-    Rails.cache.fetch(CacheConfiguration.key(:quick_advance_rates, member_id, iso8601_funding_date), expires_in: CacheConfiguration.expiry(:quick_advance_rates)) do
-      if iso8601_funding_date
-        get_hash(:quick_advance_rates, "rates/summary", funding_date: iso8601_funding_date)
-      else
-        get_hash(:quick_advance_rates, "rates/summary")
-      end
+    iso8601_maturity_date = maturity_date.try(:to_date).try(:iso8601)
+    Rails.cache.fetch(CacheConfiguration.key(:quick_advance_rates, member_id, iso8601_funding_date, iso8601_maturity_date), expires_in: CacheConfiguration.expiry(:quick_advance_rates)) do
+      get_hash(:quick_advance_rates, "rates/summary", funding_date: iso8601_funding_date, maturity_date: iso8601_maturity_date)
     end
   end
 

@@ -17,7 +17,9 @@ describe MAPI::ServiceApp do
   let(:rate)  {0.17}
   let(:check_capstock)  {true}
   let(:signer)  {'local'}
+  let(:today) { Time.zone.today }
   let(:maturity_date) { "2016-03-11".to_date }
+  let(:funding_date) { today + rand(1..3).days }
   let(:allow_grace_period) { true }
   let(:post_body) {
     {
@@ -159,14 +161,21 @@ describe MAPI::ServiceApp do
     let(:overnight_response) {{'v14:product'=>'O/N VRC', 'v14:subProduct'=>'VRC', 'v14:term'=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'D'}, 'v14:maturityDate' => Time.zone.today}}
     let(:open_response) {{'v14:product'=>'OPEN VRC', 'v14:subProduct'=>'VRC', 'v14:term'=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'D'}}}
     let(:week_response) {{'v14:product'=>'FX CONSTANT', 'v14:subProduct'=>'FRC', 'v14:term'=>{'v13:frequency'=>1, 'v13:frequencyUnit'=>'W'}, 'v14:maturityDate' => Time.zone.today}}
+    let(:today) { Time.zone.today }
+    let(:maturity_date) { today + rand(3..1095).days }
+    let(:days_to_maturity) { (maturity_date.to_date - today).to_i.to_s + 'day' }
+    let(:custom_response) {{'v14:product'=>'FX CONSTANT', 'v14:subProduct'=>'FRC', 'v14:term'=>{'v13:frequency'=>(maturity_date.to_date - today).to_i, 'v13:frequencyUnit'=>'D'}, 'v14:maturityDate' => today}}
     it 'should return overnight advance product info' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info('overnight', Time.zone.today)).to eq(overnight_response)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info('overnight', today)).to eq(overnight_response)
     end
     it 'should return open advance product info' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info('open', Time.zone.today)).to eq(open_response)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info('open', today)).to eq(open_response)
     end
     it 'should return week advance product info' do
-      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info('1week', Time.zone.today)).to eq(week_response)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info('1week', today)).to eq(week_response)
+    end
+    it 'should return custom term product info' do
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.get_advance_product_info(days_to_maturity, Time.zone.today)).to eq(custom_response)
     end
   end
 
@@ -208,15 +217,15 @@ describe MAPI::ServiceApp do
         make_request
       end
       it 'calls `get_market_cof_rates` method with the environment' do
-        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(:production, anything, anything)
+        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(:production, anything, anything, anything, anything)
         make_request
       end
       it 'calls `get_market_cof_rates` method with the term' do
-        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, advance_term, anything)
+        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, advance_term, anything, anything, anything)
         make_request
       end
       it 'calls `get_market_cof_rates` method with the type' do
-        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, advance_type)
+        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, advance_type, anything, anything)
         make_request
       end
     end
@@ -248,15 +257,23 @@ describe MAPI::ServiceApp do
       get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", funding_date: nil, allow_grace_period: allow_grace_period
     end
     it 'calls `get_market_cof_rates` method with the environment' do
-      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(environment, anything, anything).and_return({})
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(environment, anything, anything, anything, anything).and_return({})
       execute_trade
     end
     it 'calls `get_market_cof_rates` method with the term' do
-      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, advance_term, anything).and_return({})
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, advance_term, anything, anything, anything).and_return({})
       execute_trade
     end
     it 'calls `get_market_cof_rates` method with the type' do
-      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, advance_type).and_return({})
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, advance_type, anything, anything).and_return({})
+      execute_trade
+    end
+    it 'calls `get_market_cof_rates` method with the funding_date' do
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, anything, funding_date, anything).and_return({})
+      get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", funding_date: funding_date; JSON.parse(last_response.body)
+    end
+    it 'calls `get_market_cof_rates` method with the maturity_date' do
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, anything, anything, maturity_date).and_return({})
       execute_trade
     end
   end
@@ -735,16 +752,15 @@ describe MAPI::ServiceApp do
       let(:allow_grace_period) { double('Allow Grace Period Boolean') }
       let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(logger, environment, type, term, response, allow_grace_period) }
       let(:loan_term) { {display_status: false} }
-      let(:loan_terms) { { type => { term => loan_term } } }
+      let(:loan_terms) { { term => { type => loan_term } } }
       before do
         allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(logger, environment, anything).and_return(loan_terms)
       end
-
-      it 'adds a status of `DisabledProductError` if the loan term is disabled' do
-        expect(call_method['status']).to eq(original_status + ['DisabledProductError'])
+      it 'raises an error if the `MAPI::Services::Rates::LoanTerms.loan_terms` returns `nil`' do
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(logger, environment, anything).and_return(nil)
+        expect {call_method}.to raise_error('MAPI::Services::Rates::LoanTerms.loan_terms returned nil')
       end
-      it 'adds a status of `DisabledProductError` if the loan term lookup fails' do
-        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(logger, environment).and_return(nil)
+      it 'adds a status of `DisabledProductError` if the loan term is disabled' do
         expect(call_method['status']).to eq(original_status + ['DisabledProductError'])
       end
       it 'leaves status unchanged if the loan term is enabled' do
@@ -758,6 +774,28 @@ describe MAPI::ServiceApp do
       it 'defaults the allow_grace_period argument to false' do
         expect(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(anything, anything, false)
         MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(logger, environment, type, term, response)
+      end
+      describe 'when term is Custom Term' do
+        let(:custom_term) { '10day' }
+        let(:call_custom_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(logger, environment, type, custom_term, response, allow_grace_period) }
+        let(:open_loan_term) { {display_status: false} }
+        let(:custom_loan_terms) { { term => { type => loan_term }, 'open' => { type => open_loan_term } } }
+        before do
+          allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(logger, environment, anything).and_return(custom_loan_terms)
+        end
+        it 'leaves status unchanged if the loan term is enabled' do
+          loan_term[:trade_status] = true
+          expect(call_custom_method['status']).to eq(original_status)
+        end
+        it 'leaves status unchanged if the loan term is disabled for open or overnight and enabled for everything else' do
+          open_loan_term[:trade_status] = false
+          loan_term[:trade_status] = true
+          expect(call_custom_method['status']).to eq(original_status)
+        end
+        it 'sets status to DisabledProductError if loan_term is disabled' do
+          loan_term[:trade_status] = false
+          expect(call_custom_method['status']).to eq(original_status + ['DisabledProductError'])
+        end
       end
       describe 'when the product has a true value for `end_time_reached`' do
         before { loan_term[:end_time_reached] = true }
@@ -923,7 +961,6 @@ describe MAPI::ServiceApp do
     let(:cost_of_funds) { double('cost_of_funds') }
     let(:benchmark_rate) { double('benchmark_rate') }
     let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period) }
-
     before do
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:init_execute_trade_connection)
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:build_message).with(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, today, day_count).and_return(built_message)
@@ -967,6 +1004,13 @@ describe MAPI::ServiceApp do
         anythings = Array.new(5, anything)
         expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_enabled_product).with(*[*anythings, allow_grace_period]).and_return({})
         execute_trade
+      end
+      describe 'with Custom Term' do
+        let(:advance_custom_term) { '10day' }
+        let(:execute_custom_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade_internal(app, member_id, instrument, operation, amount, advance_custom_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period) }
+        before do
+          allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:build_message).with(member_id, instrument, operation, amount, advance_custom_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, today, day_count).and_return(built_message)
+        end
       end
     end
   end

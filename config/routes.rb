@@ -55,6 +55,7 @@ Rails.application.routes.draw do
     get '/manage' => 'advances#manage'
     get '/select-rate' => 'advances#select_rate'
     get '/fetch-rates' => 'advances#fetch_rates'
+    get '/fetch-custom-rates' => 'advances#fetch_custom_rates'
     post  '/preview' => 'advances#preview'
     post '/perform' => 'advances#perform'
     constraints Constraints::FeatureEnabled.new('advance-confirmation') do

@@ -26,6 +26,7 @@ $(function () {
       var today = $wrapper.data('date-picker-today');
       var linkedInputField = $wrapper.data('date-picker-linked-input-field');
       var invalidDates = $wrapper.data('date-picker-invalid-dates');
+      var hideStartDate = $wrapper.data('date-picker-hide-start-date');
       var options = {
         ranges: ranges,
         opens: openDir,
@@ -75,7 +76,7 @@ $(function () {
 
       $.isArray(invalidDates) ? disableInvalidDatesForCalendar($datePickerTrigger, $wrapper, invalidDates) : false; // Disable invalid dates if present
       options.disableWeekends ? disableWeekendsForCalendar($datePickerTrigger, $wrapper) : false;
-      setDatePickerPlaceholder($datePickerTrigger, startDate, endDate);
+      setDatePickerPlaceholder($datePickerTrigger, startDate, endDate, hideStartDate);
       if (filter !== undefined) {
         if (singleDatePicker) {
           $datePickerTrigger.on('updateCalendar.daterangepicker showCalendar.daterangepicker show.daterangepicker', function(){
@@ -196,7 +197,7 @@ $(function () {
   function setDatePickerApplyListener($datePickerTrigger, $form, linkedInputField){
     $datePickerTrigger.on('apply.daterangepicker', function(ev, picker) {
       ev.stopPropagation();
-      setDatePickerPlaceholder($datePickerTrigger, picker.startDate, picker.endDate);
+      setDatePickerPlaceholder($datePickerTrigger, picker.startDate, picker.endDate, false);
       $form.find('input[name=start_date]').val(picker.startDate.format('YYYY-MM-DD'));
       if (linkedInputField) {
         $('input[name="' + linkedInputField + '"]').val(picker.startDate.format('YYYY-MM-DD'));
@@ -208,9 +209,14 @@ $(function () {
     });
   };
 
-  function setDatePickerPlaceholder($datePickerTrigger, startDate, endDate) {
+  function setDatePickerPlaceholder($datePickerTrigger, startDate, endDate, hideStartDate) {
     if ($($datePickerTrigger.siblings('.datepicker-wrapper')).data('date-picker-single-date-picker')) {
-      var input_field_text = $datePickerTrigger.data('date-picker-input-field-text').replace(/\{replace_date\}/, startDate.format('MM/DD/YYYY'));
+      if (hideStartDate == false) {
+        var input_field_text = $datePickerTrigger.data('date-picker-input-field-text').replace(/\{replace_date\}/, startDate.format('MM/DD/YYYY'));
+      }
+      else {
+        var input_field_text = '';
+      }
       $datePickerTrigger.find('input').val(input_field_text);
     }
     else {

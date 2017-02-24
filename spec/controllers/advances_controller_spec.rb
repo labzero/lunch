@@ -251,7 +251,7 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:message_service_instance) { double('service instance', todays_quick_advance_message: nil) }
     let(:etransact_service_instance) { double('service instance', etransact_status: nil, etransact_active?: nil) }
     let(:make_request) { get :select_rate }
-    let(:advance_request) { double(AdvanceRequest, amount: advance_amount, type: advance_type, term: advance_term, term_type: advance_term_type, id: advance_id, :allow_grace_period= => nil, :type= => nil, :term= => nil, :amount= => nil) }
+    let(:advance_request) { double(AdvanceRequest, amount: advance_amount, type: advance_type, term: advance_term, term_type: advance_term_type, id: advance_id, :allow_grace_period= => nil, :type= => nil, :term= => nil, :amount= => nil, :funding_date => nil) }
     let(:profile) { double('profile') }
     let(:member_balance_service_instance) { double('member balance service instance', profile: profile) }
 
@@ -354,6 +354,7 @@ RSpec.describe AdvancesController, :type => :controller do
         allow(controller).to receive(:feature_enabled?).and_call_original
         allow(controller).to receive(:feature_enabled?).with('add-advance-custom-term').and_return(true)
         allow(CalendarService).to receive(:new).and_return(calendar_service_instance)
+        allow(subject).to receive(:date_restrictions).and_return({})
       end
       it 'assigns @today to Today' do
         allow(calendar_service_instance).to receive(:find_next_business_day).and_return(today)
@@ -382,12 +383,16 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
     let(:advance_type) { double('advance type') }
     let(:advance_term) { double('advance term') }
-    let(:advance_request) { double(AdvanceRequest, rates: rate_data, type: advance_type, term: advance_term, errors: [], id: SecureRandom.uuid, :allow_grace_period= => nil) }
+    let(:advance_request) { double(AdvanceRequest, rates: rate_data, type: advance_type, term: advance_term, errors: [], id: SecureRandom.uuid, :allow_grace_period= => nil, :funding_date => nil, :custom_maturity_date= => nil) }
     let(:make_request) { get :fetch_rates }
+    let(:today) { Time.zone.today }
+    let(:maturity_date) { today + rand(3..1095).days }
+    let(:make_request_with_maturity_date) { get :fetch_rates, maturity_date: maturity_date}
 
     before do
       allow(controller).to receive(:fetch_advance_request)
       allow(subject).to receive(:advance_request).and_return(advance_request)
+      allow(subject).to receive(:date_restrictions).and_return({})
     end
 
     it_behaves_like 'a user required action', :get, :fetch_rates
@@ -440,6 +445,111 @@ RSpec.describe AdvancesController, :type => :controller do
     it 'sets @selected_term' do
       make_request
       expect(assigns[:selected_term]).to eq(advance_term)
+    end
+    it 'populates the fetch rates parameters' do
+      expect(subject).to receive(:populate_fetch_rates_parameters)
+      make_request
+    end
+    describe 'when the `add-advance-custom-term` feature is enabled' do
+      before do
+        allow(controller).to receive(:feature_enabled?).and_call_original
+        allow(controller).to receive(:feature_enabled?).with('add-advance-custom-term').and_return(true)
+      end
+      it 'sets custom_maturity_date' do
+        expect(advance_request).to receive(:custom_maturity_date=).with(maturity_date)
+        make_request_with_maturity_date
+      end
+      it 'populates the fetch custom rates parameters' do
+        expect(subject).to receive(:populate_fetch_custom_rates_parameters).with({maturity_date: maturity_date, funding_date: anything})
+        make_request_with_maturity_date
+      end
+    end
+  end
+
+  describe 'GET fetch_custom_rates' do
+    allow_policy :advance, :show?
+    let(:advance_id) { SecureRandom.uuid }
+    let(:amount) {  }
+    let(:rate_data) { {some: 'data'} }
+    let(:RatesService) {class_double(RatesService)}
+    let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
+    let(:advance_type) { double('advance type') }
+    let(:advance_term) { double('advance term') }
+    let(:advance_request) { double(AdvanceRequest, rates: rate_data, type: advance_type, term: advance_term, errors: [], id: SecureRandom.uuid, :allow_grace_period= => nil, :funding_date => nil, :custom_maturity_date= => nil) }
+    let(:make_request) { get :fetch_custom_rates }
+    let(:today) { Time.zone.today }
+    let(:maturity_date) { today + rand(3..1095).days }
+    let(:make_request_with_maturity_date) { get :fetch_custom_rates, maturity_date: maturity_date}
+
+    before do
+      allow(controller).to receive(:fetch_advance_request)
+      allow(subject).to receive(:advance_request).and_return(advance_request)
+      allow(subject).to receive(:date_restrictions).and_return({})
+    end
+
+    it_behaves_like 'a user required action', :get, :fetch_custom_rates
+    it { should use_before_filter(:fetch_advance_request) }
+    it { should use_before_filter(:set_html_class) }
+    it { should use_after_filter(:save_advance_request) }
+
+    it 'gets the rates from the advance request' do
+      expect(subject).to receive(:advance_request).and_return(advance_request)
+      expect(advance_request).to receive(:rates).and_return(rate_data)
+      make_request
+    end
+    it 'render its view' do
+      make_request
+      expect(response.body).to render_template('fetch_custom_rates')
+    end
+    it 'includes the html in its response' do
+      make_request
+      data = JSON.parse(response.body)
+      expect(data['html']).to be_kind_of(String)
+    end
+    it 'includes the advance request ID in its response' do
+      make_request
+      data = JSON.parse(response.body)
+      expect(data['id']).to eq(advance_request.id)
+    end
+    it 'sets @add_advances_active to the result of the `etransact_active` method on the EtransactAdvancesService' do
+      add_advances_active = double('etransact active')
+      allow(EtransactAdvancesService).to receive(:new).and_return(double('service instance', etransact_active?: add_advances_active))
+      make_request
+      expect(assigns[:add_advances_active]).to eq(add_advances_active)
+    end
+    it 'sets @rate_data' do
+      make_request
+      expect(assigns[:rate_data]).to eq(rate_data)
+    end
+    it 'sets @advance_terms' do
+      make_request
+      expect(assigns[:advance_terms]).to eq(AdvanceRequest::ADVANCE_TERMS)
+    end
+    it 'sets @advance_types' do
+      make_request
+      expect(assigns[:advance_types]).to eq(AdvanceRequest::ADVANCE_TYPES)
+    end
+    it 'sets @selected_type' do
+      make_request
+      expect(assigns[:selected_type]).to eq(advance_type)
+    end
+    it 'sets @selected_term' do
+      make_request
+      expect(assigns[:selected_term]).to eq(advance_term)
+    end
+    it 'populates the fetch rates parameters' do
+      expect(subject).to receive(:populate_fetch_rates_parameters)
+      make_request
+    end
+    describe 'with maturity date' do
+      it 'sets custom_maturity_date' do
+        expect(advance_request).to receive(:custom_maturity_date=).with(maturity_date)
+        make_request_with_maturity_date
+      end
+      it 'populate the fetch custom rates parameters' do
+        expect(subject).to receive(:populate_fetch_custom_rates_parameters).with({maturity_date: maturity_date, funding_date: anything})
+        make_request_with_maturity_date
+      end
     end
   end
 
@@ -885,6 +995,73 @@ RSpec.describe AdvancesController, :type => :controller do
       end
     end
 
+    describe '`populate_fetch_rates_parameters`' do
+      let(:call_method) { subject.send(:populate_fetch_rates_parameters) }
+      let(:advance_request) { double('An AdvanceRequest').as_null_object }
+      let(:etransact_service_instance) { double('service instance', etransact_status: nil, etransact_active?: nil) }
+      let(:etransact_active) { SecureRandom.hex }
+      before do
+        allow(subject).to receive(:advance_request).and_return(advance_request)
+        allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
+      end
+      it 'gets the advance request' do
+        expect(subject).to receive(:advance_request)
+        call_method
+      end
+      it 'sets @add_advances_active to the value returned by the EtransactAdvancesService' do
+        allow(etransact_service_instance).to receive(:etransact_active?).and_return(etransact_active)
+        call_method
+        expect(assigns[:add_advances_active]).to eq(etransact_active)
+      end
+      it
+      {
+        rate_data: :rates,
+        selected_type: :type,
+        selected_term: :term
+      }.each do |param, method|
+        it "populates the view variable `@#{param}` with the value found on the advance request for attribute `#{method}`" do
+          value = double("Advance Request Parameter: #{method}")
+          allow(advance_request).to receive(method).and_return(value)
+          call_method
+          expect(assigns[param]).to eq(value)
+        end
+      end
+    end
+
+    describe '`populate_fetch_custom_rates_parameters`' do
+      let(:maturity_date) { SecureRandom.hex }
+      let(:funding_date) { SecureRandom.hex }
+      let(:call_method) { subject.send(:populate_fetch_custom_rates_parameters, maturity_date: maturity_date, funding_date: funding_date) }
+      let(:days) { rand(3..1095) }
+      let(:custom_term) { days.to_s + 'day' }
+      let(:days_to_maturity_return) { {days: days, term: custom_term} }
+      let(:advance_request) { double('An AdvanceRequest').as_null_object }
+      before do
+        allow(subject).to receive(:days_to_maturity).and_return(days_to_maturity_return)
+        allow(subject).to receive(:advance_request).and_return(advance_request)
+      end
+      it 'sets @maturity_date to maturity_date' do
+        call_method
+        expect(assigns[:maturity_date]).to eq(maturity_date)
+      end
+      it 'sets custom_maturity_date' do
+        expect(advance_request).to receive(:custom_maturity_date=).with(maturity_date)
+        call_method
+      end
+      it 'calls days_to_maturity with maturity_string and funding_date' do
+        expect(subject).to receive(:days_to_maturity).with(maturity_date, funding_date)
+        call_method
+      end
+      it 'sets @days_to_maturity to days_to_maturity[:days]' do
+        call_method
+        expect(assigns[:days_to_maturity]).to eq(days_to_maturity_return[:days])
+      end
+      it 'sets @custom_term to [days_to_maturity[:term]]' do
+        call_method
+        expect(assigns[:custom_term]).to eq([days_to_maturity_return[:term]])
+      end
+    end
+
     describe '`advance_request`' do
       let(:call_method) { subject.send(:advance_request) }
       let(:advance_request) { double(AdvanceRequest, owners: double(Set, add: nil)) }
@@ -1033,5 +1210,4 @@ RSpec.describe AdvancesController, :type => :controller do
       end
     end
   end
-
 end

@@ -49,6 +49,10 @@ Then(/^I should see the add advance rate table$/) do
   page.assert_selector('.advance-rates-table')
 end
 
+Then(/^I should see the add advance custom rate table$/) do
+  page.assert_selector('.advance-rates-custom-table')
+end
+
 Then(/^I should not see the add advance rate table$/) do
   page.assert_no_selector('.advance-rates-table')
 end
@@ -99,6 +103,11 @@ When(/^I select the rate with a term of "(.*?)" and a type of "(.*?)" on the add
   @rate_term = term
   @rate_type = type
   page.find(".advance-rates-table td[data-advance-term='#{term}'][data-advance-type='#{type}']").click
+end
+
+When(/^I select custom rate with a term of "(.*?)" and a type of "(.*?)" on the add advance page$/) do |term, type|
+  @rate_type = type
+  page.find(".advance-rates-custom-table td[data-advance-type='#{type}']").click
 end
 
 When(/^I see the unselected state for the cell with a term of "(.*?)" and a type of "(.*?)" on the add advance page$/) do |term, type|
@@ -323,11 +332,19 @@ Then(/^I should (see|not see) the borrowing capacity sidebar/) do |visible|
 end
 
 Then(/^I should see Funding Date information$/) do
-  page.assert_selector('.advance-funding-date-wrapper')
+  page.assert_selector('.advance-funding-date-wrapper', visible: true)
+end
+
+Then(/^I should see Custom Term information$/) do
+  page.assert_selector('.advance-custom-date-wrapper', visible: true)
 end
 
 When(/^I click on Edit Funding Date link$/) do
   page.find('.advance-alternate-funding-date-edit').click
+end
+
+When(/^I click on Add Custom Term link$/) do
+  page.find('.advance-custom-date-add').click
 end
 
 When(/^I click on the Today radio button$/) do
@@ -344,6 +361,18 @@ end
 
 Then(/^I should see Set an Alternate Funding Date$/) do
   page.assert_selector('.advance-alternate-funding-date-wrapper')
+end
+
+Then(/^I should see Custom Term Calendar$/) do
+  page.assert_selector('.advance-custom-date-maturity-calendar-partial', visible: true)
+end
+
+When(/^I click on the Cancel link$/) do
+  page.find('.advance-custom-date-cancel').click
+end
+
+When(/^I click on Edit Custom Term link$/) do
+  page.find('.advance-custom-date-edit').click
 end
 
 Then(/^I should see an Advance Confirmation column in the data table$/) do
@@ -379,6 +408,10 @@ end
 
 When(/^I click on the confirm add advance button$/) do
   page.find('.confirm-add-advance').click
+end
+
+When(/^I click on the View Rates For this Term button$/) do
+  page.find('.view-custom-rates').click
 end
 
 Then(/^I should see the add advance confirmation page$/) do

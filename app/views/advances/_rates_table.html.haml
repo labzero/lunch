@@ -3,6 +3,8 @@
 - selected_type ||= nil
 - selected_term ||= nil
 - rate_data ||= nil
+- days_to_maturity ||= nil
+- custom_term ||= nil
 - advance_terms.each_with_index do |advance_term, i|
   - classes = (i == 0 || i == 1) ? ['vrc-rates'] : ['frc-rates']
   - classes << 'add-advance-table-label-row' if i == 0 || i == 2
@@ -12,7 +14,10 @@
       - rate_disabled = rate[:disabled] if rate
       - if j == 0
         %td.row-label{class: ('cell-selected' if selected_term == advance_term && !loading && !rate_disabled)}
-          .add-advance-cell-wrapper= t("dashboard.quick_advance.table.axes_labels.#{advance_term}")
+          -if (advance_term == custom_term)
+            .add-advance-cell-wrapper= t('advances.custom_term.in_days', days: days_to_maturity)
+          -else
+            .add-advance-cell-wrapper= t("dashboard.quick_advance.table.axes_labels.#{advance_term}")
       - unless loading
         - advance_rate = rate[:rate].to_f
         - cell_selected = advance_type == selected_type && advance_term == selected_term && !rate_disabled
@@ -23,6 +28,8 @@
               = render 'shared/tooltip', tooltip_data: make_quick_advance_tooltip_data( rate, advance_term )
             - else
               = t('global.missing_value')
-      - if (i == 0 || i == 2) && j == 0
+      - if (i == 0 || i == 2) && j == (advance_types.length - 1)
         %td.add-advance-table-loading-cell{rowspan: advance_terms.length, colspan: advance_types.length}
           %span= t("dashboard.retrieving_data")
+        %td.add-advance-table-error-cell{rowspan: advance_terms.length, colspan: advance_types.length}
+          %span= t('advances.messages.no_rates')
