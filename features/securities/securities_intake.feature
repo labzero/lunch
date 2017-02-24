@@ -297,3 +297,22 @@ Feature: Securities Intake
     | page     | success_page    |
     | safekeep | safekept intake |
     | pledge   | pledge intake   |
+
+  @jira-mem-2233
+  Scenario Outline: View the Delivery Instructions field sets specific to the intake flow
+    When I am on the <page> securities page
+    Then I should see "DTC" as the selected release delivery instructions
+    And I should see the "DTC" release instructions fields
+    And I should not see the field for further credit account number in the "DTC" fieldset
+    When I select "Fed" as the release delivery instructions
+    Then I should see "Fed" as the selected release delivery instructions
+    And I should see the "Fed" release instructions fields
+    And I should not see the field for further credit account number in the "Fed" fieldset
+    When I select "Physical" as the release delivery instructions
+    Then I should see "Physical" as the selected release delivery instructions
+    And I should see the "Physical" release instructions fields
+    And I should not see the field for further credit account number in the "Physical" fieldset
+  Examples:
+    | page     |
+    | safekeep |
+    | pledge   |

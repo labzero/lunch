@@ -537,6 +537,23 @@ Then(/^I should see the contact information for (Securities Services|Collateral 
   page.assert_selector('.securities-download-instructions-description:last-of-type', text: text, exact: true, visible: true)
 end
 
+Then(/^I (should|should not) see the field for further credit account number in the "(.*?)" fieldset$/) do |assertion, delivery_instruction|
+  attribute = case delivery_instruction
+    when 'DTC'
+      'dtc_credit_account_number'
+    when 'Fed'
+      'fed_credit_account_number'
+    when 'Physical'
+      'physical_securities_credit_account_number'
+              end
+  selector = "input[name='securities_request[#{attribute}]'"
+  if assertion == 'should'
+    page.assert_selector(selector, visible: true)
+  else
+    page.assert_no_selector(selector)
+  end
+end
+
 def delivery_instructions(text)
   case text
   when 'DTC'
