@@ -4,7 +4,7 @@ describe MembersService do
   let(:member_id) { 3 }
   let(:request_object) {double('Request')}
   let(:response_object) { double('Response', body: "[]")}
-  subject { MembersService.new(double('request', uuid: '12345')) }
+  subject { MembersService.new(ActionDispatch::TestRequest.new) }
   it { expect(subject).to respond_to(:report_disabled?) }
 
   describe '`report_disabled?` method' do

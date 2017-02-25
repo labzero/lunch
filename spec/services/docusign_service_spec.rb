@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe DocusignService do
-  let(:request) { double('request', uuid: '12345') }
+  let(:request) { ActionDispatch::TestRequest.new }
 
   subject { DocusignService.new(request) }
 

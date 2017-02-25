@@ -323,31 +323,60 @@ RSpec.describe InternalMailer, :type => :mailer do
   describe '`user_name_from_user` protected method' do
     subject { described_class.send :new }
     let(:user) { double('A User', display_name: nil, username: nil)}
+    let(:user_id) { rand(1000..10000).to_s }
     let(:call_method) { subject.send(:user_name_from_user, user) }
+
+    shared_examples 'handles a `User` instance' do
+      it 'return the `display_name` if found' do
+        display_name = double('A Display Name')
+        allow(user).to receive(:display_name).and_return(display_name)
+        expect(call_method).to be(display_name)
+      end
+
+      it 'returns the `username` if display_name is not found' do
+        username = double('A Username')
+        allow(user).to receive(:username).and_return(username)
+        expect(call_method).to be(username)
+      end
+      
+      it 'returns the `username` if `display_name` raises an error' do
+        username = double('A Username')
+        allow(user).to receive(:display_name).and_raise('some error')
+        allow(user).to receive(:username).and_return(username)
+        expect(call_method).to be(username)
+      end
+    end
+
+    include_examples 'handles a `User` instance'
 
     it 'returns the user directly if its a string' do
       user = double('A String')
       allow(user).to receive(:is_a?).with(String).and_return(true)
       expect(subject.send(:user_name_from_user, user)).to be(user)
     end
-    it 'return the `display_name` if found' do
-      display_name = double('A Display Name')
-      allow(user).to receive(:display_name).and_return(display_name)
-      expect(call_method).to be(display_name)
-    end
-    it 'returns the `username` if display_name is not found' do
-      username = double('A Username')
-      allow(user).to receive(:username).and_return(username)
-      expect(call_method).to be(username)
-    end
-    it 'returns the `username` if `display_name` raises an error' do
-      username = double('A Username')
-      allow(user).to receive(:display_name).and_raise('some error')
-      allow(user).to receive(:username).and_return(username)
-      expect(call_method).to be(username)
-    end
+
     it 'returns the global unknown string if passed nil' do
       expect(subject.send(:user_name_from_user, nil)).to eq(I18n.t('global.unknown'))
+    end
+
+    describe 'if a user ID is supplied' do
+      let(:call_method) { subject.send(:user_name_from_user, user_id) }
+
+      before do
+        allow(User).to receive(:find).with(user_id).and_return(user)
+      end
+
+      it 'searches for the indicated user' do
+        expect(User).to receive(:find).with(user_id).and_return(user)
+        call_method
+      end
+
+      it 'returns the user ID if the user was not found' do
+        allow(User).to receive(:find).with(user_id).and_raise(ActiveRecord::RecordNotFound)
+        expect(call_method).to be(user_id)
+      end
+
+      include_examples 'handles a `User` instance'
     end
   end
 end

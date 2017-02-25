@@ -9,7 +9,7 @@ describe RatesService do
   let(:start_date) {Date.new(2014,12,01)}
   let(:end_date) {Date.new(2014,12,31)}
 
-  subject { RatesService.new(double('request', uuid: '12345')) }
+  subject { RatesService.new(ActionDispatch::TestRequest.new) }
   it { expect(subject).to respond_to(:overnight_vrc) }
   it { expect(subject).to respond_to(:current_overnight_vrc) }
   it { expect(subject).to respond_to(:quick_advance_rates) }

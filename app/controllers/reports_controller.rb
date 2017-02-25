@@ -1141,7 +1141,7 @@ class ReportsController < ApplicationController
         if report_disabled?(HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS)
           data = {}
         elsif self.skip_deferred_load
-          data = RatesServiceJob.perform_now('historical_price_indications', request.uuid, @start_date.to_s, @end_date.to_s, @collateral_type, @credit_type)
+          data = RatesServiceJob.perform_now('historical_price_indications', request.uuid, current_user.id, @start_date.to_s, @end_date.to_s, @collateral_type, @credit_type)
         else
           job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
           raise ActiveRecord::RecordNotFound unless job_status
@@ -1224,7 +1224,7 @@ class ReportsController < ApplicationController
         }
         render layout: false if request.try(:xhr?)
       else
-        job_status = RatesServiceJob.perform_later('historical_price_indications', request.uuid, @start_date.to_s, @end_date.to_s, @collateral_type, @credit_type).job_status
+        job_status = RatesServiceJob.perform_later('historical_price_indications', request.uuid, current_user.id, @start_date.to_s, @end_date.to_s, @collateral_type, @credit_type).job_status
         job_status.update_attributes!(user_id: current_user.id)
         @job_status_url = job_status_url(job_status)
         new_params = {

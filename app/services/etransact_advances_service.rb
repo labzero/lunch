@@ -176,8 +176,12 @@ class EtransactAdvancesService < MAPIService
 
   def calypso_error_handler(member_id)
     -> (name, msg, err) do
-      InternalMailer.calypso_error(err, request_uuid, request_user, member_id_to_name(member_id)).deliver_now
+      InternalMailer.calypso_error(err, connection_request_uuid, connection_user, member_id_to_name(member_id)).deliver_now
     end
+  end
+
+  def member_id_to_name(member_id)
+    (member_id == request.member_id ? request.member_name : nil) || member_id
   end
 
 end

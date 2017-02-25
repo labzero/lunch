@@ -2,32 +2,34 @@ class MAPIService
 
   def initialize(request)
     @request = request
-    @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"", :'X-Request-ID' => request_uuid}
+    @connection = ::RestClient::Resource.new Rails.configuration.mapi.endpoint, headers: {:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""}
+    self.connection_request_uuid = request.try(:uuid)
+    self.connection_user_id = request.try(:user_id)
   end
 
   def request
     @request
   end
 
-  def request_uuid
-    @request.try(:uuid)
+  def connection_user_id=(user_id)
+    @connection.headers[:'X-User-ID'] = user_id
+    @connection_user = nil
   end
 
-  def request_user
-    warden_user = @request.session[ApplicationController::SessionKeys::WARDEN_USER]
-    User.find(warden_user[0][0]) if warden_user
+  def connection_request_uuid=(uuid)
+    @connection.headers[:'X-Request-ID'] = uuid
   end
 
-  def request_member_id
-    @request.session[ApplicationController::SessionKeys::MEMBER_ID]
+  def connection_request_uuid
+    @connection.headers[:'X-Request-ID']
   end
 
-  def request_member_name
-    @request.session[ApplicationController::SessionKeys::MEMBER_NAME]
+  def connection_user_id
+    @connection.headers[:'X-User-ID']
   end
 
-  def member_id_to_name(member_id)
-    (member_id == request_member_id ? request_member_name : nil) || member_id
+  def connection_user
+    @connection_user ||= User.find(connection_user_id)
   end
   
   def warn(name, msg, error, &error_handler)

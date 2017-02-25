@@ -1,77 +1,54 @@
 require 'rails_helper'
 
 describe MAPIService do
-  let(:request) { double('request', uuid: '12345', session: session) }
+  let(:user_id) { double('A User ID') }
+  let(:uuid) { double('A UUID') }
+  let(:request) { instance_double(ActionDispatch::Request, uuid: uuid, user_id: user_id, session: session) }
   let(:session) { double('A Session', :[] => nil) }
+  let(:connection) { instance_double(RestClient::Resource, headers: {}, get: nil, put: nil, post: nil, delete: nil) }
+
+  before do
+    allow(connection).to receive(:[]).and_return(connection)
+    allow(RestClient::Resource).to receive(:new).with(Rails.configuration.mapi.endpoint, any_args).and_return(connection)
+  end
 
   subject { MAPIService.new(request) }
+
+  describe 'initialization' do
+    it 'assigns the `request` `uuid` to the `connection_request_uuid`' do
+      expect(subject.connection_request_uuid).to be(uuid)
+    end
+    it 'assigns the `request` `user_id` to the `connection_user_id`' do
+      expect(subject.connection_user_id).to be(user_id)
+    end
+    it 'creates a new `RestClient::Resource` with the MAPI endpoint' do
+      expect(RestClient::Resource).to receive(:new).with(Rails.configuration.mapi.endpoint, any_args)
+      subject
+    end
+    it 'creates a new `RestClient::Resource` with the MAPI endpoint secret key in its request headers' do
+      expect(RestClient::Resource).to receive(:new).with(anything, include(headers: include(:'Authorization' => "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\"")))
+      subject
+    end
+    it 'assigns the `request` to the `request` attribute' do
+      expect(subject.instance_variable_get(:@request)).to be(request)
+    end
+  end
+
   describe '`ping` method' do
     let(:status) { subject.ping }
     let(:json_response) { {'foo' => 'bar'} }
     let (:mapi_response) {double('MAPI_response', body: json_response.to_json)}
     it 'returns the value of `etransact_advances_status` from a hash built from the JSON response' do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(mapi_response)
+      allow(connection).to receive(:get).and_return(mapi_response)
       expect(status).to eq(json_response)
     end
     it "should return false if there was an error" do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
+      allow(connection).to receive(:get).and_raise(RestClient::InternalServerError)
       expect(status).to eq(false)
     end
     it "should return false if the service was unreachable" do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      allow(connection).to receive(:get).and_raise(Errno::ECONNREFUSED)
       expect(status).to eq(false)
-    end
-  end
-
-  describe '`request_uuid` method' do
-    it 'returns the UUID of the associated request' do
-      uuid = double('Some UUID')
-      allow(request).to receive(:uuid).and_return(uuid)
-      expect(subject.request_uuid).to be(uuid)
-    end
-  end
-
-  describe '`request_user` method' do
-    let(:user_id) { double('A User ID') }
-
-    before do
-      allow(request).to receive(:session).and_return(session)
-    end
-
-    it 'fetches the user ID from the session' do
-      expect(session).to receive(:[]).with(ApplicationController::SessionKeys::WARDEN_USER)
-      subject.request_user
-    end
-    it 'returns the User assocaited with the request' do
-      user = double('A User')
-      allow(session).to receive(:[]).with(ApplicationController::SessionKeys::WARDEN_USER).and_return([[user_id]])
-      allow(User).to receive(:find).with(user_id).and_return(user)
-      expect(subject.request_user).to be(user)
-    end
-    it 'returns nil if the user cant be found' do
-      expect(subject.request_user).to be_nil
-    end
-  end
-
-  describe '`request_member_id` method' do
-    it 'returns the member ID assocaited with the request' do
-      member_id = double('A Member ID')
-      allow(session).to receive(:[]).with(ApplicationController::SessionKeys::MEMBER_ID).and_return(member_id)
-      expect(subject.request_member_id).to be(member_id)
-    end
-    it 'returns nil if no member ID is associated' do
-      expect(subject.request_member_id).to be_nil
-    end
-  end
-
-  describe '`request_member_name` method' do
-    it 'returns the member name assocaited with the request' do
-      member_name = double('A Member Name')
-      allow(session).to receive(:[]).with(ApplicationController::SessionKeys::MEMBER_NAME).and_return(member_name)
-      expect(subject.request_member_name).to be(member_name)
-    end
-    it 'returns nil if no member name is associated' do
-      expect(subject.request_member_name).to be_nil
     end
   end
 
@@ -81,21 +58,63 @@ describe MAPIService do
     end
   end
 
-  describe '`member_id_to_name` method' do
-    let(:member_id) { double('Member ID') }
-    let(:call_method) { subject.member_id_to_name(member_id) }
-    let(:member_name) { double('A Member Name') }
+  describe '`connection_user_id` method' do
+    it 'returns the `X-User-ID` header value that will be sent on all REST requests' do
+      subject # force instantiation
+      value = double('A Value')
+      connection.headers[:'X-User-ID'] = value
+      expect(subject.connection_user_id).to be(value)
+    end
+  end
 
+  describe '`connection_request_uuid` method' do
+    it 'returns the `X-Request-ID` header value that will be sent on all REST requests' do
+      subject # force instantiation
+      value = double('A Value')
+      connection.headers[:'X-Request-ID'] = value
+      expect(subject.connection_request_uuid).to be(value)
+    end
+  end
+
+  describe '`connection_user_id=` method' do
+    it 'assigns the `X-User-ID` header value that will be sent on all REST requests' do
+      value = double('A Value')
+      subject.connection_user_id = value
+      expect(connection.headers[:'X-User-ID']).to be(value)
+    end
+    it 'discards the `@connection_user` value' do
+      subject.instance_variable_set(:@connection_user, double('A Value'))
+      subject.connection_user_id = double('Another Value')
+      expect(subject.instance_variable_get(:@connection_user)).to be_nil
+    end
+  end
+
+  describe '`connection_request_uuid=` method' do
+    it 'assigns the `X-Request-ID` header value that will be sent on all REST requests' do
+      value = double('A Value')
+      subject.connection_request_uuid = value
+      expect(connection.headers[:'X-Request-ID']).to be(value)
+    end
+  end
+
+  describe '`connection_user` method' do
+    let(:call_method) { subject.connection_user }
+    let(:user) { instance_double(User) }
     before do
-      allow(subject).to receive(:request_member_name).and_return(member_name)
+      allow(subject).to receive(:connection_user_id).and_return(user_id)
+      allow(User).to receive(:find).with(user_id).and_return(user)
     end
-
-    it 'returns the member name assocaited with the supplied member ID' do
-      allow(subject).to receive(:request_member_id).and_return(member_id)
-      expect(call_method).to be(member_name)
+    it 'find the user idenitifed by `connection_user_id`' do
+      expect(User).to receive(:find).with(user_id)
+      call_method
     end
-    it 'returns the member ID if the name cant be found' do
-      expect(call_method).to be(member_id)
+    it 'returns the user idenitifed by `connection_user_id`' do
+      expect(call_method).to be(user)
+    end
+    it 'returns the same user object on a subsequent call' do
+      allow(User).to receive(:find).with(user_id).and_return(user, instance_double(User))
+      call_method
+      expect(call_method).to be(user)
     end
   end
 
@@ -135,18 +154,18 @@ describe MAPIService do
       'network' => Errno::ECONNREFUSED.new
     }.each do |error_type, exception|
       it "handles #{error_type} errors" do
-        allow_any_instance_of(RestClient::Resource).to receive(rest_action).and_raise(exception)
+        allow(connection).to receive(rest_action).and_raise(exception)
         expect(subject).to receive(:warn).with(name, kind_of(String), exception)
         call_method
       end
       it "returns the result of `warn` on an #{error_type} error" do
         warn = double('A Warn Result')
         allow(subject).to receive(:warn).and_return(warn)
-        allow_any_instance_of(RestClient::Resource).to receive(rest_action).and_raise(exception)
+        allow(connection).to receive(rest_action).and_raise(exception)
         expect(call_method).to be(warn)
       end
       it "passes the error handler off to `warn` when handling a #{error_type} error" do
-        allow_any_instance_of(RestClient::Resource).to receive(rest_action).and_raise(exception)
+        allow(connection).to receive(rest_action).and_raise(exception)
         allow(subject).to receive(:warn).with(anything, anything, anything) do |*args, &block|
           expect(block).to be(error_handler)
         end
@@ -154,7 +173,7 @@ describe MAPIService do
       end
     end
     it 'accepts a custom error handler' do
-      allow_any_instance_of(RestClient::Resource).to receive(rest_action).and_return(response)
+      allow(connection).to receive(rest_action).and_return(response)
       expect{call_method_with_error_handler}.to_not raise_error
     end
   end
@@ -256,16 +275,16 @@ describe MAPIService do
       it_behaves_like 'a MAPI REST request', action
 
       it "#{action.to_s.upcase}s the `endpoint`" do
-        allow_any_instance_of(RestClient::Resource).to receive(:[]).with(endpoint).and_return(endpoint_client)
+        allow(connection).to receive(:[]).with(endpoint).and_return(endpoint_client)
         expect(endpoint_client).to receive(action)
         call_method
       end
       it "returns the result of the #{action.to_s.upcase}" do
-        allow_any_instance_of(RestClient::Resource).to receive(action).and_return(response)
+        allow(connection).to receive(action).and_return(response)
         expect(call_method).to be(response)
       end
       it 'passes along any supplied query string parameters' do
-        allow_any_instance_of(RestClient::Resource).to receive(:[]).with(endpoint).and_return(endpoint_client)
+        allow(connection).to receive(:[]).with(endpoint).and_return(endpoint_client)
         expect(endpoint_client).to receive(action).with(params: params)
         call_method
       end
@@ -338,19 +357,19 @@ describe MAPIService do
     it_behaves_like 'a MAPI REST request', :post, 'Data to Post', 'application/json'
 
     it 'POSTs to the `endpoint`' do
-      expect_any_instance_of(RestClient::Resource).to receive(:[]).with(endpoint).and_return(endpoint_client)
+      expect(connection).to receive(:[]).with(endpoint).and_return(endpoint_client)
       call_method
     end
     it 'POSTs the `body`' do
-      expect_any_instance_of(RestClient::Resource).to receive(:post).with(body, anything)
+      expect(connection).to receive(:post).with(body, anything)
       call_method
     end
     it 'POSTs the `content_type` if one is given' do
-      expect_any_instance_of(RestClient::Resource).to receive(:post).with(anything, content_type: content_type)
+      expect(connection).to receive(:post).with(anything, content_type: content_type)
       call_method
     end
     it 'does not set the `content_type` if one is not given' do
-      expect_any_instance_of(RestClient::Resource).to receive(:post).with(anything)
+      expect(connection).to receive(:post).with(anything)
       subject.post(name, endpoint, body)
     end
     it 'succeeds if a `content_type` is given' do
@@ -372,19 +391,19 @@ describe MAPIService do
     it_behaves_like 'a MAPI REST request', :put, 'Data to PUT', 'application/json'
 
     it 'PUTs to the `endpoint`' do
-      expect_any_instance_of(RestClient::Resource).to receive(:[]).with(endpoint).and_return(endpoint_client)
+      expect(connection).to receive(:[]).with(endpoint).and_return(endpoint_client)
       call_method
     end
     it 'PUTs the `body`' do
-      expect_any_instance_of(RestClient::Resource).to receive(:put).with(body, anything)
+      expect(connection).to receive(:put).with(body, anything)
       call_method
     end
     it 'PUTs the `content_type` if one is given' do
-      expect_any_instance_of(RestClient::Resource).to receive(:put).with(anything, content_type: content_type)
+      expect(connection).to receive(:put).with(anything, content_type: content_type)
       call_method
     end
     it 'does not set the `content_type` if one is not given' do
-      expect_any_instance_of(RestClient::Resource).to receive(:put).with(anything)
+      expect(connection).to receive(:put).with(anything)
       subject.put(name, endpoint, body)
     end
     it 'succeeds if a `content_type` is given' do

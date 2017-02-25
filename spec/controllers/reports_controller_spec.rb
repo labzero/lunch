@@ -2513,24 +2513,28 @@ RSpec.describe ReportsController, :type => :controller do
           expect(RatesServiceJob).to receive(job_call).with(anything, request.uuid, any_args).and_return(job_response)
           call_action
         end
+        it 'passes the proper user ID' do
+          expect(RatesServiceJob).to receive(job_call).with(anything, anything, controller.current_user.id, any_args).and_return(job_response)
+          call_action
+        end
         it 'passes `historical_price_indications`' do
           expect(RatesServiceJob).to receive(job_call).with('historical_price_indications', any_args).and_return(job_response)
           call_action
         end
         describe 'additional arguments' do
           it 'uses the string version of start_date and end_date provided in the params hash if available' do
-            expect(RatesServiceJob).to receive(job_call).with(anything, anything, start_date.to_s, end_date.to_s, anything, anything).and_return(job_response)
+            expect(RatesServiceJob).to receive(job_call).with(anything, anything, anything, start_date.to_s, end_date.to_s, anything, anything).and_return(job_response)
             get :historical_price_indications, start_date: start_date, end_date: end_date
           end
           it 'uses the last 30 days to date as the date range if no params are passed' do
             last_30_days = today - 1.month
             allow(ReportConfiguration).to receive(:date_bounds).with(:historical_price_indications, nil, nil)
                                             .and_return({ min: min_date, start: last_30_days, end: today, max: max_date })
-            expect(RatesServiceJob).to receive(job_call).with(anything, anything, last_30_days.to_s, today.to_s, anything, anything).and_return(job_response)
+            expect(RatesServiceJob).to receive(job_call).with(anything, anything, anything, last_30_days.to_s, today.to_s, anything, anything).and_return(job_response)
             call_action
           end
           it 'passes credit_type and collateral_type' do
-            expect(RatesServiceJob).to receive(job_call).with(anything, anything, anything, anything, 'sbc', '1m_libor').and_return(job_response)
+            expect(RatesServiceJob).to receive(job_call).with(anything, anything, anything, anything, anything, 'sbc', '1m_libor').and_return(job_response)
             get :historical_price_indications, historical_price_collateral_type: 'sbc', historical_price_credit_type: '1m_libor'
           end
         end

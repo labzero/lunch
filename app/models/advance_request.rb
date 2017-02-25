@@ -142,11 +142,7 @@ class AdvanceRequest
   end
 
   def rates
-    unless @rates
-      @rates = rate_service.quick_advance_rates(member_id, funding_date, custom_maturity_date)
-      notify_if_rate_bands_exceeded
-    end
-    @rates 
+    @rates ||= rate_service.quick_advance_rates(member_id, funding_date, custom_maturity_date)
   end
 
   def funding_date=(funding_date)
@@ -397,20 +393,6 @@ class AdvanceRequest
 
   protected
 
-  def notify_if_rate_bands_exceeded
-    return unless @rates
-    ADVANCE_TYPES.each do |type|
-      ADVANCE_TERMS.each do |term|
-        rate_data = @rates[type][term].dup
-        rate_data[:type] = type
-        rate_data[:term] = term
-        if rate_data[:disabled] && !rate_data[:end_of_day] && (rate_data[:rate_band_info][:min_threshold_exceeded] || rate_data[:rate_band_info][:max_threshold_exceeded])
-          InternalMailer.exceeds_rate_band(rate_data, request.try(:uuid), signer).deliver_now
-        end
-      end
-    end
-  end
-
   def terms_present?
     term.present? && type.present? && rate!.present? && amount.present?
   end
@@ -480,7 +462,7 @@ class AdvanceRequest
       if rate_details
         stale_rate = rate_details[:updated_at] + settings[:rate_stale_check].seconds < Time.zone.now
         if stale_rate
-          InternalMailer.stale_rate(settings[:rate_stale_check], request.try(:request_uuid), signer).deliver_now
+          InternalMailer.stale_rate(settings[:rate_stale_check], request.try(:connection_request_uuid), signer).deliver_now
           add_error(:rate, :stale)
         end
 

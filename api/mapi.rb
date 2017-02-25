@@ -2,70 +2,21 @@ require 'sinatra/base'
 require 'swagger/blocks'
 require 'active_support/concern'
 require 'active_support/time'
+require 'active_job'
 require 'savon'
 HTTPI::Adapter.use # force Savon to load its adapters
 
-require_relative 'shared/constants'
-require_relative 'shared/exceptions'
-require_relative 'shared/utils'
+require_relative '../lib/redis_helper'
+ActiveJob::Base.queue_adapter = :resque
+ENV['RESQUE_CONFIG_FILE'] ||= File.join(__dir__, '..', 'config', 'resque.yml')
+require_relative '../config/initializers/resque'
 
 require_relative 'services/base'
-require_relative 'services/fees'
-require_relative 'services/mock_rates'
-require_relative 'services/mock_members'
-require_relative 'services/rates'
-require_relative 'services/rates/blackout_dates'
-require_relative 'services/rates/holidays'
-require_relative 'services/rates/loan_terms'
-require_relative 'services/rates/price_indication_historical'
-require_relative 'services/rates/historical_sta'
-require_relative 'services/rates/rate_bands'
-require_relative 'services/rates/blackout_dates'
-require_relative 'services/member'
-require_relative 'services/etransact_advances'
-require_relative 'services/users'
-require_relative 'services/health'
-require_relative 'services/customers'
-require_relative 'services/calendar'
-
-require_relative 'models/member'
-require_relative 'models/etransact_advances'
-require_relative 'models/etransact_settings'
-require_relative 'models/member_balance_pledged_collateral'
-require_relative 'models/member_balance_total_securities'
-require_relative 'models/member_balance_effective_borrowing_capacity'
-require_relative 'models/realtime_rate'
-require_relative 'models/summary_rates'
-require_relative 'models/member_capital_stock'
-require_relative 'models/member_capital_stock_trial_balance'
-require_relative 'models/member_borrowing_capacity_details'
-require_relative 'models/member_sta_activities'
-require_relative 'models/member_current_sta_rate'
-require_relative 'models/member_advances_details'
-require_relative 'models/member_active_advances'
-require_relative 'models/member_profile'
-require_relative 'models/member_cash_projections'
-require_relative 'models/member_signers'
-require_relative 'models/member_securities_position'
-require_relative 'models/member_forward_commitments'
-require_relative 'models/member_letters_of_credit'
-require_relative 'models/current_price_indications'
-require_relative 'models/rates/price_indication_historical'
-require_relative 'models/rates/historical_sta'
-require_relative 'models/member_execute_advance'
-require_relative 'models/member_capital_stock_and_leverage'
-require_relative 'models/member_interest_rate_resets'
-require_relative 'models/member_parallel_shift'
-require_relative 'models/member_dividend_statement'
-require_relative 'models/member_contacts'
-require_relative 'models/member_todays_credit_activity'
-require_relative 'models/member_mortgage_collateral_update'
-require_relative 'models/fee_schedules'
-require_relative 'models/member_quick_advance_flag'
-require_relative 'models/member_quick_advance_request'
-require_relative 'models/customers'
-require_relative 'models/securities_request'
-require_relative 'models/calendar_holidays'
+['shared', 'mailers', 'services', 'models', 'jobs'].each do |dir|
+  Dir::glob(File.join(__dir__, dir, '**', '*.rb')) do |file|
+    require file
+  end
+end
 
 require 'newrelic_rpm'
 NewRelic::Agent.add_instrumentation(File.join(__dir__, '..', 'lib', 'new_relic', 'instrumentation', '**', '*.rb')) if defined?(NewRelic::Agent)
@@ -83,10 +34,14 @@ module MAPI
 
     def call(env)
       resp = nil
-      tags = ["request_id=#{env['HTTP_X_REQUEST_ID'] || SecureRandom.uuid}"]
+      request_id = env['HTTP_X_REQUEST_ID'] || SecureRandom.uuid
+      user_id = env['HTTP_X_USER_ID']
+      tags = ["request_id=#{request_id}", "user_id=#{user_id}"]
       @logger.tagged(*tags) do
         env['rack.logger'] = @logger
         env['logger.tags'] = tags
+        env['mapi.request.id'] = request_id
+        env['mapi.request.user_id'] = user_id
         resp = @app.call env
       end
       resp
@@ -130,6 +85,14 @@ module MAPI
 
     error do
       error_handler env['sinatra.error']
+    end
+
+    def request_id
+      env['mapi.request.id']
+    end
+
+    def request_user_id
+      env['mapi.request.user_id']
     end
 
     def error_handler(error)

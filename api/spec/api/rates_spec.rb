@@ -214,6 +214,7 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Rates).to receive(:extract_text).with(xml_type_data, :type_long).and_return(type_long)
       loan_mapping_inverted = { type_long => type }
       stub_const 'MAPI::Shared::Constants::LOAN_MAPPING_INVERTED', loan_mapping_inverted
+      allow(NewRelic::Agent).to receive(:notice_error)
     end
 
     describe 'when there are no custom terms' do
@@ -254,6 +255,11 @@ describe MAPI::ServiceApp do
           allow(MAPI::Services::Rates).to receive(:get_term_data).and_return(get_term_data_overnight_response)
           expect(call_method[type][:open]).to eq(call_method[type][:overnight])
         end
+        it 'logs a NewRelic error if a blank rate is returned' do
+          get_term_data_response[:rate] = ''
+          expect(NewRelic::Agent).to receive(:notice_error).with('Blank rate returned', trace_only: true, custom_params: {term: term, type: type, data: xml_term_data})
+          call_method
+        end
       end
     end
     describe 'when there are custom terms' do
@@ -268,8 +274,8 @@ describe MAPI::ServiceApp do
   end
 
   describe 'get_term_data' do
-    let(:type_data) { SecureRandom.hex }
-    let(:term_data) { SecureRandom.hex }
+    let(:type_data) { double('Type Data') }
+    let(:term_data) { double('Term Data') }
     let(:funding_date) { SecureRandom.hex }
     let(:maturity_string) { SecureRandom.hex }
     let(:rate) { SecureRandom.hex }
@@ -354,6 +360,7 @@ describe MAPI::ServiceApp do
 
   describe "rate summary" do
     before do
+      allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
       allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
       allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_dates)
       allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_hash)
@@ -361,7 +368,9 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Rates).to receive(:init_mds_connection).and_return(false)
       allow(MAPI::Services::Rates).to receive(:fake).with('market_data_live_rates').and_return(live_hash)
       allow(MAPI::Services::Rates).to receive(:fake).with('market_data_start_of_day_rates').and_return(start_of_day_hash)
+      allow(MAPI::Mailers::InternalMailer).to receive(:send_rate_band_alert)
     end
+    let(:logger) { instance_double(Logger, error: nil)}
     let(:today) { Time.zone.today }
     let(:one_week_away) { today + 1.week }
     let(:three_weeks_away) { today + 3.week }
@@ -388,10 +397,7 @@ describe MAPI::ServiceApp do
     let (:threshold_as_BPS) { (threshold*100).to_i.to_s }
 
     let(:start_of_day_hash) do
-      h = JSON.parse(File.read(File.join(MAPI.root, 'fakes', "market_data_live_rates.json"))).with_indifferent_access
-      h[:aa][:'1week'][:rate]  = (h[:aa][:'1week'][:rate].to_f + (2*threshold)).to_s
-      h[:aaa][:'1week'][:rate] = (h[:aa][:'1week'][:rate].to_f - (2*threshold)).to_s
-      h
+      JSON.parse(File.read(File.join(MAPI.root, 'fakes', "market_data_live_rates.json"))).with_indifferent_access
     end
     let(:rate_bands_hash) { n_level_hash_with_default(threshold_as_BPS, 2) }
     let(:rate_summary) do
@@ -439,6 +445,82 @@ describe MAPI::ServiceApp do
           expect(r[:end_of_day]).to be(cutoff)
           expect(r[:start_of_day_rate]).to eq(start_of_day_rate)
           expect(r[:rate_band_info]).to eq(MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term]))
+        end
+        describe 'when a rate band violation occurs' do
+          let(:rate_band_hash) {MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term])}
+          before do
+            rate_band_hash[:max_threshold_exceeded] = false
+            rate_band_hash[:min_threshold_exceeded] = false
+            loan_terms_hash[loan_term][loan_type][:trade_status] = true
+            loan_terms_hash[loan_term][loan_type][:display_status] = true
+            allow(MAPI::Services::Rates).to receive(:rate_band_info).and_call_original
+            allow(MAPI::Services::Rates).to receive(:rate_band_info).with(live_hash[loan_type][loan_term], rate_bands_hash[loan_term]).and_return(rate_band_hash)
+            allow(logger).to receive(:error)
+            allow(NewRelic::Agent).to receive(:notice_error)
+          end
+          shared_examples 'rate band violations' do |term, type|
+            it 'logs the violation' do
+              expect(logger).to receive(:error).with(match(/type=#{type}, term=#{term}, details=#{Regexp.quote(rate_summary[type][term].to_json)}/))
+              get '/rates/summary'
+            end
+            it 'logs the violation in NewRelic' do
+              details = rate_summary[type][term]
+              details[:maturity_date] = details[:maturity_date].to_date
+              expect(NewRelic::Agent).to receive(:notice_error).with('Rate band threshold exceeded', trace_only: true, custom_params: {term: term, type: type, details: details})
+              get '/rates/summary'
+            end
+            it 'sends a rate band alert' do
+              request_id = instance_double(String, 'A Request UUID')
+              user_id = instance_double(String, 'A User ID')
+              allow_any_instance_of(MAPI::ServiceApp).to receive(:request_id).and_return(request_id)
+              allow_any_instance_of(MAPI::ServiceApp).to receive(:request_user_id).and_return(user_id)
+              expect(MAPI::Mailers::InternalMailer).to receive(:send_rate_band_alert).with(type, term, live_hash[type][term][:rate].to_f, start_of_day_hash[type][term][:rate].to_f, rate_band_hash, request_id, user_id)
+              rate_summary
+            end
+            shared_examples 'ignored violation' do
+              it 'does not log the violation in NewRelic' do
+                expect(NewRelic::Agent).to_not receive(:notice_error)
+                rate_summary
+              end
+              it 'does not log the violation' do
+                expect(logger).to_not receive(:error)
+                rate_summary
+              end
+              it 'does not send a rate band alert' do
+                expect(MAPI::Mailers::InternalMailer).to_not receive(:send_rate_band_alert)
+                rate_summary
+              end
+            end
+            describe 'if its passed the end-of-day' do
+              before do
+                loan_terms_hash[loan_term][loan_type][:trade_status] = false
+              end
+
+              include_examples 'ignored violation'
+            end
+
+            describe 'if the rate is already disabled' do
+              before do
+                loan_terms_hash[loan_term][loan_type][:display_status] = false
+              end
+
+              include_examples 'ignored violation'
+            end
+          end
+          describe 'when the rate high threshold is exceeded' do
+            before do
+              rate_band_hash[:max_threshold_exceeded] = true
+            end
+
+            include_examples 'rate band violations', loan_term, loan_type
+          end
+          describe 'when the rate low threshold is exceeded' do
+            before do
+              rate_band_hash[:min_threshold_exceeded] = true
+            end
+
+            include_examples 'rate band violations', loan_term, loan_type
+          end
         end
       end
     end

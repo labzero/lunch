@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe EtransactAdvancesService do
-  let(:request) { double('request', uuid: '12345', session: double('A Session', :[] => nil)) }
+  let(:request) { instance_double(ActionDispatch::Request, uuid: '12345', session: double('A Session', :[] => nil), member_id: nil, member_name: nil) }
   subject { EtransactAdvancesService.new(request) }
   it { expect(subject).to respond_to(:etransact_active?) }
   describe '`etransact_active?` method', :vcr do
@@ -510,13 +510,16 @@ describe EtransactAdvancesService do
     let(:member_name) { double('A Member Name') }
     let(:mail) { double('An Email', deliver_now: nil)}
 
+    before do
+      allow(subject).to receive(:connection_request_uuid).and_return(request_uuid)
+      allow(subject).to receive(:connection_user).and_return(request_user)
+      allow(subject).to receive(:member_id_to_name).with(member_id).and_return(member_name)
+    end
+
     it 'returns a Proc' do
       expect(error_handler).to be_kind_of(Proc)
     end
     it 'builds a `calypso_error` email when the Proc is called' do
-      allow(subject).to receive(:request_uuid).and_return(request_uuid)
-      allow(subject).to receive(:request_user).and_return(request_user)
-      allow(subject).to receive(:member_id_to_name).with(member_id).and_return(member_name)
       expect(InternalMailer).to receive(:calypso_error).with(error, request_uuid, request_user, member_name).and_return(mail)
       call_error_handler
     end
@@ -524,6 +527,24 @@ describe EtransactAdvancesService do
       allow(InternalMailer).to receive(:calypso_error).and_return(mail)
       expect(mail).to receive(:deliver_now)
       call_error_handler
+    end
+  end
+
+  describe '`member_id_to_name` protected method' do
+    let(:member_id) { double('Member ID') }
+    let(:call_method) { subject.send(:member_id_to_name, member_id) }
+    let(:member_name) { double('A Member Name') }
+
+    before do
+      allow(request).to receive(:member_name).and_return(member_name)
+    end
+
+    it 'returns the member name assocaited with the supplied member ID' do
+      allow(request).to receive(:member_id).and_return(member_id)
+      expect(call_method).to be(member_name)
+    end
+    it 'returns the member ID if the name cant be found' do
+      expect(call_method).to be(member_id)
     end
   end
 end

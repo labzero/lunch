@@ -333,13 +333,17 @@ RSpec.describe DashboardController, :type => :controller do
         make_request 
       end
       it 'uses the current_member_id for the rate fetch job' do
-        expect(RatesServiceJob).to receive(:perform_later).with(anything, anything, member_id)
+        expect(RatesServiceJob).to receive(:perform_later).with(anything, anything, anything, member_id)
         make_request 
       end
       it 'uses the current request UUID for the rate fetch job' do
         uuid = SecureRandom.hex
         allow(request).to receive(:uuid).and_return(uuid)
-        expect(RatesServiceJob).to receive(:perform_later).with(anything, uuid, anything)
+        expect(RatesServiceJob).to receive(:perform_later).with(anything, uuid, anything, anything)
+        make_request 
+      end
+      it 'uses the current user ID for the rate fetch job' do
+        expect(RatesServiceJob).to receive(:perform_later).with(anything, anything, controller.current_user.id, anything)
         make_request 
       end
     end

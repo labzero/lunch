@@ -7,7 +7,7 @@ describe MemberBalanceService do
     end
   end
   let(:member_id) { 750 }
-  subject { MemberBalanceService.new(member_id, double('request', uuid: '12345')) }
+  subject { MemberBalanceService.new(member_id, ActionDispatch::TestRequest.new) }
   it { expect(subject).to respond_to(:pledged_collateral) }
   it { expect(subject).to respond_to(:total_securities) }
   it { expect(subject).to respond_to(:effective_borrowing_capacity) }

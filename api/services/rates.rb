@@ -194,8 +194,11 @@ module MAPI
             term_data_result = MAPI::Services::Rates.get_term_data(type_data, term_data, is_custom)
             if term_data_result
               hash[type] ||= {}
-              hash[type][term_data_result[:term].to_sym] = {
-                rate: term_data_result[:rate],
+              term = term_data_result[:term].to_sym
+              rate = term_data_result[:rate]
+              NewRelic::Agent.notice_error('Blank rate returned', trace_only: true, custom_params: {term: term.to_s, type: type.to_s, data: term_data}) unless rate.present?
+              hash[type][term] = {
+                rate: rate,
                 maturity_date: Time.zone.parse(term_data_result[:maturity_string]).to_date,
                 payment_on: 'Maturity',
                 interest_day_count: day_count_basis
@@ -816,12 +819,18 @@ module MAPI
           end
           LOAN_TYPES.each do |type|
             LOAN_TERMS.each do |term|
+              term_details             = loan_terms[term][type]
               live                     = live_data[type][term]
               live[:start_of_day_rate] = start_of_day[type][term][:rate].to_f
               live[:rate_band_info]    = MAPI::Services::Rates.rate_band_info(live, rate_bands[term])
               live[:maturity_date]     = MAPI::Services::Rates.get_maturity_date(live[:maturity_date], TERM_MAPPING[term][:frequency_unit], holidays)
-              live[:disabled]          = MAPI::Services::Rates.disabled?(live, loan_terms[term][type], blackout_dates)
-              live[:end_of_day]        = !loan_terms[term][type][:trade_status]
+              live[:disabled]          = MAPI::Services::Rates.disabled?(live, term_details, blackout_dates)
+              live[:end_of_day]        = !term_details[:trade_status]
+              if !live[:end_of_day] && term_details[:display_status] && (live[:rate_band_info][:min_threshold_exceeded] || live[:rate_band_info][:max_threshold_exceeded])
+                logger.error("Rate band threshold exceeded: type=#{type}, term=#{term}, details=#{live.to_json}")
+                NewRelic::Agent.notice_error('Rate band threshold exceeded', trace_only: true, custom_params: {term: term, type: type, details: live})
+                Mailers::InternalMailer.send_rate_band_alert(type, term, live[:rate].to_f, live[:start_of_day_rate], live[:rate_band_info], request_id, request_user_id)
+              end
             end
             if maturity_date
               live                     = live_data[type][custom_term]
