@@ -1281,7 +1281,7 @@ en:
         title: Requests for Authorization
       authorized:
         title: Authorized Requests
-        description: Authorized requests are displayed for 7 days after settlement.
+        description: Authorized requests are displayed for %{display_history} after settlement.
       view:
         request_id: 'Request ID:'
         authorization_date: 'Authorization Date:'
