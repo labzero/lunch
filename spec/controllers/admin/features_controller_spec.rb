@@ -84,20 +84,38 @@ RSpec.describe Admin::FeaturesController, :type => :controller do
         end
         features << feature
         allow(Rails.application.flipper).to receive(:[]).with(feature_name).and_return(feature)
-        make_request
       end
 
-      it 'assigns `@feature_name` to the feature name' do
-        expect(assigns[:feature_name]).to be(feature.name)
+      shared_examples 'assigns the feature' do
+        it 'assigns `@feature_name` to the feature name' do
+          expect(assigns[:feature_name]).to be(feature.name)
+        end
+        it 'assigns `@feature_status` to the feature state' do
+          expect(assigns[:feature_status]).to be(feature.state)
+        end
+        it 'assigns `@enabled_users` to the list of usernames who have that feature enabled at an individual level' do
+          expect(assigns[:enabled_users]).to match(usernames)
+        end
+        it 'assigns `@enabled_members` to the list of members name who have that feature enabled' do
+          expect(assigns[:enabled_members]).to match(members.collect(&:name))
+        end
       end
-      it 'assigns `@feature_status` to the feature state' do
-        expect(assigns[:feature_status]).to be(feature.state)
+
+      context 'and feature names as strings' do
+        before do
+          make_request
+        end
+        
+        include_examples 'assigns the feature'
       end
-      it 'assigns `@enabled_users` to the list of usernames who have that feature enabled at an individual level' do
-        expect(assigns[:enabled_users]).to match(usernames)
-      end
-      it 'assigns `@enabled_members` to the list of members name who have that feature enabled' do
-        expect(assigns[:enabled_members]).to match(members.collect(&:name))
+
+      context 'and feature names as symbols' do
+        before do
+          allow(feature).to receive(:name).and_return(feature_name.to_sym)
+          make_request
+        end
+        
+        include_examples 'assigns the feature'
       end
     end
 

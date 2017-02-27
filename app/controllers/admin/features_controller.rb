@@ -22,7 +22,7 @@ class Admin::FeaturesController < Admin::BaseController
   end
 
   def view
-    raise ActiveRecord::RecordNotFound unless Rails.application.flipper.features.collect(&:name).include?(params[:feature])
+    raise ActiveRecord::RecordNotFound unless Rails.application.flipper.features.collect(&:name).collect(&:to_s).include?(params[:feature])
     feature = Rails.application.flipper[params[:feature]]
     @feature_name = feature.name
     @feature_status = feature.state
