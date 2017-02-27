@@ -303,6 +303,78 @@ describe MAPI::ServiceApp do
         }
       }
     }
+    describe 'in the `production` environment' do
+      before do
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
+        allow(ActiveRecord::Base.connection).to receive(:execute).and_return(member_name_cursor, sta_number_cursor, customer_signature_card_cursor)
+        allow(MAPI::Services::Member::Profile).to receive(:fetch_hash)
+        allow(MAPI::Services::Member::Profile).to receive(:get_account_numbers)
+      end
+
+      it 'succeeds' do
+        expect{make_request}.not_to raise_error
+      end
+      describe 'the SQL query for the sta number' do
+        let(:ensure_after_select_regexp) { '(?:\A\s*SELECT\s+sta.sta_account_number\s+)' }
+        it 'SELECTs the `sta.sta_account_number`' do
+          matcher = Regexp.new(/\A\s*SELECT\s+sta.sta_account_number\s+/i)
+          expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(sta_number_cursor)
+          make_request
+        end
+        it 'selects from `portfolios.sta` and `portfolios.sta_trans`' do
+          matcher = Regexp.new(/#{ensure_after_select_regexp}FROM\s+portfolios.sta\s+sta\s*,\s+portfolios.sta_trans\s+st/i)
+          expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(sta_number_cursor)
+          make_request
+        end
+        describe 'the WHERE clause' do
+          let(:ensure_position_regexp) { '\A\s*SELECT\s+sta.sta_account_number\s+FROM\s+.+\s+.+\s+WHERE.*' }
+          before { allow(MAPI::Services::Member::Profile).to receive(:quote) }
+          it 'quotes the member_id' do
+            expect(MAPI::Services::Member::Profile).to receive(:quote).with(member_id.to_s)
+            make_request
+          end
+          it 'ensures the fhlb_id is the member_id' do
+            allow(MAPI::Services::Member::Profile).to receive(:quote).with(member_id.to_s).and_return(member_id)
+            matcher = Regexp.new(/#{ensure_position_regexp}sta.fhlb_id\s+=\s+#{member_id}/im)
+            expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(sta_number_cursor)
+            make_request
+          end
+          it 'matches the `sta_id` between the two tables' do
+            matcher = Regexp.new(/#{ensure_position_regexp}sta.sta_id\s+=\s+st.sta_id/im)
+            expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(sta_number_cursor)
+            make_request
+          end
+          it 'ensures the `sta_account_type` is `1`' do
+            matcher = Regexp.new(/#{ensure_position_regexp}sta.sta_account_type\s+=\s+1/im)
+            expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(sta_number_cursor)
+            make_request
+          end
+          it 'ensures the `stx_update_date` is the latest available update date' do
+            matcher = Regexp.new(/#{ensure_position_regexp}TRUNC\(st.stx_update_date\)\s+=\s+\(SELECT.*\)/im)
+            expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(sta_number_cursor)
+            make_request
+          end
+          describe 'fetching the latest available `stx_update_date`' do
+            let(:ensure_position_regexp) { '\A\s*SELECT\s+sta.sta_account_number\s+FROM\s+.+\s+.+\s+WHERE.*TRUNC\(st.stx_update_date\)\s+=\s+\(.*' }
+            it 'selects the truncated max `stx_update_date`' do
+              matcher = Regexp.new(/#{ensure_position_regexp}SELECT\s+TRUNC\s*\(\s*MAX\s*\(\s*stx_update_date\s*\)\s*\).*\)/im)
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(sta_number_cursor)
+              make_request
+            end
+            it 'selects from `portfolios.sta_trans`' do
+              matcher = Regexp.new(/#{ensure_position_regexp}SELECT\s+.*FROM\s+portfolios.sta_trans.*\)/im)
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(sta_number_cursor)
+              make_request
+            end
+            it 'ensures the stx_update_date is greater than the `SYSDATE` minus 10' do
+              matcher = Regexp.new(/#{ensure_position_regexp}SELECT\s+.*FROM\s+.*WHERE\s+stx_update_date\s*>\s*SYSDATE\s*-\s*10.*\)/im)
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(sta_number_cursor)
+              make_request
+            end
+          end
+        end
+      end
+    end
     [:production, :development].each do |env|
       describe "in the `#{env}` environment" do
         before do
