@@ -2137,9 +2137,6 @@ class ReportsController < ApplicationController
     if roles.include?(User::Roles::WIRE_SIGNER)
       roles = roles.push(TOKEN_WIRES)
     end
-    if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
-      roles = roles - AUTHORIZATIONS_ROLL_UP
-    end
     if roles.include?(User::Roles::ETRANSACT_SIGNER)
       roles.collect! do |role|
         case role
@@ -2153,6 +2150,9 @@ class ReportsController < ApplicationController
       end.flatten!
       roles.uniq!
       roles -= [User::Roles::ETRANSACT_SIGNER] if (roles & [TOKEN_SECURITIES, TOKEN_ADVANCES, TOKEN_WIRES]).any?
+    end
+    if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
+      roles = roles - AUTHORIZATIONS_ROLL_UP
     end
     roles.sort_by! { |role| AUTHORIZATIONS_ORDER.index(role) || 0 }
     roles.collect! { |role| AUTHORIZATIONS_MAPPING.keys.include?(role) ? role : nil }

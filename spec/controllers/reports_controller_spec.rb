@@ -3891,6 +3891,27 @@ RSpec.describe ReportsController, :type => :controller do
             expect(call_method).to_not include(User::Roles::ETRANSACT_SIGNER)
           end
         end
+        describe 'and the signer is a SIGNER_ENTIRE_AUTHORITY user' do
+          before do
+            roles << User::Roles::SIGNER_ENTIRE_AUTHORITY << User::Roles::SECURITIES_SIGNER << User::Roles::ADVANCE_SIGNER << User::Roles::COLLATERAL_SIGNER
+          end
+          it 'adds the TOKEN_ADVANCES role' do
+            expect(call_method).to include(described_class::TOKEN_ADVANCES)
+          end
+          it 'adds the TOKEN_SECURITIES role' do
+            expect(call_method).to include(described_class::TOKEN_SECURITIES)
+          end
+          it 'does not include the TOKEN_WIRES role' do
+            expect(call_method).to_not include(described_class::TOKEN_WIRES)
+          end
+          it 'removes the ETRANSACT_SIGNER role' do
+            expect(call_method).to_not include(User::Roles::ETRANSACT_SIGNER)
+          end
+          it 'includes TOKEN_WIRES if the signer is a WIRE_SIGNER' do
+            roles << User::Roles::WIRE_SIGNER
+            expect(call_method).to include(described_class::TOKEN_WIRES)
+          end
+        end
         it 'removes duplicate roles' do
           roles << User::Roles::COLLATERAL_SIGNER << User::Roles::SECURITIES_SIGNER << User::Roles::WIRE_SIGNER
           result = call_method
