@@ -388,6 +388,8 @@ RSpec.describe LettersOfCreditController, :type => :controller do
         email: SecureRandom.hex,
         phone_number: SecureRandom.hex
       }}
+      let(:name) { double('name') }
+      let(:user) { instance_double(User, display_name: name, accepted_terms?: true, id: nil) }
       let(:securid_status) { double('some status') }
       let(:call_action) { post :execute }
 
@@ -461,8 +463,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
             before { allow(letter_of_credit_request).to receive(:valid?).and_return(true) }
 
             it 'calls `execute` on the letter of credit request with the display_name of the current_user' do
-              name = double('name')
-              allow(controller).to receive(:current_user).and_return(instance_double(User, display_name: name, accepted_terms?: true, id: nil))
+              allow(controller).to receive(:current_user).and_return(user)
               expect(letter_of_credit_request).to receive(:execute).with(name)
               call_action
             end
@@ -472,8 +473,35 @@ RSpec.describe LettersOfCreditController, :type => :controller do
               it_behaves_like 'a letter of credit request with a generic error'
             end
             context 'when the execution of the letter of credit request succeeds' do
-              before { allow(letter_of_credit_request).to receive(:execute).and_return(true) }
+              let(:letter_of_credit_json) { double('loc as json') }
+              let(:mailer) { double('mailer', deliver_later: nil) }
+              before do
+                allow(letter_of_credit_request).to receive(:execute).and_return(true)
+                allow(InternalMailer).to receive(:letter_of_credit_request).and_return(mailer)
+              end
 
+              it 'converts the letter of credit request to JSON' do
+                expect(letter_of_credit_request).to receive(:to_json)
+                call_action
+              end
+              it 'calls `InternalMailer#letter_of_credit_request` with the current_member_id' do
+                expect(InternalMailer).to receive(:letter_of_credit_request).with(member_id, any_args).and_return(mailer)
+                call_action
+              end
+              it 'calls `InternalMailer#letter_of_credit_request` with the letter of credit as JSON' do
+                allow(letter_of_credit_request).to receive(:to_json).and_return(letter_of_credit_json)
+                expect(InternalMailer).to receive(:letter_of_credit_request).with(anything, letter_of_credit_json, any_args).and_return(mailer)
+                call_action
+              end
+              it 'calls `InternalMailer#letter_of_credit_request` with the current_user' do
+                allow(controller).to receive(:current_user).and_return(user)
+                expect(InternalMailer).to receive(:letter_of_credit_request).with(anything, anything, user).and_return(mailer)
+                call_action
+              end
+              it 'calls `deliver_later` on the result of `InternalMailer#letter_of_credit_request`' do
+                expect(mailer).to receive(:deliver_later)
+                call_action
+              end
               it 'calls `set_titles` with the appropriate title' do
                 expect(controller).to receive(:set_titles).with(I18n.t('letters_of_credit.success.title'))
                 call_action

@@ -83,6 +83,7 @@ class LettersOfCreditController < ApplicationController
       @securid_status = securid_status
     elsif letter_of_credit_request.valid? && letter_of_credit_request.execute(current_user.display_name)
       set_titles(t('letters_of_credit.success.title'))
+      InternalMailer.letter_of_credit_request(current_member_id, @letter_of_credit_request.to_json, current_user).deliver_later
       request_succeeded = true
     else
       @error_message = t('letters_of_credit.errors.generic_html', rm_email: @contacts[:rm][:email], rm_phone_number: @contacts[:rm][:phone_number])
