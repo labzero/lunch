@@ -72,10 +72,9 @@ describe SecuritiesRequestService do
       allow(subject).to receive(:process_securities_requests).and_return(processed_requests)
       expect(call_method).to be(processed_requests)
     end
-    it 'calls `get_json` with a parameter `settle_start_date` set to today' do
-      today = Time.zone.today
-      allow(Time.zone).to receive(:today).and_return(today)
-      expect(subject).to receive(:get_json).with(anything, anything, include(settle_start_date: today))
+    it 'calls `get_json` with a parameter `settle_start_date` set to today minus the SecuritiesRequest::MIN_DATE_RESTRICTION value' do
+      min_date = Time.zone.today - SecuritiesRequest::MIN_DATE_RESTRICTION
+      expect(subject).to receive(:get_json).with(anything, anything, include(settle_start_date: min_date))
       call_method
     end
   end
@@ -171,6 +170,14 @@ describe SecuritiesRequestService do
             it 'calls the error handler with the error if an error handler was supplied' do
               expect{|error_handler| subject.submit_request_for_authorization(securities_request, user, type, &error_handler)}.to yield_with_args(error)
             end
+            it 'returns false' do
+              expect(call_method).to be(false)
+            end
+          end
+          describe 'when there is a RestClient error is nil' do
+            let(:status) { nil }
+            let(:error) { RestClient::Exception.new(nil, status) }
+            before { allow_any_instance_of(RestClient::Resource).to receive(method).and_raise(error) }
             it 'returns false' do
               expect(call_method).to be(false)
             end

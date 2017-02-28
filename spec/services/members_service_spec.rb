@@ -128,31 +128,49 @@ describe MembersService do
     end
   end
 
-  describe '`member` method', :vcr do
+  describe '`member` method' do
     let(:member) { subject.member(member_id) }
     let(:response) { double(member) }
     let(:cached_member) { double('member') }
     let(:call_method) { subject.member(member_id) }
-    it 'should return nil if there was an API error' do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
-      expect(member).to eq(nil)
+    it 'fetches the value from the cache with the correct key' do
+      expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:member_data, member_id), anything)
+      call_method
     end
-    it 'should return nil if there was a connection error' do
-      allow_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
-      expect(member).to eq(nil)
+    it 'fetches the value from the cache with the correct expiration' do
+      expect(Rails.cache).to receive(:fetch).with(anything, expires_in: CacheConfiguration.expiry(:member_data))
+      call_method
     end
-    it 'should return nil if there was a JSON parse error' do
-      allow(JSON).to receive(:parse).and_raise(JSON::ParserError)
-      expect(member).to eq(nil)
+    it 'returns the result of accessing the cache' do
+      allow(Rails.cache).to receive(:fetch).and_return(cached_member)
+      expect(call_method).to eq(cached_member)
     end
-    it 'returns a member on success' do
-      expect(member).to be_kind_of(Hash)
-      expect(member[:sta_number]).to be_kind_of(String)
-      expect(member[:sta_number]).to be_present
-      expect(member[:fhfa_number]).to be_kind_of(String)
-      expect(member[:fhfa_number]).to be_present
-      expect(member[:name]).to be_kind_of(String)
-      expect(member[:name]).to be_present
+    describe 'when `member_data` already exists in the Rails cache' do
+      before { allow(Rails.cache).to receive(:fetch).and_return(cached_member) }
+      it 'does not call `get_hash`' do
+        expect(subject).not_to receive(:get_hash)
+        call_method
+      end
+      it 'returns the cached value' do
+        expect(call_method).to eq(cached_member)
+      end
+    end
+    describe 'when `member_data` does not yet exist in the Rails cache' do
+      before do
+        allow(Rails.cache).to receive(:fetch).and_yield
+        allow(subject).to receive(:get_hash).and_return(response)
+      end
+      it 'calls `get_hash` with `:member` as the name arg' do
+        expect(subject).to receive(:get_hash).with(:member, any_args)
+        call_method
+      end
+      it 'calls `get_hash` with the proper MAPI endpoint' do
+        expect(subject).to receive(:get_hash).with(anything, "member/#{member_id}/")
+        call_method
+      end
+      it 'returns `member` from the results of `get_hash`' do
+        expect(call_method).to eq(response)
+      end
     end
     it 'fetches the value from the cache with the correct key' do
       expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:member_data, member_id), anything)

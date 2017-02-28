@@ -72,6 +72,8 @@ class SecuritiesController < ApplicationController
     '89'=> 'DTC'
   }
 
+  MIN_DATE_SELECTOR = (SecuritiesRequest::MIN_DATE_RESTRICTION - 4.days).freeze
+
   before_action do
     set_active_nav(:securities)
     @html_class ||= 'white-background'
@@ -738,6 +740,7 @@ class SecuritiesController < ApplicationController
   def date_restrictions
     today = Time.zone.today
     max_date = today + SecuritiesRequest::MAX_DATE_RESTRICTION
+    min_date = today - MIN_DATE_SELECTOR
     holidays =  CalendarService.new(request).holidays(today, max_date).map{|date| date.iso8601}
     weekends = []
     date_iterator = today.clone
@@ -746,6 +749,7 @@ class SecuritiesController < ApplicationController
       date_iterator += 1.day
     end
     {
+      min_date: min_date,
       max_date: max_date,
       invalid_dates: holidays + weekends
     }

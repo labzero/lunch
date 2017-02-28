@@ -48,10 +48,10 @@ module MAPI
             advances_percentage = cap_stock_requirements[:ADVANCES_PCT].to_f
             total_capital_stock = cap_stock_member_details[:TOTAL_CAPITAL_STOCK].to_i
             required_by_mpf = ((cap_stock_member_details[:MPF_UNPAID_BALANCE].to_i * cap_stock_requirements[:MPF_PCT].to_f) / 100).ceil * 100
-            unrounded_adv_and_mpf_stock_requirement = (cap_stock_member_details[:TOT_MPF].to_i * cap_stock_requirements[:MPF_PCT].to_f) + (cap_stock_member_details[:ADVANCES_OUTS].to_i * advances_percentage)
-            adv_and_mpf_stock_requirement = (unrounded_adv_and_mpf_stock_requirement / 100).ceil * 100
+            unrounded_adv_and_mpf_stock_requirement = (cap_stock_member_details[:TOT_MPF].to_i * cap_stock_requirements[:MPF_PCT].to_f) + (cap_stock_member_details[:ADVANCES_OUTS].to_f * advances_percentage)
+            adv_and_mpf_stock_requirement = (unrounded_adv_and_mpf_stock_requirement.to_f / 100).ceil * 100
             required_by_advances = adv_and_mpf_stock_requirement - required_by_mpf
-            mav_stock_requirement = (cap_stock_member_details[:MORTGAGE_RELATED_ASSETS].to_i / 100).ceil * 100
+            mav_stock_requirement = (cap_stock_member_details[:MORTGAGE_RELATED_ASSETS].to_f / 100).ceil * 100
 
             # Capital Stock Requirement Calculation
             minimum_stock_requirement = adv_and_mpf_stock_requirement > mav_stock_requirement ? adv_and_mpf_stock_requirement : mav_stock_requirement

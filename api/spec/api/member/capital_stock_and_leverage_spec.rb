@@ -71,7 +71,7 @@ describe MAPI::ServiceApp do
         expect(capital_stock_and_leverage[:required_by_mpf]).to eq(((cap_stock_member_details.first[:MPF_UNPAID_BALANCE] * cap_stock_requirements.first[:MPF_PCT]) / 100).ceil * 100)
       end
       it 'returns a `mav_stock_requirement` that is equal to MORTGAGE_RELATED_ASSETS' do
-        expect(capital_stock_and_leverage[:mav_stock_requirement]).to eq(((cap_stock_member_details.first[:MORTGAGE_RELATED_ASSETS]) / 100).ceil * 100)
+        expect(capital_stock_and_leverage[:mav_stock_requirement]).to eq(((cap_stock_member_details.first[:MORTGAGE_RELATED_ASSETS]).to_f / 100).ceil * 100)
       end
       describe 'values calculated with the `minimum_stock_requirement`' do
         let(:adv_and_mpf_stock_requirement) { (((cap_stock_member_details.first[:TOT_MPF] * cap_stock_requirements.first[:MPF_PCT]) + (cap_stock_member_details.first[:ADVANCES_OUTS] * cap_stock_requirements.first[:ADVANCES_PCT])) / 100).ceil * 100 }
@@ -113,7 +113,7 @@ describe MAPI::ServiceApp do
           end
         end
         describe 'the `minimum_requirement` value' do
-          let(:mav_stock_requirement) {(cap_stock_member_details.first[:MORTGAGE_RELATED_ASSETS] / 100).ceil * 100}
+          let(:mav_stock_requirement) {(cap_stock_member_details.first[:MORTGAGE_RELATED_ASSETS].to_f / 100).ceil * 100}
           it 'is equal to the adv_and_mpf_stock_requirement when adv_and_mpf_stock_requirement is greater than the mav_stock_requirement' do
             cap_stock_member_details.first[:MORTGAGE_RELATED_ASSETS] = adv_and_mpf_stock_requirement - 500
             expect(capital_stock_and_leverage[:minimum_requirement]).to eq(adv_and_mpf_stock_requirement)

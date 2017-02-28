@@ -337,6 +337,18 @@
       }
     }
   }
+  .etransact-status-message {
+    @extend %bordered-section;
+    margin-bottom: 0;
+    p {
+      margin: 0;
+    }
+    a {
+      display: inline-block;
+      margin-top: 1rem;
+      text-transform: uppercase;
+    }
+  }
 }
 
 .add-advance-body {

@@ -13,7 +13,7 @@ class SecuritiesRequestService < MAPIService
   end
 
   def awaiting_authorization
-    requests = get_json(:awaiting_authorization, "/member/#{member_id}/securities/requests", status: :awaiting_authorization, settle_start_date: Time.zone.today)
+    requests = get_json(:awaiting_authorization, "/member/#{member_id}/securities/requests", status: :awaiting_authorization, settle_start_date: Time.zone.today - SecuritiesRequest::MIN_DATE_RESTRICTION)
     process_securities_requests(requests)
   end
 
@@ -30,7 +30,7 @@ class SecuritiesRequestService < MAPIService
     method = body[:request_id] ? :put_hash : :post_hash
     type = :intake if type == :pledge || type == :safekeep
     response = send(method, :submit_request_for_authorization, "/member/#{member_id}/securities/#{type}", body) do |name, msg, err|
-      if err.is_a?(RestClient::Exception) && err.http_code >= 400 && err.http_code < 500 && error_handler
+      if err.is_a?(RestClient::Exception) && err.http_code.to_i >= 400 && err.http_code.to_i < 500 && error_handler
         Rails.logger.info { "error submitting securities request: #{err.http_body}" }
         error_handler.call(err)
       else
