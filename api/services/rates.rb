@@ -231,11 +231,13 @@ module MAPI
           period          = "#{frequency}#{unit}"
           term            = PERIOD_TO_TERM[period]
         end
-        {
-          rate: rate,
-          maturity_string: maturity_string,
-          term: term
-        }
+        if term
+          {
+            rate: rate,
+            maturity_string: maturity_string,
+            term: term
+          }
+        end
       end
 
       def self.is_limited_pricing_day?(app, date)

@@ -309,9 +309,15 @@ describe MAPI::ServiceApp do
         expect(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :unit)
         call_method
       end
+      it 'returns nil if the term could not be identified' do
+        stub_const('MAPI::Services::Rates::PERIOD_TO_TERM', {})
+        expect(call_method).to be_nil
+      end
     end
     describe 'when custom' do
       before do
+        allow(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :maturity_string).and_return(maturity_string)
+        allow(MAPI::Services::Rates).to receive(:extract_text).with(type_data, :spot_date).and_return(funding_date)
         allow(MAPI::Services::Rates).to receive(:days_to_maturity).and_return(days_to_maturity_return)
       end
       it 'extracts unit from the term data' do
@@ -319,22 +325,18 @@ describe MAPI::ServiceApp do
         call_method_custom
       end
       it 'calls days_to_maturity with maturity_string and funding_date' do
-        allow(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :maturity_string).and_return(maturity_string)
-        allow(MAPI::Services::Rates).to receive(:extract_text).with(type_data, :spot_date).and_return(funding_date)
         expect(MAPI::Services::Rates).to receive(:days_to_maturity).with(maturity_string, funding_date)
         call_method_custom
+      end
+      it 'returns nil if the term could not be identified' do
+        allow(MAPI::Services::Rates).to receive(:days_to_maturity).with(maturity_string, funding_date).and_return({})
+        expect(call_method_custom).to be_nil
       end
     end
     describe 'return hash' do
       before do
         allow(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :rate).and_return(rate)
         allow(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :maturity_string).and_return(maturity_string)
-      end
-      it 'sets the correct rate' do
-        expect(call_method[:rate]).to eq(rate)
-      end
-      it 'sets the correct maturity_string' do
-        expect(call_method[:maturity_string]).to eq(maturity_string)
       end
       describe 'when not custom' do
         before do
@@ -346,6 +348,9 @@ describe MAPI::ServiceApp do
         it 'sets the correct rate' do
           expect(call_method[:term]).to eq(term)
         end
+        it 'sets the correct maturity_string' do
+          expect(call_method[:maturity_string]).to eq(maturity_string)
+        end
       end
       describe 'when custom' do
         before do
@@ -353,6 +358,9 @@ describe MAPI::ServiceApp do
         end
         it 'sets the correct rate' do
           expect(call_method_custom[:term]).to eq(custom_term)
+        end
+        it 'sets the correct maturity_string' do
+          expect(call_method_custom[:maturity_string]).to eq(maturity_string)
         end
       end
     end
