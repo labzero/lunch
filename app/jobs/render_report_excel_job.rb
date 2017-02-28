@@ -1,4 +1,5 @@
 class RenderReportExcelJob < FhlbJob
+  include CustomFormattingHelper
   queue_as :high_priority
 
   def perform(member_id, report_name, filename, params={}, report_view=nil)
@@ -22,6 +23,7 @@ class RenderReportExcelJob < FhlbJob
     file = StringIOWithFilename.new(xlsx)
     file.content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     filename ||= controller.report_download_name
+    filename ||= "#{controller.action_name.to_s.gsub('_','-')}-#{fhlb_report_date_numeric(Time.zone.today)}" if controller.action_name
     file.original_filename = "#{filename}.xlsx"
     return if job_status.canceled?
     job_status.result = file

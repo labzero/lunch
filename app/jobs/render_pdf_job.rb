@@ -1,4 +1,5 @@
 class RenderPDFJob < FhlbJob
+  include CustomFormattingHelper
   queue_as :high_priority
 
   MARGIN = 19.05 # in mm
@@ -14,6 +15,7 @@ class RenderPDFJob < FhlbJob
     file = StringIOWithFilename.new(render_pdf(view))
     file.content_type = 'application/pdf'
     filename ||= controller.report_download_name
+    filename ||= "#{controller.action_name.to_s.gsub('_','-')}-#{fhlb_report_date_numeric(Time.zone.today)}" if controller.action_name
     file.original_filename = "#{filename}.pdf"
     return if job_status.canceled?
     job_status.result = file

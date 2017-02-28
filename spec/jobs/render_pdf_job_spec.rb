@@ -32,6 +32,8 @@ RSpec.describe RenderPDFJob, type: :job do
         allow(subject).to receive(:render_pdf)
         allow(StringIOWithFilename).to receive(:new).and_return(file)
       end
+
+      it_behaves_like 'a job that has a filename', :pdf
       it 'initializes the controller' do
         expect(subject).to receive(:initialize_controller)
         call_method
@@ -67,15 +69,6 @@ RSpec.describe RenderPDFJob, type: :job do
       end
       it 'sets the file\'s content_type to `application/pdf`' do
         expect(file).to receive(:content_type=).with('application/pdf')
-        call_method
-      end
-      it 'sets the file\'s original_filename to the passed filename if one is provided' do
-        expect(file).to receive(:original_filename=).with("#{filename}.pdf")
-        subject.perform(member_id, action_name, filename)
-      end
-      it 'sets the file\'s original_filename to the controller\'s report_download_name if a filename is not provided' do
-        allow(controller).to receive(:report_download_name).and_return(report_download_name)
-        expect(file).to receive(:original_filename=).with("#{report_download_name}.pdf")
         call_method
       end
       it 'sets the job_status result to the file' do

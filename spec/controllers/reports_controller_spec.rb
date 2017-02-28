@@ -728,7 +728,12 @@ RSpec.describe ReportsController, :type => :controller do
         expect(assigns[:dropdown_options_text]).to eq(I18n.t("dates.quarters.#{div_ids.first.last}", year: div_ids.first[0..3]))
       end
       it 'sets @as_of to the value of @dropdown_options_text' do
+        make_request
         expect(assigns[:as_of]).to eq(assigns[:dropdown_options_text])
+      end
+      it 'sets the `report_download_name` attribute to include the value of @dropdown_options_text' do
+        make_request
+        expect(subject.report_download_name).to eq("dividend-statement-#{assigns[:dropdown_options_text].downcase.gsub(' ', '-')}")
       end
       it 'defaults @div_id to the first value in @dropdown_options' do
         allow(response_hash).to receive(:[]).with(:div_ids).and_return(div_ids)

@@ -1358,6 +1358,7 @@ class ReportsController < ApplicationController
         @div_id ||= @dropdown_options[0][1]
         @show_summary_data = true if %w(1 2 3 4).include?(@div_id.last)
         @as_of = @dropdown_options_text
+        self.report_download_name = "dividend-statement-#{@dropdown_options_text.downcase.gsub(' ', '-')}"
       end
     end
   end
@@ -2197,7 +2198,6 @@ class ReportsController < ApplicationController
   def downloadable_report(formats = DOWNLOAD_FORMATS, report_download_params = {}, report_download_name = nil, report_view = nil)
     export_format = params[:export_format]
     self.report_download_name ||= report_download_name
-    self.report_download_name ||= "#{action_name.to_s.gsub('_','-')}-#{fhlb_report_date_numeric(Time.zone.today)}" if action_name
     if export_format
       formats = Array.wrap(formats || DOWNLOAD_FORMATS)
       export_format = export_format.to_sym
