@@ -477,7 +477,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
               let(:mailer) { double('mailer', deliver_later: nil) }
               before do
                 allow(letter_of_credit_request).to receive(:execute).and_return(true)
-                allow(InternalMailer).to receive(:letter_of_credit_request).and_return(mailer)
+                allow(MemberMailer).to receive(:letter_of_credit_request).and_return(mailer)
               end
 
               it 'converts the letter of credit request to JSON' do
@@ -485,17 +485,17 @@ RSpec.describe LettersOfCreditController, :type => :controller do
                 call_action
               end
               it 'calls `InternalMailer#letter_of_credit_request` with the current_member_id' do
-                expect(InternalMailer).to receive(:letter_of_credit_request).with(member_id, any_args).and_return(mailer)
+                expect(MemberMailer).to receive(:letter_of_credit_request).with(member_id, any_args).and_return(mailer)
                 call_action
               end
               it 'calls `InternalMailer#letter_of_credit_request` with the letter of credit as JSON' do
                 allow(letter_of_credit_request).to receive(:to_json).and_return(letter_of_credit_json)
-                expect(InternalMailer).to receive(:letter_of_credit_request).with(anything, letter_of_credit_json, any_args).and_return(mailer)
+                expect(MemberMailer).to receive(:letter_of_credit_request).with(anything, letter_of_credit_json, any_args).and_return(mailer)
                 call_action
               end
               it 'calls `InternalMailer#letter_of_credit_request` with the current_user' do
                 allow(controller).to receive(:current_user).and_return(user)
-                expect(InternalMailer).to receive(:letter_of_credit_request).with(anything, anything, user).and_return(mailer)
+                expect(MemberMailer).to receive(:letter_of_credit_request).with(anything, anything, user).and_return(mailer)
                 call_action
               end
               it 'calls `deliver_later` on the result of `InternalMailer#letter_of_credit_request`' do

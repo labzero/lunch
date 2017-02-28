@@ -3,6 +3,7 @@ class InternalMailer < ActionMailer::Base
   helper AssetHelper
   include CustomFormattingHelper
   helper ContactInformationHelper
+  include ActionView::Helpers::TextHelper
   GENERAL_ALERT_ADDRESS = 'MemberPortalAlert@fhlbsf.com'
   WEB_TRADE_ALERT_ADDRESS = 'WebTrade@fhlbsf.com'
   WEB_SECURITIES = 'WebSecurities@fhlbsf.com'
@@ -90,16 +91,6 @@ class InternalMailer < ActionMailer::Base
             I18n.t('emails.securities_request.authorized.safekeeping').upcase),
           from: WEB_SECURITIES,
           to: @securities_request.is_collateral? ? COLLATERAL_OPERATIONS : SECURITIES_SERVICES
-    )
-  end
-
-  def letter_of_credit_request(member_id, lc_as_json, user)
-    @letter_of_credit_request = LetterOfCreditRequest.from_json(lc_as_json, nil)
-    pdf_name = "letter_of_credit_request_#{@letter_of_credit_request.lc_number}"
-    file = RenderLetterOfCreditPDFJob.perform_now(member_id, 'view', pdf_name, { letter_of_credit_request: {id: @letter_of_credit_request.id} })
-    attachments[file.original_filename] = file.read
-    mail(subject: I18n.t('letters_of_credit.email.subject'),
-         from: t('emails.new_user.sender', email: ContactInformationHelper::WEB_SUPPORT_EMAIL)
     )
   end
 
