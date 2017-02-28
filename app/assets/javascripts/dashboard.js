@@ -1,4 +1,8 @@
 $(function () {
+  var trackLoading = true;
+  var $deferredElements = $('.dashboard-module-content-deferred');
+  var deferredJobsRemaining = $deferredElements.length;
+  var overnightVrcLoaded = false;
 
   function showDashboardAddAdvanceClosedState() {
     $('.etransact-status-message-closed ').show();
@@ -17,7 +21,13 @@ $(function () {
     }, 30000);
     if ($rate_element.is('.dashboard-element-loading')) {
       getOvernightVrc();
+    } else {
+      overnightVrcLoaded = true;
+      checkPageLoaded();
     }
+  } else {
+    overnightVrcLoaded = true;
+    checkPageLoaded();
   };
 
   function getOvernightVrc() {
@@ -39,12 +49,13 @@ $(function () {
       }).always(function() {
         isCheckingRate = false;
         $rate_element.removeClass('dashboard-element-loading');
+        overnightVrcLoaded = true;
+        checkPageLoaded();
       });
     };
   };
 
   // Handle loading of deferred elements on dashboard
-  var $deferredElements = $('.dashboard-module-content-deferred');
   $.each($deferredElements, function(i, el) {
     var $el = $(el);
     checkDeferredElementStatus($el, $el.data('deferred'), $el.data('deferred-load'));
@@ -71,12 +82,25 @@ $(function () {
       $el.replaceWith($newContent);
     }).fail(function() {
       deferredElementError($el);
+    }).always(function() {
+      deferredJobsRemaining -= 1;
+      checkPageLoaded();
     });
   };
 
   function deferredElementError($el) {
     $el.find('.dashboard-module-loading').hide();
     $el.find('.dashboard-module-temporarily-unavailable').show();
+    deferredJobsRemaining -= 1;
+    checkPageLoaded();
+  };
+
+  function checkPageLoaded() {
+    if (trackLoading && window.pageLoadTimestamp && overnightVrcLoaded && (deferredJobsRemaining === 0)) {
+      var elapsedTime = Date.now() - window.pageLoadTimestamp;
+      Fhlb.Track.dashboard_loaded(elapsedTime);
+      trackLoading = false;
+    };
   };
 
 });
