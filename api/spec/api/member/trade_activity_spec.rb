@@ -1154,5 +1154,275 @@ describe MAPI::ServiceApp do
         end
       end
     end
+
+    describe '`process_credit_activities` class method' do
+      let(:today) { Time.zone.today }
+
+      before do
+        allow(Time.zone).to receive(:today).and_return(today)
+      end
+
+      it 'returns an empty array when passed an empty array' do
+        expect(trade_activity_module.process_credit_activities([])).to eq([])
+      end
+      describe 'when passed an array of activities' do
+        datetime_attrs = [['terminationDate', :termination_date]]
+        date_attrs = [['tradeDate', :trade_date], ['fundingDate', :funding_date], ['maturityDate', :maturity_date]]
+        string_attrs = [['instrumentType', :instrument_type], ['tradeID', :transaction_number],
+                        ['productDescription', :product_description], ['terminationFullPartial', :termination_full_partial],
+                        ['product', :product], ['subProduct', :sub_product], ['lifeCycleEvent', :life_cycle_event],
+                        ['beneficiary', :beneficiary]]
+        float_attrs = [['terminationPar', :termination_par], ['amount', :current_par], ['terminationFee', :termination_fee],
+                       ['rate', :interest_rate]]
+        let(:sentinel) { SecureRandom.hex }
+        let(:activity) do
+          activity = {}
+          string_attrs.each {|attr| activity[attr.first] = double(attr.first, to_s: nil) }
+          float_attrs.each {|attr| activity[attr.first] = double(attr.first, to_f: nil) }
+          (datetime_attrs + date_attrs).each {|attr| activity[attr.first] = double(attr.first) }
+          activity
+        end
+        let(:call_method) { trade_activity_module.process_credit_activities([activity]) }
+
+        before do
+          allow(Time.zone).to receive(:parse).and_return(instance_double(Time, to_date: nil))
+          allow(DateTime).to receive(:strptime).and_return(instance_double(DateTime, to_date: nil))
+          allow(trade_activity_module).to receive(:decimal_to_percentage_rate)
+        end
+        shared_examples 'an array with an invalid activity' do
+          it 'does not include the invalid activity in the array of returned activities' do
+            expect(call_method).to eq([])
+          end
+        end
+        shared_examples 'an array with valid activities' do |skipped_attrs=[]|
+          it 'returns an array of processed activities equal in length to the raw activities array' do
+            n = rand(1..10)
+            raw_activities = []
+            n.times { raw_activities << activity }
+            expect(trade_activity_module.process_credit_activities(raw_activities).length).to eq(n)
+          end
+          describe 'processing an activity' do
+            describe 'processing the string attributes' do
+              string_attrs.each do |attr|
+                it "calls `to_s` on the `#{attr.first}` value in the raw activity" do
+                  expect(activity[attr.first]).to receive(:to_s)
+                  call_method
+                end
+                it "sets the `#{attr.last}` value in the processed activity to the processed `#{attr.first}` value" do
+                  allow(activity[attr.first]).to receive(:to_s).and_return(sentinel)
+                  results = call_method
+                  expect(results.length).to be > 0
+                  results.each do |processed_activity|
+                    expect(processed_activity[attr.last]).to eq(sentinel)
+                  end
+                end
+              end
+            end
+            describe 'processing the float attributes' do
+              tested_attrs = (float_attrs - [['rate', :interest_rate]])
+              tested_attrs = tested_attrs - [['terminationPar', :termination_par]] if skipped_attrs.include?(:termination_par)
+              tested_attrs.each do |attr|
+                it "calls `to_f` on the `#{attr.first}` value in the raw activity" do
+                  expect(activity[attr.first]).to receive(:to_f)
+                  call_method
+                end
+                it "sets the `#{attr.last}` value in the processed activity to the processed `#{attr.first}` value" do
+                  allow(activity[attr.first]).to receive(:to_f).and_return(sentinel)
+                  results = call_method
+                  expect(results.length).to be > 0
+                  results.each do |processed_activity|
+                    expect(processed_activity[attr.last]).to eq(sentinel)
+                  end
+                end
+              end
+            end
+            describe 'processing the `rate` attribute' do
+              it 'calls `to_f` on the `rate` value in the raw activity' do
+                expect(activity['rate']).to receive(:to_f)
+                call_method
+              end
+              it 'calls `decimal_to_percentage_rate` with the rate float' do
+                allow(activity['rate']).to receive(:to_f).and_return(sentinel)
+                expect(trade_activity_module).to receive(:decimal_to_percentage_rate).with(sentinel)
+                call_method
+              end
+              it 'sets the `interest_rate` value in the processed activity to the processed `rate` value' do
+                float = instance_double(Float)
+                allow(activity['rate']).to receive(:to_f).and_return(float)
+                allow(trade_activity_module).to receive(:decimal_to_percentage_rate).with(float).and_return(sentinel)
+                results = call_method
+                expect(results.length).to be > 0
+                results.each do |processed_activity|
+                  expect(processed_activity[:interest_rate]).to eq(sentinel)
+                end
+              end
+            end
+            describe 'processing the `maintenanceFee` attribute' do
+              let(:maintenance_fee_float) { instance_double(Float, :* => nil) }
+              before do
+                activity['maintenanceFee'] = double('maintenanceFee', to_f: rand)
+              end
+              it 'calls `to_f` on the `maintenanceFee` value in the raw activity' do
+                expect(activity['maintenanceFee']).to receive(:to_f).and_return(maintenance_fee_float)
+                call_method
+              end
+              it 'multiplies the `maintenanceFee` float by 10000' do
+                expect(activity['maintenanceFee']).to receive(:to_f).and_return(maintenance_fee_float)
+                expect(maintenance_fee_float).to receive(:*).with(10000)
+                call_method
+              end
+              it 'sets the `maintenance_charge` value in the processed activity to the processed `maintenanceFee` value' do
+                allow(activity['maintenanceFee']).to receive(:to_f).and_return(instance_double(Float, :* => sentinel))
+                results = call_method
+                expect(results.length).to be > 0
+                results.each do |processed_activity|
+                  expect(processed_activity[:maintenance_charge]).to eq(sentinel)
+                end
+              end
+            end
+            describe 'processing the date attributes' do
+              let(:time) { instance_double(Time, to_date: nil) }
+              tested_attrs = skipped_attrs.include?(:funding_date) ? date_attrs - [['fundingDate', :funding_date]] : date_attrs
+              tested_attrs.each do |attr|
+                it "calls `Time.zone.parse` with the `#{attr.first}` value in the raw activity" do
+                  expect(Time.zone).to receive(:parse).with(activity[attr.first]).and_return(time)
+                  call_method
+                end
+                it "calls `to_date` on the result of `Time.zone.parse`" do
+                  allow(Time.zone).to receive(:parse).with(activity[attr.first]).and_return(time)
+                  expect(time).to receive(:to_date)
+                  call_method
+                end
+                it "sets the `#{attr.last}` value in the processed activity to the processed `#{attr.first}` value" do
+                  allow(Time.zone).to receive(:parse).with(activity[attr.first]).and_return(instance_double(Time, to_date: sentinel))
+                  results = call_method
+                  expect(results.length).to be > 0
+                  results.each do |processed_activity|
+                    expect(processed_activity[attr.last]).to eq(sentinel)
+                  end
+                end
+              end
+            end
+            describe 'processing the datetime attributes' do
+              let(:datetime) { instance_double(DateTime, to_date: nil) }
+              datetime_attrs.each do |attr|
+                it "calls `DateTime.strptime` with the `#{attr.first}` value in the raw activity" do
+                  expect(DateTime).to receive(:strptime).with(activity[attr.first], anything).and_return(datetime)
+                  call_method
+                end
+                it "calls `DateTime.strptime` with the `'%m/%d/%Y'` as its format" do
+                  expect(DateTime).to receive(:strptime).with(anything, '%m/%d/%Y').and_return(datetime)
+                  call_method
+                end
+                it "calls `to_date` on the result of `DateTime.strptime`" do
+                  allow(DateTime).to receive(:strptime).with(activity[attr.first], '%m/%d/%Y').and_return(datetime)
+                  expect(datetime).to receive(:to_date)
+                  call_method
+                end
+                it "sets the `#{attr.last}` value in the processed activity to the processed `#{attr.first}` value" do
+                  allow(DateTime).to receive(:strptime).with(activity[attr.first], '%m/%d/%Y').and_return(instance_double(DateTime, to_date: sentinel))
+                  results = call_method
+                  expect(results.length).to be > 0
+                  results.each do |processed_activity|
+                    expect(processed_activity[attr.last]).to eq(sentinel)
+                  end
+                end
+              end
+            end
+            describe 'processing the `lcNumber`' do
+              let(:lc_number) { double('lcNumber', to_s: nil) }
+              let(:other_lc_number) { double('lcNumber') }
+              context 'when the raw value for `lcNumber` is an array' do
+                before { activity['lcNumber'] = [lc_number, other_lc_number] }
+                it 'calls `to_s` on the first value of the passed array' do
+                  expect(lc_number).to receive(:to_s)
+                  call_method
+                end
+                it 'ignores any other values in the array' do
+                  expect(other_lc_number).not_to receive(:to_s)
+                  call_method
+                end
+                it 'sets the `lc_number` value in the processed activity to the processed `lcNumber` value' do
+                  allow(lc_number).to receive(:to_s).and_return(sentinel)
+                  results = call_method
+                  expect(results.length).to be > 0
+                  results.each do |processed_activity|
+                    expect(processed_activity[:lc_number]).to eq(sentinel)
+                  end
+                end
+              end
+              context 'when the raw value for `lcNumber` is not an array' do
+                before { activity['lcNumber'] = lc_number }
+                it 'calls `to_s` with the `lcNumber` value of the raw activity' do
+                  expect(lc_number).to receive(:to_s)
+                  call_method
+                end
+                it 'sets the `lc_number` value in the processed activity to the processed `lcNumber` value' do
+                  allow(lc_number).to receive(:to_s).and_return(sentinel)
+                  results = call_method
+                  expect(results.length).to be > 0
+                  results.each do |processed_activity|
+                    expect(processed_activity[:lc_number]).to eq(sentinel)
+                  end
+                end
+              end
+            end
+          end
+        end
+        context 'when `status` is not included in the list of allowed statuses' do
+          before { activity['status'] = 'Foo' }
+          it_behaves_like 'an array with an invalid activity'
+        end
+        context 'when `status` is included in the list of allowed statuses' do
+          before { activity['status'] = trade_activity_module::TODAYS_CREDIT_ARRAY.sample }
+          context 'when the `instrument_type` is not `ADVANCE`' do
+            it_behaves_like 'an array with valid activities'
+          end
+          context 'when the `instrument_type` is `ADVANCE`' do
+            before { activity['instrumentType'] = 'ADVANCE' }
+            context 'when the status is `EXERCISED`' do
+              before { activity['status'] = 'EXERCISED'}
+              it_behaves_like 'an array with valid activities'
+            end
+            context 'when the status is not `EXERCISED`' do
+              before do
+                activity['status'] = (trade_activity_module::TODAYS_CREDIT_ARRAY - ['EXERCISED']).sample
+              end
+              context 'when there is a `termination_par`' do
+                before { allow(activity['terminationPar']).to receive(:to_f).and_return(activity['terminationPar']) }
+                it_behaves_like 'an array with valid activities'
+              end
+              context 'when there is no `termination_par`' do
+                before { activity.delete('terminationPar') }
+                context 'when there is no `funding_date`' do
+                  before { activity.delete('fundingDate') }
+                  it_behaves_like 'an array with valid activities', [:termination_par, :funding_date]
+                end
+                context 'when there is a `funding_date`' do
+                  context 'when the `funding_date` occurs earlier than today' do
+                    before { allow(Time.zone).to receive(:parse).with(activity['fundingDate']).and_return(instance_double(Time, to_date: today - 1.day)) }
+                    it_behaves_like 'an array with an invalid activity'
+                  end
+                  context 'when the `funding_date` occurs later than today' do
+                    before do
+                      allow(Time.zone).to receive(:parse).with(activity['fundingDate']).and_return(instance_double(Time, to_date: today + 1.day))
+                      allow(sentinel).to receive(:<).and_return(false)
+                    end
+                    it_behaves_like 'an array with valid activities', [:termination_par]
+                  end
+                  context 'when the `funding_date` occurs today' do
+                    before do
+                      allow(Time.zone).to receive(:parse).with(activity['fundingDate']).and_return(instance_double(Time, to_date: today))
+                      allow(sentinel).to receive(:<).and_return(false)
+                    end
+                    it_behaves_like 'an array with valid activities', [:termination_par]
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
   end
 end

@@ -48,7 +48,7 @@
     "product": "LC",
     "subProduct": "LC",
     "maintenanceFee": "0.001",
-    "lcNumber": "2016-053",
+    "lcNumber": ["2016-053"],
     "beneficiary": "State of California"
   },
   {
@@ -68,7 +68,7 @@
     "subProduct": "LC",
     "lifeCycleEvent": "Amended",
     "maintenanceFee": "0.001",
-    "lcNumber": "2016-054",
+    "lcNumber": ["2016-054"],
     "beneficiary": "City of San Francisco"
   },
   {
@@ -88,7 +88,7 @@
     "subProduct": "LC",
     "lifeCycleEvent": "Canceled",
     "maintenanceFee": "0.0013",
-    "lcNumber": "2016-055",
+    "lcNumber": ["2016-055"],
     "beneficiary": "Yolo County"
   },
   {

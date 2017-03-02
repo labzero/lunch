@@ -480,7 +480,9 @@ module MAPI
             sub_product = activity['subProduct'].to_s if activity['subProduct'].present?
             termination_date = DateTime.strptime(activity['terminationDate'], '%m/%d/%Y').to_date if activity['terminationDate'].present?
             life_cycle_event = activity['lifeCycleEvent'].to_s if activity['lifeCycleEvent'].present?
-            lc_number = activity['lcNumber'].to_s if activity['lcNumber'].present?
+            lc_number = if activity['lcNumber'].present?
+                          activity['lcNumber'].is_a?(Array) ? activity['lcNumber'].first.to_s : activity['lcNumber'].to_s
+                        end
             maintenance_fee = (activity['maintenanceFee'].to_f * 10000) if activity['maintenanceFee'].present?
             beneficiary = activity['beneficiary'].to_s if activity['beneficiary'].present?
 
