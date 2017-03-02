@@ -9,8 +9,8 @@
     "cur_units":10700000,
     "cur_maturity_date":"2016-06-18",
     "cur_principal_amount":1609041.64,
-    "cur_interest_amount":0,
-    "cur_total_amount":1609041.64
+    "cur_interest_amount":320.24,
+    "cur_total_amount":1609361.88
   },
   {
     "fhlb_id":564,
@@ -42,13 +42,13 @@
     "fhlb_id":564,
     "cur_btc_account_number":"082011",
     "cur_new_trans":true,
-    "cur_cusip":"31398M7H3",
+    "cur_cusip":"31393RVW7",
     "cur_trans_code":"DELD",
-    "cur_desc_line_1":"FEDERAL NAT MTG ASSN REMIC",
-    "cur_units":10000000,
-    "cur_maturity_date":"2025-07-24",
-    "cur_principal_amount":439472.71,
-    "cur_interest_amount":0,
-    "cur_total_amount":439472.71
+    "cur_desc_line_1":"FEDERAL HOME LN MTG GD REMIC",
+    "cur_units":10700000,
+    "cur_maturity_date":"2016-06-18",
+    "cur_principal_amount":-1609041.64,
+    "cur_interest_amount":-320.24,
+    "cur_total_amount":-1609361.88
   }
 ]
