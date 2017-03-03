@@ -3,10 +3,14 @@ require 'rails_helper'
 RSpec.describe LetterOfCreditRequest, :type => :model do
   let(:today) { Time.zone.today }
   let(:calendar_service) { instance_double(CalendarService, holidays: [], find_next_business_day: today) }
+  let(:member_id) { rand(1000..9999) }
 
   before { allow(CalendarService).to receive(:new).and_return(calendar_service) }
 
+  subject { described_class.new(member_id) }
+
   describe 'validations' do
+    before { subject.instance_variable_set('@borrowing_capacity', {}) }
     [:beneficiary_name, :amount, :issue_date, :expiration_date].each do |attr|
       it "validates the presence of `#{attr}`" do
         expect(subject).to validate_presence_of attr
@@ -18,7 +22,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
     it 'validates tha `amount` is greater than zero' do
       is_expected.to validate_numericality_of(:amount).is_greater_than(0)
     end
-    [:issue_date_must_come_before_expiration_date, :issue_date_within_range, :expiration_date_within_range].each do |method|
+    [:issue_date_must_come_before_expiration_date, :issue_date_within_range, :expiration_date_within_range, :amount_does_not_exceed_borrowing_capacity].each do |method|
       it "calls `#{method}` as a validator" do
         expect(subject).to receive(method)
         subject.valid?
@@ -114,16 +118,58 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         end
       end
     end
+
+    describe '`amount_does_not_exceed_borrowing_capacity`' do
+      let(:today) { Time.zone.today }
+      let(:remaining_bc) { rand(10000..9999999) }
+      let(:call_validator) { subject.send(:amount_does_not_exceed_borrowing_capacity) }
+
+      before do
+        allow(Time.zone).to receive(:today).and_return(today)
+        allow(subject).to receive(:fetch_borrowing_capacity) { subject.instance_variable_set('@borrowing_capacity', {standard_excess_capacity: remaining_bc}) }
+      end
+
+      it 'calls `fetch_borrowing_capacity`' do
+        expect(subject).to receive(:fetch_borrowing_capacity) { subject.instance_variable_set('@borrowing_capacity', {standard_excess_capacity: remaining_bc}) }
+        call_validator
+      end
+      describe 'when there is no amount value' do
+        it 'does not add an error' do
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is less than the remaining standard borrowing capacity' do
+        it 'does not add an error' do
+          subject.amount = remaining_bc - rand(100..9999)
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is equal to the remaining standard borrowing capacity' do
+        it 'does not add an error' do
+          subject.amount = remaining_bc
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is greater than the remaining standard borrowing capacity' do
+        before { subject.amount = remaining_bc + rand(1..100000) }
+        it 'adds an error' do
+          expect(subject.errors).to receive(:add).with(:amount, :exceeds_borrowing_capacity)
+          call_validator
+        end
+      end
+    end
   end
 
   describe 'initialization' do
     let(:issue_date) { today + rand(0..7).days }
-    let(:new_loc) { LetterOfCreditRequest.new }
+    let(:new_loc) { LetterOfCreditRequest.new(member_id) }
     let(:request) { double('request') }
 
     describe 'when a request arg is passed' do
-      let(:new_loc) { LetterOfCreditRequest.new(request) }
-      subject { described_class.new(request) }
+      let(:new_loc) { LetterOfCreditRequest.new(member_id, request) }
       it 'sets `request` to the passed arg' do
         expect(new_loc.request).to eq(request)
       end
@@ -145,6 +191,9 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         expect(CalendarService).to receive(:new).with(request).and_return(calendar_service)
         new_loc
       end
+    end
+    it 'sets `member_id` to the passed member_id arg' do
+      expect(new_loc.member_id).to eq(member_id)
     end
     it "sets `issuance_fee` to `#{described_class::DEFAULT_ISSUANCE_FEE}`" do
       expect(subject.issuance_fee).to eq(described_class::DEFAULT_ISSUANCE_FEE)
@@ -355,7 +404,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       let(:beneficiaries_service) { instance_double(BeneficiariesService, all: []) }
       let(:beneficiary_name) { SecureRandom.hex }
       let(:request) { double('request') }
-      subject { described_class.new(request) }
+      subject { described_class.new(member_id, request) }
       let(:call_method) { subject.beneficiary_name = beneficiary_name }
 
       before do
@@ -435,7 +484,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       let(:date) { today + rand(0..7).days }
       let(:date_restriction) { rand(1..30).days }
       let(:request) { double('request') }
-      subject { described_class.new(request) }
+      subject { described_class.new(member_id, request) }
       let(:call_method) { subject.send(:date_within_range, date, date_restriction) }
       it 'creates a new CalendarService instance with the request' do
         expect(CalendarService).to receive(:new).with(request).and_return(calendar_service)
@@ -664,6 +713,25 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       it 'raises an error if `next_in_sequence` raises an error' do
         allow(subject).to receive(:next_in_sequence).and_raise(error)
         expect{call_method}.to raise_error(error)
+      end
+    end
+
+    describe '`fetch_borrowing_capacity`' do
+      let(:borrowing_capacity_summary) { double('borrowing capacity summary')}
+      let(:member_balance_service) { instance_double(MemberBalanceService, borrowing_capacity_summary: borrowing_capacity_summary) }
+      let(:call_method) { subject.send(:fetch_borrowing_capacity) }
+      before { allow(MemberBalanceService).to receive(:new).and_return(member_balance_service) }
+      it 'creates a new instance of MemberBalanceService with the member_id and request' do
+        expect(MemberBalanceService).to receive(:new).with(subject.member_id, subject.request).and_return(member_balance_service)
+        call_method
+      end
+      it 'calls `borrowing_capacity_summary` on the instance of MemberBalanceService with today as an argument' do
+        expect(member_balance_service).to receive(:borrowing_capacity_summary).with(today).and_return(borrowing_capacity_summary)
+        call_method
+      end
+      it 'returns the same object on each call' do
+        borrowing_capacity = call_method
+        expect(call_method).to be(borrowing_capacity)
       end
     end
   end

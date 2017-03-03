@@ -31,7 +31,7 @@ Feature: Requesting a New Letter of Credit
   Scenario: The Preview Request button state
     When I visit the Request Letter of Credit page
     Then I should see the Preview Request button in its disabled state
-    When I enter 1234567 in the letter of credit amount field
+    When I enter 1234 in the letter of credit amount field
     Then I should see the Preview Request button in its enabled state
 
   @jira-mem-1972
@@ -39,7 +39,7 @@ Feature: Requesting a New Letter of Credit
     When I visit the Request Letter of Credit page
     And I choose the first possible date for the expiration date
     And I choose the last possible date for the issue date
-    And I enter 1234567 in the letter of credit amount field
+    And I enter 1234 in the letter of credit amount field
     When I click the Preview Request button
     Then I should see the "expiration date before issue date" form error
 
@@ -52,3 +52,11 @@ Feature: Requesting a New Letter of Credit
     Given I visit the Request Letter of Credit page
     When I enter 7894561235 in the letter of credit amount field
     Then the letter of credit amount field should show "7,894,561,235"
+
+  @jira-mem-2148
+  Scenario: Member enters an amount that exceeds their Remaining Standard Borrowing Capacity
+    Given I visit the Request Letter of Credit page
+    And I have a borrowing capacity of 1000
+    And I enter 1234 in the letter of credit amount field
+    When I click the Preview Request button
+    Then I should see the "exceeds borrowing capacity by 1000" form error

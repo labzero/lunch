@@ -62,6 +62,8 @@ Then(/^I should see the "(.*?)" form error$/) do |error_type|
     I18n.t('activemodel.errors.models.letter_of_credit_request.attributes.expiration_date.before_issue_date')
   when 'internal user not authorized'
     I18n.t('letters_of_credit.errors.not_authorized')
+  when /^exceeds borrowing capacity by (\d+)$/
+    I18n.t('letters_of_credit.errors.exceeds_borrowing_capacity', borrowing_capacity: fhlb_formatted_currency_whole($1, html: false))
   end
   page.assert_selector('.form-error-section p', text: text, exact: true)
 end

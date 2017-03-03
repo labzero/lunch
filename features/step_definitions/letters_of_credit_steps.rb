@@ -17,7 +17,7 @@ When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Le
     visit '/letters-of-credit/request'
   when 'Preview Letter of Credit'
     visit '/letters-of-credit/request'
-    step 'I enter 1234567 in the letter of credit amount field'
+    step 'I enter 1234 in the letter of credit amount field'
     step 'I click the Preview Request button'
     step 'I should be on the Preview Letter of Credit Request page'
   when 'Letter of Credit Success'
@@ -107,4 +107,8 @@ end
 
 Then(/^the letter of credit amount field should show "(.*?)"/) do |text|
   expect(page.find("input[name='letter_of_credit_request[amount]'").value).to eq(text)
+end
+
+When(/^I have a borrowing capacity of (\d+)/) do |borrowing_capacity|
+  allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return({standard_excess_capacity: borrowing_capacity})
 end

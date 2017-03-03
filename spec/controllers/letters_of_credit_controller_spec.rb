@@ -358,17 +358,18 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       end
       describe 'when the created LetterOfCreditRequest instance is invalid' do
         let(:error_message) { instance_double(String) }
-        let(:errors) {[
-          [SecureRandom.hex, error_message],
-          [SecureRandom.hex, instance_double(String)]
-        ]}
         before do
           allow(letter_of_credit_request).to receive(:valid?).and_return(false)
-          allow(letter_of_credit_request).to receive(:errors).and_return(errors)
           allow(controller).to receive(:populate_new_request_view_variables)
+          allow(controller).to receive(:prioritized_error_message)
         end
 
-        it 'sets `@error_message` to the error message of the first error in the returned error array' do
+        it 'calls `prioritized_error_message` with the letter of credit request' do
+          expect(controller).to receive(:prioritized_error_message).with(letter_of_credit_request)
+          call_action
+        end
+        it 'sets `@error_message` to the result of `prioritized_error_message`' do
+          allow(controller).to receive(:prioritized_error_message).and_return(error_message)
           call_action
           expect(assigns[:error_message]).to eq(error_message)
         end
@@ -716,8 +717,8 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       context 'when the `@letter_of_credit_request` instance variable does not yet exist' do
         before { allow(LetterOfCreditRequest).to receive(:new).and_return(letter_of_credit_request) }
 
-        it 'does creates a new `LetterOfCreditRequest` with the request' do
-          expect(LetterOfCreditRequest).to receive(:new).with(request)
+        it 'creates a new `LetterOfCreditRequest` with the current_member_id and request' do
+          expect(LetterOfCreditRequest).to receive(:new).with(member_id, request)
           call_method
         end
         it 'sets `@letter_of_credit_request` to the new LetterOfCreditRequest instance' do
@@ -804,6 +805,48 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       context 'when the `@letter_of_credit_request` instance variable does not exist' do
         it 'returns nil' do
           expect(call_method).to be nil
+        end
+      end
+    end
+
+    describe '`prioritized_error_message`' do
+      let(:remaining_bc) { rand(1000..999999) }
+      let(:letter_of_credit) { instance_double(LetterOfCreditRequest, errors: nil, borrowing_capacity: {standard_excess_capacity: remaining_bc})}
+      let(:call_method) { subject.send(:prioritized_error_message, letter_of_credit) }
+
+      context 'when there are no errors' do
+        it 'returns nil' do
+          expect(call_method).to be nil
+        end
+      end
+      context 'when there are errors' do
+        let(:error_message) { instance_double(String) }
+        let(:errors) { instance_double(ActiveModel::Errors, :added? => nil, first: [SecureRandom.hex, error_message]) }
+        before { allow(letter_of_credit).to receive(:errors).and_return(errors) }
+        it 'checks to see if an `amount` `exceeds_borrowing_capacity` error has been added' do
+          expect(errors).to receive(:added?).with(:amount, :exceeds_borrowing_capacity)
+          call_method
+        end
+        describe 'when the errors contain an `amount` `exceeds_borrowing_capacity` error' do
+          before { allow(errors).to receive(:added?).with(:amount, :exceeds_borrowing_capacity).and_return(true) }
+          it 'reads the borrowing_capacity attribute of the letter_of_credit_request' do
+            expect(letter_of_credit).to receive(:borrowing_capacity).and_return({standard_excess_capacity: remaining_bc})
+            call_method
+          end
+          it 'formats the remaining standard borrowing capacity' do
+            expect(subject).to receive(:fhlb_formatted_currency_whole).with(remaining_bc, html: false)
+            call_method
+          end
+          it 'adds an error message containing the formatted remaining standard borrowing capacity' do
+            formatted_capacity = SecureRandom.hex
+            allow(controller).to receive(:fhlb_formatted_currency_whole).and_return(formatted_capacity)
+            expect(call_method).to eq(I18n.t('letters_of_credit.errors.exceeds_borrowing_capacity', borrowing_capacity: formatted_capacity))
+          end
+        end
+        describe 'when the errors do not contain an `amount` `exceeds_borrowing_capacity` error' do
+          it 'returns the first error message in the error array' do
+            expect(call_method).to eq(error_message)
+          end
         end
       end
     end

@@ -1,6 +1,7 @@
 class LetterOfCreditRequest
   include ActiveModel::Model
   include RedisBackedObject
+  include CustomFormattingHelper
 
   # The DEFAULT_ISSUANCE_FEE and DEFAULT_MAINTENANCE_FEE may eventually come from a service, but we have been asked by
   # Scott and Michael to hardcode them in until an appropriate service is built to expose this information.
@@ -10,7 +11,7 @@ class LetterOfCreditRequest
   ISSUE_MAX_DATE_RESTRICTION = 1.week # TODO: Validate issue date as part of MEM-2151
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
-  READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners]
+  READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners, :member_id, :borrowing_capacity]
   ACCESSIBLE_ATTRS = [:beneficiary_name, :beneficiary_address, :amount, :issue_date, :expiration_date, :created_at, :created_by]
   DATE_ATTRS = [:issue_date, :expiration_date, :created_at]
   REQUIRED_ATTRS = [:beneficiary_name, :amount, :issue_date, :expiration_date]
@@ -24,8 +25,10 @@ class LetterOfCreditRequest
   validate :issue_date_must_come_before_expiration_date
   validate :issue_date_within_range
   validate :expiration_date_within_range
+  validate :amount_does_not_exceed_borrowing_capacity
 
-  def initialize(request=ActionDispatch::TestRequest.new)
+  def initialize(member_id, request=ActionDispatch::TestRequest.new)
+    @member_id = member_id
     @request = request
     calendar_service = CalendarService.new(@request)
     today = Time.zone.today
@@ -103,7 +106,7 @@ class LetterOfCreditRequest
   end
 
   def self.from_json(json, request)
-    new.from_json(json)
+    new(nil, request).from_json(json)
   end
 
   def self.policy_class
@@ -167,6 +170,16 @@ class LetterOfCreditRequest
   def next_in_new_sequence
     create_sequence rescue ActiveRecord::StatementInvalid
     next_in_sequence
+  end
+
+  def amount_does_not_exceed_borrowing_capacity
+    fetch_borrowing_capacity
+    remaining_standard_bc = borrowing_capacity[:standard_excess_capacity].to_i
+    errors.add(:amount, :exceeds_borrowing_capacity) unless !amount || amount <= remaining_standard_bc
+  end
+
+  def fetch_borrowing_capacity
+    @borrowing_capacity ||= MemberBalanceService.new(member_id, request).borrowing_capacity_summary(Time.zone.today)
   end
 
 end

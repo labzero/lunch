@@ -65,7 +65,7 @@ class LettersOfCreditController < ApplicationController
     letter_of_credit_request.attributes = params[:letter_of_credit_request]
     @session_elevated = session_elevated?
     unless @letter_of_credit_request.valid?
-      @error_message = @letter_of_credit_request.errors.first.last
+      @error_message = prioritized_error_message(@letter_of_credit_request)
       populate_new_request_view_variables
       render :new
     end
@@ -148,7 +148,7 @@ class LettersOfCreditController < ApplicationController
   end
 
   def letter_of_credit_request
-    @letter_of_credit_request ||= LetterOfCreditRequest.new(request)
+    @letter_of_credit_request ||= LetterOfCreditRequest.new(current_member_id, request)
     @letter_of_credit_request.owners.add(current_user.id)
     @letter_of_credit_request
   end
@@ -163,6 +163,17 @@ class LettersOfCreditController < ApplicationController
 
   def save_letter_of_credit_request
     @letter_of_credit_request.save if @letter_of_credit_request
+  end
+
+  def prioritized_error_message(letter_of_credit)
+    errors = letter_of_credit.errors
+    unless errors.blank?
+      if errors.added? :amount, :exceeds_borrowing_capacity
+        t('letters_of_credit.errors.exceeds_borrowing_capacity', borrowing_capacity: fhlb_formatted_currency_whole(letter_of_credit.borrowing_capacity[:standard_excess_capacity].to_i, html: false))
+      else
+        errors.first.last
+      end
+    end
   end
 
 end
