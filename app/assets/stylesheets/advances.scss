@@ -739,3 +739,12 @@
   display: none;
 }
 
+.add-advance-future-funding-message {
+  @extend %default-border;
+  padding: 20px 25px 10px 20px;
+  margin-bottom: 10px;
+  span {
+    @extend %typography-graph-data;
+  }
+}
+

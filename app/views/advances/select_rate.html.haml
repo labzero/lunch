@@ -28,6 +28,7 @@
               .advance-alternate-funding-date-wrapper
                 %span= t('advances.funding.set_alternate')
                 %button.advance-alternate-funding-date-close.text-only-button= t('global.close')
+                %p= t('advances.funding.alert_message')
                 %ul
                   %li
                     = render 'shared/radio_button', id: 'funding_date_today', name: 'alternate-funding-date', checked: true, text:fhlb_date_standard_numeric(@today), value: @today.iso8601

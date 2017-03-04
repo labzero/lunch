@@ -219,6 +219,9 @@ class AdvancesController < ApplicationController
       populate_advance_preview_view_parameters
       advance_request.timestamp!
     end
+    if feature_enabled?('add-advance-custom-term')
+      @future_funding = advance_request.funding_date.to_date > Time.zone.today
+    end
 
     logger.info { '  Advance Request State: ' + advance_request.inspect }
     logger.info { '  Advance Request Errors: ' + advance_request.errors.inspect }

@@ -14,6 +14,11 @@
               %p= t('dashboard.quick_advance.preview.intro')
             %p= t('dashboard.quick_advance.preview.lock_rate')
           = render 'add_advance_summary', preview: true, advance_amount: @total_amount, advance_description: @advance_description, advance_program: @advance_program, advance_type: @advance_type, advance_rate: @advance_rate, rate_changed: @rate_changed, old_rate: @old_rate, human_interest_day_count: @human_interest_day_count, human_payment_on: @human_payment_on, advance_term: @advance_term, advance_raw_term: @advance_raw_term, funding_date: @funding_date, maturity_date: @maturity_date, stock: @stock
+          - if feature_enabled?('add-advance-custom-term')
+            - if @future_funding
+              .add-advance-future-funding-message
+                %span= t('advances.funding.funded_on', funding_date: fhlb_date_standard_numeric(@funding_date))
+                %p= t('advances.funding.funding_message', funding_date: fhlb_date_standard_numeric(@funding_date))
           - unless @session_elevated || walkthrough_mode
             = render 'shared/securid_module', autofocus: true
         .request-form-actions

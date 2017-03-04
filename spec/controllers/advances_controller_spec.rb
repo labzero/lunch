@@ -567,12 +567,14 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:interest_day_count) { 'some interest_day_count' }
     let(:payment_on) { 'some payment_on' }
     let(:maturity_date) { 'some maturity_date' }
+    let(:funding_date) { Time.zone.today + rand(1..3).days}
     let(:check_capstock) { true }
     let(:check_result) {{:status => 'pass', :low => 100000, :high => 1000000000}}
     let(:error_code) { double('error code') }
     let(:error_value) { double('error value') }
     let(:make_request) { post :preview, advance_request: {term: advance_term, type: advance_type, rate: advance_rate, amount: amount, id: advance_id} }
-    let(:advance_request) { double(AdvanceRequest, :type= => nil, :term= => nil, :amount= => nil, :stock_choice= => nil, validate_advance: true, errors: [], sta_debit_amount: 0, timestamp!: nil, amount: amount, id: SecureRandom.uuid) }
+    let(:advance_request) { double(AdvanceRequest, :type= => nil, :term= => nil, :amount= => nil, :stock_choice= => nil, validate_advance: true, errors: [], sta_debit_amount: 0, timestamp!: nil, amount: amount, id: SecureRandom.uuid, funding_date: Time.zone.today) }
+    let(:advance_request_future_funded) { double(AdvanceRequest, :type= => nil, :term= => nil, :amount= => nil, :stock_choice= => nil, validate_advance: true, errors: [], sta_debit_amount: 0, timestamp!: nil, amount: amount, id: SecureRandom.uuid, funding_date: funding_date) }
     before do
       allow(subject).to receive(:advance_request).and_return(advance_request)
       allow(subject).to receive(:populate_advance_summary_view_parameters)
@@ -610,6 +612,19 @@ RSpec.describe AdvancesController, :type => :controller do
     it 'clears the capital stock choice if passed an amount' do
       expect(advance_request).to receive(:stock_choice=).with(nil)
       make_request
+    end
+    it 'sets @future_funding to false if funding_date is not greater than today' do
+      make_request
+      expect(assigns[:future_funding]).to be(false)
+    end
+    describe 'future funded' do
+      before do
+        allow(subject).to receive(:advance_request).and_return(advance_request_future_funded)
+      end
+      it 'sets @future_funding to true if funding_date is greater than today' do
+        make_request
+        expect(assigns[:future_funding]).to be(true)
+      end
     end
     context 'various error states' do
       shared_examples 'an advance preview error' do
