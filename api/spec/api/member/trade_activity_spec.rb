@@ -1367,6 +1367,14 @@ describe MAPI::ServiceApp do
                 end
               end
             end
+
+            describe 'processing the `lifeCycleEvent`' do
+              it 'ignores LC products without a `lifeCycleEvent`' do
+                activity['lifeCycleEvent'] = nil
+                activity['product'] = 'LC'
+                expect(call_method.length).to be(0)
+              end
+            end
           end
         end
         context 'when `status` is not included in the list of allowed statuses' do
