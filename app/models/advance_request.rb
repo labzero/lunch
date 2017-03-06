@@ -304,6 +304,8 @@ class AdvanceRequest
     case term
     when *ADVANCE_TERMS
       I18n.t("dashboard.quick_advance.table.axes_labels.#{term}")
+    when CUSTOM_TERM
+      I18n.t('advances.custom_term.in_days', days: Regexp.last_match[1])
     else
       term
     end

@@ -2292,7 +2292,7 @@ en:
       instructions: Placeholder for Instructions
       edit: Edit Custom Term
       matures_on: Matures in %{days} days on %{date}
-      in_days: "%{days} days"
+      in_days: "%{days} Days"
     actions:
       review: Review Advance
       submit: Submit Advance
