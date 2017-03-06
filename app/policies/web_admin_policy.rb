@@ -1,6 +1,10 @@
 class WebAdminPolicy < ApplicationPolicy
 
   def show?
+    user && user.intranet_user?
+  end
+
+  def edit_features?
     user && user.roles.include?(::User::Roles::ADMIN)
   end
 

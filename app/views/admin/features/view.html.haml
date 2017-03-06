@@ -2,16 +2,41 @@
   %h1
     %span{class: "admin-#{@feature_status}-icon"}<> &nbsp;
     %span=@feature_name
+  - if policy(:web_admin).edit_features?
+    %button.text-only-button{disabled: @feature_status == :on, data: {confirmation_dialog_name: 'enable-all'}}= t('admin.features.confirmations.enable_all.accept')
+    %button.text-only-button{disabled: @feature_status == :off, data: {confirmation_dialog_name: 'disable-all'}}= t('admin.features.confirmations.disable_all.accept')
 %section.row.row-elements-equal-height.admin-feature-edit
   %section.column-2.column-bordered
     %h2= t('admin.features.edit.members')
     %table
-      - @enabled_members.each do |member|
+      - if @feature_status == :on
         %tr
-          %td= member
+          %td= t('admin.features.edit.all_members')
+      - elsif @enabled_members.present?
+        - @enabled_members.each do |member|
+          %tr
+            %td= member
+      - else
+        %tr
+          %td= t('admin.features.edit.no_members')
   %section.column-2.column-bordered
     %h2= t('admin.features.edit.users')
     %table
-      - @enabled_users.each do |user|
+      - if @feature_status == :on
         %tr
-          %td= user
+          %td= t('admin.features.edit.all_users')
+      - elsif @enabled_users.present?
+        - @enabled_users.each do |user|
+          %tr
+            %td= user
+      - else
+        %tr
+          %td= t('admin.features.edit.no_members')
+%section.admin-confirmation-dialog{data: {confirmation_dialog_name: 'enable-all'}}
+  %h3= t('admin.features.confirmations.enable_all.title')
+  %button.secondary-button{data: {flyout_action: :close}}= t('global.cancel')
+  = link_to(t('admin.features.confirmations.enable_all.accept'), feature_enable_admin_path, method: :put, remote: true, class: 'primary-button')
+%section.admin-confirmation-dialog{data: {confirmation_dialog_name: 'disable-all'}}
+  %h3= t('admin.features.confirmations.disable_all.title')
+  %button.secondary-button{data: {flyout_action: :close}}= t('global.cancel')
+  = link_to(t('admin.features.confirmations.disable_all.accept'), feature_disable_admin_path, method: :put, remote: true, class: 'primary-button')

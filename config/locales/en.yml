@@ -3197,6 +3197,17 @@ en:
       edit:
         members: Institutions where all users are enabled for this feature
         users: Individual users who are enabled for this feature
+        all_users: All Users
+        all_members: All Institutions
+        no_users: No users are enabled for this feature.
+        no_members: No institutions are enabled for this feature.
+      confirmations:
+        enable_all:
+          title: Enable this feature for all members and users?
+          accept: Enable for all
+        disable_all:
+          title: Disable this feature for all members and users?
+          accept: Disable for all
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

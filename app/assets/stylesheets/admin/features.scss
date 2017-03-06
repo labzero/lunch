@@ -14,7 +14,7 @@
 
   .admin-feature-edit {
     h1 {
-      margin-bottom: 60px;
+      margin-bottom: 10px;
     }
     h2 {
       @extend %typography-admin-subtitle;
@@ -26,6 +26,17 @@
       margin-bottom: 0;
       td, th {
         border: none;
+      }
+    }
+    .text-only-button {
+      @extend %typography-admin-subtitle;
+      text-transform: uppercase;
+      padding: 0;
+      margin-top: 0;
+      margin-bottom: 40px;
+      &:first-of-type {
+        margin-left: 42px;
+        margin-right: 20px;
       }
     }
   }

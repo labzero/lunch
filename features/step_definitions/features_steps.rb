@@ -21,3 +21,36 @@ end
 Then(/^I see a list of enabled users$/) do
   page.assert_selector('.admin-feature-edit h2', text: I18n.t('admin.features.edit.users'), visible: true)
 end
+
+Then(/^I see an (enable|disable) feature button$/) do |action|
+  i18n_key = action == 'enable' ? 'admin.features.confirmations.enable_all.accept' : 'admin.features.confirmations.disable_all.accept'
+  page.assert_selector('.admin-feature-edit button:not([disabled])', text: /\A#{Regexp.quote(I18n.t(i18n_key))}\z/i, exact: true, visible: true)
+end
+
+When(/^I (enable|disable) the feature$/) do |action|
+  i18n_key = action == 'enable' ? 'admin.features.confirmations.enable_all.accept' : 'admin.features.confirmations.disable_all.accept'
+  button_regex = /\A#{Regexp.quote(I18n.t(i18n_key))}\z/i
+  page.find('.admin-feature-edit button', text: button_regex, exact: true).click
+  page.assert_selector('.flyout .admin-confirmation-dialog')
+  page.find('.flyout .admin-confirmation-dialog .primary-button', text: button_regex, exact: true).click
+end
+
+Then(/^I see the feature (enabled|disabled) for everyone$/) do |state|
+  icon_state = state == 'enabled' ? 'admin-on-icon' : 'admin-off-icon'
+  page.assert_selector(".admin-feature-edit .#{icon_state}")
+end
+
+
+Given(/^the feature "([^"]*)" is (enabled|disabled)$/) do |feature_name, state|
+  feature = Rails.application.flipper[feature_name]
+  if state == 'enabled'
+    feature.enable
+  else
+    feature.disable
+  end
+end
+
+When(/^I click on the view feature link for "([^"]*)"$/) do |feature_name|
+  row = page.find('.admin-features-table td', text: /\A#{Regexp.quote(feature_name)}\z/i, exact: true).find(:xpath, '..')
+  row.find('a', text: /\A#{Regexp.quote(I18n.t('admin.features.index.actions.edit'))}\z/i, exact: true).click
+end

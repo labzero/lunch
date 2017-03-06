@@ -230,7 +230,11 @@ Rails.application.routes.draw do
       get '/' => 'admin/dashboard#index', as: :dashboard_admin
       get '/features' => 'admin/features#index', as: :features_admin
       get '/features/:feature' => 'admin/features#view', as: :feature_admin
-      mount Flipper::UI.app(Rails.application.flipper) => '/flipper-features', as: :flipper_features_admin
+      put '/features/:feature/enable' => 'admin/features#enable_feature', as: :feature_enable_admin
+      put '/features/:feature/disable' => 'admin/features#disable_feature', as: :feature_disable_admin
+      constraints Constraints::WebAdmin.new(:edit_features?) do
+        mount Flipper::UI.app(Rails.application.flipper) => '/flipper-features', as: :flipper_features_admin
+      end
     end
   end
 

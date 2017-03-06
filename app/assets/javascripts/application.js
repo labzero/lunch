@@ -19,4 +19,4 @@
 //= require daterangepicker
 //= require rails.validations
 //= require jquery-fileupload/basic
-//= require_tree .
+//= require_directory .
