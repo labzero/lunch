@@ -263,7 +263,7 @@ en:
             issue_date:
               invalid: Issue date may not occur on a weekend, a holiday or more than 1 week from today.
             expiration_date:
-              invalid: Expiration date may not occur on a weekend, a holiday or more than 15 years from the issue date.
+              invalid: "The expiration date must not occur on a weekend or holiday; must not be in the past; and must be less than 15 years from the issue date. Adjust the date selection and try again."
               before_issue_date: Expiration date must be after issue date.
             amount:
               invalid: Amount must be a positive number with no fractional cents.

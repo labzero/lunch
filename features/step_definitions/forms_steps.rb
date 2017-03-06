@@ -58,6 +58,8 @@ end
 
 Then(/^I should see the "(.*?)" form error$/) do |error_type|
   text = case error_type
+  when 'expiration date invalid'
+    I18n.t('activemodel.errors.models.letter_of_credit_request.attributes.expiration_date.invalid')
   when 'expiration date before issue date'
     I18n.t('activemodel.errors.models.letter_of_credit_request.attributes.expiration_date.before_issue_date')
   when 'internal user not authorized'

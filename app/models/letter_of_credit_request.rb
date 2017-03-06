@@ -122,16 +122,17 @@ class LetterOfCreditRequest
   end
 
   def issue_date_within_range
-    errors.add(:issue_date, :invalid) unless !issue_date || date_within_range(issue_date, ISSUE_MAX_DATE_RESTRICTION)
+    max_date = Time.zone.today + ISSUE_MAX_DATE_RESTRICTION
+    errors.add(:issue_date, :invalid) unless !issue_date || date_within_range(issue_date, max_date)
   end
 
   def expiration_date_within_range
-    errors.add(:expiration_date, :invalid) unless !expiration_date || date_within_range(expiration_date, EXPIRATION_MAX_DATE_RESTRICTION)
+    max_date = (issue_date || Time.zone.today) + EXPIRATION_MAX_DATE_RESTRICTION
+    errors.add(:expiration_date, :invalid) unless !expiration_date || date_within_range(expiration_date, max_date)
   end
 
-  def date_within_range(date, max_date_restriction)
+  def date_within_range(date, max_date)
     today = Time.zone.today
-    max_date = today + max_date_restriction
     holidays = CalendarService.new(request).holidays(today, max_date)
     !(date.try(:sunday?) || date.try(:saturday?)) && !(holidays.include?(date)) && date.try(:>=, today) && date.try(:<=, max_date)
   end

@@ -5,7 +5,10 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
   let(:calendar_service) { instance_double(CalendarService, holidays: [], find_next_business_day: today) }
   let(:member_id) { rand(1000..9999) }
 
-  before { allow(CalendarService).to receive(:new).and_return(calendar_service) }
+  before do
+    allow(CalendarService).to receive(:new).and_return(calendar_service)
+    allow(Time.zone).to receive(:today).and_return(today)
+  end
 
   subject { described_class.new(member_id) }
 
@@ -72,8 +75,12 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         let(:issue_date) { today + rand(0..7).days }
         before { subject.issue_date = issue_date }
 
-        it 'calls `date_within_range`' do
-          expect(subject).to receive(:date_within_range).with(issue_date, described_class::ISSUE_MAX_DATE_RESTRICTION)
+        it 'calls `date_within_range` with the issue_date' do
+          expect(subject).to receive(:date_within_range).with(issue_date, anything)
+          call_validator
+        end
+        it 'calls `date_within_range` with the ISSUE_MAX_DATE_RESTRICTION plus today' do
+          expect(subject).to receive(:date_within_range).with(anything, today + described_class::ISSUE_MAX_DATE_RESTRICTION)
           call_validator
         end
         it 'does not add an error if `date_within_range` returns true' do
@@ -102,9 +109,23 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         let(:expiration_date) { today + rand(0..7).days }
         before { subject.expiration_date = expiration_date }
 
-        it 'calls `date_within_range`' do
-          expect(subject).to receive(:date_within_range).with(expiration_date, described_class::EXPIRATION_MAX_DATE_RESTRICTION)
+        it 'calls `date_within_range` with the expiration_date' do
+          expect(subject).to receive(:date_within_range).with(expiration_date, anything)
           call_validator
+        end
+        context 'when there is an issue_date' do
+          let(:issue_date) { today + rand(0..7).days }
+          before { subject.issue_date = issue_date }
+          it 'calls `date_within_range` with the EXPIRATION_MAX_DATE_RESTRICTION plus the issue_date' do
+            expect(subject).to receive(:date_within_range).with(anything, issue_date + described_class::EXPIRATION_MAX_DATE_RESTRICTION)
+            call_validator
+          end
+        end
+        context 'when there is not an issue_date' do
+          it 'calls `date_within_range` with the EXPIRATION_MAX_DATE_RESTRICTION plus today' do
+            expect(subject).to receive(:date_within_range).with(anything, today + described_class::EXPIRATION_MAX_DATE_RESTRICTION)
+            call_validator
+          end
         end
         it 'does not add an error if `date_within_range` returns true' do
           allow(subject).to receive(:date_within_range).and_return(true)
@@ -482,10 +503,10 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
   describe 'private methods' do
     describe '`date_within_range`' do
       let(:date) { today + rand(0..7).days }
-      let(:date_restriction) { rand(1..30).days }
+      let(:max_date) { date + rand(1..30).days }
       let(:request) { double('request') }
       subject { described_class.new(member_id, request) }
-      let(:call_method) { subject.send(:date_within_range, date, date_restriction) }
+      let(:call_method) { subject.send(:date_within_range, date, max_date) }
       it 'creates a new CalendarService instance with the request' do
         expect(CalendarService).to receive(:new).with(request).and_return(calendar_service)
         call_method
@@ -494,13 +515,13 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         expect(calendar_service).to receive(:holidays).with(today, anything).and_return([])
         call_method
       end
-      it 'calls `holidays` on the CalendarService instance with today plus the max_date_restriction as the max_date arg' do
-        expect(calendar_service).to receive(:holidays).with(anything, today + date_restriction).and_return([])
+      it 'calls `holidays` on the CalendarService instance with the max_date arg' do
+        expect(calendar_service).to receive(:holidays).with(anything, max_date).and_return([])
         call_method
       end
       it 'returns false if the passed date is a Sunday' do
         date = instance_double(Date, sunday?: true, :+ => nil)
-        expect(subject.send(:date_within_range, date, date_restriction)).to be false
+        expect(subject.send(:date_within_range, date, max_date)).to be false
       end
       describe 'when the passed date is not a Sunday' do
         let(:date) { instance_double(Date, sunday?: false, :+ => nil) }
@@ -524,7 +545,6 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
             end
 
             describe 'when the date is today or later' do
-              let(:max_date) { today + date_restriction }
               before { allow(date).to receive(:>=).with(today).and_return(true) }
 
               it 'returns false if the date occurs after today plus the max date restriction' do
