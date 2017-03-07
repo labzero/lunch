@@ -1400,8 +1400,9 @@ RSpec.describe SecuritiesController, type: :controller do
     let(:job_status) { double('JobStatus', update_attributes!: nil, id: nil, destroy: nil, result_as_string: nil ) }
     let(:request_id) { rand(0..99999) }
     let(:user_id) { rand(1000) }
+    let(:kind) { SecureRandom.hex }
     let(:active_job) { double('Active Job Instance', job_status: job_status) }
-    let(:call_action) { get :generate_authorized_request, request_id: request_id }
+    let(:call_action) { get :generate_authorized_request, request_id: request_id, kind: kind }
     let(:current_user) { double('User', id: user_id, :accepted_terms? => true)}
     let(:member_id) { rand(1000) }
 
@@ -1411,8 +1412,20 @@ RSpec.describe SecuritiesController, type: :controller do
       allow(subject).to receive(:current_member_id).and_return(member_id)
     end
 
-    it "enqueues the render securities request pdf job" do
+    it "calls `perform_later` on `RenderSecuritiesRequestsPDFJob` with the current_member_id" do
       expect(RenderSecuritiesRequestsPDFJob).to receive(:perform_later).with(member_id, any_args).and_return(active_job)
+      call_action
+    end
+    it "calls `perform_later` on `RenderSecuritiesRequestsPDFJob` with the `view_authorized_request` as the action name" do
+      expect(RenderSecuritiesRequestsPDFJob).to receive(:perform_later).with(anything, 'view_authorized_request', any_args).and_return(active_job)
+      call_action
+    end
+    it "calls `perform_later` on `RenderSecuritiesRequestsPDFJob` with the a download name including the request_id" do
+      expect(RenderSecuritiesRequestsPDFJob).to receive(:perform_later).with(anything, anything, "authorized_request_#{request_id}.pdf", any_args).and_return(active_job)
+      call_action
+    end
+    it "calls `perform_later` on `RenderSecuritiesRequestsPDFJob` with the request_id and kind params" do
+      expect(RenderSecuritiesRequestsPDFJob).to receive(:perform_later).with(anything, anything, anything, { request_id: request_id.to_s, kind: kind }).and_return(active_job)
       call_action
     end
     it 'updates the job_status instance with the user_id of the current user' do
@@ -2289,6 +2302,7 @@ RSpec.describe SecuritiesController, type: :controller do
         end
       end
     end
+
 
     describe '`prioritized_securities_request_error`' do
       generic_error_message = I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email)

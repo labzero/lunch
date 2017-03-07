@@ -2,6 +2,8 @@ class InternalMailer < ActionMailer::Base
   helper CustomFormattingHelper
   helper AssetHelper
   include CustomFormattingHelper
+  helper ContactInformationHelper
+  include ActionView::Helpers::TextHelper
   GENERAL_ALERT_ADDRESS = 'MemberPortalAlert@fhlbsf.com'
   WEB_TRADE_ALERT_ADDRESS = 'WebTrade@fhlbsf.com'
   WEB_SECURITIES = 'WebSecurities@fhlbsf.com'
@@ -96,6 +98,7 @@ class InternalMailer < ActionMailer::Base
 
   def user_name_from_user(user)
     user ||= I18n.t('global.unknown')
+    user = User.find(user) if user.try(:match, /\A\d+\z/) rescue ActiveRecord::RecordNotFound
     return user if user.is_a?(String)
 
     begin

@@ -154,7 +154,21 @@
 }
 
 .advances-add {
-  .advance-rates-table {
+  overflow: visible;
+  .icon-dollar-before:before {
+    @extend %dashboard-module-advances-icon-dollar;
+  }
+  .input-field-container {
+    input:not([name^=securid]) {
+      @extend %dashboard-module-advances-input;
+    }
+  }
+  .advance-rates-table, .advance-rates-custom-table {
+    @extend %typography-paragraph-tight;
+    margin: 25px auto;
+    width: calc(100% - 40px);
+    table-layout: fixed;
+    text-align: center;
     .add-advance-cell-wrapper:hover {
       z-index: 2;
     }
@@ -167,18 +181,6 @@
         }
       }
     }
-  }
-  .icon-dollar-before:before {
-    @extend %dashboard-module-advances-icon-dollar;
-  }
-  .input-field-container {
-    input:not([name^=securid]) {
-      @extend %dashboard-module-advances-input;
-    }
-  }
-  table {
-    @extend %typography-paragraph-tight;
-    text-align: center;
     tbody {
       background: $light-gray; // fix for IE11 incongruity in the way height is measured for cells with rowspan
     }
@@ -242,7 +244,7 @@
         background: $white;
         border-right: 1px solid $light-blue;
         vertical-align: top;
-        padding-top: 30px;
+        padding-top: 10px;
         cursor: default;
         span {
           position: relative;
@@ -256,6 +258,13 @@
             left: 0;
           }
         }
+      }
+      &.add-advance-table-error-cell {
+        @extend %empty_table_cell;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        vertical-align: top;
+        display: none;
       }
     }
     tr {
@@ -336,6 +345,14 @@
         display: none;
       }
     }
+    &.add-advance-table-error {
+      .add-advance-table-error-cell {
+        display: table-cell;
+      }
+      .add-advance-rate-cell {
+        display: none;
+      }
+    }
   }
   .etransact-status-message {
     @extend %bordered-section;
@@ -348,6 +365,10 @@
       margin-top: 1rem;
       text-transform: uppercase;
     }
+  }
+  .text-only-button {
+    float: right;
+    text-transform: uppercase;
   }
 }
 
@@ -563,9 +584,6 @@
 }
 
 .advance-rates-table {
-  margin: 25px auto;
-  width: calc(100% - 40px);
-  table-layout: fixed;
   tbody {
     tr {
       display: none;
@@ -583,6 +601,39 @@
           color: $medium-gray;
           text-transform: uppercase;
           text-align: left;
+        }
+      }
+    }
+  }
+}
+
+.advance-rates-custom-table {
+  .add-advance-table-loading-cell {
+    padding-bottom: 10px;
+  }
+  thead {
+    tr {
+      &:first-child {
+        th {
+          @extend %typography-header-nav;
+          border: none;
+          color: $medium-gray;
+          text-align: left;
+          span {
+            @extend %typography-header-nav;
+            &:first-child {
+              color: $medium-gray;
+            }
+            &:nth-child(2) {
+              margin-left: 60px;
+            }
+          }
+          a {
+            float: right;
+            cursor: pointer;
+            color: $actionable-blue;
+            text-transform: uppercase;
+          }
         }
       }
     }
@@ -611,27 +662,12 @@
      &:nth-child(2) {
        margin-left: 40px;
      }
-     &:last-child {
-       float: right;
-       cursor: pointer;
-       color: $actionable-blue;
-       text-transform: uppercase;
-     }
    }
  }
 
 .advance-alternate-funding-date-wrapper {
   span {
-    &:first-child {
-      @extend %typography-table-heading;
-    }
-    &:nth-child(2) {
-      @extend %typography-header-nav;
-      float: right;
-      cursor: pointer;
-      color: $actionable-blue;
-      text-transform: uppercase;
-    }
+    @extend %typography-table-heading;
   }
   ul {
     list-style: none;
@@ -657,3 +693,49 @@
     }
   }
 }
+
+.advance-custom-date-wrapper {
+  display: none;
+  padding: 0px 50px 40px 0px;
+}
+
+.advance-create-custom-date-wrapper {
+  @extend %bordered-section;
+  display: none;
+  margin: 25px 15px;
+  padding: 10px 20px;
+  border-bottom: 1px solid $light-blue;
+  span {
+    @extend %typography-table-heading;
+  }
+  p {
+    color: $medium-gray;
+  }
+  .input-field-container-horizontal {
+    @extend %pseudoelement-clearfix;
+    float: none;
+    margin-right: 0;
+    label, span {
+      float: left;
+      color: $medium-gray;
+      line-height: 30px;
+      vertical-align: top;
+      margin-right: 20px;
+    }
+    .primary-button {
+      float: right;
+    }
+    .daterangepicker  {
+      width: 232px;
+    }
+  }
+  .input-field-container {
+    width: 180px;
+    text-align: left;
+  }
+}
+
+.advance-select-custom-date-wrapper {
+  display: none;
+}
+

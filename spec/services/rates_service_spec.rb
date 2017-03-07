@@ -9,7 +9,7 @@ describe RatesService do
   let(:start_date) {Date.new(2014,12,01)}
   let(:end_date) {Date.new(2014,12,31)}
 
-  subject { RatesService.new(double('request', uuid: '12345')) }
+  subject { RatesService.new(ActionDispatch::TestRequest.new) }
   it { expect(subject).to respond_to(:overnight_vrc) }
   it { expect(subject).to respond_to(:current_overnight_vrc) }
   it { expect(subject).to respond_to(:quick_advance_rates) }
@@ -50,8 +50,9 @@ describe RatesService do
     
     describe 'with a funding_date' do
       let(:funding_date) { instance_double(DateTime, iso8601: iso8601_date) }
+      let(:maturity_date) { instance_double(DateTime, iso8601: iso8601_date) }
       let(:iso8601_date) { double('An ISO8601 Date') }
-      let(:call_method) { subject.quick_advance_rates(member_id, funding_date) }
+      let(:call_method) { subject.quick_advance_rates(member_id, funding_date, maturity_date) }
 
       before do
         allow(funding_date).to receive(:to_date).and_return(funding_date)
@@ -62,8 +63,13 @@ describe RatesService do
           allow(Rails.cache).to receive(:fetch).and_yield
         end
 
-        it 'calls get_hash with funding_date' do
-          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: iso8601_date)
+        it 'calls get_hash with funding_date and maturity date' do
+          allow(maturity_date).to receive(:to_date).and_return(maturity_date)
+          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: iso8601_date, maturity_date: iso8601_date)
+          call_method
+        end
+        it 'calls get_hash with funding_date and no maturity date' do
+          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: iso8601_date, maturity_date: nil)
           call_method
         end
         it 'calls get_hash with the right endpoint' do
@@ -73,29 +79,56 @@ describe RatesService do
       end
       
       it 'fetches the `quick_advance_rates` from the Rails cache with the proper key and expiry param' do
-        expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:quick_advance_rates, member_id, iso8601_date), expires_in: CacheConfiguration.expiry(:quick_advance_rates))
+        expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:quick_advance_rates, member_id, iso8601_date, nil), expires_in: CacheConfiguration.expiry(:quick_advance_rates))
         call_method
       end
     end
 
-    describe 'without a funding_date' do
+    describe 'with a maturity_date' do
+      let(:funding_date) { instance_double(DateTime, iso8601: iso8601_date) }
+      let(:maturity_date) { instance_double(DateTime, iso8601: iso8601_date) }
+      let(:iso8601_date) { double('An ISO8601 Date') }
+      let(:call_method) { subject.quick_advance_rates(member_id, funding_date, maturity_date) }
+
+      before do
+        allow(maturity_date).to receive(:to_date).and_return(maturity_date)
+      end
+
+      describe 'when `quick_advance_rates` does not yet exist in the Rails cache' do
+        before do
+          allow(Rails.cache).to receive(:fetch).and_yield
+        end
+
+        it 'calls get_hash with no funding_date and maturity date' do
+          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: nil, maturity_date: iso8601_date)
+          call_method
+        end
+      end
+
+      it 'fetches the `quick_advance_rates` from the Rails cache with the proper key and expiry param' do
+        expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:quick_advance_rates, member_id, nil, iso8601_date), expires_in: CacheConfiguration.expiry(:quick_advance_rates))
+        call_method
+      end
+    end
+
+    describe 'without a funding_date or maturity_date' do
       describe 'when `quick_advance_rates` does not yet exist in the Rails cache' do
         before do
           allow(Rails.cache).to receive(:fetch).and_yield
         end
 
         it 'calls get_hash without funding_date, if funding_date is nil' do
-          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything)
+          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: nil, maturity_date: nil)
           call_method
         end
         it 'calls get_hash with the right endpoint' do
-          expect(subject).to receive(:get_hash).with(:quick_advance_rates, 'rates/summary')
+          expect(subject).to receive(:get_hash).with(:quick_advance_rates, 'rates/summary', funding_date: nil, maturity_date: nil)
           call_method
         end
       end
 
       it 'fetches the `quick_advance_rates` from the Rails cache with the proper key and expiry param' do
-        expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:quick_advance_rates, member_id, nil), expires_in: CacheConfiguration.expiry(:quick_advance_rates))
+        expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:quick_advance_rates, member_id, nil, nil), expires_in: CacheConfiguration.expiry(:quick_advance_rates))
         call_method
       end
     end

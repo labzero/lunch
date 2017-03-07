@@ -24,10 +24,10 @@
               .advance-funding-date-wrapper
                 %span= t('advances.funding.funding_date')
                 %span= t('advances.funding.funding_today', date: fhlb_date_standard_numeric(@today))
-                %span.advance-alternate-funding-date-edit= t('advances.funding.edit')
+                %button.advance-alternate-funding-date-edit.text-only-button= t('advances.funding.edit')
               .advance-alternate-funding-date-wrapper
                 %span= t('advances.funding.set_alternate')
-                %span.advance-alternate-funding-date-close= t('global.close')
+                %button.advance-alternate-funding-date-close.text-only-button= t('global.close')
                 %ul
                   %li
                     = render 'shared/radio_button', id: 'funding_date_today', name: 'alternate-funding-date', checked: true, text:fhlb_date_standard_numeric(@today), value: @today.iso8601
@@ -60,6 +60,20 @@
                     .add-advance-cell-wrapper= t('dashboard.quick_advance.table.aa')
               %tbody
                 = render 'rates_table', advance_terms: @advance_terms, advance_types: @advance_types, loading: true, selected_type: @selected_type, selected_term: @selected_term
+            - if feature_enabled?('add-advance-custom-term')
+              .advance-custom-date-wrapper
+                %button.advance-custom-date-add.text-only-button= t('advances.custom_term.add')
+              .advance-create-custom-date-wrapper
+                %span= t('advances.custom_term.create')
+                %button.advance-custom-date-cancel.text-only-button= t('global.cancel')
+                %p= t('advances.custom_term.instructions')
+                .input-field-container-horizontal
+                  %span= t('advances.custom_term.set')
+                  = render 'maturity_date_calendar', date_restrictions: @date_restrictions, hide_start_date: 'true'
+                  %button.primary-button.view-custom-rates{disabled: true}= t('advances.custom_term.view_rates')
+              .advance-select-custom-date-wrapper
+                %table.advance-rates-custom-table.add-advance-table-loading{data: {fetch_custom_rates_url: advances_fetch_custom_rates_path({advance_request: {id: @advance_request_id}})}}
+                  = render 'custom_rates', custom_term: @custom_term, advance_types: @advance_types, loading: true, selected_type: @selected_type, selected_term: @selected_term, days_to_maturity: @days_to_maturity, maturity_date: @maturity_date, add_advances_active: @add_advances_active
           .request-form-actions
             = link_to(t('global.cancel'), advances_manage_path, class: 'secondary-button cancel-advance')
             = f.submit({disabled: true, class: ["primary-button initiate-add-advance"], value: t('advances.actions.review')})

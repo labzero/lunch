@@ -99,7 +99,7 @@ describe ContactInformationHelper, type: :helper do
   end
 
   describe 'the `member_contacts` method' do
-    let(:helper_instance) { mock_context(klass: described_class, instance_methods: [:current_member_id, :request]) }
+    let(:helper_instance) { mock_context(described_class, instance_methods: [:current_member_id, :request]) }
     let(:request_obj) { double('request') }
     let(:member_id) { double('member id') }
     let(:member_service) { instance_double(MembersService, member_contacts: nil) }

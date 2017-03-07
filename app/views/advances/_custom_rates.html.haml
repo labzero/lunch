@@ -1,0 +1,9 @@
+- rate_data ||= nil
+%thead
+  %tr
+    %th{colspan: 5}
+      %span= t('advances.custom_term.title')
+      %span= t('advances.custom_term.matures_on', days: days_to_maturity, date: fhlb_date_standard_numeric(maturity_date))
+      %button.advance-custom-date-edit.text-only-button= t('advances.custom_term.edit')
+%tbody
+  = render 'rates_table', custom_term: custom_term[0], advance_terms: custom_term, advance_types: advance_types, loading: loading, selected_type: selected_type, selected_term: selected_term, days_to_maturity: days_to_maturity, rate_data: rate_data, add_advances_active: add_advances_active

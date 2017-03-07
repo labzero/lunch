@@ -382,3 +382,43 @@ Scenario: Intranet user walks through the add advance flow
   Then I shouldn't see the SecurID fields
   When I click on the add advance confirm button
   Then I should see a "unauthorized" advance error
+
+@jira-mem-1650 @flip-on-add-advance-custom-term
+Scenario: User clicks on the FRC rates and sees Add Custom Term then selects maturity day and begins the advance process
+  Given I am on the "Add Advance" advances page
+  And I enter an amount into the add advance amount field
+  When I click to toggle to the frc rates
+  Then I should see the add advance rate table
+  Then I should see Custom Term information
+  When I click on Add Custom Term link
+  Then I should see Custom Term Calendar
+  When I click the datepicker field
+  And I choose the first available custom date
+  And I click on the View Rates For this Term button
+  Then I should see the add advance custom rate table
+  When I select custom rate with a term of "custom" and a type of "whole" on the add advance page
+  And I click on the initiate advance button on the add advance page
+  Then I should see a preview of the advance
+
+@jira-mem-1650 @flip-on-add-advance-custom-term
+Scenario: User clicks on the FRC rates and sees Add Custom Term, Cancels, selects Add Custom Term then Cancels again
+  Given I am on the "Add Advance" advances page
+  And I enter an amount into the add advance amount field
+  When I click to toggle to the frc rates
+  Then I should see the add advance rate table
+  Then I should see Custom Term information
+  When I click on Add Custom Term link
+  Then I should see Custom Term Calendar
+  When I click on the Cancel link
+  Then I should see Custom Term information
+  When I click on Add Custom Term link
+  Then I should see Custom Term Calendar
+  When I click the datepicker field
+  And I choose the first available custom date
+  And I click on the View Rates For this Term button
+  Then I should see the add advance custom rate table
+  Then I select custom rate with a term of "custom" and a type of "whole" on the add advance page
+  When I click on Edit Custom Term link
+  Then I should see Custom Term Calendar
+  When I click on the Cancel link
+  Then I should see the add advance custom rate table

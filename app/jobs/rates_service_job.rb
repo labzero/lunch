@@ -1,9 +1,11 @@
 class RatesServiceJob < FhlbJsonResponseJob
   queue_as :high_priority
 
-  def perform(method, uuid = nil, *args)
+  def perform(method, uuid = nil, user_id = nil, *args)
     uuid ||= job_id
-    request = ActionDispatch::TestRequest.new({'action_dispatch.request_id' => uuid})
-    RatesService.new(request).send(method.to_sym, *args)
+    service = RatesService.new(ActionDispatch::TestRequest.new)
+    service.connection_request_uuid = uuid
+    service.connection_user_id = user_id
+    service.send(method.to_sym, *args)
   end
 end

@@ -3,6 +3,7 @@ class AdvancesController < ApplicationController
   include StreamingHelper
   include CustomFormattingHelper
   include SidebarHelper
+  include DatePickerHelper
 
   before_action do
     set_active_nav(:advances)
@@ -14,11 +15,11 @@ class AdvancesController < ApplicationController
     authorize :advance, :show?
   end
 
-  before_action :fetch_advance_request, only: [:select_rate, :fetch_rates, :perform, :preview]
+  before_action :fetch_advance_request, only: [:select_rate, :fetch_rates, :fetch_custom_rates, :perform, :preview]
 
-  after_action :save_advance_request, only: [:select_rate, :fetch_rates, :perform, :preview]
+  after_action :save_advance_request, only: [:select_rate, :fetch_rates, :fetch_custom_rates, :perform, :preview]
 
-  before_action only: [:select_rate, :fetch_rates] do
+  before_action only: [:select_rate, :fetch_rates, :fetch_custom_rates] do
     @advance_terms = AdvanceRequest::ADVANCE_TERMS
     @advance_types = AdvanceRequest::ADVANCE_TYPES
   end
@@ -120,6 +121,8 @@ class AdvancesController < ApplicationController
       @today = Time.zone.today
       @next_day = calendar_service.find_next_business_day(@today+1, 1.day)
       @skip_day = calendar_service.find_next_business_day(@next_day+1, 1.day)
+      @date_restrictions = date_restrictions(request, AdvanceRequest::MAX_CUSTOM_TERM_DATE_RESTRICTION, advance_request.funding_date, true)
+      @custom_term = ['custom']
     end
     etransact_service = EtransactAdvancesService.new(request)
     @limited_pricing_message = MessageService.new.todays_quick_advance_message
@@ -142,18 +145,26 @@ class AdvancesController < ApplicationController
   # GET
   def fetch_rates
     if feature_enabled?('add-advance-custom-term')
-      funding_date = params[:funding_date]
+      funding_date = params[:funding_date].try(:to_date)
       advance_request.funding_date = funding_date if funding_date
+      date_restrictions = date_restrictions(request, AdvanceRequest::MAX_CUSTOM_TERM_DATE_RESTRICTION, advance_request.funding_date, true)
+      populate_fetch_custom_rates_parameters(maturity_date: params[:maturity_date].try(:to_date), funding_date: funding_date)
     end
-    etransact_service = EtransactAdvancesService.new(request)
-    @add_advances_active = etransact_service.etransact_active?
-    @rate_data = advance_request.rates
-    @selected_type = advance_request.type
-    @selected_term = advance_request.term
-    logger.info { '  Advance Request State: ' + advance_request.inspect }
-    logger.info { '  Advance Request Errors: ' + advance_request.errors.inspect }
+    populate_fetch_rates_parameters
+    json = {html: render_to_string(layout: false), id: advance_request.id}
+    json[:maturity_calendar_html] = render_to_string(partial: 'maturity_date_calendar', locals: {date_restrictions: date_restrictions, hide_start_date: 'false', start_date: date_restrictions[:min_date]}, layout: false) if feature_enabled?('add-advance-custom-term')
+    render json: json
+  end
 
-    render json: {html: render_to_string(layout: false), id: advance_request.id}
+  # GET
+  def fetch_custom_rates
+    funding_date = params[:funding_date].try(:to_date)
+    advance_request.funding_date = funding_date if funding_date
+    date_restrictions = date_restrictions(request, AdvanceRequest::MAX_CUSTOM_TERM_DATE_RESTRICTION, advance_request.funding_date, true)
+    populate_fetch_custom_rates_parameters(maturity_date: params[:maturity_date].try(:to_date), funding_date: funding_date)
+    populate_fetch_rates_parameters
+
+    render json: {html: render_to_string(layout: false), id: advance_request.id, maturity_calendar_html: render_to_string(partial: 'maturity_date_calendar', locals: {date_restrictions: date_restrictions, hide_start_date: 'false', start_date: date_restrictions[:min_date]}, layout: false)}
   end
 
   # POST
@@ -302,6 +313,28 @@ class AdvancesController < ApplicationController
     @securid_status = securid_status
   end
 
+  def populate_fetch_rates_parameters
+    etransact_service = EtransactAdvancesService.new(request)
+    @add_advances_active = etransact_service.etransact_active?
+    @rate_data = advance_request.rates
+    @selected_type = advance_request.type
+    @selected_term = advance_request.term
+    logger.info { '  Advance Request State: ' + advance_request.inspect }
+    logger.info { '  Advance Request Errors: ' + advance_request.errors.inspect }
+  end
+
+  def populate_fetch_custom_rates_parameters(maturity_date:nil, funding_date:nil)
+    @maturity_date = maturity_date
+    if @maturity_date
+      advance_request.custom_maturity_date = @maturity_date
+      days_to_maturity = days_to_maturity(@maturity_date, funding_date) if funding_date
+      if days_to_maturity
+        @days_to_maturity = days_to_maturity[:days]
+        @custom_term = [days_to_maturity[:term]]
+      end
+    end
+  end
+
   def fetch_advance_request
     advance_request_params = request.params[:advance_request] || {}
     id = advance_request_params[:id]
@@ -350,5 +383,15 @@ class AdvancesController < ApplicationController
     logger.info { 'Exception: ' + exception.to_s }
     logger.info { 'Advance Request State at Exception: ' + advance_request.to_json }
     render :error
+  end
+
+
+  def days_to_maturity(maturity_date, funding_date=nil)
+    today = Time.zone.today
+    days_to_maturity = (maturity_date.to_date - (funding_date || today).to_date).to_i
+    {
+      days: days_to_maturity,
+      term: days_to_maturity.to_s + 'day'
+    }
   end
 end

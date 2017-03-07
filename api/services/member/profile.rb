@@ -243,7 +243,7 @@ module MAPI
             where sta.fhlb_id = #{quote(member_id)}
             AND sta.sta_id = st.sta_id
             AND sta.sta_account_type = 1
-            AND TRUNC(st.stx_update_date) = (SELECT TRUNC(MAX(stx_update_date))  FROM  portfolios.sta_trans)
+            AND TRUNC(st.stx_update_date) = (SELECT TRUNC(MAX(stx_update_date)) FROM portfolios.sta_trans WHERE stx_update_date > SYSDATE - 10)
           SQL
 
           customer_signature_card_sql = <<-SQL

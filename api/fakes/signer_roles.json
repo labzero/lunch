@@ -3,28 +3,42 @@
     {
       "name": "Chaste Access",
       "username": "extra-chaste-access",
-      "roles": ["signer", "signer-etransact"],
+      "roles": [
+        "signer-manager"
+      ],
       "first_name": "Chaste",
       "last_name": "Access"
     },
     {
       "name": "Della Duck",
       "username": null,
-      "roles": ["signer-collateral", "signer-moneymarket"],
+      "roles": [
+        "signer-collateral"
+      ],
       "first_name": "Della",
       "last_name": "Duck"
     },
     {
       "name": "Ronald Ruck",
       "username": null,
-      "roles": ["signer", "signer-manager"],
+      "roles": [
+        "signer-manager",
+        "signer-wiretransfers",
+        "signer-moneymarket",
+        "signer-affordability"
+      ],
       "first_name": "Ronald",
       "last_name": "Ruck"
     },
     {
       "name": "Duffy Ruck",
       "username": null,
-      "roles": ["signer-wiretransfers"],
+      "roles": [
+        "signer-entire-authority",
+        "signer-etransact",
+        "signer-advances",
+        "signer-wiretransfers"
+      ],
       "first_name": "Duffy",
       "last_name": "Ruck"
     }

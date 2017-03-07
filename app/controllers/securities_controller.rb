@@ -2,6 +2,7 @@ class SecuritiesController < ApplicationController
   include CustomFormattingHelper
   include ContactInformationHelper
   include ActionView::Helpers::TextHelper
+  include DatePickerHelper
 
   before_action only: [:delete_request] do
     authorize :security, :delete?
@@ -211,7 +212,8 @@ class SecuritiesController < ApplicationController
   end
 
   def generate_authorized_request
-    job_status = RenderSecuritiesRequestsPDFJob.perform_later(current_member_id, { request_id: params[:request_id], kind: params[:kind] }).job_status
+    pdf_name = "authorized_request_#{params[:request_id]}.pdf"
+    job_status = RenderSecuritiesRequestsPDFJob.perform_later(current_member_id, 'view_authorized_request', pdf_name, { request_id: params[:request_id], kind: params[:kind] }).job_status
     job_status.update_attributes!(user_id: current_user.id)
     render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
   end

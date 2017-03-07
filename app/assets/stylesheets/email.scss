@@ -22,3 +22,24 @@ header {
 dt {
   font-weight: $bold-weight;
 }
+
+.form-summary-data {
+  margin: 30px 0;
+  dl {
+    margin: 0.5rem 0 1rem;
+  }
+  dt {
+    float: left;
+    text-align: left;
+    width: 220px;
+    overflow: hidden;
+    clear: left;
+  }
+  dd {
+    overflow: hidden;
+    text-align: left;
+    p {
+      margin: 0;
+    }
+  }
+}

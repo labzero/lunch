@@ -74,10 +74,10 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
-  def check_limits(member_id, amount, advance_term)
+  def check_limits(member_id, amount, advance_term, custom_maturity_date=nil)
     return nil if amount.nil? || advance_term.nil?
     if limits = get_json(:check_limits, 'etransact_advances/limits')
-      days_to_maturity = get_days_to_maturity(advance_term)
+      days_to_maturity = get_days_to_maturity(advance_term, custom_maturity_date)
       min_amount = 0
       max_amount = 0
       low_days = 0
@@ -149,7 +149,7 @@ class EtransactAdvancesService < MAPIService
     (date - Time.zone.today).to_i
   end
 
-  def get_days_to_maturity (term)
+  def get_days_to_maturity (term, custom_maturity_date=nil)
     today = Time.zone.today
     case term
     when /\Aovernight|open\z/i
@@ -160,6 +160,8 @@ class EtransactAdvancesService < MAPIService
         days_until(today + $1.to_i.month)
     when /\A(\d+)y/i
         days_until(today + $1.to_i.year)
+    when /\A(\d+)day\z/i
+        (custom_maturity_date.to_date - today.to_date).to_i
     end
   end
 
@@ -174,8 +176,12 @@ class EtransactAdvancesService < MAPIService
 
   def calypso_error_handler(member_id)
     -> (name, msg, err) do
-      InternalMailer.calypso_error(err, request_uuid, request_user, member_id_to_name(member_id)).deliver_now
+      InternalMailer.calypso_error(err, connection_request_uuid, connection_user, member_id_to_name(member_id)).deliver_now
     end
+  end
+
+  def member_id_to_name(member_id)
+    (member_id == request.member_id ? request.member_name : nil) || member_id
   end
 
 end

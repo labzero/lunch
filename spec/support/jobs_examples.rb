@@ -100,3 +100,68 @@ RSpec.shared_examples 'a job that makes service calls' do |service, methods|
     run_job
   end
 end
+
+RSpec.shared_examples 'a job that initializes a controller' do |report_class|
+  let(:call_method) { subject.initialize_controller }
+
+  it 'has the method `initialize_controller`' do
+    expect(subject).to respond_to(:initialize_controller)
+  end
+  it "creates a new instance of the `#{report_class}`" do
+    expect(report_class).to receive(:new)
+    call_method
+  end
+  it "sets `@controller` to the newly created instance of `#{report_class}`" do
+    call_method
+    expect(subject.controller).to be_a(report_class)
+  end
+end
+
+RSpec.shared_examples 'a job that has a filename' do |file_extension|
+  describe 'with a `filename` passed in' do
+    it 'sets the `original_filename` of the file to the provided `filename`' do
+      expect(file).to receive(:original_filename=).with("#{filename}.#{file_extension}")
+      subject.perform(member_id, action_name, filename)
+    end
+    it 'ignores the controller `report_download_name` attribute' do
+      report_name = SecureRandom.hex
+      allow(controller).to receive(:report_download_name).and_return(report_name)
+      expect(file).to_not receive(:original_filename=).with("#{report_name}.#{file_extension}")
+      subject.perform(member_id, action_name, filename)
+    end
+    it 'does not provide a default filename when the controller has an `action_name`' do
+      allow(controller).to receive(:action_name).and_return(action_name)
+      today = Time.zone.today
+      allow(Time.zone).to receive(:today).and_return(today)
+      expect(file).to_not receive(:original_filename=).with("#{action_name}-#{subject.fhlb_report_date_numeric(today)}.#{file_extension}")
+      subject.perform(member_id, action_name, filename)
+    end
+  end
+  describe 'with no `filename` passed in' do
+    let(:call_method) { subject.perform(member_id, action_name, nil) }
+    it 'sets the filename to controller`s `report_download_name` attribute when provided' do
+      report_name = SecureRandom.hex
+      allow(controller).to receive(:report_download_name).and_return(report_name)
+      expect(file).to receive(:original_filename=).with("#{report_name}.#{file_extension}")
+      call_method
+    end
+    it 'sets the filename to the default value if the controller has an `action_name` and no `report_download_name` is provided' do
+      first_part = SecureRandom.hex
+      last_part = SecureRandom.hex
+      report_name = "#{first_part}_#{last_part}"
+      transformed_report_name = "#{first_part}-#{last_part}"
+      today = Time.zone.today
+      allow(Time.zone).to receive(:today).and_return(today)
+      allow(controller).to receive(:report_download_name).and_return(nil)
+      allow(controller).to receive(:action_name).and_return(report_name)
+      expect(file).to receive(:original_filename=).with("#{transformed_report_name}-#{subject.fhlb_report_date_numeric(today)}.#{file_extension}")
+      call_method
+    end
+    it 'sets the filename to `nil` if `report_download_name` and `action_name` are both missing' do
+      allow(controller).to receive(:action_name).and_return(nil)
+      allow(controller).to receive(:report_download_name).and_return(nil)
+      expect(file).to receive(:original_filename=).with(".#{file_extension}")
+      call_method
+    end
+  end
+end

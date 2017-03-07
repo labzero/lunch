@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe ModelLogger do
-  subject { mock_context(klass: ModelLogger) }
+  subject { mock_context(ModelLogger) }
   let(:described_class) { subject.class }
   let(:log_prefix) { SecureRandom.hex }
 

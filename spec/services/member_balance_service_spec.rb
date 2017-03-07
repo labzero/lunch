@@ -7,7 +7,7 @@ describe MemberBalanceService do
     end
   end
   let(:member_id) { 750 }
-  subject { MemberBalanceService.new(member_id, double('request', uuid: '12345')) }
+  subject { MemberBalanceService.new(member_id, ActionDispatch::TestRequest.new) }
   it { expect(subject).to respond_to(:pledged_collateral) }
   it { expect(subject).to respond_to(:total_securities) }
   it { expect(subject).to respond_to(:effective_borrowing_capacity) }
@@ -331,9 +331,7 @@ describe MemberBalanceService do
     describe 'totals' do
       let(:debits) { Array.new(10, nil).collect { rand(-10000..0) } }
       let(:credits) { Array.new(10, nil).collect { rand(0..10000) } }
-      let(:interests) { Array.new(10, nil).collect { rand(0..1000) } + Array.new(10, 0) }
-      let!(:total_interest) { interests.sum }
-      let(:transactions) { (debits + credits).collect { |amount| {payment_or_principal: amount, interest: interests.pop } } }
+      let(:transactions) { (debits + credits).collect { |amount| {total: amount } } }
       before do
         allow(subject).to receive(:get_hash).and_return({
           final: true,
@@ -343,8 +341,8 @@ describe MemberBalanceService do
       it 'sets `total_debits` to the sum of all debit transactions' do
         expect(securities_transactions[:total_debits]).to be(debits.sum)
       end
-      it 'sets `total_credits` to the sum of all credit transactions and interest' do
-        expect(securities_transactions[:total_credits]).to be(credits.sum + total_interest)
+      it 'sets `total_credits` to the sum of all credit transactions' do
+        expect(securities_transactions[:total_credits]).to be(credits.sum)
       end
       it 'handles nils in the `payment_or_principal` data' do
         transactions << {payment_or_principal: nil}

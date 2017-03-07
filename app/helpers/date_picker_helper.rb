@@ -175,4 +175,17 @@ module DatePickerHelper
     end
     weekends + holidays
   end
+
+  def date_restrictions(request, length, funding_date=nil, include_start_date=nil)
+    calendar_service = CalendarService.new(request)
+    today = Time.zone.today
+    start_date = calendar_service.find_next_business_day(include_start_date ? (funding_date || today).to_date + 2.days : today, 1.day)
+    max_date = start_date + length
+    hash = {
+      max_date: max_date,
+      invalid_dates: weekends_and_holidays(start_date: start_date, end_date: max_date, calendar_service: calendar_service, request: request)
+    }
+    hash[:min_date] = start_date if include_start_date
+    hash
+  end
 end

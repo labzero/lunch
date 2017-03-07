@@ -28,6 +28,16 @@ if (typeof Fhlb.Track === 'undefined') {
         });
       };
     };
+    function sendLoadEvent(eventCategory, elapsedTime) {
+      if (ga_defined()) {
+        ga('send', {
+          hitType: 'event',
+          eventCategory: eventCategory,
+          eventAction: 'load',
+          eventValue: elapsedTime
+        });
+      };
+    };
     Fhlb.Track = {
       // Old Advances Flow - delete as part of MEM-1460
       quick_advance_rate_table:     function(){sendQuickAdvanceEvent('Quick Advance Rate Table')},
@@ -53,7 +63,9 @@ if (typeof Fhlb.Track === 'undefined') {
       // 500 Error Page
       generic_error_page:                  function(){sendEvent('500 Error', 'Errors')},
       // Session Time-Out
-      session_time_out:                    function(){sendEvent('Session Time-Out', 'Session')}
+      session_time_out:                    function(){sendEvent('Session Time-Out', 'Session')},
+      // Loading of pages with deferred data
+      dashboard_loaded:                    function(elapsedTime){sendLoadEvent('Dashboard', elapsedTime)}
     };
   })();
 };

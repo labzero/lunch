@@ -11,26 +11,7 @@
     = content_with_sidebar([{name: 'borrowing_capacity', locals: {profile: @profile}}, {name: 'contact', locals: {relationship_manager: relationship_manager, text: t('letters_of_credit.contact')}}]) do
       = form_for(@letter_of_credit_request, url: letters_of_credit_execute_path, html: {class: 'letter-of-credit-request-form', data: {securid_status: @securid_status, 'prevent-submit-on-enter' => true}}) do |f|
         = f.hidden_field(:id)
-        .form-summary-data
-          %dl
-            %dt= t('global.defined_term', term: t('letters_of_credit.request.beneficiary'))
-            %dd= @letter_of_credit_request.beneficiary_name
-          %dl
-            %dt= t('global.defined_term', term: t('letters_of_credit.preview.beneficiary_address'))
-            %dd= simple_format(@letter_of_credit_request.beneficiary_address)
-          %dl
-            %dt= t('global.defined_term', term: t('letters_of_credit.request.amount'))
-            %dd= fhlb_formatted_currency_whole(@letter_of_credit_request.amount)
-          %dl
-            %dt= t('global.defined_term', term: t('letters_of_credit.preview.issue_date'))
-            %dd= fhlb_date_standard_numeric(@letter_of_credit_request.issue_date)
-            %dt= t('global.defined_term', term: t('letters_of_credit.manage.expiration_date'))
-            %dd= fhlb_date_standard_numeric(@letter_of_credit_request.expiration_date)
-          %dl
-            %dt= t('global.defined_term', term: t('letters_of_credit.request.fees.issuance_fee'))
-            %dd= fhlb_formatted_currency_whole(@letter_of_credit_request.issuance_fee)
-            %dt= t('global.defined_term', term: t('letters_of_credit.request.fees.maintenance_fee'))
-            %dd= @letter_of_credit_request.maintenance_fee
+        = render 'summary_data'
         -if @error_message
           .letters-of-credit-error-actions
             = link_to(t('letters_of_credit.success.new_request'), letters_of_credit_request_path, class: 'primary-button')

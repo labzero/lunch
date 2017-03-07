@@ -95,8 +95,9 @@ RSpec.describe Member, type: :model do
     describe '`requires_dual_signers?`' do
       let(:call_method) { subject.requires_dual_signers? }
       let(:request) { double('request object') }
+      let(:members_service_instance) { instance_double(MembersService, member: member_details) }
       let(:member_details) { {dual_signers_required: double('dual_signers_required')} }
-      before { allow_any_instance_of(MembersService).to receive(:member).and_return({}) }
+      before { allow(MembersService).to receive(:new).and_return(members_service_instance) }
       describe 'when @member_details are not present' do
         it 'fetches details with the request object it was passed' do
           expect(subject).to receive(:fetch_details).with(request).and_call_original
@@ -113,7 +114,6 @@ RSpec.describe Member, type: :model do
         call_method
       end
       it 'returns the value of `dual_signers_required` from member details' do
-        allow_any_instance_of(MembersService).to receive(:member).and_return(member_details)
         expect(call_method).to eq(member_details[:dual_signers_required])
       end
     end
@@ -121,7 +121,8 @@ RSpec.describe Member, type: :model do
       let(:call_method) { subject.name }
       let(:request) { double('request object') }
       let(:member_details) { {name: double('a name')} }
-      before { allow_any_instance_of(MembersService).to receive(:member).and_return({}) }
+      let(:members_service_instance) { instance_double(MembersService, member: member_details) }
+      before { allow(MembersService).to receive(:new).and_return(members_service_instance) }
       describe 'when @member_details are not present' do
         it 'fetches details with the request object it was passed' do
           expect(subject).to receive(:fetch_details).with(request).and_call_original
@@ -138,7 +139,6 @@ RSpec.describe Member, type: :model do
         call_method
       end
       it 'returns the value of `dual_signers_required` from member details' do
-        allow_any_instance_of(MembersService).to receive(:member).and_return(member_details)
         expect(call_method).to eq(member_details[:name])
       end
     end

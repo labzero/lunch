@@ -341,7 +341,7 @@ class ReportsController < ApplicationController
     @report_name = ReportConfiguration.report_title(:capital_stock_trial_balance)
     initialize_dates(:capital_stock_trial_balance, params[:start_date])
     report_download_name = "capital_stock_trial_balance-#{fhlb_report_date_numeric(@start_date)}"
-    downloadable_report(:xlsx, {start_date: @start_date.to_s}, report_download_name) do
+    downloadable_report(DOWNLOAD_FORMATS, {start_date: @start_date.to_s}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
         summary = { certificates: [] }
@@ -1141,7 +1141,7 @@ class ReportsController < ApplicationController
         if report_disabled?(HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS)
           data = {}
         elsif self.skip_deferred_load
-          data = RatesServiceJob.perform_now('historical_price_indications', request.uuid, @start_date.to_s, @end_date.to_s, @collateral_type, @credit_type)
+          data = RatesServiceJob.perform_now('historical_price_indications', request.uuid, current_user.id, @start_date.to_s, @end_date.to_s, @collateral_type, @credit_type)
         else
           job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
           raise ActiveRecord::RecordNotFound unless job_status
@@ -1224,7 +1224,7 @@ class ReportsController < ApplicationController
         }
         render layout: false if request.try(:xhr?)
       else
-        job_status = RatesServiceJob.perform_later('historical_price_indications', request.uuid, @start_date.to_s, @end_date.to_s, @collateral_type, @credit_type).job_status
+        job_status = RatesServiceJob.perform_later('historical_price_indications', request.uuid, current_user.id, @start_date.to_s, @end_date.to_s, @collateral_type, @credit_type).job_status
         job_status.update_attributes!(user_id: current_user.id)
         @job_status_url = job_status_url(job_status)
         new_params = {
@@ -1358,6 +1358,7 @@ class ReportsController < ApplicationController
         @div_id ||= @dropdown_options[0][1]
         @show_summary_data = true if %w(1 2 3 4).include?(@div_id.last)
         @as_of = @dropdown_options_text
+        self.report_download_name = "dividend-statement-#{@dropdown_options_text.downcase.gsub(' ', '-')}"
       end
     end
   end
@@ -2137,9 +2138,6 @@ class ReportsController < ApplicationController
     if roles.include?(User::Roles::WIRE_SIGNER)
       roles = roles.push(TOKEN_WIRES)
     end
-    if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
-      roles = roles - AUTHORIZATIONS_ROLL_UP
-    end
     if roles.include?(User::Roles::ETRANSACT_SIGNER)
       roles.collect! do |role|
         case role
@@ -2153,6 +2151,9 @@ class ReportsController < ApplicationController
       end.flatten!
       roles.uniq!
       roles -= [User::Roles::ETRANSACT_SIGNER] if (roles & [TOKEN_SECURITIES, TOKEN_ADVANCES, TOKEN_WIRES]).any?
+    end
+    if roles.include?(User::Roles::SIGNER_ENTIRE_AUTHORITY) || roles.include?(User::Roles::SIGNER_MANAGER)
+      roles = roles - AUTHORIZATIONS_ROLL_UP
     end
     roles.sort_by! { |role| AUTHORIZATIONS_ORDER.index(role) || 0 }
     roles.collect! { |role| AUTHORIZATIONS_MAPPING.keys.include?(role) ? role : nil }
@@ -2197,7 +2198,6 @@ class ReportsController < ApplicationController
   def downloadable_report(formats = DOWNLOAD_FORMATS, report_download_params = {}, report_download_name = nil, report_view = nil)
     export_format = params[:export_format]
     self.report_download_name ||= report_download_name
-    self.report_download_name ||= "#{action_name.to_s.gsub('_','-')}-#{fhlb_report_date_numeric(Time.zone.today)}" if action_name
     if export_format
       formats = Array.wrap(formats || DOWNLOAD_FORMATS)
       export_format = export_format.to_sym

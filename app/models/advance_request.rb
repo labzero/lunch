@@ -34,7 +34,7 @@ class AdvanceRequest
     :gross_pre_trade_stock_required, :gross_net_stock_required,
     :interest_day_count, :payment_on, :funding_date, :maturity_date, :initiated_at,
     :confirmation_number, :authorized_amount, :credit_max_amount, :collateral_max_amount,
-    :collateral_authorized_amount, :trade_date, :allow_grace_period, :maximum_term, :maximum_term_unit
+    :collateral_authorized_amount, :trade_date, :allow_grace_period, :maximum_term, :maximum_term_unit, :custom_maturity_date
   ].freeze
   CORE_PARAMETERS = [:type, :rates, :term, :amount, :rate, :stock_choice].freeze
   PREVIEW_EXCLUDE_KEYS = [:advance_amount, :advance_rate, :advance_type, :advance_term, :status, :total_daily_limit, :end_of_day].freeze
@@ -43,6 +43,8 @@ class AdvanceRequest
 
   VALID_AMOUNT = /\A[0-9,]+(\.0?0?)?\z/i.freeze
   REDIS_EXPIRATION_KEY_PATH =  'advance_request.key_expiration'
+  CUSTOM_TERM = /\A(\d+)day\z/i.freeze
+  MAX_CUSTOM_TERM_DATE_RESTRICTION = 3.years
 
   attr_accessor *CORE_PARAMETERS
   attr_accessor *REQUEST_PARAMETERS
@@ -119,6 +121,13 @@ class AdvanceRequest
     self.maturity_date = maturity_date_for(term, type)
   end
 
+  def custom_maturity_date=(custom_maturity_date)
+    if @custom_maturity_date != custom_maturity_date
+      self.rates = nil
+      @custom_maturity_date = custom_maturity_date
+    end
+  end
+
   def maturity_date=(value)
     @maturity_date = value.try(:to_date)
   end
@@ -133,23 +142,19 @@ class AdvanceRequest
   end
 
   def rates
-    unless @rates
-      @rates = rate_service.quick_advance_rates(member_id, funding_date)
-      notify_if_rate_bands_exceeded
-    end
-    @rates 
+    @rates ||= rate_service.quick_advance_rates(member_id, funding_date, custom_maturity_date)
   end
 
   def funding_date=(funding_date)
     if @funding_date != funding_date
-      rates = nil
+      self.rates = nil
       @funding_date = funding_date
     end
   end
 
   def term=(term)
     term = term.try(:to_sym)
-    raise ArgumentError.new("Unknown Advance Term: #{term}") unless ADVANCE_TERMS.include?(term)
+    raise ArgumentError.new("Unknown Advance Term: #{term}") unless (ADVANCE_TERMS.include?(term) || (term=~CUSTOM_TERM))
     old_term = @term
     @term = term
     if old_term != term && type
@@ -388,20 +393,6 @@ class AdvanceRequest
 
   protected
 
-  def notify_if_rate_bands_exceeded
-    return unless @rates
-    ADVANCE_TYPES.each do |type|
-      ADVANCE_TERMS.each do |term|
-        rate_data = @rates[type][term].dup
-        rate_data[:type] = type
-        rate_data[:term] = term
-        if rate_data[:disabled] && !rate_data[:end_of_day] && (rate_data[:rate_band_info][:min_threshold_exceeded] || rate_data[:rate_band_info][:max_threshold_exceeded])
-          InternalMailer.exceeds_rate_band(rate_data, request.try(:uuid), signer).deliver_now
-        end
-      end
-    end
-  end
-
   def terms_present?
     term.present? && type.present? && rate!.present? && amount.present?
   end
@@ -445,7 +436,7 @@ class AdvanceRequest
   end
 
   def perform_limit_check
-    result = etransact_service.check_limits(member_id, amount, term)
+    result = etransact_service.check_limits(member_id, amount, term, custom_maturity_date)
     if result
       if result[:status] != 'pass'
         code = result[:status].to_sym
@@ -465,13 +456,13 @@ class AdvanceRequest
   def perform_rate_check
     return if aasm.current_event == :execute
     settings = etransact_service.settings
-    rate_details = rate_service.rate(type, term)
+    rate_details = rate_service.rate(type, term, 'Live', funding_date)
 
     if settings && settings[:rate_stale_check]
       if rate_details
         stale_rate = rate_details[:updated_at] + settings[:rate_stale_check].seconds < Time.zone.now
         if stale_rate
-          InternalMailer.stale_rate(settings[:rate_stale_check], request.try(:request_uuid), signer).deliver_now
+          InternalMailer.stale_rate(settings[:rate_stale_check], request.try(:connection_request_uuid), signer).deliver_now
           add_error(:rate, :stale)
         end
 

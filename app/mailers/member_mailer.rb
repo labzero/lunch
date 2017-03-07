@@ -2,6 +2,7 @@ class MemberMailer < Devise::Mailer
   helper AssetHelper
   helper CustomFormattingHelper
   helper ContactInformationHelper
+  include ActionView::Helpers::TextHelper
   layout 'mailer'
 
   def reset_password_instructions(record, token, opts={})
@@ -18,5 +19,17 @@ class MemberMailer < Devise::Mailer
     @member_name = institution
     @token = token
     mail( to: "#{user.display_name} <#{user.email}>", subject: t('emails.new_user.subject'), from: t('emails.new_user.sender', email: ContactInformationHelper::WEB_SUPPORT_EMAIL) )
+  end
+
+  def letter_of_credit_request(member_id, lc_as_json, user)
+    @letter_of_credit_request = LetterOfCreditRequest.from_json(lc_as_json, nil)
+    pdf_name = "letter_of_credit_request_#{@letter_of_credit_request.lc_number}"
+    file = RenderLetterOfCreditPDFJob.perform_now(member_id, 'view', pdf_name, { letter_of_credit_request: {id: @letter_of_credit_request.id} })
+    attachments[file.original_filename] = file.read
+    mail(subject: I18n.t('letters_of_credit.email.subject'),
+         to: "#{user.display_name} <#{user.email}>",
+         bcc: InternalMailer::GENERAL_ALERT_ADDRESS,
+         from: t('emails.new_user.sender', email: ContactInformationHelper::WEB_SUPPORT_EMAIL)
+    )
   end
 end

@@ -9,5 +9,6 @@
       %p= t('letters_of_credit.success.questions', phone_number: member_services_phone_number)
     .letters-of-credit-success-actions
       = link_to(t('letters_of_credit.manage.title'), letters_of_credit_manage_path, class: 'secondary-button')
-      = link_to(t('letters_of_credit.success.download_pdf'), '#', class: 'secondary-button')
+      = link_to(t('letters_of_credit.success.download_pdf'), letters_of_credit_view_path(letter_of_credit_request: {id: @letter_of_credit_request.id}, export_format: :pdf), class: 'secondary-button letters-of-credit-download-pdf')
       = link_to(t('letters_of_credit.success.new_request'), letters_of_credit_request_path, class: 'secondary-button')
+= render 'reports/report_loading_flyout'

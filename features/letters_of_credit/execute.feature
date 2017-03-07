@@ -22,7 +22,7 @@ Feature: Executing a New Letter of Credit Request
     Then I should be on the Manage Letters of Credit page
 
   @jira-mem-1971
-    Scenario: Make a new request from the success page
+  Scenario: Make a new request from the success page
     Given I visit the Letter of Credit Success page
     When I click the Make a New Request button
     Then I should be on the New Letter of Credit Request page
@@ -34,3 +34,9 @@ Feature: Executing a New Letter of Credit Request
     And I click the Authorize Request button
     Then I should be on the Preview Letter of Credit Request page
     And I should see the "internal user not authorized" form error
+
+  @jira-mem-2181
+  Scenario: User downloads the Letter of Credit Request
+    Given I visit the Letter of Credit Success page
+    When I click the Download Letter of Credit Request button
+    Then I should begin downloading a file

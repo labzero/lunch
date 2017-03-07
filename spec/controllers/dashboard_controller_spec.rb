@@ -33,7 +33,7 @@ RSpec.describe DashboardController, :type => :controller do
 
   it { should use_around_filter(:skip_timeout_reset) }
 
-  describe "GET index", :vcr do
+  describe "GET index" do
     let(:member_id) {750}
     let(:empty_financing_availability_gauge) {{total: {amount: 0, display_percentage: 100, percentage: 0}}}
     let(:profile) { {} }
@@ -333,13 +333,17 @@ RSpec.describe DashboardController, :type => :controller do
         make_request 
       end
       it 'uses the current_member_id for the rate fetch job' do
-        expect(RatesServiceJob).to receive(:perform_later).with(anything, anything, member_id)
+        expect(RatesServiceJob).to receive(:perform_later).with(anything, anything, anything, member_id)
         make_request 
       end
       it 'uses the current request UUID for the rate fetch job' do
         uuid = SecureRandom.hex
         allow(request).to receive(:uuid).and_return(uuid)
-        expect(RatesServiceJob).to receive(:perform_later).with(anything, uuid, anything)
+        expect(RatesServiceJob).to receive(:perform_later).with(anything, uuid, anything, anything)
+        make_request 
+      end
+      it 'uses the current user ID for the rate fetch job' do
+        expect(RatesServiceJob).to receive(:perform_later).with(anything, anything, controller.current_user.id, anything)
         make_request 
       end
     end
@@ -352,44 +356,42 @@ RSpec.describe DashboardController, :type => :controller do
     end
   end
 
-  describe "GET current_overnight_vrc", :vcr do
-    let(:rate_service_instance) {double('RatesService')}
-    let(:etransact_service_instance) {double('EtransactAdvancesService')}
+  describe "GET current_overnight_vrc" do
+    let(:rate_service_instance) {double('RatesService', current_overnight_vrc: rate_service_response) }
+    let(:etransact_service_instance) {double('EtransactAdvancesService', etransact_active?: true)}
     let(:RatesService) {class_double(RatesService)}
     let(:rate) { double('rate') }
-    let(:rate_service_response) { double('rate service response', :[] => nil, :[]= => nil) }
-    let(:response_hash) { get :current_overnight_vrc; JSON.parse(response.body) }
-    it_behaves_like 'a user required action', :get, :current_overnight_vrc
-    it 'calls `current_overnight_vrc` on the rate service and `etransact_active?` on the etransact service' do
+    let(:rate_service_response) { {rate: rate} }
+    let(:sentinel) { SecureRandom.hex }
+    let(:call_action) { get :current_overnight_vrc }
+    let(:response_hash) { call_action; JSON.parse(response.body) }
+    before do
       allow(RatesService).to receive(:new).and_return(rate_service_instance)
       allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
-      expect(etransact_service_instance).to receive(:etransact_active?)
+      allow(subject).to receive(:fhlb_formatted_number)
+    end
+
+    it_behaves_like 'a user required action', :get, :current_overnight_vrc
+    it 'calls `current_overnight_vrc` on the rate service' do
       expect(rate_service_instance).to receive(:current_overnight_vrc).and_return({})
-      get :current_overnight_vrc
+      call_action
     end
-    it 'returns a rate' do
-      expect(response_hash['rate']).to be_kind_of(String)
-      expect(response_hash['rate'].to_f).to be >= 0
+    it 'calls `etransact_active?` on the etransact service' do
+      expect(etransact_service_instance).to receive(:etransact_active?)
+      call_action
     end
-    it 'returns a time stamp for when the rate was last updated' do
-      date = DateTime.parse(response_hash['updated_at'])
-      expect(date).to be_kind_of(DateTime)
-      expect(date).to be <= DateTime.now
+    it 'sets the `etransact_active` value in the response hash to the result of `etransact_active?`' do
+      allow(etransact_service_instance).to receive(:etransact_active?).and_return(sentinel)
+      expect(response_hash['etransact_active']).to eq(sentinel)
     end
     describe 'the rate value' do
-      before do
-        allow(RatesService).to receive(:new).and_return(rate_service_instance)
-        allow(rate_service_instance).to receive(:current_overnight_vrc).and_return(rate_service_response)
-        allow(rate_service_response).to receive(:[]).with(:rate).and_return(rate)
-      end
       it 'is passed to the `fhlb_formatted_number` helper' do
         expect(subject).to receive(:fhlb_formatted_number).with(rate, {precision: 2, html: false})
-        get :current_overnight_vrc
+        call_action
       end
       it 'is set to the returned `fhlb_formatted_number` string' do
-        allow(subject).to receive(:fhlb_formatted_number).and_return(rate)
-        expect(rate_service_response).to receive(:[]=).with(:rate, rate)
-        get :current_overnight_vrc
+        allow(subject).to receive(:fhlb_formatted_number).and_return(sentinel)
+        expect(response_hash['rate']).to eq(sentinel)
       end
     end
     it 'caches the response' do

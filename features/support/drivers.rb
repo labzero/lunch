@@ -1,7 +1,7 @@
 require 'selenium/webdriver'
 
 my_driver = (ENV['BROWSER'] && ENV['BROWSER'].to_sym) || :chrome
-puts "my_driver:  #{my_driver}"
+log "my_driver:  #{my_driver}"
 
 if defined?(Capybara)
   Capybara.default_driver = my_driver

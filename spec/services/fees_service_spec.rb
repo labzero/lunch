@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe FeesService do
-  subject { FeesService.new(double('request', uuid: '12345')) }
+  subject { FeesService.new(ActionDispatch::TestRequest.new) }
   
   describe '`fee_schedules` method' do
     let(:fee_schedules) { subject.fee_schedules }

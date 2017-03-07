@@ -1,0 +1,10 @@
+.letters-of-credit.letters-of-credit-view
+  .row
+    .column-9x3-left
+      %h1= t('letters_of_credit.pdf.requested')
+      .report-print-details
+        .report-print-bank= @member_name
+        .report-print-sta= @member_fhfa
+  .row
+    = render 'summary_data', extended_info: true
+    .letters-of-credit-legal-copy=simple_format(t'letters_of_credit.preview.legal')

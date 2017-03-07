@@ -22,5 +22,7 @@ def authorizations_roles(role)
       I18n.t('user_roles.resolution.title')
     when 'Securities Services'
       I18n.t('user_roles.securities.title')
+    when 'Entire Authority'
+      I18n.t('user_roles.entire_authority.title')
   end
 end

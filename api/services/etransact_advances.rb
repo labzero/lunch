@@ -216,6 +216,13 @@ module MAPI
                 key :description, 'Maturity date.'
               end
               parameter do
+                key :paramType, :path
+                key :name, :funding_date
+                key :required, false
+                key :type, :string
+                key :description, 'Funding date.'
+              end
+              parameter do
                 key :paramType, :query
                 key :name, :allow_grace_period
                 key :required, false
@@ -358,7 +365,7 @@ module MAPI
           funding_date = body[:funding_date].try(:to_date)
 
           begin
-            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term, advance_type), advance_type)
+            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term, advance_type, funding_date, maturity_date), advance_type)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
@@ -387,7 +394,7 @@ module MAPI
           funding_date = params[:funding_date].try(:to_date)
 
           begin
-            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term, advance_type), advance_type)
+            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term, advance_type, funding_date, maturity_date), advance_type)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'

@@ -35,10 +35,10 @@ describe SecuritiesRequestService do
       expect(subject).to receive(:get_json).with(anything, anything, include(status: :authorized))
       call_method
     end
-    it 'calls `get_json` with a parameter `settle_start_date` set to 7 days ago' do
+    it "calls `get_json` with a parameter `settle_start_date` set to #{SecuritiesRequest::MIN_DATE_RESTRICTION} ago" do
       today = Time.zone.today
       allow(Time.zone).to receive(:today).and_return(today)
-      expect(subject).to receive(:get_json).with(anything, anything, include(settle_start_date: today - 7.days))
+      expect(subject).to receive(:get_json).with(anything, anything, include(settle_start_date: today - SecuritiesRequest::MIN_DATE_RESTRICTION))
       call_method
     end
     it 'calls `process_securities_requests` with the reponse from `get_json`' do

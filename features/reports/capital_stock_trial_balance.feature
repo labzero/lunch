@@ -36,6 +36,12 @@ Scenario: Member downloads an XLSX of the Capital Stock Trial Balance report
   When I request an XLSX
   Then I should begin downloading a file
 
+@jira-mem-2145
+Scenario: Member downloads a PDF of the Capital Stock Trial Balance report
+  Given I am on the "Capital Stock Trial Balance" report page
+  When I request a PDF
+  Then I should begin downloading a file
+
 @jira-mem-1237
 Scenario: Member tries to pick a date occuring before January 1, 2002
   Given I am on the "Capital Stock Trial Balance" report page

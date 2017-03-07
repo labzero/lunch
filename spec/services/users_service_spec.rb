@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe UsersService, :type => :service do
-  subject { UsersService.new(double('request', uuid: '12345')) }
+  subject { UsersService.new(ActionDispatch::TestRequest.new) }
 
   describe '`user_roles` method', :vcr  do
     let(:user_roles) {subject.user_roles('local')}

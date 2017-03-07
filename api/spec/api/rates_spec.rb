@@ -10,6 +10,10 @@ def types_and_terms_hash
   Hash[loan_types.map { |type| [type, Hash[loan_terms.map{ |term| [term, yield(type, term)] }]] }]
 end
 
+def types_and_terms_custom_hash
+  Hash[loan_types.map { |type| [type, Hash[loan_terms_custom.map{ |term| [term, yield(type, term)] }]] }]
+end
+
 def mk_term(frequency, unit, term)
   {
       xml: double("#{term}/xml"),
@@ -35,15 +39,17 @@ end
 describe MAPI::ServiceApp do
   subject { MAPI::Services::Rates }
 
-  RSpec.shared_examples 'a rates summary' do |funding_date=nil|
+  RSpec.shared_examples 'a rates summary' do |funding_date=nil, maturity_date=nil|
     before do
-      allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date).and_return(live_data_xml)
-      allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay', funding_date).and_return(start_of_day_xml)
+      allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date, maturity_date).and_return(live_data_xml)
+      allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay', funding_date, maturity_date).and_return(start_of_day_xml)
     end
     it "returns Internal Service Error, if calendar service is unavailable" do
       allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return(nil)
       if funding_date
         get '/rates/summary', funding_date: funding_date
+      elsif maturity_date
+        get '/rates/summary', maturity_date: maturity_date
       else
         get '/rates/summary'
       end
@@ -54,6 +60,8 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(nil)
       if funding_date
         get '/rates/summary', funding_date: funding_date
+      elsif maturity_date
+        get '/rates/summary', maturity_date: maturity_date
       else
         get '/rates/summary'
       end
@@ -64,6 +72,8 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(nil)
       if funding_date
         get '/rates/summary', funding_date: funding_date
+      elsif maturity_date
+        get '/rates/summary', maturity_date: maturity_date
       else
         get '/rates/summary'
       end
@@ -71,9 +81,11 @@ describe MAPI::ServiceApp do
     end
 
     it "returns Internal Service Error, if get_market_data soap endpoint is unavailable" do
-      allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date).and_return(nil)
+      allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date, maturity_date).and_return(nil)
       if funding_date
         get '/rates/summary', funding_date: funding_date
+      elsif maturity_date
+        get '/rates/summary', maturity_date: maturity_date
       else
         get '/rates/summary'
       end
@@ -85,6 +97,8 @@ describe MAPI::ServiceApp do
       expect(logger).to receive(:error).at_least(1).times
       if funding_date
         get '/rates/summary', funding_date: funding_date
+      elsif maturity_date
+        get '/rates/summary', maturity_date: maturity_date
       else
         get '/rates/summary'
       end
@@ -93,6 +107,8 @@ describe MAPI::ServiceApp do
     it "returns 200 if all the endpoints return valid data" do
       if funding_date
         get '/rates/summary', funding_date: funding_date
+      elsif maturity_date
+        get '/rates/summary', maturity_date: maturity_date
       else
         get '/rates/summary'
       end
@@ -127,8 +143,10 @@ describe MAPI::ServiceApp do
   end
 
   describe "current rates" do
+    let(:today) { Time.zone.today }
+    let(:maturity_date) { today + rand(3..1095).days }
     MAPI::Services::Rates::LOAN_TYPES.each do |loan|
-      MAPI::Services::Rates::LOAN_TERMS.each do |term|
+      [*MAPI::Services::Rates::LOAN_TERMS, "#{rand(3..1095)}day"].each do |term|
         ['Live', 'StartOfDay', nil].each do |type|
           it "should return a #{loan}:#{term}:#{type} rate" do
             get (type.nil? ? "/rates/#{loan}/#{term}" : "/rates/#{loan}/#{term}/#{type}")
@@ -141,66 +159,208 @@ describe MAPI::ServiceApp do
         end
       end
     end
+    describe "in the production environment" do
+      let(:mds_connection) { MAPI::Services::Rates.init_mds_connection(:production) }
+      let(:call_method) { get 'rates/whole/2month' }
+      let(:call_method_custom) { get 'rates/whole/10day' }
+      before do
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
+      end
+      it 'calls `init_mds_connection`' do
+        expect(MAPI::Services::Rates).to receive(:init_mds_connection).with(:production)
+        call_method
+      end
+      describe 'building the MDS message', vcr: {cassette_name: 'market_data_rate_2months'} do
+        it 'includes the caller ID' do
+          expect(mds_connection).to receive(:call).with(:get_market_data, include(message: include('v11:caller' => [{'v11:id' => ENV['MAPI_COF_ACCOUNT']}])) ).and_call_original
+          call_method
+        end
+        it 'includes paymentFrequency with frequency = 2 and frequencyUnit = M' do
+          requests = include('v1:marketData' => [include('v12:data' => [{'v12:FhlbsfDataPoint' => ['v12:tenor' => ['v12:interval' => [{'v13:frequency' => '2','v13:frequencyUnit' => 'M'}]]]}])])
+          expect(mds_connection).to receive(:call).with(:get_market_data, include(message: include('v1:requests' => [{'v1:fhlbsfMarketDataRequest' => [requests]}])) ).and_call_original
+          call_method
+        end
+      end
+      describe 'building the custom MDS message', vcr: {cassette_name: 'market_data_rate_custom'} do
+        it 'includes paymentFrequency with frequency = 10 and frequencyUnit = D' do
+          requests = include('v1:marketData' => [include('v12:data' => [{'v12:FhlbsfDataPoint' => ['v12:tenor' => ['v12:interval' => [{'v13:frequency' => '10','v13:frequencyUnit' => 'D'}]]]}])])
+          expect(mds_connection).to receive(:call).with(:get_market_data, include(message: include('v1:requests' => [{'v1:fhlbsfMarketDataRequest' => [requests]}])) ).and_call_original
+          call_method_custom
+        end
+      end
+    end
   end
 
   describe "extract_market_data_from_soap_response" do
-    let (:types)     { %w(whole agency aa aaa).map{ |type| mk_type(type) } }
-    let (:types_xml) { types.map{ |type| type[:xml] } }
+    let(:xml_type_data) { instance_double(Nokogiri::XML::Node, css: []) }
+    let(:xml_term_data) { instance_double(Nokogiri::XML::Node) }
+    let(:xml_document) { instance_double(Nokogiri::XML::Document, remove_namespaces!: true, xpath: []) }
+    let(:rate) { SecureRandom.hex }
+    let(:maturity_string) { (Time.zone.today+ rand(3..1095).days).to_s }
+    let(:type) { SecureRandom.hex }
+    let(:type_long) { SecureRandom.hex }
+    let(:day_count_basis) { SecureRandom.hex }
+    let(:term) { SecureRandom.hex }
+    let(:get_term_data_response) { { rate: rate, maturity_string: maturity_string, term: term } }
+    let(:get_term_data_overnight_response) { { rate: rate, maturity_string: maturity_string, term: 'overnight' } }
+    let(:response) { instance_double(Savon::Response, doc: xml_document) }
+    let(:call_method) { subject.extract_market_data_from_soap_response(response) }
 
-    let (:overnight) { mk_term('1', 'D', 'overnight') }
-    let (:open_day)  { overnight.clone }
-    let (:w1)        { mk_term('1', 'W', '1week') }
-    let (:w2)        { mk_term('2', 'W', '2week') }
-    let (:w3)        { mk_term('3', 'W', '3week') }
-    let (:m1)        { mk_term('1', 'M', '1month') }
-    let (:m2)        { mk_term('2', 'M', '2month') }
-    let (:m3)        { mk_term('3', 'M', '3month') }
-    let (:m4)        { mk_term('4', 'M', '4month') }
-    let (:m5)        { mk_term('5', 'M', '5month') }
-    let (:m6)        { mk_term('6', 'M', '6month') }
-    let (:y1)        { mk_term('1', 'Y', '1year') }
-    let (:y2)        { mk_term('2', 'Y', '2year') }
-    let (:y3)        { mk_term('3', 'Y', '3year') }
-    let (:terms) { [overnight,open_day,w1,w2,w3,m1,m2,m3,m4,m5,m6,y1,y2,y3] }
-    let (:invalid_terms) { [m4,m5] }
-    let (:valid_terms) { terms - invalid_terms }
-    let (:terms_xml) { terms.map{ |term| term[:xml] } }
-
-    let (:response) { double('response') }
-    let (:result)   { subject.extract_market_data_from_soap_response(response) }
     before do
-      allow(response).to receive_message_chain(:doc,:remove_namespaces!)
-      allow(response).to receive_message_chain(:doc,:xpath).with(subject::PATHS[:type_data]).and_return(types_xml)
-
-      types.each do |type|
-        allow(type[:xml]).to  receive(:css).with(subject::PATHS[:term_data]).and_return(terms_xml)
-        allow(subject).to receive(:extract_text).with(type[:xml], :type_long).and_return(type[:type_long])
-        allow(subject).to receive(:extract_text).with(type[:xml], :day_count_basis).and_return(type[:day_count_basis])
-      end
-
-      terms.each do |term|
-        [:frequency, :unit, :rate, :maturity_string].each do |field|
-          allow(subject).to receive(:extract_text).with(term[:xml], field).and_return(term[field])
-        end
-        allow(Time).to receive_message_chain(:zone,:parse).with(term[:maturity_string]).and_return(term[:maturity_time])
-        allow(term[:maturity_time]).to receive(:to_date).and_return(term[:maturity_date])
-      end
+      allow(xml_document).to receive(:xpath).with(MAPI::Services::Rates::PATHS[:type_data]).and_return([xml_type_data])
+      allow(xml_type_data).to receive(:css).with(MAPI::Services::Rates::PATHS[:term_data]).and_return([xml_term_data])
+      allow(MAPI::Services::Rates).to receive(:get_term_data).and_return(get_term_data_response)
+      allow(MAPI::Services::Rates).to receive(:extract_text)
+      allow(MAPI::Services::Rates).to receive(:extract_text).with(xml_type_data, :type_long).and_return(type_long)
+      loan_mapping_inverted = { type_long => type }
+      stub_const 'MAPI::Shared::Constants::LOAN_MAPPING_INVERTED', loan_mapping_inverted
+      allow(NewRelic::Agent).to receive(:notice_error)
     end
 
-    it 'should return correct rate, maturity_data and interest_day_count for valid terms' do
-      types.each do |type|
-        valid_terms.each do |term|
-          expect(result[type[:type]][term[:term]][:rate]).to eq(term[:rate])
-          expect(result[type[:type]][term[:term]][:maturity_date]).to eq(term[:maturity_date])
-          expect(result[type[:type]][term[:term]][:interest_day_count]).to eq(type[:day_count_basis])
+    describe 'when there are no custom terms' do
+      it 'extracts the day count basis from the term data' do
+        expect(MAPI::Services::Rates).to receive(:extract_text).with(xml_type_data, :day_count_basis)
+        call_method
+      end
+      it 'extracts the `type_long` from the term data' do
+        expect(MAPI::Services::Rates).to receive(:extract_text).with(xml_type_data, :type_long)
+        call_method
+      end
+      it 'converts the `type_long` to a type' do
+        expect(call_method[type].length).to be > 0
+      end
+      it 'calls `get_term_data` with the `term_data` and `type_data`' do
+        expect(MAPI::Services::Rates).to receive(:get_term_data).with(xml_type_data, xml_term_data, false)
+        call_method
+      end
+      it 'returns no results if `get_term_data` returns nothing' do
+        allow(MAPI::Services::Rates).to receive(:get_term_data).with(xml_type_data, xml_term_data, anything).and_return(nil)
+        expect(call_method).to be_empty
+      end
+      describe 'when `get_term_data` successfully parses the data' do
+        it 'returns the correct rate' do
+          expect(call_method[type][term][:rate]).to eq(rate)
+        end
+        it 'returns the correct maturity_date' do
+          expect(call_method[type][term][:maturity_date]).to eq(Time.zone.parse(maturity_string).to_date)
+        end
+        it 'returns the correct interest_day_count' do
+          allow(MAPI::Services::Rates).to receive(:extract_text).with(xml_type_data, :day_count_basis).and_return(day_count_basis)
+          expect(call_method[type][term][:interest_day_count]).to eq(day_count_basis)
+        end
+        it 'returns the correct payment_on' do
+          expect(call_method[type][term][:payment_on]).to eq('Maturity')
+        end
+        it 'clones overnight term into open term' do
+          allow(MAPI::Services::Rates).to receive(:get_term_data).and_return(get_term_data_overnight_response)
+          expect(call_method[type][:open]).to eq(call_method[type][:overnight])
+        end
+        it 'logs a NewRelic error if a blank rate is returned' do
+          get_term_data_response[:rate] = ''
+          expect(NewRelic::Agent).to receive(:notice_error).with('Blank rate returned', trace_only: true, custom_params: {term: term, type: type, data: xml_term_data})
+          call_method
         end
       end
     end
+    describe 'when there are custom terms' do
+      before do
+        allow(xml_document).to receive(:xpath).with(MAPI::Services::Rates::PATHS[:type_data]).and_return([xml_type_data, xml_type_data])
+      end
+      it 'calls `get_term_data` with the `term_data`, `type_data` and is_custom' do
+        expect(MAPI::Services::Rates).to receive(:get_term_data).with(xml_type_data, xml_term_data, true)
+        call_method
+      end
+    end
+  end
 
-    it 'should not return anything for invalid terms' do
-      types.each do |type|
-        invalid_terms.each do |term|
-          expect(result[type[:type]][term[:term]]).to be_nil
+  describe 'get_term_data' do
+    let(:type_data) { double('Type Data') }
+    let(:term_data) { double('Term Data') }
+    let(:funding_date) { SecureRandom.hex }
+    let(:maturity_string) { SecureRandom.hex }
+    let(:rate) { SecureRandom.hex }
+    let(:term) { SecureRandom.hex }
+    let(:frequency) { SecureRandom.hex }
+    let(:unit) { SecureRandom.hex }
+    let(:days) { rand(3..1095) }
+    let(:custom_term) { days.to_s + 'day' }
+    let(:days_to_maturity_return) { {days: days, term: custom_term} }
+    let(:call_method) { subject.get_term_data(type_data, term_data, false) }
+    let(:call_method_custom) { subject.get_term_data(type_data, term_data, true) }
+
+    before do
+      allow(MAPI::Services::Rates).to receive(:extract_text)
+    end
+
+    it 'extracts rate from the term data' do
+      expect(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :rate)
+      call_method
+    end
+    it 'extracts maturity_string from the term data' do
+      expect(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :maturity_string)
+      call_method
+    end
+    describe 'when not custom' do
+      it 'extracts frequency from the term data' do
+        expect(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :frequency)
+        call_method
+      end
+      it 'extracts unit from the term data' do
+        expect(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :unit)
+        call_method
+      end
+      it 'returns nil if the term could not be identified' do
+        stub_const('MAPI::Services::Rates::PERIOD_TO_TERM', {})
+        expect(call_method).to be_nil
+      end
+    end
+    describe 'when custom' do
+      before do
+        allow(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :maturity_string).and_return(maturity_string)
+        allow(MAPI::Services::Rates).to receive(:extract_text).with(type_data, :spot_date).and_return(funding_date)
+        allow(MAPI::Services::Rates).to receive(:days_to_maturity).and_return(days_to_maturity_return)
+      end
+      it 'extracts unit from the term data' do
+        expect(MAPI::Services::Rates).to receive(:extract_text).with(type_data, :spot_date)
+        call_method_custom
+      end
+      it 'calls days_to_maturity with maturity_string and funding_date' do
+        expect(MAPI::Services::Rates).to receive(:days_to_maturity).with(maturity_string, funding_date)
+        call_method_custom
+      end
+      it 'returns nil if the term could not be identified' do
+        allow(MAPI::Services::Rates).to receive(:days_to_maturity).with(maturity_string, funding_date).and_return({})
+        expect(call_method_custom).to be_nil
+      end
+    end
+    describe 'return hash' do
+      before do
+        allow(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :rate).and_return(rate)
+        allow(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :maturity_string).and_return(maturity_string)
+      end
+      describe 'when not custom' do
+        before do
+          allow(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :frequency).and_return(frequency)
+          allow(MAPI::Services::Rates).to receive(:extract_text).with(term_data, :unit).and_return(unit)
+          period_to_term = { "#{frequency}#{unit}" => term }
+          stub_const 'MAPI::Services::Rates::PERIOD_TO_TERM', period_to_term
+        end
+        it 'sets the correct rate' do
+          expect(call_method[:term]).to eq(term)
+        end
+        it 'sets the correct maturity_string' do
+          expect(call_method[:maturity_string]).to eq(maturity_string)
+        end
+      end
+      describe 'when custom' do
+        before do
+          allow(MAPI::Services::Rates).to receive(:days_to_maturity).and_return(days_to_maturity_return)
+        end
+        it 'sets the correct rate' do
+          expect(call_method_custom[:term]).to eq(custom_term)
+        end
+        it 'sets the correct maturity_string' do
+          expect(call_method_custom[:maturity_string]).to eq(maturity_string)
         end
       end
     end
@@ -208,6 +368,7 @@ describe MAPI::ServiceApp do
 
   describe "rate summary" do
     before do
+      allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
       allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
       allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(blackout_dates)
       allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).and_return(loan_terms_hash)
@@ -215,14 +376,18 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Rates).to receive(:init_mds_connection).and_return(false)
       allow(MAPI::Services::Rates).to receive(:fake).with('market_data_live_rates').and_return(live_hash)
       allow(MAPI::Services::Rates).to receive(:fake).with('market_data_start_of_day_rates').and_return(start_of_day_hash)
+      allow(MAPI::Mailers::InternalMailer).to receive(:send_rate_band_alert)
     end
+    let(:logger) { instance_double(Logger, error: nil)}
     let(:today) { Time.zone.today }
     let(:one_week_away) { today + 1.week }
     let(:three_weeks_away) { today + 3.week }
     let(:blackout_dates) { [one_week_away, three_weeks_away] }
     loan_terms = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year']
+    loan_terms_custom = [:overnight, :open, :'1week', :'2week', :'3week', :'1month', :'2month', :'3month', :'6month', :'1year', :'2year', :'3year', :'10day']
     loan_types = [:whole, :agency, :aaa, :aa]
     let(:loan_terms) { loan_terms }
+    let(:loan_terms_custom) { loan_terms_custom }
     let(:loan_types) { loan_types }
     let(:loan_terms_hash) do
       default = n_level_hash_with_default(true, 2)
@@ -240,14 +405,17 @@ describe MAPI::ServiceApp do
     let (:threshold_as_BPS) { (threshold*100).to_i.to_s }
 
     let(:start_of_day_hash) do
-      h = JSON.parse(File.read(File.join(MAPI.root, 'fakes', "market_data_live_rates.json"))).with_indifferent_access
-      h[:aa][:'1week'][:rate]  = (h[:aa][:'1week'][:rate].to_f + (2*threshold)).to_s
-      h[:aaa][:'1week'][:rate] = (h[:aa][:'1week'][:rate].to_f - (2*threshold)).to_s
-      h
+      JSON.parse(File.read(File.join(MAPI.root, 'fakes', "market_data_live_rates.json"))).with_indifferent_access
     end
     let(:rate_bands_hash) { n_level_hash_with_default(threshold_as_BPS, 2) }
     let(:rate_summary) do
       get '/rates/summary'
+      JSON.parse(last_response.body).with_indifferent_access
+    end
+    let(:custom_maturity_date) { Time.zone.today+ rand(3..1095).days }
+    let(:days_to_maturity_term) { (custom_maturity_date.to_date - Time.zone.today).to_i.to_s + 'day' }
+    let(:rate_summary_with_maturity_date) do
+      get '/rates/summary', maturity_date: custom_maturity_date
       JSON.parse(last_response.body).with_indifferent_access
     end
     it "returns rates for default loan_types at default loan_terms" do
@@ -286,6 +454,82 @@ describe MAPI::ServiceApp do
           expect(r[:start_of_day_rate]).to eq(start_of_day_rate)
           expect(r[:rate_band_info]).to eq(MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term]))
         end
+        describe 'when a rate band violation occurs' do
+          let(:rate_band_hash) {MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term])}
+          before do
+            rate_band_hash[:max_threshold_exceeded] = false
+            rate_band_hash[:min_threshold_exceeded] = false
+            loan_terms_hash[loan_term][loan_type][:trade_status] = true
+            loan_terms_hash[loan_term][loan_type][:display_status] = true
+            allow(MAPI::Services::Rates).to receive(:rate_band_info).and_call_original
+            allow(MAPI::Services::Rates).to receive(:rate_band_info).with(live_hash[loan_type][loan_term], rate_bands_hash[loan_term]).and_return(rate_band_hash)
+            allow(logger).to receive(:error)
+            allow(NewRelic::Agent).to receive(:notice_error)
+          end
+          shared_examples 'rate band violations' do |term, type|
+            it 'logs the violation' do
+              expect(logger).to receive(:error).with(match(/type=#{type}, term=#{term}, details=#{Regexp.quote(rate_summary[type][term].to_json)}/))
+              get '/rates/summary'
+            end
+            it 'logs the violation in NewRelic' do
+              details = rate_summary[type][term]
+              details[:maturity_date] = details[:maturity_date].to_date
+              expect(NewRelic::Agent).to receive(:notice_error).with('Rate band threshold exceeded', trace_only: true, custom_params: {term: term, type: type, details: details})
+              get '/rates/summary'
+            end
+            it 'sends a rate band alert' do
+              request_id = instance_double(String, 'A Request UUID')
+              user_id = instance_double(String, 'A User ID')
+              allow_any_instance_of(MAPI::ServiceApp).to receive(:request_id).and_return(request_id)
+              allow_any_instance_of(MAPI::ServiceApp).to receive(:request_user_id).and_return(user_id)
+              expect(MAPI::Mailers::InternalMailer).to receive(:send_rate_band_alert).with(type, term, live_hash[type][term][:rate].to_f, start_of_day_hash[type][term][:rate].to_f, rate_band_hash, request_id, user_id)
+              rate_summary
+            end
+            shared_examples 'ignored violation' do
+              it 'does not log the violation in NewRelic' do
+                expect(NewRelic::Agent).to_not receive(:notice_error)
+                rate_summary
+              end
+              it 'does not log the violation' do
+                expect(logger).to_not receive(:error)
+                rate_summary
+              end
+              it 'does not send a rate band alert' do
+                expect(MAPI::Mailers::InternalMailer).to_not receive(:send_rate_band_alert)
+                rate_summary
+              end
+            end
+            describe 'if its passed the end-of-day' do
+              before do
+                loan_terms_hash[loan_term][loan_type][:trade_status] = false
+              end
+
+              include_examples 'ignored violation'
+            end
+
+            describe 'if the rate is already disabled' do
+              before do
+                loan_terms_hash[loan_term][loan_type][:display_status] = false
+              end
+
+              include_examples 'ignored violation'
+            end
+          end
+          describe 'when the rate high threshold is exceeded' do
+            before do
+              rate_band_hash[:max_threshold_exceeded] = true
+            end
+
+            include_examples 'rate band violations', loan_term, loan_type
+          end
+          describe 'when the rate low threshold is exceeded' do
+            before do
+              rate_band_hash[:min_threshold_exceeded] = true
+            end
+
+            include_examples 'rate band violations', loan_term, loan_type
+          end
+        end
       end
     end
     it "returns a timestamp" do
@@ -303,6 +547,26 @@ describe MAPI::ServiceApp do
       loan_types.each do |loan_type|
         loan_terms.each do |loan_term|
           expect(rate_summary[loan_type][loan_term][:maturity_date]).to eq(maturity_date)
+        end
+      end
+    end
+
+    describe "sets custom term data if maturity_date is not nil" do
+      loan_types.each do |loan_type|
+        it "should set #{loan_type} payment_on" do
+          expect(rate_summary_with_maturity_date[loan_type][days_to_maturity_term][:payment_on]).to eq('Maturity')
+        end
+        it "should set #{loan_type} interest_day_count" do
+          expect(rate_summary_with_maturity_date[loan_type][days_to_maturity_term][:interest_day_count]).to eq('ACT/ACT')
+        end
+        it "should set #{loan_type} days_to_maturity" do
+          expect(rate_summary_with_maturity_date[loan_type][days_to_maturity_term][:days_to_maturity]).to eq((custom_maturity_date.to_date - Time.zone.today.to_date).to_i)
+        end
+        it "should set #{loan_type} rate" do
+          expect(rate_summary_with_maturity_date[loan_type][days_to_maturity_term][:rate]).to be_kind_of(Float)
+        end
+        it "should set #{loan_type} maturity_date" do
+          expect(rate_summary_with_maturity_date[loan_type][days_to_maturity_term][:maturity_date]).to eq(custom_maturity_date.iso8601)
         end
       end
     end
@@ -328,6 +592,12 @@ describe MAPI::ServiceApp do
       let(:live_data_hash_with_symbol_keys) do
         types_and_terms_hash { |_type, _term| live_data_value_with_symbol_keys.clone }
       end
+      let(:live_data_custom_hash_with_string_keys) do
+        types_and_terms_custom_hash { |_type, _term| live_data_value_with_string_keys.clone }
+      end
+      let(:live_data_custom_hash_with_symbol_keys) do
+        types_and_terms_custom_hash { |_type, _term| live_data_value_with_symbol_keys.clone }
+      end
       let(:start_of_day_xml){ double('start_of_day_xml') }
       let(:start_of_day){ n_level_hash_with_default("5.0", 3) }
       let(:mds_connection){ double('mds_connection') }
@@ -336,6 +606,7 @@ describe MAPI::ServiceApp do
       let(:display_status){ double('display_status') }
       today = Time.zone.today
       funding_date =  today + rand(1..2).days
+      maturity_date =  today + 10.days
       let(:loan_terms_hash){ n_level_hash_with_default({ trade_status: trade_status, display_status: display_status }, 2) }
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
@@ -349,20 +620,37 @@ describe MAPI::ServiceApp do
         allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(start_of_day_xml).and_return(start_of_day)
         allow(MAPI::Services::Rates).to receive(:get_maturity_date).with(maturity_date_before, kind_of(String), []).and_return(maturity_date_after)
       end
-      describe "funding date is nil" do
+      describe "funding date is nil and maturity date is nil" do
         it_behaves_like 'a rates summary'
       end
       describe "funding date is not nil" do
         before do
-          allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date).and_return(live_data_xml)
-          allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay', funding_date).and_return(start_of_day_xml)
+          allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date, nil).and_return(live_data_xml)
+          allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay', funding_date, nil).and_return(start_of_day_xml)
         end
         it_behaves_like 'a rates summary', funding_date
 
         it "passes funding date to get_market_data_from_soap method, if the date is supplied" do
-          expect(subject).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date)
-          expect(subject).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay', funding_date)
+          expect(subject).to receive(:get_market_data_from_soap).with(logger, 'Live', funding_date, nil)
+          expect(subject).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay', funding_date, nil)
           get '/rates/summary', funding_date: funding_date
+        end
+      end
+      describe "maturity date is not nil" do
+        before do
+          allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'Live', nil, maturity_date).and_return(live_data_xml)
+          allow(MAPI::Services::Rates).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay', nil, maturity_date).and_return(start_of_day_xml)
+          allow(MAPI::Services::Rates).to receive(:extract_market_data_from_soap_response).with(live_data_xml).and_return(live_data_custom_hash_with_symbol_keys)
+        end
+        it_behaves_like 'a rates summary', nil, maturity_date
+
+        it "passes maturity date to get_market_data_from_soap method, if the date is supplied with `live` value" do
+          expect(subject).to receive(:get_market_data_from_soap).with(logger, 'Live', nil, maturity_date)
+          get '/rates/summary', maturity_date: maturity_date
+        end
+        it "passes maturity date to get_market_data_from_soap method, if the date is supplied with `StartOfDay` value" do
+          expect(subject).to receive(:get_market_data_from_soap).with(logger, 'StartOfDay', nil, maturity_date)
+          get '/rates/summary', maturity_date: maturity_date
         end
       end
     end
@@ -754,7 +1042,7 @@ describe MAPI::ServiceApp do
     end
     describe 'in the production environment' do
       before do
-        expect(MAPI::ServiceApp).to receive(:environment).at_least(1).and_return(:production)
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
       end
       it 'should return data relevant to each loan_term', vcr: {cassette_name: 'current_price_indications_arc'} do
         price_indications_current_arc.each do |arc|
@@ -773,6 +1061,33 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe '`get_market_data_from_soap` method' do
+    let(:logger){ double('logger') }
+    today = Time.zone.today
+    let(:funding_date) { today + rand(1..2).days }
+    let(:maturity_date) { today + rand(3..1095).days }
+    let(:live_or_start_of_day){ double('live_or_start_of_day') }
+    let(:call_method) { subject.get_market_data_from_soap(logger, live_or_start_of_day, funding_date, maturity_date) }
+
+    before do
+      allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
+      MAPI::Services::Rates.class_variable_set(:@@mds_connection, nil)
+    end
+
+    MAPI::Services::Rates::LOAN_TYPES.each do |loan|
+      it "calls market_data_message_for_loan_type with #{loan}" do
+        allow(subject).to receive(:market_data_message_for_loan_type)
+        expect(subject).to receive(:market_data_message_for_loan_type).with(loan, live_or_start_of_day, funding_date)
+        call_method
+      end
+      it "calls market_data_message_for_loan_type with #{loan} with maturity_date" do
+        allow(subject).to receive(:market_data_message_for_loan_type)
+        expect(subject).to receive(:market_data_message_for_loan_type).with(loan, live_or_start_of_day, funding_date, maturity_date)
+        call_method
+      end
+    end
+  end
+
   describe '`market_data_message_for_loan_type` method' do
     let(:loan_type){ [:whole, :agency, :aaa, :aa].sample }
     let(:loan_type_result){ MAPI::Shared::Constants::LOAN_MAPPING[loan_type.to_s] }
@@ -782,6 +1097,9 @@ describe MAPI::ServiceApp do
     let(:call_method) { subject.market_data_message_for_loan_type(loan_type, live_or_start_of_day, funding_date) }
     let(:call_method_no_funding_date) { subject.market_data_message_for_loan_type(loan_type, live_or_start_of_day, nil) }
     let(:caller) { double('caller') }
+    let(:maturity_date) { today + rand(3..1095).days }
+    let(:call_method_maturity_date) { subject.market_data_message_for_loan_type(loan_type, live_or_start_of_day, funding_date, maturity_date) }
+    let(:frequency) {(maturity_date.to_date - (funding_date || Time.zone.today).to_date).to_i.to_s}
 
     it 'returns a hash with a `v11:id` inside `v1:caller' do
       allow(ENV).to receive(:[]).with('MAPI_FHLBSF_ACCOUNT').and_return(caller)
@@ -801,6 +1119,11 @@ describe MAPI::ServiceApp do
     end
     it 'returns a hash with a `v12:id` inside `v12:pricingGroup`' do
       expect(call_method['v1:marketData'].first['v12:pricingGroup'].first).to include('v12:id'=>live_or_start_of_day)
+    end
+    describe 'custom date' do
+      it 'returns a hash with a `v12:FhlbsfDataPoint` inside `v1:data`' do
+        expect(call_method_maturity_date['v1:marketData'].first['v12:data'].first).to include('v12:FhlbsfDataPoint' => ['v12:tenor' => ['v12:interval' => [{'v13:frequency'=>frequency, 'v13:frequencyUnit'=>'D'}]]])
+      end
     end
   end
 

@@ -18,8 +18,8 @@ class LettersOfCreditController < ApplicationController
     authorize :letters_of_credit, :request?
   end
 
-  before_action :fetch_letter_of_credit_request, except: [:manage]
-  after_action :save_letter_of_credit_request, except: [:manage]
+  before_action :fetch_letter_of_credit_request, except: [:manage, :view]
+  after_action :save_letter_of_credit_request, except: [:manage, :view]
 
   # GET
   def manage
@@ -83,6 +83,7 @@ class LettersOfCreditController < ApplicationController
       @securid_status = securid_status
     elsif letter_of_credit_request.valid? && letter_of_credit_request.execute(current_user.display_name)
       set_titles(t('letters_of_credit.success.title'))
+      MemberMailer.letter_of_credit_request(current_member_id, @letter_of_credit_request.to_json, current_user).deliver_later
       request_succeeded = true
     else
       @error_message = t('letters_of_credit.errors.generic_html', rm_email: @contacts[:rm][:email], rm_phone_number: @contacts[:rm][:phone_number])
@@ -90,6 +91,21 @@ class LettersOfCreditController < ApplicationController
     unless request_succeeded
       set_titles(t('letters_of_credit.request.title'))
       render :preview
+    end
+  end
+
+  # GET
+  def view
+    @letter_of_credit_request = LetterOfCreditRequest.find(params[:letter_of_credit_request][:id], request)
+    if params[:export_format] == 'pdf'
+      pdf_name = "letter_of_credit_request_#{@letter_of_credit_request.lc_number}.pdf"
+      job_status = RenderLetterOfCreditPDFJob.perform_later(current_member_id, action_name, pdf_name, { letter_of_credit_request: {id: letter_of_credit_request.id} }).job_status
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
+    else
+      member = MembersService.new(request).member(current_member_id)
+      raise ActionController::RoutingError.new("There has been an error and LettersOfCreditController#view has encountered nil calling MembersService. Check error logs.") if member.nil?
+      @member_name, @member_fhla = member[:name], member[:fhla_number]
     end
   end
 
@@ -138,7 +154,7 @@ class LettersOfCreditController < ApplicationController
   end
 
   def fetch_letter_of_credit_request
-    letter_of_credit_params = request.params[:letter_of_credit_request] || {}
+    letter_of_credit_params = (request.params[:letter_of_credit_request] || {}).with_indifferent_access
     id = letter_of_credit_params[:id]
     @letter_of_credit_request = id ? LetterOfCreditRequest.find(id, request) : letter_of_credit_request
     authorize @letter_of_credit_request, :modify?

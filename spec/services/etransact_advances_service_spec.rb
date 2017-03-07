@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe EtransactAdvancesService do
-  let(:request) { double('request', uuid: '12345', session: double('A Session', :[] => nil)) }
+  let(:request) { instance_double(ActionDispatch::Request, uuid: '12345', session: double('A Session', :[] => nil), member_id: nil, member_name: nil) }
   subject { EtransactAdvancesService.new(request) }
   it { expect(subject).to respond_to(:etransact_active?) }
   describe '`etransact_active?` method', :vcr do
@@ -69,7 +69,7 @@ describe EtransactAdvancesService do
       expect(call_method).to be_kind_of(Hash)
     end
     it 'calls `get_hash`' do
-      expect(subject).to receive(:get_hash).with(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", allow_grace_period: allow_grace_period, funding_date: nil, )
+      expect(subject).to receive(:get_hash).with(:quick_advance_validate, "etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{advance_rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", allow_grace_period: allow_grace_period, funding_date: nil)
       call_method
     end
     it 'calls `get_hash` with funding_date' do
@@ -198,8 +198,8 @@ describe EtransactAdvancesService do
     it_should_behave_like 'a MAPI backed service object method', :check_limits, [m_id, l_amount, '1Week']
     describe 'without service exceptions' do
       before do
-        allow(subject).to receive(:get_days_to_maturity).with(advance_term).and_return(low_days)
-        allow(subject).to receive(:get_days_to_maturity).with(nil).and_return(nil)
+        allow(subject).to receive(:get_days_to_maturity).with(advance_term, nil).and_return(low_days)
+        allow(subject).to receive(:get_days_to_maturity).with(nil, nil).and_return(nil)
         allow(subject).to receive(:todays_advances_amount).with(member_id, anything, anything).and_return(todays_advances_amount_response)
         allow(subject).to receive(:settings).and_return(settings_response)
         allow(subject).to receive(:todays_cumulative_advances_amount).with(member_id).and_return(todays_cumulative_advances_amount_response)
@@ -376,6 +376,7 @@ describe EtransactAdvancesService do
 
   describe 'get_days_to_maturity' do
     let(:today) { Time.zone.today }
+    let(:custom_maturity_date) { today + rand(3..1095).days }
     it 'should map overnight to 1' do
       expect(subject.send(:get_days_to_maturity,'Overnight')).to eq( 1 )
       expect(subject.send(:get_days_to_maturity,'overnight')).to eq( 1 )
@@ -401,6 +402,10 @@ describe EtransactAdvancesService do
     end
     it 'returns nil if passed nil' do
       expect(subject.send(:get_days_to_maturity, nil)).to be_nil
+    end
+    it 'should map custom to custom_maturity_date - today' do
+      result = (custom_maturity_date.to_date - today.to_date).to_i
+      expect(subject.send(:get_days_to_maturity, '10day', custom_maturity_date)).to eq(result)
     end
   end
 
@@ -505,13 +510,16 @@ describe EtransactAdvancesService do
     let(:member_name) { double('A Member Name') }
     let(:mail) { double('An Email', deliver_now: nil)}
 
+    before do
+      allow(subject).to receive(:connection_request_uuid).and_return(request_uuid)
+      allow(subject).to receive(:connection_user).and_return(request_user)
+      allow(subject).to receive(:member_id_to_name).with(member_id).and_return(member_name)
+    end
+
     it 'returns a Proc' do
       expect(error_handler).to be_kind_of(Proc)
     end
     it 'builds a `calypso_error` email when the Proc is called' do
-      allow(subject).to receive(:request_uuid).and_return(request_uuid)
-      allow(subject).to receive(:request_user).and_return(request_user)
-      allow(subject).to receive(:member_id_to_name).with(member_id).and_return(member_name)
       expect(InternalMailer).to receive(:calypso_error).with(error, request_uuid, request_user, member_name).and_return(mail)
       call_error_handler
     end
@@ -519,6 +527,24 @@ describe EtransactAdvancesService do
       allow(InternalMailer).to receive(:calypso_error).and_return(mail)
       expect(mail).to receive(:deliver_now)
       call_error_handler
+    end
+  end
+
+  describe '`member_id_to_name` protected method' do
+    let(:member_id) { double('Member ID') }
+    let(:call_method) { subject.send(:member_id_to_name, member_id) }
+    let(:member_name) { double('A Member Name') }
+
+    before do
+      allow(request).to receive(:member_name).and_return(member_name)
+    end
+
+    it 'returns the member name assocaited with the supplied member ID' do
+      allow(request).to receive(:member_id).and_return(member_id)
+      expect(call_method).to be(member_name)
+    end
+    it 'returns the member ID if the name cant be found' do
+      expect(call_method).to be(member_id)
     end
   end
 end
