@@ -810,8 +810,9 @@ RSpec.describe LettersOfCreditController, :type => :controller do
     end
 
     describe '`prioritized_error_message`' do
+      let(:max_term) { rand(12..120) }
       let(:remaining_bc) { rand(1000..999999) }
-      let(:letter_of_credit) { instance_double(LetterOfCreditRequest, errors: nil, borrowing_capacity: {standard_excess_capacity: remaining_bc})}
+      let(:letter_of_credit) { instance_double(LetterOfCreditRequest, errors: nil, standard_borrowing_capacity: remaining_bc, max_term: max_term)}
       let(:call_method) { subject.send(:prioritized_error_message, letter_of_credit) }
 
       context 'when there are no errors' do
@@ -822,15 +823,22 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       context 'when there are errors' do
         let(:error_message) { instance_double(String) }
         let(:errors) { instance_double(ActiveModel::Errors, :added? => nil, first: [SecureRandom.hex, error_message]) }
-        before { allow(letter_of_credit).to receive(:errors).and_return(errors) }
+        before do
+          allow(letter_of_credit).to receive(:errors).and_return(errors)
+          allow(errors).to receive(:added?)
+        end
         it 'checks to see if an `amount` `exceeds_borrowing_capacity` error has been added' do
           expect(errors).to receive(:added?).with(:amount, :exceeds_borrowing_capacity)
           call_method
         end
+        it 'checks to see if an `expiration_date` `after_max_term` error has been added' do
+          expect(errors).to receive(:added?).with(:expiration_date, :after_max_term)
+          call_method
+        end
         describe 'when the errors contain an `amount` `exceeds_borrowing_capacity` error' do
           before { allow(errors).to receive(:added?).with(:amount, :exceeds_borrowing_capacity).and_return(true) }
-          it 'reads the borrowing_capacity attribute of the letter_of_credit_request' do
-            expect(letter_of_credit).to receive(:borrowing_capacity).and_return({standard_excess_capacity: remaining_bc})
+          it 'reads the standard_borrowing_capacity attribute of the letter_of_credit_request' do
+            expect(letter_of_credit).to receive(:standard_borrowing_capacity).and_return(remaining_bc)
             call_method
           end
           it 'formats the remaining standard borrowing capacity' do
@@ -841,6 +849,16 @@ RSpec.describe LettersOfCreditController, :type => :controller do
             formatted_capacity = SecureRandom.hex
             allow(controller).to receive(:fhlb_formatted_currency_whole).and_return(formatted_capacity)
             expect(call_method).to eq(I18n.t('letters_of_credit.errors.exceeds_borrowing_capacity', borrowing_capacity: formatted_capacity))
+          end
+        end
+        describe 'when the errors contain an `expiration_date` `after_max_term` error' do
+          before { allow(errors).to receive(:added?).with(:expiration_date, :after_max_term).and_return(true) }
+          it 'reads the max_term attribute of the letter_of_credit_request' do
+            expect(letter_of_credit).to receive(:max_term).and_return(max_term)
+            call_method
+          end
+          it 'adds an error message containing the max term' do
+            expect(call_method).to eq(I18n.t('letters_of_credit.errors.after_max_term', max_term: max_term))
           end
         end
         describe 'when the errors do not contain an `amount` `exceeds_borrowing_capacity` error' do

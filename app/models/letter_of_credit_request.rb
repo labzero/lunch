@@ -11,10 +11,10 @@ class LetterOfCreditRequest
   ISSUE_MAX_DATE_RESTRICTION = 1.week # TODO: Validate issue date as part of MEM-2151
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
-  READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners, :member_id, :borrowing_capacity]
-  ACCESSIBLE_ATTRS = [:beneficiary_name, :beneficiary_address, :amount, :issue_date, :expiration_date, :created_at, :created_by]
-  DATE_ATTRS = [:issue_date, :expiration_date, :created_at]
-  REQUIRED_ATTRS = [:beneficiary_name, :amount, :issue_date, :expiration_date]
+  READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners, :member_id, :standard_borrowing_capacity, :max_term].freeze
+  ACCESSIBLE_ATTRS = [:beneficiary_name, :beneficiary_address, :amount, :issue_date, :expiration_date, :created_at, :created_by].freeze
+  DATE_ATTRS = [:issue_date, :expiration_date, :created_at].freeze
+  REQUIRED_ATTRS = [:beneficiary_name, :amount, :issue_date, :expiration_date].freeze
   SERIALIZATION_EXCLUDE_ATTRS = [:request].freeze
 
   attr_accessor *ACCESSIBLE_ATTRS
@@ -26,6 +26,7 @@ class LetterOfCreditRequest
   validate :issue_date_within_range
   validate :expiration_date_within_range
   validate :amount_does_not_exceed_borrowing_capacity
+  validate :expiration_date_before_max_term
 
   def initialize(member_id, request=ActionDispatch::TestRequest.new)
     @member_id = member_id
@@ -60,7 +61,7 @@ class LetterOfCreditRequest
       when *READ_ONLY_ATTRS
         instance_variable_set("@#{key}", value)
       when *DATE_ATTRS
-        value = Time.zone.parse(value) if value
+        value = Date.parse(value) if value
         send("#{key}=", value)
       when *ACCESSIBLE_ATTRS
         send("#{key}=", value)
@@ -103,6 +104,14 @@ class LetterOfCreditRequest
 
   def owners
     @owners ||= Set.new
+  end
+
+  def standard_borrowing_capacity
+    @standard_borrowing_capacity ||= (@member_profile[:collateral_borrowing_capacity][:standard][:remaining].to_i if @member_profile)
+  end
+
+  def max_term
+    @max_term ||= (@member_profile[:maximum_term].to_i if @member_profile)
   end
 
   def self.from_json(json, request)
@@ -174,13 +183,20 @@ class LetterOfCreditRequest
   end
 
   def amount_does_not_exceed_borrowing_capacity
-    fetch_borrowing_capacity
-    remaining_standard_bc = borrowing_capacity[:standard_excess_capacity].to_i
-    errors.add(:amount, :exceeds_borrowing_capacity) unless !amount || amount <= remaining_standard_bc
+    fetch_member_profile
+    errors.add(:amount, :exceeds_borrowing_capacity) unless !amount || amount <= standard_borrowing_capacity
   end
 
-  def fetch_borrowing_capacity
-    @borrowing_capacity ||= MemberBalanceService.new(member_id, request).borrowing_capacity_summary(Time.zone.today)
+  def expiration_date_before_max_term
+    if expiration_date && issue_date
+      fetch_member_profile
+      term = (expiration_date.to_date - issue_date.to_date).to_i
+      errors.add(:expiration_date, :after_max_term) unless term.days <= max_term.months
+    end
+  end
+
+  def fetch_member_profile
+    @member_profile ||= MemberBalanceService.new(member_id, request).profile
   end
 
 end

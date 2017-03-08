@@ -66,6 +66,8 @@ Then(/^I should see the "(.*?)" form error$/) do |error_type|
     I18n.t('letters_of_credit.errors.not_authorized')
   when /^exceeds borrowing capacity by (\d+)$/
     I18n.t('letters_of_credit.errors.exceeds_borrowing_capacity', borrowing_capacity: fhlb_formatted_currency_whole($1, html: false))
+  when /^expiration date exceeds max term of (\d+) months$/
+    I18n.t('letters_of_credit.errors.after_max_term', max_term: $1)
   end
   page.assert_selector('.form-error-section p', text: text, exact: true)
 end

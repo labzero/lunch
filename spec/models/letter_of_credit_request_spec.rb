@@ -13,7 +13,10 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
   subject { described_class.new(member_id) }
 
   describe 'validations' do
-    before { subject.instance_variable_set('@borrowing_capacity', {}) }
+    before do
+      subject.instance_variable_set('@standard_borrowing_capacity', 0)
+      subject.instance_variable_set('@max_term', 0)
+    end
     [:beneficiary_name, :amount, :issue_date, :expiration_date].each do |attr|
       it "validates the presence of `#{attr}`" do
         expect(subject).to validate_presence_of attr
@@ -147,11 +150,11 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
 
       before do
         allow(Time.zone).to receive(:today).and_return(today)
-        allow(subject).to receive(:fetch_borrowing_capacity) { subject.instance_variable_set('@borrowing_capacity', {standard_excess_capacity: remaining_bc}) }
+        allow(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@standard_borrowing_capacity', remaining_bc) }
       end
 
-      it 'calls `fetch_borrowing_capacity`' do
-        expect(subject).to receive(:fetch_borrowing_capacity) { subject.instance_variable_set('@borrowing_capacity', {standard_excess_capacity: remaining_bc}) }
+      it 'calls `fetch_member_profile`' do
+        expect(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@standard_borrowing_capacity', remaining_bc) }
         call_validator
       end
       describe 'when there is no amount value' do
@@ -178,6 +181,54 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         before { subject.amount = remaining_bc + rand(1..100000) }
         it 'adds an error' do
           expect(subject.errors).to receive(:add).with(:amount, :exceeds_borrowing_capacity)
+          call_validator
+        end
+      end
+    end
+
+    describe '`expiration_date_before_max_term`' do
+      let(:issue_date) { today }
+      let(:expiration_date) { today + rand(12..36).months }
+      let(:max_term) { double('max term', months: 12.months) }
+      let(:call_validator) { subject.send(:expiration_date_before_max_term) }
+      context 'when there is an issue_date' do
+        before do
+          subject.issue_date = issue_date
+          subject.expiration_date = nil
+        end
+        it 'does not add an error if there is no expiration_date' do
+          expect(subject.errors).not_to receive(:add).with(:expiration_date, :after_max_term)
+          call_validator
+        end
+      end
+      context 'when there is an expiration_date' do
+        before do
+          subject.expiration_date = expiration_date
+          subject.issue_date = nil
+        end
+        it 'does not add an error if there is no issue_date' do
+          expect(subject.errors).not_to receive(:add).with(:expiration_date, :after_max_term)
+          call_validator
+        end
+      end
+      context 'when there is both an issue_date and an expiration_date' do
+        before do
+          subject.expiration_date = expiration_date
+          subject.issue_date = issue_date
+          allow(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@max_term', max_term) }
+        end
+        it 'calls `fetch_member_profile`' do
+          expect(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@max_term', max_term) }
+          call_validator
+        end
+        it 'does not add an error if time span between the issue_date and expiration_date is less than the max_term in months' do
+          allow(max_term).to receive(:months).and_return(120.months)
+          expect(subject.errors).not_to receive(:add).with(:expiration_date, :after_max_term)
+          call_validator
+        end
+        it 'adds an error if time span between the issue_date and expiration_date is more than the max_term in months' do
+          allow(max_term).to receive(:months).and_return(6.months)
+          expect(subject.errors).to receive(:add).with(:expiration_date, :after_max_term)
           call_validator
         end
       end
@@ -351,7 +402,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       date_attrs.each do |key|
         it "assigns a datefied value found under `#{key}` to the attribute `#{key}`" do
           datefied_value = double('some value as a date')
-          allow(Time.zone).to receive(:parse).with(value).and_return(datefied_value)
+          allow(Date).to receive(:parse).with(value).and_return(datefied_value)
           hash[key.to_s] = value
           call_method
           expect(subject.send(key)).to be(datefied_value)
@@ -496,6 +547,66 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       it 'returns the same object on each call' do
         set = call_method
         expect(call_method).to be(set)
+      end
+    end
+
+    describe '`standard_borrowing_capacity` method' do
+      let(:call_method) { subject.standard_borrowing_capacity }
+      it 'returns the `@standard_borrowing_capacity` attribute if already set' do
+        existing_value = double('some value')
+        subject.instance_variable_set('@standard_borrowing_capacity', existing_value)
+        expect(call_method).to eq(existing_value)
+      end
+      context 'when the `@standard_borrowing_capacity` attribute is not already set' do
+        it 'returns nil if there is no @member_profile' do
+          expect(call_method).to be nil
+        end
+        context 'when there is a @member_profile' do
+          let(:standard_excess_capacity) { double('excess capacity') }
+          let(:member_profile) { {collateral_borrowing_capacity: {standard: {remaining: double('excess bc', to_i: standard_excess_capacity)}} } }
+          before { subject.instance_variable_set('@member_profile', member_profile) }
+          it 'calls `to_i` on the value of `@member_profile[:collateral_borrowing_capacity][:standard][:remaining]`' do
+            expect(member_profile[:collateral_borrowing_capacity][:standard][:remaining]).to receive(:to_i)
+            call_method
+          end
+          it 'returns the `standard_excess_capacity`' do
+            expect(call_method).to eq(standard_excess_capacity)
+          end
+          it 'returns the same object on each call' do
+            capacity = call_method
+            expect(call_method).to be(capacity)
+          end
+        end
+      end
+    end
+
+    describe '`max_term` method' do
+      let(:call_method) { subject.max_term }
+      it 'returns the `@max_term` attribute if already set' do
+        existing_value = double('some value')
+        subject.instance_variable_set('@max_term', existing_value)
+        expect(call_method).to eq(existing_value)
+      end
+      context 'when the `@max_term` attribute is not already set' do
+        it 'returns nil if there is no @member_profile' do
+          expect(call_method).to be nil
+        end
+        context 'when there is @member_profile' do
+          let(:max_term) { double('the maximum term in months') }
+          let(:member_profile) { {maximum_term: double('max term', to_i: max_term)} }
+          before { subject.instance_variable_set('@member_profile', member_profile) }
+          it 'calls `to_i` on the value of `maximum_term` for @member_profile' do
+            expect(member_profile[:maximum_term]).to receive(:to_i)
+            call_method
+          end
+          it 'returns the `maximum_term`' do
+            expect(call_method).to eq(max_term)
+          end
+          it 'returns the same object on each call' do
+            term = call_method
+            expect(call_method).to be(term)
+          end
+        end
       end
     end
   end
@@ -736,22 +847,23 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       end
     end
 
-    describe '`fetch_borrowing_capacity`' do
-      let(:borrowing_capacity_summary) { double('borrowing capacity summary')}
-      let(:member_balance_service) { instance_double(MemberBalanceService, borrowing_capacity_summary: borrowing_capacity_summary) }
-      let(:call_method) { subject.send(:fetch_borrowing_capacity) }
+    describe '`fetch_member_profile`' do
+      let(:member_profile) { double('member_profile')}
+      let(:member_balance_service) { instance_double(MemberBalanceService, profile: member_profile) }
+      let(:call_method) { subject.send(:fetch_member_profile) }
       before { allow(MemberBalanceService).to receive(:new).and_return(member_balance_service) }
+
       it 'creates a new instance of MemberBalanceService with the member_id and request' do
         expect(MemberBalanceService).to receive(:new).with(subject.member_id, subject.request).and_return(member_balance_service)
         call_method
       end
-      it 'calls `borrowing_capacity_summary` on the instance of MemberBalanceService with today as an argument' do
-        expect(member_balance_service).to receive(:borrowing_capacity_summary).with(today).and_return(borrowing_capacity_summary)
+      it 'calls `profile` on the `member_balance_service`' do
+        expect(member_balance_service).to receive(:profile).and_return(member_profile)
         call_method
       end
       it 'returns the same object on each call' do
-        borrowing_capacity = call_method
-        expect(call_method).to be(borrowing_capacity)
+        profile = call_method
+        expect(call_method).to be(profile)
       end
     end
   end

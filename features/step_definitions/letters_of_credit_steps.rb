@@ -105,10 +105,33 @@ Then(/^the letter of credit amount field should be blank$/) do
   expect(page.find('input[name="letter_of_credit_request[amount]"]').value).to eq('')
 end
 
-Then(/^the letter of credit amount field should show "(.*?)"/) do |text|
+Then(/^the letter of credit amount field should show "(.*?)"$/) do |text|
   expect(page.find("input[name='letter_of_credit_request[amount]'").value).to eq(text)
 end
 
-When(/^I have a borrowing capacity of (\d+)/) do |borrowing_capacity|
-  allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_summary).and_return({standard_excess_capacity: borrowing_capacity})
+When(/^I have a borrowing capacity of (\d+)$/) do |borrowing_capacity|
+  profile = member_profile_mock
+  profile[:collateral_borrowing_capacity][:standard][:remaining] = borrowing_capacity.to_i
+  allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile)
+end
+
+When(/^I have a maximum borrowing term of (\d+) months$/) do |max_term|
+  profile = member_profile_mock
+  profile[:maximum_term] = max_term
+  allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile)
+end
+
+def member_profile_mock
+  {
+    maximum_term: 500,
+    collateral_borrowing_capacity: {
+      standard: {remaining: 1000000000},
+      sbc: {
+        agency: {remaining: 0},
+        aaa: {remaining: 0},
+        aa: {remaining: 0}
+      }
+    },
+    capital_stock: {remaining_leverage: 0}
+  }
 end

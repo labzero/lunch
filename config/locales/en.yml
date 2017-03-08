@@ -265,6 +265,7 @@ en:
             expiration_date:
               invalid: "The expiration date must not occur on a weekend or holiday; must not be in the past; and must be less than 15 years from the issue date. Adjust the date selection and try again."
               before_issue_date: Expiration date must be after issue date.
+              after_max_term: The expiration date exceeds the maximum borrowing term allowed for your institution. Adjust the expiration or issue date and try again.
             amount:
               invalid: Amount must be a positive number with no fractional cents.
               not_a_number: Amount must be a positive number with no fractional cents.
@@ -1545,6 +1546,7 @@ en:
       not_authorized: This Letter of Credit Request was not completed because Bank employees are not authorized to request letters of credit via the member portal.
       generic_html: "We are unable to process your request at this time. Contact your Relationship Manager: %{rm_email}, %{rm_phone_number}."
       exceeds_borrowing_capacity: The amount you selected exceeds your institution's current whole loan borrowing capacity of %{borrowing_capacity}. You may make a request for a lower amount, or check with your Relationship Manager or Member Services Desk to adjust your collateral first.
+      after_max_term: The expiration date cannot be more than %{max_term} months from the issue date. Adjust the expiration or issue date and try again.
     pdf:
       requested: Letter of Credit Request
       request_date: Request Date/Time
