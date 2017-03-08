@@ -4669,9 +4669,9 @@ loud-rejection@^1.0.0:
     currently-unhandled "^0.4.1"
     signal-exit "^3.0.0"
 
-lru-cache@2:
-  version "2.7.3"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-2.7.3.tgz#6d4524e8b955f95d4f5b58851ce21dd72fb4e952"
+lru-cache@2, lru-cache@~2.0.0:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-2.0.4.tgz#b8b61ae09848385ec6768760e39c123e7e39568a"
 
 lru-cache@^3.2.0:
   version "3.2.0"
@@ -4685,10 +4685,6 @@ lru-cache@^4.0.1:
   dependencies:
     pseudomap "^1.0.1"
     yallist "^2.0.0"
-
-lru-cache@~2.0.0:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-2.0.4.tgz#b8b61ae09848385ec6768760e39c123e7e39568a"
 
 lru-queue@0.1:
   version "0.1.0"
@@ -5050,7 +5046,7 @@ node-sass@^4.5.0:
     sass-graph "^2.1.1"
     stdout-stream "^1.4.0"
 
-node-uuid@^1.4.7, node-uuid@~1.4.7:
+node-uuid@~1.4.7:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/node-uuid/-/node-uuid-1.4.7.tgz#6da5a17668c4b3dd59623bda11cf7fa4c1f60a6f"
 
@@ -7811,7 +7807,7 @@ uuid@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-2.0.3.tgz#67e2e863797215530dff318e5bf9dcebfd47b21a"
 
-uuid@^3.0.0:
+uuid@^3.0.0, uuid@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.0.1.tgz#6544bba2dfda8c1cf17e629a3a305e2bb1fee6c1"
 

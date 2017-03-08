@@ -1,6 +1,6 @@
 import { normalize, arrayOf } from 'normalizr';
 import update from 'react-addons-update';
-import uuid from 'node-uuid';
+import uuidV1 from 'uuid/v1';
 import ActionTypes from './constants/ActionTypes';
 import { getRestaurantIds, getRestaurantById } from './selectors/restaurants';
 import { getTagIds, getTagById } from './selectors/tags';
@@ -327,7 +327,7 @@ export const notifications = new Map([
     const { realAction } = action;
     const notification = {
       actionType: realAction.type,
-      id: uuid.v1()
+      id: uuidV1()
     };
     switch (notification.actionType) {
       case ActionTypes.RESTAURANT_POSTED: {
