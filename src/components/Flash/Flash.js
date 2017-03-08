@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+// eslint-disable-next-line css-modules/no-unused-class
 import s from './Flash.scss';
 
 class Flash extends Component {

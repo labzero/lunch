@@ -13,6 +13,15 @@ class ContextHolder extends React.Component {
     children: PropTypes.element.isRequired,
   };
 
+  static defaultProps = {
+    context: {
+      insertCss: () => {},
+      onSetMeta: () => {},
+      onPageNotFound: () => {},
+      onSetTitle: () => {}
+    }
+  }
+
   static childContextTypes = {
     insertCss: PropTypes.func,
     onSetTitle: PropTypes.func,

@@ -1,3 +1,5 @@
+/* eslint-disable css-modules/no-unused-class */
+
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from '../NotificationContent.scss';
@@ -17,6 +19,10 @@ RestaurantDeleted.propTypes = {
   loggedIn: PropTypes.bool.isRequired,
   user: PropTypes.string,
   restaurantName: PropTypes.string.isRequired
+};
+
+RestaurantDeleted.defaultProps = {
+  user: ''
 };
 
 export default withStyles(s)(RestaurantDeleted);

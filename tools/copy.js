@@ -1,56 +1,68 @@
 /**
  * React Starter Kit (https://www.reactstarterkit.com/)
  *
- * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
+ * Copyright © 2014-present Kriasoft, LLC. All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE.txt file in the root directory of this source tree.
  */
 
 import path from 'path';
-import gaze from 'gaze';
-import Promise from 'bluebird';
-import fs from './lib/fs';
+import chokidar from 'chokidar';
+import { writeFile, copyFile, makeDir, copyDir, cleanDir } from './lib/fs';
 import pkg from '../package.json';
+import { format } from './run';
+
 /**
  * Copies static files such as robots.txt, favicon.ico to the
  * output (build) folder.
  */
-async function copy({ watch } = {}) {
-  const ncp = Promise.promisify(require('ncp'));
-
+async function copy() {
+  await makeDir('build');
   await Promise.all([
-    ncp('src/public', 'build/public'),
-    ncp('src/content', 'build/content'),
-    ncp('package.json', 'build/package.json'),
-    ncp('.env.prod', 'build/.env'),
-    ncp('database.js', 'build/database.js'),
-    ncp('.sequelizerc', 'build/.sequelizerc'),
-    ncp('db', 'build/db'),
-    ncp('cert', 'build/cert')
+    writeFile('build/package.json', JSON.stringify({
+      private: true,
+      engines: pkg.engines,
+      dependencies: pkg.dependencies,
+      scripts: {
+        start: 'node server.js',
+      },
+    }, null, 2)),
+    copyFile('LICENSE.txt', 'build/LICENSE.txt'),
+    copyDir('public', 'build/public'),
+    copyFile('.env.prod', 'build/.env'),
+    copyFile('database.js', 'build/database.js'),
+    copyFile('.sequelizerc', 'build/.sequelizerc'),
+    copyDir('db', 'build/db'),
+    copyDir('cert', 'build/cert')
   ]);
 
-  await fs.writeFile('./build/package.json', JSON.stringify({
-    private: true,
-    engines: pkg.engines,
-    dependencies: pkg.dependencies,
-    scripts: {
-      start: 'node server.js',
-    },
-  }, null, 2));
+  if (process.argv.includes('--watch')) {
+    const watcher = chokidar.watch([
+      'public/**/*',
+    ], { ignoreInitial: true });
 
-  if (watch) {
-    const watcher = await new Promise((resolve, reject) => {
-      gaze('src/content/**/*.*', (err, val) => (err ? reject(err) : resolve(val)));
+    watcher.on('all', async (event, filePath) => {
+      const start = new Date();
+      const src = path.relative('./', filePath);
+      const dist = path.join('build/', src.startsWith('src') ? path.relative('src', src) : src);
+      switch (event) {
+        case 'add':
+        case 'change':
+          await makeDir(path.dirname(dist));
+          await copyFile(filePath, dist);
+          break;
+        case 'unlink':
+        case 'unlinkDir':
+          cleanDir(dist, { nosort: true, dot: true });
+          break;
+        default:
+          return;
+      }
+      const end = new Date();
+      const time = end.getTime() - start.getTime();
+      console.log(`[${format(end)}] ${event} '${dist}' after ${time} ms`);
     });
-
-    const cp = async (file) => {
-      const relPath = file.substr(path.join(__dirname, '../src/content/').length);
-      await ncp(`src/content/${relPath}`, `build/content/${relPath}`);
-    };
-
-    watcher.on('changed', cp);
-    watcher.on('added', cp);
   }
 }
 

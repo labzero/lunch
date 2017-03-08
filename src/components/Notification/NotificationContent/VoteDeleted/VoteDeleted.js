@@ -30,4 +30,8 @@ VoteDeleted.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
+VoteDeleted.defaultProps = {
+  user: ''
+};
+
 export default withStyles(s)(VoteDeleted);

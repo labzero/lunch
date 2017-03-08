@@ -25,4 +25,8 @@ VotePosted.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
+VotePosted.defaultProps = {
+  user: ''
+};
+
 export default withStyles(s)(VotePosted);

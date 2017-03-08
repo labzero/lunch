@@ -1,3 +1,5 @@
+/* eslint-disable css-modules/no-unused-class */
+
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from '../NotificationContent.scss';
@@ -12,8 +14,11 @@ const TagDeleted = ({ loggedIn, user, tagName }) => {
 TagDeleted.propTypes = {
   loggedIn: PropTypes.bool.isRequired,
   user: PropTypes.string,
-  tagName: PropTypes.string.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired
+  tagName: PropTypes.string.isRequired
+};
+
+TagDeleted.defaultProps = {
+  user: ''
 };
 
 export default withStyles(s)(TagDeleted);

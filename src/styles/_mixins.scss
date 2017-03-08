@@ -50,3 +50,11 @@
   overflow: hidden;
   padding: 0;
 }
+
+@mixin clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}

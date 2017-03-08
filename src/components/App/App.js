@@ -10,11 +10,13 @@
 import React, { Component, PropTypes } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import emptyFunction from 'fbjs/lib/emptyFunction';
+import bootstrap from 'bootstrap/dist/css/bootstrap.css';
 import HeaderContainer from '../../containers/HeaderContainer';
 import FooterContainer from '../../containers/FooterContainer';
 import NotificationListContainer from '../../containers/NotificationListContainer';
 import ModalSectionContainer from '../../containers/ModalSectionContainer';
 import s from './App.scss';
+// eslint-disable-next-line css-modules/no-unused-class
 import globalCss from '../../styles/globalCss.scss';
 
 class App extends Component {
@@ -27,6 +29,10 @@ class App extends Component {
     shouldScrollToTop: PropTypes.bool.isRequired,
     scrolledToTop: PropTypes.func.isRequired
   };
+
+  static defaultProps = {
+    error: undefined
+  }
 
   static contextTypes = {
     insertCss: PropTypes.func,
@@ -44,6 +50,7 @@ class App extends Component {
   }
 
   componentWillMount() {
+    this.removeBootstrap = this.context.insertCss(s, bootstrap);
     this.removeCss = this.context.insertCss(s, globalCss);
 
     if (canUseDOM) {
@@ -74,6 +81,7 @@ class App extends Component {
 
   componentWillUnmount() {
     this.removeCss();
+    this.removeBootstrap();
   }
 
   render() {

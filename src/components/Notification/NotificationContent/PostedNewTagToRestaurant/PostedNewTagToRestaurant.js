@@ -36,4 +36,8 @@ PostedNewTagToRestaurant.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
+PostedNewTagToRestaurant.defaultProps = {
+  user: ''
+};
+
 export default withStyles(s)(PostedNewTagToRestaurant);

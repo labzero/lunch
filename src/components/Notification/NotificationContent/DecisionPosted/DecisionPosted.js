@@ -25,4 +25,8 @@ DecisionPosted.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
+DecisionPosted.defaultProps = {
+  user: ''
+};
+
 export default withStyles(s)(DecisionPosted);

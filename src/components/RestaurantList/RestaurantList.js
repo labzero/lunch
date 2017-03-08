@@ -9,7 +9,7 @@ const RestaurantList = ({ ids }) => (
   <ul className={s.root}>
     <FlipMove staggerDelayBy={40} staggerDurationBy={40}>
       {ids.map(id => (
-        <li className={s.item} key={`restaurantListItem_${id}`}>
+        <li key={`restaurantListItem_${id}`}>
           <ScrollElement name={`restaurantListItem_${id}`}>
             <RestaurantContainer
               id={id}

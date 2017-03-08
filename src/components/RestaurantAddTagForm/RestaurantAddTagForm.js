@@ -3,10 +3,13 @@ import Autosuggest from 'react-autosuggest';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
 import s from './RestaurantAddTagForm.scss';
+
+// eslint-disable-next-line css-modules/no-unused-class
 import autosuggestTheme from './RestaurantAddTagFormAutosuggest.scss';
 
 const returnTrue = () => true;
 
+// eslint-disable-next-line css-modules/no-undef-class
 autosuggestTheme.input = 'form-control input-sm';
 
 export class _RestaurantAddTagForm extends Component {

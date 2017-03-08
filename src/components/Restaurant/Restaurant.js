@@ -65,7 +65,7 @@ const Restaurant = ({
 
   return (
     <div className={s.root}>
-      <div className={s.header}>
+      <div>
         {nameArea}
         <div className={s.voteContainer}>
           <RestaurantVoteCountContainer id={restaurant.id} />
@@ -74,7 +74,6 @@ const Restaurant = ({
       </div>
       <div className={s.addressContainer}>
         <a
-          className={s.addressLink}
           href={`/api/restaurants/${restaurant.id}/place_url`}
           target="_blank"
           rel="noopener noreferrer"
@@ -101,6 +100,11 @@ Restaurant.propTypes = {
   listUiItem: PropTypes.object.isRequired,
   showAddTagForm: PropTypes.func.isRequired,
   showMapAndInfoWindow: PropTypes.func.isRequired
+};
+
+Restaurant.defaultProps = {
+  shouldShowAddTagArea: false,
+  shouldShowDropdown: false
 };
 
 export const undecorated = Restaurant;

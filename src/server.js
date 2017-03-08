@@ -1,7 +1,7 @@
 /**
  * React Starter Kit (https://www.reactstarterkit.com/)
  *
- * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
+ * Copyright © 2014-present Kriasoft, LLC. All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE.txt file in the root directory of this source tree.
@@ -32,7 +32,7 @@ import { ErrorPageWithoutStyle } from './components/ErrorPage/ErrorPage';
 import errorPageStyle from './components/ErrorPage/ErrorPage.scss';
 import configureStore from './configureStore';
 /* eslint-disable import/no-unresolved */
-import assets from './assets';
+import assets from './assets.json'; // eslint-disable-line import/no-unresolved
 /* eslint-enable import/no-unresolved */
 import { port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } from './config';
 import makeRoutes from './routes';
@@ -89,6 +89,9 @@ app.use(passport.initialize());
 app.get('/login',
   passport.authenticate('google', { scope: ['email', 'profile'] })
 );
+if (__DEV__) {
+  app.enable('trust proxy');
+}
 app.get('/login/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
@@ -96,7 +99,7 @@ app.get('/login/callback',
     const token = jwt.sign(req.user.toJSON(), auth.jwt.secret, { expiresIn });
     res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
     res.redirect('/');
-  }
+  },
 );
 app.get('/logout', (req, res) => {
   req.logout();
@@ -210,10 +213,8 @@ app.get('*', async (req, res, next) => {
             children: '',
             title: 'Lunch',
             description: 'An app for groups to decide on nearby lunch options.',
-            style: '',
             body: '',
             root: `${req.protocol}://${req.get('host')}`,
-            script: assets.main.js,
             initialState: serialize(initialState)
           };
           const css = new Set();
@@ -232,8 +233,13 @@ app.get('*', async (req, res, next) => {
               </Provider>
             </ContextHolder>
           );
-          data.style = [...css].join('');
-          data.script = assets.main.js;
+          data.styles = [
+            { id: 'css', cssText: [...css].join('') },
+          ];
+          data.scripts = [
+            assets.vendor.js,
+            assets.client.js,
+          ];
           const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
           res.status(statusCode);
           res.send(`<!doctype html>${html}`);
@@ -257,10 +263,10 @@ app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     <Html
       title="Internal Server Error"
       description={err.message}
-      style={errorPageStyle._getCss()} // eslint-disable-line no-underscore-dangle
+      styles={[{ id: 'css', cssText: errorPageStyle._getCss() }]} // eslint-disable-line no-underscore-dangle
     >
       {ReactDOM.renderToString(<ErrorPageWithoutStyle error={err} />)}
-    </Html>
+    </Html>,
   );
   res.status(err.status || 500);
   res.send(`<!doctype html>${html}`);

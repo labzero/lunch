@@ -4,8 +4,11 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import TagContainer from '../../containers/TagContainer';
 import { getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
 import s from './TagFilterForm.scss';
+
+// eslint-disable-next-line css-modules/no-unused-class
 import autosuggestTheme from './TagFilterFormAutosuggest.scss';
 
+// eslint-disable-next-line css-modules/no-undef-class
 autosuggestTheme.input = 'form-control';
 
 const returnTrue = () => true;
@@ -85,6 +88,10 @@ TagFilterForm.propTypes = {
   addedTags: PropTypes.array.isRequired,
   tags: PropTypes.array.isRequired,
   tagUiForm: PropTypes.object.isRequired
+};
+
+TagFilterForm.defaultProps = {
+  exclude: false
 };
 
 export const undecorated = TagFilterForm;

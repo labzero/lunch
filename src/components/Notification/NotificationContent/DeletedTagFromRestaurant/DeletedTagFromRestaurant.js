@@ -36,4 +36,8 @@ DeletedTagFromRestaurant.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
+DeletedTagFromRestaurant.defaultProps = {
+  user: ''
+};
+
 export default withStyles(s)(DeletedTagFromRestaurant);

@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import Geosuggest from 'react-geosuggest';
 
-let google = { maps: { Geocoder: () => ({}), GeocoderStatus: {} } };
+let google = { maps: { Geocoder: function Geocoder() { return {}; }, GeocoderStatus: {} } };
 if (canUseDOM) {
   google = window.google || google;
 }

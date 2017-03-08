@@ -13,7 +13,7 @@ class RestaurantNameForm extends Component {
 
   render() {
     return (
-      <form className={s.root} onSubmit={this.props.changeRestaurantName}>
+      <form onSubmit={this.props.changeRestaurantName}>
         <span className={s.inputContainer}>
           <input
             type="text"

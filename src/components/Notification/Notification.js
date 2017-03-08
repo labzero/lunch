@@ -37,6 +37,11 @@ class Notification extends Component {
     contentProps: PropTypes.object.isRequired
   };
 
+  static defaultProps = {
+    actionType: '',
+    noRender: false
+  }
+
   componentDidMount() {
     this.timeout = setTimeout(this.props.expireNotification, 5000);
   }

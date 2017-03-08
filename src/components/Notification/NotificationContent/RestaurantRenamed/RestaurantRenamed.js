@@ -27,4 +27,8 @@ RestaurantRenamed.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
+RestaurantRenamed.defaultProps = {
+  user: ''
+};
+
 export default withStyles(s)(RestaurantRenamed);

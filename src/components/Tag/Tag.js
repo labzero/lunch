@@ -30,5 +30,9 @@ Tag.propTypes = {
   exclude: PropTypes.bool
 };
 
+Tag.defaultProps = {
+  exclude: false
+};
+
 export const undecorated = Tag;
 export default withStyles(s)(Tag);

@@ -95,4 +95,9 @@ RestaurantDropdown.propTypes = {
   decide: PropTypes.func.isRequired
 };
 
+RestaurantDropdown.defaultProps = {
+  decision: {},
+  removeDecision: () => {}
+};
+
 export default withStyles(s)(RestaurantDropdown);

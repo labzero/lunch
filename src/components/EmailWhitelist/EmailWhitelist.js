@@ -27,4 +27,8 @@ EmailWhitelist.propTypes = {
   setEmailWhitelistInputValue: PropTypes.func.isRequired
 };
 
+EmailWhitelist.defaultProps = {
+  inputValue: ''
+};
+
 export default EmailWhitelist;

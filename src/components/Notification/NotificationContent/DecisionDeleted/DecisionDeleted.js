@@ -25,4 +25,8 @@ DecisionDeleted.propTypes = {
   showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
+DecisionDeleted.defaultProps = {
+  user: ''
+};
+
 export default withStyles(s)(DecisionDeleted);

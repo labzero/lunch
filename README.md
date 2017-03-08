@@ -8,7 +8,7 @@ An app for groups to decide on nearby lunch options. [Check out a live version](
 
 Make two copies of `.env.sample`, named `.env` and `.env.prod`.
 
-`OAUTH_DOMAIN` is optional, but it allows you to restrict logins to a specific domain (such as your company's) 
+`OAUTH_DOMAIN` is optional, but it allows you to restrict logins to a specific domain (such as your company's)
 
 #### Google project
 
@@ -33,8 +33,10 @@ Set up a PostgreSQL database and enter the credentials into `.env`. If you want 
 
 After setting up your environment:
 
+First, [install Yarn.](https://yarnpkg.com/en/docs/install) Then:
+
 ```bash
-npm install
+yarn
 npm install -g sequelize-cli
 sequelize db:migrate
 ```

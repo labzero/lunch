@@ -17,7 +17,7 @@ import s from './Header.scss';
 const Header = ({ flashes }) => {
   const flashContainers = flashes.map(
     (flash, i) =>
-      <FlashContainer message={flash.message} type={flash.type} id={i} key={`flash_${i}`} />
+      <FlashContainer message={flash.message} type={flash.type} id={i} key={`${flash.type}_${flash.message}`} />
   );
 
   return (
