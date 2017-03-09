@@ -1,5 +1,8 @@
 import React, { PropTypes } from 'react';
-import { Modal, ModalBody, ModalFooter, Button } from 'react-bootstrap';
+import Modal from 'react-bootstrap/lib/Modal';
+import ModalBody from 'react-bootstrap/lib/ModalBody';
+import ModalFooter from 'react-bootstrap/lib/ModalFooter';
+import Button from 'react-bootstrap/lib/Button';
 
 const DeleteTagModal = ({ tagName, shown, hideModal, deleteTag }) => (
   <Modal show={shown} onHide={hideModal}>

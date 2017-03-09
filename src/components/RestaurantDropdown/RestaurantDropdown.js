@@ -1,5 +1,7 @@
 import React, { PropTypes } from 'react';
-import { Dropdown, Glyphicon, MenuItem } from 'react-bootstrap';
+import Dropdown from 'react-bootstrap/lib/Dropdown';
+import Glyphicon from 'react-bootstrap/lib/Glyphicon';
+import MenuItem from 'react-bootstrap/lib/MenuItem';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantDropdown.scss';
 

@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import OverlayTrigger from 'react-bootstrap/lib/OverlayTrigger';
+import Tooltip from 'react-bootstrap/lib/Tooltip';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantDecision.scss';
 

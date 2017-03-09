@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import { Modal } from 'react-bootstrap';
+import Modal from 'react-bootstrap/lib/Modal';
 import { expect } from 'chai';
 import React from 'react';
 import sinon from 'sinon';
