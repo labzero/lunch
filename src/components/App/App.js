@@ -10,7 +10,6 @@
 import React, { Component, PropTypes } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import emptyFunction from 'fbjs/lib/emptyFunction';
-import bootstrap from 'bootstrap/dist/css/bootstrap.css';
 import HeaderContainer from '../../containers/HeaderContainer';
 import FooterContainer from '../../containers/FooterContainer';
 import NotificationListContainer from '../../containers/NotificationListContainer';
@@ -50,7 +49,6 @@ class App extends Component {
   }
 
   componentWillMount() {
-    this.removeBootstrap = this.context.insertCss(s, bootstrap);
     this.removeCss = this.context.insertCss(s, globalCss);
 
     if (canUseDOM) {
@@ -81,7 +79,6 @@ class App extends Component {
 
   componentWillUnmount() {
     this.removeCss();
-    this.removeBootstrap();
   }
 
   render() {

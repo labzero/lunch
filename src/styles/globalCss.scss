@@ -1,5 +1,21 @@
 @import '../../node_modules/react-geosuggest/module/geosuggest.css';
 @import './_variables.scss';
+$icon-font-path: '../../node_modules/bootstrap-sass/assets/fonts/bootstrap/';
+
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/variables';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/mixins';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/normalize';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/glyphicons';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/scaffolding';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/type';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/forms';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/buttons';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/component-animations';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/dropdowns';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/button-groups';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/close';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/modals';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/tooltip';
 
 html {
   font-size: 16px;

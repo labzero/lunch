@@ -127,13 +127,20 @@ const config = {
             }
           },
           {
-            loader: 'sass-loader'
-          },
-          {
             loader: 'postcss-loader',
             options: {
               config: './tools/postcss.sass.config.js',
             },
+          },
+          {
+            loader: 'resolve-url-loader'
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              precision: 8,
+              sourceMap: isDebug,
+            }
           },
         ]
       },
@@ -159,13 +166,20 @@ const config = {
             },
           },
           {
-            loader: 'sass-loader'
-          },
-          {
             loader: 'postcss-loader',
             options: {
               config: './tools/postcss.sass.config.js',
             },
+          },
+          {
+            loader: 'resolve-url-loader'
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              precision: 8,
+              sourceMap: isDebug,
+            }
           },
         ],
       },
@@ -272,7 +286,7 @@ const clientConfig = {
 
     // Webpack Bundle Analyzer
     // https://github.com/th0r/webpack-bundle-analyzer
-    ...isAnalyze ? [new BundleAnalyzerPlugin()] : [],
+    ...isAnalyze ? [new BundleAnalyzerPlugin({ generateStatsFile: true })] : [],
   ],
 
   // Choose a developer tool to enhance debugging
