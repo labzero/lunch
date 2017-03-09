@@ -11,7 +11,8 @@ class LetterOfCreditRequest
   ISSUE_MAX_DATE_RESTRICTION = 1.week # TODO: Validate issue date as part of MEM-2151
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
-  READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners, :member_id, :standard_borrowing_capacity, :max_term].freeze
+  READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners, :member_id,
+                     :standard_borrowing_capacity, :max_term, :remaining_financing_available].freeze
   ACCESSIBLE_ATTRS = [:beneficiary_name, :beneficiary_address, :amount, :issue_date, :expiration_date, :created_at, :created_by].freeze
   DATE_ATTRS = [:issue_date, :expiration_date, :created_at].freeze
   REQUIRED_ATTRS = [:beneficiary_name, :amount, :issue_date, :expiration_date].freeze
@@ -26,6 +27,7 @@ class LetterOfCreditRequest
   validate :issue_date_within_range
   validate :expiration_date_within_range
   validate :amount_does_not_exceed_borrowing_capacity
+  validate :amount_does_not_exceed_financing_availability
   validate :expiration_date_before_max_term
 
   def initialize(member_id, request=ActionDispatch::TestRequest.new)
@@ -114,6 +116,10 @@ class LetterOfCreditRequest
     @max_term ||= (@member_profile[:maximum_term].to_i if @member_profile)
   end
 
+  def remaining_financing_available
+    @remaining_financing_available ||= (@member_profile[:remaining_financing_available].to_i if @member_profile)
+  end
+
   def self.from_json(json, request)
     new(nil, request).from_json(json)
   end
@@ -185,6 +191,11 @@ class LetterOfCreditRequest
   def amount_does_not_exceed_borrowing_capacity
     fetch_member_profile
     errors.add(:amount, :exceeds_borrowing_capacity) unless !amount || amount <= standard_borrowing_capacity
+  end
+
+  def amount_does_not_exceed_financing_availability
+    fetch_member_profile
+    errors.add(:amount, :exceeds_financing_availability) unless !amount || amount <= remaining_financing_available
   end
 
   def expiration_date_before_max_term

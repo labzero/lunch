@@ -272,6 +272,7 @@ en:
               not_an_integer: Amount must be a positive number with no fractional cents.
               greater_than: Amount must be a positive number with no fractional cents.
               exceeds_borrowing_capacity: The amount you selected exceeds your institution's current whole loan borrowing capacity. You may make a request for a lower amount, or check with your Relationship Manager or Member Services Desk to adjust your collateral first.
+              exceeds_financing_availability: The amount you entered exceeds your institution's current financing availability. Submit a request for a lesser amount or contact your Relationship Manager or the Member Services Desk.
             beneficiary_name:
               invalid: Please choose a valid beneficiary.
     attributes:
@@ -1547,6 +1548,7 @@ en:
       generic_html: "We are unable to process your request at this time. Contact your Relationship Manager: %{rm_email}, %{rm_phone_number}."
       exceeds_borrowing_capacity: The amount you selected exceeds your institution's current whole loan borrowing capacity of %{borrowing_capacity}. You may make a request for a lower amount, or check with your Relationship Manager or Member Services Desk to adjust your collateral first.
       after_max_term: The expiration date cannot be more than %{max_term} months from the issue date. Adjust the expiration or issue date and try again.
+      exceeds_financing_availability: The amount you entered exceeds your institution's current financing availability of %{financing_availability}. Submit a request for a lesser amount or contact your Relationship Manager or the Member Services Desk.
     pdf:
       requested: Letter of Credit Request
       request_date: Request Date/Time

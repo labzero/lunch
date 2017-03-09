@@ -109,29 +109,9 @@ Then(/^the letter of credit amount field should show "(.*?)"$/) do |text|
   expect(page.find("input[name='letter_of_credit_request[amount]'").value).to eq(text)
 end
 
-When(/^I have a borrowing capacity of (\d+)$/) do |borrowing_capacity|
-  profile = member_profile_mock
-  profile[:collateral_borrowing_capacity][:standard][:remaining] = borrowing_capacity.to_i
-  allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile)
-end
-
-When(/^I have a maximum borrowing term of (\d+) months$/) do |max_term|
-  profile = member_profile_mock
-  profile[:maximum_term] = max_term
-  allow_any_instance_of(MemberBalanceService).to receive(:profile).and_return(profile)
-end
-
-def member_profile_mock
-  {
-    maximum_term: 500,
-    collateral_borrowing_capacity: {
-      standard: {remaining: 1000000000},
-      sbc: {
-        agency: {remaining: 0},
-        aaa: {remaining: 0},
-        aa: {remaining: 0}
-      }
-    },
-    capital_stock: {remaining_leverage: 0}
-  }
+When(/^I set the Letter of Credit Request (issue|expiration) date to (\d+) (weeks|months) from today$/) do |field, n, unit|
+  field = field == 'issue' ? 'issue_date' : 'expiration_date'
+  field_date = Time.zone.today + n.to_i.send(:"#{unit}")
+  field_date = CalendarService.new(ActionDispatch::TestRequest.new).find_next_business_day(field_date, 1.day).to_s
+  page.execute_script("$('input[name=\"letter_of_credit_request[#{field}]\"]').val(\"#{field_date}\")")
 end

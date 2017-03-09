@@ -16,6 +16,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
     before do
       subject.instance_variable_set('@standard_borrowing_capacity', 0)
       subject.instance_variable_set('@max_term', 0)
+      subject.instance_variable_set('@remaining_financing_available', 0)
     end
     [:beneficiary_name, :amount, :issue_date, :expiration_date].each do |attr|
       it "validates the presence of `#{attr}`" do
@@ -229,6 +230,49 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         it 'adds an error if time span between the issue_date and expiration_date is more than the max_term in months' do
           allow(max_term).to receive(:months).and_return(6.months)
           expect(subject.errors).to receive(:add).with(:expiration_date, :after_max_term)
+          call_validator
+        end
+      end
+    end
+
+    describe '`amount_does_not_exceed_financing_availability`' do
+      let(:today) { Time.zone.today }
+      let(:remaining_financing_available) { rand(10000..9999999) }
+      let(:call_validator) { subject.send(:amount_does_not_exceed_financing_availability) }
+
+      before do
+        allow(Time.zone).to receive(:today).and_return(today)
+        allow(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@remaining_financing_available', remaining_financing_available) }
+      end
+
+      it 'calls `fetch_member_profile`' do
+        expect(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@remaining_financing_available', remaining_financing_available) }
+        call_validator
+      end
+      describe 'when there is no amount value' do
+        it 'does not add an error' do
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is less than the remaining financing available' do
+        it 'does not add an error' do
+          subject.amount = remaining_financing_available - rand(100..9999)
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is equal to the remaining financing available' do
+        it 'does not add an error' do
+          subject.amount = remaining_financing_available
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is greater than the remaining financing available' do
+        before { subject.amount = remaining_financing_available + rand(1..100000) }
+        it 'adds an error' do
+          expect(subject.errors).to receive(:add).with(:amount, :exceeds_financing_availability)
           call_validator
         end
       end
@@ -601,6 +645,36 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
           end
           it 'returns the `maximum_term`' do
             expect(call_method).to eq(max_term)
+          end
+          it 'returns the same object on each call' do
+            term = call_method
+            expect(call_method).to be(term)
+          end
+        end
+      end
+    end
+
+    describe '`remaining_financing_available` method' do
+      let(:call_method) { subject.remaining_financing_available }
+      it 'returns the `@remaining_financing_available` attribute if already set' do
+        existing_value = double('some value')
+        subject.instance_variable_set('@remaining_financing_available', existing_value)
+        expect(call_method).to eq(existing_value)
+      end
+      context 'when the `@remaining_financing_available` attribute is not already set' do
+        it 'returns nil if there is no @member_profile' do
+          expect(call_method).to be nil
+        end
+        context 'when there is @member_profile' do
+          let(:remaining_financing_available) { double('remaining_financing_available') }
+          let(:member_profile) { {remaining_financing_available: double('financing available', to_i: remaining_financing_available)} }
+          before { subject.instance_variable_set('@member_profile', member_profile) }
+          it 'calls `to_i` on the value of `remaining_financing_available` for @member_profile' do
+            expect(member_profile[:remaining_financing_available]).to receive(:to_i)
+            call_method
+          end
+          it 'returns the `remaining_financing_available`' do
+            expect(call_method).to eq(remaining_financing_available)
           end
           it 'returns the same object on each call' do
             term = call_method

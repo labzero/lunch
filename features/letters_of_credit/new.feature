@@ -34,10 +34,9 @@ Feature: Requesting a New Letter of Credit
     When I enter 1234 in the letter of credit amount field
     Then I should see the Preview Request button in its enabled state
 
-  @jira-mem-2149 @local-only
+  @jira-mem-2149
   Scenario: Member selects an expiration date that occurs more than 15 years after the issue date
     When I visit the Request Letter of Credit page
-    And I have a maximum borrowing term of 500 months
     And I choose the last possible date for the expiration date
     And I choose the first possible date for the issue date
     And I enter 1234567 in the letter of credit amount field
@@ -53,14 +52,13 @@ Feature: Requesting a New Letter of Credit
     When I click the Preview Request button
     Then I should see the "expiration date before issue date" form error
 
-  @jira-mem-2150 @local-only
+  @jira-mem-2150
   Scenario: Member selects an expiration date that exceeds their maximum term limit for borrowing
     Given I visit the Request Letter of Credit page
-    And I have a maximum borrowing term of 12 months
-    And I choose the last possible date for the expiration date
+    And I set the Letter of Credit Request expiration date to 201 months from today
     And I enter 1234567 in the letter of credit amount field
     When I click the Preview Request button
-    Then I should see the "expiration date exceeds max term of 12 months" form error
+    Then I should see the "expiration date exceeds max term of 200 months" form error
 
   Scenario: Letter of credit amount input field does not allow letters or symbols
     Given I visit the Request Letter of Credit page
@@ -75,7 +73,13 @@ Feature: Requesting a New Letter of Credit
   @jira-mem-2148
   Scenario: Member enters an amount that exceeds their Remaining Standard Borrowing Capacity
     Given I visit the Request Letter of Credit page
-    And I have a borrowing capacity of 1000
-    And I enter 1234 in the letter of credit amount field
+    And I enter 100000000 in the letter of credit amount field
     When I click the Preview Request button
-    Then I should see the "exceeds borrowing capacity by 1000" form error
+    Then I should see the "exceeds borrowing capacity of 95460000" form error
+
+  @jira-mem-2265
+  Scenario: Member enters an amount that exceeds their Remaining Standard Borrowing Capacity
+    Given I visit the Request Letter of Credit page
+    And I enter 150000000 in the letter of credit amount field
+    When I click the Preview Request button
+    Then I should see the "exceeds financing availability of 149,603,250" form error

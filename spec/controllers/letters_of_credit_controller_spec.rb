@@ -812,7 +812,8 @@ RSpec.describe LettersOfCreditController, :type => :controller do
     describe '`prioritized_error_message`' do
       let(:max_term) { rand(12..120) }
       let(:remaining_bc) { rand(1000..999999) }
-      let(:letter_of_credit) { instance_double(LetterOfCreditRequest, errors: nil, standard_borrowing_capacity: remaining_bc, max_term: max_term)}
+      let(:remaining_financing) { rand(1000..999999) }
+      let(:letter_of_credit) { instance_double(LetterOfCreditRequest, errors: nil, standard_borrowing_capacity: remaining_bc, max_term: max_term, remaining_financing_available: remaining_financing)}
       let(:call_method) { subject.send(:prioritized_error_message, letter_of_credit) }
 
       context 'when there are no errors' do
@@ -827,6 +828,10 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           allow(letter_of_credit).to receive(:errors).and_return(errors)
           allow(errors).to receive(:added?)
         end
+        it 'checks to see if an `amount` `exceeds_financing_availability` error has been added' do
+          expect(errors).to receive(:added?).with(:amount, :exceeds_financing_availability)
+          call_method
+        end
         it 'checks to see if an `amount` `exceeds_borrowing_capacity` error has been added' do
           expect(errors).to receive(:added?).with(:amount, :exceeds_borrowing_capacity)
           call_method
@@ -834,6 +839,22 @@ RSpec.describe LettersOfCreditController, :type => :controller do
         it 'checks to see if an `expiration_date` `after_max_term` error has been added' do
           expect(errors).to receive(:added?).with(:expiration_date, :after_max_term)
           call_method
+        end
+        describe 'when the errors contain an `amount` `exceeds_financing_availability` error' do
+          before { allow(errors).to receive(:added?).with(:amount, :exceeds_financing_availability).and_return(true) }
+          it 'reads the remaining_financing_available attribute of the letter_of_credit_request' do
+            expect(letter_of_credit).to receive(:remaining_financing_available).and_return(remaining_financing)
+            call_method
+          end
+          it 'formats the remaining financing available' do
+            expect(subject).to receive(:fhlb_formatted_currency_whole).with(remaining_financing, html: false)
+            call_method
+          end
+          it 'adds an error message containing the formatted remaining financing available' do
+            formatted_remaining = SecureRandom.hex
+            allow(controller).to receive(:fhlb_formatted_currency_whole).and_return(formatted_remaining)
+            expect(call_method).to eq(I18n.t('letters_of_credit.errors.exceeds_financing_availability', financing_availability: formatted_remaining))
+          end
         end
         describe 'when the errors contain an `amount` `exceeds_borrowing_capacity` error' do
           before { allow(errors).to receive(:added?).with(:amount, :exceeds_borrowing_capacity).and_return(true) }
