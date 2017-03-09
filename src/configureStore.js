@@ -1,6 +1,6 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { routerReducer } from 'react-router-redux';
-import { normalize, arrayOf } from 'normalizr';
+import { normalize } from 'normalizr';
 import thunkMiddleware from 'redux-thunk';
 import * as schemas from './schemas';
 import * as reducerMaps from './reducerMaps';
@@ -19,13 +19,13 @@ export default function configureStore(initialState) {
   const normalizedInitialState = Object.assign({}, initialState);
 
   normalizedInitialState.restaurants.items =
-    normalize(initialState.restaurants.items, arrayOf(schemas.restaurant));
+    normalize(initialState.restaurants.items, [schemas.restaurant]);
   normalizedInitialState.tags.items =
-    normalize(initialState.tags.items, arrayOf(schemas.tag));
+    normalize(initialState.tags.items, [schemas.tag]);
   normalizedInitialState.users.items =
-    normalize(initialState.users.items, arrayOf(schemas.user));
+    normalize(initialState.users.items, [schemas.user]);
   normalizedInitialState.whitelistEmails.items =
-    normalize(initialState.whitelistEmails.items, arrayOf(schemas.whitelistEmail));
+    normalize(initialState.whitelistEmails.items, [schemas.whitelistEmail]);
   normalizedInitialState.restaurants.items.entities.votes =
     initialState.restaurants.items.entities.votes || {};
 

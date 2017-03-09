@@ -1,4 +1,4 @@
-import { normalize, arrayOf } from 'normalizr';
+import { normalize } from 'normalizr';
 import update from 'react-addons-update';
 import uuidV1 from 'uuid/v1';
 import ActionTypes from './constants/ActionTypes';
@@ -82,7 +82,7 @@ export const restaurants = new Map([
       $merge: {
         isFetching: false,
         didInvalidate: false,
-        items: normalize(action.items, arrayOf(schemas.restaurant))
+        items: normalize(action.items, [schemas.restaurant])
       }
     })
   ],

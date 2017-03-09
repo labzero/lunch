@@ -2,7 +2,7 @@
 /* eslint-disable padded-blocks, no-unused-expressions */
 
 import { expect } from 'chai';
-import { normalize, arrayOf } from 'normalizr';
+import { normalize } from 'normalizr';
 import { makeGetTagList } from '.';
 import { tag as tagSchema } from '../schemas';
 
@@ -47,7 +47,7 @@ describe('selectors', () => {
           }, {
             id: 11,
             name: 'chain'
-          }], arrayOf(tagSchema))
+          }], [tagSchema])
         }
       };
 

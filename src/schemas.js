@@ -1,11 +1,9 @@
-import { Schema, arrayOf } from 'normalizr';
+import { schema } from 'normalizr';
 
-export const restaurant = new Schema('restaurants');
-export const vote = new Schema('votes');
-export const tag = new Schema('tags');
-export const user = new Schema('users');
-export const whitelistEmail = new Schema('whitelistEmails');
-
-restaurant.define({
-  votes: arrayOf(vote)
+export const vote = new schema.Entity('votes');
+export const restaurant = new schema.Entity('restaurants', {
+  votes: [vote]
 });
+export const tag = new schema.Entity('tags');
+export const user = new schema.Entity('users');
+export const whitelistEmail = new schema.Entity('whitelistEmails');
