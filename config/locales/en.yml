@@ -261,7 +261,7 @@ en:
           blank: 'Missing required field: %{attribute}'
           attributes:
             issue_date:
-              invalid: Issue date may not occur on a weekend, a holiday or more than 1 week from today.
+              invalid: "The issue date must not occur on a weekend or holiday; must not be in the past; and must not be more than 7 days from today. Adjust the date selection and try again."
             expiration_date:
               invalid: "The expiration date must not occur on a weekend or holiday; must not be in the past; and must be less than 15 years from the issue date. Adjust the date selection and try again."
               before_issue_date: Expiration date must be after issue date.

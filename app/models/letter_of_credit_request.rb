@@ -7,8 +7,8 @@ class LetterOfCreditRequest
   # Scott and Michael to hardcode them in until an appropriate service is built to expose this information.
   DEFAULT_ISSUANCE_FEE = 100
   DEFAULT_MAINTENANCE_FEE = '10 bps'
-  EXPIRATION_MAX_DATE_RESTRICTION = 15.years # TODO: Validate expiration date as part of MEM-2149
-  ISSUE_MAX_DATE_RESTRICTION = 1.week # TODO: Validate issue date as part of MEM-2151
+  EXPIRATION_MAX_DATE_RESTRICTION = 15.years
+  ISSUE_MAX_DATE_RESTRICTION = 1.week
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
   READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners, :member_id,

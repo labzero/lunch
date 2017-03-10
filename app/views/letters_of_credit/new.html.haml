@@ -9,7 +9,7 @@
       %p= t('letters_of_credit.request.support_html', rm_email: mail_to(relationship_manager[:email], relationship_manager[:full_name]), rm_phone_number: fhlb_formatted_phone_number(relationship_manager[:phone_number]))
   .row
     = content_with_sidebar([{name: 'borrowing_capacity', locals: {profile: @profile}}, {name: 'contact', locals: {relationship_manager: relationship_manager, text: t('letters_of_credit.contact')}}]) do
-      = form_for(@letter_of_credit_request, url: letters_of_credit_preview_path, html: {class: 'letter-of-credit-preview'}) do |f|
+      = form_for(@letter_of_credit_request, url: letters_of_credit_preview_path, html: {class: 'letter-of-credit-preview', data: {'prevent-submit-on-enter' => true}}) do |f|
         = f.hidden_field(:id)
         = f.hidden_field(:issue_date)
         = f.hidden_field(:expiration_date)
