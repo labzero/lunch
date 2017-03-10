@@ -165,7 +165,7 @@
   }
   .advance-rates-table, .advance-rates-custom-table {
     @extend %typography-paragraph-tight;
-    margin: 25px auto;
+    margin: 15px 25px 25px auto;
     width: calc(100% - 40px);
     table-layout: fixed;
     text-align: center;
@@ -648,8 +648,9 @@
 .advance-funding-date-wrapper, .advance-alternate-funding-date-wrapper {
   @extend %bordered-section;
   display: none;
+  position: relative;
   margin: 25px 15px 0;
-  padding: 10px 20px;
+  padding: 15px 15px 20px 15px;
   border-bottom: 1px solid $light-blue;
 }
 
@@ -667,12 +668,12 @@
 
 .advance-alternate-funding-date-wrapper {
   span {
-    @extend %typography-table-heading;
+    @extend %typography-subtitle;
   }
   ul {
     list-style: none;
-    padding: 0;
-    margin-bottom: 50px;
+    padding: 10px 0px 0px 0px;
+    margin-bottom: 40px;
   }
   li {
     float: left;
@@ -688,7 +689,7 @@
       padding-left: 0;
     }
     label + label {
-      @extend %typography-header-nav;
+      @extend %typography-header-text;
       display: block;
     }
   }
@@ -741,10 +742,14 @@
 
 .add-advance-future-funding-message {
   @extend %default-border;
-  padding: 20px 25px 10px 20px;
+  padding: 10px 25px 0px 20px;
   margin-bottom: 10px;
   span {
     @extend %typography-graph-data;
   }
 }
 
+.advance-alternate-funding-date-close {
+  position: absolute;
+  right: 10px;
+}
