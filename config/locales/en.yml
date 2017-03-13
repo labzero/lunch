@@ -2287,6 +2287,7 @@ en:
       alert_message: You may select a funding date that is different from the trade date. Advance execution is subject to sufficient financing availability on the trade date and sufficient collateral borrowing capacity and capital stock on the funding date.
       funding_message: You have selected a funding date that is different from the trade date. Advance execution is subject to sufficient financing availability on the trade date and sufficient collateral borrowing capacity and capital stock on the funding date. Please ensure your institution meets those requirements on %{funding_date}.
       funded_on: This advance will be funded on %{funding_date}
+      funding_on: Funds on %{date}
     custom_term:
       title: Custom Term
       add: Add Custom Term

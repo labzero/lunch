@@ -147,12 +147,13 @@ class AdvancesController < ApplicationController
     if feature_enabled?('add-advance-custom-term')
       funding_date = params[:funding_date].try(:to_date)
       advance_request.funding_date = funding_date if funding_date
-      date_restrictions = date_restrictions(request, AdvanceRequest::MAX_CUSTOM_TERM_DATE_RESTRICTION, advance_request.funding_date, true)
       populate_fetch_custom_rates_parameters(maturity_date: params[:maturity_date].try(:to_date), funding_date: funding_date)
     end
     populate_fetch_rates_parameters
     json = {html: render_to_string(layout: false), id: advance_request.id}
-    json[:maturity_calendar_html] = render_to_string(partial: 'maturity_date_calendar', locals: {date_restrictions: date_restrictions, hide_start_date: 'false', start_date: date_restrictions[:min_date]}, layout: false) if feature_enabled?('add-advance-custom-term')
+    if feature_enabled?('add-advance-custom-term') && @future_funding_date
+      json[:alternate_funding_date_html] = render_to_string(partial: 'alternate_funding_date', locals: {future_funding_date: @future_funding_date}, layout: false)
+    end
     render json: json
   end
 
@@ -160,11 +161,10 @@ class AdvancesController < ApplicationController
   def fetch_custom_rates
     funding_date = params[:funding_date].try(:to_date)
     advance_request.funding_date = funding_date if funding_date
-    date_restrictions = date_restrictions(request, AdvanceRequest::MAX_CUSTOM_TERM_DATE_RESTRICTION, advance_request.funding_date, true)
     populate_fetch_custom_rates_parameters(maturity_date: params[:maturity_date].try(:to_date), funding_date: funding_date)
     populate_fetch_rates_parameters
 
-    render json: {html: render_to_string(layout: false), id: advance_request.id, maturity_calendar_html: render_to_string(partial: 'maturity_date_calendar', locals: {date_restrictions: date_restrictions, hide_start_date: 'false', start_date: date_restrictions[:min_date]}, layout: false)}
+    render json: {html: render_to_string(layout: false), id: advance_request.id}
   end
 
   # POST
@@ -322,6 +322,10 @@ class AdvancesController < ApplicationController
     @rate_data = advance_request.rates
     @selected_type = advance_request.type
     @selected_term = advance_request.term
+    if feature_enabled?('add-advance-custom-term')
+      future_funding_date = advance_request.funding_date.try(:to_date)
+      @future_funding_date = future_funding_date if future_funding_date && future_funding_date > Time.zone.today
+    end
     logger.info { '  Advance Request State: ' + advance_request.inspect }
     logger.info { '  Advance Request Errors: ' + advance_request.errors.inspect }
   end
@@ -336,6 +340,7 @@ class AdvancesController < ApplicationController
         @custom_term = [days_to_maturity[:term]]
       end
     end
+    @date_restrictions = date_restrictions(request, AdvanceRequest::MAX_CUSTOM_TERM_DATE_RESTRICTION, advance_request.funding_date, true)
   end
 
   def fetch_advance_request

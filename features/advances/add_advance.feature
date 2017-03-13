@@ -422,3 +422,18 @@ Scenario: User clicks on the FRC rates and sees Add Custom Term, Cancels, select
   Then I should see Custom Term Calendar
   When I click on the Cancel link
   Then I should see the add advance custom rate table
+
+@jira-mem-2251 @flip-on-add-advance-custom-term
+Scenario: User clicks on the FRC rates and selects funding date, closes selection and sees the new funding date of the screen
+  Given I am on the "Add Advance" advances page
+  And I enter an amount into the add advance amount field
+  When I click to toggle to the frc rates
+  Then I should see the add advance rate table
+  Then I should see Funding Date information
+  When I click on Edit Funding Date link
+  Then I should see Set an Alternate Funding Date
+  When I click on the Next Business Day radio button
+  Then I should see the add advance rate table
+  Then I select the rate with a term of "2week" and a type of "whole" on the add advance page
+  When I click on Close Funding Date link
+  Then I should see Updated Funding Date

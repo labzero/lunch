@@ -383,11 +383,14 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
     let(:advance_type) { double('advance type') }
     let(:advance_term) { double('advance term') }
+    let(:funding_date) { Time.zone.today + rand(1..3).days}
     let(:advance_request) { double(AdvanceRequest, rates: rate_data, type: advance_type, term: advance_term, errors: [], id: SecureRandom.uuid, :allow_grace_period= => nil, :funding_date => nil, :custom_maturity_date= => nil) }
+    let(:advance_request_with_funding_date) { double(AdvanceRequest, rates: rate_data, type: advance_type, term: advance_term, errors: [], id: SecureRandom.uuid, :allow_grace_period= => nil, :funding_date => funding_date, :custom_maturity_date= => nil) }
     let(:make_request) { get :fetch_rates }
     let(:today) { Time.zone.today }
     let(:maturity_date) { today + rand(3..1095).days }
     let(:make_request_with_maturity_date) { get :fetch_rates, maturity_date: maturity_date}
+    let(:html_response_string) { SecureRandom.hex }
 
     before do
       allow(controller).to receive(:fetch_advance_request)
@@ -462,6 +465,30 @@ RSpec.describe AdvancesController, :type => :controller do
       it 'populates the fetch custom rates parameters' do
         expect(subject).to receive(:populate_fetch_custom_rates_parameters).with({maturity_date: maturity_date, funding_date: anything})
         make_request_with_maturity_date
+      end
+      describe 'when future funding' do
+        before do
+          allow(controller).to receive(:render_to_string)
+          allow(subject).to receive(:advance_request).and_return(advance_request_with_funding_date)
+        end
+        it 'renders the view to a string with partial set to alternate_funding_date' do
+          expect(controller).to receive(:render_to_string).with(partial: 'alternate_funding_date', locals: {future_funding_date: anything}, layout: anything)
+          make_request
+        end
+        it 'renders the view to a string with future_funding_date set to funding_date' do
+          expect(controller).to receive(:render_to_string).with(partial: anything, locals: {future_funding_date: funding_date}, layout: anything)
+          make_request
+        end
+        it 'renders the view to a string with layout set to false' do
+          expect(controller).to receive(:render_to_string).with(partial: anything, locals: {future_funding_date: anything}, layout: false)
+          make_request
+        end
+        it 'includes the alternate_funding_date_html in its response if future funding' do
+          allow(controller).to receive(:render_to_string).with(partial: 'alternate_funding_date', locals: {future_funding_date: funding_date}, layout: false).and_return(html_response_string)
+          make_request
+          data = JSON.parse(response.body)
+          expect(data['alternate_funding_date_html']).to eq(html_response_string)
+        end
       end
     end
   end
@@ -1015,6 +1042,7 @@ RSpec.describe AdvancesController, :type => :controller do
       let(:advance_request) { double('An AdvanceRequest').as_null_object }
       let(:etransact_service_instance) { double('service instance', etransact_status: nil, etransact_active?: nil) }
       let(:etransact_active) { SecureRandom.hex }
+      let(:funding_date) { Time.zone.today + rand(1..3).days}
       before do
         allow(subject).to receive(:advance_request).and_return(advance_request)
         allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service_instance)
@@ -1041,11 +1069,28 @@ RSpec.describe AdvancesController, :type => :controller do
           expect(assigns[param]).to eq(value)
         end
       end
+      describe 'when the `add-advance-custom-term` feature is enabled' do
+        before do
+          allow(controller).to receive(:feature_enabled?).and_call_original
+          allow(controller).to receive(:feature_enabled?).with('add-advance-custom-term').and_return(true)
+        end
+        it 'sets @@future_funding_date to advance_request.funding_date if advance_request.funding_date is greater than today' do
+          allow(advance_request).to receive(:funding_date).and_return(funding_date)
+          call_method
+          expect(assigns[:future_funding_date]).to eq(funding_date)
+        end
+        it 'does not set @@future_funding_date to advance_request.funding_date if advance_request.funding_date = today' do
+          allow(advance_request).to receive(:funding_date).and_return(Time.zone.today)
+          call_method
+          expect(assigns[:future_funding_date]).to eq(nil)
+        end
+      end
     end
 
     describe '`populate_fetch_custom_rates_parameters`' do
       let(:maturity_date) { SecureRandom.hex }
       let(:funding_date) { SecureRandom.hex }
+      let(:date_restrictions_result) { SecureRandom.hex }
       let(:call_method) { subject.send(:populate_fetch_custom_rates_parameters, maturity_date: maturity_date, funding_date: funding_date) }
       let(:days) { rand(3..1095) }
       let(:custom_term) { days.to_s + 'day' }
@@ -1054,6 +1099,24 @@ RSpec.describe AdvancesController, :type => :controller do
       before do
         allow(subject).to receive(:days_to_maturity).and_return(days_to_maturity_return)
         allow(subject).to receive(:advance_request).and_return(advance_request)
+        allow(subject).to receive(:date_restrictions).and_return(date_restrictions_result)
+      end
+      it 'calls date_restrictions with request' do
+        expect(subject).to receive(:date_restrictions).with(subject.request, anything, anything, anything)
+        call_method
+      end
+      it 'calls date_restrictions with MAX_CUSTOM_TERM_DATE_RESTRICTION' do
+        expect(subject).to receive(:date_restrictions).with(anything, AdvanceRequest::MAX_CUSTOM_TERM_DATE_RESTRICTION, anything, anything)
+        call_method
+      end
+      it 'calls date_restrictions with advance_request.funding_date' do
+        allow(advance_request).to receive(:funding_date).and_return(funding_date)
+        expect(subject).to receive(:date_restrictions).with(anything, anything, funding_date, anything)
+        call_method
+      end
+      it 'calls date_restrictions with true' do
+        expect(subject).to receive(:date_restrictions).with(anything, anything, anything, true)
+        call_method
       end
       it 'sets @maturity_date to maturity_date' do
         call_method
@@ -1074,6 +1137,10 @@ RSpec.describe AdvancesController, :type => :controller do
       it 'sets @custom_term to [days_to_maturity[:term]]' do
         call_method
         expect(assigns[:custom_term]).to eq([days_to_maturity_return[:term]])
+      end
+      it 'sets @date_restrictions to date_restrictions result' do
+        call_method
+        expect(assigns[:date_restrictions]).to eq(date_restrictions_result)
       end
     end
 

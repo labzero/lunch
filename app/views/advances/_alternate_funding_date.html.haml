@@ -1,0 +1,8 @@
+- future_funding_date ||= nil
+.advance-funding-date-wrapper
+  %span= t('advances.funding.funding_date')
+  -if future_funding_date
+    %span= t('advances.funding.funding_on', date: fhlb_date_standard_numeric(@future_funding_date))
+  -else
+    %span= t('advances.funding.funding_today', date: fhlb_date_standard_numeric(@today))
+  %button.advance-alternate-funding-date-edit.text-only-button= t('advances.funding.edit')
