@@ -277,12 +277,57 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         end
       end
     end
+
+    describe '`issue_date_valid_for_today`' do
+      let(:call_validator) { subject.send(:issue_date_valid_for_today) }
+      it 'is not called as a validator if there is no issue date' do
+        subject.issue_date = nil
+        expect(subject).not_to receive(:issue_date_valid_for_today)
+        subject.valid?
+      end
+      it 'is not caled as a validator if the issue date is not today' do
+        subject.issue_date = today + rand(1..6).days
+        expect(subject).not_to receive(:issue_date_valid_for_today)
+        subject.valid?
+      end
+      context 'when the issue date is today' do
+        let(:time_limit) { Time.zone.parse(described_class::ISSUE_DATE_TIME_RESTRICTION) + described_class::ISSUE_DATE_TIME_RESTRICTION_WINDOW }
+        before { subject.issue_date = today }
+
+        it 'is called as a validator' do
+          expect(subject).to receive(:issue_date_valid_for_today)
+          subject.valid?
+        end
+        it 'does not add an error if it is before the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
+          allow(Time.zone).to receive(:now).and_return(time_limit - 1.minute)
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+        it 'does not add an error if the current time is exactly the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
+          allow(Time.zone).to receive(:now).and_return(time_limit)
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+        it 'adds an error if it is after the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
+          allow(Time.zone).to receive(:now).and_return(time_limit + 1.minute)
+          expect(subject.errors).to receive(:add).with(:issue_date, :no_longer_valid)
+          call_validator
+        end
+      end
+    end
   end
 
   describe 'initialization' do
     let(:issue_date) { today + rand(0..7).days }
     let(:new_loc) { LetterOfCreditRequest.new(member_id) }
+    let(:now) { instance_double(Time, :> => nil) }
+    let(:parsed_time) { instance_double(Time) }
     let(:request) { double('request') }
+
+    before do
+      allow(Time.zone).to receive(:now).and_return(now)
+      allow(Time.zone).to receive(:parse).and_return(parsed_time)
+    end
 
     describe 'when a request arg is passed' do
       let(:new_loc) { LetterOfCreditRequest.new(member_id, request) }
@@ -318,13 +363,32 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       expect(subject.maintenance_fee).to eq(described_class::DEFAULT_MAINTENANCE_FEE)
     end
     describe 'initial `issue_date` value' do
-      it 'calls `find_next_business_day` with today and a 1.day step' do
-        expect(calendar_service).to receive(:find_next_business_day).with(today, 1.day)
+      it 'parses the LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION to create an ActiveRecord::TimeWithZone object' do
+        expect(Time.zone).to receive(:parse).with(LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION).and_return(parsed_time)
         new_loc
       end
-      it 'sets `issue_date` to the result of `find_next_business_day`' do
-        allow(calendar_service).to receive(:find_next_business_day).with(today, 1.day).and_return(issue_date)
-        expect(subject.issue_date).to eq(issue_date)
+      it 'checks to see if the current time is greater than the time restriction' do
+        expect(now).to receive(:>).with(parsed_time)
+        new_loc
+      end
+      shared_examples 'it sets `issue_date` based on `find_next_business_day`' do |day|
+        let(:start_date) { day == :today ? today : today + 1.day }
+        it "calls `find_next_business_day` with #{day} and a 1.day step" do
+          expect(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day)
+          new_loc
+        end
+        it 'sets `issue_date` to the result of `find_next_business_day`' do
+          allow(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day).and_return(issue_date)
+          expect(subject.issue_date).to eq(issue_date)
+        end
+      end
+      context 'when it is before the ISSUE_DATE_TIME_RESTRICTION' do
+        before { allow(now).to receive(:>).and_return(false) }
+        it_behaves_like 'it sets `issue_date` based on `find_next_business_day`', :today
+      end
+      context 'when it is after the ISSUE_DATE_TIME_RESTRICTION' do
+        before { allow(now).to receive(:>).and_return(true) }
+        it_behaves_like 'it sets `issue_date` based on `find_next_business_day`', :tomorrow
       end
     end
     describe 'initial `expiration_date` value' do
@@ -748,8 +812,6 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
 
     describe '`sequence_name`' do
       it 'returns "LC_" and the current year' do
-        today = instance_double(DateTime, year: SecureRandom.hex)
-        allow(Time.zone).to receive(:today).and_return(today)
         expect(subject.send(:sequence_name)).to eq("LC_#{today.year}")
       end
     end

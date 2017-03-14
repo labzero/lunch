@@ -59,7 +59,7 @@ Feature: Requesting a New Letter of Credit
     And I enter 1234567 in the letter of credit amount field
     When I click the Preview Request button
     Then I should see the "expiration date exceeds max term of 200 months" form error
-
+    
   @jira-mem-2151
   Scenario: Member submits a request with an issue date that is more than 1 week in the future
     When I visit the Request Letter of Credit page
@@ -67,6 +67,17 @@ Feature: Requesting a New Letter of Credit
     And I enter 1234 in the letter of credit amount field
     When I click the Preview Request button
     Then I should see the "issue date invalid" form error
+
+  @jira-mem-2153 @local-only
+  Scenario: Member selects today as the issue date, but it is after 11:05am
+    Given I am logged out
+    And that today's time is "13:00"
+    When I am logged in as a "quick-advance signer"
+    And I visit the Request Letter of Credit page
+    And I set the Letter of Credit Request issue date to today
+    And I enter 1234 in the letter of credit amount field
+    When I click the Preview Request button
+    Then I should see the "issue date no longer valid" form error
 
   Scenario: Letter of credit amount input field does not allow letters or symbols
     Given I visit the Request Letter of Credit page

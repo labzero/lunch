@@ -131,12 +131,13 @@ class LettersOfCreditController < ApplicationController
   def date_restrictions
     today = Time.zone.today
     calendar_service = CalendarService.new(request)
-    expiration_max_date = today + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION
+    start_date = Time.zone.now > Time.zone.parse(LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION) ? today + 1.day : today
+    expiration_max_date = start_date + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION
     {
-      min_date: calendar_service.find_next_business_day(today, 1.day),
-      invalid_dates: weekends_and_holidays(start_date: today, end_date: expiration_max_date, calendar_service: calendar_service),
+      min_date: calendar_service.find_next_business_day(start_date, 1.day),
+      invalid_dates: weekends_and_holidays(start_date: start_date, end_date: expiration_max_date, calendar_service: calendar_service),
       expiration_max_date: expiration_max_date,
-      issue_max_date: today + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION
+      issue_max_date: start_date + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION
     }
   end
 

@@ -168,6 +168,11 @@ When(/^that today's date is "(.*?)"$/) do |date|
   Timecop.travel(today)
 end
 
+When(/^that today's time is "(.*?)"$/) do |time|
+  now = Time.zone.parse(time)
+  Timecop.travel(now)
+end
+
 def get_datepicker_preset_label(preset)
   case preset
     when 'month to date'

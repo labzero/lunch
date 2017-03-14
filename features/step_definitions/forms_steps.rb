@@ -64,6 +64,8 @@ Then(/^I should see the "(.*?)" form error$/) do |error_type|
     I18n.t('activemodel.errors.models.letter_of_credit_request.attributes.issue_date.invalid')
   when 'expiration date before issue date'
     I18n.t('activemodel.errors.models.letter_of_credit_request.attributes.expiration_date.before_issue_date')
+  when 'issue date no longer valid'
+    I18n.t('activemodel.errors.models.letter_of_credit_request.attributes.issue_date.no_longer_valid')
   when 'internal user not authorized'
     I18n.t('letters_of_credit.errors.not_authorized')
   when /^exceeds borrowing capacity of (\d+)$/

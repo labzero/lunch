@@ -9,6 +9,8 @@ class LetterOfCreditRequest
   DEFAULT_MAINTENANCE_FEE = '10 bps'
   EXPIRATION_MAX_DATE_RESTRICTION = 15.years
   ISSUE_MAX_DATE_RESTRICTION = 1.week
+  ISSUE_DATE_TIME_RESTRICTION = '11:00:00'
+  ISSUE_DATE_TIME_RESTRICTION_WINDOW = 5.minutes
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
   READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners, :member_id,
@@ -25,6 +27,7 @@ class LetterOfCreditRequest
   validates :amount, numericality: { greater_than: 0, only_integer: true}
   validate :issue_date_must_come_before_expiration_date
   validate :issue_date_within_range
+  validate :issue_date_valid_for_today, if: Proc.new { |request| request.issue_date && request.issue_date.to_date == Time.zone.today }
   validate :expiration_date_within_range
   validate :amount_does_not_exceed_borrowing_capacity
   validate :amount_does_not_exceed_financing_availability
@@ -37,7 +40,8 @@ class LetterOfCreditRequest
     today = Time.zone.today
     @issuance_fee = DEFAULT_ISSUANCE_FEE
     @maintenance_fee = DEFAULT_MAINTENANCE_FEE
-    @issue_date = calendar_service.find_next_business_day(today, 1.day)
+    start_date = Time.zone.now > Time.zone.parse(ISSUE_DATE_TIME_RESTRICTION) ? today + 1.day : today
+    @issue_date = calendar_service.find_next_business_day(start_date, 1.day)
     @expiration_date = calendar_service.find_next_business_day(@issue_date + 1.year, 1.day)
   end
 
@@ -210,4 +214,7 @@ class LetterOfCreditRequest
     @member_profile ||= MemberBalanceService.new(member_id, request).profile
   end
 
+  def issue_date_valid_for_today
+    errors.add(:issue_date, :no_longer_valid) if Time.zone.now > (Time.zone.parse(ISSUE_DATE_TIME_RESTRICTION) + ISSUE_DATE_TIME_RESTRICTION_WINDOW)
+  end
 end

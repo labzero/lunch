@@ -115,3 +115,7 @@ When(/^I set the Letter of Credit Request (issue|expiration) date to (\d+) (week
   field_date = CalendarService.new(ActionDispatch::TestRequest.new).find_next_business_day(field_date, 1.day).to_s
   page.execute_script("$('input[name=\"letter_of_credit_request[#{field}]\"]').val(\"#{field_date}\")")
 end
+
+When(/^I set the Letter of Credit Request issue date to today$/) do
+  page.execute_script("$('input[name=\"letter_of_credit_request[issue_date]\"]').val(\"#{Time.zone.today.to_s}\")")
+end
