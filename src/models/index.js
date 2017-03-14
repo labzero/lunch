@@ -4,7 +4,9 @@ import User from './User';
 import WhitelistEmail from './WhitelistEmail';
 import RestaurantTag from './RestaurantTag';
 import Tag from './Tag';
+import Team from './Team';
 import Restaurant from './Restaurant';
+import Role from './Role';
 import Decision from './Decision';
 
 Tag.addScope('orderedByRestaurant', {
@@ -72,14 +74,36 @@ Restaurant.belongsToMany(Tag, {
 });
 Restaurant.hasMany(RestaurantTag);
 
+Role.belongsTo(User);
+Role.belongsTo(Team);
+
 User.hasMany(Vote);
+User.hasMany(Role);
+User.belongsToMany(Team, {
+  through: 'role'
+});
 
 Tag.belongsToMany(Restaurant, {
   through: 'restaurants_tags'
 });
 Tag.hasMany(RestaurantTag);
 
+Team.hasMany(Role);
+Team.belongsToMany(User, {
+  through: 'role'
+});
+
 RestaurantTag.belongsTo(Restaurant);
 RestaurantTag.belongsTo(Tag);
 
-export { Vote, User, WhitelistEmail, RestaurantTag, Tag, Restaurant, Decision };
+export {
+  Vote,
+  User,
+  WhitelistEmail,
+  RestaurantTag,
+  Tag,
+  Team,
+  Restaurant,
+  Role,
+  Decision
+};

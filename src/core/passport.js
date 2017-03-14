@@ -15,7 +15,7 @@
 
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { User, WhitelistEmail } from '../models';
+import { User, Role, WhitelistEmail } from '../models';
 
 /**
  * Sign in with Google.
@@ -42,7 +42,16 @@ passport.use(new GoogleStrategy(
           profile._json.domain === process.env.OAUTH_DOMAIN ||
           process.env.OAUTH_DOMAIN === undefined
         ) {
-          return User.findOrCreate({ where: { google_id: profile.id } }).spread(user => {
+          return User.findAll({
+            where: { google_id: profile.id },
+            include: [
+              {
+                model: Role,
+                required: false,
+                attributes: ['type', 'team_id']
+              }
+            ],
+          }).spread(user => {
             const userUpdates = {};
             let doUpdates = false;
 

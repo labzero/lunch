@@ -9,9 +9,9 @@
 
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import { IndexLink } from 'react-router';
 import LoginContainer from '../../containers/LoginContainer';
 import FlashContainer from '../../containers/FlashContainer';
+import Link from '../Link';
 import s from './Header.scss';
 
 const Header = ({ flashes }) => {
@@ -30,7 +30,7 @@ const Header = ({ flashes }) => {
       <div className={s.container}>
         <div className={s.banner}>
           <h1 className={s.bannerTitle}>
-            <IndexLink to="/">Lunch</IndexLink>
+            <Link to="/">Lunch</Link>
           </h1>
         </div>
       </div>

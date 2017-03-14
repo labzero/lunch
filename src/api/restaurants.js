@@ -40,6 +40,8 @@ router
         );
       }
     }).catch(err => {
+      // eslint-disable-next-line no-console
+      console.error(err);
       next(err);
     });
   })
@@ -69,7 +71,9 @@ router
         const json = obj.toJSON();
         req.wss.broadcast(restaurantPosted(json, req.user.id));
         res.status(201).send({ error: false, data: json });
-      }).catch(() => {
+      }).catch((e) => {
+        // eslint-disable-next-line no-console
+        console.error(e);
         const error = { message: 'Could not save new restaurant. Has it already been added?' };
         errorCatcher(res, error);
       });
@@ -88,7 +92,9 @@ router
         const json = { name: rows[0].toJSON().name };
         req.wss.broadcast(restaurantRenamed(id, json, req.user.id));
         res.status(200).send({ error: false, data: json });
-      }).catch(() => {
+      }).catch((e) => {
+        // eslint-disable-next-line no-console
+        console.error(e);
         const error = { message: 'Could not update restaurant.' };
         errorCatcher(res, error);
       });
@@ -102,7 +108,11 @@ router
       Restaurant.destroy({ where: { id } }).then(() => {
         req.wss.broadcast(restaurantDeleted(id, req.user.id));
         res.status(204).send({ error: false });
-      }).catch(err => errorCatcher(res, err));
+      }).catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error(err);
+        errorCatcher(res, err);
+      });
     }
   )
   .use('/:restaurant_id/votes', voteApi)

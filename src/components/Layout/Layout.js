@@ -14,24 +14,19 @@ import HeaderContainer from '../../containers/HeaderContainer';
 import FooterContainer from '../../containers/FooterContainer';
 import NotificationListContainer from '../../containers/NotificationListContainer';
 import ModalSectionContainer from '../../containers/ModalSectionContainer';
-import s from './App.scss';
+import s from './Layout.scss';
 // eslint-disable-next-line css-modules/no-unused-class
 import globalCss from '../../styles/globalCss.scss';
 
-class App extends Component {
+class Layout extends Component {
 
   static propTypes = {
     children: PropTypes.element.isRequired,
     messageReceived: PropTypes.func.isRequired,
-    error: PropTypes.object,
     wsPort: PropTypes.number.isRequired,
     shouldScrollToTop: PropTypes.bool.isRequired,
     scrolledToTop: PropTypes.func.isRequired
   };
-
-  static defaultProps = {
-    error: undefined
-  }
 
   static contextTypes = {
     insertCss: PropTypes.func,
@@ -82,7 +77,7 @@ class App extends Component {
   }
 
   render() {
-    return !this.props.error ? (
+    return (
       <div>
         <HeaderContainer />
         {this.props.children}
@@ -90,9 +85,9 @@ class App extends Component {
         <NotificationListContainer />
         <ModalSectionContainer />
       </div>
-    ) : this.props.children;
+    );
   }
 
 }
 
-export default App;
+export default Layout;

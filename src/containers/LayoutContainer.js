@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { messageReceived } from '../actions/websockets';
 import { scrolledToTop } from '../actions/pageUi';
-import App from '../components/App';
+import Layout from '../components/Layout';
 
 const mapStateToProps = (state, ownProps) => ({
   wsPort: state.wsPort,
@@ -21,4 +21,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(App);
+)(Layout);

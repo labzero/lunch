@@ -1,0 +1,6 @@
+{
+  "name": "RestaurantsPage",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./RestaurantsPage.js"
+}

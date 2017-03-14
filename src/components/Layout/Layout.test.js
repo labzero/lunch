@@ -14,7 +14,7 @@ import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
-import App from './App';
+import Layout from './Layout';
 
 const context = { insertCss: () => {} };
 
@@ -32,9 +32,9 @@ describe('App', () => {
 
   it('renders children correctly', () => {
     const wrapper = shallow(
-      <App {...props}>
+      <Layout {...props}>
         <div className="child" />
-      </App>,
+      </Layout>,
     { context });
 
     expect(wrapper.contains(<div className="child" />)).to.be.true;

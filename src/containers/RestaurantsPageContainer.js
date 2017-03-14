@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { fetchRestaurantsIfNeeded, invalidateRestaurants } from '../actions/restaurants';
-import HomePage from '../components/HomePage';
+import RestaurantsPage from '../components/RestaurantsPage';
 
 const mapStateToProps = state => {
   const { user } = state;
@@ -19,4 +19,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(HomePage);
+)(RestaurantsPage);

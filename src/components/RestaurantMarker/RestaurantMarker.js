@@ -1,8 +1,7 @@
 import React, { PropTypes } from 'react';
-import { Provider } from 'react-redux';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import ContextHolder from '../../core/ContextHolder';
+import App from '../App';
 import RestaurantContainer from '../../containers/RestaurantContainer';
 import s from './RestaurantMarker.scss';
 
@@ -94,16 +93,14 @@ const RestaurantMarker = ({
   };
 
   return (
-    <ContextHolder context={context}>
-      <Provider store={context.store}>
-        <StyledRestaurantMarker
-          lat={restaurant.lat}
-          lng={restaurant.lng}
-          restaurant={restaurant}
-          {...props}
-        />
-      </Provider>
-    </ContextHolder>
+    <App context={context}>
+      <StyledRestaurantMarker
+        lat={restaurant.lat}
+        lng={restaurant.lng}
+        restaurant={restaurant}
+        {...props}
+      />
+    </App>
   );
 };
 
