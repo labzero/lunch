@@ -632,4 +632,63 @@ describe MAPI::ServiceApp do
       make_request
     end
   end
+
+  describe 'GET `securities_services_statements_available`' do
+    let(:make_request) { get "/member/#{member_id}/securities_services_statements_available" }
+    describe 'calls `MAPI::Services::Member::SecuritiesServicesStatements.available_statements`' do
+      let(:logger) { instance_double(Logger) }
+      before { allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger) }
+      it 'passes in the logger' do
+        expect(MAPI::Services::Member::SecuritiesServicesStatements).to receive(:available_statements).with(logger, any_args)
+        make_request
+      end
+      it 'passes in the environment' do
+        expect(MAPI::Services::Member::SecuritiesServicesStatements).to receive(:available_statements).with(anything, app.environment, any_args)
+        make_request
+      end
+      it 'passes in the `id`' do
+        expect(MAPI::Services::Member::SecuritiesServicesStatements).to receive(:available_statements).with(anything, anything, member_id)
+        make_request
+      end
+    end
+    it 'responds with the return from `MAPI::Services::Member::SecuritiesServicesStatements.available_statements` as JSON' do
+      json_value = SecureRandom.hex
+      value = double('A Value', to_json: json_value)
+      allow(MAPI::Services::Member::SecuritiesServicesStatements).to receive(:available_statements).and_return(value)
+      make_request
+      expect(last_response.body).to eq(json_value)
+    end
+  end
+
+  describe 'GET `securities_services_statements`' do
+    let(:date) { Time.zone.today }
+    let(:make_request) { get "/member/#{member_id}/securities_services_statements/#{date.iso8601}" }
+    describe 'calls `MAPI::Services::Member::SecuritiesServicesStatements.statement`' do
+      let(:logger) { instance_double(Logger) }
+      before { allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger) }
+      it 'passes in the logger' do
+        expect(MAPI::Services::Member::SecuritiesServicesStatements).to receive(:statement).with(logger, any_args)
+        make_request
+      end
+      it 'passes in the environment' do
+        expect(MAPI::Services::Member::SecuritiesServicesStatements).to receive(:statement).with(anything, app.environment, any_args)
+        make_request
+      end
+      it 'passes in the `id`' do
+        expect(MAPI::Services::Member::SecuritiesServicesStatements).to receive(:statement).with(anything, anything, member_id, any_args)
+        make_request
+      end
+      it 'passes in the `date`' do
+        expect(MAPI::Services::Member::SecuritiesServicesStatements).to receive(:statement).with(anything, anything, anything, date)
+        make_request
+      end
+    end
+    it 'responds with the return from `MAPI::Services::Member::SecuritiesServicesStatements.statement` as JSON' do
+      json_value = SecureRandom.hex
+      value = double('A Value', to_json: json_value)
+      allow(MAPI::Services::Member::SecuritiesServicesStatements).to receive(:statement).and_return(value)
+      make_request
+      expect(last_response.body).to eq(json_value)
+    end
+  end
 end

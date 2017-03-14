@@ -84,10 +84,7 @@ module MAPI
               sta_count = row['BALANCE_ROW_COUNT']
               break
             end
-            if sta_count == 0
-              # halt 404, "No Data Found"
-              {}
-            else
+            if sta_count > 0
               sta_open_cursor = ActiveRecord::Base.connection.execute(sta_open_balance_connection_string)
               while row = sta_open_cursor.fetch_hash()
                 open_balance_hash  = row
@@ -113,10 +110,7 @@ module MAPI
           else
             sta_count_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_count.json')))
             sta_count = sta_count_hash['BALANCE_ROW_COUNT'].to_i
-            if sta_count == 0
-              # return {} to the caller to indicate no data found
-              {}
-            else
+            if sta_count > 0
               open_balance_adjust_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_open_balance_adjust_value.json')))
               open_balance_hash = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'member_sta_activities_open_balance_earliest.json')))
               if to_date - from_date > 4

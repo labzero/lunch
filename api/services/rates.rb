@@ -12,10 +12,6 @@ module MAPI
       SOAP_OPEN_TIMEOUT = 0.2 # seconds
       SOAP_READ_TIMEOUT = 45 # seconds
 
-      def self.types_and_terms_hash
-        Hash[LOAN_TYPES.map { |type| [type, Hash[LOAN_TERMS.map{ |term| [term, yield(type, term)] }]] }]
-      end
-
       def self.find_next_business_day(candidate, delta, holidays)
         weekend_or_holiday?(candidate, holidays) ? find_next_business_day(candidate + delta, delta, holidays) : candidate
       end
@@ -139,11 +135,12 @@ module MAPI
       end
 
       def self.get_market_data_from_soap(logger, live_or_start_of_day, funding_date=nil, maturity_date=nil)
-        requests = [{'v1:fhlbsfMarketDataRequest' => LOAN_TYPES.map { |lt| market_data_message_for_loan_type(lt, live_or_start_of_day, funding_date) }}]
-        if maturity_date
-          requests.first['v1:fhlbsfMarketDataRequest'].push(*LOAN_TYPES.map { |lt| market_data_message_for_loan_type(lt, live_or_start_of_day, funding_date, maturity_date) })
-        end
         if !@@mds_connection.nil?
+          requests = [{'v1:fhlbsfMarketDataRequest' => LOAN_TYPES.map { |lt| market_data_message_for_loan_type(lt, live_or_start_of_day, funding_date) }}]
+          if maturity_date
+            requests.first['v1:fhlbsfMarketDataRequest'].push(*LOAN_TYPES.map { |lt| market_data_message_for_loan_type(lt, live_or_start_of_day, funding_date, maturity_date) })
+          end
+
           begin
             @@mds_connection.call(:get_market_data,
                                   message_tag: 'marketDataRequest',
@@ -172,7 +169,7 @@ module MAPI
       }.with_indifferent_access
 
       def self.extract_text(xml, field)
-        xml.at_css(PATHS[field]).content
+        xml.at_css(PATHS[field]).try(:content)
       end
 
       PERIOD_TO_TERM= {
@@ -541,20 +538,17 @@ module MAPI
 
         relative_get "/historic/overnight" do
           days = (params[:limit] || 30).to_i
-          connection_string = <<-SQL
+          query = <<-SQL
               SELECT * FROM (SELECT TRX_EFFECTIVE_DATE, TRX_VALUE
               FROM IRDB.IRDB_TRANS T
               WHERE TRX_IR_CODE = 'FRADVN'
               AND (TRX_TERM_VALUE || TRX_TERM_UOM  = '1D' )
-              ORDER BY TRX_EFFECTIVE_DATE DESC) WHERE ROWNUM <= #{days}
+              ORDER BY TRX_EFFECTIVE_DATE DESC) WHERE ROWNUM <= #{ActiveRecord::Base.connection.quote(days)}
           SQL
 
           data = if settings.environment == :production
-            cursor = ActiveRecord::Base.connection.execute(connection_string)
-            rows = []
-            while row = cursor.fetch()
-              rows.push([row[0], row[1]])
-            end
+            rows = MAPI::Services::Rates.fetch_objects(logger, query)
+            halt 503, 'Internal Service Error' if rows.nil?
             rows
           else
             rows = MAPI::Services::Rates.fake('rates_historic_overnight')[0..(days - 1)]

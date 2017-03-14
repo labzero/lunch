@@ -31,7 +31,7 @@ describe MAPI::ServiceApp do
       it 'executes the SQL query for the irdb_connection' do
         allow(MAPI::Services::Rates::HistoricalSTA::Private).to receive(:irdb_sql_query).and_return(irdb_query)
         expect(ActiveRecord::Base.connection).to receive(:execute).with(irdb_query).and_return(irdb_cursor)
-        allow(irdb_cursor).to receive(:fetch_hash)
+        allow(irdb_cursor).to receive(:fetch_hash).and_return({'TRX_EFFECTIVE_DATE' => Time.zone.today, 'TRX_VALUE' => rand()}, nil)
         historical_sta_price_indications
       end
     end

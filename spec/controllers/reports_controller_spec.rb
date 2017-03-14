@@ -2125,6 +2125,16 @@ RSpec.describe ReportsController, :type => :controller do
           expect(response.body).to render_template('current_price_indications_pdf')
         end
       end
+      context 'when the request is an XHR' do
+        before do
+          allow(controller).to receive(:render)
+          allow(request).to receive(:xhr?).and_return(true)
+        end
+        it 'renders w/o a layout' do
+          expect(controller).to receive(:render).with(include(layout: false))
+          current_price_indications
+        end
+      end
     end
     describe 'table data' do
       interest_day_count_key = I18n.t('reports.pages.price_indications.current.interest_day_count')

@@ -117,8 +117,9 @@ describe MAPI::ServiceApp do
   end
 
   describe "historic overnight rates" do
+    let(:make_request) { get '/rates/historic/overnight' }
+    let(:rates) { make_request; JSON.parse(last_response.body) }
     describe "development" do
-      let(:rates) { get '/rates/historic/overnight'; JSON.parse(last_response.body) }
       it "should return an array of rates" do
         expect(rates.length).to be >= 1
         rates.each do |rate|
@@ -138,6 +139,43 @@ describe MAPI::ServiceApp do
 
       it "should return the rates in ascending date order" do
         expect( rates ).to be == rates.sort_by{|r| Time.zone.parse(r.first) }
+      end
+    end
+    describe 'in production' do
+      before do
+        allow(described_class).to receive(:environment).and_return(:production)
+        allow(subject).to receive(:fetch_objects).and_return([])
+      end
+      describe 'queries the DB for historic rates' do
+        it 'calls `fetch_objects` with the logger' do
+          logger = instance_double(Logger, error: nil)
+          allow_any_instance_of(described_class).to receive(:logger).and_return(logger)
+          expect(subject).to receive(:fetch_objects).with(logger, anything)
+          make_request
+        end
+        it 'calls `fetch_objects` with the query' do
+          expect(subject).to receive(:fetch_objects).with(anything, match(/SELECT\s+TRX_EFFECTIVE_DATE,\s+TRX_VALUE\s+FROM IRDB.IRDB_TRANS\s+T\s+WHERE\s+TRX_IR_CODE\s+=\s+'FRADVN'\s+AND\s+\(TRX_TERM_VALUE\s+\|\|\s+TRX_TERM_UOM\s+=\s+'1D'\s+\)\s+ORDER/i))
+          make_request
+        end
+        it 'orders the query by `TRX_EFFECTIVE_DATE` descending' do
+          expect(subject).to receive(:fetch_objects).with(anything, match(/\s+ORDER\s+BY\s+TRX_EFFECTIVE_DATE\s+DESC/i))
+          make_request
+        end
+        it 'includes the limit in the query' do
+          limit = rand(1..10)
+          quoted_limit = SecureRandom.hex
+          allow(ActiveRecord::Base.connection).to receive(:quote).with(limit).and_return(quoted_limit)
+          expect(subject).to receive(:fetch_objects).with(anything, match(/\A\s*SELECT\s+\*\s+FROM\s+\(.*\)\s+WHERE\s+ROWNUM\s+<=\s+#{quoted_limit}\s*\z/im))
+          get '/rates/historic/overnight', limit: limit
+        end
+      end
+      it 'returns an empty JSON array if no data was found' do
+        expect(rates).to eq([])
+      end
+      it 'returns a 503 if an error occured' do
+        allow(subject).to receive(:fetch_objects).and_return(nil)
+        make_request
+        expect(last_response.status).to be(503)
       end
     end
   end
@@ -188,6 +226,43 @@ describe MAPI::ServiceApp do
           call_method_custom
         end
       end
+      it 'returns a 503 if the MDS connection was not successful', vcr: {cassette_name: 'market_data_rate_2months'} do
+        allow(mds_connection).to receive(:call).and_return(instance_double(Savon::Response, success?: false))
+        call_method
+        expect(last_response.status).to be(503)
+      end
+      it 'returns a 503 if the MDS connection returned an error', vcr: {cassette_name: 'market_data_rate_error'} do
+        call_method
+        expect(last_response.status).to be(503)
+      end
+    end
+  end
+
+  describe '`extract_text` class method' do
+    let(:node) { instance_double(Nokogiri::XML::Node, content: nil) }
+    let(:document) { instance_double(Nokogiri::XML::Document, at_css: node) }
+    let(:path_key) { instance_double(Symbol, 'A Path Key') }
+    let(:path) { instance_double(String, 'A Path') }
+    let(:call_method) { MAPI::Services::Rates.extract_text(document, path_key) }
+    before do
+      stub_const('MAPI::Services::Rates::PATHS', {path_key => path})
+    end
+    it 'looks up the `path_key` in the `PATHS`' do
+      expect(MAPI::Services::Rates::PATHS).to receive(:[]).with(path_key).and_return(path)
+      call_method
+    end
+    it 'calls `at_css` on the `document` with the `path`' do
+      expect(document).to receive(:at_css).with(path)
+      call_method
+    end
+    it 'returns the content from the found node' do
+      content = instance_double(String, 'Some Content')
+      allow(node).to receive(:content).and_return(content)
+      expect(call_method).to be(content)
+    end
+    it 'returns nil if the node is not found' do
+      allow(document).to receive(:at_css).and_return(nil)
+      expect(call_method).to be(nil)
     end
   end
 
@@ -1062,16 +1137,17 @@ describe MAPI::ServiceApp do
   end
 
   describe '`get_market_data_from_soap` method' do
-    let(:logger){ double('logger') }
+    let(:logger){ instance_double(Logger, error: nil) }
     today = Time.zone.today
     let(:funding_date) { today + rand(1..2).days }
     let(:maturity_date) { today + rand(3..1095).days }
     let(:live_or_start_of_day){ double('live_or_start_of_day') }
+    let(:mds_connection) { instance_double(Savon::Client, call: nil) }
     let(:call_method) { subject.get_market_data_from_soap(logger, live_or_start_of_day, funding_date, maturity_date) }
 
     before do
       allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
-      MAPI::Services::Rates.class_variable_set(:@@mds_connection, nil)
+      MAPI::Services::Rates.class_variable_set(:@@mds_connection, mds_connection)
     end
 
     MAPI::Services::Rates::LOAN_TYPES.each do |loan|
@@ -1085,6 +1161,71 @@ describe MAPI::ServiceApp do
         expect(subject).to receive(:market_data_message_for_loan_type).with(loan, live_or_start_of_day, funding_date, maturity_date)
         call_method
       end
+    end
+
+    describe 'requesting rates from MDS' do
+      it 'calls the `get_market_data` endpoint' do
+        expect(mds_connection).to receive(:call).with(:get_market_data, anything)
+        call_method
+      end
+      it 'includes `marketDataRequest` as the `message_tag`' do
+        expect(mds_connection).to receive(:call).with(:get_market_data, include(message_tag: 'marketDataRequest'))
+        call_method
+      end
+      it 'includes the caller ID in the message' do
+        account = instance_double(String, 'MAPI_COF_ACCOUNT')
+        stub_const('ENV', {'MAPI_COF_ACCOUNT' => account})
+        expect(mds_connection).to receive(:call).with(:get_market_data, include(message: include('v11:caller' => [include('v11:id' => account)])))
+        call_method
+      end
+      it 'includes the built regular term requests in the message' do
+        allow(subject).to receive(:market_data_message_for_loan_type)
+        type_requests = MAPI::Services::Rates::LOAN_TYPES.collect do |type|
+          type_message = double('A Type Message')
+          allow(subject).to receive(:market_data_message_for_loan_type).with(type, live_or_start_of_day, funding_date).and_return(type_message)
+          type_message
+        end
+        expect(mds_connection).to receive(:call).with(:get_market_data, include(message: include('v1:requests' => [include('v1:fhlbsfMarketDataRequest' => include(*type_requests))])))
+        call_method
+      end
+      it 'includes the built custom term requests in the message' do
+        allow(subject).to receive(:market_data_message_for_loan_type)
+        type_requests = MAPI::Services::Rates::LOAN_TYPES.collect do |type|
+          type_message = double('A Type Message')
+          allow(subject).to receive(:market_data_message_for_loan_type).with(type, live_or_start_of_day, funding_date, maturity_date).and_return(type_message)
+          type_message
+        end
+        expect(mds_connection).to receive(:call).with(:get_market_data, include(message: include('v1:requests' => [include('v1:fhlbsfMarketDataRequest' => include(*type_requests))])))
+        call_method
+      end
+      it 'includes SOAP authentication headers' do
+        expect(mds_connection).to receive(:call).with(:get_market_data, include(soap_header: subject::SOAP_HEADER))
+        call_method
+      end
+      describe 'when a Savon::Error is raised' do
+        let(:err) { Savon::Error.new }
+        before do
+          allow(mds_connection).to receive(:call).and_raise(err)
+        end
+        it 'returns nil on error' do
+          expect(call_method).to be_nil
+        end
+        it 'logs the error' do
+          expect(logger).to receive(:error).with(err)
+          call_method
+        end
+      end
+    end
+
+    it 'returns the results of the MDS call' do
+      market_data = double('Some Market Data')
+      allow(mds_connection).to receive(:call).and_return(market_data)
+      expect(call_method).to be(market_data)
+    end
+
+    it 'returns nil if there is no MDS connection' do
+      MAPI::Services::Rates.class_variable_set(:@@mds_connection, nil)
+      expect(call_method).to be_nil
     end
   end
 

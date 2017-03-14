@@ -86,19 +86,20 @@ describe MAPI::ServiceApp do
     end
     let(:final_securities_count_sql) { double('final_securities_count_sql') }
     let(:securities_transactions_sql) { double('securities_transactions_sql') }
-    let(:logger) { double('logger')  }
+    let(:logger) { instance_double(Logger, error: nil)  }
+    let(:make_request) { get "/member/#{fhlb_id}/securities_transactions/#{rundate.iso8601}" }
 
     [:test, :development, :production].each do |environment|
       describe "#{environment}" do
-        let(:securities_transactions) { get "/member/#{fhlb_id}/securities_transactions/#{rundate.iso8601}"; JSON.parse(last_response.body) }
+        let(:securities_transactions) { make_request; JSON.parse(last_response.body) }
         before do
           allow(subject).to receive(:final_securities_count_sql).with(fhlb_id, rundate).and_return(final_securities_count_sql)
           allow(subject).to receive(:fetch_hashes).with(anything, final_securities_count_sql).and_return([{'RECORDSCOUNT' => 2}])
           allow(subject).to receive(:securities_transactions_sql).with(fhlb_id, rundate, true).and_return(securities_transactions_sql)
           allow(subject).to receive(:fetch_hashes).with(anything, securities_transactions_sql,{to_date: ['CUR_MATURITY_DATE'], to_i: ["CUR_UNITS"], to_f: %w(CUR_PRINCIPAL_AMOUNT CUR_INTEREST_AMOUNT CUR_TOTAL_AMOUNT)}, true).and_return([before_hash, before_hash2])
+          allow(MAPI::ServiceApp).to receive(:environment).and_return(environment)
         end
         it "returns expected advances detail hash where value could not be nil in #{environment}" do
-          allow(MAPI::ServiceApp).to receive(:environment).and_return(environment)
           securities_transactions['transactions'].each do |row|
             expect(row['fhlb_id']).to              be_kind_of(Numeric)
             expect(row['custody_account_no']).to   be_kind_of(String)
@@ -111,6 +112,21 @@ describe MAPI::ServiceApp do
             expect(row['payment_or_principal']).to be_kind_of(Numeric)
             expect(row['interest']).to             be_kind_of(Numeric)
             expect(row['total']).to                be_kind_of(Numeric)
+          end
+        end
+        describe 'when `MAPI::Services::Member::SecuritiesTransactions.securities_transactions` raises an error' do
+          let(:err) { StandardError.new }
+          before do
+            allow(subject).to receive(:securities_transactions).and_raise(err)
+            allow_any_instance_of(described_class).to receive(:logger).and_return(logger)
+          end
+          it 'returns a 503' do
+            make_request
+            expect(last_response.status).to be(503)
+          end
+          it 'logs the error' do
+            expect(logger).to receive(:error).with(err)
+            make_request
           end
         end
       end
@@ -285,6 +301,40 @@ describe MAPI::ServiceApp do
     describe 'translate_securities_transactions_fields' do
       it 'maps fields appropriately for upper case keys' do
         expect(subject.translate_securities_transactions_fields(before_hash)).to eq(after_hash)
+      end
+    end
+
+    describe '`previous_business_day` class method' do
+      let(:date) { Time.zone.today }
+      let(:app) { instance_double(described_class) }
+      let(:holidays) { instance_double(Array, 'An Array of Holidays')}
+      let(:next_business_day) { instance_double(Date) }
+      let(:call_method) { subject.previous_business_day(app, date) }
+
+      before do
+        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return(holidays)
+        allow(MAPI::Services::Rates).to receive(:find_next_business_day).and_return(next_business_day)
+      end
+
+      it 'fetches the holidays for the past week' do
+        expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(app, date - 1.week, date - 1.day)
+        call_method
+      end
+
+      it 'finds the next business day starting from yesterday' do
+        expect(MAPI::Services::Rates).to receive(:find_next_business_day).with(date - 1.day, anything, anything)
+        call_method
+      end
+      it 'finds the next business day using a negative increment' do
+        expect(MAPI::Services::Rates).to receive(:find_next_business_day).with(anything, -1.day, anything)
+        call_method
+      end
+      it 'finds the next business day using the holidays for the last week' do
+        expect(MAPI::Services::Rates).to receive(:find_next_business_day).with(anything, anything, holidays)
+        call_method
+      end
+      it 'returns the found date' do
+        expect(call_method).to be(next_business_day)
       end
     end
   end

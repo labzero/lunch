@@ -19,4 +19,19 @@ describe MAPI::ServiceApp do
       expect(subject.request_user_id).to be(value)
     end    
   end
+
+  describe 'GET /' do
+    it 'responds with the current environment' do
+      env = SecureRandom.hex
+      allow(described_class).to receive(:environment).and_return(env)
+      get '/'
+      expect(last_response.body).to eq(env)
+    end
+  end
+
+  describe 'GET /raise_error' do
+    it 'raises an error' do
+      expect{get '/raise_error'}.to raise_error(/Some Error/)
+    end
+  end
 end

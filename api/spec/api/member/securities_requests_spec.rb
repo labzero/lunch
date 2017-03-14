@@ -1927,7 +1927,7 @@ describe MAPI::ServiceApp do
           end
           it "raises a `CustomTypedFieldError` if `delivery_type` is `fed` and `original_par` is greater than #{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}" do
             security['original_par'] = rand(50000001..99999999)
-            expect{securities_request_module.validate_securities([security], settlement_type, 'fed', type)}.to raise_error(CustomTypedFieldError, "original par must be less than $#{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}") do |error|
+            expect{securities_request_module.validate_securities([security], settlement_type, 'fed', type)}.to raise_error(MAPI::Shared::Errors::CustomTypedFieldError, "original par must be less than $#{MAPI::Services::Member::SecuritiesRequests::FED_AMOUNT_LIMIT}") do |error|
               expect(error.code).to eq(:securities)
               expect(error.type).to eq(:original_par)
             end
@@ -1962,7 +1962,7 @@ describe MAPI::ServiceApp do
                 before { security['original_par'] = original_par }
 
                 it 'raises a `CustomTypedFieldError`' do
-                  expect{call_method}.to raise_error(CustomTypedFieldError, "original par must be a whole number when delivery_type is 'fed' or 'dtc'") do |error|
+                  expect{call_method}.to raise_error(MAPI::Shared::Errors::CustomTypedFieldError, "original par must be a whole number when delivery_type is 'fed' or 'dtc'") do |error|
                     expect(error.code).to eq(:securities)
                     expect(error.type).to eq(:original_par_whole_number)
                   end
@@ -5438,6 +5438,61 @@ describe MAPI::ServiceApp do
       end
       it 'includes the `member_id` in the WHERE clause' do
         expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+FHLB_ID\s+=\s+#{member_id}\s+/)
+      end
+    end
+
+    describe '`REQUEST_HEADER_MAPPING` constant' do
+      let(:header_details) { {} }
+      let(:value) { double('A Value') }
+      let(:converted_value) { double('A Converted Value') }
+      let(:integer_value)  { instance_double(Integer) }
+      let(:call_method) { MAPI::Services::Member::SecuritiesRequests.map_hash_values(header_details, MAPI::Services::Member::SecuritiesRequests::REQUEST_HEADER_MAPPING) }
+      ['BROKER_WIRE_ADDR', 'ABA_NO', 'DTC_AGENT_PARTICIPANT_NO', 'MUTUAL_FUND_COMPANY', 'DELIVERY_BANK_AGENT',
+        'REC_BANK_AGENT_NAME', 'REC_BANK_AGENT_ADDR', 'CREDIT_ACCT_NO1', 'CREDIT_ACCT_NO2', 'MUTUAL_FUND_ACCT_NO',
+        'CREDIT_ACCT_NO3', 'CREATED_BY', 'CREATED_BY_NAME'].each do |attr|
+          it "converts `#{attr}` to a string" do
+            allow(value).to receive(:to_s).and_return(converted_value)
+            header_details[attr] = value
+            expect(call_method[attr]).to be(converted_value)
+          end
+        end
+      ['SETTLE_DATE', 'TRADE_DATE', 'AUTHORIZED_DATE'].each do |attr|
+        it "converts `#{attr}` to a date" do
+          allow(value).to receive(:to_date).and_return(converted_value)
+          header_details[attr] = value
+          expect(call_method[attr]).to be(converted_value)
+        end
+      end
+      it 'converts `PLEDGE_TYPE` to a `TRANSACTION_CODE`' do
+        allow(value).to receive(:to_i).and_return(integer_value)
+        stub_const('MAPI::Services::Member::SecuritiesRequests::TRANSACTION_CODE', {converted_value => integer_value})
+        header_details['PLEDGE_TYPE'] = value
+        expect(call_method['PLEDGE_TYPE']).to be(converted_value)
+      end
+      it 'converts `REQUEST_STATUS` to a `SETTLEMENT_TYPE`' do
+        allow(value).to receive(:to_i).and_return(integer_value)
+        stub_const('MAPI::Services::Member::SecuritiesRequests::SETTLEMENT_TYPE', {converted_value => integer_value})
+        header_details['REQUEST_STATUS'] = value
+        expect(call_method['REQUEST_STATUS']).to be(converted_value)
+      end
+      it 'converts `FORM_TYPE` to a `SSKFormType`' do
+        stub_const('MAPI::Services::Member::SecuritiesRequests::REQUEST_FORM_TYPE_MAPPING', {value => converted_value})
+        header_details['FORM_TYPE'] = value
+        expect(call_method['FORM_TYPE']).to be(converted_value)
+      end
+      it 'converts `PLEDGE_TO` to a `SSKPledgeTo`' do
+        allow(value).to receive(:to_i).and_return(integer_value)
+        stub_const('MAPI::Services::Member::SecuritiesRequests::PLEDGE_TO', {converted_value => integer_value})
+        header_details['PLEDGE_TO'] = value
+        expect(call_method['PLEDGE_TO']).to be(converted_value)
+      end
+      ['DELIVER_TO', 'RECEIVE_FROM'].each do |attr|
+        it "converts `#{attr}` to a `SSKDeliverTo`" do
+          allow(value).to receive(:to_i).and_return(integer_value)
+          stub_const('MAPI::Services::Member::SecuritiesRequests::DELIVERY_TYPE', {converted_value => integer_value})
+          header_details[attr] = value
+          expect(call_method[attr]).to be(converted_value)
+        end
       end
     end
   end

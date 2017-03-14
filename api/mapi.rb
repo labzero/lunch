@@ -63,7 +63,6 @@ module MAPI
 
   class ServiceApp < Sinatra::Base
     require 'logging'
-    require_relative '../lib/logging/appenders/rack'
     require 'sinatra/activerecord'
     register Sinatra::ActiveRecordExtension
     configure do
@@ -129,8 +128,6 @@ module MAPI
       raise 'Some Error'
     end
 
-    register MAPI::Services::MockRates
-    register MAPI::Services::MockMembers
     register MAPI::Services::Rates
     register MAPI::Services::Member
     register MAPI::Services::EtransactAdvances

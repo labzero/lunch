@@ -92,8 +92,6 @@ class AdvancesController < ApplicationController
             else
               next
             end
-          elsif key == :status || key == :original_par
-            next
           else
             columns << {value: value}
           end

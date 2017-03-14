@@ -68,7 +68,6 @@ Rails.application.routes.draw do
     get    '/'                         => 'error#not_found'
     get    '/password'                 => 'settings#change_password'
     put    '/password'                 => 'settings#update_password'
-    post   '/save'                     => 'settings#save'
     get    '/two-factor'               => 'settings#two_factor'
     put    '/two-factor/pin'           => 'settings#reset_pin'
     post   '/two-factor/pin'           => 'settings#new_pin'

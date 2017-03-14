@@ -105,10 +105,8 @@ module MAPI
                 # if date is yesterday or later, get data from the lastest view
                 rows = if latest_row_found = as_of_date >  today_date  - 2.days
                   fake('member_advances_latest').sample
-                elsif as_of_date < today_date
-                  fake('member_advances_historical').sample
                 else
-                  []
+                  fake('member_advances_historical').sample
                 end
                 rows.each do |row|
                   if row['ADVDET_MATURITY_DATE'].to_date < as_of_date

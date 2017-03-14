@@ -1,0 +1,115 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://appservices/MarketDataServicesAuth/MarketDataService.svc?wsdl
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - text/xml; charset=UTF-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Thu, 16 Feb 2017 00:40:46 GMT
+      Content-Length:
+      - '3609'
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="utf-8"?><wsdl:definitions name="MarketDataService"
+        targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:i1="http://fhlbsf.com/reports/contract/v1"
+        xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:tns="http://tempuri.org/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract"
+        xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+        xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing"
+        xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:i0="http://fhlbsf.com/contract/marketdata/v1"
+        xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
+        xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+        xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"><wsdl:import namespace="http://fhlbsf.com/contract/marketdata/v1"
+        location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc?wsdl=wsdl0"/><wsdl:import
+        namespace="http://fhlbsf.com/reports/contract/v1" location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc?wsdl=wsdl1"/><wsdl:types/><wsdl:binding
+        name="ClearUsernameBinding_IMarketDataService" type="i0:IMarketDataService"><soap:binding
+        transport="http://schemas.xmlsoap.org/soap/http"/><wsdl:operation name="getMarketData"><soap:operation
+        soapAction="http://fhlbsf.com/contract/marketdata/v1/IMarketDataService/getMarketData"
+        style="document"/><wsdl:input name="MarketDataRequest"><soap:body use="literal"/></wsdl:input><wsdl:output
+        name="MarketDataResponse"><soap:body use="literal"/></wsdl:output></wsdl:operation><wsdl:operation
+        name="fakeMarketData"><soap:operation soapAction="http://fhlbsf.com/contract/marketdata/v1/IMarketDataService/fakeMarketData"
+        style="document"/><wsdl:input><soap:body use="literal"/></wsdl:input><wsdl:output><soap:body
+        use="literal"/></wsdl:output></wsdl:operation></wsdl:binding><wsdl:binding
+        name="ClearUsernameBinding_IPricingIndicationsService" type="i1:IPricingIndicationsService"><soap:binding
+        transport="http://schemas.xmlsoap.org/soap/http"/><wsdl:operation name="getPricingIndications"><soap:operation
+        soapAction="http://fhlbsf.com/reports/contract/v1/IPricingIndicationsService/getPricingIndications"
+        style="document"/><wsdl:input name="PricingIndicationsRequest"><soap:body
+        use="literal"/></wsdl:input><wsdl:output name="PricingIndicationsResponse"><soap:body
+        use="literal"/></wsdl:output></wsdl:operation><wsdl:operation name="fakePricingIndicationsData"><soap:operation
+        soapAction="http://fhlbsf.com/reports/contract/v1/IPricingIndicationsService/fakePricingIndicationsData"
+        style="document"/><wsdl:input><soap:body use="literal"/></wsdl:input><wsdl:output><soap:body
+        use="literal"/></wsdl:output></wsdl:operation></wsdl:binding><wsdl:service
+        name="MarketDataService"><wsdl:port name="ClearUsernameBinding_IMarketDataService"
+        binding="tns:ClearUsernameBinding_IMarketDataService"><soap:address location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc"/></wsdl:port><wsdl:port
+        name="ClearUsernameBinding_IPricingIndicationsService" binding="tns:ClearUsernameBinding_IPricingIndicationsService"><soap:address
+        location="http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc"/></wsdl:port></wsdl:service></wsdl:definitions>
+    http_version: 
+  recorded_at: Thu, 16 Feb 2017 00:40:46 GMT
+- request:
+    method: post
+    uri: http://sfdw64netapp1.fhlbsf-i.com/MarketDataServicesAuth/MarketDataService.svc
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="UTF-8"?><soapenv:Envelope xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:v1="http://fhlbsf.com/schema/msg/marketdata/v1"
+        xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"
+        xmlns:v11="http://fhlbsf.com/schema/canonical/common/v1" xmlns:v12="http://fhlbsf.com/schema/canonical/marketdata/v1"
+        xmlns:v13="http://fhlbsf.com/schema/canonical/shared/v1"><soapenv:Header><wsse:Security><wsse:UsernameToken><wsse:Username>FHLBSF\\svcsys_fobo_mdtest</wsse:Username><wsse:Password>RiYPHJfc9g2L6eAisIQX3QWu4DJs75</wsse:Password></wsse:UsernameToken></wsse:Security></soapenv:Header><soapenv:Body><v1:marketDataRequest><v11:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v11:caller><v1:requests><v1:fhlbsfMarketDataRequest><v1:caller><v11:id>FHLBSF\\svcsys_fobo_mdtest</v11:id></v1:caller><v1:marketData><v12:spotDate>2017-02-15</v12:spotDate><v12:customRollingDay>0</v12:customRollingDay><v12:name>FRC_WL</v12:name><v12:pricingGroup><v12:id>Live</v12:id></v12:pricingGroup><v12:data><v12:FhlbsfDataPoint><v12:tenor><v12:interval><v13:frequency>2</v13:frequency><v13:frequencyUnit>M</v13:frequencyUnit></v12:interval></v12:tenor></v12:FhlbsfDataPoint></v12:data></v1:marketData></v1:fhlbsfMarketDataRequest></v1:requests></v1:marketDataRequest></soapenv:Body></soapenv:Envelope>
+    headers:
+      Soapaction:
+      - '"http://fhlbsf.com/contract/marketdata/v1/IMarketDataService/getMarketData"'
+      Content-Type:
+      - text/xml;charset=UTF-8
+      Content-Length:
+      - '1460'
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - text/xml; charset=utf-8
+      Server:
+      - Microsoft-IIS/7.5
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Thu, 16 Feb 2017 00:40:46 GMT
+      Content-Length:
+      - '815'
+    body:
+      encoding: UTF-8
+      string: <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"><s:Header><o:Security
+        s:mustUnderstand="1" xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"><u:Timestamp
+        u:Id="_0"><u:Created>2017-02-16T00:40:46.351Z</u:Created><u:Expires>2017-02-16T00:45:46.351Z</u:Expires></u:Timestamp></o:Security></s:Header><s:Body><marketDataResponse
+        xmlns="http://fhlbsf.com/schema/msg/marketdata/v1"><responses xmlns:i="http://www.w3.org/2001/XMLSchema-instance"><fhlbsfMarketDataResponse><description/><requestTime>2017-02-15T16:40:46.3519519-08:00</requestTime><transactionResult>Error</transactionResult></fhlbsfMarketDataResponse></responses></marketDataResponse></s:Body></s:Envelope>
+    http_version: 
+  recorded_at: Thu, 16 Feb 2017 00:40:46 GMT
+recorded_with: VCR 2.9.3

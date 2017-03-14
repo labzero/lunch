@@ -693,6 +693,31 @@ RSpec.describe AdvancesController, :type => :controller do
           make_request
         end
       end
+      describe 'max term execeeded error' do
+        let(:preview_error) { instance_double(AdvanceRequest::Error, type: :preview, code: :exceeds_maximum_term, value: error_value) }
+        before do
+          allow(advance_request).to receive(:errors).and_return([preview_error])
+        end
+        it_behaves_like 'an advance preview error'
+        it 'populates the advance error view parameters with the proper error message and error value' do
+          expect(subject).to receive(:populate_advance_error_view_parameters).with({error_message: :exceeds_maximum_term, error_value: error_value})
+          make_request
+        end
+      end
+      describe 'gross up financing availablity error' do
+        let(:preview_error) { instance_double(AdvanceRequest::Error, type: :preview, code: :gross_up_exceeds_financing_availability, value: error_value) }
+        before do
+          allow(advance_request).to receive(:errors).and_return([preview_error])
+        end
+        it 'populates the advance summary view parameters' do
+          expect(subject).to receive(:populate_advance_summary_view_parameters)
+          make_request
+        end
+        it 'renders the financing availablity view' do
+          make_request
+          expect(response).to render_template(:financing_availability_limit)
+        end
+      end
       describe 'other preview errors' do
         let(:preview_error) { double('preview error', type: :preview, code: :foo, value: error_value) }
         before do
@@ -1288,6 +1313,45 @@ RSpec.describe AdvancesController, :type => :controller do
             path = advances_confirmation_path(advance_number: advances[i][:advance_number], confirmation_number: advances[i][:confirmation_number])
             expect(result.second).to eq(path)
           end
+        end
+      end
+    end
+
+    describe '`days_to_maturity`' do
+      let(:today) { Time.zone.today }
+      let(:days_to_maturity) { rand(1..10) }
+      let(:maturity_date) { today + (days_to_maturity + (funding_date - today)).days }
+      let(:funding_date) { today + rand(1..3).days }
+      let(:call_method) { subject.send(:days_to_maturity, maturity_date, funding_date) }
+
+      before do
+        allow(Time.zone).to receive(:today).and_return(today)
+      end
+
+      it 'returns a hash with a `days` key' do
+        expect(call_method).to have_key(:days)
+      end
+      it 'returns a hash with a `term` key' do
+        expect(call_method).to have_key(:term)
+      end
+      it 'returns the number of days between the `maturity_date` and `funding_date` in the `days` key' do
+        expect(call_method[:days]).to be(days_to_maturity)
+      end
+      it 'returns a custom term token in the `term` key' do
+        expect(call_method[:term]).to eq("#{days_to_maturity}day")
+      end
+      it 'converts the `maturity_date` to a Date' do
+        expect(maturity_date).to receive(:to_date).and_call_original
+        call_method
+      end
+      it 'converts the `funding_date` to a Date' do
+        expect(funding_date).to receive(:to_date).and_call_original
+        call_method
+      end
+      context 'if no `funding_date` is provided' do
+        let(:funding_date) { today }
+        it 'sets `funding_date` to today' do
+          expect(subject.send(:days_to_maturity, maturity_date)[:days]).to be(days_to_maturity)
         end
       end
     end
