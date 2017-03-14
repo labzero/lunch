@@ -822,6 +822,8 @@ class ReportsController < ApplicationController
         raise StandardError, "There has been an error and ReportsController#advances_detail has encountered nil. Check error logs." if @advances_detail.nil?
 
         @advances_detail[:advances_details].to_a.each_with_index do |advance, i|
+          interest_rate = advance[:interest_rate]
+          advance[:interest_rate_precision] = interest_rate_precision_by_advance_type(interest_rate, advance[:advance_type]) if interest_rate
           case advance[:notes]
             when 'unavailable_online'
               @advances_detail[:advances_details][i][:prepayment_fee_indication_notes] = t('reports.pages.advances_detail.unavailable_online')

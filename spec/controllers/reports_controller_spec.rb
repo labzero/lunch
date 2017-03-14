@@ -1759,8 +1759,48 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
 
+      describe 'setting the `interest_rate_precision` attribute for a given advance record' do
+        let(:advance_record) {double('Advance Record', :[] => nil, :[]= => nil)}
+        let(:advances_array) {[advance_record]}
+        before do
+          allow(advances_detail).to receive(:[]).with(:advances_details).and_return(advances_array)
+          allow(Regexp).to receive(:new).and_call_original
+        end
+
+        context 'when the advance has no interest_rate' do
+          it 'does not set `interest_rate_precision`' do
+            expect(advance_record).not_to receive(:[]=).with(:interest_rate_precision, anything)
+            call_action_shared_example
+          end
+        end
+
+        context 'when the advance has an interest rate' do
+          let(:interest_rate) { double('interest rate') }
+          let(:advance_type) { double('advance type') }
+
+          before do
+            allow(advance_record).to receive(:[]).with(:interest_rate).and_return(interest_rate)
+            allow(advance_record).to receive(:[]).with(:advance_type).and_return(advance_type)
+          end
+          it 'calls `interest_rate_precision_by_advance_type` with the interest_rate' do
+            expect(subject).to receive(:interest_rate_precision_by_advance_type).with(interest_rate, anything)
+            call_action_shared_example
+          end
+          it 'calls `interest_rate_precision_by_advance_type` with the advance_type' do
+            expect(subject).to receive(:interest_rate_precision_by_advance_type).with(anything, advance_type)
+            call_action_shared_example
+          end
+          it 'sets `advance[:interest_rate_precision]` to the result of `interest_rate_precision_by_advance_type`' do
+            precision = double('some precision')
+            allow(subject).to receive(:interest_rate_precision_by_advance_type).and_return(precision)
+            expect(advance_record).to receive(:[]=).with(:interest_rate_precision, precision)
+            call_action_shared_example
+          end
+        end
+      end
+
       describe 'setting the `prepayment_fee_indication_notes` attribute for a given advance record' do
-        let(:advance_record) {double('Advance Record')}
+        let(:advance_record) {double('Advance Record', :[] => nil, :[]= => nil)}
         let(:advances_array) {[advance_record]}
         let(:prepayment_fee) {464654654}
         before do
