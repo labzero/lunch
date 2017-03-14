@@ -425,17 +425,13 @@ module MAPI
                 'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
                 'v1:tradeRequestParameters' => [
                   {
-                    'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}]
-                  },
-                  {
-                    'v1:arrayOfTradeIds' => trade_id_array
-                  },
-                  # Calypso required `rangeOfSettlementDates`, but they are not actually used as part of the lookup. Just a quirk of the system.
-                  {
-                    'v1:rangeOfSettlementDates' => [
-                      {'v1:startDate' => (today - 100.years).iso8601},
-                      {'v1:endDate' => (today + 100.years).iso8601}
-                    ]
+                    'v1:arrayOfTradeIds' => trade_id_array,
+                    'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}],
+                    # Calypso required `rangeOfSettlementDates`, but they are not actually used as part of the lookup. Just a quirk of the system.
+                    'v1:rangeOfSettlementDates' => [{
+                      'v1:startDate' => (today - 100.years).iso8601,
+                      'v1:endDate' => (today + 100.years).iso8601
+                    }]
                   }
                 ]
               }

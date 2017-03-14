@@ -1120,15 +1120,15 @@ describe MAPI::ServiceApp do
               call_method
             end
             it 'includes the fhlb_id of the member in question' do
-              expect(trade_activity_connection).to receive(:call).with(anything, hash_including(message: hash_including('v1:tradeRequestParameters' => include({'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}]}))))
+              expect(trade_activity_connection).to receive(:call).with(anything, hash_including(message: hash_including('v1:tradeRequestParameters' => [include('v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}])])))
               call_method
             end
             it 'includes a start_date a hundred years in the past' do
-              expect(trade_activity_connection).to receive(:call).with(anything, hash_including(message: hash_including('v1:tradeRequestParameters' => include({'v1:rangeOfSettlementDates' => include('v1:startDate' => (today - 100.years).iso8601)}))))
+              expect(trade_activity_connection).to receive(:call).with(anything, hash_including(message: hash_including('v1:tradeRequestParameters' => [include('v1:rangeOfSettlementDates' => [include('v1:startDate' => (today - 100.years).iso8601)])])))
               call_method
             end
             it 'includes an end_date a hundred years in the future' do
-              expect(trade_activity_connection).to receive(:call).with(anything, hash_including(message: hash_including('v1:tradeRequestParameters' => include({'v1:rangeOfSettlementDates' => include('v1:endDate' => (today + 100.years).iso8601)}))))
+              expect(trade_activity_connection).to receive(:call).with(anything, hash_including(message: hash_including('v1:tradeRequestParameters' => [include('v1:rangeOfSettlementDates' => [include('v1:endDate' => (today + 100.years).iso8601)])])))
               call_method
             end
             it 'includes an array of all trade ids' do
@@ -1139,7 +1139,14 @@ describe MAPI::ServiceApp do
               trade_ids.each do |trade_id|
                 trade_id_array << {'v1:tradeId' => {'v1:tradeId' => trade_id}}
               end
-              expect(trade_activity_connection).to receive(:call).with(anything, hash_including(message: hash_including('v1:tradeRequestParameters' => include({'v1:arrayOfTradeIds' => trade_id_array}))))
+              expect(trade_activity_connection).to receive(:call).with(anything, hash_including(message: hash_including('v1:tradeRequestParameters' => [include('v1:arrayOfTradeIds' => trade_id_array)])))
+              call_method
+            end
+            it 'puts the trade ids first, then the customer id then the settlement date range' do
+              expect(trade_activity_connection).to receive(:call) do |tag, options|
+                expect(options[:message]['v1:tradeRequestParameters'].first.keys).to match(['v1:arrayOfTradeIds', 'v1:arrayOfCustomers', 'v1:rangeOfSettlementDates'])
+                savon_response
+              end
               call_method
             end
           end
