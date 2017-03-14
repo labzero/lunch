@@ -55,6 +55,9 @@ export default (stateData) => {
   if (stateData.tags) {
     initialState.tags.items = stateData.tags.map(t => t.toJSON());
   }
+  if (stateData.team) {
+    initialState.team = stateData.team;
+  }
   if (stateData.decision) {
     initialState.decision.inst = stateData.decision.toJSON();
   }

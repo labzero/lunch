@@ -9,46 +9,27 @@
 
 import React from 'react';
 import queryString from 'query-string';
+import hasRole from '../../helpers/hasRole';
 import LayoutContainer from '../../containers/LayoutContainer';
 
 const title = 'Admin';
-
-const hasRole = (user, team, role) => {
-  if (!role || user.superuser) {
-    return true;
-  }
-  const teamRole = user.roles.find(userRole => userRole.team_id === userRole.id);
-  if (!teamRole) {
-    return false;
-  }
-  switch (role) {
-    case 'admin':
-      return teamRole.type === 'admin' || teamRole.type === 'owner';
-    case 'owner':
-      return teamRole.type === 'owner';
-    default:
-      return false;
-  }
-};
 
 export default {
 
   path: '/admin',
 
   async action(context) {
-    console.log(context);
-
     const state = context.store.getState();
     const user = state.user;
     const team = state.team;
 
     if (user.id && hasRole(user, team, 'admin')) {
-      const Admin = await require.ensure([], require => require('./Admin').default, 'admin');
+      const AdminContainer = await require.ensure([], require => require('./AdminContainer').default, 'admin');
 
       return {
         title,
         chunk: 'admin',
-        component: <LayoutContainer><Admin title={title} /></LayoutContainer>,
+        component: <LayoutContainer><AdminContainer title={title} /></LayoutContainer>,
       };
     }
 

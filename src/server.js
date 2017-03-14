@@ -40,7 +40,8 @@ import restaurantApi from './api/restaurants';
 import tagApi from './api/tags';
 import decisionApi from './api/decisions';
 import whitelistEmailApi from './api/whitelistEmails';
-import { Restaurant, Tag, User, WhitelistEmail, Decision } from './models';
+import { Decision, Restaurant, Role, Tag, Team, User, WhitelistEmail } from './models';
+import hasRole from './helpers/hasRole';
 
 const app = express();
 
@@ -169,21 +170,37 @@ app.get('*', async (req, res, next) => {
       return;
     }
 
+    let team;
+
     const finds = [
       Restaurant.findAllWithTagIds(),
       Tag.scope('orderedByRestaurant').findAll(),
       Decision.scope('fromToday').findOne()
     ];
     if (req.user) {
-      finds.push(User.findAll({ attributes: ['id', 'name'] }));
+      const firstRole = req.user.roles[0];
+      if (firstRole) {
+        team = await Team.findOne({ where: { id: firstRole.team_id } });
+      }
+
+      let userAttributes = ['id', 'name'];
+      let userIncludes;
+      if (hasRole(req.user, team, 'admin')) {
+        userAttributes = userAttributes.concat(['email']);
+        userIncludes = [Role];
+      }
+      finds.push(User.findAll({ attributes: userAttributes, include: userIncludes }));
       finds.push(WhitelistEmail.findAll({ attributes: ['id', 'email'] }));
     }
 
-    Promise.all(finds).then(([restaurants, tags, decision, users, whitelistEmails]) => {
+    try {
+      const [restaurants, tags, decision, users, whitelistEmails] = await Promise.all(finds);
+
       const stateData = {
+        decision,
         restaurants,
         tags,
-        decision
+        team
       };
       if (req.user) {
         stateData.user = req.user;
@@ -222,7 +239,9 @@ app.get('*', async (req, res, next) => {
       const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
       res.status(route.status || 200);
       res.send(`<!doctype html>${html}`);
-    }).catch(err => next(err));
+    } catch (err) {
+      next(err);
+    }
   } catch (err) {
     next(err);
   }
