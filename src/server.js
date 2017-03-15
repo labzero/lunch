@@ -85,17 +85,45 @@ app.use(expressJwt({
 }));
 app.use(passport.initialize());
 
+app.use((req, res, next) => {
+  if (typeof req.user === 'number' || typeof req.user === 'string') {
+    User.findAll({
+      where: {
+        id: req.user
+      },
+      include: [
+        {
+          model: Role,
+          required: false,
+          attributes: ['type', 'team_id']
+        }
+      ]
+    }).then(users => {
+      if (users.length > 0) {
+        // eslint-disable-next-line no-param-reassign
+        req.user = users[0];
+      } else {
+        // eslint-disable-next-line no-param-reassign
+        delete req.user;
+      }
+      next();
+    }).catch(err => next(err));
+  } else {
+    next();
+  }
+});
+
 if (__DEV__) {
   app.enable('trust proxy');
 }
 app.get('/login',
-  passport.authenticate('google', { scope: ['email', 'profile'] })
+  passport.authenticate('google', { scope: ['email', 'profile'], session: false })
 );
 app.get('/login/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     const expiresIn = 60 * 60 * 24 * 180; // 180 days
-    const token = jwt.sign(req.user.toJSON(), auth.jwt.secret, { expiresIn });
+    const token = jwt.sign(req.user, auth.jwt.secret);
     res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
     res.redirect('/');
   },

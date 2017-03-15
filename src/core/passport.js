@@ -15,7 +15,7 @@
 
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { User, Role, WhitelistEmail } from '../models';
+import { User, WhitelistEmail } from '../models';
 
 /**
  * Sign in with Google.
@@ -41,15 +41,8 @@ passport.use(new GoogleStrategy(
           profile._json.domain === process.env.OAUTH_DOMAIN ||
           process.env.OAUTH_DOMAIN === undefined
         ) {
-          return User.findAll({
-            where: { google_id: profile.id },
-            include: [
-              {
-                model: Role,
-                required: false,
-                attributes: ['type', 'team_id']
-              }
-            ],
+          return User.findOrCreate({
+            where: { google_id: profile.id }
           }).spread(user => {
             const userUpdates = {};
             let doUpdates = false;
@@ -68,10 +61,10 @@ passport.use(new GoogleStrategy(
             }
 
             if (doUpdates) {
-              return user.update(userUpdates).then(updatedUser => done(null, updatedUser));
+              return user.update(userUpdates).then(updatedUser => done(null, updatedUser.id));
             }
 
-            return done(null, user);
+            return done(null, user.id);
           }).catch(err => done(err));
         }
         return done(null, false, { message: 'Please log in using your Lab Zero account.' });
@@ -81,8 +74,6 @@ passport.use(new GoogleStrategy(
   }
 ));
 
-passport.serializeUser((user, cb) => {
-  cb(null, user.id);
-});
+passport.serializeUser((userId, cb) => cb(null, userId));
 
 export default passport;
