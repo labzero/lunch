@@ -9,6 +9,7 @@ class InternalMailer < ActionMailer::Base
   WEB_SECURITIES = 'WebSecurities@fhlbsf.com'
   SECURITIES_SERVICES = 'SecuritiesServices@fhlbsf.com'
   COLLATERAL_OPERATIONS = 'CollateralOperations@fhlbsf.com'
+  LETTER_OF_CREDIT_ADDRESS = 'LetterOfCredit@fhlbsf.com'
   layout 'mailer'
   default to: GENERAL_ALERT_ADDRESS, from: GENERAL_ALERT_ADDRESS
 
