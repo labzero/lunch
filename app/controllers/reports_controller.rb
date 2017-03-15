@@ -1973,8 +1973,11 @@ class ReportsController < ApplicationController
     rows = []
     activities = sort_report_data(activities, :funding_date)
     activities.each do |activity|
+      if activity[:instrument_type] == 'LC'
+        activity[:product_description] = 'LC'
+        activity[:interest_rate] = nil if activity[:status] == 'EXERCISED'
       # Handling for Advances that have been EXERCISED
-      if (activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC') && activity[:status] == 'EXERCISED'
+      elsif activity[:instrument_type] == 'ADVANCE' && activity[:status] == 'EXERCISED'
         activity[:product_description] = activity[:termination_full_partial]
         activity[:interest_rate] = nil
       else
@@ -1982,7 +1985,7 @@ class ReportsController < ApplicationController
           # handling for Termination Par
         if !activity[:termination_par].blank?
           if !activity[:termination_full_partial].blank?
-            if activity[:instrument_type] == 'ADVANCE' || activity[:instrument_type] == 'LC'
+            if activity[:instrument_type] == 'ADVANCE'
                          activity[:termination_full_partial]
             elsif activity[:status] == 'TERMINATED'
               'TERMINATION'

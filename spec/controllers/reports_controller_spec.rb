@@ -1473,6 +1473,11 @@ RSpec.describe ReportsController, :type => :controller do
         todays_credit
         expect(assigns[:todays_credit][:rows][0][:columns][2][:value]).to be_nil
       end
+      it 'sets the `product_description` of an EXERCISED LC to `LC`' do
+        allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([exercised_lc])
+        todays_credit
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq('LC')
+      end
       it 'sets the `interest_rate` of an EXERCISED LC to nil' do
         allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([exercised_lc])
         todays_credit
@@ -1483,10 +1488,10 @@ RSpec.describe ReportsController, :type => :controller do
         todays_credit
         expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(terminated_advance[:termination_full_partial])
       end
-      it 'sets the `product_description` of a TERMINATED LC to its `termination_full_partial` value' do
+      it 'sets the `product_description` of a TERMINATED LC to `LC`' do
         allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([terminated_lc])
         todays_credit
-        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq(terminated_lc[:termination_full_partial])
+        expect(assigns[:todays_credit][:rows][0][:columns][5][:value]).to eq('LC')
       end
       it 'sets the `product_description` to `TERMINATION` for TERMINATED activities that are not ADVANCEs or LCs' do
         allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([terminated_activity_with_status])
