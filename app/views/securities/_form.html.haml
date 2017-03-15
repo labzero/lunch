@@ -7,7 +7,7 @@
   = f.hidden_field(:pledged_account)
   = f.hidden_field(:safekept_account)
   - if @error_message
-    .securities-submit-request-form-errors
+    .form-error-section
       %p= @error_message
   %section.securities-broker-instructions.form-fields-section-column-2.form-fields-section-column-2-multirow
     %h2= t('securities.release.broker_instructions')

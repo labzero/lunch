@@ -262,7 +262,7 @@ $(function() {
     };
   };
 
-  if ($('.securities-submit-request-form-errors').length) {
+  if ($('.securities .form-error-section').length) {
     authorizer ? Fhlb.Track.securities_authorize_request_failed() : Fhlb.Track.securities_submit_request_failed();
   };
 
