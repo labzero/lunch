@@ -290,7 +290,7 @@ class SecuritiesRequest
     unless securities.blank?
       whole_number = true
       securities.each do |security|
-        whole_number = ((security.original_par * 100).to_i % 100) == 0
+        whole_number = ((security.original_par * 1e7).round % 1e7) == 0
         break unless whole_number
       end
       errors.add(:securities, :original_par_whole_number) unless whole_number

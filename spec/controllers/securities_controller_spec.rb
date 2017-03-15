@@ -739,11 +739,12 @@ RSpec.describe SecuritiesController, type: :controller do
   end
 
   describe 'POST upload_securities' do
-    shared_examples 'an upload_securities action with a type' do |type|
+    shared_examples 'an upload_securities action with a type' do |type, floating_point_error_filename: nil, **files|
       uploaded_file = excel_fixture_file_upload('sample-securities-upload.xlsx')
       headerless_file = excel_fixture_file_upload('sample-securities-upload-headerless.xlsx')
       uploaded_with_blanks_file = excel_fixture_file_upload('sample-securities-upload-blanks.xlsx')
       uploaded_with_whitespace_file = excel_fixture_file_upload('sample-securities-upload-whitespace.xlsx')
+      uploaded_with_floating_point_approximation = excel_fixture_file_upload(floating_point_error_filename)
       let(:security) { instance_double(Security, :valid? => true) }
       let(:invalid_security) { instance_double(Security, :valid? => false, errors: {}) }
       let(:sample_securities_upload_array) { [security,security,security,security,security] }
@@ -814,7 +815,6 @@ RSpec.describe SecuritiesController, type: :controller do
             end
             it 'returns a json object with an error message that is the result of calling `prioritized_security_error`' do
               allow(controller).to receive(:prioritized_security_error).and_return(error_message)
-              call_action
               expect(parsed_response_body[:error]).to eq(simple_format(error_message))
             end
           end
@@ -833,8 +833,22 @@ RSpec.describe SecuritiesController, type: :controller do
             end
             it 'prioritizes blank CUSIP errors over invalid CUSIP errors' do
               allow(invalid_security).to receive(:cusip).and_return('', invalid_cusip_2)
-              call_action
               expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('activemodel.errors.models.security.blank')))
+            end
+          end
+          describe 'when there is valid floating point approximation par amount present' do
+            let(:call_action) { post :upload_securities, file: uploaded_with_floating_point_approximation, type: type }
+            before do
+              allow(Security).to receive(:from_hash).and_call_original
+            end
+            it 'does not return an error' do
+              expect(parsed_response_body[:error]).to be_nil
+            end
+            it 'correctly parses the par amount' do
+              expect(JSON.parse(parsed_response_body[:form_data]).first['original_par']).to be(10000000.0)
+            end
+            it 'does not round values that are within the float precision' do
+              expect(JSON.parse(parsed_response_body[:form_data])[1]['original_par']).to be(5000000.003)
             end
           end
         end
@@ -842,21 +856,18 @@ RSpec.describe SecuritiesController, type: :controller do
       describe 'when the uploaded file does not contain a header row with `CUSIP` as a value' do
         let(:call_action) { post :upload_securities, file: headerless_file, type: type }
         it 'renders a json object with a nil value for `html`' do
-          call_action
           expect(parsed_response_body[:html]).to be_nil
         end
         it 'renders a json object with a generic error messages' do
-          call_action
           expect(parsed_response_body[:error]).to eq(simple_format(I18n.t('securities.upload_errors.generic')))
         end
       end
       describe 'when the uploaded file contains blanks' do
         let(:call_action) { post :upload_securities, file: uploaded_with_blanks_file, type: type }
         it 'does not return an error' do
-          call_action
           expect(parsed_response_body[:error]).to be_nil
         end
-        it 'calls `populate_securities_table_data_view_variable` with the securities, skiping blank lines' do
+        it 'calls `populate_securities_table_data_view_variable` with the securities, skipping blank lines' do
           expect(controller).to receive(:populate_securities_table_data_view_variable).with(type, sample_securities_upload_array)
           call_action
         end
@@ -864,10 +875,9 @@ RSpec.describe SecuritiesController, type: :controller do
       describe 'when the uploaded file contains lines of pure whitespace' do
         let(:call_action) { post :upload_securities, file: uploaded_with_whitespace_file, type: type }
         it 'does not return an error' do
-          call_action
           expect(parsed_response_body[:error]).to be_nil
         end
-        it 'calls `populate_securities_table_data_view_variable` with the securities, skiping empty lines' do
+        it 'calls `populate_securities_table_data_view_variable` with the securities, skipping empty lines' do
           expect(controller).to receive(:populate_securities_table_data_view_variable).with(type, sample_securities_upload_array)
           call_action
         end
@@ -943,7 +953,7 @@ RSpec.describe SecuritiesController, type: :controller do
         original_par: original_par,
         payment_amount: payment_amount
       }}
-      it_behaves_like 'an upload_securities action with a type', :release
+      it_behaves_like 'an upload_securities action with a type', :release, floating_point_error_filename: 'securities-release-cents-floating-point-error.xlsx'
     end
 
     describe 'when the type param is `transfer`' do
@@ -962,7 +972,7 @@ RSpec.describe SecuritiesController, type: :controller do
         description: description,
         original_par: original_par
       }}
-      it_behaves_like 'an upload_securities action with a type', :transfer
+      it_behaves_like 'an upload_securities action with a type', :transfer, floating_point_error_filename: 'securities-release-cents-floating-point-error.xlsx'
     end
 
     [:pledge, :safekeep].each do |type|
@@ -983,7 +993,7 @@ RSpec.describe SecuritiesController, type: :controller do
           payment_amount: payment_amount,
           custodian_name: custodian_name
         }}
-        it_behaves_like 'an upload_securities action with a type', type
+        it_behaves_like 'an upload_securities action with a type', type, floating_point_error_filename: 'securities-pledge-cents-floating-point-error.xlsx'
       end
     end
   end
@@ -997,6 +1007,7 @@ RSpec.describe SecuritiesController, type: :controller do
       expect{call_action}.to raise_error(ArgumentError, "Unknown request type: #{type}")
     end
   end
+
   {
     pledge_release: [:edit_release, I18n.t('securities.authorize.release.title'), :securities_release_pledge_success_url, :release],
     safekept_release: [:edit_release, I18n.t('securities.authorize.release.title'), :securities_release_safekeep_success_url, :release],
@@ -2429,7 +2440,6 @@ RSpec.describe SecuritiesController, type: :controller do
         end
       end
     end
-
     describe '`populate_authorize_request_view_variables`' do
       describe 'when passed a kind that is not a valid SecuritiesRequest `kind`' do
         let(:call_method) { controller.send(:populate_authorize_request_view_variables, SecureRandom.hex) }
@@ -2465,7 +2475,6 @@ RSpec.describe SecuritiesController, type: :controller do
         end
       end
     end
-
     describe '`populate_contact_info_by_kind`' do
       let(:sentinel) { instance_double(String) }
 
@@ -2589,7 +2598,6 @@ RSpec.describe SecuritiesController, type: :controller do
         end
       end
     end
-
     describe '`get_delivery_instruction_rows`' do
       let(:delivery_type) { double('A Delivery Type') }
       let(:delivery_instruction_keys) {[]}

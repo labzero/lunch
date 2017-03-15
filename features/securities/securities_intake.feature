@@ -68,6 +68,19 @@ Feature: Securities Intake
   | safekeep securities |
   | pledge securities   |
 
+  @jira-mem-2176 @data-unavailable
+  Scenario Outline: Member uploads a securities intake file that has a valid floating point representation of Original Par
+    Given I am on the <page> page
+    When I drag and drop the "securities-pledge-cents-valid-floating-point.xlsx" file into the upload securities dropzone
+    Then I should see a report table with multiple data rows
+    When I fill in the "clearing_agent_participant_number" securities field with "2345"
+    And I submit the securities request for authorization
+    Then I should see the title for the "<success_page>" success page
+  Examples:
+    | page                | success_page     |
+    | safekeep securities | safekept intake |
+    | pledge securities   | pledge intake   |
+
   @jira-mem-1669
   Scenario Outline: A signer views a previously submitted request
     Given I am logged in as a "quick-advance signer"
@@ -88,7 +101,7 @@ Feature: Securities Intake
     And I submit the securities request for authorization
     Then I should see the title for the "<success_page>" success page
   Examples:
-  | security_type | success_page     |
+  | security_type | success_page    |
   | safekeep      | safekept intake |
   | pledge        | pledge intake   |
 
