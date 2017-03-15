@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import App from '../App';
-import RestaurantContainer from '../../containers/RestaurantContainer';
+import RestaurantContainer from '../Restaurant/RestaurantContainer';
 import s from './RestaurantMarker.scss';
 
 let google = { maps: { Marker: { MAX_ZINDEX: 1000000 } } };

@@ -10,10 +10,10 @@
 import React, { Component, PropTypes } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import emptyFunction from 'fbjs/lib/emptyFunction';
-import HeaderContainer from '../../containers/HeaderContainer';
-import FooterContainer from '../../containers/FooterContainer';
-import NotificationListContainer from '../../containers/NotificationListContainer';
-import ModalSectionContainer from '../../containers/ModalSectionContainer';
+import HeaderContainer from '../Header/HeaderContainer';
+import FooterContainer from '../Footer/FooterContainer';
+import NotificationListContainer from '../NotificationList/NotificationListContainer';
+import ModalSectionContainer from '../ModalSection/ModalSectionContainer';
 import s from './Layout.scss';
 // eslint-disable-next-line css-modules/no-unused-class
 import globalCss from '../../styles/globalCss.scss';

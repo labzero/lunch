@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './TagManager.scss';
-import TagManagerItemContainer from '../../containers/TagManagerItemContainer';
+import TagManagerItemContainer from '../TagManagerItem/TagManagerItemContainer';
 
 const TagManager = ({ tags }) => (
   <ul className={s.list}>

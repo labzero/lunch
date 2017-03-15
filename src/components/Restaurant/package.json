@@ -1,6 +1,0 @@
-{
-  "name": "Restaurant",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./Restaurant.js"
-}

@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantTagList.scss';
-import TagContainer from '../../containers/TagContainer';
+import TagContainer from '../Tag/TagContainer';
 
 const RestaurantTagList = ({ ids, removeTag, loggedIn }) => (
   <ul className={`${s.root} ${ids.length === 0 ? s.empty : ''}`}>

@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import EmailWhitelistItemContainer from '../../containers/EmailWhitelistItemContainer';
+import EmailWhitelistItemContainer from '../EmailWhitelistItem/EmailWhitelistItemContainer';
 
 const EmailWhitelist = ({
   inputValue,

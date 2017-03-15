@@ -9,7 +9,7 @@
 
 import React from 'react';
 import HomeContainer from './HomeContainer';
-import LayoutContainer from '../../../../containers/LayoutContainer';
+import LayoutContainer from '../../../../components/Layout/LayoutContainer';
 
 export default {
 

@@ -6,7 +6,7 @@ import sinon from 'sinon';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import { _RestaurantsPage as RestaurantsPage } from './RestaurantsPage';
-import RestaurantAddFormContainer from '../../containers/RestaurantAddFormContainer';
+import RestaurantAddFormContainer from '../RestaurantAddForm/RestaurantAddFormContainer';
 
 describe('HomePage', () => {
   let props;

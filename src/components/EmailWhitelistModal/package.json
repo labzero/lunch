@@ -1,6 +1,0 @@
-{
-  "name": "EmailWhitelistModal",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./EmailWhitelistModal.js"
-}

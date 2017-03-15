@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
-import RestaurantsPageContainer from '../../../../containers/RestaurantsPageContainer';
-import LoginPageContainer from '../../../../containers/LoginPageContainer';
+import RestaurantsPageContainer from '../../../../components/RestaurantsPage/RestaurantsPageContainer';
+import LoginPageContainer from '../../../../components/LoginPage/LoginPageContainer';
 
 const HomePage = ({ loggedIn }) => {
   if (loggedIn) {

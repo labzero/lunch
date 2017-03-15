@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import NotificationContainer from '../../containers/NotificationContainer';
+import NotificationContainer from '../Notification/NotificationContainer';
 import s from './NotificationList.scss';
 
 const NotificationList = ({ notifications }) => (

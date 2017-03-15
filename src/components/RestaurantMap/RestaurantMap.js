@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import GoogleMap from 'google-map-react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import RestaurantMarkerContainer from '../../containers/RestaurantMarkerContainer';
-import RestaurantMapSettingsContainer from '../../containers/RestaurantMapSettingsContainer';
+import RestaurantMarkerContainer from '../RestaurantMarker/RestaurantMarkerContainer';
+import RestaurantMapSettingsContainer from '../RestaurantMapSettings/RestaurantMapSettingsContainer';
 import s from './RestaurantMap.scss';
 
 const HereMarker = () => (

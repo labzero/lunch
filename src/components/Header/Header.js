@@ -9,8 +9,8 @@
 
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import LoginContainer from '../../containers/LoginContainer';
-import FlashContainer from '../../containers/FlashContainer';
+import LoginContainer from '../Login/LoginContainer';
+import FlashContainer from '../Flash/FlashContainer';
 import Link from '../Link';
 import s from './Header.scss';
 

@@ -3,7 +3,7 @@ import FlipMove from 'react-flip-move';
 import { Element as ScrollElement } from 'react-scroll';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantList.scss';
-import RestaurantContainer from '../../containers/RestaurantContainer';
+import RestaurantContainer from '../Restaurant/RestaurantContainer';
 
 class RestaurantList extends Component {
   componentWillUpdate() {

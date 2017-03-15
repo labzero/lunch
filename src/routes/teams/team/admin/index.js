@@ -10,7 +10,7 @@
 import React from 'react';
 import queryString from 'query-string';
 import hasRole from '../../../../helpers/hasRole';
-import LayoutContainer from '../../../../containers/LayoutContainer';
+import LayoutContainer from '../../../../components/Layout/LayoutContainer';
 
 const title = 'Admin';
 

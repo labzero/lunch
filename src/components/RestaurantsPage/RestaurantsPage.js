@@ -1,10 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantsPage.scss';
-import RestaurantMapContainer from '../../containers/RestaurantMapContainer';
-import RestaurantListContainer from '../../containers/RestaurantListContainer';
-import RestaurantAddFormContainer from '../../containers/RestaurantAddFormContainer';
-import TagFilterFormContainer from '../../containers/TagFilterFormContainer';
+import RestaurantMapContainer from '../RestaurantMap/RestaurantMapContainer';
+import RestaurantListContainer from '../RestaurantList/RestaurantListContainer';
+import RestaurantAddFormContainer from '../RestaurantAddForm/RestaurantAddFormContainer';
+import TagFilterFormContainer from '../TagFilterForm/TagFilterFormContainer';
 
 export class _RestaurantsPage extends Component {
 

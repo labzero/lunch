@@ -9,7 +9,7 @@
 
 import React from 'react';
 import queryString from 'query-string';
-import LayoutContainer from '../../containers/LayoutContainer';
+import LayoutContainer from '../../components/Layout/LayoutContainer';
 import NewTeamContainer from './NewTeamContainer';
 
 const title = 'New Team';

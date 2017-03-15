@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/lib/Modal';
 import ModalBody from 'react-bootstrap/lib/ModalBody';
 import ModalHeader from 'react-bootstrap/lib/ModalHeader';
 import ModalTitle from 'react-bootstrap/lib/ModalTitle';
-import TagManagerContainer from '../../containers/TagManagerContainer';
+import TagManagerContainer from '../TagManager/TagManagerContainer';
 
 const TagManagerModal = ({ shown, hideModal }) => (
   <Modal show={shown} onHide={hideModal}>

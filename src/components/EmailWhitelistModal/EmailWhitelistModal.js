@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/lib/Modal';
 import ModalBody from 'react-bootstrap/lib/ModalBody';
 import ModalHeader from 'react-bootstrap/lib/ModalHeader';
 import ModalTitle from 'react-bootstrap/lib/ModalTitle';
-import EmailWhitelistContainer from '../../containers/EmailWhitelistContainer';
+import EmailWhitelistContainer from '../EmailWhitelist/EmailWhitelistContainer';
 
 const EmailWhitelistModal = ({ shown, hideModal }) => (
   <Modal show={shown} onHide={hideModal}>

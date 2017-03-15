@@ -1,6 +1,6 @@
 import React from 'react';
 import TeamsContainer from './TeamsContainer';
-import LayoutContainer from '../../containers/LayoutContainer';
+import LayoutContainer from '../../components/Layout/LayoutContainer';
 
 /* eslint-disable global-require */
 

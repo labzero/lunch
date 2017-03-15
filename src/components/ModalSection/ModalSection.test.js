@@ -5,7 +5,7 @@ import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import ModalSection from './ModalSection';
-import DeleteRestaurantModalContainer from '../../containers/DeleteRestaurantModalContainer';
+import DeleteRestaurantModalContainer from '../DeleteRestaurantModal/DeleteRestaurantModalContainer';
 
 const context = { insertCss: () => {} };
 
