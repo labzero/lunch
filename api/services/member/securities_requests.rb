@@ -761,11 +761,11 @@ module MAPI
           true
         end
 
-        def self.set_broker_instructions_for_transfer(app, broker_instructions, kind)
+        def self.set_broker_instructions_for_transfer(app, broker_instructions)
           today = Time.zone.today
           holidays = MAPI::Services::Rates::Holidays.holidays(app)
           default_date = MAPI::Services::Rates.find_next_business_day(today, 1.day, holidays)
-          broker_instructions['settlement_type'] ||= kind == :pledge_transfer ? 'free' : 'vs_payment'
+          broker_instructions['settlement_type'] = 'free'
           broker_instructions['trade_date'] ||= default_date.iso8601
           broker_instructions['settlement_date'] ||= default_date.iso8601
           broker_instructions['transaction_code'] ||= 'standard'
@@ -773,7 +773,7 @@ module MAPI
 
         def self.create_transfer(app, member_id, user_name, full_name, session_id, broker_instructions, securities, kind)
           validate_kind(:transfer, kind)
-          set_broker_instructions_for_transfer(app, broker_instructions, kind)
+          set_broker_instructions_for_transfer(app, broker_instructions)
           validate_securities(securities, broker_instructions['settlement_type'], :transfer, kind)
           validate_broker_instructions(broker_instructions, app, kind)
           user_name.downcase!
@@ -809,7 +809,7 @@ module MAPI
 
         def self.update_transfer(app, member_id, request_id, user_name, full_name, session_id, broker_instructions, securities, kind)
           validate_kind(:transfer, kind)
-          set_broker_instructions_for_transfer(app, broker_instructions, kind)
+          set_broker_instructions_for_transfer(app, broker_instructions)
           validate_securities(securities, broker_instructions['settlement_type'], :transfer, kind)
           validate_broker_instructions(broker_instructions, app, kind)
           unless should_fake?(app)

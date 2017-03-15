@@ -4603,11 +4603,10 @@ describe MAPI::ServiceApp do
 
     describe '`set_broker_instructions_for_transfer`' do
       let(:app) { double(MAPI::ServiceApp, logger: double('logger'), settings: nil) }
-      let(:kind) { SecureRandom.hex }
       let(:broker_instructions) {{}}
       let(:today) { Time.zone.today }
       let(:value) { SecureRandom.hex }
-      let(:call_method) { securities_request_module.set_broker_instructions_for_transfer(app, broker_instructions, kind) }
+      let(:call_method) { securities_request_module.set_broker_instructions_for_transfer(app, broker_instructions) }
       before do
         allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
         allow(securities_request_module).to receive(:weekend_or_holiday?).and_return(false)
@@ -4617,7 +4616,7 @@ describe MAPI::ServiceApp do
         expect(MAPI::Services::Rates::Holidays).to receive(:holidays).with(app).and_return([])
         call_method
       end
-      ['settlement_type', 'transaction_code', 'trade_date', 'settlement_date'].each do |attr|
+      ['transaction_code', 'trade_date', 'settlement_date'].each do |attr|
         it "does not change the value for `#{attr}` if there is a previously existing value" do
           broker_instructions[attr] = value
           call_method
@@ -4645,13 +4644,9 @@ describe MAPI::ServiceApp do
         call_method
         expect(broker_instructions['transaction_code']).to eq('standard')
       end
-      it 'sets `settlement_type` to `free` if the kind is `:pledge_transfer`' do
-        securities_request_module.set_broker_instructions_for_transfer(app, broker_instructions, :pledge_transfer)
+      it 'sets `settlement_type` to `free`' do
+        call_method
         expect(broker_instructions['settlement_type']).to eq('free')
-      end
-      it 'sets `settlement_type` to `vs_payment` if the kind is `:safekept_transfer`' do
-        securities_request_module.set_broker_instructions_for_transfer(app, broker_instructions, :safekept_transfer)
-        expect(broker_instructions['settlement_type']).to eq('vs_payment')
       end
     end
 
