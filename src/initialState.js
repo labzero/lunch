@@ -42,24 +42,28 @@ const initialState = {
     filterForm: {},
     exclusionForm: {}
   },
-  team: {},
+  teams: {
+    isFetching: false,
+    didInvalidate: false,
+    items: []
+  },
   pageUi: {},
   whitelistEmailUi: {},
   wsPort: process.env.BS_RUNNING ? port : 0
 };
 
 export default (stateData) => {
+  if (stateData.decision) {
+    initialState.decision.inst = stateData.decision.toJSON();
+  }
   if (stateData.restaurants) {
     initialState.restaurants.items = stateData.restaurants.map(r => r.toJSON());
   }
   if (stateData.tags) {
     initialState.tags.items = stateData.tags.map(t => t.toJSON());
   }
-  if (stateData.team) {
-    initialState.team = stateData.team;
-  }
-  if (stateData.decision) {
-    initialState.decision.inst = stateData.decision.toJSON();
+  if (stateData.teams) {
+    initialState.teams.items = stateData.teams.map(t => t.toJSON());
   }
   if (stateData.user) {
     initialState.user = stateData.user;

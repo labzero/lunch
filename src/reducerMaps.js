@@ -869,7 +869,7 @@ export const whitelistEmailUi = new Map([
 ]);
 
 export const latLng = new Map();
-export const team = new Map();
+export const teams = new Map();
 export const user = new Map();
 export const users = new Map();
 export const wsPort = new Map();

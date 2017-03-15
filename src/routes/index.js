@@ -16,8 +16,9 @@ export default {
 
   // Keep in mind, routes are evaluated in order
   children: [
-    require('./home').default,
-    require('./admin').default,
+    require('./teamRedirect').default,
+    require('./newTeam').default,
+    require('./teams').default,
 
     // Wildcard routes, e.g. { path: '*', ... } (must go last)
     require('./notFound').default,
@@ -28,7 +29,12 @@ export default {
     const route = await next();
 
     // Provide default values for title, description etc.
-    route.title = route.title || 'Lunch';
+    const title = 'Lunch';
+    if (route.title) {
+      route.title = `${title} | ${route.title}`;
+    } else {
+      route.title = title;
+    }
     route.description = route.description || '';
 
     return route;

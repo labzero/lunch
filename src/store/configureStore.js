@@ -33,6 +33,8 @@ export default function configureStore(initialState, helpersConfig) {
     normalize(initialState.restaurants.items, [schemas.restaurant]);
   normalizedInitialState.tags.items =
     normalize(initialState.tags.items, [schemas.tag]);
+  normalizedInitialState.teams.items =
+    normalize(initialState.teams.items, [schemas.team]);
   normalizedInitialState.users.items =
     normalize(initialState.users.items, [schemas.user]);
   normalizedInitialState.whitelistEmails.items =

@@ -1,7 +1,7 @@
 import getRole from './getRole';
 
 export default (user, team, role) => {
-  if (!role || user.superuser) {
+  if ((user.id && !role) || user.superuser) {
     return true;
   }
   const teamRole = getRole(user, team);

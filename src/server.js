@@ -170,7 +170,7 @@ app.get('*', async (req, res, next) => {
       return;
     }
 
-    let team;
+    let teams;
 
     const finds = [
       Restaurant.findAllWithTagIds(),
@@ -178,14 +178,11 @@ app.get('*', async (req, res, next) => {
       Decision.scope('fromToday').findOne()
     ];
     if (req.user) {
-      const firstRole = req.user.roles[0];
-      if (firstRole) {
-        team = await Team.findOne({ where: { id: firstRole.team_id } });
-      }
+      teams = await Team.findAll({ where: { id: req.user.roles.map(r => r.team_id) } });
 
       let userAttributes = ['id', 'name'];
       let userIncludes;
-      if (hasRole(req.user, team, 'admin')) {
+      if (hasRole(req.user, teams[0], 'admin')) {
         userAttributes = userAttributes.concat(['email']);
         userIncludes = [Role];
       }
@@ -200,7 +197,7 @@ app.get('*', async (req, res, next) => {
         decision,
         restaurants,
         tags,
-        team
+        teams
       };
       if (req.user) {
         stateData.user = req.user;
