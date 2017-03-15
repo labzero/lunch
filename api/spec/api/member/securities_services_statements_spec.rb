@@ -165,10 +165,6 @@ describe MAPI::ServiceApp do
         allow(subject).to receive(:quote).with(report_date).and_return(quoted_report_date)
       end
 
-      # it 'selects the distinct `SSX_BTC_DATE` as `report_end_date` from `SAFEKEEPING.SECURITIES_FEES_STMT_WEB`' do
-      #   expect(call_method).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*DISTINCT\s+SSX_BTC_DATE\s+AS\s+report_end_date((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING.SECURITIES_FEES_STMT_WEB\s/mi)
-      # end
-
       MAPI::Services::Member::SecuritiesServicesStatements::MAP_KEYS.each do |field, _|
         it "selects the `#{field}` from `SAFEKEEPING.SECURITIES_FEES_STMT_WEB`" do
           expect(call_method).to match(/\A\s*SELECT\s+.*#{field}(,[^,]*)*\s+FROM\s+SAFEKEEPING.SECURITIES_FEES_STMT_WEB\s/mi)
