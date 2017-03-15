@@ -1,6 +1,6 @@
 import { port } from './config';
 
-const initialState = {
+const getInitialState = () => ({
   restaurants: {
     isFetching: false,
     didInvalidate: false,
@@ -50,9 +50,10 @@ const initialState = {
   pageUi: {},
   whitelistEmailUi: {},
   wsPort: process.env.BS_RUNNING ? port : 0
-};
+});
 
 export default (stateData) => {
+  const initialState = getInitialState();
   if (stateData.decision) {
     initialState.decision.inst = stateData.decision.toJSON();
   }

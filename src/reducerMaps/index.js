@@ -9,12 +9,12 @@ export { default as restaurants } from './restaurants';
 export { default as tagExclusions } from './tagExclusions';
 export { default as tagFilters } from './tagFilters';
 export { default as tags } from './tags';
+export { default as teams } from './teams';
 export { default as tagUi } from './tagUi';
 export { default as whitelistEmails } from './whitelistEmails';
 export { default as whitelistEmailUi } from './whitelistEmailUi';
 
 export const latLng = new Map();
-export const teams = new Map();
 export const user = new Map();
 export const users = new Map();
 export const wsPort = new Map();

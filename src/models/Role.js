@@ -1,6 +1,10 @@
 import { sequelize, DataTypes } from './db';
 
 const Role = sequelize.define('role', {
+  type: {
+    allowNull: false,
+    type: DataTypes.ENUM('admin', 'owner'),
+  },
   user_id: {
     type: DataTypes.INTEGER,
     references: {

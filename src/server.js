@@ -38,6 +38,7 @@ import makeInitialState from './initialState';
 import passport from './core/passport';
 import restaurantApi from './api/restaurants';
 import tagApi from './api/tags';
+import teamApi from './api/teams';
 import decisionApi from './api/decisions';
 import whitelistEmailApi from './api/whitelistEmails';
 import { Decision, Restaurant, Role, Tag, Team, User, WhitelistEmail } from './models';
@@ -126,6 +127,7 @@ app.use((req, res, next) => {
 // -----------------------------------------------------------------------------
 app.use('/api/restaurants', restaurantApi);
 app.use('/api/tags', tagApi);
+app.use('/api/teams', teamApi);
 app.use('/api/decisions', decisionApi);
 app.use('/api/whitelistEmails', whitelistEmailApi);
 

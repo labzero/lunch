@@ -1,30 +1,54 @@
 import React, { Component, PropTypes } from 'react';
+import history from '../../core/history';
 
 export default class NewTeam extends Component {
   static propTypes = {
-    createNewTeam: PropTypes.func.isRequired
+    createTeam: PropTypes.func.isRequired
   };
 
   state = {
-    name: ''
+    name: '',
+    slug: ''
   };
 
-  handleChange = event => this.setState({ name: event.target.value });
+  handleChange = field => event => this.setState({ [field]: event.target.value });
 
   handleSubmit = (event) => {
     event.preventDefault();
 
-    this.props.createNewTeam(this.state.name);
+    this.props.createTeam(this.state).then(() => history.push('/teams'));
   }
 
   render() {
-    const { name } = this.state;
+    const { name, slug } = this.state;
 
     return (
       <div className="page">
         <h2>Create a new team</h2>
         <form onSubmit={this.handleSubmit}>
-          <input type="text" value={name} onChange={this.handleChange} />
+          <label htmlFor="new-team-name">
+            Name:
+            <input
+              id="new-team-name"
+              type="text"
+              onChange={this.handleChange('name')}
+              value={name}
+              required
+            />
+          </label>
+          <label htmlFor="new-team-slug">
+            URL:
+          </label>
+          https://lunch.labzero.com/<input
+            id="new-team-slug"
+            autoCorrect="off"
+            autoCapitalize="off"
+            type="text"
+            value={slug}
+            onChange={this.handleChange('slug')}
+            required
+          />
+          <input type="submit" />
         </form>
       </div>
     );

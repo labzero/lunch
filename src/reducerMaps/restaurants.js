@@ -1,5 +1,5 @@
 import { normalize } from 'normalizr';
-import update from 'react-addons-update';
+import update from 'immutability-helper';
 import ActionTypes from '../constants/ActionTypes';
 import { getRestaurantIds, getRestaurantById } from '../selectors/restaurants';
 import * as schemas from '../schemas';

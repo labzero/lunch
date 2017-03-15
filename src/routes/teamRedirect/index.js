@@ -7,8 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import queryString from 'query-string';
 import { getTeamEntities } from '../../selectors/teams';
+import redirectToLogin from '../../helpers/redirectToLogin';
 
 export default {
 
@@ -30,11 +30,6 @@ export default {
       };
     }
 
-    let stringifiedQuery = queryString.stringify(context.query);
-    if (stringifiedQuery) {
-      stringifiedQuery = `%3F${stringifiedQuery}`;
-    }
-
-    return { redirect: `/login?next=${context.path}${stringifiedQuery}` };
+    return redirectToLogin(context);
   },
 };

@@ -1,4 +1,4 @@
-import update from 'react-addons-update';
+import update from 'immutability-helper';
 import ActionTypes from '../constants/ActionTypes';
 import { getTagIds, getTagById } from '../selectors/tags';
 import isFetching from './helpers/isFetching';
