@@ -271,7 +271,7 @@ module MAPI
                    {'v13:partyId' => member_id}]
                 },
                 'v12:instrument' => instrument,
-                'v12:tradeDate' => settlement_date,
+                'v12:tradeDate' => Time.zone.today,
                 'v12:settlementDate' => settlement_date,
                 'v12:openDateMaturity' => advance_term == 'open'
               },
@@ -316,7 +316,7 @@ module MAPI
             'advance_type' => advance_type,
             'interest_day_count' => day_count,
             'payment_on' => payment_info[:payment_at],
-            'trade_date' => settlement_date,
+            'trade_date' => Time.zone.today,
             'funding_date' => settlement_date,
             'maturity_date' => maturity_date
           }
