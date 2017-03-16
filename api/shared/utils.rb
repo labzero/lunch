@@ -80,6 +80,21 @@ module MAPI
           end
         end
 
+        def fetch_rows(logger, sql)
+          begin
+            results = []
+            cursor  = execute_sql(logger, sql)
+            raise MAPI::Shared::Errors::SQLError, "SQL execution failed" if cursor.nil?
+            while objects = cursor.fetch()
+              results << objects
+            end
+            results
+          rescue => e
+            logger.error(e.message)
+            nil
+          end
+        end
+
         def decimal_to_percentage_rate(rate)
           rate.to_f.round(7) * 100.0 if rate
         end

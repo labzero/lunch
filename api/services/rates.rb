@@ -547,7 +547,7 @@ module MAPI
           SQL
 
           data = if settings.environment == :production
-            rows = MAPI::Services::Rates.fetch_objects(logger, query)
+            rows = MAPI::Services::Rates.fetch_rows(logger, query)
             halt 503, 'Internal Service Error' if rows.nil?
             rows
           else

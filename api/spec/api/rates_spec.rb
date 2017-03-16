@@ -144,28 +144,28 @@ describe MAPI::ServiceApp do
     describe 'in production' do
       before do
         allow(described_class).to receive(:environment).and_return(:production)
-        allow(subject).to receive(:fetch_objects).and_return([])
+        allow(subject).to receive(:fetch_rows).and_return([])
       end
       describe 'queries the DB for historic rates' do
-        it 'calls `fetch_objects` with the logger' do
+        it 'calls `fetch_rows` with the logger' do
           logger = instance_double(Logger, error: nil)
           allow_any_instance_of(described_class).to receive(:logger).and_return(logger)
-          expect(subject).to receive(:fetch_objects).with(logger, anything)
+          expect(subject).to receive(:fetch_rows).with(logger, anything)
           make_request
         end
-        it 'calls `fetch_objects` with the query' do
-          expect(subject).to receive(:fetch_objects).with(anything, match(/SELECT\s+TRX_EFFECTIVE_DATE,\s+TRX_VALUE\s+FROM IRDB.IRDB_TRANS\s+T\s+WHERE\s+TRX_IR_CODE\s+=\s+'FRADVN'\s+AND\s+\(TRX_TERM_VALUE\s+\|\|\s+TRX_TERM_UOM\s+=\s+'1D'\s+\)\s+ORDER/i))
+        it 'calls `fetch_rows` with the query' do
+          expect(subject).to receive(:fetch_rows).with(anything, match(/SELECT\s+TRX_EFFECTIVE_DATE,\s+TRX_VALUE\s+FROM IRDB.IRDB_TRANS\s+T\s+WHERE\s+TRX_IR_CODE\s+=\s+'FRADVN'\s+AND\s+\(TRX_TERM_VALUE\s+\|\|\s+TRX_TERM_UOM\s+=\s+'1D'\s+\)\s+ORDER/i))
           make_request
         end
         it 'orders the query by `TRX_EFFECTIVE_DATE` descending' do
-          expect(subject).to receive(:fetch_objects).with(anything, match(/\s+ORDER\s+BY\s+TRX_EFFECTIVE_DATE\s+DESC/i))
+          expect(subject).to receive(:fetch_rows).with(anything, match(/\s+ORDER\s+BY\s+TRX_EFFECTIVE_DATE\s+DESC/i))
           make_request
         end
         it 'includes the limit in the query' do
           limit = rand(1..10)
           quoted_limit = SecureRandom.hex
           allow(ActiveRecord::Base.connection).to receive(:quote).with(limit).and_return(quoted_limit)
-          expect(subject).to receive(:fetch_objects).with(anything, match(/\A\s*SELECT\s+\*\s+FROM\s+\(.*\)\s+WHERE\s+ROWNUM\s+<=\s+#{quoted_limit}\s*\z/im))
+          expect(subject).to receive(:fetch_rows).with(anything, match(/\A\s*SELECT\s+\*\s+FROM\s+\(.*\)\s+WHERE\s+ROWNUM\s+<=\s+#{quoted_limit}\s*\z/im))
           get '/rates/historic/overnight', limit: limit
         end
       end
@@ -173,7 +173,7 @@ describe MAPI::ServiceApp do
         expect(rates).to eq([])
       end
       it 'returns a 503 if an error occured' do
-        allow(subject).to receive(:fetch_objects).and_return(nil)
+        allow(subject).to receive(:fetch_rows).and_return(nil)
         make_request
         expect(last_response.status).to be(503)
       end

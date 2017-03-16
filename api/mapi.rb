@@ -153,14 +153,6 @@ module MAPI
         key :in, 'header'
       end
       api do
-        key :path, '/mock_rates'
-        key :description, 'Operations about dummy rates'
-      end
-      api do
-        key :path, '/mock_members'
-        key :description, 'Operations about dummy members'
-      end
-      api do
         key :path, '/rates'
         key :description, 'Operations about rates'
       end
