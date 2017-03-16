@@ -9,7 +9,6 @@ const resetAddTagAutosuggestValue = (state, action) =>
   });
 
 export default new Map([
-  [ActionTypes.RECEIVE_RESTAURANTS, () => {}],
   [ActionTypes.RESTAURANT_RENAMED, resetRestaurant],
   [ActionTypes.RESTAURANT_POSTED, (state, action) =>
     resetRestaurant(update(state, {

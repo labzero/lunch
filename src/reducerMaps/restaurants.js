@@ -48,8 +48,7 @@ export default new Map([
   [ActionTypes.REQUEST_RESTAURANTS, state =>
     update(state, {
       $merge: {
-        isFetching: true,
-        didInvalidate: false
+        isFetching: true
       }
     })
   ],
@@ -58,7 +57,8 @@ export default new Map([
       $merge: {
         isFetching: false,
         didInvalidate: false,
-        items: normalize(action.items, [schemas.restaurant])
+        items: normalize(action.items, [schemas.restaurant]),
+        teamSlug: action.teamSlug
       }
     })
   ],

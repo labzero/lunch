@@ -5,8 +5,8 @@ import React from 'react';
 import sinon from 'sinon';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
-import { _RestaurantsPage as RestaurantsPage } from './RestaurantsPage';
-import RestaurantAddFormContainer from '../RestaurantAddForm/RestaurantAddFormContainer';
+import { _Home as Home } from './Home';
+import RestaurantAddFormContainer from '../../../../components/RestaurantAddForm/RestaurantAddFormContainer';
 
 describe('HomePage', () => {
   let props;
@@ -23,7 +23,7 @@ describe('HomePage', () => {
       id: 1
     };
 
-    const wrapper = shallow(<RestaurantsPage {...props} />);
+    const wrapper = shallow(<Home {...props} />);
     expect(wrapper.find(RestaurantAddFormContainer).length).to.eq(1);
   });
 });

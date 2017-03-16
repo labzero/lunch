@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Tag, RestaurantTag } from '../models';
-import { loggedIn, errorCatcher } from './ApiHelper';
+import errorCatcher from './helpers/errorCatcher';
+import loggedIn from './helpers/loggedIn';
 import {
   postedNewTagToRestaurant,
   postedTagToRestaurant,
@@ -24,29 +25,36 @@ router
           where: {
             name: req.body.name.toLowerCase().trim()
           }
-        }).spread(tag =>
-          RestaurantTag.create({
-            restaurant_id: restaurantId,
-            tag_id: tag.id
-          }).then(() => {
+        }).spread(async tag => {
+          try {
+            await RestaurantTag.create({
+              restaurant_id: restaurantId,
+              tag_id: tag.id
+            });
             const json = tag.toJSON();
             json.restaurant_count = 1;
             req.wss.broadcast(postedNewTagToRestaurant(restaurantId, json, req.user.id));
             res.status(201).send({ error: false, data: json });
-          }).catch(alreadyAddedError)
-        ).catch(err => {
+          } catch (err) {
+            alreadyAddedError(err);
+          }
+        }).catch(err => {
           errorCatcher(res, err);
         });
       } else if (req.body.id !== undefined) {
         const id = parseInt(req.body.id, 10);
-        RestaurantTag.create({
-          restaurant_id: restaurantId,
-          tag_id: id
-        }).then(obj => {
+        try {
+          const obj = await RestaurantTag.create({
+            restaurant_id: restaurantId,
+            tag_id: id
+          });
+
           const json = obj.toJSON();
           req.wss.broadcast(postedTagToRestaurant(restaurantId, id, req.user.id));
           res.status(201).send({ error: false, data: json });
-        }).catch(alreadyAddedError);
+        } catch (err) {
+          alreadyAddedError(err);
+        }
       } else {
         errorCatcher(res);
       }
@@ -58,10 +66,13 @@ router
     async (req, res) => {
       const id = parseInt(req.params.id, 10);
       const restaurantId = parseInt(req.params.restaurant_id, 10);
-      RestaurantTag.destroy({ where: { restaurant_id: restaurantId, tag_id: id } }).then(() => {
+      try {
+        await RestaurantTag.destroy({ where: { restaurant_id: restaurantId, tag_id: id } });
         req.wss.broadcast(deletedTagFromRestaurant(restaurantId, id, req.user.id));
         res.status(204).send({ error: false });
-      }).catch(err => errorCatcher(res, err));
+      } catch (err) {
+        errorCatcher(res, err);
+      }
     }
   );
 

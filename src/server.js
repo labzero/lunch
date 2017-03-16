@@ -41,7 +41,7 @@ import tagApi from './api/tags';
 import teamApi from './api/teams';
 import decisionApi from './api/decisions';
 import whitelistEmailApi from './api/whitelistEmails';
-import { Decision, Restaurant, Role, Tag, Team, User, WhitelistEmail } from './models';
+import { /* Decision, Restaurant, */Role, /* Tag, */Team, User, WhitelistEmail } from './models';
 import hasRole from './helpers/hasRole';
 
 const app = express();
@@ -165,8 +165,11 @@ app.use('/api/whitelistEmails', whitelistEmailApi);
 app.get('*', async (req, res, next) => {
   try {
     const routerStateData = {};
+    let teams;
     if (req.user) {
       routerStateData.user = req.user;
+      teams = await Team.findAll({ where: { id: req.user.roles.map(r => r.team_id) } });
+      routerStateData.teams = teams;
     }
     const initialRouterState = makeInitialState(routerStateData);
     const routerStore = configureStore(initialRouterState, {
@@ -200,16 +203,15 @@ app.get('*', async (req, res, next) => {
       return;
     }
 
-    let teams;
-
+    const finds = [];
+    /*
     const finds = [
       Restaurant.findAllWithTagIds(),
       Tag.scope('orderedByRestaurant').findAll(),
       Decision.scope('fromToday').findOne()
-    ];
-    if (req.user) {
-      teams = await Team.findAll({ where: { id: req.user.roles.map(r => r.team_id) } });
+    ];*/
 
+    if (req.user) {
       let userAttributes = ['id', 'name'];
       let userIncludes;
       if (hasRole(req.user, teams[0], 'admin')) {
@@ -221,12 +223,9 @@ app.get('*', async (req, res, next) => {
     }
 
     try {
-      const [restaurants, tags, decision, users, whitelistEmails] = await Promise.all(finds);
+      const [users, whitelistEmails] = await Promise.all(finds);
 
       const stateData = {
-        decision,
-        restaurants,
-        tags,
         teams
       };
       if (req.user) {

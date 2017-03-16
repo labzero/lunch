@@ -7,11 +7,7 @@ import redirectToLogin from '../../helpers/redirectToLogin';
 
 export default {
 
-  path: '/teams',
-
-  children: [
-    require('./team').default,
-  ],
+  path: '/',
 
   action(context) {
     const state = context.store.getState();

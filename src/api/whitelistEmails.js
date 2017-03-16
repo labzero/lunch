@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { WhitelistEmail } from '../models';
-import { loggedIn, errorCatcher } from './ApiHelper';
+import errorCatcher from './helpers/errorCatcher';
+import loggedIn from './helpers/loggedIn';
 import { whitelistEmailPosted, whitelistEmailDeleted } from '../actions/whitelistEmails';
 
 const router = new Router();
@@ -11,14 +12,17 @@ router
     loggedIn,
     async (req, res) => {
       const { email } = req.body;
-      WhitelistEmail.create({ email }).then(obj => {
+
+      try {
+        const obj = await WhitelistEmail.create({ email });
+
         const json = obj.toJSON();
         req.wss.broadcast(whitelistEmailPosted(json, req.user.id));
         res.status(201).send({ error: false, data: json });
-      }).catch(() => {
+      } catch (err) {
         const error = { message: 'Could not add email to whitelist. Is it already added?' };
         errorCatcher(res, error);
-      });
+      }
     }
   )
   .delete(
@@ -26,10 +30,15 @@ router
     loggedIn,
     async (req, res) => {
       const id = parseInt(req.params.id, 10);
-      WhitelistEmail.destroy({ where: { id } }).then(() => {
+
+      try {
+        await WhitelistEmail.destroy({ where: { id } });
+
         req.wss.broadcast(whitelistEmailDeleted(id, req.user.id));
         res.status(204).send({ error: false });
-      }).catch(err => errorCatcher(res, err));
+      } catch (err) {
+        errorCatcher(res, err);
+      }
     }
   );
 

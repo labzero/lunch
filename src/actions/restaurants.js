@@ -69,14 +69,18 @@ export function restaurantRenamed(id, obj, userId) {
   };
 }
 
-export function requestRestaurants() {
-  return { type: ActionTypes.REQUEST_RESTAURANTS };
+export function requestRestaurants(teamSlug) {
+  return {
+    type: ActionTypes.REQUEST_RESTAURANTS,
+    teamSlug
+  };
 }
 
-export function receiveRestaurants(json) {
+export function receiveRestaurants(json, teamSlug) {
   return {
     type: ActionTypes.RECEIVE_RESTAURANTS,
-    items: json
+    items: json,
+    teamSlug
   };
 }
 
@@ -163,17 +167,22 @@ export function deletedTagFromRestaurant(restaurantId, id, userId) {
   };
 }
 
-function fetchRestaurants() {
+function fetchRestaurants(teamSlug) {
   return dispatch => {
-    dispatch(requestRestaurants());
-    return fetch('/api/restaurants')
+    dispatch(requestRestaurants(teamSlug));
+    return fetch(`/api/teams/${teamSlug}/restaurants`, {
+      credentials
+    })
       .then(response => processResponse(response))
-      .then(json => dispatch(receiveRestaurants(json)));
+      .then(json => dispatch(receiveRestaurants(json, teamSlug)));
   };
 }
 
-function shouldFetchRestaurants(state) {
+function shouldFetchRestaurants(state, teamSlug) {
   const restaurants = state.restaurants;
+  if (restaurants.teamSlug !== teamSlug) {
+    return true;
+  }
   if (!restaurants.items) {
     return true;
   }
@@ -183,7 +192,7 @@ function shouldFetchRestaurants(state) {
   return restaurants.didInvalidate;
 }
 
-export function fetchRestaurantsIfNeeded() {
+export function fetchRestaurantsIfNeeded(teamSlug) {
   // Note that the function also receives getState()
   // which lets you choose what to dispatch next.
 
@@ -191,9 +200,9 @@ export function fetchRestaurantsIfNeeded() {
   // a cached value is already available.
 
   return (dispatch, getState) => {
-    if (shouldFetchRestaurants(getState())) {
+    if (shouldFetchRestaurants(getState(), teamSlug)) {
       // Dispatch a thunk from thunk!
-      return dispatch(fetchRestaurants());
+      return dispatch(fetchRestaurants(teamSlug));
     }
 
     // Let the calling code know there's nothing to wait for.

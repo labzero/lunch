@@ -7,7 +7,7 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import { getTeamEntities } from '../../selectors/teams';
+import { getTeams } from '../../selectors/teams';
 import redirectToLogin from '../../helpers/redirectToLogin';
 
 export default {
@@ -20,7 +20,7 @@ export default {
 
     if (user.id) {
       if (user.roles.length === 1) {
-        const team = getTeamEntities(state)[0];
+        const team = getTeams(state)[0];
         return {
           redirect: `/teams/${team.slug}`
         };

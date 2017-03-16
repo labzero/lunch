@@ -6,7 +6,9 @@ const Teams = ({ teams }) => (
     <h2>Visit one of your teams:</h2>
     <ul>
       {teams.map(team => (
-        <li key={team.id}>{team.name}</li>
+        <li key={team.id}>
+          <Link to={`/teams/${team.slug}`}>{team.name}</Link>
+        </li>
       ))}
     </ul>
     <h2>Or join an existing one:</h2>

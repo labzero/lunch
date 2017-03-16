@@ -3,30 +3,25 @@ import { port } from './config';
 const getInitialState = () => ({
   restaurants: {
     isFetching: false,
-    didInvalidate: false,
-    items: []
-  },
-  tags: {
-    isFetching: false,
-    didInvalidate: false,
-    items: []
+    didInvalidate: true,
+    items: [],
+    teamSlug: null
   },
   decision: {
     isFetching: false,
-    didInvalidate: false,
-    inst: null
+    didInvalidate: true,
+    inst: null,
+    teamSlug: null
   },
   flashes: [],
   notifications: [],
   modals: {},
   user: {},
   users: {
-    items: []
-  },
-  whitelistEmails: {
     isFetching: false,
-    didInvalidate: false,
-    items: []
+    didInvalidate: true,
+    items: [],
+    teamSlug: null
   },
   latLng: {
     lat: parseFloat(process.env.SUGGEST_LAT),
@@ -38,42 +33,44 @@ const getInitialState = () => ({
   },
   tagFilters: [],
   tagExclusions: [],
+  tags: {
+    isFetching: false,
+    didInvalidate: true,
+    items: [],
+    teamSlug: null
+  },
   tagUi: {
     filterForm: {},
     exclusionForm: {}
   },
   teams: {
     isFetching: false,
-    didInvalidate: false,
+    didInvalidate: true,
     items: []
   },
   pageUi: {},
+  whitelistEmails: {
+    isFetching: false,
+    didInvalidate: true,
+    items: [],
+    teamSlug: null
+  },
   whitelistEmailUi: {},
   wsPort: process.env.BS_RUNNING ? port : 0
 });
 
 export default (stateData) => {
   const initialState = getInitialState();
-  if (stateData.decision) {
-    initialState.decision.inst = stateData.decision.toJSON();
-  }
-  if (stateData.restaurants) {
-    initialState.restaurants.items = stateData.restaurants.map(r => r.toJSON());
-  }
-  if (stateData.tags) {
-    initialState.tags.items = stateData.tags.map(t => t.toJSON());
-  }
   if (stateData.teams) {
     initialState.teams.items = stateData.teams.map(t => t.toJSON());
+    initialState.teams.didInvalidate = false;
   }
   if (stateData.user) {
     initialState.user = stateData.user;
   }
   if (stateData.users) {
     initialState.users.items = stateData.users.map(u => u.toJSON());
-  }
-  if (stateData.whitelistEmails) {
-    initialState.whitelistEmails.items = stateData.whitelistEmails.map(w => w.toJSON());
+    initialState.users.didInvalidate = false;
   }
   return initialState;
 };

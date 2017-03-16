@@ -8,7 +8,7 @@ exports.up = (queryInterface, Sequelize) =>
     },
     type: {
       allowNull: false,
-      type: Sequelize.ENUM('admin', 'owner'),
+      type: Sequelize.ENUM('user', 'admin', 'owner'),
     },
     team_id: {
       type: Sequelize.INTEGER,

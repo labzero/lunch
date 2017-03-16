@@ -18,7 +18,13 @@ export default {
   children: [
     require('./teamRedirect').default,
     require('./newTeam').default,
-    require('./teams').default,
+    {
+      path: '/teams',
+      children: [
+        require('./teams').default,
+        require('./teams/team').default
+      ]
+    },
 
     // Wildcard routes, e.g. { path: '*', ... } (must go last)
     require('./notFound').default,

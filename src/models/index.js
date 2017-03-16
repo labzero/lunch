@@ -27,7 +27,7 @@ Tag.addScope('orderedByRestaurant', {
   order: 'restaurant_count DESC'
 });
 
-Restaurant.findAllWithTagIds = () =>
+Restaurant.findAllWithTagIds = ({ team_id }) =>
   Restaurant.findAll({
     attributes: {
       include: [
@@ -64,7 +64,10 @@ Restaurant.findAllWithTagIds = () =>
       votes.created_at DESC NULLS LAST,
       all_decision_count ASC,
       all_vote_count DESC,
-      name ASC`
+      name ASC`,
+    where: {
+      team_id
+    }
   });
 
 Restaurant.hasMany(Vote);

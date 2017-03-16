@@ -1,7 +1,10 @@
 import getRole from './getRole';
 
 export default (user, team, role) => {
-  if ((user.id && !role) || user.superuser) {
+  if (!user.id) {
+    return false;
+  }
+  if (user.superuser) {
     return true;
   }
   const teamRole = getRole(user, team);
@@ -14,6 +17,6 @@ export default (user, team, role) => {
     case 'owner':
       return teamRole.type === 'owner';
     default:
-      return false;
+      return true;
   }
 };
