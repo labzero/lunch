@@ -80,6 +80,11 @@ class ProductsController < ApplicationController
   end
 
   # GET
+  def convertible
+    @last_modified = Date.new(2017, 4, 1)
+  end
+
+  # GET
   def pfi
     @all_applicants_rows = [
       {

@@ -28,6 +28,8 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.sbc.title')
     when 'mortgage partnership finance'
       I18n.t('products.advances.mpf.title')
+    when 'convertible'
+      I18n.t('products.advances.convertible.title')
     else
       raise 'unknown product page'
   end

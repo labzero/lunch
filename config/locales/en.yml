@@ -2503,6 +2503,32 @@ en:
         minimum_interest_rate_convention: The Bank will not be obligated to pay the borrower any amount relating to the application of a negative interest rate to the remaining principal amount of the advance.
         prepayment_features: The prepayment fee will be determined using the Bank’s standard prepayment formula.
         availability: Choice LIBOR ARC Advances are available on an order basis only, subject to the Bank’s ability to price a particular advance structure in the market.
+      convertible:
+        title: Convertible Advance
+        description: Use the Convertible Advance to obtain adjustable rate funding now, taking advantage of today’s low interest rates, while locking in a pre-determined fixed interest rate that will become effective on a specified future conversion date. The Convertible Advance allows you to earn higher margins today, while managing the risk of higher interest rates tomorrow.
+        uses:
+          protect: Protect against rising interest rates
+          fund: Fund fixed and adjustable rate loans and other interest-rate-sensitive assets
+          lock: Lock in current spreads for extended terms
+          increase: Increase long-term liquidity
+        key_advantages:
+          allows: Allows you to manage your interest rate risk exposure while taking advantage of short-term interest rates for a defined period of time
+          wide: Wide range of maturities, customized to your needs
+        minimum_term: 1 year
+        maximum_term: 15 years (subject to marketplace liquidity)
+        conversion_date_description: At the time the advance is made, a conversion date is established that coincides with one of the interest payment dates for the adjustable rate portion of the advance. On the conversion date, the advance will convert from an adjustable rate to a fixed rate at the pre-determined fixed interest rate.
+        prepayment_features_description_html: "When the advance is made, the borrower may have the option of selecting one of two prepayment alternatives: the standard prepayment formula or the prepayment formula for advances with a partially symmetric prepayment feature. The borrower must submit to the Bank the %{download_link} signed by an authorized officer before any advances with partial prepayment symmetry may be executed."
+        availability_description: Convertible Advances are available on an order basis only, subject to the Bank’s ability to price a particular advance structure in the market.
+        interest_rate:
+          description: "The interest rate may be indexed to 1-month, 3-month, or 6-month LIBOR.\n\nAt the time the advance is made, the interest rate index, spread, and rate reset interval are established for the period during which the advance has an adjustable rate. At the specified interval, the interest rate is determined by adding the established spread to the new index value.\n\nIf a specified index is unavailable or is fundamentally altered, the Bank will designate a replacement index that is based on comparable information, as determined by the Bank in its sole discretion."
+          reset_dates: Monthly, quarterly, or semiannually, depending on the interest rate index selected. The interest rate reset dates are established at the time the advance is made.
+          day_count: "Actual/360"
+          payment_dates: Same as the interest rate reset dates
+          minimum: "The minimum interest rate at each rate reset date will be 0.00%."
+        fixed_rate_terms:
+          rate: On the conversion date, the fixed interest rate that was established at the time the advance was made will become effective, and that fixed interest rate will remain in effect for the remaining term of the advance.
+          day_count: Actual/Actual (Actual/360 for Securities-Backed Credit Program and for advances with partial prepayment symmetry)
+          payment_frequency: At monthend and at repayment (semiannually and at repayment for Securities-Backed Credit Program; quarterly and at repayment for advances with partial prepayment symmetry)
       frc:
         title: Fixed Rate Credit (FRC) Advance
         description: Use the FRC Advance to achieve a wide variety of financial management goals, taking advantage of maturities up to 30 years.
@@ -2879,10 +2905,12 @@ en:
       use: Use
       uses: Uses
       additional_information: Additional Information
+      adjustable_rate_terms: Adjustable Rate Terms
       advantage: Key Advantage
       advantages: Key Advantages
       collateral_requirements: Collateral Requirements
       features: Key Features
+      fixed_rate_terms: Fixed Rate Terms
       last_modified: "Last Modified: %{date}"
       background: Background
       member_eligibility: Member Eligibility
@@ -2897,13 +2925,16 @@ en:
       delivery: Delivery
       interest_day_count: Interest Day Count
       interest_rate: Interest Rate
+      interest_rate_reset_dates: Interest Rate Reset Dates
       interest_day_count: Interest Day Count
+      interest_payment_dates: Interest Payment Dates
       interest_payment_frequency: Interest Payment Frequency
       credit_products_available: Credit Products Available
       eligible_capacity: Eligible Securities and Borrowing Capacity
       market_value: Market Value
       maximum_term: Maximum Term
       minimum_term: Minimum Term
+      minimum_interest_rate: Minimum Interest Rate
       minimum_interest_rate_convention: Minimum Interest Rate Convention
       option_types: Option Types
       prepayment_features: Prepayment Features
@@ -2949,6 +2980,7 @@ en:
       renewal: Renewal
       repayment: Repayment
       bank_terminate: "Bank’s Right to Terminate"
+      conversion_date: Conversion Date
     swaps:
       title: Interest Rate Swaps, Caps & Floors
       summary_html: "At this time, the Bank is not offering stand-alone interest rate swaps, caps, and floors, <a href=%{url}>pending publication</a> of final rules by the U.S. Commodity Futures Trading Commission (CFTC) that will affect the Bank’s ability to offer these products. The rules are expected to be published later this year. The following information is provided for members that have already purchases interest rate swaps, caps, and floors from the Bank."
