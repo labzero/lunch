@@ -38,28 +38,29 @@ const mapDispatchToProps = dispatch => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
-  handleSuggestSelect: (suggestion, geosuggest) => {
-    let name = suggestion.label;
-    let address;
-    const { placeId, location: { lat, lng } } = suggestion;
-    if (suggestCache[placeId] !== undefined) {
-      name = suggestCache[placeId];
+const mergeProps = (stateProps, dispatchProps, ownProps) =>
+  Object.assign({}, stateProps, dispatchProps, {
+    handleSuggestSelect: (suggestion, geosuggest) => {
+      let name = suggestion.label;
+      let address;
+      const { placeId, location: { lat, lng } } = suggestion;
+      if (suggestCache[placeId] !== undefined) {
+        name = suggestCache[placeId];
+      }
+      if (suggestion.gmaps !== undefined) {
+        address = suggestion.gmaps.formatted_address;
+      }
+      suggestCache = [];
+      geosuggest.update('');
+      const existingRestaurant = stateProps.restaurants.find(r => r.place_id === placeId);
+      if (existingRestaurant === undefined) {
+        dispatchProps.dispatch(addRestaurant(ownProps.teamSlug, name, placeId, address, lat, lng));
+      } else {
+        scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, true, undefined, -20);
+      }
+      dispatchProps.dispatch(clearTempMarker());
     }
-    if (suggestion.gmaps !== undefined) {
-      address = suggestion.gmaps.formatted_address;
-    }
-    suggestCache = [];
-    geosuggest.update('');
-    const existingRestaurant = stateProps.restaurants.find(r => r.place_id === placeId);
-    if (existingRestaurant === undefined) {
-      dispatchProps.dispatch(addRestaurant(name, placeId, address, lat, lng));
-    } else {
-      scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, true, undefined, -20);
-    }
-    dispatchProps.dispatch(clearTempMarker());
-  }
-});
+  });
 
 export default connect(
   mapStateToProps,

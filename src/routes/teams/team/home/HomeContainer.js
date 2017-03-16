@@ -2,10 +2,10 @@ import { connect } from 'react-redux';
 import { fetchRestaurantsIfNeeded, invalidateRestaurants } from '../../../../actions/restaurants';
 import Home from './Home';
 
-const mapStateToProps = state => {
-  const { user } = state;
-  return { user };
-};
+const mapStateToProps = (state, ownProps) => ({
+  teamSlug: ownProps.teamSlug,
+  user: state.user
+});
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   fetchRestaurantsIfNeeded() {

@@ -73,13 +73,11 @@ router
     loggedIn,
     hasTeamRole(),
     async (req, res) => {
-      // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
       const { name, place_id, lat, lng } = req.body;
 
       let { address } = req.body;
       address = address.replace(`${name}, `, '');
 
-      // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
       try {
         const obj = await Restaurant.create({
           name,
@@ -87,11 +85,9 @@ router
           address,
           lat,
           lng,
+          team_id: req.team.id,
           votes: [],
-          tags: [],
-          team_id: req.team.id
-
-        // jscs:enable requireCamelCaseOrUpperCaseIdentifiers
+          tags: []
         }, { include: [Vote, Tag] });
 
         const json = obj.toJSON();

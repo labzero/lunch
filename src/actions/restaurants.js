@@ -210,11 +210,11 @@ export function fetchRestaurantsIfNeeded(teamSlug) {
   };
 }
 
-export function addRestaurant(name, placeId, address, lat, lng) {
+export function addRestaurant(teamSlug, name, placeId, address, lat, lng) {
   const payload = { name, place_id: placeId, address, lat, lng };
   return (dispatch) => {
     dispatch(postRestaurant(payload));
-    return fetch('/api/restaurants', {
+    return fetch(`/api/teams/${teamSlug}/restaurants`, {
       method: 'post',
       credentials,
       headers: jsonHeaders,

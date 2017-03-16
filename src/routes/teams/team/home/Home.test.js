@@ -8,13 +8,14 @@ import { shallow } from 'enzyme';
 import { _Home as Home } from './Home';
 import RestaurantAddFormContainer from '../../../../components/RestaurantAddForm/RestaurantAddFormContainer';
 
-describe('HomePage', () => {
+describe('Home', () => {
   let props;
 
   beforeEach(() => {
     props = {
       fetchRestaurantsIfNeeded: sinon.mock(),
       invalidateRestaurants: sinon.mock(),
+      teamSlug: 'foo'
     };
   });
 

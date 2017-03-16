@@ -11,7 +11,8 @@ export class _Home extends Component {
   static propTypes = {
     user: PropTypes.object.isRequired,
     fetchRestaurantsIfNeeded: PropTypes.func.isRequired,
-    invalidateRestaurants: PropTypes.func.isRequired
+    invalidateRestaurants: PropTypes.func.isRequired,
+    teamSlug: PropTypes.string.isRequired
   };
 
   componentWillMount() {
@@ -26,9 +27,11 @@ export class _Home extends Component {
   }
 
   render() {
+    const { user, teamSlug } = this.props;
+
     let restaurantAddForm = null;
-    if (typeof this.props.user.id === 'number') {
-      restaurantAddForm = <RestaurantAddFormContainer />;
+    if (typeof user.id === 'number') {
+      restaurantAddForm = <RestaurantAddFormContainer teamSlug={teamSlug} />;
     }
 
     return (
