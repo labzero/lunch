@@ -14,6 +14,7 @@ describe('Home', () => {
   beforeEach(() => {
     props = {
       fetchRestaurantsIfNeeded: sinon.mock(),
+      fetchTagsIfNeeded: sinon.mock(),
       invalidateRestaurants: sinon.mock(),
       teamSlug: 'foo'
     };

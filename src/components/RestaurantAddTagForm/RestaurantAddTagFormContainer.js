@@ -45,7 +45,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) =>
   Object.assign({}, stateProps, dispatchProps, {
     addNewTagToRestaurant: event => {
       event.preventDefault();
-      dispatchProps.dispatch(addNewTagToRestaurant(ownProps.id, stateProps.autosuggestValue));
+      dispatchProps.dispatch(
+        addNewTagToRestaurant(ownProps.teamSlug, ownProps.id, stateProps.autosuggestValue)
+      );
     }
   });
 

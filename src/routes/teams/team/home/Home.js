@@ -11,12 +11,14 @@ export class _Home extends Component {
   static propTypes = {
     user: PropTypes.object.isRequired,
     fetchRestaurantsIfNeeded: PropTypes.func.isRequired,
+    fetchTagsIfNeeded: PropTypes.func.isRequired,
     invalidateRestaurants: PropTypes.func.isRequired,
     teamSlug: PropTypes.string.isRequired
   };
 
   componentWillMount() {
     this.props.fetchRestaurantsIfNeeded();
+    this.props.fetchTagsIfNeeded();
   }
 
   componentDidMount() {

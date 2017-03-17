@@ -119,11 +119,12 @@ export function voteDeleted(restaurantId, userId, id) {
   };
 }
 
-export function postNewTagToRestaurant(restaurantId, value) {
+export function postNewTagToRestaurant(teamSlug, restaurantId, value) {
   return {
     type: ActionTypes.POST_NEW_TAG_TO_RESTAURANT,
     restaurantId,
-    value
+    value,
+    teamSlug
   };
 }
 
@@ -282,10 +283,10 @@ export function removeVote(teamSlug, restaurantId, id) {
   };
 }
 
-export function addNewTagToRestaurant(restaurantId, value) {
+export function addNewTagToRestaurant(teamSlug, restaurantId, value) {
   return (dispatch) => {
-    dispatch(postNewTagToRestaurant(restaurantId, value));
-    return fetch(`/api/restaurants/${restaurantId}/tags`, {
+    dispatch(postNewTagToRestaurant(teamSlug, restaurantId, value));
+    return fetch(`/api/teams/${teamSlug}/restaurants/${restaurantId}/tags`, {
       method: 'post',
       credentials,
       headers: jsonHeaders,

@@ -5,7 +5,7 @@ import hasTeamRole from './helpers/hasTeamRole';
 import loggedIn from './helpers/loggedIn';
 import { tagDeleted } from '../actions/tags';
 
-const router = new Router();
+const router = new Router({ mergeParams: true });
 
 router
   .get(

@@ -3,6 +3,7 @@ import { Team, Role } from '../models';
 import errorCatcher from './helpers/errorCatcher';
 import loggedIn from './helpers/loggedIn';
 import restaurantApi from './restaurants';
+import tagApi from './tags';
 
 const router = new Router();
 
@@ -33,6 +34,7 @@ router
       }
     }
   )
-  .use('/:slug/restaurants', restaurantApi);
+  .use('/:slug/restaurants', restaurantApi)
+  .use('/:slug/tags', tagApi);
 
 export default router;

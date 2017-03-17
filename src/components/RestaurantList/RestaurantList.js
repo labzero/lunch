@@ -16,7 +16,11 @@ class RestaurantList extends Component {
   }
 
   render() {
-    const { ids, teamSlug } = this.props;
+    const { ids, restaurantListReady, teamSlug } = this.props;
+
+    if (!restaurantListReady) {
+      return null;
+    }
 
     return (
       <FlipMove typeName="ul" className={s.root} staggerDelayBy={40} staggerDurationBy={40}>
@@ -39,6 +43,7 @@ class RestaurantList extends Component {
 
 RestaurantList.propTypes = {
   ids: PropTypes.array.isRequired,
+  restaurantListReady: PropTypes.bool.isRequired,
   teamSlug: PropTypes.string.isRequired
 };
 

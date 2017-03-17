@@ -30,7 +30,7 @@ const Restaurant = ({
     );
     if (shouldShowAddTagArea) {
       if (listUiItem.isAddingTags) {
-        addTagArea = <RestaurantAddTagFormContainer id={restaurant.id} />;
+        addTagArea = <RestaurantAddTagFormContainer id={restaurant.id} teamSlug={teamSlug} />;
       } else {
         addTagArea = (
           <button className="btn btn-sm btn-default" onClick={showAddTagForm}>add tag</button>

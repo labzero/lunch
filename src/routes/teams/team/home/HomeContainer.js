@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import { fetchRestaurantsIfNeeded, invalidateRestaurants } from '../../../../actions/restaurants';
+import { fetchTagsIfNeeded } from '../../../../actions/tags';
 import Home from './Home';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -10,6 +11,9 @@ const mapStateToProps = (state, ownProps) => ({
 const mapDispatchToProps = (dispatch, ownProps) => ({
   fetchRestaurantsIfNeeded() {
     dispatch(fetchRestaurantsIfNeeded(ownProps.teamSlug));
+  },
+  fetchTagsIfNeeded() {
+    dispatch(fetchTagsIfNeeded(ownProps.teamSlug));
   },
   invalidateRestaurants() {
     dispatch(invalidateRestaurants());

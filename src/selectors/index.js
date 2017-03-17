@@ -1,7 +1,12 @@
 import { createSelector } from 'reselect';
-import { getRestaurantIds, getRestaurantEntities, getRestaurantById } from './restaurants';
+import {
+  areRestaurantsLoading,
+  getRestaurantIds,
+  getRestaurantEntities,
+  getRestaurantById
+} from './restaurants';
 import { getVoteEntities, getVoteById } from './votes';
-import { getTags } from './tags';
+import { areTagsLoading, getTags } from './tags';
 import { getTagFilters } from './tagFilters';
 import { getTagExclusions } from './tagExclusions';
 import { getUserId, getUserById } from './users';
@@ -12,7 +17,7 @@ export const getUserByVoteId = (state, voteId) =>
 
 export const makeGetRestaurantVotesForUser = () =>
   createSelector(
-    [getRestaurantById, getVoteEntities, getUserId],
+    getRestaurantById, getVoteEntities, getUserId,
     (restaurant, voteEntities, userId) =>
       restaurant.votes.filter(voteId => voteEntities[voteId].user_id === userId)
   );
@@ -23,7 +28,7 @@ const escapeRegexCharacters = (str) => str.replace(/[.*+?^${}()|[\]\\]/gi, '\\$&
 
 export const makeGetTagList = () =>
   createSelector(
-    [getTags, getAddedTags, getAutosuggestValue],
+    getTags, getAddedTags, getAutosuggestValue,
     (allTags, addedTags, autosuggestValue) => {
       const escapedValue = escapeRegexCharacters(autosuggestValue.trim());
       const regex = new RegExp(`${escapedValue}`, 'i');
@@ -35,14 +40,14 @@ export const makeGetTagList = () =>
   );
 
 export const getMapItems = createSelector(
-  [getRestaurantIds, getRestaurantEntities, getMapUi],
+  getRestaurantIds, getRestaurantEntities, getMapUi,
   (restaurantIds, restaurantEntities, mapUi) => restaurantIds.filter(id =>
     mapUi.showUnvoted || (!mapUi.showUnvoted && restaurantEntities[id].votes.length > 0)
   ).map(id => ({ id, lat: restaurantEntities[id].lat, lng: restaurantEntities[id].lng }))
 );
 
 export const getFilteredRestaurants = createSelector(
-  [getRestaurantIds, getTagFilters, getTagExclusions, getRestaurantEntities],
+  getRestaurantIds, getTagFilters, getTagExclusions, getRestaurantEntities,
   (restaurantIds, tagFilters, tagExclusions, restaurantEntities) => {
     if (tagFilters.length === 0 && tagExclusions.length === 0) { return restaurantIds; }
     return restaurantIds.filter(id =>
@@ -52,4 +57,9 @@ export const getFilteredRestaurants = createSelector(
         !restaurantEntities[id].tags.includes(tagExclusion)))
     );
   }
+);
+
+export const isRestaurantListReady = createSelector(
+  areRestaurantsLoading, areTagsLoading,
+  (restaurantsLoading, tagsLoading) => !restaurantsLoading && !tagsLoading
 );

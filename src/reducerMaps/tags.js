@@ -1,9 +1,28 @@
+import { normalize } from 'normalizr';
 import update from 'immutability-helper';
 import ActionTypes from '../constants/ActionTypes';
 import { getTagIds, getTagById } from '../selectors/tags';
+import * as schemas from '../schemas';
 import isFetching from './helpers/isFetching';
 
 export default new Map([
+  [ActionTypes.REQUEST_TAGS, state =>
+    update(state, {
+      $merge: {
+        isFetching: true
+      }
+    })
+  ],
+  [ActionTypes.RECEIVE_TAGS, (state, action) =>
+    update(state, {
+      $merge: {
+        isFetching: false,
+        didInvalidate: false,
+        items: normalize(action.items, [schemas.tag]),
+        teamSlug: action.teamSlug
+      }
+    })
+  ],
   [ActionTypes.POSTED_TAG_TO_RESTAURANT, (state, action) =>
     update(state, {
       items: {
