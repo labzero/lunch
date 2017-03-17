@@ -1,8 +1,7 @@
 exports.up = (queryInterface, Sequelize) =>
   queryInterface.addColumn('teams', 'slug', {
-    allowNull: false,
     type: Sequelize.STRING,
-    unique: true
+    unique: true,
   });
 
 exports.down = queryInterface =>

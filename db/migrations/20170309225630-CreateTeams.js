@@ -1,5 +1,13 @@
-exports.up = (queryInterface, Sequelize) =>
-  queryInterface.createTable('teams', {
+const db = require('../../src/models/db');
+
+exports.up = (queryInterface, Sequelize) => {
+  const Team = db.sequelize.define('team', {
+    name: Sequelize.STRING,
+  }, {
+    underscored: true
+  });
+
+  return queryInterface.createTable('teams', {
     id: {
       allowNull: false,
       autoIncrement: true,
@@ -18,7 +26,10 @@ exports.up = (queryInterface, Sequelize) =>
       allowNull: false,
       type: Sequelize.DATE
     }
-  });
+  }).then(() => Team.create({
+    name: 'Lab Zero'
+  }));
+};
 
 exports.down = queryInterface =>
   queryInterface.dropTable('teams');
