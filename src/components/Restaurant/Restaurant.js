@@ -17,6 +17,7 @@ const Restaurant = ({
   listUiItem,
   showAddTagForm,
   showMapAndInfoWindow,
+  teamSlug,
 }) => {
   let voteButton;
   let addTagArea;
@@ -39,7 +40,7 @@ const Restaurant = ({
     if (shouldShowDropdown) {
       dropdown = (
         <div className={s.dropdownContainer}>
-          <RestaurantDropdownContainer id={restaurant.id} />
+          <RestaurantDropdownContainer id={restaurant.id} teamSlug={teamSlug} />
         </div>
       );
     }
@@ -99,7 +100,8 @@ Restaurant.propTypes = {
   shouldShowDropdown: PropTypes.bool,
   listUiItem: PropTypes.object.isRequired,
   showAddTagForm: PropTypes.func.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired
+  showMapAndInfoWindow: PropTypes.func.isRequired,
+  teamSlug: PropTypes.string.isRequired
 };
 
 Restaurant.defaultProps = {

@@ -17,7 +17,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   deleteRestaurant: () => {
-    dispatch(showModal('deleteRestaurant', { restaurantId: ownProps.id }));
+    dispatch(showModal('deleteRestaurant', { teamSlug: ownProps.teamSlug, restaurantId: ownProps.id }));
   },
   removeDecision: () => {
     dispatch(removeDecision());

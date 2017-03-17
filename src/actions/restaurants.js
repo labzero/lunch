@@ -227,10 +227,10 @@ export function addRestaurant(teamSlug, name, placeId, address, lat, lng) {
   };
 }
 
-export function removeRestaurant(id) {
+export function removeRestaurant(teamSlug, id) {
   return (dispatch) => {
     dispatch(deleteRestaurant(id));
-    return fetch(`/api/restaurants/${id}`, {
+    return fetch(`/api/teams/${teamSlug}/restaurants/${id}`, {
       credentials,
       method: 'delete'
     });

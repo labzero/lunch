@@ -39,6 +39,7 @@ class RestaurantMap extends Component {
       lat: PropTypes.number.isRequired,
       lng: PropTypes.number.isRequired
     }),
+    teamSlug: PropTypes.string.isRequired,
     tempMarker: PropTypes.object,
     newlyAddedRestaurant: PropTypes.object,
     clearCenter: PropTypes.func.isRequired,
@@ -156,6 +157,7 @@ class RestaurantMap extends Component {
               baseZIndex={this.props.items.length}
               store={this.context.store}
               insertCss={this.context.insertCss}
+              teamSlug={this.props.teamSlug}
             />
           )}
         </GoogleMap>

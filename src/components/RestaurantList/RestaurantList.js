@@ -16,7 +16,7 @@ class RestaurantList extends Component {
   }
 
   render() {
-    const { ids } = this.props;
+    const { ids, teamSlug } = this.props;
 
     return (
       <FlipMove typeName="ul" className={s.root} staggerDelayBy={40} staggerDurationBy={40}>
@@ -27,6 +27,7 @@ class RestaurantList extends Component {
                 id={id}
                 shouldShowAddTagArea
                 shouldShowDropdown
+                teamSlug={teamSlug}
               />
             </ScrollElement>
           </li>
@@ -37,7 +38,8 @@ class RestaurantList extends Component {
 }
 
 RestaurantList.propTypes = {
-  ids: PropTypes.array.isRequired
+  ids: PropTypes.array.isRequired,
+  teamSlug: PropTypes.string.isRequired
 };
 
 export default withStyles(s)(RestaurantList);

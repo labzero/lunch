@@ -36,14 +36,14 @@ export class _Home extends Component {
 
     return (
       <div className={s.root}>
-        <RestaurantMapContainer />
+        <RestaurantMapContainer teamSlug={teamSlug} />
         <section className={s.forms}>
           {restaurantAddForm}
           <TagFilterFormContainer />
           <TagFilterFormContainer exclude />
         </section>
         <div className={s.restaurantList}>
-          <RestaurantListContainer />
+          <RestaurantListContainer teamSlug={teamSlug} />
         </div>
       </div>
     );

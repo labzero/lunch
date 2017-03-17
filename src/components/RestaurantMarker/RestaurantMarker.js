@@ -12,6 +12,7 @@ if (canUseDOM) {
 
 const InnerRestaurantMarker = ({
   restaurant,
+  teamSlug,
   decided,
   index,
   baseZIndex,
@@ -47,6 +48,7 @@ const InnerRestaurantMarker = ({
     >
       <RestaurantContainer
         id={restaurant.id}
+        teamSlug={teamSlug}
       />
     </div>
   );
@@ -74,6 +76,7 @@ const InnerRestaurantMarker = ({
 
 InnerRestaurantMarker.propTypes = {
   restaurant: PropTypes.object.isRequired,
+  teamSlug: PropTypes.string.isRequired,
   decided: PropTypes.bool.isRequired,
   index: PropTypes.number.isRequired,
   baseZIndex: PropTypes.number.isRequired,
@@ -107,7 +110,8 @@ const RestaurantMarker = ({
 RestaurantMarker.propTypes = {
   store: PropTypes.object.isRequired,
   insertCss: PropTypes.func.isRequired,
-  restaurant: PropTypes.object.isRequired
+  restaurant: PropTypes.object.isRequired,
+  teamSlug: PropTypes.string.isRequired
 };
 
 export default RestaurantMarker;

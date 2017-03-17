@@ -73,8 +73,12 @@ export default new Map([
           $unshift: [action.restaurant.id]
         },
         entities: {
-          restaurants: {
+          restaurants: state.items.entities.restaurants ? {
             $merge: {
+              [action.restaurant.id]: action.restaurant
+            }
+          } : {
+            $set: {
               [action.restaurant.id]: action.restaurant
             }
           }
