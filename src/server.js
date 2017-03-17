@@ -137,7 +137,10 @@ app.get('/logout', (req, res) => {
 //
 // Register WebSockets
 // -----------------------------------------------------------------------------
-const wss = new WebSocketServer({ server: httpsServer === undefined ? httpServer : httpsServer });
+const wss = new WebSocketServer({
+  server: httpsServer === undefined ? httpServer : httpsServer,
+  verifyClient: () => true // todo
+});
 
 wss.broadcast = data => {
   wss.clients.forEach(client => {

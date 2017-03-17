@@ -1,5 +1,21 @@
-exports.up = (queryInterface, Sequelize) =>
-  queryInterface.createTable('roles', {
+const db = require('../../src/models/db');
+
+exports.up = (queryInterface, Sequelize) => {
+  const User = db.sequelize.define('user', {
+    google_id: Sequelize.STRING,
+    name: Sequelize.STRING,
+    email: Sequelize.STRING
+  }, {
+    underscored: true
+  });
+
+  const Team = db.sequelize.define('team', {
+    name: Sequelize.STRING,
+  }, {
+    underscored: true
+  });
+
+  return queryInterface.createTable('roles', {
     id: {
       allowNull: false,
       autoIncrement: true,
@@ -42,7 +58,50 @@ exports.up = (queryInterface, Sequelize) =>
         fields: ['team_id', 'user_id']
       }
     }
-  });
+  })
+  .then(() => User.findAll())
+  .then((users) =>
+    Team.findOne({ where: { name: 'Lab Zero' } }).then(team => {
+      const Role = db.sequelize.define('role', {
+        type: {
+          allowNull: false,
+          type: Sequelize.ENUM('user', 'admin', 'owner'),
+        },
+        user_id: {
+          type: Sequelize.INTEGER,
+          references: {
+            model: 'user',
+            key: 'id'
+          },
+          allowNull: false,
+          onDelete: 'cascade'
+        },
+        team_id: {
+          type: Sequelize.INTEGER,
+          references: {
+            model: 'team',
+            key: 'id'
+          },
+          allowNull: false,
+          onDelete: 'cascade'
+        }
+      }, {
+        uniqueKeys: {
+          unique: {
+            fields: ['user_id', 'team_id']
+          }
+        },
+        underscored: true
+      });
+
+      return Promise.all(users.map(user => Role.create({
+        team_id: team.id,
+        user_id: user.id,
+        type: 'admin'
+      })));
+    })
+  );
+};
 
 exports.down = queryInterface =>
   queryInterface.dropTable('roles');

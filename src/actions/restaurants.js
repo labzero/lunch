@@ -37,10 +37,11 @@ export function restaurantPosted(obj, userId) {
   };
 }
 
-export function deleteRestaurant(id) {
+export function deleteRestaurant(teamSlug, id) {
   return {
     type: ActionTypes.DELETE_RESTAURANT,
-    id
+    id,
+    teamSlug
   };
 }
 
@@ -52,11 +53,12 @@ export function restaurantDeleted(id, userId) {
   };
 }
 
-export function renameRestaurant(id, obj) {
+export function renameRestaurant(teamSlug, id, obj) {
   return {
     type: ActionTypes.RENAME_RESTAURANT,
     id,
-    restaurant: obj
+    restaurant: obj,
+    teamSlug
   };
 }
 
@@ -229,7 +231,7 @@ export function addRestaurant(teamSlug, name, placeId, address, lat, lng) {
 
 export function removeRestaurant(teamSlug, id) {
   return (dispatch) => {
-    dispatch(deleteRestaurant(id));
+    dispatch(deleteRestaurant(teamSlug, id));
     return fetch(`/api/teams/${teamSlug}/restaurants/${id}`, {
       credentials,
       method: 'delete'
@@ -237,11 +239,11 @@ export function removeRestaurant(teamSlug, id) {
   };
 }
 
-export function changeRestaurantName(id, value) {
+export function changeRestaurantName(teamSlug, id, value) {
   const payload = { name: value };
   return dispatch => {
-    dispatch(renameRestaurant(id, payload));
-    return fetch(`/api/restaurants/${id}`, {
+    dispatch(renameRestaurant(teamSlug, id, payload));
+    return fetch(`/api/teams/${teamSlug}/restaurants/${id}`, {
       credentials,
       headers: jsonHeaders,
       method: 'PATCH',

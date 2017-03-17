@@ -50,7 +50,11 @@ const Restaurant = ({
   if (listUiItem.isEditingName && shouldShowDropdown) {
     nameArea = (
       <span className={s.restaurantNameFormContainer}>
-        <RestaurantNameFormContainer id={restaurant.id} name={restaurant.name} />
+        <RestaurantNameFormContainer
+          id={restaurant.id}
+          name={restaurant.name}
+          teamSlug={teamSlug}
+        />
       </span>
     );
   } else {

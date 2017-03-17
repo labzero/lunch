@@ -15,7 +15,6 @@ export default {
 
     if (user.id) {
       return {
-        title: 'Lunch',
         component: <LayoutContainer><TeamsContainer /></LayoutContainer>,
       };
     }
