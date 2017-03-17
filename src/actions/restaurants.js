@@ -101,11 +101,12 @@ export function votePosted(json) {
   };
 }
 
-export function deleteVote(restaurantId, id) {
+export function deleteVote(teamSlug, restaurantId, id) {
   return {
     type: ActionTypes.DELETE_VOTE,
     restaurantId,
-    id
+    id,
+    teamSlug
   };
 }
 
@@ -271,10 +272,10 @@ export function addVote(teamSlug, id) {
   };
 }
 
-export function removeVote(restaurantId, id) {
+export function removeVote(teamSlug, restaurantId, id) {
   return (dispatch) => {
-    dispatch(deleteVote(restaurantId, id));
-    return fetch(`/api/restaurants/${restaurantId}/votes/${id}`, {
+    dispatch(deleteVote(teamSlug, restaurantId, id));
+    return fetch(`/api/teams/${teamSlug}/restaurants/${restaurantId}/votes/${id}`, {
       credentials,
       method: 'delete'
     });
