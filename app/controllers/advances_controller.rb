@@ -62,6 +62,16 @@ class AdvancesController < ApplicationController
         ]
       },
     }
+    @column_definitions = [
+      {orderData: [0, 3], orderSequence: [:desc, :asc], targets: [0]},
+      {orderData: [1, 3], orderSequence: [:desc, :asc], targets: [1]},
+      {orderData: [2, 3], orderSequence: [:desc, :asc], targets: [2]},
+      {orderSequence: [:desc], targets: [3]},
+      {orderData: [4, 3], orderSequence: [:desc, :asc], targets: [4]},
+      {orderData: [5, 3], orderSequence: [:desc, :asc], targets: [5]},
+      {orderData: [6, 3], orderSequence: [:desc, :asc], targets: [6]},
+      {type: :date, targets: [0, 1, 2]}
+    ]
     if params[:job_id]
       job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
       raise ActiveRecord::RecordNotFound unless job_status
