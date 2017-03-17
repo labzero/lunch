@@ -137,11 +137,12 @@ export function postedNewTagToRestaurant(restaurantId, tag, userId) {
   };
 }
 
-export function postTagToRestaurant(restaurantId, id) {
+export function postTagToRestaurant(teamSlug, restaurantId, id) {
   return {
     type: ActionTypes.POST_TAG_TO_RESTAURANT,
     restaurantId,
-    id
+    id,
+    teamSlug
   };
 }
 
@@ -299,10 +300,10 @@ export function addNewTagToRestaurant(teamSlug, restaurantId, value) {
   };
 }
 
-export function addTagToRestaurant(restaurantId, id) {
+export function addTagToRestaurant(teamSlug, restaurantId, id) {
   return (dispatch) => {
-    dispatch(postTagToRestaurant(restaurantId, id));
-    return fetch(`/api/restaurants/${restaurantId}/tags`, {
+    dispatch(postTagToRestaurant(teamSlug, restaurantId, id));
+    return fetch(`/api/teams/${teamSlug}/restaurants/${restaurantId}/tags`, {
       method: 'post',
       credentials,
       headers: jsonHeaders,

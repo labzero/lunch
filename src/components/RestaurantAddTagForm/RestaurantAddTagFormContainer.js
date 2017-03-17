@@ -27,7 +27,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     if (method === 'enter') {
       event.preventDefault();
     }
-    dispatch(addTagToRestaurant(ownProps.id, suggestion.id));
+    dispatch(addTagToRestaurant(ownProps.teamSlug, ownProps.id, suggestion.id));
   },
   hideAddTagForm: () => {
     dispatch(hideAddTagForm(ownProps.id));
