@@ -50,16 +50,18 @@ def compare_sort_order(column_name, sort_order, table_selector='.report-table')
           value = element.text == I18n.t('global.open') ? (Time.zone.today + 1000.years) : Date.strptime(element.text, '%m/%d/%Y')
         when 'Date', 'Trade Date', 'Settlement Date', 'Issue Date', 'Start Date', 'End Date', 'Funding Date'
           value = Date.strptime(element.text, '%m/%d/%Y')
-        when 'Certificate Sequence', 'Days Outstanding'
+        when 'Certificate Sequence', 'Days Outstanding', 'Advance Number'
           value = element.text.to_i
         when 'Original Amount', 'Borrowing Capacity Remaining'
           value = element.text.delete('$,').to_i
-        when 'Dividend'
+        when 'Dividend', 'Rate (%)*'
           value = element.text.delete('$,').to_f
         when 'Average Shares Outstanding'
           value = element.text.delete(',').to_f
-        when 'Shares Outstanding'
+        when 'Shares Outstanding', 'Current Par ($)'
           value = element.text.delete(',').to_i
+        when 'Advance Type'
+          value = element.text
         else
           raise 'column_name not recognized'
       end

@@ -29,16 +29,37 @@ Scenario: Members filter the Advances list
   Then I see only outstanding advances
   And  I see the "Outstanding Advances" filter selected
 
-@jira-mem-1962
+@jira-mem-1962 @jira-mem-2122
 Scenario: Members sorts the Advances list
-  Given I am on the "Manage Advances" advances page
+  When I am on the "Manage Advances" advances page
   And I wait for the report to load
+  Then I should see the "Trade Date" column values in "descending" order
+  When I click the "Trade Date" column heading on the "Manage Advances" table
+  Then I should see the "Trade Date" column values in "ascending" order
+  When I click the "Funding Date" column heading on the "Manage Advances" table
+  Then I should see the "Funding Date" column values in "descending" order
+  When I click the "Funding Date" column heading on the "Manage Advances" table
+  Then I should see the "Funding Date" column values in "ascending" order
+  When I click the "Maturity Date" column heading on the "Manage Advances" table
+  Then I should see the "Maturity Date" column values in "descending" order
   When I click the "Maturity Date" column heading on the "Manage Advances" table
   Then I should see the "Maturity Date" column values in "ascending" order
-  When I filter the advances by "All Advances"
-  And I click the "Maturity Date" column heading on the "Manage Advances" table
-  Then I should see the "Maturity Date" column values in "ascending" order
-
+  When I click the "Advance Number" column heading on the "Manage Advances" table
+  Then I should see the "Advance Number" column values in "descending" order
+  When I click the "Advance Number" column heading on the "Manage Advances" table
+  Then I should see the "Advance Number" column values in "ascending" order
+  When I click the "Advance Type" column heading on the "Manage Advances" table
+  Then I should see the "Advance Type" column values in "descending" order
+  When I click the "Advance Type" column heading on the "Manage Advances" table
+  Then I should see the "Advance Type" column values in "ascending" order
+  When I click the "Rate (%)*" column heading on the "Manage Advances" table
+  Then I should see the "Rate (%)*" column values in "descending" order
+  When I click the "Rate (%)*" column heading on the "Manage Advances" table
+  Then I should see the "Rate (%)*" column values in "ascending" order
+  When I click the "Current Par ($)" column heading on the "Manage Advances" table
+  Then I should see the "Current Par ($)" column values in "descending" order
+  When I click the "Current Par ($)" column heading on the "Manage Advances" table
+  Then I should see the "Current Par ($)" column values in "ascending" order
 
 @data-unavailable @jira-mem-535 @jira-mem-1053
 Scenario: No data is available to show in the Manage Advances Page

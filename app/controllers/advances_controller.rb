@@ -38,10 +38,10 @@ class AdvancesController < ApplicationController
   end
 
   def manage
-    column_headings = [{title: t('common_table_headings.trade_date')}, {title: t('common_table_headings.funding_date')}, {title: t('common_table_headings.maturity_date'), sortable: true}, {title: t('common_table_headings.advance_number')}, {title: t('common_table_headings.advance_type')}, {title: t('global.footnoted_string', string: t('advances.rate'))}, {title: t('common_table_headings.current_par') + ' ($)'}]
-    column_headings << {title: t('advances.confirmation.title')} if feature_enabled?('advance-confirmation')
+    column_headings = [{title: t('common_table_headings.trade_date')}, {title: t('common_table_headings.funding_date')}, {title: t('common_table_headings.maturity_date')}, {title: t('common_table_headings.advance_number')}, {title: t('common_table_headings.advance_type')}, {title: t('global.footnoted_string', string: t('advances.rate'))}, {title: t('common_table_headings.current_par') + ' ($)'}]
+    column_headings.each {|col| col[:sortable] = true }
+    column_headings << {title: t('advances.confirmation.title'), sortable: false} if feature_enabled?('advance-confirmation')
     outstanding_only = params[:maturity] == ADVANCES_OUTSTANDING || params[:maturity].nil?
-    column_headings.each {|col| col[:sortable] ||= false }
     @advances_data_table = {
       column_headings: column_headings,
       rows: [],

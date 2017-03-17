@@ -83,13 +83,13 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:user_id) { user.id }
     let(:member_id) { controller.current_member_id }
     let(:column_headings) { [
-      { title: I18n.t('common_table_headings.trade_date'), sortable: false }, 
-      { title: I18n.t('common_table_headings.funding_date'), sortable: false },
+      { title: I18n.t('common_table_headings.trade_date'), sortable: true },
+      { title: I18n.t('common_table_headings.funding_date'), sortable: true },
       { title: I18n.t('common_table_headings.maturity_date'), sortable: true },
-      { title: I18n.t('common_table_headings.advance_number'), sortable: false },
-      { title: I18n.t('common_table_headings.advance_type'), sortable: false },
-      { title: I18n.t('global.footnoted_string', string: I18n.t('advances.rate')), sortable: false },
-      { title: I18n.t('common_table_headings.current_par') + ' ($)', sortable: false }
+      { title: I18n.t('common_table_headings.advance_number'), sortable: true },
+      { title: I18n.t('common_table_headings.advance_type'), sortable: true },
+      { title: I18n.t('global.footnoted_string', string: I18n.t('advances.rate')), sortable: true },
+      { title: I18n.t('common_table_headings.current_par') + ' ($)', sortable: true }
     ]}
     let(:active_advances_response) {[
       {

@@ -27,13 +27,13 @@ $(function() {
               targets: 'report-column-nosort',
               orderable: false
             }
-          ].concat(dataColumnDefs),
+          ],
           aoColumnDefs: [
             {
               bSortable: false,
               aTargets: $unsortableColumnIndices
             }
-          ]
+          ].concat(dataColumnDefs)
         };
         if ($this.is('[data-sortable]')) {
           dataTableOptions['order'] = $this.data('default-sort') || [[0, 'asc']]
