@@ -25,7 +25,7 @@ const Restaurant = ({
   if (loggedIn) {
     voteButton = (
       <span className={s.voteButtonContainer}>
-        <RestaurantVoteButtonContainer id={restaurant.id} />
+        <RestaurantVoteButtonContainer id={restaurant.id} teamSlug={teamSlug} />
       </span>
     );
     if (shouldShowAddTagArea) {

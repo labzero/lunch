@@ -86,10 +86,11 @@ export function receiveRestaurants(json, teamSlug) {
   };
 }
 
-export function postVote(id) {
+export function postVote(teamSlug, id) {
   return {
     type: ActionTypes.POST_VOTE,
-    id
+    id,
+    teamSlug
   };
 }
 
@@ -256,10 +257,10 @@ export function changeRestaurantName(teamSlug, id, value) {
   };
 }
 
-export function addVote(id) {
+export function addVote(teamSlug, id) {
   return (dispatch) => {
-    dispatch(postVote(id));
-    return fetch(`/api/restaurants/${id}/votes`, {
+    dispatch(postVote(teamSlug, id));
+    return fetch(`/api/teams/${teamSlug}/restaurants/${id}/votes`, {
       method: 'post',
       credentials
     })

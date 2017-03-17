@@ -23,7 +23,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) =>
           dispatchProps.dispatch(removeVote(ownProps.id, vote));
         });
       } else {
-        dispatchProps.dispatch(addVote(ownProps.id));
+        dispatchProps.dispatch(addVote(ownProps.teamSlug, ownProps.id));
       }
     }
   });

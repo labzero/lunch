@@ -134,8 +134,12 @@ export default new Map([
               }
             }
           },
-          votes: {
+          votes: state.items.entities.votes ? {
             $merge: {
+              [action.vote.id]: action.vote
+            }
+          } : {
+            $set: {
               [action.vote.id]: action.vote
             }
           }
