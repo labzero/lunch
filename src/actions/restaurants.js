@@ -155,12 +155,12 @@ export function postedTagToRestaurant(restaurantId, id, userId) {
   };
 }
 
-export function deleteTagFromRestaurant(restaurantId, id, userId) {
+export function deleteTagFromRestaurant(teamSlug, restaurantId, id) {
   return {
     type: ActionTypes.DELETE_TAG_FROM_RESTAURANT,
     restaurantId,
     id,
-    userId
+    teamSlug
   };
 }
 
@@ -316,10 +316,10 @@ export function addTagToRestaurant(teamSlug, restaurantId, id) {
   };
 }
 
-export function removeTagFromRestaurant(restaurantId, id) {
+export function removeTagFromRestaurant(teamSlug, restaurantId, id) {
   return (dispatch) => {
-    dispatch(deleteTagFromRestaurant(restaurantId, id));
-    return fetch(`/api/restaurants/${restaurantId}/tags/${id}`, {
+    dispatch(deleteTagFromRestaurant(teamSlug, restaurantId, id));
+    return fetch(`/api/teams/${teamSlug}/restaurants/${restaurantId}/tags/${id}`, {
       credentials,
       method: 'delete'
     });

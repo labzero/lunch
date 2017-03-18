@@ -10,7 +10,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   removeTag(id) {
-    dispatch(removeTagFromRestaurant(ownProps.id, id));
+    dispatch(removeTagFromRestaurant(ownProps.slug, ownProps.id, id));
   }
 });
 

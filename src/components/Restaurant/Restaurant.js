@@ -88,7 +88,7 @@ const Restaurant = ({
       </div>
       <div className={s.footer}>
         <div className={s.tagsArea}>
-          <RestaurantTagListContainer id={restaurant.id} />
+          <RestaurantTagListContainer id={restaurant.id} teamSlug={teamSlug} />
           {addTagArea}
         </div>
         {dropdown}
