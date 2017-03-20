@@ -7,7 +7,6 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import Promise from 'bluebird';
 import path from 'path';
 import express from 'express';
 import fs from 'fs';
@@ -37,8 +36,7 @@ import { port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } fr
 import makeInitialState from './initialState';
 import passport from './core/passport';
 import teamApi from './api/teams';
-import whitelistEmailApi from './api/whitelistEmails';
-import { /* Decision, Restaurant, */Role, /* Tag, */Team, User, WhitelistEmail } from './models';
+import { Role, Team, User } from './models';
 import hasRole from './helpers/hasRole';
 
 const app = express();
@@ -154,7 +152,6 @@ app.use((req, res, next) => {
 // Register API middleware
 // -----------------------------------------------------------------------------
 app.use('/api/teams', teamApi);
-app.use('/api/whitelistEmails', whitelistEmailApi);
 
 //
 // Register server-side rendering middleware
@@ -200,30 +197,25 @@ app.get('*', async (req, res, next) => {
       return;
     }
 
-    const finds = [];
-
-    if (req.user) {
-      let userAttributes = ['id', 'name'];
-      let userIncludes;
-      if (hasRole(req.user, teams[0], 'admin')) {
-        userAttributes = userAttributes.concat(['email']);
-        userIncludes = [Role];
-      }
-      finds.push(User.findAll({ attributes: userAttributes, include: userIncludes }));
-      finds.push(WhitelistEmail.findAll({ attributes: ['id', 'email'] }));
-    }
-
     try {
-      const [users, whitelistEmails] = await Promise.all(finds);
-
       const stateData = {
         teams
       };
+
       if (req.user) {
+        let userAttributes = ['id', 'name'];
+        let userIncludes;
+        if (hasRole(req.user, teams[0], 'admin')) {
+          userAttributes = userAttributes.concat(['email']);
+          userIncludes = [Role];
+        }
+
+        const users = await User.findAll({ attributes: userAttributes, include: userIncludes });
+
         stateData.user = req.user;
         stateData.users = users;
-        stateData.whitelistEmails = whitelistEmails;
       }
+
       const initialState = makeInitialState(stateData);
 
       context.store = configureStore(initialState, {

@@ -7,9 +7,6 @@ const mapStateToProps = state => ({ user: state.user });
 const mapDispatchToProps = (dispatch, ownProps) => ({
   manageTags() {
     dispatch(showModal('tagManager', { teamSlug: ownProps.teamSlug }));
-  },
-  openEmailWhitelist() {
-    dispatch(showModal('emailWhitelist'));
   }
 });
 

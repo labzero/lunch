@@ -2,7 +2,6 @@ import React, { PropTypes } from 'react';
 import DeleteRestaurantModalContainer from '../DeleteRestaurantModal/DeleteRestaurantModalContainer';
 import TagManagerModalContainer from '../TagManagerModal/TagManagerModalContainer';
 import DeleteTagModalContainer from '../DeleteTagModal/DeleteTagModalContainer';
-import EmailWhitelistModalContainer from '../EmailWhitelistModal/EmailWhitelistModalContainer';
 
 const ModalSection = ({ modals }) => {
   const modalContainers = [];
@@ -14,9 +13,6 @@ const ModalSection = ({ modals }) => {
   }
   if (modals.deleteTag !== undefined) {
     modalContainers.push(<DeleteTagModalContainer key="modalContainer_deleteTag" />);
-  }
-  if (modals.emailWhitelist !== undefined) {
-    modalContainers.push(<EmailWhitelistModalContainer key="modalContainer_emailWhitelist" />);
   }
 
   return (

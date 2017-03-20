@@ -49,13 +49,6 @@ const getInitialState = () => ({
     items: []
   },
   pageUi: {},
-  whitelistEmails: {
-    isFetching: false,
-    didInvalidate: true,
-    items: [],
-    teamSlug: null
-  },
-  whitelistEmailUi: {},
   wsPort: process.env.BS_RUNNING ? port : 0
 });
 

@@ -1,7 +1,6 @@
 import { sequelize } from './db';
 import Vote from './Vote';
 import User from './User';
-import WhitelistEmail from './WhitelistEmail';
 import RestaurantTag from './RestaurantTag';
 import Tag from './Tag';
 import Team from './Team';
@@ -102,7 +101,6 @@ RestaurantTag.belongsTo(Tag);
 export {
   Vote,
   User,
-  WhitelistEmail,
   RestaurantTag,
   Tag,
   Team,

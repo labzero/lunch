@@ -15,7 +15,7 @@
 
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { User, WhitelistEmail } from '../models';
+import { User } from '../models';
 
 /**
  * Sign in with Google.
@@ -32,42 +32,30 @@ passport.use(new GoogleStrategy(
       profile.emails.length !== undefined
     ) {
       const accountEmail = profile.emails.find(email => email.type === 'account');
-      return WhitelistEmail.findAll().then(whitelistEmails => {
+      return User.findOrCreate({
+        where: { google_id: profile.id }
+      }).spread(user => {
+        const userUpdates = {};
+        let doUpdates = false;
+
         if (
-          whitelistEmails
-            .map(we => we.get('email').toLowerCase())
-            .indexOf(accountEmail.value.toLowerCase()) > -1 ||
-          // eslint-disable-next-line no-underscore-dangle
-          profile._json.domain === process.env.OAUTH_DOMAIN ||
-          process.env.OAUTH_DOMAIN === undefined
+          typeof profile.displayName === 'string' &&
+          profile.displayName !== user.get('name')
         ) {
-          return User.findOrCreate({
-            where: { google_id: profile.id }
-          }).spread(user => {
-            const userUpdates = {};
-            let doUpdates = false;
-
-            if (
-              typeof profile.displayName === 'string' &&
-              profile.displayName !== user.get('name')
-            ) {
-              userUpdates.name = profile.displayName;
-              doUpdates = true;
-            }
-
-            if (accountEmail !== undefined && accountEmail.value !== user.get('email')) {
-              userUpdates.email = accountEmail.value;
-              doUpdates = true;
-            }
-
-            if (doUpdates) {
-              return user.update(userUpdates).then(updatedUser => done(null, updatedUser.id));
-            }
-
-            return done(null, user.id);
-          }).catch(err => done(err));
+          userUpdates.name = profile.displayName;
+          doUpdates = true;
         }
-        return done(null, false, { message: 'Please log in using your Lab Zero account.' });
+
+        if (accountEmail !== undefined && accountEmail.value !== user.get('email')) {
+          userUpdates.email = accountEmail.value;
+          doUpdates = true;
+        }
+
+        if (doUpdates) {
+          return user.update(userUpdates).then(updatedUser => done(null, updatedUser.id));
+        }
+
+        return done(null, user.id);
       }).catch(err => done(err));
     }
     return done(null, false, { message: 'No email provided.' });

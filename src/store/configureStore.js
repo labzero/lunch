@@ -37,8 +37,6 @@ export default function configureStore(initialState, helpersConfig) {
     normalize(initialState.teams.items, [schemas.team]);
   normalizedInitialState.users.items =
     normalize(initialState.users.items, [schemas.user]);
-  normalizedInitialState.whitelistEmails.items =
-    normalize(initialState.whitelistEmails.items, [schemas.whitelistEmail]);
   normalizedInitialState.restaurants.items.entities.votes =
     normalizedInitialState.restaurants.items.entities.votes || {};
 

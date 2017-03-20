@@ -11,14 +11,12 @@ exports.up = (queryInterface, Sequelize) => {
   return Team.update({ slug: 'labzero' }, { where: { name: 'Lab Zero' } }).then(() =>
     queryInterface.changeColumn('teams', 'slug', {
       allowNull: false,
-      type: Sequelize.STRING,
-      unique: true
+      type: Sequelize.STRING
     }));
 };
 
 exports.down = (queryInterface, Sequelize) =>
   queryInterface.changeColumn('teams', 'slug', {
     allowNull: true,
-    type: Sequelize.STRING,
-    unique: true
+    type: Sequelize.STRING
   });

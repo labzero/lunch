@@ -97,7 +97,7 @@ exports.up = (queryInterface, Sequelize) => {
       return Promise.all(users.map(user => Role.create({
         team_id: team.id,
         user_id: user.id,
-        type: 'admin'
+        type: user.email.match(/@labzero\.com$/) ? 'admin' : 'user'
       })));
     })
   );
