@@ -10,7 +10,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   handleDeleteClicked() {
-    dispatch(showModal('deleteTag', { tagId: ownProps.id }));
+    dispatch(showModal('deleteTag', { tagId: ownProps.id, teamSlug: ownProps.teamSlug }));
   }
 });
 

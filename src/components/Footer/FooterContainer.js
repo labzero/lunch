@@ -2,11 +2,11 @@ import { connect } from 'react-redux';
 import { showModal } from '../../actions/modals';
 import Footer from './Footer';
 
-const mapStateToProps = (state) => ({ user: state.user });
+const mapStateToProps = state => ({ user: state.user });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch, ownProps) => ({
   manageTags() {
-    dispatch(showModal('tagManager'));
+    dispatch(showModal('tagManager', { teamSlug: ownProps.teamSlug }));
   },
   openEmailWhitelist() {
     dispatch(showModal('emailWhitelist'));

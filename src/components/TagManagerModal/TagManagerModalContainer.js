@@ -5,7 +5,8 @@ import TagManagerModal from './TagManagerModal';
 const modalName = 'tagManager';
 
 const mapStateToProps = state => ({
-  shown: !!state.modals[modalName].shown
+  shown: !!state.modals[modalName].shown,
+  teamSlug: state.modals[modalName].teamSlug
 });
 
 const mapDispatchToProps = dispatch => ({

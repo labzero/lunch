@@ -60,10 +60,11 @@ export function fetchTagsIfNeeded(teamSlug) {
   };
 }
 
-export function deleteTag(id) {
+export function deleteTag(teamSlug, id) {
   return {
     type: ActionTypes.DELETE_TAG,
-    id
+    id,
+    teamSlug
   };
 }
 
@@ -75,10 +76,10 @@ export function tagDeleted(id, userId) {
   };
 }
 
-export function removeTag(id) {
+export function removeTag(teamSlug, id) {
   return (dispatch) => {
-    dispatch(deleteTag(id));
-    return fetch(`/api/tags/${id}`, {
+    dispatch(deleteTag(teamSlug, id));
+    return fetch(`/api/teams/${teamSlug}/tags/${id}`, {
       credentials,
       method: 'delete'
     });

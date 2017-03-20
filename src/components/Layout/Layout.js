@@ -25,7 +25,12 @@ class Layout extends Component {
     messageReceived: PropTypes.func.isRequired,
     wsPort: PropTypes.number.isRequired,
     shouldScrollToTop: PropTypes.bool.isRequired,
-    scrolledToTop: PropTypes.func.isRequired
+    scrolledToTop: PropTypes.func.isRequired,
+    teamSlug: PropTypes.string // temp
+  };
+
+  static defaultProps = {
+    teamSlug: ''
   };
 
   static contextTypes = {
@@ -77,11 +82,13 @@ class Layout extends Component {
   }
 
   render() {
+    const { teamSlug } = this.props;
+
     return (
       <div>
         <HeaderContainer />
         {this.props.children}
-        <FooterContainer />
+        <FooterContainer teamSlug={teamSlug} /* temporary */ />
         <NotificationListContainer />
         <ModalSectionContainer />
       </div>

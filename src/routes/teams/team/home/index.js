@@ -16,7 +16,9 @@ export default {
     if (user.id) {
       return {
         component: (
-          <LayoutContainer>
+          <LayoutContainer
+            teamSlug={context.params.slug} /* Temporary. Move team-specific components into Home. */
+          >
             <HomeContainer teamSlug={context.params.slug} />
           </LayoutContainer>
         ),
