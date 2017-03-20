@@ -9,18 +9,16 @@
 
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import getRole from '../../../../helpers/getRole';
 import s from './Admin.css';
 
 class Admin extends React.Component {
   static propTypes = {
     users: PropTypes.array.isRequired,
-    team: PropTypes.object.isRequired,
     title: PropTypes.string.isRequired,
   };
 
   render() {
-    const { team, users } = this.props;
+    const { users } = this.props;
 
     return (
       <div className={s.root}>
@@ -39,7 +37,7 @@ class Admin extends React.Component {
                 <tr key={user.id}>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
-                  <td>{getRole(user, team)}</td>
+                  <td>{user.role.type}</td>
                 </tr>
               ))}
             </tbody>

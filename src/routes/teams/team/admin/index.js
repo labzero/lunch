@@ -29,7 +29,11 @@ export default {
       return {
         title,
         chunk: 'admin',
-        component: <LayoutContainer><AdminContainer title={title} /></LayoutContainer>,
+        component: (
+          <LayoutContainer>
+            <AdminContainer title={title} teamSlug={context.params.slug} />
+          </LayoutContainer>
+        ),
       };
     }
 

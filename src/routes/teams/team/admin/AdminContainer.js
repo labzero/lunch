@@ -1,9 +1,9 @@
 import { connect } from 'react-redux';
-import { getUsers } from '../../../../selectors/users';
+import { getUsersWithTeamRole } from '../../../../selectors';
 import Admin from './Admin';
 
 const mapStateToProps = (state, ownProps) => ({
-  users: getUsers(state),
+  users: getUsersWithTeamRole(state, ownProps.teamSlug),
   title: ownProps.title
 });
 

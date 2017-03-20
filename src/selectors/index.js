@@ -10,7 +10,8 @@ import { getVoteEntities, getVoteById } from './votes';
 import { areTagsLoading, getTags } from './tags';
 import { getTagFilters } from './tagFilters';
 import { getTagExclusions } from './tagExclusions';
-import { getUserId, getUserById } from './users';
+import { getTeamBySlug } from './teams';
+import { getUserId, getUserById, getUsers } from './users';
 import { getMapUi } from './mapUi';
 
 export const getUserByVoteId = (state, voteId) =>
@@ -64,4 +65,12 @@ export const isRestaurantListReady = createSelector(
   areRestaurantsLoading, areTagsLoading, isDecisionLoading,
   (restaurantsLoading, tagsLoading, decisionLoading) =>
     !restaurantsLoading && !tagsLoading && !decisionLoading
+);
+
+export const getUsersWithTeamRole = createSelector(
+  getUsers, getTeamBySlug,
+  (users, team) => users.map(user => ({
+    ...user,
+    role: user.roles.find(role => role.team_id === team.id)
+  }))
 );
