@@ -6,6 +6,13 @@ import * as schemas from '../schemas';
 import isFetching from './helpers/isFetching';
 
 export default new Map([
+  [ActionTypes.INVALIDATE_TAGS, state =>
+    update(state, {
+      $merge: {
+        didInvalidate: true
+      }
+    })
+  ],
   [ActionTypes.REQUEST_TAGS, state =>
     update(state, {
       $merge: {

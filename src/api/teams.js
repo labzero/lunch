@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { Team, Role } from '../models';
 import errorCatcher from './helpers/errorCatcher';
 import loggedIn from './helpers/loggedIn';
+import decisionApi from './decisions';
 import restaurantApi from './restaurants';
 import tagApi from './tags';
 
@@ -34,6 +35,7 @@ router
       }
     }
   )
+  .use('/:slug/decisions', decisionApi)
   .use('/:slug/restaurants', restaurantApi)
   .use('/:slug/tags', tagApi);
 

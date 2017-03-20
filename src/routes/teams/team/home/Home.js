@@ -10,21 +10,29 @@ export class _Home extends Component {
 
   static propTypes = {
     user: PropTypes.object.isRequired,
+    fetchDecisionIfNeeded: PropTypes.func.isRequired,
     fetchRestaurantsIfNeeded: PropTypes.func.isRequired,
     fetchTagsIfNeeded: PropTypes.func.isRequired,
+    invalidateDecision: PropTypes.func.isRequired,
     invalidateRestaurants: PropTypes.func.isRequired,
+    invalidateTags: PropTypes.func.isRequired,
     teamSlug: PropTypes.string.isRequired
   };
 
   componentWillMount() {
     this.props.fetchRestaurantsIfNeeded();
     this.props.fetchTagsIfNeeded();
+    this.props.fetchDecisionIfNeeded();
   }
 
   componentDidMount() {
     setInterval(() => {
+      this.props.invalidateDecision();
       this.props.invalidateRestaurants();
+      this.props.invalidateTags();
+      this.props.fetchDecisionIfNeeded();
       this.props.fetchRestaurantsIfNeeded();
+      this.props.fetchTagsIfNeeded();
     }, 1000 * 60 * 60 * 6);
   }
 

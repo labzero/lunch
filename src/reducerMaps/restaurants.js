@@ -15,7 +15,7 @@ export default new Map([
             result.forEach((id, index) => {
               sortIndexes[id] = index;
             });
-            return result.sort((a, b) => {
+            const sortedResult = Array.from(result).sort((a, b) => {
               if (action.newlyAdded !== undefined && action.user.id === action.newlyAdded.userId) {
                 if (a === action.newlyAdded.id) { return -1; }
                 if (b === action.newlyAdded.id) { return 1; }
@@ -33,6 +33,8 @@ export default new Map([
               }
               return sortIndexes[a] - sortIndexes[b];
             });
+            // If array contents match, return original (for shallow comparison)
+            return sortedResult.some((r, i) => r !== result[i]) ? sortedResult : result;
           }
         }
       }

@@ -20,10 +20,10 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     dispatch(showModal('deleteRestaurant', { teamSlug: ownProps.teamSlug, restaurantId: ownProps.id }));
   },
   removeDecision: () => {
-    dispatch(removeDecision());
+    dispatch(removeDecision(ownProps.teamSlug));
   },
   decide: () => {
-    dispatch(decide(ownProps.id));
+    dispatch(decide(ownProps.teamSlug, ownProps.id));
   },
   showMapAndInfoWindow: () => {
     dispatch(showMapAndInfoWindow(ownProps.id));

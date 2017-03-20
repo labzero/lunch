@@ -63,7 +63,7 @@ const Restaurant = ({
         <button onClick={showMapAndInfoWindow} className={s.headingButton}>
           {restaurant.name}
         </button>
-        <RestaurantDecisionContainer id={restaurant.id} />
+        <RestaurantDecisionContainer id={restaurant.id} teamSlug={teamSlug} />
       </h2>
     );
   }

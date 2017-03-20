@@ -291,7 +291,7 @@ const clientConfig = {
 
   // Choose a developer tool to enhance debugging
   // http://webpack.github.io/docs/configuration.html#devtool
-  devtool: isDebug ? 'cheap-module-source-map' : false,
+  devtool: isDebug ? 'source-map' : false,
 
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
@@ -385,7 +385,7 @@ const serverConfig = {
     __dirname: false,
   },
 
-  devtool: isDebug ? 'cheap-module-source-map' : 'source-map',
+  devtool: 'source-map'
 };
 
 export default [clientConfig, serverConfig];

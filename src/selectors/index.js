@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import { isDecisionLoading } from './decisions';
 import {
   areRestaurantsLoading,
   getRestaurantIds,
@@ -60,6 +61,7 @@ export const getFilteredRestaurants = createSelector(
 );
 
 export const isRestaurantListReady = createSelector(
-  areRestaurantsLoading, areTagsLoading,
-  (restaurantsLoading, tagsLoading) => !restaurantsLoading && !tagsLoading
+  areRestaurantsLoading, areTagsLoading, isDecisionLoading,
+  (restaurantsLoading, tagsLoading, decisionLoading) =>
+    !restaurantsLoading && !tagsLoading && !decisionLoading
 );

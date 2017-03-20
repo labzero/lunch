@@ -37,7 +37,6 @@ import { port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } fr
 import makeInitialState from './initialState';
 import passport from './core/passport';
 import teamApi from './api/teams';
-import decisionApi from './api/decisions';
 import whitelistEmailApi from './api/whitelistEmails';
 import { /* Decision, Restaurant, */Role, /* Tag, */Team, User, WhitelistEmail } from './models';
 import hasRole from './helpers/hasRole';
@@ -155,7 +154,6 @@ app.use((req, res, next) => {
 // Register API middleware
 // -----------------------------------------------------------------------------
 app.use('/api/teams', teamApi);
-app.use('/api/decisions', decisionApi);
 app.use('/api/whitelistEmails', whitelistEmailApi);
 
 //
@@ -203,12 +201,6 @@ app.get('*', async (req, res, next) => {
     }
 
     const finds = [];
-    /*
-    const finds = [
-      Restaurant.findAllWithTagIds(),
-      Tag.scope('orderedByRestaurant').findAll(),
-      Decision.scope('fromToday').findOne()
-    ];*/
 
     if (req.user) {
       let userAttributes = ['id', 'name'];

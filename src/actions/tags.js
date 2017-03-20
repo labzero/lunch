@@ -2,6 +2,10 @@ import fetch from '../core/fetch';
 import ActionTypes from '../constants/ActionTypes';
 import { credentials, processResponse } from '../core/ApiClient';
 
+export function invalidateTags() {
+  return { type: ActionTypes.INVALIDATE_TAGS };
+}
+
 export function requestTags(teamSlug) {
   return {
     type: ActionTypes.REQUEST_TAGS,

@@ -13,9 +13,12 @@ describe('Home', () => {
 
   beforeEach(() => {
     props = {
+      fetchDecisionIfNeeded: sinon.mock(),
       fetchRestaurantsIfNeeded: sinon.mock(),
       fetchTagsIfNeeded: sinon.mock(),
+      invalidateDecision: sinon.mock(),
       invalidateRestaurants: sinon.mock(),
+      invalidateTags: sinon.mock(),
       teamSlug: 'foo'
     };
   });

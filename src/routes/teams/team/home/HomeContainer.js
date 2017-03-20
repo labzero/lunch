@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
+import { fetchDecisionIfNeeded, invalidateDecision } from '../../../../actions/decisions';
 import { fetchRestaurantsIfNeeded, invalidateRestaurants } from '../../../../actions/restaurants';
-import { fetchTagsIfNeeded } from '../../../../actions/tags';
+import { fetchTagsIfNeeded, invalidateTags } from '../../../../actions/tags';
 import Home from './Home';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -15,8 +16,17 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   fetchTagsIfNeeded() {
     dispatch(fetchTagsIfNeeded(ownProps.teamSlug));
   },
+  fetchDecisionIfNeeded() {
+    dispatch(fetchDecisionIfNeeded(ownProps.teamSlug));
+  },
+  invalidateDecision() {
+    dispatch(invalidateDecision());
+  },
   invalidateRestaurants() {
     dispatch(invalidateRestaurants());
+  },
+  invalidateTags() {
+    dispatch(invalidateTags());
   }
 });
 
