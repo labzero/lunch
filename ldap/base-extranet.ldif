@@ -256,6 +256,22 @@ primaryGroupID: 513
 mail: extra-securities-signer@example.com
 lockoutTime: 0
 
+# extra custom term user
+dn: sAMAccountName=extra-custom-term,dc=extranet,dc=fhlbsf,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Extranet Custom Term User
+sn: Custom Term User
+sAMAccountName: extra-custom-term
+givenName: Extranet
+displayName: Extranet Custom Term User
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+mail: extra-custom-term@example.com
+userAccountControl: 512
+lockoutTime: 0
+
 # Chaste Manhatten
 dn: CN=FHLB6,dc=extranet,dc=fhlbsf,dc=com
 cn: FHLB6
@@ -304,6 +320,13 @@ objectClass: group
 objectClass: top
 member: sAMAccountName=dual-signer-required,dc=extranet,dc=fhlbsf,dc=com
 
+# Irish Bank
+dn: CN=FHLB3,dc=extranet,dc=fhlbsf,dc=com
+cn: FHLB3
+objectClass: group
+objectClass: top
+member: sAMAccountName=extra-custom-term,dc=extranet,dc=fhlbsf,dc=com
+
 # FCN-MemberSite-AccessManagers group
 dn: CN=FCN-MemberSite-AccessManagers,dc=extranet,dc=fhlbsf,dc=com
 cn: FCN-MemberSite-AccessManagers
@@ -345,3 +368,4 @@ member: sAMAccountName=extra-signer,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-chaste-access-read-only,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-securities-signer,dc=extranet,dc=fhlbsf,dc=com
 member: sAMAccountName=extra-collateral-signer,dc=extranet,dc=fhlbsf,dc=com
+member: sAMAccountName=extra-custom-term,dc=extranet,dc=fhlbsf,dc=com

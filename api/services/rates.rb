@@ -812,6 +812,22 @@ module MAPI
                 live_data[type][term][:maturity_date] = Time.zone.today + TERM_MAPPING[term][:time]
               end
             end
+            if params[:member_id].to_i == 3
+              blackout_dates = []
+              holidays = []
+              end_of_day = Time.zone.now.end_of_day
+              LOAN_TYPES.each do |type|
+                LOAN_TERMS.each do |term|
+                  term_details = loan_terms[term][type]
+                  term_details[:trade_status] = true
+                  term_details[:display_status] = true
+                  term_details[:end_time] = end_of_day
+                  term_details[:end_time_reached] = false
+                  rate_bands[term]['LOW_BAND_OFF_BP'] = 1000
+                  rate_bands[term]['HIGH_BAND_OFF_BP'] = 1000
+                end
+              end
+            end
           end
           LOAN_TYPES.each do |type|
             LOAN_TERMS.each do |term|

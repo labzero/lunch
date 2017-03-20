@@ -60,7 +60,7 @@
                 = render 'rates_table', advance_terms: @advance_terms, advance_types: @advance_types, loading: true, selected_type: @selected_type, selected_term: @selected_term
             - if feature_enabled?('add-advance-custom-term')
               .advance-custom-date-wrapper
-                %button.advance-custom-date-add.text-only-button= t('advances.custom_term.add')
+                %button.advance-custom-date-add.text-only-button{disabled: true}= t('advances.custom_term.add')
               .advance-create-custom-date-wrapper
                 %span= t('advances.custom_term.create')
                 %button.advance-custom-date-cancel.text-only-button= t('global.cancel')

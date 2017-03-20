@@ -61,6 +61,9 @@ default: &default
   securities_signer:
     username: <%= ENV['CUCUMBER_SIGNER_SECURITIES_USERNAME'] || 'extra-securities-signer' %>
     password: <%= ENV['CUCUMBER_SIGNER_SECURITIES_PASSWORD'] || 'development' %>
+  custom_term:
+    username: <%= ENV['CUCUMBER_CUSTOM_TERM_USERNAME'] || 'extra-custom-term' %>
+    password: <%= ENV['CUCUMBER_CUSTOM_TERM_PASSWORD'] || 'development' %>
   valid_password: <%= ENV['CUCUMBER_VALID_PASSWORD'] || '123Abcd3!' %>
 
 local:

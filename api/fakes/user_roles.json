@@ -7,5 +7,6 @@
   "extra-securities-signer": ["signer", "signer-securities"],
   "extra-chaste-access": ["signer", "signer-etransact"],
   "quick-advance-disabled": ["signer", "signer-advances"],
-  "dual-signer-required": ["signer", "signer-advances"]
+  "dual-signer-required": ["signer", "signer-advances"],
+  "extra-custom-term": ["signer", "signer-advances"]
 }
