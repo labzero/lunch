@@ -1,7 +1,7 @@
 import getRole from './getRole';
 
 export default (user, team, role) => {
-  if (!user.id) {
+  if (!user || !user.id) {
     return false;
   }
   if (user.superuser) {

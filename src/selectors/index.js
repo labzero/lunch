@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import getRole from '../helpers/getRole';
 import { isDecisionLoading } from './decisions';
 import {
   areRestaurantsLoading,
@@ -71,6 +72,6 @@ export const getUsersWithTeamRole = createSelector(
   getUsers, getTeamBySlug,
   (users, team) => users.map(user => ({
     ...user,
-    role: user.roles.find(role => role.team_id === team.id)
+    role: getRole(user, team)
   }))
 );
