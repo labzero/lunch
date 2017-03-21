@@ -59,7 +59,7 @@ router
         await Decision.scope('fromToday').destroy({ where: { team_id: req.team.id } });
 
         req.wss.broadcast(decisionDeleted(restaurantId, req.user.id));
-        res.status(204).send({ error: false });
+        res.status(204).send();
       } catch (err) {
         errorCatcher(res, err);
       }

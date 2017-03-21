@@ -58,7 +58,7 @@ router
           notFound(res);
         } else {
           req.wss.broadcast(voteDeleted(parseInt(req.params.restaurant_id, 10), req.user.id, id));
-          res.status(204).send({ error: false });
+          res.status(204).send();
         }
       } catch (err) {
         errorCatcher(res, err);

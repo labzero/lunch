@@ -180,7 +180,10 @@ function fetchRestaurants(teamSlug) {
       credentials
     })
       .then(response => processResponse(response))
-      .then(json => dispatch(receiveRestaurants(json, teamSlug)));
+      .then(json => dispatch(receiveRestaurants(json, teamSlug)))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }
 
@@ -239,7 +242,11 @@ export function removeRestaurant(teamSlug, id) {
     return fetch(`/api/teams/${teamSlug}/restaurants/${id}`, {
       credentials,
       method: 'delete'
-    });
+    })
+      .then(response => processResponse(response))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }
 
@@ -280,7 +287,11 @@ export function removeVote(teamSlug, restaurantId, id) {
     return fetch(`/api/teams/${teamSlug}/restaurants/${restaurantId}/votes/${id}`, {
       credentials,
       method: 'delete'
-    });
+    })
+      .then(response => processResponse(response))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }
 
@@ -322,6 +333,10 @@ export function removeTagFromRestaurant(teamSlug, restaurantId, id) {
     return fetch(`/api/teams/${teamSlug}/restaurants/${restaurantId}/tags/${id}`, {
       credentials,
       method: 'delete'
-    });
+    })
+      .then(response => processResponse(response))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }

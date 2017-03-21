@@ -29,7 +29,10 @@ function fetchUsers(teamSlug) {
       credentials
     })
       .then(response => processResponse(response))
-      .then(json => dispatch(receiveUsers(json, teamSlug)));
+      .then(json => dispatch(receiveUsers(json, teamSlug)))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }
 
@@ -87,7 +90,12 @@ export function removeUser(teamSlug, id) {
     return fetch(`/api/teams/${teamSlug}/users/${id}`, {
       credentials,
       method: 'delete'
-    });
+    })
+      .then(response => processResponse(response))
+      .then(() => dispatch(userDeleted(id, teamSlug)))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }
 

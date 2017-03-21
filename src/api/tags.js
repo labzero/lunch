@@ -33,7 +33,7 @@ router
           res.status(404).json({ error: true, data: { message: 'Tag not found.' } });
         } else {
           req.wss.broadcast(tagDeleted(id, req.user.id));
-          res.status(204).send({ error: false });
+          res.status(204).send();
         }
       } catch (err) {
         errorCatcher(res, err);

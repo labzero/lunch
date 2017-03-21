@@ -10,7 +10,9 @@ export default new Map([
       }
     ]
   ],
-  [ActionTypes.EXPIRE_FLASH, (state, action) =>
-    Array.from(state).splice(action.id, 1)
-  ]
+  [ActionTypes.EXPIRE_FLASH, (state, action) => {
+    const newState = Array.from(state);
+    newState.splice(action.id, 1);
+    return newState;
+  }]
 ]);

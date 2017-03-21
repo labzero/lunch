@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { Role, User } from '../models';
+import getRole from '../helpers/getRole';
 import hasRole from '../helpers/hasRole';
 import errorCatcher from './helpers/errorCatcher';
 import checkTeamRole from './helpers/checkTeamRole';
@@ -55,7 +56,7 @@ router
               include: [Role]
             });
           } else {
-            throw new Error('User already exists on this team.');
+            res.status(409).json({ error: true, data: { message: 'User already exists on this team.' } });
           }
         } else {
           user = await UserWithTeamRole.create({
@@ -74,6 +75,57 @@ router
         console.error(err);
         const error = { message: 'Could not add user to team. They might already exist.' };
         errorCatcher(res, error);
+      }
+    }
+  )
+  .delete(
+    '/:id',
+    loggedIn,
+    checkTeamRole('admin'),
+    async (req, res) => {
+      const id = parseInt(req.params.id, 10);
+      const currentUserRole = getRole(req.user, req.team);
+
+      try {
+        let roleToDelete;
+        if (req.user.id === id) {
+          roleToDelete = currentUserRole;
+        } else {
+          roleToDelete = await Role.findOne({ where: { team_id: req.team.id, user_id: id } });
+        }
+
+        if (roleToDelete) {
+          let allowed = false;
+          if (currentUserRole.type === 'owner') {
+            if (req.user.id === id) {
+              const allTeamRoles = await Role.findAll({ where: { team_id: req.team.id } });
+              if (allTeamRoles.some(role => role.type === 'owner' && role.user_id !== id)) {
+                allowed = true;
+              } else {
+                return res.status(403).json({
+                  error: true,
+                  data: {
+                    message: `You cannot remove yourself if you are the only owner.
+Transfer ownership to another user first.`
+                  }
+                });
+              }
+            } else {
+              allowed = true;
+            }
+          } else if (currentUserRole === 'admin' && roleToDelete === 'user') {
+            allowed = true;
+          }
+
+          if (allowed) {
+            await roleToDelete.destroy();
+            return res.status(204).send();
+          }
+          return res.status(403).json({ error: true, data: { message: 'You do not have permission to remove this user.' } });
+        }
+        return res.status(404).json({ error: true, data: { message: 'User not found on team.' } });
+      } catch (err) {
+        return errorCatcher(res, err);
       }
     }
   );

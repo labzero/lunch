@@ -30,7 +30,10 @@ function fetchDecision(teamSlug) {
       credentials
     })
       .then(response => processResponse(response))
-      .then(json => dispatch(receiveDecision(json, teamSlug)));
+      .then(json => dispatch(receiveDecision(json, teamSlug)))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }
 
@@ -111,5 +114,9 @@ export const removeDecision = teamSlug => (dispatch, getState) => {
     headers: jsonHeaders,
     method: 'delete',
     body: JSON.stringify(payload)
-  });
+  })
+    .then(response => processResponse(response))
+    .catch(
+      err => dispatch(flashError(err.message))
+    );
 };

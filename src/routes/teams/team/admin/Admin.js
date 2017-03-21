@@ -19,6 +19,8 @@ class Admin extends React.Component {
     adminUserListReady: PropTypes.bool.isRequired,
     fetchUsersIfNeeded: PropTypes.func.isRequired,
     intl: intlShape.isRequired,
+    removeUserFromTeam: PropTypes.func.isRequired,
+    userId: PropTypes.number.isRequired,
     users: PropTypes.array.isRequired,
     title: PropTypes.string.isRequired,
   };
@@ -43,8 +45,12 @@ class Admin extends React.Component {
     this.setState(Object.assign({}, Admin.defaultState));
   };
 
+  handleDeleteClicked = id => () => {
+    this.props.removeUserFromTeam(id);
+  };
+
   render() {
-    const { adminUserListReady, intl: { formatMessage: f }, users } = this.props;
+    const { adminUserListReady, intl: { formatMessage: f }, userId, users } = this.props;
     const { email, name, type } = this.state;
 
     if (!adminUserListReady) {
@@ -61,6 +67,7 @@ class Admin extends React.Component {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -69,6 +76,11 @@ class Admin extends React.Component {
                   <td>{user.name ? user.name : f(gm('noUserName'))}</td>
                   <td>{user.email}</td>
                   <td>{f(gm(`${user.type}Role`))}</td>
+                  <td>
+                    {userId !== user.id && (
+                      <button type="button" onClick={this.handleDeleteClicked(user.id)} aria-label="Remove">&times;</button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

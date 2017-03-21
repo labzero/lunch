@@ -69,7 +69,7 @@ router
       try {
         await RestaurantTag.destroy({ where: { restaurant_id: restaurantId, tag_id: id } });
         req.wss.broadcast(deletedTagFromRestaurant(restaurantId, id, req.user.id));
-        res.status(204).send({ error: false });
+        res.status(204).send();
       } catch (err) {
         errorCatcher(res, err);
       }

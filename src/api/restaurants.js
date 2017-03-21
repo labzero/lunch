@@ -140,7 +140,7 @@ router
           notFound(res);
         } else {
           req.wss.broadcast(restaurantDeleted(id, req.user.id));
-          res.status(204).send({ error: false });
+          res.status(204).send();
         }
       } catch (err) {
         // eslint-disable-next-line no-console

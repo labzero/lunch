@@ -4,6 +4,11 @@ export function processResponse(response) {
       throw new Error(json.data.message);
     }
     return json.data;
+  }).catch((message) => {
+    // no json - possibly a 204 response
+    if (response.status >= 400) {
+      throw new Error(message);
+    }
   });
 }
 
