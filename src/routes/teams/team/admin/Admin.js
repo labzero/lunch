@@ -8,7 +8,9 @@
  */
 
 import React, { PropTypes } from 'react';
+import { intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import { globalMessageDescriptor as gm } from '../../../../helpers/generateMessageDescriptor';
 import s from './Admin.css';
 
 class Admin extends React.Component {
@@ -16,13 +18,17 @@ class Admin extends React.Component {
     addUserToTeam: PropTypes.func.isRequired,
     adminUserListReady: PropTypes.bool.isRequired,
     fetchUsersIfNeeded: PropTypes.func.isRequired,
+    intl: intlShape.isRequired,
     users: PropTypes.array.isRequired,
     title: PropTypes.string.isRequired,
   };
 
-  state = {
-    email: ''
+  static defaultState = {
+    email: '',
+    type: 'user'
   };
+
+  state = Object.assign({}, Admin.defaultState);
 
   componentWillMount() {
     this.props.fetchUsersIfNeeded();
@@ -33,14 +39,12 @@ class Admin extends React.Component {
   handleSubmit = (event) => {
     event.preventDefault();
     this.props.addUserToTeam(this.state.email);
-    this.setState({
-      email: ''
-    });
+    this.setState(Object.assign({}, Admin.defaultState));
   };
 
   render() {
-    const { adminUserListReady, users } = this.props;
-    const { email } = this.state;
+    const { adminUserListReady, intl: { formatMessage: f }, users } = this.props;
+    const { email, type } = this.state;
 
     if (!adminUserListReady) {
       return null;
@@ -63,7 +67,7 @@ class Admin extends React.Component {
                 <tr key={user.id}>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
-                  <td>{user.type}</td>
+                  <td>{f(gm(`${user.type}Role`))}</td>
                 </tr>
               ))}
             </tbody>
@@ -80,6 +84,19 @@ class Admin extends React.Component {
               value={email}
               required
             />
+            <label htmlFor="admin-type">
+              Type:
+            </label>
+            <select
+              id="admin-type"
+              onChange={this.handleChange('type')}
+              value={type}
+              required
+            >
+              <option value="user">{f(gm('userRole'))}</option>
+              <option value="admin">{f(gm('adminRole'))}</option>
+              <option value="owner">{f(gm('ownerRole'))}</option>
+            </select>
             <input type="submit" />
           </form>
         </div>

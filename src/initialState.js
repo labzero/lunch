@@ -28,6 +28,7 @@ const getInitialState = () => ({
     lng: parseFloat(process.env.SUGGEST_LNG)
   },
   listUi: {},
+  locale: 'en',
   mapUi: {
     showUnvoted: true
   },

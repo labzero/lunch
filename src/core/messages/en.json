@@ -1,0 +1,5 @@
+{
+  "adminRole": "Admin",
+  "ownerRole": "Owner",
+  "userRole": "User"
+}

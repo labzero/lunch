@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { injectIntl } from 'react-intl';
 import { addUser, fetchUsersIfNeeded } from '../../../../actions/users';
 import { isAdminUserListReady } from '../../../../selectors';
 import { getUsers } from '../../../../selectors/users';
@@ -20,4 +21,6 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Admin);
+)(
+  injectIntl(Admin)
+);
