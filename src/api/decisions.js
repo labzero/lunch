@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Decision } from '../models';
 import errorCatcher from './helpers/errorCatcher';
-import hasTeamRole from './helpers/hasTeamRole';
+import checkTeamRole from './helpers/checkTeamRole';
 import loggedIn from './helpers/loggedIn';
 import { decisionPosted, decisionDeleted } from '../actions/decisions';
 
@@ -11,7 +11,7 @@ router
   .get(
     '/fromToday',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res) => {
       try {
         const decision = await Decision.scope('fromToday').findOne({ where: { team_id: req.team.id } });
@@ -25,7 +25,7 @@ router
   .post(
     '/',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res) => {
       const restaurantId = parseInt(req.body.restaurant_id, 10);
       try {
@@ -52,7 +52,7 @@ router
   .delete(
     '/fromToday',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res) => {
       const restaurantId = parseInt(req.body.restaurant_id, 10);
       try {

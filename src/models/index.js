@@ -69,6 +69,17 @@ Restaurant.findAllWithTagIds = ({ team_id }) =>
     }
   });
 
+User.findAllForTeam = (teamId, attributes) =>
+  User.findAll({
+    attributes: {
+      include: attributes.concat([
+        [sequelize.literal(`(SELECT "roles"."type" FROM "roles"
+          WHERE "roles"."team_id" = ${teamId} AND "roles"."user_id" = "user"."id")`),
+          'type']
+      ])
+    }
+  });
+
 Restaurant.hasMany(Vote);
 Restaurant.hasMany(Decision);
 Restaurant.belongsToMany(Tag, {

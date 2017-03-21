@@ -2,7 +2,7 @@ import { Router } from 'express';
 import request from 'request';
 import { Restaurant, Vote, Tag } from '../models';
 import errorCatcher from './helpers/errorCatcher';
-import hasTeamRole from './helpers/hasTeamRole';
+import checkTeamRole from './helpers/checkTeamRole';
 import loggedIn from './helpers/loggedIn';
 import { restaurantPosted, restaurantDeleted, restaurantRenamed } from '../actions/restaurants';
 import voteApi from './votes';
@@ -19,7 +19,7 @@ router
   .get(
     '/',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res) => {
       try {
         const all = await Restaurant.findAllWithTagIds({ team_id: req.team.id });
@@ -32,7 +32,7 @@ router
   ).get(
     '/:id/place_url',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res, next) => {
       try {
         const r = await Restaurant.findById(parseInt(req.params.id, 10));
@@ -71,7 +71,7 @@ router
   .post(
     '/',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res) => {
       const { name, place_id, lat, lng } = req.body;
 
@@ -104,7 +104,7 @@ router
   .patch(
     '/:id',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res) => {
       const id = parseInt(req.params.id, 10);
       const { name } = req.body;
@@ -131,7 +131,7 @@ router
   .delete(
     '/:id',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res) => {
       const id = parseInt(req.params.id, 10);
       try {

@@ -1,10 +1,23 @@
 import { connect } from 'react-redux';
-import { getUsersWithTeamRole } from '../../../../selectors';
+import { addUser, fetchUsersIfNeeded } from '../../../../actions/users';
+import { isAdminUserListReady } from '../../../../selectors';
+import { getUsers } from '../../../../selectors/users';
 import Admin from './Admin';
 
 const mapStateToProps = (state, ownProps) => ({
-  users: getUsersWithTeamRole(state, ownProps.teamSlug),
+  users: getUsers(state, ownProps.teamSlug),
+  adminUserListReady: isAdminUserListReady(state),
   title: ownProps.title
 });
 
-export default connect(mapStateToProps)(Admin);
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  addUserToTeam: email => dispatch(addUser(email)),
+  fetchUsersIfNeeded() {
+    dispatch(fetchUsersIfNeeded(ownProps.teamSlug));
+  },
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Admin);

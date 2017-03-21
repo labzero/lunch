@@ -2,6 +2,7 @@ import { connect } from 'react-redux';
 import { fetchDecisionIfNeeded, invalidateDecision } from '../../../../actions/decisions';
 import { fetchRestaurantsIfNeeded, invalidateRestaurants } from '../../../../actions/restaurants';
 import { fetchTagsIfNeeded, invalidateTags } from '../../../../actions/tags';
+import { fetchUsersIfNeeded, invalidateUsers } from '../../../../actions/users';
 import Home from './Home';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -10,14 +11,17 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
+  fetchDecisionIfNeeded() {
+    dispatch(fetchDecisionIfNeeded(ownProps.teamSlug));
+  },
   fetchRestaurantsIfNeeded() {
     dispatch(fetchRestaurantsIfNeeded(ownProps.teamSlug));
   },
   fetchTagsIfNeeded() {
     dispatch(fetchTagsIfNeeded(ownProps.teamSlug));
   },
-  fetchDecisionIfNeeded() {
-    dispatch(fetchDecisionIfNeeded(ownProps.teamSlug));
+  fetchUsersIfNeeded() {
+    dispatch(fetchUsersIfNeeded(ownProps.teamSlug));
   },
   invalidateDecision() {
     dispatch(invalidateDecision());
@@ -27,6 +31,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   },
   invalidateTags() {
     dispatch(invalidateTags());
+  },
+  invalidateUsers() {
+    dispatch(invalidateUsers());
   }
 });
 

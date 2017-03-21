@@ -16,9 +16,11 @@ describe('Home', () => {
       fetchDecisionIfNeeded: sinon.mock(),
       fetchRestaurantsIfNeeded: sinon.mock(),
       fetchTagsIfNeeded: sinon.mock(),
+      fetchUsersIfNeeded: sinon.mock(),
       invalidateDecision: sinon.mock(),
       invalidateRestaurants: sinon.mock(),
       invalidateTags: sinon.mock(),
+      invalidateUsers: sinon.mock(),
       teamSlug: 'foo'
     };
   });

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Tag } from '../models';
 import errorCatcher from './helpers/errorCatcher';
-import hasTeamRole from './helpers/hasTeamRole';
+import checkTeamRole from './helpers/checkTeamRole';
 import loggedIn from './helpers/loggedIn';
 import { tagDeleted } from '../actions/tags';
 
@@ -11,7 +11,7 @@ router
   .get(
     '/',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res) => {
       try {
         const all = await Tag.scope('orderedByRestaurant').findAll({ where: { team_id: req.team.id } });
@@ -24,7 +24,7 @@ router
   .delete(
     '/:id',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res) => {
       const id = parseInt(req.params.id, 10);
       try {

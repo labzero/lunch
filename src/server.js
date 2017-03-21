@@ -37,7 +37,6 @@ import makeInitialState from './initialState';
 import passport from './core/passport';
 import teamApi from './api/teams';
 import { Role, Team, User } from './models';
-import hasRole from './helpers/hasRole';
 
 const app = express();
 
@@ -82,7 +81,7 @@ app.use(passport.initialize());
 
 app.use((req, res, next) => {
   if (typeof req.user === 'number' || typeof req.user === 'string') {
-    User.findAll({
+    User.findOne({
       where: {
         id: req.user
       },
@@ -93,10 +92,10 @@ app.use((req, res, next) => {
           attributes: ['type', 'team_id']
         }
       ]
-    }).then(users => {
-      if (users.length > 0) {
+    }).then(user => {
+      if (user) {
         // eslint-disable-next-line no-param-reassign
-        req.user = users[0];
+        req.user = user;
       } else {
         // eslint-disable-next-line no-param-reassign
         delete req.user;
@@ -158,15 +157,13 @@ app.use('/api/teams', teamApi);
 // -----------------------------------------------------------------------------
 app.get('*', async (req, res, next) => {
   try {
-    const routerStateData = {};
-    let teams;
+    const stateData = {};
     if (req.user) {
-      routerStateData.user = req.user;
-      teams = await Team.findAll({ where: { id: req.user.roles.map(r => r.team_id) } });
-      routerStateData.teams = teams;
+      stateData.user = req.user;
+      stateData.teams = await Team.findAll({ where: { id: req.user.roles.map(r => r.team_id) } });
     }
-    const initialRouterState = makeInitialState(routerStateData);
-    const routerStore = configureStore(initialRouterState, {
+    const initialState = makeInitialState(stateData);
+    const store = configureStore(initialState, {
       cookie: req.headers.cookie,
     });
 
@@ -183,7 +180,7 @@ app.get('*', async (req, res, next) => {
       },
       // Initialize a new Redux store
       // http://redux.js.org/docs/basics/UsageWithReact.html
-      store: routerStore,
+      store
     };
 
     const route = await UniversalRouter.resolve(routes, {
@@ -197,60 +194,32 @@ app.get('*', async (req, res, next) => {
       return;
     }
 
-    try {
-      const stateData = {
-        teams
-      };
+    const data = { ...route,
+      apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
+      children: '',
+      title: 'Lunch',
+      description: 'An app for groups to decide on nearby lunch options.',
+      body: '',
+      root: `${req.protocol}://${req.get('host')}`,
+      initialState: serialize(initialState)
+    };
 
-      if (req.user) {
-        let userAttributes = ['id', 'name'];
-        let userIncludes;
-        if (hasRole(req.user, teams[0], 'admin')) {
-          userAttributes = userAttributes.concat(['email']);
-          userIncludes = [Role];
-        }
+    data.children = ReactDOM.renderToString(<App context={context}>{route.component}</App>);
 
-        const users = await User.findAll({ attributes: userAttributes, include: userIncludes });
-
-        stateData.user = req.user;
-        stateData.users = users;
-      }
-
-      const initialState = makeInitialState(stateData);
-
-      context.store = configureStore(initialState, {
-        cookie: req.headers.cookie,
-      });
-
-      const data = { ...route,
-        apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
-        children: '',
-        title: 'Lunch',
-        description: 'An app for groups to decide on nearby lunch options.',
-        body: '',
-        root: `${req.protocol}://${req.get('host')}`,
-        initialState: serialize(initialState)
-      };
-
-      data.children = ReactDOM.renderToString(<App context={context}>{route.component}</App>);
-
-      data.styles = [
-        { id: 'css', cssText: [...css].join('') },
-      ];
-      data.scripts = [
-        assets.vendor.js,
-        assets.client.js,
-      ];
-      if (assets[route.chunk]) {
-        data.scripts.push(assets[route.chunk].js);
-      }
-
-      const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
-      res.status(route.status || 200);
-      res.send(`<!doctype html>${html}`);
-    } catch (err) {
-      next(err);
+    data.styles = [
+      { id: 'css', cssText: [...css].join('') },
+    ];
+    data.scripts = [
+      assets.vendor.js,
+      assets.client.js,
+    ];
+    if (assets[route.chunk]) {
+      data.scripts.push(assets[route.chunk].js);
     }
+
+    const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
+    res.status(route.status || 200);
+    res.send(`<!doctype html>${html}`);
   } catch (err) {
     next(err);
   }

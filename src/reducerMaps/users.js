@@ -1,51 +1,45 @@
+import { normalize } from 'normalizr';
 import update from 'immutability-helper';
 import ActionTypes from '../constants/ActionTypes';
+import { getUserIds } from '../selectors/users';
+import * as schemas from '../schemas';
 import isFetching from './helpers/isFetching';
 
 export default new Map([
-  [ActionTypes.INVALIDATE_DECISION, state =>
+  [ActionTypes.INVALIDATE_USERS, state =>
     update(state, {
       $merge: {
         didInvalidate: true
       }
     })
   ],
-  [ActionTypes.REQUEST_DECISION, state =>
+  [ActionTypes.REQUEST_USERS, state =>
     update(state, {
       $merge: {
         isFetching: true
       }
     })
   ],
-  [ActionTypes.RECEIVE_DECISION, (state, action) =>
+  [ActionTypes.RECEIVE_USERS, (state, action) =>
     update(state, {
       $merge: {
         isFetching: false,
         didInvalidate: false,
-        inst: action.inst,
+        items: normalize(action.items, [schemas.user]),
         teamSlug: action.teamSlug
       }
     })
   ],
-  [ActionTypes.POST_DECISION, isFetching],
-  [ActionTypes.DECISION_POSTED, (state, action) =>
+  [ActionTypes.DELETE_USER, isFetching],
+  [ActionTypes.USER_DELETED, (state, action) =>
     update(state, {
       isFetching: {
         $set: false
       },
-      inst: {
-        $set: action.decision
-      }
-    })
-  ],
-  [ActionTypes.DELETE_DECISION, isFetching],
-  [ActionTypes.DECISION_DELETED, (state) =>
-    update(state, {
-      isFetching: {
-        $set: false
-      },
-      inst: {
-        $set: null
+      items: {
+        result: {
+          $splice: [[getUserIds({ users: state }).indexOf(action.id), 1]]
+        }
       }
     })
   ]

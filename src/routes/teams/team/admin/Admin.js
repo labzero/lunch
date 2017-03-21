@@ -13,12 +13,38 @@ import s from './Admin.css';
 
 class Admin extends React.Component {
   static propTypes = {
+    addUserToTeam: PropTypes.func.isRequired,
+    adminUserListReady: PropTypes.bool.isRequired,
+    fetchUsersIfNeeded: PropTypes.func.isRequired,
     users: PropTypes.array.isRequired,
     title: PropTypes.string.isRequired,
   };
 
+  state = {
+    email: ''
+  };
+
+  componentWillMount() {
+    this.props.fetchUsersIfNeeded();
+  }
+
+  handleChange = field => event => this.setState({ [field]: event.target.value });
+
+  handleSubmit = (event) => {
+    event.preventDefault();
+    this.props.addUserToTeam(this.state.email);
+    this.setState({
+      email: ''
+    });
+  };
+
   render() {
-    const { users } = this.props;
+    const { adminUserListReady, users } = this.props;
+    const { email } = this.state;
+
+    if (!adminUserListReady) {
+      return null;
+    }
 
     return (
       <div className={s.root}>
@@ -37,11 +63,25 @@ class Admin extends React.Component {
                 <tr key={user.id}>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
-                  <td>{user.role.type}</td>
+                  <td>{user.type}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          <h2>Add User</h2>
+          <form onSubmit={this.handleSubmit}>
+            <label htmlFor="admin-email">
+              Email:
+            </label>
+            <input
+              id="admin-email"
+              type="email"
+              onChange={this.handleChange('email')}
+              value={email}
+              required
+            />
+            <input type="submit" />
+          </form>
         </div>
       </div>
     );

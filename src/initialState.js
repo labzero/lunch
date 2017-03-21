@@ -61,9 +61,5 @@ export default (stateData) => {
   if (stateData.user) {
     initialState.user = stateData.user;
   }
-  if (stateData.users) {
-    initialState.users.items = stateData.users.map(u => u.toJSON());
-    initialState.users.didInvalidate = false;
-  }
   return initialState;
 };

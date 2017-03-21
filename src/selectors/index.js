@@ -1,5 +1,4 @@
 import { createSelector } from 'reselect';
-import getRole from '../helpers/getRole';
 import { isDecisionLoading } from './decisions';
 import {
   areRestaurantsLoading,
@@ -11,8 +10,7 @@ import { getVoteEntities, getVoteById } from './votes';
 import { areTagsLoading, getTags } from './tags';
 import { getTagFilters } from './tagFilters';
 import { getTagExclusions } from './tagExclusions';
-import { getTeamBySlug } from './teams';
-import { getUserId, getUserById, getUsers } from './users';
+import { areUsersLoading, getUserId, getUserById } from './users';
 import { getMapUi } from './mapUi';
 
 export const getUserByVoteId = (state, voteId) =>
@@ -63,15 +61,12 @@ export const getFilteredRestaurants = createSelector(
 );
 
 export const isRestaurantListReady = createSelector(
-  areRestaurantsLoading, areTagsLoading, isDecisionLoading,
-  (restaurantsLoading, tagsLoading, decisionLoading) =>
-    !restaurantsLoading && !tagsLoading && !decisionLoading
+  areRestaurantsLoading, areTagsLoading, areUsersLoading, isDecisionLoading,
+  (restaurantsLoading, tagsLoading, usersLoading, decisionLoading) =>
+    !restaurantsLoading && !tagsLoading && !usersLoading && !decisionLoading
 );
 
-export const getUsersWithTeamRole = createSelector(
-  getUsers, getTeamBySlug,
-  (users, team) => users.map(user => ({
-    ...user,
-    role: getRole(user, team)
-  }))
+export const isAdminUserListReady = createSelector(
+  areUsersLoading,
+  (usersLoading) => !usersLoading
 );

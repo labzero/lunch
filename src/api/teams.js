@@ -5,6 +5,7 @@ import loggedIn from './helpers/loggedIn';
 import decisionApi from './decisions';
 import restaurantApi from './restaurants';
 import tagApi from './tags';
+import userApi from './users';
 
 const router = new Router();
 
@@ -37,6 +38,7 @@ router
   )
   .use('/:slug/decisions', decisionApi)
   .use('/:slug/restaurants', restaurantApi)
-  .use('/:slug/tags', tagApi);
+  .use('/:slug/tags', tagApi)
+  .use('/:slug/users', userApi);
 
 export default router;

@@ -13,16 +13,16 @@ export class _Home extends Component {
     fetchDecisionIfNeeded: PropTypes.func.isRequired,
     fetchRestaurantsIfNeeded: PropTypes.func.isRequired,
     fetchTagsIfNeeded: PropTypes.func.isRequired,
+    fetchUsersIfNeeded: PropTypes.func.isRequired,
     invalidateDecision: PropTypes.func.isRequired,
     invalidateRestaurants: PropTypes.func.isRequired,
     invalidateTags: PropTypes.func.isRequired,
+    invalidateUsers: PropTypes.func.isRequired,
     teamSlug: PropTypes.string.isRequired
   };
 
   componentWillMount() {
-    this.props.fetchRestaurantsIfNeeded();
-    this.props.fetchTagsIfNeeded();
-    this.props.fetchDecisionIfNeeded();
+    this.fetchAllData();
   }
 
   componentDidMount() {
@@ -30,25 +30,26 @@ export class _Home extends Component {
       this.props.invalidateDecision();
       this.props.invalidateRestaurants();
       this.props.invalidateTags();
-      this.props.fetchDecisionIfNeeded();
-      this.props.fetchRestaurantsIfNeeded();
-      this.props.fetchTagsIfNeeded();
+      this.props.invalidateUsers();
+      this.fetchAllData();
     }, 1000 * 60 * 60 * 6);
+  }
+
+  fetchAllData() {
+    this.props.fetchDecisionIfNeeded();
+    this.props.fetchRestaurantsIfNeeded();
+    this.props.fetchTagsIfNeeded();
+    this.props.fetchUsersIfNeeded();
   }
 
   render() {
     const { user, teamSlug } = this.props;
 
-    let restaurantAddForm = null;
-    if (typeof user.id === 'number') {
-      restaurantAddForm = <RestaurantAddFormContainer teamSlug={teamSlug} />;
-    }
-
     return (
       <div className={s.root}>
         <RestaurantMapContainer teamSlug={teamSlug} />
         <section className={s.forms}>
-          {restaurantAddForm}
+          {user.id && <RestaurantAddFormContainer teamSlug={teamSlug} />}
           <TagFilterFormContainer />
           <TagFilterFormContainer exclude />
         </section>

@@ -28,14 +28,14 @@ export default class NewTeam extends Component {
         <form onSubmit={this.handleSubmit}>
           <label htmlFor="new-team-name">
             Name:
-            <input
-              id="new-team-name"
-              type="text"
-              onChange={this.handleChange('name')}
-              value={name}
-              required
-            />
           </label>
+          <input
+            id="new-team-name"
+            type="text"
+            onChange={this.handleChange('name')}
+            value={name}
+            required
+          />
           <label htmlFor="new-team-slug">
             URL:
           </label>

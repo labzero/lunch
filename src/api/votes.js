@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Vote } from '../models';
 import errorCatcher from './helpers/errorCatcher';
-import hasTeamRole from './helpers/hasTeamRole';
+import checkTeamRole from './helpers/checkTeamRole';
 import loggedIn from './helpers/loggedIn';
 import { votePosted, voteDeleted } from '../actions/restaurants';
 
@@ -15,7 +15,7 @@ router
   .post(
     '/',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res) => {
       const restaurantId = parseInt(req.params.restaurant_id, 10);
       try {
@@ -47,7 +47,7 @@ router
   .delete(
     '/:id',
     loggedIn,
-    hasTeamRole(),
+    checkTeamRole(),
     async (req, res) => {
       const id = parseInt(req.params.id, 10);
 
