@@ -326,6 +326,109 @@ RSpec.describe Admin::FeaturesController, :type => :controller do
     end
   end
 
+  describe 'POST add_user' do
+    let(:feature_name) { SecureRandom.hex }
+    let(:username) { SecureRandom.hex }
+    let(:feature) { instance_double(Flipper::Feature, name: feature_name, enable_actor: true) }
+    let(:user) { instance_double(User) }
+    let(:make_request) { post :add_user, feature: feature_name, username: username }
+
+    allow_policy(:web_admin, :edit_features?)
+    allow_policy(:web_admin, :show?)
+
+    it_behaves_like 'an authorization required method', :post, :add_user, :web_admin, [:show?, :edit_features?], feature: :foo, username: :bar
+
+    it 'calls `find_feature`' do
+      expect(controller).to receive(:find_feature).with(feature_name).and_return(feature)
+      allow(controller).to receive(:find_user)
+      make_request
+    end
+
+    describe 'when it finds the feature' do
+      before do
+        allow(controller).to receive(:find_feature).with(feature_name).and_return(feature)
+      end
+
+      it 'calls `find_user`' do
+        expect(controller).to receive(:find_user).with(username).and_return(user)
+        make_request
+      end
+
+      describe 'when it finds the user' do
+        before do
+          allow(controller).to receive(:find_user).and_return(user)
+        end
+
+
+        it 'calls `enable_actor` on the feature' do
+          expect(feature).to receive(:enable_actor).with(user).and_return(true)
+          make_request
+        end
+        it 'redirects to the `view` action on success' do
+          expect(make_request).to redirect_to(feature_admin_path(feature_name))
+        end
+        it 'redirects with a 303 status code' do
+          expect(make_request.status).to be(303)
+        end
+        it 'raises an error on failure' do
+          allow(feature).to receive(:enable_actor).with(user).and_return(false)
+          expect { make_request }.to raise_error(/failed to add user/i)
+        end
+      end
+    end
+  end
+  
+  describe 'DELETE remove_user' do
+    let(:feature_name) { SecureRandom.hex }
+    let(:username) { SecureRandom.hex }
+    let(:feature) { instance_double(Flipper::Feature, name: feature_name, disable_actor: true) }
+    let(:user) { instance_double(User) }
+    let(:make_request) { delete :remove_user, feature: feature_name, username: username }
+
+    allow_policy(:web_admin, :edit_features?)
+    allow_policy(:web_admin, :show?)
+
+    it_behaves_like 'an authorization required method', :delete, :remove_user, :web_admin, [:show?, :edit_features?], feature: :foo, username: :bar
+
+    it 'calls `find_feature`' do
+      expect(controller).to receive(:find_feature).with(feature_name).and_return(feature)
+      allow(controller).to receive(:find_user)
+      make_request
+    end
+
+    describe 'when it finds the feature' do
+      before do
+        allow(controller).to receive(:find_feature).with(feature_name).and_return(feature)
+      end
+
+      it 'calls `find_user`' do
+        expect(controller).to receive(:find_user).with(username).and_return(user)
+        make_request
+      end
+
+      describe 'when it finds the user' do
+        before do
+          allow(controller).to receive(:find_user).and_return(user)
+        end
+
+        it 'calls `disable_actor` on the feature' do
+          expect(feature).to receive(:disable_actor).with(user).and_return(true)
+          make_request
+        end
+        it 'redirects to the `view` action on success' do
+          expect(make_request).to redirect_to(feature_admin_path(feature_name))
+        end
+        it 'redirects with a 303 status code' do
+          expect(make_request.status).to be(303)
+        end
+        it 'raises an error on failure' do
+          allow(feature).to receive(:disable_actor).with(user).and_return(false)
+          expect { make_request }.to raise_error(/failed to remove user/i)
+        end
+      end
+    end
+  end
+
   describe '`find_feature` protected method' do
     let(:feature) { instance_double(Flipper::Feature, name: feature_name) }
     let(:feature_name) { SecureRandom.hex }
@@ -385,6 +488,33 @@ RSpec.describe Admin::FeaturesController, :type => :controller do
     describe 'with a valid member id' do
       it 'returns the member' do
         expect(call_method).to be(member)
+      end
+    end
+    
+  end
+
+  describe '`find_user` protected method' do
+    let(:username) { SecureRandom.hex }
+    let(:user) { instance_double(User) }
+    let(:call_method) { subject.send(:find_user, username) }
+
+    before do
+      allow(User).to receive(:find_or_create_if_valid_login).with(username: username).and_return(user)
+    end
+
+    it 'finds or creates the user by the username' do
+      expect(User).to receive(:find_or_create_if_valid_login).with(username: username).and_return(user)
+      call_method
+    end
+
+    it 'raises a `RecordNotFound` if a user is not found' do
+      allow(User).to receive(:find_or_create_if_valid_login).with(username: username).and_return(nil)
+      expect{ call_method }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    describe 'with a valid username' do
+      it 'returns the user' do
+        expect(call_method).to be(user)
       end
     end
     

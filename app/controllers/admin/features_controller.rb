@@ -5,16 +5,20 @@ class Admin::FeaturesController < Admin::BaseController
     authorize :web_admin, :show?
   end
 
-  before_action only: [:enable_feature, :disable_feature, :add_member, :remove_member] do
+  before_action except: [:index, :view] do
     authorize :web_admin, :edit_features?
   end
 
-  before_action only: [:view, :enable_feature, :disable_feature, :add_member, :remove_member] do
+  before_action only: [:view, :enable_feature, :disable_feature, :add_member, :remove_member, :add_user, :remove_user] do
     @feature = find_feature(params[:feature])
   end
 
   before_action only: [:add_member, :remove_member] do
     @member = find_member(params[:member_id])
+  end
+
+  before_action only: [:add_user, :remove_user] do
+    @user = find_user(params[:username])
   end
 
   def index
@@ -85,6 +89,22 @@ class Admin::FeaturesController < Admin::BaseController
     end
   end
 
+  def add_user
+    if @feature.enable_actor(@user)
+      redirect_to(feature_admin_path(@feature.name), status: 303)
+    else
+      raise 'failed to add user'
+    end
+  end
+
+  def remove_user
+    if @feature.disable_actor(@user)
+      redirect_to(feature_admin_path(@feature.name), status: 303)
+    else
+      raise 'failed to remove user'
+    end
+  end
+
   protected
 
   def find_feature(name)
@@ -97,6 +117,12 @@ class Admin::FeaturesController < Admin::BaseController
     member = Member.new(id)
     raise ActiveRecord::RecordNotFound unless member.found?(request)
     member
+  end
+
+  def find_user(username)
+    user = User.find_or_create_if_valid_login(username: username)
+    raise ActiveRecord::RecordNotFound unless user
+    user
   end
 
 end

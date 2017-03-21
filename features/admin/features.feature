@@ -50,6 +50,18 @@ Feature: Toggling conditional features
     And I see "Chaste Manhattan" in the enabled institution list
 
   @jira-mem-2115 @local-only
+  Scenario: Admins can cancel adding a member
+    Given I am logged into the admin panel
+    And the feature "test-feature" is disabled
+    When I am on the features list
+    And I click on the view feature link for "test-feature"
+    Then I see an add institution button
+    When I initiate adding an institution
+    And I select the institution "Chaste Manhattan"
+    And I cancel adding an institution
+    And I do not see "Chaste Manhattan" in the enabled institution list
+
+  @jira-mem-2115 @local-only
   Scenario: Admins can remove a member from a features list of enabled institutions
     Given I am logged into the admin panel
     And the feature "test-feature" is conditionally enabled for the "Chaste Manhattan" institution
@@ -57,4 +69,37 @@ Feature: Toggling conditional features
     And I click on the view feature link for "test-feature"
     Then I see a remove institution button
     When I remove the institution "Chaste Manhattan"
-    Then I do not "Chaste Manhattan" in the enabled institution list
+    Then I do not see "Chaste Manhattan" in the enabled institution list
+
+  @jira-mem-2116 @local-only
+  Scenario: Admins can enable a feature for a user
+    Given I am logged into the admin panel
+    And the feature "test-feature" is disabled
+    When I am on the features list
+    And I click on the view feature link for "test-feature"
+    Then I see an add user button
+    When I add the user "local"
+    Then I see the feature conditionally enabled
+    And I see "local" in the enabled user list
+
+  @jira-mem-2116 @local-only
+  Scenario: Admins can cancel adding a user
+    Given I am logged into the admin panel
+    And the feature "test-feature" is disabled
+    When I am on the features list
+    And I click on the view feature link for "test-feature"
+    Then I see an add user button
+    When I initiate adding a user
+    And I enter the user "local"
+    And I cancel adding a user
+    And I do not see "local" in the enabled user list
+
+  @jira-mem-2116 @local-only
+  Scenario: Admins can remove a user from a features list of enabled institutions
+    Given I am logged into the admin panel
+    And the feature "test-feature" is conditionally enabled for the "local" user
+    When I am on the features list
+    And I click on the view feature link for "test-feature"
+    Then I see a remove user button
+    When I remove the user "local"
+    Then I do not see "local" in the enabled user list

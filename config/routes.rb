@@ -234,6 +234,8 @@ Rails.application.routes.draw do
       put '/features/:feature/disable' => 'admin/features#disable_feature', as: :feature_disable_admin
       post '/features/:feature/member' => 'admin/features#add_member', as: :feature_add_member_admin
       delete '/features/:feature/member/:member_id' => 'admin/features#remove_member', as: :feature_remove_member_admin
+      post '/features/:feature/user' => 'admin/features#add_user', as: :feature_add_user_admin
+      delete '/features/:feature/user/:username' => 'admin/features#remove_user', as: :feature_remove_user_admin
 
       constraints Constraints::WebAdmin.new(:edit_features?) do
         mount Flipper::UI.app(Rails.application.flipper) => '/flipper-features', as: :flipper_features_admin

@@ -30,8 +30,13 @@
         - else
           = no_members_html
   %section.column-2.column-bordered
+    - if policy(:web_admin).edit_features?
+      %button.secondary-button{disabled: @feature_status == :on, data: {confirmation_dialog_name: 'add-user'}}= t('admin.features.confirmations.add_user.accept')
     %h2= t('admin.features.edit.users')
-    %table
+    - no_users_html = capture do
+      %tr.admin-feature-none-enabled
+        %td= t('admin.features.edit.no_users')
+    %table{data: {empty_html: no_users_html}}
       %tbody
         - if @feature_status == :on
           %tr
@@ -39,10 +44,14 @@
         - elsif @enabled_users.present?
           - @enabled_users.each do |user|
             %tr
-              %td= user
+              %td
+                - if policy(:web_admin).edit_features?
+                  = link_to('', feature_remove_user_admin_path(username: user), remote: true, method: :delete, class: 'admin-feature-link-remove')
+                = user
+                .admin-feature-error-message
+                  = t('admin.features.confirmations.remove_user.error')
         - else
-          %tr.admin-feature-none-enabled
-            %td= t('admin.features.edit.no_users')
+          = no_users_html
 %section.admin-confirmation-dialog{data: {confirmation_dialog_name: 'enable-all'}}
   %h3= t('admin.features.confirmations.enable_all.title')
   %button.secondary-button{data: {flyout_action: :close}}= t('global.cancel')
@@ -56,5 +65,11 @@
   = form_tag(feature_add_member_admin_path, remote: true ) do
     - default_selection = t('admin.features.confirmations.add_member.select')
     = select_tag(:member_id, options_for_select(@members.unshift([default_selection, default_selection]), {selected: default_selection, disabled: default_selection} ), autofocus: true)
-    %button.secondary-button{data: {flyout_action: :close}}= t('global.cancel')
-    %button.primary-button{typ: :submit}= t('admin.features.confirmations.add_member.accept')
+    %button.secondary-button{type: :button, data: {flyout_action: :close}}= t('global.cancel')
+    %button.primary-button{type: :submit}= t('admin.features.confirmations.add_member.accept')
+%section.admin-confirmation-dialog{data: {confirmation_dialog_name: 'add-user'}}
+  %h3= t('admin.features.confirmations.add_user.title')
+  = form_tag(feature_add_user_admin_path, remote: true ) do
+    = render 'shared/input_field', field_name: :username, placeholder: t('admin.features.confirmations.add_user.select')
+    %button.secondary-button{type: :button, data: {flyout_action: :close}}= t('global.cancel')
+    %button.primary-button{type: :submit}= t('admin.features.confirmations.add_user.accept')

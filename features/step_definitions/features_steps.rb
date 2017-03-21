@@ -67,12 +67,12 @@ Then(/^I see an add institution button$/) do
 end
 
 Then(/^I see a remove institution button$/) do
-  page.assert_selector('.admin-feature-link-remove', visible: true)
+  page.assert_selector('.admin-feature-edit table:first-of-type .admin-feature-link-remove', visible: true)
 end
 
 When(/^I add the institution "([^"]*)"$/) do |bank|
-  click_button(I18n.t('admin.features.confirmations.add_member.accept'))
-  page.select(bank, from: :member_id)
+  step %{I initiate adding an institution}
+  step %{I select the institution "#{bank}"}
   page.find('.flyout .primary-button', text: /\A#{Regexp.quote(I18n.t('admin.features.confirmations.add_member.accept'))}\z/i, exact: true, visible: true).click
 end
 
@@ -81,14 +81,71 @@ Then(/^I see the feature conditionally enabled$/) do
 end
 
 Then(/^I see "([^"]*)" in the enabled institution list$/) do |bank|
-  page.assert_selector('.admin-feature-edit td', text: bank)
+  page.assert_selector('.admin-feature-edit table:first-of-type td', text: bank)
 end
 
 When(/^I remove the institution "([^"]*)"$/) do |bank|
-  row = page.find('.admin-feature-edit td', text: bank)
+  row = page.find('.admin-feature-edit table:first-of-type td', text: bank)
   row.find('.admin-feature-link-remove').click
 end
 
 Then(/^I do not "([^"]*)" in the enabled institution list$/) do |bank|
   page.assert_no_selector('.admin-feature-edit td', text: bank)
+end
+
+When(/^I initiate adding an institution$/) do
+  click_button(I18n.t('admin.features.confirmations.add_member.accept'))
+end
+
+When(/^I select the institution "([^"]*)"$/) do |bank|
+  page.select(bank, from: :member_id)
+end
+
+When(/^I cancel adding an? (?:institution|user)$/) do
+  click_button(I18n.t('global.cancel'))
+end
+
+When(/^I do not see "([^"]*)" in the enabled institution list$/) do |bank|
+  page.assert_no_selector('.flyout .admin-confirmation-dialog', visible: true)
+  page.assert_no_selector('.admin-feature-edit td', text: bank)
+end
+
+When(/^I initiate adding a user$/) do
+  click_button(I18n.t('admin.features.confirmations.add_user.accept'))
+end
+
+Then(/^I see an add user button$/) do
+  page.assert_selector('button', text: /\A#{Regexp.quote(I18n.t('admin.features.confirmations.add_user.accept'))}\z/i, exact: true, visible: true)
+end
+
+When(/^I add the user "([^"]*)"$/) do |user|
+  step %{I initiate adding a user}
+  step %{I enter the user "#{user}"}
+  page.find('.flyout .primary-button', text: /\A#{Regexp.quote(I18n.t('admin.features.confirmations.add_user.accept'))}\z/i, exact: true, visible: true).click
+end
+
+Then(/^I see "([^"]*)" in the enabled user list$/) do |user|
+  page.assert_selector('.admin-feature-edit table:last-of-type td', text: user)
+end
+
+When(/^I enter the user "([^"]*)"$/) do |user|
+  page.fill_in(:username, with: user)
+end
+
+When(/^I do not see "([^"]*)" in the enabled user list$/) do |user|
+  page.assert_no_selector('.admin-feature-edit table:last-of-type td', text: user)
+end
+
+Given(/^the feature "([^"]*)" is conditionally enabled for the "([^"]*)" user$/) do |feature_name, user|
+  feature = Rails.application.flipper[feature_name]
+  feature.enable_actor(User.find_or_create_if_valid_login(username: user))
+end
+
+Then(/^I see a remove user button$/) do
+  page.assert_selector('.admin-feature-edit table:last-of-type .admin-feature-link-remove', visible: true)
+end
+
+When(/^I remove the user "([^"]*)"$/) do |user|
+  row = page.find('.admin-feature-edit table:last-of-type td', text: user)
+  row.find('.admin-feature-link-remove').click
 end

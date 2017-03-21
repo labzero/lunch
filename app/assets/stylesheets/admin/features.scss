@@ -102,3 +102,9 @@
     margin-bottom: 20px;
   }
 }
+
+.admin-confirmation-dialog[data-confirmation-dialog-name=add-user] {
+  h3, .input-field-container {
+    margin-bottom: 20px;
+  }
+}
