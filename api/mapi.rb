@@ -63,7 +63,6 @@ module MAPI
 
   class ServiceApp < Sinatra::Base
     require 'logging'
-    require_relative '../lib/logging/appenders/rack'
     require 'sinatra/activerecord'
     register Sinatra::ActiveRecordExtension
     configure do
@@ -129,8 +128,6 @@ module MAPI
       raise 'Some Error'
     end
 
-    register MAPI::Services::MockRates
-    register MAPI::Services::MockMembers
     register MAPI::Services::Rates
     register MAPI::Services::Member
     register MAPI::Services::EtransactAdvances
@@ -154,14 +151,6 @@ module MAPI
         key :type, 'apiKey'
         key :name, 'Authorization'
         key :in, 'header'
-      end
-      api do
-        key :path, '/mock_rates'
-        key :description, 'Operations about dummy rates'
-      end
-      api do
-        key :path, '/mock_members'
-        key :description, 'Operations about dummy members'
       end
       api do
         key :path, '/rates'

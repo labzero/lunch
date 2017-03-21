@@ -68,7 +68,6 @@ Rails.application.routes.draw do
     get    '/'                         => 'error#not_found'
     get    '/password'                 => 'settings#change_password'
     put    '/password'                 => 'settings#update_password'
-    post   '/save'                     => 'settings#save'
     get    '/two-factor'               => 'settings#two_factor'
     put    '/two-factor/pin'           => 'settings#reset_pin'
     post   '/two-factor/pin'           => 'settings#new_pin'
@@ -230,7 +229,11 @@ Rails.application.routes.draw do
       get '/' => 'admin/dashboard#index', as: :dashboard_admin
       get '/features' => 'admin/features#index', as: :features_admin
       get '/features/:feature' => 'admin/features#view', as: :feature_admin
-      mount Flipper::UI.app(Rails.application.flipper) => '/flipper-features', as: :flipper_features_admin
+      put '/features/:feature/enable' => 'admin/features#enable_feature', as: :feature_enable_admin
+      put '/features/:feature/disable' => 'admin/features#disable_feature', as: :feature_disable_admin
+      constraints Constraints::WebAdmin.new(:edit_features?) do
+        mount Flipper::UI.app(Rails.application.flipper) => '/flipper-features', as: :flipper_features_admin
+      end
     end
   end
 

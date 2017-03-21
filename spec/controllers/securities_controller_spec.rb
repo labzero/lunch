@@ -364,6 +364,17 @@ RSpec.describe SecuritiesController, type: :controller do
             expect(row[:columns].last).to eq({value: [[I18n.t('securities.requests.actions.authorize'), nil ]], type: :actions})
           end
         end
+        it "sets the authorize action URL to nil when the `kind` is nil" do
+          awaiting_authorization_requests << {
+            request_id: request_id,
+            kind: nil
+          }
+          call_action
+          expect(assigns[:awaiting_authorization_requests_table][:rows].length).to be > 0
+          assigns[:awaiting_authorization_requests_table][:rows].each do |row|
+            expect(row[:columns].last).to eq({value: [I18n.t('securities.requests.actions.authorize')], type: :actions})
+          end
+        end
       end
     end
   end

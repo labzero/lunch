@@ -358,17 +358,18 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       end
       describe 'when the created LetterOfCreditRequest instance is invalid' do
         let(:error_message) { instance_double(String) }
-        let(:errors) {[
-          [SecureRandom.hex, error_message],
-          [SecureRandom.hex, instance_double(String)]
-        ]}
         before do
           allow(letter_of_credit_request).to receive(:valid?).and_return(false)
-          allow(letter_of_credit_request).to receive(:errors).and_return(errors)
           allow(controller).to receive(:populate_new_request_view_variables)
+          allow(controller).to receive(:prioritized_error_message)
         end
 
-        it 'sets `@error_message` to the error message of the first error in the returned error array' do
+        it 'calls `prioritized_error_message` with the letter of credit request' do
+          expect(controller).to receive(:prioritized_error_message).with(letter_of_credit_request)
+          call_action
+        end
+        it 'sets `@error_message` to the result of `prioritized_error_message`' do
+          allow(controller).to receive(:prioritized_error_message).and_return(error_message)
           call_action
           expect(assigns[:error_message]).to eq(error_message)
         end
@@ -572,12 +573,15 @@ RSpec.describe LettersOfCreditController, :type => :controller do
 
     describe '`date_restrictions`' do
       let(:today) { Time.zone.today }
-      let(:max_date) { today + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION }
+      let(:now) { Time.zone.now }
+      let(:cutoff_time) { Time.zone.parse(LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION) }
       let(:weekends_and_holidays) { instance_double(Array) }
       let(:calendar_service) { instance_double(CalendarService, find_next_business_day: nil) }
       let(:call_method) { subject.send(:date_restrictions) }
 
       before do
+        allow(Time.zone).to receive(:today).and_return(today)
+        allow(Time.zone).to receive(:now).and_return(now)
         allow(CalendarService).to receive(:new).and_return(calendar_service)
         allow(controller).to receive(:weekends_and_holidays)
       end
@@ -586,41 +590,61 @@ RSpec.describe LettersOfCreditController, :type => :controller do
         expect(CalendarService).to receive(:new).with(request).and_return(calendar_service)
         call_method
       end
-      it 'calls `find_next_business_day` on the service instance with today and a 1.day step' do
-        expect(calendar_service).to receive(:find_next_business_day).with(today, 1.day)
+      it 'parses the LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION to create an ActiveRecord::TimeWithZone object' do
+        expect(Time.zone).to receive(:parse).with(LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION).and_call_original
         call_method
       end
-      describe 'the returned hash' do
-        it 'has a `min_date` that is the result of calling `find_next_business_day` on the calendar service instance' do
-          min_date = instance_double(Date)
-          allow(calendar_service).to receive(:find_next_business_day).and_return(min_date)
+      shared_examples 'it bases other dates off a given start date' do |day|
+        let(:start_date) { day == :today ? today : today + 1.day }
+        let(:max_date) { start_date + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION }
+        it "calls `find_next_business_day` on the service instance with #{day} and a 1.day step" do
+          expect(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day)
           call_method
-          expect(call_method[:min_date]).to eq(min_date)
         end
-        it 'has an `expiration_max_date` of today plus the `LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION`' do
-          expect(call_method[:expiration_max_date]).to eq(max_date)
-        end
-        it 'has an `issue_max_date` of today plus the `LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION`' do
-          expect(call_method[:issue_max_date]).to eq(today + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION)
-        end
-        describe 'the `invalid_dates` array' do
-          it 'calls `weekends_and_holidays` with today as the start_date arg' do
-            expect(controller).to receive(:weekends_and_holidays).with(start_date: today, end_date: anything, calendar_service: anything)
+        describe 'the returned hash' do
+          it 'has a `min_date` that is the result of calling `find_next_business_day` on the calendar service instance' do
+            min_date = instance_double(Date)
+            allow(calendar_service).to receive(:find_next_business_day).and_return(min_date)
             call_method
+            expect(call_method[:min_date]).to eq(min_date)
           end
-          it "calls `weekends_and_holidays` with a date #{LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION} from today as the end_date arg" do
-            expect(controller).to receive(:weekends_and_holidays).with(start_date: anything, end_date: (today + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION), calendar_service: anything)
-            call_method
+          it "has an `expiration_max_date` of #{day} plus the `LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION` plus the `LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION`" do
+            expect(call_method[:expiration_max_date]).to eq(max_date)
           end
-          it 'calls `weekends_and_holidays` with the calendar service instance as the calendar_service arg' do
-            expect(controller).to receive(:weekends_and_holidays).with(start_date: anything, end_date: anything, calendar_service: calendar_service)
-            call_method
+          it "has an `issue_max_date` of #{day} plus the `LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION`" do
+            expect(call_method[:issue_max_date]).to eq(start_date + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION)
           end
-          it 'has a value equal to the result of calling `weekends_and_holidays`' do
-            allow(controller).to receive(:weekends_and_holidays).and_return(weekends_and_holidays)
-            expect(call_method[:invalid_dates]).to eq(weekends_and_holidays)
+          describe 'the `invalid_dates` array' do
+            it "calls `weekends_and_holidays` with #{day} as the start_date arg" do
+              expect(controller).to receive(:weekends_and_holidays).with(start_date: start_date, end_date: anything, calendar_service: anything)
+              call_method
+            end
+            it "calls `weekends_and_holidays` with a date #{LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION} from #{day} as the end_date arg" do
+              expect(controller).to receive(:weekends_and_holidays).with(start_date: anything, end_date: (start_date + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION), calendar_service: anything)
+              call_method
+            end
+            it 'calls `weekends_and_holidays` with the calendar service instance as the calendar_service arg' do
+              expect(controller).to receive(:weekends_and_holidays).with(start_date: anything, end_date: anything, calendar_service: calendar_service)
+              call_method
+            end
+            it 'has a value equal to the result of calling `weekends_and_holidays`' do
+              allow(controller).to receive(:weekends_and_holidays).and_return(weekends_and_holidays)
+              expect(call_method[:invalid_dates]).to eq(weekends_and_holidays)
+            end
           end
         end
+      end
+      context 'when the current time is less than the LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION' do
+        before { allow(Time.zone).to receive(:now).and_return(cutoff_time - 1.hour, now) }
+        it_behaves_like 'it bases other dates off a given start date', :today
+      end
+      context 'when the current time is equal to the LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION' do
+        before { allow(Time.zone).to receive(:now).and_return(cutoff_time, now) }
+        it_behaves_like 'it bases other dates off a given start date', :today
+      end
+      context 'when the current time is greater than the LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION' do
+        before { allow(Time.zone).to receive(:now).and_return(cutoff_time + 1.hour, now) }
+        it_behaves_like 'it bases other dates off a given start date', :tomorrow
       end
     end
 
@@ -716,8 +740,8 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       context 'when the `@letter_of_credit_request` instance variable does not yet exist' do
         before { allow(LetterOfCreditRequest).to receive(:new).and_return(letter_of_credit_request) }
 
-        it 'does creates a new `LetterOfCreditRequest` with the request' do
-          expect(LetterOfCreditRequest).to receive(:new).with(request)
+        it 'creates a new `LetterOfCreditRequest` with the current_member_id and request' do
+          expect(LetterOfCreditRequest).to receive(:new).with(member_id, request)
           call_method
         end
         it 'sets `@letter_of_credit_request` to the new LetterOfCreditRequest instance' do
@@ -804,6 +828,87 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       context 'when the `@letter_of_credit_request` instance variable does not exist' do
         it 'returns nil' do
           expect(call_method).to be nil
+        end
+      end
+    end
+
+    describe '`prioritized_error_message`' do
+      let(:max_term) { rand(12..120) }
+      let(:remaining_bc) { rand(1000..999999) }
+      let(:remaining_financing) { rand(1000..999999) }
+      let(:letter_of_credit) { instance_double(LetterOfCreditRequest, errors: nil, standard_borrowing_capacity: remaining_bc, max_term: max_term, remaining_financing_available: remaining_financing)}
+      let(:call_method) { subject.send(:prioritized_error_message, letter_of_credit) }
+
+      context 'when there are no errors' do
+        it 'returns nil' do
+          expect(call_method).to be nil
+        end
+      end
+      context 'when there are errors' do
+        let(:error_message) { instance_double(String) }
+        let(:errors) { instance_double(ActiveModel::Errors, :added? => nil, first: [SecureRandom.hex, error_message]) }
+        before do
+          allow(letter_of_credit).to receive(:errors).and_return(errors)
+          allow(errors).to receive(:added?)
+        end
+        it 'checks to see if an `amount` `exceeds_financing_availability` error has been added' do
+          expect(errors).to receive(:added?).with(:amount, :exceeds_financing_availability)
+          call_method
+        end
+        it 'checks to see if an `amount` `exceeds_borrowing_capacity` error has been added' do
+          expect(errors).to receive(:added?).with(:amount, :exceeds_borrowing_capacity)
+          call_method
+        end
+        it 'checks to see if an `expiration_date` `after_max_term` error has been added' do
+          expect(errors).to receive(:added?).with(:expiration_date, :after_max_term)
+          call_method
+        end
+        describe 'when the errors contain an `amount` `exceeds_financing_availability` error' do
+          before { allow(errors).to receive(:added?).with(:amount, :exceeds_financing_availability).and_return(true) }
+          it 'reads the remaining_financing_available attribute of the letter_of_credit_request' do
+            expect(letter_of_credit).to receive(:remaining_financing_available).and_return(remaining_financing)
+            call_method
+          end
+          it 'formats the remaining financing available' do
+            expect(subject).to receive(:fhlb_formatted_currency_whole).with(remaining_financing, html: false)
+            call_method
+          end
+          it 'adds an error message containing the formatted remaining financing available' do
+            formatted_remaining = SecureRandom.hex
+            allow(controller).to receive(:fhlb_formatted_currency_whole).and_return(formatted_remaining)
+            expect(call_method).to eq(I18n.t('letters_of_credit.errors.exceeds_financing_availability', financing_availability: formatted_remaining))
+          end
+        end
+        describe 'when the errors contain an `amount` `exceeds_borrowing_capacity` error' do
+          before { allow(errors).to receive(:added?).with(:amount, :exceeds_borrowing_capacity).and_return(true) }
+          it 'reads the standard_borrowing_capacity attribute of the letter_of_credit_request' do
+            expect(letter_of_credit).to receive(:standard_borrowing_capacity).and_return(remaining_bc)
+            call_method
+          end
+          it 'formats the remaining standard borrowing capacity' do
+            expect(subject).to receive(:fhlb_formatted_currency_whole).with(remaining_bc, html: false)
+            call_method
+          end
+          it 'adds an error message containing the formatted remaining standard borrowing capacity' do
+            formatted_capacity = SecureRandom.hex
+            allow(controller).to receive(:fhlb_formatted_currency_whole).and_return(formatted_capacity)
+            expect(call_method).to eq(I18n.t('letters_of_credit.errors.exceeds_borrowing_capacity', borrowing_capacity: formatted_capacity))
+          end
+        end
+        describe 'when the errors contain an `expiration_date` `after_max_term` error' do
+          before { allow(errors).to receive(:added?).with(:expiration_date, :after_max_term).and_return(true) }
+          it 'reads the max_term attribute of the letter_of_credit_request' do
+            expect(letter_of_credit).to receive(:max_term).and_return(max_term)
+            call_method
+          end
+          it 'adds an error message containing the max term' do
+            expect(call_method).to eq(I18n.t('letters_of_credit.errors.after_max_term', max_term: max_term))
+          end
+        end
+        describe 'when the errors do not contain an `amount` `exceeds_borrowing_capacity` error' do
+          it 'returns the first error message in the error array' do
+            expect(call_method).to eq(error_message)
+          end
         end
       end
     end

@@ -9,6 +9,7 @@ describe MAPI::ServiceApp do
                              "ADVDET_MNEMONIC"=>  "FRC",  "ADVDET_DATEUPDATE"=>  "27-JAN-2014 12:00 AM",  "ADVDET_SUBSIDY_PROGRAM"=> nil,
                              "TRADE_DATE"=> "23-SEP-2014 12:00 AM", "FUTURE_INTEREST"=> 6981.37, "ADV_INDEX"=> "USD-VRC-FHLBSF 1D",
                              "TOTAL_PREPAY_FEES"=>  nil, "SA_TOTAL_PREPAY_FEES"=>  nil ,  "SA_INDICATION_VALUATION_DATE"=> nil}}
+  let(:advances_db_records) { [advances_historical] }
 
   before do
     header 'Authorization', "Token token=\"#{ENV['MAPI_SECRET_TOKEN']}\""
@@ -39,9 +40,43 @@ describe MAPI::ServiceApp do
           end
         end
       end
+      it 'uses the raw `ADV_PAYMENT_FREQ` if a mapping in `ADVANCES_PAYMENT_FREQUENCY_MAPPING` can\'t be found' do
+        payment_frequency = SecureRandom.hex
+        advances_db_records.first['ADV_PAYMENT_FREQ'] = payment_frequency
+        stub_const('MAPI::Services::Member::AdvancesDetails::ADVANCES_PAYMENT_FREQUENCY_MAPPING', {})
+        expect(advances['advances_details'].first['interest_payment_frequency']).to eq(payment_frequency)
+      end
+
+      it 'uses the raw `ADV_DAY_COUNT` if a mapping in `ADVANCES_DAY_COUNT_BASIS_MAPPING` can\'t be found' do
+        day_count = SecureRandom.hex
+        advances_db_records.first['ADV_DAY_COUNT'] = day_count
+        stub_const('MAPI::Services::Member::AdvancesDetails::ADVANCES_DAY_COUNT_BASIS_MAPPING', {})
+        expect(advances['advances_details'].first['day_count_basis']).to eq(day_count)
+      end
+
     end
 
     describe 'in the development environment' do
+      let(:advances_db_records) { MAPI::Services::Member::AdvancesDetails.fake('member_advances_latest').sample }
+      before do
+        allow(MAPI::Services::Member::AdvancesDetails).to receive(:fake).and_return([advances_db_records])
+      end
+
+      shared_examples 'issue_date correction' do
+        context 'if the `ADVDET_ISSUE_DATE` is after the `as_of_date`' do
+          before do
+            advances_db_records.first['ADVDET_ISSUE_DATE'] = as_of_date + 5.days
+          end
+          it 'sets the `ADVDET_ISSUE_DATE` to be before the `as_of_date`' do
+            expect(advances['advances_details'].first['funding_date'].to_date).to be < as_of_date
+          end
+          it 'sets the `TRADE_DATE` to the `ADVDET_ISSUE_DATE`' do
+            funding_date = advances['advances_details'].first['funding_date']
+            expect(advances['advances_details'].first['trade_date']).to eq(funding_date)
+          end
+        end
+      end
+
       it 'should return 4 or 6 rows when reading from current fake data ' do
         expect(advances['structured_product_indication_date'].to_s).to match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
         advances['advances_details'].each do |row|
@@ -63,18 +98,22 @@ describe MAPI::ServiceApp do
       end
 
       it_behaves_like 'Advances Details endpoint'
-    end
+      include_examples 'issue_date correction'
 
-    describe 'in development environment, if date is before yesterday, it should get historical data' do
-      let(:advances) { get "/member/#{member_id}/advances_details/2013-01-02"; JSON.parse(last_response.body) }
-      it 'should show nil for prepayment related ' do
-        advances['advances_details'].each do |row|
-          expect(row['prepayment_fee_indication']).to be_nil()
-          expect(row['structure_product_prepay_valuation_date']).to be_nil()
+      describe 'if date is before yesterday, it should get historical data' do
+        let(:advances_db_records) { MAPI::Services::Member::AdvancesDetails.fake('member_advances_historical').sample }
+        let(:advances) { get "/member/#{member_id}/advances_details/2013-01-02"; JSON.parse(last_response.body) }
+        it 'should show nil for prepayment related ' do
+          advances['advances_details'].each do |row|
+            expect(row['prepayment_fee_indication']).to be_nil()
+            expect(row['structure_product_prepay_valuation_date']).to be_nil()
+          end
         end
+
+        it_behaves_like 'Advances Details endpoint'
+        include_examples 'issue_date correction'
       end
 
-      it_behaves_like 'Advances Details endpoint'
     end
 
     it 'invalid param or future date result in 400 error message' do
@@ -99,6 +138,7 @@ describe MAPI::ServiceApp do
                                 "TRADE_DATE"=> "23-SEP-2013 12:00 AM", "FUTURE_INTEREST"=> 6981.37, "ADV_INDEX"=> "USD-VRC-FHLBSF 1D",
                                 "TOTAL_PREPAY_FEES"=>  nil, "SA_TOTAL_PREPAY_FEES"=>  nil ,  "SA_INDICATION_VALUATION_DATE"=> nil}}
       let(:result_set1) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:advances_db_records) { [advances_current1a] }
 
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
@@ -162,6 +202,7 @@ describe MAPI::ServiceApp do
 
 
       let(:result_set1) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:advances_db_records) { [advances_current1, advances_current2, advances_current3, advances_current4] }
 
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
@@ -220,6 +261,7 @@ describe MAPI::ServiceApp do
 
       let(:result_set1) {double('Oracle Result Set', fetch_hash: nil)}
       let(:result_set2) {double('Oracle Result Set', fetch_hash: nil)}
+      let(:advances_db_records) { [advances_historical, advances_historical2, advances_historical3] }
       before do
         expect(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
         expect(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set1)

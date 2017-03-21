@@ -3,10 +3,21 @@ require 'rails_helper'
 RSpec.describe LetterOfCreditRequest, :type => :model do
   let(:today) { Time.zone.today }
   let(:calendar_service) { instance_double(CalendarService, holidays: [], find_next_business_day: today) }
+  let(:member_id) { rand(1000..9999) }
 
-  before { allow(CalendarService).to receive(:new).and_return(calendar_service) }
+  before do
+    allow(CalendarService).to receive(:new).and_return(calendar_service)
+    allow(Time.zone).to receive(:today).and_return(today)
+  end
+
+  subject { described_class.new(member_id) }
 
   describe 'validations' do
+    before do
+      subject.instance_variable_set('@standard_borrowing_capacity', 0)
+      subject.instance_variable_set('@max_term', 0)
+      subject.instance_variable_set('@remaining_financing_available', 0)
+    end
     [:beneficiary_name, :amount, :issue_date, :expiration_date].each do |attr|
       it "validates the presence of `#{attr}`" do
         expect(subject).to validate_presence_of attr
@@ -18,7 +29,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
     it 'validates tha `amount` is greater than zero' do
       is_expected.to validate_numericality_of(:amount).is_greater_than(0)
     end
-    [:issue_date_must_come_before_expiration_date, :issue_date_within_range, :expiration_date_within_range].each do |method|
+    [:issue_date_must_come_before_expiration_date, :issue_date_within_range, :expiration_date_within_range, :amount_does_not_exceed_borrowing_capacity].each do |method|
       it "calls `#{method}` as a validator" do
         expect(subject).to receive(method)
         subject.valid?
@@ -68,8 +79,12 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         let(:issue_date) { today + rand(0..7).days }
         before { subject.issue_date = issue_date }
 
-        it 'calls `date_within_range`' do
-          expect(subject).to receive(:date_within_range).with(issue_date, described_class::ISSUE_MAX_DATE_RESTRICTION)
+        it 'calls `date_within_range` with the issue_date' do
+          expect(subject).to receive(:date_within_range).with(issue_date, anything)
+          call_validator
+        end
+        it 'calls `date_within_range` with the ISSUE_MAX_DATE_RESTRICTION plus today' do
+          expect(subject).to receive(:date_within_range).with(anything, today + described_class::ISSUE_MAX_DATE_RESTRICTION)
           call_validator
         end
         it 'does not add an error if `date_within_range` returns true' do
@@ -98,9 +113,23 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         let(:expiration_date) { today + rand(0..7).days }
         before { subject.expiration_date = expiration_date }
 
-        it 'calls `date_within_range`' do
-          expect(subject).to receive(:date_within_range).with(expiration_date, described_class::EXPIRATION_MAX_DATE_RESTRICTION)
+        it 'calls `date_within_range` with the expiration_date' do
+          expect(subject).to receive(:date_within_range).with(expiration_date, anything)
           call_validator
+        end
+        context 'when there is an issue_date' do
+          let(:issue_date) { today + rand(0..7).days }
+          before { subject.issue_date = issue_date }
+          it 'calls `date_within_range` with the EXPIRATION_MAX_DATE_RESTRICTION plus the issue_date' do
+            expect(subject).to receive(:date_within_range).with(anything, issue_date + described_class::EXPIRATION_MAX_DATE_RESTRICTION)
+            call_validator
+          end
+        end
+        context 'when there is not an issue_date' do
+          it 'calls `date_within_range` with the EXPIRATION_MAX_DATE_RESTRICTION plus today' do
+            expect(subject).to receive(:date_within_range).with(anything, today + described_class::EXPIRATION_MAX_DATE_RESTRICTION)
+            call_validator
+          end
         end
         it 'does not add an error if `date_within_range` returns true' do
           allow(subject).to receive(:date_within_range).and_return(true)
@@ -114,16 +143,194 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         end
       end
     end
+
+    describe '`amount_does_not_exceed_borrowing_capacity`' do
+      let(:today) { Time.zone.today }
+      let(:remaining_bc) { rand(10000..9999999) }
+      let(:call_validator) { subject.send(:amount_does_not_exceed_borrowing_capacity) }
+
+      before do
+        allow(Time.zone).to receive(:today).and_return(today)
+        allow(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@standard_borrowing_capacity', remaining_bc) }
+      end
+
+      it 'calls `fetch_member_profile`' do
+        expect(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@standard_borrowing_capacity', remaining_bc) }
+        call_validator
+      end
+      describe 'when there is no amount value' do
+        it 'does not add an error' do
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is less than the remaining standard borrowing capacity' do
+        it 'does not add an error' do
+          subject.amount = remaining_bc - rand(100..9999)
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is equal to the remaining standard borrowing capacity' do
+        it 'does not add an error' do
+          subject.amount = remaining_bc
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is greater than the remaining standard borrowing capacity' do
+        before { subject.amount = remaining_bc + rand(1..100000) }
+        it 'adds an error' do
+          expect(subject.errors).to receive(:add).with(:amount, :exceeds_borrowing_capacity)
+          call_validator
+        end
+      end
+    end
+
+    describe '`expiration_date_before_max_term`' do
+      let(:issue_date) { today }
+      let(:expiration_date) { today + rand(12..36).months }
+      let(:max_term) { double('max term', months: 12.months) }
+      let(:call_validator) { subject.send(:expiration_date_before_max_term) }
+      context 'when there is an issue_date' do
+        before do
+          subject.issue_date = issue_date
+          subject.expiration_date = nil
+        end
+        it 'does not add an error if there is no expiration_date' do
+          expect(subject.errors).not_to receive(:add).with(:expiration_date, :after_max_term)
+          call_validator
+        end
+      end
+      context 'when there is an expiration_date' do
+        before do
+          subject.expiration_date = expiration_date
+          subject.issue_date = nil
+        end
+        it 'does not add an error if there is no issue_date' do
+          expect(subject.errors).not_to receive(:add).with(:expiration_date, :after_max_term)
+          call_validator
+        end
+      end
+      context 'when there is both an issue_date and an expiration_date' do
+        before do
+          subject.expiration_date = expiration_date
+          subject.issue_date = issue_date
+          allow(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@max_term', max_term) }
+        end
+        it 'calls `fetch_member_profile`' do
+          expect(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@max_term', max_term) }
+          call_validator
+        end
+        it 'does not add an error if time span between the issue_date and expiration_date is less than the max_term in months' do
+          allow(max_term).to receive(:months).and_return(120.months)
+          expect(subject.errors).not_to receive(:add).with(:expiration_date, :after_max_term)
+          call_validator
+        end
+        it 'adds an error if time span between the issue_date and expiration_date is more than the max_term in months' do
+          allow(max_term).to receive(:months).and_return(6.months)
+          expect(subject.errors).to receive(:add).with(:expiration_date, :after_max_term)
+          call_validator
+        end
+      end
+    end
+
+    describe '`amount_does_not_exceed_financing_availability`' do
+      let(:today) { Time.zone.today }
+      let(:remaining_financing_available) { rand(10000..9999999) }
+      let(:call_validator) { subject.send(:amount_does_not_exceed_financing_availability) }
+
+      before do
+        allow(Time.zone).to receive(:today).and_return(today)
+        allow(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@remaining_financing_available', remaining_financing_available) }
+      end
+
+      it 'calls `fetch_member_profile`' do
+        expect(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@remaining_financing_available', remaining_financing_available) }
+        call_validator
+      end
+      describe 'when there is no amount value' do
+        it 'does not add an error' do
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is less than the remaining financing available' do
+        it 'does not add an error' do
+          subject.amount = remaining_financing_available - rand(100..9999)
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is equal to the remaining financing available' do
+        it 'does not add an error' do
+          subject.amount = remaining_financing_available
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+      end
+      describe 'when the amount is greater than the remaining financing available' do
+        before { subject.amount = remaining_financing_available + rand(1..100000) }
+        it 'adds an error' do
+          expect(subject.errors).to receive(:add).with(:amount, :exceeds_financing_availability)
+          call_validator
+        end
+      end
+    end
+
+    describe '`issue_date_valid_for_today`' do
+      let(:call_validator) { subject.send(:issue_date_valid_for_today) }
+      it 'is not called as a validator if there is no issue date' do
+        subject.issue_date = nil
+        expect(subject).not_to receive(:issue_date_valid_for_today)
+        subject.valid?
+      end
+      it 'is not caled as a validator if the issue date is not today' do
+        subject.issue_date = today + rand(1..6).days
+        expect(subject).not_to receive(:issue_date_valid_for_today)
+        subject.valid?
+      end
+      context 'when the issue date is today' do
+        let(:time_limit) { Time.zone.parse(described_class::ISSUE_DATE_TIME_RESTRICTION) + described_class::ISSUE_DATE_TIME_RESTRICTION_WINDOW }
+        before { subject.issue_date = today }
+
+        it 'is called as a validator' do
+          expect(subject).to receive(:issue_date_valid_for_today)
+          subject.valid?
+        end
+        it 'does not add an error if it is before the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
+          allow(Time.zone).to receive(:now).and_return(time_limit - 1.minute)
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+        it 'does not add an error if the current time is exactly the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
+          allow(Time.zone).to receive(:now).and_return(time_limit)
+          expect(subject.errors).not_to receive(:add)
+          call_validator
+        end
+        it 'adds an error if it is after the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
+          allow(Time.zone).to receive(:now).and_return(time_limit + 1.minute)
+          expect(subject.errors).to receive(:add).with(:issue_date, :no_longer_valid)
+          call_validator
+        end
+      end
+    end
   end
 
   describe 'initialization' do
     let(:issue_date) { today + rand(0..7).days }
-    let(:new_loc) { LetterOfCreditRequest.new }
+    let(:new_loc) { LetterOfCreditRequest.new(member_id) }
+    let(:now) { instance_double(Time, :> => nil) }
+    let(:parsed_time) { instance_double(Time) }
     let(:request) { double('request') }
 
+    before do
+      allow(Time.zone).to receive(:now).and_return(now)
+      allow(Time.zone).to receive(:parse).and_return(parsed_time)
+    end
+
     describe 'when a request arg is passed' do
-      let(:new_loc) { LetterOfCreditRequest.new(request) }
-      subject { described_class.new(request) }
+      let(:new_loc) { LetterOfCreditRequest.new(member_id, request) }
       it 'sets `request` to the passed arg' do
         expect(new_loc.request).to eq(request)
       end
@@ -146,6 +353,9 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         new_loc
       end
     end
+    it 'sets `member_id` to the passed member_id arg' do
+      expect(new_loc.member_id).to eq(member_id)
+    end
     it "sets `issuance_fee` to `#{described_class::DEFAULT_ISSUANCE_FEE}`" do
       expect(subject.issuance_fee).to eq(described_class::DEFAULT_ISSUANCE_FEE)
     end
@@ -153,13 +363,32 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       expect(subject.maintenance_fee).to eq(described_class::DEFAULT_MAINTENANCE_FEE)
     end
     describe 'initial `issue_date` value' do
-      it 'calls `find_next_business_day` with today and a 1.day step' do
-        expect(calendar_service).to receive(:find_next_business_day).with(today, 1.day)
+      it 'parses the LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION to create an ActiveRecord::TimeWithZone object' do
+        expect(Time.zone).to receive(:parse).with(LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION).and_return(parsed_time)
         new_loc
       end
-      it 'sets `issue_date` to the result of `find_next_business_day`' do
-        allow(calendar_service).to receive(:find_next_business_day).with(today, 1.day).and_return(issue_date)
-        expect(subject.issue_date).to eq(issue_date)
+      it 'checks to see if the current time is greater than the time restriction' do
+        expect(now).to receive(:>).with(parsed_time)
+        new_loc
+      end
+      shared_examples 'it sets `issue_date` based on `find_next_business_day`' do |day|
+        let(:start_date) { day == :today ? today : today + 1.day }
+        it "calls `find_next_business_day` with #{day} and a 1.day step" do
+          expect(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day)
+          new_loc
+        end
+        it 'sets `issue_date` to the result of `find_next_business_day`' do
+          allow(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day).and_return(issue_date)
+          expect(subject.issue_date).to eq(issue_date)
+        end
+      end
+      context 'when it is before the ISSUE_DATE_TIME_RESTRICTION' do
+        before { allow(now).to receive(:>).and_return(false) }
+        it_behaves_like 'it sets `issue_date` based on `find_next_business_day`', :today
+      end
+      context 'when it is after the ISSUE_DATE_TIME_RESTRICTION' do
+        before { allow(now).to receive(:>).and_return(true) }
+        it_behaves_like 'it sets `issue_date` based on `find_next_business_day`', :tomorrow
       end
     end
     describe 'initial `expiration_date` value' do
@@ -281,7 +510,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       date_attrs.each do |key|
         it "assigns a datefied value found under `#{key}` to the attribute `#{key}`" do
           datefied_value = double('some value as a date')
-          allow(Time.zone).to receive(:parse).with(value).and_return(datefied_value)
+          allow(Date).to receive(:parse).with(value).and_return(datefied_value)
           hash[key.to_s] = value
           call_method
           expect(subject.send(key)).to be(datefied_value)
@@ -355,7 +584,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       let(:beneficiaries_service) { instance_double(BeneficiariesService, all: []) }
       let(:beneficiary_name) { SecureRandom.hex }
       let(:request) { double('request') }
-      subject { described_class.new(request) }
+      subject { described_class.new(member_id, request) }
       let(:call_method) { subject.beneficiary_name = beneficiary_name }
 
       before do
@@ -428,15 +657,105 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         expect(call_method).to be(set)
       end
     end
+
+    describe '`standard_borrowing_capacity` method' do
+      let(:call_method) { subject.standard_borrowing_capacity }
+      it 'returns the `@standard_borrowing_capacity` attribute if already set' do
+        existing_value = double('some value')
+        subject.instance_variable_set('@standard_borrowing_capacity', existing_value)
+        expect(call_method).to eq(existing_value)
+      end
+      context 'when the `@standard_borrowing_capacity` attribute is not already set' do
+        it 'returns nil if there is no @member_profile' do
+          expect(call_method).to be nil
+        end
+        context 'when there is a @member_profile' do
+          let(:standard_excess_capacity) { double('excess capacity') }
+          let(:member_profile) { {collateral_borrowing_capacity: {standard: {remaining: double('excess bc', to_i: standard_excess_capacity)}} } }
+          before { subject.instance_variable_set('@member_profile', member_profile) }
+          it 'calls `to_i` on the value of `@member_profile[:collateral_borrowing_capacity][:standard][:remaining]`' do
+            expect(member_profile[:collateral_borrowing_capacity][:standard][:remaining]).to receive(:to_i)
+            call_method
+          end
+          it 'returns the `standard_excess_capacity`' do
+            expect(call_method).to eq(standard_excess_capacity)
+          end
+          it 'returns the same object on each call' do
+            capacity = call_method
+            expect(call_method).to be(capacity)
+          end
+        end
+      end
+    end
+
+    describe '`max_term` method' do
+      let(:call_method) { subject.max_term }
+      it 'returns the `@max_term` attribute if already set' do
+        existing_value = double('some value')
+        subject.instance_variable_set('@max_term', existing_value)
+        expect(call_method).to eq(existing_value)
+      end
+      context 'when the `@max_term` attribute is not already set' do
+        it 'returns nil if there is no @member_profile' do
+          expect(call_method).to be nil
+        end
+        context 'when there is @member_profile' do
+          let(:max_term) { double('the maximum term in months') }
+          let(:member_profile) { {maximum_term: double('max term', to_i: max_term)} }
+          before { subject.instance_variable_set('@member_profile', member_profile) }
+          it 'calls `to_i` on the value of `maximum_term` for @member_profile' do
+            expect(member_profile[:maximum_term]).to receive(:to_i)
+            call_method
+          end
+          it 'returns the `maximum_term`' do
+            expect(call_method).to eq(max_term)
+          end
+          it 'returns the same object on each call' do
+            term = call_method
+            expect(call_method).to be(term)
+          end
+        end
+      end
+    end
+
+    describe '`remaining_financing_available` method' do
+      let(:call_method) { subject.remaining_financing_available }
+      it 'returns the `@remaining_financing_available` attribute if already set' do
+        existing_value = double('some value')
+        subject.instance_variable_set('@remaining_financing_available', existing_value)
+        expect(call_method).to eq(existing_value)
+      end
+      context 'when the `@remaining_financing_available` attribute is not already set' do
+        it 'returns nil if there is no @member_profile' do
+          expect(call_method).to be nil
+        end
+        context 'when there is @member_profile' do
+          let(:remaining_financing_available) { double('remaining_financing_available') }
+          let(:member_profile) { {remaining_financing_available: double('financing available', to_i: remaining_financing_available)} }
+          before { subject.instance_variable_set('@member_profile', member_profile) }
+          it 'calls `to_i` on the value of `remaining_financing_available` for @member_profile' do
+            expect(member_profile[:remaining_financing_available]).to receive(:to_i)
+            call_method
+          end
+          it 'returns the `remaining_financing_available`' do
+            expect(call_method).to eq(remaining_financing_available)
+          end
+          it 'returns the same object on each call' do
+            term = call_method
+            expect(call_method).to be(term)
+          end
+        end
+      end
+    end
   end
 
   describe 'private methods' do
     describe '`date_within_range`' do
       let(:date) { today + rand(0..7).days }
-      let(:date_restriction) { rand(1..30).days }
+      let(:max_date) { date + rand(1..30).days }
       let(:request) { double('request') }
-      subject { described_class.new(request) }
-      let(:call_method) { subject.send(:date_within_range, date, date_restriction) }
+      subject { described_class.new(member_id, request) }
+      let(:call_method) { subject.send(:date_within_range, date, max_date) }
       it 'creates a new CalendarService instance with the request' do
         expect(CalendarService).to receive(:new).with(request).and_return(calendar_service)
         call_method
@@ -445,13 +764,13 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         expect(calendar_service).to receive(:holidays).with(today, anything).and_return([])
         call_method
       end
-      it 'calls `holidays` on the CalendarService instance with today plus the max_date_restriction as the max_date arg' do
-        expect(calendar_service).to receive(:holidays).with(anything, today + date_restriction).and_return([])
+      it 'calls `holidays` on the CalendarService instance with the max_date arg' do
+        expect(calendar_service).to receive(:holidays).with(anything, max_date).and_return([])
         call_method
       end
       it 'returns false if the passed date is a Sunday' do
         date = instance_double(Date, sunday?: true, :+ => nil)
-        expect(subject.send(:date_within_range, date, date_restriction)).to be false
+        expect(subject.send(:date_within_range, date, max_date)).to be false
       end
       describe 'when the passed date is not a Sunday' do
         let(:date) { instance_double(Date, sunday?: false, :+ => nil) }
@@ -475,7 +794,6 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
             end
 
             describe 'when the date is today or later' do
-              let(:max_date) { today + date_restriction }
               before { allow(date).to receive(:>=).with(today).and_return(true) }
 
               it 'returns false if the date occurs after today plus the max date restriction' do
@@ -494,8 +812,6 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
 
     describe '`sequence_name`' do
       it 'returns "LC_" and the current year' do
-        today = instance_double(DateTime, year: SecureRandom.hex)
-        allow(Time.zone).to receive(:today).and_return(today)
         expect(subject.send(:sequence_name)).to eq("LC_#{today.year}")
       end
     end
@@ -664,6 +980,26 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       it 'raises an error if `next_in_sequence` raises an error' do
         allow(subject).to receive(:next_in_sequence).and_raise(error)
         expect{call_method}.to raise_error(error)
+      end
+    end
+
+    describe '`fetch_member_profile`' do
+      let(:member_profile) { double('member_profile')}
+      let(:member_balance_service) { instance_double(MemberBalanceService, profile: member_profile) }
+      let(:call_method) { subject.send(:fetch_member_profile) }
+      before { allow(MemberBalanceService).to receive(:new).and_return(member_balance_service) }
+
+      it 'creates a new instance of MemberBalanceService with the member_id and request' do
+        expect(MemberBalanceService).to receive(:new).with(subject.member_id, subject.request).and_return(member_balance_service)
+        call_method
+      end
+      it 'calls `profile` on the `member_balance_service`' do
+        expect(member_balance_service).to receive(:profile).and_return(member_profile)
+        call_method
+      end
+      it 'returns the same object on each call' do
+        profile = call_method
+        expect(call_method).to be(profile)
       end
     end
   end

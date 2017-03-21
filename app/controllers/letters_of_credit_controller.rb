@@ -65,7 +65,7 @@ class LettersOfCreditController < ApplicationController
     letter_of_credit_request.attributes = params[:letter_of_credit_request]
     @session_elevated = session_elevated?
     unless @letter_of_credit_request.valid?
-      @error_message = @letter_of_credit_request.errors.first.last
+      @error_message = prioritized_error_message(@letter_of_credit_request)
       populate_new_request_view_variables
       render :new
     end
@@ -131,12 +131,13 @@ class LettersOfCreditController < ApplicationController
   def date_restrictions
     today = Time.zone.today
     calendar_service = CalendarService.new(request)
-    expiration_max_date = today + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION
+    start_date = Time.zone.now > Time.zone.parse(LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION) ? today + 1.day : today
+    expiration_max_date = start_date + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION
     {
-      min_date: calendar_service.find_next_business_day(today, 1.day),
-      invalid_dates: weekends_and_holidays(start_date: today, end_date: expiration_max_date, calendar_service: calendar_service),
+      min_date: calendar_service.find_next_business_day(start_date, 1.day),
+      invalid_dates: weekends_and_holidays(start_date: start_date, end_date: expiration_max_date, calendar_service: calendar_service),
       expiration_max_date: expiration_max_date,
-      issue_max_date: today + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION
+      issue_max_date: start_date + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION
     }
   end
 
@@ -148,7 +149,7 @@ class LettersOfCreditController < ApplicationController
   end
 
   def letter_of_credit_request
-    @letter_of_credit_request ||= LetterOfCreditRequest.new(request)
+    @letter_of_credit_request ||= LetterOfCreditRequest.new(current_member_id, request)
     @letter_of_credit_request.owners.add(current_user.id)
     @letter_of_credit_request
   end
@@ -165,4 +166,18 @@ class LettersOfCreditController < ApplicationController
     @letter_of_credit_request.save if @letter_of_credit_request
   end
 
+  def prioritized_error_message(letter_of_credit)
+    errors = letter_of_credit.errors
+    unless errors.blank?
+      if errors.added? :amount, :exceeds_financing_availability
+        t('letters_of_credit.errors.exceeds_financing_availability', financing_availability: fhlb_formatted_currency_whole(letter_of_credit.remaining_financing_available, html: false))
+      elsif errors.added? :amount, :exceeds_borrowing_capacity
+        t('letters_of_credit.errors.exceeds_borrowing_capacity', borrowing_capacity: fhlb_formatted_currency_whole(letter_of_credit.standard_borrowing_capacity, html: false))
+      elsif errors.added? :expiration_date, :after_max_term
+        t('letters_of_credit.errors.after_max_term', max_term: letter_of_credit.max_term)
+      else
+        errors.first.last
+      end
+    end
+  end
 end

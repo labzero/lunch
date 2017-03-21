@@ -191,7 +191,8 @@ describe MAPI::ServiceApp do
     [:test, :production].each do |env|
       describe "`current_securities_method` method in the #{env} environment" do
         managed_security_fields = %i(eligibility authorized_by borrowing_capacity)
-        let(:managed_securities) { MAPI::Services::Member::SecuritiesPosition.securities_position(subject, member_id, :managed) }
+        let(:options) { Hash.new }
+        let(:managed_securities) { MAPI::Services::Member::SecuritiesPosition.securities_position(subject, member_id, :managed, options) }
         let(:securities) { JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'securities.json'))) }
         let(:securities_result_set) {double('Oracle Result Set', fetch_hash: nil)}
 
@@ -217,9 +218,15 @@ describe MAPI::ServiceApp do
               expect(ActiveRecord::Base.connection).to receive(:execute).with(a_string_including(from_statement)).and_return(securities_result_set)
               managed_securities
             end
-            it 'it includes the proper WHERE modifier' do
+            it 'includes the proper WHERE modifier' do
               where_statement = "fhlb_id = #{member_id}"
               expect(ActiveRecord::Base.connection).to receive(:execute).with(a_string_including(where_statement)).and_return(securities_result_set)
+              managed_securities
+            end
+            it 'includes the `custody_account_type` if provided' do
+              custody_account_type = SecureRandom.hex
+              options[:custody_account_type] = custody_account_type
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(/AND\s+#{MAPI::Services::Member::SecuritiesPosition::SECURITIES_FIELD_MAPPINGS[:custody_account_type][:current]}\s+=\s+#{ActiveRecord::Base.connection.quote(options[:custody_account_type])}/).and_return(securities_result_set)
               managed_securities
             end
           end

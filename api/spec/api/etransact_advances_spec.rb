@@ -216,4 +216,29 @@ describe MAPI::ServiceApp do
       expect(last_response.status).to be(503)
     end
   end
+
+  describe 'GET blockout_dates' do
+    let(:logger) { instance_double(Logger) }
+    let(:environment) { instance_double(Symbol, 'An Environment') }
+    let(:make_request) { get '/etransact_advances/blackout_dates' }
+    before do
+      allow_any_instance_of(described_class).to receive(:logger).and_return(logger)
+      allow(described_class).to receive(:environment).and_return(environment)
+    end
+    it 'calls `MAPI::Services::Rates::BlackoutDates::blackout_dates` with the `logger`' do
+      expect(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).with(logger, any_args)
+      make_request
+    end
+    it 'calls `MAPI::Services::Rates::BlackoutDates::blackout_dates` with the `environment`' do
+      expect(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).with(anything, environment)
+      make_request
+    end
+    it 'responds with the results of `MAPI::Services::Rates::BlackoutDates::blackout_dates` converted to JSON' do
+      json_results = SecureRandom.hex
+      results = double('Some Results', to_json: json_results)
+      allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(results)
+      make_request
+      expect(last_response.body).to eq(json_results)
+    end
+  end
 end

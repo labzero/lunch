@@ -1,0 +1,63 @@
+$admin-confirmation-transition-time: 0.25s;
+.admin-flyout-confirmation {
+  width: 480px;
+  .admin-confirmation-dialog {
+    display: block;
+    @include clearfix;
+    * {
+      transition: opacity $admin-confirmation-transition-time;
+    }
+    &:before {
+      opacity: 0;
+      transition: opacity $admin-confirmation-transition-time $admin-confirmation-transition-time / 2;
+      @extend %absolute-pseudoelement;
+    }
+    h3 {
+      @extend %typography-admin-subtitle;
+      margin-top: 0;
+      margin-bottom: 30px;
+    }
+    .primary-button, .secondary-button {
+      width: calc(50% - 5px);
+      float: right;
+    }
+    .secondary-button {
+      float: left;
+    }
+    &.admin-confirmation-loading:before {
+      @include icon-loading;
+    }
+    &.admin-confirmation-error {
+      h3 {
+        opacity: 1;
+        vertical-align: middle;
+        &:before {
+          @extend %icon-alert;
+          @extend %extra-large-icon-font;
+          color: $alert-red;
+          padding-right: 10px;
+          vertical-align: middle;
+        }
+      }
+      *:not(h3):not([data-flyout-action]) {
+        opacity: 0;
+      }
+    }
+    &.admin-confirmation-loading {
+      position: relative;
+      &:before {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 1;
+      }
+      * {
+        opacity: 0;
+      }
+    }
+  }
+}
+.admin-confirmation-dialog {
+  display: none;
+}

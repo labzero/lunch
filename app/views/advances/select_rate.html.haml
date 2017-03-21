@@ -21,13 +21,11 @@
               %span{data: {active_term_type: :vrc}}= t('advances.vrc_rates')
               %span{data: {active_term_type: :frc}}= t('advances.frc_rates')
             - if feature_enabled?('add-advance-custom-term')
-              .advance-funding-date-wrapper
-                %span= t('advances.funding.funding_date')
-                %span= t('advances.funding.funding_today', date: fhlb_date_standard_numeric(@today))
-                %button.advance-alternate-funding-date-edit.text-only-button= t('advances.funding.edit')
+              = render 'alternate_funding_date', future_funding_date: @future_funding_date
               .advance-alternate-funding-date-wrapper
                 %span= t('advances.funding.set_alternate')
                 %button.advance-alternate-funding-date-close.text-only-button= t('global.close')
+                %p= t('advances.funding.alert_message')
                 %ul
                   %li
                     = render 'shared/radio_button', id: 'funding_date_today', name: 'alternate-funding-date', checked: true, text:fhlb_date_standard_numeric(@today), value: @today.iso8601

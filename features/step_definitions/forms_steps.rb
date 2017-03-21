@@ -58,10 +58,22 @@ end
 
 Then(/^I should see the "(.*?)" form error$/) do |error_type|
   text = case error_type
+  when 'expiration date invalid'
+    I18n.t('activemodel.errors.models.letter_of_credit_request.attributes.expiration_date.invalid')
+  when 'issue date invalid'
+    I18n.t('activemodel.errors.models.letter_of_credit_request.attributes.issue_date.invalid')
   when 'expiration date before issue date'
     I18n.t('activemodel.errors.models.letter_of_credit_request.attributes.expiration_date.before_issue_date')
+  when 'issue date no longer valid'
+    I18n.t('activemodel.errors.models.letter_of_credit_request.attributes.issue_date.no_longer_valid')
   when 'internal user not authorized'
     I18n.t('letters_of_credit.errors.not_authorized')
+  when /^exceeds borrowing capacity of (\d+)$/
+    I18n.t('letters_of_credit.errors.exceeds_borrowing_capacity', borrowing_capacity: fhlb_formatted_currency_whole($1, html: false))
+  when /^expiration date exceeds max term of (\d+) months$/
+    I18n.t('letters_of_credit.errors.after_max_term', max_term: $1)
+  when /^exceeds financing availability of (\d+)$/
+    I18n.t('letters_of_credit.errors.exceeds_financing_availability', financing_availability: $1)
   end
   page.assert_selector('.form-error-section p', text: text, exact: true)
 end

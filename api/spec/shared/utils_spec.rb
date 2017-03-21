@@ -123,6 +123,40 @@ describe MAPI::Shared::Utils::ClassMethods do
     end
   end
 
+  describe 'fetch_rows' do
+    let(:logger) { double(Logger) }
+    let(:sql)    { double('sql') }
+    let(:cursor) { double(OCI8::Cursor) }
+    let(:rows) { [double(Array), double(Array), double(Array)]}
+    let(:call_method) { subject.fetch_rows(logger, sql)}
+
+    before do
+      allow(subject).to receive(:execute_sql).with(logger, sql).and_return(cursor)
+      allow(cursor).to receive(:fetch).and_return(*(rows + [nil]))
+    end
+
+    it 'invokes execute sql with a logger and a sql query' do
+      expect(subject).to receive(:execute_sql).with(logger, sql).and_return(cursor)
+      call_method
+    end
+
+    it 'calls `fetch` on the results cursor until nil is receieved' do
+      expect(cursor).to receive(:fetch).and_return(*(rows + [nil])).exactly(rows.length + 1)
+      call_method
+    end
+
+    it 'returns an empty array if the SQL query yields no results' do
+      allow(cursor).to receive(:fetch).and_return(nil)
+      expect(call_method).to eq([])
+    end
+
+    it 'logs an error for exceptions' do
+      allow(cursor).to receive(:fetch).and_raise(exception)
+      expect(logger).to receive(:error).with(exception_message)
+      call_method
+    end
+  end
+
   describe '`decimal_to_percentage_rate` method' do
     it 'converts a decimal rate to a percentage rate' do
       rate = double('A Rate')

@@ -788,6 +788,11 @@ describe AdvanceRequest do
         expect(call_method).to eq(human_term)
       end
     end
+    it 'returns formatted custom term when the term matches `CUSTOM_TERM`' do
+      days = rand(1..1000)
+      allow(subject).to receive(:term).and_return("#{days}day")
+      expect(call_method).to eq(I18n.t('advances.custom_term.in_days', days: days))
+    end
     it 'returns the `term` when its anything else' do
       term = double('A Term')
       allow(subject).to receive(:term).and_return(term)

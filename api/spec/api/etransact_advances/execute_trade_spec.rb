@@ -276,6 +276,25 @@ describe MAPI::ServiceApp do
       expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, anything, anything, maturity_date).and_return({})
       execute_trade
     end
+    {cof_data_cleanup: MAPI::Services::EtransactAdvances, get_market_cof_rates: MAPI::Services::Rates::MarketDataRates, execute_trade: MAPI::Services::EtransactAdvances::ExecuteTrade}.each do |method, module_name|
+      describe "when `#{module_name}.#{method}` raises a `Savon::Error`" do
+        let(:err) { Savon::Error.new }
+        let(:logger) { instance_double(Logger, error: true) }
+        let(:make_request) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}" }
+        before do
+          allow(module_name).to receive(method).and_raise(err)
+          allow_any_instance_of(described_class).to receive(:logger).and_return(logger)
+        end
+        it 'logs the error' do
+          expect(logger).to receive(:error).with(err)
+          make_request
+        end
+        it 'returns a 503' do
+          make_request
+          expect(last_response.status).to be(503)
+        end
+      end
+    end
   end
 
   describe 'Validate Trade check' do
@@ -960,7 +979,8 @@ describe MAPI::ServiceApp do
     let(:blended_cost_of_funds) { double('blended_cost_of_funds') }
     let(:cost_of_funds) { double('cost_of_funds') }
     let(:benchmark_rate) { double('benchmark_rate') }
-    let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, false, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period) }
+    let(:check_capital_stock) { false }
+    let(:execute_trade) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, check_capital_stock, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period) }
     before do
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:init_execute_trade_connection)
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:build_message).with(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, today, day_count).and_return(built_message)
@@ -980,13 +1000,86 @@ describe MAPI::ServiceApp do
         execute_trade
       end
     end
+    shared_examples 'errors' do
+      it 'returns an error status is found in the SOAP transactionResult', vcr: {cassette_name: 'execute_trade_service_error'} do
+        allow(app.settings).to receive(:environment).and_return(:production)
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:init_execute_trade_connection).and_call_original
+        expect(execute_trade['status']).to eq(['Error'])
+      end
+    end
     describe 'execute' do
       let(:operation) { 'EXECUTE' }
       include_examples 'dates'
+      include_examples 'errors'
+      describe 'in the development environment' do
+        before do
+          allow(app.settings).to receive(:environment).and_return(:development)
+        end
+        context 'the amount is 100005' do
+          let(:amount) { 100005 }
+          it 'returns a DisabledProductError `status`' do
+            expect(execute_trade['status']).to include('DisabledProductError')
+          end
+        end
+      end
     end
     describe 'validate' do
       let(:operation) { 'VALIDATE' }
       include_examples 'dates'
+      include_examples 'errors'
+      describe 'in the development environment' do
+        before do
+          allow(app.settings).to receive(:environment).and_return(:development)
+        end
+        context 'the amount is 100004' do
+          let(:amount) { 100004 }
+          it 'returns a DisabledProductError `status`' do
+            expect(execute_trade['status']).to include('DisabledProductError')
+          end
+        end
+        context 'the amount is 100006' do
+          let(:amount) { 100006 }
+          it 'returns a CollateralError `status`' do
+            expect(execute_trade['status']).to include('CollateralError')
+          end
+          it 'returns a CapitalStockError `status`' do
+            expect(execute_trade['status']).to include('CapitalStockError')
+          end
+        end
+        context 'the amount is 100007 and we want to check capital stock' do
+          let(:check_capital_stock) { true }
+          let(:amount) { 100007 }
+          it 'returns a GrossUpExceedsFinancingAvailabilityError `status`' do
+            expect(execute_trade['status']).to include('GrossUpExceedsFinancingAvailabilityError')
+          end
+          it 'returns a CapitalStockError `status`' do
+            expect(execute_trade['status']).to include('CapitalStockError')
+          end
+        end
+        context 'the amount is 100008' do
+          let(:amount) { 100008 }
+          it 'returns a EndOfDayReached `status`' do
+            expect(execute_trade['status']).to include('EndOfDayReached')
+          end
+          it 'returns an `end_of_day` ISO8601 thats 5 minutes ago' do
+            now = Time.zone.now
+            allow(Time.zone).to receive(:now).and_return(now)
+            expect(execute_trade['end_of_day']).to eq((now - 5.minutes).iso8601)
+          end
+        end
+        context 'the amount is 100010' do
+          let(:amount) { 100010 }
+          it 'returns a ExceedsMaximumTerm `status`' do
+            expect(execute_trade['status']).to include('ExceedsMaximumTerm')
+          end
+          it 'returns an `maximum_term` thats 4' do
+            expect(execute_trade['maximum_term']).to be(4)
+          end
+          it 'returns an `maximum_term_unit` thats 4' do
+            expect(execute_trade['maximum_term_unit']).to be(:month)
+          end
+        end
+      end
     end
     context 'grace periods', vcr: {cassette_name: 'execute_trade_service_agency_1week'} do
       let(:operation) { 'EXECUTE' }
@@ -1037,6 +1130,24 @@ describe MAPI::ServiceApp do
         message = MAPI::Services::EtransactAdvances::ExecuteTrade.build_message(member_id, instrument, operation, amount, 'open', advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, today, day_count).first
         expect(message['v1:trade']['v12:advance']['v14:coupon']['v13:paymentDates']['v13:paymentConvention']['v13:businessDayAdjustment']).to eq('MODFOLLOWING')
       end
+    end
+  end
+
+  describe '`round_up_stock` class method' do
+    it 'returns 0 if passed 0' do
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.round_up_stock(0)).to be(0)
+    end
+    it 'returns 0 if passed a negative number' do
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.round_up_stock(-rand(1..100))).to be(0)
+    end
+    it 'returns the passed stock value if its a multiple of 100' do
+      stock = rand(1..100) * 100
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.round_up_stock(stock)).to be(stock)
+    end
+    it 'returns the passed stock value rounded to the next multiple of 100 if passed a stock value that is not a multiple of 100' do
+      stock_base = rand(1..100)
+      stock = (stock_base * 100) + rand(0..99)
+      expect(MAPI::Services::EtransactAdvances::ExecuteTrade.round_up_stock(stock)).to be((stock_base + 1) * 100)
     end
   end
 end

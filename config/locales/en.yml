@@ -261,15 +261,19 @@ en:
           blank: 'Missing required field: %{attribute}'
           attributes:
             issue_date:
-              invalid: Issue date may not occur on a weekend, a holiday or more than 1 week from today.
+              invalid: "The issue date must not occur on a weekend or holiday; must not be in the past; and must not be more than 7 days from today. Adjust the date selection and try again."
+              no_longer_valid: To be processed the same day, Letter of Credit requests must be submitted before 11:00 am. Adjust the issue date and try again.
             expiration_date:
-              invalid: Expiration date may not occur on a weekend, a holiday or more than 15 years from the issue date.
+              invalid: "The expiration date must not occur on a weekend or holiday; must not be in the past; and must be less than 15 years from the issue date. Adjust the date selection and try again."
               before_issue_date: Expiration date must be after issue date.
+              after_max_term: The expiration date exceeds the maximum borrowing term allowed for your institution. Adjust the expiration or issue date and try again.
             amount:
               invalid: Amount must be a positive number with no fractional cents.
               not_a_number: Amount must be a positive number with no fractional cents.
               not_an_integer: Amount must be a positive number with no fractional cents.
               greater_than: Amount must be a positive number with no fractional cents.
+              exceeds_borrowing_capacity: The amount you selected exceeds your institution's current whole loan borrowing capacity. You may make a request for a lower amount, or check with your Relationship Manager or Member Services Desk to adjust your collateral first.
+              exceeds_financing_availability: The amount you entered exceeds your institution's current financing availability. Submit a request for a lesser amount or contact your Relationship Manager or the Member Services Desk.
             beneficiary_name:
               invalid: Please choose a valid beneficiary.
     attributes:
@@ -1158,7 +1162,7 @@ en:
           description: "This form authorizes the designated individuals listed to engage in interest rate derivative transactions with the Bank."
         id_2089:
           title: "Calculation of 10% Requirement: Commercial Banks, Savings Institutions, and Industrial Loan Companies (FC 2089)"
-          description: "This worksheet is only required for institutions with average total assets for the preceding three-year period of $1,123 million or greater (as of January 1, 2015; subject to annual adjustment). This worksheet helps you determine whether your institution has at least 10% of total assets in residential mortgage loans, a statutory eligibility requirement for membership."
+          description: "This worksheet is only required for institutions with average total assets for the preceding three-year period of $1,148 million or greater (as of January 1, 2017; subject to annual adjustment). This worksheet helps you determine whether your institution has at least 10% of total assets in residential mortgage loans, a statutory eligibility requirement for membership."
         id_2090:
           title: "Certificate of Applicant (FC 2090)"
           description: "This document must be completed and signed by the person(s) authorized in the Resolution: Membership."
@@ -1543,6 +1547,9 @@ en:
     errors:
       not_authorized: This Letter of Credit Request was not completed because Bank employees are not authorized to request letters of credit via the member portal.
       generic_html: "We are unable to process your request at this time. Contact your Relationship Manager: %{rm_email}, %{rm_phone_number}."
+      exceeds_borrowing_capacity: The amount you selected exceeds your institution's current whole loan borrowing capacity of %{borrowing_capacity}. You may make a request for a lower amount, or check with your Relationship Manager or Member Services Desk to adjust your collateral first.
+      after_max_term: The expiration date cannot be more than %{max_term} months from the issue date. Adjust the expiration or issue date and try again.
+      exceeds_financing_availability: The amount you entered exceeds your institution's current financing availability of %{financing_availability}. Submit a request for a lesser amount or contact your Relationship Manager or the Member Services Desk.
     pdf:
       requested: Letter of Credit Request
       request_date: Request Date/Time
@@ -2274,10 +2281,14 @@ en:
       funding_date: Funding Date
       funding_today: Funds Today on %{date}
       edit: Edit Funding Date
-      set_alternate: Set an Alternate Funding Date
+      set_alternate: Select a Funding Date
       default: (default)
       next_business: Next Business Day
       skip_day: Skip Day
+      alert_message: You may select a funding date that is different from the trade date. Advance execution is subject to sufficient financing availability on the trade date and sufficient collateral borrowing capacity and capital stock on the funding date.
+      funding_message: You have selected a funding date that is different from the trade date. Advance execution is subject to sufficient financing availability on the trade date and sufficient collateral borrowing capacity and capital stock on the funding date. Please ensure your institution meets those requirements on %{funding_date}.
+      funded_on: This advance will be funded on %{funding_date}
+      funding_on: Funds on %{date}
     custom_term:
       title: Custom Term
       add: Add Custom Term
@@ -2287,7 +2298,7 @@ en:
       instructions: Placeholder for Instructions
       edit: Edit Custom Term
       matures_on: Matures in %{days} days on %{date}
-      in_days: "%{days} days"
+      in_days: "%{days} Days"
     actions:
       review: Review Advance
       submit: Submit Advance
@@ -3192,6 +3203,17 @@ en:
       edit:
         members: Institutions where all users are enabled for this feature
         users: Individual users who are enabled for this feature
+        all_users: All Users
+        all_members: All Institutions
+        no_users: No users are enabled for this feature.
+        no_members: No institutions are enabled for this feature.
+      confirmations:
+        enable_all:
+          title: Enable this feature for all members and users?
+          accept: Enable for all
+        disable_all:
+          title: Disable this feature for all members and users?
+          accept: Disable for all
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

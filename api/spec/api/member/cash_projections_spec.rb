@@ -91,10 +91,16 @@ describe MAPI::ServiceApp do
       end
 
       describe '`fake_as_of_date` method' do
-        let(:fake_as_of_date) { MAPI::Services::Member::CashProjections::Private.fake_as_of_date }
-
-        it 'should always return a weekday' do
-          expect(fake_as_of_date.wday).to be_between(1,5)
+        today = Time.zone.today
+        (0..6).each do |day|
+          date = today + day
+          it "returns a weekday when passed a #{date.strftime('%A')} " do
+            expect(MAPI::Services::Member::CashProjections::Private.fake_as_of_date(date).wday).to be_between(1,5)
+          end
+        end
+        it 'defaults to `now` when no date is provided' do
+          allow(Time.zone).to receive(:now).and_return(today.sunday)
+          expect(MAPI::Services::Member::CashProjections::Private.fake_as_of_date).to be_friday
         end
       end
 

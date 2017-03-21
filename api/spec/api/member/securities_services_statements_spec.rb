@@ -65,25 +65,33 @@ describe MAPI::ServiceApp do
     describe 'production' do
       let(:env){ :production }
       let(:available_statements_sql){ double('available_statements_sql') }
-      let(:available_statements_hashes){ double('available_statements_hashes') }
+      let(:available_statements_hash) { {'report_end_date' => report_end_date} }
+      let(:available_statements_hashes){ [available_statements_hash] }
       let(:statement_sql){ double('statement_sql') }
       let(:statement_hash){ double('statement_record', with_indifferent_access: indifferent_statement_hash) }
       let(:indifferent_statement_hash){ double('indifferent_statement_hash') }
       let(:fixed_statement_hash) { double('fixed_statement_hash') }
       let(:transformed_statement_hash){ double('transformed_statement_hash') }
+      let(:report_end_date) { instance_double(String, 'A Report End Date') }
+      let(:call_method) { subject.available_statements(logger, env, fhlb_id) }
 
       before do
         allow(subject).to receive(:available_statements_sql).with(fhlb_id).and_return(available_statements_sql)
         allow(subject).to receive(:statement_sql).with(fhlb_id, date).and_return(statement_sql)
         allow(subject).to receive(:fetch_hashes).with(logger, available_statements_sql, {}, true).and_return(available_statements_hashes)
-        allow(available_statements_hashes).to receive(:each).and_return(available_statements_hashes)
         allow(subject).to receive(:fetch_hashes).with(logger, statement_sql, subject::MAP_VALUES).and_return([statement_hash])
         allow(subject).to receive(:multi_level_transform).with(statement_hash, subject::MAP_KEYS).and_return(transformed_statement_hash)
+        allow(subject).to receive(:dateify)
       end
 
       describe 'available_statements' do
         it 'should return available_statements_hashes' do
-          expect(subject.available_statements(logger, env, fhlb_id)).to eq(available_statements_hashes)
+          expect(call_method).to eq(available_statements_hashes)
+        end
+        it 'converts statement `report_end_date` to a date' do
+          converted_report_end_date = instance_double(Date, 'A Converted Report End Date')
+          allow(subject).to receive(:dateify).with(report_end_date).and_return(converted_report_end_date)
+          expect(call_method.first['report_end_date']).to be(converted_report_end_date)
         end
       end
 
@@ -120,6 +128,59 @@ describe MAPI::ServiceApp do
             expect(subject.statement(logger, env, fhlb_id, date)).to eq(transformed_hash)
           end
         end
+      end
+    end
+
+    describe '`available_statements_sql` class method' do
+      let(:fhlb_id) { instance_double(Numeric) }
+      let(:quoted_fhlb_id) { SecureRandom.hex }
+      let(:call_method) { subject.available_statements_sql(fhlb_id) }
+
+      before do
+        allow(subject).to receive(:quote).with(fhlb_id).and_return(quoted_fhlb_id)
+      end
+
+      it 'selects the distinct `SSX_BTC_DATE` as `report_end_date` from `SAFEKEEPING.SECURITIES_FEES_STMT_WEB`' do
+        expect(call_method).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*DISTINCT\s+SSX_BTC_DATE\s+AS\s+report_end_date((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING.SECURITIES_FEES_STMT_WEB\s/mi)
+      end
+
+      it 'filters based on the quouted `fhlb_id`' do
+        expect(call_method).to match(/\sWHERE\s+fhlb_id\s*=\s*#{quoted_fhlb_id}\s+/mi)
+      end
+
+      it 'orders rows based on descending `SSX_BTC_DATE`' do
+        expect(call_method).to match(/\sWHERE(\s+.+\s+AND)*(\s+.+)?\s+ORDER\s+BY\s+SSX_BTC_DATE\s+DESC\s*\z/mi)
+      end
+    end
+
+    describe '`statement_sql` class method' do
+      let(:fhlb_id) { instance_double(Numeric) }
+      let(:report_date) { instance_double(Date, 'A Report Date') }
+      let(:quoted_report_date) { SecureRandom.hex }
+      let(:quoted_fhlb_id) { SecureRandom.hex }
+      let(:call_method) { subject.statement_sql(fhlb_id, report_date) }
+
+      before do
+        allow(subject).to receive(:quote).with(fhlb_id).and_return(quoted_fhlb_id)
+        allow(subject).to receive(:quote).with(report_date).and_return(quoted_report_date)
+      end
+
+      # it 'selects the distinct `SSX_BTC_DATE` as `report_end_date` from `SAFEKEEPING.SECURITIES_FEES_STMT_WEB`' do
+      #   expect(call_method).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*DISTINCT\s+SSX_BTC_DATE\s+AS\s+report_end_date((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING.SECURITIES_FEES_STMT_WEB\s/mi)
+      # end
+
+      MAPI::Services::Member::SecuritiesServicesStatements::MAP_KEYS.each do |field, _|
+        it "selects the `#{field}` from `SAFEKEEPING.SECURITIES_FEES_STMT_WEB`" do
+          expect(call_method).to match(/\A\s*SELECT\s+.*#{field}(,[^,]*)*\s+FROM\s+SAFEKEEPING.SECURITIES_FEES_STMT_WEB\s/mi)
+        end
+      end
+
+      it 'filters based on the quouted `fhlb_id`' do
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+FHLB_ID\s+=\s+#{quoted_fhlb_id}(\s+|\z)/mi)
+      end
+
+      it 'filters based on the quouted `report_date`' do
+        expect(call_method).to match(/\sWHERE(\s+\S+\s+=\s+\S+\s+AND)*\s+SSX_BTC_DATE\s+=\s+#{quoted_report_date}(\s+|\z)/mi)
       end
     end
   end

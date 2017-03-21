@@ -86,6 +86,10 @@ $(function () {
       var tbody = $rateTable.find('tbody');
       tbody.children().remove();
       tbody.append($(data.html));
+      if ((data.alternate_funding_date_html) && (!maturity_date)) {
+        var $fundingDateWrapper = $formPreview.find('.advance-funding-date-wrapper');
+        $fundingDateWrapper.replaceWith(data.alternate_funding_date_html);
+      }
       bindApplyHandler();
       bindRateTableCells($rateTable);
       $idField.val(data.id);
@@ -215,14 +219,6 @@ $(function () {
     e.preventDefault();
   });
 
-  // Open Alternate Funding Date Selector
-  $('.advance-alternate-funding-date-edit').on('click', function(e) {
-    $('.advance-alternate-funding-date-wrapper').show();
-    $('.advance-funding-date-wrapper').hide();
-    e.stopPropagation();
-    e.preventDefault();
-  });
-
   // Open Custom Date Selector
   $('.advance-custom-date-add').on('click', function(e) {
     $('.advance-custom-date-wrapper').hide();
@@ -262,6 +258,14 @@ $(function () {
       $('.advance-custom-date-wrapper').hide();
       $('.advance-select-custom-date-wrapper').hide();
       $('.advance-create-custom-date-wrapper').show();
+      e.stopPropagation();
+      e.preventDefault();
+    });
+
+    // Open Alternate Funding Date Selector
+    $('.advance-alternate-funding-date-edit').on('click', function(e) {
+      $('.advance-alternate-funding-date-wrapper').show();
+      $('.advance-funding-date-wrapper').hide();
       e.stopPropagation();
       e.preventDefault();
     });

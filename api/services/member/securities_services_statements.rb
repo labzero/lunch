@@ -87,14 +87,14 @@ module MAPI
           <<-SQL
           SELECT #{MAP_KEYS.keys.join(',')}
           FROM SAFEKEEPING.SECURITIES_FEES_STMT_WEB
-          WHERE FHLB_ID = #{fhlb_id} AND (SSX_BTC_DATE = #{quote(report_date)})
+          WHERE FHLB_ID = #{quote(fhlb_id)} AND SSX_BTC_DATE = #{quote(report_date)}
           SQL
         end
 
         def self.available_statements_sql(fhlb_id)
           <<-SQL
           SELECT DISTINCT SSX_BTC_DATE as report_end_date
-          FROM SAFEKEEPING.SECURITIES_FEES_STMT_WEB WHERE FHLB_ID = #{fhlb_id}
+          FROM SAFEKEEPING.SECURITIES_FEES_STMT_WEB WHERE FHLB_ID = #{quote(fhlb_id)}
           ORDER BY SSX_BTC_DATE DESC
           SQL
         end

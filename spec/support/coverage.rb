@@ -24,7 +24,7 @@ module FhlbMember
       SimpleCov.add_group 'Services', 'app/services'
       SimpleCov.add_filter 'api/spec'
       SimpleCov.add_filter 'lib/new_relic' # ignore new relic instrumentation
-      SimpleCov.minimum_coverage ENV['SIMPLECOV_MINIMUM_COVERAGE'] ? ENV['SIMPLECOV_MINIMUM_COVERAGE'].to_i : 98
+      SimpleCov.minimum_coverage ENV['SIMPLECOV_MINIMUM_COVERAGE'] ? ENV['SIMPLECOV_MINIMUM_COVERAGE'].to_i : 100
       SimpleCov.start 'rails'
     end
   end

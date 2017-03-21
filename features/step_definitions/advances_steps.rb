@@ -343,6 +343,15 @@ When(/^I click on Edit Funding Date link$/) do
   page.find('.advance-alternate-funding-date-edit').click
 end
 
+When(/^I click on Close Funding Date link$/) do
+  page.find('.advance-alternate-funding-date-close').click
+end
+
+Then(/^I should see Updated Funding Date$/) do
+  page.assert_selector('.advance-funding-date-wrapper span:nth-child(2)', text: I18n.t('advances.funding.funding_on', date: fhlb_date_standard_numeric(@future_funding_date)), exact: true, visible: true)
+end
+
+
 When(/^I click on Add Custom Term link$/) do
   page.find('.advance-custom-date-add').click
 end
@@ -352,6 +361,7 @@ When(/^I click on the Today radio button$/) do
 end
 
 When(/^I click on the Next Business Day radio button$/) do
+  @future_funding_date = page.find('.advance-alternate-funding-date-wrapper ul li:nth-child(2) input[type=radio]').value
   page.find('.advance-alternate-funding-date-wrapper ul li:nth-child(2) input[type=radio]').click
 end
 

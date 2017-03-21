@@ -76,4 +76,58 @@ describe MAPI::Services::Rates::Holidays do
       end
     end
   end
+
+  describe '`get_holidays_from_soap` class method' do
+    let(:logger) { instance_double(Logger, error: nil) }
+    let(:connection) { instance_double(Savon::Client) }
+    let(:start_date) { instance_double(Date, 'Start Date') }
+    let(:end_date) { instance_double(Date, 'End Date') }
+    let(:holidays) { instance_double(Savon::Response, 'Holidays')}
+    let(:call_method) { subject.get_holidays_from_soap(logger, connection, start_date, end_date) }
+
+    before do
+      allow(connection).to receive(:call).with(:get_holiday, any_args).and_return(holidays)
+    end
+
+    it 'calls the `get_holiday` SOAP endpoint' do
+      expect(connection).to receive(:call).with(:get_holiday, any_args)
+      call_method
+    end
+    it 'returns the results of the SOAP call' do
+      expect(call_method).to be(holidays)
+    end
+    describe 'calling the `get_holiday` endpoint' do
+      it 'uses a `holidayRequest` message tag' do
+        expect(connection).to receive(:call).with(:get_holiday, include(message_tag: 'holidayRequest'))
+        call_method
+      end
+      it 'includes the SOAP authentication headers' do
+        expect(connection).to receive(:call).with(:get_holiday, include(soap_header: described_class::SOAP_HEADER))
+        call_method
+      end
+      it 'includes the start date in the message' do
+        expect(connection).to receive(:call).with(:get_holiday, include(message: include('v1:startDate' => start_date)))
+        call_method
+      end
+      it 'includes the end date in the message' do
+        expect(connection).to receive(:call).with(:get_holiday, include(message: include('v1:endDate' => end_date)))
+        call_method
+      end
+    end
+    describe 'on a Savon::Error' do
+      let(:err) { Savon::Error.new }
+
+      before do
+        allow(connection).to receive(:call).with(:get_holiday, any_args).and_raise(err)
+      end
+
+      it 'logs the error' do
+        expect(logger).to receive(:error).with(err)
+        call_method
+      end
+      it 'returns nil' do
+        expect(call_method).to be_nil
+      end
+    end
+  end
 end

@@ -48,7 +48,7 @@ module CustomFormattingHelper
   end
 
   def fhlb_date_standard_numeric(date)
-    return t('global.missing_value') if date.nil?
+    return I18n.t('global.missing_value') if date.nil?
     date.to_date.strftime('%m/%d/%Y')
   end
 

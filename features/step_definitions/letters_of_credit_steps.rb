@@ -17,7 +17,7 @@ When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Le
     visit '/letters-of-credit/request'
   when 'Preview Letter of Credit'
     visit '/letters-of-credit/request'
-    step 'I enter 1234567 in the letter of credit amount field'
+    step 'I enter 1234 in the letter of credit amount field'
     step 'I click the Preview Request button'
     step 'I should be on the Preview Letter of Credit Request page'
   when 'Letter of Credit Success'
@@ -105,6 +105,17 @@ Then(/^the letter of credit amount field should be blank$/) do
   expect(page.find('input[name="letter_of_credit_request[amount]"]').value).to eq('')
 end
 
-Then(/^the letter of credit amount field should show "(.*?)"/) do |text|
+Then(/^the letter of credit amount field should show "(.*?)"$/) do |text|
   expect(page.find("input[name='letter_of_credit_request[amount]'").value).to eq(text)
+end
+
+When(/^I set the Letter of Credit Request (issue|expiration) date to (\d+) (weeks|months) from today$/) do |field, n, unit|
+  field = field == 'issue' ? 'issue_date' : 'expiration_date'
+  field_date = Time.zone.today + n.to_i.send(:"#{unit}")
+  field_date = CalendarService.new(ActionDispatch::TestRequest.new).find_next_business_day(field_date, 1.day).to_s
+  page.execute_script("$('input[name=\"letter_of_credit_request[#{field}]\"]').val(\"#{field_date}\")")
+end
+
+When(/^I set the Letter of Credit Request issue date to today$/) do
+  page.execute_script("$('input[name=\"letter_of_credit_request[issue_date]\"]').val(\"#{Time.zone.today.to_s}\")")
 end

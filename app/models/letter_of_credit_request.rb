@@ -1,19 +1,23 @@
 class LetterOfCreditRequest
   include ActiveModel::Model
   include RedisBackedObject
+  include CustomFormattingHelper
 
   # The DEFAULT_ISSUANCE_FEE and DEFAULT_MAINTENANCE_FEE may eventually come from a service, but we have been asked by
   # Scott and Michael to hardcode them in until an appropriate service is built to expose this information.
   DEFAULT_ISSUANCE_FEE = 100
   DEFAULT_MAINTENANCE_FEE = '10 bps'
-  EXPIRATION_MAX_DATE_RESTRICTION = 15.years # TODO: Validate expiration date as part of MEM-2149
-  ISSUE_MAX_DATE_RESTRICTION = 1.week # TODO: Validate issue date as part of MEM-2151
+  EXPIRATION_MAX_DATE_RESTRICTION = 15.years
+  ISSUE_MAX_DATE_RESTRICTION = 1.week
+  ISSUE_DATE_TIME_RESTRICTION = '11:00:00'
+  ISSUE_DATE_TIME_RESTRICTION_WINDOW = 5.minutes
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
-  READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners]
-  ACCESSIBLE_ATTRS = [:beneficiary_name, :beneficiary_address, :amount, :issue_date, :expiration_date, :created_at, :created_by]
-  DATE_ATTRS = [:issue_date, :expiration_date, :created_at]
-  REQUIRED_ATTRS = [:beneficiary_name, :amount, :issue_date, :expiration_date]
+  READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners, :member_id,
+                     :standard_borrowing_capacity, :max_term, :remaining_financing_available].freeze
+  ACCESSIBLE_ATTRS = [:beneficiary_name, :beneficiary_address, :amount, :issue_date, :expiration_date, :created_at, :created_by].freeze
+  DATE_ATTRS = [:issue_date, :expiration_date, :created_at].freeze
+  REQUIRED_ATTRS = [:beneficiary_name, :amount, :issue_date, :expiration_date].freeze
   SERIALIZATION_EXCLUDE_ATTRS = [:request].freeze
 
   attr_accessor *ACCESSIBLE_ATTRS
@@ -23,15 +27,21 @@ class LetterOfCreditRequest
   validates :amount, numericality: { greater_than: 0, only_integer: true}
   validate :issue_date_must_come_before_expiration_date
   validate :issue_date_within_range
+  validate :issue_date_valid_for_today, if: Proc.new { |request| request.issue_date && request.issue_date.to_date == Time.zone.today }
   validate :expiration_date_within_range
+  validate :amount_does_not_exceed_borrowing_capacity
+  validate :amount_does_not_exceed_financing_availability
+  validate :expiration_date_before_max_term
 
-  def initialize(request=ActionDispatch::TestRequest.new)
+  def initialize(member_id, request=ActionDispatch::TestRequest.new)
+    @member_id = member_id
     @request = request
     calendar_service = CalendarService.new(@request)
     today = Time.zone.today
     @issuance_fee = DEFAULT_ISSUANCE_FEE
     @maintenance_fee = DEFAULT_MAINTENANCE_FEE
-    @issue_date = calendar_service.find_next_business_day(today, 1.day)
+    start_date = Time.zone.now > Time.zone.parse(ISSUE_DATE_TIME_RESTRICTION) ? today + 1.day : today
+    @issue_date = calendar_service.find_next_business_day(start_date, 1.day)
     @expiration_date = calendar_service.find_next_business_day(@issue_date + 1.year, 1.day)
   end
 
@@ -57,7 +67,7 @@ class LetterOfCreditRequest
       when *READ_ONLY_ATTRS
         instance_variable_set("@#{key}", value)
       when *DATE_ATTRS
-        value = Time.zone.parse(value) if value
+        value = Date.parse(value) if value
         send("#{key}=", value)
       when *ACCESSIBLE_ATTRS
         send("#{key}=", value)
@@ -102,8 +112,20 @@ class LetterOfCreditRequest
     @owners ||= Set.new
   end
 
+  def standard_borrowing_capacity
+    @standard_borrowing_capacity ||= (@member_profile[:collateral_borrowing_capacity][:standard][:remaining].to_i if @member_profile)
+  end
+
+  def max_term
+    @max_term ||= (@member_profile[:maximum_term].to_i if @member_profile)
+  end
+
+  def remaining_financing_available
+    @remaining_financing_available ||= (@member_profile[:remaining_financing_available].to_i if @member_profile)
+  end
+
   def self.from_json(json, request)
-    new.from_json(json)
+    new(nil, request).from_json(json)
   end
 
   def self.policy_class
@@ -119,16 +141,17 @@ class LetterOfCreditRequest
   end
 
   def issue_date_within_range
-    errors.add(:issue_date, :invalid) unless !issue_date || date_within_range(issue_date, ISSUE_MAX_DATE_RESTRICTION)
+    max_date = Time.zone.today + ISSUE_MAX_DATE_RESTRICTION
+    errors.add(:issue_date, :invalid) unless !issue_date || date_within_range(issue_date, max_date)
   end
 
   def expiration_date_within_range
-    errors.add(:expiration_date, :invalid) unless !expiration_date || date_within_range(expiration_date, EXPIRATION_MAX_DATE_RESTRICTION)
+    max_date = (issue_date || Time.zone.today) + EXPIRATION_MAX_DATE_RESTRICTION
+    errors.add(:expiration_date, :invalid) unless !expiration_date || date_within_range(expiration_date, max_date)
   end
 
-  def date_within_range(date, max_date_restriction)
+  def date_within_range(date, max_date)
     today = Time.zone.today
-    max_date = today + max_date_restriction
     holidays = CalendarService.new(request).holidays(today, max_date)
     !(date.try(:sunday?) || date.try(:saturday?)) && !(holidays.include?(date)) && date.try(:>=, today) && date.try(:<=, max_date)
   end
@@ -169,4 +192,29 @@ class LetterOfCreditRequest
     next_in_sequence
   end
 
+  def amount_does_not_exceed_borrowing_capacity
+    fetch_member_profile
+    errors.add(:amount, :exceeds_borrowing_capacity) unless !amount || amount <= standard_borrowing_capacity
+  end
+
+  def amount_does_not_exceed_financing_availability
+    fetch_member_profile
+    errors.add(:amount, :exceeds_financing_availability) unless !amount || amount <= remaining_financing_available
+  end
+
+  def expiration_date_before_max_term
+    if expiration_date && issue_date
+      fetch_member_profile
+      term = (expiration_date.to_date - issue_date.to_date).to_i
+      errors.add(:expiration_date, :after_max_term) unless term.days <= max_term.months
+    end
+  end
+
+  def fetch_member_profile
+    @member_profile ||= MemberBalanceService.new(member_id, request).profile
+  end
+
+  def issue_date_valid_for_today
+    errors.add(:issue_date, :no_longer_valid) if Time.zone.now > (Time.zone.parse(ISSUE_DATE_TIME_RESTRICTION) + ISSUE_DATE_TIME_RESTRICTION_WINDOW)
+  end
 end

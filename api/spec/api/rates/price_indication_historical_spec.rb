@@ -97,15 +97,26 @@ describe MAPI::ServiceApp do
       let(:benchmark_query) {double('SQL query for irdb and benchmark')}
       let(:irdb_cursor) {double('irdb cursor')}
       let(:benchmark_cursor) {double('benchmark cursor')}
-      let(:rows) {{
-                       'TRX_IR_CODE' => 'PRIME',
-                       'TRX_EFFECTIVE_DATE' => '2014-01-01',
-                       'TRX_TERM_VALUE' => '1',
-                       'TRX_TERM_UOM' => 'D',
-                       'TRX_VALUE' => 0.436,
-                       'MS_DAY_CNT_BAS' => 'Actual/360',
-                       'MS_DATA_FREQ' => 'Daily'
-                   }}
+      let(:rows) {
+        [{
+          'TRX_IR_CODE' => 'PRIME',
+          'TRX_EFFECTIVE_DATE' => '2014-01-01',
+          'TRX_TERM_VALUE' => '1',
+          'TRX_TERM_UOM' => 'D',
+          'TRX_VALUE' => 0.436,
+          'MS_DAY_CNT_BAS' => 'Actual/360',
+          'MS_DATA_FREQ' => 'Daily'
+        },
+        {
+          'TRX_IR_CODE' => 'PRIME',
+          'TRX_EFFECTIVE_DATE' => '2015-01-01',
+          'TRX_TERM_VALUE' => '1',
+          'TRX_TERM_UOM' => 'D',
+          'TRX_VALUE' => 0.476,
+          'MS_DAY_CNT_BAS' => 'Actual/360',
+          'MS_DATA_FREQ' => 'Daily'
+        }]
+      }
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
         allow(MAPI::Services::Rates::PriceIndicationHistorical).to receive(:calendar_holiday_london_only).and_return([])
@@ -121,6 +132,12 @@ describe MAPI::ServiceApp do
         expect(ActiveRecord::Base.connection).to receive(:execute).with(benchmark_query).and_return(benchmark_cursor)
         allow(benchmark_cursor).to receive(:fetch_hash)
         get "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/daily_prime"; JSON.parse(last_response.body)
+      end
+      it 'returns one rate per row found' do
+        allow(MAPI::Services::Rates::PriceIndicationHistorical::Private).to receive(:irdb_sql_query).and_return(irdb_query)
+        allow(ActiveRecord::Base.connection).to receive(:execute).with(irdb_query).and_return(irdb_cursor)
+        allow(irdb_cursor).to receive(:fetch_hash).and_return(*rows, nil)
+        expect(price_indications['rates_by_date'].length).to be(rows.length)
       end
     end
 

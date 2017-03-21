@@ -425,17 +425,13 @@ module MAPI
                 'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
                 'v1:tradeRequestParameters' => [
                   {
-                    'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}]
-                  },
-                  {
-                    'v1:arrayOfTradeIds' => trade_id_array
-                  },
-                  # Calypso required `rangeOfSettlementDates`, but they are not actually used as part of the lookup. Just a quirk of the system.
-                  {
-                    'v1:rangeOfSettlementDates' => [
-                      {'v1:startDate' => (today - 100.years).iso8601},
-                      {'v1:endDate' => (today + 100.years).iso8601}
-                    ]
+                    'v1:arrayOfTradeIds' => trade_id_array,
+                    'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}],
+                    # Calypso required `rangeOfSettlementDates`, but they are not actually used as part of the lookup. Just a quirk of the system.
+                    'v1:rangeOfSettlementDates' => [{
+                      'v1:startDate' => (today - 100.years).iso8601,
+                      'v1:endDate' => (today + 100.years).iso8601
+                    }]
                   }
                 ]
               }
@@ -480,35 +476,39 @@ module MAPI
             sub_product = activity['subProduct'].to_s if activity['subProduct'].present?
             termination_date = DateTime.strptime(activity['terminationDate'], '%m/%d/%Y').to_date if activity['terminationDate'].present?
             life_cycle_event = activity['lifeCycleEvent'].to_s if activity['lifeCycleEvent'].present?
-            lc_number = activity['lcNumber'].to_s if activity['lcNumber'].present?
+            lc_number = if activity['lcNumber'].present?
+                          activity['lcNumber'].is_a?(Array) ? activity['lcNumber'].first.to_s : activity['lcNumber'].to_s
+                        end
             maintenance_fee = (activity['maintenanceFee'].to_f * 10000) if activity['maintenanceFee'].present?
             beneficiary = activity['beneficiary'].to_s if activity['beneficiary'].present?
 
             # skip the trade if it is an old Advance that is not prepaid, but rather Amended
-            if TODAYS_CREDIT_ARRAY.include?(status) && !(instrument_type == 'ADVANCE' && status != 'EXERCISED' && termination_par.blank? && !funding_date.blank? && funding_date < today)
-              hash = {
-                transaction_number: transaction_number,
-                current_par: current_par,
-                interest_rate: decimal_to_percentage_rate(interest_rate),
-                trade_date: trade_date,
-                funding_date: funding_date,
-                maturity_date: maturity_date,
-                product_description: product_description,
-                instrument_type: instrument_type,
-                status: status,
-                termination_par: termination_par,
-                termination_fee: termination_fee,
-                termination_full_partial: termination_full_partial,
-                termination_date: termination_date,
-                product: product,
-                sub_product: sub_product,
-                life_cycle_event: life_cycle_event,
-                lc_number: lc_number,
-                maintenance_charge: maintenance_fee,
-                beneficiary: beneficiary
-              }
-              credit_activities.push(hash)
-            end
+            next unless TODAYS_CREDIT_ARRAY.include?(status) && !(instrument_type == 'ADVANCE' && status != 'EXERCISED' && termination_par.blank? && !funding_date.blank? && funding_date < today)
+            # skip if its a LC entry w/o a lifeCycleEvent
+            next if product == 'LC' && life_cycle_event.blank?
+
+            hash = {
+              transaction_number: transaction_number,
+              current_par: current_par,
+              interest_rate: decimal_to_percentage_rate(interest_rate),
+              trade_date: trade_date,
+              funding_date: funding_date,
+              maturity_date: maturity_date,
+              product_description: product_description,
+              instrument_type: instrument_type,
+              status: status,
+              termination_par: termination_par,
+              termination_fee: termination_fee,
+              termination_full_partial: termination_full_partial,
+              termination_date: termination_date,
+              product: product,
+              sub_product: sub_product,
+              life_cycle_event: life_cycle_event,
+              lc_number: lc_number,
+              maintenance_charge: maintenance_fee,
+              beneficiary: beneficiary
+            }
+            credit_activities.push(hash)
           end
           credit_activities
         end

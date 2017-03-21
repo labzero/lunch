@@ -645,7 +645,7 @@ RSpec.describe DashboardController, :type => :controller do
     let(:user_id) { rand(1..9999) }
     let(:job_status_as_string) { double('job status as string') }
     let(:job_status) { double('an instance of JobStatus', result_as_string: job_status_as_string, destroy: nil) }
-    let(:job) { double('an instance of the MemberBalanceTodaysCreditActivityJob', job_status: job_status) }
+    let(:job) { instance_double('FhlbJsonResponseJob', job_status: job_status) }
     let(:current_user) { double('User', id: user_id)}
     let(:parsed_response) { double('parsed response') }
     let(:call_method) { subject.send(:deferred_job_data) }
