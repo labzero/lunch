@@ -13,14 +13,13 @@ router
     loggedIn,
     checkTeamRole(),
     async (req, res) => {
-      let attributes = ['id', 'name'];
-      if (hasRole(req.user, req.team, 'admin')) {
-        attributes = attributes.concat(['email']);
+      let exclude;
+      if (!hasRole(req.user, req.team, 'admin')) {
+        exclude = ['email'];
       }
 
       try {
-        // TODO attributes not working
-        const users = await User.findAllForTeam(req.team.id, attributes);
+        const users = await User.findAllForTeam(req.team.id, exclude);
 
         res.status(200).json({ error: false, data: users });
       } catch (err) {

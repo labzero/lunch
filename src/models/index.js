@@ -69,14 +69,15 @@ Restaurant.findAllWithTagIds = ({ team_id }) =>
     }
   });
 
-User.findAllForTeam = (teamId, attributes) =>
+User.findAllForTeam = (teamId, exclude) =>
   User.findAll({
     attributes: {
-      include: attributes.concat([
+      include: [
         [sequelize.literal(`(SELECT "roles"."type" FROM "roles"
           WHERE "roles"."team_id" = ${teamId} AND "roles"."user_id" = "user"."id")`),
           'type']
-      ])
+      ],
+      exclude: ['created_at', 'updated_at', 'google_id', 'superuser'].concat(exclude)
     }
   });
 
