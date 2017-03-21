@@ -25,6 +25,7 @@ class Admin extends React.Component {
 
   static defaultState = {
     email: '',
+    name: '',
     type: 'user'
   };
 
@@ -38,13 +39,13 @@ class Admin extends React.Component {
 
   handleSubmit = (event) => {
     event.preventDefault();
-    this.props.addUserToTeam(this.state.email);
+    this.props.addUserToTeam(this.state);
     this.setState(Object.assign({}, Admin.defaultState));
   };
 
   render() {
     const { adminUserListReady, intl: { formatMessage: f }, users } = this.props;
-    const { email, type } = this.state;
+    const { email, name, type } = this.state;
 
     if (!adminUserListReady) {
       return null;
@@ -65,7 +66,7 @@ class Admin extends React.Component {
             <tbody>
               {users.map(user => (
                 <tr key={user.id}>
-                  <td>{user.name}</td>
+                  <td>{user.name ? user.name : f(gm('noUserName'))}</td>
                   <td>{user.email}</td>
                   <td>{f(gm(`${user.type}Role`))}</td>
                 </tr>
@@ -74,6 +75,15 @@ class Admin extends React.Component {
           </table>
           <h2>Add User</h2>
           <form onSubmit={this.handleSubmit}>
+            <label htmlFor="admin-name">
+              Name:
+            </label>
+            <input
+              id="admin-name"
+              type="text"
+              onChange={this.handleChange('name')}
+              value={name}
+            />
             <label htmlFor="admin-email">
               Email:
             </label>

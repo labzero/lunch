@@ -69,16 +69,25 @@ Restaurant.findAllWithTagIds = ({ team_id }) =>
     }
   });
 
-User.findAllForTeam = (teamId, exclude) =>
+const teamUserAttributes = (teamId, extraAttributes) => ({
+  attributes: extraAttributes.concat([
+    'name',
+    'id',
+    [sequelize.literal(`(SELECT "roles"."type" FROM "roles"
+      WHERE "roles"."team_id" = ${teamId} AND "roles"."user_id" = "user"."id")`),
+      'type']
+  ])
+});
+
+User.findAllForTeam = (teamId, extraAttributes) =>
   User.findAll({
-    attributes: {
-      include: [
-        [sequelize.literal(`(SELECT "roles"."type" FROM "roles"
-          WHERE "roles"."team_id" = ${teamId} AND "roles"."user_id" = "user"."id")`),
-          'type']
-      ],
-      exclude: ['created_at', 'updated_at', 'google_id', 'superuser'].concat(exclude)
-    }
+    attributes: teamUserAttributes(teamId, extraAttributes)
+  });
+
+User.findOneWithRoleType = (id, teamId, extraAttributes) =>
+  User.findOne({
+    attributes: teamUserAttributes(teamId, extraAttributes),
+    where: { id }
   });
 
 Restaurant.hasMany(Vote);

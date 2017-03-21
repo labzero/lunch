@@ -26,15 +26,28 @@ passport.use(new GoogleStrategy(
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: '/login/callback'
   },
-  (accessToken, refreshToken, profile, done) => {
+  async (accessToken, refreshToken, profile, done) => {
     if (
       typeof profile.emails === 'object' &&
       profile.emails.length !== undefined
     ) {
       const accountEmail = profile.emails.find(email => email.type === 'account');
-      return User.findOrCreate({
-        where: { google_id: profile.id }
-      }).spread(user => {
+      try {
+        let user = await User.findOne({
+          where: { google_id: profile.id }
+        });
+
+        // might not have been linked with Google yet
+        if (!user) {
+          user = await User.findOne({
+            where: { email: accountEmail }
+          });
+        }
+
+        if (!user) {
+          return done(null, false, { message: 'User not found.' });
+        }
+
         const userUpdates = {};
         let doUpdates = false;
 
@@ -56,7 +69,9 @@ passport.use(new GoogleStrategy(
         }
 
         return done(null, user.id);
-      }).catch(err => done(err));
+      } catch (err) {
+        done(err);
+      }
     }
     return done(null, false, { message: 'No email provided.' });
   }

@@ -42,5 +42,26 @@ export default new Map([
         }
       }
     })
-  ]
+  ],
+  [ActionTypes.POST_USER, isFetching],
+  [ActionTypes.USER_POSTED, (state, action) =>
+    update(state, {
+      items: {
+        result: {
+          $push: [action.user.id]
+        },
+        entities: {
+          users: state.items.entities.users ? {
+            $merge: {
+              [action.user.id]: action.user
+            }
+          } : {
+            $set: {
+              [action.user.id]: action.user
+            }
+          }
+        }
+      }
+    })
+  ],
 ]);

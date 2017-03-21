@@ -12,7 +12,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  addUserToTeam: email => dispatch(addUser(email)),
+  addUserToTeam: payload => dispatch(addUser(ownProps.teamSlug, payload)),
   fetchUsersIfNeeded() {
     dispatch(fetchUsersIfNeeded(ownProps.teamSlug));
   },

@@ -1,6 +1,7 @@
 import fetch from '../core/fetch';
 import ActionTypes from '../constants/ActionTypes';
-import { credentials, processResponse } from '../core/ApiClient';
+import { credentials, jsonHeaders, processResponse } from '../core/ApiClient';
+import { flashError } from './flash.js';
 
 export function invalidateUsers() {
   return { type: ActionTypes.INVALIDATE_USERS };
@@ -87,5 +88,38 @@ export function removeUser(teamSlug, id) {
       credentials,
       method: 'delete'
     });
+  };
+}
+
+export function postUser(teamSlug, id) {
+  return {
+    type: ActionTypes.POST_USER,
+    id,
+    teamSlug
+  };
+}
+
+export function userPosted(json, teamSlug) {
+  return {
+    type: ActionTypes.USER_POSTED,
+    user: json,
+    teamSlug
+  };
+}
+
+export function addUser(teamSlug, payload) {
+  return (dispatch) => {
+    dispatch(postUser(teamSlug, payload));
+    return fetch(`/api/teams/${teamSlug}/users`, {
+      method: 'post',
+      credentials,
+      headers: jsonHeaders,
+      body: JSON.stringify(payload)
+    })
+      .then(response => processResponse(response))
+      .then(json => dispatch(userPosted(json, teamSlug)))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }
