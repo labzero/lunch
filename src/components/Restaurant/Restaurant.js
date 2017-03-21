@@ -79,7 +79,7 @@ const Restaurant = ({
       </div>
       <div className={s.addressContainer}>
         <a
-          href={`/api/restaurants/${restaurant.id}/place_url`}
+          href={`/api/teams/${teamSlug}/restaurants/${restaurant.id}/place_url`}
           target="_blank"
           rel="noopener noreferrer"
         >
