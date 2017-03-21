@@ -3246,6 +3246,12 @@ en:
         disable_all:
           title: Disable this feature for all members and users?
           accept: Disable for all
+        add_member:
+          title: Add Institution
+          select: Select Institution
+          accept: Add Institution
+        remove_member:
+          error: This institution could not be removed at this time.
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

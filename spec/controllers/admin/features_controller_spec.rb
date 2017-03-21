@@ -65,6 +65,10 @@ RSpec.describe Admin::FeaturesController, :type => :controller do
     let(:feature_name) { SecureRandom.hex }
     let(:make_request) { get :view, feature: feature_name }
 
+    before do
+      allow(MembersService).to receive(:new).and_return(instance_double(MembersService, all_members: []))
+    end
+
     it_behaves_like 'a controller action with an active nav setting', :view, :features, feature: :foo
     it_behaves_like 'an authorization required method', :get, :view, :web_admin, :show?, feature: :foo
 
@@ -81,7 +85,7 @@ RSpec.describe Admin::FeaturesController, :type => :controller do
       let(:feature) { instance_double('Flipper::Feature', name: feature_name, state: double('A Feature State'), actors_value: [*usernames, *member_actors]) }
       before do
         member_ids.each do |id|
-          member = instance_double(Member, name: double('A Name'))
+          member = instance_double(Member, name: "Member-#{id}", id: id.to_i)
           members << member
           allow(Member).to receive(:new).with(id).and_return(member)
         end
@@ -99,10 +103,16 @@ RSpec.describe Admin::FeaturesController, :type => :controller do
           expect(assigns[:feature_status]).to be(feature.state)
         end
         it 'assigns `@enabled_users` to the list of usernames who have that feature enabled at an individual level' do
-          expect(assigns[:enabled_users]).to match(usernames)
+          expect(assigns[:enabled_users]).to contain_exactly(*usernames)
         end
         it 'assigns `@enabled_members` to the list of members name who have that feature enabled' do
-          expect(assigns[:enabled_members]).to match(members.collect(&:name))
+          expect(assigns[:enabled_members]).to contain_exactly(*members.collect {|m| {name: m.name, id: m.id}} )
+        end
+        it 'orders the @enabled_users by ascending username' do
+          expect(assigns[:enabled_users]).to match(usernames.sort)
+        end
+        it 'orders the @enabled_members by ascending name' do
+          expect(assigns[:enabled_members].collect { |m| m[:name] }.sort).to match(members.collect(&:name).sort)
         end
       end
 
@@ -213,12 +223,116 @@ RSpec.describe Admin::FeaturesController, :type => :controller do
     end
   end
 
+  describe 'POST add_member' do
+    let(:feature_name) { SecureRandom.hex }
+    let(:member_id) { SecureRandom.hex }
+    let(:feature) { instance_double(Flipper::Feature, name: feature_name, enable_actor: true) }
+    let(:member) { instance_double(Member) }
+    let(:make_request) { post :add_member, feature: feature_name, member_id: member_id }
+
+    allow_policy(:web_admin, :edit_features?)
+    allow_policy(:web_admin, :show?)
+
+    it_behaves_like 'an authorization required method', :post, :add_member, :web_admin, [:show?, :edit_features?], feature: :foo, member_id: :bar
+
+    it 'calls `find_feature`' do
+      expect(controller).to receive(:find_feature).with(feature_name).and_return(feature)
+      allow(controller).to receive(:find_member)
+      make_request
+    end
+
+    describe 'when it finds the feature' do
+      before do
+        allow(controller).to receive(:find_feature).with(feature_name).and_return(feature)
+      end
+
+      it 'calls `find_member`' do
+        expect(controller).to receive(:find_member).with(member_id).and_return(member)
+        make_request
+      end
+
+      describe 'when it finds the member' do
+        before do
+          allow(controller).to receive(:find_member).and_return(member)
+        end
+
+
+        it 'calls `enable_actor` on the feature' do
+          expect(feature).to receive(:enable_actor).with(member).and_return(true)
+          make_request
+        end
+        it 'redirects to the `view` action on success' do
+          expect(make_request).to redirect_to(feature_admin_path(feature_name))
+        end
+        it 'redirects with a 303 status code' do
+          expect(make_request.status).to be(303)
+        end
+        it 'raises an error on failure' do
+          allow(feature).to receive(:enable_actor).with(member).and_return(false)
+          expect { make_request }.to raise_error(/failed to add member/i)
+        end
+      end
+    end
+  end
+  
+  describe 'DELETE remove_member' do
+    let(:feature_name) { SecureRandom.hex }
+    let(:member_id) { SecureRandom.hex }
+    let(:feature) { instance_double(Flipper::Feature, name: feature_name, disable_actor: true) }
+    let(:member) { instance_double(Member) }
+    let(:make_request) { delete :remove_member, feature: feature_name, member_id: member_id }
+
+    allow_policy(:web_admin, :edit_features?)
+    allow_policy(:web_admin, :show?)
+
+    it_behaves_like 'an authorization required method', :delete, :remove_member, :web_admin, [:show?, :edit_features?], feature: :foo, member_id: :bar
+
+    it 'calls `find_feature`' do
+      expect(controller).to receive(:find_feature).with(feature_name).and_return(feature)
+      allow(controller).to receive(:find_member)
+      make_request
+    end
+
+    describe 'when it finds the feature' do
+      before do
+        allow(controller).to receive(:find_feature).with(feature_name).and_return(feature)
+      end
+
+      it 'calls `find_member`' do
+        expect(controller).to receive(:find_member).with(member_id).and_return(member)
+        make_request
+      end
+
+      describe 'when it finds the member' do
+        before do
+          allow(controller).to receive(:find_member).and_return(member)
+        end
+
+        it 'calls `disable_actor` on the feature' do
+          expect(feature).to receive(:disable_actor).with(member).and_return(true)
+          make_request
+        end
+        it 'redirects to the `view` action on success' do
+          expect(make_request).to redirect_to(feature_admin_path(feature_name))
+        end
+        it 'redirects with a 303 status code' do
+          expect(make_request.status).to be(303)
+        end
+        it 'raises an error on failure' do
+          allow(feature).to receive(:disable_actor).with(member).and_return(false)
+          expect { make_request }.to raise_error(/failed to remove member/i)
+        end
+      end
+    end
+  end
+
   describe '`find_feature` protected method' do
     let(:feature) { instance_double(Flipper::Feature, name: feature_name) }
     let(:feature_name) { SecureRandom.hex }
     let(:call_method) { subject.send(:find_feature, feature_name) }
 
     it 'raises a `RecordNotFound` if a feature is not found' do
+      allow(Rails.application.flipper).to receive(:features).and_return([])
       expect{ call_method }.to raise_error(ActiveRecord::RecordNotFound)
     end
 
@@ -240,6 +354,40 @@ RSpec.describe Admin::FeaturesController, :type => :controller do
         end
       end
     end
+  end
+
+  describe '`find_member` protected method' do
+    let(:member_id) { SecureRandom.hex }
+    let(:member) { instance_double(Member, found?: true) }
+    let(:request) { ActionDispatch::TestRequest.new }
+    let(:call_method) { subject.send(:find_member, member_id) }
+
+    before do
+      allow(Member).to receive(:new).with(member_id).and_return(member)
+      allow(subject).to receive(:request).and_return(request)
+    end
+
+    it 'constructs a Member with the member_id' do
+      expect(Member).to receive(:new).with(member_id).and_return(member)
+      call_method
+    end
+
+    it 'calls `found?` on the member, passing the request' do
+      expect(member).to receive(:found?).with(request).and_return(true)
+      call_method
+    end
+
+    it 'raises a `RecordNotFound` if a member is not found' do
+      allow(member).to receive(:found?).and_return(false)
+      expect{ call_method }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    describe 'with a valid member id' do
+      it 'returns the member' do
+        expect(call_method).to be(member)
+      end
+    end
+    
   end
 
 end

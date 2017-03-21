@@ -7,31 +7,42 @@
     %button.text-only-button{disabled: @feature_status == :off, data: {confirmation_dialog_name: 'disable-all'}}= t('admin.features.confirmations.disable_all.accept')
 %section.row.row-elements-equal-height.admin-feature-edit
   %section.column-2.column-bordered
+    - if policy(:web_admin).edit_features?
+      %button.secondary-button{disabled: @feature_status == :on, data: {confirmation_dialog_name: 'add-member'}}= t('admin.features.confirmations.add_member.accept')
     %h2= t('admin.features.edit.members')
-    %table
-      - if @feature_status == :on
-        %tr
-          %td= t('admin.features.edit.all_members')
-      - elsif @enabled_members.present?
-        - @enabled_members.each do |member|
+    - no_members_html = capture do
+      %tr.admin-feature-none-enabled
+        %td= t('admin.features.edit.no_members')
+    %table{data: {empty_html: no_members_html}}
+      %tbody
+        - if @feature_status == :on
           %tr
-            %td= member
-      - else
-        %tr
-          %td= t('admin.features.edit.no_members')
+            %td= t('admin.features.edit.all_members')
+        - elsif @enabled_members.present?
+          - @enabled_members.each do |member|
+            %tr
+              %td
+                - if policy(:web_admin).edit_features?
+                  = link_to('', feature_remove_member_admin_path(member_id: member[:id]), remote: true, method: :delete, class: 'admin-feature-link-remove')
+                = member[:name]
+                .admin-feature-error-message
+                  = t('admin.features.confirmations.remove_member.error')
+        - else
+          = no_members_html
   %section.column-2.column-bordered
     %h2= t('admin.features.edit.users')
     %table
-      - if @feature_status == :on
-        %tr
-          %td= t('admin.features.edit.all_users')
-      - elsif @enabled_users.present?
-        - @enabled_users.each do |user|
+      %tbody
+        - if @feature_status == :on
           %tr
-            %td= user
-      - else
-        %tr
-          %td= t('admin.features.edit.no_members')
+            %td= t('admin.features.edit.all_users')
+        - elsif @enabled_users.present?
+          - @enabled_users.each do |user|
+            %tr
+              %td= user
+        - else
+          %tr.admin-feature-none-enabled
+            %td= t('admin.features.edit.no_users')
 %section.admin-confirmation-dialog{data: {confirmation_dialog_name: 'enable-all'}}
   %h3= t('admin.features.confirmations.enable_all.title')
   %button.secondary-button{data: {flyout_action: :close}}= t('global.cancel')
@@ -40,3 +51,10 @@
   %h3= t('admin.features.confirmations.disable_all.title')
   %button.secondary-button{data: {flyout_action: :close}}= t('global.cancel')
   = link_to(t('admin.features.confirmations.disable_all.accept'), feature_disable_admin_path, method: :put, remote: true, class: 'primary-button')
+%section.admin-confirmation-dialog{data: {confirmation_dialog_name: 'add-member'}}
+  %h3= t('admin.features.confirmations.add_member.title')
+  = form_tag(feature_add_member_admin_path, remote: true ) do
+    - default_selection = t('admin.features.confirmations.add_member.select')
+    = select_tag(:member_id, options_for_select(@members.unshift([default_selection, default_selection]), {selected: default_selection, disabled: default_selection} ), autofocus: true)
+    %button.secondary-button{data: {flyout_action: :close}}= t('global.cancel')
+    %button.primary-button{typ: :submit}= t('admin.features.confirmations.add_member.accept')

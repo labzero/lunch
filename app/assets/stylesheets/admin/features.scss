@@ -1,42 +1,104 @@
-  .admin-features-table {
-    th:last-child {
-      text-align: right;
-    }
-    td:first-child {
-      text-align: center;
-    }
-    th, td {
-      &:nth-child(2) {
-        width: 100%;
-      }
+.admin-features-table {
+  th:last-child {
+    text-align: right;
+  }
+  td:first-child {
+    text-align: center;
+  }
+  th, td {
+    &:nth-child(2) {
+      width: 100%;
     }
   }
+  &:empty {
+    background: red;
+  }
+}
 
-  .admin-feature-edit {
-    h1 {
-      margin-bottom: 10px;
-    }
-    h2 {
-      @extend %typography-admin-subtitle;
-      margin: 0 0 15px 0;
-    }
-    table {
-      @extend %table-report;
+.admin-feature-edit {
+  h1 {
+    margin-bottom: 10px;
+  }
+  h2 {
+    @extend %typography-admin-subtitle;
+    margin: 0 0 15px 0;
+    clear: both;
+  }
+  table {
+    @extend %table-report;
+    border: none;
+    margin-bottom: 0;
+    td, th {
       border: none;
-      margin-bottom: 0;
-      td, th {
-        border: none;
-      }
+      white-space: inherit;
     }
-    .text-only-button {
-      @extend %typography-admin-subtitle;
-      text-transform: uppercase;
-      padding: 0;
-      margin-top: 0;
-      margin-bottom: 40px;
-      &:first-of-type {
-        margin-left: 42px;
-        margin-right: 20px;
+    tr.admin-feature-row-error {
+      color: $alert-red;
+    }
+    tbody tr.admin-feature-none-enabled {
+      background-color: inherit;
+      td {
+        padding-left: 0;
+        padding-right: 0;
+        color: $medium-gray;
       }
     }
   }
+  .text-only-button {
+    @extend %typography-admin-subtitle;
+    text-transform: uppercase;
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 40px;
+    &:first-of-type {
+      margin-left: 42px;
+      margin-right: 20px;
+    }
+  }
+  .secondary-button {
+    float: right;
+    margin-bottom: 25px;
+  }
+}
+
+.admin-feature-link-remove {
+  float: right;
+  vertical-align: middle;
+  &:hover {
+    text-decoration: none;
+  }
+  &:before {
+    @extend %icon-font;
+    content: "#{$icon-close}";
+  }
+  .admin-feature-row-error & {
+    color: inherit;
+  }
+  &.admin-feature-link-loading {
+    &:before {
+      content: '';
+      @include icon-loading-ellipsis;
+      display: block;
+      background-size: contain;
+      width: $ellipsis-width / 2;
+    }
+  }
+}
+
+.admin-feature-error-message {
+  display: none;
+  margin-top: 10px;
+  @extend %typography-table-total;
+  .admin-feature-row-error & {
+    display: block;
+  }
+}
+
+.admin-confirmation-dialog[data-confirmation-dialog-name=add-member] {
+  select {
+    width: 100%;
+  }
+  h3, select {
+    margin-bottom: 20px;
+  }
+}

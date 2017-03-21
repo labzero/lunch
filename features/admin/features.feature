@@ -37,3 +37,24 @@ Feature: Toggling conditional features
     Then I see an disable feature button
     When I disable the feature
     Then I see the feature disabled for everyone
+
+  @jira-mem-2115 @local-only
+  Scenario: Admins can enable a feature for a member
+    Given I am logged into the admin panel
+    And the feature "test-feature" is disabled
+    When I am on the features list
+    And I click on the view feature link for "test-feature"
+    Then I see an add institution button
+    When I add the institution "Chaste Manhattan"
+    Then I see the feature conditionally enabled
+    And I see "Chaste Manhattan" in the enabled institution list
+
+  @jira-mem-2115 @local-only
+  Scenario: Admins can remove a member from a features list of enabled institutions
+    Given I am logged into the admin panel
+    And the feature "test-feature" is conditionally enabled for the "Chaste Manhattan" institution
+    When I am on the features list
+    And I click on the view feature link for "test-feature"
+    Then I see a remove institution button
+    When I remove the institution "Chaste Manhattan"
+    Then I do not "Chaste Manhattan" in the enabled institution list

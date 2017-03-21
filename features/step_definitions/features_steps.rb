@@ -50,7 +50,45 @@ Given(/^the feature "([^"]*)" is (enabled|disabled)$/) do |feature_name, state|
   end
 end
 
+Given(/^the feature "([^"]*)" is conditionally enabled for the "([^"]*)" institution$/) do |feature_name, bank|
+  feature = Rails.application.flipper[feature_name]
+  id = (MembersService.new(ActionDispatch::TestRequest.new).all_members.find { |member|  member[:name] == bank })[:id]
+  feature.enable_actor(Member.new(id))
+end
+
+
 When(/^I click on the view feature link for "([^"]*)"$/) do |feature_name|
   row = page.find('.admin-features-table td', text: /\A#{Regexp.quote(feature_name)}\z/i, exact: true).find(:xpath, '..')
   row.find('a', text: /\A#{Regexp.quote(I18n.t('admin.features.index.actions.edit'))}\z/i, exact: true).click
+end
+
+Then(/^I see an add institution button$/) do
+  page.assert_selector('button', text: /\A#{Regexp.quote(I18n.t('admin.features.confirmations.add_member.accept'))}\z/i, exact: true, visible: true)
+end
+
+Then(/^I see a remove institution button$/) do
+  page.assert_selector('.admin-feature-link-remove', visible: true)
+end
+
+When(/^I add the institution "([^"]*)"$/) do |bank|
+  click_button(I18n.t('admin.features.confirmations.add_member.accept'))
+  page.select(bank, from: :member_id)
+  page.find('.flyout .primary-button', text: /\A#{Regexp.quote(I18n.t('admin.features.confirmations.add_member.accept'))}\z/i, exact: true, visible: true).click
+end
+
+Then(/^I see the feature conditionally enabled$/) do
+  page.assert_selector('.admin-feature-edit h1 .admin-conditional-icon', visible: true)
+end
+
+Then(/^I see "([^"]*)" in the enabled institution list$/) do |bank|
+  page.assert_selector('.admin-feature-edit td', text: bank)
+end
+
+When(/^I remove the institution "([^"]*)"$/) do |bank|
+  row = page.find('.admin-feature-edit td', text: bank)
+  row.find('.admin-feature-link-remove').click
+end
+
+Then(/^I do not "([^"]*)" in the enabled institution list$/) do |bank|
+  page.assert_no_selector('.admin-feature-edit td', text: bank)
 end
