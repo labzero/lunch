@@ -24,7 +24,7 @@ exports.up = (queryInterface, Sequelize) => {
     },
     type: {
       allowNull: false,
-      type: Sequelize.ENUM('user', 'admin', 'owner'),
+      type: Sequelize.ENUM('guest', 'member', 'owner'),
     },
     team_id: {
       type: Sequelize.INTEGER,
@@ -65,7 +65,7 @@ exports.up = (queryInterface, Sequelize) => {
       const Role = db.sequelize.define('role', {
         type: {
           allowNull: false,
-          type: Sequelize.ENUM('user', 'admin', 'owner'),
+          type: Sequelize.ENUM('guest', 'member', 'owner'),
         },
         user_id: {
           type: Sequelize.INTEGER,
@@ -97,11 +97,12 @@ exports.up = (queryInterface, Sequelize) => {
       return Promise.all(users.map(user => Role.create({
         team_id: team.id,
         user_id: user.id,
-        type: user.email.match(/@labzero\.com$/) ? 'admin' : 'user'
+        type: user.email.match(/@labzero\.com$/) ? 'member' : 'guest'
       })));
     })
   );
 };
 
 exports.down = queryInterface =>
-  queryInterface.dropTable('roles');
+  queryInterface.dropTable('roles').then(() =>
+    db.sequelize.query('DROP TYPE enum_roles_type'));

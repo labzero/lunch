@@ -1,7 +1,7 @@
 export default (currentRole, target) => {
   switch (target) {
-    case 'admin':
-      return currentRole === 'admin' || currentRole === 'owner';
+    case 'member':
+      return currentRole === 'member' || currentRole === 'owner';
     case 'owner':
       return currentRole === 'owner';
     default:

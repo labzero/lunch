@@ -1,7 +1,7 @@
 export default (role, roleToDelete) => {
   switch (role) {
-    case 'admin':
-      return roleToDelete === 'user';
+    case 'member':
+      return roleToDelete === 'guest';
     case 'owner':
       return true;
     default:

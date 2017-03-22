@@ -31,7 +31,7 @@ class Team extends React.Component {
   static defaultState = {
     email: '',
     name: '',
-    type: 'user'
+    type: 'member'
   };
 
   state = Object.assign({}, Team.defaultState);
@@ -118,8 +118,8 @@ class Team extends React.Component {
               value={type}
               required
             >
-              {hasRole(currentUser, team, 'user') && <option value="user">{f(gm('userRole'))}</option>}
-              {hasRole(currentUser, team, 'admin') && <option value="admin">{f(gm('adminRole'))}</option>}
+              {hasRole(currentUser, team, 'guest') && <option value="guest">{f(gm('guestRole'))}</option>}
+              {hasRole(currentUser, team, 'member') && <option value="member">{f(gm('memberRole'))}</option>}
               {hasRole(currentUser, team, 'owner') && <option value="owner">{f(gm('ownerRole'))}</option>}
             </select>
             <input type="submit" />

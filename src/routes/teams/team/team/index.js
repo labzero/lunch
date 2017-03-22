@@ -24,7 +24,7 @@ export default {
     const user = state.user;
     const team = getTeamBySlug(state, context.params.slug);
 
-    if (user.id && hasRole(user, team, 'admin')) {
+    if (user.id && hasRole(user, team, 'member')) {
       const TeamContainer = await require.ensure([], require => require('./TeamContainer').default, 'team');
 
       return {

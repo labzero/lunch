@@ -16,7 +16,7 @@ router
     checkTeamRole(),
     async (req, res) => {
       let extraAttributes;
-      if (hasRole(req.user, req.team, 'admin')) {
+      if (hasRole(req.user, req.team, 'member')) {
         extraAttributes = ['email'];
       }
 
@@ -40,7 +40,7 @@ router
   .post(
     '/',
     loggedIn,
-    checkTeamRole('admin'),
+    checkTeamRole('member'),
     async (req, res) => {
       const { email, name, type } = req.body;
 
@@ -89,7 +89,7 @@ router
   .delete(
     '/:id',
     loggedIn,
-    checkTeamRole('admin'),
+    checkTeamRole('member'),
     async (req, res) => {
       const id = parseInt(req.params.id, 10);
       const currentUserRole = getRole(req.user, req.team);
