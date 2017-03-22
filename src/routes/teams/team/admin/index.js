@@ -11,6 +11,7 @@ import React from 'react';
 import queryString from 'query-string';
 import hasRole from '../../../../helpers/hasRole';
 import LayoutContainer from '../../../../components/Layout/LayoutContainer';
+import { getTeamBySlug } from '../../../../selectors/teams';
 
 const title = 'Admin';
 
@@ -21,7 +22,7 @@ export default {
   async action(context) {
     const state = context.store.getState();
     const user = state.user;
-    const team = state.team;
+    const team = getTeamBySlug(state, context.params.slug);
 
     if (user.id && hasRole(user, team, 'admin')) {
       const AdminContainer = await require.ensure([], require => require('./AdminContainer').default, 'admin');

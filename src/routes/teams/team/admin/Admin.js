@@ -11,17 +11,19 @@ import React, { PropTypes } from 'react';
 import { intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { globalMessageDescriptor as gm } from '../../../../helpers/generateMessageDescriptor';
+import canDeleteUser from '../../../../helpers/canDeleteUser';
 import s from './Admin.css';
 
 class Admin extends React.Component {
   static propTypes = {
     addUserToTeam: PropTypes.func.isRequired,
     adminUserListReady: PropTypes.bool.isRequired,
+    currentUser: PropTypes.object.isRequired,
     fetchUsersIfNeeded: PropTypes.func.isRequired,
     intl: intlShape.isRequired,
     removeUserFromTeam: PropTypes.func.isRequired,
-    userId: PropTypes.number.isRequired,
     users: PropTypes.array.isRequired,
+    team: PropTypes.object.isRequired,
     title: PropTypes.string.isRequired,
   };
 
@@ -50,7 +52,7 @@ class Admin extends React.Component {
   };
 
   render() {
-    const { adminUserListReady, intl: { formatMessage: f }, userId, users } = this.props;
+    const { adminUserListReady, currentUser, intl: { formatMessage: f }, users, team } = this.props;
     const { email, name, type } = this.state;
 
     if (!adminUserListReady) {
@@ -77,7 +79,7 @@ class Admin extends React.Component {
                   <td>{user.email}</td>
                   <td>{f(gm(`${user.type}Role`))}</td>
                   <td>
-                    {userId !== user.id && (
+                    {currentUser.id !== user.id && canDeleteUser(currentUser, user, team) && (
                       <button type="button" onClick={this.handleDeleteClicked(user.id)} aria-label="Remove">&times;</button>
                     )}
                   </td>

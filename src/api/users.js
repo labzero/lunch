@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { Role, User } from '../models';
 import getRole from '../helpers/getRole';
 import hasRole from '../helpers/hasRole';
+import roleCanDeleteRole from '../helpers/roleCanDeleteRole';
 import errorCatcher from './helpers/errorCatcher';
 import checkTeamRole from './helpers/checkTeamRole';
 import loggedIn from './helpers/loggedIn';
@@ -44,6 +45,10 @@ router
       const { email, name, type } = req.body;
 
       try {
+        if (!hasRole(req.user, req.team, type)) {
+          return res.status(403).json({ error: true, data: { message: 'You cannot add a user with a role greater than your own.' } });
+        }
+
         let user = await User.findOne({ where: { email }, include: [Role] });
 
         const UserWithTeamRole = User.scope({ method: ['withTeamRole', req.team.id, ['email']] });
@@ -56,10 +61,10 @@ router
               include: [Role]
             });
           } else {
-            res.status(409).json({ error: true, data: { message: 'User already exists on this team.' } });
+            return res.status(409).json({ error: true, data: { message: 'User already exists on this team.' } });
           }
         } else {
-          user = await UserWithTeamRole.create({
+          user = await User.create({
             email,
             name,
             roles: [{
@@ -67,14 +72,17 @@ router
               type
             }]
           }, { include: [Role] });
+
+          // ugly hack: sequelize can't apply scopes on create, so just get user again
+          user = await UserWithTeamRole.findOne({ where: { id: user.id } });
         }
 
-        res.status(201).json({ error: false, data: user });
+        return res.status(201).json({ error: false, data: user });
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
         const error = { message: 'Could not add user to team. They might already exist.' };
-        errorCatcher(res, error);
+        return errorCatcher(res, error);
       }
     }
   )
@@ -113,8 +121,8 @@ Transfer ownership to another user first.`
             } else {
               allowed = true;
             }
-          } else if (currentUserRole === 'admin' && roleToDelete === 'user') {
-            allowed = true;
+          } else {
+            allowed = roleCanDeleteRole(currentUserRole, roleToDelete);
           }
 
           if (allowed) {
