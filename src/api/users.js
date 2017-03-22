@@ -49,14 +49,14 @@ router
           return res.status(403).json({ error: true, data: { message: 'You cannot add a user with a role greater than your own.' } });
         }
 
-        let user = await User.findOne({ where: { email }, include: [Role] });
+        let userToAdd = await User.findOne({ where: { email }, include: [Role] });
 
         const UserWithTeamRole = User.scope({ method: ['withTeamRole', req.team.id, ['email']] });
 
-        if (user) {
-          if (!hasRole(user, req.team)) {
-            await Role.create({ team_id: req.team.id, user_id: user.id, type });
-            user = await UserWithTeamRole.findOne({
+        if (userToAdd) {
+          if (!hasRole(userToAdd, req.team)) {
+            await Role.create({ team_id: req.team.id, user_id: userToAdd.id, type });
+            userToAdd = await UserWithTeamRole.findOne({
               where: { email },
               include: [Role]
             });
@@ -64,7 +64,7 @@ router
             return res.status(409).json({ error: true, data: { message: 'User already exists on this team.' } });
           }
         } else {
-          user = await User.create({
+          userToAdd = await User.create({
             email,
             name,
             roles: [{
@@ -74,10 +74,10 @@ router
           }, { include: [Role] });
 
           // ugly hack: sequelize can't apply scopes on create, so just get user again
-          user = await UserWithTeamRole.findOne({ where: { id: user.id } });
+          userToAdd = await UserWithTeamRole.findOne({ where: { id: userToAdd.id } });
         }
 
-        return res.status(201).json({ error: false, data: user });
+        return res.status(201).json({ error: false, data: userToAdd });
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -104,7 +104,9 @@ router
 
         if (roleToDelete) {
           let allowed = false;
-          if (currentUserRole.type === 'owner') {
+          if (req.user.superuser) {
+            allowed = true;
+          } else if (currentUserRole.type === 'owner') {
             if (req.user.id === id) {
               const allTeamRoles = await Role.findAll({ where: { team_id: req.team.id } });
               if (allTeamRoles.some(role => role.type === 'owner' && role.user_id !== id)) {
