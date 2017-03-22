@@ -1,4 +1,3 @@
-import fetch from '../core/fetch';
 import ActionTypes from '../constants/ActionTypes';
 import { credentials, processResponse } from '../core/ApiClient';
 import { flashError } from './flash';

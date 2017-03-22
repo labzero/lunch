@@ -1,4 +1,3 @@
-import fetch from '../core/fetch';
 import ActionTypes from '../constants/ActionTypes';
 import { getDecision } from '../selectors/decisions';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
@@ -23,7 +22,7 @@ export function receiveDecision(json, teamSlug) {
   };
 }
 
-function fetchDecision(teamSlug) {
+export function fetchDecision(teamSlug) {
   return dispatch => {
     dispatch(requestDecision(teamSlug));
     return fetch(`/api/teams/${teamSlug}/decisions/fromToday`, {
@@ -37,7 +36,7 @@ function fetchDecision(teamSlug) {
   };
 }
 
-function shouldFetchDecision(state, teamSlug) {
+export function shouldFetchDecision(state, teamSlug) {
   const restaurants = state.restaurants;
   if (restaurants.teamSlug !== teamSlug) {
     return true;

@@ -7,6 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+import 'isomorphic-fetch';
+import Promise from 'bluebird';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import FastClick from 'fastclick';
@@ -19,6 +21,8 @@ import App from './components/App';
 import configureStore from './store/configureStore';
 import { updateMeta } from './core/DOMUtils';
 import { ErrorReporter, deepForceUpdate } from './core/devUtils';
+
+fetch.promise = Promise;
 
 window.ReconnectingWebSocket = ReconnectingWebSocket;
 

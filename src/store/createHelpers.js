@@ -1,5 +1,3 @@
-import fetch from '../core/fetch';
-
 function createFetchKnowingCookie({ cookie }) {
   if (!process.env.BROWSER) {
     return (url, options = {}) => {

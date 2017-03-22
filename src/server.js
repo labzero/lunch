@@ -7,6 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+import 'isomorphic-fetch';
+import Promise from 'bluebird';
 import path from 'path';
 import express from 'express';
 import fs from 'fs';
@@ -37,6 +39,8 @@ import makeInitialState from './initialState';
 import passport from './core/passport';
 import teamApi from './api/teams';
 import { Role, Team, User } from './models';
+
+fetch.promise = Promise;
 
 const app = express();
 

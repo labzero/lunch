@@ -1,4 +1,3 @@
-import fetch from '../core/fetch';
 import ActionTypes from '../constants/ActionTypes';
 import { getDecision } from '../selectors/decisions';
 import { getNewlyAdded } from '../selectors/listUi';
