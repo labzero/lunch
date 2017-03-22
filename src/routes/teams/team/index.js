@@ -6,6 +6,6 @@ export default {
 
   children: [
     require('./home').default,
-    require('./admin').default,
+    require('./team').default,
   ]
 };

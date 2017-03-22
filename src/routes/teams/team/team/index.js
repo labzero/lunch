@@ -13,11 +13,11 @@ import hasRole from '../../../../helpers/hasRole';
 import LayoutContainer from '../../../../components/Layout/LayoutContainer';
 import { getTeamBySlug } from '../../../../selectors/teams';
 
-const title = 'Admin';
+const title = 'Team';
 
 export default {
 
-  path: '/admin',
+  path: '/team',
 
   async action(context) {
     const state = context.store.getState();
@@ -25,14 +25,14 @@ export default {
     const team = getTeamBySlug(state, context.params.slug);
 
     if (user.id && hasRole(user, team, 'admin')) {
-      const AdminContainer = await require.ensure([], require => require('./AdminContainer').default, 'admin');
+      const TeamContainer = await require.ensure([], require => require('./TeamContainer').default, 'team');
 
       return {
         title,
         chunk: 'admin',
         component: (
           <LayoutContainer>
-            <AdminContainer title={title} teamSlug={context.params.slug} />
+            <TeamContainer title={title} teamSlug={context.params.slug} />
           </LayoutContainer>
         ),
       };

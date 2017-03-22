@@ -66,7 +66,7 @@ export const isRestaurantListReady = createSelector(
     !restaurantsLoading && !tagsLoading && !usersLoading && !decisionLoading
 );
 
-export const isAdminUserListReady = createSelector(
+export const isUserListReady = createSelector(
   areUsersLoading,
   (usersLoading) => !usersLoading
 );

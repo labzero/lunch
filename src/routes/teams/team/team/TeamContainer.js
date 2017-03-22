@@ -1,16 +1,16 @@
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { addUser, fetchUsersIfNeeded, removeUser } from '../../../../actions/users';
-import { isAdminUserListReady } from '../../../../selectors';
+import { isUserListReady } from '../../../../selectors';
 import { getTeamBySlug } from '../../../../selectors/teams';
 import { getCurrentUser } from '../../../../selectors/user';
 import { getUsers } from '../../../../selectors/users';
-import Admin from './Admin';
+import Team from './Team';
 
 const mapStateToProps = (state, ownProps) => ({
   currentUser: getCurrentUser(state),
   users: getUsers(state, ownProps.teamSlug),
-  adminUserListReady: isAdminUserListReady(state),
+  userListReady: isUserListReady(state),
   team: getTeamBySlug(state, ownProps.teamSlug),
   title: ownProps.title
 });
@@ -27,5 +27,5 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(
-  injectIntl(Admin)
+  injectIntl(Team)
 );

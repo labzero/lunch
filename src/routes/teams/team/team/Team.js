@@ -13,16 +13,16 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { globalMessageDescriptor as gm } from '../../../../helpers/generateMessageDescriptor';
 import hasRole from '../../../../helpers/hasRole';
 import canDeleteUser from '../../../../helpers/canDeleteUser';
-import s from './Admin.css';
+import s from './Team.css';
 
-class Admin extends React.Component {
+class Team extends React.Component {
   static propTypes = {
     addUserToTeam: PropTypes.func.isRequired,
-    adminUserListReady: PropTypes.bool.isRequired,
     currentUser: PropTypes.object.isRequired,
     fetchUsersIfNeeded: PropTypes.func.isRequired,
     intl: intlShape.isRequired,
     removeUserFromTeam: PropTypes.func.isRequired,
+    userListReady: PropTypes.bool.isRequired,
     users: PropTypes.array.isRequired,
     team: PropTypes.object.isRequired,
     title: PropTypes.string.isRequired,
@@ -34,7 +34,7 @@ class Admin extends React.Component {
     type: 'user'
   };
 
-  state = Object.assign({}, Admin.defaultState);
+  state = Object.assign({}, Team.defaultState);
 
   componentWillMount() {
     this.props.fetchUsersIfNeeded();
@@ -45,7 +45,7 @@ class Admin extends React.Component {
   handleSubmit = (event) => {
     event.preventDefault();
     this.props.addUserToTeam(this.state);
-    this.setState(Object.assign({}, Admin.defaultState));
+    this.setState(Object.assign({}, Team.defaultState));
   };
 
   handleDeleteClicked = id => () => {
@@ -53,10 +53,10 @@ class Admin extends React.Component {
   };
 
   render() {
-    const { adminUserListReady, currentUser, intl: { formatMessage: f }, users, team } = this.props;
+    const { userListReady, currentUser, intl: { formatMessage: f }, users, team } = this.props;
     const { email, name, type } = this.state;
 
-    if (!adminUserListReady) {
+    if (!userListReady) {
       return null;
     }
 
@@ -90,30 +90,30 @@ class Admin extends React.Component {
           </table>
           <h2>Add User</h2>
           <form onSubmit={this.handleSubmit}>
-            <label htmlFor="admin-name">
+            <label htmlFor="team-name">
               Name:
             </label>
             <input
-              id="admin-name"
+              id="team-name"
               type="text"
               onChange={this.handleChange('name')}
               value={name}
             />
-            <label htmlFor="admin-email">
+            <label htmlFor="team-email">
               Email:
             </label>
             <input
-              id="admin-email"
+              id="team-email"
               type="email"
               onChange={this.handleChange('email')}
               value={email}
               required
             />
-            <label htmlFor="admin-type">
+            <label htmlFor="team-type">
               Type:
             </label>
             <select
-              id="admin-type"
+              id="team-type"
               onChange={this.handleChange('type')}
               value={type}
               required
@@ -130,4 +130,4 @@ class Admin extends React.Component {
   }
 }
 
-export default withStyles(s)(Admin);
+export default withStyles(s)(Team);
