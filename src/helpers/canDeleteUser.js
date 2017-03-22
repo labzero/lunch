@@ -1,5 +1,5 @@
 import getRole from './getRole';
-import roleCanDeleteRole from './roleCanDeleteRole';
+import canDeleteRole from './canDeleteRole';
 
 export default (user, userToDelete, team) => {
   if (!user || !user.id) {
@@ -13,5 +13,5 @@ export default (user, userToDelete, team) => {
   if (!userRole || !userToDeleteRole) {
     return false;
   }
-  return roleCanDeleteRole(userRole, userToDeleteRole);
+  return canDeleteRole(userRole.type, userToDeleteRole.type);
 };

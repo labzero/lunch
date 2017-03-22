@@ -11,6 +11,7 @@ import React, { PropTypes } from 'react';
 import { intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { globalMessageDescriptor as gm } from '../../../../helpers/generateMessageDescriptor';
+import hasRole from '../../../../helpers/hasRole';
 import canDeleteUser from '../../../../helpers/canDeleteUser';
 import s from './Admin.css';
 
@@ -117,9 +118,9 @@ class Admin extends React.Component {
               value={type}
               required
             >
-              <option value="user">{f(gm('userRole'))}</option>
-              <option value="admin">{f(gm('adminRole'))}</option>
-              <option value="owner">{f(gm('ownerRole'))}</option>
+              {hasRole(currentUser, team, 'user') && <option value="user">{f(gm('userRole'))}</option>}
+              {hasRole(currentUser, team, 'admin') && <option value="admin">{f(gm('adminRole'))}</option>}
+              {hasRole(currentUser, team, 'owner') && <option value="owner">{f(gm('ownerRole'))}</option>}
             </select>
             <input type="submit" />
           </form>

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { Role, User } from '../models';
 import getRole from '../helpers/getRole';
 import hasRole from '../helpers/hasRole';
-import roleCanDeleteRole from '../helpers/roleCanDeleteRole';
+import canDeleteRole from '../helpers/canDeleteRole';
 import errorCatcher from './helpers/errorCatcher';
 import checkTeamRole from './helpers/checkTeamRole';
 import loggedIn from './helpers/loggedIn';
@@ -122,7 +122,7 @@ Transfer ownership to another user first.`
               allowed = true;
             }
           } else {
-            allowed = roleCanDeleteRole(currentUserRole, roleToDelete);
+            allowed = canDeleteRole(currentUserRole.type, roleToDelete.type);
           }
 
           if (allowed) {
