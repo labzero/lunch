@@ -65,4 +65,42 @@ describe('actions/decisions', () => {
       });
     });
   });
+
+  describe('decide', () => {
+    let restaurantId;
+
+    beforeEach(() => {
+      restaurantId = 1;
+    });
+
+    describe('before fetch', () => {
+      beforeEach(() => {
+        fetchMock.mock('*', {});
+      });
+
+      it('dispatches postDecision', () => {
+        store.dispatch(decisions.decide(teamSlug, restaurantId));
+
+        expect(store.getActions()[0].type).to.eq(ActionTypes.POST_DECISION);
+      });
+
+      it('fetches decision', () => {
+        store.dispatch(decisions.decide(teamSlug, restaurantId));
+
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/decisions`);
+        expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ restaurant_id: 1 }));
+      });
+    });
+
+    describe('failure', () => {
+      beforeEach(() => {
+        fetchMock.mock('*', 400);
+        return store.dispatch(decisions.decide(teamSlug, restaurantId));
+      });
+
+      it('dispatches flashError', () => {
+        expect(store.getActions()[1].type).to.eq(ActionTypes.FLASH_ERROR);
+      });
+    });
+  });
 });

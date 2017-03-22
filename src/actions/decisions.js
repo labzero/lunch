@@ -92,7 +92,7 @@ export const decisionDeleted = (restaurantId, userId) => ({
 export const decide = (teamSlug, restaurantId) => dispatch => {
   const payload = { restaurant_id: restaurantId };
   dispatch(postDecision(teamSlug, restaurantId));
-  fetch(`/api/teams/${teamSlug}/decisions`, {
+  return fetch(`/api/teams/${teamSlug}/decisions`, {
     credentials,
     headers: jsonHeaders,
     method: 'post',
@@ -108,7 +108,7 @@ export const removeDecision = teamSlug => (dispatch, getState) => {
   const restaurantId = getDecision(getState()).restaurant_id;
   const payload = { restaurant_id: restaurantId };
   dispatch(deleteDecision(teamSlug, restaurantId));
-  fetch(`/api/teams/${teamSlug}/decisions/fromToday`, {
+  return fetch(`/api/teams/${teamSlug}/decisions/fromToday`, {
     credentials,
     headers: jsonHeaders,
     method: 'delete',
