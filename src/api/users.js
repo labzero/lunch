@@ -9,6 +9,38 @@ import loggedIn from './helpers/loggedIn';
 
 const router = new Router({ mergeParams: true });
 
+const hasOtherOwners = async (team, id) => {
+  const allTeamRoles = await Role.findAll({ where: { team_id: team.id } });
+  return allTeamRoles.some(role => role.type === 'owner' && role.user_id !== id);
+};
+
+const canChangeUser = async (user, roleToChange, team, noOtherOwners) => {
+  let currentUserRole;
+  if (user.id === roleToChange.user_id) {
+    currentUserRole = roleToChange;
+  } else {
+    currentUserRole = getRole(user, team);
+  }
+  let allowed = false;
+  if (user.superuser) {
+    allowed = true;
+  } else if (currentUserRole.type === 'owner') {
+    if (user.id === roleToChange.user_id) {
+      const otherOwners = await hasOtherOwners(team, roleToChange.user_id);
+      if (otherOwners) {
+        allowed = true;
+      } else {
+        return noOtherOwners();
+      }
+    } else {
+      allowed = true;
+    }
+  } else {
+    allowed = canChangeRole(currentUserRole.type, roleToChange.type);
+  }
+  return allowed;
+};
+
 router
   .get(
     '/',
@@ -86,45 +118,77 @@ router
       }
     }
   )
+  .patch(
+    '/:id',
+    loggedIn,
+    checkTeamRole('member'),
+    async (req, res) => {
+      const id = parseInt(req.params.id, 10);
+
+      try {
+        let roleToChange;
+        if (req.user.id === id) {
+          roleToChange = getRole(req.user, req.team);
+        } else {
+          roleToChange = await Role.findOne({ where: { team_id: req.team.id, user_id: id } });
+        }
+
+        if (roleToChange) {
+          const allowed = await canChangeUser(
+            req.user, roleToChange, req.team, () => res.status(403).json({
+              error: true,
+              data: {
+                message: `You cannot demote yourself if you are the only owner.
+Grant ownership to another user first.`
+              }
+            })
+          );
+
+          if (typeof allowed !== 'boolean') {
+            return allowed;
+          }
+
+          if (allowed) {
+            await roleToChange.update({ type: req.body.type });
+            const user = await User.scope({ method: ['withTeamRole', req.team.id, ['email']] }).findOne({ where: { id } });
+            return res.status(200).json({ error: false, data: user });
+          }
+          return res.status(403).json({ error: true, data: { message: 'You do not have permission to change this user.' } });
+        }
+        return res.status(404).json({ error: true, data: { message: 'User not found on team.' } });
+      } catch (err) {
+        return errorCatcher(res, err);
+      }
+    }
+  )
   .delete(
     '/:id',
     loggedIn,
     checkTeamRole('member'),
     async (req, res) => {
       const id = parseInt(req.params.id, 10);
-      const currentUserRole = getRole(req.user, req.team);
 
       try {
         let roleToDelete;
         if (req.user.id === id) {
-          roleToDelete = currentUserRole;
+          roleToDelete = getRole(req.user, req.team);
         } else {
           roleToDelete = await Role.findOne({ where: { team_id: req.team.id, user_id: id } });
         }
 
         if (roleToDelete) {
-          let allowed = false;
-          if (req.user.superuser) {
-            allowed = true;
-          } else if (currentUserRole.type === 'owner') {
-            if (req.user.id === id) {
-              const allTeamRoles = await Role.findAll({ where: { team_id: req.team.id } });
-              if (allTeamRoles.some(role => role.type === 'owner' && role.user_id !== id)) {
-                allowed = true;
-              } else {
-                return res.status(403).json({
-                  error: true,
-                  data: {
-                    message: `You cannot remove yourself if you are the only owner.
+          const allowed = await canChangeUser(
+            req.user, roleToDelete, req.team, () => res.status(403).json({
+              error: true,
+              data: {
+                message: `You cannot remove yourself if you are the only owner.
 Transfer ownership to another user first.`
-                  }
-                });
               }
-            } else {
-              allowed = true;
-            }
-          } else {
-            allowed = canChangeRole(currentUserRole.type, roleToDelete.type);
+            })
+          );
+
+          if (typeof allowed !== 'boolean') {
+            return allowed;
           }
 
           if (allowed) {
