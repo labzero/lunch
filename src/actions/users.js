@@ -21,7 +21,7 @@ export function receiveUsers(json, teamSlug) {
   };
 }
 
-function fetchUsers(teamSlug) {
+export function fetchUsers(teamSlug) {
   return dispatch => {
     dispatch(requestUsers(teamSlug));
     return fetch(`/api/teams/${teamSlug}/users`, {
