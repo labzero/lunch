@@ -172,7 +172,7 @@ export function deletedTagFromRestaurant(restaurantId, id, userId) {
   };
 }
 
-function fetchRestaurants(teamSlug) {
+export function fetchRestaurants(teamSlug) {
   return dispatch => {
     dispatch(requestRestaurants(teamSlug));
     return fetch(`/api/teams/${teamSlug}/restaurants`, {
@@ -249,8 +249,8 @@ export function removeRestaurant(teamSlug, id) {
   };
 }
 
-export function changeRestaurantName(teamSlug, id, value) {
-  const payload = { name: value };
+export function changeRestaurantName(teamSlug, id, name) {
+  const payload = { name };
   return dispatch => {
     dispatch(renameRestaurant(teamSlug, id, payload));
     return fetch(`/api/teams/${teamSlug}/restaurants/${id}`, {
@@ -294,14 +294,14 @@ export function removeVote(teamSlug, restaurantId, id) {
   };
 }
 
-export function addNewTagToRestaurant(teamSlug, restaurantId, value) {
+export function addNewTagToRestaurant(teamSlug, restaurantId, name) {
   return (dispatch) => {
-    dispatch(postNewTagToRestaurant(teamSlug, restaurantId, value));
+    dispatch(postNewTagToRestaurant(teamSlug, restaurantId, name));
     return fetch(`/api/teams/${teamSlug}/restaurants/${restaurantId}/tags`, {
       method: 'post',
       credentials,
       headers: jsonHeaders,
-      body: JSON.stringify({ name: value })
+      body: JSON.stringify({ name })
     })
       .then(response => processResponse(response))
       .catch(

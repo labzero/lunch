@@ -36,7 +36,7 @@ export function fetchDecision(teamSlug) {
   };
 }
 
-export function shouldFetchDecision(state, teamSlug) {
+function shouldFetchDecision(state, teamSlug) {
   const restaurants = state.restaurants;
   if (restaurants.teamSlug !== teamSlug) {
     return true;

@@ -15,10 +15,13 @@ const mockStore = configureStore(middlewares);
 describe('actions/decisions', () => {
   let store;
   let teamSlug;
+  let flashErrorStub;
 
   beforeEach(() => {
     store = mockStore({});
     teamSlug = 'labzero';
+    flashErrorStub = actionCreatorStub();
+    decisionsRewireAPI.__Rewire__('flashError', flashErrorStub);
   });
 
   describe('fetchDecision', () => {
@@ -58,11 +61,8 @@ describe('actions/decisions', () => {
     });
 
     describe('failure', () => {
-      let flashErrorStub;
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        flashErrorStub = actionCreatorStub();
-        decisionsRewireAPI.__Rewire__('flashError', flashErrorStub);
         return store.dispatch(decisions.fetchDecision(teamSlug));
       });
 
@@ -102,11 +102,8 @@ describe('actions/decisions', () => {
     });
 
     describe('failure', () => {
-      let flashErrorStub;
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        flashErrorStub = actionCreatorStub();
-        decisionsRewireAPI.__Rewire__('flashError', flashErrorStub);
         return store.dispatch(decisions.decide(teamSlug, restaurantId));
       });
 
@@ -148,11 +145,8 @@ describe('actions/decisions', () => {
     });
 
     describe('failure', () => {
-      let flashErrorStub;
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        flashErrorStub = actionCreatorStub();
-        decisionsRewireAPI.__Rewire__('flashError', flashErrorStub);
         return store.dispatch(decisions.removeDecision(teamSlug));
       });
 
