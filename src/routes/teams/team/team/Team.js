@@ -11,8 +11,9 @@ import React, { PropTypes } from 'react';
 import { intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { globalMessageDescriptor as gm } from '../../../../helpers/generateMessageDescriptor';
+import getRole from '../../../../helpers/getRole';
 import hasRole from '../../../../helpers/hasRole';
-import canDeleteUser from '../../../../helpers/canDeleteUser';
+import canChangeUser from '../../../../helpers/canChangeUser';
 import s from './Team.css';
 
 class Team extends React.Component {
@@ -48,12 +49,47 @@ class Team extends React.Component {
     this.setState(Object.assign({}, Team.defaultState));
   };
 
+  handleRoleChange = user => event => {
+    const { currentUser, team } = this.props;
+
+    let confirmed = true;
+    if (event.target.value === 'member' && getRole(currentUser, team).type === 'member') {
+      // eslint-disable-next-line no-alert
+      confirmed = confirm('Are you sure you want to promote this user to Member status? You will not be able to demote them later.');
+    } if (currentUser.id === user.id && !currentUser.superuser) {
+      // eslint-disable-next-line no-alert
+      confirmed = confirm('Are you sure you want to demote yourself? You will not be able to undo this by yourself.');
+    }
+
+    if (!confirmed) {
+      event.preventDefault();
+    }
+  };
+
   handleDeleteClicked = id => () => {
     this.props.removeUserFromTeam(id);
   };
 
+  roleOptions = (user) => {
+    const { currentUser, intl: { formatMessage: f }, team, users } = this.props;
+
+    if (canChangeUser(currentUser, user, team, users)) {
+      return (
+        <select
+          onChange={this.handleRoleChange(user)}
+          value={user.type}
+        >
+          {hasRole(currentUser, team, 'guest') && <option value="guest">{f(gm('guestRole'))}</option>}
+          {hasRole(currentUser, team, 'member') && <option value="member">{f(gm('memberRole'))}</option>}
+          {hasRole(currentUser, team, 'owner') && <option value="owner">{f(gm('ownerRole'))}</option>}
+        </select>
+      );
+    }
+    return f(gm(`${user.type}Role`));
+  }
+
   render() {
-    const { userListReady, currentUser, intl: { formatMessage: f }, users, team } = this.props;
+    const { userListReady, currentUser, intl: { formatMessage: f }, team, users } = this.props;
     const { email, name, type } = this.state;
 
     if (!userListReady) {
@@ -78,11 +114,17 @@ class Team extends React.Component {
                 <tr key={user.id}>
                   <td>{user.name ? user.name : f(gm('noUserName'))}</td>
                   <td>{user.email}</td>
-                  <td>{f(gm(`${user.type}Role`))}</td>
                   <td>
-                    {currentUser.id !== user.id && canDeleteUser(currentUser, user, team) && (
-                      <button type="button" onClick={this.handleDeleteClicked(user.id)} aria-label="Remove">&times;</button>
-                    )}
+                    {this.roleOptions(user)}
+                  </td>
+                  <td>
+                    {
+                      currentUser.id !== user.id &&
+                      canChangeUser(currentUser, user, team, users) &&
+                      (
+                        <button type="button" onClick={this.handleDeleteClicked(user.id)} aria-label="Remove">&times;</button>
+                      )
+                    }
                   </td>
                 </tr>
               ))}

@@ -9,7 +9,7 @@ import Team from './Team';
 
 const mapStateToProps = (state, ownProps) => ({
   currentUser: getCurrentUser(state),
-  users: getUsers(state, ownProps.teamSlug),
+  users: getUsers(state),
   userListReady: isUserListReady(state),
   team: getTeamBySlug(state, ownProps.teamSlug),
   title: ownProps.title
