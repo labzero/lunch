@@ -21,7 +21,7 @@ export function receiveTags(json, teamSlug) {
   };
 }
 
-function fetchTags(teamSlug) {
+export function fetchTags(teamSlug) {
   return dispatch => {
     dispatch(requestTags(teamSlug));
     return fetch(`/api/teams/${teamSlug}/tags`, {

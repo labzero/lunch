@@ -165,7 +165,7 @@ describe('actions/restaurants', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(restaurants.removeRestaurant(teamSlug));
+        return store.dispatch(restaurants.removeRestaurant(teamSlug, id));
       });
 
       it('dispatches flashError', () => {
