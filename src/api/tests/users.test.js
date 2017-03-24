@@ -409,8 +409,8 @@ describe('api/users', () => {
         expect(loggedInSpy.called).to.be.true;
       });
 
-      it('checks for team role', () => {
-        expect(checkTeamRoleSpy.called).to.be.true;
+      it('checks for team role of member or greater', () => {
+        expect(checkTeamRoleSpy.calledWith('member')).to.be.true;
       });
     });
 
@@ -759,6 +759,65 @@ describe('api/users', () => {
 
       it('calls errorCatcher', () => {
         expect(errorCatcherSpy.calledWith(match.any, match({ name: 'Oh No' }))).to.be.true;
+      });
+    });
+  });
+
+  describe('DELETE /:id', () => {
+    describe('before query', () => {
+      beforeEach(() =>
+        request(app).delete('/1')
+      );
+
+      it('checks for login', () => {
+        expect(loggedInSpy.called).to.be.true;
+      });
+
+      it('checks for team role of member or greater', () => {
+        expect(checkTeamRoleSpy.calledWith('member')).to.be.true;
+      });
+    });
+
+    describe('success', () => {
+      let response;
+      let roleToDestroy;
+      let currentUserRole;
+      let userToDelete;
+      beforeEach((done) => {
+        currentUserRole = {
+          user_id: user.id,
+          team_id: team.id,
+          type: 'member'
+        };
+        userToDelete = {
+          id: 2,
+        };
+        roleToDestroy = {
+          destroy: spy(() => Promise.resolve()),
+          user_id: userToDelete.id,
+          team_id: team.id,
+          type: 'guest'
+        };
+        stub(RoleMock, 'findOne').callsFake(() => Promise.resolve(roleToDestroy));
+        stub(UserMock, 'findOne').callsFake(() => Promise.resolve(userToDelete));
+        app = makeApp({
+          '../helpers/getRole': mockEsmodule({
+            default: spy(() => currentUserRole)
+          })
+        });
+
+        request(app).delete(`/${userToDelete.id}`).then(r => {
+          response = r;
+          done();
+        });
+      });
+
+      it('deletes role', () => {
+        expect(roleToDestroy.destroy.callCount).to.eq(1);
+      });
+
+      it('returns 204', () => {
+        expect(response.statusCode).to.eq(204);
       });
     });
   });

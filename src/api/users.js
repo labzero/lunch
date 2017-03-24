@@ -9,6 +9,13 @@ import loggedIn from './helpers/loggedIn';
 
 const router = new Router({ mergeParams: true });
 
+const getRoleToChange = async (currentUser, targetId, team) => {
+  if (currentUser.id === targetId) {
+    return getRole(currentUser, team);
+  }
+  return Role.findOne({ where: { team_id: team.id, user_id: targetId } });
+};
+
 const hasOtherOwners = async (team, id) => {
   const allTeamRoles = await Role.findAll({ where: { team_id: team.id } });
   return allTeamRoles.some(role => role.type === 'owner' && role.user_id !== id);
@@ -121,12 +128,7 @@ router
       const id = parseInt(req.params.id, 10);
 
       try {
-        let roleToChange;
-        if (req.user.id === id) {
-          roleToChange = getRole(req.user, req.team);
-        } else {
-          roleToChange = await Role.findOne({ where: { team_id: req.team.id, user_id: id } });
-        }
+        const roleToChange = await getRoleToChange(req.user, id, req.team);
 
         if (roleToChange) {
           const allowed = await canChangeUser(
@@ -165,16 +167,11 @@ Grant ownership to another user first.`
       const id = parseInt(req.params.id, 10);
 
       try {
-        let roleToDelete;
-        if (req.user.id === id) {
-          roleToDelete = getRole(req.user, req.team);
-        } else {
-          roleToDelete = await Role.findOne({ where: { team_id: req.team.id, user_id: id } });
-        }
+        const roleToDelete = await getRoleToChange(req.user, id, req.team);
 
         if (roleToDelete) {
           const allowed = await canChangeUser(
-            req.user, roleToDelete, req.body.type, req.team, () => res.status(403).json({
+            req.user, roleToDelete, undefined, req.team, () => res.status(403).json({
               error: true,
               data: {
                 message: `You cannot remove yourself if you are the only owner.
