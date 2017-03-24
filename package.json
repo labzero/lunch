@@ -144,7 +144,7 @@
     "rimraf": "^2.5.4",
     "sass-loader": "^6.0.3",
     "sequelize-mock": "^0.7.0",
-    "sinon": "^2.0.0-pre.5",
+    "sinon": "^2.1.0",
     "style-loader": "^0.13.2",
     "stylefmt": "^5.1.1",
     "stylelint": "^7.8.0",

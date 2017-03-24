@@ -54,16 +54,12 @@ router
                   res.redirect(`https://www.google.com/maps/place/${r.name}, ${r.address}`);
                 }
               } else {
-                // eslint-disable-next-line no-console
-                console.error(error);
                 next(error);
               }
             }
           );
         }
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
         next(err);
       }
     }
@@ -94,8 +90,6 @@ router
         req.wss.broadcast(restaurantPosted(json, req.user.id));
         res.status(201).send({ error: false, data: json });
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
         const error = { message: 'Could not save new restaurant. Has it already been added?' };
         errorCatcher(res, error);
       }
@@ -120,9 +114,7 @@ router
           req.wss.broadcast(restaurantRenamed(id, json, req.user.id));
           res.status(200).send({ error: false, data: json });
         }
-      }).catch((e) => {
-        // eslint-disable-next-line no-console
-        console.error(e);
+      }).catch(() => {
         const error = { message: 'Could not update restaurant.' };
         errorCatcher(res, error);
       });
@@ -143,8 +135,6 @@ router
           res.status(204).send();
         }
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
         errorCatcher(res, err);
       }
     }

@@ -63,8 +63,6 @@ router
 
         res.status(200).json({ error: false, data: users });
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
         errorCatcher(res, err);
       }
     }
@@ -111,10 +109,7 @@ router
 
         return res.status(201).json({ error: false, data: userToAdd });
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err);
-        const error = { message: 'Could not add user to team. They might already exist.' };
-        return errorCatcher(res, error);
+        return errorCatcher(res, err);
       }
     }
   )

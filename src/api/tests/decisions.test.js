@@ -112,15 +112,12 @@ describe('api/decisions', () => {
           res.send();
         });
         app = makeApp({
-          '../models': mockEsmodule({
-            Decision: {
-              scope: stub().throws('Oh No')
-            }
-          }),
           './helpers/errorCatcher': mockEsmodule({
             default: errorCatcherSpy
           })
         });
+
+        stub(DecisionMock, 'scope').throws('Oh No');
 
         return request(app).get('/fromToday');
       });
@@ -212,15 +209,12 @@ describe('api/decisions', () => {
       describe('when destroying', () => {
         beforeEach(() => {
           app = makeApp({
-            '../models': mockEsmodule({
-              Decision: {
-                scope: stub().throws('Oh No')
-              }
-            }),
             './helpers/errorCatcher': mockEsmodule({
               default: errorCatcherSpy
             })
           });
+
+          stub(DecisionMock, 'scope').throws('Oh No');
 
           return request(app).post('/');
         });
@@ -319,15 +313,12 @@ describe('api/decisions', () => {
         });
 
         app = makeApp({
-          '../models': mockEsmodule({
-            Decision: {
-              scope: stub().throws('Oh No')
-            }
-          }),
           './helpers/errorCatcher': mockEsmodule({
             default: errorCatcherSpy
           })
         });
+
+        stub(DecisionMock, 'scope').throws('Oh No');
 
         return request(app).delete('/fromToday');
       });

@@ -29,8 +29,6 @@ router
         const json = obj.toJSON();
         res.status(201).send({ error: false, data: json });
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
         const error = { message: 'Could not create new team. It might already exist.' };
         errorCatcher(res, error);
       }
