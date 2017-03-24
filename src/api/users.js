@@ -14,7 +14,7 @@ const hasOtherOwners = async (team, id) => {
   return allTeamRoles.some(role => role.type === 'owner' && role.user_id !== id);
 };
 
-const canChangeUser = async (user, roleToChange, team, noOtherOwners) => {
+const canChangeUser = async (user, roleToChange, target, team, noOtherOwners) => {
   let currentUserRole;
   if (user.id === roleToChange.user_id) {
     currentUserRole = roleToChange;
@@ -36,7 +36,7 @@ const canChangeUser = async (user, roleToChange, team, noOtherOwners) => {
       allowed = true;
     }
   } else {
-    allowed = canChangeRole(currentUserRole.type, roleToChange.type);
+    allowed = canChangeRole(currentUserRole.type, roleToChange.type, target);
   }
   return allowed;
 };
@@ -130,7 +130,7 @@ router
 
         if (roleToChange) {
           const allowed = await canChangeUser(
-            req.user, roleToChange, req.team, () => res.status(403).json({
+            req.user, roleToChange, req.body.type, req.team, () => res.status(403).json({
               error: true,
               data: {
                 message: `You cannot demote yourself if you are the only owner.
@@ -139,6 +139,7 @@ Grant ownership to another user first.`
             })
           );
 
+          // in case of error response within canChangeUser
           if (typeof allowed !== 'boolean') {
             return allowed;
           }
@@ -173,7 +174,7 @@ Grant ownership to another user first.`
 
         if (roleToDelete) {
           const allowed = await canChangeUser(
-            req.user, roleToDelete, req.team, () => res.status(403).json({
+            req.user, roleToDelete, req.body.type, req.team, () => res.status(403).json({
               error: true,
               data: {
                 message: `You cannot remove yourself if you are the only owner.
@@ -182,6 +183,7 @@ Transfer ownership to another user first.`
             })
           );
 
+          // in case of error response within canChangeUser
           if (typeof allowed !== 'boolean') {
             return allowed;
           }

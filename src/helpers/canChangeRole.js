@@ -1,7 +1,7 @@
-export default (role, roleToChange) => {
+export default (role, roleToChange, target) => {
   switch (role) {
     case 'member':
-      return roleToChange === 'guest';
+      return roleToChange === 'guest' && target === 'member';
     case 'owner':
       return true;
     default:

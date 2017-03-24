@@ -22,23 +22,27 @@ describe('api/users', () => {
   let loggedInSpy;
   let makeApp;
   let broadcastSpy;
+  let team;
+  let user;
 
   beforeEach(() => {
     UserMock = dbMock.define('user', {});
     RoleMock = dbMock.define('role', {});
 
+    team = {
+      id: 77,
+      stub: 'Lab Zero'
+    };
     checkTeamRoleSpy = spy(() => (req, res, next) => {
-      req.team = { // eslint-disable-line no-param-reassign
-        id: 77,
-        stub: 'Lab Zero'
-      };
+      req.team = team; // eslint-disable-line no-param-reassign
       next();
     });
 
+    user = {
+      id: 231
+    };
     loggedInSpy = spy((req, res, next) => {
-      req.user = { // eslint-disable-line no-param-reassign
-        id: 231
-      };
+      req.user = user; // eslint-disable-line no-param-reassign
       next();
     });
 
@@ -334,10 +338,10 @@ describe('api/users', () => {
     });
 
     describe('success', () => {
-      let user;
+      let userToCreate;
       let response;
       beforeEach((done) => {
-        user = { id: 2 };
+        userToCreate = { id: 2 };
         app = makeApp({
           '../helpers/hasRole': mockEsmodule({
             default: () => true
@@ -347,9 +351,9 @@ describe('api/users', () => {
           .onFirstCall()
           .callsFake(() => Promise.resolve(null))
           .onSecondCall()
-          .callsFake(() => Promise.resolve(user));
+          .callsFake(() => Promise.resolve(userToCreate));
         stub(UserMock, 'create')
-          .callsFake(() => Promise.resolve(user));
+          .callsFake(() => Promise.resolve(userToCreate));
         request(app)
           .post('/')
           .send({ email: 'foo@bar.com', name: 'Jeffrey', type: 'member' })
@@ -365,7 +369,7 @@ describe('api/users', () => {
 
       it('returns json with user', () => {
         expect(response.body.error).to.eq(false);
-        expect(response.body.data).to.deep.eq(user);
+        expect(response.body.data).to.deep.eq(userToCreate);
       });
     });
 
@@ -394,11 +398,11 @@ describe('api/users', () => {
       });
     });
   });
-/*
-  describe('DELETE /fromToday', () => {
+
+  describe('PATCH /:id', () => {
     describe('before query', () => {
       beforeEach(() =>
-        request(app).delete('/fromToday')
+        request(app).patch('/1')
       );
 
       it('checks for login', () => {
@@ -410,44 +414,325 @@ describe('api/users', () => {
       });
     });
 
-    describe('query', () => {
-      let destroySpy;
+    describe('when patching self', () => {
+      let getRoleSpy;
+      let path;
       beforeEach(() => {
-        destroySpy = spy(DecisionMock, 'destroy');
-        return request(app).delete('/fromToday').send({ restaurant_id: 1 });
+        getRoleSpy = spy();
+        app = makeApp({
+          '../helpers/getRole': mockEsmodule({
+            default: getRoleSpy
+          })
+        });
+        path = `/${user.id}`;
+        return request(app).patch(path).send({ type: 'member' });
       });
 
-      it('deletes decision', () => {
-        expect(destroySpy.calledWith({
-          where: { team_id: 77 }
+      it('gets user\'s role on team', () => {
+        expect(getRoleSpy.firstCall.args).to.deep.eq([user, team]);
+      });
+    });
+
+    describe('when owner is changing self', () => {
+      let role;
+      let path;
+      beforeEach(() => {
+        role = {
+          update: spy(),
+          user_id: user.id,
+          team_id: team.id,
+          type: 'owner'
+        };
+        path = `/${user.id}`;
+        app = makeApp({
+          '../helpers/getRole': mockEsmodule({
+            default: spy(() => role)
+          })
+        });
+      });
+
+      describe('to member', () => {
+        let payload;
+        beforeEach(() => {
+          payload = { type: 'member' };
+        });
+
+        describe('but there are no other owners', () => {
+          let findAllStub;
+          let response;
+          beforeEach((done) => {
+            findAllStub = stub(RoleMock, 'findAll').callsFake(() => Promise.resolve([role, {
+              type: 'member',
+              user_id: 2
+            }]));
+            request(app).patch(path).send(payload).then((r) => {
+              response = r;
+              done();
+            });
+          });
+
+          it('finds all roles', () => {
+            expect(findAllStub.calledWith({ where: { team_id: team.id } })).to.be.true;
+          });
+
+          it('returns 403', () => {
+            expect(response.statusCode).to.eq(403);
+          });
+
+          it('returns json with error', () => {
+            expect(response.body.error).to.be.true;
+            expect(response.body.data.message).to.be.a('string');
+          });
+        });
+
+        describe('and there are other owners', () => {
+          beforeEach(() => {
+            stub(RoleMock, 'findAll').callsFake(() => Promise.resolve([role, {
+              type: 'owner',
+              user_id: 2
+            }]));
+            return request(app).patch(path).send(payload);
+          });
+
+          it('updates role', () => {
+            expect(role.update.calledWith({ type: 'member' })).to.be.true;
+          });
+        });
+      });
+    });
+
+    describe('when patching other', () => {
+      let findOneStub;
+      beforeEach(() => {
+        findOneStub = stub(RoleMock, 'findOne');
+        return request(app).patch('/2').send({ type: 'member' });
+      });
+
+      it('queries role on team', () => {
+        expect(findOneStub.calledWith({
+          where: {
+            team_id: team.id,
+            user_id: 2
+          }
         })).to.be.true;
       });
     });
 
-    describe('success', () => {
-      let decisionDeletedSpy;
-      let response;
-      beforeEach((done) => {
-        decisionDeletedSpy = spy();
+    describe('when owner is changing other', () => {
+      let currentUserRole;
+      let otherUserId;
+      let path;
+      let role;
+      beforeEach(() => {
+        currentUserRole = {
+          user_id: user.id,
+          team_id: team.id,
+          type: 'owner'
+        };
+        role = {
+          update: spy(),
+          user_id: otherUserId,
+          team_id: team.id
+        };
+        otherUserId = 2;
+        path = `/${otherUserId}`;
         app = makeApp({
-          '../actions/decisions': mockEsmodule({
-            decisionDeleted: decisionDeletedSpy
+          '../helpers/getRole': mockEsmodule({
+            default: spy(() => currentUserRole)
           })
         });
+      });
 
-        request(app).delete('/fromToday').send({ restaurant_id: 1 }).then(r => {
+      describe('owner', () => {
+        beforeEach(() => {
+          role.type = 'owner';
+          stub(RoleMock, 'findOne').callsFake(() => Promise.resolve(role));
+          return request(app).patch(path).send({ type: 'member' });
+        });
+
+        it('updates role', () => {
+          expect(role.update.calledWith({ type: 'member' })).to.be.true;
+        });
+      });
+
+      describe('member', () => {
+        beforeEach(() => {
+          role.type = 'member';
+          stub(RoleMock, 'findOne').callsFake(() => Promise.resolve(role));
+          return request(app).patch(path).send({ type: 'owner' });
+        });
+
+        it('updates role', () => {
+          expect(role.update.calledWith({ type: 'owner' })).to.be.true;
+        });
+      });
+
+      describe('guest', () => {
+        beforeEach(() => {
+          role.type = 'guest';
+          stub(RoleMock, 'findOne').callsFake(() => Promise.resolve(role));
+          return request(app).patch(path).send({ type: 'owner' });
+        });
+
+        it('updates role', () => {
+          expect(role.update.calledWith({ type: 'owner' })).to.be.true;
+        });
+      });
+    });
+
+    describe('when member is changing other', () => {
+      let currentUserRole;
+      let otherUserId;
+      let path;
+      let role;
+      beforeEach(() => {
+        currentUserRole = {
+          user_id: user.id,
+          team_id: team.id,
+          type: 'member'
+        };
+        role = {
+          update: spy(),
+          user_id: otherUserId,
+          team_id: team.id
+        };
+        otherUserId = 2;
+        path = `/${otherUserId}`;
+        app = makeApp({
+          '../helpers/getRole': mockEsmodule({
+            default: spy(() => currentUserRole)
+          })
+        });
+      });
+
+      describe('owner', () => {
+        let response;
+        beforeEach((done) => {
+          role.type = 'owner';
+          stub(RoleMock, 'findOne').callsFake(() => Promise.resolve(role));
+          request(app).patch(path).send({ type: 'member' }).then((r) => {
+            response = r;
+            done();
+          });
+        });
+
+        it('returns 403', () => {
+          expect(response.statusCode).to.eq(403);
+        });
+
+        it('returns json with error', () => {
+          expect(response.body.error).to.be.true;
+          expect(response.body.data.message).to.be.a('string');
+        });
+      });
+
+      describe('member', () => {
+        let response;
+        beforeEach((done) => {
+          role.type = 'member';
+          stub(RoleMock, 'findOne').callsFake(() => Promise.resolve(role));
+          request(app).patch(path).send({ type: 'member' }).then((r) => {
+            response = r;
+            done();
+          });
+        });
+
+        it('returns 403', () => {
+          expect(response.statusCode).to.eq(403);
+        });
+      });
+
+      describe('guest', () => {
+        beforeEach(() => {
+          role.type = 'guest';
+          stub(RoleMock, 'findOne').callsFake(() => Promise.resolve(role));
+        });
+
+        describe('to member', () => {
+          beforeEach(() =>
+            request(app).patch(path).send({ type: 'member' })
+          );
+
+          it('updates role', () => {
+            expect(role.update.calledWith({ type: 'member' })).to.be.true;
+          });
+        });
+
+        describe('to owner', () => {
+          let response;
+          beforeEach((done) => {
+            request(app).patch(path).send({ type: 'owner' }).then((r) => {
+              response = r;
+              done();
+            });
+          });
+
+          it('returns 403', () => {
+            expect(response.statusCode).to.eq(403);
+          });
+        });
+      });
+    });
+
+    describe('when no user is found', () => {
+      let response;
+      beforeEach((done) => {
+        stub(RoleMock, 'findOne').callsFake(() => Promise.resolve(null));
+        request(app).patch('/2').send({ type: 'member' }).then((r) => {
           response = r;
           done();
         });
       });
 
-      it('broadcasts decisionDeleted', () => {
-        expect(broadcastSpy.called).to.be.true;
-        expect(decisionDeletedSpy.calledWith(1, 231)).to.be.true;
+      it('returns 404', () => {
+        expect(response.statusCode).to.eq(404);
       });
 
-      it('returns 204', () => {
-        expect(response.statusCode).to.eq(204);
+      it('returns json with error', () => {
+        expect(response.body.error).to.eq(true);
+        expect(response.body.data.message).to.be.a('string');
+      });
+    });
+
+    describe('success', () => {
+      let response;
+      let currentUserRole;
+      let userToChange;
+      beforeEach((done) => {
+        currentUserRole = {
+          user_id: user.id,
+          team_id: team.id,
+          type: 'member'
+        };
+        userToChange = {
+          id: 2,
+        };
+        stub(RoleMock, 'findOne').callsFake(() => Promise.resolve({
+          update: () => Promise.resolve(),
+          user_id: userToChange.id,
+          team_id: team.id,
+          type: 'guest'
+        }));
+        stub(UserMock, 'findOne').callsFake(() => Promise.resolve(userToChange));
+        app = makeApp({
+          '../helpers/getRole': mockEsmodule({
+            default: spy(() => currentUserRole)
+          })
+        });
+
+        request(app).patch('/2').send({ type: 'member' }).then(r => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns 200', () => {
+        expect(response.statusCode).to.eq(200);
+      });
+
+      it('returns json with user', () => {
+        expect(response.body.error).to.be.false;
+        expect(response.body.data).to.deep.eq(userToChange);
       });
     });
 
@@ -460,8 +745,8 @@ describe('api/users', () => {
 
         app = makeApp({
           '../models': mockEsmodule({
-            Decision: {
-              scope: stub().throws('Oh No')
+            Role: {
+              findOne: stub().throws('Oh No')
             }
           }),
           './helpers/errorCatcher': mockEsmodule({
@@ -469,12 +754,12 @@ describe('api/users', () => {
           })
         });
 
-        return request(app).delete('/fromToday');
+        return request(app).patch('/1');
       });
 
       it('calls errorCatcher', () => {
         expect(errorCatcherSpy.calledWith(match.any, match({ name: 'Oh No' }))).to.be.true;
       });
     });
-  });*/
+  });
 });
