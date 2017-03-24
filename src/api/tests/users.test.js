@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-/* eslint-disable no-unused-expressions, no-underscore-dangle */
+/* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
 import { match, spy, stub } from 'sinon';

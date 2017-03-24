@@ -64,4 +64,21 @@ export default new Map([
       }
     })
   ],
+  [ActionTypes.PATCH_USER, isFetching],
+  [ActionTypes.USER_PATCHED, (state, action) =>
+    update(state, {
+      isFetching: {
+        $set: false
+      },
+      items: {
+        entities: {
+          users: {
+            [action.id]: {
+              $merge: action.user
+            }
+          }
+        }
+      }
+    })
+  ],
 ]);

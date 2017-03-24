@@ -149,7 +149,7 @@ describe('actions/users', () => {
         expect(deleteUserStub.calledWith(teamSlug, id)).to.be.true;
       });
 
-      it('fetches restaurant', () => {
+      it('fetches user', () => {
         store.dispatch(users.removeUser(teamSlug, id));
 
         expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/users/${id}`);
@@ -174,6 +174,62 @@ describe('actions/users', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
         return store.dispatch(users.removeUser(teamSlug, id));
+      });
+
+      it('dispatches flashError', () => {
+        expect(flashErrorStub.called).to.be.true;
+      });
+    });
+  });
+
+  describe('changeUserRole', () => {
+    let id;
+    let roleType;
+    beforeEach(() => {
+      id = 1;
+      roleType = 'member';
+    });
+
+    describe('before fetch', () => {
+      beforeEach(() => {
+        fetchMock.mock('*', {});
+      });
+
+      it('dispatches patchUser', () => {
+        const patchUserStub = actionCreatorStub();
+        usersRewireAPI.__Rewire__('patchUser', patchUserStub);
+
+        store.dispatch(users.changeUserRole(teamSlug, id, roleType));
+
+        expect(patchUserStub.calledWith(teamSlug, id, roleType)).to.be.true;
+      });
+
+      it('fetches user', () => {
+        store.dispatch(users.changeUserRole(teamSlug, id, roleType));
+
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/users/${id}`);
+        expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ id, type: roleType }));
+      });
+    });
+
+    describe('success', () => {
+      let userPatchedStub;
+      beforeEach(() => {
+        fetchMock.mock('*', { data: { foo: 'bar' } });
+        userPatchedStub = actionCreatorStub();
+        usersRewireAPI.__Rewire__('userPatched', userPatchedStub);
+        return store.dispatch(users.changeUserRole(teamSlug, id, roleType));
+      });
+
+      it('dispatches userPatched', () => {
+        expect(userPatchedStub.calledWith(id, { foo: 'bar' }, teamSlug)).to.be.true;
+      });
+    });
+
+    describe('failure', () => {
+      beforeEach(() => {
+        fetchMock.mock('*', 400);
+        return store.dispatch(users.changeUserRole(teamSlug, id, roleType));
       });
 
       it('dispatches flashError', () => {

@@ -130,3 +130,39 @@ export function addUser(teamSlug, payload) {
       );
   };
 }
+
+export function patchUser(teamSlug, id, roleType) {
+  return {
+    type: ActionTypes.PATCH_USER,
+    id,
+    roleType,
+    teamSlug
+  };
+}
+
+export function userPatched(id, json, teamSlug) {
+  return {
+    type: ActionTypes.USER_PATCHED,
+    id,
+    user: json,
+    teamSlug
+  };
+}
+
+export function changeUserRole(teamSlug, id, type) {
+  const payload = { id, type };
+  return (dispatch) => {
+    dispatch(patchUser(teamSlug, id, type));
+    return fetch(`/api/teams/${teamSlug}/users/${id}`, {
+      method: 'PATCH',
+      credentials,
+      headers: jsonHeaders,
+      body: JSON.stringify(payload)
+    })
+      .then(response => processResponse(response))
+      .then(json => dispatch(userPatched(id, json, teamSlug)))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
+  };
+}

@@ -19,6 +19,7 @@ import s from './Team.css';
 class Team extends React.Component {
   static propTypes = {
     addUserToTeam: PropTypes.func.isRequired,
+    changeUserRole: PropTypes.func.isRequired,
     currentUser: PropTypes.object.isRequired,
     fetchUsersIfNeeded: PropTypes.func.isRequired,
     intl: intlShape.isRequired,
@@ -61,8 +62,8 @@ class Team extends React.Component {
       confirmed = confirm('Are you sure you want to demote yourself? You will not be able to undo this by yourself.');
     }
 
-    if (!confirmed) {
-      event.preventDefault();
+    if (confirmed) {
+      this.props.changeUserRole(user.id, event.target.value);
     }
   };
 

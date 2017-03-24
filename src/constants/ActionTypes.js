@@ -74,6 +74,8 @@ const actions = [
   'INVALIDATE_USERS',
   'REQUEST_USERS',
   'RECEIVE_USERS',
+  'PATCH_USER',
+  'USER_PATCHED',
   'POST_USER',
   'USER_POSTED',
   'DELETE_USER',

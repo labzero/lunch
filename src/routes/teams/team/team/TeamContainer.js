@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
-import { addUser, fetchUsersIfNeeded, removeUser } from '../../../../actions/users';
+import { addUser, changeUserRole, fetchUsersIfNeeded, removeUser } from '../../../../actions/users';
 import { isUserListReady } from '../../../../selectors';
 import { getTeamBySlug } from '../../../../selectors/teams';
 import { getCurrentUser } from '../../../../selectors/user';
@@ -17,6 +17,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   addUserToTeam: payload => dispatch(addUser(ownProps.teamSlug, payload)),
+  changeUserRole: (id, type) => dispatch(changeUserRole(ownProps.teamSlug, id, type)),
   fetchUsersIfNeeded() {
     dispatch(fetchUsersIfNeeded(ownProps.teamSlug));
   },
