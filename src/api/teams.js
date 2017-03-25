@@ -44,7 +44,7 @@ export default () => {
       const hasRole = await getTeamIfHasRole(req.user, req.params.slug);
 
       if (!hasRole) {
-        ws.close();
+        ws.close(1008, 'Not authorized for this team.');
       }
     });
 };

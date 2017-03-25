@@ -14,7 +14,7 @@ import ReactDOM from 'react-dom';
 import FastClick from 'fastclick';
 import UniversalRouter from 'universal-router';
 import queryString from 'query-string';
-import ReconnectingWebSocket from 'reconnectingwebsocket';
+import RobustWebSocket from 'robust-websocket';
 import { createPath } from 'history/PathUtils';
 import history from './core/history';
 import App from './components/App';
@@ -24,7 +24,7 @@ import { ErrorReporter, deepForceUpdate } from './core/devUtils';
 
 fetch.promise = Promise;
 
-window.ReconnectingWebSocket = ReconnectingWebSocket;
+window.RobustWebSocket = RobustWebSocket;
 
 // Global (context) variables that can be easily accessed from any React component
 // https://facebook.github.io/react/docs/context.html
