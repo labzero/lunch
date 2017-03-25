@@ -1,10 +1,9 @@
-import { Team } from '../../models';
-import hasRole from '../../helpers/hasRole';
+import getTeamIfHasRole from './getTeamIfHasRole';
 
 export default role => async (req, res, next) => {
-  const team = await Team.findOne({ where: { slug: req.params.slug } });
+  const team = await getTeamIfHasRole(req.user, req.params.slug, role);
 
-  if (team && hasRole(req.user, team, role)) {
+  if (team) {
     req.team = team; // eslint-disable-line no-param-reassign
     next();
   } else {

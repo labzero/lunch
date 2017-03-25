@@ -3,11 +3,13 @@ import { fetchDecisionIfNeeded, invalidateDecision } from '../../../../actions/d
 import { fetchRestaurantsIfNeeded, invalidateRestaurants } from '../../../../actions/restaurants';
 import { fetchTagsIfNeeded, invalidateTags } from '../../../../actions/tags';
 import { fetchUsersIfNeeded, invalidateUsers } from '../../../../actions/users';
+import { messageReceived } from '../../../../actions/websockets';
 import Home from './Home';
 
 const mapStateToProps = (state, ownProps) => ({
   teamSlug: ownProps.teamSlug,
-  user: state.user
+  user: state.user,
+  wsPort: state.wsPort
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
@@ -34,6 +36,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   },
   invalidateUsers() {
     dispatch(invalidateUsers());
+  },
+  messageReceived(event) {
+    dispatch(messageReceived(event.data));
   }
 });
 

@@ -64,7 +64,7 @@ describe('api/decisions', () => {
         };
         next();
       });
-      server.use('/', decisionsApi);
+      server.use('/', decisionsApi());
       return server;
     };
 

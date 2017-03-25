@@ -90,6 +90,18 @@ User.findOneWithRoleType = (id, teamId, extraAttributes) =>
     where: { id }
   });
 
+User.getSessionUser = (id) =>
+  User.findOne({
+    where: { id },
+    include: [
+      {
+        model: Role,
+        required: false,
+        attributes: ['type', 'team_id']
+      }
+    ]
+  });
+
 Restaurant.hasMany(Vote);
 Restaurant.hasMany(Decision);
 Restaurant.belongsToMany(Tag, {

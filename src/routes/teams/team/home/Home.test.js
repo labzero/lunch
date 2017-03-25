@@ -21,7 +21,9 @@ describe('Home', () => {
       invalidateRestaurants: sinon.mock(),
       invalidateTags: sinon.mock(),
       invalidateUsers: sinon.mock(),
-      teamSlug: 'foo'
+      messageReceived: sinon.mock(),
+      teamSlug: 'foo',
+      wsPort: 3000
     };
   });
 

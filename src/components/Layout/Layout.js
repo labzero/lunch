@@ -22,8 +22,6 @@ class Layout extends Component {
 
   static propTypes = {
     children: PropTypes.element.isRequired,
-    messageReceived: PropTypes.func.isRequired,
-    wsPort: PropTypes.number.isRequired,
     shouldScrollToTop: PropTypes.bool.isRequired,
     scrolledToTop: PropTypes.func.isRequired,
     teamSlug: PropTypes.string // temp
@@ -50,19 +48,6 @@ class Layout extends Component {
 
   componentWillMount() {
     this.removeCss = this.context.insertCss(s, globalCss);
-
-    if (canUseDOM) {
-      let host = window.location.host;
-      if (this.props.wsPort !== 0 && this.props.wsPort !== window.location.port) {
-        host = `${window.location.hostname}:${this.props.wsPort}`;
-      }
-      let protocol = 'ws:';
-      if (window.location.protocol === 'https:') {
-        protocol = 'wss:';
-      }
-      this.socket = new window.ReconnectingWebSocket(`${protocol}//${host}`);
-      this.socket.onmessage = this.props.messageReceived;
-    }
   }
 
   componentDidUpdate() {

@@ -23,7 +23,7 @@ import jwt from 'jsonwebtoken';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import UniversalRouter from 'universal-router';
-import { Server as WebSocketServer } from 'ws';
+import expressWs from 'express-ws';
 import serialize from 'serialize-javascript';
 import Honeybadger from 'honeybadger';
 import PrettyError from 'pretty-error';
@@ -38,7 +38,7 @@ import { port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } fr
 import makeInitialState from './initialState';
 import passport from './core/passport';
 import teamApi from './api/teams';
-import { Role, Team, User } from './models';
+import { Team, User } from './models';
 
 fetch.promise = Promise;
 
@@ -85,18 +85,7 @@ app.use(passport.initialize());
 
 app.use((req, res, next) => {
   if (typeof req.user === 'number' || typeof req.user === 'string') {
-    User.findOne({
-      where: {
-        id: req.user
-      },
-      include: [
-        {
-          model: Role,
-          required: false,
-          attributes: ['type', 'team_id']
-        }
-      ]
-    }).then(user => {
+    User.getSessionUser(req.user).then(user => {
       if (user) {
         // eslint-disable-next-line no-param-reassign
         req.user = user;
@@ -118,7 +107,7 @@ app.get('/login',
   passport.authenticate('google', { scope: ['email', 'profile'], session: false })
 );
 app.get('/login/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
+  passport.authenticate('google', { failureRedirect: '/', session: false }),
   (req, res) => {
     const expiresIn = 60 * 60 * 24 * 180; // 180 days
     const token = jwt.sign(req.user, auth.jwt.secret);
@@ -135,10 +124,8 @@ app.get('/logout', (req, res) => {
 //
 // Register WebSockets
 // -----------------------------------------------------------------------------
-const wss = new WebSocketServer({
-  server: httpsServer === undefined ? httpServer : httpsServer,
-  verifyClient: () => true // todo
-});
+const wsInstance = expressWs(app, httpsServer === undefined ? httpServer : httpsServer);
+const wss = wsInstance.getWss();
 
 wss.broadcast = data => {
   wss.clients.forEach(client => {
@@ -154,7 +141,7 @@ app.use((req, res, next) => {
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
-app.use('/api/teams', teamApi);
+app.use('/api/teams', teamApi());
 
 //
 // Register server-side rendering middleware

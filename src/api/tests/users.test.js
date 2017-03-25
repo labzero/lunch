@@ -71,7 +71,7 @@ describe('api/users', () => {
         };
         next();
       });
-      server.use('/', usersApi);
+      server.use('/', usersApi());
       return server;
     };
 

@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Home.scss';
 import RestaurantMapContainer from '../../../../components/RestaurantMap/RestaurantMapContainer';
@@ -18,14 +19,29 @@ export class _Home extends Component {
     invalidateRestaurants: PropTypes.func.isRequired,
     invalidateTags: PropTypes.func.isRequired,
     invalidateUsers: PropTypes.func.isRequired,
-    teamSlug: PropTypes.string.isRequired
+    messageReceived: PropTypes.func.isRequired,
+    teamSlug: PropTypes.string.isRequired,
+    wsPort: PropTypes.number.isRequired
   };
 
-  componentWillMount() {
-    this.fetchAllData();
-  }
-
   componentDidMount() {
+    const { messageReceived, teamSlug, wsPort } = this.props;
+
+    this.fetchAllData();
+
+    if (canUseDOM) {
+      let host = window.location.host;
+      if (wsPort !== 0 && wsPort !== window.location.port) {
+        host = `${window.location.hostname}:${wsPort}`;
+      }
+      let protocol = 'ws:';
+      if (window.location.protocol === 'https:') {
+        protocol = 'wss:';
+      }
+      this.socket = new window.ReconnectingWebSocket(`${protocol}//${host}/api/teams/${teamSlug}`);
+      this.socket.onmessage = messageReceived;
+    }
+
     setInterval(() => {
       this.props.invalidateDecision();
       this.props.invalidateRestaurants();
