@@ -37,19 +37,21 @@ passport.use(new GoogleStrategy(
           where: { google_id: profile.id }
         });
 
+        const userUpdates = {};
+        let doUpdates = false;
+
         // might not have been linked with Google yet
         if (!user) {
           user = await User.findOne({
-            where: { email: accountEmail }
+            where: { email: accountEmail.value }
           });
+          userUpdates.google_id = profile.id;
+          doUpdates = true;
         }
 
         if (!user) {
           return done(null, false, { message: 'User not found.' });
         }
-
-        const userUpdates = {};
-        let doUpdates = false;
 
         if (
           typeof profile.displayName === 'string' &&

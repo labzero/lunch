@@ -8,7 +8,7 @@
  */
 
 import { getTeams } from '../../selectors/teams';
-import redirectToLogin from '../../helpers/redirectToLogin';
+import redirectToLogin from '../helpers/redirectToLogin';
 
 export default {
 

@@ -8,10 +8,11 @@
  */
 
 import React from 'react';
-import queryString from 'query-string';
 import hasRole from '../../../../helpers/hasRole';
 import LayoutContainer from '../../../../components/Layout/LayoutContainer';
 import { getTeamBySlug } from '../../../../selectors/teams';
+import redirectToLogin from '../../../helpers/redirectToLogin';
+import render404 from '../../../helpers/render404';
 
 const title = 'Team';
 
@@ -24,26 +25,24 @@ export default {
     const user = state.user;
     const team = getTeamBySlug(state, context.params.slug);
 
-    if (user.id && hasRole(user, team, 'member')) {
-      const TeamContainer = await require.ensure([], require => require('./TeamContainer').default, 'team');
+    if (user.id) {
+      if (hasRole(user, team, 'member')) {
+        const TeamContainer = await require.ensure([], require => require('./TeamContainer').default, 'team');
 
-      return {
-        title,
-        chunk: 'admin',
-        component: (
-          <LayoutContainer>
-            <TeamContainer title={title} teamSlug={context.params.slug} />
-          </LayoutContainer>
-        ),
-      };
+        return {
+          title,
+          chunk: 'admin',
+          component: (
+            <LayoutContainer>
+              <TeamContainer title={title} teamSlug={context.params.slug} />
+            </LayoutContainer>
+          ),
+        };
+      }
+      return render404;
     }
 
-    let stringifiedQuery = queryString.stringify(context.query);
-    if (stringifiedQuery) {
-      stringifiedQuery = `%3F${stringifiedQuery}`;
-    }
-
-    return { redirect: `/login?next=${context.path}${stringifiedQuery}` };
+    return redirectToLogin(context);
   },
 
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import TeamsContainer from './TeamsContainer';
 import LayoutContainer from '../../components/Layout/LayoutContainer';
-import redirectToLogin from '../../helpers/redirectToLogin';
+import redirectToLogin from '../helpers/redirectToLogin';
 
 /* eslint-disable global-require */
 

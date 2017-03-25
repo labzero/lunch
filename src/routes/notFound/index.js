@@ -7,22 +7,13 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from 'react';
-import LayoutContainer from '../../components/Layout/LayoutContainer';
-import NotFound from './NotFound';
-
-const title = 'Page Not Found';
+import render404 from '../helpers/render404';
 
 export default {
 
   path: '*',
 
   action() {
-    return {
-      title,
-      component: <LayoutContainer><NotFound title={title} /></LayoutContainer>,
-      status: 404,
-    };
+    return render404;
   },
-
 };
