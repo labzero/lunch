@@ -33,8 +33,7 @@ export default () => {
               req.wss.broadcast(votePosted(json));
               res.status(201).send({ error: false, data: obj });
             } catch (err) {
-              const error = { message: 'Could not vote. Did you already vote today?' };
-              errorCatcher(res, error);
+              errorCatcher(res, err);
             }
           } else {
             const error = { message: 'Could not vote. Did you already vote today?' };
