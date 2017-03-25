@@ -36,10 +36,10 @@ export default () => {
               const error = { message: 'Could not vote. Did you already vote today?' };
               errorCatcher(res, error);
             }
+          } else {
+            const error = { message: 'Could not vote. Did you already vote today?' };
+            errorCatcher(res, error);
           }
-
-          const error = { message: 'Could not vote. Did you already vote today?' };
-          errorCatcher(res, error);
         } catch (err) {
           errorCatcher(res, err);
         }
