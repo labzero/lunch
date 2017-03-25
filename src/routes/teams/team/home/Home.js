@@ -38,7 +38,12 @@ export class _Home extends Component {
       if (window.location.protocol === 'https:') {
         protocol = 'wss:';
       }
-      this.socket = new window.RobustWebSocket(`${protocol}//${host}/api/teams/${teamSlug}`);
+      this.socket = new window.RobustWebSocket(`${protocol}//${host}/api/teams/${teamSlug}`, null, {
+        shouldReconnect: (event, ws) => {
+          if (event.code === 1008 || event.code === 1011) return undefined;
+          return 1000 * ws.attempts;
+        },
+      });
       this.socket.onmessage = messageReceived;
     }
 
