@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Tag, RestaurantTag } from '../models';
 import errorCatcher from './helpers/errorCatcher';
+import checkTeamRole from './helpers/checkTeamRole';
 import loggedIn from './helpers/loggedIn';
 import {
   postedNewTagToRestaurant,
@@ -15,6 +16,7 @@ export default () => {
     .post(
       '/',
       loggedIn,
+      checkTeamRole(),
       async (req, res) => {
         const restaurantId = parseInt(req.params.restaurant_id, 10);
         const alreadyAddedError = () => {
@@ -34,7 +36,10 @@ export default () => {
               });
               const json = tag.toJSON();
               json.restaurant_count = 1;
-              req.wss.broadcast(postedNewTagToRestaurant(restaurantId, json, req.user.id));
+              req.wss.broadcast(
+                req.team.id,
+                postedNewTagToRestaurant(restaurantId, json, req.user.id)
+              );
               res.status(201).send({ error: false, data: json });
             } catch (err) {
               alreadyAddedError(err);
@@ -51,7 +56,7 @@ export default () => {
             });
 
             const json = obj.toJSON();
-            req.wss.broadcast(postedTagToRestaurant(restaurantId, id, req.user.id));
+            req.wss.broadcast(req.team.id, postedTagToRestaurant(restaurantId, id, req.user.id));
             res.status(201).send({ error: false, data: json });
           } catch (err) {
             alreadyAddedError(err);
@@ -64,12 +69,13 @@ export default () => {
     .delete(
       '/:id',
       loggedIn,
+      checkTeamRole(),
       async (req, res) => {
         const id = parseInt(req.params.id, 10);
         const restaurantId = parseInt(req.params.restaurant_id, 10);
         try {
           await RestaurantTag.destroy({ where: { restaurant_id: restaurantId, tag_id: id } });
-          req.wss.broadcast(deletedTagFromRestaurant(restaurantId, id, req.user.id));
+          req.wss.broadcast(req.team.id, deletedTagFromRestaurant(restaurantId, id, req.user.id));
           res.status(204).send();
         } catch (err) {
           errorCatcher(res, err);

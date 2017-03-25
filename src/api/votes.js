@@ -30,7 +30,7 @@ export default () => {
               });
 
               const json = obj.toJSON();
-              req.wss.broadcast(votePosted(json));
+              req.wss.broadcast(req.team.id, votePosted(json));
               res.status(201).send({ error: false, data: obj });
             } catch (err) {
               errorCatcher(res, err);
@@ -57,7 +57,10 @@ export default () => {
           if (count === 0) {
             notFound(res);
           } else {
-            req.wss.broadcast(voteDeleted(parseInt(req.params.restaurant_id, 10), req.user.id, id));
+            req.wss.broadcast(
+              req.team.id,
+              voteDeleted(parseInt(req.params.restaurant_id, 10), req.user.id, id)
+            );
             res.status(204).send();
           }
         } catch (err) {

@@ -127,9 +127,11 @@ app.get('/logout', (req, res) => {
 const wsInstance = expressWs(app, httpsServer === undefined ? httpServer : httpsServer);
 const wss = wsInstance.getWss();
 
-wss.broadcast = data => {
+wss.broadcast = (teamId, data) => {
   wss.clients.forEach(client => {
-    client.send(JSON.stringify(data));
+    if (client.teamId === teamId) {
+      client.send(JSON.stringify(data));
+    }
   });
 };
 

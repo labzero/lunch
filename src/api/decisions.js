@@ -39,7 +39,7 @@ export default () => {
             });
 
             const json = obj.toJSON();
-            req.wss.broadcast(decisionPosted(json, req.user.id));
+            req.wss.broadcast(req.team.id, decisionPosted(json, req.user.id));
             res.status(201).send({ error: false, data: obj });
           } catch (err) {
             const error = { message: 'Could not save decision.' };
@@ -59,7 +59,7 @@ export default () => {
         try {
           await Decision.scope('fromToday').destroy({ where: { team_id: req.team.id } });
 
-          req.wss.broadcast(decisionDeleted(restaurantId, req.user.id));
+          req.wss.broadcast(req.team.id, decisionDeleted(restaurantId, req.user.id));
           res.status(204).send();
         } catch (err) {
           errorCatcher(res, err);

@@ -41,10 +41,12 @@ export default () => {
     .use('/:slug/tags', tagApi())
     .use('/:slug/users', userApi())
     .ws('/:slug', async (ws, req) => {
-      const hasRole = await getTeamIfHasRole(req.user, req.params.slug);
+      const team = await getTeamIfHasRole(req.user, req.params.slug);
 
-      if (!hasRole) {
+      if (!team) {
         ws.close(1008, 'Not authorized for this team.');
+      } else {
+        ws.teamId = team.id; // eslint-disable-line no-param-reassign
       }
     });
 };
