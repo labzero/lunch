@@ -11,9 +11,9 @@ export { default as tagFilters } from './tagFilters';
 export { default as tags } from './tags';
 export { default as teams } from './teams';
 export { default as tagUi } from './tagUi';
+export { default as user } from './user';
 export { default as users } from './users';
 
 export const latLng = new Map();
 export const locale = new Map();
-export const user = new Map();
 export const wsPort = new Map();

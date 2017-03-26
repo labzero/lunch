@@ -7,8 +7,10 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+import React from 'react';
 import { getTeams } from '../../selectors/teams';
-import redirectToLogin from '../helpers/redirectToLogin';
+import LayoutContainer from '../../components/Layout/LayoutContainer';
+import Landing from './Landing';
 
 export default {
 
@@ -30,6 +32,12 @@ export default {
       };
     }
 
-    return redirectToLogin(context);
+    return {
+      component: (
+        <LayoutContainer>
+          <Landing />
+        </LayoutContainer>
+      ),
+    };
   },
 };

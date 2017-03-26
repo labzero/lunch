@@ -42,15 +42,12 @@ passport.use(new GoogleStrategy(
 
         // might not have been linked with Google yet
         if (!user) {
-          user = await User.findOne({
+          const results = await User.findOrCreate({
             where: { email: accountEmail.value }
           });
+          user = results[0];
           userUpdates.google_id = profile.id;
           doUpdates = true;
-        }
-
-        if (!user) {
-          return done(null, false, { message: 'User not found.' });
         }
 
         if (
@@ -67,7 +64,8 @@ passport.use(new GoogleStrategy(
         }
 
         if (doUpdates) {
-          return user.update(userUpdates).then(updatedUser => done(null, updatedUser.id));
+          const updatedUser = await user.update(userUpdates);
+          return done(null, updatedUser.id);
         }
 
         return done(null, user.id);

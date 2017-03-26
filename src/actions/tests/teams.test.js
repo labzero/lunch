@@ -50,6 +50,38 @@ describe('actions/teams', () => {
       });
     });
 
+    describe('success', () => {
+      let team;
+      let teamPostedStub;
+      let userRoleAddedStub;
+      beforeEach(() => {
+        team = {
+          foo: 'bar',
+          roles: [{
+            id: 1,
+            team_id: 2,
+            user_id: 3
+          }]
+        };
+        fetchMock.mock('*', {
+          data: team
+        });
+        teamPostedStub = actionCreatorStub();
+        teamsRewireAPI.__Rewire__('teamPosted', teamPostedStub);
+        userRoleAddedStub = actionCreatorStub();
+        teamsRewireAPI.__Rewire__('userRoleAdded', userRoleAddedStub);
+        return store.dispatch(teams.createTeam(payload));
+      });
+
+      it('dispatches teamPosted', () => {
+        expect(teamPostedStub.calledWith(team)).to.be.true;
+      });
+
+      it('dispatches userRoleAdded', () => {
+        expect(userRoleAddedStub.calledWith(team.roles[0])).to.be.true;
+      });
+    });
+
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);

@@ -1,6 +1,7 @@
 import ActionTypes from '../constants/ActionTypes';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
 import { flashError } from './flash.js';
+import { userRoleAdded } from './users.js';
 
 export function postTeam(obj) {
   return {
@@ -26,7 +27,14 @@ export function createTeam(payload) {
       body: JSON.stringify(payload)
     })
       .then(response => processResponse(response))
-      .then(obj => dispatch(teamPosted(obj)))
+      .then(obj => {
+        dispatch(teamPosted(obj));
+        if (obj.roles) {
+          obj.roles.forEach(role => {
+            dispatch(userRoleAdded(role));
+          });
+        }
+      })
       .catch(
         err => dispatch(flashError(err.message))
       );

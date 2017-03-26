@@ -166,3 +166,10 @@ export function changeUserRole(teamSlug, id, type) {
       );
   };
 }
+
+export function userRoleAdded(role) {
+  return {
+    type: ActionTypes.USER_ROLE_ADDED,
+    role
+  };
+}

@@ -16,13 +16,6 @@ const getInitialState = () => ({
   flashes: [],
   notifications: [],
   modals: {},
-  user: {},
-  users: {
-    isFetching: false,
-    didInvalidate: true,
-    items: [],
-    teamSlug: null
-  },
   latLng: {
     lat: parseFloat(process.env.SUGGEST_LAT),
     lng: parseFloat(process.env.SUGGEST_LNG)
@@ -32,6 +25,7 @@ const getInitialState = () => ({
   mapUi: {
     showUnvoted: true
   },
+  pageUi: {},
   tagFilters: [],
   tagExclusions: [],
   tags: {
@@ -49,7 +43,13 @@ const getInitialState = () => ({
     didInvalidate: true,
     items: []
   },
-  pageUi: {},
+  user: {},
+  users: {
+    isFetching: false,
+    didInvalidate: true,
+    items: [],
+    teamSlug: null
+  },
   wsPort: process.env.BS_RUNNING ? port : 0
 });
 

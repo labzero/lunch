@@ -16,7 +16,7 @@ export default {
 
   // Keep in mind, routes are evaluated in order
   children: [
-    require('./teamRedirect').default,
+    require('./landing').default,
     require('./newTeam').default,
     {
       path: '/teams',
