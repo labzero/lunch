@@ -23,8 +23,7 @@ class Layout extends Component {
   static propTypes = {
     children: PropTypes.element.isRequired,
     shouldScrollToTop: PropTypes.bool.isRequired,
-    scrolledToTop: PropTypes.func.isRequired,
-    teamSlug: PropTypes.string // temp
+    scrolledToTop: PropTypes.func.isRequired
   };
 
   static defaultProps = {
@@ -67,13 +66,11 @@ class Layout extends Component {
   }
 
   render() {
-    const { teamSlug } = this.props;
-
     return (
       <div>
         <HeaderContainer />
         {this.props.children}
-        <FooterContainer teamSlug={teamSlug} /* temporary */ />
+        <FooterContainer />
         <NotificationListContainer />
         <ModalSectionContainer />
       </div>

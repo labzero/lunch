@@ -99,6 +99,25 @@ describe('actions/tags', () => {
       });
     });
 
+    describe('success', () => {
+      let tagDeletedStub;
+      beforeEach(() => {
+        store = mockStore({
+          user: {
+            id: 1
+          }
+        });
+        fetchMock.mock('*', {});
+        tagDeletedStub = actionCreatorStub();
+        tagsRewireAPI.__Rewire__('tagDeleted', tagDeletedStub);
+        return store.dispatch(tags.removeTag(teamSlug, id));
+      });
+
+      it('dispatches tagDeleted', () => {
+        expect(tagDeletedStub.calledWith(id, 1, teamSlug)).to.be.true;
+      });
+    });
+
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);

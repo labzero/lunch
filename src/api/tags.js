@@ -33,7 +33,7 @@ export default () => {
           if (count === 0) {
             res.status(404).json({ error: true, data: { message: 'Tag not found.' } });
           } else {
-            req.wss.broadcast(req.team.id, tagDeleted(id, req.user.id));
+            req.wss.broadcast(req.team.id, tagDeleted(id, req.user.id, req.team.slug));
             res.status(204).send();
           }
         } catch (err) {

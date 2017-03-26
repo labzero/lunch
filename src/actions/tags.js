@@ -75,22 +75,24 @@ export function deleteTag(teamSlug, id) {
   };
 }
 
-export function tagDeleted(id, userId) {
+export function tagDeleted(id, userId, teamSlug) {
   return {
     type: ActionTypes.TAG_DELETED,
     id,
+    teamSlug,
     userId
   };
 }
 
 export function removeTag(teamSlug, id) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     dispatch(deleteTag(teamSlug, id));
     return fetch(`/api/teams/${teamSlug}/tags/${id}`, {
       credentials,
       method: 'delete'
     })
       .then(response => processResponse(response))
+      .then(() => dispatch(tagDeleted(id, getState().user.id, teamSlug)))
       .catch(
         err => dispatch(flashError(err.message))
       );

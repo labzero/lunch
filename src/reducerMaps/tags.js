@@ -52,8 +52,12 @@ export default new Map([
           $push: [action.tag.id]
         },
         entities: {
-          tags: {
+          tags: state.items.entities.tags ? {
             $merge: {
+              [action.tag.id]: action.tag
+            }
+          } : {
+            $set: {
               [action.tag.id]: action.tag
             }
           }

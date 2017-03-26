@@ -14,11 +14,11 @@ import { getTeamBySlug } from '../../../../selectors/teams';
 import redirectToLogin from '../../../helpers/redirectToLogin';
 import render404 from '../../../helpers/render404';
 
-const title = 'Team';
+const title = 'Tags';
 
 export default {
 
-  path: '/team',
+  path: '/tags',
 
   async action(context) {
     const state = context.store.getState();
@@ -26,20 +26,20 @@ export default {
     const team = getTeamBySlug(state, context.params.slug);
 
     if (user.id) {
-      if (hasRole(user, team, 'member')) {
-        let TeamContainer;
+      if (hasRole(user, team)) {
+        let TagsContainer;
         try {
-          TeamContainer = await require.ensure([], require => require('./TeamContainer').default, 'team');
+          TagsContainer = await require.ensure([], require => require('./TagsContainer').default, 'tags');
         } catch (err) {
-          TeamContainer = () => null;
+          TagsContainer = () => null;
         }
 
         return {
           title,
-          chunk: 'team',
+          chunk: 'tags',
           component: (
             <LayoutContainer>
-              <TeamContainer title={title} teamSlug={context.params.slug} />
+              <TagsContainer title={title} teamSlug={context.params.slug} />
             </LayoutContainer>
           ),
         };
@@ -48,6 +48,5 @@ export default {
     }
 
     return redirectToLogin(context);
-  },
-
+  }
 };

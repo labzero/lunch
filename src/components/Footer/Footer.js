@@ -11,18 +11,10 @@ import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Footer.scss';
 
-const Footer = ({ user, manageTags }) => {
-  let manageTagsButton;
-  let manageTagsSpacer;
+const Footer = ({ user }) => {
   let logoutSection;
 
   if (user.id !== undefined) {
-    manageTagsButton = (
-      <button className={`${s.link} ${s.text}`} onClick={manageTags}>
-        Manage Tags
-      </button>
-    );
-    manageTagsSpacer = <span className={s.spacer} />;
     logoutSection = (
       <div className={s.container}>
         <span className={s.text}>
@@ -38,8 +30,6 @@ const Footer = ({ user, manageTags }) => {
     <div className={s.root}>
       {logoutSection}
       <div className={s.container}>
-        {manageTagsButton}
-        {manageTagsSpacer}
         <a
           className={s.link}
           href="https://github.com/labzero/lunch"
@@ -66,7 +56,6 @@ const Footer = ({ user, manageTags }) => {
 };
 
 Footer.propTypes = {
-  manageTags: PropTypes.func.isRequired,
   user: PropTypes.object.isRequired
 };
 
