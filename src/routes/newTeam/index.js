@@ -26,7 +26,11 @@ export default {
       return {
         title,
         chunk: 'admin',
-        component: <LayoutContainer><NewTeamContainer title={title} /></LayoutContainer>,
+        component: (
+          <LayoutContainer path={context.path}>
+            <NewTeamContainer title={title} />
+          </LayoutContainer>
+        ),
       };
     }
 

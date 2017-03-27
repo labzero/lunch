@@ -1,60 +1,41 @@
-@mixin plain-button {
-  background: none;
-  border: 0;
-  outline: none;
-  padding: 0;
-  text-align: left;
-}
+/*
+ * Colors
+ * ========================================================================== */
+$white-color: #fff;
+$black-color: #000;
+$background-color: #333;
+$border-color: $black-color;
+$link-color: #66e;
+$link-hover-color: #44e;
+$link-active-color: #22e;
+$danger-color: #ff75e3;
+$danger-hover-color: #e258c6;
+$danger-active-color: #c43bab;
+$text-color: $black-color;
 
-@mixin plain-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
+/*
+ * Typography
+ * ========================================================================== */
+$font-family-base: Nunito, sans-serif;
+$normal-weight: 400;
+$bold-weight: 900;
 
-@mixin autosuggest-container {
-  display: inline-block;
-  position: relative;
+/*
+ * Layout
+ * ========================================================================== */
+$max-content-width: 1000px;
 
-  input {
-    display: inline;
-    vertical-align: middle;
-  }
-}
+/*
+ * Media queries breakpoints
+ * ========================================================================== */
+$screen-xs-min: 480px;  /* Extra small screen / phone */
+$screen-sm-min: 768px;  /* Small screen / tablet */
+$screen-md-min: 992px;  /* Medium screen / desktop */
+$screen-lg-min: 1200px; /* Large screen / wide desktop */
 
-@mixin autosuggest-suggestions-container {
-  position: absolute;
-  width: 100%;
-  z-index: 1;
-
-  ul {
-    @include plain-list;
-
-    background: #fff;
-    border: 1px solid black;
-  }
-}
-
-@mixin autosuggest-suggestion {
-  cursor: pointer;
-  padding: 0 .25em;
-}
-
-@mixin autosuggest-suggestion-focused {
-  background: pink;
-}
-
-@mixin image-replace {
-  text-indent: 102%;
-  white-space: nowrap;
-  overflow: hidden;
-  padding: 0;
-}
-
-@mixin clearfix {
-  &::after {
-    content: '';
-    display: table;
-    clear: both;
-  }
-}
+/*
+ * Etc.
+ * ========================================================================== */
+$default-border-width: 3px;
+$default-border: $default-border-width solid $border-color;
+$button-border-radius: 4px;

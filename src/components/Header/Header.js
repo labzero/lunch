@@ -7,39 +7,93 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import LoginContainer from '../Login/LoginContainer';
 import FlashContainer from '../Flash/FlashContainer';
+import MenuContainer from '../Menu/MenuContainer';
 import Link from '../Link';
+import lunch from './lunch.png';
 import s from './Header.scss';
 
-const Header = ({ flashes }) => {
-  const flashContainers = flashes.map(
-    (flash, i) =>
-      <FlashContainer message={flash.message} type={flash.type} id={i} key={`${flash.type}_${flash.message}`} />
-  );
+class Header extends Component {
+  static propTypes = {
+    flashes: PropTypes.array.isRequired,
+    loggedIn: PropTypes.bool.isRequired,
+    path: PropTypes.string,
+    teamSlug: PropTypes.string
+  };
 
-  return (
-    <div className={s.root}>
-      <div className={s.background} />
-      <div className={s.flashes}>
-        {flashContainers}
-      </div>
-      <LoginContainer />
-      <div className={s.container}>
-        <div className={s.banner}>
-          <h1 className={s.bannerTitle}>
-            <Link to="/">Lunch</Link>
-          </h1>
+  static defaultProps = {
+    path: PropTypes.string,
+    teamSlug: undefined
+  };
+
+  state = {
+    menuOpen: false
+  };
+
+  componentWillReceiveProps(nextProps) {
+    if (!nextProps.path || nextProps.path !== this.props.path) {
+      this.setState({
+        menuOpen: false
+      });
+    }
+  }
+
+  flashContainers = () => {
+    const { flashes } = this.props;
+
+    return flashes.map(
+      (flash, i) =>
+        <FlashContainer message={flash.message} type={flash.type} id={i} key={`${flash.type}_${flash.message}`} />
+    );
+  }
+
+  closeMenu = () => {
+    this.setState({
+      menuOpen: false
+    });
+  }
+
+  toggleMenu = () => {
+    this.setState({
+      menuOpen: !this.state.menuOpen
+    });
+  }
+
+  render() {
+    const { loggedIn, teamSlug } = this.props;
+    const { menuOpen } = this.state;
+    return (
+      <div className={`${s.root} ${loggedIn ? s.loggedIn : ''}`}>
+        <div className={s.background} />
+        <div className={s.flashes}>
+          {this.flashContainers()}
         </div>
+        <div className={s.container}>
+          <div className={s.banner}>
+            <h1 className={s.bannerTitle}>
+              <Link to={teamSlug ? `/teams/${teamSlug}` : '/'}>
+                <img src={lunch} alt="Lunch" />
+              </Link>
+            </h1>
+          </div>
+        </div>
+        {loggedIn ?
+          <div>
+            <button className={s.hamburger} onClick={this.toggleMenu}>
+              <span>Menu</span>
+            </button>
+            {menuOpen && <button className={s.menuBackground} onClick={this.closeMenu} />}
+            <MenuContainer open={menuOpen} teamSlug={teamSlug} closeMenu={this.closeMenu} />
+          </div>
+          :
+          <LoginContainer />
+        }
       </div>
-    </div>
-  );
-};
-
-Header.propTypes = {
-  flashes: PropTypes.array.isRequired
-};
+    );
+  }
+}
 
 export default withStyles(s)(Header);

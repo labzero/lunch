@@ -34,7 +34,7 @@ export default {
 
     return {
       component: (
-        <LayoutContainer>
+        <LayoutContainer path={context.path}>
           <Landing />
         </LayoutContainer>
       ),

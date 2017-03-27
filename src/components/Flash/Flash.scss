@@ -1,10 +1,12 @@
+@import '../../styles/_variables.scss';
+
 .root {
   padding: .5em;
 }
 
 .error,
 .success {
-  color: #fff;
+  color: $white-color;
 }
 
 .error {

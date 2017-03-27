@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import hasRole from '../helpers/hasRole';
 import { isDecisionLoading } from './decisions';
 import {
   areRestaurantsLoading,
@@ -7,10 +8,12 @@ import {
   getRestaurantById
 } from './restaurants';
 import { getVoteEntities, getVoteById } from './votes';
+import { getTeamBySlug } from './teams';
 import { areTagsLoading, getTags } from './tags';
 import { getTagFilters } from './tagFilters';
 import { getTagExclusions } from './tagExclusions';
 import { areUsersLoading, getUserId, getUserById } from './users';
+import { getCurrentUser } from './user';
 import { getMapUi } from './mapUi';
 
 export const getUserByVoteId = (state, voteId) =>
@@ -58,6 +61,12 @@ export const getFilteredRestaurants = createSelector(
         !restaurantEntities[id].tags.includes(tagExclusion)))
     );
   }
+);
+
+const getRoleProp = (state, props) => props.role;
+export const currentUserHasRole = createSelector(
+  getCurrentUser, getTeamBySlug, getRoleProp,
+  hasRole
 );
 
 export const isRestaurantListReady = createSelector(

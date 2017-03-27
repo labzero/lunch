@@ -176,7 +176,9 @@ app.get('*', async (req, res, next) => {
       store
     };
 
-    const route = await UniversalRouter.resolve(routes, {
+    const router = new UniversalRouter(routes);
+
+    const route = await router.resolve({
       ...context,
       path: req.path,
       query: req.query,

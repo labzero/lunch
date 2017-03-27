@@ -15,7 +15,7 @@ export default {
 
     if (user.id) {
       return {
-        component: <LayoutContainer><TeamsContainer /></LayoutContainer>,
+        component: <LayoutContainer path={context.path}><TeamsContainer /></LayoutContainer>,
       };
     }
 

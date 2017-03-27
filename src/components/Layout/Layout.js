@@ -22,12 +22,15 @@ class Layout extends Component {
 
   static propTypes = {
     children: PropTypes.element.isRequired,
+    path: PropTypes.string,
     shouldScrollToTop: PropTypes.bool.isRequired,
-    scrolledToTop: PropTypes.func.isRequired
+    scrolledToTop: PropTypes.func.isRequired,
+    teamSlug: PropTypes.string,
   };
 
   static defaultProps = {
-    teamSlug: ''
+    path: undefined,
+    teamSlug: undefined
   };
 
   static contextTypes = {
@@ -66,9 +69,11 @@ class Layout extends Component {
   }
 
   render() {
+    const { path, teamSlug } = this.props;
+
     return (
       <div>
-        <HeaderContainer />
+        <HeaderContainer path={path} teamSlug={teamSlug} />
         {this.props.children}
         <FooterContainer />
         <NotificationListContainer />

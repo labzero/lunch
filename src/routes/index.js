@@ -32,7 +32,7 @@ export default {
 
   async action({ next }) {
     // Execute each child route until one of them return the result
-    const route = await next();
+    const route = await next(true);
 
     // Provide default values for title, description etc.
     const title = 'Lunch';

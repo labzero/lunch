@@ -38,7 +38,7 @@ export default {
           title,
           chunk: 'tags',
           component: (
-            <LayoutContainer>
+            <LayoutContainer path={context.path} teamSlug={context.params.slug}>
               <TagsContainer title={title} teamSlug={context.params.slug} />
             </LayoutContainer>
           ),

@@ -70,7 +70,7 @@
     "serialize-javascript": "^1.2.0",
     "source-map-support": "^0.4.12",
     "sqlite3": "^3.1.8",
-    "universal-router": "^2.0.0",
+    "universal-router": "^3.0.0",
     "uuid": "^3.0.1",
     "whatwg-fetch": "^2.0.2"
   },

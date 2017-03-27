@@ -100,6 +100,8 @@ let appInstance;
 let currentLocation = history.location;
 let routes = require('./routes').default;
 
+const router = new UniversalRouter(routes);
+
 // Re-render the app when window.location changes
 async function onLocationChange(location, action) {
   // Remember the latest scroll position for the previous location
@@ -117,7 +119,7 @@ async function onLocationChange(location, action) {
     // Traverses the list of routes in the order they are defined until
     // it finds the first route that matches provided URL path string
     // and whose action method returns anything other than `undefined`.
-    const route = await UniversalRouter.resolve(routes, {
+    const route = await router.resolve({
       ...context,
       path: location.pathname,
       query: queryString.parse(location.search),

@@ -21,9 +21,7 @@ export default {
       if (hasRole(user, team)) {
         return {
           component: (
-            <LayoutContainer
-              teamSlug={context.params.slug} /* Temporary. Move team-specific stuff into Home. */
-            >
+            <LayoutContainer path={context.path} teamSlug={context.params.slug}>
               <HomeContainer teamSlug={context.params.slug} />
             </LayoutContainer>
           ),

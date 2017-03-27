@@ -1,0 +1,84 @@
+@import '../../styles/_mixins.scss';
+@import '../../styles/_variables.scss';
+
+.root,
+.lists {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.root {
+  background: url('./beef.jpg');
+  border-left: $default-border;
+  height: 100%;
+  max-width: 100%;
+  min-width: 250px;
+  padding: 10px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  transform: translateX(100%);
+  transition: transform .25s;
+}
+
+.open {
+  transform: translateX(0);
+}
+
+.name {
+  @include text-on-texture;
+
+  margin-bottom: .5em;
+  text-align: right;
+}
+
+.lists {
+  flex-grow: 1;
+}
+
+.list {
+  @include plain-list;
+}
+
+.item {
+  margin-bottom: 10px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.button {
+  background: $white-color;
+  display: block;
+  border: $default-border;
+  border-radius: $button-border-radius;
+  font-size: 2em;
+  font-weight: $bold-weight;
+  padding: .25em;
+  text-align: center;
+
+  &,
+  &:hover,
+  &:active,
+  &:focus {
+    color: $black-color;
+  }
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}
+
+.logout {
+  .button {
+    &,
+    &:hover,
+    &:active,
+    &:focus {
+      color: red;
+    }
+  }
+}
