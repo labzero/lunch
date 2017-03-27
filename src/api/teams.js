@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import reservedUsernames from 'reserved-usernames';
 import { Team, Role } from '../models';
 import errorCatcher from './helpers/errorCatcher';
 import getTeamIfHasRole from './helpers/getTeamIfHasRole';
@@ -17,6 +18,11 @@ export default () => {
       loggedIn,
       async (req, res) => {
         const { name, slug } = req.body;
+        const error = { message: 'Could not create new team. It might already exist.' };
+
+        if (reservedUsernames.indexOf(slug) > -1) {
+          return errorCatcher(res, error);
+        }
 
         try {
           const obj = await Team.create({
@@ -29,10 +35,9 @@ export default () => {
           }, { include: [Role] });
 
           const json = obj.toJSON();
-          res.status(201).send({ error: false, data: json });
+          return res.status(201).send({ error: false, data: json });
         } catch (e) {
-          const error = { message: 'Could not create new team. It might already exist.' };
-          errorCatcher(res, error);
+          return errorCatcher(res, error);
         }
       }
     )

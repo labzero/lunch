@@ -63,6 +63,7 @@
     "redux-thunk": "^2.2.0",
     "request": "^2.71.0",
     "reselect": "^2.3.0",
+    "reserved-usernames": "^1.0.3",
     "resolve-url-loader": "^2.0.2",
     "robust-websocket": "^0.2.1",
     "sequelize": "^3.30.3",
@@ -215,6 +216,7 @@
   "stylelint": {
     "extends": "stylelint-config-standard",
     "rules": {
+      "declaration-empty-line-before": null,
       "string-quotes": "single",
       "number-leading-zero": "never",
       "property-no-unknown": [
