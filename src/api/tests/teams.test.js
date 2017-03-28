@@ -73,7 +73,7 @@ describe('api/teams', () => {
   describe('POST /', () => {
     describe('before query', () => {
       beforeEach(() =>
-        request(app).post('/')
+        request(app).post('/').send({ name: 'Something', slug: 'something' })
       );
 
       it('checks for login', () => {
@@ -81,7 +81,7 @@ describe('api/teams', () => {
       });
     });
 
-    describe('reserved username check', () => {
+    describe('reserved slug check', () => {
       let createSpy;
       let errorCatcherSpy;
       beforeEach(() => {
@@ -103,6 +103,58 @@ describe('api/teams', () => {
 
       it('calls errorCatcher', () => {
         expect(errorCatcherSpy.calledWith(match.any, { message: match.string })).to.be.true;
+      });
+    });
+
+    describe('invalid slug', () => {
+      let createSpy;
+      let errorCatcherSpy;
+      beforeEach(() => {
+        createSpy = spy(TeamMock, 'create');
+        errorCatcherSpy = spy((res) => {
+          res.send();
+        });
+        app = makeApp({
+          './helpers/errorCatcher': mockEsmodule({
+            default: errorCatcherSpy
+          })
+        });
+      });
+
+      describe('with only numbers', () => {
+        beforeEach(() => request(app).post('/').send({ name: 'Numbers', slug: '33' }));
+
+        it('does not create team', () => {
+          expect(createSpy.callCount).to.eq(0);
+        });
+
+        it('calls errorCatcher', () => {
+          expect(errorCatcherSpy.calledWith(match.any, { message: match.string })).to.be.true;
+        });
+      });
+
+      describe('with dashes at beginning', () => {
+        beforeEach(() => request(app).post('/').send({ name: 'Beginning Dash', slug: '-abc' }));
+
+        it('does not create team', () => {
+          expect(createSpy.callCount).to.eq(0);
+        });
+
+        it('calls errorCatcher', () => {
+          expect(errorCatcherSpy.calledWith(match.any, { message: match.string })).to.be.true;
+        });
+      });
+
+      describe('with dashes at end', () => {
+        beforeEach(() => request(app).post('/').send({ name: 'Ending Dash', slug: 'abc-' }));
+
+        it('does not create team', () => {
+          expect(createSpy.callCount).to.eq(0);
+        });
+
+        it('calls errorCatcher', () => {
+          expect(errorCatcherSpy.calledWith(match.any, { message: match.string })).to.be.true;
+        });
       });
     });
 
@@ -128,7 +180,7 @@ describe('api/teams', () => {
     describe('success', () => {
       let response;
       beforeEach((done) => {
-        request(app).post('/').send({ name: 'Lab Zero', slug: 'labzero' }).then(r => {
+        request(app).post('/').send({ name: 'Lab Zero', slug: '333-labzero-333' }).then(r => {
           response = r;
           done();
         });
@@ -162,7 +214,7 @@ describe('api/teams', () => {
             default: errorCatcherSpy
           })
         });
-        return request(app).post('/');
+        return request(app).post('/').send({ name: 'blah', slug: 'blah' });
       });
 
       it('calls errorCatcher', () => {

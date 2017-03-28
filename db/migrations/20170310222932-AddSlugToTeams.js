@@ -1,6 +1,6 @@
 exports.up = (queryInterface, Sequelize) =>
   queryInterface.addColumn('teams', 'slug', {
-    type: Sequelize.STRING,
+    type: Sequelize.STRING(63),
     unique: true,
   });
 

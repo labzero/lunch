@@ -3,7 +3,7 @@ const db = require('../../src/models/db');
 exports.up = (queryInterface, Sequelize) => {
   const Team = db.sequelize.define('team', {
     name: Sequelize.STRING,
-    slug: Sequelize.STRING
+    slug: Sequelize.STRING(63)
   }, {
     underscored: true
   });

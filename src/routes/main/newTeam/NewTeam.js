@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { TEAM_SLUG_REGEX } from '../../../constants';
 import history from '../../../core/history';
 
 export default class NewTeam extends Component {
@@ -12,6 +13,12 @@ export default class NewTeam extends Component {
   };
 
   handleChange = field => event => this.setState({ [field]: event.target.value });
+
+  handleSlugChange = event => {
+    this.setState({
+      slug: event.target.value.toLowerCase()
+    });
+  };
 
   handleSubmit = (event) => {
     event.preventDefault();
@@ -37,17 +44,20 @@ export default class NewTeam extends Component {
             required
           />
           <label htmlFor="new-team-slug">
-            URL:
+            URL: (letters, numbers, and dashes only)
           </label>
-          https://lunch.labzero.com/<input
+          <input
             id="new-team-slug"
             autoCorrect="off"
             autoCapitalize="off"
             type="text"
             value={slug}
-            onChange={this.handleChange('slug')}
+            maxLength={63}
+            minLength={2}
+            pattern={TEAM_SLUG_REGEX}
+            onChange={this.handleSlugChange}
             required
-          />
+          />.lunch.pink
           <input type="submit" />
         </form>
       </div>
