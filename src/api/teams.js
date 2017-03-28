@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Team, Role } from '../models';
 import reservedTeamSlugs from '../constants/reservedTeamSlugs';
-import { TEAM_SLUG_REGEX } from '../constants';
+import { TEAM_LIMIT, TEAM_SLUG_REGEX } from '../constants';
 import errorCatcher from './helpers/errorCatcher';
 import loggedIn from './helpers/loggedIn';
 
@@ -16,14 +16,16 @@ export default () => {
         const { name, slug } = req.body;
         const error = { message: 'Could not create new team. It might already exist.' };
 
+        if (req.user.roles.length >= TEAM_LIMIT) {
+          return res.status(403).json({ error: true, data: { message: `You currently can't join more than ${TEAM_LIMIT} teams.` } });
+        }
+
         if (reservedTeamSlugs.indexOf(slug) > -1) {
-          return errorCatcher(res, error);
+          return res.status(409).json({ error: true, data: error });
         }
 
         if (!slug.match(TEAM_SLUG_REGEX)) {
-          return errorCatcher(res, {
-            message: 'Team URL doesn\'t meet the criteria.'
-          });
+          return res.status(422).json({ error: true, data: { message: 'Team URL doesn\'t match the criteria.' } });
         }
 
         try {

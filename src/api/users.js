@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { Role, User } from '../models';
+import { TEAM_LIMIT } from '../constants';
 import getRole from '../helpers/getRole';
 import hasRole from '../helpers/hasRole';
 import canChangeRole from '../helpers/canChangeRole';
@@ -92,15 +93,17 @@ export default () => {
           const UserWithTeamRole = User.scope({ method: ['withTeamRole', req.team.id, ['email']] });
 
           if (userToAdd) {
-            if (!hasRole(userToAdd, req.team)) {
-              await Role.create({ team_id: req.team.id, user_id: userToAdd.id, type });
-              userToAdd = await UserWithTeamRole.findOne({
-                where: { email },
-                include: [Role]
-              });
-            } else {
+            if (userToAdd.roles.length >= TEAM_LIMIT) {
+              return res.status(403).json({ error: true, data: { message: 'This user currently cannot be added to any more teams.' } });
+            }
+            if (hasRole(userToAdd, req.team)) {
               return res.status(409).json({ error: true, data: { message: 'User already exists on this team.' } });
             }
+            await Role.create({ team_id: req.team.id, user_id: userToAdd.id, type });
+            userToAdd = await UserWithTeamRole.findOne({
+              where: { email },
+              include: [Role]
+            });
           } else {
             userToAdd = await User.create({
               email,

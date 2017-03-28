@@ -28,7 +28,8 @@ describe('api/teams', () => {
 
     loggedInSpy = spy((req, res, next) => {
       req.user = { // eslint-disable-line no-param-reassign
-        id: 231
+        id: 231,
+        roles: []
       };
       next();
     });
@@ -81,79 +82,138 @@ describe('api/teams', () => {
       });
     });
 
-    describe('reserved slug check', () => {
+    describe('exceeds team limit', () => {
       let createSpy;
-      let errorCatcherSpy;
-      beforeEach(() => {
+      let response;
+      beforeEach((done) => {
         createSpy = spy(TeamMock, 'create');
-        errorCatcherSpy = spy((res) => {
-          res.send();
+        loggedInSpy = spy((req, res, next) => {
+          req.user = { // eslint-disable-line no-param-reassign
+            id: 231,
+            roles: [{}, {}, {}, {}, {}]
+          };
+          next();
         });
         app = makeApp({
-          './helpers/errorCatcher': mockEsmodule({
-            default: errorCatcherSpy
+          '../constants': mockEsmodule({
+            TEAM_LIMIT: 5
           })
         });
-        return request(app).post('/').send({ name: 'World Wide What', slug: 'www' });
+        request(app).post('/').send({ name: 'Something', slug: 'something' }).then(r => {
+          response = r;
+          done();
+        });
       });
 
       it('does not create team', () => {
         expect(createSpy.callCount).to.eq(0);
       });
 
-      it('calls errorCatcher', () => {
-        expect(errorCatcherSpy.calledWith(match.any, { message: match.string })).to.be.true;
+      it('returns 403', () => {
+        expect(response.statusCode).to.eq(403);
+      });
+
+      it('returns json with error message', () => {
+        expect(response.body.error).to.be.true;
+        expect(response.body.data.message).to.be.a('string');
+      });
+    });
+
+    describe('reserved slug check', () => {
+      let createSpy;
+      let response;
+      beforeEach((done) => {
+        createSpy = spy(TeamMock, 'create');
+        request(app).post('/').send({ name: 'World Wide What', slug: 'www' }).then(r => {
+          response = r;
+          done();
+        });
+      });
+
+      it('does not create team', () => {
+        expect(createSpy.callCount).to.eq(0);
+      });
+
+      it('returns 409', () => {
+        expect(response.statusCode).to.eq(409);
+      });
+
+      it('returns json with error message', () => {
+        expect(response.body.error).to.be.true;
+        expect(response.body.data.message).to.be.a('string');
       });
     });
 
     describe('invalid slug', () => {
       let createSpy;
-      let errorCatcherSpy;
+      let response;
       beforeEach(() => {
         createSpy = spy(TeamMock, 'create');
-        errorCatcherSpy = spy((res) => {
-          res.send();
-        });
-        app = makeApp({
-          './helpers/errorCatcher': mockEsmodule({
-            default: errorCatcherSpy
-          })
-        });
       });
 
       describe('with only numbers', () => {
-        beforeEach(() => request(app).post('/').send({ name: 'Numbers', slug: '33' }));
+        beforeEach((done) => {
+          request(app).post('/').send({ name: 'Numbers', slug: '33' }).then(r => {
+            response = r;
+            done();
+          });
+        });
 
         it('does not create team', () => {
           expect(createSpy.callCount).to.eq(0);
         });
 
-        it('calls errorCatcher', () => {
-          expect(errorCatcherSpy.calledWith(match.any, { message: match.string })).to.be.true;
+        it('returns 422', () => {
+          expect(response.statusCode).to.eq(422);
+        });
+
+        it('returns json with error message', () => {
+          expect(response.body.error).to.be.true;
+          expect(response.body.data.message).to.be.a('string');
         });
       });
 
       describe('with dashes at beginning', () => {
-        beforeEach(() => request(app).post('/').send({ name: 'Beginning Dash', slug: '-abc' }));
+        beforeEach((done) => {
+          request(app).post('/').send({ name: 'Beginning Dash', slug: '-abc' }).then(r => {
+            response = r;
+            done();
+          });
+        });
 
         it('does not create team', () => {
           expect(createSpy.callCount).to.eq(0);
         });
 
-        it('calls errorCatcher', () => {
-          expect(errorCatcherSpy.calledWith(match.any, { message: match.string })).to.be.true;
+        it('returns 422', () => {
+          expect(response.statusCode).to.eq(422);
+        });
+
+        it('returns json with error message', () => {
+          expect(response.body.error).to.be.true;
+          expect(response.body.data.message).to.be.a('string');
         });
       });
 
       describe('with dashes at end', () => {
-        beforeEach(() => request(app).post('/').send({ name: 'Ending Dash', slug: 'abc-' }));
+        beforeEach((done) => {
+          request(app).post('/').send({ name: 'Ending Dash', slug: 'abc-' }).then(r => {
+            response = r;
+            done();
+          });
+        });
 
         it('does not create team', () => {
           expect(createSpy.callCount).to.eq(0);
         });
 
-        it('calls errorCatcher', () => {
-          expect(errorCatcherSpy.calledWith(match.any, { message: match.string })).to.be.true;
+        it('returns 422', () => {
+          expect(response.statusCode).to.eq(422);
+        });
+
+        it('returns json with error message', () => {
+          expect(response.body.error).to.be.true;
+          expect(response.body.data.message).to.be.a('string');
         });
       });
     });

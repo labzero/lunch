@@ -244,16 +244,48 @@ describe('api/users', () => {
       });
     });
 
+    describe('when user exists and has many roles', () => {
+      let response;
+      beforeEach((done) => {
+        stub(UserMock, 'findOne').callsFake(() => Promise.resolve({
+          id: 2,
+          roles: [{}, {}, {}, {}, {}]
+        }));
+        app = makeApp({
+          '../constants': mockEsmodule({
+            TEAM_LIMIT: 5
+          }),
+          '../helpers/hasRole': mockEsmodule({
+            default: () => true
+          })
+        });
+        request(app).post('/').send({ email: 'foo@bar.com', type: 'member' }).then(r => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns 403', () => {
+        expect(response.statusCode).to.eq(403);
+      });
+
+      it('returns json with error', () => {
+        expect(response.body.error).to.be.true;
+        expect(response.body.data.message).to.be.a('string');
+      });
+    });
+
     describe('when user exists', () => {
       beforeEach(() => {
         stub(UserMock, 'findOne').callsFake(() => Promise.resolve({
-          id: 2
+          id: 2,
+          roles: []
         }));
       });
 
-      describe('and is already on team', () => {
+      describe('but is already on team', () => {
         let response;
-        beforeEach((next) => {
+        beforeEach((done) => {
           app = makeApp({
             '../helpers/hasRole': mockEsmodule({
               default: () => true
@@ -261,7 +293,7 @@ describe('api/users', () => {
           });
           request(app).post('/').send({ email: 'foo@bar.com', type: 'member' }).then(r => {
             response = r;
-            next();
+            done();
           });
         });
 
@@ -275,7 +307,7 @@ describe('api/users', () => {
         });
       });
 
-      describe('but is not on team', () => {
+      describe('and is not on team', () => {
         let createSpy;
         beforeEach(() => {
           app = makeApp({
