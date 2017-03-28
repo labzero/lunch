@@ -8,7 +8,7 @@ import {
   getRestaurantById
 } from './restaurants';
 import { getVoteEntities, getVoteById } from './votes';
-import { getTeamBySlug } from './teams';
+import { getTeam } from './team';
 import { areTagsLoading, getTags } from './tags';
 import { getTagFilters } from './tagFilters';
 import { getTagExclusions } from './tagExclusions';
@@ -65,7 +65,7 @@ export const getFilteredRestaurants = createSelector(
 
 const getRoleProp = (state, props) => props.role;
 export const currentUserHasRole = createSelector(
-  getCurrentUser, getTeamBySlug, getRoleProp,
+  getCurrentUser, getTeam, getRoleProp,
   hasRole
 );
 

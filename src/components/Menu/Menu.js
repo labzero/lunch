@@ -8,17 +8,18 @@ class Menu extends Component {
     closeMenu: PropTypes.func.isRequired,
     hasGuestRole: PropTypes.bool.isRequired,
     hasMemberRole: PropTypes.bool.isRequired,
+    host: PropTypes.string.isRequired,
     open: PropTypes.bool.isRequired,
-    teamSlug: PropTypes.string,
+    team: PropTypes.object,
     user: PropTypes.object.isRequired
   }
 
   static defaultProps = {
-    teamSlug: undefined
+    team: undefined
   };
 
   render() {
-    const { closeMenu, hasGuestRole, hasMemberRole, open, teamSlug, user } = this.props;
+    const { closeMenu, hasGuestRole, hasMemberRole, host, open, team, user } = this.props;
 
     return (
       <nav className={`${s.root} ${open ? s.open : ''}`}>
@@ -26,26 +27,26 @@ class Menu extends Component {
           {user.name}
         </div>
         <div className={s.lists}>
-          {teamSlug && (
+          {team && (
             <ul className={s.list}>
               {hasMemberRole && (
                 <li className={s.item}>
-                  <Link className={s.button} onClick={closeMenu} to={`/teams/${teamSlug}/team`}>Team</Link>
+                  <Link className={s.button} onClick={closeMenu} to="/team">Team</Link>
                 </li>
               )}
               {hasGuestRole && (
                 <li className={s.item}>
-                  <Link className={s.button} onClick={closeMenu} to={`/teams/${teamSlug}/tags`}>Tags</Link>
+                  <Link className={s.button} onClick={closeMenu} to="/tags">Tags</Link>
                 </li>
               )}
             </ul>
           )}
           <ul className={s.list}>
             <li className={s.item}>
-              <Link className={s.button} onClick={closeMenu} to="/teams">My Teams</Link>
+              <a className={s.button} onClick={closeMenu} href={`//${host}/teams`}>My Teams</a>
             </li>
             <li className={`${s.item} ${s.logout}`}>
-              <a className={s.button} onClick={closeMenu} href="/logout">Log Out</a>
+              <a className={s.button} onClick={closeMenu} href={`//${host}/logout`}>Log Out</a>
             </li>
           </ul>
         </div>

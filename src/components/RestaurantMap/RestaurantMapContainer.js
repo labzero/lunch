@@ -6,7 +6,7 @@ import { getCurrentUser } from '../../selectors/user';
 import { getMapItems } from '../../selectors';
 import RestaurantMap from './RestaurantMap';
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
   const mapUi = getMapUi(state);
   return {
     items: getMapItems(state),
@@ -18,7 +18,6 @@ const mapStateToProps = (state, ownProps) => {
       undefined,
     newlyAddedUserId: mapUi.newlyAdded ? mapUi.newlyAdded.userId : undefined,
     latLng: state.latLng,
-    teamSlug: ownProps.teamSlug,
     user: getCurrentUser(state)
   };
 };

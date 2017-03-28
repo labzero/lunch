@@ -16,7 +16,7 @@ class RestaurantList extends Component {
   }
 
   render() {
-    const { ids, restaurantListReady, teamSlug } = this.props;
+    const { ids, restaurantListReady } = this.props;
 
     if (!restaurantListReady) {
       return null;
@@ -31,7 +31,6 @@ class RestaurantList extends Component {
                 id={id}
                 shouldShowAddTagArea
                 shouldShowDropdown
-                teamSlug={teamSlug}
               />
             </ScrollElement>
           </li>
@@ -43,8 +42,7 @@ class RestaurantList extends Component {
 
 RestaurantList.propTypes = {
   ids: PropTypes.array.isRequired,
-  restaurantListReady: PropTypes.bool.isRequired,
-  teamSlug: PropTypes.string.isRequired
+  restaurantListReady: PropTypes.bool.isRequired
 };
 
 export default withStyles(s)(RestaurantList);

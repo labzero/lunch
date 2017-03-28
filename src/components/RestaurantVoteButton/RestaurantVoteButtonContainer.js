@@ -20,10 +20,10 @@ const mergeProps = (stateProps, dispatchProps, ownProps) =>
     handleClick: () => {
       if (stateProps.userVotes.length > 0) {
         stateProps.userVotes.forEach(vote => {
-          dispatchProps.dispatch(removeVote(ownProps.teamSlug, ownProps.id, vote));
+          dispatchProps.dispatch(removeVote(ownProps.id, vote));
         });
       } else {
-        dispatchProps.dispatch(addVote(ownProps.teamSlug, ownProps.id));
+        dispatchProps.dispatch(addVote(ownProps.id));
       }
     }
   });

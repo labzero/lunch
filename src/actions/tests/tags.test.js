@@ -14,12 +14,10 @@ const mockStore = configureStore(middlewares);
 
 describe('actions/tags', () => {
   let store;
-  let teamSlug;
   let flashErrorStub;
 
   beforeEach(() => {
     store = mockStore({});
-    teamSlug = 'labzero';
     flashErrorStub = actionCreatorStub();
     tagsRewireAPI.__Rewire__('flashError', flashErrorStub);
   });
@@ -34,15 +32,15 @@ describe('actions/tags', () => {
         const requestTagsStub = actionCreatorStub();
         tagsRewireAPI.__Rewire__('requestTags', requestTagsStub);
 
-        store.dispatch(tags.fetchTags(teamSlug));
+        store.dispatch(tags.fetchTags());
 
-        expect(requestTagsStub.calledWith(teamSlug)).to.be.true;
+        expect(requestTagsStub.callCount).to.eq(1);
       });
 
       it('fetches tags', () => {
-        store.dispatch(tags.fetchTags(teamSlug));
+        store.dispatch(tags.fetchTags());
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/tags`);
+        expect(fetchMock.lastCall()[0]).to.eq('/api/tags');
       });
     });
 
@@ -52,18 +50,18 @@ describe('actions/tags', () => {
         fetchMock.mock('*', { data: [{ foo: 'bar' }] });
         receiveTagsStub = actionCreatorStub();
         tagsRewireAPI.__Rewire__('receiveTags', receiveTagsStub);
-        return store.dispatch(tags.fetchTags(teamSlug));
+        return store.dispatch(tags.fetchTags());
       });
 
       it('dispatches receiveTags', () => {
-        expect(receiveTagsStub.calledWith([{ foo: 'bar' }], teamSlug)).to.be.true;
+        expect(receiveTagsStub.calledWith([{ foo: 'bar' }])).to.be.true;
       });
     });
 
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(tags.fetchTags(teamSlug));
+        return store.dispatch(tags.fetchTags());
       });
 
       it('dispatches flashError', () => {
@@ -87,15 +85,15 @@ describe('actions/tags', () => {
         const deleteTagStub = actionCreatorStub();
         tagsRewireAPI.__Rewire__('deleteTag', deleteTagStub);
 
-        store.dispatch(tags.removeTag(teamSlug, id));
+        store.dispatch(tags.removeTag(id));
 
-        expect(deleteTagStub.calledWith(teamSlug, id)).to.be.true;
+        expect(deleteTagStub.calledWith(id)).to.be.true;
       });
 
       it('fetches restaurant', () => {
-        store.dispatch(tags.removeTag(teamSlug, id));
+        store.dispatch(tags.removeTag(id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/tags/${id}`);
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/tags/${id}`);
       });
     });
 
@@ -110,18 +108,18 @@ describe('actions/tags', () => {
         fetchMock.mock('*', {});
         tagDeletedStub = actionCreatorStub();
         tagsRewireAPI.__Rewire__('tagDeleted', tagDeletedStub);
-        return store.dispatch(tags.removeTag(teamSlug, id));
+        return store.dispatch(tags.removeTag(id));
       });
 
       it('dispatches tagDeleted', () => {
-        expect(tagDeletedStub.calledWith(id, 1, teamSlug)).to.be.true;
+        expect(tagDeletedStub.calledWith(id, 1)).to.be.true;
       });
     });
 
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(tags.removeTag(teamSlug, id));
+        return store.dispatch(tags.removeTag(id));
       });
 
       it('dispatches flashError', () => {

@@ -14,12 +14,10 @@ const mockStore = configureStore(middlewares);
 
 describe('actions/decisions', () => {
   let store;
-  let teamSlug;
   let flashErrorStub;
 
   beforeEach(() => {
     store = mockStore({});
-    teamSlug = 'labzero';
     flashErrorStub = actionCreatorStub();
     decisionsRewireAPI.__Rewire__('flashError', flashErrorStub);
   });
@@ -34,15 +32,15 @@ describe('actions/decisions', () => {
         const requestDecisionStub = actionCreatorStub();
         decisionsRewireAPI.__Rewire__('requestDecision', requestDecisionStub);
 
-        store.dispatch(decisions.fetchDecision(teamSlug));
+        store.dispatch(decisions.fetchDecision());
 
-        expect(requestDecisionStub.calledWith(teamSlug)).to.be.true;
+        expect(requestDecisionStub.callCount).to.eq(1);
       });
 
       it('fetches decision', () => {
-        store.dispatch(decisions.fetchDecision(teamSlug));
+        store.dispatch(decisions.fetchDecision());
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/decisions/fromToday`);
+        expect(fetchMock.lastCall()[0]).to.eq('/api/decisions/fromToday');
       });
     });
 
@@ -52,18 +50,18 @@ describe('actions/decisions', () => {
         fetchMock.mock('*', { data: { foo: 'bar' } });
         receiveDecisionStub = actionCreatorStub();
         decisionsRewireAPI.__Rewire__('receiveDecision', receiveDecisionStub);
-        return store.dispatch(decisions.fetchDecision(teamSlug));
+        return store.dispatch(decisions.fetchDecision());
       });
 
       it('dispatches receiveDecision', () => {
-        expect(receiveDecisionStub.calledWith({ foo: 'bar' }, teamSlug)).to.be.true;
+        expect(receiveDecisionStub.calledWith({ foo: 'bar' })).to.be.true;
       });
     });
 
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(decisions.fetchDecision(teamSlug));
+        return store.dispatch(decisions.fetchDecision());
       });
 
       it('dispatches flashError', () => {
@@ -88,15 +86,15 @@ describe('actions/decisions', () => {
         const postDecisionStub = actionCreatorStub();
         decisionsRewireAPI.__Rewire__('postDecision', postDecisionStub);
 
-        store.dispatch(decisions.decide(teamSlug, restaurantId));
+        store.dispatch(decisions.decide(restaurantId));
 
-        expect(postDecisionStub.calledWith(teamSlug, restaurantId)).to.be.true;
+        expect(postDecisionStub.calledWith(restaurantId)).to.be.true;
       });
 
       it('fetches decision', () => {
-        store.dispatch(decisions.decide(teamSlug, restaurantId));
+        store.dispatch(decisions.decide(restaurantId));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/decisions`);
+        expect(fetchMock.lastCall()[0]).to.eq('/api/decisions');
         expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ restaurant_id: 1 }));
       });
     });
@@ -104,7 +102,7 @@ describe('actions/decisions', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(decisions.decide(teamSlug, restaurantId));
+        return store.dispatch(decisions.decide(restaurantId));
       });
 
       it('dispatches flashError', () => {
@@ -131,15 +129,15 @@ describe('actions/decisions', () => {
         const deleteDecisionStub = actionCreatorStub();
         decisionsRewireAPI.__Rewire__('deleteDecision', deleteDecisionStub);
 
-        store.dispatch(decisions.removeDecision(teamSlug));
+        store.dispatch(decisions.removeDecision());
 
-        expect(deleteDecisionStub.calledWith(teamSlug, restaurantId)).to.be.true;
+        expect(deleteDecisionStub.calledWith(restaurantId)).to.be.true;
       });
 
       it('fetches decision', () => {
-        store.dispatch(decisions.removeDecision(teamSlug));
+        store.dispatch(decisions.removeDecision());
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/decisions/fromToday`);
+        expect(fetchMock.lastCall()[0]).to.eq('/api/decisions/fromToday');
         expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ restaurant_id: 1 }));
       });
     });
@@ -147,7 +145,7 @@ describe('actions/decisions', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(decisions.removeDecision(teamSlug));
+        return store.dispatch(decisions.removeDecision());
       });
 
       it('dispatches flashError', () => {

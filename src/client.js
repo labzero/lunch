@@ -26,6 +26,23 @@ fetch.promise = Promise;
 
 window.RobustWebSocket = RobustWebSocket;
 
+// Undo Browsersync mangling of host
+/* eslint-disable no-underscore-dangle */
+let host = window.__INITIAL_STATE__.host;
+if (host.indexOf('//') === 0) {
+  host = host.slice(2);
+}
+if (window.__INITIAL_STATE__.team.slug) {
+  const teamSlug = window.__INITIAL_STATE__.team.slug;
+  if (host.indexOf(teamSlug) === 0) {
+    host = host.slice(teamSlug.length + 1); // + 1 for dot
+  }
+}
+window.__INITIAL_STATE__.host = host;
+
+const store = configureStore(window.__INITIAL_STATE__, { history });
+/* eslint-enable no-underscore-dangle */
+
 // Global (context) variables that can be easily accessed from any React component
 // https://facebook.github.io/react/docs/context.html
 const context = {
@@ -38,8 +55,7 @@ const context = {
   },
   // Initialize a new Redux store
   // http://redux.js.org/docs/basics/UsageWithReact.html
-  // eslint-disable-next-line no-underscore-dangle
-  store: configureStore(window.__INITIAL_STATE__, { history }),
+  store
 };
 
 // Switch off the native scroll restoration behavior and handle it manually
@@ -98,7 +114,13 @@ FastClick.attach(document.body);
 const container = document.getElementById('app');
 let appInstance;
 let currentLocation = history.location;
-let routes = require('./routes').default;
+
+let routes;
+if (store.getState().team.slug) {
+  routes = require('./routes/team').default; // eslint-disable-line global-require
+} else {
+  routes = require('./routes/main').default; // eslint-disable-line global-require
+}
 
 const router = new UniversalRouter(routes);
 
@@ -175,9 +197,7 @@ if (__DEV__) {
 
 // Enable Hot Module Replacement (HMR)
 if (module.hot) {
-  module.hot.accept('./routes', () => {
-    routes = require('./routes').default; // eslint-disable-line global-require
-
+  const hotUpdate = () => {
     if (appInstance) {
       try {
         // Force-update the whole tree, including components that refuse to update
@@ -191,5 +211,15 @@ if (module.hot) {
     }
 
     onLocationChange(currentLocation);
+  };
+
+  module.hot.accept('./routes/team', () => {
+    routes = require('./routes/team').default; // eslint-disable-line global-require
+    hotUpdate();
+  });
+
+  module.hot.accept('./routes/main', () => {
+    routes = require('./routes/main').default; // eslint-disable-line global-require
+    hotUpdate();
   });
 }

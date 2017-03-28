@@ -36,11 +36,10 @@ export function restaurantPosted(obj, userId) {
   };
 }
 
-export function deleteRestaurant(teamSlug, id) {
+export function deleteRestaurant(id) {
   return {
     type: ActionTypes.DELETE_RESTAURANT,
-    id,
-    teamSlug
+    id
   };
 }
 
@@ -52,12 +51,11 @@ export function restaurantDeleted(id, userId) {
   };
 }
 
-export function renameRestaurant(teamSlug, id, obj) {
+export function renameRestaurant(id, obj) {
   return {
     type: ActionTypes.RENAME_RESTAURANT,
     id,
-    restaurant: obj,
-    teamSlug
+    restaurant: obj
   };
 }
 
@@ -70,26 +68,23 @@ export function restaurantRenamed(id, obj, userId) {
   };
 }
 
-export function requestRestaurants(teamSlug) {
+export function requestRestaurants() {
   return {
-    type: ActionTypes.REQUEST_RESTAURANTS,
-    teamSlug
+    type: ActionTypes.REQUEST_RESTAURANTS
   };
 }
 
-export function receiveRestaurants(json, teamSlug) {
+export function receiveRestaurants(json) {
   return {
     type: ActionTypes.RECEIVE_RESTAURANTS,
-    items: json,
-    teamSlug
+    items: json
   };
 }
 
-export function postVote(teamSlug, id) {
+export function postVote(id) {
   return {
     type: ActionTypes.POST_VOTE,
-    id,
-    teamSlug
+    id
   };
 }
 
@@ -100,12 +95,11 @@ export function votePosted(json) {
   };
 }
 
-export function deleteVote(teamSlug, restaurantId, id) {
+export function deleteVote(restaurantId, id) {
   return {
     type: ActionTypes.DELETE_VOTE,
     restaurantId,
-    id,
-    teamSlug
+    id
   };
 }
 
@@ -118,12 +112,11 @@ export function voteDeleted(restaurantId, userId, id) {
   };
 }
 
-export function postNewTagToRestaurant(teamSlug, restaurantId, value) {
+export function postNewTagToRestaurant(restaurantId, value) {
   return {
     type: ActionTypes.POST_NEW_TAG_TO_RESTAURANT,
     restaurantId,
-    value,
-    teamSlug
+    value
   };
 }
 
@@ -136,12 +129,11 @@ export function postedNewTagToRestaurant(restaurantId, tag, userId) {
   };
 }
 
-export function postTagToRestaurant(teamSlug, restaurantId, id) {
+export function postTagToRestaurant(restaurantId, id) {
   return {
     type: ActionTypes.POST_TAG_TO_RESTAURANT,
     restaurantId,
-    id,
-    teamSlug
+    id
   };
 }
 
@@ -154,12 +146,11 @@ export function postedTagToRestaurant(restaurantId, id, userId) {
   };
 }
 
-export function deleteTagFromRestaurant(teamSlug, restaurantId, id) {
+export function deleteTagFromRestaurant(restaurantId, id) {
   return {
     type: ActionTypes.DELETE_TAG_FROM_RESTAURANT,
     restaurantId,
-    id,
-    teamSlug
+    id
   };
 }
 
@@ -172,25 +163,22 @@ export function deletedTagFromRestaurant(restaurantId, id, userId) {
   };
 }
 
-export function fetchRestaurants(teamSlug) {
+export function fetchRestaurants() {
   return dispatch => {
-    dispatch(requestRestaurants(teamSlug));
-    return fetch(`/api/teams/${teamSlug}/restaurants`, {
+    dispatch(requestRestaurants());
+    return fetch('/api/restaurants', {
       credentials
     })
       .then(response => processResponse(response))
-      .then(json => dispatch(receiveRestaurants(json, teamSlug)))
+      .then(json => dispatch(receiveRestaurants(json)))
       .catch(
         err => dispatch(flashError(err.message))
       );
   };
 }
 
-function shouldFetchRestaurants(state, teamSlug) {
+function shouldFetchRestaurants(state) {
   const restaurants = state.restaurants;
-  if (restaurants.teamSlug !== teamSlug) {
-    return true;
-  }
   if (!restaurants.items) {
     return true;
   }
@@ -200,7 +188,7 @@ function shouldFetchRestaurants(state, teamSlug) {
   return restaurants.didInvalidate;
 }
 
-export function fetchRestaurantsIfNeeded(teamSlug) {
+export function fetchRestaurantsIfNeeded() {
   // Note that the function also receives getState()
   // which lets you choose what to dispatch next.
 
@@ -208,9 +196,9 @@ export function fetchRestaurantsIfNeeded(teamSlug) {
   // a cached value is already available.
 
   return (dispatch, getState) => {
-    if (shouldFetchRestaurants(getState(), teamSlug)) {
+    if (shouldFetchRestaurants(getState())) {
       // Dispatch a thunk from thunk!
-      return dispatch(fetchRestaurants(teamSlug));
+      return dispatch(fetchRestaurants());
     }
 
     // Let the calling code know there's nothing to wait for.
@@ -218,11 +206,11 @@ export function fetchRestaurantsIfNeeded(teamSlug) {
   };
 }
 
-export function addRestaurant(teamSlug, name, placeId, address, lat, lng) {
+export function addRestaurant(name, placeId, address, lat, lng) {
   const payload = { name, place_id: placeId, address, lat, lng };
   return (dispatch) => {
     dispatch(postRestaurant(payload));
-    return fetch(`/api/teams/${teamSlug}/restaurants`, {
+    return fetch('/api/restaurants', {
       method: 'post',
       credentials,
       headers: jsonHeaders,
@@ -235,10 +223,10 @@ export function addRestaurant(teamSlug, name, placeId, address, lat, lng) {
   };
 }
 
-export function removeRestaurant(teamSlug, id) {
+export function removeRestaurant(id) {
   return (dispatch) => {
-    dispatch(deleteRestaurant(teamSlug, id));
-    return fetch(`/api/teams/${teamSlug}/restaurants/${id}`, {
+    dispatch(deleteRestaurant(id));
+    return fetch(`/api/restaurants/${id}`, {
       credentials,
       method: 'delete'
     })
@@ -249,11 +237,11 @@ export function removeRestaurant(teamSlug, id) {
   };
 }
 
-export function changeRestaurantName(teamSlug, id, name) {
+export function changeRestaurantName(id, name) {
   const payload = { name };
   return dispatch => {
-    dispatch(renameRestaurant(teamSlug, id, payload));
-    return fetch(`/api/teams/${teamSlug}/restaurants/${id}`, {
+    dispatch(renameRestaurant(id, payload));
+    return fetch(`/api/restaurants/${id}`, {
       credentials,
       headers: jsonHeaders,
       method: 'PATCH',
@@ -266,10 +254,10 @@ export function changeRestaurantName(teamSlug, id, name) {
   };
 }
 
-export function addVote(teamSlug, id) {
+export function addVote(id) {
   return (dispatch) => {
-    dispatch(postVote(teamSlug, id));
-    return fetch(`/api/teams/${teamSlug}/restaurants/${id}/votes`, {
+    dispatch(postVote(id));
+    return fetch(`/api/restaurants/${id}/votes`, {
       method: 'post',
       credentials
     })
@@ -280,10 +268,10 @@ export function addVote(teamSlug, id) {
   };
 }
 
-export function removeVote(teamSlug, restaurantId, id) {
+export function removeVote(restaurantId, id) {
   return (dispatch) => {
-    dispatch(deleteVote(teamSlug, restaurantId, id));
-    return fetch(`/api/teams/${teamSlug}/restaurants/${restaurantId}/votes/${id}`, {
+    dispatch(deleteVote(restaurantId, id));
+    return fetch(`/api/restaurants/${restaurantId}/votes/${id}`, {
       credentials,
       method: 'delete'
     })
@@ -294,10 +282,10 @@ export function removeVote(teamSlug, restaurantId, id) {
   };
 }
 
-export function addNewTagToRestaurant(teamSlug, restaurantId, name) {
+export function addNewTagToRestaurant(restaurantId, name) {
   return (dispatch) => {
-    dispatch(postNewTagToRestaurant(teamSlug, restaurantId, name));
-    return fetch(`/api/teams/${teamSlug}/restaurants/${restaurantId}/tags`, {
+    dispatch(postNewTagToRestaurant(restaurantId, name));
+    return fetch(`/api/restaurants/${restaurantId}/tags`, {
       method: 'post',
       credentials,
       headers: jsonHeaders,
@@ -310,10 +298,10 @@ export function addNewTagToRestaurant(teamSlug, restaurantId, name) {
   };
 }
 
-export function addTagToRestaurant(teamSlug, restaurantId, id) {
+export function addTagToRestaurant(restaurantId, id) {
   return (dispatch) => {
-    dispatch(postTagToRestaurant(teamSlug, restaurantId, id));
-    return fetch(`/api/teams/${teamSlug}/restaurants/${restaurantId}/tags`, {
+    dispatch(postTagToRestaurant(restaurantId, id));
+    return fetch(`/api/restaurants/${restaurantId}/tags`, {
       method: 'post',
       credentials,
       headers: jsonHeaders,
@@ -326,10 +314,10 @@ export function addTagToRestaurant(teamSlug, restaurantId, id) {
   };
 }
 
-export function removeTagFromRestaurant(teamSlug, restaurantId, id) {
+export function removeTagFromRestaurant(restaurantId, id) {
   return (dispatch) => {
-    dispatch(deleteTagFromRestaurant(teamSlug, restaurantId, id));
-    return fetch(`/api/teams/${teamSlug}/restaurants/${restaurantId}/tags/${id}`, {
+    dispatch(deleteTagFromRestaurant(restaurantId, id));
+    return fetch(`/api/restaurants/${restaurantId}/tags/${id}`, {
       credentials,
       method: 'delete'
     })

@@ -23,9 +23,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) =>
     handleClick() {
       if (stateProps.loggedIn) {
         if (stateProps.decided) {
-          dispatchProps.dispatch(removeDecision(ownProps.teamSlug));
+          dispatchProps.dispatch(removeDecision());
         } else {
-          dispatchProps.dispatch(decide(ownProps.teamSlug, ownProps.id));
+          dispatchProps.dispatch(decide(ownProps.id));
         }
       }
     },

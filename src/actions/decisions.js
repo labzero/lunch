@@ -7,47 +7,42 @@ export function invalidateDecision() {
   return { type: ActionTypes.INVALIDATE_DECISION };
 }
 
-export function requestDecision(teamSlug) {
+export function requestDecision() {
   return {
-    type: ActionTypes.REQUEST_DECISION,
-    teamSlug
+    type: ActionTypes.REQUEST_DECISION
   };
 }
 
-export function receiveDecision(json, teamSlug) {
+export function receiveDecision(json) {
   return {
     type: ActionTypes.RECEIVE_DECISION,
-    inst: json,
-    teamSlug
+    inst: json
   };
 }
 
-export function fetchDecision(teamSlug) {
+export function fetchDecision() {
   return dispatch => {
-    dispatch(requestDecision(teamSlug));
-    return fetch(`/api/teams/${teamSlug}/decisions/fromToday`, {
+    dispatch(requestDecision());
+    return fetch('/api/decisions/fromToday', {
       credentials
     })
       .then(response => processResponse(response))
-      .then(json => dispatch(receiveDecision(json, teamSlug)))
+      .then(json => dispatch(receiveDecision(json)))
       .catch(
         err => dispatch(flashError(err.message))
       );
   };
 }
 
-function shouldFetchDecision(state, teamSlug) {
+function shouldFetchDecision(state) {
   const restaurants = state.restaurants;
-  if (restaurants.teamSlug !== teamSlug) {
-    return true;
-  }
   if (restaurants.isFetching) {
     return false;
   }
   return restaurants.didInvalidate;
 }
 
-export function fetchDecisionIfNeeded(teamSlug) {
+export function fetchDecisionIfNeeded() {
   // Note that the function also receives getState()
   // which lets you choose what to dispatch next.
 
@@ -55,9 +50,9 @@ export function fetchDecisionIfNeeded(teamSlug) {
   // a cached value is already available.
 
   return (dispatch, getState) => {
-    if (shouldFetchDecision(getState(), teamSlug)) {
+    if (shouldFetchDecision(getState())) {
       // Dispatch a thunk from thunk!
-      return dispatch(fetchDecision(teamSlug));
+      return dispatch(fetchDecision());
     }
 
     // Let the calling code know there's nothing to wait for.
@@ -65,10 +60,9 @@ export function fetchDecisionIfNeeded(teamSlug) {
   };
 }
 
-export const postDecision = (teamSlug, restaurantId) => ({
+export const postDecision = (restaurantId) => ({
   type: ActionTypes.POST_DECISION,
-  restaurantId,
-  teamSlug
+  restaurantId
 });
 
 export const decisionPosted = (decision, userId) => ({
@@ -77,10 +71,9 @@ export const decisionPosted = (decision, userId) => ({
   userId
 });
 
-export const deleteDecision = (teamSlug, restaurantId) => ({
+export const deleteDecision = (restaurantId) => ({
   type: ActionTypes.DELETE_DECISION,
-  restaurantId,
-  teamSlug
+  restaurantId
 });
 
 export const decisionDeleted = (restaurantId, userId) => ({
@@ -89,10 +82,10 @@ export const decisionDeleted = (restaurantId, userId) => ({
   userId
 });
 
-export const decide = (teamSlug, restaurantId) => dispatch => {
+export const decide = (restaurantId) => dispatch => {
   const payload = { restaurant_id: restaurantId };
-  dispatch(postDecision(teamSlug, restaurantId));
-  return fetch(`/api/teams/${teamSlug}/decisions`, {
+  dispatch(postDecision(restaurantId));
+  return fetch('/api/decisions', {
     credentials,
     headers: jsonHeaders,
     method: 'post',
@@ -104,11 +97,11 @@ export const decide = (teamSlug, restaurantId) => dispatch => {
     );
 };
 
-export const removeDecision = teamSlug => (dispatch, getState) => {
+export const removeDecision = () => (dispatch, getState) => {
   const restaurantId = getDecision(getState()).restaurant_id;
   const payload = { restaurant_id: restaurantId };
-  dispatch(deleteDecision(teamSlug, restaurantId));
-  return fetch(`/api/teams/${teamSlug}/decisions/fromToday`, {
+  dispatch(deleteDecision(restaurantId));
+  return fetch('/api/decisions/fromToday', {
     credentials,
     headers: jsonHeaders,
     method: 'delete',

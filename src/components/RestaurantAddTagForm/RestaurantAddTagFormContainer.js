@@ -27,7 +27,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     if (method === 'enter') {
       event.preventDefault();
     }
-    dispatch(addTagToRestaurant(ownProps.teamSlug, ownProps.id, suggestion.id));
+    dispatch(addTagToRestaurant(ownProps.id, suggestion.id));
   },
   hideAddTagForm: () => {
     dispatch(hideAddTagForm(ownProps.id));
@@ -46,7 +46,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) =>
     addNewTagToRestaurant: event => {
       event.preventDefault();
       dispatchProps.dispatch(
-        addNewTagToRestaurant(ownProps.teamSlug, ownProps.id, stateProps.autosuggestValue)
+        addNewTagToRestaurant(ownProps.id, stateProps.autosuggestValue)
       );
     }
   });

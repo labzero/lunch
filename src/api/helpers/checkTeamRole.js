@@ -1,10 +1,7 @@
-import getTeamIfHasRole from './getTeamIfHasRole';
+import hasRole from '../../helpers/hasRole';
 
-export default role => async (req, res, next) => {
-  const team = await getTeamIfHasRole(req.user, req.params.slug, role);
-
-  if (team) {
-    req.team = team; // eslint-disable-line no-param-reassign
+export default role => (req, res, next) => {
+  if (hasRole(req.user, req.team, role)) {
     next();
   } else {
     res.status(404).json({ error: true, data: { message: 'Not found' } });

@@ -5,8 +5,7 @@ import Header from './Header';
 const mapStateToProps = (state, ownProps) => ({
   flashes: state.flashes,
   loggedIn: isLoggedIn(state),
-  path: ownProps.path,
-  teamSlug: ownProps.teamSlug
+  path: ownProps.path
 });
 
 export default connect(mapStateToProps)(Header);

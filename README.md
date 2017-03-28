@@ -4,11 +4,24 @@ An app for groups to decide on nearby lunch options. [Check out a live version](
 
 ## Setup
 
+### `/etc/hosts`
+
+Add this line to `/etc/hosts`:
+
+```
+127.0.0.1 local.lunch.pink
+```
+
+If you will be testing subdomains, you should add an additional line for each subdomain, e.g.:
+
+```
+127.0.0.1 labzero.local.lunch.pink
+127.0.0.1 someotherteam.local.lunch.pink
+```
+
 ### Environment variables
 
 Make two copies of `.env.sample`, named `.env` and `.env.prod`.
-
-`OAUTH_DOMAIN` is optional, but it allows you to restrict logins to a specific domain (such as your company's)
 
 #### Google project
 
@@ -18,8 +31,8 @@ For `GOOGLE_CLIENT_*` env variables:
 - Enable the Google+ API, Contacts API, and Google Maps JavaScript API.
 - Go to the Credentials section and create an OAuth client ID.
 - For local development:
-  - Enter `http://localhost:3000` and `http://localhost:3001` as authorized JavaScript origins
-  - Enter `http://localhost:3000/login/callback` and `http://localhost:3001/login/callback` as authorized redirect URIs
+  - Enter `http://local.lunch.pink:3000` and `http://local.lunch.pink:3001` as authorized JavaScript origins
+  - Enter `http://local.lunch.pink:3000/login/callback` and `http://local.lunch.pink:3001/login/callback` as authorized redirect URIs
 - Add your deployment target(s) as additional origins/redirect URIs.
 - Go back to the Credentials section and create an API key.
   - Choose "Browser key".

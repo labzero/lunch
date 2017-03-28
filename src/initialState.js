@@ -1,19 +1,18 @@
-import { port } from './config';
+import { host, port } from './config';
 
 const getInitialState = () => ({
   restaurants: {
     isFetching: false,
     didInvalidate: true,
-    items: [],
-    teamSlug: null
+    items: []
   },
   decision: {
     isFetching: false,
     didInvalidate: true,
-    inst: null,
-    teamSlug: null
+    inst: null
   },
   flashes: [],
+  host,
   notifications: [],
   modals: {},
   latLng: {
@@ -31,13 +30,13 @@ const getInitialState = () => ({
   tags: {
     isFetching: false,
     didInvalidate: true,
-    items: [],
-    teamSlug: null
+    items: []
   },
   tagUi: {
     filterForm: {},
     exclusionForm: {}
   },
+  team: {},
   teams: {
     isFetching: false,
     didInvalidate: true,
@@ -47,8 +46,7 @@ const getInitialState = () => ({
   users: {
     isFetching: false,
     didInvalidate: true,
-    items: [],
-    teamSlug: null
+    items: []
   },
   wsPort: process.env.BS_RUNNING ? port : 0
 });
@@ -61,6 +59,9 @@ export default (stateData) => {
   }
   if (stateData.user) {
     initialState.user = stateData.user;
+  }
+  if (stateData.team) {
+    initialState.team = stateData.team;
   }
   return initialState;
 };

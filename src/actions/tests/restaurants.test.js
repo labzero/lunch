@@ -14,12 +14,10 @@ const mockStore = configureStore(middlewares);
 
 describe('actions/restaurants', () => {
   let store;
-  let teamSlug;
   let flashErrorStub;
 
   beforeEach(() => {
     store = mockStore({});
-    teamSlug = 'labzero';
     flashErrorStub = actionCreatorStub();
     restaurantsRewireAPI.__Rewire__('flashError', flashErrorStub);
   });
@@ -34,15 +32,15 @@ describe('actions/restaurants', () => {
         const requestRestaurantsStub = actionCreatorStub();
         restaurantsRewireAPI.__Rewire__('requestRestaurants', requestRestaurantsStub);
 
-        store.dispatch(restaurants.fetchRestaurants(teamSlug));
+        store.dispatch(restaurants.fetchRestaurants());
 
-        expect(requestRestaurantsStub.calledWith(teamSlug)).to.be.true;
+        expect(requestRestaurantsStub.callCount).to.eq(1);
       });
 
       it('fetches restaurants', () => {
-        store.dispatch(restaurants.fetchRestaurants(teamSlug));
+        store.dispatch(restaurants.fetchRestaurants());
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/restaurants`);
+        expect(fetchMock.lastCall()[0]).to.eq('/api/restaurants');
       });
     });
 
@@ -52,18 +50,18 @@ describe('actions/restaurants', () => {
         fetchMock.mock('*', { data: [{ foo: 'bar' }] });
         receiveRestaurantsStub = actionCreatorStub();
         restaurantsRewireAPI.__Rewire__('receiveRestaurants', receiveRestaurantsStub);
-        return store.dispatch(restaurants.fetchRestaurants(teamSlug));
+        return store.dispatch(restaurants.fetchRestaurants());
       });
 
       it('dispatches receiveRestaurants', () => {
-        expect(receiveRestaurantsStub.calledWith([{ foo: 'bar' }], teamSlug)).to.be.true;
+        expect(receiveRestaurantsStub.calledWith([{ foo: 'bar' }])).to.be.true;
       });
     });
 
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(restaurants.fetchRestaurants(teamSlug));
+        return store.dispatch(restaurants.fetchRestaurants());
       });
 
       it('dispatches flashError', () => {
@@ -96,7 +94,7 @@ describe('actions/restaurants', () => {
         const postRestaurantStub = actionCreatorStub();
         restaurantsRewireAPI.__Rewire__('postRestaurant', postRestaurantStub);
 
-        store.dispatch(restaurants.addRestaurant(teamSlug, name, placeId, address, lat, lng));
+        store.dispatch(restaurants.addRestaurant(name, placeId, address, lat, lng));
 
         expect(postRestaurantStub.calledWith({
           name,
@@ -108,9 +106,9 @@ describe('actions/restaurants', () => {
       });
 
       it('fetches restaurant', () => {
-        store.dispatch(restaurants.addRestaurant(teamSlug, name, placeId, address, lat, lng));
+        store.dispatch(restaurants.addRestaurant(name, placeId, address, lat, lng));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/restaurants`);
+        expect(fetchMock.lastCall()[0]).to.eq('/api/restaurants');
         expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({
           name,
           place_id: placeId,
@@ -125,7 +123,7 @@ describe('actions/restaurants', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
         return store.dispatch(
-          restaurants.addRestaurant(teamSlug, name, placeId, address, lat, lng)
+          restaurants.addRestaurant(name, placeId, address, lat, lng)
         );
       });
 
@@ -150,22 +148,22 @@ describe('actions/restaurants', () => {
         const deleteRestaurantStub = actionCreatorStub();
         restaurantsRewireAPI.__Rewire__('deleteRestaurant', deleteRestaurantStub);
 
-        store.dispatch(restaurants.removeRestaurant(teamSlug, id));
+        store.dispatch(restaurants.removeRestaurant(id));
 
-        expect(deleteRestaurantStub.calledWith(teamSlug, id)).to.be.true;
+        expect(deleteRestaurantStub.calledWith(id)).to.be.true;
       });
 
       it('fetches restaurant', () => {
-        store.dispatch(restaurants.removeRestaurant(teamSlug, id));
+        store.dispatch(restaurants.removeRestaurant(id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/restaurants/${id}`);
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${id}`);
       });
     });
 
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(restaurants.removeRestaurant(teamSlug, id));
+        return store.dispatch(restaurants.removeRestaurant(id));
       });
 
       it('dispatches flashError', () => {
@@ -192,15 +190,15 @@ describe('actions/restaurants', () => {
         const renameRestaurantStub = actionCreatorStub();
         restaurantsRewireAPI.__Rewire__('renameRestaurant', renameRestaurantStub);
 
-        store.dispatch(restaurants.changeRestaurantName(teamSlug, id, name));
+        store.dispatch(restaurants.changeRestaurantName(id, name));
 
-        expect(renameRestaurantStub.calledWith(teamSlug, id, { name })).to.be.true;
+        expect(renameRestaurantStub.calledWith(id, { name })).to.be.true;
       });
 
       it('fetches restaurant', () => {
-        store.dispatch(restaurants.changeRestaurantName(teamSlug, id, name));
+        store.dispatch(restaurants.changeRestaurantName(id, name));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/restaurants/${id}`);
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${id}`);
         expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ name }));
       });
     });
@@ -209,7 +207,7 @@ describe('actions/restaurants', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
         return store.dispatch(
-          restaurants.changeRestaurantName(teamSlug, id, name)
+          restaurants.changeRestaurantName(id, name)
         );
       });
 
@@ -234,15 +232,15 @@ describe('actions/restaurants', () => {
         const postVoteStub = actionCreatorStub();
         restaurantsRewireAPI.__Rewire__('postVote', postVoteStub);
 
-        store.dispatch(restaurants.addVote(teamSlug, id));
+        store.dispatch(restaurants.addVote(id));
 
-        expect(postVoteStub.calledWith(teamSlug, id)).to.be.true;
+        expect(postVoteStub.calledWith(id)).to.be.true;
       });
 
       it('fetches vote', () => {
-        store.dispatch(restaurants.addVote(teamSlug, id));
+        store.dispatch(restaurants.addVote(id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/restaurants/${id}/votes`);
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${id}/votes`);
       });
     });
 
@@ -250,7 +248,7 @@ describe('actions/restaurants', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
         return store.dispatch(
-          restaurants.addVote(teamSlug, id)
+          restaurants.addVote(id)
         );
       });
 
@@ -277,15 +275,15 @@ describe('actions/restaurants', () => {
         const deleteVoteStub = actionCreatorStub();
         restaurantsRewireAPI.__Rewire__('deleteVote', deleteVoteStub);
 
-        store.dispatch(restaurants.removeVote(teamSlug, restaurantId, id));
+        store.dispatch(restaurants.removeVote(restaurantId, id));
 
-        expect(deleteVoteStub.calledWith(teamSlug, restaurantId, id)).to.be.true;
+        expect(deleteVoteStub.calledWith(restaurantId, id)).to.be.true;
       });
 
       it('fetches vote', () => {
-        store.dispatch(restaurants.removeVote(teamSlug, restaurantId, id));
+        store.dispatch(restaurants.removeVote(restaurantId, id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/restaurants/${restaurantId}/votes/${id}`);
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${restaurantId}/votes/${id}`);
       });
     });
 
@@ -293,7 +291,7 @@ describe('actions/restaurants', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
         return store.dispatch(
-          restaurants.removeVote(teamSlug, restaurantId, id)
+          restaurants.removeVote(restaurantId, id)
         );
       });
 
@@ -320,15 +318,15 @@ describe('actions/restaurants', () => {
         const postNewTagToRestaurantStub = actionCreatorStub();
         restaurantsRewireAPI.__Rewire__('postNewTagToRestaurant', postNewTagToRestaurantStub);
 
-        store.dispatch(restaurants.addNewTagToRestaurant(teamSlug, id, name));
+        store.dispatch(restaurants.addNewTagToRestaurant(id, name));
 
-        expect(postNewTagToRestaurantStub.calledWith(teamSlug, id, name)).to.be.true;
+        expect(postNewTagToRestaurantStub.calledWith(id, name)).to.be.true;
       });
 
       it('fetches tag', () => {
-        store.dispatch(restaurants.addNewTagToRestaurant(teamSlug, id, name));
+        store.dispatch(restaurants.addNewTagToRestaurant(id, name));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/restaurants/${id}/tags`);
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${id}/tags`);
         expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ name }));
       });
     });
@@ -337,7 +335,7 @@ describe('actions/restaurants', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
         return store.dispatch(
-          restaurants.addNewTagToRestaurant(teamSlug, id, name)
+          restaurants.addNewTagToRestaurant(id, name)
         );
       });
 
@@ -364,15 +362,15 @@ describe('actions/restaurants', () => {
         const postTagToRestaurantStub = actionCreatorStub();
         restaurantsRewireAPI.__Rewire__('postTagToRestaurant', postTagToRestaurantStub);
 
-        store.dispatch(restaurants.addTagToRestaurant(teamSlug, restaurantId, id));
+        store.dispatch(restaurants.addTagToRestaurant(restaurantId, id));
 
-        expect(postTagToRestaurantStub.calledWith(teamSlug, restaurantId, id)).to.be.true;
+        expect(postTagToRestaurantStub.calledWith(restaurantId, id)).to.be.true;
       });
 
       it('fetches tag', () => {
-        store.dispatch(restaurants.addTagToRestaurant(teamSlug, restaurantId, id));
+        store.dispatch(restaurants.addTagToRestaurant(restaurantId, id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/restaurants/${restaurantId}/tags`);
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${restaurantId}/tags`);
         expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ id }));
       });
     });
@@ -381,7 +379,7 @@ describe('actions/restaurants', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
         return store.dispatch(
-          restaurants.addTagToRestaurant(teamSlug, restaurantId, id)
+          restaurants.addTagToRestaurant(restaurantId, id)
         );
       });
 
@@ -408,15 +406,15 @@ describe('actions/restaurants', () => {
         const deleteTagFromRestaurantStub = actionCreatorStub();
         restaurantsRewireAPI.__Rewire__('deleteTagFromRestaurant', deleteTagFromRestaurantStub);
 
-        store.dispatch(restaurants.removeTagFromRestaurant(teamSlug, restaurantId, id));
+        store.dispatch(restaurants.removeTagFromRestaurant(restaurantId, id));
 
-        expect(deleteTagFromRestaurantStub.calledWith(teamSlug, restaurantId, id)).to.be.true;
+        expect(deleteTagFromRestaurantStub.calledWith(restaurantId, id)).to.be.true;
       });
 
       it('fetches tag', () => {
-        store.dispatch(restaurants.removeTagFromRestaurant(teamSlug, restaurantId, id));
+        store.dispatch(restaurants.removeTagFromRestaurant(restaurantId, id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/restaurants/${restaurantId}/tags/${id}`);
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${restaurantId}/tags/${id}`);
       });
     });
 
@@ -424,7 +422,7 @@ describe('actions/restaurants', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
         return store.dispatch(
-          restaurants.removeTagFromRestaurant(teamSlug, restaurantId, id)
+          restaurants.removeTagFromRestaurant(restaurantId, id)
         );
       });
 

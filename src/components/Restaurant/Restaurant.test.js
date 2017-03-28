@@ -22,8 +22,7 @@ describe('Restaurant', () => {
       listUiItem: {},
       showAddTagForm: sinon.mock(),
       showMapAndInfoWindow: sinon.mock(),
-      removeTag: sinon.mock(),
-      teamSlug: 'foo',
+      removeTag: sinon.mock()
     };
   });
 

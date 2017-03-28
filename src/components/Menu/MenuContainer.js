@@ -1,13 +1,15 @@
 import { connect } from 'react-redux';
 import { getCurrentUser } from '../../selectors/user';
+import { getTeam } from '../../selectors/team';
 import { currentUserHasRole } from '../../selectors';
 import Menu from './Menu';
 
 const mapStateToProps = (state, ownProps) => ({
-  hasGuestRole: currentUserHasRole(state, { role: 'guest', teamSlug: ownProps.teamSlug }),
-  hasMemberRole: currentUserHasRole(state, { role: 'member', teamSlug: ownProps.teamSlug }),
+  hasGuestRole: currentUserHasRole(state, { role: 'guest' }),
+  hasMemberRole: currentUserHasRole(state, { role: 'member' }),
+  host: state.host,
   open: ownProps.open,
-  teamSlug: ownProps.teamSlug,
+  team: getTeam(state),
   user: getCurrentUser(state)
 });
 

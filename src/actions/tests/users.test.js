@@ -14,12 +14,10 @@ const mockStore = configureStore(middlewares);
 
 describe('actions/users', () => {
   let store;
-  let teamSlug;
   let flashErrorStub;
 
   beforeEach(() => {
     store = mockStore({});
-    teamSlug = 'labzero';
     flashErrorStub = actionCreatorStub();
     usersRewireAPI.__Rewire__('flashError', flashErrorStub);
   });
@@ -34,15 +32,15 @@ describe('actions/users', () => {
         const requestUsersStub = actionCreatorStub();
         usersRewireAPI.__Rewire__('requestUsers', requestUsersStub);
 
-        store.dispatch(users.fetchUsers(teamSlug));
+        store.dispatch(users.fetchUsers());
 
-        expect(requestUsersStub.calledWith(teamSlug)).to.be.true;
+        expect(requestUsersStub.callCount).to.eq(1);
       });
 
       it('fetches users', () => {
-        store.dispatch(users.fetchUsers(teamSlug));
+        store.dispatch(users.fetchUsers());
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/users`);
+        expect(fetchMock.lastCall()[0]).to.eq('/api/users');
       });
     });
 
@@ -52,18 +50,18 @@ describe('actions/users', () => {
         fetchMock.mock('*', { data: [{ foo: 'bar' }] });
         receiveUsersStub = actionCreatorStub();
         usersRewireAPI.__Rewire__('receiveUsers', receiveUsersStub);
-        return store.dispatch(users.fetchUsers(teamSlug));
+        return store.dispatch(users.fetchUsers());
       });
 
       it('dispatches receiveUsers', () => {
-        expect(receiveUsersStub.calledWith([{ foo: 'bar' }], teamSlug)).to.be.true;
+        expect(receiveUsersStub.calledWith([{ foo: 'bar' }])).to.be.true;
       });
     });
 
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(users.fetchUsers(teamSlug));
+        return store.dispatch(users.fetchUsers());
       });
 
       it('dispatches flashError', () => {
@@ -88,15 +86,15 @@ describe('actions/users', () => {
         const postUserStub = actionCreatorStub();
         usersRewireAPI.__Rewire__('postUser', postUserStub);
 
-        store.dispatch(users.addUser(teamSlug, payload));
+        store.dispatch(users.addUser(payload));
 
-        expect(postUserStub.calledWith(teamSlug, payload)).to.be.true;
+        expect(postUserStub.calledWith(payload)).to.be.true;
       });
 
       it('fetches restaurant', () => {
-        store.dispatch(users.addUser(teamSlug, payload));
+        store.dispatch(users.addUser(payload));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/users`);
+        expect(fetchMock.lastCall()[0]).to.eq('/api/users');
         expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify(payload));
       });
     });
@@ -107,11 +105,11 @@ describe('actions/users', () => {
         fetchMock.mock('*', { data: { foo: 'bar' } });
         userPostedStub = actionCreatorStub();
         usersRewireAPI.__Rewire__('userPosted', userPostedStub);
-        return store.dispatch(users.addUser(teamSlug, payload));
+        return store.dispatch(users.addUser(payload));
       });
 
       it('dispatches userPosted', () => {
-        expect(userPostedStub.calledWith({ foo: 'bar' }, teamSlug)).to.be.true;
+        expect(userPostedStub.calledWith({ foo: 'bar' })).to.be.true;
       });
     });
 
@@ -119,7 +117,7 @@ describe('actions/users', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
         return store.dispatch(
-          users.addUser(teamSlug, payload)
+          users.addUser(payload)
         );
       });
 
@@ -144,15 +142,15 @@ describe('actions/users', () => {
         const deleteUserStub = actionCreatorStub();
         usersRewireAPI.__Rewire__('deleteUser', deleteUserStub);
 
-        store.dispatch(users.removeUser(teamSlug, id));
+        store.dispatch(users.removeUser(id));
 
-        expect(deleteUserStub.calledWith(teamSlug, id)).to.be.true;
+        expect(deleteUserStub.calledWith(id)).to.be.true;
       });
 
       it('fetches user', () => {
-        store.dispatch(users.removeUser(teamSlug, id));
+        store.dispatch(users.removeUser(id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/users/${id}`);
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/users/${id}`);
       });
     });
 
@@ -162,18 +160,18 @@ describe('actions/users', () => {
         fetchMock.mock('*', {});
         userDeletedStub = actionCreatorStub();
         usersRewireAPI.__Rewire__('userDeleted', userDeletedStub);
-        return store.dispatch(users.removeUser(teamSlug, id));
+        return store.dispatch(users.removeUser(id));
       });
 
       it('dispatches userDeleted', () => {
-        expect(userDeletedStub.calledWith(id, teamSlug)).to.be.true;
+        expect(userDeletedStub.calledWith(id)).to.be.true;
       });
     });
 
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(users.removeUser(teamSlug, id));
+        return store.dispatch(users.removeUser(id));
       });
 
       it('dispatches flashError', () => {
@@ -199,15 +197,15 @@ describe('actions/users', () => {
         const patchUserStub = actionCreatorStub();
         usersRewireAPI.__Rewire__('patchUser', patchUserStub);
 
-        store.dispatch(users.changeUserRole(teamSlug, id, roleType));
+        store.dispatch(users.changeUserRole(id, roleType));
 
-        expect(patchUserStub.calledWith(teamSlug, id, roleType)).to.be.true;
+        expect(patchUserStub.calledWith(id, roleType)).to.be.true;
       });
 
       it('fetches user', () => {
-        store.dispatch(users.changeUserRole(teamSlug, id, roleType));
+        store.dispatch(users.changeUserRole(id, roleType));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/teams/${teamSlug}/users/${id}`);
+        expect(fetchMock.lastCall()[0]).to.eq(`/api/users/${id}`);
         expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ id, type: roleType }));
       });
     });
@@ -218,18 +216,18 @@ describe('actions/users', () => {
         fetchMock.mock('*', { data: { foo: 'bar' } });
         userPatchedStub = actionCreatorStub();
         usersRewireAPI.__Rewire__('userPatched', userPatchedStub);
-        return store.dispatch(users.changeUserRole(teamSlug, id, roleType));
+        return store.dispatch(users.changeUserRole(id, roleType));
       });
 
       it('dispatches userPatched', () => {
-        expect(userPatchedStub.calledWith(id, { foo: 'bar' }, teamSlug)).to.be.true;
+        expect(userPatchedStub.calledWith(id, { foo: 'bar' })).to.be.true;
       });
     });
 
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(users.changeUserRole(teamSlug, id, roleType));
+        return store.dispatch(users.changeUserRole(id, roleType));
       });
 
       it('dispatches flashError', () => {

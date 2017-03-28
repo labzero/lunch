@@ -59,8 +59,7 @@ export default new Map([
       $merge: {
         isFetching: false,
         didInvalidate: false,
-        items: normalize(action.items, [schemas.restaurant]),
-        teamSlug: action.teamSlug
+        items: normalize(action.items, [schemas.restaurant])
       }
     })
   ],

@@ -73,6 +73,10 @@ async function start() {
       bs.init({
         ...isDebug ? {} : { notify: false, ui: false },
 
+        host: server.hostname,
+
+        open: 'external',
+
         proxy: {
           target: server.host,
           middleware: [wpMiddleware, hotMiddleware],

@@ -20,13 +20,11 @@ class Header extends Component {
   static propTypes = {
     flashes: PropTypes.array.isRequired,
     loggedIn: PropTypes.bool.isRequired,
-    path: PropTypes.string,
-    teamSlug: PropTypes.string
+    path: PropTypes.string
   };
 
   static defaultProps = {
-    path: PropTypes.string,
-    teamSlug: undefined
+    path: PropTypes.string
   };
 
   state = {
@@ -63,7 +61,7 @@ class Header extends Component {
   }
 
   render() {
-    const { loggedIn, teamSlug } = this.props;
+    const { loggedIn } = this.props;
     const { menuOpen } = this.state;
     return (
       <div className={`${s.root} ${loggedIn ? s.loggedIn : ''}`}>
@@ -74,7 +72,7 @@ class Header extends Component {
         <div className={s.container}>
           <div className={s.banner}>
             <h1 className={s.bannerTitle}>
-              <Link to={teamSlug ? `/teams/${teamSlug}` : '/'}>
+              <Link to="/">
                 <img src={lunch} alt="Lunch" />
               </Link>
             </h1>
@@ -86,7 +84,7 @@ class Header extends Component {
               <span>Menu</span>
             </button>
             {menuOpen && <button className={s.menuBackground} onClick={this.closeMenu} />}
-            <MenuContainer open={menuOpen} teamSlug={teamSlug} closeMenu={this.closeMenu} />
+            <MenuContainer open={menuOpen} closeMenu={this.closeMenu} />
           </div>
           :
           <LoginContainer />

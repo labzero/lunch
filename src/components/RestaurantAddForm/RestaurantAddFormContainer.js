@@ -38,7 +38,7 @@ const mapDispatchToProps = dispatch => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) =>
+const mergeProps = (stateProps, dispatchProps) =>
   Object.assign({}, stateProps, dispatchProps, {
     handleSuggestSelect: (suggestion, geosuggest) => {
       let name = suggestion.label;
@@ -54,7 +54,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) =>
       geosuggest.update('');
       const existingRestaurant = stateProps.restaurants.find(r => r.place_id === placeId);
       if (existingRestaurant === undefined) {
-        dispatchProps.dispatch(addRestaurant(ownProps.teamSlug, name, placeId, address, lat, lng));
+        dispatchProps.dispatch(addRestaurant(name, placeId, address, lat, lng));
       } else {
         scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, true, undefined, -20);
       }

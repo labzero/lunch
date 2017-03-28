@@ -25,8 +25,7 @@ export default new Map([
       $merge: {
         isFetching: false,
         didInvalidate: false,
-        items: normalize(action.items, [schemas.user]),
-        teamSlug: action.teamSlug
+        items: normalize(action.items, [schemas.user])
       }
     })
   ],

@@ -8,7 +8,6 @@ const modalName = 'deleteTag';
 
 const mapStateToProps = state => ({
   tag: getTagById(state, state.modals[modalName].tagId),
-  teamSlug: state.modals[modalName].teamSlug,
   shown: !!state.modals[modalName].shown
 });
 
@@ -23,7 +22,7 @@ const mergeProps = (stateProps, dispatchProps) => Object.assign(stateProps, disp
   tagName: stateProps.tag.name,
   deleteTag: event => {
     event.preventDefault();
-    dispatchProps.dispatch(removeTag(stateProps.teamSlug, stateProps.tag.id));
+    dispatchProps.dispatch(removeTag(stateProps.tag.id));
   }
 });
 

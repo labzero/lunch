@@ -26,7 +26,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) =>
     changeRestaurantName: event => {
       event.preventDefault();
       dispatchProps.dispatch(
-        changeRestaurantName(ownProps.teamSlug, ownProps.id, stateProps.editNameFormValue)
+        changeRestaurantName(ownProps.id, stateProps.editNameFormValue)
       );
     }
   });

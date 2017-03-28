@@ -17,13 +17,13 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   deleteRestaurant: () => {
-    dispatch(showModal('deleteRestaurant', { teamSlug: ownProps.teamSlug, restaurantId: ownProps.id }));
+    dispatch(showModal('deleteRestaurant', { restaurantId: ownProps.id }));
   },
   removeDecision: () => {
-    dispatch(removeDecision(ownProps.teamSlug));
+    dispatch(removeDecision());
   },
   decide: () => {
-    dispatch(decide(ownProps.teamSlug, ownProps.id));
+    dispatch(decide(ownProps.id));
   },
   showMapAndInfoWindow: () => {
     dispatch(showMapAndInfoWindow(ownProps.id));

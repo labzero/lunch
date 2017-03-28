@@ -17,7 +17,6 @@ const Restaurant = ({
   listUiItem,
   showAddTagForm,
   showMapAndInfoWindow,
-  teamSlug,
 }) => {
   let voteButton;
   let addTagArea;
@@ -25,12 +24,12 @@ const Restaurant = ({
   if (loggedIn) {
     voteButton = (
       <span className={s.voteButtonContainer}>
-        <RestaurantVoteButtonContainer id={restaurant.id} teamSlug={teamSlug} />
+        <RestaurantVoteButtonContainer id={restaurant.id} />
       </span>
     );
     if (shouldShowAddTagArea) {
       if (listUiItem.isAddingTags) {
-        addTagArea = <RestaurantAddTagFormContainer id={restaurant.id} teamSlug={teamSlug} />;
+        addTagArea = <RestaurantAddTagFormContainer id={restaurant.id} />;
       } else {
         addTagArea = (
           <button className="btn btn-sm btn-default" onClick={showAddTagForm}>add tag</button>
@@ -40,7 +39,7 @@ const Restaurant = ({
     if (shouldShowDropdown) {
       dropdown = (
         <div className={s.dropdownContainer}>
-          <RestaurantDropdownContainer id={restaurant.id} teamSlug={teamSlug} />
+          <RestaurantDropdownContainer id={restaurant.id} />
         </div>
       );
     }
@@ -53,7 +52,6 @@ const Restaurant = ({
         <RestaurantNameFormContainer
           id={restaurant.id}
           name={restaurant.name}
-          teamSlug={teamSlug}
         />
       </span>
     );
@@ -63,7 +61,7 @@ const Restaurant = ({
         <button onClick={showMapAndInfoWindow} className={s.headingButton}>
           {restaurant.name}
         </button>
-        <RestaurantDecisionContainer id={restaurant.id} teamSlug={teamSlug} />
+        <RestaurantDecisionContainer id={restaurant.id} />
       </h2>
     );
   }
@@ -79,7 +77,7 @@ const Restaurant = ({
       </div>
       <div className={s.addressContainer}>
         <a
-          href={`/api/teams/${teamSlug}/restaurants/${restaurant.id}/place_url`}
+          href={`/api/restaurants/${restaurant.id}/place_url`}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -88,7 +86,7 @@ const Restaurant = ({
       </div>
       <div className={s.footer}>
         <div className={s.tagsArea}>
-          <RestaurantTagListContainer id={restaurant.id} teamSlug={teamSlug} />
+          <RestaurantTagListContainer id={restaurant.id} />
           {addTagArea}
         </div>
         {dropdown}
@@ -104,8 +102,7 @@ Restaurant.propTypes = {
   shouldShowDropdown: PropTypes.bool,
   listUiItem: PropTypes.object.isRequired,
   showAddTagForm: PropTypes.func.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired,
-  teamSlug: PropTypes.string.isRequired
+  showMapAndInfoWindow: PropTypes.func.isRequired
 };
 
 Restaurant.defaultProps = {

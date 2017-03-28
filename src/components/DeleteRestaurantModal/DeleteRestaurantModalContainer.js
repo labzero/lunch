@@ -8,8 +8,7 @@ const modalName = 'deleteRestaurant';
 
 const mapStateToProps = state => ({
   restaurant: getRestaurantById(state, state.modals[modalName].restaurantId),
-  shown: !!state.modals[modalName].shown,
-  teamSlug: state.modals[modalName].teamSlug
+  shown: !!state.modals[modalName].shown
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -23,7 +22,7 @@ const mergeProps = (stateProps, dispatchProps) => Object.assign(stateProps, disp
   restaurantName: stateProps.restaurant.name,
   deleteRestaurant: event => {
     event.preventDefault();
-    dispatchProps.dispatch(removeRestaurant(stateProps.teamSlug, stateProps.restaurant.id));
+    dispatchProps.dispatch(removeRestaurant(stateProps.restaurant.id));
   }
 });
 

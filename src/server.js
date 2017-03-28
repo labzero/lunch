@@ -31,18 +31,22 @@ import App from './components/App';
 import Html from './components/Html';
 import { ErrorPageWithoutStyle } from './components/ErrorPage/ErrorPage';
 import errorPageStyle from './components/ErrorPage/ErrorPage.scss';
-import routes from './routes';
+import teamRoutes from './routes/team';
+import mainRoutes from './routes/main';
 import assets from './assets.json'; // eslint-disable-line import/no-unresolved
 import configureStore from './store/configureStore';
-import { port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } from './config';
+import { host, port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } from './config';
 import makeInitialState from './initialState';
 import passport from './core/passport';
-import teamApi from './api/teams';
+import api from './api';
 import { Team, User } from './models';
 
 fetch.promise = Promise;
 
 const app = express();
+
+const hostname = host.match(/^([^:]*):?[0-9]{0,}/)[1];
+const domain = `.${hostname}`;
 
 const httpServer = new HttpServer(app);
 let httpsServer;
@@ -111,13 +115,17 @@ app.get('/login/callback',
   (req, res) => {
     const expiresIn = 60 * 60 * 24 * 180; // 180 days
     const token = jwt.sign(req.user, auth.jwt.secret);
-    res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
+    res.cookie('id_token', token, {
+      domain,
+      maxAge: 1000 * expiresIn,
+      httpOnly: true
+    });
     res.redirect('/');
   },
 );
 app.get('/logout', (req, res) => {
   req.logout();
-  res.clearCookie('id_token');
+  res.clearCookie('id_token', { domain });
   res.redirect('/');
 });
 
@@ -141,9 +149,25 @@ app.use((req, res, next) => {
 });
 
 //
+// Get current team
+// -----------------------------------------------------------------------------
+app.use(async (req, res, next) => {
+  const subdomainMatch = req.hostname.match(`^(.*)${domain.replace(/\./g, '\\.')}`);
+  if (subdomainMatch) {
+    // eslint-disable-next-line no-param-reassign
+    req.team = await Team.findOne({ where: { slug: subdomainMatch[1] } });
+    if (!req.team) {
+      res.redirect(302, `${req.protocol}://${host}`);
+      return;
+    }
+  }
+  next();
+});
+
+//
 // Register API middleware
 // -----------------------------------------------------------------------------
-app.use('/api/teams', teamApi());
+app.use('/api', api());
 
 //
 // Register server-side rendering middleware
@@ -154,7 +178,9 @@ app.get('*', async (req, res, next) => {
     if (req.user) {
       stateData.user = req.user;
       stateData.teams = await Team.findAll({ where: { id: req.user.roles.map(r => r.team_id) } });
+      stateData.team = req.team;
     }
+
     const initialState = makeInitialState(stateData);
     const store = configureStore(initialState, {
       cookie: req.headers.cookie,
@@ -176,12 +202,17 @@ app.get('*', async (req, res, next) => {
       store
     };
 
-    const router = new UniversalRouter(routes);
+    let router;
+    if (stateData.team) {
+      router = new UniversalRouter(teamRoutes);
+    } else {
+      router = new UniversalRouter(mainRoutes);
+    }
 
     const route = await router.resolve({
       ...context,
       path: req.path,
-      query: req.query,
+      query: req.query
     });
 
     if (route.redirect) {
@@ -249,10 +280,10 @@ app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
 // -----------------------------------------------------------------------------
 httpServer.listen(port, () => {
   /* eslint-disable no-console */
-  console.log(`The server is running at http://localhost:${port}/`);
+  console.log(`The server is running at http://local.lunch.pink:${port}/`);
 });
 if (httpsServer !== undefined) {
   httpsServer.listen(httpsPort, () => {
-    console.log(`The HTTPS server is running at https://localhost:${httpsPort}`);
+    console.log(`The HTTPS server is running at https://local.lunch.pink:${httpsPort}`);
   });
 }

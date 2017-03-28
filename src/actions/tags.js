@@ -6,50 +6,45 @@ export function invalidateTags() {
   return { type: ActionTypes.INVALIDATE_TAGS };
 }
 
-export function requestTags(teamSlug) {
+export function requestTags() {
   return {
-    type: ActionTypes.REQUEST_TAGS,
-    teamSlug
+    type: ActionTypes.REQUEST_TAGS
   };
 }
 
-export function receiveTags(json, teamSlug) {
+export function receiveTags(json) {
   return {
     type: ActionTypes.RECEIVE_TAGS,
-    items: json,
-    teamSlug
+    items: json
   };
 }
 
-export function fetchTags(teamSlug) {
+export function fetchTags() {
   return dispatch => {
-    dispatch(requestTags(teamSlug));
-    return fetch(`/api/teams/${teamSlug}/tags`, {
+    dispatch(requestTags());
+    return fetch('/api/tags', {
       credentials
     })
       .then(response => processResponse(response))
-      .then(json => dispatch(receiveTags(json, teamSlug)))
+      .then(json => dispatch(receiveTags(json)))
       .catch(
         err => dispatch(flashError(err.message))
       );
   };
 }
 
-function shouldFetchTags(state, teamSlug) {
-  const restaurants = state.restaurants;
-  if (restaurants.teamSlug !== teamSlug) {
+function shouldFetchTags(state) {
+  const tags = state.tags;
+  if (!tags.items) {
     return true;
   }
-  if (!restaurants.items) {
-    return true;
-  }
-  if (restaurants.isFetching) {
+  if (tags.isFetching) {
     return false;
   }
-  return restaurants.didInvalidate;
+  return tags.didInvalidate;
 }
 
-export function fetchTagsIfNeeded(teamSlug) {
+export function fetchTagsIfNeeded() {
   // Note that the function also receives getState()
   // which lets you choose what to dispatch next.
 
@@ -57,9 +52,9 @@ export function fetchTagsIfNeeded(teamSlug) {
   // a cached value is already available.
 
   return (dispatch, getState) => {
-    if (shouldFetchTags(getState(), teamSlug)) {
+    if (shouldFetchTags(getState())) {
       // Dispatch a thunk from thunk!
-      return dispatch(fetchTags(teamSlug));
+      return dispatch(fetchTags());
     }
 
     // Let the calling code know there's nothing to wait for.
@@ -67,32 +62,30 @@ export function fetchTagsIfNeeded(teamSlug) {
   };
 }
 
-export function deleteTag(teamSlug, id) {
+export function deleteTag(id) {
   return {
     type: ActionTypes.DELETE_TAG,
-    id,
-    teamSlug
+    id
   };
 }
 
-export function tagDeleted(id, userId, teamSlug) {
+export function tagDeleted(id, userId) {
   return {
     type: ActionTypes.TAG_DELETED,
     id,
-    teamSlug,
     userId
   };
 }
 
-export function removeTag(teamSlug, id) {
+export function removeTag(id) {
   return (dispatch, getState) => {
-    dispatch(deleteTag(teamSlug, id));
-    return fetch(`/api/teams/${teamSlug}/tags/${id}`, {
+    dispatch(deleteTag(id));
+    return fetch(`/api/tags/${id}`, {
       credentials,
       method: 'delete'
     })
       .then(response => processResponse(response))
-      .then(() => dispatch(tagDeleted(id, getState().user.id, teamSlug)))
+      .then(() => dispatch(tagDeleted(id, getState().user.id)))
       .catch(
         err => dispatch(flashError(err.message))
       );

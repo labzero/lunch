@@ -12,7 +12,7 @@ import cp from 'child_process';
 import webpackConfig from './webpack.config';
 
 // Should match the text string used in `src/server.js/server.listen(...)`
-const RUNNING_REGEXP = /The server is running at http:\/\/(.*?)\//;
+const RUNNING_REGEXP = /The server is running at http:\/\/((.*?):?[0-9]{0,})\//;
 
 let server;
 let pending = true;
@@ -31,6 +31,7 @@ function runServer() {
 
       if (match) {
         server.host = match[1];
+        server.hostname = match[2];
         server.stdout.removeListener('data', onStdOut);
         server.stdout.on('data', x => process.stdout.write(x));
         pending = false;

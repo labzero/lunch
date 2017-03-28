@@ -6,50 +6,45 @@ export function invalidateUsers() {
   return { type: ActionTypes.INVALIDATE_USERS };
 }
 
-export function requestUsers(teamSlug) {
+export function requestUsers() {
   return {
-    type: ActionTypes.REQUEST_USERS,
-    teamSlug
+    type: ActionTypes.REQUEST_USERS
   };
 }
 
-export function receiveUsers(json, teamSlug) {
+export function receiveUsers(json) {
   return {
     type: ActionTypes.RECEIVE_USERS,
-    items: json,
-    teamSlug
+    items: json
   };
 }
 
-export function fetchUsers(teamSlug) {
+export function fetchUsers() {
   return dispatch => {
-    dispatch(requestUsers(teamSlug));
-    return fetch(`/api/teams/${teamSlug}/users`, {
+    dispatch(requestUsers());
+    return fetch('/api/users', {
       credentials
     })
       .then(response => processResponse(response))
-      .then(json => dispatch(receiveUsers(json, teamSlug)))
+      .then(json => dispatch(receiveUsers(json)))
       .catch(
         err => dispatch(flashError(err.message))
       );
   };
 }
 
-function shouldFetchUsers(state, teamSlug) {
-  const restaurants = state.restaurants;
-  if (restaurants.teamSlug !== teamSlug) {
+function shouldFetchUsers(state) {
+  const users = state.users;
+  if (!users.items) {
     return true;
   }
-  if (!restaurants.items) {
-    return true;
-  }
-  if (restaurants.isFetching) {
+  if (users.isFetching) {
     return false;
   }
-  return restaurants.didInvalidate;
+  return users.didInvalidate;
 }
 
-export function fetchUsersIfNeeded(teamSlug) {
+export function fetchUsersIfNeeded() {
   // Note that the function also receives getState()
   // which lets you choose what to dispatch next.
 
@@ -57,9 +52,9 @@ export function fetchUsersIfNeeded(teamSlug) {
   // a cached value is already available.
 
   return (dispatch, getState) => {
-    if (shouldFetchUsers(getState(), teamSlug)) {
+    if (shouldFetchUsers(getState())) {
       // Dispatch a thunk from thunk!
-      return dispatch(fetchUsers(teamSlug));
+      return dispatch(fetchUsers());
     }
 
     // Let the calling code know there's nothing to wait for.
@@ -67,11 +62,10 @@ export function fetchUsersIfNeeded(teamSlug) {
   };
 }
 
-export function deleteUser(teamSlug, id) {
+export function deleteUser(id) {
   return {
     type: ActionTypes.DELETE_USER,
-    id,
-    teamSlug
+    id
   };
 }
 
@@ -83,84 +77,80 @@ export function userDeleted(id, userId) {
   };
 }
 
-export function removeUser(teamSlug, id) {
+export function removeUser(id) {
   return (dispatch) => {
-    dispatch(deleteUser(teamSlug, id));
-    return fetch(`/api/teams/${teamSlug}/users/${id}`, {
+    dispatch(deleteUser(id));
+    return fetch(`/api/users/${id}`, {
       credentials,
       method: 'delete'
     })
       .then(response => processResponse(response))
-      .then(() => dispatch(userDeleted(id, teamSlug)))
+      .then(() => dispatch(userDeleted(id)))
       .catch(
         err => dispatch(flashError(err.message))
       );
   };
 }
 
-export function postUser(teamSlug, id) {
+export function postUser(id) {
   return {
     type: ActionTypes.POST_USER,
-    id,
-    teamSlug
+    id
   };
 }
 
-export function userPosted(json, teamSlug) {
+export function userPosted(json) {
   return {
     type: ActionTypes.USER_POSTED,
-    user: json,
-    teamSlug
+    user: json
   };
 }
 
-export function addUser(teamSlug, payload) {
+export function addUser(payload) {
   return (dispatch) => {
-    dispatch(postUser(teamSlug, payload));
-    return fetch(`/api/teams/${teamSlug}/users`, {
+    dispatch(postUser(payload));
+    return fetch('/api/users', {
       method: 'post',
       credentials,
       headers: jsonHeaders,
       body: JSON.stringify(payload)
     })
       .then(response => processResponse(response))
-      .then(json => dispatch(userPosted(json, teamSlug)))
+      .then(json => dispatch(userPosted(json)))
       .catch(
         err => dispatch(flashError(err.message))
       );
   };
 }
 
-export function patchUser(teamSlug, id, roleType) {
+export function patchUser(id, roleType) {
   return {
     type: ActionTypes.PATCH_USER,
     id,
-    roleType,
-    teamSlug
+    roleType
   };
 }
 
-export function userPatched(id, json, teamSlug) {
+export function userPatched(id, json) {
   return {
     type: ActionTypes.USER_PATCHED,
     id,
-    user: json,
-    teamSlug
+    user: json
   };
 }
 
-export function changeUserRole(teamSlug, id, type) {
+export function changeUserRole(id, type) {
   const payload = { id, type };
   return (dispatch) => {
-    dispatch(patchUser(teamSlug, id, type));
-    return fetch(`/api/teams/${teamSlug}/users/${id}`, {
+    dispatch(patchUser(id, type));
+    return fetch(`/api/users/${id}`, {
       method: 'PATCH',
       credentials,
       headers: jsonHeaders,
       body: JSON.stringify(payload)
     })
       .then(response => processResponse(response))
-      .then(json => dispatch(userPatched(id, json, teamSlug)))
+      .then(json => dispatch(userPatched(id, json)))
       .catch(
         err => dispatch(flashError(err.message))
       );

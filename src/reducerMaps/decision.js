@@ -22,8 +22,7 @@ export default new Map([
       $merge: {
         isFetching: false,
         didInvalidate: false,
-        inst: action.inst,
-        teamSlug: action.teamSlug
+        inst: action.inst
       }
     })
   ],

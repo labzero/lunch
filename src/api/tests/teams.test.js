@@ -39,8 +39,8 @@ describe('api/teams', () => {
           Team: TeamMock,
           Role: RoleMock
         }),
-        './helpers/getTeamIfHasRole': mockEsmodule({
-          default: () => null
+        '../helpers/hasRole': mockEsmodule({
+          default: () => false
         }),
         './helpers/loggedIn': mockEsmodule({
           default: loggedInSpy
