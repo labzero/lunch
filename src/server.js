@@ -46,6 +46,7 @@ fetch.promise = Promise;
 const app = express();
 
 const hostname = host.match(/^([^:]*):?[0-9]{0,}/)[1];
+const bsHost = process.env.BS_RUNNING ? `${hostname}:3001` : host;
 const domain = `.${hostname}`;
 
 const httpServer = new HttpServer(app);
@@ -157,7 +158,7 @@ app.use(async (req, res, next) => {
     // eslint-disable-next-line no-param-reassign
     req.team = await Team.findOne({ where: { slug: subdomainMatch[1] } });
     if (!req.team) {
-      res.redirect(302, `${req.protocol}://${host}`);
+      res.redirect(302, `${req.protocol}://${bsHost}`);
       return;
     }
   }
@@ -174,7 +175,9 @@ app.use('/api', api());
 // -----------------------------------------------------------------------------
 app.get('*', async (req, res, next) => {
   try {
-    const stateData = {};
+    const stateData = {
+      host: bsHost
+    };
     if (req.user) {
       stateData.user = req.user;
       stateData.teams = await Team.findAll({ where: { id: req.user.roles.map(r => r.team_id) } });

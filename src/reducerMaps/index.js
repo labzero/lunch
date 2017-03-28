@@ -15,7 +15,6 @@ export { default as user } from './user';
 export { default as users } from './users';
 
 export const host = new Map();
-export const latLng = new Map();
 export const locale = new Map();
 export const team = new Map();
 export const wsPort = new Map();

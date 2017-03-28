@@ -25,7 +25,7 @@ export default {
       if (user.roles.length === 1) {
         const team = getTeams(state)[0];
         return {
-          redirect: `//:${team.slug}.${host}`
+          redirect: `//${team.slug}.${host}`
         };
       }
       return {

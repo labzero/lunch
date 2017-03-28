@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import { scroller } from 'react-scroll';
 import { getRestaurants } from '../../selectors/restaurants';
+import { getTeamLatLng } from '../../selectors/team';
 import { addRestaurant } from '../../actions/restaurants';
 import { createTempMarker, clearTempMarker } from '../../actions/mapUi';
 import RestaurantAddForm from './RestaurantAddForm';
@@ -10,7 +11,7 @@ import RestaurantAddForm from './RestaurantAddForm';
 let suggestCache = {};
 
 const mapStateToProps = state => ({
-  latLng: state.latLng,
+  latLng: getTeamLatLng(state),
   restaurants: getRestaurants(state)
 });
 

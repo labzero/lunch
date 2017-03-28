@@ -15,10 +15,6 @@ const getInitialState = () => ({
   host,
   notifications: [],
   modals: {},
-  latLng: {
-    lat: parseFloat(process.env.SUGGEST_LAT),
-    lng: parseFloat(process.env.SUGGEST_LNG)
-  },
   listUi: {},
   locale: 'en',
   mapUi: {
@@ -62,6 +58,9 @@ export default (stateData) => {
   }
   if (stateData.team) {
     initialState.team = stateData.team;
+  }
+  if (stateData.host) {
+    initialState.host = stateData.host;
   }
   return initialState;
 };

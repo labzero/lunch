@@ -29,7 +29,7 @@ describe('routes/landing', () => {
 
     it('redirects user to team home', () => {
       expect(landing.action(context)).to.deep.eq({
-        redirect: '//:labzero.lunch.pink'
+        redirect: '//labzero.lunch.pink'
       });
     });
   });

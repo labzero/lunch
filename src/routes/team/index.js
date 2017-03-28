@@ -20,6 +20,7 @@ export default {
     require('./home').default,
     require('./team').default,
     require('./tags').default,
+    require('./teams').default,
 
     // Wildcard routes, e.g. { path: '*', ... } (must go last)
     require('../notFound').default,

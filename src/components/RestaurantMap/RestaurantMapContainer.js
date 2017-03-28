@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import { clearCenter, hideInfoWindow, showInfoWindow, clearNewlyAdded } from '../../actions/mapUi';
 import { getRestaurantById } from '../../selectors/restaurants';
+import { getTeamLatLng } from '../../selectors/team';
 import { getMapUi } from '../../selectors/mapUi';
 import { getCurrentUser } from '../../selectors/user';
 import { getMapItems } from '../../selectors';
@@ -17,7 +18,7 @@ const mapStateToProps = (state) => {
       :
       undefined,
     newlyAddedUserId: mapUi.newlyAdded ? mapUi.newlyAdded.userId : undefined,
-    latLng: state.latLng,
+    latLng: getTeamLatLng(state),
     user: getCurrentUser(state)
   };
 };
