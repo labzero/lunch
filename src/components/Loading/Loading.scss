@@ -1,0 +1,77 @@
+@import '../../styles/_variables.scss';
+
+@keyframes move {
+  0% {
+    animation-timing-function: cubic-bezier(0, 0, .5, .875);
+    left: 0%;
+  }
+
+  50% {
+    animation-timing-function: cubic-bezier(.5, .125, 1, 1);
+    left: calc(50% - 12.5px);
+  }
+
+  100% {
+    animation-timing-function: cubic-bezier(0, 0, .5, .875);
+    left: 100%;
+  }
+}
+
+@keyframes resize {
+  0% {
+    animation-timing-function: cubic-bezier(0, 0, .25, 1);
+    height: 0;
+    top: 37.5px;
+    width: 0;
+  }
+
+  50% {
+    animation-timing-function: cubic-bezier(.75, 0, 1, 1);
+    height: 25px;
+    top: 25px;
+    width: 25px;
+  }
+
+  100% {
+    animation-timing-function: cubic-bezier(0, 0, .25, 1);
+    height: 0;
+    top: 37.5px;
+    width: 0;
+  }
+}
+
+.root {
+  height: 75px;
+  padding: 25px 0;
+  margin: 0 auto;
+  max-width: 400px;
+  position: relative;
+
+  > * {
+    animation: resize 2s infinite linear, move 2s infinite linear;
+    background: pink;
+    border: $default-border;
+    border-radius: 50%;
+    position: absolute;
+
+    &:nth-child(1) {
+      animation-delay: -0s;
+    }
+
+    &:nth-child(2) {
+      animation-delay: -.4s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: -.8s;
+    }
+
+    &:nth-child(4) {
+      animation-delay: -1.2s;
+    }
+
+    &:nth-child(5) {
+      animation-delay: -1.6s;
+    }
+  }
+}

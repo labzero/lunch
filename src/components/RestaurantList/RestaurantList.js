@@ -4,6 +4,7 @@ import { Element as ScrollElement } from 'react-scroll';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantList.scss';
 import RestaurantContainer from '../Restaurant/RestaurantContainer';
+import Loading from '../Loading';
 
 class RestaurantList extends Component {
   componentWillUpdate() {
@@ -19,7 +20,7 @@ class RestaurantList extends Component {
     const { ids, restaurantListReady } = this.props;
 
     if (!restaurantListReady) {
-      return null;
+      return <Loading />;
     }
 
     return (
