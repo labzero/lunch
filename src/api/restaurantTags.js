@@ -26,7 +26,8 @@ export default () => {
         if (req.body.name !== undefined) {
           Tag.findOrCreate({
             where: {
-              name: req.body.name.toLowerCase().trim()
+              name: req.body.name.toLowerCase().trim(),
+              team_id: req.team.id
             }
           }).spread(async tag => {
             try {

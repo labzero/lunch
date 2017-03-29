@@ -1,6 +1,5 @@
 const db = require('../../src/models/db');
 const Promise = require('bluebird');
-const lzCoords = require('../../src/constants/lzCoords');
 
 exports.up = (queryInterface, Sequelize) => {
   const Team = db.sequelize.define('team', {
@@ -14,8 +13,9 @@ exports.up = (queryInterface, Sequelize) => {
   });
 
   return Team.update({
-    ...lzCoords,
-    address: '77 Battery Street, San Francisco, CA 94111, USA'
+    address: '77 Battery Street, San Francisco, CA 94111, USA',
+    lat: 37.7956,
+    lng: -122.3933
   }, {
     where: { slug: 'labzero' }
   }).then(() =>
