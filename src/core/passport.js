@@ -42,12 +42,15 @@ passport.use(new GoogleStrategy(
 
         // might not have been linked with Google yet
         if (!user) {
-          const results = await User.findOrCreate({
+          user = await User.findOne({
             where: { email: accountEmail.value }
           });
-          user = results[0];
           userUpdates.google_id = profile.id;
           doUpdates = true;
+        }
+
+        if (!user) {
+          return done(null, false, { message: 'Sign-ups are disabled for now.' });
         }
 
         if (

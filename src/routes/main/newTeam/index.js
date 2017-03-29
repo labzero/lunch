@@ -25,7 +25,7 @@ export default {
     if (user.id) {
       return {
         title,
-        chunk: 'admin',
+        // chunk: 'admin',
         component: (
           <LayoutContainer path={context.url}>
             <NewTeamContainer title={title} />

@@ -112,7 +112,7 @@ app.get('/login',
   passport.authenticate('google', { scope: ['email', 'profile'], session: false })
 );
 app.get('/login/callback',
-  passport.authenticate('google', { failureRedirect: '/', session: false }),
+  passport.authenticate('google', { failureRedirect: '/coming-soon', session: false }),
   (req, res) => {
     const expiresIn = 60 * 60 * 24 * 180; // 180 days
     const token = jwt.sign(req.user, auth.jwt.secret);

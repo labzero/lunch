@@ -20,6 +20,7 @@ export default {
     require('./landing').default,
     require('./teams').default,
     require('./newTeam').default,
+    require('./comingSoon').default,
 
     // Wildcard routes, e.g. { path: '*', ... } (must go last)
     require('../notFound').default,
