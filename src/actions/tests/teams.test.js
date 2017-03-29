@@ -85,7 +85,7 @@ describe('actions/teams', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(teams.createTeam(payload));
+        return store.dispatch(teams.createTeam(payload)).catch(() => Promise.resolve());
       });
 
       it('dispatches flashError', () => {

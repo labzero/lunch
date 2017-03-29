@@ -1,9 +1,16 @@
 import { connect } from 'react-redux';
 import NewTeam from './NewTeam';
+import { setCenter } from '../../../actions/mapUi';
 import { createTeam } from '../../../actions/teams';
+import { getCenter } from '../../../selectors/mapUi';
 
-const mapDispatchToProps = dispatch => ({
-  createTeam: payload => dispatch(createTeam(payload))
+const mapStateToProps = state => ({
+  center: getCenter(state)
 });
 
-export default connect(null, mapDispatchToProps)(NewTeam);
+const mapDispatchToProps = dispatch => ({
+  createTeam: payload => dispatch(createTeam(payload)),
+  setCenter: center => dispatch(setCenter(center))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(NewTeam);

@@ -1,16 +1,54 @@
 import React, { Component, PropTypes } from 'react';
+import Geosuggest from 'react-geosuggest';
+import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import { TEAM_SLUG_REGEX } from '../../../constants';
+import lzCoords from '../../../constants/lzCoords';
+import TeamMapContainer from '../../../components/TeamMap/TeamMapContainer';
 import history from '../../../core/history';
 
-export default class NewTeam extends Component {
+let google = { maps: { Geocoder: function Geocoder() { return {}; }, GeocoderStatus: {} } };
+if (canUseDOM) {
+  google = window.google || google;
+}
+
+class NewTeam extends Component {
   static propTypes = {
-    createTeam: PropTypes.func.isRequired
+    center: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired
+    }),
+    createTeam: PropTypes.func.isRequired,
+    setCenter: PropTypes.func.isRequired
   };
 
-  state = {
-    name: '',
-    slug: ''
-  };
+  static defaultProps = {
+    center: lzCoords
+  }
+
+  constructor(props) {
+    super(props);
+    this.geocoder = new google.maps.Geocoder();
+    this.state = {
+      name: '',
+      slug: '',
+      address: ''
+    };
+  }
+
+  getCoordsForMarker = (suggest) => {
+    if (suggest !== null) {
+      this.geocoder.geocode({ placeId: suggest.placeId }, (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK) {
+          const location = results[0].geometry.location;
+          const center = {
+            lat: location.lat(),
+            lng: location.lng()
+          };
+          this.props.setCenter(center);
+        }
+      });
+    }
+  }
 
   handleChange = field => event => this.setState({ [field]: event.target.value });
 
@@ -21,9 +59,18 @@ export default class NewTeam extends Component {
   };
 
   handleSubmit = (event) => {
+    const { center, createTeam } = this.props;
+
     event.preventDefault();
 
-    this.props.createTeam(this.state).then(() => history.push('/teams'));
+    createTeam({
+      ...center,
+      ...this.state
+    }).then(() => history.push('/teams'));
+  }
+
+  handleSuggestSelect = (suggestion) => {
+    this.props.setCenter(suggestion.location);
   }
 
   render() {
@@ -58,9 +105,26 @@ export default class NewTeam extends Component {
             onChange={this.handleSlugChange}
             required
           />.lunch.pink
+          <label htmlFor="new-team-address">Address:</label>
+          <p>
+            Pick a centerpoint for your team.
+            It will ensure we show nearby recommendations when you search for restaurants.
+          </p>
+          <TeamMapContainer />
+          <Geosuggest
+            autoActivateFirstSuggest
+            id="new-team-address"
+            onActivateSuggest={this.getCoordsForMarker}
+            onSuggestSelect={this.handleSuggestSelect}
+            placeholder="Enter your address"
+            ref={g => { this.geosuggest = g; }}
+            types={['geocode']}
+          />
           <input type="submit" />
         </form>
       </div>
     );
   }
 }
+
+export default NewTeam;

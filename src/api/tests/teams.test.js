@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { match, spy, stub } from 'sinon';
+import { spy, stub } from 'sinon';
 import bodyParser from 'body-parser';
 import request from 'supertest';
 import express, { Router } from 'express';
@@ -222,11 +222,14 @@ describe('api/teams', () => {
       let createSpy;
       beforeEach(() => {
         createSpy = spy(TeamMock, 'create');
-        return request(app).post('/').send({ name: 'Lab Zero', slug: 'labzero' });
+        return request(app).post('/').send({ address: '77 Battery', lat: 123, lng: 321, name: 'Lab Zero', slug: 'labzero' });
       });
 
       it('creates new team', () => {
         expect(createSpy.calledWith({
+          address: '77 Battery',
+          lat: 123,
+          lng: 321,
           name: 'Lab Zero',
           slug: 'labzero',
           roles: [{
@@ -278,7 +281,7 @@ describe('api/teams', () => {
       });
 
       it('calls errorCatcher', () => {
-        expect(errorCatcherSpy.calledWith(match.any, { message: match.string })).to.be.true;
+        expect(errorCatcherSpy.callCount).to.eq(1);
       });
     });
   });

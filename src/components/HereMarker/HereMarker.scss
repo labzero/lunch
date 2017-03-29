@@ -1,0 +1,21 @@
+.root {
+  position: relative;
+
+  &::before,
+  &::after {
+    background: red;
+    content: '';
+    height: 3px;
+    margin: -2px -8px;
+    position: absolute;
+    width: 16px;
+  }
+
+  &::before {
+    transform: rotate(45deg);
+  }
+
+  &::after {
+    transform: rotate(135deg);
+  }
+}

@@ -27,7 +27,7 @@ class Menu extends Component {
           {user.name}
         </div>
         <div className={s.lists}>
-          {team && (
+          {team.id && (
             <ul className={s.list}>
               {hasMemberRole && (
                 <li className={s.item}>

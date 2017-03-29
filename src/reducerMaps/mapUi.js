@@ -46,6 +46,13 @@ export default new Map([
       }
     })
   ],
+  [ActionTypes.SET_CENTER, (state, action) =>
+    update(state, {
+      center: {
+        $set: action.center
+      }
+    })
+  ],
   [ActionTypes.CLEAR_CENTER, state =>
     update(state, {
       center: {

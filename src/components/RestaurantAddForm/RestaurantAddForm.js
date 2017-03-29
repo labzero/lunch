@@ -20,11 +20,9 @@ class RestaurantAddForm extends Component {
   constructor(props) {
     super(props);
     this.geocoder = new google.maps.Geocoder();
-    this.boundHandleSuggestSelect = this.handleSuggestSelect.bind(this);
-    this.boundGetCoordsForMarker = this.getCoordsForMarker.bind(this);
   }
 
-  getCoordsForMarker(suggest) {
+  getCoordsForMarker = (suggest) => {
     if (suggest !== null) {
       this.geocoder.geocode({ placeId: suggest.placeId }, (results, status) => {
         if (status === google.maps.GeocoderStatus.OK) {
@@ -34,7 +32,7 @@ class RestaurantAddForm extends Component {
     }
   }
 
-  handleSuggestSelect(suggestion) {
+  handleSuggestSelect = (suggestion) => {
     this.props.handleSuggestSelect(suggestion, this.geosuggest);
   }
 
@@ -46,13 +44,11 @@ class RestaurantAddForm extends Component {
           location={{ lat: () => this.props.latLng.lat, lng: () => this.props.latLng.lng }}
           radius="0"
           onBlur={this.props.clearTempMarker}
-          onActivateSuggest={this.boundGetCoordsForMarker}
-          onSuggestSelect={this.boundHandleSuggestSelect}
+          onActivateSuggest={this.getCoordsForMarker}
+          onSuggestSelect={this.handleSuggestSelect}
           getSuggestLabel={this.props.getSuggestLabel}
           ref={g => { this.geosuggest = g; }}
-          types={[
-            'establishment'
-          ]}
+          types={['establishment']}
         />
       </form>
     );

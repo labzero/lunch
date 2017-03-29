@@ -2,6 +2,13 @@ import ActionTypes from '../constants/ActionTypes';
 import { getRestaurantById } from '../selectors/restaurants';
 import { scrollToTop } from './pageUi';
 
+export function setCenter(center) {
+  return {
+    type: ActionTypes.SET_CENTER,
+    center
+  };
+}
+
 export function clearCenter() {
   return {
     type: ActionTypes.CLEAR_CENTER

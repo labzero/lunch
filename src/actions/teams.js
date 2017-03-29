@@ -35,8 +35,9 @@ export function createTeam(payload) {
           });
         }
       })
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .catch(err => {
+        dispatch(flashError(err.message));
+        throw err;
+      });
   };
 }

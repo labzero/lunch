@@ -6436,9 +6436,9 @@ react-flip-move@^1.3.1:
   version "1.4.2"
   resolved "https://registry.yarnpkg.com/react-flip-move/-/react-flip-move-1.4.2.tgz#a1f4892aec237e0e78b5bd6c9b419f621dfc515e"
 
-react-geosuggest@^1.25.0:
-  version "1.25.1"
-  resolved "https://registry.yarnpkg.com/react-geosuggest/-/react-geosuggest-1.25.1.tgz#cd1cb7dd8597c5fdaf4c49d26f9f9c9374116fb9"
+react-geosuggest@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/react-geosuggest/-/react-geosuggest-2.1.0.tgz#c27701359469a6afd2e7298a9bbe6c5615bbee32"
   dependencies:
     classnames "^2.2.3"
     lodash.debounce "^4.0.6"

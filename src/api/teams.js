@@ -13,15 +13,14 @@ export default () => {
       '/',
       loggedIn,
       async (req, res) => {
-        const { name, slug } = req.body;
-        const error = { message: 'Could not create new team. It might already exist.' };
+        const { address, lat, lng, name, slug } = req.body;
 
         if (req.user.roles.length >= TEAM_LIMIT) {
           return res.status(403).json({ error: true, data: { message: `You currently can't join more than ${TEAM_LIMIT} teams.` } });
         }
 
         if (reservedTeamSlugs.indexOf(slug) > -1) {
-          return res.status(409).json({ error: true, data: error });
+          return res.status(409).json({ error: true, data: { message: 'Could not create new team. It might already exist.' } });
         }
 
         if (!slug.match(TEAM_SLUG_REGEX)) {
@@ -30,6 +29,9 @@ export default () => {
 
         try {
           const obj = await Team.create({
+            address,
+            lat,
+            lng,
             name,
             slug,
             roles: [{
@@ -41,7 +43,7 @@ export default () => {
           const json = obj.toJSON();
           return res.status(201).send({ error: false, data: json });
         } catch (e) {
-          return errorCatcher(res, error);
+          return errorCatcher(res, e);
         }
       }
     );

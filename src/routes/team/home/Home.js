@@ -1,11 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import s from './Home.scss';
 import RestaurantMapContainer from '../../../components/RestaurantMap/RestaurantMapContainer';
 import RestaurantListContainer from '../../../components/RestaurantList/RestaurantListContainer';
 import RestaurantAddFormContainer from '../../../components/RestaurantAddForm/RestaurantAddFormContainer';
 import TagFilterFormContainer from '../../../components/TagFilterForm/TagFilterFormContainer';
+import s from './Home.scss';
 
 export class _Home extends Component {
 

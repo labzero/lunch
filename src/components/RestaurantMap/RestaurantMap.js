@@ -1,13 +1,12 @@
 import React, { Component, PropTypes } from 'react';
 import GoogleMap from 'google-map-react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import { GOOGLE_MAP_ZOOM } from '../../constants';
+import googleMapOptions from '../../constants/googleMapOptions';
 import RestaurantMarkerContainer from '../RestaurantMarker/RestaurantMarkerContainer';
 import RestaurantMapSettingsContainer from '../RestaurantMapSettings/RestaurantMapSettingsContainer';
+import HereMarker from '../HereMarker';
 import s from './RestaurantMap.scss';
-
-const HereMarker = () => (
-  <div className={s.center} title="You are here" />
-);
 
 const TempMarker = () => (
   <div className={s.tempMarker}>
@@ -72,11 +71,11 @@ class RestaurantMap extends Component {
     }
   }
 
-  render() {
-    const setMap = ({ map }) => {
-      this.map = map;
-    };
+  setMap = ({ map }) => {
+    this.map = map;
+  };
 
+  render() {
     const tempMarkers = [];
     if (this.props.tempMarker !== undefined) {
       tempMarkers.push(<TempMarker key="tempMarker" {...this.props.tempMarker.latLng} />);
@@ -85,62 +84,12 @@ class RestaurantMap extends Component {
     return (
       <section className={s.root} ref={r => { this.root = r; }}>
         <GoogleMap
-          defaultZoom={16}
+          defaultZoom={GOOGLE_MAP_ZOOM}
           defaultCenter={this.props.latLng}
           center={this.props.center}
           margin={[100, 0, 0, 0]}
-          options={{
-            backgroundColor: '#fcb3f2',
-            scrollwheel: false,
-            styles: [
-              {
-                featureType: 'landscape',
-                elementType: 'geometry',
-                stylers: [
-                  {
-                    color: '#fbf5fa'
-                  }
-                ]
-              },
-              {
-                featureType: 'road',
-                elementType: 'geometry',
-                stylers: [
-                  {
-                    color: '#fdc0cb'
-                  }
-                ]
-              },
-              {
-                featureType: 'poi',
-                elementType: 'geometry.fill',
-                stylers: [
-                  {
-                    color: '#fbd1f6'
-                  }
-                ]
-              },
-              {
-                featureType: 'poi',
-                elementType: 'labels',
-                stylers: [
-                  {
-                    visibility: 'off'
-                  }
-                ]
-              },
-              {
-                featureType: 'water',
-                elementType: 'geometry',
-                stylers: [
-                  {
-                    color: '#fcb3f2'
-                  }
-                ]
-              }
-            ]
-          }}
-          onGoogleApiLoaded={setMap}
+          options={googleMapOptions}
+          onGoogleApiLoaded={this.setMap}
           onClick={this.props.mapClicked}
           yesIWantToUseGoogleMapApiInternals
         >
