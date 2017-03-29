@@ -4,7 +4,7 @@ import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import HereMarker from '../../components/HereMarker';
 import { GOOGLE_MAP_ZOOM } from '../../constants';
 import googleMapOptions from '../../constants/googleMapOptions';
-import lzCoords from '../../constants/lzCoords';
+import defaultCoords from '../../constants/defaultCoords';
 import s from './TeamMap.scss';
 
 class TeamMap extends Component {
@@ -17,7 +17,7 @@ class TeamMap extends Component {
   }
 
   static defaultProps = {
-    center: lzCoords
+    center: defaultCoords
   }
 
   setMap = ({ map }) => {

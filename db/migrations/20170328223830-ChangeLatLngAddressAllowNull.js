@@ -14,8 +14,8 @@ exports.up = (queryInterface, Sequelize) => {
 
   return Team.update({
     address: '77 Battery Street, San Francisco, CA 94111, USA',
-    lat: 37.7956,
-    lng: -122.3933
+    lat: 37.79195,
+    lng: -122.399991
   }, {
     where: { slug: 'labzero' }
   }).then(() =>

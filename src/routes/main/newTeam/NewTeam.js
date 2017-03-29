@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import Geosuggest from 'react-geosuggest';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import { TEAM_SLUG_REGEX } from '../../../constants';
-import lzCoords from '../../../constants/lzCoords';
+import defaultCoords from '../../../constants/defaultCoords';
 import TeamMapContainer from '../../../components/TeamMap/TeamMapContainer';
 import history from '../../../core/history';
 
@@ -22,7 +22,7 @@ class NewTeam extends Component {
   };
 
   static defaultProps = {
-    center: lzCoords
+    center: defaultCoords
   }
 
   constructor(props) {
