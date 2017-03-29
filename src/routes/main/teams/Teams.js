@@ -11,10 +11,6 @@ const Teams = ({ host, teams }) => (
         </li>
       ))}
     </ul>
-    <h2>Or join an existing one:</h2>
-    <form>
-      <input type="text" />
-    </form>
     <Link to="/new-team">Create a new team</Link>
   </div>
 );
