@@ -10,7 +10,8 @@ const Decision = sequelize.define('decision', {
     },
     allowNull: false,
     onDelete: 'cascade'
-  }
+  },
+  team_id: DataTypes.INTEGER
 }, {
   scopes: {
     fromToday: () => ({
