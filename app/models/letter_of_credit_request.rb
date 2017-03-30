@@ -67,7 +67,7 @@ class LetterOfCreditRequest
       when *READ_ONLY_ATTRS
         instance_variable_set("@#{key}", value)
       when *DATE_ATTRS
-        value = Date.parse(value) if value
+        value = DateTime.parse(value) if value
         send("#{key}=", value)
       when *ACCESSIBLE_ATTRS
         send("#{key}=", value)
