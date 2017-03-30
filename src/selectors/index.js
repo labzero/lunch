@@ -79,3 +79,8 @@ export const isUserListReady = createSelector(
   areUsersLoading,
   (usersLoading) => !usersLoading
 );
+
+export const isTagListReady = createSelector(
+  areTagsLoading,
+  (tagsLoading) => !tagsLoading
+);

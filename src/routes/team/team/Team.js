@@ -10,6 +10,7 @@
 import React, { PropTypes } from 'react';
 import { intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import Loading from '../../../components/Loading';
 import { globalMessageDescriptor as gm } from '../../../helpers/generateMessageDescriptor';
 import getRole from '../../../helpers/getRole';
 import hasRole from '../../../helpers/hasRole';
@@ -38,7 +39,7 @@ class Team extends React.Component {
 
   state = Object.assign({}, Team.defaultState);
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.fetchUsersIfNeeded();
   }
 
@@ -97,7 +98,7 @@ class Team extends React.Component {
     const { email, name, type } = this.state;
 
     if (!userListReady) {
-      return null;
+      return <Loading />;
     }
 
     return (

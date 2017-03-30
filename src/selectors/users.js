@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 const emptyObj = {};
 
 export const areUsersLoading = state =>
-  state.users.didInvalidate && state.users.isFetching;
+  state.users.didInvalidate;
 export const getUserId = (state, props) => props.userId;
 export const getUserIds = state => state.users.items.result;
 export const getUserEntities = state => state.users.items.entities.users || emptyObj;

@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 
 const emptyObj = {};
 
-export const areTagsLoading = state => state.tags.didInvalidate && state.tags.isFetching;
+export const areTagsLoading = state => state.tags.didInvalidate;
 export const getTagIds = state => state.tags.items.result;
 export const getTagEntities = state => state.tags.items.entities.tags || emptyObj;
 

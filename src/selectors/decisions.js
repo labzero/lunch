@@ -1,3 +1,3 @@
 export const isDecisionLoading = state =>
-  state.decision.didInvalidate && state.decision.isFetching;
+  state.decision.didInvalidate;
 export const getDecision = state => state.decision.inst;

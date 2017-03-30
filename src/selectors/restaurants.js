@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 
 export const areRestaurantsLoading = state =>
-  state.restaurants.didInvalidate && state.restaurants.isFetching;
+  state.restaurants.didInvalidate;
 export const getRestaurantId = (state, props) =>
   typeof props === 'object' ? props.restaurantId : props;
 export const getRestaurantIds = state => state.restaurants.items.result;
