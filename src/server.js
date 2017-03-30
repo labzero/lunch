@@ -105,14 +105,34 @@ app.use((req, res, next) => {
   }
 });
 
+const getSubdomainMatch = req => req.hostname.match(`^(.*)${domain.replace(/\./g, '\\.')}`);
+
 if (__DEV__) {
   app.enable('trust proxy');
 }
-app.get('/login',
-  passport.authenticate('google', { scope: ['email', 'profile'], session: false })
+app.get(
+  '/login',
+  (req, res, next) => {
+    const subdomainMatch = getSubdomainMatch(req);
+    if (subdomainMatch) {
+      res.redirect(301, `${req.protocol}://${bsHost}/login?team=${subdomainMatch[1]}`);
+    } else {
+      const options = { scope: ['email', 'profile'], session: false };
+      if (req.query.team) {
+        options.state = req.query.team;
+      }
+      passport.authenticate('google', options)(req, res, next);
+    }
+  },
 );
 app.get('/login/callback',
-  passport.authenticate('google', { failureRedirect: '/coming-soon', session: false }),
+  (req, res, next) => {
+    const options = { failureRedirect: '/coming-soon', session: false };
+    if (req.query.team) {
+      options.state = req.query.team;
+    }
+    passport.authenticate('google', options)(req, res, next);
+  },
   (req, res) => {
     const expiresIn = 60 * 60 * 24 * 180; // 180 days
     const token = jwt.sign(req.user, auth.jwt.secret);
@@ -121,7 +141,11 @@ app.get('/login/callback',
       maxAge: 1000 * expiresIn,
       httpOnly: true
     });
-    res.redirect('/');
+    if (req.query.state) {
+      res.redirect(`${req.protocol}://${req.query.state}.${bsHost}/`);
+    } else {
+      res.redirect('/');
+    }
   },
 );
 app.get('/logout', (req, res) => {
@@ -153,7 +177,7 @@ app.use((req, res, next) => {
 // Get current team
 // -----------------------------------------------------------------------------
 app.use(async (req, res, next) => {
-  const subdomainMatch = req.hostname.match(`^(.*)${domain.replace(/\./g, '\\.')}`);
+  const subdomainMatch = getSubdomainMatch(req);
   if (subdomainMatch) {
     // eslint-disable-next-line no-param-reassign
     req.team = await Team.findOne({ where: { slug: subdomainMatch[1] } });
