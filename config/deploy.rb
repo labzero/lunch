@@ -307,3 +307,12 @@ namespace :service_fake do
     end
   end
 end
+
+namespace :bundler do
+  desc 'Reinstalls all gems'
+  task :reinstall do |t, args|
+    flags = fetch(:bundle_flags)
+    set(:bundle_flags, flags + ' --force')
+    invoke 'bundler:install'
+  end
+end
