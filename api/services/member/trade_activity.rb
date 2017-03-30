@@ -418,14 +418,14 @@ module MAPI
             unless trade_ids.blank?
               trade_id_array = []
               trade_ids.each do |trade_id|
-                trade_id_array << {'v1:tradeId' => {'v1:tradeId' => trade_id}}
+                trade_id_array << {'v1:tradeId' => trade_id}
               end
               connection = MAPI::Services::Member::TradeActivity.init_trade_activity_connection(app.settings.environment)
               message = {
                 'v11:caller' => [{'v11:id' => ENV['MAPI_FHLBSF_ACCOUNT']}],
                 'v1:tradeRequestParameters' => [
                   {
-                    'v1:arrayOfTradeIds' => trade_id_array,
+                    'v1:arrayOfTradeIds' => {'v1:tradeId' => trade_id_array},
                     'v1:arrayOfCustomers' => [{'v1:fhlbId' => member_id}],
                     # Calypso required `rangeOfSettlementDates`, but they are not actually used as part of the lookup. Just a quirk of the system.
                     'v1:rangeOfSettlementDates' => [{
