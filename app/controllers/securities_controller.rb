@@ -441,6 +441,7 @@ class SecuritiesController < ApplicationController
               }
             end
             next if security_hash.values.reject(&:blank?).empty?
+            security_hash[:original_par] = security_hash[:original_par].try(:round, 7)
             security = Security.from_hash(security_hash)
             if security.valid?
               securities << security

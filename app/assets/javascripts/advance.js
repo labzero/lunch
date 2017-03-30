@@ -88,13 +88,20 @@ $(function () {
       tbody.append($(data.html));
       if ((data.alternate_funding_date_html) && (!maturity_date)) {
         var $fundingDateWrapper = $formPreview.find('.advance-funding-date-wrapper');
-        $fundingDateWrapper.replaceWith(data.alternate_funding_date_html);
+        var isVisible = $fundingDateWrapper.is(':visible');
+        var $newFundingDateWrapper = $(data.alternate_funding_date_html);
+        $fundingDateWrapper.replaceWith($newFundingDateWrapper);
+        if (isVisible) {
+          $newFundingDateWrapper.show();
+        }
       }
+      $('.advance-alternate-funding-date-close').attr('disabled', false);
       bindApplyHandler();
       bindRateTableCells($rateTable);
       $idField.val(data.id);
       Fhlb.Track.advance_rate_table();
       selectColumnLabelIfRatePreSelected($rateTable);
+      enableCustomFunding($rateTable);
       validateForm();
       $rateTable.removeClass('add-advance-table-loading');
     });
@@ -121,6 +128,17 @@ $(function () {
         $($rateTable.find('tr.add-advance-column-labels th')[$this.index()]).toggleClass('cell-hovered');
       };
     });
+  };
+
+  function enableCustomFunding(table) {
+    if (table.find('tr.frc-rates').find('.disabled-cell').length) {
+      $('.advance-alternate-funding-date-edit').attr('disabled', true);
+      $('.advance-custom-date-add').attr('disabled', true);
+    }
+    else {
+      $('.advance-alternate-funding-date-edit').attr('disabled', false);
+      $('.advance-custom-date-add').attr('disabled', false);
+    };
   };
 
   function selectColumnLabelIfRatePreSelected(table) {
@@ -211,7 +229,7 @@ $(function () {
     };
   });
 
-  // Open Default Funding Date Selector
+  // Close Default Funding Date Selector
   $('.advance-alternate-funding-date-close').on('click', function(e) {
     $('.advance-alternate-funding-date-wrapper').hide();
     $('.advance-funding-date-wrapper').show();
@@ -279,6 +297,7 @@ $(function () {
     $('.advance-custom-date-wrapper').show();
     $('.advance-create-custom-date-wrapper').hide();
     $('.advance-select-custom-date-wrapper').hide();
+    $('.advance-alternate-funding-date-close').attr('disabled', true);
     showRatesLoadingState($rateTable);
     showAdvanceRates($funding_date, null);
   });

@@ -11,6 +11,10 @@ unless defined?(CacheConfiguration)
         key_prefix: 'member_data',
         expiry: 24.hours
       },
+      members_list: {
+        key_prefix: 'members_list',
+        expiry: 24.hours
+      },
       user_metadata: {
         key_prefix: "users#{SEPARATOR}ldap#{SEPARATOR}metadata",
         expiry: 24.hours

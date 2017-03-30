@@ -134,6 +134,11 @@
     }
     .report-print-details {
       margin-bottom: 30px;
+      h2, .report-print-sta {
+        @include typography-print-details;
+        display: inline-block;
+        margin: 0;
+      }
     }
     .form-summary-data {
       padding: 0;

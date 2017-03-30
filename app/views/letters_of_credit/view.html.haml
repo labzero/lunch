@@ -4,6 +4,7 @@
       %h1= t('letters_of_credit.pdf.requested')
       .report-print-details
         .report-print-bank= @member_name
+        %h2= t('reports.pages.member_profile.fhfa_number')
         .report-print-sta= @member_fhfa
   .row
     = render 'summary_data', extended_info: true

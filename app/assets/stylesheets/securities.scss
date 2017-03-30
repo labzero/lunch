@@ -25,6 +25,9 @@
 
 .securities-main-body {
   @extend %page-main-body;
+  .form-error-section {
+    margin-top: 0;
+  }
 }
 
 .securities-success {
@@ -363,10 +366,6 @@
 
 .securities-request-upload-success {
   display: none;
-}
-
-.securities-submit-request-form-errors {
-  color: $alert-red;
 }
 
 .securities-request-legal {

@@ -493,6 +493,10 @@ describe MAPI::ServiceApp do
       get '/rates/summary', maturity_date: custom_maturity_date
       JSON.parse(last_response.body).with_indifferent_access
     end
+    let(:rate_summary_with_member_id) do
+      get '/rates/summary', member_id: 3
+      JSON.parse(last_response.body).with_indifferent_access
+    end
     it "returns rates for default loan_types at default loan_terms" do
       loan_types.each do |loan_type|
         loan_terms.each do |loan_term|
@@ -642,6 +646,53 @@ describe MAPI::ServiceApp do
         end
         it "should set #{loan_type} maturity_date" do
           expect(rate_summary_with_maturity_date[loan_type][days_to_maturity_term][:maturity_date]).to eq(custom_maturity_date.iso8601)
+        end
+      end
+    end
+
+    describe 'sets fake rates a for member, if member_id = 3' do
+      before do
+        allow(subject).to receive(:disabled?)
+        allow(subject).to receive(:get_maturity_date)
+        allow(subject).to receive(:rate_band_info).and_call_original
+      end
+      loan_types.each do |loan_type|
+        loan_terms.each do |loan_term|
+          it 'sets blackout_dates to []' do
+            expect(subject).to receive(:disabled?).with(anything, loan_terms_hash[loan_term][loan_type], [])
+            rate_summary_with_member_id
+          end
+          it 'sets holidays to []' do
+            expect(subject).to receive(:get_maturity_date).with(anything, anything, [])
+            rate_summary_with_member_id
+          end
+          it "sets end_of_day for #{loan_type} #{loan_term} to false" do
+            expect(rate_summary_with_member_id[loan_type][loan_term][:end_of_day]).to eq(false)
+          end
+          it "sets trade_status for #{loan_type} #{loan_term} to true" do
+            expect(subject).to receive(:disabled?).with(anything,  {trade_status: true, display_status: anything, end_time: anything, end_time_reached: anything}, anything)
+            rate_summary_with_member_id
+          end
+          it "sets display_status for #{loan_type} #{loan_term} to true" do
+            expect(subject).to receive(:disabled?).with(anything,  {trade_status: anything, display_status: true, end_time: anything, end_time_reached: anything}, anything)
+            rate_summary_with_member_id
+          end
+          it "sets end_time for #{loan_type} #{loan_term} to end_of_day" do
+            expect(subject).to receive(:disabled?).with(anything,  {trade_status: anything, display_status: anything, end_time: Time.zone.now.end_of_day, end_time_reached: anything}, anything)
+            rate_summary_with_member_id
+          end
+          it "sets end_time_reached for #{loan_type} #{loan_term} to false" do
+            expect(subject).to receive(:disabled?).with(anything,  {trade_status: anything, display_status: anything, end_time: anything, end_time_reached: false}, anything)
+            rate_summary_with_member_id
+          end
+          it "sets LOW_BAND_OFF_BP for #{loan_term} to 1000" do
+            expect(subject).to receive(:rate_band_info).with(anything,  {'LOW_BAND_OFF_BP'=> 1000, 'HIGH_BAND_OFF_BP'=> anything})
+            rate_summary_with_member_id
+          end
+          it "sets HIGH_BAND_OFF_BP for #{loan_term} to 1000" do
+            expect(subject).to receive(:rate_band_info).with(anything,  {'LOW_BAND_OFF_BP'=> anything, 'HIGH_BAND_OFF_BP'=> 1000})
+            rate_summary_with_member_id
+          end
         end
       end
     end

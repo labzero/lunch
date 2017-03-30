@@ -65,11 +65,11 @@ describe RatesService do
 
         it 'calls get_hash with funding_date and maturity date' do
           allow(maturity_date).to receive(:to_date).and_return(maturity_date)
-          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: iso8601_date, maturity_date: iso8601_date)
+          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: iso8601_date, maturity_date: iso8601_date, member_id: member_id)
           call_method
         end
         it 'calls get_hash with funding_date and no maturity date' do
-          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: iso8601_date, maturity_date: nil)
+          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: iso8601_date, maturity_date: nil, member_id: member_id)
           call_method
         end
         it 'calls get_hash with the right endpoint' do
@@ -100,7 +100,7 @@ describe RatesService do
         end
 
         it 'calls get_hash with no funding_date and maturity date' do
-          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: nil, maturity_date: iso8601_date)
+          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: nil, maturity_date: iso8601_date, member_id: member_id)
           call_method
         end
       end
@@ -118,11 +118,11 @@ describe RatesService do
         end
 
         it 'calls get_hash without funding_date, if funding_date is nil' do
-          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: nil, maturity_date: nil)
+          expect(subject).to receive(:get_hash).with(:quick_advance_rates, anything, funding_date: nil, maturity_date: nil, member_id: member_id)
           call_method
         end
         it 'calls get_hash with the right endpoint' do
-          expect(subject).to receive(:get_hash).with(:quick_advance_rates, 'rates/summary', funding_date: nil, maturity_date: nil)
+          expect(subject).to receive(:get_hash).with(:quick_advance_rates, 'rates/summary', funding_date: nil, maturity_date: nil, member_id: member_id)
           call_method
         end
       end

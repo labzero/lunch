@@ -83,13 +83,13 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:user_id) { user.id }
     let(:member_id) { controller.current_member_id }
     let(:column_headings) { [
-      { title: I18n.t('common_table_headings.trade_date'), sortable: false }, 
-      { title: I18n.t('common_table_headings.funding_date'), sortable: false },
+      { title: I18n.t('common_table_headings.trade_date'), sortable: true },
+      { title: I18n.t('common_table_headings.funding_date'), sortable: true },
       { title: I18n.t('common_table_headings.maturity_date'), sortable: true },
-      { title: I18n.t('common_table_headings.advance_number'), sortable: false },
-      { title: I18n.t('common_table_headings.advance_type'), sortable: false },
-      { title: I18n.t('global.footnoted_string', string: I18n.t('advances.rate')), sortable: false },
-      { title: I18n.t('common_table_headings.current_par') + ' ($)', sortable: false }
+      { title: I18n.t('common_table_headings.advance_number'), sortable: true },
+      { title: I18n.t('common_table_headings.advance_type'), sortable: true },
+      { title: I18n.t('global.footnoted_string', string: I18n.t('advances.rate')), sortable: true },
+      { title: I18n.t('common_table_headings.current_par') + ' ($)', sortable: true }
     ]}
     let(:active_advances_response) {[
       {
@@ -135,6 +135,37 @@ RSpec.describe AdvancesController, :type => :controller do
     it 'sets @advances_data_table[:column_headings] appropriately' do
       call_action
       expect(assigns[:advances_data_table][:column_headings]).to eq(column_headings)
+    end
+    describe 'ordering the table data via @column_definitions' do
+      let(:column_definitions) { call_action; assigns[:column_definitions] }
+      it 'sets @column_definitions' do
+        expect(column_definitions).not_to be nil
+      end
+      [0,1,2,4,5,6].each do |column_index|
+        describe "the column with index #{column_index}" do
+          let(:column_data) { column_definitions[column_index] }
+          it "sets its order first by itself and then by the column with index 3" do
+            expect(column_data[:orderData]).to eq([column_index, 3])
+          end
+          it "sets its target to itself" do
+            expect(column_data[:targets]).to eq([column_index])
+          end
+          it 'sets `orderSequence` to `[ :desc, :asc ]`' do
+            expect(column_data[:orderSequence]).to eq([:desc, :asc])
+          end
+        end
+      end
+      describe 'the column with index 3' do
+        it 'orders itself in descending sequence' do
+          expect(column_definitions[3][:orderSequence]).to eq([:desc])
+        end
+        it "sets its target to itself" do
+          expect(column_definitions[3][:targets]).to eq([3])
+        end
+      end
+      it 'calls out which columns are dates' do
+        expect(column_definitions).to include({type: :date, targets: [0, 1, 2]})
+      end
     end
     describe 'filtering' do
       it 'sets a `filter` entry on `@advances_data_table`' do

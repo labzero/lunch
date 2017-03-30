@@ -138,8 +138,38 @@ RSpec.describe Member, type: :model do
         expect(subject).not_to receive(:fetch_details)
         call_method
       end
-      it 'returns the value of `dual_signers_required` from member details' do
+      it 'returns the value of `name` from member details' do
         expect(call_method).to eq(member_details[:name])
+      end
+    end
+
+    describe '`found?`' do
+      let(:call_method) { subject.found? }
+      let(:request) { double('request object') }
+      let(:member_details) { {} }
+      let(:members_service_instance) { instance_double(MembersService, member: member_details) }
+      before { allow(MembersService).to receive(:new).and_return(members_service_instance) }
+      describe 'when @member_details are not present' do
+        it 'fetches details with the request object it was passed' do
+          expect(subject).to receive(:fetch_details).with(request).and_call_original
+          subject.name(request)
+        end
+        it 'fetches details with no request object if none was passed' do
+          expect(subject).to receive(:fetch_details).with(nil).and_call_original
+          call_method
+        end
+      end
+      it 'does not fetch details if @member_details are present' do
+        call_method
+        expect(subject).not_to receive(:fetch_details)
+        call_method
+      end
+      it 'returns true if the details are present after fetching' do
+        expect(call_method).to eq(true)
+      end
+      it 'returns false if the details are aren\'t present after fetching' do
+        allow(subject).to receive(:fetch_details).and_return(nil)
+        expect(call_method).to eq(false)
       end
     end
   end

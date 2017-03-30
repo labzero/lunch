@@ -317,7 +317,8 @@ Scenario: User navigates to the select rate page from the Manage Advances page
 
 @jira-mem-1649 @flip-on-add-advance-custom-term
 Scenario: User clicks on the FRC rates and sees Funding Date then selects today and begins the advance process
-  Given I am on the "Add Advance" advances page
+  Given I am logged in as a "custom-term signer"
+  And I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
   When I click to toggle to the frc rates
   Then I should see Funding Date information
@@ -332,9 +333,11 @@ Scenario: User clicks on the FRC rates and sees Funding Date then selects today 
 
 @jira-mem-1649 @flip-on-add-advance-custom-term
 Scenario: User clicks on the FRC rates and sees Funding Date then selects next business day and begins the advance process
-  Given I am on the "Add Advance" advances page
+  Given I am logged in as a "custom-term signer"
+  And I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
   When I click to toggle to the frc rates
+  Then I select the rate with a term of "2week" and a type of "whole" on the add advance page
   Then I should see Funding Date information
   When I click on Edit Funding Date link
   Then I should see Set an Alternate Funding Date
@@ -347,9 +350,11 @@ Scenario: User clicks on the FRC rates and sees Funding Date then selects next b
 
 @jira-mem-1649 @flip-on-add-advance-custom-term
 Scenario: User clicks on the FRC rates and sees Funding Date then selects skip business day and begins the advance process
-  Given I am on the "Add Advance" advances page
+  Given I am logged in as a "custom-term signer"
+  And I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
   When I click to toggle to the frc rates
+  Then I select the rate with a term of "2week" and a type of "whole" on the add advance page
   Then I should see Funding Date information
   When I click on Edit Funding Date link
   Then I should see Set an Alternate Funding Date
@@ -362,7 +367,8 @@ Scenario: User clicks on the FRC rates and sees Funding Date then selects skip b
   
 @jira-mem-1521
 Scenario: Member sees messaging that credit limit does not cover gross up stock purchase
-  Given I am on the "Add Advance" advances page
+  Given I am logged in as a "custom-term signer"
+  And I am on the "Add Advance" advances page
   And I enter "100007" into the add advance amount field
   And I click to toggle to the frc rates
   And I select the rate with a term of "2week" and a type of "whole" on the add advance page
@@ -385,7 +391,8 @@ Scenario: Intranet user walks through the add advance flow
 
 @jira-mem-1650 @flip-on-add-advance-custom-term
 Scenario: User clicks on the FRC rates and sees Add Custom Term then selects maturity day and begins the advance process
-  Given I am on the "Add Advance" advances page
+  Given I am logged in as a "custom-term signer"
+  And I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
   When I click to toggle to the frc rates
   Then I should see the add advance rate table
@@ -402,7 +409,8 @@ Scenario: User clicks on the FRC rates and sees Add Custom Term then selects mat
 
 @jira-mem-1650 @flip-on-add-advance-custom-term
 Scenario: User clicks on the FRC rates and sees Add Custom Term, Cancels, selects Add Custom Term then Cancels again
-  Given I am on the "Add Advance" advances page
+  Given I am logged in as a "custom-term signer"
+  And I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
   When I click to toggle to the frc rates
   Then I should see the add advance rate table
@@ -425,7 +433,8 @@ Scenario: User clicks on the FRC rates and sees Add Custom Term, Cancels, select
 
 @jira-mem-2251 @flip-on-add-advance-custom-term
 Scenario: User clicks on the FRC rates and selects funding date, closes selection and sees the new funding date of the screen
-  Given I am on the "Add Advance" advances page
+  Given I am logged in as a "custom-term signer"
+  And I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field
   When I click to toggle to the frc rates
   Then I should see the add advance rate table

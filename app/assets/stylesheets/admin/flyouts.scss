@@ -39,8 +39,9 @@ $admin-confirmation-transition-time: 0.25s;
           vertical-align: middle;
         }
       }
-      *:not(h3):not([data-flyout-action]) {
+      *:not(h3):not([data-flyout-action]):not(form) {
         opacity: 0;
+        pointer-events: none;
       }
     }
     &.admin-confirmation-loading {

@@ -55,6 +55,11 @@ class Member
     @member_details[:name]
   end
 
+  def found?(request=nil)
+    fetch_details(request) unless @member_details.present?
+    !!@member_details
+  end
+
   protected
 
   def fetch_details(request=nil)

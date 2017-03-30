@@ -296,6 +296,18 @@ RSpec.describe SecuritiesRequest, :type => :model do
             expect(subject.errors).not_to receive(:add)
             call_validation
           end
+          it 'adds an error if the `original_par` rounded to the 7th decimal is not a whole number' do
+            original_par = rand(0..500000) + 0.9999999
+            subject.securities = [FactoryGirl.build(:security, original_par: original_par)]
+            expect(subject.errors).to receive(:add).with(:securities, :original_par_whole_number)
+            call_validation
+          end
+          it 'does not add an error if Excel`s floating point representation of `original_par` is a whole number' do
+            original_par = rand(0..500000) + 0.99999999
+            subject.securities = [FactoryGirl.build(:security, original_par: original_par)]
+            expect(subject.errors).not_to receive(:add)
+            call_validation
+          end
         end
       end
       (described_class::DELIVERY_INSTRUCTION_KEYS.keys - delivery_types_to_validate).each do |delivery_type|

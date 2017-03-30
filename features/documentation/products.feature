@@ -101,3 +101,9 @@ Feature: Products Page
   Scenario: Member sees forms on the pfi page
     Given I am on the pfi page
     Then I should see at least one pfi form to download
+
+  @smoke @jira-mem-2268
+  Scenario: Member navigates to the convertible product page
+    Given I click on the products link in the header
+    When I click on the convertible link in the header
+    Then I should see the "convertible" product page

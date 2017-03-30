@@ -343,6 +343,8 @@ def user_for_type(user_type)
     extranet_signer
   when 'admin user'
     admin_user
+  when 'custom-term signer'
+    custom_term_user
   else
     raise 'unknown user type'
   end
@@ -434,6 +436,10 @@ end
 
 def admin_user
   CustomConfig.env_config['intranet_user']
+end
+
+def custom_term_user
+  CustomConfig.env_config['custom_term']
 end
 
 def current_member_name

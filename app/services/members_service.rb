@@ -78,8 +78,10 @@ class MembersService < MAPIService
   end
 
   def all_members
-    if data = get_json(:all_members, "member/")
-      data.collect! { |member| member.with_indifferent_access }
+    Rails.cache.fetch(CacheConfiguration.key(:members_list), expires_in: CacheConfiguration.expiry(:members_list)) do
+      if data = get_json(:all_members, "member/")
+        data.collect! { |member| member.with_indifferent_access }
+      end
     end
   end
 

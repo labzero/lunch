@@ -28,7 +28,7 @@ class MemberMailer < Devise::Mailer
     attachments[file.original_filename] = file.read
     mail(subject: I18n.t('letters_of_credit.email.subject'),
          to: "#{user.display_name} <#{user.email}>",
-         bcc: InternalMailer::GENERAL_ALERT_ADDRESS,
+         bcc: InternalMailer::LETTER_OF_CREDIT_ADDRESS,
          from: t('emails.new_user.sender', email: ContactInformationHelper::WEB_SUPPORT_EMAIL)
     )
   end

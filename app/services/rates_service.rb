@@ -66,7 +66,7 @@ class RatesService < MAPIService
     iso8601_funding_date = funding_date.try(:to_date).try(:iso8601)
     iso8601_maturity_date = maturity_date.try(:to_date).try(:iso8601)
     Rails.cache.fetch(CacheConfiguration.key(:quick_advance_rates, member_id, iso8601_funding_date, iso8601_maturity_date), expires_in: CacheConfiguration.expiry(:quick_advance_rates)) do
-      get_hash(:quick_advance_rates, "rates/summary", funding_date: iso8601_funding_date, maturity_date: iso8601_maturity_date)
+      get_hash(:quick_advance_rates, "rates/summary", funding_date: iso8601_funding_date, maturity_date: iso8601_maturity_date, member_id: member_id)
     end
   end
 

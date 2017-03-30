@@ -38,10 +38,10 @@ class AdvancesController < ApplicationController
   end
 
   def manage
-    column_headings = [{title: t('common_table_headings.trade_date')}, {title: t('common_table_headings.funding_date')}, {title: t('common_table_headings.maturity_date'), sortable: true}, {title: t('common_table_headings.advance_number')}, {title: t('common_table_headings.advance_type')}, {title: t('global.footnoted_string', string: t('advances.rate'))}, {title: t('common_table_headings.current_par') + ' ($)'}]
-    column_headings << {title: t('advances.confirmation.title')} if feature_enabled?('advance-confirmation')
+    column_headings = [{title: t('common_table_headings.trade_date')}, {title: t('common_table_headings.funding_date')}, {title: t('common_table_headings.maturity_date')}, {title: t('common_table_headings.advance_number')}, {title: t('common_table_headings.advance_type')}, {title: t('global.footnoted_string', string: t('advances.rate'))}, {title: t('common_table_headings.current_par') + ' ($)'}]
+    column_headings.each {|col| col[:sortable] = true }
+    column_headings << {title: t('advances.confirmation.title'), sortable: false} if feature_enabled?('advance-confirmation')
     outstanding_only = params[:maturity] == ADVANCES_OUTSTANDING || params[:maturity].nil?
-    column_headings.each {|col| col[:sortable] ||= false }
     @advances_data_table = {
       column_headings: column_headings,
       rows: [],
@@ -62,6 +62,16 @@ class AdvancesController < ApplicationController
         ]
       },
     }
+    @column_definitions = [
+      {orderData: [0, 3], orderSequence: [:desc, :asc], targets: [0]},
+      {orderData: [1, 3], orderSequence: [:desc, :asc], targets: [1]},
+      {orderData: [2, 3], orderSequence: [:desc, :asc], targets: [2]},
+      {orderSequence: [:desc], targets: [3]},
+      {orderData: [4, 3], orderSequence: [:desc, :asc], targets: [4]},
+      {orderData: [5, 3], orderSequence: [:desc, :asc], targets: [5]},
+      {orderData: [6, 3], orderSequence: [:desc, :asc], targets: [6]},
+      {type: :date, targets: [0, 1, 2]}
+    ]
     if params[:job_id]
       job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
       raise ActiveRecord::RecordNotFound unless job_status
