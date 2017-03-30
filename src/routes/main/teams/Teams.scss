@@ -1,0 +1,15 @@
+@import '../../../styles/_mixins.scss';
+
+.root {
+  @include page-root;
+}
+
+.list {
+  font-size: 1.5em;
+  font-weight: bold;
+  text-align: center;
+}
+
+.centerer {
+  text-align: center;
+}

@@ -10,12 +10,13 @@
 import React, { PropTypes } from 'react';
 import { intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import Grid from 'react-bootstrap/lib/Grid';
 import Loading from '../../../components/Loading';
 import { globalMessageDescriptor as gm } from '../../../helpers/generateMessageDescriptor';
 import getRole from '../../../helpers/getRole';
 import hasRole from '../../../helpers/hasRole';
 import canChangeUser from '../../../helpers/canChangeUser';
-import s from './Team.css';
+import s from './Team.scss';
 
 class Team extends React.Component {
   static propTypes = {
@@ -102,77 +103,75 @@ class Team extends React.Component {
     }
 
     return (
-      <div className={s.root}>
-        <div className={s.container}>
-          <h1>{this.props.title}</h1>
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th />
+      <Grid className={s.root}>
+        <h1>{this.props.title}</h1>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {users.map(user => (
+              <tr key={user.id}>
+                <td>{user.name ? user.name : f(gm('noUserName'))}</td>
+                <td>{user.email}</td>
+                <td>
+                  {this.roleOptions(user)}
+                </td>
+                <td>
+                  {
+                    currentUser.id !== user.id &&
+                    canChangeUser(currentUser, user, team, users) &&
+                    (
+                      <button type="button" onClick={this.handleDeleteClicked(user.id)} aria-label="Remove">&times;</button>
+                    )
+                  }
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {users.map(user => (
-                <tr key={user.id}>
-                  <td>{user.name ? user.name : f(gm('noUserName'))}</td>
-                  <td>{user.email}</td>
-                  <td>
-                    {this.roleOptions(user)}
-                  </td>
-                  <td>
-                    {
-                      currentUser.id !== user.id &&
-                      canChangeUser(currentUser, user, team, users) &&
-                      (
-                        <button type="button" onClick={this.handleDeleteClicked(user.id)} aria-label="Remove">&times;</button>
-                      )
-                    }
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <h2>Add User</h2>
-          <form onSubmit={this.handleSubmit}>
-            <label htmlFor="team-name">
-              Name:
-            </label>
-            <input
-              id="team-name"
-              type="text"
-              onChange={this.handleChange('name')}
-              value={name}
-            />
-            <label htmlFor="team-email">
-              Email:
-            </label>
-            <input
-              id="team-email"
-              type="email"
-              onChange={this.handleChange('email')}
-              value={email}
-              required
-            />
-            <label htmlFor="team-type">
-              Type:
-            </label>
-            <select
-              id="team-type"
-              onChange={this.handleChange('type')}
-              value={type}
-              required
-            >
-              {hasRole(currentUser, team, 'guest') && <option value="guest">{f(gm('guestRole'))}</option>}
-              {hasRole(currentUser, team, 'member') && <option value="member">{f(gm('memberRole'))}</option>}
-              {hasRole(currentUser, team, 'owner') && <option value="owner">{f(gm('ownerRole'))}</option>}
-            </select>
-            <input type="submit" />
-          </form>
-        </div>
-      </div>
+            ))}
+          </tbody>
+        </table>
+        <h2>Add User</h2>
+        <form onSubmit={this.handleSubmit}>
+          <label htmlFor="team-name">
+            Name:
+          </label>
+          <input
+            id="team-name"
+            type="text"
+            onChange={this.handleChange('name')}
+            value={name}
+          />
+          <label htmlFor="team-email">
+            Email:
+          </label>
+          <input
+            id="team-email"
+            type="email"
+            onChange={this.handleChange('email')}
+            value={email}
+            required
+          />
+          <label htmlFor="team-type">
+            Type:
+          </label>
+          <select
+            id="team-type"
+            onChange={this.handleChange('type')}
+            value={type}
+            required
+          >
+            {hasRole(currentUser, team, 'guest') && <option value="guest">{f(gm('guestRole'))}</option>}
+            {hasRole(currentUser, team, 'member') && <option value="member">{f(gm('memberRole'))}</option>}
+            {hasRole(currentUser, team, 'owner') && <option value="owner">{f(gm('ownerRole'))}</option>}
+          </select>
+          <input type="submit" />
+        </form>
+      </Grid>
     );
   }
 }

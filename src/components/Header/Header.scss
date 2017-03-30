@@ -35,6 +35,7 @@
 }
 
 .root {
+  border-bottom: $default-border;
   overflow: hidden;
   position: relative;
   z-index: 2; /* above things in layout children */

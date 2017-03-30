@@ -6,13 +6,20 @@ $white-color: #fff;
 $black-color: #000;
 $background-color: #333;
 $border-color: $black-color;
-$link-color: #66e;
-$link-hover-color: #44e;
-$link-active-color: #22e;
-$danger-color: #ff75e3;
-$danger-hover-color: #e258c6;
-$danger-active-color: #c43bab;
 $text-color: $black-color;
+
+// Bootstrap overrides
+$gray-base: $black-color;
+$gray-darker: $black-color;
+$gray-dark: $black-color;
+$gray: $black-color;
+$list-group-link-color: $black-color;
+$btn-default-color: $black-color;
+
+$link-color: #66e;
+
+$brand-danger: #ff75e3;
+$brand-primary: $link-color;
 
 /*
  * Typography

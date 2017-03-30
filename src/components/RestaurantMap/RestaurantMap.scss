@@ -3,7 +3,7 @@
 .root {
   background: #fcb3f2;
   border: solid black;
-  border-width: $default-border-width 0;
+  border-width: 0 0 $default-border-width;
   height: 500px;
   overflow: hidden;
   position: relative;

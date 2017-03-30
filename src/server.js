@@ -204,7 +204,10 @@ app.get('*', async (req, res, next) => {
     };
     if (req.user) {
       stateData.user = req.user;
-      stateData.teams = await Team.findAll({ where: { id: req.user.roles.map(r => r.team_id) } });
+      stateData.teams = await Team.findAll({
+        order: 'created_at ASC',
+        where: { id: req.user.roles.map(r => r.team_id) }
+      });
       stateData.team = req.team;
     }
 
