@@ -34,7 +34,8 @@ async function copy() {
     copyFile('database.js', 'build/database.js'),
     copyFile('.sequelizerc', 'build/.sequelizerc'),
     copyDir('db', 'build/db'),
-    copyDir('cert', 'build/cert')
+    copyDir('cert', 'build/cert'),
+    makeDir('build/src').then(() => makeDir('build/src/models')).then(() => copyFile('src/models/db.js', 'build/src/models/db.js'))
   ]);
 
   if (process.argv.includes('--watch')) {
