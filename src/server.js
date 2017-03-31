@@ -76,6 +76,7 @@ if (process.env.NODE_ENV === 'production') {
     trustProtoHeader: true,
     trustXForwardedHostHeader: true
   }));
+  app.set('trust proxy', true);
 }
 
 //
