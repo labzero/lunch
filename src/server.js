@@ -98,9 +98,11 @@ app.use(bodyParser.json());
 //
 // Redirect old labzero.com host
 // -----------------------------------------------------------------------------
-app.use((req, res) => {
+app.use((req, res, next) => {
   if (req.hostname === 'lunch.labzero.com') {
     res.redirect(301, `${req.protocol}://lunch.pink`);
+  } else {
+    next();
   }
 });
 
