@@ -152,6 +152,10 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
+app.get('/health', (req, res) => {
+  res.status(200).send('welcome to the health endpoint');
+});
+
 //
 // Register WebSockets
 // -----------------------------------------------------------------------------
