@@ -38,9 +38,8 @@ You will need to be invited back by another member.`,
               >
                 {team.name}
               </a>
-              <button className={s.leave} onClick={this.confirmLeave(team)}>
+              <button className={s.leave} onClick={this.confirmLeave(team)} aria-label="Leave">
                 <Glyphicon glyph="remove" />
-                <span className="sr-only">Leave</span>
               </button>
             </li>
           ))}

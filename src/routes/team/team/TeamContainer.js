@@ -7,12 +7,11 @@ import { getCurrentUser } from '../../../selectors/user';
 import { getUsers } from '../../../selectors/users';
 import Team from './Team';
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = state => ({
   currentUser: getCurrentUser(state),
   users: getUsers(state),
   userListReady: isUserListReady(state),
-  team: getTeam(state),
-  title: ownProps.title
+  team: getTeam(state)
 });
 
 const mapDispatchToProps = (dispatch) => ({

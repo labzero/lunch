@@ -10,7 +10,14 @@
 import React, { PropTypes } from 'react';
 import { intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import Button from 'react-bootstrap/lib/Button';
+import ControlLabel from 'react-bootstrap/lib/ControlLabel';
+import FormControl from 'react-bootstrap/lib/FormControl';
+import FormGroup from 'react-bootstrap/lib/FormGroup';
+import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Grid from 'react-bootstrap/lib/Grid';
+import HelpBlock from 'react-bootstrap/lib/HelpBlock';
+import Table from 'react-bootstrap/lib/Table';
 import Loading from '../../../components/Loading';
 import { globalMessageDescriptor as gm } from '../../../helpers/generateMessageDescriptor';
 import getRole from '../../../helpers/getRole';
@@ -28,8 +35,7 @@ class Team extends React.Component {
     removeUserFromTeam: PropTypes.func.isRequired,
     userListReady: PropTypes.bool.isRequired,
     users: PropTypes.array.isRequired,
-    team: PropTypes.object.isRequired,
-    title: PropTypes.string.isRequired,
+    team: PropTypes.object.isRequired
   };
 
   static defaultState = {
@@ -104,8 +110,8 @@ class Team extends React.Component {
 
     return (
       <Grid className={s.root}>
-        <h1>{this.props.title}</h1>
-        <table>
+        <h1>{team.name}</h1>
+        <Table responsive>
           <thead>
             <tr>
               <th>Name</th>
@@ -127,49 +133,59 @@ class Team extends React.Component {
                     currentUser.id !== user.id &&
                     canChangeUser(currentUser, user, team, users) &&
                     (
-                      <button type="button" onClick={this.handleDeleteClicked(user.id)} aria-label="Remove">&times;</button>
+                      <button className={s.remove} type="button" onClick={this.handleDeleteClicked(user.id)} aria-label="Remove">
+                        <Glyphicon glyph="remove" />
+                      </button>
                     )
                   }
                 </td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
         <h2>Add User</h2>
         <form onSubmit={this.handleSubmit}>
-          <label htmlFor="team-name">
-            Name:
-          </label>
-          <input
-            id="team-name"
-            type="text"
-            onChange={this.handleChange('name')}
-            value={name}
-          />
-          <label htmlFor="team-email">
-            Email:
-          </label>
-          <input
-            id="team-email"
-            type="email"
-            onChange={this.handleChange('email')}
-            value={email}
-            required
-          />
-          <label htmlFor="team-type">
-            Type:
-          </label>
-          <select
-            id="team-type"
-            onChange={this.handleChange('type')}
-            value={type}
-            required
-          >
-            {hasRole(currentUser, team, 'guest') && <option value="guest">{f(gm('guestRole'))}</option>}
-            {hasRole(currentUser, team, 'member') && <option value="member">{f(gm('memberRole'))}</option>}
-            {hasRole(currentUser, team, 'owner') && <option value="owner">{f(gm('ownerRole'))}</option>}
-          </select>
-          <input type="submit" />
+          <FormGroup controlId="team-name">
+            <ControlLabel>
+              Name
+            </ControlLabel>
+            <FormControl
+              type="text"
+              onChange={this.handleChange('name')}
+              value={name}
+            />
+          </FormGroup>
+          <FormGroup controlId="team-email">
+            <ControlLabel>
+              Email
+            </ControlLabel>
+            <FormControl
+              type="email"
+              onChange={this.handleChange('email')}
+              value={email}
+              required
+            />
+          </FormGroup>
+          <FormGroup controlId="team-type">
+            <ControlLabel>
+              Type
+            </ControlLabel>
+            <FormControl
+              componentClass="select"
+              onChange={this.handleChange('type')}
+              value={type}
+              required
+            >
+              {hasRole(currentUser, team, 'guest') && <option value="guest">{f(gm('guestRole'))}</option>}
+              {hasRole(currentUser, team, 'member') && <option value="member">{f(gm('memberRole'))}</option>}
+              {hasRole(currentUser, team, 'owner') && <option value="owner">{f(gm('ownerRole'))}</option>}
+            </FormControl>
+            <HelpBlock>
+              Members can add new users and remove guests.
+              Owners can manage all user roles and manage overall team information.
+            </HelpBlock>
+          </FormGroup>
+          <Button type="submit">Submit</Button>
         </form>
       </Grid>
     );

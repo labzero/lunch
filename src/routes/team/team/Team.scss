@@ -3,3 +3,11 @@
 .root {
   @include page-root;
 }
+
+.remove {
+  @include plain-button;
+
+  span {
+    line-height: 1.5em;
+  }
+}
