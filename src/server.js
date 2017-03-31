@@ -62,22 +62,7 @@ const accessLogStream = rfs('access.log', {
   path: logDirectory
 });
 
-// setup the logger
-app.use(morgan('combined', { stream: accessLogStream }));
-
-app.get('/health', (req, res) => {
-  res.status(200).send('welcome to the health endpoint');
-});
-
 const httpServer = new HttpServer(app);
-let httpsServer;
-if (process.env.NODE_ENV === 'production') {
-  app.use(enforce.HTTPS({
-    trustProtoHeader: true,
-    trustXForwardedHostHeader: true
-  }));
-  app.set('trust proxy', true);
-}
 
 //
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
@@ -90,11 +75,34 @@ global.navigator.userAgent = global.navigator.userAgent || 'all';
 // Register Node.js middleware
 // -----------------------------------------------------------------------------
 app.use(Honeybadger.requestHandler); // Use *before* all other app middleware.
+app.use(morgan('combined', { stream: accessLogStream }));
+
+app.get('/health', (req, res) => {
+  res.status(200).send('welcome to the health endpoint');
+});
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(enforce.HTTPS({
+    trustProtoHeader: true,
+    trustXForwardedHostHeader: true
+  }));
+  app.set('trust proxy', true);
+}
+
 app.use(compression());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+//
+// Redirect old labzero.com host
+// -----------------------------------------------------------------------------
+app.use((req, res) => {
+  if (req.hostname === 'lunch.labzero.com') {
+    res.redirect(301, `${req.protocol}://lunch.pink`);
+  }
+});
 
 //
 // Authentication
@@ -178,7 +186,7 @@ app.get('/logout', (req, res) => {
 //
 // Register WebSockets
 // -----------------------------------------------------------------------------
-const wsInstance = expressWs(app, httpsServer === undefined ? httpServer : httpsServer);
+const wsInstance = expressWs(app, httpServer);
 const wss = wsInstance.getWss();
 
 wss.broadcast = (teamId, data) => {
