@@ -11,11 +11,9 @@ import 'isomorphic-fetch';
 import Promise from 'bluebird';
 import path from 'path';
 import express from 'express';
-import fs from 'fs';
 import { Server as HttpServer } from 'http';
-import { Server as HttpsServer } from 'https';
+import enforce from 'express-sslify';
 import compression from 'compression';
-import forceSSL from 'express-force-ssl';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import expressJwt from 'express-jwt';
@@ -36,7 +34,7 @@ import teamRoutes from './routes/team';
 import mainRoutes from './routes/main';
 import assets from './assets.json'; // eslint-disable-line import/no-unresolved
 import configureStore from './store/configureStore';
-import { host, hostname, port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } from './config';
+import { host, hostname, port, auth } from './config';
 import makeInitialState from './initialState';
 import passport from './core/passport';
 import api from './api';
@@ -52,13 +50,10 @@ const domain = `.${hostname}`;
 const httpServer = new HttpServer(app);
 let httpsServer;
 if (process.env.NODE_ENV === 'production') {
-  if (selfSigned) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  }
-  const key = fs.readFileSync(privateKeyPath);
-  const cert = fs.readFileSync(certificatePath);
-  httpsServer = new HttpsServer({ key, cert }, app);
-  app.use(forceSSL);
+  app.use(enforce.HTTPS({
+    trustProtoHeader: true,
+    trustXForwardedHostHeader: true
+  }));
 }
 
 //
@@ -312,8 +307,3 @@ httpServer.listen(port, () => {
   /* eslint-disable no-console */
   console.log(`The server is running at http://local.lunch.pink:${port}/`);
 });
-if (httpsServer !== undefined) {
-  httpsServer.listen(httpsPort, () => {
-    console.log(`The HTTPS server is running at https://local.lunch.pink:${httpsPort}`);
-  });
-}

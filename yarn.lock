@@ -2791,12 +2791,6 @@ expand-tilde@^1.2.1, expand-tilde@^1.2.2:
   dependencies:
     os-homedir "^1.0.1"
 
-express-force-ssl@^0.3.1:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/express-force-ssl/-/express-force-ssl-0.3.2.tgz#01b2b498ae6fd2e41152b22b57a3e173773af67e"
-  dependencies:
-    lodash.assign "^3.2.0"
-
 express-jwt@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/express-jwt/-/express-jwt-5.1.0.tgz#a1c5e3381bc78d2de4d3c51133421c69e004d581"
@@ -2805,6 +2799,10 @@ express-jwt@^5.1.0:
     express-unless "^0.3.0"
     jsonwebtoken "~6.2.0"
     lodash.set "^4.0.0"
+
+express-sslify@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/express-sslify/-/express-sslify-1.2.0.tgz#30e84bceed1557eb187672bbe1430a0a2a100d9c"
 
 express-unless@^0.3.0:
   version "0.3.0"
