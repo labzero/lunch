@@ -47,6 +47,10 @@ const app = express();
 const bsHost = process.env.BS_RUNNING ? `${hostname}:3001` : host;
 const domain = `.${hostname}`;
 
+app.get('/health', (req, res) => {
+  res.status(200).send('welcome to the health endpoint');
+});
+
 const httpServer = new HttpServer(app);
 let httpsServer;
 if (process.env.NODE_ENV === 'production') {
@@ -150,10 +154,6 @@ app.get('/logout', (req, res) => {
   req.logout();
   res.clearCookie('id_token', { domain });
   res.redirect('/');
-});
-
-app.get('/health', (req, res) => {
-  res.status(200).send('welcome to the health endpoint');
 });
 
 //
