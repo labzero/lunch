@@ -10,6 +10,9 @@
 import 'isomorphic-fetch';
 import Promise from 'bluebird';
 import path from 'path';
+import fs from 'fs';
+import rfs from 'rotating-file-stream';
+import morgan from 'morgan';
 import express from 'express';
 import { Server as HttpServer } from 'http';
 import enforce from 'express-sslify';
@@ -46,6 +49,21 @@ const app = express();
 
 const bsHost = process.env.BS_RUNNING ? `${hostname}:3001` : host;
 const domain = `.${hostname}`;
+
+const logDirectory = path.join(__dirname, 'log');
+
+// ensure log directory exists
+// eslint-disable-next-line no-unused-expressions
+fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
+
+// create a rotating write stream
+const accessLogStream = rfs('access.log', {
+  interval: '1d', // rotate daily
+  path: logDirectory
+});
+
+// setup the logger
+app.use(morgan('combined', { stream: accessLogStream }));
 
 app.get('/health', (req, res) => {
   res.status(200).send('welcome to the health endpoint');

@@ -1048,6 +1048,10 @@ base64url@2.0.0, base64url@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/base64url/-/base64url-2.0.0.tgz#eac16e03ea1438eff9423d69baa36262ed1f70bb"
 
+basic-auth@~1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/basic-auth/-/basic-auth-1.1.0.tgz#45221ee429f7ee1e5035be3f51533f1cdfd29884"
+
 batch@0.5.3:
   version "0.5.3"
   resolved "https://registry.yarnpkg.com/batch/-/batch-0.5.3.tgz#3f3414f380321743bfc1042f9a83ff1d5824d464"
@@ -2047,9 +2051,15 @@ debug@2.3.3:
   dependencies:
     ms "0.7.2"
 
-debug@2.6.0, debug@^2.1.1, debug@^2.2.0:
+debug@2.6.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.0.tgz#bc596bcabe7617f11d9fa15361eded5608b8499b"
+  dependencies:
+    ms "0.7.2"
+
+debug@2.6.1, debug@^2.1.1, debug@^2.2.0:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.1.tgz#79855090ba2c4e3115cc7d8769491d58f0491351"
   dependencies:
     ms "0.7.2"
 
@@ -5008,6 +5018,16 @@ moment@2.x.x, "moment@>= 2.6.0", moment@^2.11.2, moment@^2.13.0, moment@^2.15.1,
   version "2.17.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.17.1.tgz#fed9506063f36b10f066c8b59a144d7faebe1d82"
 
+morgan@^1.8.1:
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/morgan/-/morgan-1.8.1.tgz#f93023d3887bd27b78dfd6023cea7892ee27a4b1"
+  dependencies:
+    basic-auth "~1.1.0"
+    debug "2.6.1"
+    depd "~1.1.0"
+    on-finished "~2.3.0"
+    on-headers "~1.0.1"
+
 ms@0.7.1:
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/ms/-/ms-0.7.1.tgz#9cd13c03adbff25b65effde7ce864ee952017098"
@@ -6941,6 +6961,10 @@ ripemd160@^1.0.0:
 robust-websocket@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/robust-websocket/-/robust-websocket-0.2.1.tgz#ed72a9abeeecbfae781c85fff78a31853b1b273b"
+
+rotating-file-stream@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/rotating-file-stream/-/rotating-file-stream-1.2.1.tgz#550602c793380253f539f66b8f43e62fc1cbf509"
 
 run-async@^0.1.0:
   version "0.1.0"
