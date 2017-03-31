@@ -30,7 +30,11 @@
       %li= link_to(t('products.advances.sbc.title'), sbc_path)
       %li= link_to(t('products.advances.vrc.title'), vrc_path)
     %h2= t('products.standby_loc.title')
-    %p= t('products.standby_loc.description_html', url: 'http://fhlbsf.com/community/credit/lc-profile.aspx')
+    %p= t('products.standby_loc.description')
+    %h3= t('products.standby_loc.standard_loc.title')
+    %p= t('products.standby_loc.standard_loc.description_html', url: 'http://fhlbsf.com/community/credit/lc-profile.aspx')
+    %h3= t('products.standby_loc.variable_balance_loc.title')
+    %p= t('products.standby_loc.variable_balance_loc.description_html', url: products_vbloc_path)
     %a{name: 'mpf_program'}
     %h2= t('products.mpf_program.title')
     %p= t('products.mpf_program.description_html', url: mpf_url)

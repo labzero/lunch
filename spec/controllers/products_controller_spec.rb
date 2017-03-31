@@ -16,9 +16,31 @@ RSpec.describe ProductsController, :type => :controller do
     end
   end
 
+  describe 'GET loc' do
+    it_behaves_like 'a user required action', :get, :loc
+    it_behaves_like 'a controller action with an active nav setting', :loc, :products
+    it 'should render the loc view' do
+      get :loc
+      expect(response.body).to render_template('loc')
+    end
+    it 'sets the active nav to :products' do
+      expect(controller).to receive(:set_active_nav).with(:products)
+      get :loc
+    end
+  end
+
   [:arc, :arc_embedded, :frc_embedded, :frc, :amortizing, :choice_libor, :knockout, :ocn, :putable, :mpf, :callable, :vrc, :sbc, :swaps, :authorizations, :convertible].each do |action|
     describe "GET #{action}" do
       it_behaves_like 'a product page', action
+    end
+  end
+
+  describe 'GET vbloc' do
+    it_behaves_like 'a user required action', :get, :vbloc
+    it_behaves_like 'a product page', :vbloc
+    it 'should render the vbloc view' do
+      get :vbloc
+      expect(response.body).to render_template('vbloc')
     end
   end
 

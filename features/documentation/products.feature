@@ -107,3 +107,11 @@ Feature: Products Page
     Given I click on the products link in the header
     When I click on the convertible link in the header
     Then I should see the "convertible" product page
+
+  @smoke @jira-mem-2299
+  Scenario: Member navigates to the standby letters of credit product page
+    Given I click on the products link in the header
+    When I click on the standby letters of credit link in the header
+    Then I should see the "standby letters of credit" product page
+    When I click on the variable balance letter of credit link
+    Then I should see the "variable balance letter of credit" product page

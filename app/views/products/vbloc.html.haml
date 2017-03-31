@@ -1,0 +1,33 @@
+.row.product-page
+  .column-2x10-right
+    %h1= t('products.variable_balance_loc.title')
+    %p= t('products.variable_balance_loc.description')
+    %h2= t('products.variable_balance_loc.eligible_uses.title')
+    %ul
+      %li= t('products.variable_balance_loc.eligible_uses.uses.arizona')
+      %li= t('products.variable_balance_loc.eligible_uses.uses.california')
+      %li= t('products.variable_balance_loc.eligible_uses.uses.nevada')
+    %h2= t('products.section_headings.advantages')
+    %ul
+      %li= t('products.variable_balance_loc.key_advantages.attract')
+      %li= t('products.variable_balance_loc.key_advantages.increase')
+      %li= t('products.variable_balance_loc.key_advantages.fees')
+    %h2= t('products.section_headings.features')
+    %h3= t('products.common_key_features.purpose')
+    %p= t('products.variable_balance_loc.key_features.purpose')
+    %h3= t('products.common_key_features.maximum_term')
+    %p= t('products.variable_balance_loc.key_features.maxterm')
+    %h3= t('products.section_headings.collateral_requirements')
+    %p= t('products.variable_balance_loc.key_features.collateral_requirements')
+    %h3= t('products.common_key_features.stock')
+    %p= t('products.variable_balance_loc.key_features.stock')
+    %h3= t('products.common_key_features.payment_reimbursements')
+    %p= t('products.variable_balance_loc.key_features.payment_reimbursements')
+    %h3= t('products.common_key_features.fees')
+    %p= simple_format(t('products.variable_balance_loc.key_features.fees.description'))
+    %ul
+      %li= t('products.variable_balance_loc.key_features.fees.maintenance.minimum')
+      %li= t('products.variable_balance_loc.key_features.fees.maintenance.annual')
+    %h3= t('products.variable_balance_loc.key_features.fee_certification.title')
+    %p= t('products.variable_balance_loc.key_features.fee_certification.description')
+    .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))

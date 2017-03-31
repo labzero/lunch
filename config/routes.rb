@@ -125,9 +125,10 @@ Rails.application.routes.draw do
   scope 'products' do
     get '/authorizations' => 'products#authorizations', as: :products_authorizations
     get '/summary' => 'products#index', as: :product_summary
-    get '/letters-of-credit' => 'error#not_found'
+    get '/letters-of-credit' => 'products#loc', as: :products_loc
     get '/community_programs' => 'error#not_found'
     get '/interest-rate-swaps-caps-floors' => 'products#swaps', as: :product_swaps
+    get '/variable-balance-letters-of-credit' => 'products#vbloc', as: :products_vbloc
     scope 'advances' do
       get 'adjustable-rate-credit' => 'products#arc', as: :arc
       get 'advances-for-community-enterprise' => 'error#not_found', as: :ace
