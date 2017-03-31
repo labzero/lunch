@@ -169,7 +169,7 @@ class LetterOfCreditRequest
     name = ActiveRecord::Base.connection.quote_table_name(sequence_name)
     statement = <<-SQL
       CREATE SEQUENCE #{name} 
-      START WITH 1000
+      START WITH 500
       INCREMENT BY 1
       NOCACHE
     SQL

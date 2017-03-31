@@ -877,8 +877,8 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
           expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher)
           call_method
         end
-        it 'starts incrementing the sequence at 1000' do
-          matcher = Regexp.new(/#{ensure_order_regexp}START\s+WITH\s+1000\s*/im)
+        it 'starts incrementing the sequence at 500' do
+          matcher = Regexp.new(/#{ensure_order_regexp}START\s+WITH\s+500\s*/im)
           expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher)
           call_method
         end
