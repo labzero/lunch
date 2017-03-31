@@ -15,7 +15,7 @@
 
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { User, WhitelistEmail } from '../models';
+import { User } from '../models';
 
 /**
  * Sign in with Google.
@@ -24,65 +24,62 @@ passport.use(new GoogleStrategy(
   {
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: '/login/callback',
-    passReqToCallback: true
+    callbackURL: '/login/callback'
   },
-  (req, accessToken, refreshToken, profile, done) => {
+  async (accessToken, refreshToken, profile, done) => {
     if (
       typeof profile.emails === 'object' &&
       profile.emails.length !== undefined
     ) {
       const accountEmail = profile.emails.find(email => email.type === 'account');
-      return WhitelistEmail.findAll().then(whitelistEmails => {
-        if (
-          whitelistEmails
-            .map(we => we.get('email').toLowerCase())
-            .indexOf(accountEmail.value.toLowerCase()) > -1 ||
-          // eslint-disable-next-line no-underscore-dangle
-          profile._json.domain === process.env.OAUTH_DOMAIN ||
-          process.env.OAUTH_DOMAIN === undefined
-        ) {
-          return User.findOrCreate({ where: { google_id: profile.id } }).spread(user => {
-            const userUpdates = {};
-            let doUpdates = false;
+      try {
+        let user = await User.findOne({
+          where: { google_id: profile.id }
+        });
 
-            if (
-              typeof profile.displayName === 'string' &&
-              profile.displayName !== user.get('name')
-            ) {
-              userUpdates.name = profile.displayName;
-              doUpdates = true;
-            }
+        const userUpdates = {};
+        let doUpdates = false;
 
-            if (accountEmail !== undefined && accountEmail.value !== user.get('email')) {
-              userUpdates.email = accountEmail.value;
-              doUpdates = true;
-            }
-
-            if (doUpdates) {
-              return user.update(userUpdates).then(updatedUser => done(null, updatedUser));
-            }
-
-            return done(null, user);
-          }).catch(err => done(err));
+        // might not have been linked with Google yet
+        if (!user) {
+          user = await User.findOne({
+            where: { email: accountEmail.value }
+          });
+          userUpdates.google_id = profile.id;
+          doUpdates = true;
         }
-        return done(null, false, { message: 'Please log in using your Lab Zero account.' });
-      }).catch(err => done(err));
+
+        if (!user) {
+          return done(null, false, { message: 'Sign-ups are disabled for now.' });
+        }
+
+        if (
+          typeof profile.displayName === 'string' &&
+          profile.displayName !== user.get('name')
+        ) {
+          userUpdates.name = profile.displayName;
+          doUpdates = true;
+        }
+
+        if (accountEmail !== undefined && accountEmail.value !== user.get('email')) {
+          userUpdates.email = accountEmail.value;
+          doUpdates = true;
+        }
+
+        if (doUpdates) {
+          const updatedUser = await user.update(userUpdates);
+          return done(null, updatedUser.id);
+        }
+
+        return done(null, user.id);
+      } catch (err) {
+        done(err);
+      }
     }
     return done(null, false, { message: 'No email provided.' });
   }
 ));
 
-passport.serializeUser((user, cb) => {
-  cb(null, user.id);
-});
-
-passport.deserializeUser((id, cb) => {
-  User.findById(id).then(user => {
-    cb(null, user);
-  }).catch(err => {
-    cb(err);
-  });
-});
+passport.serializeUser((userId, cb) => cb(null, userId));
 
 export default passport;

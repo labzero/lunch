@@ -1,12 +1,12 @@
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import RestaurantVoteCountContainer from '../../containers/RestaurantVoteCountContainer';
-import RestaurantVoteButtonContainer from '../../containers/RestaurantVoteButtonContainer';
-import RestaurantDecisionContainer from '../../containers/RestaurantDecisionContainer';
-import RestaurantTagListContainer from '../../containers/RestaurantTagListContainer';
-import RestaurantAddTagFormContainer from '../../containers/RestaurantAddTagFormContainer';
-import RestaurantNameFormContainer from '../../containers/RestaurantNameFormContainer';
-import RestaurantDropdownContainer from '../../containers/RestaurantDropdownContainer';
+import RestaurantVoteCountContainer from '../RestaurantVoteCount/RestaurantVoteCountContainer';
+import RestaurantVoteButtonContainer from '../RestaurantVoteButton/RestaurantVoteButtonContainer';
+import RestaurantDecisionContainer from '../RestaurantDecision/RestaurantDecisionContainer';
+import RestaurantTagListContainer from '../RestaurantTagList/RestaurantTagListContainer';
+import RestaurantAddTagFormContainer from '../RestaurantAddTagForm/RestaurantAddTagFormContainer';
+import RestaurantNameFormContainer from '../RestaurantNameForm/RestaurantNameFormContainer';
+import RestaurantDropdownContainer from '../RestaurantDropdown/RestaurantDropdownContainer';
 import s from './Restaurant.scss';
 
 const Restaurant = ({
@@ -49,7 +49,10 @@ const Restaurant = ({
   if (listUiItem.isEditingName && shouldShowDropdown) {
     nameArea = (
       <span className={s.restaurantNameFormContainer}>
-        <RestaurantNameFormContainer id={restaurant.id} name={restaurant.name} />
+        <RestaurantNameFormContainer
+          id={restaurant.id}
+          name={restaurant.name}
+        />
       </span>
     );
   } else {

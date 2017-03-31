@@ -1,7 +1,7 @@
 import React, { PropTypes, Component } from 'react';
 import Autosuggest from 'react-autosuggest';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import TagContainer from '../../containers/TagContainer';
+import TagContainer from '../Tag/TagContainer';
 import { getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
 import s from './TagFilterForm.scss';
 

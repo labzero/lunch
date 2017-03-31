@@ -1,4 +1,3 @@
-import fetch from '../core/fetch';
 import ActionTypes from '../constants/ActionTypes';
 import { getDecision } from '../selectors/decisions';
 import { getNewlyAdded } from '../selectors/listUi';
@@ -70,7 +69,9 @@ export function restaurantRenamed(id, obj, userId) {
 }
 
 export function requestRestaurants() {
-  return { type: ActionTypes.REQUEST_RESTAURANTS };
+  return {
+    type: ActionTypes.REQUEST_RESTAURANTS
+  };
 }
 
 export function receiveRestaurants(json) {
@@ -145,12 +146,11 @@ export function postedTagToRestaurant(restaurantId, id, userId) {
   };
 }
 
-export function deleteTagFromRestaurant(restaurantId, id, userId) {
+export function deleteTagFromRestaurant(restaurantId, id) {
   return {
     type: ActionTypes.DELETE_TAG_FROM_RESTAURANT,
     restaurantId,
-    id,
-    userId
+    id
   };
 }
 
@@ -163,12 +163,17 @@ export function deletedTagFromRestaurant(restaurantId, id, userId) {
   };
 }
 
-function fetchRestaurants() {
+export function fetchRestaurants() {
   return dispatch => {
     dispatch(requestRestaurants());
-    return fetch('/api/restaurants')
+    return fetch('/api/restaurants', {
+      credentials
+    })
       .then(response => processResponse(response))
-      .then(json => dispatch(receiveRestaurants(json)));
+      .then(json => dispatch(receiveRestaurants(json)))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }
 
@@ -224,12 +229,16 @@ export function removeRestaurant(id) {
     return fetch(`/api/restaurants/${id}`, {
       credentials,
       method: 'delete'
-    });
+    })
+      .then(response => processResponse(response))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }
 
-export function changeRestaurantName(id, value) {
-  const payload = { name: value };
+export function changeRestaurantName(id, name) {
+  const payload = { name };
   return dispatch => {
     dispatch(renameRestaurant(id, payload));
     return fetch(`/api/restaurants/${id}`, {
@@ -265,18 +274,22 @@ export function removeVote(restaurantId, id) {
     return fetch(`/api/restaurants/${restaurantId}/votes/${id}`, {
       credentials,
       method: 'delete'
-    });
+    })
+      .then(response => processResponse(response))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }
 
-export function addNewTagToRestaurant(restaurantId, value) {
+export function addNewTagToRestaurant(restaurantId, name) {
   return (dispatch) => {
-    dispatch(postNewTagToRestaurant(restaurantId, value));
+    dispatch(postNewTagToRestaurant(restaurantId, name));
     return fetch(`/api/restaurants/${restaurantId}/tags`, {
       method: 'post',
       credentials,
       headers: jsonHeaders,
-      body: JSON.stringify({ name: value })
+      body: JSON.stringify({ name })
     })
       .then(response => processResponse(response))
       .catch(
@@ -307,6 +320,10 @@ export function removeTagFromRestaurant(restaurantId, id) {
     return fetch(`/api/restaurants/${restaurantId}/tags/${id}`, {
       credentials,
       method: 'delete'
-    });
+    })
+      .then(response => processResponse(response))
+      .catch(
+        err => dispatch(flashError(err.message))
+      );
   };
 }

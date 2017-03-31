@@ -1,32 +1,39 @@
 /*
  * Colors
  * ========================================================================== */
-
+$white-color: #fff;
+$black-color: #000;
 $background-color: #333;
-$border-color: #000;
+$border-color: $black-color;
+$text-color: $black-color;
+
+// Bootstrap overrides
+$gray-base: $black-color;
+$gray-darker: $black-color;
+$gray-dark: $black-color;
+$gray: $black-color;
+$btn-default-color: $black-color;
+$list-group-border: #ddd;
+$list-group-link-color: $black-color;
 $link-color: #66e;
-$link-hover-color: #44e;
-$link-active-color: #22e;
-$danger-color: #ff75e3;
-$danger-hover-color: #e258c6;
-$danger-active-color: #c43bab;
+$brand-danger: #ff75e3;
+$brand-primary: $link-color;
 
 /*
  * Typography
  * ========================================================================== */
-
 $font-family-base: Nunito, sans-serif;
+$normal-weight: 400;
+$bold-weight: 900;
 
 /*
  * Layout
  * ========================================================================== */
-
 $max-content-width: 1000px;
 
 /*
  * Media queries breakpoints
  * ========================================================================== */
-
 $screen-xs-min: 480px;  /* Extra small screen / phone */
 $screen-sm-min: 768px;  /* Small screen / tablet */
 $screen-md-min: 992px;  /* Medium screen / desktop */
@@ -37,3 +44,4 @@ $screen-lg-min: 1200px; /* Large screen / wide desktop */
  * ========================================================================== */
 $default-border-width: 3px;
 $default-border: $default-border-width solid $border-color;
+$button-border-radius: 4px;

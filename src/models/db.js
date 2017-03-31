@@ -1,5 +1,6 @@
-import Sequelize from 'sequelize';
-import configs from '../../database.js';
+// use require syntax to work with migrations
+const Sequelize = require('sequelize');
+const configs = require('../../database.js');
 
 const env = process.env.NODE_ENV || 'development';
 const config = configs[env];
@@ -12,6 +13,7 @@ if (config.use_env_variable) {
   sequelizeInst = new Sequelize(config.database, config.username, config.password, config);
 }
 
-export const sequelize = sequelizeInst;
-
-export const DataTypes = Sequelize;
+module.exports = {
+  sequelize: sequelizeInst,
+  DataTypes: Sequelize
+};

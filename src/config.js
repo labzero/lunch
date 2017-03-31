@@ -8,20 +8,14 @@
  */
 
 /* eslint-disable max-len */
-/* jscs:disable maximumLineLength */
 
 export const port = process.env.PORT || 3000;
 export const host = process.env.WEBSITE_HOSTNAME ||
                     process.env.DOCKERCLOUD_SERVICE_FQDN ? `${process.env.DOCKERCLOUD_SERVICE_FQDN}:${port}` : undefined ||
-                    `localhost:${port}`;
+                    `local.lunch.pink:${port}`;
+export const hostname = host.match(/^([^:]*):?[0-9]{0,}/)[1];
 
 export const wsHost = process.env.WS_HOST;
-
-export const httpsPort = process.env.HTTPS_PORT || 443;
-export const selfSigned = process.env.HTTPS_PRIVATEKEY === undefined ||
-                          process.env.HTTPS_CERTIFICATE === undefined;
-export const privateKeyPath = process.env.HTTPS_PRIVATEKEY || 'cert/server.key';
-export const certificatePath = process.env.HTTPS_CERTIFICATE || 'cert/server.crt';
 
 export const analytics = {
 

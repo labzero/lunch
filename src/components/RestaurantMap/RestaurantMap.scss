@@ -3,7 +3,7 @@
 .root {
   background: #fcb3f2;
   border: solid black;
-  border-width: $default-border-width 0;
+  border-width: 0 0 $default-border-width;
   height: 500px;
   overflow: hidden;
   position: relative;
@@ -39,28 +39,6 @@
 
 .tempMarkerCircle {
   animation: dash 1s infinite linear;
-}
-
-.center {
-  position: relative;
-
-  &::before,
-  &::after {
-    background: red;
-    content: '';
-    height: 3px;
-    margin: -6px;
-    position: absolute;
-    width: 16px;
-  }
-
-  &::before {
-    transform: rotate(45deg);
-  }
-
-  &::after {
-    transform: rotate(135deg);
-  }
 }
 
 .mapSettingsContainer {

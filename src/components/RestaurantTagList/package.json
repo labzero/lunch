@@ -1,6 +1,0 @@
-{
-  "name": "RestaurantTagList",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./RestaurantTagList.js"
-}

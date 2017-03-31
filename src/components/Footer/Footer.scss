@@ -7,18 +7,18 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+@import '../../styles/_mixins.scss';
 @import '../../styles/_variables.scss';
 
 .root {
   background: url('./footer-bg.jpg');
   background-size: cover;
   border-top: $default-border;
-  color: #fff;
   padding: 20px 15px;
 
   &,
   button {
-    text-shadow: 0 0 5px black, 0 0 10px black, 0 0 20px black;
+    @include text-on-texture;
   }
 }
 
@@ -26,10 +26,6 @@
   margin: 0 auto;
   max-width: $max-content-width;
   text-align: center;
-}
-
-.spacer {
-  border-left: 1px solid #fff;
 }
 
 .text,
@@ -43,7 +39,7 @@
 .link:visited {
   background: none;
   border: 0;
-  color: #fff;
+  color: $white-color;
   outline: none;
   text-decoration: none;
 }

@@ -1,0 +1,6 @@
+{
+  "name": "ConfirmModal",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./ConfirmModal.js"
+}

@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './TagManagerItem.scss';
-import TagContainer from '../../containers/TagContainer';
+import TagContainer from '../Tag/TagContainer';
 
 const TagManagerItem = ({ tag, showDelete, handleDeleteClicked }) => (
   <li>

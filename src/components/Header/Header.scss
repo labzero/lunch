@@ -7,6 +7,7 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+@import '../../styles/_mixins.scss';
 @import '../../styles/_variables.scss';
 
 @keyframes animatedBackground {
@@ -34,8 +35,18 @@
 }
 
 .root {
+  border-bottom: $default-border;
   overflow: hidden;
   position: relative;
+  z-index: 2; /* above things in layout children */
+}
+
+.loggedIn {
+  .bannerTitle {
+    img {
+      height: 5em;
+    }
+  }
 }
 
 .background {
@@ -53,7 +64,6 @@
   padding: 10px 0;
   position: relative;
   max-width: $max-content-width;
-  z-index: 1; /* above background */
 }
 
 .banner {
@@ -62,17 +72,12 @@
 
 .bannerTitle {
   animation: squashStretch .25s cubic-bezier(.45, -.61, .57, 1.48);
-  background: url('./lunch.png') no-repeat center;
   background-size: contain;
-  font-size: 5em;
+  font-size: inherit;
   margin: 0;
-  padding: 10px;
 
-  a {
-    display: block;
-    overflow: hidden;
-    text-indent: 100%;
-    white-space: nowrap;
+  img {
+    height: 6em;
   }
 }
 
@@ -82,8 +87,54 @@
   z-index: 2; /* above logo */
 }
 
+.hamburger {
+  @include plain-button;
+
+  cursor: pointer;
+  margin-top: -15px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+
+  span {
+    @include image-replace;
+
+    background: url('./hamburger.svg') no-repeat center;
+    display: block;
+    height: 30px;
+    transform: scale(1);
+    transition: transform .1s;
+    width: 45px;
+  }
+
+  &:hover {
+    span {
+      background-image: url('./hamburger-hover.svg');
+    }
+  }
+
+  &:active {
+    span {
+      transform: scale(1.25, .75);
+    }
+  }
+}
+
+.menuBackground {
+  @include plain-button;
+
+  background: rgba(0, 0, 0, .5);
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
 @media only screen and (max-height: 500px) {
   .bannerTitle {
-    font-size: 4em;
+    img {
+      height: 5em;
+    }
   }
 }

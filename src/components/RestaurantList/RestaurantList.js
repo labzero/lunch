@@ -3,7 +3,8 @@ import FlipMove from 'react-flip-move';
 import { Element as ScrollElement } from 'react-scroll';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './RestaurantList.scss';
-import RestaurantContainer from '../../containers/RestaurantContainer';
+import RestaurantContainer from '../Restaurant/RestaurantContainer';
+import Loading from '../Loading';
 
 class RestaurantList extends Component {
   componentWillUpdate() {
@@ -16,7 +17,11 @@ class RestaurantList extends Component {
   }
 
   render() {
-    const { ids } = this.props;
+    const { ids, restaurantListReady } = this.props;
+
+    if (!restaurantListReady) {
+      return <Loading />;
+    }
 
     return (
       <FlipMove typeName="ul" className={s.root} staggerDelayBy={40} staggerDurationBy={40}>
@@ -37,7 +42,8 @@ class RestaurantList extends Component {
 }
 
 RestaurantList.propTypes = {
-  ids: PropTypes.array.isRequired
+  ids: PropTypes.array.isRequired,
+  restaurantListReady: PropTypes.bool.isRequired
 };
 
 export default withStyles(s)(RestaurantList);

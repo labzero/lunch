@@ -1,3 +1,5 @@
+@import './_variables.scss';
+
 @mixin plain-button {
   background: none;
   border: 0;
@@ -10,6 +12,11 @@
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+@mixin page-root {
+  padding-bottom: 2em;
+  padding-top: 1em;
 }
 
 @mixin autosuggest-container {
@@ -29,9 +36,8 @@
 
   ul {
     @include plain-list;
-
-    background: #fff;
-    border: 1px solid black;
+    background: $white-color;
+    border: 1px solid $black-color;
   }
 }
 
@@ -42,6 +48,11 @@
 
 @mixin autosuggest-suggestion-focused {
   background: pink;
+}
+
+@mixin text-on-texture {
+  color: $white-color;
+  text-shadow: 0 0 5px $black-color, 0 0 10px $black-color, 0 0 20px $black-color;
 }
 
 @mixin image-replace {

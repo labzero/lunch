@@ -1,0 +1,44 @@
+@import '../../../styles/_mixins.scss';
+@import '../../../styles/_variables.scss';
+
+.root {
+  @include page-root;
+}
+
+.list {
+  font-size: 1.5em;
+  font-weight: bold;
+  text-align: center;
+}
+
+.item {
+  display: flex;
+  padding: 0;
+}
+
+.itemLink {
+  border: 0;
+  color: $black-color;
+  flex-grow: 1;
+  margin: 0;
+
+  &,
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.leave {
+  background: none;
+  border: solid $list-group-border;
+  border-width: 0 0 0 1px;
+  outline: 0;
+
+  span {
+    line-height: 2em;
+  }
+}
+
+.centerer {
+  text-align: center;
+}

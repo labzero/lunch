@@ -7,57 +7,54 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+import 'isomorphic-fetch';
 import Promise from 'bluebird';
 import path from 'path';
 import express from 'express';
-import fs from 'fs';
 import { Server as HttpServer } from 'http';
-import { Server as HttpsServer } from 'https';
+import enforce from 'express-sslify';
 import compression from 'compression';
-import forceSSL from 'express-force-ssl';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import expressJwt from 'express-jwt';
 import jwt from 'jsonwebtoken';
 import React from 'react';
-import { Provider } from 'react-redux';
 import ReactDOM from 'react-dom/server';
-import { match, RouterContext } from 'react-router';
-import { Server as WebSocketServer } from 'ws';
+import UniversalRouter from 'universal-router';
+import expressWs from 'express-ws';
 import serialize from 'serialize-javascript';
 import Honeybadger from 'honeybadger';
 import PrettyError from 'pretty-error';
+import App from './components/App';
 import Html from './components/Html';
 import { ErrorPageWithoutStyle } from './components/ErrorPage/ErrorPage';
 import errorPageStyle from './components/ErrorPage/ErrorPage.scss';
-import configureStore from './configureStore';
-/* eslint-disable import/no-unresolved */
+import hasRole from './helpers/hasRole';
+import teamRoutes from './routes/team';
+import mainRoutes from './routes/main';
 import assets from './assets.json'; // eslint-disable-line import/no-unresolved
-/* eslint-enable import/no-unresolved */
-import { port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } from './config';
-import makeRoutes from './routes';
-import ContextHolder from './core/ContextHolder';
+import configureStore from './store/configureStore';
+import { host, hostname, port, auth } from './config';
+import makeInitialState from './initialState';
 import passport from './core/passport';
-import restaurantApi from './api/restaurants';
-import tagApi from './api/tags';
-import decisionApi from './api/decisions';
-import whitelistEmailApi from './api/whitelistEmails';
-import { Restaurant, Tag, User, WhitelistEmail, Decision } from './models';
+import api from './api';
+import { Team, User } from './models';
+
+fetch.promise = Promise;
 
 const app = express();
+
+const bsHost = process.env.BS_RUNNING ? `${hostname}:3001` : host;
+const domain = `.${hostname}`;
 
 const httpServer = new HttpServer(app);
 let httpsServer;
 if (process.env.NODE_ENV === 'production') {
-  if (selfSigned) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  }
-  const key = fs.readFileSync(privateKeyPath);
-  const cert = fs.readFileSync(certificatePath);
-  httpsServer = new HttpsServer({ key, cert }, app);
-  app.use(forceSSL);
+  app.use(enforce.HTTPS({
+    trustProtoHeader: true,
+    trustXForwardedHostHeader: true
+  }));
 }
-const routes = makeRoutes();
 
 //
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
@@ -86,35 +83,86 @@ app.use(expressJwt({
 }));
 app.use(passport.initialize());
 
-app.get('/login',
-  passport.authenticate('google', { scope: ['email', 'profile'] })
-);
+app.use((req, res, next) => {
+  const subdomainMatch = req.hostname.match(`^(.*)${domain.replace(/\./g, '\\.')}`);
+  if (subdomainMatch && subdomainMatch[1]) {
+    // eslint-disable-next-line no-param-reassign
+    req.subdomain = subdomainMatch[1];
+  }
+
+  if (typeof req.user === 'number' || typeof req.user === 'string') {
+    User.getSessionUser(req.user).then(user => {
+      if (user) {
+        // eslint-disable-next-line no-param-reassign
+        req.user = user;
+      } else {
+        // eslint-disable-next-line no-param-reassign
+        delete req.user;
+      }
+      next();
+    }).catch(err => next(err));
+  } else {
+    next();
+  }
+});
+
 if (__DEV__) {
   app.enable('trust proxy');
 }
+app.get(
+  '/login',
+  (req, res, next) => {
+    if (req.subdomain) {
+      res.redirect(301, `${req.protocol}://${bsHost}/login?team=${req.subdomain}`);
+    } else {
+      const options = { scope: ['email', 'profile'], session: false };
+      if (req.query.team) {
+        options.state = req.query.team;
+      }
+      passport.authenticate('google', options)(req, res, next);
+    }
+  },
+);
 app.get('/login/callback',
-  passport.authenticate('google', { failureRedirect: '/' }),
+  (req, res, next) => {
+    const options = { failureRedirect: '/coming-soon', session: false };
+    if (req.query.team) {
+      options.state = req.query.team;
+    }
+    passport.authenticate('google', options)(req, res, next);
+  },
   (req, res) => {
     const expiresIn = 60 * 60 * 24 * 180; // 180 days
-    const token = jwt.sign(req.user.toJSON(), auth.jwt.secret, { expiresIn });
-    res.cookie('id_token', token, { maxAge: 1000 * expiresIn, httpOnly: true });
-    res.redirect('/');
+    const token = jwt.sign(req.user, auth.jwt.secret);
+    res.cookie('id_token', token, {
+      domain,
+      maxAge: 1000 * expiresIn,
+      httpOnly: true
+    });
+    if (req.query.state) {
+      res.redirect(`${req.protocol}://${req.query.state}.${bsHost}/`);
+    } else {
+      res.redirect('/');
+    }
   },
 );
 app.get('/logout', (req, res) => {
   req.logout();
-  res.clearCookie('id_token');
+  res.clearCookie('id_token', { domain });
   res.redirect('/');
 });
 
 //
 // Register WebSockets
 // -----------------------------------------------------------------------------
-const wss = new WebSocketServer({ server: httpsServer === undefined ? httpServer : httpsServer });
+const wsInstance = expressWs(app, httpsServer === undefined ? httpServer : httpsServer);
+const wss = wsInstance.getWss();
 
-wss.broadcast = data => {
+wss.broadcast = (teamId, data) => {
   wss.clients.forEach(client => {
-    client.send(JSON.stringify(data));
+    if (client.teamId === teamId) {
+      client.send(JSON.stringify(data));
+    }
   });
 };
 
@@ -124,127 +172,105 @@ app.use((req, res, next) => {
 });
 
 //
+// Get current team
+// -----------------------------------------------------------------------------
+app.use(async (req, res, next) => {
+  if (req.subdomain) {
+    const team = await Team.findOne({ where: { slug: req.subdomain } });
+    if (team && hasRole(req.user, team)) {
+      req.team = team; // eslint-disable-line no-param-reassign
+    }
+  }
+  next();
+});
+
+//
 // Register API middleware
 // -----------------------------------------------------------------------------
-app.use('/api/restaurants', restaurantApi);
-app.use('/api/tags', tagApi);
-app.use('/api/decisions', decisionApi);
-app.use('/api/whitelistEmails', whitelistEmailApi);
+app.use('/api', api());
 
 //
 // Register server-side rendering middleware
 // -----------------------------------------------------------------------------
 app.get('*', async (req, res, next) => {
   try {
-    match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
-      if (error) {
-        throw error;
-      }
-      if (redirectLocation) {
-        const redirectPath = `${redirectLocation.pathname}${redirectLocation.search}`;
-        res.redirect(302, redirectPath);
-        return;
-      }
-      const finds = [
-        Restaurant.findAllWithTagIds(),
-        Tag.scope('orderedByRestaurant').findAll(),
-        Decision.scope('fromToday').findOne()
-      ];
-      if (req.user) {
-        finds.push(User.findAll({ attributes: ['id', 'name'] }));
-        finds.push(WhitelistEmail.findAll({ attributes: ['id', 'email'] }));
-      }
-      Promise.all(finds)
-        .then(([restaurants, tags, decision, users, whitelistEmails]) => {
-          let statusCode = 200;
-          const initialState = {
-            restaurants: {
-              isFetching: false,
-              didInvalidate: false,
-              items: restaurants.map(r => r.toJSON())
-            },
-            tags: {
-              isFetching: false,
-              didInvalidate: false,
-              items: tags.map(t => t.toJSON())
-            },
-            decision: {
-              isFetching: false,
-              didInvalidate: false,
-              inst: decision === null ? decision : decision.toJSON()
-            },
-            flashes: [],
-            notifications: [],
-            modals: {},
-            user: {},
-            users: {
-              items: []
-            },
-            whitelistEmails: {
-              isFetching: false,
-              didInvalidate: false,
-              items: []
-            },
-            latLng: {
-              lat: parseFloat(process.env.SUGGEST_LAT),
-              lng: parseFloat(process.env.SUGGEST_LNG)
-            },
-            listUi: {},
-            mapUi: {
-              showUnvoted: true
-            },
-            tagFilters: [],
-            tagExclusions: [],
-            tagUi: {
-              filterForm: {},
-              exclusionForm: {}
-            },
-            pageUi: {},
-            whitelistEmailUi: {},
-            wsPort: process.env.BS_RUNNING ? port : 0
-          };
-          if (req.user) {
-            initialState.user = req.user;
-            initialState.users.items = users.map(u => u.toJSON());
-            initialState.whitelistEmails.items = whitelistEmails.map(w => w.toJSON());
-          }
-          const data = {
-            apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
-            children: '',
-            title: 'Lunch',
-            description: 'An app for groups to decide on nearby lunch options.',
-            body: '',
-            root: `${req.protocol}://${req.get('host')}`,
-            initialState: serialize(initialState)
-          };
-          const css = new Set();
-          const context = {
-            insertCss: (...styles) => {
-              // eslint-disable-next-line no-underscore-dangle
-              styles.forEach(style => css.add(style._getCss()));
-            },
-            onPageNotFound: () => (statusCode = 404),
-          };
-          const store = configureStore(initialState);
-          data.children = ReactDOM.renderToString(
-            <ContextHolder context={context}>
-              <Provider store={store}>
-                <RouterContext {...renderProps} />
-              </Provider>
-            </ContextHolder>
-          );
-          data.styles = [
-            { id: 'css', cssText: [...css].join('') },
-          ];
-          data.scripts = [
-            assets.vendor.js,
-            assets.client.js,
-          ];
-          const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
-          res.status(statusCode);
-          res.send(`<!doctype html>${html}`);
-        }).catch(err => next(err));
+    const stateData = {
+      host: bsHost
+    };
+    if (req.user) {
+      stateData.user = req.user;
+      stateData.teams = await Team.findAll({
+        order: 'created_at ASC',
+        where: { id: req.user.roles.map(r => r.team_id) }
+      });
+      stateData.team = req.team;
+    }
+
+    const initialState = makeInitialState(stateData);
+    const store = configureStore(initialState, {
+      cookie: req.headers.cookie,
     });
+
+    const css = new Set();
+
+    // Global (context) variables that can be easily accessed from any React component
+    // https://facebook.github.io/react/docs/context.html
+    const context = {
+      // Enables critical path CSS rendering
+      // https://github.com/kriasoft/isomorphic-style-loader
+      insertCss: (...styles) => {
+        // eslint-disable-next-line no-underscore-dangle
+        styles.forEach(style => css.add(style._getCss()));
+      },
+      // Initialize a new Redux store
+      // http://redux.js.org/docs/basics/UsageWithReact.html
+      store
+    };
+
+    let router;
+    if (req.subdomain) {
+      router = new UniversalRouter(teamRoutes);
+    } else {
+      router = new UniversalRouter(mainRoutes);
+    }
+
+    const route = await router.resolve({
+      ...context,
+      path: req.path,
+      query: req.query
+    });
+
+    if (route.redirect) {
+      res.redirect(route.status || 302, route.redirect);
+      return;
+    }
+
+    const data = { ...route,
+      apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
+      children: '',
+      title: 'Lunch',
+      description: 'An app for groups to decide on nearby lunch options.',
+      body: '',
+      root: `${req.protocol}://${req.get('host')}`,
+      initialState: serialize(initialState)
+    };
+
+    data.children = ReactDOM.renderToString(<App context={context}>{route.component}</App>);
+
+    data.styles = [
+      { id: 'css', cssText: [...css].join('') },
+    ];
+    data.scripts = [
+      assets.vendor.js,
+      assets.client.js,
+    ];
+    if (assets[route.chunk]) {
+      data.scripts.push(assets[route.chunk].js);
+    }
+
+    const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
+    res.status(route.status || 200);
+    res.send(`<!doctype html>${html}`);
   } catch (err) {
     next(err);
   }
@@ -279,10 +305,5 @@ app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
 // -----------------------------------------------------------------------------
 httpServer.listen(port, () => {
   /* eslint-disable no-console */
-  console.log(`The server is running at http://localhost:${port}/`);
+  console.log(`The server is running at http://local.lunch.pink:${port}/`);
 });
-if (httpsServer !== undefined) {
-  httpsServer.listen(httpsPort, () => {
-    console.log(`The HTTPS server is running at https://localhost:${httpsPort}`);
-  });
-}

@@ -1,10 +1,11 @@
 import { sequelize } from './db';
 import Vote from './Vote';
 import User from './User';
-import WhitelistEmail from './WhitelistEmail';
 import RestaurantTag from './RestaurantTag';
 import Tag from './Tag';
+import Team from './Team';
 import Restaurant from './Restaurant';
+import Role from './Role';
 import Decision from './Decision';
 
 Tag.addScope('orderedByRestaurant', {
@@ -25,7 +26,7 @@ Tag.addScope('orderedByRestaurant', {
   order: 'restaurant_count DESC'
 });
 
-Restaurant.findAllWithTagIds = () =>
+Restaurant.findAllWithTagIds = ({ team_id }) =>
   Restaurant.findAll({
     attributes: {
       include: [
@@ -62,7 +63,43 @@ Restaurant.findAllWithTagIds = () =>
       votes.created_at DESC NULLS LAST,
       all_decision_count ASC,
       all_vote_count DESC,
-      name ASC`
+      name ASC`,
+    where: {
+      team_id
+    }
+  });
+
+const teamUserAttributes = (teamId, extraAttributes) => ({
+  attributes: extraAttributes.concat([
+    'name',
+    'id',
+    [sequelize.literal(`(SELECT "roles"."type" FROM "roles"
+      WHERE "roles"."team_id" = ${teamId} AND "roles"."user_id" = "user"."id")`),
+      'type']
+  ])
+});
+
+User.findAllForTeam = (teamId, extraAttributes) =>
+  User.findAll({
+    attributes: teamUserAttributes(teamId, extraAttributes)
+  });
+
+User.findOneWithRoleType = (id, teamId, extraAttributes) =>
+  User.findOne({
+    attributes: teamUserAttributes(teamId, extraAttributes),
+    where: { id }
+  });
+
+User.getSessionUser = (id) =>
+  User.findOne({
+    where: { id },
+    include: [
+      {
+        model: Role,
+        required: false,
+        attributes: ['type', 'team_id', 'user_id']
+      }
+    ]
   });
 
 Restaurant.hasMany(Vote);
@@ -72,14 +109,35 @@ Restaurant.belongsToMany(Tag, {
 });
 Restaurant.hasMany(RestaurantTag);
 
+Role.belongsTo(User);
+Role.belongsTo(Team);
+
 User.hasMany(Vote);
+User.hasMany(Role);
+User.belongsToMany(Team, {
+  through: 'role'
+});
 
 Tag.belongsToMany(Restaurant, {
   through: 'restaurants_tags'
 });
 Tag.hasMany(RestaurantTag);
 
+Team.hasMany(Role);
+Team.belongsToMany(User, {
+  through: 'role'
+});
+
 RestaurantTag.belongsTo(Restaurant);
 RestaurantTag.belongsTo(Tag);
 
-export { Vote, User, WhitelistEmail, RestaurantTag, Tag, Restaurant, Decision };
+export {
+  Vote,
+  User,
+  RestaurantTag,
+  Tag,
+  Team,
+  Restaurant,
+  Role,
+  Decision
+};

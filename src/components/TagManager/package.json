@@ -1,6 +1,0 @@
-{
-  "name": "TagManager",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./TagManager.js"
-}

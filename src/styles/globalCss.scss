@@ -8,11 +8,14 @@ $icon-font-path: '../../node_modules/bootstrap-sass/assets/fonts/bootstrap/';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/glyphicons';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/scaffolding';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/type';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/forms';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/buttons';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/component-animations';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/dropdowns';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/button-groups';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/forms';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/grid';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/list-group';
+@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/tables';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/close';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/modals';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/tooltip';
@@ -27,18 +30,9 @@ body {
 
 a {
   color: $link-color;
-
-  &:hover,
-  &:focus {
-    color: $link-hover-color;
-  }
-
-  &:active {
-    color: $link-active-color;
-  }
 }
 
-.geosuggest-item {
+.geosuggest__item {
   &:hover {
     background: transparentize(pink, .75);
   }
@@ -101,31 +95,25 @@ a {
 
   &:hover,
   &:focus {
-    background: $link-hover-color;
     border-color: $border-color;
   }
 
   &:active,
   &:hover:active,
   &:focus:active {
-    background: $link-active-color;
     border-color: $border-color;
   }
 }
 
 .btn-danger {
-  background: $danger-color;
-
   &:hover,
   &:focus {
-    background: $danger-hover-color;
     border-color: $border-color;
   }
 
   &:active,
   &:hover:active,
   &:focus:active {
-    background: $danger-active-color;
     border-color: $border-color;
   }
 }

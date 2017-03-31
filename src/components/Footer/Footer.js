@@ -7,78 +7,26 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React, { PropTypes } from 'react';
+import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Footer.scss';
 
-const Footer = ({ user, manageTags, openEmailWhitelist }) => {
-  let manageTagsButton;
-  let manageTagsSpacer;
-  let emailWhitelistButton;
-  let emailWhitelistSpacer;
-  let logoutSection;
-
-  if (user.id !== undefined) {
-    manageTagsButton = (
-      <button className={`${s.link} ${s.text}`} onClick={manageTags}>
-        Manage Tags
-      </button>
-    );
-    manageTagsSpacer = <span className={s.spacer} />;
-    emailWhitelistButton = (
-      <button className={`${s.link} ${s.text}`} onClick={openEmailWhitelist}>
-        Email Whitelist
-      </button>
-    );
-    emailWhitelistSpacer = <span className={s.spacer} />;
-    logoutSection = (
-      <div className={s.container}>
-        <span className={s.text}>
-          {user.name}
-        </span>
-        <span className={s.spacer} />
-        <a className={s.link} href="/logout">Log Out</a>
-      </div>
-    );
-  }
-
-  return (
-    <div className={s.root}>
-      {logoutSection}
-      <div className={s.container}>
-        {manageTagsButton}
-        {manageTagsSpacer}
-        {emailWhitelistButton}
-        {emailWhitelistSpacer}
+const Footer = () => (
+  <div className={s.root}>
+    <div className={s.container}>
+      <span className={s.text}>
+        ©
         <a
           className={s.link}
-          href="https://github.com/labzero/lunch"
+          href="https://labzero.com"
           target="_blank"
           rel="noopener noreferrer"
         >
-          GitHub
+          Lab Zero
         </a>
-        <span className={s.spacer} />
-        <span className={s.text}>
-          ©
-          <a
-            className={s.link}
-            href="https://labzero.com"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Lab Zero
-          </a>
-        </span>
-      </div>
+      </span>
     </div>
-  );
-};
-
-Footer.propTypes = {
-  manageTags: PropTypes.func.isRequired,
-  user: PropTypes.object.isRequired,
-  openEmailWhitelist: PropTypes.func.isRequired
-};
+  </div>
+);
 
 export default withStyles(s)(Footer);
