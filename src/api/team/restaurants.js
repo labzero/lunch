@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import request from 'request';
-import { Restaurant, Vote, Tag } from '../models';
-import errorCatcher from './helpers/errorCatcher';
-import checkTeamRole from './helpers/checkTeamRole';
-import loggedIn from './helpers/loggedIn';
-import { restaurantPosted, restaurantDeleted, restaurantRenamed } from '../actions/restaurants';
+import { Restaurant, Vote, Tag } from '../../models';
+import errorCatcher from '../helpers/errorCatcher';
+import checkTeamRole from '../helpers/checkTeamRole';
+import loggedIn from '../helpers/loggedIn';
+import { restaurantPosted, restaurantDeleted, restaurantRenamed } from '../../actions/restaurants';
 import voteApi from './votes';
 import restaurantTagApi from './restaurantTags';
 

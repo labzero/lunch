@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import { Tag, RestaurantTag } from '../models';
-import errorCatcher from './helpers/errorCatcher';
-import checkTeamRole from './helpers/checkTeamRole';
-import loggedIn from './helpers/loggedIn';
+import { Tag, RestaurantTag } from '../../models';
+import errorCatcher from '../helpers/errorCatcher';
+import checkTeamRole from '../helpers/checkTeamRole';
+import loggedIn from '../helpers/loggedIn';
 import {
   postedNewTagToRestaurant,
   postedTagToRestaurant,
   deletedTagFromRestaurant
-} from '../actions/restaurants';
+} from '../../actions/restaurants';
 
 export default () => {
   const router = new Router({ mergeParams: true });

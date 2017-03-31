@@ -14,7 +14,7 @@ const proxyquireStrict = proxyquire.noCallThru();
 
 const dbMock = new SequelizeMock();
 
-describe('api/users', () => {
+describe('api/team/users', () => {
   let app;
   let checkTeamRoleSpy;
   let RoleMock;
@@ -49,15 +49,15 @@ describe('api/users', () => {
     broadcastSpy = spy();
 
     makeApp = deps => {
-      const usersApi = proxyquireStrict('../users', {
-        '../models': mockEsmodule({
+      const usersApi = proxyquireStrict('../team/users', {
+        '../../models': mockEsmodule({
           Role: RoleMock,
           User: UserMock,
         }),
-        './helpers/loggedIn': mockEsmodule({
+        '../helpers/loggedIn': mockEsmodule({
           default: loggedInSpy
         }),
-        './helpers/checkTeamRole': mockEsmodule({
+        '../helpers/checkTeamRole': mockEsmodule({
           default: checkTeamRoleSpy
         }),
         ...deps
@@ -81,7 +81,7 @@ describe('api/users', () => {
   describe('GET /', () => {
     beforeEach(() => {
       app = makeApp({
-        '../helpers/hasRole': mockEsmodule({
+        '../../helpers/hasRole': mockEsmodule({
           default: () => false
         })
       });
@@ -122,7 +122,7 @@ describe('api/users', () => {
       describe('as member or owner', () => {
         beforeEach(() => {
           app = makeApp({
-            '../helpers/hasRole': mockEsmodule({
+            '../../helpers/hasRole': mockEsmodule({
               default: () => true
             })
           });
@@ -163,15 +163,15 @@ describe('api/users', () => {
           res.send();
         });
         app = makeApp({
-          '../helpers/hasRole': mockEsmodule({
+          '../../helpers/hasRole': mockEsmodule({
             default: () => true
           }),
-          '../models': mockEsmodule({
+          '../../models': mockEsmodule({
             User: {
               scope: stub().throws('Oh No')
             }
           }),
-          './helpers/errorCatcher': mockEsmodule({
+          '../helpers/errorCatcher': mockEsmodule({
             default: errorCatcherSpy
           })
         });
@@ -204,7 +204,7 @@ describe('api/users', () => {
       let response;
       beforeEach((done) => {
         app = makeApp({
-          '../helpers/hasRole': mockEsmodule({
+          '../../helpers/hasRole': mockEsmodule({
             default: () => false
           })
         });
@@ -228,7 +228,7 @@ describe('api/users', () => {
       let findOneSpy;
       beforeEach(() => {
         app = makeApp({
-          '../helpers/hasRole': mockEsmodule({
+          '../../helpers/hasRole': mockEsmodule({
             default: () => true
           })
         });
@@ -252,10 +252,10 @@ describe('api/users', () => {
           roles: [{}, {}, {}, {}, {}]
         }));
         app = makeApp({
-          '../constants': mockEsmodule({
+          '../../constants': mockEsmodule({
             TEAM_LIMIT: 5
           }),
-          '../helpers/hasRole': mockEsmodule({
+          '../../helpers/hasRole': mockEsmodule({
             default: () => true
           })
         });
@@ -287,7 +287,7 @@ describe('api/users', () => {
         let response;
         beforeEach((done) => {
           app = makeApp({
-            '../helpers/hasRole': mockEsmodule({
+            '../../helpers/hasRole': mockEsmodule({
               default: () => true
             })
           });
@@ -311,7 +311,7 @@ describe('api/users', () => {
         let createSpy;
         beforeEach(() => {
           app = makeApp({
-            '../helpers/hasRole': mockEsmodule({
+            '../../helpers/hasRole': mockEsmodule({
               default: stub()
                 .onFirstCall()
                 .returns(true)
@@ -338,7 +338,7 @@ describe('api/users', () => {
       let findOneStub;
       beforeEach(() => {
         app = makeApp({
-          '../helpers/hasRole': mockEsmodule({
+          '../../helpers/hasRole': mockEsmodule({
             default: () => true
           })
         });
@@ -375,7 +375,7 @@ describe('api/users', () => {
       beforeEach((done) => {
         userToCreate = { id: 2 };
         app = makeApp({
-          '../helpers/hasRole': mockEsmodule({
+          '../../helpers/hasRole': mockEsmodule({
             default: () => true
           })
         });
@@ -413,10 +413,10 @@ describe('api/users', () => {
           res.send();
         });
         app = makeApp({
-          '../helpers/hasRole': mockEsmodule({
+          '../../helpers/hasRole': mockEsmodule({
             default: () => true
           }),
-          './helpers/errorCatcher': mockEsmodule({
+          '../helpers/errorCatcher': mockEsmodule({
             default: errorCatcherSpy
           })
         });
@@ -452,7 +452,7 @@ describe('api/users', () => {
       beforeEach(() => {
         getRoleSpy = spy();
         app = makeApp({
-          '../helpers/getRole': mockEsmodule({
+          '../../helpers/getRole': mockEsmodule({
             default: getRoleSpy
           })
         });
@@ -477,7 +477,7 @@ describe('api/users', () => {
         };
         path = `/${user.id}`;
         app = makeApp({
-          '../helpers/getRole': mockEsmodule({
+          '../../helpers/getRole': mockEsmodule({
             default: spy(() => role)
           })
         });
@@ -569,7 +569,7 @@ describe('api/users', () => {
         otherUserId = 2;
         path = `/${otherUserId}`;
         app = makeApp({
-          '../helpers/getRole': mockEsmodule({
+          '../../helpers/getRole': mockEsmodule({
             default: spy(() => currentUserRole)
           })
         });
@@ -631,7 +631,7 @@ describe('api/users', () => {
         otherUserId = 2;
         path = `/${otherUserId}`;
         app = makeApp({
-          '../helpers/getRole': mockEsmodule({
+          '../../helpers/getRole': mockEsmodule({
             default: spy(() => currentUserRole)
           })
         });
@@ -747,7 +747,7 @@ describe('api/users', () => {
         }));
         stub(UserMock, 'findOne').callsFake(() => Promise.resolve(userToChange));
         app = makeApp({
-          '../helpers/getRole': mockEsmodule({
+          '../../helpers/getRole': mockEsmodule({
             default: spy(() => currentUserRole)
           })
         });
@@ -776,12 +776,12 @@ describe('api/users', () => {
         });
 
         app = makeApp({
-          '../models': mockEsmodule({
+          '../../models': mockEsmodule({
             Role: {
               findOne: stub().throws('Oh No')
             }
           }),
-          './helpers/errorCatcher': mockEsmodule({
+          '../helpers/errorCatcher': mockEsmodule({
             default: errorCatcherSpy
           })
         });
@@ -833,7 +833,7 @@ describe('api/users', () => {
         stub(RoleMock, 'findOne').callsFake(() => Promise.resolve(roleToDestroy));
         stub(UserMock, 'findOne').callsFake(() => Promise.resolve(userToDelete));
         app = makeApp({
-          '../helpers/getRole': mockEsmodule({
+          '../../helpers/getRole': mockEsmodule({
             default: spy(() => currentUserRole)
           })
         });

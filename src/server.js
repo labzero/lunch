@@ -31,11 +31,12 @@ import App from './components/App';
 import Html from './components/Html';
 import { ErrorPageWithoutStyle } from './components/ErrorPage/ErrorPage';
 import errorPageStyle from './components/ErrorPage/ErrorPage.scss';
+import hasRole from './helpers/hasRole';
 import teamRoutes from './routes/team';
 import mainRoutes from './routes/main';
 import assets from './assets.json'; // eslint-disable-line import/no-unresolved
 import configureStore from './store/configureStore';
-import { host, port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } from './config';
+import { host, hostname, port, httpsPort, auth, selfSigned, privateKeyPath, certificatePath } from './config';
 import makeInitialState from './initialState';
 import passport from './core/passport';
 import api from './api';
@@ -45,7 +46,6 @@ fetch.promise = Promise;
 
 const app = express();
 
-const hostname = host.match(/^([^:]*):?[0-9]{0,}/)[1];
 const bsHost = process.env.BS_RUNNING ? `${hostname}:3001` : host;
 const domain = `.${hostname}`;
 
@@ -89,6 +89,12 @@ app.use(expressJwt({
 app.use(passport.initialize());
 
 app.use((req, res, next) => {
+  const subdomainMatch = req.hostname.match(`^(.*)${domain.replace(/\./g, '\\.')}`);
+  if (subdomainMatch && subdomainMatch[1]) {
+    // eslint-disable-next-line no-param-reassign
+    req.subdomain = subdomainMatch[1];
+  }
+
   if (typeof req.user === 'number' || typeof req.user === 'string') {
     User.getSessionUser(req.user).then(user => {
       if (user) {
@@ -105,17 +111,14 @@ app.use((req, res, next) => {
   }
 });
 
-const getSubdomainMatch = req => req.hostname.match(`^(.*)${domain.replace(/\./g, '\\.')}`);
-
 if (__DEV__) {
   app.enable('trust proxy');
 }
 app.get(
   '/login',
   (req, res, next) => {
-    const subdomainMatch = getSubdomainMatch(req);
-    if (subdomainMatch) {
-      res.redirect(301, `${req.protocol}://${bsHost}/login?team=${subdomainMatch[1]}`);
+    if (req.subdomain) {
+      res.redirect(301, `${req.protocol}://${bsHost}/login?team=${req.subdomain}`);
     } else {
       const options = { scope: ['email', 'profile'], session: false };
       if (req.query.team) {
@@ -177,13 +180,10 @@ app.use((req, res, next) => {
 // Get current team
 // -----------------------------------------------------------------------------
 app.use(async (req, res, next) => {
-  const subdomainMatch = getSubdomainMatch(req);
-  if (subdomainMatch) {
-    // eslint-disable-next-line no-param-reassign
-    req.team = await Team.findOne({ where: { slug: subdomainMatch[1] } });
-    if (!req.team) {
-      res.redirect(302, `${req.protocol}://${bsHost}`);
-      return;
+  if (req.subdomain) {
+    const team = await Team.findOne({ where: { slug: req.subdomain } });
+    if (team && hasRole(req.user, team)) {
+      req.team = team; // eslint-disable-line no-param-reassign
     }
   }
   next();
@@ -233,7 +233,7 @@ app.get('*', async (req, res, next) => {
     };
 
     let router;
-    if (stateData.team) {
+    if (req.subdomain) {
       router = new UniversalRouter(teamRoutes);
     } else {
       router = new UniversalRouter(mainRoutes);

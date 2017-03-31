@@ -1,25 +1,36 @@
 import { Router } from 'express';
 import hasRole from '../helpers/hasRole';
-import decisionApi from './decisions';
-import tagApi from './tags';
-import teamApi from './teams';
-import userApi from './users';
-import restaurantApi from './restaurants';
+import teamApi from './main/teams';
+import decisionApi from './team/decisions';
+import tagApi from './team/tags';
+import userApi from './team/users';
+import restaurantApi from './team/restaurants';
 
 export default () => {
-  const router = new Router();
+  const mainRouter = new Router();
+  const teamRouter = new Router();
 
-  return router
+  mainRouter
+    .use('/teams', teamApi());
+
+  teamRouter
     .use('/decisions', decisionApi())
     .use('/restaurants', restaurantApi())
     .use('/tags', tagApi())
-    .use('/teams', teamApi())
     .use('/users', userApi())
     .ws('/', async (ws, req) => {
-      if (!hasRole(req.user, req.team)) {
-        ws.close(1008, 'Not authorized for this team.');
-      } else {
+      if (hasRole(req.user, req.team)) {
         ws.teamId = req.team.id; // eslint-disable-line no-param-reassign
+      } else {
+        ws.close(1008, 'Not authorized for this team.');
       }
     });
+
+  return (req, res, next) => {
+    if (req.subdomain) {
+      return teamRouter(req, res, next);
+    }
+
+    return mainRouter(req, res, next);
+  };
 };

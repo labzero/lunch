@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { Team, Role } from '../models';
-import reservedTeamSlugs from '../constants/reservedTeamSlugs';
-import { TEAM_LIMIT, TEAM_SLUG_REGEX } from '../constants';
-import errorCatcher from './helpers/errorCatcher';
-import loggedIn from './helpers/loggedIn';
+import { Team, Role } from '../../models';
+import reservedTeamSlugs from '../../constants/reservedTeamSlugs';
+import { TEAM_LIMIT, TEAM_SLUG_REGEX } from '../../constants';
+import errorCatcher from '../helpers/errorCatcher';
+import loggedIn from '../helpers/loggedIn';
 
 export default () => {
   const router = new Router();

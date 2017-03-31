@@ -130,6 +130,9 @@ describe('actions/users', () => {
   describe('removeUser', () => {
     let id;
     beforeEach(() => {
+      usersRewireAPI.__Rewire__('getCurrentUser', () => ({
+        id: 231
+      }));
       id = 1;
     });
 
@@ -151,6 +154,47 @@ describe('actions/users', () => {
         store.dispatch(users.removeUser(id));
 
         expect(fetchMock.lastCall()[0]).to.eq(`/api/users/${id}`);
+      });
+    });
+
+    describe('when id is of current user', () => {
+      let deleteUserStub;
+      beforeEach(() => {
+        id = 231;
+        fetchMock.mock('*', {});
+        deleteUserStub = actionCreatorStub();
+        usersRewireAPI.__Rewire__('deleteUser', deleteUserStub);
+
+        store.dispatch(users.removeUser(id));
+      });
+
+      it('dispatches deleteUser with isSelf = true', () => {
+        expect(deleteUserStub.calledWith(id, undefined, true)).to.be.true;
+      });
+    });
+
+    describe('when team is provided', () => {
+      let deleteUserStub;
+      let team;
+      beforeEach(() => {
+        store = mockStore({
+          host: 'lunch.pink'
+        });
+        team = {
+          slug: 'labzero'
+        };
+        fetchMock.mock('*', {});
+        deleteUserStub = actionCreatorStub();
+        usersRewireAPI.__Rewire__('deleteUser', deleteUserStub);
+        store.dispatch(users.removeUser(id, team));
+      });
+
+      it('dispatches deleteUser with team', () => {
+        expect(deleteUserStub.calledWith(id, team)).to.be.true;
+      });
+
+      it('fetches user with full url', () => {
+        expect(fetchMock.lastCall()[0]).to.eq(`//${team.slug}.lunch.pink/api/users/${id}`);
       });
     });
 

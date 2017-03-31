@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import { spy, stub } from 'sinon';
 import bodyParser from 'body-parser';
 import request from 'supertest';
-import express, { Router } from 'express';
+import express from 'express';
 import proxyquire from 'proxyquire';
 import SequelizeMock from 'sequelize-mock';
 import expressWs from 'express-ws';
@@ -15,7 +15,7 @@ const proxyquireStrict = proxyquire.noCallThru();
 
 const dbMock = new SequelizeMock();
 
-describe('api/teams', () => {
+describe('api/main/teams', () => {
   let app;
   let RoleMock;
   let TeamMock;
@@ -35,28 +35,16 @@ describe('api/teams', () => {
     });
 
     makeApp = deps => {
-      const teamsApi = proxyquireStrict('../teams', {
-        '../models': mockEsmodule({
+      const teamsApi = proxyquireStrict('../main/teams', {
+        '../../models': mockEsmodule({
           Team: TeamMock,
           Role: RoleMock
         }),
-        '../helpers/hasRole': mockEsmodule({
+        '../../helpers/hasRole': mockEsmodule({
           default: () => false
         }),
-        './helpers/loggedIn': mockEsmodule({
+        '../helpers/loggedIn': mockEsmodule({
           default: loggedInSpy
-        }),
-        './decisions': mockEsmodule({
-          default: () => new Router()
-        }),
-        './restaurants': mockEsmodule({
-          default: () => new Router()
-        }),
-        './tags': mockEsmodule({
-          default: () => new Router()
-        }),
-        './users': mockEsmodule({
-          default: () => new Router()
         }),
         ...deps
       }).default;
@@ -95,7 +83,7 @@ describe('api/teams', () => {
           next();
         });
         app = makeApp({
-          '../constants': mockEsmodule({
+          '../../constants': mockEsmodule({
             TEAM_LIMIT: 5
           })
         });
@@ -266,14 +254,14 @@ describe('api/teams', () => {
           res.send();
         });
         app = makeApp({
-          '../models': mockEsmodule({
+          '../../models': mockEsmodule({
             Team: {
               create: stub().throws(),
               destroy: TeamMock.destroy,
               scope: TeamMock.scope
             }
           }),
-          './helpers/errorCatcher': mockEsmodule({
+          '../helpers/errorCatcher': mockEsmodule({
             default: errorCatcherSpy
           })
         });

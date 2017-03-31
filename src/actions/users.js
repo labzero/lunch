@@ -1,5 +1,6 @@
 import ActionTypes from '../constants/ActionTypes';
 import { credentials, jsonHeaders, processResponse } from '../core/ApiClient';
+import { getCurrentUser } from '../selectors/user';
 import { flashError } from './flash.js';
 
 export function invalidateUsers() {
@@ -62,30 +63,43 @@ export function fetchUsersIfNeeded() {
   };
 }
 
-export function deleteUser(id) {
+export function deleteUser(id, team, isSelf) {
   return {
     type: ActionTypes.DELETE_USER,
-    id
+    id,
+    isSelf,
+    team
   };
 }
 
-export function userDeleted(id, userId) {
+export function userDeleted(id, team, isSelf) {
   return {
     type: ActionTypes.USER_DELETED,
     id,
-    userId
+    isSelf,
+    team
   };
 }
 
-export function removeUser(id) {
-  return (dispatch) => {
-    dispatch(deleteUser(id));
-    return fetch(`/api/users/${id}`, {
-      credentials,
+export function removeUser(id, team) {
+  return (dispatch, getState) => {
+    const state = getState();
+    let isSelf = false;
+    if (getCurrentUser(state).id === id) {
+      isSelf = true;
+    }
+    dispatch(deleteUser(id, team, isSelf));
+    let url = `/api/users/${id}`;
+    const host = state.host;
+    if (team) {
+      url = `//${team.slug}.${host}${url}`;
+    }
+    return fetch(url, {
+      credentials: team ? 'include' : credentials,
       method: 'delete'
     })
       .then(response => processResponse(response))
-      .then(() => dispatch(userDeleted(id)))
+      .then(() => dispatch(userDeleted(id, team, isSelf)))
       .catch(
         err => dispatch(flashError(err.message))
       );
@@ -154,12 +168,5 @@ export function changeUserRole(id, type) {
       .catch(
         err => dispatch(flashError(err.message))
       );
-  };
-}
-
-export function userRoleAdded(role) {
-  return {
-    type: ActionTypes.USER_ROLE_ADDED,
-    role
   };
 }

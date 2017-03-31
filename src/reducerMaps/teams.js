@@ -25,4 +25,16 @@ export default new Map([
       }
     }
   })],
+  [ActionTypes.USER_DELETED, (state, action) => {
+    if (action.isSelf) {
+      return update(state, {
+        items: {
+          result: {
+            $splice: [[state.items.result.indexOf(action.team.id), 1]]
+          }
+        }
+      });
+    }
+    return state;
+  }],
 ]);

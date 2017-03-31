@@ -26,19 +26,27 @@ fetch.promise = Promise;
 
 window.RobustWebSocket = RobustWebSocket;
 
+let onSubdomain = false;
+
 // Undo Browsersync mangling of host
 /* eslint-disable no-underscore-dangle */
 let host = window.__INITIAL_STATE__.host;
 if (host.indexOf('//') === 0) {
   host = host.slice(2);
 }
-if (window.__INITIAL_STATE__.team.slug) {
-  const teamSlug = window.__INITIAL_STATE__.team.slug;
-  if (host.indexOf(teamSlug) === 0) {
-    host = host.slice(teamSlug.length + 1); // + 1 for dot
-  }
+const teamSlug = window.__INITIAL_STATE__.team.slug;
+if (teamSlug && host.indexOf(teamSlug) === 0) {
+  onSubdomain = true;
+  host = host.slice(teamSlug.length + 1); // + 1 for dot
 }
 window.__INITIAL_STATE__.host = host;
+
+if (!onSubdomain) {
+  // escape domain periods to not appear as regex wildcards
+  if (window.location.host.match(`^(.*)${host.replace(/\./g, '\\.')}`)[1]) {
+    onSubdomain = true;
+  }
+}
 
 const store = configureStore(window.__INITIAL_STATE__, { history });
 /* eslint-enable no-underscore-dangle */
@@ -116,7 +124,7 @@ let appInstance;
 let currentLocation = history.location;
 
 let routes;
-if (store.getState().team.slug) {
+if (onSubdomain) {
   routes = require('./routes/team').default; // eslint-disable-line global-require
 } else {
   routes = require('./routes/main').default; // eslint-disable-line global-require

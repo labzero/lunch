@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { Tag } from '../models';
-import errorCatcher from './helpers/errorCatcher';
-import checkTeamRole from './helpers/checkTeamRole';
-import loggedIn from './helpers/loggedIn';
-import { tagDeleted } from '../actions/tags';
+import { Tag } from '../../models';
+import errorCatcher from '../helpers/errorCatcher';
+import checkTeamRole from '../helpers/checkTeamRole';
+import loggedIn from '../helpers/loggedIn';
+import { tagDeleted } from '../../actions/tags';
 
 export default () => {
   const router = new Router({ mergeParams: true });

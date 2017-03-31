@@ -81,7 +81,6 @@ const actions = [
   'USER_POSTED',
   'DELETE_USER',
   'USER_DELETED',
-  'USER_ROLE_ADDED',
   'SCROLL_TO_TOP',
   'SCROLLED_TO_TOP'
 ];

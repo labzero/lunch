@@ -8,8 +8,9 @@
  */
 
 import React, { PropTypes } from 'react';
+import Grid from 'react-bootstrap/lib/Grid';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import s from './NotFound.css';
+import s from './NotFound.scss';
 
 class NotFound extends React.Component {
   static propTypes = {
@@ -18,12 +19,10 @@ class NotFound extends React.Component {
 
   render() {
     return (
-      <div className={s.root}>
-        <div className={s.container}>
-          <h1>{this.props.title}</h1>
-          <p>Sorry, the page you were trying to view does not exist.</p>
-        </div>
-      </div>
+      <Grid className={s.root}>
+        <h1>{this.props.title}</h1>
+        <p>Sorry, the page you were trying to view does not exist.</p>
+      </Grid>
     );
   }
 }

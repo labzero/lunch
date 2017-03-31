@@ -97,7 +97,7 @@ User.getSessionUser = (id) =>
       {
         model: Role,
         required: false,
-        attributes: ['type', 'team_id']
+        attributes: ['type', 'team_id', 'user_id']
       }
     ]
   });

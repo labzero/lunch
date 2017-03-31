@@ -14,7 +14,7 @@ const proxyquireStrict = proxyquire.noCallThru();
 
 const dbMock = new SequelizeMock();
 
-describe('api/decisions', () => {
+describe('api/team/decisions', () => {
   let app;
   let checkTeamRoleSpy;
   let DecisionMock;
@@ -43,14 +43,14 @@ describe('api/decisions', () => {
     broadcastSpy = spy();
 
     makeApp = deps => {
-      const decisionsApi = proxyquireStrict('../decisions', {
-        '../models': mockEsmodule({
+      const decisionsApi = proxyquireStrict('../team/decisions', {
+        '../../models': mockEsmodule({
           Decision: DecisionMock,
         }),
-        './helpers/loggedIn': mockEsmodule({
+        '../helpers/loggedIn': mockEsmodule({
           default: loggedInSpy
         }),
-        './helpers/checkTeamRole': mockEsmodule({
+        '../helpers/checkTeamRole': mockEsmodule({
           default: checkTeamRoleSpy
         }),
         ...deps
@@ -112,7 +112,7 @@ describe('api/decisions', () => {
           res.send();
         });
         app = makeApp({
-          './helpers/errorCatcher': mockEsmodule({
+          '../helpers/errorCatcher': mockEsmodule({
             default: errorCatcherSpy
           })
         });
@@ -172,7 +172,7 @@ describe('api/decisions', () => {
       beforeEach((done) => {
         decisionPostedSpy = spy();
         app = makeApp({
-          '../actions/decisions': mockEsmodule({
+          '../../actions/decisions': mockEsmodule({
             decisionPosted: decisionPostedSpy
           })
         });
@@ -209,7 +209,7 @@ describe('api/decisions', () => {
       describe('when destroying', () => {
         beforeEach(() => {
           app = makeApp({
-            './helpers/errorCatcher': mockEsmodule({
+            '../helpers/errorCatcher': mockEsmodule({
               default: errorCatcherSpy
             })
           });
@@ -227,14 +227,14 @@ describe('api/decisions', () => {
       describe('when creating', () => {
         beforeEach(() => {
           app = makeApp({
-            '../models': mockEsmodule({
+            '../../models': mockEsmodule({
               Decision: {
                 create: stub().throws(),
                 destroy: DecisionMock.destroy,
                 scope: DecisionMock.scope
               }
             }),
-            './helpers/errorCatcher': mockEsmodule({
+            '../helpers/errorCatcher': mockEsmodule({
               default: errorCatcherSpy
             })
           });
@@ -284,7 +284,7 @@ describe('api/decisions', () => {
       beforeEach((done) => {
         decisionDeletedSpy = spy();
         app = makeApp({
-          '../actions/decisions': mockEsmodule({
+          '../../actions/decisions': mockEsmodule({
             decisionDeleted: decisionDeletedSpy
           })
         });
@@ -313,7 +313,7 @@ describe('api/decisions', () => {
         });
 
         app = makeApp({
-          './helpers/errorCatcher': mockEsmodule({
+          '../helpers/errorCatcher': mockEsmodule({
             default: errorCatcherSpy
           })
         });

@@ -1,12 +1,14 @@
 import { Router } from 'express';
-import { Role, User } from '../models';
-import { TEAM_LIMIT } from '../constants';
-import getRole from '../helpers/getRole';
-import hasRole from '../helpers/hasRole';
-import canChangeRole from '../helpers/canChangeRole';
-import errorCatcher from './helpers/errorCatcher';
-import checkTeamRole from './helpers/checkTeamRole';
-import loggedIn from './helpers/loggedIn';
+import cors from 'cors';
+import { Role, User } from '../../models';
+import { TEAM_LIMIT } from '../../constants';
+import getRole from '../../helpers/getRole';
+import hasRole from '../../helpers/hasRole';
+import canChangeRole from '../../helpers/canChangeRole';
+import errorCatcher from '../helpers/errorCatcher';
+import checkTeamRole from '../helpers/checkTeamRole';
+import loggedIn from '../helpers/loggedIn';
+import { hostname } from '../../config';
 
 export default () => {
   const router = new Router({ mergeParams: true });
@@ -48,6 +50,14 @@ export default () => {
       allowed = canChangeRole(currentUserRole.type, roleToChange.type, target);
     }
     return allowed;
+  };
+
+  const corsOptionsDelegate = (req, callback) => {
+    callback(null, {
+      credentials: true,
+      optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+      origin: !!req.hostname.match(`${hostname}$`)
+    });
   };
 
   return router
@@ -163,8 +173,10 @@ export default () => {
         }
       }
     )
+    .options('/:id', cors(corsOptionsDelegate)) // enable pre-flight request for DELETE request
     .delete(
       '/:id',
+      cors(corsOptionsDelegate),
       loggedIn,
       checkTeamRole('member'),
       async (req, res) => {

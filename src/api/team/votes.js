@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { Vote } from '../models';
-import errorCatcher from './helpers/errorCatcher';
-import checkTeamRole from './helpers/checkTeamRole';
-import loggedIn from './helpers/loggedIn';
-import { votePosted, voteDeleted } from '../actions/restaurants';
+import { Vote } from '../../models';
+import errorCatcher from '../helpers/errorCatcher';
+import checkTeamRole from '../helpers/checkTeamRole';
+import loggedIn from '../helpers/loggedIn';
+import { votePosted, voteDeleted } from '../../actions/restaurants';
 
 export default () => {
   const router = new Router({ mergeParams: true });
