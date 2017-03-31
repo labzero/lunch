@@ -11,6 +11,7 @@ Feature: Visiting the Account Summary Page
 Scenario: Visit account summary report page from header link
   Given I visit the dashboard
   When I select "Account Summary" from the reports dropdown
+  And I wait for the report to load
   Then I should see 6 report tables with multiple data rows
   And I should see a report header with just freshness
 
