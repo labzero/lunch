@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Geosuggest from 'react-geosuggest';
+import s from './RestaurantAddForm.scss';
 
 let google = { maps: { Geocoder: function Geocoder() { return {}; }, GeocoderStatus: {} } };
 if (canUseDOM) {
@@ -41,6 +43,11 @@ class RestaurantAddForm extends Component {
       <form>
         <Geosuggest
           autoActivateFirstSuggest
+          className={s.geosuggest}
+          inputClassName={s.input}
+          suggestItemClassName={s.suggestItem}
+          suggestItemActiveClassName={s.suggestItemActive}
+          suggestsClassName={s.suggests}
           location={{ lat: () => this.props.latLng.lat, lng: () => this.props.latLng.lng }}
           radius="0"
           onBlur={this.props.clearTempMarker}
@@ -56,4 +63,4 @@ class RestaurantAddForm extends Component {
 
 }
 
-export default RestaurantAddForm;
+export default withStyles(s)(RestaurantAddForm);

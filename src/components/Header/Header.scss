@@ -38,7 +38,7 @@
   border-bottom: $default-border;
   overflow: hidden;
   position: relative;
-  z-index: 2; /* above things in layout children */
+  z-index: 3; /* above form-control within input-group */
 }
 
 .loggedIn {

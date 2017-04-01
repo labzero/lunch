@@ -1,4 +1,7 @@
-.mapContainer {
+@import '../../styles/_variables.scss';
+
+.root {
+  border: $default-border;
   height: 300px;
   position: relative;
 }

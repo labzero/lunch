@@ -131,7 +131,7 @@ class Team extends React.Component {
 
     return (
       <Grid className={s.root}>
-        <h1>{team.name}</h1>
+        <h2>{team.name}</h2>
         <Table responsive>
           <thead>
             <tr>
@@ -164,7 +164,7 @@ class Team extends React.Component {
             ))}
           </tbody>
         </Table>
-        <h2>Add User</h2>
+        <h3>Add User</h3>
         <form onSubmit={this.handleSubmit}>
           <FormGroup controlId="team-name">
             <ControlLabel>
@@ -203,14 +203,16 @@ class Team extends React.Component {
             </FormControl>
             <HelpBlock>
               Members can add new users and remove guests.
-              Owners can manage all user roles and manage overall team information.
+              {hasOwnerRole &&
+                ' Owners can manage all user roles and manage overall team information.'
+              }
             </HelpBlock>
           </FormGroup>
           <Button type="submit">Submit</Button>
         </form>
         {hasOwnerRole && (
           <div className={s.teamManagement}>
-            <h2>Team Management</h2>
+            <h3>Team Management</h3>
             <Button bsStyle="danger" onClick={confirmDeleteTeam}>Delete team</Button>
           </div>
         )}

@@ -35,22 +35,18 @@ class TeamMap extends Component {
     const { center } = this.props;
 
     return (
-      <div>
-        <div className={s.mapContainer}>
-          <GoogleMap
-            center={center}
-            defaultZoom={GOOGLE_MAP_ZOOM}
-            defaultCenter={TeamMap.defaultProps.center}
-            onGoogleApiLoaded={this.setMap}
-            options={googleMapOptions}
-            yesIWantToUseGoogleMapApiInternals
-          />
-          <div className={s.hereCenterer}>
-            <HereMarker />
-          </div>
+      <div className={s.root}>
+        <GoogleMap
+          center={center}
+          defaultZoom={GOOGLE_MAP_ZOOM}
+          defaultCenter={TeamMap.defaultProps.center}
+          onGoogleApiLoaded={this.setMap}
+          options={googleMapOptions}
+          yesIWantToUseGoogleMapApiInternals
+        />
+        <div className={s.hereCenterer}>
+          <HereMarker />
         </div>
-        Lat: {center.lat.toFixed(6)};
-        Lng: {center.lng.toFixed(6)};
       </div>
     );
   }
