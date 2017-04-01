@@ -1,0 +1,146 @@
+@import '../../../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/variables';
+@import '../../../styles/_variables.scss';
+
+.root {
+  background: pink url('../../../styles/ham.jpg');
+  background-attachment: fixed;
+
+  img {
+    width: 100%;
+  }
+}
+
+.jumbotron {
+  background: url('./jumbotron.jpg') no-repeat 50% 25%;
+  background-size: cover;
+  border-bottom: $default-border;
+  margin: 0;
+  padding-bottom: 8em;
+  text-align: right;
+  text-shadow: 0 0 .5em white, 0 0 1em white, 0 0 1em white;
+}
+
+.jumbotronHeading {
+  font-size: $jumbotron-heading-font-size;
+  font-weight: bold;
+}
+
+.cta {
+  margin-top: 1em;
+  text-shadow: none;
+}
+
+.feature {
+  display: flex;
+  font-size: 2em;
+  position: relative;
+
+  &::before,
+  &::after {
+    border-bottom: $default-border;
+    content: '';
+    display: block;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    width: calc(50vw + 1.5px);
+    z-index: 0;
+  }
+
+  &:nth-child(even)::after,
+  &:nth-child(odd)::before {
+    background: $white-color;
+  }
+
+  &::before {
+    border-right: $default-border;
+    right: calc(50% - 1.5px);
+  }
+
+  &::after {
+    left: calc(50% + 1.5px);
+  }
+
+  &:last-child {
+    &::before {
+      border-bottom: none;
+    }
+  }
+
+  & > * {
+    padding-bottom: ($grid-gutter-width / 2) + $default-border-width;
+    padding-top: ($grid-gutter-width / 2) + $default-border-width;
+    position: relative;
+    z-index: 1; /* above pseudoelements */
+
+    & > :first-child {
+      font-size: 1.5em;
+      margin-top: 0;
+    }
+  }
+
+  & > :last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  &:nth-child(odd) {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+}
+
+.finalCta {
+  margin-top: 4em;
+  padding-bottom: 4em;
+  text-align: center;
+}
+
+@media (max-width: $screen-md-max) {
+  .feature {
+    font-size: 1.5em;
+  }
+}
+
+@media (max-width: $screen-xs-max) {
+  .feature {
+    display: block;
+
+    &::before,
+    &::after {
+      display: none;
+    }
+
+    &:nth-child(odd) {
+      text-align: left;
+    }
+
+    & > * {
+      float: none;
+    }
+
+    & > :first-child {
+      text-align: center;
+    }
+
+    & > :last-child {
+      &::before {
+        background: $white-color;
+        border: $default-border;
+        border-width: $default-border-width 0;
+        content: '';
+        height: 100%;
+        left: -$grid-gutter-width / 2;
+        position: absolute;
+        top: 0;
+        width: 100vw;
+        z-index: -1;
+      }
+    }
+
+    img {
+      max-width: 480px;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Button from 'react-bootstrap/lib/Button';
+import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
@@ -87,61 +88,64 @@ class NewTeam extends Component {
 
     return (
       <Grid className={s.root}>
-        <h2>Create a new team</h2>
-        <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="new-team-name">
-            <ControlLabel>
-              Name
-            </ControlLabel>
-            <FormControl
-              type="text"
-              onChange={this.handleChange('name')}
-              value={name}
-              required
-            />
-          </FormGroup>
-          <FormGroup controlId="new-team-slug">
-            <ControlLabel>
-              URL
-            </ControlLabel>
-            <InputGroup>
+        <Col xs={12}>
+          <h2>Create a new team</h2>
+          <form onSubmit={this.handleSubmit}>
+            <FormGroup controlId="new-team-name">
+              <ControlLabel>
+                Name
+              </ControlLabel>
               <FormControl
-                autoCorrect="off"
-                autoCapitalize="off"
-                className={s.teamUrl}
                 type="text"
-                value={slug}
-                maxLength={63}
-                minLength={2}
-                pattern={TEAM_SLUG_REGEX}
-                onChange={this.handleSlugChange}
+                onChange={this.handleChange('name')}
+                value={name}
                 required
               />
-              <InputGroup.Addon>.lunch.pink</InputGroup.Addon>
-            </InputGroup>
-            <HelpBlock>Letters, numbers, and dashes only.</HelpBlock>
-          </FormGroup>
-          <FormGroup controlId="new-team-address">
-            <ControlLabel>Address</ControlLabel>
-            <p>
-              Pick a centerpoint for your team.
-              It will ensure that nearby recommendations are shown when you search for restaurants.
-              You can drag the map or enter your full address.
-            </p>
-            <TeamMapContainer />
-            <Geosuggest
-              autoActivateFirstSuggest
-              id="new-team-address"
-              inputClassName="form-control"
-              onActivateSuggest={this.getCoordsForMarker}
-              onSuggestSelect={this.handleSuggestSelect}
-              placeholder="Enter your address"
-              ref={g => { this.geosuggest = g; }}
-              types={['geocode']}
-            />
-          </FormGroup>
-          <Button type="submit">Submit</Button>
-        </form>
+            </FormGroup>
+            <FormGroup controlId="new-team-slug">
+              <ControlLabel>
+                URL
+              </ControlLabel>
+              <InputGroup>
+                <FormControl
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  className={s.teamUrl}
+                  type="text"
+                  value={slug}
+                  maxLength={63}
+                  minLength={2}
+                  pattern={TEAM_SLUG_REGEX}
+                  onChange={this.handleSlugChange}
+                  required
+                />
+                <InputGroup.Addon>.lunch.pink</InputGroup.Addon>
+              </InputGroup>
+              <HelpBlock>Letters, numbers, and dashes only.</HelpBlock>
+            </FormGroup>
+            <FormGroup controlId="new-team-address">
+              <ControlLabel>Address</ControlLabel>
+              <p>
+                Pick a centerpoint for your team.
+                It will ensure that nearby recommendations are shown when you search
+                for restaurants.
+                You can drag the map or enter your full address.
+              </p>
+              <TeamMapContainer />
+              <Geosuggest
+                autoActivateFirstSuggest
+                id="new-team-address"
+                inputClassName="form-control"
+                onActivateSuggest={this.getCoordsForMarker}
+                onSuggestSelect={this.handleSuggestSelect}
+                placeholder="Enter your address"
+                ref={g => { this.geosuggest = g; }}
+                types={['geocode']}
+              />
+            </FormGroup>
+            <Button type="submit">Submit</Button>
+          </form>
+        </Col>
       </Grid>
     );
   }

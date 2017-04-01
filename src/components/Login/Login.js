@@ -9,6 +9,7 @@
 
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import Button from 'react-bootstrap/lib/Button';
 import s from './Login.scss';
 
 const Login = ({ user }) => {
@@ -16,7 +17,9 @@ const Login = ({ user }) => {
   if (user.id === undefined) {
     content = (
       <div className={s.root}>
-        <div className={s.flexContainer}><a href="/login">Log In</a></div>
+        <Button bsSize="small" bsStyle="primary" href="/login">
+          Log In
+        </Button>
       </div>
     );
   }
