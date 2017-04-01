@@ -5,8 +5,8 @@ import { currentUserHasRole } from '../../selectors';
 import Menu from './Menu';
 
 const mapStateToProps = (state, ownProps) => ({
-  hasGuestRole: currentUserHasRole(state, { role: 'guest' }),
-  hasMemberRole: currentUserHasRole(state, { role: 'member' }),
+  hasGuestRole: currentUserHasRole(state, 'guest'),
+  hasMemberRole: currentUserHasRole(state, 'member'),
   host: state.host,
   open: ownProps.open,
   team: getTeam(state),

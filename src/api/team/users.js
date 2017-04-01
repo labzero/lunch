@@ -7,8 +7,8 @@ import hasRole from '../../helpers/hasRole';
 import canChangeRole from '../../helpers/canChangeRole';
 import errorCatcher from '../helpers/errorCatcher';
 import checkTeamRole from '../helpers/checkTeamRole';
+import corsOptionsDelegate from '../helpers/corsOptionsDelegate';
 import loggedIn from '../helpers/loggedIn';
-import { hostname } from '../../config';
 
 export default () => {
   const router = new Router({ mergeParams: true });
@@ -50,14 +50,6 @@ export default () => {
       allowed = canChangeRole(currentUserRole.type, roleToChange.type, target);
     }
     return allowed;
-  };
-
-  const corsOptionsDelegate = (req, callback) => {
-    callback(null, {
-      credentials: true,
-      optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-      origin: !!req.hostname.match(`${hostname}$`)
-    });
   };
 
   return router

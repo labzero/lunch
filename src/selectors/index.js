@@ -63,7 +63,7 @@ export const getFilteredRestaurants = createSelector(
   }
 );
 
-const getRoleProp = (state, props) => props.role;
+const getRoleProp = (state, props) => props.role || props;
 export const currentUserHasRole = createSelector(
   getCurrentUser, getTeam, getRoleProp,
   hasRole

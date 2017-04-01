@@ -40,9 +40,6 @@ describe('api/main/teams', () => {
           Team: TeamMock,
           Role: RoleMock
         }),
-        '../../helpers/hasRole': mockEsmodule({
-          default: () => false
-        }),
         '../helpers/loggedIn': mockEsmodule({
           default: loggedInSpy
         }),
@@ -266,6 +263,87 @@ describe('api/main/teams', () => {
           })
         });
         return request(app).post('/').send({ name: 'blah', slug: 'blah' });
+      });
+
+      it('calls errorCatcher', () => {
+        expect(errorCatcherSpy.callCount).to.eq(1);
+      });
+    });
+  });
+
+  describe('DELETE /:id', () => {
+    let checkTeamRoleSpy;
+    beforeEach(() => {
+      checkTeamRoleSpy = spy(() => (req, res, next) => next());
+
+      app = makeApp({
+        '../helpers/checkTeamRole': checkTeamRoleSpy
+      });
+    });
+
+    describe('before deletion', () => {
+      let findOneSpy;
+      beforeEach(() => {
+        findOneSpy = spy(TeamMock, 'findOne');
+
+        return request(app).delete('/1');
+      });
+
+      it('finds team', () => {
+        expect(findOneSpy.calledWith({ where: { id: 1 } })).to.be.true;
+      });
+
+      it('checks for owner role', () => {
+        expect(checkTeamRoleSpy.calledWith('owner')).to.be.true;
+      });
+    });
+
+    describe('query', () => {
+      let destroySpy;
+      beforeEach(() => {
+        destroySpy = spy();
+        stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
+          destroy: destroySpy
+        }));
+
+        return request(app).delete('/1');
+      });
+
+      it('deletes team', () => {
+        expect(destroySpy.callCount).to.eq(1);
+      });
+    });
+
+    describe('success', () => {
+      let response;
+      beforeEach((done) => {
+        request(app).delete('/1').then(r => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns 204', () => {
+        expect(response.statusCode).to.eq(204);
+      });
+    });
+
+    describe('failure', () => {
+      let errorCatcherSpy;
+      beforeEach(() => {
+        errorCatcherSpy = spy((res) => {
+          res.send();
+        });
+        stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
+          destroy: stub().throws()
+        }));
+        app = makeApp({
+          '../helpers/checkTeamRole': checkTeamRoleSpy,
+          '../helpers/errorCatcher': mockEsmodule({
+            default: errorCatcherSpy
+          })
+        });
+        return request(app).delete('/1');
       });
 
       it('calls errorCatcher', () => {

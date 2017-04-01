@@ -1,7 +1,8 @@
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
+import { showModal } from '../../../actions/modals';
 import { addUser, changeUserRole, fetchUsersIfNeeded, removeUser } from '../../../actions/users';
-import { isUserListReady } from '../../../selectors';
+import { currentUserHasRole, isUserListReady } from '../../../selectors';
 import { getTeam } from '../../../selectors/team';
 import { getCurrentUser } from '../../../selectors/user';
 import { getUsers } from '../../../selectors/users';
@@ -9,6 +10,9 @@ import Team from './Team';
 
 const mapStateToProps = state => ({
   currentUser: getCurrentUser(state),
+  hasGuestRole: currentUserHasRole(state, 'guest'),
+  hasMemberRole: currentUserHasRole(state, 'member'),
+  hasOwnerRole: currentUserHasRole(state, 'owner'),
   users: getUsers(state),
   userListReady: isUserListReady(state),
   team: getTeam(state)
@@ -17,6 +21,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = (dispatch) => ({
   addUserToTeam: payload => dispatch(addUser(payload)),
   changeUserRole: (id, type) => dispatch(changeUserRole(id, type)),
+  confirmDeleteTeam: () => dispatch(showModal('deleteTeam')),
   fetchUsersIfNeeded() {
     dispatch(fetchUsersIfNeeded());
   },

@@ -1,7 +1,10 @@
 import { Router } from 'express';
+import cors from 'cors';
 import { Team, Role } from '../../models';
 import reservedTeamSlugs from '../../constants/reservedTeamSlugs';
 import { TEAM_LIMIT, TEAM_SLUG_REGEX } from '../../constants';
+import checkTeamRole from '../helpers/checkTeamRole';
+import corsOptionsDelegate from '../helpers/corsOptionsDelegate';
 import errorCatcher from '../helpers/errorCatcher';
 import loggedIn from '../helpers/loggedIn';
 
@@ -49,6 +52,27 @@ export default () => {
           if (err.name === 'SequelizeUniqueConstraintError') {
             return error409(res);
           }
+          return errorCatcher(res, err);
+        }
+      }
+    )
+    .options('/:id', cors(corsOptionsDelegate)) // enable pre-flight request for DELETE request
+    .delete(
+      '/:id',
+      cors(corsOptionsDelegate),
+      loggedIn,
+      async (req, res, next) => {
+        const id = parseInt(req.params.id, 10);
+        const team = await Team.findOne({ where: { id } });
+        req.team = team; // eslint-disable-line no-param-reassign
+        next();
+      },
+      checkTeamRole('owner'),
+      async (req, res) => {
+        try {
+          await req.team.destroy();
+          return res.status(204).send();
+        } catch (err) {
           return errorCatcher(res, err);
         }
       }

@@ -21,7 +21,6 @@ import Table from 'react-bootstrap/lib/Table';
 import Loading from '../../../components/Loading';
 import { globalMessageDescriptor as gm } from '../../../helpers/generateMessageDescriptor';
 import getRole from '../../../helpers/getRole';
-import hasRole from '../../../helpers/hasRole';
 import canChangeUser from '../../../helpers/canChangeUser';
 import s from './Team.scss';
 
@@ -29,8 +28,12 @@ class Team extends React.Component {
   static propTypes = {
     addUserToTeam: PropTypes.func.isRequired,
     changeUserRole: PropTypes.func.isRequired,
+    confirmDeleteTeam: PropTypes.func.isRequired,
     currentUser: PropTypes.object.isRequired,
     fetchUsersIfNeeded: PropTypes.func.isRequired,
+    hasGuestRole: PropTypes.bool.isRequired,
+    hasMemberRole: PropTypes.bool.isRequired,
+    hasOwnerRole: PropTypes.bool.isRequired,
     intl: intlShape.isRequired,
     removeUserFromTeam: PropTypes.func.isRequired,
     userListReady: PropTypes.bool.isRequired,
@@ -75,7 +78,7 @@ class Team extends React.Component {
     }
   };
 
-  handleDeleteClicked = id => () => {
+  handleDeleteUserClicked = id => () => {
     // eslint-disable-next-line no-alert
     if (confirm('Are you sure you want to remove this user from this team?')) {
       this.props.removeUserFromTeam(id);
@@ -83,7 +86,15 @@ class Team extends React.Component {
   };
 
   roleOptions = (user) => {
-    const { currentUser, intl: { formatMessage: f }, team, users } = this.props;
+    const {
+      currentUser,
+      hasGuestRole,
+      hasMemberRole,
+      hasOwnerRole,
+      intl: { formatMessage: f },
+      team,
+      users
+    } = this.props;
 
     if (canChangeUser(currentUser, user, team, users)) {
       return (
@@ -91,9 +102,9 @@ class Team extends React.Component {
           onChange={this.handleRoleChange(user)}
           value={user.type}
         >
-          {hasRole(currentUser, team, 'guest') && <option value="guest">{f(gm('guestRole'))}</option>}
-          {hasRole(currentUser, team, 'member') && <option value="member">{f(gm('memberRole'))}</option>}
-          {hasRole(currentUser, team, 'owner') && <option value="owner">{f(gm('ownerRole'))}</option>}
+          {hasGuestRole && <option value="guest">{f(gm('guestRole'))}</option>}
+          {hasMemberRole && <option value="member">{f(gm('memberRole'))}</option>}
+          {hasOwnerRole && <option value="owner">{f(gm('ownerRole'))}</option>}
         </select>
       );
     }
@@ -101,7 +112,17 @@ class Team extends React.Component {
   }
 
   render() {
-    const { userListReady, currentUser, intl: { formatMessage: f }, team, users } = this.props;
+    const {
+      confirmDeleteTeam,
+      currentUser,
+      hasGuestRole,
+      hasMemberRole,
+      hasOwnerRole,
+      intl: { formatMessage: f },
+      team,
+      userListReady,
+      users
+    } = this.props;
     const { email, name, type } = this.state;
 
     if (!userListReady) {
@@ -133,7 +154,7 @@ class Team extends React.Component {
                     currentUser.id !== user.id &&
                     canChangeUser(currentUser, user, team, users) &&
                     (
-                      <button className={s.remove} type="button" onClick={this.handleDeleteClicked(user.id)} aria-label="Remove">
+                      <button className={s.remove} type="button" onClick={this.handleDeleteUserClicked(user.id)} aria-label="Remove">
                         <Glyphicon glyph="remove" />
                       </button>
                     )
@@ -176,9 +197,9 @@ class Team extends React.Component {
               value={type}
               required
             >
-              {hasRole(currentUser, team, 'guest') && <option value="guest">{f(gm('guestRole'))}</option>}
-              {hasRole(currentUser, team, 'member') && <option value="member">{f(gm('memberRole'))}</option>}
-              {hasRole(currentUser, team, 'owner') && <option value="owner">{f(gm('ownerRole'))}</option>}
+              {hasGuestRole && <option value="guest">{f(gm('guestRole'))}</option>}
+              {hasMemberRole && <option value="member">{f(gm('memberRole'))}</option>}
+              {hasOwnerRole && <option value="owner">{f(gm('ownerRole'))}</option>}
             </FormControl>
             <HelpBlock>
               Members can add new users and remove guests.
@@ -187,6 +208,12 @@ class Team extends React.Component {
           </FormGroup>
           <Button type="submit">Submit</Button>
         </form>
+        {hasOwnerRole && (
+          <div className={s.teamManagement}>
+            <h2>Team Management</h2>
+            <Button bsStyle="danger" onClick={confirmDeleteTeam}>Delete team</Button>
+          </div>
+        )}
       </Grid>
     );
   }
