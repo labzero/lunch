@@ -46,7 +46,7 @@ export class _RestaurantAddTagForm extends Component {
           type="button"
           onClick={this.props.hideAddTagForm}
         >
-          cancel
+          done
         </button>
       </form>
     );
