@@ -24,7 +24,12 @@ class Menu extends Component {
     return (
       <nav className={`${s.root} ${open ? s.open : ''}`}>
         <div className={s.name}>
-          {user.name}
+          <div>
+            {user.name}
+          </div>
+          <div>
+            {user.email}
+          </div>
         </div>
         <div className={s.lists}>
           {team.id && (
