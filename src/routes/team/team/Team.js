@@ -138,7 +138,7 @@ class Team extends React.Component {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Email</th>
+                {hasOwnerRole && <th>Email</th>}
                 <th>Role</th>
                 <th />
               </tr>
@@ -147,11 +147,11 @@ class Team extends React.Component {
               {users.map(user => (
                 <tr key={user.id}>
                   <td>{user.name ? user.name : f(gm('noUserName'))}</td>
-                  <td>{user.email}</td>
+                  {hasOwnerRole && <td>{user.email}</td>}
                   <td>
                     {this.roleOptions(user)}
                   </td>
-                  <td>
+                  <td className={s.deleteCell}>
                     {
                       currentUser.id !== user.id &&
                       canChangeUser(currentUser, user, team, users) &&

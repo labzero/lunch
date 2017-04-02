@@ -59,7 +59,7 @@ export default () => {
       checkTeamRole(),
       async (req, res) => {
         let extraAttributes;
-        if (hasRole(req.user, req.team, 'member')) {
+        if (hasRole(req.user, req.team, 'owner')) {
           extraAttributes = ['email'];
         }
 
@@ -85,6 +85,11 @@ export default () => {
       async (req, res) => {
         const { email, name, type } = req.body;
 
+        let extraAttributes;
+        if (hasRole(req.user, req.team, 'owner')) {
+          extraAttributes = ['email'];
+        }
+
         try {
           if (!hasRole(req.user, req.team, type)) {
             return res.status(403).json({ error: true, data: { message: 'You cannot add a user with a role greater than your own.' } });
@@ -92,7 +97,7 @@ export default () => {
 
           let userToAdd = await User.findOne({ where: { email }, include: [Role] });
 
-          const UserWithTeamRole = User.scope({ method: ['withTeamRole', req.team.id, ['email']] });
+          const UserWithTeamRole = User.scope({ method: ['withTeamRole', req.team.id, extraAttributes] });
 
           if (userToAdd) {
             if (userToAdd.roles.length >= TEAM_LIMIT) {
