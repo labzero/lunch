@@ -65,7 +65,9 @@ class Header extends Component {
     const { menuOpen } = this.state;
     return (
       <div className={`${s.root} ${loggedIn ? s.loggedIn : ''}`}>
-        <div className={s.background} />
+        <div className={s.backgroundOverflow}>
+          <div className={s.background} />
+        </div>
         <div className={s.flashes}>
           {this.flashContainers()}
         </div>
