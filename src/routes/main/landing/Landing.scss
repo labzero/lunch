@@ -17,7 +17,7 @@
   margin: 0;
   padding-bottom: 8em;
   text-align: right;
-  text-shadow: 0 0 .5em white, 0 0 1em white, 0 0 1em white;
+  text-shadow: 0 0 .25em white, 0 0 .5em white, 0 0 1em white, 0 0 2em white;
 }
 
 .jumbotronHeading {
@@ -68,8 +68,10 @@
   }
 
   & > * {
-    padding-bottom: ($grid-gutter-width / 2) + $default-border-width;
-    padding-top: ($grid-gutter-width / 2) + $default-border-width;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: ($grid-gutter-width + $default-border-width) $grid-gutter-width;
     position: relative;
     z-index: 1; /* above pseudoelements */
 
@@ -77,12 +79,6 @@
       font-size: 1.5em;
       margin-top: 0;
     }
-  }
-
-  & > :last-child {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
   }
 
   &:nth-child(odd) {
