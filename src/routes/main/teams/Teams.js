@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import Col from 'react-bootstrap/lib/Col';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Grid from 'react-bootstrap/lib/Grid';
 import Link from '../../../components/Link';
@@ -28,28 +27,26 @@ You will need to be invited back by another member.`,
 
     return (
       <Grid className={s.root}>
-        <Col xs={12}>
-          <h2>Visit one of your teams:</h2>
-          <ul className={`list-group ${s.list}`}>
-            {teams.map(team => (
-              <li className={`list-group-item ${s.item}`}>
-                <a
-                  className={`list-group-item ${s.itemLink}`}
-                  key={team.id}
-                  href={`//${team.slug}.${host}`}
-                >
-                  {team.name}
-                </a>
-                <button className={s.leave} onClick={this.confirmLeave(team)} aria-label="Leave">
-                  <Glyphicon glyph="remove" />
-                </button>
-              </li>
-            ))}
-          </ul>
-          <div className={s.centerer}>
-            <Link className="btn btn-default" to="/new-team">Create a new team</Link>
-          </div>
-        </Col>
+        <h2>Visit one of your teams:</h2>
+        <ul className={`list-group ${s.list}`}>
+          {teams.map(team => (
+            <li className={`list-group-item ${s.item}`}>
+              <a
+                className={`list-group-item ${s.itemLink}`}
+                key={team.id}
+                href={`//${team.slug}.${host}`}
+              >
+                {team.name}
+              </a>
+              <button className={s.leave} onClick={this.confirmLeave(team)} aria-label="Leave">
+                <Glyphicon glyph="remove" />
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className={s.centerer}>
+          <Link className="btn btn-default" to="/new-team">Create a new team</Link>
+        </div>
       </Grid>
     );
   }

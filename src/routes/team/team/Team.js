@@ -11,7 +11,6 @@ import React, { PropTypes } from 'react';
 import { intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Button from 'react-bootstrap/lib/Button';
-import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
@@ -132,93 +131,91 @@ class Team extends React.Component {
 
     return (
       <Grid className={s.root}>
-        <Col xs={12}>
-          <h2>{team.name}</h2>
-          <Table responsive>
-            <thead>
-              <tr>
-                <th>Name</th>
-                {hasOwnerRole && <th>Email</th>}
-                <th>Role</th>
-                <th />
+        <h2>{team.name}</h2>
+        <Table responsive>
+          <thead>
+            <tr>
+              <th>Name</th>
+              {hasOwnerRole && <th>Email</th>}
+              <th>Role</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {users.map(user => (
+              <tr key={user.id}>
+                <td>{user.name ? user.name : f(gm('noUserName'))}</td>
+                {hasOwnerRole && <td>{user.email}</td>}
+                <td>
+                  {this.roleOptions(user)}
+                </td>
+                <td className={s.deleteCell}>
+                  {
+                    currentUser.id !== user.id &&
+                    canChangeUser(currentUser, user, team, users) &&
+                    (
+                      <button className={s.remove} type="button" onClick={this.handleDeleteUserClicked(user.id)} aria-label="Remove">
+                        <Glyphicon glyph="remove" />
+                      </button>
+                    )
+                  }
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {users.map(user => (
-                <tr key={user.id}>
-                  <td>{user.name ? user.name : f(gm('noUserName'))}</td>
-                  {hasOwnerRole && <td>{user.email}</td>}
-                  <td>
-                    {this.roleOptions(user)}
-                  </td>
-                  <td className={s.deleteCell}>
-                    {
-                      currentUser.id !== user.id &&
-                      canChangeUser(currentUser, user, team, users) &&
-                      (
-                        <button className={s.remove} type="button" onClick={this.handleDeleteUserClicked(user.id)} aria-label="Remove">
-                          <Glyphicon glyph="remove" />
-                        </button>
-                      )
-                    }
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-          <h3>Add User</h3>
-          <form onSubmit={this.handleSubmit}>
-            <FormGroup controlId="team-name">
-              <ControlLabel>
-                Name
-              </ControlLabel>
-              <FormControl
-                type="text"
-                onChange={this.handleChange('name')}
-                value={name}
-              />
-            </FormGroup>
-            <FormGroup controlId="team-email">
-              <ControlLabel>
-                Email
-              </ControlLabel>
-              <FormControl
-                type="email"
-                onChange={this.handleChange('email')}
-                value={email}
-                required
-              />
-            </FormGroup>
-            <FormGroup controlId="team-type">
-              <ControlLabel>
-                Type
-              </ControlLabel>
-              <FormControl
-                componentClass="select"
-                onChange={this.handleChange('type')}
-                value={type}
-                required
-              >
-                {hasGuestRole && <option value="guest">{f(gm('guestRole'))}</option>}
-                {hasMemberRole && <option value="member">{f(gm('memberRole'))}</option>}
-                {hasOwnerRole && <option value="owner">{f(gm('ownerRole'))}</option>}
-              </FormControl>
-              <HelpBlock>
-                Members can add new users and remove guests.
-                {hasOwnerRole &&
-                  ' Owners can manage all user roles and manage overall team information.'
-                }
-              </HelpBlock>
-            </FormGroup>
-            <Button type="submit">Submit</Button>
-          </form>
-          {hasOwnerRole && (
-            <div className={s.teamManagement}>
-              <h3>Team Management</h3>
-              <Button bsStyle="danger" onClick={confirmDeleteTeam}>Delete team</Button>
-            </div>
-          )}
-        </Col>
+            ))}
+          </tbody>
+        </Table>
+        <h3>Add User</h3>
+        <form onSubmit={this.handleSubmit}>
+          <FormGroup controlId="team-name">
+            <ControlLabel>
+              Name
+            </ControlLabel>
+            <FormControl
+              type="text"
+              onChange={this.handleChange('name')}
+              value={name}
+            />
+          </FormGroup>
+          <FormGroup controlId="team-email">
+            <ControlLabel>
+              Email
+            </ControlLabel>
+            <FormControl
+              type="email"
+              onChange={this.handleChange('email')}
+              value={email}
+              required
+            />
+          </FormGroup>
+          <FormGroup controlId="team-type">
+            <ControlLabel>
+              Type
+            </ControlLabel>
+            <FormControl
+              componentClass="select"
+              onChange={this.handleChange('type')}
+              value={type}
+              required
+            >
+              {hasGuestRole && <option value="guest">{f(gm('guestRole'))}</option>}
+              {hasMemberRole && <option value="member">{f(gm('memberRole'))}</option>}
+              {hasOwnerRole && <option value="owner">{f(gm('ownerRole'))}</option>}
+            </FormControl>
+            <HelpBlock>
+              Members can add new users and remove guests.
+              {hasOwnerRole &&
+                ' Owners can manage all user roles and manage overall team information.'
+              }
+            </HelpBlock>
+          </FormGroup>
+          <Button type="submit">Submit</Button>
+        </form>
+        {hasOwnerRole && (
+          <div className={s.teamManagement}>
+            <h3>Team Management</h3>
+            <Button bsStyle="danger" onClick={confirmDeleteTeam}>Delete team</Button>
+          </div>
+        )}
       </Grid>
     );
   }

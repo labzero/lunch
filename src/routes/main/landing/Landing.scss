@@ -23,6 +23,7 @@
 .jumbotronHeading {
   font-size: $jumbotron-heading-font-size;
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .cta {
@@ -67,6 +68,10 @@
     }
   }
 
+  & > :first-child {
+    align-items: center;
+  }
+
   & > * {
     display: flex;
     flex-direction: column;
@@ -79,6 +84,14 @@
       font-size: 1.5em;
       margin-top: 0;
     }
+  }
+
+  &:nth-child(odd) > :first-child {
+    padding-right: $grid-gutter-width / 2;
+  }
+
+  &:nth-child(even) > :first-child {
+    padding-left: $grid-gutter-width / 2;
   }
 
   &:nth-child(odd) {
@@ -100,6 +113,10 @@
 }
 
 @media (max-width: $screen-xs-max) {
+  .jumbotronHeading {
+    font-size: 3em;
+  }
+
   .feature {
     display: block;
 
@@ -117,6 +134,8 @@
     }
 
     & > :first-child {
+      padding-left: $grid-gutter-width / 2;
+      padding-right: $grid-gutter-width / 2;
       text-align: center;
     }
 
@@ -127,7 +146,7 @@
         border-width: $default-border-width 0;
         content: '';
         height: 100%;
-        left: -$grid-gutter-width / 2;
+        left: 0;
         position: absolute;
         top: 0;
         width: 100vw;

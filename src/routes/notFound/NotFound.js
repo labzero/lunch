@@ -8,7 +8,6 @@
  */
 
 import React, { PropTypes } from 'react';
-import Col from 'react-bootstrap/lib/Col';
 import Grid from 'react-bootstrap/lib/Grid';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './NotFound.scss';
@@ -21,10 +20,8 @@ class NotFound extends React.Component {
   render() {
     return (
       <Grid className={s.root}>
-        <Col xs={12}>
-          <h2>{this.props.title}</h2>
-          <p>Sorry, the page you were trying to view does not exist.</p>
-        </Col>
+        <h2>{this.props.title}</h2>
+        <p>Sorry, the page you were trying to view does not exist.</p>
       </Grid>
     );
   }
