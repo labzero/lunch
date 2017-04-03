@@ -13,8 +13,10 @@
  * https://github.com/membership/membership.db/tree/master/postgres
  */
 
+import bcrypt from 'bcrypt';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Strategy as LocalStrategy } from 'passport-local';
 import { User } from '../models';
 
 /**
@@ -33,6 +35,8 @@ passport.use(new GoogleStrategy(
     ) {
       const accountEmail = profile.emails.find(email => email.type === 'account');
       try {
+        // WARNING: this retrieves all attributes (incl. password).
+        // But we only provide the ID to passport.
         let user = await User.findOne({
           where: { google_id: profile.id }
         });
@@ -55,30 +59,51 @@ passport.use(new GoogleStrategy(
 
         if (
           typeof profile.displayName === 'string' &&
-          profile.displayName !== user.get('name')
+          profile.displayName !== user.get('name') &&
+          !user.get('name_changed')
         ) {
           userUpdates.name = profile.displayName;
           doUpdates = true;
         }
 
-        if (accountEmail !== undefined && accountEmail.value !== user.get('email')) {
-          userUpdates.email = accountEmail.value;
-          doUpdates = true;
-        }
-
         if (doUpdates) {
           const updatedUser = await user.update(userUpdates);
-          return done(null, updatedUser.id);
+          return done(null, updatedUser.get('id'));
         }
 
-        return done(null, user.id);
+        return done(null, user.get('id'));
       } catch (err) {
-        done(err);
+        return done(err);
       }
     }
     return done(null, false, { message: 'No email provided.' });
   }
 ));
+
+/**
+ * Sign in locally.
+ */
+passport.use(new LocalStrategy({
+  usernameField: 'email',
+  passReqToCallback: true
+}, async (req, email, password, done) => {
+  const failureData = { message: 'Invalid email or password.' };
+  try {
+    // WARNING: this retrieves all attributes (incl. password).
+    // But we only provide the ID to passport.
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return done(null, false, failureData);
+    }
+    const passwordValid = await bcrypt.compare(password, user.get('encrypted_password'));
+    if (passwordValid) {
+      return done(null, user.get('id'));
+    }
+    return done(null, false, failureData);
+  } catch (err) {
+    return done(err);
+  }
+}));
 
 passport.serializeUser((userId, cb) => cb(null, userId));
 

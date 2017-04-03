@@ -186,10 +186,6 @@ class Team extends React.Component {
               value={email}
               required
             />
-            <HelpBlock>
-              <strong>Please note:</strong> only email addresses linked with a Google
-              account can currently be used (e.g. Gmail or G Suite/Google Apps).
-            </HelpBlock>
           </FormGroup>
           <FormGroup controlId="team-type">
             <ControlLabel>

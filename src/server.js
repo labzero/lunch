@@ -142,11 +142,12 @@ app.use((req, res, next) => {
 if (__DEV__) {
   app.enable('trust proxy');
 }
+
 app.get(
-  '/login',
+  '/login/google',
   (req, res, next) => {
     if (req.subdomain) {
-      res.redirect(301, `${req.protocol}://${bsHost}/login?team=${req.subdomain}`);
+      res.redirect(301, `${req.protocol}://${bsHost}/login/google?team=${req.subdomain}`);
     } else {
       const options = { scope: ['email', 'profile'], session: false };
       if (req.query.team) {
@@ -156,7 +157,7 @@ app.get(
     }
   },
 );
-app.get('/login/callback',
+app.get('/login/google/callback',
   (req, res, next) => {
     const options = { failureRedirect: '/coming-soon', session: false };
     if (req.query.team) {
@@ -179,6 +180,14 @@ app.get('/login/callback',
     }
   },
 );
+
+app.post('/login',
+  passport.authenticate('local', { failureRedirect: '/login', session: false }),
+  (req, res) => {
+    res.redirect('/');
+  }
+);
+
 app.get('/logout', (req, res) => {
   req.logout();
   res.clearCookie('id_token', { domain });

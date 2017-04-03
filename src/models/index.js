@@ -90,8 +90,9 @@ User.findOneWithRoleType = (id, teamId, extraAttributes) =>
     where: { id }
   });
 
-User.getSessionUser = (id) =>
+User.getSessionUser = id =>
   User.findOne({
+    attributes: ['id', 'name', 'email', 'superuser'],
     where: { id },
     include: [
       {

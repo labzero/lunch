@@ -25,7 +25,10 @@ export const analytics = {
 };
 
 export const auth = {
-
   jwt: { secret: process.env.JWT_SECRET || 'React Starter Kit' },
-
+  smtp: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+    server: process.env.SMTP_SERVER
+  }
 };

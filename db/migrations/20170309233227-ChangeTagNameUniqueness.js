@@ -6,7 +6,7 @@ exports.up = (queryInterface, Sequelize) =>
     allowNull: false,
     unique: false
   }).then(() =>
-    db.sequelize.query('ALTER TABLE tags DROP CONSTRAINT tags_name_key;'));
+    db.sequelize.query('ALTER TABLE tags DROP CONSTRAINT IF EXISTS tags_name_key;'));
 
 exports.down = (queryInterface, Sequelize) =>
   queryInterface.changeColumn('tags', 'name', {

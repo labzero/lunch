@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import cors from 'cors';
+import crypto from 'crypto';
 import { Role, User } from '../../models';
 import { TEAM_LIMIT } from '../../constants';
 import getRole from '../../helpers/getRole';
@@ -23,6 +24,13 @@ export default () => {
   const hasOtherOwners = async (team, id) => {
     const allTeamRoles = await Role.findAll({ where: { team_id: team.id } });
     return allTeamRoles.some(role => role.type === 'owner' && role.user_id !== id);
+  };
+
+  const getExtraAttributes = (req) => {
+    if (hasRole(req.user, req.team, 'owner')) {
+      return ['email'];
+    }
+    return undefined;
   };
 
   const canChangeUser = async (user, roleToChange, target, team, noOtherOwners) => {
@@ -58,10 +66,7 @@ export default () => {
       loggedIn,
       checkTeamRole(),
       async (req, res) => {
-        let extraAttributes;
-        if (hasRole(req.user, req.team, 'owner')) {
-          extraAttributes = ['email'];
-        }
+        const extraAttributes = getExtraAttributes(req);
 
         try {
           const users = await User.scope({ method: ['withTeamRole', req.team.id, extraAttributes] }).findAll({
@@ -85,16 +90,15 @@ export default () => {
       async (req, res) => {
         const { email, name, type } = req.body;
 
-        let extraAttributes;
-        if (hasRole(req.user, req.team, 'owner')) {
-          extraAttributes = ['email'];
-        }
+        const extraAttributes = getExtraAttributes(req);
 
         try {
           if (!hasRole(req.user, req.team, type)) {
             return res.status(403).json({ error: true, data: { message: 'You cannot add a user with a role greater than your own.' } });
           }
 
+          // WARNING: this retrieves all attributes (incl. password).
+          // But it is overridden with the scoped findOne call below
           let userToAdd = await User.findOne({ where: { email }, include: [Role] });
 
           const UserWithTeamRole = User.scope({ method: ['withTeamRole', req.team.id, extraAttributes] });
@@ -111,21 +115,30 @@ export default () => {
               where: { email },
               include: [Role]
             });
-          } else {
-            userToAdd = await User.create({
+
+            return res.status(201).json({ error: false, data: userToAdd });
+          }
+
+          return crypto.randomBytes(20, async (err, buf) => {
+            const resetPasswordToken = buf.toString('hex');
+
+            let newUser = await User.create({
               email,
               name,
+              reset_password_token: resetPasswordToken,
+              reset_password_sent_at: new Date(),
               roles: [{
                 team_id: req.team.id,
                 type
               }]
             }, { include: [Role] });
 
-            // ugly hack: sequelize can't apply scopes on create, so just get user again
-            userToAdd = await UserWithTeamRole.findOne({ where: { id: userToAdd.id } });
-          }
+            // Sequelize can't apply scopes on create, so just get user again.
+            // Also will exclude hidden fields like password, token, etc.
+            newUser = await UserWithTeamRole.findOne({ where: { id: newUser.id } });
 
-          return res.status(201).json({ error: false, data: userToAdd });
+            return res.status(201).json({ error: false, data: newUser });
+          });
         } catch (err) {
           return errorCatcher(res, err);
         }
@@ -137,6 +150,8 @@ export default () => {
       checkTeamRole('member'),
       async (req, res) => {
         const id = parseInt(req.params.id, 10);
+
+        const extraAttributes = getExtraAttributes(req);
 
         try {
           const roleToChange = await getRoleToChange(req.user, id, req.team);
@@ -159,7 +174,7 @@ export default () => {
 
             if (allowed) {
               await roleToChange.update({ type: req.body.type });
-              const user = await User.scope({ method: ['withTeamRole', req.team.id, ['email']] }).findOne({ where: { id } });
+              const user = await User.scope({ method: ['withTeamRole', req.team.id, extraAttributes] }).findOne({ where: { id } });
               return res.status(200).json({ error: false, data: user });
             }
             return res.status(403).json({ error: true, data: { message: 'You do not have permission to change this user.' } });
