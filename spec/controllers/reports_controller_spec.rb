@@ -848,6 +848,7 @@ RSpec.describe ReportsController, :type => :controller do
         allow(response_hash).to receive(:[]).with(:credits)
         allow(member_balance_service_instance).to receive(:letters_of_credit).and_return(response_hash)
         allow(controller).to receive(:sort_report_data).and_return([])
+        allow(controller).to receive(:report_download_name=)
       end
 
       it_behaves_like 'a user required action', :get, :letters_of_credit
@@ -861,10 +862,10 @@ RSpec.describe ReportsController, :type => :controller do
         make_request
       end
       describe 'view instance variables' do
-        it 'sets @as_of_date to the value returned by MemberBalanceService.letters_of_credit' do
+        it 'sets @as_of to the `as_of_date` value returned by MemberBalanceService.letters_of_credit' do
           expect(response_hash).to receive(:[]).with(:as_of_date).and_return(as_of_date)
           make_request
-          expect(assigns[:as_of_date]).to eq(as_of_date)
+          expect(assigns[:as_of]).to eq(as_of_date)
         end
         it 'sets @total_current_par to the value returned by MemberBalanceService.letters_of_credit' do
           expect(response_hash).to receive(:[]).with(:total_current_par).and_return(total_current_par)
@@ -893,6 +894,19 @@ RSpec.describe ReportsController, :type => :controller do
         it 'sets @loc_table_data[:rows] to an empty array if no credit data is returned from MemberBalanceService.letters_of_credit' do
           make_request
           expect(assigns[:loc_table_data][:rows]).to eq([])
+        end
+      end
+      describe 'setting the `report_download_name`' do
+        let(:formatted_date) { SecureRandom.hex }
+        before { allow(response_hash).to receive(:[]).with(:as_of_date).and_return(as_of_date) }
+        it 'formats the `@as_of` date' do
+          expect(controller).to receive(:fhlb_report_date_numeric).with(as_of_date)
+          make_request
+        end
+        it 'sets `report_download_name` with the formatted date' do
+          allow(controller).to receive(:fhlb_report_date_numeric).and_return(formatted_date)
+          expect(controller).to receive(:report_download_name=).with("letters-of-credit-#{formatted_date}")
+          make_request
         end
       end
       describe 'with the report disabled' do

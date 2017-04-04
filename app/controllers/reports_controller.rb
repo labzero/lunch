@@ -1403,7 +1403,8 @@ class ReportsController < ApplicationController
         letters_of_credit = member_balances.letters_of_credit
         raise StandardError, "There has been an error and ReportsController#letters_of_credit has encountered nil. Check error logs." if letters_of_credit.nil?
       end
-      @as_of_date = letters_of_credit[:as_of_date]
+      @as_of = letters_of_credit[:as_of_date]
+      self.report_download_name = "letters-of-credit-#{fhlb_report_date_numeric(@as_of)}"
       @total_current_par = letters_of_credit[:total_current_par]
       letters_of_credit[:credits] = sort_report_data(letters_of_credit[:credits], :lc_number)
       rows = if letters_of_credit[:credits]
