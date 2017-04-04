@@ -1,5 +1,6 @@
 - future_funding_date ||= nil
-.advance-funding-date-wrapper
+- active_term_type ||= :vrc
+.advance-funding-date-wrapper{style: active_term_type == :vrc ? 'display: none;' : nil}
   %span= t('advances.funding.funding_date')
   -if future_funding_date
     %span= t('advances.funding.funding_on', date: fhlb_date_standard_numeric(@future_funding_date))

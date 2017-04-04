@@ -131,6 +131,9 @@ class AdvancesController < ApplicationController
       @skip_day = calendar_service.find_next_business_day(@next_day+1, 1.day)
       @date_restrictions = date_restrictions(request, AdvanceRequest::MAX_CUSTOM_TERM_DATE_RESTRICTION, advance_request.funding_date, true)
       @custom_term = ['custom']
+      future_funding_date = advance_request.funding_date.try(:to_date)
+      @future_funding_date = future_funding_date if future_funding_date && future_funding_date > Time.zone.today
+      @maturity_date = advance_request.custom_maturity_date if advance_request.custom_maturity_date
     end
     etransact_service = EtransactAdvancesService.new(request)
     @limited_pricing_message = MessageService.new.todays_quick_advance_message
@@ -407,7 +410,7 @@ class AdvancesController < ApplicationController
     days_to_maturity = (maturity_date.to_date - (funding_date || today).to_date).to_i
     {
       days: days_to_maturity,
-      term: days_to_maturity.to_s + 'day'
+      term: (days_to_maturity.to_s + 'day').to_sym
     }
   end
 end

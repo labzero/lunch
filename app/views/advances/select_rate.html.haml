@@ -21,7 +21,7 @@
               %span{data: {active_term_type: :vrc}}= t('advances.vrc_rates')
               %span{data: {active_term_type: :frc}}= t('advances.frc_rates')
             - if feature_enabled?('add-advance-custom-term')
-              = render 'alternate_funding_date', future_funding_date: @future_funding_date
+              = render 'alternate_funding_date', future_funding_date: @future_funding_date, active_term_type: @active_term_type
               .advance-alternate-funding-date-wrapper
                 %span= t('advances.funding.set_alternate')
                 %button.advance-alternate-funding-date-close.text-only-button= t('global.close')
@@ -67,9 +67,9 @@
                 %p= t('advances.custom_term.instructions')
                 .input-field-container-horizontal
                   %span= t('advances.custom_term.set')
-                  = render 'maturity_date_calendar', date_restrictions: @date_restrictions, hide_start_date: 'true'
+                  = render 'maturity_date_calendar', date_restrictions: @date_restrictions, hide_start_date: @maturity_date.blank?, start_date: @maturity_date
                   %button.primary-button.view-custom-rates{disabled: true}= t('advances.custom_term.view_rates')
-              .advance-select-custom-date-wrapper
+              .advance-select-custom-date-wrapper{style: @maturity_date ? 'display: block;' : nil}
                 %table.advance-rates-custom-table.add-advance-table-loading{data: {fetch_custom_rates_url: advances_fetch_custom_rates_path({advance_request: {id: @advance_request_id}})}}
                   = render 'custom_rates', custom_term: @custom_term, advance_types: @advance_types, loading: true, selected_type: @selected_type, selected_term: @selected_term, days_to_maturity: @days_to_maturity, maturity_date: @maturity_date, add_advances_active: @add_advances_active
           .request-form-actions

@@ -647,7 +647,6 @@
 
 .advance-funding-date-wrapper, .advance-alternate-funding-date-wrapper {
   @extend %bordered-section;
-  display: none;
   position: relative;
   margin: 25px 15px 0;
   padding: 15px 15px 20px 15px;
@@ -667,6 +666,7 @@
  }
 
 .advance-alternate-funding-date-wrapper {
+  display: none;
   span {
     @extend %typography-subtitle;
   }
