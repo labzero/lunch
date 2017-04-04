@@ -2273,7 +2273,8 @@ RSpec.describe SecuritiesController, type: :controller do
     describe '`date_restrictions`' do
       let(:today) { Time.zone.today }
       let(:max_date) { today + SecuritiesRequest::MAX_DATE_RESTRICTION }
-      let(:min_date) { today - described_class::MIN_DATE_SELECTOR }
+      let(:min_dates) { { trade_date: today - SecuritiesRequest::MIN_TRADE_DATE_RESTRICTION,
+                          settlement_date: today - SecuritiesRequest::MIN_SETTLEMENT_DATE_RESTRICTION - 4.days } }
       let(:holidays) do
         holidays = []
         rand(2..4).times do
@@ -2307,24 +2308,25 @@ RSpec.describe SecuritiesController, type: :controller do
         call_method
       end
       describe 'the returned hash' do
-        it 'has a `max_date` of today plus the `SecuritiesRequest::MAX_DATE_RESTRICTION`' do
-          expect(call_method[:max_date]).to eq(max_date)
-        end
-        it 'has a `min_date` of today minus the `MIN_DATE_SELECTOR`' do
-          expect(call_method[:min_date]).to eq(min_date)
-        end
-        describe 'the `invalid_dates` array' do
-          it 'includes all dates returned from the CalendarService as iso8601 strings' do
-            holidays_strings = holidays.map{|holiday| holiday.iso8601}
-            expect(call_method[:invalid_dates]).to include(*holidays_strings)
+        [:trade_date, :settlement_date].each do |date_type|
+          it "`#{date_type}` has a `max_date` of `today` plus the `SecuritiesRequest::MAX_DATE_RESTRICTION`" do
+            expect(call_method[date_type][:max_date]).to eq(max_date)
           end
-          it 'includes all weekends between the today and the max date' do
-            expect(call_method[:invalid_dates]).to include(*weekends)
+          it 'has the correct `min_date`' do
+            expect(call_method[date_type][:min_date]).to eq(min_dates[date_type])
+          end
+          describe 'the `invalid_dates` array' do
+            it 'includes all dates returned from the CalendarService as iso8601 strings' do
+              holidays_strings = holidays.map{|holiday| holiday.iso8601}
+              expect(call_method[date_type][:invalid_dates]).to include(*holidays_strings)
+            end
+            it 'includes all weekends between the today and the max date' do
+              expect(call_method[date_type][:invalid_dates]).to include(*weekends)
+            end
           end
         end
       end
     end
-
 
     describe '`prioritized_securities_request_error`' do
       generic_error_message = I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email)

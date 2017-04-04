@@ -8,12 +8,12 @@ class SecuritiesRequestService < MAPIService
   end
 
   def authorized
-    requests = get_json(:authorized, "/member/#{member_id}/securities/requests", status: :authorized, settle_start_date: Time.zone.today - SecuritiesRequest::MIN_DATE_RESTRICTION)
+    requests = get_json(:authorized, "/member/#{member_id}/securities/requests", status: :authorized, settle_start_date: Time.zone.today - SecuritiesRequest::MIN_SETTLEMENT_DATE_RESTRICTION)
     process_securities_requests(requests)
   end
 
   def awaiting_authorization
-    requests = get_json(:awaiting_authorization, "/member/#{member_id}/securities/requests", status: :awaiting_authorization, settle_start_date: Time.zone.today - SecuritiesRequest::MIN_DATE_RESTRICTION)
+    requests = get_json(:awaiting_authorization, "/member/#{member_id}/securities/requests", status: :awaiting_authorization, settle_start_date: Time.zone.today - SecuritiesRequest::MIN_SETTLEMENT_DATE_RESTRICTION)
     process_securities_requests(requests)
   end
 

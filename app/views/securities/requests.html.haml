@@ -10,6 +10,6 @@
     %section
       %header
         %h2= t('securities.requests.authorized.title')
-        %p= t('securities.requests.authorized.description', display_history: time_ago_in_words(Time.zone.now - SecuritiesRequest::MIN_DATE_RESTRICTION))
+        %p= t('securities.requests.authorized.description', display_history: time_ago_in_words(Time.zone.now - SecuritiesRequest::MIN_SETTLEMENT_DATE_RESTRICTION))
         = render 'reports/reports_table', table_class: ['securities-request-table', 'authorized-requests'], table_data: @authorized_requests_table, sortable: false
 = render 'reports/report_loading_flyout'
