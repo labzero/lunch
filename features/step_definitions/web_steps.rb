@@ -78,6 +78,14 @@ Then(/^I should( not)? see an "([^"]*)" button$/) do |negation, text|
   end
 end
 
+When(/^I press the Esc key$/) do
+  jquery_execute("
+    var event = jQuery.Event('keydown');
+    event.keyCode = 27;
+    $(document).trigger(event);
+  ")
+end
+
 def jquery_guard(timeout=10)
   times_out_at = Time.now + timeout
   while page.evaluate_script('typeof $') == 'undefined'
