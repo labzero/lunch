@@ -26,7 +26,7 @@ passport.use(new GoogleStrategy(
   {
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: '/login/callback'
+    callbackURL: '/login/google/callback'
   },
   async (accessToken, refreshToken, profile, done) => {
     if (
@@ -54,7 +54,10 @@ passport.use(new GoogleStrategy(
         }
 
         if (!user) {
-          return done(null, false, { message: 'Sign-ups are disabled for now.' });
+          return done(null, false, {
+            message: 'Sign-ups are disabled for now.',
+            type: 'error'
+          });
         }
 
         if (
@@ -76,7 +79,10 @@ passport.use(new GoogleStrategy(
         return done(err);
       }
     }
-    return done(null, false, { message: 'No email provided.' });
+    return done(null, false, {
+      message: 'No email provided.',
+      type: 'error'
+    });
   }
 ));
 
@@ -87,12 +93,15 @@ passport.use(new LocalStrategy({
   usernameField: 'email',
   passReqToCallback: true
 }, async (req, email, password, done) => {
-  const failureData = { message: 'Invalid email or password.' };
+  const failureData = {
+    message: 'Invalid email or password.',
+    type: 'error'
+  };
   try {
     // WARNING: this retrieves all attributes (incl. password).
     // But we only provide the ID to passport.
     const user = await User.findOne({ where: { email } });
-    if (!user) {
+    if (!user || !user.get('encrypted_password')) {
       return done(null, false, failureData);
     }
     const passwordValid = await bcrypt.compare(password, user.get('encrypted_password'));

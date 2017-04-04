@@ -62,5 +62,8 @@ export default (stateData) => {
   if (stateData.host) {
     initialState.host = stateData.host;
   }
+  if (stateData.flashes) {
+    initialState.flashes = stateData.flashes;
+  }
   return initialState;
 };

@@ -18,6 +18,7 @@ export default {
   // Keep in mind, routes are evaluated in order
   children: [
     require('./landing').default,
+    require('./login').default,
     require('./teams').default,
     require('./newTeam').default,
     require('./comingSoon').default,

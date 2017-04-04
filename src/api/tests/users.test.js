@@ -31,6 +31,9 @@ describe('api/team/users', () => {
 
     team = {
       id: 77,
+      get: function get(prop) {
+        return this[prop];
+      },
       stub: 'Lab Zero'
     };
     checkTeamRoleSpy = spy(() => (req, res, next) => {
@@ -39,6 +42,9 @@ describe('api/team/users', () => {
     });
 
     user = {
+      get: function get(prop) {
+        return this[prop];
+      },
       id: 231
     };
     loggedInSpy = spy((req, res, next) => {
@@ -186,12 +192,17 @@ describe('api/team/users', () => {
   });
 
   describe('POST /', () => {
+    let sendMailSpy;
+    beforeEach(() => {
+      sendMailSpy = spy(() => Promise.resolve());
+    });
+
     describe('before query', () => {
       beforeEach(() => {
         app = makeApp({
           '../../helpers/hasRole': mockEsmodule({
             default: () => true
-          })
+          }),
         });
 
         return request(app).post('/');
@@ -325,6 +336,11 @@ describe('api/team/users', () => {
                 .returns(true)
                 .onThirdCall()
                 .returns(false)
+            }),
+            '../../mailers/transporter': mockEsmodule({
+              default: {
+                sendMail: sendMailSpy
+              }
             })
           });
           createSpy = spy(RoleMock, 'create');
@@ -338,6 +354,10 @@ describe('api/team/users', () => {
             type: 'member'
           })).to.be.true;
         });
+
+        it('calls sendMail', () => {
+          expect(sendMailSpy.callCount).to.eq(1);
+        });
       });
     });
 
@@ -348,12 +368,19 @@ describe('api/team/users', () => {
         app = makeApp({
           '../../helpers/hasRole': mockEsmodule({
             default: () => true
+          }),
+          '../../mailers/transporter': mockEsmodule({
+            default: {
+              sendMail: sendMailSpy
+            }
           })
         });
         findOneStub = stub(UserMock, 'findOne')
           .callsFake(() => Promise.resolve(null));
         createStub = stub(UserMock, 'create')
-          .callsFake(() => Promise.resolve({ id: 2 }));
+          .callsFake(() => Promise.resolve({
+            id: 2
+          }));
         return request(app).post('/').send({ email: 'foo@bar.com', name: 'Jeffrey', type: 'member' });
       });
 
@@ -368,6 +395,10 @@ describe('api/team/users', () => {
             type: 'member'
           }]
         })).to.be.true;
+      });
+
+      it('calls sendMail', () => {
+        expect(sendMailSpy.callCount).to.eq(1);
       });
 
       it('looks for user again', () => {
@@ -387,6 +418,11 @@ describe('api/team/users', () => {
         app = makeApp({
           '../../helpers/hasRole': mockEsmodule({
             default: () => true
+          }),
+          '../../mailers/transporter': mockEsmodule({
+            default: {
+              sendMail: sendMailSpy
+            }
           })
         });
         stub(UserMock, 'findOne')

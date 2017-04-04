@@ -10,9 +10,9 @@
 import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Button from 'react-bootstrap/lib/Button';
-import s from './Login.scss';
+import s from './HeaderLogin.scss';
 
-const Login = ({ user }) => {
+const HeaderLogin = ({ user }) => {
   let content = <div />;
   if (user.id === undefined) {
     content = (
@@ -27,8 +27,8 @@ const Login = ({ user }) => {
   return content;
 };
 
-Login.propTypes = {
+HeaderLogin.propTypes = {
   user: PropTypes.object.isRequired
 };
 
-export default withStyles(s)(Login);
+export default withStyles(s)(HeaderLogin);

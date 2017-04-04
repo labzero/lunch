@@ -10,11 +10,11 @@
 import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
 import renderIfLoggedOut from '../../helpers/renderIfLoggedOut';
-import Landing from './Landing';
+import Login from './Login';
 
 export default {
 
-  path: '/',
+  path: '/login',
 
   action(context) {
     const state = context.store.getState();
@@ -22,7 +22,7 @@ export default {
     return renderIfLoggedOut(state, () => ({
       component: (
         <LayoutContainer path={context.url}>
-          <Landing />
+          <Login />
         </LayoutContainer>
       ),
     }));

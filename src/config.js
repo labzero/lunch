@@ -29,6 +29,6 @@ export const auth = {
   smtp: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
-    server: process.env.SMTP_SERVER
+    service: process.env.SMTP_SERVICE
   }
 };

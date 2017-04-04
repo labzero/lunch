@@ -32,6 +32,7 @@ import App from './components/App';
 import Html from './components/Html';
 import { ErrorPageWithoutStyle } from './components/ErrorPage/ErrorPage';
 import errorPageStyle from './components/ErrorPage/ErrorPage.scss';
+import generateUrl from './helpers/generateUrl';
 import hasRole from './helpers/hasRole';
 import teamRoutes from './routes/team';
 import mainRoutes from './routes/main';
@@ -100,7 +101,7 @@ app.use(bodyParser.json());
 // -----------------------------------------------------------------------------
 app.use((req, res, next) => {
   if (req.hostname === 'lunch.labzero.com') {
-    res.redirect(301, `${req.protocol}://lunch.pink`);
+    res.redirect(301, generateUrl(req, bsHost, path));
   } else {
     next();
   }
@@ -147,7 +148,7 @@ app.get(
   '/login/google',
   (req, res, next) => {
     if (req.subdomain) {
-      res.redirect(301, `${req.protocol}://${bsHost}/login/google?team=${req.subdomain}`);
+      res.redirect(301, generateUrl(req, bsHost, `/login/google?team=${req.subdomain}`));
     } else {
       const options = { scope: ['email', 'profile'], session: false };
       if (req.query.team) {
@@ -174,7 +175,7 @@ app.get('/login/google/callback',
       httpOnly: true
     });
     if (req.query.state) {
-      res.redirect(`${req.protocol}://${req.query.state}.${bsHost}/`);
+      res.redirect(generateUrl(req, `${req.query.state}.${bsHost}`));
     } else {
       res.redirect('/');
     }
@@ -182,9 +183,15 @@ app.get('/login/google/callback',
 );
 
 app.post('/login',
-  passport.authenticate('local', { failureRedirect: '/login', session: false }),
-  (req, res) => {
-    res.redirect('/');
+  (req, res, next) => {
+    passport.authenticate('local', { session: false }, (err, user, info) => {
+      if (err) { return next(err); }
+      if (!user) {
+        req.flashes = [info]; // eslint-disable-line no-param-reassign
+        return next();
+      }
+      return res.redirect('/');
+    })(req, res, next);
   }
 );
 
@@ -234,7 +241,7 @@ app.use('/api', api());
 //
 // Register server-side rendering middleware
 // -----------------------------------------------------------------------------
-app.get('*', async (req, res, next) => {
+const render = async (req, res, next) => {
   try {
     const stateData = {
       host: bsHost
@@ -246,6 +253,9 @@ app.get('*', async (req, res, next) => {
         where: { id: req.user.roles.map(r => r.team_id) }
       });
       stateData.team = req.team;
+    }
+    if (req.flashes) {
+      stateData.flashes = req.flashes;
     }
 
     const initialState = makeInitialState(stateData);
@@ -293,7 +303,7 @@ app.get('*', async (req, res, next) => {
       title: 'Lunch',
       description: 'An app for groups to decide on nearby lunch options.',
       body: '',
-      root: `${req.protocol}://${req.get('host')}`,
+      root: generateUrl(req, req.get('host')),
       initialState: serialize(initialState)
     };
 
@@ -316,7 +326,10 @@ app.get('*', async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-});
+};
+
+app.post('/login', render);
+app.get('*', render);
 
 //
 // Error handling

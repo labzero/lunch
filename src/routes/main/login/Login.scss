@@ -1,0 +1,26 @@
+@import '../../../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/variables';
+@import '../../../styles/_mixins.scss';
+
+.root {
+  @include page-root;
+}
+
+.googleButtonContainer {
+  margin: 2em 0;
+  text-align: center;
+}
+
+$button-height: ($padding-large-vertical * 2) + ($font-size-large * $line-height-large);
+
+.googleButton {
+  position: relative;
+  padding-left: $button-height + $padding-large-horizontal;
+}
+
+.googleLogo {
+  border-radius: $btn-border-radius-large - 1;
+  left: 0;
+  height: $button-height;
+  position: absolute;
+  top: 0;
+}

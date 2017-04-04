@@ -2,7 +2,9 @@ import { Router } from 'express';
 import cors from 'cors';
 import crypto from 'crypto';
 import { Role, User } from '../../models';
+import { host, hostname } from '../../config';
 import { TEAM_LIMIT } from '../../constants';
+import generateUrl from '../../helpers/generateUrl';
 import getRole from '../../helpers/getRole';
 import hasRole from '../../helpers/hasRole';
 import canChangeRole from '../../helpers/canChangeRole';
@@ -10,6 +12,10 @@ import errorCatcher from '../helpers/errorCatcher';
 import checkTeamRole from '../helpers/checkTeamRole';
 import corsOptionsDelegate from '../helpers/corsOptionsDelegate';
 import loggedIn from '../helpers/loggedIn';
+import generateMailOptions from '../../mailers/generateMailOptions';
+import transporter from '../../mailers/transporter';
+
+const bsHost = process.env.BS_RUNNING ? `${hostname}:3001` : host;
 
 export default () => {
   const router = new Router({ mergeParams: true });
@@ -111,6 +117,23 @@ export default () => {
               return res.status(409).json({ error: true, data: { message: 'User already exists on this team.' } });
             }
             await Role.create({ team_id: req.team.id, user_id: userToAdd.id, type });
+
+            // returns a promise but we're not going to wait to see if it succeeds.
+            transporter.sendMail(generateMailOptions({
+              name,
+              email,
+              subject: 'You were added to a team!',
+              text: `Hi there!
+
+${req.user.get('name')} invited you to the ${req.team.get('name')} team on Lunch!
+
+To get started, simply visit ${generateUrl(req, `${req.team.get('slug')}.${bsHost}`)} and vote away.
+
+Happy Lunching!`
+            })).then(() => {}).catch((err) => {
+              console.error(err); // eslint-disable-line no-console
+            });
+
             userToAdd = await UserWithTeamRole.findOne({
               where: { email },
               include: [Role]
@@ -119,7 +142,7 @@ export default () => {
             return res.status(201).json({ error: false, data: userToAdd });
           }
 
-          return crypto.randomBytes(20, async (err, buf) => {
+          return crypto.randomBytes(20, async (error, buf) => {
             const resetPasswordToken = buf.toString('hex');
 
             let newUser = await User.create({
@@ -132,6 +155,25 @@ export default () => {
                 type
               }]
             }, { include: [Role] });
+
+            // returns a promise but we're not going to wait to see if it succeeds.
+            transporter.sendMail(generateMailOptions({
+              name,
+              email,
+              subject: 'Welcome to Lunch!',
+              text: `Hi there!
+
+${req.user.get('name')} invited you to the ${req.team.get('name')} team on Lunch!
+
+To get started, simply visit ${generateUrl(req, bsHost)} and log in with Google.
+
+If you'd like to log in using a password instead, just follow this URL to generate one:
+${generateUrl(req, bsHost, `/reset-password?token=${resetPasswordToken}`)}
+
+Happy Lunching!`
+            })).then(() => {}).catch((err) => {
+              console.error(err); // eslint-disable-line no-console
+            });
 
             // Sequelize can't apply scopes on create, so just get user again.
             // Also will exclude hidden fields like password, token, etc.

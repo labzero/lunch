@@ -9,7 +9,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import LoginContainer from '../Login/LoginContainer';
+import HeaderLoginContainer from '../HeaderLogin/HeaderLoginContainer';
 import FlashContainer from '../Flash/FlashContainer';
 import MenuContainer from '../Menu/MenuContainer';
 import Link from '../Link';
@@ -89,7 +89,7 @@ class Header extends Component {
             <MenuContainer open={menuOpen} closeMenu={this.closeMenu} />
           </div>
           :
-          <LoginContainer />
+          <HeaderLoginContainer />
         }
       </div>
     );
