@@ -12,7 +12,7 @@
     %a{name: 'letter_of_credit'}
     %h2= t('resources.fee_schedules.letter_of_credit')
     %h3= t('resources.fee_schedules.annual_maintenance_charge') 
-    %p= t('resources.fee_schedules.loc_pricing_info')
+    = simple_format t('resources.fee_schedules.loc_pricing_info')
     = render 'reports/reports_table', sortable: false, table_data: @annual_maintenance_charge_table
     %h3= t('resources.fee_schedules.issuance_fee')
     = render 'reports/reports_table', sortable: false, table_data: @issuance_fee_table  

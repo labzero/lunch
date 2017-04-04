@@ -155,7 +155,7 @@ $resource-page-padding: 140px !default;
     &:first-child {
       @extend %typography-table-heading;
       background: $light-gray;
-      width: 350px;
+      width: 425px;
     }
     &:last-child {
       text-align: right;
@@ -163,7 +163,7 @@ $resource-page-padding: 140px !default;
   }
   table {
     margin-bottom: 0;
-    width: 550px;
+    width: 625px;
   }
 }
 

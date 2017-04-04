@@ -215,7 +215,7 @@ RSpec.describe ResourcesController, type: :controller do
         before do
           allow(loc_hash).to receive(:[]).with(:annual_maintenance_charge).and_return(annual_maintenance_charge_hash)
           allow(annual_maintenance_charge_hash).to receive(:[]).with(:minimum_annual_fee).and_return(whole_dollar_amount)
-          [:cip_ace, :agency_deposits, :other_purposes].each do |key|
+          [:cip_ace, :agency_deposits, :agency_deposits_variable_balance, :other_purposes].each do |key|
             allow(annual_maintenance_charge_hash).to receive(:[]).with(key).and_return(basis_point)
           end
         end
@@ -225,6 +225,7 @@ RSpec.describe ResourcesController, type: :controller do
             [:minimum_annual_fee, whole_dollar_amount, :currency_whole],
             [:cip_ace, I18n.t('resources.fee_schedules.basis_point_per_annum', basis_point: basis_point)],
             [:agency_deposits, I18n.t('resources.fee_schedules.basis_point_per_annum', basis_point: basis_point)],
+            [:agency_deposits_variable_balance, I18n.t('resources.fee_schedules.basis_point_per_annum', basis_point: basis_point)],
             [:other_purposes, I18n.t('resources.fee_schedules.basis_point_per_annum', basis_point: basis_point)]
           ]
           allow(controller).to receive(:fee_schedule_table_hash).with(annual_maintenance_charge_rows).and_return(table_data)
@@ -237,7 +238,7 @@ RSpec.describe ResourcesController, type: :controller do
         let(:issuance_fee_hash) { double('a hash of issuance fee data', :[] => fee_subhash) }
         before do
           allow(loc_hash).to receive(:[]).with(:issuance_fee).and_return(issuance_fee_hash)
-          [:agency_deposits, :other_purposes].each do |key|
+          [:agency_deposits, :agency_deposits_variable_balance, :other_purposes].each do |key|
             allow(issuance_fee_hash).to receive(:[]).with(key).and_return(whole_dollar_amount)
           end
           [:commercial_paper, :tax_exempt_bond].each do |key|
@@ -250,6 +251,7 @@ RSpec.describe ResourcesController, type: :controller do
         it 'sets @issuance_fee_table to the result of passing issuance_fee_rows into the `fee_schedule_table_hash` method' do
           issuance_fee_rows = [
             [:agency_deposits, whole_dollar_amount, :currency_whole],
+            [:agency_deposits_variable_balance, whole_dollar_amount, :currency_whole],
             [:other_purposes, whole_dollar_amount, :currency_whole],
             [:commercial_paper, I18n.t('resources.fee_schedules.price_range', lower: fhlb_formatted_currency_whole(whole_dollar_amount, html: false), upper: fhlb_formatted_currency_whole(whole_dollar_amount, html: false))],
             [:tax_exempt_bond, I18n.t('resources.fee_schedules.price_range', lower: fhlb_formatted_currency_whole(whole_dollar_amount, html: false), upper: fhlb_formatted_currency_whole(whole_dollar_amount, html: false))]
@@ -280,7 +282,7 @@ RSpec.describe ResourcesController, type: :controller do
         let(:amendment_fee_hash) { double('a hash of issuance fee data', :[] => fee_subhash) }
         before do
           allow(loc_hash).to receive(:[]).with(:amendment_fee).and_return(amendment_fee_hash)
-          [:agency_deposits, :other_purposes].each do |key|
+          [:agency_deposits, :agency_deposits_variable_balance, :other_purposes].each do |key|
             allow(amendment_fee_hash).to receive(:[]).with(key).and_return(whole_dollar_amount)
           end
         end
@@ -289,6 +291,7 @@ RSpec.describe ResourcesController, type: :controller do
           amendment_fee_rows = [
             [:increase_extension],
             [:agency_deposits, whole_dollar_amount, :currency_whole],
+            [:agency_deposits_variable_balance, whole_dollar_amount, :currency_whole],
             [:other_purposes, whole_dollar_amount, :currency_whole]
           ]
           allow(controller).to receive(:fee_schedule_table_hash).with(amendment_fee_rows).and_return(table_data)
