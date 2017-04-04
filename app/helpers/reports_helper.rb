@@ -50,7 +50,12 @@ module ReportsHelper
 
   def sort_report_data(data, sort_field, sort_order='asc')
     return data unless data
-    data = data.sort{|a,b| a[sort_field] <=> b[sort_field]}
+    data = data.sort do |a,b|
+      a_val = a[sort_field]
+      b_val = b[sort_field]
+      comparison = a_val <=> b_val
+      comparison || (!b_val && 1) || (!a_val && -1) || nil
+    end
     sort_order == 'asc' ? data : data.reverse
   end
 
