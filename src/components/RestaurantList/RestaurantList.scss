@@ -6,3 +6,26 @@
   padding: 20px;
   padding-top: 0;
 }
+
+.welcome {
+  background: $white-color;
+  border: $default-border;
+  padding-bottom: 20px;
+  padding-top: 20px;
+
+  :first-child {
+    margin-top: 0;
+  }
+
+  :last-child {
+    margin-bottom: 0;
+  }
+
+  h2 {
+    font-weight: bold;
+  }
+
+  p {
+    font-size: 1.25em;
+  }
+}
