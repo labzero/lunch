@@ -53,6 +53,7 @@ const mergeProps = (stateProps, dispatchProps) =>
       }
       suggestCache = [];
       geosuggest.update('');
+      geosuggest.showSuggests();
       const existingRestaurant = stateProps.restaurants.find(r => r.place_id === placeId);
       if (existingRestaurant === undefined) {
         dispatchProps.dispatch(addRestaurant(name, placeId, address, lat, lng));
