@@ -11,7 +11,8 @@ const setCookie = (req, res, next) => {
     res.cookie('id_token', token, {
       domain,
       maxAge: 1000 * expiresIn,
-      httpOnly: true
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production'
     });
     if (req.query.state) {
       res.redirect(generateUrl(req, `${req.query.state}.${bsHost}`));
@@ -50,7 +51,7 @@ export default () => {
       passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) { return next(err); }
         if (!user) {
-          req.flashes = [info]; // eslint-disable-line no-param-reassign
+          req.flash('error', info); // eslint-disable-line no-param-reassign
           return next();
         }
         return req.logIn(user, (logInErr) => {

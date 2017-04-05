@@ -54,10 +54,7 @@ passport.use(new GoogleStrategy(
         }
 
         if (!user) {
-          return done(null, false, {
-            message: 'Sign-ups are disabled for now.',
-            type: 'error'
-          });
+          return done(null, false, 'Sign-ups are disabled for now.');
         }
 
         if (
@@ -79,10 +76,7 @@ passport.use(new GoogleStrategy(
         return done(err);
       }
     }
-    return done(null, false, {
-      message: 'No email provided.',
-      type: 'error'
-    });
+    return done(null, false, 'No email provided.');
   }
 ));
 
@@ -93,10 +87,7 @@ passport.use(new LocalStrategy({
   usernameField: 'email',
   passReqToCallback: true
 }, async (req, email, password, done) => {
-  const failureData = {
-    message: 'Invalid email or password.',
-    type: 'error'
-  };
+  const failureData = 'Invalid email or password.';
   try {
     // WARNING: this retrieves all attributes (incl. password).
     // But we only provide the ID to passport.

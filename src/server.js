@@ -20,6 +20,9 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
+import session from 'express-session';
+import connectSessionSequelize from 'connect-session-sequelize';
+import flash from 'connect-flash';
 import expressJwt from 'express-jwt';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
@@ -44,6 +47,7 @@ import passport from './core/passport';
 import loginMiddleware from './middlewares/login';
 import passwordMiddleware from './middlewares/password';
 import api from './api';
+import { sequelize } from './models/db';
 import { Team, User } from './models';
 
 fetch.promise = Promise;
@@ -115,6 +119,30 @@ app.use((req, res, next) => {
 });
 
 //
+// Session / Flash
+// -----------------------------------------------------------------------------
+if (__DEV__) {
+  app.enable('trust proxy');
+}
+
+const SequelizeStore = connectSessionSequelize(session.Store);
+app.use(session({
+  cookie: {
+    domain,
+    secure: process.env.NODE_ENV === 'production'
+  },
+  saveUninitialized: false,
+  secret: auth.session.secret,
+  store: new SequelizeStore({
+    db: sequelize
+  }),
+  resave: false,
+  proxy: true
+}));
+
+app.use(flash());
+
+//
 // Authentication
 // -----------------------------------------------------------------------------
 app.use(expressJwt({
@@ -157,10 +185,6 @@ app.use((req, res, next) => {
     next();
   }
 });
-
-if (__DEV__) {
-  app.enable('trust proxy');
-}
 
 app.use('/login', loginMiddleware());
 app.use('/password', passwordMiddleware());
@@ -224,8 +248,13 @@ const render = async (req, res, next) => {
       });
       stateData.team = req.team;
     }
-    if (req.flashes) {
-      stateData.flashes = req.flashes;
+
+    const errorFlashes = req.flash('error');
+    if (errorFlashes.length) {
+      stateData.flashes = errorFlashes.map(f => ({
+        message: f,
+        type: 'error'
+      }));
     }
 
     const initialState = makeInitialState(stateData);

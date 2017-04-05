@@ -13,6 +13,10 @@ class Edit extends Component {
     token: PropTypes.string.isRequired
   };
 
+  componentDidMount() {
+    this.passwordField.focus();
+  }
+
   render() {
     const { token } = this.props;
 
@@ -23,6 +27,7 @@ class Edit extends Component {
           <FormGroup controlId="resetPassword-password">
             <ControlLabel>New password</ControlLabel>
             <FormControl
+              inputRef={(i) => { this.passwordField = i; }}
               minLength={PASSWORD_MIN_LENGTH}
               name="password"
               required

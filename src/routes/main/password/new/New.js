@@ -16,6 +16,10 @@ class New extends Component {
     email: ''
   };
 
+  componentDidMount() {
+    this.emailField.focus();
+  }
+
   render() {
     const { email } = this.props;
 
@@ -31,6 +35,7 @@ class New extends Component {
             <ControlLabel>Email</ControlLabel>
             <FormControl
               defaultValue={email}
+              inputRef={(i) => { this.emailField = i; }}
               name="email"
               required
               type="email"

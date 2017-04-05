@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
+import commonPassword from 'common-password';
 import { bsHost } from '../config';
 import { PASSWORD_MIN_LENGTH } from '../constants';
 import generateUrl from '../helpers/generateUrl';
@@ -42,9 +43,14 @@ Happy Lunching!`
       if (!user || !user.resetPasswordValid()) {
         res.redirect('/password/new');
       } else if (!req.body.password || req.body.password.length < PASSWORD_MIN_LENGTH) {
-        res.status(422).json({
-          error: true,
-          data: { message: `Password must be at least ${PASSWORD_MIN_LENGTH} characters long.` }
+        req.flash('error', `Password must be at least ${PASSWORD_MIN_LENGTH} characters long.`);
+        req.session.save(() => {
+          res.redirect(`/password/edit?token=${req.body.token}`);
+        });
+      } else if (commonPassword(req.body.password)) {
+        req.flash('error', 'The password you provided is too common. Please try another one.');
+        req.session.save(() => {
+          res.redirect(`/password/edit?token=${req.body.token}`);
         });
       } else {
         const encryptedPassword = await bcrypt.hash(req.body.password, 10);

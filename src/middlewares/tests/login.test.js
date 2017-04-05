@@ -133,27 +133,27 @@ describe('middlewares/login', () => {
 
   describe('POST /', () => {
     describe('when there is an error getting the user', () => {
-      let flashes;
+      let flashSpy;
       beforeEach(() => {
         authenticateStub = stub().callsFake((strategy, options, callback) => () => {
-          callback(null, false, { message: 'Oh No' });
+          callback(null, false, 'Oh No');
         });
+        flashSpy = spy();
         app = makeApp({
           '../core/passport': mockEsmodule({
             default: {
               authenticate: authenticateStub
             }
           })
-        });
-        app.use((req, res, next) => {
-          flashes = req.flashes;
+        }, (req, res, next) => {
+          req.flash = flashSpy; // eslint-disable-line no-param-reassign
           next();
         });
         return request(app).post('/');
       });
 
-      it('adds error to flashes', () => {
-        expect(flashes).to.deep.eq([{ message: 'Oh No' }]);
+      it('flashes error', () => {
+        expect(flashSpy.calledWith('error', 'Oh No')).to.be.true;
       });
     });
 

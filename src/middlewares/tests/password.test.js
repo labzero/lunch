@@ -20,12 +20,14 @@ describe('middlewares/password', () => {
   let makeApp;
   let sendMailSpy;
   let UserMock;
+  let flashSpy;
 
   beforeEach(() => {
     UserMock = dbMock.define('user', {});
     UserMock.generateToken = () => Promise.resolve('12345');
     sendMailSpy = spy();
     hashSpy = spy(() => Promise.resolve('drowssap taerg a'));
+    flashSpy = spy();
     makeApp = (deps) => {
       const passwordMiddleware = proxyquireStrict('../password', {
         bcrypt: mockEsmodule({
@@ -46,6 +48,13 @@ describe('middlewares/password', () => {
 
       const server = express();
       server.use(bodyParser.json());
+      server.use((req, res, next) => {
+        req.flash = flashSpy; // eslint-disable-line no-param-reassign
+        req.session = { // eslint-disable-line no-param-reassign
+          save: cb => cb()
+        };
+        next();
+      });
       server.use('/', passwordMiddleware());
       return server;
     };
@@ -158,7 +167,7 @@ describe('middlewares/password', () => {
         }));
 
         request(app).put('/').send({
-          password: 'badpass',
+          password: 'short',
           reset_password_token: '12345'
         }).then((r) => {
           response = r;
@@ -166,13 +175,45 @@ describe('middlewares/password', () => {
         });
       });
 
-      it('returns 422', () => {
-        expect(response.statusCode).to.eq(422);
+      it('sets flash error', () => {
+        expect(flashSpy.calledWith('error', match.string)).to.be.true;
       });
 
-      it('returns json with error message', () => {
-        expect(response.body.error).to.be.true;
-        expect(response.body.data.message).to.be.a('string');
+      it('returns 302', () => {
+        expect(response.statusCode).to.eq(302);
+      });
+
+      it('does not update password', () => {
+        expect(updateSpy.callCount).to.eq(0);
+      });
+    });
+
+    describe('when user submits password that is too common', () => {
+      let response;
+      let updateSpy;
+      beforeEach((done) => {
+        updateSpy = spy(() => Promise.resolve());
+        stub(UserMock, 'findOne').callsFake(() => ({
+          get: () => false,
+          update: updateSpy,
+          resetPasswordValid: () => true
+        }));
+
+        request(app).put('/').send({
+          password: 'password',
+          reset_password_token: '12345'
+        }).then((r) => {
+          response = r;
+          done();
+        });
+      });
+
+      it('sets flash error', () => {
+        expect(flashSpy.calledWith('error', match.string)).to.be.true;
+      });
+
+      it('returns 302', () => {
+        expect(response.statusCode).to.eq(302);
       });
 
       it('does not update password', () => {
