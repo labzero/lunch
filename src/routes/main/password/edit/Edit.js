@@ -5,6 +5,7 @@ import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Grid from 'react-bootstrap/lib/Grid';
+import { PASSWORD_MIN_LENGTH } from '../../../../constants';
 import s from './Edit.scss';
 
 class Edit extends Component {
@@ -22,6 +23,7 @@ class Edit extends Component {
           <FormGroup controlId="resetPassword-password">
             <ControlLabel>New password</ControlLabel>
             <FormControl
+              minLength={PASSWORD_MIN_LENGTH}
               name="password"
               required
               type="password"

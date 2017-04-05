@@ -146,6 +146,40 @@ describe('middlewares/password', () => {
       });
     });
 
+    describe('when user submits password that is too short', () => {
+      let response;
+      let updateSpy;
+      beforeEach((done) => {
+        updateSpy = spy(() => Promise.resolve());
+        stub(UserMock, 'findOne').callsFake(() => ({
+          get: () => false,
+          update: updateSpy,
+          resetPasswordValid: () => true
+        }));
+
+        request(app).put('/').send({
+          password: 'badpass',
+          reset_password_token: '12345'
+        }).then((r) => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns 422', () => {
+        expect(response.statusCode).to.eq(422);
+      });
+
+      it('returns json with error message', () => {
+        expect(response.body.error).to.be.true;
+        expect(response.body.data.message).to.be.a('string');
+      });
+
+      it('does not update password', () => {
+        expect(updateSpy.callCount).to.eq(0);
+      });
+    });
+
     describe('when user has valid reset token', () => {
       let updateSpy;
       beforeEach(() => {

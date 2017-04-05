@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import { bsHost } from '../config';
+import { PASSWORD_MIN_LENGTH } from '../constants';
 import generateUrl from '../helpers/generateUrl';
 import generateMailOptions from '../mailers/generateMailOptions';
 import transporter from '../mailers/transporter';
@@ -40,6 +41,11 @@ Happy Lunching!`
       const user = await User.findOne({ where: { reset_password_token: req.body.token } });
       if (!user || !user.resetPasswordValid()) {
         res.redirect('/password/new');
+      } else if (!req.body.password || req.body.password.length < PASSWORD_MIN_LENGTH) {
+        res.status(422).json({
+          error: true,
+          data: { message: `Password must be at least ${PASSWORD_MIN_LENGTH} characters long.` }
+        });
       } else {
         const encryptedPassword = await bcrypt.hash(req.body.password, 10);
         const updates = {

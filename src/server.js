@@ -123,6 +123,17 @@ app.use(expressJwt({
   getToken: req => req.cookies.id_token,
 }));
 app.use(passport.initialize());
+app.use((err, req, res, next) => {
+  // In the case of an invalid token, attempt to remove it but also
+  // attempt to render the requested page as a logged-out user.
+  // If the cookie's domain is .lunch.pink but the current host is
+  // local.lunch.pink, the cookie might not be removed, so don't blow up.
+  if (err.name === 'UnauthorizedError') {
+    req.logout();
+    res.clearCookie('id_token', { domain });
+    next();
+  }
+});
 
 app.use((req, res, next) => {
   const subdomainMatch = req.hostname.match(`^(.*)${domain.replace(/\./g, '\\.')}`);
