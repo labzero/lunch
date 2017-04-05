@@ -1,6 +1,9 @@
 import React, { Component, PropTypes } from 'react';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import Grid from 'react-bootstrap/lib/Grid';
 import Loading from '../../../components/Loading';
 import TagManagerContainer from '../../../components/TagManager/TagManagerContainer';
+import s from './Tags.scss';
 
 class Tags extends Component {
   componentDidMount() {
@@ -13,7 +16,10 @@ class Tags extends Component {
     }
 
     return (
-      <TagManagerContainer />
+      <Grid className={s.root}>
+        <h2>Tags</h2>
+        <TagManagerContainer />
+      </Grid>
     );
   }
 }
@@ -23,4 +29,4 @@ Tags.propTypes = {
   tagListReady: PropTypes.bool.isRequired
 };
 
-export default Tags;
+export default withStyles(s)(Tags);
