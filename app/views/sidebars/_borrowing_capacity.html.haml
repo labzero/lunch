@@ -28,3 +28,8 @@
       %tr
         %td.label=t('advances.add_advance.borrowing_capacity.stock_leverage')
         %td.value= fhlb_formated_currency_unit(profile[:capital_stock][:remaining_leverage])
+  %table
+    %tbody
+      %tr
+        %td.label=t('reports.pages.account_summary.financing_availability.maximum_term')
+        %td.value= t('reports.month_count.other', count: profile[:maximum_term])
