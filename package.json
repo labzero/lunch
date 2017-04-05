@@ -118,6 +118,7 @@
     "json-loader": "^0.5.4",
     "lint-staged": "^3.3.0",
     "markdown-it": "^8.2.2",
+    "method-override": "^2.3.8",
     "mkdirp": "^0.5.1",
     "mocha": "^3.2.0",
     "node-sass": "^4.5.0",

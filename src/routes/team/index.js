@@ -21,6 +21,7 @@ export default {
     require('./team').default,
     require('./tags').default,
     require('./teams').default,
+    require('../login').default,
 
     // Wildcard routes, e.g. { path: '*', ... } (must go last)
     require('../notFound').default,

@@ -19,8 +19,8 @@ import enforce from 'express-sslify';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
+import methodOverride from 'method-override';
 import expressJwt from 'express-jwt';
-import jwt from 'jsonwebtoken';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import UniversalRouter from 'universal-router';
@@ -38,18 +38,17 @@ import teamRoutes from './routes/team';
 import mainRoutes from './routes/main';
 import assets from './assets.json'; // eslint-disable-line import/no-unresolved
 import configureStore from './store/configureStore';
-import { host, hostname, port, auth } from './config';
+import { domain, bsHost, port, auth } from './config';
 import makeInitialState from './initialState';
 import passport from './core/passport';
+import loginMiddleware from './middlewares/login';
+import passwordMiddleware from './middlewares/password';
 import api from './api';
 import { Team, User } from './models';
 
 fetch.promise = Promise;
 
 const app = express();
-
-const bsHost = process.env.BS_RUNNING ? `${hostname}:3001` : host;
-const domain = `.${hostname}`;
 
 const logDirectory = path.join(__dirname, 'log');
 
@@ -95,6 +94,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(methodOverride((req) => {
+  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+    const method = req.body._method; // eslint-disable-line no-underscore-dangle
+    delete req.body._method; // eslint-disable-line no-underscore-dangle, no-param-reassign
+    return method;
+  }
+  return undefined;
+}));
 
 //
 // Redirect old labzero.com host
@@ -144,56 +151,8 @@ if (__DEV__) {
   app.enable('trust proxy');
 }
 
-app.get(
-  '/login/google',
-  (req, res, next) => {
-    if (req.subdomain) {
-      res.redirect(301, generateUrl(req, bsHost, `/login/google?team=${req.subdomain}`));
-    } else {
-      const options = { scope: ['email', 'profile'], session: false };
-      if (req.query.team) {
-        options.state = req.query.team;
-      }
-      passport.authenticate('google', options)(req, res, next);
-    }
-  },
-);
-app.get('/login/google/callback',
-  (req, res, next) => {
-    const options = { failureRedirect: '/coming-soon', session: false };
-    if (req.query.team) {
-      options.state = req.query.team;
-    }
-    passport.authenticate('google', options)(req, res, next);
-  },
-  (req, res) => {
-    const expiresIn = 60 * 60 * 24 * 180; // 180 days
-    const token = jwt.sign(req.user, auth.jwt.secret);
-    res.cookie('id_token', token, {
-      domain,
-      maxAge: 1000 * expiresIn,
-      httpOnly: true
-    });
-    if (req.query.state) {
-      res.redirect(generateUrl(req, `${req.query.state}.${bsHost}`));
-    } else {
-      res.redirect('/');
-    }
-  },
-);
-
-app.post('/login',
-  (req, res, next) => {
-    passport.authenticate('local', { session: false }, (err, user, info) => {
-      if (err) { return next(err); }
-      if (!user) {
-        req.flashes = [info]; // eslint-disable-line no-param-reassign
-        return next();
-      }
-      return res.redirect('/');
-    })(req, res, next);
-  }
-);
+app.use('/login', loginMiddleware());
+app.use('/password', passwordMiddleware());
 
 app.get('/logout', (req, res) => {
   req.logout();
@@ -289,7 +248,8 @@ const render = async (req, res, next) => {
     const route = await router.resolve({
       ...context,
       path: req.path,
-      query: req.query
+      query: req.query,
+      subdomain: req.subdomain
     });
 
     if (route.redirect) {
@@ -329,6 +289,8 @@ const render = async (req, res, next) => {
 };
 
 app.post('/login', render);
+app.post('/password', render);
+app.put('/password', render);
 app.get('*', render);
 
 //
@@ -340,17 +302,28 @@ pe.skipPackage('express');
 
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
   console.log(pe.render(err)); // eslint-disable-line no-console
-  const html = ReactDOM.renderToStaticMarkup(
-    <Html
-      title="Internal Server Error"
-      description={err.message}
-      styles={[{ id: 'css', cssText: errorPageStyle._getCss() }]} // eslint-disable-line no-underscore-dangle
-    >
-      {ReactDOM.renderToString(<ErrorPageWithoutStyle error={err} />)}
-    </Html>,
-  );
   res.status(err.status || 500);
-  res.send(`<!doctype html>${html}`);
+  if (req.accepts('html') === 'html') {
+    const html = ReactDOM.renderToStaticMarkup(
+      <Html
+        title="Internal Server Error"
+        description={err.message}
+        styles={[{ id: 'css', cssText: errorPageStyle._getCss() }]} // eslint-disable-line no-underscore-dangle
+      >
+        {ReactDOM.renderToString(<ErrorPageWithoutStyle error={err} />)}
+      </Html>,
+    );
+    res.send(`<!doctype html>${html}`);
+  } else {
+    res.json({
+      error: true,
+      data: {
+        message: err.message,
+        stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
+      }
+    });
+  }
+  next(err);
 });
 
 app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.

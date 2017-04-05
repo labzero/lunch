@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import request from 'request';
 import { Restaurant, Vote, Tag } from '../../models';
-import errorCatcher from '../helpers/errorCatcher';
 import checkTeamRole from '../helpers/checkTeamRole';
 import loggedIn from '../helpers/loggedIn';
 import { restaurantPosted, restaurantDeleted, restaurantRenamed } from '../../actions/restaurants';
@@ -21,13 +20,13 @@ export default () => {
       '/',
       loggedIn,
       checkTeamRole(),
-      async (req, res) => {
+      async (req, res, next) => {
         try {
           const all = await Restaurant.findAllWithTagIds({ team_id: req.team.id });
 
           res.status(200).json({ error: false, data: all });
         } catch (err) {
-          errorCatcher(res, err);
+          next(err);
         }
       }
     ).get(
@@ -48,7 +47,7 @@ export default () => {
                   if (json.status !== 'OK') {
                     const newError = { message: `Could not get info for restaurant. Google might have
     removed its entry. Try removing it and adding it to Lunch again.` };
-                    errorCatcher(res, newError);
+                    res.status(404).json({ error: true, newError });
                   } else if (json.result && json.result.url) {
                     res.redirect(json.result.url);
                   } else {
@@ -69,7 +68,7 @@ export default () => {
       '/',
       loggedIn,
       checkTeamRole(),
-      async (req, res) => {
+      async (req, res, next) => {
         const { name, place_id, lat, lng } = req.body;
 
         let { address } = req.body;
@@ -92,7 +91,7 @@ export default () => {
           res.status(201).send({ error: false, data: json });
         } catch (err) {
           const error = { message: 'Could not save new restaurant. Has it already been added?' };
-          errorCatcher(res, error);
+          next(error);
         }
       }
     )
@@ -100,7 +99,7 @@ export default () => {
       '/:id',
       loggedIn,
       checkTeamRole(),
-      async (req, res) => {
+      async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
         const { name } = req.body;
 
@@ -117,7 +116,7 @@ export default () => {
           }
         }).catch(() => {
           const error = { message: 'Could not update restaurant.' };
-          errorCatcher(res, error);
+          next(error);
         });
       }
     )
@@ -125,7 +124,7 @@ export default () => {
       '/:id',
       loggedIn,
       checkTeamRole(),
-      async (req, res) => {
+      async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
         try {
           const count = await Restaurant.destroy({ where: { id, team_id: req.team.id } });
@@ -136,7 +135,7 @@ export default () => {
             res.status(204).send();
           }
         } catch (err) {
-          errorCatcher(res, err);
+          next(err);
         }
       }
     )

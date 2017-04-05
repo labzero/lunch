@@ -8,26 +8,18 @@
  */
 
 /* eslint-disable global-require */
-import rootAction from '../helpers/rootAction';
 
 // The top-level (parent) route
 export default {
-
-  path: '/',
+  path: '/password',
 
   // Keep in mind, routes are evaluated in order
   children: [
-    require('./landing').default,
-    require('./teams').default,
-    require('./newTeam').default,
-    require('./password').default,
-    require('./comingSoon').default,
-    require('../login').default,
+    require('./create').default,
+    require('./edit').default,
+    require('./new').default,
 
     // Wildcard routes, e.g. { path: '*', ... } (must go last)
-    require('../notFound').default,
-  ],
-
-  action: rootAction
-
+    require('../../notFound').default,
+  ]
 };

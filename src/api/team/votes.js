@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { Vote } from '../../models';
-import errorCatcher from '../helpers/errorCatcher';
 import checkTeamRole from '../helpers/checkTeamRole';
 import loggedIn from '../helpers/loggedIn';
 import { votePosted, voteDeleted } from '../../actions/restaurants';
@@ -17,7 +16,7 @@ export default () => {
       '/',
       loggedIn,
       checkTeamRole(),
-      async (req, res) => {
+      async (req, res, next) => {
         const restaurantId = parseInt(req.params.restaurant_id, 10);
         try {
           const count = await Vote.recentForRestaurantAndUser(restaurantId, req.user.id);
@@ -33,14 +32,14 @@ export default () => {
               req.wss.broadcast(req.team.id, votePosted(json));
               res.status(201).send({ error: false, data: obj });
             } catch (err) {
-              errorCatcher(res, err);
+              next(err);
             }
           } else {
             const error = { message: 'Could not vote. Did you already vote today?' };
-            errorCatcher(res, error);
+            next(error);
           }
         } catch (err) {
-          errorCatcher(res, err);
+          next(err);
         }
       }
     )
@@ -48,7 +47,7 @@ export default () => {
       '/:id',
       loggedIn,
       checkTeamRole(),
-      async (req, res) => {
+      async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
 
         try {
@@ -64,7 +63,7 @@ export default () => {
             res.status(204).send();
           }
         } catch (err) {
-          errorCatcher(res, err);
+          next(err);
         }
       }
     );

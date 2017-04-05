@@ -5,7 +5,6 @@ import reservedTeamSlugs from '../../constants/reservedTeamSlugs';
 import { TEAM_LIMIT, TEAM_SLUG_REGEX } from '../../constants';
 import checkTeamRole from '../helpers/checkTeamRole';
 import corsOptionsDelegate from '../helpers/corsOptionsDelegate';
-import errorCatcher from '../helpers/errorCatcher';
 import loggedIn from '../helpers/loggedIn';
 
 const error409 = (res) =>
@@ -18,7 +17,7 @@ export default () => {
     .post(
       '/',
       loggedIn,
-      async (req, res) => {
+      async (req, res, next) => {
         const { address, lat, lng, name, slug } = req.body;
 
         if (req.user.roles.length >= TEAM_LIMIT) {
@@ -52,7 +51,7 @@ export default () => {
           if (err.name === 'SequelizeUniqueConstraintError') {
             return error409(res);
           }
-          return errorCatcher(res, err);
+          return next(err);
         }
       }
     )
@@ -68,12 +67,12 @@ export default () => {
         next();
       },
       checkTeamRole('owner'),
-      async (req, res) => {
+      async (req, res, next) => {
         try {
           await req.team.destroy();
           return res.status(204).send();
         } catch (err) {
-          return errorCatcher(res, err);
+          return next(err);
         }
       }
     );

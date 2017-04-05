@@ -8,9 +8,6 @@ const Restaurant = sequelize.define('restaurant', {
   place_id: DataTypes.STRING,
   team_id: DataTypes.INTEGER
 }, {
-  instanceMethods: {
-    tagIds: () => this.getTags().map(tag => tag.get('id'))
-  },
   underscored: true
 });
 

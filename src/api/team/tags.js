@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { Tag } from '../../models';
-import errorCatcher from '../helpers/errorCatcher';
 import checkTeamRole from '../helpers/checkTeamRole';
 import loggedIn from '../helpers/loggedIn';
 import { tagDeleted } from '../../actions/tags';
@@ -13,12 +12,12 @@ export default () => {
       '/',
       loggedIn,
       checkTeamRole(),
-      async (req, res) => {
+      async (req, res, next) => {
         try {
           const all = await Tag.scope('orderedByRestaurant').findAll({ where: { team_id: req.team.id } });
           res.status(200).send({ error: false, data: all });
         } catch (err) {
-          errorCatcher(res, err);
+          next(err);
         }
       }
     )
@@ -26,7 +25,7 @@ export default () => {
       '/:id',
       loggedIn,
       checkTeamRole(),
-      async (req, res) => {
+      async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
         try {
           const count = await Tag.destroy({ where: { id, team_id: req.team.id } });
@@ -37,7 +36,7 @@ export default () => {
             res.status(204).send();
           }
         } catch (err) {
-          errorCatcher(res, err);
+          next(err);
         }
       }
     );

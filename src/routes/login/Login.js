@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
@@ -8,7 +8,7 @@ import Button from 'react-bootstrap/lib/Button';
 import google from './google.svg';
 import s from './Login.scss';
 
-const Login = () => (
+const Login = ({ host, teamSlug }) => (
   <Grid className={s.root}>
     <h2>Log in</h2>
     <div className={s.googleButtonContainer}>
@@ -16,7 +16,7 @@ const Login = () => (
         bsSize="large"
         bsStyle="primary"
         className={s.googleButton}
-        href="/login/google"
+        href={`//${host}/login/google${teamSlug ? `?team=${teamSlug}` : ''}`}
       >
         <img className={s.googleLogo} src={google} alt="" />
         Sign in with Google
@@ -41,8 +41,18 @@ const Login = () => (
         />
       </FormGroup>
       <Button type="submit">Log in</Button>
+      <Button bsStyle="link" href={`//${host}/password/new`}>Forgot password?</Button>
     </form>
   </Grid>
 );
+
+Login.propTypes = {
+  host: PropTypes.string.isRequired,
+  teamSlug: PropTypes.string
+};
+
+Login.defaultProps = {
+  teamSlug: undefined
+};
 
 export default withStyles(s)(Login);

@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { Tag, RestaurantTag } from '../../models';
-import errorCatcher from '../helpers/errorCatcher';
 import checkTeamRole from '../helpers/checkTeamRole';
 import loggedIn from '../helpers/loggedIn';
 import {
@@ -17,11 +16,11 @@ export default () => {
       '/',
       loggedIn,
       checkTeamRole(),
-      async (req, res) => {
+      async (req, res, next) => {
         const restaurantId = parseInt(req.params.restaurant_id, 10);
         const alreadyAddedError = () => {
           const error = { message: 'Could not add tag to restaurant. Is it already added?' };
-          errorCatcher(res, error);
+          res.status(409).json({ error: true, data: error });
         };
         if (req.body.name !== undefined) {
           Tag.findOrCreate({
@@ -46,7 +45,7 @@ export default () => {
               alreadyAddedError(err);
             }
           }).catch(err => {
-            errorCatcher(res, err);
+            next(err);
           });
         } else if (req.body.id !== undefined) {
           const id = parseInt(req.body.id, 10);
@@ -63,7 +62,7 @@ export default () => {
             alreadyAddedError(err);
           }
         } else {
-          errorCatcher(res);
+          next();
         }
       }
     )
@@ -71,7 +70,7 @@ export default () => {
       '/:id',
       loggedIn,
       checkTeamRole(),
-      async (req, res) => {
+      async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
         const restaurantId = parseInt(req.params.restaurant_id, 10);
         try {
@@ -79,7 +78,7 @@ export default () => {
           req.wss.broadcast(req.team.id, deletedTagFromRestaurant(restaurantId, id, req.user.id));
           res.status(204).send();
         } catch (err) {
-          errorCatcher(res, err);
+          next(err);
         }
       }
     );

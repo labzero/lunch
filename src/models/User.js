@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { sequelize, DataTypes } from './db';
 
 const User = sequelize.define('user', {
@@ -13,6 +14,11 @@ const User = sequelize.define('user', {
   name_changed: DataTypes.BOOLEAN,
   superuser: DataTypes.BOOLEAN
 }, {
+  instanceMethods: {
+    resetPasswordValid() {
+      return new Date() - this.get('reset_password_sent_at') < 60 * 60 * 1000 * 24;
+    }
+  },
   scopes: {
     withTeamRole: (teamId, extraAttributes) => ({
       attributes: [
@@ -25,6 +31,15 @@ const User = sequelize.define('user', {
     })
   },
   underscored: true
+});
+
+User.generateToken = () => new Promise((resolve, reject) => {
+  crypto.randomBytes(20, async (error, buf) => {
+    if (error) {
+      return reject(error);
+    }
+    return resolve(buf.toString('hex'));
+  });
 });
 
 export default User;

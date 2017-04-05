@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import cors from 'cors';
-import crypto from 'crypto';
 import { Role, User } from '../../models';
 import { host, hostname } from '../../config';
 import { TEAM_LIMIT } from '../../constants';
@@ -8,7 +7,6 @@ import generateUrl from '../../helpers/generateUrl';
 import getRole from '../../helpers/getRole';
 import hasRole from '../../helpers/hasRole';
 import canChangeRole from '../../helpers/canChangeRole';
-import errorCatcher from '../helpers/errorCatcher';
 import checkTeamRole from '../helpers/checkTeamRole';
 import corsOptionsDelegate from '../helpers/corsOptionsDelegate';
 import loggedIn from '../helpers/loggedIn';
@@ -71,7 +69,7 @@ export default () => {
       '/',
       loggedIn,
       checkTeamRole(),
-      async (req, res) => {
+      async (req, res, next) => {
         const extraAttributes = getExtraAttributes(req);
 
         try {
@@ -85,7 +83,7 @@ export default () => {
 
           res.status(200).json({ error: false, data: users });
         } catch (err) {
-          errorCatcher(res, err);
+          next(err);
         }
       }
     )
@@ -93,7 +91,7 @@ export default () => {
       '/',
       loggedIn,
       checkTeamRole('member'),
-      async (req, res) => {
+      async (req, res, next) => {
         const { email, name, type } = req.body;
 
         const extraAttributes = getExtraAttributes(req);
@@ -130,9 +128,7 @@ ${req.user.get('name')} invited you to the ${req.team.get('name')} team on Lunch
 To get started, simply visit ${generateUrl(req, `${req.team.get('slug')}.${bsHost}`)} and vote away.
 
 Happy Lunching!`
-            })).then(() => {}).catch((err) => {
-              console.error(err); // eslint-disable-line no-console
-            });
+            })).then(() => {}).catch(() => {});
 
             userToAdd = await UserWithTeamRole.findOne({
               where: { email },
@@ -142,47 +138,43 @@ Happy Lunching!`
             return res.status(201).json({ error: false, data: userToAdd });
           }
 
-          return crypto.randomBytes(20, async (error, buf) => {
-            const resetPasswordToken = buf.toString('hex');
+          const resetPasswordToken = await User.generateToken();
 
-            let newUser = await User.create({
-              email,
-              name,
-              reset_password_token: resetPasswordToken,
-              reset_password_sent_at: new Date(),
-              roles: [{
-                team_id: req.team.id,
-                type
-              }]
-            }, { include: [Role] });
+          let newUser = await User.create({
+            email,
+            name,
+            reset_password_token: resetPasswordToken,
+            reset_password_sent_at: new Date(),
+            roles: [{
+              team_id: req.team.id,
+              type
+            }]
+          }, { include: [Role] });
 
-            // returns a promise but we're not going to wait to see if it succeeds.
-            transporter.sendMail(generateMailOptions({
-              name,
-              email,
-              subject: 'Welcome to Lunch!',
-              text: `Hi there!
+          // returns a promise but we're not going to wait to see if it succeeds.
+          transporter.sendMail(generateMailOptions({
+            name,
+            email,
+            subject: 'Welcome to Lunch!',
+            text: `Hi there!
 
 ${req.user.get('name')} invited you to the ${req.team.get('name')} team on Lunch!
 
 To get started, simply visit ${generateUrl(req, bsHost)} and log in with Google.
 
 If you'd like to log in using a password instead, just follow this URL to generate one:
-${generateUrl(req, bsHost, `/reset-password?token=${resetPasswordToken}`)}
+${generateUrl(req, bsHost, `/password/edit?token=${resetPasswordToken}`)}
 
 Happy Lunching!`
-            })).then(() => {}).catch((err) => {
-              console.error(err); // eslint-disable-line no-console
-            });
+          })).then(() => {}).catch(() => {});
 
-            // Sequelize can't apply scopes on create, so just get user again.
-            // Also will exclude hidden fields like password, token, etc.
-            newUser = await UserWithTeamRole.findOne({ where: { id: newUser.id } });
+          // Sequelize can't apply scopes on create, so just get user again.
+          // Also will exclude hidden fields like password, token, etc.
+          newUser = await UserWithTeamRole.findOne({ where: { id: newUser.id } });
 
-            return res.status(201).json({ error: false, data: newUser });
-          });
+          return res.status(201).json({ error: false, data: newUser });
         } catch (err) {
-          return errorCatcher(res, err);
+          return next(err);
         }
       }
     )
@@ -190,7 +182,7 @@ Happy Lunching!`
       '/:id',
       loggedIn,
       checkTeamRole('member'),
-      async (req, res) => {
+      async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
 
         const extraAttributes = getExtraAttributes(req);
@@ -223,7 +215,7 @@ Happy Lunching!`
           }
           return res.status(404).json({ error: true, data: { message: 'User not found on team.' } });
         } catch (err) {
-          return errorCatcher(res, err);
+          return next(err);
         }
       }
     )
@@ -233,7 +225,7 @@ Happy Lunching!`
       cors(corsOptionsDelegate),
       loggedIn,
       checkTeamRole('member'),
-      async (req, res) => {
+      async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
 
         try {
@@ -263,7 +255,7 @@ Happy Lunching!`
           }
           return res.status(404).json({ error: true, data: { message: 'User not found on team.' } });
         } catch (err) {
-          return errorCatcher(res, err);
+          return next(err);
         }
       }
     );

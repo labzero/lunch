@@ -245,11 +245,8 @@ describe('api/main/teams', () => {
     });
 
     describe('failure', () => {
-      let errorCatcherSpy;
-      beforeEach(() => {
-        errorCatcherSpy = spy((res) => {
-          res.send();
-        });
+      let response;
+      beforeEach((done) => {
         app = makeApp({
           '../../models': mockEsmodule({
             Team: {
@@ -258,15 +255,15 @@ describe('api/main/teams', () => {
               scope: TeamMock.scope
             }
           }),
-          '../helpers/errorCatcher': mockEsmodule({
-            default: errorCatcherSpy
-          })
         });
-        return request(app).post('/').send({ name: 'blah', slug: 'blah' });
+        request(app).post('/').send({ name: 'blah', slug: 'blah' }).then((r) => {
+          response = r;
+          done();
+        });
       });
 
-      it('calls errorCatcher', () => {
-        expect(errorCatcherSpy.callCount).to.eq(1);
+      it('returns error', () => {
+        expect(response.error.text).to.exist;
       });
     });
   });
@@ -329,25 +326,22 @@ describe('api/main/teams', () => {
     });
 
     describe('failure', () => {
-      let errorCatcherSpy;
-      beforeEach(() => {
-        errorCatcherSpy = spy((res) => {
-          res.send();
-        });
+      let response;
+      beforeEach((done) => {
         stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
-          destroy: stub().throws()
+          destroy: stub().throws('Oh No')
         }));
         app = makeApp({
           '../helpers/checkTeamRole': checkTeamRoleSpy,
-          '../helpers/errorCatcher': mockEsmodule({
-            default: errorCatcherSpy
-          })
         });
-        return request(app).delete('/1');
+        request(app).delete('/1').then((r) => {
+          response = r;
+          done();
+        });
       });
 
-      it('calls errorCatcher', () => {
-        expect(errorCatcherSpy.callCount).to.eq(1);
+      it('returns error', () => {
+        expect(response.error.text).to.contain('Oh No');
       });
     });
   });

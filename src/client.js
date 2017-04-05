@@ -26,7 +26,7 @@ fetch.promise = Promise;
 
 window.RobustWebSocket = RobustWebSocket;
 
-let onSubdomain = false;
+let subdomain;
 
 // Undo Browsersync mangling of host
 /* eslint-disable no-underscore-dangle */
@@ -36,15 +36,16 @@ if (host.indexOf('//') === 0) {
 }
 const teamSlug = window.__INITIAL_STATE__.team.slug;
 if (teamSlug && host.indexOf(teamSlug) === 0) {
-  onSubdomain = true;
+  subdomain = teamSlug;
   host = host.slice(teamSlug.length + 1); // + 1 for dot
 }
 window.__INITIAL_STATE__.host = host;
 
-if (!onSubdomain) {
+if (!subdomain) {
   // escape domain periods to not appear as regex wildcards
-  if (window.location.host.match(`^(.*)${host.replace(/\./g, '\\.')}`)[1]) {
-    onSubdomain = true;
+  const subdomainMatch = window.location.host.match(`^(.*)\\.${host.replace(/\./g, '\\.')}`);
+  if (subdomainMatch) {
+    subdomain = subdomainMatch[1];
   }
 }
 
@@ -124,7 +125,7 @@ let appInstance;
 let currentLocation = history.location;
 
 let routes;
-if (onSubdomain) {
+if (subdomain) {
   routes = require('./routes/team').default; // eslint-disable-line global-require
 } else {
   routes = require('./routes/main').default; // eslint-disable-line global-require
@@ -153,6 +154,7 @@ async function onLocationChange(location, action) {
       ...context,
       path: location.pathname,
       query: queryString.parse(location.search),
+      subdomain
     });
 
     // Prevent multiple page renders during the routing process

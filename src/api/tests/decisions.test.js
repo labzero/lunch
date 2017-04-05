@@ -106,24 +106,18 @@ describe('api/team/decisions', () => {
     });
 
     describe('failure', () => {
-      let errorCatcherSpy;
-      beforeEach(() => {
-        errorCatcherSpy = spy((res) => {
-          res.send();
-        });
-        app = makeApp({
-          '../helpers/errorCatcher': mockEsmodule({
-            default: errorCatcherSpy
-          })
-        });
-
+      let response;
+      beforeEach((done) => {
         stub(DecisionMock, 'scope').throws('Oh No');
 
-        return request(app).get('/fromToday');
+        request(app).get('/fromToday').then((r) => {
+          response = r;
+          done();
+        });
       });
 
-      it('calls errorCatcher', () => {
-        expect(errorCatcherSpy.calledWith(match.any, match({ name: 'Oh No' }))).to.be.true;
+      it('returns error', () => {
+        expect(response.error.text).to.contain('Oh No');
       });
     });
   });
@@ -199,33 +193,25 @@ describe('api/team/decisions', () => {
     });
 
     describe('failure', () => {
-      let errorCatcherSpy;
-      beforeEach(() => {
-        errorCatcherSpy = spy((res) => {
-          res.send();
-        });
-      });
-
       describe('when destroying', () => {
-        beforeEach(() => {
-          app = makeApp({
-            '../helpers/errorCatcher': mockEsmodule({
-              default: errorCatcherSpy
-            })
-          });
-
+        let response;
+        beforeEach((done) => {
           stub(DecisionMock, 'scope').throws('Oh No');
 
-          return request(app).post('/');
+          request(app).post('/').then((r) => {
+            response = r;
+            done();
+          });
         });
 
-        it('calls errorCatcher', () => {
-          expect(errorCatcherSpy.calledWith(match.any, match({ name: 'Oh No' }))).to.be.true;
+        it('returns error', () => {
+          expect(response.error.text).to.contain('Oh No');
         });
       });
 
       describe('when creating', () => {
-        beforeEach(() => {
+        let response;
+        beforeEach((done) => {
           app = makeApp({
             '../../models': mockEsmodule({
               Decision: {
@@ -234,16 +220,16 @@ describe('api/team/decisions', () => {
                 scope: DecisionMock.scope
               }
             }),
-            '../helpers/errorCatcher': mockEsmodule({
-              default: errorCatcherSpy
-            })
           });
 
-          return request(app).post('/');
+          request(app).post('/').then((r) => {
+            response = r;
+            done();
+          });
         });
 
-        it('calls errorCatcher', () => {
-          expect(errorCatcherSpy.calledWith(match.any, { message: match.string })).to.be.true;
+        it('returns error', () => {
+          expect(response.error.text).to.exist;
         });
       });
     });
@@ -306,25 +292,18 @@ describe('api/team/decisions', () => {
     });
 
     describe('failure', () => {
-      let errorCatcherSpy;
-      beforeEach(() => {
-        errorCatcherSpy = spy((res) => {
-          res.send();
-        });
-
-        app = makeApp({
-          '../helpers/errorCatcher': mockEsmodule({
-            default: errorCatcherSpy
-          })
-        });
-
+      let response;
+      beforeEach((done) => {
         stub(DecisionMock, 'scope').throws('Oh No');
 
-        return request(app).delete('/fromToday');
+        request(app).delete('/fromToday').then((r) => {
+          response = r;
+          done();
+        });
       });
 
-      it('calls errorCatcher', () => {
-        expect(errorCatcherSpy.calledWith(match.any, match({ name: 'Oh No' }))).to.be.true;
+      it('returns error', () => {
+        expect(response.error.text).to.contain('Oh No');
       });
     });
   });

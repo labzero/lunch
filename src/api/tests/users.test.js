@@ -27,6 +27,7 @@ describe('api/team/users', () => {
 
   beforeEach(() => {
     UserMock = dbMock.define('user', {});
+    UserMock.generateToken = () => Promise.resolve('12345');
     RoleMock = dbMock.define('role', {});
 
     team = {
@@ -163,11 +164,8 @@ describe('api/team/users', () => {
     });
 
     describe('failure', () => {
-      let errorCatcherSpy;
-      beforeEach(() => {
-        errorCatcherSpy = spy((res) => {
-          res.send();
-        });
+      let response;
+      beforeEach((done) => {
         app = makeApp({
           '../../helpers/hasRole': mockEsmodule({
             default: () => true
@@ -176,17 +174,17 @@ describe('api/team/users', () => {
             User: {
               scope: stub().throws('Oh No')
             }
-          }),
-          '../helpers/errorCatcher': mockEsmodule({
-            default: errorCatcherSpy
           })
         });
 
-        return request(app).get('/');
+        request(app).get('/').then((r) => {
+          response = r;
+          done();
+        });
       });
 
-      it('calls errorCatcher', () => {
-        expect(errorCatcherSpy.calledWith(match.any, match({ name: 'Oh No' }))).to.be.true;
+      it('returns error', () => {
+        expect(response.error.text).to.contain('Oh No');
       });
     });
   });
@@ -388,7 +386,7 @@ describe('api/team/users', () => {
         expect(createStub.calledWith({
           email: 'foo@bar.com',
           name: 'Jeffrey',
-          reset_password_token: match.string,
+          reset_password_token: '12345',
           reset_password_sent_at: match.date,
           roles: [{
             team_id: 77,
@@ -452,27 +450,23 @@ describe('api/team/users', () => {
     });
 
     describe('failure', () => {
-      let errorCatcherSpy;
-
-      beforeEach(() => {
-        errorCatcherSpy = spy((res) => {
-          res.send();
-        });
+      let response;
+      beforeEach((done) => {
         app = makeApp({
           '../../helpers/hasRole': mockEsmodule({
             default: () => true
           }),
-          '../helpers/errorCatcher': mockEsmodule({
-            default: errorCatcherSpy
-          })
         });
         stub(UserMock, 'findOne').throws('Oh No');
 
-        return request(app).post('/');
+        request(app).post('/').then((r) => {
+          response = r;
+          done();
+        });
       });
 
-      it('calls errorCatcher', () => {
-        expect(errorCatcherSpy.calledWith(match.any, match({ name: 'Oh No' }))).to.be.true;
+      it('returns error', () => {
+        expect(response.error.text).to.contain('Oh No');
       });
     });
   });
@@ -593,14 +587,14 @@ describe('api/team/users', () => {
     });
 
     describe('when patching other', () => {
-      let findOneStub;
+      let findOneSpy;
       beforeEach(() => {
-        findOneStub = stub(RoleMock, 'findOne');
+        findOneSpy = spy(RoleMock, 'findOne');
         return request(app).patch('/2').send({ type: 'member' });
       });
 
       it('queries role on team', () => {
-        expect(findOneStub.calledWith({
+        expect(findOneSpy.calledWith({
           where: {
             team_id: team.id,
             user_id: 2
@@ -814,7 +808,7 @@ describe('api/team/users', () => {
           })
         });
 
-        request(app).patch('/2').send({ type: 'member' }).then(r => {
+        request(app).patch('/2').send({ type: 'member' }).then((r) => {
           response = r;
           done();
         });
@@ -831,29 +825,25 @@ describe('api/team/users', () => {
     });
 
     describe('failure', () => {
-      let errorCatcherSpy;
-      beforeEach(() => {
-        errorCatcherSpy = spy((res) => {
-          res.send();
-        });
-
+      let response;
+      beforeEach((done) => {
         app = makeApp({
           '../../helpers/hasRole': hasRole,
           '../../models': mockEsmodule({
             Role: {
               findOne: stub().throws('Oh No')
             }
-          }),
-          '../helpers/errorCatcher': mockEsmodule({
-            default: errorCatcherSpy
           })
         });
 
-        return request(app).patch('/1');
+        request(app).patch('/1').then((r) => {
+          response = r;
+          done();
+        });
       });
 
-      it('calls errorCatcher', () => {
-        expect(errorCatcherSpy.calledWith(match.any, match({ name: 'Oh No' }))).to.be.true;
+      it('returns error', () => {
+        expect(response.error.text).to.contain('Oh No');
       });
     });
   });

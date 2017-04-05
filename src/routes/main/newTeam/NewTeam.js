@@ -89,7 +89,7 @@ class NewTeam extends Component {
       <Grid className={s.root}>
         <h2>Create a new team</h2>
         <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="new-team-name">
+          <FormGroup controlId="newTeam-name">
             <ControlLabel>
               Name
             </ControlLabel>
@@ -100,7 +100,7 @@ class NewTeam extends Component {
               required
             />
           </FormGroup>
-          <FormGroup controlId="new-team-slug">
+          <FormGroup controlId="newTeam-slug">
             <ControlLabel>
               URL
             </ControlLabel>
@@ -121,7 +121,7 @@ class NewTeam extends Component {
             </InputGroup>
             <HelpBlock>Letters, numbers, and dashes only.</HelpBlock>
           </FormGroup>
-          <FormGroup controlId="new-team-address">
+          <FormGroup controlId="newTeam-address">
             <ControlLabel>Address</ControlLabel>
             <p>
               Pick a centerpoint for your team.
@@ -132,7 +132,7 @@ class NewTeam extends Component {
             <TeamMapContainer />
             <Geosuggest
               autoActivateFirstSuggest
-              id="new-team-address"
+              id="newTeam-address"
               inputClassName="form-control"
               onActivateSuggest={this.getCoordsForMarker}
               onSuggestSelect={this.handleSuggestSelect}

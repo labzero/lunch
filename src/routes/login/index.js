@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import LayoutContainer from '../../../components/Layout/LayoutContainer';
-import renderIfLoggedOut from '../../helpers/renderIfLoggedOut';
-import Login from './Login';
+import LayoutContainer from '../../components/Layout/LayoutContainer';
+import renderIfLoggedOut from '../helpers/renderIfLoggedOut';
+import LoginContainer from './LoginContainer';
 
 export default {
 
@@ -19,10 +19,12 @@ export default {
   action(context) {
     const state = context.store.getState();
 
+    const subdomain = context.subdomain;
+
     return renderIfLoggedOut(state, () => ({
       component: (
         <LayoutContainer path={context.url}>
-          <Login />
+          <LoginContainer teamSlug={subdomain} />
         </LayoutContainer>
       ),
     }));
