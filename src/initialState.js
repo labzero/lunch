@@ -18,7 +18,9 @@ const getInitialState = () => ({
   listUi: {},
   locale: 'en',
   mapUi: {
-    showUnvoted: true
+    infoWindow: {},
+    showUnvoted: true,
+    showPOIs: false
   },
   pageUi: {},
   tagFilters: [],

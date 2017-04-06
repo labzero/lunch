@@ -200,9 +200,8 @@ describe('api/team/users', () => {
         app = makeApp({
           '../../helpers/hasRole': mockEsmodule({
             default: () => true
-          }),
+          })
         });
-
         return request(app).post('/');
       });
 

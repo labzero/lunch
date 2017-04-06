@@ -3,8 +3,8 @@ import GoogleMap from 'google-map-react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import HereMarker from '../../components/HereMarker';
 import { GOOGLE_MAP_ZOOM } from '../../constants';
-import googleMapOptions from '../../constants/googleMapOptions';
 import defaultCoords from '../../constants/defaultCoords';
+import googleMapOptions from '../../helpers/googleMapOptions';
 import s from './TeamMap.scss';
 
 class TeamMap extends Component {
@@ -41,7 +41,7 @@ class TeamMap extends Component {
           defaultZoom={GOOGLE_MAP_ZOOM}
           defaultCenter={TeamMap.defaultProps.center}
           onGoogleApiLoaded={this.setMap}
-          options={googleMapOptions}
+          options={googleMapOptions()}
           yesIWantToUseGoogleMapApiInternals
         />
         <div className={s.hereCenterer}>

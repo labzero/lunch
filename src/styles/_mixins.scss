@@ -50,6 +50,37 @@
   background: pink;
 }
 
+@mixin info-window {
+  bottom: 100%;
+  position: absolute;
+  text-align: left;
+  transform: translateX(-50%);
+
+  &::before,
+  &::after {
+    border-style: solid;
+    content: '';
+    left: 50%;
+    margin-top: -13px;
+    position: absolute;
+    top: 100%;
+    height: 0;
+    width: 0;
+  }
+
+  &::before {
+    border-width: 44px 8px 0;
+    border-color: $black-color transparent transparent;
+    margin-left: -8px;
+  }
+
+  &::after {
+    border-width: 32px 5px 0;
+    border-color: $white-color transparent transparent;
+    margin-left: -5px;
+  }
+}
+
 @mixin text-on-texture {
   color: $white-color;
   text-shadow: 0 0 5px $black-color, 0 0 10px $black-color, 0 0 20px $black-color;

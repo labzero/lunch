@@ -44,6 +44,7 @@ class RestaurantAddForm extends Component {
         <Geosuggest
           autoActivateFirstSuggest
           className={s.geosuggest}
+          ignoreTab
           inputClassName={s.input}
           suggestItemClassName={s.suggestItem}
           suggestItemActiveClassName={s.suggestItemActive}

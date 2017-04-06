@@ -21,43 +21,62 @@ class TagFilterForm extends Component {
   }
 
   render() {
+    const {
+      addByName,
+      addedTags,
+      autosuggestValue,
+      exclude,
+      handleSuggestionSelected,
+      hideForm,
+      removeTag,
+      setAutosuggestValue,
+      showForm,
+      tags,
+      tagUiForm
+    } = this.props;
+
     let form;
     let showButton;
-    if (this.props.tagUiForm.shown) {
+
+    if (!tags.length) {
+      return null;
+    }
+
+    if (tagUiForm.shown) {
       form = (
-        <form className={s.form} onSubmit={this.props.addByName}>
+        <form className={s.form} onSubmit={addByName}>
           <Autosuggest
-            suggestions={this.props.tags}
+            suggestions={tags}
             focusInputOnSuggestionClick={false}
             getSuggestionValue={getSuggestionValue}
             renderSuggestion={renderSuggestion}
             inputProps={{
-              placeholder: this.props.exclude ? 'exclude' : 'filter',
-              value: this.props.autosuggestValue,
-              onChange: this.props.setAutosuggestValue,
+              placeholder: exclude ? 'exclude' : 'filter',
+              value: autosuggestValue,
+              onChange: setAutosuggestValue,
             }}
             theme={autosuggestTheme}
-            onSuggestionSelected={this.props.handleSuggestionSelected}
+            onSuggestionSelected={handleSuggestionSelected}
             shouldRenderSuggestions={returnTrue}
             ref={a => { this.autosuggest = a; }}
           />
-          {this.props.addedTags.map(tag => (
+          {addedTags.map(tag => (
             <div
               className={s.tagContainer}
-              key={this.props.exclude ? `tagExclusion_${tag}` : `tagFilter_${tag}`}
+              key={exclude ? `tagExclusion_${tag}` : `tagFilter_${tag}`}
             >
               <TagContainer
                 id={tag}
                 showDelete
-                onDeleteClicked={() => this.props.removeTag(tag)}
-                exclude={this.props.exclude}
+                onDeleteClicked={() => removeTag(tag)}
+                exclude={exclude}
               />
             </div>
           ))}
           <button
             className="btn btn-default"
             type="button"
-            onClick={this.props.hideForm}
+            onClick={hideForm}
           >
             cancel
           </button>
@@ -65,8 +84,8 @@ class TagFilterForm extends Component {
       );
     } else {
       showButton = (
-        <button className="btn btn-default" onClick={this.props.showForm}>
-          {this.props.exclude ? 'exclude tags' : 'filter by tag'}
+        <button className="btn btn-default" onClick={showForm}>
+          {exclude ? 'exclude tags' : 'filter by tag'}
         </button>
       );
     }

@@ -1,0 +1,14 @@
+@import '../../styles/_mixins.scss';
+@import '../../styles/_variables.scss';
+
+.root {
+  @include info-window;
+  margin-bottom: 40px;
+}
+
+.buttonContainer {
+  background: $white-color;
+  border: $default-border;
+  padding: 10px;
+  margin-bottom: 10px;
+}

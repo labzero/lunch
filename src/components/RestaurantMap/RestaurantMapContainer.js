@@ -1,5 +1,11 @@
 import { connect } from 'react-redux';
-import { clearCenter, hideInfoWindow, showInfoWindow, clearNewlyAdded } from '../../actions/mapUi';
+import {
+  clearCenter,
+  clearNewlyAdded,
+  hideInfoWindow,
+  showGoogleInfoWindow,
+  showRestaurantInfoWindow
+} from '../../actions/mapUi';
 import { getRestaurantById } from '../../selectors/restaurants';
 import { getTeamLatLng } from '../../selectors/team';
 import { getMapUi } from '../../selectors/mapUi';
@@ -10,6 +16,7 @@ import RestaurantMap from './RestaurantMap';
 const mapStateToProps = (state) => {
   const mapUi = getMapUi(state);
   return {
+    infoWindow: state.mapUi.infoWindow,
     items: getMapItems(state),
     center: mapUi.center,
     tempMarker: mapUi.tempMarker,
@@ -19,26 +26,26 @@ const mapStateToProps = (state) => {
       undefined,
     newlyAddedUserId: mapUi.newlyAdded ? mapUi.newlyAdded.userId : undefined,
     latLng: getTeamLatLng(state),
+    showPOIs: mapUi.showPOIs,
     user: getCurrentUser(state)
   };
 };
 
 const mapDispatchToProps = dispatch => ({
-  clearCenter: () => {
-    dispatch(clearCenter());
-  },
+  clearCenter: () => dispatch(clearCenter()),
   mapClicked: ({ event }) => {
     if (!event.target.closest('[data-marker]')) {
       dispatch(hideInfoWindow());
     }
   },
+  showGoogleInfoWindow: (event) => dispatch(showGoogleInfoWindow(event)),
   dispatch
 });
 
 const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
   showNewlyAddedInfoWindow: () => {
     if (stateProps.newlyAddedUserId === stateProps.user.id) {
-      dispatchProps.dispatch(showInfoWindow(stateProps.newlyAddedRestaurant));
+      dispatchProps.dispatch(showRestaurantInfoWindow(stateProps.newlyAddedRestaurant));
       dispatchProps.dispatch(clearNewlyAdded());
     }
   }
