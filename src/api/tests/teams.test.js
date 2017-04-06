@@ -8,7 +8,6 @@ import request from 'supertest';
 import express from 'express';
 import proxyquire from 'proxyquire';
 import SequelizeMock from 'sequelize-mock';
-import expressWs from 'express-ws';
 import mockEsmodule from '../../../test/mockEsmodule';
 
 const proxyquireStrict = proxyquire.noCallThru();
@@ -48,7 +47,6 @@ describe('api/main/teams', () => {
 
       const server = express();
       server.use(bodyParser.json());
-      expressWs(server);
       server.use('/', teamsApi());
       return server;
     };
@@ -335,6 +333,105 @@ describe('api/main/teams', () => {
           '../helpers/checkTeamRole': checkTeamRoleSpy,
         });
         request(app).delete('/1').then((r) => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns error', () => {
+        expect(response.error.text).to.contain('Oh No');
+      });
+    });
+  });
+
+  describe('PATCH /:id', () => {
+    let checkTeamRoleSpy;
+    beforeEach(() => {
+      checkTeamRoleSpy = spy((req, res, next) => next());
+
+      app = makeApp({
+        '../helpers/checkTeamRole': () => checkTeamRoleSpy
+      });
+    });
+
+    describe('before updating', () => {
+      let findOneSpy;
+      beforeEach(() => {
+        findOneSpy = spy(TeamMock, 'findOne');
+
+        return request(app).patch('/1');
+      });
+
+      it('finds team', () => {
+        expect(findOneSpy.calledWith({ where: { id: 1 } })).to.be.true;
+      });
+
+      it('checks for team role', () => {
+        expect(checkTeamRoleSpy.callCount).to.eq(1);
+      });
+    });
+
+    describe('without valid parameters', () => {
+      let response;
+      beforeEach((done) => {
+        request(app).patch('/1').send({ id: 123 }).then((r) => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns 422', () => {
+        expect(response.statusCode).to.eq(422);
+      });
+
+      it('returns json with error', () => {
+        expect(response.body.error).to.eq(true);
+        expect(response.body.data.message).to.be.a('string');
+      });
+    });
+
+    describe('query', () => {
+      let updateSpy;
+      beforeEach(() => {
+        updateSpy = spy();
+        stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
+          update: updateSpy
+        }));
+
+        return request(app).patch('/1').send({ default_zoom: 15 });
+      });
+
+      it('updates team', () => {
+        expect(updateSpy.callCount).to.eq(1);
+      });
+    });
+
+    describe('success', () => {
+      let response;
+      beforeEach((done) => {
+        request(app).patch('/1').send({ default_zoom: 15 }).then(r => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns 200', () => {
+        expect(response.statusCode).to.eq(200);
+      });
+
+      it('returns json with team', () => {
+        expect(response.body.error).to.eq(false);
+        expect(response.body.data).to.be.an('object');
+      });
+    });
+
+    describe('failure', () => {
+      let response;
+      beforeEach((done) => {
+        stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
+          update: stub().throws('Oh No')
+        }));
+        request(app).patch('/1').send({ default_zoom: 15 }).then((r) => {
           response = r;
           done();
         });
