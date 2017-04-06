@@ -85,7 +85,18 @@ $(function () {
         };
       };
       $datePickerTrigger.data('datepicker-initialized', true);
+      var $datePickerFields = $('.daterangepicker.single .daterangepicker_start_input input');
+      $datePickerFields.on('keydown', function(e) {
+        if (e.keyCode === 13) {
+            e.stopPropagation();
+            e.preventDefault();
+            $(e.target).blur();
+            var $applyButton = $datePickerWrapper.find('button.applyBtn.btn.btn-small.btn-sm.btn-success');
+            $applyButton.trigger('click');
+        };
+      });
     });
+
     var $datePickerFields = $(".datepicker_input_field .input-mini");
     var $datePickerWrapper = $('.datepicker-wrapper');
     $datePickerFields.keypress(function(e) {

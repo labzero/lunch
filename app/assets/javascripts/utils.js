@@ -12,7 +12,7 @@ if (typeof Fhlb.Utils === 'undefined') {
         allowedAsciiCodes = allowedAsciiCodes.concat(extra_allowed_ascii_codes);
       };
 
-      if (!(allowedAsciiCodes.indexOf(e.which)>=0)) {
+      if (allowedAsciiCodes.indexOf(e.which)<0) {
         e.preventDefault();
       };
     },
