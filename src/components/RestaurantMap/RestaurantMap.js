@@ -24,6 +24,7 @@ class RestaurantMap extends Component {
       lat: PropTypes.number.isRequired,
       lng: PropTypes.number.isRequired
     }),
+    defaultZoom: PropTypes.number,
     tempMarker: PropTypes.object,
     newlyAddedRestaurant: PropTypes.object,
     clearCenter: PropTypes.func.isRequired,
@@ -35,6 +36,7 @@ class RestaurantMap extends Component {
 
   static defaultProps = {
     center: undefined,
+    defaultZoom: GOOGLE_MAP_ZOOM,
     tempMarker: undefined,
     newlyAddedRestaurant: undefined
   }
@@ -81,6 +83,7 @@ class RestaurantMap extends Component {
   render() {
     const {
       center,
+      defaultZoom,
       infoWindow,
       items,
       latLng,
@@ -108,7 +111,7 @@ class RestaurantMap extends Component {
     return (
       <section className={s.root} ref={r => { this.root = r; }}>
         <GoogleMap
-          defaultZoom={GOOGLE_MAP_ZOOM}
+          defaultZoom={defaultZoom || GOOGLE_MAP_ZOOM}
           defaultCenter={latLng}
           center={center}
           margin={[100, 0, 0, 0]}

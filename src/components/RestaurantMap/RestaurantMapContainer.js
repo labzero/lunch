@@ -7,7 +7,7 @@ import {
   showRestaurantInfoWindow
 } from '../../actions/mapUi';
 import { getRestaurantById } from '../../selectors/restaurants';
-import { getTeamLatLng } from '../../selectors/team';
+import { getTeamDefaultZoom, getTeamLatLng } from '../../selectors/team';
 import { getMapUi } from '../../selectors/mapUi';
 import { getCurrentUser } from '../../selectors/user';
 import { getMapItems } from '../../selectors';
@@ -19,6 +19,7 @@ const mapStateToProps = (state) => {
     infoWindow: state.mapUi.infoWindow,
     items: getMapItems(state),
     center: mapUi.center,
+    defaultZoom: getTeamDefaultZoom(state),
     tempMarker: mapUi.tempMarker,
     newlyAddedRestaurant: mapUi.newlyAdded ?
       getRestaurantById(state, mapUi.newlyAdded.id)

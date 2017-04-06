@@ -8,6 +8,13 @@ import corsOptionsDelegate from '../helpers/corsOptionsDelegate';
 import errorCatcher from '../helpers/errorCatcher';
 import loggedIn from '../helpers/loggedIn';
 
+const getTeam = async (req, res, next) => {
+  const id = parseInt(req.params.id, 10);
+  const team = await Team.findOne({ where: { id } });
+  req.team = team; // eslint-disable-line no-param-reassign
+  next();
+};
+
 const error409 = (res) =>
   res.status(409).json({ error: true, data: { message: 'Could not create new team. It might already exist.' } });
 
@@ -56,17 +63,12 @@ export default () => {
         }
       }
     )
-    .options('/:id', cors(corsOptionsDelegate)) // enable pre-flight request for DELETE request
+    .options('/:id', cors(corsOptionsDelegate)) // enable pre-flight request for DELETE/PATCH
     .delete(
       '/:id',
       cors(corsOptionsDelegate),
       loggedIn,
-      async (req, res, next) => {
-        const id = parseInt(req.params.id, 10);
-        const team = await Team.findOne({ where: { id } });
-        req.team = team; // eslint-disable-line no-param-reassign
-        next();
-      },
+      getTeam,
       checkTeamRole('owner'),
       async (req, res) => {
         try {
@@ -74,6 +76,29 @@ export default () => {
           return res.status(204).send();
         } catch (err) {
           return errorCatcher(res, err);
+        }
+      }
+    )
+    .patch(
+      '/:id',
+      cors(corsOptionsDelegate),
+      loggedIn,
+      getTeam,
+      checkTeamRole(),
+      async (req, res, next) => {
+        const { default_zoom } = req.body;
+
+        if (default_zoom && typeof default_zoom === 'number') { // eslint-disable-line camelcase
+          try {
+            await req.team.update({
+              default_zoom
+            });
+            res.status(200).json({ error: false, data: req.team });
+          } catch (err) {
+            next(err);
+          }
+        } else {
+          res.status(422).json({ error: true, data: { message: 'Can\'t update any of the provided fields.' } });
         }
       }
     );
