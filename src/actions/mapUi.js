@@ -15,9 +15,20 @@ export function clearCenter() {
   };
 }
 
-export function showInfoWindow(restaurant) {
+export function showGoogleInfoWindow(event) {
   return {
-    type: ActionTypes.SHOW_INFO_WINDOW,
+    type: ActionTypes.SHOW_GOOGLE_INFO_WINDOW,
+    placeId: event.placeId,
+    latLng: {
+      lat: event.latLng.lat(),
+      lng: event.latLng.lng()
+    }
+  };
+}
+
+export function showRestaurantInfoWindow(restaurant) {
+  return {
+    type: ActionTypes.SHOW_RESTAURANT_INFO_WINDOW,
     restaurant
   };
 }
@@ -49,7 +60,7 @@ export function clearNewlyAdded() {
 
 export function showMapAndInfoWindow(id) {
   return (dispatch, getState) => {
-    dispatch(showInfoWindow(getRestaurantById(getState(), id)));
+    dispatch(showRestaurantInfoWindow(getRestaurantById(getState(), id)));
     dispatch(scrollToTop());
   };
 }
@@ -57,6 +68,13 @@ export function showMapAndInfoWindow(id) {
 export function setShowUnvoted(val) {
   return {
     type: ActionTypes.SET_SHOW_UNVOTED,
+    val
+  };
+}
+
+export function setShowPOIs(val) {
+  return {
+    type: ActionTypes.SET_SHOW_POIS,
     val
   };
 }

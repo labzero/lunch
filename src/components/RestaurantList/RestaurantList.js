@@ -30,8 +30,8 @@ class RestaurantList extends Component {
           <Grid className={s.welcome}>
             <h2>Welcome to Lunch!</h2>
             <p>
-              Get started by adding restaurants! Use the above search box and
-              add as many restaurants as you like. Then you and your team can
+              Get started by adding restaurants! Use the above map or search box
+              and add as many restaurants as you like. Then you and your team can
               start voting!
             </p>
           </Grid>

@@ -2,28 +2,13 @@ import React, { Component, PropTypes } from 'react';
 import GoogleMap from 'google-map-react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { GOOGLE_MAP_ZOOM } from '../../constants';
-import googleMapOptions from '../../constants/googleMapOptions';
+import googleMapOptions from '../../helpers/googleMapOptions';
 import RestaurantMarkerContainer from '../RestaurantMarker/RestaurantMarkerContainer';
 import RestaurantMapSettingsContainer from '../RestaurantMapSettings/RestaurantMapSettingsContainer';
+import GoogleInfoWindowContainer from '../GoogleInfoWindow/GoogleInfoWindowContainer';
 import HereMarker from '../HereMarker';
+import TempMarker from '../TempMarker';
 import s from './RestaurantMap.scss';
-
-const TempMarker = () => (
-  <div className={s.tempMarker}>
-    <svg viewBox="-2 -2 19 19" width="19" height="19">
-      <circle
-        className={s.tempMarkerCircle}
-        strokeWidth="2"
-        stroke="#000"
-        fill="transparent"
-        strokeDasharray="2.95, 2.95"
-        r="7.5"
-        cx="7.5"
-        cy="7.5"
-      />
-    </svg>
-  </div>
-);
 
 class RestaurantMap extends Component {
   static contextTypes = {
@@ -32,6 +17,7 @@ class RestaurantMap extends Component {
   };
 
   static propTypes = {
+    infoWindow: PropTypes.object.isRequired,
     items: PropTypes.array.isRequired,
     latLng: PropTypes.object.isRequired,
     center: PropTypes.shape({
@@ -42,8 +28,16 @@ class RestaurantMap extends Component {
     newlyAddedRestaurant: PropTypes.object,
     clearCenter: PropTypes.func.isRequired,
     mapClicked: PropTypes.func.isRequired,
-    showNewlyAddedInfoWindow: PropTypes.func.isRequired
+    showGoogleInfoWindow: PropTypes.func.isRequired,
+    showNewlyAddedInfoWindow: PropTypes.func.isRequired,
+    showPOIs: PropTypes.bool.isRequired
   };
+
+  static defaultProps = {
+    center: undefined,
+    tempMarker: undefined,
+    newlyAddedRestaurant: undefined
+  }
 
   componentDidMount() {
     this.root.addEventListener('touchmove', event => {
@@ -73,36 +67,67 @@ class RestaurantMap extends Component {
 
   setMap = ({ map }) => {
     this.map = map;
+    map.addListener('click', (event) => {
+      if (event.placeId) {
+        event.stop();
+        const defaultPrevented = event.ya && event.ya.defaultPrevented;
+        if (!defaultPrevented) {
+          this.props.showGoogleInfoWindow(event);
+        }
+      }
+    });
   };
 
   render() {
-    const tempMarkers = [];
-    if (this.props.tempMarker !== undefined) {
-      tempMarkers.push(<TempMarker key="tempMarker" {...this.props.tempMarker.latLng} />);
+    const {
+      center,
+      infoWindow,
+      items,
+      latLng,
+      mapClicked,
+      showPOIs,
+      tempMarker
+    } = this.props;
+
+    let tempMarkerComponent;
+    if (tempMarker !== undefined) {
+      tempMarkerComponent = <TempMarker {...tempMarker.latLng} />;
+    }
+
+    let googleInfoWindow;
+    if (infoWindow.placeId && infoWindow.latLng) {
+      googleInfoWindow = (
+        <GoogleInfoWindowContainer
+          map={this.map}
+          placeId={infoWindow.placeId}
+          {...infoWindow.latLng}
+        />
+      );
     }
 
     return (
       <section className={s.root} ref={r => { this.root = r; }}>
         <GoogleMap
           defaultZoom={GOOGLE_MAP_ZOOM}
-          defaultCenter={this.props.latLng}
-          center={this.props.center}
+          defaultCenter={latLng}
+          center={center}
           margin={[100, 0, 0, 0]}
-          options={googleMapOptions}
+          options={googleMapOptions(showPOIs)}
           onGoogleApiLoaded={this.setMap}
-          onClick={this.props.mapClicked}
+          onClick={mapClicked}
           yesIWantToUseGoogleMapApiInternals
         >
-          <HereMarker lat={this.props.latLng.lat} lng={this.props.latLng.lng} />
-          {tempMarkers}
-          {this.props.items.map((item, index) =>
+          <HereMarker lat={latLng.lat} lng={latLng.lng} />
+          {googleInfoWindow}
+          {tempMarkerComponent}
+          {items.map((item, index) =>
             <RestaurantMarkerContainer
               lat={item.lat}
               lng={item.lng}
               key={`restaurantMarkerContainer_${item.id}`}
               id={item.id}
               index={index}
-              baseZIndex={this.props.items.length}
+              baseZIndex={items.length}
               store={this.context.store}
               insertCss={this.context.insertCss}
             />

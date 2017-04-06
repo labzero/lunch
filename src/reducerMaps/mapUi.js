@@ -5,6 +5,8 @@ import resetRestaurant from './helpers/resetRestaurant';
 export default new Map([
   [ActionTypes.RECEIVE_RESTAURANTS, () =>
     ({
+      infoWindow: {},
+      showPOIs: false,
       showUnvoted: true
     })
   ],
@@ -19,7 +21,23 @@ export default new Map([
     }), action)
   ],
   [ActionTypes.RESTAURANT_DELETED, resetRestaurant],
-  [ActionTypes.SHOW_INFO_WINDOW, (state, action) =>
+  [ActionTypes.SHOW_GOOGLE_INFO_WINDOW, (state, action) =>
+    update(state, {
+      center: {
+        $set: {
+          lat: action.latLng.lat,
+          lng: action.latLng.lng
+        }
+      },
+      infoWindow: {
+        $set: {
+          latLng: action.latLng,
+          placeId: action.placeId
+        }
+      }
+    })
+  ],
+  [ActionTypes.SHOW_RESTAURANT_INFO_WINDOW, (state, action) =>
     update(state, {
       center: {
         $set: {
@@ -27,18 +45,40 @@ export default new Map([
           lng: action.restaurant.lng
         }
       },
-      infoWindowId: {
-        $set: action.restaurant.id
+      infoWindow: {
+        $set: {
+          id: action.restaurant.id
+        }
       }
     })
   ],
   [ActionTypes.HIDE_INFO_WINDOW, state =>
     update(state, {
-      infoWindowId: {
-        $set: undefined
+      infoWindow: {
+        $set: {}
       }
     })
   ],
+  [ActionTypes.SET_SHOW_POIS, (state, action) => {
+    const updates = {
+      showPOIs: {
+        $set: action.val
+      }
+    };
+
+    if (!action.val) {
+      updates.infoWindow = {
+        latLng: {
+          $set: undefined
+        },
+        placeId: {
+          $set: undefined
+        }
+      };
+    }
+
+    return update(state, updates);
+  }],
   [ActionTypes.SET_SHOW_UNVOTED, (state, action) =>
     update(state, {
       $merge: {
@@ -86,5 +126,15 @@ export default new Map([
         $set: undefined
       }
     })
-  ]
+  ],
+  [ActionTypes.RECEIVE_RESTAURANTS, (state, action) => {
+    if (!action.items.length) {
+      return update(state, {
+        showPOIs: {
+          $set: true
+        }
+      });
+    }
+    return state;
+  }],
 ]);

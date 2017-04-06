@@ -1,4 +1,4 @@
-export default {
+export default (showPOIs) => ({
   backgroundColor: '#fcb3f2',
   scrollwheel: false,
   styles: [
@@ -39,6 +39,15 @@ export default {
       ]
     },
     {
+      featureType: 'poi.business',
+      elementType: 'labels',
+      stylers: [
+        {
+          visibility: showPOIs ? 'on' : 'off'
+        }
+      ]
+    },
+    {
       featureType: 'water',
       elementType: 'geometry',
       stylers: [
@@ -48,4 +57,4 @@ export default {
       ]
     }
   ]
-};
+});

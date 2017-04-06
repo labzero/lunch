@@ -1,0 +1,13 @@
+.tempMarker {
+  left: -10.5px;
+  position: relative;
+  top: -10.5px;
+}
+
+@keyframes dash {
+  to { stroke-dashoffset: -6; }
+}
+
+.tempMarkerCircle {
+  animation: dash 1s infinite linear;
+}

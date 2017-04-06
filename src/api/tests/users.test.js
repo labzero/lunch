@@ -187,9 +187,14 @@ describe('api/team/users', () => {
 
   describe('POST /', () => {
     describe('before query', () => {
-      beforeEach(() =>
-        request(app).post('/')
-      );
+      beforeEach(() => {
+        app = makeApp({
+          '../../helpers/hasRole': mockEsmodule({
+            default: () => true
+          })
+        });
+        return request(app).post('/');
+      });
 
       it('checks for login', () => {
         expect(loggedInSpy.called).to.be.true;
@@ -316,6 +321,8 @@ describe('api/team/users', () => {
                 .onFirstCall()
                 .returns(true)
                 .onSecondCall()
+                .returns(true)
+                .onThirdCall()
                 .returns(false)
             })
           });

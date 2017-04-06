@@ -29,35 +29,12 @@
 }
 
 .infoWindow {
-  bottom: 100%;
+  @include info-window;
   margin-bottom: 48px;
   min-width: 300px;
-  position: absolute;
-  text-align: left;
-  transform: translateX(-50%);
-
-  &::before,
-  &::after {
-    border-style: solid;
-    content: '';
-    left: 50%;
-    margin-top: -13px;
-    position: absolute;
-    top: 100%;
-    height: 0;
-    width: 0;
-  }
-
-  &::before {
-    border-width: 44px 8px 0;
-    border-color: black transparent transparent;
-    margin-left: -8px;
-  }
 
   &::after {
-    border-width: 32px 5px 0;
     border-color: #fcc transparent transparent;
-    margin-left: -5px;
   }
 }
 
