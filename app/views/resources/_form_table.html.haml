@@ -3,8 +3,6 @@
   %tr{class: nested ? 'nested-row' : nil}
     %td
       = row[:title]
-      - if row[:form_number]
-        %span.resource-form-number= row[:form_number]
     - if row[:pdf_link]
       - links << link_to_download_resource(t('global.view_pdf'), row[:pdf_link])
     - if row[:word_link]
