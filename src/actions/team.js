@@ -33,3 +33,38 @@ export function removeTeam() {
       });
   };
 }
+
+export function patchTeam(obj) {
+  return {
+    type: ActionTypes.PATCH_TEAM,
+    team: obj
+  };
+}
+
+export function teamPatched(json) {
+  return {
+    type: ActionTypes.TEAM_PATCHED,
+    team: json
+  };
+}
+
+export function updateTeam(payload) {
+  return (dispatch, getState) => {
+    const state = getState();
+    const teamId = state.team.id;
+    const host = state.host;
+    dispatch(patchTeam(payload));
+    return fetch(`//${host}/api/teams/${teamId}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: jsonHeaders,
+      body: JSON.stringify(payload)
+    })
+      .then(response => processResponse(response))
+      .then(json => dispatch(teamPatched(json)))
+      .catch(err => {
+        dispatch(flashError(err.message));
+        throw err;
+      });
+  };
+}

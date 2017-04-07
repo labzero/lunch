@@ -137,7 +137,7 @@ class RestaurantMap extends Component {
           )}
         </GoogleMap>
         <div className={s.mapSettingsContainer}>
-          <RestaurantMapSettingsContainer />
+          <RestaurantMapSettingsContainer map={this.map} />
         </div>
       </section>
     );

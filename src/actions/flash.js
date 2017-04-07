@@ -7,6 +7,13 @@ export function flashError(message) {
   };
 }
 
+export function flashSuccess(message) {
+  return {
+    type: ActionTypes.FLASH_SUCCESS,
+    message
+  };
+}
+
 export function expireFlash(id) {
   return {
     type: ActionTypes.EXPIRE_FLASH,
