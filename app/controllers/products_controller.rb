@@ -16,7 +16,7 @@ class ProductsController < ApplicationController
 
   # GET
   def amortizing
-    @last_modified = Date.new(2003, 12, 1)
+    @last_modified = Date.new(2017, 4, 1)
   end
 
   # GET
