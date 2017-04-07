@@ -1734,7 +1734,7 @@ class ReportsController < ApplicationController
 
     report_download_name = "account-summary-#{fhlb_report_date_numeric(@date)}"
     downloadable_report(:pdf, nil, report_download_name) do
-
+      @tracking_account_category = 'Account Summary'.freeze
       @collateral_notice = 'N'
 
       @financing_availability = { }
