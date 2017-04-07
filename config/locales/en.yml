@@ -914,10 +914,7 @@ en:
       other_fee_info_html: The Bank charges fees for certain products and services. Other fees are included in the <a href=%{credit_guide_url}>Credit Guide</a> and the <a href=%{collateral_guide_url}>Collateral Guide</a>.
       letter_of_credit: Standby Letter of Credit Prices and Fees
       annual_maintenance_charge: Pricing/Annual Maintenance Charge
-      loc_pricing_info: "Prices for standby letters of credit will be established and disclosed prior to issuance and will include, at a minimum, an ongoing annual maintenance charge.\n\n
-      The annual maintenance charge for most letter of credit types is to be paid monthly in advance on a 30/360 day count basis.\n\n
-      The annual maintenance charge for the Variable Balance Letter of Credit is based on the actual balances of public unit deposits supported by the letter of credit, subject to a minimum maintenance fee that is based on 70% of the notional amount of the Variable Balance Letter of Credit. The maintenance charge is paid quarterly in two installments, partly in advance and partly in arrears, on an Actual/360 day count basis.\n\n
-      Current annual maintenance charges are listed below:"
+      loc_pricing_info: "Prices for standby letters of credit will be established and disclosed prior to issuance and will include, at a minimum, an ongoing annual maintenance charge.\n\nThe annual maintenance charge for most letter of credit types is to be paid monthly in advance on a 30/360 day count basis, using the 30E/360 ISDA day count method.\n\nThe annual maintenance charge for the Variable Balance Letter of Credit is based on the actual balances of public unit deposits supported by the letter of credit, subject to a minimum maintenance fee that is based on 70% of the notional amount of the Variable Balance Letter of Credit. The maintenance charge is paid quarterly in two installments, partly in advance and partly in arrears, on an Actual/360 day count basis.\n\nCurrent annual maintenance charges are listed below:"
       minimum_annual_fee: Minimum annual fee
       issuance_fee: Issuance Fee
       cip_ace: CIP/ACE
