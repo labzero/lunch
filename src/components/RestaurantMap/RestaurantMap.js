@@ -1,14 +1,16 @@
 import React, { Component, PropTypes } from 'react';
-import GoogleMap from 'google-map-react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { GOOGLE_MAP_ZOOM } from '../../constants';
 import googleMapOptions from '../../helpers/googleMapOptions';
+import loadComponent from '../../helpers/loadComponent';
 import RestaurantMarkerContainer from '../RestaurantMarker/RestaurantMarkerContainer';
 import RestaurantMapSettingsContainer from '../RestaurantMapSettings/RestaurantMapSettingsContainer';
 import GoogleInfoWindowContainer from '../GoogleInfoWindow/GoogleInfoWindowContainer';
 import HereMarker from '../HereMarker';
 import TempMarker from '../TempMarker';
 import s from './RestaurantMap.scss';
+
+let GoogleMap = () => null;
 
 class RestaurantMap extends Component {
   static contextTypes = {
@@ -45,6 +47,10 @@ class RestaurantMap extends Component {
     this.root.addEventListener('touchmove', event => {
       // prevent window from scrolling
       event.preventDefault();
+    });
+    loadComponent(() => require.ensure([], require => require('google-map-react').default, 'map')).then((map) => {
+      GoogleMap = map;
+      this.forceUpdate();
     });
   }
 

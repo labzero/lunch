@@ -8,7 +8,8 @@
  */
 
 import 'isomorphic-fetch';
-import Promise from 'bluebird';
+import 'custom-event-polyfill';
+import es6Promise from 'es6-promise';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import FastClick from 'fastclick';
@@ -22,7 +23,7 @@ import configureStore from './store/configureStore';
 import { updateMeta } from './core/DOMUtils';
 import { ErrorReporter, deepForceUpdate } from './core/devUtils';
 
-fetch.promise = Promise;
+es6Promise.polyfill();
 
 window.RobustWebSocket = RobustWebSocket;
 

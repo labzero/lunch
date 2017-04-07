@@ -1,11 +1,13 @@
 import React, { Component, PropTypes } from 'react';
-import GoogleMap from 'google-map-react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import HereMarker from '../../components/HereMarker';
 import { GOOGLE_MAP_ZOOM } from '../../constants';
 import defaultCoords from '../../constants/defaultCoords';
 import googleMapOptions from '../../helpers/googleMapOptions';
+import loadComponent from '../../helpers/loadComponent';
 import s from './TeamMap.scss';
+
+let GoogleMap = () => null;
 
 class TeamMap extends Component {
   static propTypes = {
@@ -18,6 +20,13 @@ class TeamMap extends Component {
 
   static defaultProps = {
     center: defaultCoords
+  }
+
+  componentDidMount() {
+    loadComponent(() => require.ensure([], require => require('google-map-react').default, 'map')).then((map) => {
+      GoogleMap = map;
+      this.forceUpdate();
+    });
   }
 
   setMap = ({ map }) => {

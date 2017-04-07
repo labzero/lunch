@@ -300,6 +300,9 @@ app.get('*', async (req, res, next) => {
     if (assets[route.chunk]) {
       data.scripts.push(assets[route.chunk].js);
     }
+    if (route.map) {
+      data.scripts.push(assets.map.js);
+    }
 
     const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
     res.status(route.status || 200);

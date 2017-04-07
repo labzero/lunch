@@ -9,8 +9,8 @@
 
 import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
+import loadComponent from '../../../helpers/loadComponent';
 import redirectToLogin from '../../helpers/redirectToLogin';
-import NewTeamContainer from './NewTeamContainer';
 
 const title = 'New Team';
 
@@ -23,14 +23,19 @@ export default {
     const user = state.user;
 
     if (user.id) {
+      const NewTeamContainer = await loadComponent(
+        () => require.ensure([], require => require('./NewTeamContainer').default, 'new-team')
+      );
+
       return {
         title,
-        // chunk: 'admin',
+        chunk: 'new-team',
         component: (
           <LayoutContainer path={context.url}>
             <NewTeamContainer title={title} />
           </LayoutContainer>
         ),
+        map: true
       };
     }
 

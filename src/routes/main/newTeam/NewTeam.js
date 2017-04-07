@@ -7,13 +7,15 @@ import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Grid from 'react-bootstrap/lib/Grid';
 import HelpBlock from 'react-bootstrap/lib/HelpBlock';
 import InputGroup from 'react-bootstrap/lib/InputGroup';
-import Geosuggest from 'react-geosuggest';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import { TEAM_SLUG_REGEX } from '../../../constants';
 import defaultCoords from '../../../constants/defaultCoords';
 import TeamMapContainer from '../../../components/TeamMap/TeamMapContainer';
 import history from '../../../core/history';
+import loadComponent from '../../../helpers/loadComponent';
 import s from './NewTeam.scss';
+
+let Geosuggest = () => null;
 
 let google = { maps: { Geocoder: function Geocoder() { return {}; }, GeocoderStatus: {} } };
 if (canUseDOM) {
@@ -42,6 +44,13 @@ class NewTeam extends Component {
       slug: '',
       address: ''
     };
+  }
+
+  componentDidMount() {
+    loadComponent(() => require.ensure([], require => require('react-geosuggest').default, 'map')).then((g) => {
+      Geosuggest = g;
+      this.forceUpdate();
+    });
   }
 
   getCoordsForMarker = (suggest) => {

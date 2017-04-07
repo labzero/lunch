@@ -1,13 +1,15 @@
 import React, { Component, PropTypes } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import Geosuggest from 'react-geosuggest';
+import loadComponent from '../../helpers/loadComponent';
 import s from './RestaurantAddForm.scss';
 
 let google = { maps: { Geocoder: function Geocoder() { return {}; }, GeocoderStatus: {} } };
 if (canUseDOM) {
   google = window.google || google;
 }
+
+let Geosuggest = () => null;
 
 class RestaurantAddForm extends Component {
 
@@ -22,6 +24,13 @@ class RestaurantAddForm extends Component {
   constructor(props) {
     super(props);
     this.geocoder = new google.maps.Geocoder();
+  }
+
+  componentDidMount() {
+    loadComponent(() => require.ensure([], require => require('react-geosuggest').default, 'map')).then((g) => {
+      Geosuggest = g;
+      this.forceUpdate();
+    });
   }
 
   getCoordsForMarker = (suggest) => {
