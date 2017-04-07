@@ -704,7 +704,6 @@
   @extend %bordered-section;
   display: none;
   margin: 25px 15px;
-  padding: 10px 20px;
   border-bottom: 1px solid $light-blue;
   span {
     @extend %typography-table-heading;
@@ -716,6 +715,7 @@
     @extend %pseudoelement-clearfix;
     float: none;
     margin-right: 0;
+    margin-top: 20px;
     label, span {
       float: left;
       color: $medium-gray;

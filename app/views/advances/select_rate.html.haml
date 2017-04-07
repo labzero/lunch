@@ -64,7 +64,6 @@
               .advance-create-custom-date-wrapper
                 %span= t('advances.custom_term.create')
                 %button.advance-custom-date-cancel.text-only-button= t('global.cancel')
-                %p= t('advances.custom_term.instructions')
                 .input-field-container-horizontal
                   %span= t('advances.custom_term.set')
                   = render 'maturity_date_calendar', date_restrictions: @date_restrictions, hide_start_date: @maturity_date.blank?, start_date: @maturity_date

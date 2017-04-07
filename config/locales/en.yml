@@ -2299,7 +2299,6 @@ en:
       create: Create a Custom Term
       set: Set Term Maturity Date
       view_rates: View Rates For This Term
-      instructions: Placeholder for Instructions
       edit: Edit Custom Term
       matures_on: Matures in %{days} days on %{date}
       in_days: "%{days} Days"
