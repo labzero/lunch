@@ -42,10 +42,14 @@ class Header extends Component {
   flashContainers = () => {
     const { flashes } = this.props;
 
-    return flashes.map(
-      (flash, i) =>
-        <FlashContainer message={flash.message} type={flash.type} id={i} key={`${flash.type}_${flash.message}`} />
-    );
+    return flashes.map(flash => (
+      <FlashContainer
+        message={flash.message}
+        type={flash.type}
+        id={flash.id}
+        key={flash.id}
+      />
+    ));
   }
 
   closeMenu = () => {
