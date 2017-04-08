@@ -21,6 +21,7 @@ export default {
     require('./teams').default,
     require('./newTeam').default,
     require('./password').default,
+    require('./about').default,
     require('./comingSoon').default,
     require('../login').default,
 

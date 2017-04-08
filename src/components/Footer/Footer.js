@@ -7,13 +7,20 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './Footer.scss';
 
-const Footer = () => (
+const Footer = ({ host }) => (
   <div className={s.root}>
     <div className={s.container}>
+      <a
+        className={s.link}
+        href={`//${host}/about`}
+      >
+        About / Privacy
+      </a>
+      <span className={s.spacer} />
       <span className={s.text}>
         ©
         <a
@@ -28,5 +35,9 @@ const Footer = () => (
     </div>
   </div>
 );
+
+Footer.propTypes = {
+  host: PropTypes.string.isRequired
+};
 
 export default withStyles(s)(Footer);

@@ -1,0 +1,13 @@
+@import '../../../styles/_mixins.scss';
+@import '../../../styles/_variables.scss';
+
+.root {
+  @include page-root;
+  max-width: 40em;
+}
+
+.slackSnippet {
+  background: #eee;
+  padding: .5em;
+  white-space: normal;
+}
