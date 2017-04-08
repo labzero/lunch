@@ -39,6 +39,7 @@ export default {
               <TeamContainer title={title} />
             </LayoutContainer>
           ),
+          map: hasRole(user, team, 'owner')
         };
       }
       return render404;

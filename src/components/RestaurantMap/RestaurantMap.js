@@ -48,6 +48,7 @@ class RestaurantMap extends Component {
       // prevent window from scrolling
       event.preventDefault();
     });
+    this.props.clearCenter();
     loadComponent(() => require.ensure([], require => require('google-map-react').default, 'map')).then((map) => {
       GoogleMap = map;
       this.forceUpdate();

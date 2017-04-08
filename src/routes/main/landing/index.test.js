@@ -10,9 +10,10 @@ const mockStore = configureStore();
 
 describe('routes/landing', () => {
   let context;
+  let route;
 
   describe('when user has one role', () => {
-    beforeEach(() => {
+    beforeEach((done) => {
       landingRewireApi.__Rewire__('getTeams', () => [{
         slug: 'labzero'
       }]);
@@ -25,17 +26,22 @@ describe('routes/landing', () => {
           }
         })
       };
+
+      landing.action(context).then((r) => {
+        route = r;
+        done();
+      });
     });
 
     it('redirects user to team home', () => {
-      expect(landing.action(context)).to.deep.eq({
+      expect(route).to.deep.eq({
         redirect: '//labzero.lunch.pink'
       });
     });
   });
 
   describe('when user has no roles', () => {
-    beforeEach(() => {
+    beforeEach((done) => {
       context = {
         store: mockStore({
           user: {
@@ -44,17 +50,22 @@ describe('routes/landing', () => {
           }
         })
       };
+
+      landing.action(context).then((r) => {
+        route = r;
+        done();
+      });
     });
 
     it('redirects user to teams list', () => {
-      expect(landing.action(context)).to.deep.eq({
+      expect(route).to.deep.eq({
         redirect: '/teams'
       });
     });
   });
 
   describe('when user has multiple roles', () => {
-    beforeEach(() => {
+    beforeEach((done) => {
       context = {
         store: mockStore({
           user: {
@@ -63,26 +74,36 @@ describe('routes/landing', () => {
           }
         })
       };
+
+      landing.action(context).then((r) => {
+        route = r;
+        done();
+      });
     });
 
     it('redirects user to teams list', () => {
-      expect(landing.action(context)).to.deep.eq({
+      expect(route).to.deep.eq({
         redirect: '/teams'
       });
     });
   });
 
   describe('when there is no user', () => {
-    beforeEach(() => {
+    beforeEach((done) => {
       context = {
         store: mockStore({
           user: {}
         })
       };
+
+      landing.action(context).then((r) => {
+        route = r;
+        done();
+      });
     });
 
     it('renders landing page', () => {
-      expect(landing.action(context)).to.have.keys('component');
+      expect(route).to.have.keys('chunk', 'component');
     });
   });
 });

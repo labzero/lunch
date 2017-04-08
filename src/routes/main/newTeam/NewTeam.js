@@ -7,20 +7,12 @@ import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Grid from 'react-bootstrap/lib/Grid';
 import HelpBlock from 'react-bootstrap/lib/HelpBlock';
 import InputGroup from 'react-bootstrap/lib/InputGroup';
-import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import { TEAM_SLUG_REGEX } from '../../../constants';
 import defaultCoords from '../../../constants/defaultCoords';
+import TeamGeosuggestContainer from '../../../components/TeamGeosuggest/TeamGeosuggestContainer';
 import TeamMapContainer from '../../../components/TeamMap/TeamMapContainer';
 import history from '../../../core/history';
-import loadComponent from '../../../helpers/loadComponent';
 import s from './NewTeam.scss';
-
-let Geosuggest = () => null;
-
-let google = { maps: { Geocoder: function Geocoder() { return {}; }, GeocoderStatus: {} } };
-if (canUseDOM) {
-  google = window.google || google;
-}
 
 class NewTeam extends Component {
   static propTypes = {
@@ -29,44 +21,17 @@ class NewTeam extends Component {
       lng: PropTypes.number.isRequired
     }),
     createTeam: PropTypes.func.isRequired,
-    setCenter: PropTypes.func.isRequired
   };
 
   static defaultProps = {
     center: defaultCoords
   }
 
-  constructor(props) {
-    super(props);
-    this.geocoder = new google.maps.Geocoder();
-    this.state = {
-      name: '',
-      slug: '',
-      address: ''
-    };
-  }
-
-  componentDidMount() {
-    loadComponent(() => require.ensure([], require => require('react-geosuggest').default, 'map')).then((g) => {
-      Geosuggest = g;
-      this.forceUpdate();
-    });
-  }
-
-  getCoordsForMarker = (suggest) => {
-    if (suggest !== null) {
-      this.geocoder.geocode({ placeId: suggest.placeId }, (results, status) => {
-        if (status === google.maps.GeocoderStatus.OK) {
-          const location = results[0].geometry.location;
-          const center = {
-            lat: location.lat(),
-            lng: location.lng()
-          };
-          this.props.setCenter(center);
-        }
-      });
-    }
-  }
+  state = {
+    name: '',
+    slug: '',
+    address: ''
+  };
 
   handleChange = field => event => this.setState({ [field]: event.target.value });
 
@@ -87,10 +52,6 @@ class NewTeam extends Component {
     }).then(() => history.push('/teams'));
   }
 
-  handleSuggestSelect = (suggestion) => {
-    this.props.setCenter(suggestion.location);
-  }
-
   render() {
     const { name, slug } = this.state;
 
@@ -98,7 +59,7 @@ class NewTeam extends Component {
       <Grid className={s.root}>
         <h2>Create a new team</h2>
         <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="new-team-name">
+          <FormGroup controlId="newTeam-name">
             <ControlLabel>
               Name
             </ControlLabel>
@@ -109,7 +70,7 @@ class NewTeam extends Component {
               required
             />
           </FormGroup>
-          <FormGroup controlId="new-team-slug">
+          <FormGroup controlId="newTeam-slug">
             <ControlLabel>
               URL
             </ControlLabel>
@@ -130,7 +91,7 @@ class NewTeam extends Component {
             </InputGroup>
             <HelpBlock>Letters, numbers, and dashes only.</HelpBlock>
           </FormGroup>
-          <FormGroup controlId="new-team-address">
+          <FormGroup controlId="newTeam-address">
             <ControlLabel>Address</ControlLabel>
             <p>
               Pick a centerpoint for your team.
@@ -138,16 +99,11 @@ class NewTeam extends Component {
               for restaurants.
               You can drag the map or enter your full address.
             </p>
-            <TeamMapContainer />
-            <Geosuggest
-              autoActivateFirstSuggest
-              id="new-team-address"
-              inputClassName="form-control"
-              onActivateSuggest={this.getCoordsForMarker}
-              onSuggestSelect={this.handleSuggestSelect}
-              placeholder="Enter your address"
-              ref={g => { this.geosuggest = g; }}
-              types={['geocode']}
+            <TeamMapContainer defaultCenter={defaultCoords} />
+            <TeamGeosuggestContainer
+              id="newTeam-address"
+              initialValue=""
+              onChange={this.handleChange('address')}
             />
           </FormGroup>
           <Button type="submit">Submit</Button>

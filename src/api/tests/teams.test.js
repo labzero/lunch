@@ -396,7 +396,7 @@ describe('api/main/teams', () => {
       });
     });
 
-    describe('query', () => {
+    describe('with at least one valid parameter', () => {
       let updateSpy;
       beforeEach(() => {
         updateSpy = spy();
@@ -404,7 +404,7 @@ describe('api/main/teams', () => {
           update: updateSpy
         }));
 
-        return request(app).patch('/1').send({ default_zoom: 15 });
+        return request(app).patch('/1').send({ default_zoom: 15, id: 123 });
       });
 
       it('updates team', () => {

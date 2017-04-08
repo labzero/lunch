@@ -2,7 +2,6 @@ import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import HereMarker from '../../components/HereMarker';
 import { GOOGLE_MAP_ZOOM } from '../../constants';
-import defaultCoords from '../../constants/defaultCoords';
 import googleMapOptions from '../../helpers/googleMapOptions';
 import loadComponent from '../../helpers/loadComponent';
 import s from './TeamMap.scss';
@@ -15,14 +14,20 @@ class TeamMap extends Component {
       lat: PropTypes.number.isRequired,
       lng: PropTypes.number.isRequired
     }),
+    clearCenter: PropTypes.func.isRequired,
+    defaultCenter: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired
+    }).isRequired,
     setCenter: PropTypes.func.isRequired
   }
 
   static defaultProps = {
-    center: defaultCoords
+    center: undefined
   }
 
   componentDidMount() {
+    this.props.clearCenter();
     loadComponent(() => require.ensure([], require => require('google-map-react').default, 'map')).then((map) => {
       GoogleMap = map;
       this.forceUpdate();
@@ -41,14 +46,14 @@ class TeamMap extends Component {
   };
 
   render() {
-    const { center } = this.props;
+    const { center, defaultCenter } = this.props;
 
     return (
       <div className={s.root}>
         <GoogleMap
           center={center}
           defaultZoom={GOOGLE_MAP_ZOOM}
-          defaultCenter={TeamMap.defaultProps.center}
+          defaultCenter={defaultCenter}
           onGoogleApiLoaded={this.setMap}
           options={googleMapOptions()}
           yesIWantToUseGoogleMapApiInternals

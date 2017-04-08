@@ -3,6 +3,7 @@ import cors from 'cors';
 import { Team, Role } from '../../models';
 import reservedTeamSlugs from '../../constants/reservedTeamSlugs';
 import { TEAM_LIMIT, TEAM_SLUG_REGEX } from '../../constants';
+import hasRole from '../../helpers/hasRole';
 import checkTeamRole from '../helpers/checkTeamRole';
 import corsOptionsDelegate from '../helpers/corsOptionsDelegate';
 import errorCatcher from '../helpers/errorCatcher';
@@ -86,13 +87,38 @@ export default () => {
       getTeam,
       checkTeamRole(),
       async (req, res, next) => {
-        const { default_zoom } = req.body;
+        let fieldCount = 0;
 
-        if (default_zoom && typeof default_zoom === 'number') { // eslint-disable-line camelcase
+        const allowedFields = [{ name: 'default_zoom', type: 'number' }];
+        if (hasRole(req.user, req.team, 'owner')) {
+          allowedFields.push({
+            name: 'address',
+            type: 'string'
+          }, {
+            name: 'lat',
+            type: 'number'
+          }, {
+            name: 'lng',
+            type: 'number',
+          }, {
+            name: 'name',
+            type: 'string'
+          });
+        }
+
+        const filteredPayload = {};
+
+        allowedFields.forEach(f => {
+          const value = req.body[f.name];
+          if (value && typeof value === f.type) { // eslint-disable-line valid-typeof
+            filteredPayload[f.name] = value;
+            fieldCount += 1;
+          }
+        });
+
+        if (fieldCount) {
           try {
-            await req.team.update({
-              default_zoom
-            });
+            await req.team.update(filteredPayload);
             res.status(200).json({ error: false, data: req.team });
           } catch (err) {
             next(err);

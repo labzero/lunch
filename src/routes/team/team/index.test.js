@@ -55,7 +55,7 @@ describe('routes/teams/team/team', () => {
     });
 
     it('renders team', () => {
-      expect(result).to.have.keys('component', /* 'chunk',*/ 'title');
+      expect(result).to.have.keys('component', 'chunk', 'map', 'title');
     });
   });
 

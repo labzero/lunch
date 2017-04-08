@@ -11,13 +11,13 @@ import React, { PropTypes } from 'react';
 import { intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Button from 'react-bootstrap/lib/Button';
-import ControlLabel from 'react-bootstrap/lib/ControlLabel';
-import FormControl from 'react-bootstrap/lib/FormControl';
-import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Grid from 'react-bootstrap/lib/Grid';
-import HelpBlock from 'react-bootstrap/lib/HelpBlock';
+import Tab from 'react-bootstrap/lib/Tab';
+import Tabs from 'react-bootstrap/lib/Tabs';
 import Table from 'react-bootstrap/lib/Table';
+import AddUserFormContainer from '../../../components/AddUserForm/AddUserFormContainer';
+import TeamFormContainer from '../../../components/TeamForm/TeamFormContainer';
 import Loading from '../../../components/Loading';
 import { globalMessageDescriptor as gm } from '../../../helpers/generateMessageDescriptor';
 import getRole from '../../../helpers/getRole';
@@ -26,7 +26,6 @@ import s from './Team.scss';
 
 class Team extends React.Component {
   static propTypes = {
-    addUserToTeam: PropTypes.func.isRequired,
     changeUserRole: PropTypes.func.isRequired,
     confirmDeleteTeam: PropTypes.func.isRequired,
     currentUser: PropTypes.object.isRequired,
@@ -41,25 +40,9 @@ class Team extends React.Component {
     team: PropTypes.object.isRequired
   };
 
-  static defaultState = {
-    email: '',
-    name: '',
-    type: 'member'
-  };
-
-  state = Object.assign({}, Team.defaultState);
-
   componentDidMount() {
     this.props.fetchUsersIfNeeded();
   }
-
-  handleChange = field => event => this.setState({ [field]: event.target.value });
-
-  handleSubmit = (event) => {
-    event.preventDefault();
-    this.props.addUserToTeam(this.state);
-    this.setState(Object.assign({}, Team.defaultState));
-  };
 
   handleRoleChange = user => event => {
     const { currentUser, team } = this.props;
@@ -111,27 +94,17 @@ class Team extends React.Component {
     return f(gm(`${user.type}Role`));
   }
 
-  render() {
+  renderUsers = () => {
     const {
-      confirmDeleteTeam,
       currentUser,
-      hasGuestRole,
-      hasMemberRole,
       hasOwnerRole,
       intl: { formatMessage: f },
       team,
-      userListReady,
       users
     } = this.props;
-    const { email, name, type } = this.state;
-
-    if (!userListReady) {
-      return <Loading />;
-    }
 
     return (
-      <Grid className={s.root}>
-        <h2>{team.name}</h2>
+      <div>
         <Table responsive>
           <thead>
             <tr>
@@ -164,62 +137,43 @@ class Team extends React.Component {
             ))}
           </tbody>
         </Table>
-        <h3>Add User</h3>
-        <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="team-name">
-            <ControlLabel>
-              Name
-            </ControlLabel>
-            <FormControl
-              type="text"
-              onChange={this.handleChange('name')}
-              value={name}
-            />
-          </FormGroup>
-          <FormGroup controlId="team-email">
-            <ControlLabel>
-              Email
-            </ControlLabel>
-            <FormControl
-              type="email"
-              onChange={this.handleChange('email')}
-              value={email}
-              required
-            />
-            <HelpBlock>
-              <strong>Please note:</strong> only email addresses linked with a Google
-              account can currently be used (e.g. Gmail or G Suite/Google Apps).
-            </HelpBlock>
-          </FormGroup>
-          <FormGroup controlId="team-type">
-            <ControlLabel>
-              Type
-            </ControlLabel>
-            <FormControl
-              componentClass="select"
-              onChange={this.handleChange('type')}
-              value={type}
-              required
-            >
-              {hasGuestRole && <option value="guest">{f(gm('guestRole'))}</option>}
-              {hasMemberRole && <option value="member">{f(gm('memberRole'))}</option>}
-              {hasOwnerRole && <option value="owner">{f(gm('ownerRole'))}</option>}
-            </FormControl>
-            <HelpBlock>
-              Members can add new users and remove guests.
-              {hasOwnerRole &&
-                ' Owners can manage all user roles and manage overall team information.'
-              }
-            </HelpBlock>
-          </FormGroup>
-          <Button type="submit">Submit</Button>
-        </form>
-        {hasOwnerRole && (
-          <div className={s.teamManagement}>
-            <h3>Team Management</h3>
-            <Button bsStyle="danger" onClick={confirmDeleteTeam}>Delete team</Button>
-          </div>
-        )}
+        <AddUserFormContainer />
+      </div>
+    );
+  }
+
+  render() {
+    const {
+      confirmDeleteTeam,
+      hasOwnerRole,
+      team,
+      userListReady
+    } = this.props;
+
+    if (!userListReady) {
+      return <Loading />;
+    }
+
+    return (
+      <Grid className={s.root}>
+        <h2>{team.name}</h2>
+        {hasOwnerRole ? (
+          <Tabs id="team-tabs" mountOnEnter>
+            <Tab eventKey={1} title="Users">
+              <h3>User List</h3>
+              {this.renderUsers()}
+            </Tab>
+            <Tab eventKey={2} title="Team">
+              <h3>Team Management</h3>
+              <TeamFormContainer />
+            </Tab>
+            <Tab eventKey={3} title="Messy Business">
+              <h3>Messy Business</h3>
+              {/* <Button onClick={confirmChangeTeamName}>Change team URL</Button> */}
+              <Button bsStyle="danger" onClick={confirmDeleteTeam}>Delete team</Button>
+            </Tab>
+          </Tabs>
+        ) : this.renderUsers()}
       </Grid>
     );
   }
