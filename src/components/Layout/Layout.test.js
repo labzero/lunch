@@ -8,12 +8,11 @@
  */
 
 /* eslint-env mocha */
-/* eslint-disable padded-blocks, no-unused-expressions */
+/* eslint-disable no-unused-expressions */
 
 import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
-import sinon from 'sinon';
 import Layout from './Layout';
 
 const context = { insertCss: () => {} };
@@ -23,10 +22,8 @@ describe('App', () => {
 
   beforeEach(() => {
     props = {
-      wsPort: 3000,
-      messageReceived: sinon.mock(),
       shouldScrollToTop: false,
-      scrolledToTop: sinon.mock()
+      scrolledToTop: () => {}
     };
   });
 
@@ -39,5 +36,4 @@ describe('App', () => {
 
     expect(wrapper.contains(<div className="child" />)).to.be.true;
   });
-
 });

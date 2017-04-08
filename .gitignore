@@ -6,9 +6,8 @@ database.sqlite
 node_modules
 ncp-debug.log
 npm-debug.log
+.idea
+
 .env
 .env.prod
-
-# Temp, while we set up Docker locally
-docker-cloud.yml
 deploy.sh

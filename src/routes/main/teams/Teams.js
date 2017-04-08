@@ -30,7 +30,7 @@ You will need to be invited back by another member.`,
         <h2>Visit one of your teams:</h2>
         <ul className={`list-group ${s.list}`}>
           {teams.map(team => (
-            <li className={`list-group-item ${s.item}`}>
+            <li className={`list-group-item ${s.item}`} key={team.slug}>
               <a
                 className={`list-group-item ${s.itemLink}`}
                 key={team.id}
