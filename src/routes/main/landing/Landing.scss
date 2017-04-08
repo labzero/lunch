@@ -6,6 +6,7 @@
   background-attachment: fixed;
 
   img {
+    height: 100%; // IE11 hack
     width: 100%;
   }
 }

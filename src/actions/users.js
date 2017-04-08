@@ -106,10 +106,10 @@ export function removeUser(id, team) {
   };
 }
 
-export function postUser(id) {
+export function postUser(obj) {
   return {
     type: ActionTypes.POST_USER,
-    id
+    user: obj
   };
 }
 

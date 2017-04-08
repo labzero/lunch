@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { getCenter } from '../../selectors/mapUi';
-import { setCenter } from '../../actions/mapUi';
+import { clearCenter, setCenter } from '../../actions/mapUi';
 import TeamMap from './TeamMap';
 
 const mapStateToProps = (state) => ({
@@ -8,6 +8,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
+  clearCenter: () => dispatch(clearCenter()),
   setCenter: center => dispatch(setCenter(center))
 });
 

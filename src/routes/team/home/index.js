@@ -1,7 +1,7 @@
 import React from 'react';
-import HomeContainer from './HomeContainer';
-import hasRole from '../../../helpers/hasRole';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
+import hasRole from '../../../helpers/hasRole';
+import loadComponent from '../../../helpers/loadComponent';
 import redirectToLogin from '../../helpers/redirectToLogin';
 import render404 from '../../helpers/render404';
 
@@ -11,19 +11,25 @@ export default {
 
   path: '/',
 
-  action(context) {
+  async action(context) {
     const state = context.store.getState();
     const user = state.user;
     const team = state.team;
 
     if (user.id) {
       if (hasRole(user, team)) {
+        const HomeContainer = await loadComponent(
+          () => require.ensure([], require => require('./HomeContainer').default, 'home')
+        );
+
         return {
+          chunk: 'home',
           component: (
             <LayoutContainer path={context.url}>
               <HomeContainer />
             </LayoutContainer>
           ),
+          map: true
         };
       }
       return render404;

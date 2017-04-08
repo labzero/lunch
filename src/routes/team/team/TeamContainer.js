@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { showModal } from '../../../actions/modals';
-import { addUser, changeUserRole, fetchUsersIfNeeded, removeUser } from '../../../actions/users';
+import { changeUserRole, fetchUsersIfNeeded, removeUser } from '../../../actions/users';
 import { currentUserHasRole, isUserListReady } from '../../../selectors';
 import { getTeam } from '../../../selectors/team';
 import { getCurrentUser } from '../../../selectors/user';
@@ -19,7 +19,6 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  addUserToTeam: payload => dispatch(addUser(payload)),
   changeUserRole: (id, type) => dispatch(changeUserRole(id, type)),
   confirmDeleteTeam: () => dispatch(showModal('deleteTeam')),
   fetchUsersIfNeeded() {

@@ -5,14 +5,23 @@ export default new Map([
     [
       ...state,
       {
+        id: action.id,
         message: action.message,
         type: 'error'
       }
     ]
   ],
-  [ActionTypes.EXPIRE_FLASH, (state, action) => {
-    const newState = Array.from(state);
-    newState.splice(action.id, 1);
-    return newState;
-  }]
+  [ActionTypes.FLASH_SUCCESS, (state, action) =>
+    [
+      ...state,
+      {
+        id: action.id,
+        message: action.message,
+        type: 'success'
+      }
+    ]
+  ],
+  [ActionTypes.EXPIRE_FLASH, (state, action) =>
+    state.filter(arr => arr.id !== action.id)
+  ]
 ]);

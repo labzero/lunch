@@ -1,5 +1,7 @@
 import { connect } from 'react-redux';
 import { setShowPOIs, setShowUnvoted } from '../../actions/mapUi';
+import { flashSuccess } from '../../actions/flash';
+import { updateTeam } from '../../actions/team';
 import RestaurantMapSettings from './RestaurantMapSettings';
 
 const mapStateToProps = state => ({
@@ -7,13 +9,14 @@ const mapStateToProps = state => ({
   showUnvoted: state.mapUi.showUnvoted,
 });
 
-const mapDispatchToProps = dispatch => ({
-  setShowUnvoted: event => {
-    dispatch(setShowUnvoted(event.target.checked));
-  },
-  setShowPOIs: event => {
-    dispatch(setShowPOIs(event.target.checked));
-  }
+const mapDispatchToProps = (dispatch, ownProps) => ({
+  setDefaultZoom: () =>
+    dispatch(updateTeam({ default_zoom: ownProps.map.getZoom() }))
+      .then(() => dispatch(flashSuccess('Default zoom level set for team.'))),
+  setShowUnvoted: event =>
+    dispatch(setShowUnvoted(event.target.checked)),
+  setShowPOIs: event =>
+    dispatch(setShowPOIs(event.target.checked))
 });
 
 export default connect(

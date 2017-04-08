@@ -7,18 +7,12 @@ import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Grid from 'react-bootstrap/lib/Grid';
 import HelpBlock from 'react-bootstrap/lib/HelpBlock';
 import InputGroup from 'react-bootstrap/lib/InputGroup';
-import Geosuggest from 'react-geosuggest';
-import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import { TEAM_SLUG_REGEX } from '../../../constants';
 import defaultCoords from '../../../constants/defaultCoords';
+import TeamGeosuggestContainer from '../../../components/TeamGeosuggest/TeamGeosuggestContainer';
 import TeamMapContainer from '../../../components/TeamMap/TeamMapContainer';
 import history from '../../../core/history';
 import s from './NewTeam.scss';
-
-let google = { maps: { Geocoder: function Geocoder() { return {}; }, GeocoderStatus: {} } };
-if (canUseDOM) {
-  google = window.google || google;
-}
 
 class NewTeam extends Component {
   static propTypes = {
@@ -27,37 +21,17 @@ class NewTeam extends Component {
       lng: PropTypes.number.isRequired
     }),
     createTeam: PropTypes.func.isRequired,
-    setCenter: PropTypes.func.isRequired
   };
 
   static defaultProps = {
     center: defaultCoords
   }
 
-  constructor(props) {
-    super(props);
-    this.geocoder = new google.maps.Geocoder();
-    this.state = {
-      name: '',
-      slug: '',
-      address: ''
-    };
-  }
-
-  getCoordsForMarker = (suggest) => {
-    if (suggest !== null) {
-      this.geocoder.geocode({ placeId: suggest.placeId }, (results, status) => {
-        if (status === google.maps.GeocoderStatus.OK) {
-          const location = results[0].geometry.location;
-          const center = {
-            lat: location.lat(),
-            lng: location.lng()
-          };
-          this.props.setCenter(center);
-        }
-      });
-    }
-  }
+  state = {
+    name: '',
+    slug: '',
+    address: ''
+  };
 
   handleChange = field => event => this.setState({ [field]: event.target.value });
 
@@ -76,10 +50,6 @@ class NewTeam extends Component {
       ...center,
       ...this.state
     }).then(() => history.push('/teams'));
-  }
-
-  handleSuggestSelect = (suggestion) => {
-    this.props.setCenter(suggestion.location);
   }
 
   render() {
@@ -129,16 +99,11 @@ class NewTeam extends Component {
               for restaurants.
               You can drag the map or enter your full address.
             </p>
-            <TeamMapContainer />
-            <Geosuggest
-              autoActivateFirstSuggest
+            <TeamMapContainer defaultCenter={defaultCoords} />
+            <TeamGeosuggestContainer
               id="newTeam-address"
-              inputClassName="form-control"
-              onActivateSuggest={this.getCoordsForMarker}
-              onSuggestSelect={this.handleSuggestSelect}
-              placeholder="Enter your address"
-              ref={g => { this.geosuggest = g; }}
-              types={['geocode']}
+              initialValue=""
+              onChange={this.handleChange('address')}
             />
           </FormGroup>
           <Button type="submit">Submit</Button>

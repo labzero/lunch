@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import hasRole from '../../../helpers/hasRole';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
+import hasRole from '../../../helpers/hasRole';
+import loadComponent from '../../../helpers/loadComponent';
 import redirectToLogin from '../../helpers/redirectToLogin';
 import render404 from '../../helpers/render404';
 
@@ -26,16 +27,13 @@ export default {
 
     if (user.id) {
       if (hasRole(user, team)) {
-        let TagsContainer;
-        try {
-          TagsContainer = await require.ensure([], require => require('./TagsContainer').default, 'tags');
-        } catch (err) {
-          TagsContainer = () => null;
-        }
+        const TagsContainer = await loadComponent(
+          () => require.ensure([], require => require('./TagsContainer').default, 'tags')
+        );
 
         return {
           title,
-          // chunk: 'tags',
+          chunk: 'tags',
           component: (
             <LayoutContainer path={context.url}>
               <TagsContainer title={title} />

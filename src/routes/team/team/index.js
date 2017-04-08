@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import hasRole from '../../../helpers/hasRole';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
+import hasRole from '../../../helpers/hasRole';
+import loadComponent from '../../../helpers/loadComponent';
 import redirectToLogin from '../../helpers/redirectToLogin';
 import render404 from '../../helpers/render404';
 
@@ -26,21 +27,19 @@ export default {
 
     if (user.id) {
       if (hasRole(user, team, 'member')) {
-        let TeamContainer;
-        try {
-          TeamContainer = await require.ensure([], require => require('./TeamContainer').default, 'team');
-        } catch (err) {
-          TeamContainer = () => null;
-        }
+        const TeamContainer = await loadComponent(
+          () => require.ensure([], require => require('./TeamContainer').default, 'team')
+        );
 
         return {
           title,
-          // chunk: 'team',
+          chunk: 'team',
           component: (
             <LayoutContainer path={context.url}>
               <TeamContainer title={title} />
             </LayoutContainer>
           ),
+          map: hasRole(user, team, 'owner')
         };
       }
       return render404;

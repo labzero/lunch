@@ -11,3 +11,16 @@
     font-weight: bold;
   }
 }
+
+.checkbox {
+  &,
+  & + .checkbox {
+    margin: 0;
+  }
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}

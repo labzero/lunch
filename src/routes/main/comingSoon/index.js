@@ -11,7 +11,7 @@ import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
 import ComingSoon from './ComingSoon';
 
-const title = 'New Team';
+const title = 'Coming Soon';
 
 export default {
 
@@ -20,7 +20,6 @@ export default {
   async action(context) {
     return {
       title,
-      // chunk: 'admin',
       component: (
         <LayoutContainer path={context.url}>
           <ComingSoon />
