@@ -27,6 +27,7 @@ import s from './Team.scss';
 class Team extends React.Component {
   static propTypes = {
     changeUserRole: PropTypes.func.isRequired,
+    confirm: PropTypes.func.isRequired,
     confirmDeleteTeam: PropTypes.func.isRequired,
     currentUser: PropTypes.object.isRequired,
     fetchUsersIfNeeded: PropTypes.func.isRequired,
@@ -47,17 +48,24 @@ class Team extends React.Component {
   handleRoleChange = user => event => {
     const { currentUser, team } = this.props;
 
-    let confirmed = true;
-    if (event.target.value === 'member' && getRole(currentUser, team).type === 'member') {
-      // eslint-disable-next-line no-alert
-      confirmed = confirm('Are you sure you want to promote this user to Member status? You will not be able to demote them later.');
-    } if (currentUser.id === user.id && !currentUser.superuser) {
-      // eslint-disable-next-line no-alert
-      confirmed = confirm('Are you sure you want to demote yourself? You will not be able to undo this by yourself.');
-    }
+    const newRole = event.target.value;
 
-    if (confirmed) {
-      this.props.changeUserRole(user.id, event.target.value);
+    const changeRole = () => this.props.changeUserRole(user.id, newRole);
+
+    if (event.target.value === 'member' && getRole(currentUser, team).type === 'member') {
+      this.props.confirm({
+        actionLabel: 'Promote',
+        body: 'Are you sure you want to promote this user to Member status? You will not be able to demote them later.',
+        handleSubmit: changeRole
+      });
+    } else if (currentUser.id === user.id && !currentUser.superuser) {
+      this.props.confirm({
+        actionLabel: 'Demote',
+        body: 'Are you sure you want to demote yourself? You will not be able to undo this by yourself.',
+        handleSubmit: changeRole
+      });
+    } else {
+      changeRole();
     }
   };
 
@@ -97,6 +105,7 @@ class Team extends React.Component {
   renderUsers = () => {
     const {
       currentUser,
+      hasMemberRole,
       hasOwnerRole,
       intl: { formatMessage: f },
       team,
@@ -137,7 +146,7 @@ class Team extends React.Component {
             ))}
           </tbody>
         </Table>
-        <AddUserFormContainer />
+        {hasMemberRole && <AddUserFormContainer />}
       </div>
     );
   }

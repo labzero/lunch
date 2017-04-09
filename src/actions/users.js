@@ -137,26 +137,36 @@ export function addUser(payload) {
   };
 }
 
-export function patchUser(id, roleType) {
+export function patchUser(id, roleType, team, isSelf) {
   return {
     type: ActionTypes.PATCH_USER,
     id,
-    roleType
+    isSelf,
+    roleType,
+    team
   };
 }
 
-export function userPatched(id, json) {
+export function userPatched(id, user, team, isSelf) {
   return {
     type: ActionTypes.USER_PATCHED,
     id,
-    user: json
+    isSelf,
+    team,
+    user
   };
 }
 
 export function changeUserRole(id, type) {
   const payload = { id, type };
-  return (dispatch) => {
-    dispatch(patchUser(id, type));
+  return (dispatch, getState) => {
+    const state = getState();
+    const team = state.team;
+    let isSelf = false;
+    if (getCurrentUser(state).id === id) {
+      isSelf = true;
+    }
+    dispatch(patchUser(id, type, team, isSelf));
     return fetch(`/api/users/${id}`, {
       method: 'PATCH',
       credentials,
@@ -164,7 +174,7 @@ export function changeUserRole(id, type) {
       body: JSON.stringify(payload)
     })
       .then(response => processResponse(response))
-      .then(json => dispatch(userPatched(id, json)))
+      .then(json => dispatch(userPatched(id, json, team, isSelf)))
       .catch(
         err => dispatch(flashError(err.message))
       );
