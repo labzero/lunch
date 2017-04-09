@@ -6,25 +6,26 @@ import { expect } from 'chai';
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
-import DeleteRestaurantModal from './DeleteRestaurantModal';
+import ConfirmModal from './ConfirmModal';
 
-describe('DeleteRestaurantModal', () => {
+describe('ConfirmModal', () => {
   let props;
 
   beforeEach(() => {
     props = {
-      restaurantName: 'Food Barn',
+      actionLabel: 'Delete',
+      body: 'Are you sure?',
       shown: true,
       hideModal: sinon.mock(),
-      deleteRestaurant: sinon.mock()
+      handleSubmit: sinon.mock()
     };
   });
 
   it('renders confirmation text', () => {
     const wrapper = shallow(
-      <DeleteRestaurantModal {...props} />
+      <ConfirmModal {...props} />
     );
     expect(wrapper.find(Modal.Body).render().text())
-      .to.eq('Are you sure you want to delete Food Barn?');
+      .to.eq('Are you sure?');
   });
 });

@@ -5,7 +5,7 @@ import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import ModalSection from './ModalSection';
-import DeleteRestaurantModalContainer from '../DeleteRestaurantModal/DeleteRestaurantModalContainer';
+import ConfirmModalContainer from '../ConfirmModal/ConfirmModalContainer';
 
 const context = { insertCss: () => {} };
 
@@ -19,10 +19,10 @@ describe('ModalSection', () => {
   });
 
   it('adds a modal if there is data', () => {
-    props.modals.deleteRestaurant = { name: 'Food Barn' };
+    props.modals.confirm = { body: 'Are you sure?' };
     const wrapper = shallow(
       <ModalSection {...props}><div /></ModalSection>,
     { context });
-    expect(wrapper.find(DeleteRestaurantModalContainer).length).to.eq(1);
+    expect(wrapper.find(ConfirmModalContainer).length).to.eq(1);
   });
 });
