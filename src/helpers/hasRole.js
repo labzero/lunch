@@ -1,11 +1,11 @@
 import canOperateAtRole from './canOperateAtRole';
 import getRole from './getRole';
 
-export default (user, team, role) => {
+export default (user, team, role, ignoreSuperuser) => {
   if (!user || !user.id) {
     return false;
   }
-  if (user.superuser) {
+  if (!ignoreSuperuser && user.superuser) {
     return true;
   }
   const currentRole = getRole(user, team);
