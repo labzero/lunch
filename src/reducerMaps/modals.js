@@ -17,15 +17,5 @@ export default new Map([
     update(state, {
       $apply: target => setOrMerge(target, action.name, { shown: false })
     })
-  ],
-  [ActionTypes.RESTAURANT_DELETED, state =>
-    update(state, {
-      $apply: target => setOrMerge(target, 'deleteRestaurant', { shown: false })
-    })
-  ],
-  [ActionTypes.TAG_DELETED, state =>
-    update(state, {
-      $apply: target => setOrMerge(target, 'deleteTag', { shown: false })
-    })
   ]
 ]);

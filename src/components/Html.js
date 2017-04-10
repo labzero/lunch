@@ -7,9 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-/* eslint-disable react/no-danger */
-
 import React, { Component, PropTypes } from 'react';
+import serialize from 'serialize-javascript';
 import { analytics } from '../config';
 
 class Html extends Component {
@@ -17,7 +16,7 @@ class Html extends Component {
     apikey: PropTypes.string,
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
-    initialState: PropTypes.string,
+    state: PropTypes.object,
     root: PropTypes.string,
     styles: PropTypes.arrayOf(PropTypes.shape({
       id: PropTypes.string.isRequired,
@@ -29,7 +28,7 @@ class Html extends Component {
 
   static defaultProps = {
     apikey: '',
-    initialState: '',
+    state: null,
     styles: [],
     scripts: [],
     root: ''
@@ -38,10 +37,10 @@ class Html extends Component {
   render() {
     const {
       apikey,
-      initialState,
       title,
       description,
       root,
+      state,
       styles,
       scripts,
       children
@@ -76,12 +75,21 @@ class Html extends Component {
           )}
         </head>
         <body>
-          <div id="app" dangerouslySetInnerHTML={{ __html: children }} />
-          {initialState && <script
-            dangerouslySetInnerHTML={{ __html: `window.__INITIAL_STATE__ = ${initialState};` }}
-          />}
+          <div
+            id="app"
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: children }}
+          />
+          {state && (
+            <script
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html:
+              `window.APP_STATE=${serialize(state, { isJSON: true })}` }}
+            />
+          )}
           {analytics.google.trackingId &&
             <script
+              // eslint-disable-next-line react/no-danger
               dangerouslySetInnerHTML={{ __html:
               'window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;' +
               `ga('create','${analytics.google.trackingId}','auto');ga('send','pageview')` }}

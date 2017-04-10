@@ -97,4 +97,61 @@ describe('reducerMaps/user', () => {
       });
     });
   });
+
+  describe('USER_PATCHED', () => {
+    let beforeState;
+    let afterState;
+    beforeEach(() => {
+      beforeState = {
+        id: 1,
+        roles: [{
+          team_id: 77,
+          type: 'owner'
+        }, {
+          team_id: 12345,
+          type: 'owner'
+        }]
+      };
+    });
+
+    describe('when current user has not been updated', () => {
+      beforeEach(() => {
+        afterState = users.get(ActionTypes.USER_PATCHED)(beforeState, {
+          id: 2,
+          isSelf: false,
+          user: { foo: 'bar' },
+          team: {
+            id: 12345
+          }
+        });
+      });
+
+      it('does not modify state', () => {
+        expect(afterState).to.eq(beforeState);
+      });
+    });
+
+    describe('when current user has been updated', () => {
+      beforeEach(() => {
+        afterState = users.get(ActionTypes.USER_PATCHED)(beforeState, {
+          id: 1,
+          isSelf: true,
+          team: {
+            id: 77
+          },
+          user: {
+            type: 'member'
+          }
+        });
+      });
+
+      it('updates user role', () => {
+        expect(afterState.roles[0].type).to.eq('member');
+      });
+
+      it('does not set type attribute', () => {
+        expect(afterState.type).to.be.undefined;
+      });
+    });
+  });
 });

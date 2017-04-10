@@ -28,7 +28,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/server';
 import UniversalRouter from 'universal-router';
 import expressWs from 'express-ws';
-import serialize from 'serialize-javascript';
 import Honeybadger from 'honeybadger';
 import PrettyError from 'pretty-error';
 import App from './components/App';
@@ -304,7 +303,7 @@ const render = async (req, res, next) => {
       description: 'An app for groups to decide on nearby lunch options.',
       body: '',
       root: generateUrl(req, req.get('host')),
-      initialState: serialize(initialState)
+      state: initialState
     };
 
     data.children = ReactDOM.renderToString(<App context={context}>{route.component}</App>);

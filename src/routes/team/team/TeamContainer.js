@@ -20,6 +20,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = (dispatch) => ({
   changeUserRole: (id, type) => dispatch(changeUserRole(id, type)),
+  confirm: opts => dispatch(showModal('confirm', opts)),
   confirmDeleteTeam: () => dispatch(showModal('deleteTeam')),
   fetchUsersIfNeeded() {
     dispatch(fetchUsersIfNeeded());

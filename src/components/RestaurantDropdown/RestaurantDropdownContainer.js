@@ -6,6 +6,7 @@ import { showModal } from '../../actions/modals';
 import { removeDecision, decide } from '../../actions/decisions';
 import { showMapAndInfoWindow } from '../../actions/mapUi';
 import { showEditNameForm, setEditNameFormValue } from '../../actions/listUi';
+import { removeRestaurant } from '../../actions/restaurants';
 import RestaurantDropdown from './RestaurantDropdown';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -16,9 +17,6 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  deleteRestaurant: () => {
-    dispatch(showModal('deleteRestaurant', { restaurantId: ownProps.id }));
-  },
   removeDecision: () => {
     dispatch(removeDecision());
   },
@@ -33,6 +31,12 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 const mergeProps = (stateProps, dispatchProps, ownProps) =>
   Object.assign({}, stateProps, dispatchProps, {
+    deleteRestaurant: () =>
+      dispatchProps.dispatch(showModal('confirm', {
+        actionLabel: 'Delete',
+        body: `Are you sure you want to delete ${stateProps.restaurant.name}?`,
+        handleSubmit: () => dispatchProps.dispatch(removeRestaurant(ownProps.id))
+      })),
     showEditNameForm: () => {
       dispatchProps.dispatch(setEditNameFormValue(ownProps.id, stateProps.restaurant.name));
       dispatchProps.dispatch(showEditNameForm(ownProps.id));

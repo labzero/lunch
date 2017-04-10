@@ -30,17 +30,16 @@ window.RobustWebSocket = RobustWebSocket;
 let subdomain;
 
 // Undo Browsersync mangling of host
-/* eslint-disable no-underscore-dangle */
-let host = window.__INITIAL_STATE__.host;
+let host = window.APP_STATE.host;
 if (host.indexOf('//') === 0) {
   host = host.slice(2);
 }
-const teamSlug = window.__INITIAL_STATE__.team.slug;
+const teamSlug = window.APP_STATE.team.slug;
 if (teamSlug && host.indexOf(teamSlug) === 0) {
   subdomain = teamSlug;
   host = host.slice(teamSlug.length + 1); // + 1 for dot
 }
-window.__INITIAL_STATE__.host = host;
+window.APP_STATE.host = host;
 
 if (!subdomain) {
   // escape domain periods to not appear as regex wildcards
@@ -50,7 +49,7 @@ if (!subdomain) {
   }
 }
 
-const store = configureStore(window.__INITIAL_STATE__, { history });
+const store = configureStore(window.APP_STATE, { history });
 /* eslint-enable no-underscore-dangle */
 
 // Global (context) variables that can be easily accessed from any React component

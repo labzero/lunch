@@ -28,4 +28,23 @@ export default new Map([
     }
     return state;
   }],
+  [ActionTypes.USER_PATCHED, (state, action) => {
+    if (action.isSelf) {
+      return {
+        ...state,
+        ...action.user,
+        roles: state.roles.map((role) => {
+          if (role.team_id === action.team.id) {
+            return {
+              ...role,
+              type: action.user.type
+            };
+          }
+          return role;
+        }),
+        type: undefined
+      };
+    }
+    return state;
+  }],
 ]);

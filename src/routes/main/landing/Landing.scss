@@ -114,6 +114,12 @@
 }
 
 @media (max-width: $screen-xs-max) {
+  .root {
+    img {
+      height: auto;
+    }
+  }
+
   .jumbotronHeading {
     font-size: 3em;
   }

@@ -1,12 +1,12 @@
 import React, { PropTypes } from 'react';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import NotificationContainer from '../Notification/NotificationContainer';
 import s from './NotificationList.scss';
 
 const NotificationList = ({ notifications }) => (
   <ul className={s.notifications}>
-    <ReactCSSTransitionGroup
+    <CSSTransitionGroup
       transitionName="notification"
       transitionEnterTimeout={250}
       transitionLeaveTimeout={1000}
@@ -16,7 +16,7 @@ const NotificationList = ({ notifications }) => (
           <NotificationContainer {...notification} />
         </li>
       )}
-    </ReactCSSTransitionGroup>
+    </CSSTransitionGroup>
   </ul>
 );
 
