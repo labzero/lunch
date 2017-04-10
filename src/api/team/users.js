@@ -111,7 +111,7 @@ export default () => {
             if (userToAdd.roles.length >= TEAM_LIMIT) {
               return res.status(403).json({ error: true, data: { message: 'This user currently cannot be added to any more teams.' } });
             }
-            if (hasRole(userToAdd, req.team)) {
+            if (hasRole(userToAdd, req.team, undefined, true)) {
               return res.status(409).json({ error: true, data: { message: 'User already exists on this team.' } });
             }
             await Role.create({ team_id: req.team.id, user_id: userToAdd.id, type });
