@@ -27,9 +27,5 @@ export const analytics = {
 export const auth = {
   jwt: { secret: process.env.JWT_SECRET || 'React Starter Kit' },
   session: { secret: process.env.SESSION_SECRET || 'Lunch session' },
-  smtp: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-    service: process.env.SMTP_SERVICE
-  }
+  sendgrid: { secret: process.env.SENDGRID_API_KEY }
 };

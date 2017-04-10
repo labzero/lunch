@@ -10,7 +10,6 @@ import canChangeRole from '../../helpers/canChangeRole';
 import checkTeamRole from '../helpers/checkTeamRole';
 import corsOptionsDelegate from '../helpers/corsOptionsDelegate';
 import loggedIn from '../helpers/loggedIn';
-import generateMailOptions from '../../mailers/generateMailOptions';
 import transporter from '../../mailers/transporter';
 
 const bsHost = process.env.BS_RUNNING ? `${hostname}:3001` : host;
@@ -117,7 +116,7 @@ export default () => {
             await Role.create({ team_id: req.team.id, user_id: userToAdd.id, type });
 
             // returns a promise but we're not going to wait to see if it succeeds.
-            transporter.sendMail(generateMailOptions({
+            transporter.sendMail({
               name,
               email,
               subject: 'You were added to a team!',
@@ -128,7 +127,7 @@ ${req.user.get('name')} invited you to the ${req.team.get('name')} team on Lunch
 To get started, simply visit ${generateUrl(req, `${req.team.get('slug')}.${bsHost}`)} and vote away.
 
 Happy Lunching!`
-            })).then(() => {}).catch(() => {});
+            }).then(() => {}).catch(() => {});
 
             userToAdd = await UserWithTeamRole.findOne({
               where: { email },
@@ -152,7 +151,7 @@ Happy Lunching!`
           }, { include: [Role] });
 
           // returns a promise but we're not going to wait to see if it succeeds.
-          transporter.sendMail(generateMailOptions({
+          transporter.sendMail({
             name,
             email,
             subject: 'Welcome to Lunch!',
@@ -166,7 +165,7 @@ If you'd like to log in using a password instead, just follow this URL to genera
 ${generateUrl(req, bsHost, `/password/edit?token=${resetPasswordToken}`)}
 
 Happy Lunching!`
-          })).then(() => {}).catch(() => {});
+          }).then(() => {}).catch(() => {});
 
           // Sequelize can't apply scopes on create, so just get user again.
           // Also will exclude hidden fields like password, token, etc.

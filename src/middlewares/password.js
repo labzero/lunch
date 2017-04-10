@@ -4,7 +4,6 @@ import commonPassword from 'common-password';
 import { bsHost } from '../config';
 import { PASSWORD_MIN_LENGTH } from '../constants';
 import generateUrl from '../helpers/generateUrl';
-import generateMailOptions from '../mailers/generateMailOptions';
 import transporter from '../mailers/transporter';
 import { User } from '../models';
 
@@ -20,7 +19,7 @@ export default () => {
           reset_password_token: resetPasswordToken,
           reset_password_sent_at: new Date()
         });
-        await transporter.sendMail(generateMailOptions({
+        await transporter.sendMail({
           name: user.name,
           email: user.email,
           subject: 'Password reset instructions',
@@ -31,7 +30,7 @@ ${generateUrl(req, bsHost, `/password/edit?token=${resetPasswordToken}`)}
 This link will expire in one day.
 
 Happy Lunching!`
-        }));
+        });
       }
       next();
     } catch (err) {

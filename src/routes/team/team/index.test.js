@@ -12,19 +12,21 @@ const mockStore = configureStore();
 describe('routes/teams/team/team', () => {
   let context;
   let render404;
+  let team;
 
   beforeEach(() => {
+    team = {
+      id: 77
+    };
     context = {
       params: {},
       store: mockStore({
+        team,
         user: {
           id: 1
         }
       })
     };
-    landingRewireApi.__Rewire__('getTeam', () => [{
-      id: 77
-    }]);
   });
 
   describe('when user is a guest', () => {
@@ -65,6 +67,7 @@ describe('routes/teams/team/team', () => {
       redirectToLoginSpy = spy();
       landingRewireApi.__Rewire__('redirectToLogin', redirectToLoginSpy);
       context.store = mockStore({
+        team,
         user: {}
       });
       return landing.action(context);
