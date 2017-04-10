@@ -26,7 +26,7 @@ export default {
     const team = state.team;
 
     if (user.id) {
-      if (hasRole(user, team, 'member')) {
+      if (team.id && hasRole(user, team, 'member')) {
         const TeamContainer = await loadComponent(
           () => require.ensure([], require => require('./TeamContainer').default, 'team')
         );

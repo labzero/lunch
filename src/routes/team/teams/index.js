@@ -22,7 +22,7 @@ export default {
     const user = state.user;
 
     if (user.id) {
-      if (hasRole(user, team)) {
+      if (team.id && hasRole(user, team)) {
         return {
           redirect: `//${host}/teams`,
           status: 301
