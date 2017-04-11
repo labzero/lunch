@@ -31,7 +31,7 @@ export default () => {
       async (req, res, next) => {
         const { address, lat, lng, name, slug } = req.body;
 
-        if (req.user.roles.length >= TEAM_LIMIT) {
+        if (!req.user.superuser && req.user.roles.length >= TEAM_LIMIT) {
           return res.status(403).json({ error: true, data: { message: `You currently can't join more than ${TEAM_LIMIT} teams.` } });
         }
 

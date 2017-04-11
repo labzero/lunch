@@ -105,7 +105,7 @@ export default () => {
           const UserWithTeamRole = User.scope({ method: ['withTeamRole', req.team.id, extraAttributes] });
 
           if (userToAdd) {
-            if (userToAdd.roles.length >= TEAM_LIMIT) {
+            if (!req.user.get('superuser') && userToAdd.roles.length >= TEAM_LIMIT) {
               return res.status(403).json({ error: true, data: { message: 'This user currently cannot be added to any more teams.' } });
             }
             if (hasRole(userToAdd, req.team, undefined, true)) {
