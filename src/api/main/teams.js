@@ -86,29 +86,6 @@ export default () => {
       getTeam,
       checkTeamRole(),
       async (req, res, next) => {
-        const { default_zoom } = req.body;
-
-        if (default_zoom && typeof default_zoom === 'number') { // eslint-disable-line camelcase
-          try {
-            await req.team.update({
-              default_zoom
-            });
-            res.status(200).json({ error: false, data: req.team });
-          } catch (err) {
-            next(err);
-          }
-        } else {
-          res.status(422).json({ error: true, data: { message: 'Can\'t update any of the provided fields.' } });
-        }
-      }
-    )
-    .patch(
-      '/:id',
-      cors(corsOptionsDelegate),
-      loggedIn,
-      getTeam,
-      checkTeamRole(),
-      async (req, res, next) => {
         let fieldCount = 0;
 
         const allowedFields = [{ name: 'default_zoom', type: 'number' }];
