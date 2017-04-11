@@ -13,12 +13,16 @@ import LayoutContainer from '../../../components/Layout/LayoutContainer';
 
 const title = 'About / Privacy';
 
+// try to fix a strange ReferenceError in production server build
+// by defining and assigning About first
+let About = () => null;
+
 export default {
 
   path: '/about',
 
   async action(context) {
-    const About = await loadComponent(
+    About = await loadComponent(
       () => require.ensure([], require => require('./About').default, 'about')
     );
 
