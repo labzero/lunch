@@ -1,36 +1,78 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  [:test, :production].each do |env|
-    describe "etransact advances limits in the #{env} environment" do
-      let(:etransact_advances_limits) { get '/etransact_advances/limits'; JSON.parse(last_response.body) }
-      let(:some_status_data) {{"WHOLE_LOAN_ENABLED" => "N", "SBC_AGENCY_ENABLED" => "Y", "SBC_AAA_ENABLED" => "Y", "SBC_AA_ENABLED" => "Y",
-                               "LOW_DAYS_TO_MATURITY" => 0, "HIGH_DAYS_TO_MATURITY" => 1, "MIN_ONLINE_ADVANCE" => "100000", "TERM_DAILY_LIMIT" => "201000000",
-                               "PRODUCT_TYPE" => "VRC", "END_TIME" => "1700", "OVERRIDE_END_DATE" => "2006-01-01", "OVERRIDE_END_TIME" => "1700"}} if env == :production
-      let(:result_set) {double('Oracle Result Set', fetch: nil)} if env == :production
+  describe 'etransact advances limits' do
+    let(:call_endpoint) { get 'etransact_advances/limits' }
+    let(:etransact_advances_limits) { get '/etransact_advances/limits'; JSON.parse(last_response.body) }
+    let(:some_status_data) {{"WHOLE_LOAN_ENABLED" => "N", "SBC_AGENCY_ENABLED" => "Y", "SBC_AAA_ENABLED" => "Y", "SBC_AA_ENABLED" => "Y",
+                             "LOW_DAYS_TO_MATURITY" => 0, "HIGH_DAYS_TO_MATURITY" => 1, "MIN_ONLINE_ADVANCE" => "100000", "TERM_DAILY_LIMIT" => "201000000",
+                             "PRODUCT_TYPE" => "VRC", "END_TIME" => "1700", "OVERRIDE_END_DATE" => "2006-01-01", "OVERRIDE_END_TIME" => "1700"}}
+
+    it 'returns the expected limits for all types of advances' do
+      expect(etransact_advances_limits.length).to be >=1
+      etransact_advances_limits.each do |row|
+        expect(row['WHOLE_LOAN_ENABLED']).to be_kind_of(String)
+        expect(row['SBC_AGENCY_ENABLED']).to be_kind_of(String)
+        expect(row['SBC_AAA_ENABLED']).to be_kind_of(String)
+        expect(row['SBC_AA_ENABLED']).to be_kind_of(String)
+        expect(row['LOW_DAYS_TO_MATURITY']).to be_kind_of(Numeric)
+        expect(row['HIGH_DAYS_TO_MATURITY']).to be_kind_of(Numeric)
+        expect(row['MIN_ONLINE_ADVANCE']).to be_kind_of(String)
+        expect(row['TERM_DAILY_LIMIT']).to be_kind_of(String)
+        expect(row['PRODUCT_TYPE']).to be_kind_of(String)
+        expect(row['END_TIME']).to be_kind_of(String)
+        expect(row['OVERRIDE_END_DATE']).to be_kind_of(String)
+        expect(row['OVERRIDE_END_TIME']).to be_kind_of(String)
+      end
+    end
+
+    describe 'in the production environment' do
       before do
-        if env == :production
-          allow(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
-          allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
-          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
-          allow(result_set).to receive(:fetch_hash).and_return(some_status_data, nil)
+        allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
+        allow(MAPI::Services::EtransactAdvances).to receive(:fetch_hashes).and_return([some_status_data])
+      end
+
+      it 'calls `fetch_hashes` with the logger' do
+        logger = instance_double(Logger)
+        allow_any_instance_of(described_class).to receive(:logger).and_return(logger)
+        expect(MAPI::Services::EtransactAdvances).to receive(:fetch_hashes).with(logger, anything)
+        call_endpoint
+      end
+      describe 'calling `fetch_hashes` with the proper SQL' do
+        describe 'the selected fields' do
+          ['AO_TERM_BUCKET_ID', 'WHOLE_LOAN_ENABLED', 'SBC_AGENCY_ENABLED', 'SBC_AAA_ENABLED', 'SBC_AA_ENABLED', 'LOW_DAYS_TO_MATURITY',
+            'HIGH_DAYS_TO_MATURITY', 'MIN_ONLINE_ADVANCE', 'TERM_DAILY_LIMIT', 'PRODUCT_TYPE', 'END_TIME', 'OVERRIDE_END_DATE'].each do |field|
+            it "selects the `#{field}` field" do
+              matcher = Regexp.new(/\A\s*SELECT.*\s+#{field}(?:,|\s+)/im)
+              expect(MAPI::Services::EtransactAdvances).to receive(:fetch_hashes).with(anything, matcher)
+              call_endpoint
+            end
+          end
+        end
+        it 'selects from `WEB_ADM.AO_TERM_BUCKETS`' do
+          matcher = Regexp.new(/\A\s*SELECT.+FROM\s+WEB_ADM.AO_TERM_BUCKETS/im)
+          expect(MAPI::Services::EtransactAdvances).to receive(:fetch_hashes).with(anything, matcher)
+          call_endpoint
         end
       end
-      it 'should return the expected limits for all types of advances' do
-        expect(etransact_advances_limits.length).to be >=1
-        etransact_advances_limits.each do |row|
-          expect(row['WHOLE_LOAN_ENABLED']).to be_kind_of(String)
-          expect(row['SBC_AGENCY_ENABLED']).to be_kind_of(String)
-          expect(row['SBC_AAA_ENABLED']).to be_kind_of(String)
-          expect(row['SBC_AA_ENABLED']).to be_kind_of(String)
-          expect(row['LOW_DAYS_TO_MATURITY']).to be_kind_of(Numeric)
-          expect(row['HIGH_DAYS_TO_MATURITY']).to be_kind_of(Numeric)
-          expect(row['MIN_ONLINE_ADVANCE']).to be_kind_of(String)
-          expect(row['TERM_DAILY_LIMIT']).to be_kind_of(String)
-          expect(row['PRODUCT_TYPE']).to be_kind_of(String)
-          expect(row['END_TIME']).to be_kind_of(String)
-          expect(row['OVERRIDE_END_DATE']).to be_kind_of(String)
-          expect(row['OVERRIDE_END_TIME']).to be_kind_of(String)
+    end
+    describe 'in a non-production environment' do
+      it 'parses the fake data file' do
+        fake_file = double('fake data')
+        allow(File).to receive(:read).with(File.join(MAPI.root, 'fakes', 'etransact_limits.json')).and_return(fake_file)
+        expect(JSON).to receive(:parse).with(fake_file).and_return([])
+        call_endpoint
+      end
+    end
+    describe 'adding the TERM to each bucket' do
+      before { allow(JSON).to receive(:parse).and_call_original }
+      MAPI::Services::EtransactAdvances::TERM_BUCKET_MAPPING.invert.each do |bucket_id, term|
+        it "adds a TERM of `#{term}` when the `AO_TERM_BUCKET_ID` is `#{bucket_id}`" do
+          expect(JSON).to receive(:parse).and_return([{'AO_TERM_BUCKET_ID' => bucket_id}])
+          expect(etransact_advances_limits.length).to be > 0
+          etransact_advances_limits.each do |bucket|
+            expect(bucket['TERM']).to eq(term.to_s)
+          end
         end
       end
     end

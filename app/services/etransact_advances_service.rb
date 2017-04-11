@@ -118,6 +118,12 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
+  def limits
+    get_json(:check_limits, 'etransact_advances/limits').collect do |bucket|
+      Hash[bucket.map{ |k,v| [k.downcase,v] }].with_indifferent_access
+    end
+  end
+
   def settings
     @settings ||= get_hash(:settings, 'etransact_advances/settings')
   end

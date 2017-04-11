@@ -7,6 +7,7 @@ module MAPI
   module Services
     module EtransactAdvances
       include MAPI::Services::Base
+      include MAPI::Shared::Utils
 
       STATUS_ON_RECORD_NOTFOUND_COUNT = 0
 
@@ -20,6 +21,8 @@ module MAPI
         :'2month'=> 6,
         :'3month'=> 7,
         :'6month'=> 8,
+        :'9month' => 9,
+        :'12month' => 10,
         :'1year'=> 11,
         :'2year'=> 12,
         :'3year'=> 13,
@@ -248,18 +251,18 @@ module MAPI
         # etransact advances limits
         relative_get '/limits' do
           etransact_limits = <<-SQL
-            SELECT WHOLE_LOAN_ENABLED, SBC_AGENCY_ENABLED, SBC_AAA_ENABLED, SBC_AA_ENABLED, LOW_DAYS_TO_MATURITY,
+            SELECT AO_TERM_BUCKET_ID, WHOLE_LOAN_ENABLED, SBC_AGENCY_ENABLED, SBC_AAA_ENABLED, SBC_AA_ENABLED, LOW_DAYS_TO_MATURITY,
             HIGH_DAYS_TO_MATURITY, MIN_ONLINE_ADVANCE, TERM_DAILY_LIMIT, PRODUCT_TYPE, END_TIME, OVERRIDE_END_DATE,
             OVERRIDE_END_TIME FROM WEB_ADM.AO_TERM_BUCKETS
           SQL
-          etransact_limits_array = []
-          if settings.environment == :production
-            etransact_limits_cursor = ActiveRecord::Base.connection.execute(etransact_limits)
-            while row = etransact_limits_cursor.fetch_hash()
-              etransact_limits_array.push(row)
-            end
+          etransact_limits_array = if settings.environment == :production
+            MAPI::Services::EtransactAdvances.fetch_hashes(logger, etransact_limits)
           else
-            etransact_limits_array = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_limits.json')))
+            JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_limits.json')))
+          end
+          reverse_bucket_mapping = TERM_BUCKET_MAPPING.invert
+          etransact_limits_array.each do |bucket|
+            bucket['TERM'] = reverse_bucket_mapping[bucket['AO_TERM_BUCKET_ID']]
           end
           etransact_limits_array.to_json
         end

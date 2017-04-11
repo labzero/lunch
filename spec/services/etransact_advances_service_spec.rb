@@ -241,6 +241,38 @@ describe EtransactAdvancesService do
     end
   end
 
+  describe '`limits` method' do
+    let(:limit_data) {[
+      {'FOO' => double('foo')},
+      {'BAR' => double('bar')}
+    ]}
+    let(:call_method) { subject.limits }
+    before { allow(subject).to receive(:get_json).and_return(limit_data) }
+
+    it 'calls `get_json` with the proper name and endpoint' do
+      expect(subject).to receive(:get_json).with(:check_limits, 'etransact_advances/limits').and_return([])
+      call_method
+    end
+    it 'downcases all of the keys from the returned hash' do
+      results = call_method
+      limit_data.each do |bucket|
+        expect(bucket.length).to be > 0
+        bucket.each do |k,v|
+          expect(results).to include(hash_including(k.downcase => v))
+        end
+      end
+    end
+    it 'returns buckets that have indifferent access' do
+      results = call_method
+      limit_data.each_with_index do |bucket, i|
+        expect(bucket.length).to be > 0
+        bucket.each do |k,v|
+          expect(results[i][k.downcase.to_sym]).to eq(v)
+        end
+      end
+    end
+  end
+
   describe '`todays_advances_amount` method' do
     l_days = 0
     h_days = 1

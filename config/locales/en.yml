@@ -3295,6 +3295,35 @@ en:
           title: Add User
           select: Enter userid
           accept: Add User
+    term_rules:
+      title: Term Rules
+      save: Save Changes
+      nav:
+        daily_limit: Minimum Requests/Daily Limits
+        rate_bands: Rate Bands
+        rate_report: Rate Report
+        term_details: Term Details
+      daily_limit:
+        global_limits: Global Limits
+        per_member: Per Member Daily Limit
+        all_member: All Member Daily Limit
+        term_limits: Limits by Term
+        minimum_online: Minimum Online Advance
+        daily: Daily Term Limit
+        dates:
+          open: Open and Overnight
+          1week: 1 Week
+          2week: 2 Weeks
+          3week: 3 Weeks
+          1month: 1 Month
+          2month: 2 Months
+          3month: 3 Months
+          6month: '4-6 Months'
+          9month: '7-9 Months'
+          12month: '10-12 Months'
+          1year: 1 Year
+          2year: 2 Years
+          3year: 3 Years
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

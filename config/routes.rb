@@ -229,15 +229,21 @@ Rails.application.routes.draw do
   constraints Constraints::WebAdmin.new do
     scope :admin do
       get '/' => 'admin/dashboard#index', as: :dashboard_admin
-      get '/features' => 'admin/features#index', as: :features_admin
-      get '/features/:feature' => 'admin/features#view', as: :feature_admin
-      put '/features/:feature/enable' => 'admin/features#enable_feature', as: :feature_enable_admin
-      put '/features/:feature/disable' => 'admin/features#disable_feature', as: :feature_disable_admin
-      post '/features/:feature/member' => 'admin/features#add_member', as: :feature_add_member_admin
-      delete '/features/:feature/member/:member_id' => 'admin/features#remove_member', as: :feature_remove_member_admin
-      post '/features/:feature/user' => 'admin/features#add_user', as: :feature_add_user_admin
-      delete '/features/:feature/user/:username' => 'admin/features#remove_user', as: :feature_remove_user_admin
-
+      scope :features do
+        get '/' => 'admin/features#index', as: :features_admin
+        get '/:feature' => 'admin/features#view', as: :feature_admin
+        put '/:feature/enable' => 'admin/features#enable_feature', as: :feature_enable_admin
+        put '/:feature/disable' => 'admin/features#disable_feature', as: :feature_disable_admin
+        post '/:feature/member' => 'admin/features#add_member', as: :feature_add_member_admin
+        delete '/:feature/member/:member_id' => 'admin/features#remove_member', as: :feature_remove_member_admin
+        post '/:feature/user' => 'admin/features#add_user', as: :feature_add_user_admin
+        delete '/:feature/user/:username' => 'admin/features#remove_user', as: :feature_remove_user_admin
+      end
+      scope :rules do
+        scope :term do
+          get '/limits' => 'admin/rules#limits', as: :rules_term_limits
+        end
+      end
       constraints Constraints::WebAdmin.new(:edit_features?) do
         mount Flipper::UI.app(Rails.application.flipper) => '/flipper-features', as: :flipper_features_admin
       end

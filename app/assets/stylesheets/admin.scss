@@ -13,6 +13,11 @@ $partial-enabled-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3
     }
   }
 
+  h2 {
+    @extend %typography-subtitle;
+    margin: 0 0 $gutter-width;
+  }
+
   .main-nav {
     background-color: $dark-gray;
     color: $white;

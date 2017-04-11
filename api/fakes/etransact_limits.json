@@ -1,5 +1,7 @@
 [
-  { "WHOLE_LOAN_ENABLED" : "N",
+  {
+    "AO_TERM_BUCKET_ID" : 1,
+    "WHOLE_LOAN_ENABLED" : "N",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
@@ -12,7 +14,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 2,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
@@ -25,7 +29,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 3,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
@@ -38,7 +44,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 4,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED": "Y",
@@ -51,7 +59,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 5,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
@@ -64,7 +74,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 6,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
@@ -77,7 +89,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 7,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
@@ -90,7 +104,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 8,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
@@ -103,7 +119,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 9,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
@@ -116,7 +134,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 10,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
@@ -129,7 +149,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 11,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
@@ -142,7 +164,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 12,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
@@ -155,7 +179,9 @@
     "OVERRIDE_END_DATE" : "01-JAN-2006 12:00 AM",
     "OVERRIDE_END_TIME" : "1700"
   },
-  { "WHOLE_LOAN_ENABLED" : "Y",
+  {
+    "AO_TERM_BUCKET_ID" : 13,
+    "WHOLE_LOAN_ENABLED" : "Y",
     "SBC_AGENCY_ENABLED" : "Y",
     "SBC_AAA_ENABLED" : "Y",
     "SBC_AA_ENABLED" : "Y",
