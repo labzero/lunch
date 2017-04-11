@@ -7,7 +7,9 @@ const About = () => (
   <Grid className={s.root}>
     <h2>About Lunch</h2>
     <p>
-      Hi! I’m Jeffrey, the guy behind Lunch. I created Lunch when my coworkers at
+      Hi! I’m
+      {' '}<a href="http://jeffreyatw.com" rel="noopener noreferrer" target="_blank">Jeffrey</a>,
+      the guy behind Lunch. I created Lunch when my coworkers at
       {' '}<a href="https://labzero.com" rel="noopener noreferrer" target="_blank">Lab Zero</a>
       {' '}realized we had fallen into sort of a rut, food-wise. We kept going to the same few
       places, and our routine was getting stale. So I made Lunch, an easy way to keep a list of
@@ -17,7 +19,7 @@ const About = () => (
       It’s worked great for us. Every day around 10:30 (we eat early to beat the crowds), we all
       hop on Lunch and vote for whatever looks good. Eventually, a consensus is reached, and we’re
       on our way. That, or a whole bunch of places are tied for votes, and so we just, y’know, talk
-      it over like people.
+      it over like humans.
     </p>
     <p>
       Either way, I hope you have fun using Lunch! I think it’s helped us grow closer as coworkers,
@@ -47,7 +49,7 @@ const About = () => (
     </p>
     <p>
       For those who are already Lunch users, when you link a Google account I only store your email
-      address, your name, and a token that ties you back to the Google account.
+      address, your name, and your Google profile ID.
     </p>
     <h4>Email use</h4>
     <p>
@@ -65,10 +67,10 @@ const About = () => (
     </p>
     <h4>Cost</h4>
     <p>
-      Lunch is currently free. Unlimited users per team, and each user can be a part of up to three
-      teams. I don’t plan on putting any limitations on what’s currently offered, but I might
-      consider charging for future features, whatever those might be. Either way, I haven’t even
-      set up a way for you to give me money, so I wouldn’t worry about it.
+      Lunch is currently free. Unlimited users per team, and each user can create or be a part of
+      up to three teams. I don’t plan on putting any limitations on what’s currently offered, but I
+      might consider charging for future features, whatever those might be. Either way, I haven’t
+      even set up a way for you to give me money, so I wouldn’t worry about it.
     </p>
     <h4>Advertising</h4>
     <p>
@@ -91,7 +93,7 @@ const About = () => (
       you.
     </p>
     <p>
-      I last updated this page on April 7, 2017.
+      I last updated this page on April 11, 2017.
     </p>
   </Grid>
 );
