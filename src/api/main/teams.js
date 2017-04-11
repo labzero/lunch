@@ -1,9 +1,12 @@
 import { Router } from 'express';
 import cors from 'cors';
-import { Team, Role } from '../../models';
+import { bsHost } from '../../config';
+import { Team, Role, User } from '../../models';
 import reservedTeamSlugs from '../../constants/reservedTeamSlugs';
 import { TEAM_LIMIT, TEAM_SLUG_REGEX } from '../../constants';
+import generateUrl from '../../helpers/generateUrl';
 import hasRole from '../../helpers/hasRole';
+import transporter from '../../mailers/transporter';
 import checkTeamRole from '../helpers/checkTeamRole';
 import corsOptionsDelegate from '../helpers/corsOptionsDelegate';
 import loggedIn from '../helpers/loggedIn';
@@ -102,6 +105,9 @@ export default () => {
           }, {
             name: 'name',
             type: 'string'
+          }, {
+            name: 'slug',
+            type: 'string'
           });
         }
 
@@ -117,8 +123,35 @@ export default () => {
 
         if (fieldCount) {
           try {
+            const oldSlug = req.team.get('slug');
+
             await req.team.update(filteredPayload);
-            res.status(200).json({ error: false, data: req.team });
+
+            if (filteredPayload.slug && oldSlug !== filteredPayload.slug) {
+              req.flash('success', 'Team URL has been updated.');
+              req.session.save(async () => {
+                const teamRoles = await Role.findAll({ where: { team_id: req.team.get('id') } });
+                const userIds = teamRoles.map(r => r.get('user_id'));
+                const recipients = await User.findAll({ where: { id: userIds } });
+
+                // returns a promise but we're not going to wait to see if it succeeds.
+                transporter.sendMail({
+                  recipients,
+                  subject: `${req.team.get('name')}'s team URL has changed`,
+                  text: `Hi there!
+
+  ${req.user.get('name')} has changed the URL of the ${req.team.get('name')} team on Lunch.
+
+  From now on, the team can be accessed at ${generateUrl(req, `${filteredPayload.slug}.${bsHost}`)}. Please update any bookmarks you might have created.
+
+  Happy Lunching!`
+                }).then(() => {}).catch(() => {});
+
+                res.status(200).json({ error: false, data: req.team });
+              });
+            } else {
+              res.status(200).json({ error: false, data: req.team });
+            }
           } catch (err) {
             next(err);
           }

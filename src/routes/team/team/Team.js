@@ -11,6 +11,7 @@ import React, { PropTypes } from 'react';
 import { intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Button from 'react-bootstrap/lib/Button';
+import ButtonToolbar from 'react-bootstrap/lib/ButtonToolbar';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import Grid from 'react-bootstrap/lib/Grid';
 import Tab from 'react-bootstrap/lib/Tab';
@@ -28,6 +29,7 @@ class Team extends React.Component {
   static propTypes = {
     changeUserRole: PropTypes.func.isRequired,
     confirm: PropTypes.func.isRequired,
+    confirmChangeTeamURL: PropTypes.func.isRequired,
     confirmDeleteTeam: PropTypes.func.isRequired,
     currentUser: PropTypes.object.isRequired,
     fetchUsersIfNeeded: PropTypes.func.isRequired,
@@ -153,6 +155,7 @@ class Team extends React.Component {
 
   render() {
     const {
+      confirmChangeTeamURL,
       confirmDeleteTeam,
       hasOwnerRole,
       team,
@@ -178,8 +181,12 @@ class Team extends React.Component {
             </Tab>
             <Tab eventKey={3} title="Messy Business">
               <h3>Messy Business</h3>
-              {/* <Button onClick={confirmChangeTeamName}>Change team URL</Button> */}
-              <Button bsStyle="danger" onClick={confirmDeleteTeam}>Delete team</Button>
+              <ButtonToolbar className={s.buttonToolbar}>
+                <Button bsStyle="info" onClick={confirmChangeTeamURL}>Change team URL</Button>
+              </ButtonToolbar>
+              <ButtonToolbar className={s.buttonToolbar}>
+                <Button bsStyle="danger" onClick={confirmDeleteTeam}>Delete team</Button>
+              </ButtonToolbar>
             </Tab>
           </Tabs>
         ) : this.renderUsers()}

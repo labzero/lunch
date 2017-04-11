@@ -61,6 +61,7 @@ class DeleteTeamModal extends Component {
                 onChange={this.handleChange}
                 pattern={TEAM_SLUG_REGEX}
                 value={confirmSlug}
+                required
               />
               <InputGroup.Addon>.lunch.pink</InputGroup.Addon>
             </InputGroup>

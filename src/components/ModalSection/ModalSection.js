@@ -1,4 +1,5 @@
 import React, { PropTypes } from 'react';
+import ChangeTeamURLModalContainer from '../ChangeTeamURLModal/ChangeTeamURLModalContainer';
 import ConfirmModalContainer from '../ConfirmModal/ConfirmModalContainer';
 import DeleteTeamModalContainer from '../DeleteTeamModal/DeleteTeamModalContainer';
 
@@ -9,6 +10,9 @@ const ModalSection = ({ modals }) => {
   }
   if (modals.deleteTeam !== undefined) {
     modalContainers.push(<DeleteTeamModalContainer key="modalContainer_deleteTeam" />);
+  }
+  if (modals.changeTeamURL !== undefined) {
+    modalContainers.push(<ChangeTeamURLModalContainer key="modalContainer_changeTeamURL" />);
   }
 
   return (

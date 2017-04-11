@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import { spy, stub } from 'sinon';
+import { match, spy, stub } from 'sinon';
 import bodyParser from 'body-parser';
 import request from 'supertest';
 import express from 'express';
@@ -18,35 +18,54 @@ describe('api/main/teams', () => {
   let app;
   let RoleMock;
   let TeamMock;
+  let UserMock;
   let loggedInSpy;
   let makeApp;
+  let sendMailSpy;
 
   beforeEach(() => {
     TeamMock = dbMock.define('team', {});
     RoleMock = dbMock.define('role', {});
+    UserMock = dbMock.define('user', {});
 
     loggedInSpy = spy((req, res, next) => {
       req.user = { // eslint-disable-line no-param-reassign
+        get: () => {},
         id: 231,
         roles: []
       };
       next();
     });
 
-    makeApp = deps => {
+    sendMailSpy = spy(() => Promise.resolve());
+
+    makeApp = (deps, middleware) => {
       const teamsApi = proxyquireStrict('../main/teams', {
         '../../models': mockEsmodule({
           Team: TeamMock,
-          Role: RoleMock
+          Role: RoleMock,
+          User: UserMock
         }),
         '../helpers/loggedIn': mockEsmodule({
           default: loggedInSpy
+        }),
+        '../../mailers/transporter': mockEsmodule({
+          default: {
+            sendMail: sendMailSpy
+          }
         }),
         ...deps
       }).default;
 
       const server = express();
       server.use(bodyParser.json());
+      server.use((req, res, next) => {
+        if (middleware) {
+          middleware(req, res, next);
+        } else {
+          next();
+        }
+      });
       server.use('/', teamsApi());
       return server;
     };
@@ -390,110 +409,12 @@ describe('api/main/teams', () => {
       });
     });
 
-    describe('query', () => {
-      let updateSpy;
-      beforeEach(() => {
-        updateSpy = spy();
-        stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
-          update: updateSpy
-        }));
-
-        return request(app).patch('/1').send({ default_zoom: 15 });
-      });
-
-      it('updates team', () => {
-        expect(updateSpy.callCount).to.eq(1);
-      });
-    });
-
-    describe('success', () => {
-      let response;
-      beforeEach((done) => {
-        request(app).patch('/1').send({ default_zoom: 15 }).then(r => {
-          response = r;
-          done();
-        });
-      });
-
-      it('returns 200', () => {
-        expect(response.statusCode).to.eq(200);
-      });
-
-      it('returns json with team', () => {
-        expect(response.body.error).to.eq(false);
-        expect(response.body.data).to.be.an('object');
-      });
-    });
-
-    describe('failure', () => {
-      let response;
-      beforeEach((done) => {
-        stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
-          update: stub().throws('Oh No')
-        }));
-        request(app).patch('/1').send({ default_zoom: 15 }).then((r) => {
-          response = r;
-          done();
-        });
-      });
-
-      it('returns error', () => {
-        expect(response.error.text).to.contain('Oh No');
-      });
-    });
-  });
-
-  describe('PATCH /:id', () => {
-    let checkTeamRoleSpy;
-    beforeEach(() => {
-      checkTeamRoleSpy = spy((req, res, next) => next());
-
-      app = makeApp({
-        '../helpers/checkTeamRole': () => checkTeamRoleSpy
-      });
-    });
-
-    describe('before updating', () => {
-      let findOneSpy;
-      beforeEach(() => {
-        findOneSpy = spy(TeamMock, 'findOne');
-
-        return request(app).patch('/1');
-      });
-
-      it('finds team', () => {
-        expect(findOneSpy.calledWith({ where: { id: 1 } })).to.be.true;
-      });
-
-      it('checks for team role', () => {
-        expect(checkTeamRoleSpy.callCount).to.eq(1);
-      });
-    });
-
-    describe('without valid parameters', () => {
-      let response;
-      beforeEach((done) => {
-        request(app).patch('/1').send({ id: 123 }).then((r) => {
-          response = r;
-          done();
-        });
-      });
-
-      it('returns 422', () => {
-        expect(response.statusCode).to.eq(422);
-      });
-
-      it('returns json with error', () => {
-        expect(response.body.error).to.eq(true);
-        expect(response.body.data.message).to.be.a('string');
-      });
-    });
-
     describe('with at least one valid parameter', () => {
       let updateSpy;
       beforeEach(() => {
         updateSpy = spy();
         stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
+          get: () => {},
           update: updateSpy
         }));
 
@@ -524,10 +445,43 @@ describe('api/main/teams', () => {
       });
     });
 
+    describe('if team has changed', () => {
+      let flashSpy;
+      beforeEach(() => {
+        flashSpy = spy();
+
+        app = makeApp({
+          '../../helpers/hasRole': mockEsmodule({
+            default: () => true
+          }),
+          '../helpers/checkTeamRole': mockEsmodule({
+            default: () => checkTeamRoleSpy
+          })
+        }, (req, res, next) => {
+          req.flash = flashSpy; // eslint-disable-line no-param-reassign
+          req.session = { // eslint-disable-line no-param-reassign
+            save: cb => cb()
+          };
+          next();
+        });
+
+        return request(app).patch('/1').send({ slug: 'new-slug' });
+      });
+
+      it('flashes a success message', () => {
+        expect(flashSpy.calledWith('success', match.string)).to.be.true;
+      });
+
+      it('sends mail', () => {
+        expect(sendMailSpy.callCount).to.eq(1);
+      });
+    });
+
     describe('failure', () => {
       let response;
       beforeEach((done) => {
         stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
+          get: () => {},
           update: stub().throws('Oh No')
         }));
         request(app).patch('/1').send({ default_zoom: 15 }).then((r) => {

@@ -248,12 +248,18 @@ const render = async (req, res, next) => {
       stateData.team = req.team;
     }
 
-    const errorFlashes = req.flash('error');
-    if (errorFlashes.length) {
-      stateData.flashes = errorFlashes.map(f => ({
-        message: f,
-        type: 'error'
-      }));
+    const flashes = req.flash();
+    const flashKeys = Object.keys(flashes);
+    if (flashKeys.length) {
+      stateData.flashes = [];
+      flashKeys.forEach(k => {
+        flashes[k].forEach(f => {
+          stateData.flashes.push({
+            message: f,
+            type: k
+          });
+        });
+      });
     }
 
     const initialState = makeInitialState(stateData);

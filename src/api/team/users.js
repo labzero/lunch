@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import cors from 'cors';
 import { Role, User } from '../../models';
-import { host, hostname } from '../../config';
+import { bsHost } from '../../config';
 import { TEAM_LIMIT } from '../../constants';
 import generateUrl from '../../helpers/generateUrl';
 import getRole from '../../helpers/getRole';
@@ -11,8 +11,6 @@ import checkTeamRole from '../helpers/checkTeamRole';
 import corsOptionsDelegate from '../helpers/corsOptionsDelegate';
 import loggedIn from '../helpers/loggedIn';
 import transporter from '../../mailers/transporter';
-
-const bsHost = process.env.BS_RUNNING ? `${hostname}:3001` : host;
 
 export default () => {
   const router = new Router({ mergeParams: true });
