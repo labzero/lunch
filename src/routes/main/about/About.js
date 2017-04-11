@@ -25,7 +25,7 @@ const About = () => (
       office for a little bit each day. Hot tip: set up a reminder in Slack to vote where to go
       every day!
     </p>
-    <pre className={s.slackSnippet}>/remind #general “Vote for lunch! https://lunch.pink” at 10:30am every weekday</pre>
+    <pre className={s.slackSnippet}>/remind #general &quot;Vote for lunch! https://lunch.pink&quot; at 10:30am every weekday</pre>
     <h3 id="privacy">Privacy</h3>
     <p>
       I haven’t talked to a lawyer, but I should probably reassure you about what might happen with
