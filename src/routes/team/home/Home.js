@@ -30,7 +30,7 @@ export class _Home extends Component {
 
     if (canUseDOM) {
       let host = window.location.host;
-      if (wsPort !== 0 && wsPort !== window.location.port) {
+      if (window.location.port && wsPort !== 0 && wsPort !== window.location.port) {
         host = `${window.location.hostname}:${wsPort}`;
       }
       let protocol = 'ws:';
