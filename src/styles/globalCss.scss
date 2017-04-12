@@ -25,6 +25,7 @@ $icon-font-path: '../../node_modules/bootstrap-sass/assets/fonts/bootstrap/';
 
 html {
   font-size: 16px;
+  overflow-anchor: none; // prevent browsers from scrolling to top after vote
 }
 
 body {

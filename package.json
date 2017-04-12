@@ -235,7 +235,8 @@
         true,
         {
           "ignoreProperties": [
-            "composes"
+            "composes",
+            "overflow-anchor"
           ]
         }
       ],

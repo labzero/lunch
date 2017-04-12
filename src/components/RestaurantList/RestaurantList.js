@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import FlipMove from 'react-flip-move';
 import { Element as ScrollElement } from 'react-scroll';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
@@ -7,55 +7,42 @@ import RestaurantContainer from '../Restaurant/RestaurantContainer';
 import Loading from '../Loading';
 import s from './RestaurantList.scss';
 
-class RestaurantList extends Component {
-  componentWillUpdate() {
-    this.scrollY = window.scrollY;
+const RestaurantList = ({ ids, restaurantListReady }) => {
+  if (!restaurantListReady) {
+    return <Loading />;
   }
 
-  componentDidUpdate() {
-    // prevent Chrome from scrolling to new position of voted restaurant
-    window.scrollTo(0, this.scrollY);
-  }
-
-  render() {
-    const { ids, restaurantListReady } = this.props;
-
-    if (!restaurantListReady) {
-      return <Loading />;
-    }
-
-    if (!ids.length) {
-      return (
-        <div className={s.root}>
-          <Grid className={s.welcome}>
-            <h2>Welcome to Lunch!</h2>
-            <p>
-              Get started by adding restaurants! Use the above map or search box
-              and add as many restaurants as you like. Then you and your team can
-              start voting!
-            </p>
-          </Grid>
-        </div>
-      );
-    }
-
+  if (!ids.length) {
     return (
-      <FlipMove typeName="ul" className={s.root} staggerDelayBy={40} staggerDurationBy={40}>
-        {ids.map(id => (
-          <li key={`restaurantListItem_${id}`}>
-            <ScrollElement name={`restaurantListItem_${id}`}>
-              <RestaurantContainer
-                id={id}
-                shouldShowAddTagArea
-                shouldShowDropdown
-              />
-            </ScrollElement>
-          </li>
-        ))}
-      </FlipMove>
+      <div className={s.root}>
+        <Grid className={s.welcome}>
+          <h2>Welcome to Lunch!</h2>
+          <p>
+            Get started by adding restaurants! Use the above map or search box
+            and add as many restaurants as you like. Then you and your team can
+            start voting!
+          </p>
+        </Grid>
+      </div>
     );
   }
-}
+
+  return (
+    <FlipMove typeName="ul" className={s.root} staggerDelayBy={40} staggerDurationBy={40}>
+      {ids.map(id => (
+        <li key={`restaurantListItem_${id}`}>
+          <ScrollElement name={`restaurantListItem_${id}`}>
+            <RestaurantContainer
+              id={id}
+              shouldShowAddTagArea
+              shouldShowDropdown
+            />
+          </ScrollElement>
+        </li>
+      ))}
+    </FlipMove>
+  );
+};
 
 RestaurantList.propTypes = {
   ids: PropTypes.array.isRequired,
