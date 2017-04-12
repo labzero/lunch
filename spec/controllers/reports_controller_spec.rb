@@ -908,6 +908,13 @@ RSpec.describe ReportsController, :type => :controller do
           expect(controller).to receive(:report_download_name=).with("letters-of-credit-#{formatted_date}")
           make_request
         end
+        context 'when the `@as_of` date is nil' do
+          before { allow(response_hash).to receive(:[]).with(:as_of_date).and_return(nil) }
+          it 'sets `report_download_name` with no date' do
+            expect(controller).to receive(:report_download_name=).with('letters-of-credit')
+            make_request
+          end
+        end
       end
       describe 'with the report disabled' do
         before do
