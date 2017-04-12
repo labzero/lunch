@@ -27,23 +27,31 @@ You will need to be invited back by another member.`,
 
     return (
       <Grid className={s.root}>
-        <h2>Visit one of your teams:</h2>
-        <ul className={`list-group ${s.list}`}>
-          {teams.map(team => (
-            <li className={`list-group-item ${s.item}`} key={team.slug}>
-              <a
-                className={`list-group-item ${s.itemLink}`}
-                key={team.id}
-                href={`//${team.slug}.${host}`}
-              >
-                {team.name}
-              </a>
-              <button className={s.leave} onClick={this.confirmLeave(team)} aria-label="Leave">
-                <Glyphicon glyph="remove" />
-              </button>
-            </li>
-          ))}
-        </ul>
+        {teams.length ? (
+          <div>
+            <h2>Visit one of your teams:</h2>
+            <ul className={`list-group ${s.list}`}>
+              {teams.map(team => (
+                <li className={`list-group-item ${s.item}`} key={team.slug}>
+                  <a
+                    className={`list-group-item ${s.itemLink}`}
+                    key={team.id}
+                    href={`//${team.slug}.${host}`}
+                  >
+                    {team.name}
+                  </a>
+                  <button className={s.leave} onClick={this.confirmLeave(team)} aria-label="Leave">
+                    <Glyphicon glyph="remove" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className={s.centerer}>
+            <h2>You&rsquo;re not currently a part of any teams!</h2>
+          </div>
+        )}
         <div className={s.centerer}>
           <Link className="btn btn-default" to="/new-team">Create a new team</Link>
         </div>
