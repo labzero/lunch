@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import bcrypt from 'bcrypt';
-import commonPassword from 'common-password';
 import { bsHost } from '../config';
-import { PASSWORD_MIN_LENGTH } from '../constants';
 import generateUrl from '../helpers/generateUrl';
+import getPasswordError from '../helpers/getPasswordError';
+import getUserPasswordUpdates from '../helpers/getUserPasswordUpdates';
 import transporter from '../mailers/transporter';
 import { User } from '../models';
 
@@ -41,28 +40,18 @@ Happy Lunching!`
       const user = await User.findOne({ where: { reset_password_token: req.body.token } });
       if (!user || !user.resetPasswordValid()) {
         res.redirect('/password/new');
-      } else if (!req.body.password || req.body.password.length < PASSWORD_MIN_LENGTH) {
-        req.flash('error', `Password must be at least ${PASSWORD_MIN_LENGTH} characters long.`);
-        req.session.save(() => {
-          res.redirect(`/password/edit?token=${req.body.token}`);
-        });
-      } else if (commonPassword(req.body.password)) {
-        req.flash('error', 'The password you provided is too common. Please try another one.');
-        req.session.save(() => {
-          res.redirect(`/password/edit?token=${req.body.token}`);
-        });
       } else {
-        const encryptedPassword = await bcrypt.hash(req.body.password, 10);
-        const updates = {
-          encrypted_password: encryptedPassword,
-          reset_password_token: null,
-          reset_password_sent_at: null
-        };
-        if (!user.get('confirmed_at')) {
-          updates.confirmed_at = new Date();
+        const passwordError = getPasswordError(req.body.password);
+        if (passwordError) {
+          req.flash('error', passwordError);
+          req.session.save(() => {
+            res.redirect(`/password/edit?token=${req.body.token}`);
+          });
+        } else {
+          const updates = await getUserPasswordUpdates(user, req.body.password);
+          await user.update(updates);
+          next();
         }
-        await user.update(updates);
-        next();
       }
     } catch (err) {
       next(err);

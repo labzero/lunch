@@ -16,7 +16,6 @@ const dbMock = new SequelizeMock();
 
 describe('middlewares/password', () => {
   let app;
-  let hashSpy;
   let makeApp;
   let sendMailSpy;
   let UserMock;
@@ -26,15 +25,9 @@ describe('middlewares/password', () => {
     UserMock = dbMock.define('user', {});
     UserMock.generateToken = () => Promise.resolve('12345');
     sendMailSpy = spy();
-    hashSpy = spy(() => Promise.resolve('drowssap taerg a'));
     flashSpy = spy();
     makeApp = (deps) => {
       const passwordMiddleware = proxyquireStrict('../password', {
-        bcrypt: mockEsmodule({
-          default: {
-            hash: hashSpy
-          }
-        }),
         '../models': mockEsmodule({
           User: UserMock,
         }),
@@ -231,6 +224,17 @@ describe('middlewares/password', () => {
           resetPasswordValid: () => true
         }));
 
+        app = makeApp({
+          '../helpers/getUserPasswordUpdates': mockEsmodule({
+            default: () => Promise.resolve({
+              encrypted_password: 'drowssap taerg a',
+              reset_password_token: null,
+              reset_password_sent_at: null,
+              confirmed_at: 'some date'
+            })
+          })
+        });
+
         return request(app).put('/').send({
           password: 'a great password',
           reset_password_token: '12345'
@@ -242,7 +246,7 @@ describe('middlewares/password', () => {
           encrypted_password: 'drowssap taerg a',
           reset_password_token: null,
           reset_password_sent_at: null,
-          confirmed_at: match.date
+          confirmed_at: 'some date'
         })).to.be.true;
       });
     });

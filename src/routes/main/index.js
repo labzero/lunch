@@ -20,6 +20,7 @@ export default {
     require('./landing').default,
     require('./teams').default,
     require('./newTeam').default,
+    require('./account').default,
     require('./password').default,
     require('./about').default,
     require('./comingSoon').default,
