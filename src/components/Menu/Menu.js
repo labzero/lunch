@@ -50,6 +50,9 @@ class Menu extends Component {
             <li className={s.item}>
               <a className={s.button} onClick={closeMenu} href={`//${host}/teams`}>My Teams</a>
             </li>
+            <li className={s.item}>
+              <a className={s.button} onClick={closeMenu} href={`//${host}/account`}>Account</a>
+            </li>
             <li className={`${s.item} ${s.logout}`}>
               <a className={s.button} onClick={closeMenu} href={`//${host}/logout`}>Log Out</a>
             </li>

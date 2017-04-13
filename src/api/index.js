@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import hasRole from '../helpers/hasRole';
 import teamApi from './main/teams';
+import userApi from './main/user';
 import decisionApi from './team/decisions';
 import tagApi from './team/tags';
-import userApi from './team/users';
+import usersApi from './team/users';
 import restaurantApi from './team/restaurants';
 
 export default () => {
@@ -11,13 +12,14 @@ export default () => {
   const teamRouter = new Router();
 
   mainRouter
-    .use('/teams', teamApi());
+    .use('/teams', teamApi())
+    .use('/user', userApi());
 
   teamRouter
     .use('/decisions', decisionApi())
     .use('/restaurants', restaurantApi())
     .use('/tags', tagApi())
-    .use('/users', userApi())
+    .use('/users', usersApi())
     .ws('/', async (ws, req) => {
       if (hasRole(req.user, req.team)) {
         ws.teamId = req.team.id; // eslint-disable-line no-param-reassign

@@ -1,0 +1,5 @@
+@import '../../../styles/_mixins.scss';
+
+.root {
+  @include page-root;
+}

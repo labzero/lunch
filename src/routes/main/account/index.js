@@ -12,30 +12,29 @@ import LayoutContainer from '../../../components/Layout/LayoutContainer';
 import loadComponent from '../../../helpers/loadComponent';
 import redirectToLogin from '../../helpers/redirectToLogin';
 
-const title = 'New Team';
+const title = 'Account';
 
 export default {
 
-  path: '/new-team',
+  path: '/account',
 
   async action(context) {
     const state = context.store.getState();
     const user = state.user;
 
     if (user.id) {
-      const NewTeamContainer = await loadComponent(
-        () => require.ensure([], require => require('./NewTeamContainer').default, 'new-team')
+      const AccountContainer = await loadComponent(
+        () => require.ensure([], require => require('./AccountContainer').default, 'account')
       );
 
       return {
         title,
-        chunk: 'new-team',
+        chunk: 'account',
         component: (
           <LayoutContainer path={context.url}>
-            <NewTeamContainer />
+            <AccountContainer />
           </LayoutContainer>
-        ),
-        map: true
+        )
       };
     }
 
