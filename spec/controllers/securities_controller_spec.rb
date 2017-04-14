@@ -2274,7 +2274,7 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:today) { Time.zone.today }
       let(:max_date) { today + SecuritiesRequest::MAX_DATE_RESTRICTION }
       let(:min_dates) { { trade_date: today - SecuritiesRequest::MIN_TRADE_DATE_RESTRICTION,
-                          settlement_date: today - SecuritiesRequest::MIN_SETTLEMENT_DATE_RESTRICTION - 4.days } }
+                          settlement_date: today - (SecuritiesRequest::MIN_SETTLEMENT_DATE_RESTRICTION - 4.days) } }
       let(:holidays) do
         holidays = []
         rand(2..4).times do

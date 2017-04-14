@@ -750,7 +750,7 @@ class SecuritiesController < ApplicationController
     end
     {
       settlement_date: {
-        min_date: today - SecuritiesRequest::MIN_SETTLEMENT_DATE_RESTRICTION - 4.days,
+        min_date: today - (SecuritiesRequest::MIN_SETTLEMENT_DATE_RESTRICTION - 4.days),
         max_date: max_date,
         invalid_dates: holidays + weekends
       },
