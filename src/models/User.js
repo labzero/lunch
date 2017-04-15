@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import { sequelize, DataTypes } from './db';
 
 const User = sequelize.define('user', {
@@ -31,15 +30,6 @@ const User = sequelize.define('user', {
     })
   },
   underscored: true
-});
-
-User.generateToken = () => new Promise((resolve, reject) => {
-  crypto.randomBytes(20, async (error, buf) => {
-    if (error) {
-      return reject(error);
-    }
-    return resolve(buf.toString('hex'));
-  });
 });
 
 export default User;

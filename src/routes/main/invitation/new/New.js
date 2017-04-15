@@ -25,13 +25,13 @@ class New extends Component {
 
     return (
       <Grid className={s.root}>
-        <h2>Request password reset</h2>
+        <h2>Request an invitation</h2>
         <p>
           Enter your email address and we will send you a link
-          to reset your password.
+          to confirm your request.
         </p>
-        <form action="/password?success=sent" method="post">
-          <FormGroup controlId="passwordNew-email">
+        <form action="/invitation?success=sent" method="post">
+          <FormGroup controlId="invitationNew-email">
             <ControlLabel>Email</ControlLabel>
             <FormControl
               defaultValue={email}

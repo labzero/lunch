@@ -36,7 +36,7 @@ export default {
           chunk: 'team',
           component: (
             <LayoutContainer path={context.url}>
-              <TeamContainer title={title} />
+              <TeamContainer />
             </LayoutContainer>
           ),
           map: hasRole(user, team, 'owner')

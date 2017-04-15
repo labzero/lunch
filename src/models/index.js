@@ -1,12 +1,13 @@
 import { sequelize } from './db';
-import Vote from './Vote';
-import User from './User';
+import Decision from './Decision';
+import Invitation from './Invitation';
+import Restaurant from './Restaurant';
 import RestaurantTag from './RestaurantTag';
+import Role from './Role';
 import Tag from './Tag';
 import Team from './Team';
-import Restaurant from './Restaurant';
-import Role from './Role';
-import Decision from './Decision';
+import User from './User';
+import Vote from './Vote';
 
 Tag.addScope('orderedByRestaurant', {
   distinct: 'id',
@@ -133,12 +134,13 @@ RestaurantTag.belongsTo(Restaurant);
 RestaurantTag.belongsTo(Tag);
 
 export {
-  Vote,
-  User,
+  Decision,
+  Invitation,
+  Restaurant,
   RestaurantTag,
+  Role,
   Tag,
   Team,
-  Restaurant,
-  Role,
-  Decision
+  User,
+  Vote
 };

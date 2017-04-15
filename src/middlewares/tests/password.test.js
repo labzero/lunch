@@ -23,7 +23,6 @@ describe('middlewares/password', () => {
 
   beforeEach(() => {
     UserMock = dbMock.define('user', {});
-    UserMock.generateToken = () => Promise.resolve('12345');
     sendMailSpy = spy();
     flashSpy = spy();
     makeApp = (deps) => {
@@ -72,7 +71,7 @@ describe('middlewares/password', () => {
 
       it('updates user with new token', () => {
         expect(updateSpy.calledWith({
-          reset_password_token: '12345',
+          reset_password_token: match.string,
           reset_password_sent_at: match.date
         })).to.be.true;
       });

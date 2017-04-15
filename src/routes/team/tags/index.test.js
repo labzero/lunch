@@ -9,7 +9,7 @@ import landing from './index';
 
 const mockStore = configureStore();
 
-describe('routes/teams/team/tags', () => {
+describe('routes/team/tags', () => {
   let context;
   let render404;
   let team;

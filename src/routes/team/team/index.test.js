@@ -9,7 +9,7 @@ import landing from './index';
 
 const mockStore = configureStore();
 
-describe('routes/teams/team/team', () => {
+describe('routes/team/team', () => {
   let context;
   let render404;
   let team;
@@ -20,6 +20,7 @@ describe('routes/teams/team/team', () => {
     };
     context = {
       params: {},
+      query: {},
       store: mockStore({
         team,
         user: {

@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import cors from 'cors';
-import { Role, User } from '../../models';
+import { Invitation, Role, User } from '../../models';
 import { bsHost } from '../../config';
 import { TEAM_LIMIT } from '../../constants';
+import generateToken from '../../helpers/generateToken';
 import generateUrl from '../../helpers/generateUrl';
 import getRole from '../../helpers/getRole';
 import hasRole from '../../helpers/hasRole';
@@ -135,7 +136,7 @@ Happy Lunching!`
             return res.status(201).json({ error: false, data: userToAdd });
           }
 
-          const resetPasswordToken = await User.generateToken();
+          const resetPasswordToken = await generateToken();
 
           let newUser = await User.create({
             email,
@@ -147,6 +148,9 @@ Happy Lunching!`
               type
             }]
           }, { include: [Role] });
+
+          // returns a promise but we're not going to wait to see if it succeeds.
+          Invitation.destroy({ where: { email } }).then(() => {}).catch(() => {});
 
           // returns a promise but we're not going to wait to see if it succeeds.
           transporter.sendMail({

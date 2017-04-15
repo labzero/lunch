@@ -43,6 +43,7 @@ import configureStore from './store/configureStore';
 import { domain, bsHost, port, auth } from './config';
 import makeInitialState from './initialState';
 import passport from './core/passport';
+import invitationMiddleware from './middlewares/invitation';
 import loginMiddleware from './middlewares/login';
 import passwordMiddleware from './middlewares/password';
 import api from './api';
@@ -185,6 +186,7 @@ app.use((req, res, next) => {
   }
 });
 
+app.use('/invitation', invitationMiddleware());
 app.use('/login', loginMiddleware());
 app.use('/password', passwordMiddleware());
 
@@ -305,7 +307,7 @@ const render = async (req, res, next) => {
     const data = { ...route,
       apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
       children: '',
-      title: 'Lunch',
+      title: route.title || 'Lunch',
       description: 'An app for groups to decide on nearby lunch options.',
       body: '',
       root: generateUrl(req, req.get('host')),
@@ -336,6 +338,7 @@ const render = async (req, res, next) => {
   }
 };
 
+app.post('/invitation', render);
 app.post('/login', render);
 app.post('/password', render);
 app.put('/password', render);
