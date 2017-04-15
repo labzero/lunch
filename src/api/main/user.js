@@ -55,6 +55,11 @@ export default () => {
               );
               delete filteredPayload.password;
             }
+            if (filteredPayload.name) {
+              if (req.user.get('name') !== filteredPayload.name) {
+                filteredPayload.name_changed = true;
+              }
+            }
             await req.user.update(filteredPayload);
 
             // get user again because now req.user contains password fields

@@ -30,6 +30,7 @@ describe('api/main/user', () => {
     loggedInSpy = spy((req, res, next) => {
       req.user = { // eslint-disable-line no-param-reassign
         get: () => {},
+        name: 'Old Name',
         id: 231,
         roles: [],
         update: updateSpy
@@ -97,6 +98,60 @@ describe('api/main/user', () => {
 
       it('updates user', () => {
         expect(updateSpy.callCount).to.eq(1);
+      });
+    });
+
+    describe('with bad password', () => {
+      let response;
+      beforeEach((done) => {
+        app = makeApp({
+          '../../helpers/getPasswordError': mockEsmodule({
+            default: () => 'Bad Password!!!'
+          })
+        });
+
+        request(app).patch('/').send({ password: 'badpassword' }).then((r) => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns 422', () => {
+        expect(response.statusCode).to.eq(422);
+      });
+
+      it('returns json with error', () => {
+        expect(response.body.error).to.eq(true);
+        expect(response.body.data.message).to.eq('Bad Password!!!');
+      });
+    });
+
+    describe('with good password', () => {
+      beforeEach(() => {
+        app = makeApp({
+          '../../helpers/getPasswordError': mockEsmodule({
+            default: () => undefined
+          }),
+          '../../helpers/getUserPasswordUpdates': mockEsmodule({
+            default: () => Promise.resolve({
+              encrypted_password: 'drowssapdoog'
+            })
+          })
+        });
+
+        return request(app).patch('/').send({ password: 'goodpassword' });
+      });
+
+      it('updates with password updates, not password', () => {
+        expect(updateSpy.calledWith({ encrypted_password: 'drowssapdoog' })).to.be.true;
+      });
+    });
+
+    describe('with new name', () => {
+      beforeEach(() => request(app).patch('/').send({ name: 'New Name' }));
+
+      it('sets name_changed', () => {
+        expect(updateSpy.calledWith({ name: 'New Name', name_changed: true })).to.be.true;
       });
     });
 
