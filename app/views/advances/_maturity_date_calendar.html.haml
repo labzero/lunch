@@ -1,4 +1,4 @@
-- hide_start_date ||= true
+- hide_start_date = true unless defined?(hide_start_date)
 - start_date ||= nil
 .advance-custom-date-maturity-calendar-partial
   = render 'shared/date_picker', single_date_picker: true, hide_start_date: hide_start_date, input_field_text: '{replace_date}', from_label: '', start_date: start_date, min_date: date_restrictions[:min_date], max_date: date_restrictions[:max_date], invalid_dates: date_restrictions[:invalid_dates]

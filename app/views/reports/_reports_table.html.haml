@@ -10,6 +10,7 @@
 - disable_auto_width = defined?(disable_auto_width) ? disable_auto_width : true
 - remaining_cells = table_data[:footer_cells]
 - column_definitions ||= []
+- tracking_event_category ||= ''
 - if table_data[:filter]
   - filter = table_data[:filter][:name] 
   - remote_filter = table_data[:filter][:remote]
@@ -17,7 +18,7 @@
   - table_class << 'table-allow-wrapping'
 - if deferred
   - table_class << 'table-loading'
-%table.report-table{data: {loaded: !deferred, sortable: is_sortable, :'default-sort' => default_sort.to_json, :'disable-auto-width' => disable_auto_width, :'missing-data-message' => missing_data_message, filter_class: filter, filter_remote: remote_filter, column_definitions: column_definitions.to_json}, class: table_class}
+%table.report-table{data: {loaded: !deferred, sortable: is_sortable, :'default-sort' => default_sort.to_json, :'disable-auto-width' => disable_auto_width, :'missing-data-message' => missing_data_message, filter_class: filter, filter_remote: remote_filter, column_definitions: column_definitions.to_json, :'tracking-event-category' => tracking_event_category}, class: table_class}
   - if deferred && hide_column_headings
     %tbody
       = render 'reports/deferred_table_row'

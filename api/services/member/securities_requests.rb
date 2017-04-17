@@ -392,7 +392,7 @@ module MAPI
           SQL
         end
 
-        def self.cusip_metadata_query(cusip)
+        def self.cusip_metadata_query(ssk_id)
           <<-SQL
             SELECT * FROM (
               SELECT SSK.SSK_ISSUE_DATE AS ISSUE_DATE, SSK.SSK_MATURITY_DATE AS MATURITY_DATE,
@@ -401,7 +401,7 @@ module MAPI
               FROM SAFEKEEPING.SSK SSK
               LEFT OUTER JOIN SAFEKEEPING.SSK_TRANS SSKT
               ON SSKT.SSK_ID = SSK.SSK_ID
-              WHERE UPPER(SSK.SSK_CUSIP) = UPPER(#{quote(cusip)})
+              WHERE SSK.SSK_ID = #{quote(ssk_id)}
               ORDER BY SSKT.SSX_RECORD_DATE_UPDATED DESC, SSK.SSK_RECORD_DATE_UPDATED DESC, SSK.SSK_ID DESC
               ) WHERE ROWNUM = 1
           SQL
@@ -706,7 +706,7 @@ module MAPI
               securities.each do |security|
                 ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), "SSK ID")
                 raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
-                populate_security_metadata(app, security)
+                populate_security_metadata(app, security, ssk_id)
                 insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
                 raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
               end
@@ -739,7 +739,7 @@ module MAPI
                 elsif !existing_security
                   ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
                   raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
-                  populate_security_metadata(app, security)
+                  populate_security_metadata(app, security, ssk_id)
                   detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
                   insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security release request detail' unless execute_sql(app.logger, insert_security_sql)
@@ -796,7 +796,7 @@ module MAPI
                 final_adx_id = (kind == :safekept_transfer ? adx_id : un_adx_id)
                 ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, final_adx_id, security['cusip']), "SSK ID")
                 raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
-                populate_security_metadata(app, security)
+                populate_security_metadata(app, security, ssk_id)
                 insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, ssk_id)
                 raise "failed to insert security release request detail" unless execute_sql(app.logger, insert_security_sql)
               end
@@ -827,7 +827,7 @@ module MAPI
                 elsif !existing_security
                   ssk_id = execute_sql_single_result(app, ssk_id_query(member_id, adx_id, security['cusip']), 'SSK ID')
                   raise "failed to retrieve SSK_ID for security with CUSIP #{security['cusip']}" unless ssk_id
-                  populate_security_metadata(app, security)
+                  populate_security_metadata(app, security, ssk_id)
                   detail_id = execute_sql_single_result(app, NEXT_ID_SQL, 'Next ID Sequence').to_i
                   insert_security_sql = insert_security_query(request_id, detail_id, user_name, session_id, security, ssk_id)
                   raise MAPI::Shared::Errors::SQLError, 'Failed to insert new security transfer request detail' unless execute_sql(app.logger, insert_security_sql)
@@ -1198,8 +1198,8 @@ module MAPI
           kind == :pledge_intake ? :pledged : :unpledged
         end
 
-        def self.populate_security_metadata(app, security)
-          metadata = fetch_hash(app, cusip_metadata_query(security['cusip'])) || {}
+        def self.populate_security_metadata(app, security, ssk_id)
+          metadata = fetch_hash(app, cusip_metadata_query(ssk_id)) || {}
           security['description'] ||= metadata['DESCRIPTION'] 
           security['issue_date'] ||= metadata['ISSUE_DATE'] 
           security['maturity_date'] ||= metadata['MATURITY_DATE']

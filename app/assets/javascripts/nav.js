@@ -12,4 +12,11 @@ $(function() {
   $('body').click(function() {
     $('.nav-dropdown').hide();
   });
+  $(document).on('keydown', function(e) {
+    if (e.keyCode === 27) {
+      e.preventDefault();
+      e.stopPropagation();
+      $('.nav-dropdown').hide();
+    };
+  });
 });

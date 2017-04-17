@@ -95,6 +95,8 @@ $(function () {
       bindReport();
     }).fail(function() {
       deferredJobError($report);
+    }).always(function() {
+      trackReport();
     });
   };
 
@@ -113,4 +115,16 @@ $(function () {
     });
   };
 
+  function trackReport() {
+    trackedTables = $('[data-tracking-event-category]');
+    for (var i = 0; i < trackedTables.length; ++i) {
+      if (!trackedTables[i].attributes['data-loaded']) {        
+        return;
+      }
+    }
+    firstTable = trackedTables[0];
+    if (firstTable) {
+      Fhlb.Track.report_loaded(firstTable.attributes['data-tracking-event-category'].value, Date.now() - window.pageLoadTimestamp);
+    }
+  };
 });

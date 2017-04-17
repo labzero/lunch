@@ -2,6 +2,8 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
   text = case product
     when 'products summary'
       I18n.t('products.products_summary.title')
+    when 'standby letters of credit'
+      I18n.t('products.standby_loc.title')
     when 'arc embedded'
       I18n.t('products.advances.arc_embedded.title')
     when 'amortizing'
@@ -30,6 +32,8 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
       I18n.t('products.advances.mpf.title')
     when 'convertible'
       I18n.t('products.advances.convertible.title')
+    when 'variable balance letter of credit'
+      I18n.t('products.variable_balance_loc.title')
     else
       raise 'unknown product page'
   end
@@ -40,8 +44,7 @@ Then(/^I should see the pfi page$/) do
   page.assert_selector('.product-page-mpf h1 span', text: I18n.t('products.advances.pfi.title'))
 end
 
-
-When(/^I click on the (arc embedded|frc|frc embedded|arc|amortizing|choice libor|knockout|putable|other cash needs|mortgage partnership finance) link in the products advances dropdown$/) do |link|
+When(/^I click on the (arc embedded|frc|frc embedded|arc|amortizing|choice libor|knockout|putable|other cash needs|mortgage partnership finance|standby letters of credit) link in the products advances dropdown$/) do |link|
   page.find('.page-header .products-dropdown a', text: dropdown_title_regex(link), exact: true).click
 end
 
@@ -57,3 +60,10 @@ Given(/^I am on the pfi page$/) do
   visit '/products/advances/pfi'
 end
 
+When(/^I click on the variable balance letter of credit link$/) do
+  click_link('Variable Balance Letter of Credit')
+end
+
+Then(/^I should see the variable letter of credit page$/) do
+  page.assert_selector('.products-page-vbloc h1', text: I18n.t('products.variable_balance_loc.title'))
+end

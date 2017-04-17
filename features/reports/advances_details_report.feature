@@ -61,6 +61,14 @@ Scenario: Entering text in the datepicker input field
   And I click the datepicker apply button
   Then I should see a "Advances Detail" report as of 1 month ago
 
+@jira-mem-2264
+Scenario: Pressing return in the datepicker input field
+  Given I am on the "Advances Detail" report page
+  When I click the datepicker field
+  And I write a date from one month ago in the datepicker start input field
+  And I press the Return key on the singledatepicker input
+  Then I should see a "Advances Detail" report as of 1 month ago
+
 @jira-mem-890
 Scenario: Member enters a date occurring before the minimum allowed date
   Given I am on the "Advances Detail" report page

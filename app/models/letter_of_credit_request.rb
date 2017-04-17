@@ -67,7 +67,7 @@ class LetterOfCreditRequest
       when *READ_ONLY_ATTRS
         instance_variable_set("@#{key}", value)
       when *DATE_ATTRS
-        value = Date.parse(value) if value
+        value = DateTime.parse(value) if value
         send("#{key}=", value)
       when *ACCESSIBLE_ATTRS
         send("#{key}=", value)
@@ -169,7 +169,7 @@ class LetterOfCreditRequest
     name = ActiveRecord::Base.connection.quote_table_name(sequence_name)
     statement = <<-SQL
       CREATE SEQUENCE #{name} 
-      START WITH 1000
+      START WITH 500
       INCREMENT BY 1
       NOCACHE
     SQL

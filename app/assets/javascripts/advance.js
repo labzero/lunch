@@ -9,6 +9,7 @@ $(function () {
   var $termField = $('input[name="advance_request[term]"]');
   var $idField = $('input[name="advance_request[id]"]');
   var $submitFieldPreview = $formPreview.find('input[type=submit]');
+  var $alternateFundingWrapper = $('.advance-alternate-funding-date-wrapper');
 
   $amountField.on('keypress', function(e){
     Fhlb.Utils.onlyAllowDigits(e);
@@ -169,7 +170,7 @@ $(function () {
 
   // Get rates only when there is a rate table
   if ($rateTable.length > 0) {
-    showAdvanceRates(null, null);
+    setTimeout(function() {showAdvanceRates(getFundingDate(), getMaturityDate());}, 1);
   };
 
   // Perform Advance
@@ -242,6 +243,7 @@ $(function () {
     $('.advance-custom-date-wrapper').hide();
     $('.advance-select-custom-date-wrapper').hide();
     $('.advance-create-custom-date-wrapper').show();
+    $('.add-advance-form').find('.datepicker-trigger').find('input').attr('disabled', false);
     e.stopPropagation();
     e.preventDefault();
   });
@@ -290,16 +292,28 @@ $(function () {
   }
   bindApplyHandler();
 
+  function getMaturityDate() {
+    var $datePickerTrigger = $($formPreview.find('.datepicker-trigger'));
+    var maturityDate = $datePickerTrigger.find('input').val();
+    if ((maturityDate != null) && (maturityDate != '')) {
+      maturityDate = moment(maturityDate).format('YYYY-MM-DD');
+    }
+    return maturityDate;
+  }
+
+  function getFundingDate() {
+    return $alternateFundingWrapper.find('input[name=alternate-funding-date]:checked').val();
+  }
+
   // event listener and handler for alternate funding date button click
-  var $alternateFundingWrapper = $('.advance-alternate-funding-date-wrapper');
   $('input[name=alternate-funding-date]').on('click', function () {
-    var $funding_date = $alternateFundingWrapper.find('input[name=alternate-funding-date]:checked').val();
+    var funding_date = $alternateFundingWrapper.find('input[name=alternate-funding-date]:checked').val();
     $('.advance-custom-date-wrapper').show();
     $('.advance-create-custom-date-wrapper').hide();
     $('.advance-select-custom-date-wrapper').hide();
     $('.advance-alternate-funding-date-close').attr('disabled', true);
     showRatesLoadingState($rateTable);
-    showAdvanceRates($funding_date, null);
+    showAdvanceRates(funding_date, null);
   });
 
   // event listener and handler for custom date button click
@@ -310,12 +324,9 @@ $(function () {
     var $viewCustomRates = $('.view-custom-rates');
     $viewCustomRates.removeClass('active');
     $viewCustomRates.attr('disabled', true);
-    var $datePickerTrigger = $($formPreview.find('.datepicker-trigger'));
-    var $maturityDate = $datePickerTrigger.find('input').val();
-    var $funding_date = $alternateFundingWrapper.find('input[name=alternate-funding-date]:checked').val();
     showRatesLoadingState($rateTable);
     showRatesLoadingState($rateCustomTable);
-    showAdvanceRates($funding_date, moment($maturityDate).format('YYYY-MM-DD'));
+    showAdvanceRates(getFundingDate(), getMaturityDate());
     e.stopPropagation();
     e.preventDefault();
   });

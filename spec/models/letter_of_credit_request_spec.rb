@@ -509,8 +509,8 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       end
       date_attrs.each do |key|
         it "assigns a datefied value found under `#{key}` to the attribute `#{key}`" do
-          datefied_value = double('some value as a date')
-          allow(Date).to receive(:parse).with(value).and_return(datefied_value)
+          datefied_value = instance_double(DateTime)
+          allow(DateTime).to receive(:parse).with(value).and_return(datefied_value)
           hash[key.to_s] = value
           call_method
           expect(subject.send(key)).to be(datefied_value)
@@ -877,8 +877,8 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
           expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher)
           call_method
         end
-        it 'starts incrementing the sequence at 1000' do
-          matcher = Regexp.new(/#{ensure_order_regexp}START\s+WITH\s+1000\s*/im)
+        it 'starts incrementing the sequence at 500' do
+          matcher = Regexp.new(/#{ensure_order_regexp}START\s+WITH\s+500\s*/im)
           expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher)
           call_method
         end

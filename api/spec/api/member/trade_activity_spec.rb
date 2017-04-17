@@ -1137,9 +1137,9 @@ describe MAPI::ServiceApp do
               trade_id_array = []
               trade_ids = loc_trade_ids + other_instrument_trade_ids
               trade_ids.each do |trade_id|
-                trade_id_array << {'v1:tradeId' => {'v1:tradeId' => trade_id}}
+                trade_id_array << {'v1:tradeId' => trade_id}
               end
-              expect(trade_activity_connection).to receive(:call).with(anything, hash_including(message: hash_including('v1:tradeRequestParameters' => [include('v1:arrayOfTradeIds' => trade_id_array)])))
+              expect(trade_activity_connection).to receive(:call).with(anything, hash_including(message: hash_including('v1:tradeRequestParameters' => [include('v1:arrayOfTradeIds' => {'v1:tradeId' => trade_id_array})])))
               call_method
             end
             it 'puts the trade ids first, then the customer id then the settlement date range' do

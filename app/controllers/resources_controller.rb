@@ -400,6 +400,7 @@ class ResourcesController < ApplicationController
       [:minimum_annual_fee, annual_maintenance_charge_root[:minimum_annual_fee], :currency_whole],
       [:cip_ace, t('resources.fee_schedules.basis_point_per_annum', basis_point: annual_maintenance_charge_root[:cip_ace])],
       [:agency_deposits, t('resources.fee_schedules.basis_point_per_annum', basis_point: annual_maintenance_charge_root[:agency_deposits])],
+      [:agency_deposits_variable_balance, t('resources.fee_schedules.basis_point_per_annum', basis_point: annual_maintenance_charge_root[:agency_deposits_variable_balance])],
       [:other_purposes, t('resources.fee_schedules.basis_point_per_annum', basis_point: annual_maintenance_charge_root[:other_purposes])]
     ]
     @annual_maintenance_charge_table = fee_schedule_table_hash(annual_maintenance_charge_rows)
@@ -408,6 +409,7 @@ class ResourcesController < ApplicationController
     issuance_fee_root = fees[:letters_of_credit][:issuance_fee]
     issuance_fee_rows = [
       [:agency_deposits, issuance_fee_root[:agency_deposits], :currency_whole],
+      [:agency_deposits_variable_balance, issuance_fee_root[:agency_deposits_variable_balance], :currency_whole],
       [:other_purposes, issuance_fee_root[:other_purposes], :currency_whole],
       [:commercial_paper, t('resources.fee_schedules.price_range', lower: fhlb_formatted_currency_whole(issuance_fee_root[:commercial_paper][:lower_limit], html: false), upper: fhlb_formatted_currency_whole(issuance_fee_root[:commercial_paper][:upper_limit], html: false))],
       [:tax_exempt_bond, t('resources.fee_schedules.price_range', lower: fhlb_formatted_currency_whole(issuance_fee_root[:tax_exempt_bond][:lower_limit], html: false), upper: fhlb_formatted_currency_whole(issuance_fee_root[:tax_exempt_bond][:upper_limit], html: false))]
@@ -422,6 +424,7 @@ class ResourcesController < ApplicationController
     amendment_fee_rows = [
       [:increase_extension],
       [:agency_deposits, amendment_fee_root[:agency_deposits], :currency_whole],
+      [:agency_deposits_variable_balance, amendment_fee_root[:agency_deposits_variable_balance], :currency_whole],
       [:other_purposes, amendment_fee_root[:other_purposes], :currency_whole]
     ]
     @amendment_fee_table = fee_schedule_table_hash(amendment_fee_rows)

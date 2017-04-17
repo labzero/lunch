@@ -36,14 +36,14 @@ RSpec.describe Security, :type => :model do
         call_validation
       end
       describe 'when there is a value for `cusip`' do
-        let(:cusip) { SecureRandom.hex.upcase }
+        let(:cusip) { SecureRandom.hex.upcase[0..Security::VALID_CUSIP_LENGTH - 1] }
         before { subject.cusip = cusip }
 
         it 'creates a new instance of `SecurityIdentifiers::CUSIP` with the provided cusip' do
           expect(SecurityIdentifiers::CUSIP).to receive(:new).with(cusip).and_return(cusip_validator)
           call_validation
         end
-        it 'adds an errorif `SecurityIdentifiers::CUSIP#valid?` returns false' do
+        it 'adds an error if `SecurityIdentifiers::CUSIP#valid?` returns false' do
           allow(cusip_validator).to receive(:valid?).and_return(false)
           expect(subject.errors).to receive(:add).with(:cusip, :invalid)
           call_validation
@@ -55,6 +55,16 @@ RSpec.describe Security, :type => :model do
         end
         it 'adds an error if `SecurityIdentifiers::CUSIP#valid?` raises a `SecurityIdentifiers::InvalidFormat` error' do
           allow(cusip_validator).to receive(:valid?).and_raise(SecurityIdentifiers::InvalidFormat)
+          expect(subject.errors).to receive(:add).with(:cusip, :invalid)
+          call_validation
+        end
+        it 'adds an error if the cusip is fewer than nine digits' do
+          subject.cusip = SecureRandom.hex.upcase[0..Security::VALID_CUSIP_LENGTH - 2]
+          expect(subject.errors).to receive(:add).with(:cusip, :invalid)
+          call_validation
+        end
+        it 'adds an error if the cusip is greater than nine digits' do
+          subject.cusip = SecureRandom.hex.upcase[0..Security::VALID_CUSIP_LENGTH]
           expect(subject.errors).to receive(:add).with(:cusip, :invalid)
           call_validation
         end

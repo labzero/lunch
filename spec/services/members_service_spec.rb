@@ -105,25 +105,76 @@ describe MembersService do
     end
   end
 
-  describe '`all_members` method', :vcr do
-    let(:members) { subject.all_members }
-    it 'should return nil if there was an API error' do
-      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
-      expect(members).to eq(nil)
+  describe '`all_members` method' do
+    let(:cached_members) { instance_double(Array) }
+    let(:call_method) { subject.all_members }
+    it 'fetches the value from the cache with the correct key' do
+      expect(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:members_list), anything)
+      call_method
     end
-    it 'should return nil if there was a connection error' do
-      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
-      expect(members).to eq(nil)
+    it 'fetches the value from the cache with the correct expiration' do
+      expect(Rails.cache).to receive(:fetch).with(anything, hash_including(expires_in: CacheConfiguration.expiry(:members_list)))
+      call_method
     end
-    it 'returns an array of members on success' do
-      expect(members).to be_kind_of(Array)
-      expect(members.count).to be >= 1
-      members.each do |member|
-        expect(member).to be_kind_of(Hash)
-        expect(member[:id]).to be_kind_of(Numeric)
-        expect(member[:id]).to be > 0
-        expect(member[:name]).to be_kind_of(String)
-        expect(member[:name]).to be_present
+    describe 'when `all_members` already exists in the Rails cache' do
+      before { allow(Rails.cache).to receive(:fetch).with(CacheConfiguration.key(:members_list), anything).and_return(cached_members) }
+      it 'does not call `get_json`' do
+        expect(subject).not_to receive(:get_json)
+        call_method
+      end
+      it 'does not write to the cache' do
+        expect(Rails.cache).not_to receive(:write)
+        call_method
+      end
+      it 'returns the cached value' do
+        expect(call_method).to eq(cached_members)
+      end
+    end
+    describe 'when `member_data` does not yet exist in the Rails cache' do
+      let(:member_data) {[instance_double(Hash, with_indifferent_access: nil)]}
+      before { allow(subject).to receive(:get_json).and_return(member_data) }
+      it 'calls `get_json` with `:all_members` as the name arg' do
+        expect(subject).to receive(:get_json).with(:all_members, any_args)
+        call_method
+      end
+      it 'calls `get_json` with the proper MAPI endpoint' do
+        expect(subject).to receive(:get_json).with(anything, "member/")
+        call_method
+      end
+      it 'calls `with_indifferent_access` on all of the returned member hashes' do
+        member_data.each do |member|
+          expect(member).to receive(:with_indifferent_access)
+          call_method
+        end
+      end
+      it 'returns the array of member hashes' do
+        member_data.each { |member| allow(member).to receive(:with_indifferent_access).and_return(member) }
+        expect(call_method).to eq(member_data)
+      end
+      it 'writes to the cache' do
+        expect(Rails.cache).to receive(:write).with(CacheConfiguration.key(:members_list), any_args)
+        call_method
+      end
+      RSpec.shared_examples 'an `all_members` endpoint returning a blank result' do
+        it 'returns nil' do
+          expect(call_method).to be nil
+        end
+        it 'does not write to the cache' do
+          expect(Rails.cache).not_to receive(:write)
+          call_method
+        end
+      end
+      describe 'when `get_json` returns nil' do
+        before { allow(subject).to receive(:get_json) }
+        it_behaves_like 'an `all_members` endpoint returning a blank result'
+      end
+      describe 'when `get_json` returns an empty array' do
+        before { allow(subject).to receive(:get_json).and_return([]) }
+        it_behaves_like 'an `all_members` endpoint returning a blank result'
+      end
+      describe 'when `get_json` returns an empty string' do
+        before { allow(subject).to receive(:get_json).and_return('') }
+        it_behaves_like 'an `all_members` endpoint returning a blank result'
       end
     end
   end

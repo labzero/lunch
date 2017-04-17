@@ -94,7 +94,7 @@
                     %table
                       %tr
                         %td= t('common_table_headings.interest_rate')
-                        %td= row[:interest_rate]
+                        %td= fhlb_formatted_number(row[:interest_rate], precision: (row[:interest_rate_precision] || 2))
                       %tr
                         %td= t('reports.pages.advances_detail.accrued_interest')
                         %td= fhlb_formatted_currency(row[:accrued_interest]) if row[:accrued_interest]

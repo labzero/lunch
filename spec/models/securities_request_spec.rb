@@ -90,8 +90,11 @@ RSpec.describe SecuritiesRequest, :type => :model do
         call_validation
       end
     end
-    [[:trade_date, :trade_date_within_range], [:settlement_date, :settlement_date_within_range]].each do |attr_array|
-      attr = attr_array.first
+    [[[:trade_date, SecuritiesRequest::MIN_TRADE_DATE_RESTRICTION], :trade_date_within_range],
+     [[:settlement_date, SecuritiesRequest::MIN_TRADE_DATE_RESTRICTION], :settlement_date_within_range]].each do |attr_array|
+      attributes = attr_array.first
+      attr = attributes.first
+      custom_min_trade_date_restriction = attributes.last
       method = attr_array.last
       describe "`#{method}`" do
         let(:call_validation) { subject.send(method) }
@@ -106,7 +109,7 @@ RSpec.describe SecuritiesRequest, :type => :model do
         it "calls `date_within_range` with the `#{attr}` as an arg" do
           date = instance_double(Date)
           subject.send("#{attr}=", date)
-          expect(subject).to receive(:date_within_range).with(date, attr)
+          expect(subject).to receive(:date_within_range).with(date, attr, custom_min_trade_date_restriction)
           call_validation
         end
         it "does not add an error if there is no value for `#{attr}`" do
@@ -131,19 +134,21 @@ RSpec.describe SecuritiesRequest, :type => :model do
     end
     describe '`date_within_range`' do
       let(:today) { Time.zone.today }
-      let(:max_date) { today + described_class::MAX_DATE_RESTRICTION }
-      let(:min_date) { today - described_class::MIN_DATE_RESTRICTION }
+      let(:max_date) { described_class::MAX_DATE_RESTRICTION }
+      let(:min_trade_date) { described_class::MIN_TRADE_DATE_RESTRICTION }
+      let(:min_settlement_date) { described_class::MIN_SETTLEMENT_DATE_RESTRICTION }
+      let(:alt_max_date) { 6.months }
       let(:date) { instance_double(Date, sunday?: false, saturday?: false, :>= => true, :<= => true) }
 
       [:trade_date, :settlement_date].each do |date_type|
-        describe "when `date_type` == #{date_type}" do
-          let(:call_method) { subject.send(:date_within_range, date, date_type) }
+        describe "when `date_type` == `#{date_type}`" do
+          let(:call_method) { subject.send(:date_within_range, date, date_type, min_trade_date) }
           it 'fetches `holidays` from the CalendarService instance with today and the max_date as args' do
-            expect_any_instance_of(CalendarService).to receive(:holidays).with(today, max_date).and_return([])
+            expect_any_instance_of(CalendarService).to receive(:holidays).with(today, today + max_date).and_return([])
             call_method
           end
           it 'returns nil if passed nil' do
-            expect(subject.send(:date_within_range, nil, date_type)).to be_nil
+            expect(subject.send(:date_within_range, nil, date_type, min_trade_date)).to be_nil
           end
           it 'returns false if the provided date is a Saturday' do
             allow(date).to receive(:saturday?).and_return(true)
@@ -158,12 +163,24 @@ RSpec.describe SecuritiesRequest, :type => :model do
             expect(call_method).to be false
           end
           it 'returns false if the provided date occurs after today plus the `MAX_DATE_RESTRICTION`' do
-            allow(date).to receive(:<=).with(max_date).and_return(false)
+            allow(date).to receive(:<=).with(today + max_date).and_return(false)
             expect(call_method).to be false
           end
-          it 'returns false if the provided date occurs before today minus the `MIN_DATE_RESTRICTION`' do
-            allow(date).to receive(:>=).with(min_date).and_return(false)
+          it 'returns false if the provided date occurs before today minus the `MIN_TRADE_DATE_RESTRICTION`' do
+            allow(date).to receive(:>=).with(today - min_trade_date).and_return(false)
             expect(call_method).to be false
+          end
+          it 'returns false if the provided date occurs before today minus the `MIN_SETTLEMENT_DATE_RESTRICTION`' do
+            allow(date).to receive(:>=).with(today - min_settlement_date).and_return(false)
+            expect(subject.send(:date_within_range, date, date_type, min_settlement_date)).to be false
+          end
+          it 'supports overriding the max date' do
+            expect(date).to receive(:<=).with(today + alt_max_date)
+            subject.send(:date_within_range, date, date_type, min_trade_date, alt_max_date)
+          end
+          it 'supports overriding the min date' do
+            expect(date).to receive(:>=).with(today - min_settlement_date)
+            subject.send(:date_within_range, date, date_type, min_settlement_date)
           end
           it 'returns true if all of the above conditions are satisfied' do
             expect(call_method).to be true

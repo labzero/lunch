@@ -596,7 +596,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       end
       shared_examples 'it bases other dates off a given start date' do |day|
         let(:start_date) { day == :today ? today : today + 1.day }
-        let(:max_date) { start_date + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION }
+        let(:max_date) { start_date + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION }
         it "calls `find_next_business_day` on the service instance with #{day} and a 1.day step" do
           expect(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day)
           call_method
@@ -608,7 +608,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
             call_method
             expect(call_method[:min_date]).to eq(min_date)
           end
-          it "has an `expiration_max_date` of #{day} plus the `LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION` plus the `LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION`" do
+          it "has an `expiration_max_date` of #{day} plus the `LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION`" do
             expect(call_method[:expiration_max_date]).to eq(max_date)
           end
           it "has an `issue_max_date` of #{day} plus the `LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION`" do
@@ -619,8 +619,8 @@ RSpec.describe LettersOfCreditController, :type => :controller do
               expect(controller).to receive(:weekends_and_holidays).with(start_date: start_date, end_date: anything, calendar_service: anything)
               call_method
             end
-            it "calls `weekends_and_holidays` with a date #{LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION} from #{day} as the end_date arg" do
-              expect(controller).to receive(:weekends_and_holidays).with(start_date: anything, end_date: (start_date + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION + LetterOfCreditRequest::ISSUE_MAX_DATE_RESTRICTION), calendar_service: anything)
+            it "calls `weekends_and_holidays` with a date #{LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION} from #{day} as the end_date arg" do
+              expect(controller).to receive(:weekends_and_holidays).with(start_date: anything, end_date: (start_date + LetterOfCreditRequest::EXPIRATION_MAX_DATE_RESTRICTION), calendar_service: anything)
               call_method
             end
             it 'calls `weekends_and_holidays` with the calendar service instance as the calendar_service arg' do

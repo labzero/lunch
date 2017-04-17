@@ -793,7 +793,7 @@ describe MAPI::ServiceApp do
           allow(securities_request_module).to receive(:validate_kind).with(:release, kind).and_return(true)
           allow(securities_request_module).to receive(:get_adx_type_from_security).with(app, member_id, security).and_return(adx_type)
           allow(securities_request_module).to receive(:validate_broker_instructions)
-          allow(securities_request_module).to receive(:populate_security_metadata).with(app, security).and_return(security)
+          allow(securities_request_module).to receive(:populate_security_metadata).with(app, security, ssk_id).and_return(security)
         end
 
         context 'validations' do
@@ -908,7 +908,7 @@ describe MAPI::ServiceApp do
             it 'populates each security with metadata' do
               expect(securities.length).to be > 0
               securities.each do |security|
-                expect(MAPI::Services::Member::SecuritiesRequests).to receive(:populate_security_metadata).with(app, security)
+                expect(MAPI::Services::Member::SecuritiesRequests).to receive(:populate_security_metadata).with(app, security, ssk_id)
               end
               call_method
             end
@@ -2328,6 +2328,7 @@ describe MAPI::ServiceApp do
       let(:securities) { [security] }
       let(:kind) { double('A Kind') }
       let(:call_method) { securities_request_module.update_release(app, member_id, request_id, username, full_name, session_id, broker_instructions, delivery_instructions, securities, kind) }
+      let(:ssk_id) { rand(1000..9999) }
 
       before do
         allow(securities_request_module).to receive(:validate_broker_instructions)
@@ -2336,7 +2337,7 @@ describe MAPI::ServiceApp do
         allow(securities_request_module).to receive(:process_delivery_instructions).and_return(processed_delivery_instructions)
         allow(securities_request_module).to receive(:should_fake?).and_return(true)
         allow(securities_request_module).to receive(:validate_kind).with(:release, kind).and_return(true)
-        allow(securities_request_module).to receive(:populate_security_metadata).with(app, security).and_return(security)
+        allow(securities_request_module).to receive(:populate_security_metadata).with(app, security, ssk_id).and_return(security)
       end
 
       it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
@@ -2392,7 +2393,6 @@ describe MAPI::ServiceApp do
         end
         let(:adx_id) { instance_double(String) }
         let(:detail_id) { rand(1000..9999) }
-        let(:ssk_id) { rand(1000..9999) }
         let(:existing_header) { instance_double(Hash) }
         let(:old_security) { security.clone.with_indifferent_access }
 
@@ -2524,7 +2524,7 @@ describe MAPI::ServiceApp do
               it 'populates each security with metadata' do
                 expect(securities.length).to be > 0
                 securities.each do |security|
-                  expect(MAPI::Services::Member::SecuritiesRequests).to receive(:populate_security_metadata).with(app, security)
+                  expect(MAPI::Services::Member::SecuritiesRequests).to receive(:populate_security_metadata).with(app, security, ssk_id)
                 end
                 call_method
               end
@@ -3692,7 +3692,8 @@ describe MAPI::ServiceApp do
           allow(securities_request_module).to receive(:validate_broker_instructions)
           allow(securities_request_module).to receive(:insert_transfer_header_query).and_return(insert_transfer_header_query_result)
           allow(securities_request_module).to receive(:set_broker_instructions_for_transfer)
-          allow(securities_request_module).to receive(:populate_security_metadata).with(app, security).and_return(security)
+          allow(securities_request_module).to receive(:execute_sql_single_result).with(app, anything, "SSK ID").and_return(ssk_id)
+          allow(securities_request_module).to receive(:populate_security_metadata).with(app, security, ssk_id).and_return(security)
         end
 
         context 'validations' do
@@ -3801,7 +3802,7 @@ describe MAPI::ServiceApp do
             it 'populates each security with metadata' do
               expect(securities.length).to be > 0
               securities.each do |security|
-                expect(MAPI::Services::Member::SecuritiesRequests).to receive(:populate_security_metadata).with(app, security)
+                expect(MAPI::Services::Member::SecuritiesRequests).to receive(:populate_security_metadata).with(app, security, ssk_id)
               end
               MAPI::Services::Member::SecuritiesRequests.create_transfer(*method_params)
             end
@@ -4078,6 +4079,7 @@ describe MAPI::ServiceApp do
                                 kind ] }
 
         let(:call_method) { securities_request_module.update_transfer(*method_params) }
+        let(:ssk_id) { rand(1000..9999) }
 
         before do
           allow(securities_request_module).to receive(:validate_broker_instructions)
@@ -4086,7 +4088,8 @@ describe MAPI::ServiceApp do
           allow(kind).to receive(:to_sym).and_return(kind)
           allow(securities_request_module).to receive(:validate_kind).with(:transfer, kind).and_return(true)
           allow(securities_request_module).to receive(:set_broker_instructions_for_transfer)
-          allow(securities_request_module).to receive(:populate_security_metadata).with(app, security).and_return(security)
+          allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, anything, 'SSK ID').and_return(ssk_id)
+          allow(securities_request_module).to receive(:populate_security_metadata).with(app, security, ssk_id).and_return(security)
         end
 
         it 'calls `validate_broker_instructions` with the `broker_instructions` arg' do
@@ -4150,7 +4153,6 @@ describe MAPI::ServiceApp do
           let(:adx_id) { instance_double(String) }
           let(:un_adx_id) { instance_double(String) }
           let(:detail_id) { rand(1000..9999) }
-          let(:ssk_id) { rand(1000..9999) }
           let(:existing_header) { instance_double(Hash) }
           let(:old_security) { security.clone.with_indifferent_access }
 
@@ -4278,7 +4280,7 @@ describe MAPI::ServiceApp do
                 it 'populates each security with metadata' do
                   expect(securities.length).to be > 0
                   securities.each do |security|
-                    expect(MAPI::Services::Member::SecuritiesRequests).to receive(:populate_security_metadata).with(app, security)
+                    expect(MAPI::Services::Member::SecuritiesRequests).to receive(:populate_security_metadata).with(app, security, ssk_id)
                   end
                   call_method
                 end
@@ -5256,6 +5258,7 @@ describe MAPI::ServiceApp do
 
     describe '`populate_security_metadata` class method' do
       let(:security) { { 'cusip' => double('A CUSIP') } }
+      let(:ssk_id) { rand(1000..9999) }
       let(:metadata) {
         {
           'DESCRIPTION' => double('A Description'),
@@ -5265,16 +5268,16 @@ describe MAPI::ServiceApp do
           'POOL_NUMBER' => double('A Pool Number')
         }
       }
-      let(:call_method) { securities_request_module.populate_security_metadata(app, security) }
+      let(:call_method) { securities_request_module.populate_security_metadata(app, security, ssk_id) }
       let(:query) { double('Metadata Query') }
 
       before do
-        allow(securities_request_module).to receive(:cusip_metadata_query).with(security['cusip']).and_return(query)
+        allow(securities_request_module).to receive(:cusip_metadata_query).with(ssk_id).and_return(query)
         allow(securities_request_module).to receive(:fetch_hash).with(app, query).and_return(metadata)
       end
 
       it 'builds SQL for querying the metadata of the CUSIP' do
-        expect(securities_request_module).to receive(:cusip_metadata_query).with(security['cusip']).and_return(query)
+        expect(securities_request_module).to receive(:cusip_metadata_query).with(ssk_id).and_return(query)
         call_method
       end
 
@@ -5314,8 +5317,8 @@ describe MAPI::ServiceApp do
     end
 
     describe '`cusip_metadata_query` class method' do
-      let(:cusip) { SecureRandom.hex }
-      let(:limit_query) { securities_request_module.cusip_metadata_query(cusip) }
+      let(:ssk_id) { SecureRandom.hex }
+      let(:limit_query) { securities_request_module.cusip_metadata_query(ssk_id) }
       let(:inner_query) { limit_query.match(/\A\s*SELECT\s+\*\s+FROM\s+\((.+)\)\s+WHERE\s+ROWNUM\s+=\s+1\s*\z/mi)[1] }
       it 'limits to a single row of results' do
         expect(limit_query).to match(/\A\s*SELECT\s+\*\s+FROM\s+\(.+\)\s+WHERE\s+ROWNUM\s+=\s+1\s*\z/mi)
@@ -5341,10 +5344,10 @@ describe MAPI::ServiceApp do
       it 'orders the results by transaction update date, then SSK update date, then `SSK_ID`, all descending' do
         expect(inner_query).to match(/\s+ORDER\s+BY\s+SSKT.SSX_RECORD_DATE_UPDATED\s+DESC,\s+SSK\.SSK_RECORD_DATE_UPDATED\s+DESC,\s+SSK\.SSK_ID\s+DESC\s+\z/mi)
       end
-      it 'finds the rows that match the provided CUSIP' do
-        quoted_cusip = SecureRandom.hex
-        allow(securities_request_module).to receive(:quote).with(cusip).and_return(quoted_cusip)
-        expect(inner_query).to match(/\s+WHERE\s+UPPER\(SSK\.SSK_CUSIP\)\s+=\s+UPPER\(#{quoted_cusip}\)\s+/)
+      it 'finds the rows that match the provided SSK_ID' do
+        quoted_ssk_id = SecureRandom.hex
+        allow(securities_request_module).to receive(:quote).with(ssk_id).and_return(quoted_ssk_id)
+        expect(inner_query).to match(/\s+WHERE\s+SSK\.SSK_ID\s+=\s+#{quoted_ssk_id}\s+/)
       end
     end
 

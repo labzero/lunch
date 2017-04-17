@@ -57,3 +57,11 @@ Scenario: Member sees securities dropdown
   And I don't see the securities dropdown
   When I click on the securities link in the header
   Then I should see the securities dropdown
+
+@jira-mem-2267
+Scenario: Member closes the nav by pressing the Esc key
+  Given I visit the dashboard
+  When I click on the reports link in the header
+  Then I should see the reports dropdown
+  When I press the Esc key
+  Then I don't see the reports dropdown

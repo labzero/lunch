@@ -3,9 +3,11 @@ letters_of_credit:
     minimum_annual_fee: 500
     cip_ace: 6
     agency_deposits: 10
+    agency_deposits_variable_balance: 12
     other_purposes: 15
   issuance_fee:
     agency_deposits: 100
+    agency_deposits_variable_balance: 100
     other_purposes: 500
     commercial_paper:
       lower_limit: 10000
@@ -16,6 +18,7 @@ letters_of_credit:
   draw_fee: 100
   amendment_fee:
     agency_deposits: 100
+    agency_deposits_variable_balance: 100
     other_purposes: 500
 wire_transfer_and_sta:
   domestic_outgoing_wires:

@@ -222,6 +222,19 @@ describe ReportsHelper do
     it 'returns an empty array if it is passed an empty array as the first argument' do
       expect(helper.send(:sort_report_data, [], :foo)).to eq([])
     end
+    describe 'with a nil value for the target attribute' do
+      let(:nil_item) { {foo: nil} }
+      let(:data) { [item_1, item_2, item_3, {foo: nil}] }
+      it 'does not raise an error' do
+        expect{helper.send(:sort_report_data, data, :foo)}.to_not raise_error
+      end
+      it 'sorts the nil first' do
+        expect(helper.send(:sort_report_data, data, :foo)).to eq([nil_item, item_2, item_1, item_3])
+      end
+    end
+    it 'raises an error when there is a differing type for the target attribute' do
+      expect{helper.send(:sort_report_data, [*data, {foo: '1'}], :foo)}.to raise_error(ArgumentError)
+    end
     describe 'default behavior' do
       it 'sorts the given data by the given field in ascending order' do
         expect(helper.send(:sort_report_data, data, :foo)).to eq([item_2, item_1, item_3])

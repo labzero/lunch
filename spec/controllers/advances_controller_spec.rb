@@ -275,6 +275,8 @@ RSpec.describe AdvancesController, :type => :controller do
   describe 'GET select_rate' do
     allow_policy :advance, :show?
     let(:advance_id) { SecureRandom.uuid }
+    let(:custom_maturity_date) { SecureRandom.uuid }
+    let(:funding_date) { Time.zone.today + rand(1..3).days}
     let(:advance_amount) { double('amount') }
     let(:advance_type) { double('type') }
     let(:advance_term) { double('term') }
@@ -282,7 +284,7 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:message_service_instance) { double('service instance', todays_quick_advance_message: nil) }
     let(:etransact_service_instance) { double('service instance', etransact_status: nil, etransact_active?: nil) }
     let(:make_request) { get :select_rate }
-    let(:advance_request) { double(AdvanceRequest, amount: advance_amount, type: advance_type, term: advance_term, term_type: advance_term_type, id: advance_id, :allow_grace_period= => nil, :type= => nil, :term= => nil, :amount= => nil, :funding_date => nil) }
+    let(:advance_request) { double(AdvanceRequest, amount: advance_amount, type: advance_type, term: advance_term, term_type: advance_term_type, id: advance_id, :allow_grace_period= => nil, :type= => nil, :term= => nil, :amount= => nil, :funding_date => nil, :custom_maturity_date => custom_maturity_date) }
     let(:profile) { double('profile') }
     let(:member_balance_service_instance) { double('member balance service instance', profile: profile) }
 
@@ -401,6 +403,23 @@ RSpec.describe AdvancesController, :type => :controller do
         allow(calendar_service_instance).to receive(:find_next_business_day).and_return(skip_day)
         make_request
         expect(assigns[:skip_day]).to eq(skip_day)
+      end
+      it 'sets @maturity_date to custom_maturity_date' do
+        allow(calendar_service_instance).to receive(:find_next_business_day).and_return(today)
+        make_request
+        expect(assigns[:maturity_date]).to eq(custom_maturity_date)
+      end
+      it 'sets @future_funding_date to advance_request.funding_date if advance_request.funding_date is greater than today' do
+        allow(calendar_service_instance).to receive(:find_next_business_day).and_return(today)
+        allow(advance_request).to receive(:funding_date).and_return(funding_date)
+        make_request
+        expect(assigns[:future_funding_date]).to eq(funding_date)
+      end
+      it 'does not set @@future_funding_date to advance_request.funding_date if advance_request.funding_date = today' do
+        allow(calendar_service_instance).to receive(:find_next_business_day).and_return(today)
+        allow(advance_request).to receive(:funding_date).and_return(Time.zone.today)
+        make_request
+        expect(assigns[:future_funding_date]).to eq(nil)
       end
     end
   end
@@ -1368,8 +1387,11 @@ RSpec.describe AdvancesController, :type => :controller do
       it 'returns the number of days between the `maturity_date` and `funding_date` in the `days` key' do
         expect(call_method[:days]).to be(days_to_maturity)
       end
-      it 'returns a custom term token in the `term` key' do
-        expect(call_method[:term]).to eq("#{days_to_maturity}day")
+      it 'returns a custom term token in the `term` key made up of the days to maturity and the word day' do
+        expect(call_method[:term]).to eq("#{days_to_maturity}day".to_sym)
+      end
+      it 'returns a custom term token in the `term` key as a symbol' do
+        expect(call_method[:term]).to be_kind_of(Symbol)
       end
       it 'converts the `maturity_date` to a Date' do
         expect(maturity_date).to receive(:to_date).and_call_original

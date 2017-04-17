@@ -365,7 +365,7 @@ Scenario: User clicks on the FRC rates and sees Funding Date then selects skip b
   Then I should not see the add advance rate table
   And I should see a preview of the advance
   
-@jira-mem-1521
+@jira-mem-1521 @flip-on-add-advance-custom-term
 Scenario: Member sees messaging that credit limit does not cover gross up stock purchase
   Given I am logged in as a "custom-term signer"
   And I am on the "Add Advance" advances page
@@ -446,3 +446,25 @@ Scenario: User clicks on the FRC rates and selects funding date, closes selectio
   Then I select the rate with a term of "2week" and a type of "whole" on the add advance page
   When I click on Close Funding Date link
   Then I should see Updated Funding Date
+
+@jira-mem-2255 @flip-on-add-advance-custom-term
+Scenario: User clicks on the FRC rates and sees Add Custom Term then selects maturity day and begins the advance process then clicks edit
+  Given I am logged in as a "custom-term signer"
+  And I am on the "Add Advance" advances page
+  And I enter an amount into the add advance amount field
+  When I click to toggle to the frc rates
+  Then I should see the add advance rate table
+  Then I should see Custom Term information
+  When I click on Add Custom Term link
+  Then I should see Custom Term Calendar
+  When I click the datepicker field
+  And I choose the first available custom date
+  And I click on the View Rates For this Term button
+  Then I should see the add advance custom rate table
+  When I select custom rate with a term of "custom" and a type of "whole" on the add advance page
+  And I click on the initiate advance button on the add advance page
+  Then I should see a preview of the advance
+  When I click on the edit button for the add advance preview
+  Then I should see the add advance custom rate table
+
+

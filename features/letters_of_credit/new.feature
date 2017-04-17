@@ -35,10 +35,20 @@ Feature: Requesting a New Letter of Credit
     Then I should see the Preview Request button in its enabled state
 
   @jira-mem-2149
-  Scenario: Member selects an expiration date that occurs more than 15 years after the issue date
+  Scenario: Member selects the minimum issue date and the maximum expiration date
     When I visit the Request Letter of Credit page
     And I choose the last possible date for the expiration date
     And I choose the first possible date for the issue date
+    And I enter 1234567 in the letter of credit amount field
+    When I click the Preview Request button
+    Then I should be on the Preview Letter of Credit Request page
+
+  @jira-mem-2149
+  Scenario: Member selects the minimum issue date and an expiration date past the maximum
+    When I visit the Request Letter of Credit page
+    And I choose the last possible date for the expiration date
+    And I choose the first possible date for the issue date
+    And I set the Letter of Credit Request expiration date to 181 months from today
     And I enter 1234567 in the letter of credit amount field
     When I click the Preview Request button
     Then I should see the "expiration date invalid" form error

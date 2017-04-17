@@ -41,6 +41,9 @@
     .value {
       text-align: right;
     }
+    &:last-child {
+      margin-top: 15px;
+    }
   }
 }
 

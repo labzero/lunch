@@ -65,7 +65,8 @@ if (typeof Fhlb.Track === 'undefined') {
       // Session Time-Out
       session_time_out:                    function(){sendEvent('Session Time-Out', 'Session')},
       // Loading of pages with deferred data
-      dashboard_loaded:                    function(elapsedTime){sendLoadEvent('Dashboard', elapsedTime)}
+      dashboard_loaded:                    function(elapsedTime){sendLoadEvent('Dashboard', elapsedTime)},
+      report_loaded:                       function(eventCategory, elapsedTime){sendLoadEvent(eventCategory, elapsedTime)}
     };
   })();
 };

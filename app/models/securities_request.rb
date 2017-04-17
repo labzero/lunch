@@ -62,7 +62,8 @@ class SecuritiesRequest
   ACCESSIBLE_ATTRS = (BROKER_INSTRUCTION_KEYS + OTHER_PARAMETERS + DELIVERY_INSTRUCTION_KEYS.values.flatten).freeze
 
   MAX_DATE_RESTRICTION = 3.months
-  MIN_DATE_RESTRICTION = 14.days
+  MIN_SETTLEMENT_DATE_RESTRICTION = 14.days
+  MIN_TRADE_DATE_RESTRICTION = 10.years
 
   FED_AMOUNT_LIMIT = 50000000
 
@@ -240,17 +241,17 @@ class SecuritiesRequest
   end
 
   def trade_date_within_range
-    errors.add(:trade_date, :invalid) unless !trade_date || date_within_range(trade_date, :trade_date)
+    errors.add(:trade_date, :invalid) unless !trade_date || date_within_range(trade_date, :trade_date, MIN_TRADE_DATE_RESTRICTION)
   end
 
   def settlement_date_within_range
-    errors.add(:settlement_date, :invalid) unless !settlement_date ||  date_within_range(settlement_date, :settlement_date)
+    errors.add(:settlement_date, :invalid) unless !settlement_date ||  date_within_range(settlement_date, :settlement_date, MIN_TRADE_DATE_RESTRICTION)
   end
 
-  def date_within_range(date, field)
+  def date_within_range(date, field, min_date_restriction, max_date_restriction=MAX_DATE_RESTRICTION)
     today = Time.zone.today
-    max_date = today + MAX_DATE_RESTRICTION
-    min_date = today - MIN_DATE_RESTRICTION
+    max_date = today + max_date_restriction
+    min_date = today - min_date_restriction
     holidays = CalendarService.new(ActionDispatch::TestRequest.new).holidays(today, max_date)
     valid = !(date.try(:sunday?) || date.try(:saturday?)) && !(holidays.include?(date)) && date.try(:>=, min_date) && date.try(:<=, max_date)
   end

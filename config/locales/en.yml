@@ -914,11 +914,12 @@ en:
       other_fee_info_html: The Bank charges fees for certain products and services. Other fees are included in the <a href=%{credit_guide_url}>Credit Guide</a> and the <a href=%{collateral_guide_url}>Collateral Guide</a>.
       letter_of_credit: Standby Letter of Credit Prices and Fees
       annual_maintenance_charge: Pricing/Annual Maintenance Charge
-      loc_pricing_info: 'Prices for standby letters of credit will be established and disclosed prior to issuance and will include, at a minimum, an ongoing annual maintenance charge, to be paid monthly in advance on a 30/360 day count basis. Current annual maintenance charges are listed below:'
+      loc_pricing_info: "Prices for standby letters of credit will be established and disclosed prior to issuance and will include, at a minimum, an ongoing annual maintenance charge.\n\nThe annual maintenance charge for most letter of credit types is to be paid monthly in advance on a 30/360 day count basis, using the 30E/360 ISDA day count method.\n\nThe annual maintenance charge for the Variable Balance Letter of Credit is based on the actual balances of public unit deposits supported by the letter of credit, subject to a minimum maintenance fee that is based on 70% of the notional amount of the Variable Balance Letter of Credit. The maintenance charge is paid quarterly in two installments, partly in advance and partly in arrears, on an Actual/360 day count basis.\n\nCurrent annual maintenance charges are listed below:"
       minimum_annual_fee: Minimum annual fee
       issuance_fee: Issuance Fee
       cip_ace: CIP/ACE
-      agency_deposits: State and local agency deposits
+      agency_deposits: State and local agency deposits - Letter of Credit
+      agency_deposits_variable_balance: State and local agency deposits – Variable Balance Letter of Credit
       other_purposes: Other purposes
       price_range: '%{lower} - %{upper}'
       commercial_paper: Commercial paper
@@ -980,7 +981,7 @@ en:
         community: Community Development Financial Institutions
         credit_unions: Credit Unions
         insurance: Insurance Companies
-        letters_of_credit: Letters of Credit Agreement
+        letters_of_credit: Letters of Credit Reimbursement Agreement
         safekeeping: Safekeeping Agreement
         settlement_transaction_account: Settlement/Transaction Account Agreement
       authorizations:
@@ -2295,7 +2296,6 @@ en:
       create: Create a Custom Term
       set: Set Term Maturity Date
       view_rates: View Rates For This Term
-      instructions: Placeholder for Instructions
       edit: Edit Custom Term
       matures_on: Matures in %{days} days on %{date}
       in_days: "%{days} Days"
@@ -2357,7 +2357,7 @@ en:
           advance: Fixed for the entire term of the advance
         interest_day_count:
           title: Interest Day Count
-          count: 30/360
+          count: 30/360 (using the 30E/360 ISDA day count method)
         principal_and_interest_payment_frequency:
           title: Principal and Interest Payment Frequency
           frequency: Monthly and at repayment
@@ -2894,13 +2894,46 @@ en:
         substitution: Borrowers may substitute like or better securities collateral, in the Bank’s discretion, subject to the Bank’s standard securities services fees.
     standby_loc:
       title: Standby Letters of Credit
-      description_html: Use standby letters of credit to facilitate a variety of transactions with third parties. A <a href=%{url}>standby letter of credit</a> is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.
+      description: "Use standby letters of credit to facilitate a variety of transactions with third parties. A standby letter of credit is an obligation of the Bank to make payment to a third party if a member or housing associate does not perform its underlying obligation to that third party.\n\nThe Bank offers two types of standby letters of credit:"
+      standard_loc:
+        title: Letters of Credit (standard)
+        description_html: "Members can use the Bank’s traditional <a href=%{url}>Letter of Credit</a> to facilitate residential housing finance and community lending, assist with asset/liability management, collateralize public unit deposits, and provide liquidity or other funding. The annual maintenance fee is based on the notional amount of the letter of credit."
+      variable_balance_loc:
+        title: Variable Balance Letters of Credit
+        description_html: "The <a href=%{url}>Variable Balance Letter of Credit</a> provides a flexible, cost-effective option for collateralizing public unit deposits while paying maintenance fees based on actual balances. Like the Bank’s standard Letter of Credit, the Variable Balance Letter of Credit may be used to collateralize public unit deposits in Arizona, California, and Nevada."
     mpf_program:
       title: Mortgage Partnership Finance (MPF) Program
       description_html: Our <a href=%{url}>Mortgage Partnership Finance&reg; (MPF&reg;) Program</a> offers you access to an alternative secondary market channel for selling your residential fixed rate mortgage loans, including conventional conforming mortgage loans, eligible jumbo mortgage loans, and government-insured or government-guaranteed mortgage loans. (“Mortgage Partnership Finance” and “MPF” are registered trademarks of the Federal Home Loan Bank of Chicago.)
     community_programs:
       title: Community Programs
       description_html: The Bank’s <a href=%{url}>community programs</a> can help you foster strong, stable, and sustainable communities by providing support for affordable housing and economic development needs in Arizona, California, Nevada, and the other regions you serve.
+    variable_balance_loc:
+      title: Variable Balance Letter of Credit
+      description: The Variable Balance Letter of Credit provides a flexible, cost-effective option for collateralizing your public unit deposits while paying a maintenance fee based on actual balances, subject to a minimum maintenance fee.
+      eligible_uses:
+        title: Eligible Uses
+        uses:
+          arizona: "In Arizona, Bank letters of credit may be used to collateralize public deposits through the Arizona Pooled Collateral Program. (Contact the Arizona State Treasurer’s Office for program requirements.)"
+          california: "In California, Bank letters of credit may be used to collateralize Local Agency or State deposits. (Contact the Local Agency Administrator or the California State Treasurer’s Office for program requirements.)"
+          nevada: "In Nevada, Bank letters of credit may be used to collateralize public deposits through the Nevada Collateral Pool. (Contact the office of the State Treasurer of Nevada for program requirements.)"
+      key_advantages:
+          attract: "Because the Bank is rated Aaa by Moody's and AA+ by Standard & Poor's, Bank letters of credit may enable you to attract public unit deposits to support your liquidity needs."
+          increase: Variable Balance Letters of Credit are flexible and competitively priced, allowing you to increase balance sheet liquidity by attracting public unit deposits while keeping costs low.
+          fees: Annual maintenance fees are based on actual public unit deposit balances (above a certain threshold), which may be less than the full notional amount of the letter of credit.
+      key_features:
+        purpose: To collateralize public unit deposits
+        maxterm: 10 years
+        collateral_requirements: The full notional amount of the letter of credit must be secured with eligible collateral at all times.
+        stock: No Bank stock purchase is required.
+        payment_reimbursements: "If the Bank makes a payment to a beneficiary under a letter of credit, the Bank will charge the member’s or the housing associate’s Settlement/Transaction Account (STA) for the amount of the payment. The member or housing associate must make a deposit to its STA the same day or arrange for an advance to do so."
+        fees:
+          description: "The Bank will charge applicable prices and fees for Variable Balance Letters of Credit, which will include an annual maintenance fee and may include an issuance fee, processing fee for each drawing, and amendment fee.\n\nThe annual maintenance fee is based on the actual balances of public unit deposits supported by the letter of credit during the accrual period, subject to a minimum maintenance fee, and is paid partly in advance and partly in arrears on an Actual/360 day count basis."
+          maintenance:
+            minimum: "The minimum maintenance fee is based on 70% of the notional amount of the letter of credit and is payable at the inception of the letter of credit and on the first business day of each calendar quarter."
+            annual: "The remainder of the annual maintenance fee is based on the difference between 70% of the notional amount of the letter of credit and the average daily balance of public unit deposits supported by the letter of credit during the accrual period. The accrual period is each calendar quarter. This part of the annual maintenance fee is payable on the 15th calendar day following the end of each quarter."
+        fee_certification:
+          title: Maintenance Fee Certification
+          description: Members will be required to report the average daily balance of public unit deposits supported by the letter of credit for the accrual period within five business days after the end of each calendar quarter and provide a certification that the numbers are true and correct.
     section_headings:
       use: Use
       uses: Uses
@@ -2931,15 +2964,19 @@ en:
       interest_payment_frequency: Interest Payment Frequency
       credit_products_available: Credit Products Available
       eligible_capacity: Eligible Securities and Borrowing Capacity
+      fees: Fees
       market_value: Market Value
       maximum_term: Maximum Term
       minimum_term: Minimum Term
       minimum_interest_rate: Minimum Interest Rate
       minimum_interest_rate_convention: Minimum Interest Rate Convention
       option_types: Option Types
+      payment_reimbursements: Payment Reimbursements
+      purpose: Purpose
       prepayment_features: Prepayment Features
       private_label_non_mbs: Private Label Non-Agency MBS
       review_ratings: Review of Ratings
+      stock: Stock
       substitution: Substitution
       term: Term
       termination_option: Termination Option

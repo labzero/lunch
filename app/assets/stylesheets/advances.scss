@@ -647,7 +647,6 @@
 
 .advance-funding-date-wrapper, .advance-alternate-funding-date-wrapper {
   @extend %bordered-section;
-  display: none;
   position: relative;
   margin: 25px 15px 0;
   padding: 15px 15px 20px 15px;
@@ -667,6 +666,7 @@
  }
 
 .advance-alternate-funding-date-wrapper {
+  display: none;
   span {
     @extend %typography-subtitle;
   }
@@ -697,14 +697,13 @@
 
 .advance-custom-date-wrapper {
   display: none;
-  padding: 0px 50px 40px 0px;
+  padding: 0px 25px 40px 0px;
 }
 
 .advance-create-custom-date-wrapper {
   @extend %bordered-section;
   display: none;
   margin: 25px 15px;
-  padding: 10px 20px;
   border-bottom: 1px solid $light-blue;
   span {
     @extend %typography-table-heading;
@@ -716,6 +715,7 @@
     @extend %pseudoelement-clearfix;
     float: none;
     margin-right: 0;
+    margin-top: 20px;
     label, span {
       float: left;
       color: $medium-gray;
@@ -725,7 +725,7 @@
     }
     .primary-button {
       float: right;
-      width: 270px;
+      width: 260px;
     }
     .daterangepicker  {
       width: 232px;

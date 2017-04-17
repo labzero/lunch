@@ -8,6 +8,7 @@ class Security
   ACCESSIBLE_ATTRS = RELEASE_REQUEST_PARAMETERS + OTHER_PARAMETERS
   REQUIRED_ATTRS = [:cusip, :original_par]
   CURRENCY_ATTRIBUTES = [:original_par, :payment_amount]
+  VALID_CUSIP_LENGTH = 9
 
   attr_accessor *ACCESSIBLE_ATTRS
 
@@ -70,7 +71,7 @@ class Security
   def cusip_format
     if cusip
       cusip_valid = begin
-        !!SecurityIdentifiers::CUSIP.new(cusip).valid?
+        !!SecurityIdentifiers::CUSIP.new(cusip).valid? if cusip.length == VALID_CUSIP_LENGTH
       rescue SecurityIdentifiers::InvalidFormat
         false
       end
