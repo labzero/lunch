@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import queryString from 'query-string';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
@@ -11,11 +12,13 @@ import s from './Login.scss';
 class Login extends Component {
   static propTypes = {
     host: PropTypes.string.isRequired,
-    teamSlug: PropTypes.string
+    next: PropTypes.string,
+    team: PropTypes.string
   };
 
   static defaultProps = {
-    teamSlug: undefined
+    next: undefined,
+    team: undefined
   };
 
   state = {
@@ -29,8 +32,11 @@ class Login extends Component {
     });
 
   render() {
-    const { host, teamSlug } = this.props;
+    const { host, next, team } = this.props;
     const { email, password } = this.state;
+
+    const googleQuery = queryString.stringify({ team, next });
+    const nextQuery = queryString.stringify({ next });
 
     return (
       <Grid className={s.root}>
@@ -40,14 +46,14 @@ class Login extends Component {
             bsSize="large"
             bsStyle="primary"
             className={s.googleButton}
-            href={`//${host}/login/google${teamSlug ? `?team=${teamSlug}` : ''}`}
+            href={`//${host}/login/google${googleQuery ? `?${googleQuery}` : ''}`}
           >
             <img className={s.googleLogo} src={google} alt="" />
             Sign in with Google
           </Button>
         </div>
         <h3>Email/password</h3>
-        <form action="/login" method="post">
+        <form action={`/login${nextQuery ? `?${nextQuery}` : ''}`} method="post">
           <FormGroup controlId="login-email">
             <ControlLabel>Email</ControlLabel>
             <FormControl

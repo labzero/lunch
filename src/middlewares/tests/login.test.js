@@ -88,7 +88,7 @@ describe('middlewares/login', () => {
       );
 
       it('adds team to state', () => {
-        expect(authenticateStub.calledWith('google', match({ state: 'labzero' }))).to.be.true;
+        expect(authenticateStub.calledWith('google', match({ state: JSON.stringify({ team: 'labzero' }) }))).to.be.true;
       });
     });
   });
@@ -115,7 +115,7 @@ describe('middlewares/login', () => {
     describe('when state is in querystring', () => {
       let response;
       beforeEach((done) => {
-        request(app).get('/google/callback?state=labzero').then((r) => {
+        request(app).get('/google/callback?state={"team":"labzero"}').then((r) => {
           response = r;
           done();
         });

@@ -14,10 +14,20 @@ const setCookie = (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production'
     });
+    let state = {};
     if (req.query.state) {
-      res.redirect(generateUrl(req, `${req.query.state}.${bsHost}`));
+      state = JSON.parse(req.query.state);
+    }
+    let path;
+    if (state.next) {
+      path = state.next;
+    } else if (req.query.next) {
+      path = req.query.next;
+    }
+    if (state.team) {
+      res.redirect(generateUrl(req, `${state.team}.${bsHost}`, path));
     } else {
-      res.redirect('/');
+      res.redirect(path || '/');
     }
   } else {
     next();
@@ -31,12 +41,17 @@ export default () => {
     '/google',
     (req, res, next) => {
       if (req.subdomain) {
-        res.redirect(301, generateUrl(req, bsHost, `/login/google?team=${req.subdomain}`));
+        let nextQuery = '';
+        if (req.query.next) {
+          nextQuery = `&next=${req.query.next}`;
+        }
+        res.redirect(301, generateUrl(req, bsHost, `/login/google?team=${req.subdomain}${nextQuery}`));
       } else {
         const options = { scope: ['email', 'profile'], session: false };
-        if (req.query.team) {
-          options.state = req.query.team;
-        }
+        options.state = JSON.stringify({
+          team: req.query.team,
+          next: req.query.next
+        });
         passport.authenticate('google', options)(req, res, next);
       }
     },
