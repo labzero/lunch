@@ -20,11 +20,19 @@
       }
     }
   }
+  .form-error-section, .form-success-section {
+    margin-top: 0;
+    p {
+      display: inline-block;
+      vertical-align: middle;
+    }
+  }
 }
 
 .limits-term {
   table {
     border: none;
+    border-collapse: separate; // fix for IE header border bug
     th {
       border-top: 1px solid $light-blue;
       &:first-child {
@@ -43,5 +51,25 @@
         border-top: 1px solid $light-blue;
       }
     }
+  }
+}
+
+.rules-limits-form {
+  @extend %clearfix;
+  input[type=text] {
+    @extend %typography-field-placeholder;
+    box-sizing: border-box;
+    width: 140px;
+    text-align: right;
+    padding: 5px 15px;
+    &:disabled {
+      border: none;
+      background: transparent;
+      padding-right: 0px;
+    }
+  }
+  .primary-button {
+    float: right;
+    width: 440px;
   }
 }

@@ -47,7 +47,7 @@ module MAPI
         end
 
         def self.term_to_id(term)
-          MAPI::Services::EtransactAdvances::TERM_BUCKET_MAPPING[term]
+          TERM_BUCKET_MAPPING[term]
         end
 
         def self.disable_term_sql(term_id)

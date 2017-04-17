@@ -128,6 +128,14 @@ class EtransactAdvancesService < MAPIService
     @settings ||= get_hash(:settings, 'etransact_advances/settings')
   end
 
+  def update_settings(settings)
+    put_hash(:update_settings, 'etransact_advances/settings', settings)
+  end
+
+  def update_term_limits(limits)
+    put_hash(:update_term_limits, 'etransact_advances/limits', limits)
+  end
+
   def etransact_status(member_id, status_object=nil)
     enabled_for_member = MembersService.new(request).quick_advance_enabled_for_member?(member_id)
     status_object = self.status unless status_object

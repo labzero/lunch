@@ -9,4 +9,10 @@
       =link_to(t('admin.term_rules.nav.rate_report'), '#', class: "#{'active-tab' if active_nav == :rate_report}")
       =link_to(t('admin.term_rules.nav.term_details'), '#', class: "#{'active-tab' if active_nav == :term_details}")
     .tabbed-content-main
+      - if flash[:error]
+        .form-error-section
+          %p= flash[:error]
+      - if flash[:notice]
+        .form-success-section
+          %p= flash[:notice]
       = yield

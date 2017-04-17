@@ -242,6 +242,7 @@ Rails.application.routes.draw do
       scope :rules do
         scope :term do
           get '/limits' => 'admin/rules#limits', as: :rules_term_limits
+          put '/limits' => 'admin/rules#update_limits', as: :rules_update_term_limits
         end
       end
       constraints Constraints::WebAdmin.new(:edit_features?) do

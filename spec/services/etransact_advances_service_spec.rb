@@ -345,14 +345,22 @@ describe EtransactAdvancesService do
     end
   end
 
-  describe '`settings` method', :vcr do
-    let(:call_method) {subject.settings}
-    it_should_behave_like 'a MAPI backed service object method', :settings
-    it 'should return the MAPI response object' do
-      response_object = double('A MAPI Response Object')
-      allow(response_object).to receive(:with_indifferent_access).and_return(response_object)
-      allow(JSON).to receive(:parse).and_return(response_object)
-      expect(call_method).to be(response_object)
+  describe '`settings` method' do
+    let(:settings) { double('some settings') }
+    let(:call_method) { subject.settings }
+
+    it_behaves_like 'a MAPI backed service object method', :settings
+    it 'calls `get_hash` with the proper endpoint name' do
+      expect(subject).to receive(:get_hash).with(:settings, any_args)
+      call_method
+    end
+    it 'calls `get_hash` with `etransact_advances/settings` as the endpoint' do
+      expect(subject).to receive(:get_hash).with(anything, 'etransact_advances/settings')
+      call_method
+    end
+    it 'returns the result of calling `get_hash`' do
+      allow(subject).to receive(:get_hash).and_return(settings)
+      expect(call_method).to eq(settings)
     end
     it 'caches its settings for the lifecycle of the object' do
       expect(subject).to receive(:get_hash)
@@ -362,6 +370,58 @@ describe EtransactAdvancesService do
       new_subject = described_class.new(request)
       expect(new_subject).to receive(:get_hash)
       new_subject.settings
+    end
+  end
+
+  describe '`update_settings` method' do
+    let(:settings) { double('some settings') }
+    let(:results) { double('some results') }
+    let(:call_method) { subject.update_settings(settings) }
+
+    it_behaves_like 'a MAPI backed service object method', :update_settings, nil, :put, nil, true do
+      let(:call_method) { subject.update_settings(settings) }
+    end
+    it 'calls `put_hash` with the proper endpoint name' do
+      expect(subject).to receive(:put_hash).with(:update_settings, any_args)
+      call_method
+    end
+    it 'calls `put_hash` with `etransact_advances/settings` as the endpoint' do
+      expect(subject).to receive(:put_hash).with(anything, 'etransact_advances/settings', anything)
+      call_method
+    end
+    it 'calls `put_hash` with the provided settings' do
+      expect(subject).to receive(:put_hash).with(anything, anything, settings)
+      call_method
+    end
+    it 'returns the result of calling `put_hash`' do
+      allow(subject).to receive(:put_hash).and_return(results)
+      expect(call_method).to eq(results)
+    end
+  end
+
+  describe '`update_term_limits` method' do
+    let(:limits) { double('some settings') }
+    let(:results) { double('some results') }
+    let(:call_method) { subject.update_term_limits(limits) }
+
+    it_behaves_like 'a MAPI backed service object method', :update_term_limits, nil, :put, nil, true do
+      let(:call_method) { subject.update_term_limits(limits) }
+    end
+    it 'calls `put_hash` with the proper endpoint name' do
+      expect(subject).to receive(:put_hash).with(:update_term_limits, any_args)
+      call_method
+    end
+    it 'calls `put_hash` with `etransact_advances/limits` as the endpoint' do
+      expect(subject).to receive(:put_hash).with(anything, 'etransact_advances/limits', anything)
+      call_method
+    end
+    it 'calls `put_hash` with the provided limits' do
+      expect(subject).to receive(:put_hash).with(anything, anything, limits)
+      call_method
+    end
+    it 'returns the result of calling `put_hash`' do
+      allow(subject).to receive(:put_hash).and_return(results)
+      expect(call_method).to eq(results)
     end
   end
 

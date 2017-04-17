@@ -2,9 +2,24 @@ module MAPI
   module Services
     module EtransactAdvances
       module Settings
+        include MAPI::Shared::Utils
+
         SETTINGS_QUERY = <<-SQL
           SELECT * FROM WEB_ADM.AO_SETTINGS
         SQL
+
+        SETTING_NAMES_MAPPING = {
+          auto_approve: 'AutoApprove',
+          end_of_day_extension: 'EndOfDayExtension',
+          rate_timeout: 'RateTimeout',
+          rates_flagged: 'RatesFlagged',
+          rsa_timeout: 'RSATimeout',
+          shareholder_total_daily_limit: 'ShareholderTotalDailyLimit',
+          shareholder_web_daily_limit: 'ShareholderWebDailyLimit',
+          maximum_online_term_days: 'MaximumOnlineTermDays',
+          rate_stale_check: 'RateStaleCheck'
+        }.with_indifferent_access
+
         def self.settings(environment)
           settings = {}
 
@@ -27,6 +42,23 @@ module MAPI
           settings['maximum_online_term_days'] = data['MaximumOnlineTermDays'].to_i
           settings['rate_stale_check'] = data['RateStaleCheck'].to_i
           settings
+        end
+
+        def self.update_settings(app, settings)
+          unless should_fake?(app)
+            ActiveRecord::Base.transaction(isolation: :read_committed) do
+              settings.each do |setting_name, setting_value|
+                raise MAPI::Shared::Errors::InvalidFieldError.new("#{setting_name} is an invalid setting name", setting_name, setting_value) unless SETTING_NAMES_MAPPING.keys.include?(setting_name.to_s)
+                update_settings_sql = <<-SQL
+                UPDATE WEB_ADM.AO_SETTINGS
+                SET SETTING_VALUE = #{quote(setting_value)}
+                WHERE SETTING_NAME = #{quote(SETTING_NAMES_MAPPING[setting_name])}
+                SQL
+                raise MAPI::Shared::Errors::SQLError, "Failed to update settings with setting name: #{setting_name}" unless execute_sql(app.logger, update_settings_sql)
+              end
+            end
+          end
+          true
         end
       end
     end

@@ -4,6 +4,9 @@ changetype: delete
 dn: sAMAccountName=local,dc=fhlbsf-i,dc=com
 changetype: delete
 
+dn: sAMAccountName=local-no-admin,dc=fhlbsf-i,dc=com
+changetype: delete
+
 dn: sAMAccountName=local-offsite,dc=fhlbsf-i,dc=com
 changetype: delete
 

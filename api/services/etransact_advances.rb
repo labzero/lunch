@@ -2,6 +2,7 @@ require_relative 'etransact_advances/execute_trade'
 require_relative 'rates/loan_terms'
 require_relative 'rates/market_data_rates'
 require_relative 'etransact_advances/settings'
+require_relative 'etransact_advances/limits'
 
 module MAPI
   module Services
@@ -10,23 +11,6 @@ module MAPI
       include MAPI::Shared::Utils
 
       STATUS_ON_RECORD_NOTFOUND_COUNT = 0
-
-      TERM_BUCKET_MAPPING = {
-        :overnight => 1,
-        :open => 1,
-        :'1week'=> 2,
-        :'2week'=> 3,
-        :'3week'=> 4,
-        :'1month'=> 5,
-        :'2month'=> 6,
-        :'3month'=> 7,
-        :'6month'=> 8,
-        :'9month' => 9,
-        :'12month' => 10,
-        :'1year'=> 11,
-        :'2year'=> 12,
-        :'3year'=> 13,
-      }
 
       TYPE_BUCKET_COLUMN_NO_MAPPING = {
         :whole => 'WHOLE_LOAN_ENABLED',
@@ -91,14 +75,49 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/settings'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Update the settings for eTransact'
+              key :nickname, :updateEtransactSettings
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :EtransactSettings
+                key :description, "The hash of etransact setting names and setting values to update."
+              end
+            end
+          end
           # etransact advances limits endpoint
           api do
             key :path, '/limits'
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve limits of etransact Advances today'
-              key :type, :etransactAdvancesLimits
               key :nickname, :getEtransactAdvancesLimits
+              key :type, :array
+              items do
+                key :'$ref', :EtransactLimitsArray
+              end
+            end
+          end
+          api do
+            key :path, '/limits'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Update limits of etransact Advances today'
+              key :nickname, :updateEtransactAdvancesLimits
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :EtransactLimitsHash
+                key :description, "The hash of etransact term limits and associated values."
+              end
             end
           end
           api do
@@ -250,21 +269,16 @@ module MAPI
 
         # etransact advances limits
         relative_get '/limits' do
-          etransact_limits = <<-SQL
-            SELECT AO_TERM_BUCKET_ID, WHOLE_LOAN_ENABLED, SBC_AGENCY_ENABLED, SBC_AAA_ENABLED, SBC_AA_ENABLED, LOW_DAYS_TO_MATURITY,
-            HIGH_DAYS_TO_MATURITY, MIN_ONLINE_ADVANCE, TERM_DAILY_LIMIT, PRODUCT_TYPE, END_TIME, OVERRIDE_END_DATE,
-            OVERRIDE_END_TIME FROM WEB_ADM.AO_TERM_BUCKETS
-          SQL
-          etransact_limits_array = if settings.environment == :production
-            MAPI::Services::EtransactAdvances.fetch_hashes(logger, etransact_limits)
-          else
-            JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_limits.json')))
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            MAPI::Services::EtransactAdvances::Limits.get_limits(self)
           end
-          reverse_bucket_mapping = TERM_BUCKET_MAPPING.invert
-          etransact_limits_array.each do |bucket|
-            bucket['TERM'] = reverse_bucket_mapping[bucket['AO_TERM_BUCKET_ID']]
+        end
+
+        relative_put '/limits' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            limits_hash = JSON.parse(request.body.read)
+            {} if MAPI::Services::EtransactAdvances::Limits.update_limits(self, limits_hash)
           end
-          etransact_limits_array.to_json
         end
         
         relative_get '/blackout_dates' do
@@ -272,11 +286,16 @@ module MAPI
         end
 
         relative_get '/settings' do
-          data = MAPI::Services::EtransactAdvances::Settings.settings(settings.environment)
-          if !data
-            halt 503, 'Interal Server Error'
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            MAPI::Services::EtransactAdvances::Settings.settings(settings.environment)
           end
-          data.to_json
+        end
+
+        relative_put '/settings' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            settings_hash = JSON.parse(request.body.read)
+            {} if MAPI::Services::EtransactAdvances::Settings.update_settings(self, settings_hash)
+          end
         end
 
         # etransact advances status

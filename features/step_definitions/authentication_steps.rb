@@ -43,6 +43,11 @@ Given(/^I am logged into the admin panel$/) do
   step %{I visit the admin dashboard}
 end
 
+Given(/^I am logged into the admin panel but do not have web admin privileges$/) do
+  step %{I am logged in as an "non-admin intranet user"}
+  step %{I visit the admin dashboard}
+end
+
 Given(/^I am logged in to a bank with data for the "([^"]*)" report$/) do |report|
   user_type = case report
   when 'Securities Services Monthly Statement'
@@ -309,6 +314,8 @@ def user_for_type(user_type)
     primary_user
   when 'intranet user'
     intranet_user
+  when 'non-admin intranet user'
+    intranet_user_no_admin
   when 'quick-advance signer'
     quick_advance_signer
   when 'quick-advance non-signer'
@@ -364,6 +371,10 @@ end
 
 def intranet_user
   CustomConfig.env_config['intranet_user']
+end
+
+def intranet_user_no_admin
+  CustomConfig.env_config['intranet_user_no_admin']
 end
 
 def extranet_user
