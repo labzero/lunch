@@ -244,6 +244,11 @@ Rails.application.routes.draw do
           get '/limits' => 'admin/rules#limits', as: :rules_term_limits
           put '/limits' => 'admin/rules#update_limits', as: :rules_update_term_limits
         end
+        scope 'advance-availability' do
+          get '/status' => 'admin/rules#advance_availability_status', as: :rules_advance_availability
+          get '/term' => 'admin/rules#advance_availability_by_term', as: :rules_advance_availability_by_term
+          get '/member' => 'admin/rules#advance_availability_by_member', as: :rules_advance_availability_by_member
+        end
       end
       constraints Constraints::WebAdmin.new(:edit_features?) do
         mount Flipper::UI.app(Rails.application.flipper) => '/flipper-features', as: :flipper_features_admin

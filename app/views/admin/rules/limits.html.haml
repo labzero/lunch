@@ -1,4 +1,4 @@
-=render layout: 'rules', locals: {active_nav: :daily_limit, classes: 'limits'} do
+=render layout: 'term', locals: {active_nav: :daily_limit, classes: 'limits'} do
   =form_tag(rules_update_term_limits_url, {class: 'rules-limits-form', method: :put}) do
     %section.limits-global
       %h2= t('admin.term_rules.daily_limit.global_limits')

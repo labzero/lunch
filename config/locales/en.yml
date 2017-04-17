@@ -3327,6 +3327,12 @@ en:
       messages:
         error: An error has occurred. Please try your action again.
         success: Your changes have been saved.
+    advance_availability:
+      title: Add Advance Availability
+      nav:
+        status: 'Add Advance On/Off'
+        term: Availability by Term
+        member: Availability by Member
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

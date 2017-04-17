@@ -86,4 +86,18 @@ class Admin::RulesController < Admin::BaseController
     redirect_to action: :limits
   end
 
+  # GET
+  def advance_availability_status
+
+  end
+
+  # GET
+  def advance_availability_by_term
+
+  end
+
+  # GET
+  def advance_availability_by_member
+
+  end
 end

@@ -14,12 +14,56 @@ Then(/^I should be on the term rules (limits) page$/) do |rules_page|
   page.assert_selector('.term-rules h1', text: title, exact: true)
 end
 
-Then(/^the term rules (daily limits) tab should be active/) do |active_nav|
+Then(/^the (term rules|add advance availability) (daily limits|status|by term|by member) tab should be active$/) do |page_selector, active_nav|
+  page_selector = case page_selector
+  when 'term rules'
+    '.limits'
+  when 'add advance availability'
+    '.advance-availability'
+  end
   nav_text = case active_nav
   when 'daily limits'
     I18n.t('admin.term_rules.nav.daily_limit')
+  when 'status'
+    I18n.t('admin.advance_availability.nav.status')
+  when 'by term'
+    I18n.t('admin.advance_availability.nav.term')
+  when 'by member'
+    I18n.t('admin.advance_availability.nav.member')
   end
-  page.assert_selector('.limits .tabbed-content nav a', text: nav_text, exact: true)
+  page.assert_selector("#{page_selector} .tabbed-content nav .active-tab", text: nav_text, exact: true)
+end
+
+Then(/^I should be on the add advance availability (status|by term|by member) page$/) do |availability_page|
+  selector = case availability_page
+  when 'status'
+    '.advance-availability-status'
+  when 'by term'
+    '.advance-availability-term'
+  when 'by member'
+    '.advance-availability-member'
+  end
+  page.assert_selector(selector)
+end
+
+When(/^I click on the (term rules|add advance availability) (daily limits|status|by term|by member) tab$/) do |page_selector, active_nav|
+  page_selector = case page_selector
+  when 'term rules'
+    '.limits'
+  when 'add advance availability'
+    '.advance-availability'
+  end
+  nav_text = case active_nav
+  when 'daily limits'
+    I18n.t('admin.term_rules.nav.daily_limit')
+  when 'status'
+    I18n.t('admin.advance_availability.nav.status')
+  when 'by term'
+    I18n.t('admin.advance_availability.nav.term')
+  when 'by member'
+    I18n.t('admin.advance_availability.nav.member')
+  end
+  page.find("#{page_selector} .tabbed-content nav a", text: nav_text, exact: true).click
 end
 
 Then(/^I should see the term rules limits page in view-only mode$/) do

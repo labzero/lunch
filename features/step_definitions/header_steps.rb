@@ -9,7 +9,7 @@ Then(/^I should see the (reports|resources|products|securities) dropdown$/) do |
   report_menu.find(:xpath, '..').assert_selector('.nav-dropdown', visible: true)
 end
 
-When(/^I click on the (agreements|amortizing|arc|arc embedded|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance|manage securities|securities requests|resources|products|learn more|securities|safekeep new|pledge new|letters of credit|manage letters of credit|test features|features|new letter of credit|convertible|standby letters of credit|trade credit rules|term rules) link in the header$/) do |link|
+When(/^I click on the (agreements|amortizing|arc|arc embedded|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance|manage securities|securities requests|resources|products|learn more|securities|safekeep new|pledge new|letters of credit|manage letters of credit|test features|features|new letter of credit|convertible|standby letters of credit|trade credit rules|term rules|add advance availability) link in the header$/) do |link|
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
 end
 
@@ -133,6 +133,8 @@ def dropdown_title_regex(dropdown)
     I18n.t('admin.nav.secondary.trade_rules')
   when 'term rules'
     I18n.t('admin.term_rules.title')
+  when 'add advance availability'
+    I18n.t('admin.advance_availability.title')
   else
     raise 'unknown dropdown'
   end

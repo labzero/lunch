@@ -263,4 +263,19 @@ RSpec.describe Admin::RulesController, :type => :controller do
       expect(response).to redirect_to(rules_term_limits_url)
     end
   end
+
+  describe 'GET advance_availability_status' do
+    let(:call_action) { get :advance_availability_status }
+    it_behaves_like 'a RulesController action with before_action methods'
+  end
+
+  describe 'GET advance_availability_by_term' do
+    let(:call_action) { get :advance_availability_by_term }
+    it_behaves_like 'a RulesController action with before_action methods'
+  end
+
+  describe 'GET advance_availability_by_member' do
+    let(:call_action) { get :advance_availability_by_member }
+    it_behaves_like 'a RulesController action with before_action methods'
+  end
 end
