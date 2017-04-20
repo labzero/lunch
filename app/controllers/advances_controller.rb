@@ -197,12 +197,15 @@ class AdvancesController < ApplicationController
       limit_error = advance_request.errors.find {|e| e.type == :limits}
       preview_errors = advance_request.errors.select {|e| e.type == :preview }
       rate_error = advance_request.errors.find {|e| e.type == :rate}
-      other_errors = advance_request.errors - [limit_error, rate_error, *preview_errors]
+      date_error = advance_request.errors.find {|e| e.type == :date}
+      other_errors = advance_request.errors - [limit_error, rate_error, date_error, *preview_errors]
 
       if limit_error.present?
         error = limit_error
       elsif rate_error.present?
         error = rate_error
+      elsif date_error.present?
+        error = date_error
       else
         collateral_error = preview_errors.find {|e| e.code == :collateral }
         exceeds_maximum_term_error = preview_errors.find {|e| e.code == :exceeds_maximum_term }

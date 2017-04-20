@@ -723,6 +723,7 @@ en:
           other: Your institution has a maximum term for advances of %{count} months. See your Account Summary for more details.
         day_unit: day
         month_unit: month
+        custom_term_date: Overnight advances are only available under the VRC program.
     reports:
       title: Reports
       as_of_yesterday: As of yesterday

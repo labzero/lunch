@@ -643,6 +643,11 @@ describe AdvanceRequest do
       expect(subject).to receive(:clear_errors)
       call_method
     end
+    it 'calls `custom_term_valid_dates_check`' do
+      expect(subject).to receive(:clear_errors).ordered
+      expect(subject).to receive(:custom_term_valid_dates_check).ordered
+      call_method
+    end
     it 'calls `perform_limit_check`' do
       expect(subject).to receive(:clear_errors).ordered
       expect(subject).to receive(:perform_limit_check).ordered
@@ -1331,6 +1336,40 @@ describe AdvanceRequest do
         allow(subject).to receive_message_chain(:aasm, :current_event).and_return(:execute)
         call_method
         expect(subject.rate).to be(rate)
+      end
+    end
+  end
+
+  describe '`custom_term_valid_dates_check` protected method' do
+    let(:call_method) { subject.send(:custom_term_valid_dates_check) }
+    let(:now) { Time.zone.now }
+
+    describe 'when term matches `CUSTOM_TERM`' do
+      before do
+        days = rand(1..1000)
+        allow(subject).to receive(:term).and_return("#{days}day")
+      end
+      it 'does not add a custom_term error if custom_maturity_date - funding_date >= 2' do
+        allow(subject).to receive(:custom_maturity_date).and_return(now + rand(2..1000).day)
+        allow(subject).to receive(:funding_date).and_return(now)
+        expect(subject).to_not receive(:add_error).with(:date, :custom_term)
+        call_method
+      end
+      it 'adds a custom_term error if custom_maturity_date - funding_date < 2' do
+        allow(subject).to receive(:custom_maturity_date).and_return(now + rand(0..1).day)
+        allow(subject).to receive(:funding_date).and_return(now)
+        expect(subject).to receive(:add_error).with(:date, :custom_term)
+        call_method
+      end
+    end
+    describe 'when term does not match `CUSTOM_TERM`' do
+      before do
+        term = double('A Term')
+        allow(subject).to receive(:term).and_return(term)
+      end
+      it 'does not add a custom_term error' do
+        expect(subject).to_not receive(:add_error).with(:date, :custom_term)
+        call_method
       end
     end
   end

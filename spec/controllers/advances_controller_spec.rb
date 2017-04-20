@@ -732,6 +732,17 @@ RSpec.describe AdvancesController, :type => :controller do
           make_request
         end
       end
+      describe 'date errors' do
+        let(:date_error) { double('date error', type: :date, code: error_code) }
+        before do
+          allow(advance_request).to receive(:errors).and_return([date_error])
+        end
+        it_behaves_like 'an advance preview error'
+        it 'populates the advance error view parameters with the proper error message' do
+          expect(subject).to receive(:populate_advance_error_view_parameters).with({error_message: error_code, error_value: nil})
+          make_request
+        end
+      end
       describe 'collateral preview errors' do
         let(:collateral_error) { double('collateral error', type: :preview, code: :collateral, value: error_value) }
         before do
