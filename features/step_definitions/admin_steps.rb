@@ -14,23 +14,14 @@ Then(/^I should be on the term rules (limits) page$/) do |rules_page|
   page.assert_selector('.term-rules h1', text: title, exact: true)
 end
 
-Then(/^the (term rules|add advance availability) (daily limits|status|by term|by member) tab should be active$/) do |page_selector, active_nav|
+Then(/^the (term rules|add advance availability) (daily limits|status|by term|by member|rate bands) tab should be active$/) do |page_selector, active_nav|
   page_selector = case page_selector
   when 'term rules'
-    '.limits'
+    '.term-rules'
   when 'add advance availability'
     '.advance-availability'
   end
-  nav_text = case active_nav
-  when 'daily limits'
-    I18n.t('admin.term_rules.nav.daily_limit')
-  when 'status'
-    I18n.t('admin.advance_availability.nav.status')
-  when 'by term'
-    I18n.t('admin.advance_availability.nav.term')
-  when 'by member'
-    I18n.t('admin.advance_availability.nav.member')
-  end
+  nav_text = translate_tab_title(active_nav)
   page.assert_selector("#{page_selector} .tabbed-content nav .active-tab", text: nav_text, exact: true)
 end
 
@@ -46,23 +37,14 @@ Then(/^I should be on the add advance availability (status|by term|by member) pa
   page.assert_selector(selector)
 end
 
-When(/^I click on the (term rules|add advance availability) (daily limits|status|by term|by member) tab$/) do |page_selector, active_nav|
+When(/^I click on the (term rules|add advance availability) (daily limits|status|by term|by member|rate bands) tab$/) do |page_selector, active_nav|
   page_selector = case page_selector
   when 'term rules'
-    '.limits'
+    '.term-rules'
   when 'add advance availability'
     '.advance-availability'
   end
-  nav_text = case active_nav
-  when 'daily limits'
-    I18n.t('admin.term_rules.nav.daily_limit')
-  when 'status'
-    I18n.t('admin.advance_availability.nav.status')
-  when 'by term'
-    I18n.t('admin.advance_availability.nav.term')
-  when 'by member'
-    I18n.t('admin.advance_availability.nav.member')
-  end
+  nav_text = translate_tab_title(active_nav)
   page.find("#{page_selector} .tabbed-content nav a", text: nav_text, exact: true).click
 end
 
@@ -91,4 +73,19 @@ end
 
 Then(/^I should see the success message on the term rules limits page$/) do
   page.assert_selector('.term-rules .form-success-section p', text: I18n.t('admin.term_rules.messages.success'), exact: true)
+end
+
+def translate_tab_title(nav)
+  case nav
+  when 'daily limits'
+    I18n.t('admin.term_rules.nav.daily_limit')
+  when 'status'
+    I18n.t('admin.advance_availability.nav.status')
+  when 'by term'
+    I18n.t('admin.advance_availability.nav.term')
+  when 'by member'
+    I18n.t('admin.advance_availability.nav.member')
+  when 'rate bands'
+    I18n.t('admin.term_rules.nav.rate_bands')
+  end
 end

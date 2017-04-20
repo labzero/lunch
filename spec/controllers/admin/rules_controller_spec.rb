@@ -278,4 +278,125 @@ RSpec.describe Admin::RulesController, :type => :controller do
     let(:call_action) { get :advance_availability_by_member }
     it_behaves_like 'a RulesController action with before_action methods'
   end
+
+  describe 'GET rate_bands' do
+    let(:sentinel) { SecureRandom.hex }
+    let(:term) { described_class::VALID_TERMS.sample }
+    let(:rate_bands) {{
+      term => {'LOW_BAND_OFF_BP' => double('LOW_BAND_OFF_BP', to_i: nil),
+      'LOW_BAND_WARN_BP' => double('LOW_BAND_WARN_BP', to_i: nil),
+      'HIGH_BAND_WARN_BP' => double('HIGH_BAND_WARN_BP', to_i: nil),
+      'HIGH_BAND_OFF_BP' => double('HIGH_BAND_OFF_BP', to_i: nil)}
+    }}
+    let(:rates_service) { instance_double(RatesService, rate_bands: rate_bands)}
+    let(:call_action) { get :rate_bands }
+
+    before do
+      allow(RatesService).to receive(:new).with(request).and_return(rates_service)
+    end
+
+    it_behaves_like 'a RulesController action with before_action methods'
+    it 'creates a new instance of the RatesService with the request' do
+      expect(RatesService).to receive(:new).with(request).and_return(rates_service)
+      call_action
+    end
+    it 'calls `rate_bands` on the instance of RatesService' do
+      expect(rates_service).to receive(:rate_bands).and_return(rate_bands)
+      call_action
+    end
+    it 'raises an error if `rate_bands` returns nil' do
+      allow(rates_service).to receive(:rate_bands).and_return(nil)
+      expect{call_action}.to raise_error('There has been an error and Admin::RulesController#rate_bands has encountered nil')
+    end
+    describe '`@rate_bands`' do
+      let(:rate_band_var) { call_action; assigns[:rate_bands] }
+      describe 'column_headings' do
+        let(:translated_string) { double('translation') }
+        before { allow(controller).to receive(:t).and_call_original }
+        it 'contains the proper translations for the column headings' do
+          expect(rate_band_var[:column_headings]).to eq(
+            ['', I18n.t('admin.term_rules.rate_bands.low_shutdown_html'), I18n.t('admin.term_rules.rate_bands.low_warning_html'),
+             I18n.t('admin.term_rules.rate_bands.high_warning_html'), I18n.t('admin.term_rules.rate_bands.high_shutdown_html')]
+          )
+        end
+        ['low_shutdown_html', 'low_warning_html', 'high_warning_html', 'high_shutdown_html'].each do |translation|
+          it "ensures the translation for `#{translation}` is html safe" do
+            allow(controller).to receive(:t).with("admin.term_rules.rate_bands.#{translation}").and_return(translated_string)
+            expect(translated_string).to receive(:html_safe)
+            call_action
+          end
+        end
+      end
+      it 'raises an error if it encounters an unrecognized `:term` in one of the rates_service.rate_bands keys' do
+        rate_bands[sentinel] = {}
+        expect{rate_band_var}.to raise_error("There has been an error and Admin::RulesController#rate_bands has encountered a RatesService.rate_bands bucket with an invalid term: #{sentinel}")
+      end
+      it 'ignores rate_band info for the `overnight` term' do
+        rate_bands['overnight'] = {}
+        expect(rate_band_var[:rows].length).to eq(1)
+      end
+      describe 'rows' do
+        let(:rate_bands) do
+          data = {}
+          described_class::VALID_TERMS.each do |term|
+            data[term] = {'LOW_BAND_OFF_BP' => double('LOW_BAND_OFF_BP', to_i: nil),
+                          'LOW_BAND_WARN_BP' => double('LOW_BAND_WARN_BP', to_i: nil),
+                          'HIGH_BAND_WARN_BP' => double('HIGH_BAND_WARN_BP', to_i: nil),
+                          'HIGH_BAND_OFF_BP' => double('HIGH_BAND_OFF_BP', to_i: nil)}
+          end
+          data
+        end
+        before { allow(rates_service).to receive(:rate_bands).and_return(rate_bands) }
+        it 'contains as many rows as rates_service.rate_bands keys' do
+          expect(rate_band_var[:rows].length).to eq(rate_bands.keys.length)
+        end
+        described_class::VALID_TERMS.each_with_index do |term, i|
+          describe "the `#{term}` term row" do
+            let(:term_row) { rate_band_var[:rows][i] }
+
+            it "has a first column value with the correct translation for the `#{term}` term" do
+              translation = term == 'open' ? 'admin.term_rules.daily_limit.dates.open' : "dashboard.quick_advance.table.axes_labels.#{term}"
+              expect(term_row[:columns][0][:value]).to eq(I18n.t(translation))
+            end
+            describe 'the second column' do
+              it 'has a `value` that is the result of calling `to_i` on the bucket\'s `LOW_BAND_OFF_BP`' do
+                allow(rate_bands[term]['LOW_BAND_OFF_BP']).to receive(:to_i).and_return(sentinel)
+                expect(term_row[:columns][1][:value]).to eq(sentinel)
+              end
+              it 'has a `type` that is `:number`' do
+                expect(term_row[:columns][1][:type]).to eq(:number)
+              end
+            end
+            describe 'the third column' do
+              it 'has a `value` that is the result of calling `to_i` on the bucket\'s `LOW_BAND_WARN_BP`' do
+                allow(rate_bands[term]['LOW_BAND_WARN_BP']).to receive(:to_i).and_return(sentinel)
+                expect(term_row[:columns][2][:value]).to eq(sentinel)
+              end
+              it 'has a `type` that is `:number`' do
+                expect(term_row[:columns][2][:type]).to eq(:number)
+              end
+            end
+            describe 'the fourth column' do
+              it 'has a `value` that is the result of calling `to_i` on the bucket\'s `HIGH_BAND_WARN_BP`' do
+                allow(rate_bands[term]['HIGH_BAND_WARN_BP']).to receive(:to_i).and_return(sentinel)
+                expect(term_row[:columns][3][:value]).to eq(sentinel)
+              end
+              it 'has a `type` that is `:number`' do
+                expect(term_row[:columns][3][:type]).to eq(:number)
+              end
+            end
+            describe 'the fifth column' do
+              it 'has a `value` that is the result of calling `to_i` on the bucket\'s `HIGH_BAND_OFF_BP`' do
+                allow(rate_bands[term]['HIGH_BAND_OFF_BP']).to receive(:to_i).and_return(sentinel)
+                expect(term_row[:columns][4][:value]).to eq(sentinel)
+              end
+              it 'has a `type` that is `:number`' do
+                expect(term_row[:columns][4][:type]).to eq(:number)
+              end
+            end
+          end
+        end
+      end
+    end
+  end
 end

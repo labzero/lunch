@@ -73,7 +73,7 @@ module MAPI
           property term do
             key :required, true
             key :type, :EtransactLimitsBucket
-            key :description, 'An object containing the limit information for the `open` term'
+            key :description, "An object containing the limit information for the `#{term}` term"
           end
         end
       end

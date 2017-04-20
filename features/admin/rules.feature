@@ -32,3 +32,11 @@ Feature: Viewing/Modifying the Term/Credit Rules
     When I click the save changes button for the rules limits form
     Then I should be on the term rules limits page
     And I should see the success message on the term rules limits page
+
+  @jira-mem-2308
+  Scenario: Navigating to the Rate Bands page
+    When I click on the trade credit rules link in the header
+    And I click on the term rules link in the header
+    And I click on the term rules rate bands tab
+    Then the term rules rate bands tab should be active
+    And I should see 1 report tables with multiple data rows

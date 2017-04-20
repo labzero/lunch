@@ -100,4 +100,27 @@ class Admin::RulesController < Admin::BaseController
   def advance_availability_by_member
 
   end
+
+  # GET
+  def rate_bands
+    rate_bands = RatesService.new(request).rate_bands
+    raise 'There has been an error and Admin::RulesController#rate_bands has encountered nil' unless rate_bands
+    @rate_bands = {
+      column_headings: ['', t('admin.term_rules.rate_bands.low_shutdown_html').html_safe, t('admin.term_rules.rate_bands.low_warning_html').html_safe,
+                        t('admin.term_rules.rate_bands.high_warning_html').html_safe, t('admin.term_rules.rate_bands.high_shutdown_html').html_safe],
+      rows: []
+    }
+    rate_bands.each do |term, rate_band_info|
+      next if term == 'overnight'
+      raise "There has been an error and Admin::RulesController#rate_bands has encountered a RatesService.rate_bands bucket with an invalid term: #{term}" unless VALID_TERMS.include?(term.to_sym)
+      row = {columns: [
+        {value: term == 'open' ? t('admin.term_rules.daily_limit.dates.open') : t("dashboard.quick_advance.table.axes_labels.#{term}")},
+        {value: rate_band_info['LOW_BAND_OFF_BP'].to_i, type: :number},
+        {value: rate_band_info['LOW_BAND_WARN_BP'].to_i, type: :number},
+        {value: rate_band_info['HIGH_BAND_WARN_BP'].to_i, type: :number},
+        {value: rate_band_info['HIGH_BAND_OFF_BP'].to_i, type: :number}
+      ]}
+      @rate_bands[:rows] << row
+    end
+  end
 end
