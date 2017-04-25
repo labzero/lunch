@@ -161,7 +161,7 @@ Happy Lunching!`
 
 ${req.user.get('name')} invited you to the ${req.team.get('name')} team on Lunch!
 
-To get started, simply visit ${generateUrl(req, bsHost)} and log in with Google.
+To get started, simply visit ${generateUrl(req, bsHost)} and log in with Google using the email address with which you've received this message.
 
 If you'd like to log in using a password instead, just follow this URL to generate one:
 ${generateUrl(req, bsHost, `/password/edit?token=${resetPasswordToken}`)}

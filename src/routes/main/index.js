@@ -26,7 +26,6 @@ export default {
     require('./password').default,
     require('./users').default,
     require('./about').default,
-    require('./comingSoon').default,
     require('../login').default,
 
     // Wildcard routes, e.g. { path: '*', ... } (must go last)

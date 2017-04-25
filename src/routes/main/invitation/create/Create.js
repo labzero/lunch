@@ -5,8 +5,13 @@ import s from './Create.scss';
 
 class Create extends Component {
   static propTypes = {
-    success: PropTypes.string.isRequired,
-    token: PropTypes.string.isRequired
+    success: PropTypes.string,
+    token: PropTypes.string
+  };
+
+  static defaultProps = {
+    success: undefined,
+    token: undefined
   };
 
   render() {

@@ -54,7 +54,7 @@ passport.use(new GoogleStrategy(
         }
 
         if (!user) {
-          return done(null, false, 'Sign-ups are disabled for now.');
+          return done(null, false, accountEmail.value);
         }
 
         if (
@@ -76,7 +76,7 @@ passport.use(new GoogleStrategy(
         return done(err);
       }
     }
-    return done(null, false, 'No email provided.');
+    return done(null, false);
   }
 ));
 

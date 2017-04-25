@@ -57,8 +57,20 @@ export default () => {
     },
   ).get('/google/callback',
     (req, res, next) => {
-      const options = { failureRedirect: '/coming-soon', session: false };
-      passport.authenticate('google', options)(req, res, next);
+      passport.authenticate('google', { session: false }, (err, user, email) => {
+        if (err) { return next(err); }
+        if (!user) {
+          let path = '/invitation/new';
+          if (email) {
+            path = `${path}?email=${email}`;
+          }
+          res.redirect(path);
+        }
+        return req.logIn(user, (logInErr) => {
+          if (logInErr) { return next(logInErr); }
+          return next();
+        });
+      })(req, res, next);
     },
     setCookie
   ).post('/',

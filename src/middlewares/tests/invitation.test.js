@@ -20,14 +20,12 @@ describe('middlewares/invitation', () => {
   let sendMailSpy;
   let InvitationMock;
   let RoleMock;
-  let TeamMock;
   let UserMock;
   let flashSpy;
 
   beforeEach(() => {
     InvitationMock = dbMock.define('invitation', {});
     RoleMock = dbMock.define('role', {});
-    TeamMock = dbMock.define('team', {});
     UserMock = dbMock.define('user', {});
     sendMailSpy = spy();
     flashSpy = spy();
@@ -36,7 +34,6 @@ describe('middlewares/invitation', () => {
         '../models': mockEsmodule({
           Invitation: InvitationMock,
           Role: RoleMock,
-          Team: TeamMock,
           User: UserMock
         }),
         '../mailers/transporter': mockEsmodule({

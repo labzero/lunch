@@ -34,14 +34,14 @@ export default () => {
               subject: 'Welcome to Lunch!',
               text: `Hi there!
 
-  You've been invited to create a team on Lunch!
+You've been invited to create a team on Lunch!
 
-  To get started, simply visit ${generateUrl(req, bsHost)} and log in with Google.
+To get started, simply visit ${generateUrl(req, bsHost)} and log in with Google using the email address with which you signed up.
 
-  If you'd like to log in using a password instead, just follow this URL to generate one:
-  ${generateUrl(req, bsHost, `/password/edit?token=${resetPasswordToken}`)}
+If you'd like to log in using a password instead, just follow this URL to generate one:
+${generateUrl(req, bsHost, `/password/edit?token=${resetPasswordToken}`)}
 
-  Happy Lunching!`
+Happy Lunching!`
             });
 
             next();

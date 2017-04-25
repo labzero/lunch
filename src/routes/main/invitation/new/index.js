@@ -16,10 +16,12 @@ export default {
   path: '/new',
 
   action(context) {
+    const email = context.query.email;
+
     return {
       component: (
         <LayoutContainer path={context.url}>
-          <New />
+          <New email={email} />
         </LayoutContainer>
       ),
     };

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { bsHost } from '../config';
 import generateToken from '../helpers/generateToken';
 import generateUrl from '../helpers/generateUrl';
-import { Invitation, Role, Team, User } from '../models';
+import { Invitation, Role, User } from '../models';
 import transporter from '../mailers/transporter';
 
 const sendConfirmation = async (req, email, token) => {
@@ -44,23 +44,12 @@ export default () => {
                 });
                 const firstSuperuser = recipients[0];
                 if (firstSuperuser) {
-                  let text = `${invitation.email} would like to be invited.`;
-
-                  const firstRole = firstSuperuser.get('roles')[0];
-                  if (firstRole) {
-                    const team = await Team.findOne({ where: { id: firstRole.get('team_id') } });
-
-                    if (team) {
-                      text += `
-                      
-Add and remove them from any team, like this one: ${generateUrl(req, `${team.slug}.${bsHost}`, `/team?email=${invitation.email}`)}`;
-                    }
-                  }
-
                   await transporter.sendMail({
                     recipients,
                     subject: 'Invitation request',
-                    text
+                    text: `${invitation.email} would like to be invited.
+                      
+Add them here: ${generateUrl(req, bsHost, `/users/new?email=${invitation.email}`)}`
                   });
                 }
                 next();
