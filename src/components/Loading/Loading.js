@@ -4,11 +4,11 @@ import s from './Loading.scss';
 
 const Loading = () => (
   <div className={s.root}>
-    <div />
-    <div />
-    <div />
-    <div />
-    <div />
+    <div><div /></div>
+    <div><div /></div>
+    <div><div /></div>
+    <div><div /></div>
+    <div><div /></div>
   </div>
 );
 

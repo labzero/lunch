@@ -3,40 +3,34 @@
 @keyframes move {
   0% {
     animation-timing-function: cubic-bezier(0, 0, .5, .875);
-    left: 0%;
+    transform: translateX(0);
   }
 
   50% {
     animation-timing-function: cubic-bezier(.5, .125, 1, 1);
-    left: calc(50% - 12.5px);
+    transform: translateX(187.5px);
   }
 
   100% {
     animation-timing-function: cubic-bezier(0, 0, .5, .875);
-    left: 100%;
+    transform: translateX(400px);
   }
 }
 
 @keyframes resize {
   0% {
     animation-timing-function: cubic-bezier(0, 0, .25, 1);
-    height: 0;
-    top: 37.5px;
-    width: 0;
+    transform: scale(0);
   }
 
   50% {
     animation-timing-function: cubic-bezier(.75, 0, 1, 1);
-    height: 25px;
-    top: 25px;
-    width: 25px;
+    transform: scale(1);
   }
 
   100% {
     animation-timing-function: cubic-bezier(0, 0, .25, 1);
-    height: 0;
-    top: 37.5px;
-    width: 0;
+    transform: scale(0);
   }
 }
 
@@ -44,34 +38,82 @@
   height: 75px;
   padding: 25px 0;
   margin: 0 auto;
-  max-width: 400px;
+  width: 400px;
   position: relative;
 
   > * {
-    animation: resize 2s infinite linear, move 2s infinite linear;
-    background: pink;
-    border: $default-border;
-    border-radius: 50%;
+    animation: move 2s infinite linear;
     position: absolute;
 
+    > * {
+      animation: resize 2s infinite linear;
+      background: pink;
+      border: $default-border;
+      border-radius: 50%;
+      height: 25px;
+      width: 25px;
+    }
+
     &:nth-child(1) {
-      animation-delay: -0s;
+      &,
+      > * {
+        animation-delay: -0s;
+      }
     }
 
     &:nth-child(2) {
-      animation-delay: -.4s;
+      &,
+      > * {
+        animation-delay: -.4s;
+      }
     }
 
     &:nth-child(3) {
-      animation-delay: -.8s;
+      &,
+      > * {
+        animation-delay: -.8s;
+      }
     }
 
     &:nth-child(4) {
-      animation-delay: -1.2s;
+      &,
+      > * {
+        animation-delay: -1.2s;
+      }
     }
 
     &:nth-child(5) {
-      animation-delay: -1.6s;
+      &,
+      > * {
+        animation-delay: -1.6s;
+      }
+    }
+  }
+}
+
+@keyframes moveSmall {
+  0% {
+    animation-timing-function: cubic-bezier(0, 0, .5, .875);
+    transform: translateX(0);
+  }
+
+  50% {
+    animation-timing-function: cubic-bezier(.5, .125, 1, 1);
+    transform: translateX(137.5px);
+  }
+
+  100% {
+    animation-timing-function: cubic-bezier(0, 0, .5, .875);
+    transform: translateX(300px);
+  }
+}
+
+@media (max-width: 439px) {
+  .root {
+    width: 300px;
+
+    > * {
+      animation: resize 2s infinite linear, moveSmall 2s infinite linear;
     }
   }
 }
