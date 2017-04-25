@@ -26,9 +26,9 @@ const Landing = () => (
               bsSize="large"
               bsStyle="primary"
               className={s.cta}
-              href="/login"
+              href="/invitation/new"
             >
-              Log into your teams
+              Get invited
             </Button>
           </Col>
         </Row>
@@ -80,7 +80,7 @@ const Landing = () => (
     </Grid>
     <Grid>
       <div className={s.finalCta}>
-        <h3>Come on in!</h3>
+        <h3>Already a member? Come on in!</h3>
         <Button bsSize="large" bsStyle="primary" className={s.cta} href="/login">
           Log into your teams
         </Button>

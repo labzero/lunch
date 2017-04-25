@@ -47,4 +47,5 @@ export default new Map([
     }
     return state;
   }],
+  [ActionTypes.CURRENT_USER_PATCHED, (state, action) => action.user]
 ]);

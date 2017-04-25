@@ -3,7 +3,8 @@ import Login from './Login';
 
 const mapStateToProps = (state, ownProps) => ({
   host: state.host,
-  teamSlug: ownProps.teamSlug
+  team: ownProps.team,
+  next: ownProps.next
 });
 
 export default connect(mapStateToProps)(Login);

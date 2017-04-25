@@ -20,11 +20,12 @@ export default {
     const state = context.store.getState();
 
     const subdomain = context.subdomain;
+    const next = context.query.next;
 
     return renderIfLoggedOut(state, () => ({
       component: (
         <LayoutContainer path={context.url}>
-          <LoginContainer teamSlug={subdomain} />
+          <LoginContainer team={subdomain} next={next} />
         </LayoutContainer>
       ),
     }));

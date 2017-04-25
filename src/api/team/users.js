@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import cors from 'cors';
-import { Role, User } from '../../models';
+import { Invitation, Role, User } from '../../models';
 import { bsHost } from '../../config';
 import { TEAM_LIMIT } from '../../constants';
+import generateToken from '../../helpers/generateToken';
 import generateUrl from '../../helpers/generateUrl';
 import getRole from '../../helpers/getRole';
 import hasRole from '../../helpers/hasRole';
@@ -135,7 +136,7 @@ Happy Lunching!`
             return res.status(201).json({ error: false, data: userToAdd });
           }
 
-          const resetPasswordToken = await User.generateToken();
+          const resetPasswordToken = await generateToken();
 
           let newUser = await User.create({
             email,
@@ -149,6 +150,9 @@ Happy Lunching!`
           }, { include: [Role] });
 
           // returns a promise but we're not going to wait to see if it succeeds.
+          Invitation.destroy({ where: { email } }).then(() => {}).catch(() => {});
+
+          // returns a promise but we're not going to wait to see if it succeeds.
           transporter.sendMail({
             name,
             email,
@@ -157,7 +161,7 @@ Happy Lunching!`
 
 ${req.user.get('name')} invited you to the ${req.team.get('name')} team on Lunch!
 
-To get started, simply visit ${generateUrl(req, bsHost)} and log in with Google.
+To get started, simply visit ${generateUrl(req, bsHost)} and log in with Google using the email address with which you've received this message.
 
 If you'd like to log in using a password instead, just follow this URL to generate one:
 ${generateUrl(req, bsHost, `/password/edit?token=${resetPasswordToken}`)}

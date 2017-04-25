@@ -1,21 +1,26 @@
 import React, { Component, PropTypes } from 'react';
+import queryString from 'query-string';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import Button from 'react-bootstrap/lib/Button';
+import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Grid from 'react-bootstrap/lib/Grid';
-import Button from 'react-bootstrap/lib/Button';
+import Row from 'react-bootstrap/lib/Row';
 import google from './google.svg';
 import s from './Login.scss';
 
 class Login extends Component {
   static propTypes = {
     host: PropTypes.string.isRequired,
-    teamSlug: PropTypes.string
+    next: PropTypes.string,
+    team: PropTypes.string
   };
 
   static defaultProps = {
-    teamSlug: undefined
+    next: undefined,
+    team: undefined
   };
 
   state = {
@@ -29,8 +34,11 @@ class Login extends Component {
     });
 
   render() {
-    const { host, teamSlug } = this.props;
+    const { host, next, team } = this.props;
     const { email, password } = this.state;
+
+    const googleQuery = queryString.stringify({ team, next });
+    const nextQuery = queryString.stringify({ next });
 
     return (
       <Grid className={s.root}>
@@ -40,34 +48,38 @@ class Login extends Component {
             bsSize="large"
             bsStyle="primary"
             className={s.googleButton}
-            href={`//${host}/login/google${teamSlug ? `?team=${teamSlug}` : ''}`}
+            href={`//${host}/login/google${googleQuery ? `?${googleQuery}` : ''}`}
           >
             <img className={s.googleLogo} src={google} alt="" />
             Sign in with Google
           </Button>
         </div>
         <h3>Email/password</h3>
-        <form action="/login" method="post">
-          <FormGroup controlId="login-email">
-            <ControlLabel>Email</ControlLabel>
-            <FormControl
-              onChange={this.handleChange('email')}
-              name="email"
-              type="email"
-              required
-              value={email}
-            />
-          </FormGroup>
-          <FormGroup controlId="login-password">
-            <ControlLabel>Password</ControlLabel>
-            <FormControl
-              onChange={this.handleChange('password')}
-              name="password"
-              type="password"
-              required
-              value={password}
-            />
-          </FormGroup>
+        <form action={`/login${nextQuery ? `?${nextQuery}` : ''}`} method="post">
+          <Row>
+            <Col sm={6}>
+              <FormGroup controlId="login-email">
+                <ControlLabel>Email</ControlLabel>
+                <FormControl
+                  onChange={this.handleChange('email')}
+                  name="email"
+                  type="email"
+                  required
+                  value={email}
+                />
+              </FormGroup>
+              <FormGroup controlId="login-password">
+                <ControlLabel>Password</ControlLabel>
+                <FormControl
+                  onChange={this.handleChange('password')}
+                  name="password"
+                  type="password"
+                  required
+                  value={password}
+                />
+              </FormGroup>
+            </Col>
+          </Row>
           <Button type="submit">Log in</Button>
           <Button bsStyle="link" href={`//${host}/password/new${email ? `?email=${email}` : ''}`}>
             Forgot password?

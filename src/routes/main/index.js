@@ -21,9 +21,11 @@ export default {
     require('./teams').default,
     require('./newTeam').default,
     require('./account').default,
+    require('./welcome').default,
+    require('./invitation').default,
     require('./password').default,
+    require('./users').default,
     require('./about').default,
-    require('./comingSoon').default,
     require('../login').default,
 
     // Wildcard routes, e.g. { path: '*', ... } (must go last)

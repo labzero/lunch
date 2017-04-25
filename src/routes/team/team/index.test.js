@@ -2,24 +2,25 @@
 /* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates */
 
 import { expect } from 'chai';
-import { spy } from 'sinon';
 import configureStore from 'redux-mock-store';
 import { __RewireAPI__ as landingRewireApi } from './index';
 import landing from './index';
 
 const mockStore = configureStore();
 
-describe('routes/teams/team/team', () => {
+describe('routes/team/team', () => {
   let context;
   let render404;
   let team;
 
   beforeEach(() => {
+    landingRewireApi.__Rewire__('renderIfHasName', (_, cb) => cb());
     team = {
       id: 77
     };
     context = {
       params: {},
+      query: {},
       store: mockStore({
         team,
         user: {
@@ -58,23 +59,6 @@ describe('routes/teams/team/team', () => {
 
     it('renders team', () => {
       expect(result).to.have.keys('component', 'chunk', 'map', 'title');
-    });
-  });
-
-  describe('when there is no user', () => {
-    let redirectToLoginSpy;
-    beforeEach(() => {
-      redirectToLoginSpy = spy();
-      landingRewireApi.__Rewire__('redirectToLogin', redirectToLoginSpy);
-      context.store = mockStore({
-        team,
-        user: {}
-      });
-      return landing.action(context);
-    });
-
-    it('redirects to login', () => {
-      expect(redirectToLoginSpy.calledWith(context)).to.be.true;
     });
   });
 });

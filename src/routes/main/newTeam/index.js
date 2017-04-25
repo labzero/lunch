@@ -10,7 +10,7 @@
 import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
 import loadComponent from '../../../helpers/loadComponent';
-import redirectToLogin from '../../helpers/redirectToLogin';
+import renderIfHasName from '../../helpers/renderIfHasName';
 
 const title = 'New Team';
 
@@ -18,11 +18,8 @@ export default {
 
   path: '/new-team',
 
-  async action(context) {
-    const state = context.store.getState();
-    const user = state.user;
-
-    if (user.id) {
+  action(context) {
+    return renderIfHasName(context, async () => {
       const NewTeamContainer = await loadComponent(
         () => require.ensure([], require => require('./NewTeamContainer').default, 'new-team')
       );
@@ -37,9 +34,7 @@ export default {
         ),
         map: true
       };
-    }
-
-    return redirectToLogin(context);
+    });
   },
 
 };

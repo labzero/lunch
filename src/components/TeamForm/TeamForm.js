@@ -1,8 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import Button from 'react-bootstrap/lib/Button';
+import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
+import Row from 'react-bootstrap/lib/Row';
 import TeamGeosuggestContainer from '../TeamGeosuggest/TeamGeosuggestContainer';
 import TeamMapContainer from '../TeamMap/TeamMapContainer';
 
@@ -46,11 +48,15 @@ class TeamForm extends Component {
           <ControlLabel>
             Name
           </ControlLabel>
-          <FormControl
-            onChange={this.handleChange('name')}
-            required
-            value={name}
-          />
+          <Row>
+            <Col sm={6}>
+              <FormControl
+                onChange={this.handleChange('name')}
+                required
+                value={name}
+              />
+            </Col>
+          </Row>
         </FormGroup>
         <FormGroup controlId="teamForm-address">
           <ControlLabel>Address</ControlLabel>

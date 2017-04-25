@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { bsHost } from '../config';
+import generateToken from '../helpers/generateToken';
 import generateUrl from '../helpers/generateUrl';
 import getPasswordError from '../helpers/getPasswordError';
 import getUserPasswordUpdates from '../helpers/getUserPasswordUpdates';
@@ -13,7 +14,7 @@ export default () => {
     try {
       const user = await User.findOne({ where: { email: req.body.email } });
       if (user) {
-        const resetPasswordToken = await User.generateToken();
+        const resetPasswordToken = await generateToken();
         await user.update({
           reset_password_token: resetPasswordToken,
           reset_password_sent_at: new Date()

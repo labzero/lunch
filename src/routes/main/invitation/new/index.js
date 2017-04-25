@@ -8,24 +8,22 @@
  */
 
 import React from 'react';
-import LayoutContainer from '../../../components/Layout/LayoutContainer';
-import ComingSoon from './ComingSoon';
-
-const title = 'Coming Soon';
+import LayoutContainer from '../../../../components/Layout/LayoutContainer';
+import New from './New';
 
 export default {
 
-  path: '/coming-soon',
+  path: '/new',
 
-  async action(context) {
+  action(context) {
+    const email = context.query.email;
+
     return {
-      title,
       component: (
         <LayoutContainer path={context.url}>
-          <ComingSoon />
+          <New email={email} />
         </LayoutContainer>
       ),
     };
   },
-
 };

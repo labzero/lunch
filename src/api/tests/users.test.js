@@ -17,6 +17,7 @@ const dbMock = new SequelizeMock();
 describe('api/team/users', () => {
   let app;
   let checkTeamRoleSpy;
+  let InvitationMock;
   let RoleMock;
   let UserMock;
   let loggedInSpy;
@@ -26,8 +27,8 @@ describe('api/team/users', () => {
   let user;
 
   beforeEach(() => {
+    InvitationMock = dbMock.define('invitation', {});
     UserMock = dbMock.define('user', {});
-    UserMock.generateToken = () => Promise.resolve('12345');
     RoleMock = dbMock.define('role', {});
 
     team = {
@@ -58,6 +59,7 @@ describe('api/team/users', () => {
     makeApp = deps => {
       const usersApi = proxyquireStrict('../team/users', {
         '../../models': mockEsmodule({
+          Invitation: InvitationMock,
           Role: RoleMock,
           User: UserMock,
         }),
@@ -360,6 +362,7 @@ describe('api/team/users', () => {
 
     describe('when user does not exist', () => {
       let createStub;
+      let destroyStub;
       let findOneStub;
       beforeEach(() => {
         app = makeApp({
@@ -378,6 +381,8 @@ describe('api/team/users', () => {
           .callsFake(() => Promise.resolve({
             id: 2
           }));
+        destroyStub = stub(InvitationMock, 'destroy')
+          .callsFake(() => Promise.resolve());
         return request(app).post('/').send({ email: 'foo@bar.com', name: 'Jeffrey', type: 'member' });
       });
 
@@ -385,12 +390,20 @@ describe('api/team/users', () => {
         expect(createStub.calledWith({
           email: 'foo@bar.com',
           name: 'Jeffrey',
-          reset_password_token: '12345',
+          reset_password_token: match.string,
           reset_password_sent_at: match.date,
           roles: [{
             team_id: 77,
             type: 'member'
           }]
+        })).to.be.true;
+      });
+
+      it('destroys any invitations that match email', () => {
+        expect(destroyStub.calledWith({
+          where: {
+            email: 'foo@bar.com'
+          }
         })).to.be.true;
       });
 

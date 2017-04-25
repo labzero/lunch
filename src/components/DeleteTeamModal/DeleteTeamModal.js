@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
@@ -7,6 +8,7 @@ import InputGroup from 'react-bootstrap/lib/InputGroup';
 import Modal from 'react-bootstrap/lib/Modal';
 import ModalBody from 'react-bootstrap/lib/ModalBody';
 import ModalFooter from 'react-bootstrap/lib/ModalFooter';
+import Row from 'react-bootstrap/lib/Row';
 import Button from 'react-bootstrap/lib/Button';
 import { TEAM_SLUG_REGEX } from '../../constants';
 import s from './DeleteTeamModal.scss';
@@ -52,20 +54,24 @@ class DeleteTeamModal extends Component {
             and all users will be unassigned from the team.
           </p>
           <p>To confirm, please write the URL of the team in the field below.</p>
-          <FormGroup controlId="deleteTeamModal-confirmSlug">
-            <ControlLabel>Team URL</ControlLabel>
-            <InputGroup>
-              <FormControl
-                className={s.teamUrl}
-                type="text"
-                onChange={this.handleChange}
-                pattern={TEAM_SLUG_REGEX}
-                value={confirmSlug}
-                required
-              />
-              <InputGroup.Addon>.lunch.pink</InputGroup.Addon>
-            </InputGroup>
-          </FormGroup>
+          <Row>
+            <Col sm={9}>
+              <FormGroup controlId="deleteTeamModal-confirmSlug">
+                <ControlLabel>Team URL</ControlLabel>
+                <InputGroup>
+                  <FormControl
+                    className={s.teamUrl}
+                    type="text"
+                    onChange={this.handleChange}
+                    pattern={TEAM_SLUG_REGEX}
+                    value={confirmSlug}
+                    required
+                  />
+                  <InputGroup.Addon>.lunch.pink</InputGroup.Addon>
+                </InputGroup>
+              </FormGroup>
+            </Col>
+          </Row>
         </ModalBody>
         <ModalFooter>
           <Button type="button" bsSize="small" onClick={hideModal}>Cancel</Button>

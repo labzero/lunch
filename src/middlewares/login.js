@@ -14,10 +14,20 @@ const setCookie = (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production'
     });
+    let state = {};
     if (req.query.state) {
-      res.redirect(generateUrl(req, `${req.query.state}.${bsHost}`));
+      state = JSON.parse(req.query.state);
+    }
+    let path;
+    if (state.next) {
+      path = state.next;
+    } else if (req.query.next) {
+      path = req.query.next;
+    }
+    if (state.team) {
+      res.redirect(generateUrl(req, `${state.team}.${bsHost}`, path));
     } else {
-      res.redirect('/');
+      res.redirect(path || '/');
     }
   } else {
     next();
@@ -31,19 +41,36 @@ export default () => {
     '/google',
     (req, res, next) => {
       if (req.subdomain) {
-        res.redirect(301, generateUrl(req, bsHost, `/login/google?team=${req.subdomain}`));
+        let nextQuery = '';
+        if (req.query.next) {
+          nextQuery = `&next=${req.query.next}`;
+        }
+        res.redirect(301, generateUrl(req, bsHost, `/login/google?team=${req.subdomain}${nextQuery}`));
       } else {
         const options = { scope: ['email', 'profile'], session: false };
-        if (req.query.team) {
-          options.state = req.query.team;
-        }
+        options.state = JSON.stringify({
+          team: req.query.team,
+          next: req.query.next
+        });
         passport.authenticate('google', options)(req, res, next);
       }
     },
   ).get('/google/callback',
     (req, res, next) => {
-      const options = { failureRedirect: '/coming-soon', session: false };
-      passport.authenticate('google', options)(req, res, next);
+      passport.authenticate('google', { session: false }, (err, user, email) => {
+        if (err) { return next(err); }
+        if (!user) {
+          let path = '/invitation/new';
+          if (email) {
+            path = `${path}?email=${email}`;
+          }
+          res.redirect(path);
+        }
+        return req.logIn(user, (logInErr) => {
+          if (logInErr) { return next(logInErr); }
+          return next();
+        });
+      })(req, res, next);
     },
     setCookie
   ).post('/',
