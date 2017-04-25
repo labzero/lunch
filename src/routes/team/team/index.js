@@ -11,7 +11,7 @@ import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
 import hasRole from '../../../helpers/hasRole';
 import loadComponent from '../../../helpers/loadComponent';
-import redirectToLogin from '../../helpers/redirectToLogin';
+import renderIfHasName from '../../helpers/renderIfHasName';
 import render404 from '../../helpers/render404';
 
 const title = 'Team';
@@ -20,12 +20,12 @@ export default {
 
   path: '/team',
 
-  async action(context) {
+  action(context) {
     const state = context.store.getState();
     const user = state.user;
     const team = state.team;
 
-    if (user.id) {
+    return renderIfHasName(context, async () => {
       if (team.id && hasRole(user, team, 'member')) {
         const TeamContainer = await loadComponent(
           () => require.ensure([], require => require('./TeamContainer').default, 'team')
@@ -43,9 +43,7 @@ export default {
         };
       }
       return render404;
-    }
-
-    return redirectToLogin(context);
+    });
   },
 
 };

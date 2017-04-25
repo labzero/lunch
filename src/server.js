@@ -46,6 +46,7 @@ import passport from './core/passport';
 import invitationMiddleware from './middlewares/invitation';
 import loginMiddleware from './middlewares/login';
 import passwordMiddleware from './middlewares/password';
+import usersMiddleware from './middlewares/users';
 import api from './api';
 import { sequelize } from './models/db';
 import { Team, User } from './models';
@@ -160,6 +161,8 @@ app.use((err, req, res, next) => {
     req.logout();
     res.clearCookie('id_token', { domain });
     next();
+  } else {
+    next(err);
   }
 });
 
@@ -189,6 +192,7 @@ app.use((req, res, next) => {
 app.use('/invitation', invitationMiddleware());
 app.use('/login', loginMiddleware());
 app.use('/password', passwordMiddleware());
+app.use('/users', usersMiddleware());
 
 app.get('/logout', (req, res) => {
   req.logout();
@@ -341,6 +345,7 @@ const render = async (req, res, next) => {
 app.post('/invitation', render);
 app.post('/login', render);
 app.post('/password', render);
+app.post('/users', render);
 app.put('/password', render);
 app.get('*', render);
 

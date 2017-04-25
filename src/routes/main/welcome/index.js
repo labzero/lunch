@@ -10,31 +10,35 @@
 import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
 import loadComponent from '../../../helpers/loadComponent';
-import renderIfHasName from '../../helpers/renderIfHasName';
+import redirectToLogin from '../../helpers/redirectToLogin';
 
-const title = 'New Team';
+const title = 'Welcome!';
 
 export default {
 
-  path: '/new-team',
+  path: '/welcome',
 
-  action(context) {
-    return renderIfHasName(context, async () => {
-      const NewTeamContainer = await loadComponent(
-        () => require.ensure([], require => require('./NewTeamContainer').default, 'new-team')
+  async action(context) {
+    const state = context.store.getState();
+    const user = state.user;
+
+    if (user.id) {
+      const WelcomeContainer = await loadComponent(
+        () => require.ensure([], require => require('./WelcomeContainer').default, 'welcome')
       );
 
       return {
         title,
-        chunk: 'new-team',
+        chunk: 'welcome',
         component: (
           <LayoutContainer path={context.url}>
-            <NewTeamContainer />
+            <WelcomeContainer next={context.query.next} team={context.query.team} />
           </LayoutContainer>
-        ),
-        map: true
+        )
       };
-    });
+    }
+
+    return redirectToLogin(context);
   },
 
 };

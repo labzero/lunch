@@ -8,7 +8,7 @@
  */
 
 import hasRole from '../../../helpers/hasRole';
-import redirectToLogin from '../../helpers/redirectToLogin';
+import renderIfHasName from '../../helpers/renderIfHasName';
 import render404 from '../../helpers/render404';
 
 export default {
@@ -21,7 +21,7 @@ export default {
     const team = state.team;
     const user = state.user;
 
-    if (user.id) {
+    return renderIfHasName(context, () => {
       if (team.id && hasRole(user, team)) {
         return {
           redirect: `//${host}/teams`,
@@ -29,8 +29,6 @@ export default {
         };
       }
       return render404;
-    }
-
-    return redirectToLogin(context);
+    });
   }
 };
