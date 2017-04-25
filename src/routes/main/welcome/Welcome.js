@@ -1,10 +1,12 @@
 import React, { Component, PropTypes } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Button from 'react-bootstrap/lib/Button';
+import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import Grid from 'react-bootstrap/lib/Grid';
+import Row from 'react-bootstrap/lib/Row';
 import s from './Welcome.scss';
 
 class Welcome extends Component {
@@ -38,16 +40,20 @@ class Welcome extends Component {
         <h2>Welcome!</h2>
         <p>Welcome to Lunch! To continue, please enter your name.</p>
         <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="account-name">
-            <ControlLabel>Name</ControlLabel>
-            <FormControl
-              name="name"
-              onChange={this.handleChange}
-              required
-              type="text"
-              value={name}
-            />
-          </FormGroup>
+          <Row>
+            <Col sm={6}>
+              <FormGroup controlId="account-name">
+                <ControlLabel>Name</ControlLabel>
+                <FormControl
+                  name="name"
+                  onChange={this.handleChange}
+                  required
+                  type="text"
+                  value={name}
+                />
+              </FormGroup>
+            </Col>
+          </Row>
           <Button type="submit">Submit</Button>
         </form>
       </Grid>

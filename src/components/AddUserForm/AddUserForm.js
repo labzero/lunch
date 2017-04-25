@@ -1,10 +1,12 @@
 import React, { Component, PropTypes } from 'react';
 import { intlShape } from 'react-intl';
 import Button from 'react-bootstrap/lib/Button';
+import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import HelpBlock from 'react-bootstrap/lib/HelpBlock';
+import Row from 'react-bootstrap/lib/Row';
 import { globalMessageDescriptor as gm } from '../../helpers/generateMessageDescriptor';
 
 class AddUserForm extends Component {
@@ -49,37 +51,49 @@ class AddUserForm extends Component {
             <ControlLabel>
               Name
             </ControlLabel>
-            <FormControl
-              type="text"
-              onChange={this.handleChange('name')}
-              value={name}
-            />
+            <Row>
+              <Col sm={6}>
+                <FormControl
+                  type="text"
+                  onChange={this.handleChange('name')}
+                  value={name}
+                />
+              </Col>
+            </Row>
           </FormGroup>
           <FormGroup controlId="addUserForm-email">
             <ControlLabel>
               Email
             </ControlLabel>
-            <FormControl
-              type="email"
-              onChange={this.handleChange('email')}
-              value={email}
-              required
-            />
+            <Row>
+              <Col sm={6}>
+                <FormControl
+                  type="email"
+                  onChange={this.handleChange('email')}
+                  value={email}
+                  required
+                />
+              </Col>
+            </Row>
           </FormGroup>
           <FormGroup controlId="addUserForm-type">
             <ControlLabel>
               Type
             </ControlLabel>
-            <FormControl
-              componentClass="select"
-              onChange={this.handleChange('type')}
-              value={type}
-              required
-            >
-              {hasGuestRole && <option value="guest">{f(gm('guestRole'))}</option>}
-              {hasMemberRole && <option value="member">{f(gm('memberRole'))}</option>}
-              {hasOwnerRole && <option value="owner">{f(gm('ownerRole'))}</option>}
-            </FormControl>
+            <Row>
+              <Col sm={6}>
+                <FormControl
+                  componentClass="select"
+                  onChange={this.handleChange('type')}
+                  value={type}
+                  required
+                >
+                  {hasGuestRole && <option value="guest">{f(gm('guestRole'))}</option>}
+                  {hasMemberRole && <option value="member">{f(gm('memberRole'))}</option>}
+                  {hasOwnerRole && <option value="owner">{f(gm('ownerRole'))}</option>}
+                </FormControl>
+              </Col>
+            </Row>
             <HelpBlock>
               Members can add new users and remove guests.
               {hasOwnerRole &&
