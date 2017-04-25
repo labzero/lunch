@@ -139,11 +139,6 @@ class ResourcesController < ApplicationController
 
     @capital_stock_rows = [
       {
-        title: t('resources.forms.authorizations.capital_stock.repurchase'),
-        form_number: 2239,
-        pdf_link: resources_download_path(file: :form_2239)
-      },
-      {
         title: t('resources.forms.authorizations.capital_stock.redemption'),
         form_number: 2238,
         pdf_link: resources_download_path(file: :form_2238)
