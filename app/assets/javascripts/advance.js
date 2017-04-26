@@ -295,7 +295,7 @@ $(function () {
   function getMaturityDate() {
     var $datePickerTrigger = $($formPreview.find('.datepicker-trigger'));
     var maturityDate = $datePickerTrigger.find('input').val();
-    if ((maturityDate != null) && (maturityDate != '')) {
+    if ((maturityDate != null) && (maturityDate != '') && (moment(maturityDate).startOf('day') > moment().startOf('day'))) {
       maturityDate = moment(maturityDate).format('YYYY-MM-DD');
     }
     return maturityDate;
