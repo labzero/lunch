@@ -54,12 +54,13 @@
   }
 }
 
-.rules-limits-form {
+.term-rules form {
   @extend %clearfix;
   input[type=text] {
     @extend %typography-field-placeholder;
+    @extend %default-border;
+    border-color: $actionable-blue;
     box-sizing: border-box;
-    width: 140px;
     text-align: right;
     padding: 5px 15px;
     &:disabled {
@@ -74,10 +75,30 @@
   }
 }
 
+.rules-limits-form {
+  input[type=text] {
+    width: 140px;
+  }
+  input[type=submit] {
+    margin-bottom: 10px;
+  }
+}
+
+.rules-rate-bands-form {
+  input[type=text] {
+    width: 60px;
+    margin-left: 55px;
+    &:disabled {
+      margin-left: 80px;
+    }
+  }
+}
+
 .term-rules-rate-bands {
   table {
     width: 840px;
     border: none;
+    margin-bottom: 20px;
   }
   thead {
     background: transparent;

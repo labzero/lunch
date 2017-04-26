@@ -545,6 +545,23 @@ module MAPI
               key :type, :RateBands
             end
           end
+
+          # Update rate band info
+          api do
+            key :path, '/rate_bands'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Update rate band info for the terms contained in the JSON body'
+              key :nickname, :UpdateRateBands
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :RateBands
+                key :description, "The hash of terms and their associated rate band values."
+              end
+            end
+          end
         end
 
         relative_get "/historic/overnight" do
@@ -889,6 +906,13 @@ module MAPI
         relative_get '/rate_bands' do
           MAPI::Services::Rates.rescued_json_response(self) do
             MAPI::Services::Rates::RateBands.rate_bands(logger, settings.environment)
+          end
+        end
+
+        relative_put '/rate_bands' do
+          MAPI::Services::Rates.rescued_json_response(self) do
+            rate_bands = JSON.parse(request.body.read)
+            {} if MAPI::Services::Rates::RateBands.update_rate_bands(self, rate_bands)
           end
         end
 

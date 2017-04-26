@@ -11,7 +11,7 @@ class Admin::RulesController < Admin::BaseController
     @can_edit_trade_rules = policy(:web_admin).edit_trade_rules?
   end
 
-  before_action only: [:update_limits] do
+  before_action only: [:update_limits, :update_rate_bands] do
     authorize :web_admin, :edit_trade_rules?
   end
 
@@ -78,11 +78,7 @@ class Admin::RulesController < Admin::BaseController
     settings_results = etransact_service.update_settings(global_limits)
     term_limits_results = etransact_service.update_term_limits(term_limits)
     raise "There has been an error and Admin::RulesController#update_limits has encountered nil" unless settings_results && term_limits_results
-    if settings_results[:error] || term_limits_results[:error]
-      flash[:error] = t('admin.term_rules.messages.error')
-    else
-      flash[:notice] = t('admin.term_rules.messages.success')
-    end
+    set_flash_message([settings_results, term_limits_results])
     redirect_to action: :limits
   end
 
@@ -115,12 +111,56 @@ class Admin::RulesController < Admin::BaseController
       raise "There has been an error and Admin::RulesController#rate_bands has encountered a RatesService.rate_bands bucket with an invalid term: #{term}" unless VALID_TERMS.include?(term.to_sym)
       row = {columns: [
         {value: term == 'open' ? t('admin.term_rules.daily_limit.dates.open') : t("dashboard.quick_advance.table.axes_labels.#{term}")},
-        {value: rate_band_info['LOW_BAND_OFF_BP'].to_i, type: :number},
-        {value: rate_band_info['LOW_BAND_WARN_BP'].to_i, type: :number},
-        {value: rate_band_info['HIGH_BAND_WARN_BP'].to_i, type: :number},
-        {value: rate_band_info['HIGH_BAND_OFF_BP'].to_i, type: :number}
+        {value: rate_band_info['LOW_BAND_OFF_BP'].to_i,
+         type: :text_field,
+         name: "rate_bands[#{term}][LOW_BAND_OFF_BP]",
+         value_type: :number,
+         disabled: !@can_edit_trade_rules,
+         options: {html: false}
+        },
+        {value: rate_band_info['LOW_BAND_WARN_BP'].to_i,
+         type: :text_field,
+         name: "rate_bands[#{term}][LOW_BAND_WARN_BP]",
+         value_type: :number,
+         disabled: !@can_edit_trade_rules,
+         options: {html: false}
+        },
+        {value: rate_band_info['HIGH_BAND_WARN_BP'].to_i,
+         type: :text_field,
+         name: "rate_bands[#{term}][HIGH_BAND_WARN_BP]",
+         value_type: :number,
+         disabled: !@can_edit_trade_rules,
+         options: {html: false}
+        },
+        {value: rate_band_info['HIGH_BAND_OFF_BP'].to_i,
+         type: :text_field,
+         name: "rate_bands[#{term}][HIGH_BAND_OFF_BP]",
+         value_type: :number,
+         disabled: !@can_edit_trade_rules,
+         options: {html: false}
+        }
       ]}
       @rate_bands[:rows] << row
+    end
+  end
+
+  # PUT
+  def update_rate_bands
+    rate_bands = params[:rate_bands].with_indifferent_access
+    rate_bands_result = RatesService.new(request).update_rate_bands(rate_bands)
+    raise "There has been an error and Admin::RulesController#update_rate_bands has encountered nil" unless rate_bands_result
+    set_flash_message(rate_bands_result)
+    redirect_to action: :rate_bands
+  end
+
+  private
+
+  def set_flash_message(results)
+    errors = Array.wrap(results).collect{ |result| result[:error] }.compact
+    if errors.present?
+      flash[:error] = t('admin.term_rules.messages.error')
+    else
+      flash[:notice] = t('admin.term_rules.messages.success')
     end
   end
 end

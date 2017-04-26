@@ -1499,4 +1499,25 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'put `rates/rate_bands`' do
+    let(:post_body) { {"params" => "#{SecureRandom.hex}"} }
+    let(:call_endpoint) { put 'rates/rate_bands', post_body.to_json }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'rates/rate_bands', :put, MAPI::Services::Rates::RateBands, :update_rate_bands, "{}"
+
+    it 'calls `MAPI::Services::Rates::RateBands.update_rate_bands` with the app' do
+      expect(MAPI::Services::Rates::RateBands).to receive(:update_rate_bands).with(an_instance_of(MAPI::ServiceApp), anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::Rates::RateBands.update_rate_bands` with the parsed post body' do
+      expect(MAPI::Services::Rates::RateBands).to receive(:update_rate_bands).with(an_instance_of(MAPI::ServiceApp), post_body)
+      call_endpoint
+    end
+    it 'returns a JSONd empty hash in the response body if the `update_limits` method is successful' do
+      allow(MAPI::Services::Rates::RateBands).to receive(:update_rate_bands).and_return(true)
+      call_endpoint
+      expect(last_response.body).to eq({}.to_json)
+    end
+  end
+
 end

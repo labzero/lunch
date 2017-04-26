@@ -48,12 +48,18 @@ When(/^I click on the (term rules|add advance availability) (daily limits|status
   page.find("#{page_selector} .tabbed-content nav a", text: nav_text, exact: true).click
 end
 
-Then(/^I should see the term rules limits page in view-only mode$/) do
-  page.assert_no_selector('.rules-limits-form input[type=submit]')
-end
-
-Then(/^I should see the term rules limits page in its editable mode$/) do
-  expect(page.find('.rules-limits-form input[type=submit]').value).to eq(I18n.t('admin.term_rules.save'))
+Then(/^I should see the term rules (limits|rate bands) page in its (view-only|editable) mode$/) do |form, mode|
+  selector = case form
+  when 'limits'
+    '.rules-limits-form'
+  when 'rate bands'
+    '.rules-rate-bands-form'
+             end
+  if mode == 'view-only'
+    page.assert_no_selector("#{selector} input[type=submit]")
+  else
+    expect(page.find("#{selector} input[type=submit]").value).to eq(I18n.t('admin.term_rules.save'))
+  end
 end
 
 When(/^I am on the term rules (limits) page$/) do |rules_page|

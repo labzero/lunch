@@ -264,4 +264,30 @@ describe RatesService do
     end
   end
 
+  describe '`update_rate_bands` method' do
+    let(:rate_bands) { double('rate bands') }
+    let(:results) { double('some results') }
+    let(:call_method) { subject.update_rate_bands(rate_bands) }
+
+    it_behaves_like 'a MAPI backed service object method', :update_rate_bands, nil, :put, nil, true do
+      let(:call_method) { subject.update_rate_bands(rate_bands) }
+    end
+    it 'calls `put_hash` with the proper endpoint name' do
+      expect(subject).to receive(:put_hash).with(:update_rate_bands, any_args)
+      call_method
+    end
+    it 'calls `put_hash` with `rates/rate_bands` as the endpoint' do
+      expect(subject).to receive(:put_hash).with(anything, 'rates/rate_bands', anything)
+      call_method
+    end
+    it 'calls `put_hash` with the provided rate bands' do
+      expect(subject).to receive(:put_hash).with(anything, anything, rate_bands)
+      call_method
+    end
+    it 'returns the result of calling `put_hash`' do
+      allow(subject).to receive(:put_hash).and_return(results)
+      expect(call_method).to eq(results)
+    end
+  end
+
 end
