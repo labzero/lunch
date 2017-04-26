@@ -64,7 +64,7 @@ export default () => {
           if (email) {
             path = `${path}?email=${email}`;
           }
-          res.redirect(path);
+          return res.redirect(path);
         }
         return req.logIn(user, (logInErr) => {
           if (logInErr) { return next(logInErr); }
