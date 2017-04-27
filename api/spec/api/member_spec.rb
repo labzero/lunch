@@ -94,6 +94,7 @@ describe MAPI::ServiceApp do
     end
 
     it_behaves_like 'a MAPI endpoint with JSON error handling', "/member/#{rand(1000..99999)}/securities/release", :post, MAPI::Services::Member::SecuritiesRequests, :create_release, {user:{}}.to_json
+    it_behaves_like 'a securities endpoint that raises a member validation error', "/member/#{rand(1000..99999)}/securities/release", :post, :create_release, {user:{}}.to_json
 
     it 'calls `MAPI::Services::Member::SecuritiesRequests.create_release`' do
       request_id = SecureRandom.hex
@@ -139,6 +140,7 @@ describe MAPI::ServiceApp do
     let(:exception_message) { SecureRandom.hex }
 
     it_behaves_like 'a MAPI endpoint with JSON error handling', "/member/#{rand(1000..99999)}/securities/transfer", :post, MAPI::Services::Member::SecuritiesRequests, :create_transfer, {user:{}}.to_json
+    it_behaves_like 'a securities endpoint that raises a member validation error', "/member/#{rand(1000..99999)}/securities/transfer", :post, :create_transfer, {user:{}}.to_json
 
     it 'returns 200 and request_id after calling `MAPI::Services::Member::SecuritiesRequests.create_transfer`' do
       request_id = SecureRandom.hex
@@ -200,6 +202,7 @@ describe MAPI::ServiceApp do
     let(:response_status) { update_transfer; last_response.status }
 
     it_behaves_like 'a MAPI endpoint with JSON error handling', "/member/#{rand(1000..99999)}/securities/transfer", :put, MAPI::Services::Member::SecuritiesRequests, :update_transfer, {user:{}, request_id: SecureRandom.hex}.to_json
+    it_behaves_like 'a securities endpoint that raises a member validation error', "/member/#{rand(1000..99999)}/securities/transfer", :put, :update_transfer, {user:{}, request_id: SecureRandom.hex}.to_json
 
     it 'returns 200 and request_id after calling `MAPI::Services::Member::SecuritiesRequests.update_transfer`' do
       allow(MAPI::Services::Member::SecuritiesRequests).to receive(:update_transfer).with(
@@ -411,6 +414,7 @@ describe MAPI::ServiceApp do
       before { allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger) }
 
       it_behaves_like 'a MAPI endpoint with JSON error handling', "/member/#{rand(1000..99999)}/securities/release", :put, MAPI::Services::Member::SecuritiesRequests, :update_release, {user: SecureRandom.hex, request_id: SecureRandom.hex}.to_json
+      it_behaves_like 'a securities endpoint that raises a member validation error', "/member/#{rand(1000..99999)}/securities/release", :put, :update_release, {user: SecureRandom.hex, request_id: SecureRandom.hex}.to_json
 
       describe 'when there is no `user` hash in the posted body' do
         before { post_body.delete(:user) }
@@ -471,6 +475,7 @@ describe MAPI::ServiceApp do
     end
 
     it_behaves_like 'a MAPI endpoint with JSON error handling', "/member/#{rand(1000..99999)}/securities/intake", :post, MAPI::Services::Member::SecuritiesRequests, :create_intake, {user:{}}.to_json
+    it_behaves_like 'a securities endpoint that raises a member validation error', "/member/#{rand(1000..99999)}/securities/intake", :post, :create_intake, {user:{}}.to_json
 
     it 'calls `MAPI::Services::Member::SecuritiesRequests.create_intake`' do
       request_id = SecureRandom.hex
@@ -573,6 +578,12 @@ describe MAPI::ServiceApp do
                       "/member/#{rand(1000..99999)}/securities/intake",
                       :put,
                       MAPI::Services::Member::SecuritiesRequests,
+                      :update_intake,
+                      {user: SecureRandom.hex, request_id: SecureRandom.hex}.to_json
+
+      it_behaves_like 'a securities endpoint that raises a member validation error',
+                      "/member/#{rand(1000..99999)}/securities/intake",
+                      :put,
                       :update_intake,
                       {user: SecureRandom.hex, request_id: SecureRandom.hex}.to_json
 

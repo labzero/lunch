@@ -1509,6 +1509,7 @@ en:
       no_rows: Your file contains no valid rows. Edit your file and try again.
     upload_success: 'The following securities from your Excel file were validated and will be included in the securities request:'
     internal_user_error: This securities request was not completed because Bank employees are not authorized to complete securities requests via the member portal.
+    member_not_set_up_html: You must have a pledge and/or safekeeping account set up to submit this request. Contact <a href=%{email}>Securities Services</a> at %{phone}.
   letters_of_credit:
     title: Letters of Credit
     contact: 'If you need assistance or wish to request a different type of letter of credit, call or email:'

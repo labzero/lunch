@@ -767,13 +767,16 @@ class SecuritiesController < ApplicationController
     securities_request_errors = securities_request.errors
     specific_error_keys = [:settlement_date, :securities, :base]
     if securities_request_errors.present?
+      if securities_request_errors.key?(:member)
+        return I18n.t('securities.release.edit.member_not_set_up_html', email: securities_services_email, phone: securities_services_phone_number).html_safe
+      end
       general_error_keys = (securities_request_errors.keys - specific_error_keys)
       if general_error_keys.present?
         error_key = general_error_keys.first
         securities_request_errors[error_key].first
-      elsif securities_request_errors[:settlement_date].present?
+      elsif securities_request_errors.key?(:settlement_date)
         securities_request_errors[:settlement_date].first
-      elsif securities_request_errors[:securities].present?
+      elsif securities_request_errors.key?(:securities)
         securities_request_errors[:securities].first
       else
         I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email).html_safe

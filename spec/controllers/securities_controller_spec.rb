@@ -2330,6 +2330,8 @@ RSpec.describe SecuritiesController, type: :controller do
 
     describe '`prioritized_securities_request_error`' do
       generic_error_message = I18n.t('securities.release.edit.generic_error_html', phone_number: securities_services_phone_number, email: securities_services_email)
+      member_not_set_up_error_message = I18n.t('securities.release.edit.member_not_set_up_html', email: securities_services_email, phone: securities_services_phone_number)
+
       let(:errors) {{
         foo: [SecureRandom.hex],
         bar: [SecureRandom.hex],
@@ -2343,6 +2345,15 @@ RSpec.describe SecuritiesController, type: :controller do
       it 'returns nil if no errors are present on the securities_request' do
         allow(securities_request).to receive(:errors).and_return({})
         expect(call_method).to be_nil
+      end
+      describe 'when the error object contains a `member` error' do
+        let(:errors) {{ member: [SecureRandom.hex],
+                        settlement_date: [SecureRandom.hex],
+                        securities: [SecureRandom.hex],
+                        base: [SecureRandom.hex] }}
+        it 'returns the member not set up message' do
+          expect(call_method).to eq(member_not_set_up_error_message)
+        end
       end
       describe 'when the error object contains standard error keys' do
         it 'returns the standard message for the first key it finds' do
