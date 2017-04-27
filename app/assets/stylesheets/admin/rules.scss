@@ -1,0 +1,131 @@
+.limits {
+  section {
+    @extend %bordered-section;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  table {
+    width: auto;
+    margin-bottom: 0;
+    td:first-child {
+      @extend %typography-table-heading;
+      background-color: $light-gray;
+    }
+    th, td {
+      width: 240px;
+      box-sizing: border-box;
+      &:first-child {
+        width: 260px;
+      }
+    }
+  }
+  .form-error-section, .form-success-section {
+    margin-top: 0;
+    p {
+      display: inline-block;
+      vertical-align: middle;
+    }
+  }
+}
+
+.limits-term {
+  table {
+    border: none;
+    border-collapse: separate; // fix for IE header border bug
+    th {
+      border-top: 1px solid $light-blue;
+      &:first-child {
+        border: none;
+        background-color: $white;
+      }
+      &:nth-child(2) {
+        border-left: 1px solid $light-blue;
+      }
+    }
+    td:first-child {
+      border-left: 1px solid $light-blue;
+    }
+    tr:first-child {
+      td:first-child {
+        border-top: 1px solid $light-blue;
+      }
+    }
+  }
+}
+
+.rules-limits-form {
+  @extend %clearfix;
+  input[type=text] {
+    @extend %typography-field-placeholder;
+    box-sizing: border-box;
+    width: 140px;
+    text-align: right;
+    padding: 5px 15px;
+    &:disabled {
+      border: none;
+      background: transparent;
+      padding-right: 0px;
+    }
+  }
+  .primary-button {
+    float: right;
+    width: 440px;
+  }
+}
+
+.term-rules-rate-bands {
+  table {
+    width: 840px;
+    border: none;
+  }
+  thead {
+    background: transparent;
+  }
+  th, td {
+    padding: 10px;
+  }
+  th {
+    border: none;
+    background: transparent;
+    box-sizing: border-box;
+    span {
+      display: block;
+    }
+    &:first-child {
+      width: 200px;
+    }
+    &:nth-child(2), &:nth-child(3), &:nth-child(4), &:nth-child(5) {
+      width: 160px;
+    }
+  }
+  td:first-child {
+    @extend %typography-table-heading;
+    background-color: $light-gray;
+    border-left: 1px solid $light-blue;
+  }
+  tr:first-child {
+    td {
+      border-top: 1px solid $light-blue;
+    }
+  }
+}
+
+.rate-band-notice {
+  margin-top: 10px;
+  height: 13px;
+  background-size: 100%;
+  background-repeat: no-repeat;
+  &.low-error {
+    background-image: image-url('fhlb-shutoff-large-left.svg');
+  }
+  &.low-warning {
+    background-image: image-url('fhlb-warning-large-left.svg');
+  }
+  &.high-error {
+    background-image: image-url('fhlb-shutoff-large-right.svg');
+  }
+  &.high-warning {
+    background-image: image-url('fhlb-warning-large-right.svg');
+  }
+}

@@ -219,6 +219,7 @@ class AdvanceRequest
 
   def validate_advance
     clear_errors
+    custom_term_valid_dates_check
     perform_limit_check
     perform_preview
     perform_rate_check
@@ -479,6 +480,12 @@ class AdvanceRequest
       end
     else
       add_error(:rate, :settings)
+    end
+  end
+
+  def custom_term_valid_dates_check
+    if self.term=~CUSTOM_TERM
+      add_error(:date, :custom_term) if self.custom_maturity_date.try(:to_date) - self.funding_date.try(:to_date) < 2
     end
   end
 

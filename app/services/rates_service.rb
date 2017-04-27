@@ -93,4 +93,8 @@ class RatesService < MAPIService
     fix_date(get_hash(:historical_price_indications, "rates/price_indication/historical/#{start_date}/#{end_date}/#{collateral_type}/#{credit_type}"), :date)
   end
 
+  def rate_bands
+    get_hash(:rate_bands, 'rates/rate_bands')
+  end
+
 end

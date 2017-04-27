@@ -1,38 +1,35 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
-  [:test, :production].each do |env|
-    describe "etransact advances limits in the #{env} environment" do
-      let(:etransact_advances_limits) { get '/etransact_advances/limits'; JSON.parse(last_response.body) }
-      let(:some_status_data) {{"WHOLE_LOAN_ENABLED" => "N", "SBC_AGENCY_ENABLED" => "Y", "SBC_AAA_ENABLED" => "Y", "SBC_AA_ENABLED" => "Y",
-                               "LOW_DAYS_TO_MATURITY" => 0, "HIGH_DAYS_TO_MATURITY" => 1, "MIN_ONLINE_ADVANCE" => "100000", "TERM_DAILY_LIMIT" => "201000000",
-                               "PRODUCT_TYPE" => "VRC", "END_TIME" => "1700", "OVERRIDE_END_DATE" => "2006-01-01", "OVERRIDE_END_TIME" => "1700"}} if env == :production
-      let(:result_set) {double('Oracle Result Set', fetch: nil)} if env == :production
-      before do
-        if env == :production
-          allow(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
-          allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
-          allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
-          allow(result_set).to receive(:fetch_hash).and_return(some_status_data, nil)
-        end
-      end
-      it 'should return the expected limits for all types of advances' do
-        expect(etransact_advances_limits.length).to be >=1
-        etransact_advances_limits.each do |row|
-          expect(row['WHOLE_LOAN_ENABLED']).to be_kind_of(String)
-          expect(row['SBC_AGENCY_ENABLED']).to be_kind_of(String)
-          expect(row['SBC_AAA_ENABLED']).to be_kind_of(String)
-          expect(row['SBC_AA_ENABLED']).to be_kind_of(String)
-          expect(row['LOW_DAYS_TO_MATURITY']).to be_kind_of(Numeric)
-          expect(row['HIGH_DAYS_TO_MATURITY']).to be_kind_of(Numeric)
-          expect(row['MIN_ONLINE_ADVANCE']).to be_kind_of(String)
-          expect(row['TERM_DAILY_LIMIT']).to be_kind_of(String)
-          expect(row['PRODUCT_TYPE']).to be_kind_of(String)
-          expect(row['END_TIME']).to be_kind_of(String)
-          expect(row['OVERRIDE_END_DATE']).to be_kind_of(String)
-          expect(row['OVERRIDE_END_TIME']).to be_kind_of(String)
-        end
-      end
+  describe 'get `etransact_advances/limits`' do
+    let(:call_endpoint) { get 'etransact_advances/limits' }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'etransact_advances/limits', :get, MAPI::Services::EtransactAdvances::Limits, :get_limits
+
+    it 'calls `MAPI::Services::EtransactAdvances::Limits.get_limits` with the app' do
+      expect(MAPI::Services::EtransactAdvances::Limits).to receive(:get_limits).with(an_instance_of(MAPI::ServiceApp))
+      call_endpoint
+    end
+  end
+
+  describe 'put `etransact_advances/limits`' do
+    let(:post_body) { {"params" => "#{SecureRandom.hex}"} }
+    let(:call_endpoint) { put 'etransact_advances/limits', post_body.to_json }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'etransact_advances/limits', :put, MAPI::Services::EtransactAdvances::Limits, :update_limits, "{}"
+
+    it 'calls `MAPI::Services::EtransactAdvances::Limits.update_limits` with the app' do
+      expect(MAPI::Services::EtransactAdvances::Limits).to receive(:update_limits).with(an_instance_of(MAPI::ServiceApp), anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::EtransactAdvances::Limits.update_limits` with the parsed post body' do
+      expect(MAPI::Services::EtransactAdvances::Limits).to receive(:update_limits).with(an_instance_of(MAPI::ServiceApp), post_body)
+      call_endpoint
+    end
+    it 'returns a JSONd empty hash in the response body if the `update_limits` method is successful' do
+      allow(MAPI::Services::EtransactAdvances::Limits).to receive(:update_limits).and_return(true)
+      call_endpoint
+      expect(last_response.body).to eq({}.to_json)
     end
   end
 
@@ -198,22 +195,41 @@ describe MAPI::ServiceApp do
     end
   end
 
-  describe 'eTransact Advances Settings' do
-    let(:make_request) { get '/etransact_advances/settings' }
-    it 'should call `MAPI::Services::EtransactAdvances::Settings.settings`' do
+  describe 'get `etransact_advances/settings`' do
+    let(:results) { {SecureRandom => 'some results'} }
+    let(:call_endpoint) { get 'etransact_advances/settings' }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'etransact_advances/settings', :get, MAPI::Services::EtransactAdvances::Settings, :settings
+
+    it 'calls `MAPI::Services::EtransactAdvances::Settings.settings`' do
       expect(MAPI::Services::EtransactAdvances::Settings).to receive(:settings)
-      make_request
+      call_endpoint
     end
-    it 'should call `to_json` on the settings returned' do
-      settings = double('Settings')
-      allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(settings)
-      expect(settings).to receive(:to_json)
-      make_request
+    it 'returns the JSONd results of calling `MAPI::Services::EtransactAdvances::Settings.settings` in the response body' do
+      allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(results)
+      call_endpoint
+      expect(last_response.body).to eq(results.to_json)
     end
-    it 'should return a 503 if no settings are found' do
-      allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return(nil)
-      make_request
-      expect(last_response.status).to be(503)
+  end
+
+  describe 'put `etransact_advances/settings`' do
+    let(:post_body) { {"params" => "#{SecureRandom.hex}"} }
+    let(:call_endpoint) { put 'etransact_advances/settings', post_body.to_json }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'etransact_advances/settings', :put, MAPI::Services::EtransactAdvances::Settings, :update_settings, "{}"
+
+    it 'calls `MAPI::Services::EtransactAdvances::Settings.update_settings` with the app' do
+      expect(MAPI::Services::EtransactAdvances::Settings).to receive(:update_settings).with(an_instance_of(MAPI::ServiceApp), anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::EtransactAdvances::Settings.update_settings` with the parsed post body' do
+      expect(MAPI::Services::EtransactAdvances::Settings).to receive(:update_settings).with(an_instance_of(MAPI::ServiceApp), post_body)
+      call_endpoint
+    end
+    it 'returns a JSONd empty hash in the response body if the `update_settings` method is successful' do
+      allow(MAPI::Services::EtransactAdvances::Settings).to receive(:update_settings).and_return(true)
+      call_endpoint
+      expect(last_response.body).to eq({}.to_json)
     end
   end
 

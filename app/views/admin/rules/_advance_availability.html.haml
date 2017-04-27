@@ -1,0 +1,14 @@
+-classes ||= nil
+.advance-availability{class: classes}
+  .row
+    %h1= t('admin.advance_availability.title')
+  .row.tabbed-content
+    %nav
+      %span<>
+        =link_to(t('admin.advance_availability.nav.status'), active_nav == :advance_availability_status ? '#' : rules_advance_availability_url, class: "#{'active-tab' if active_nav == :advance_availability_status}")
+      %span<>
+        =link_to(t('admin.advance_availability.nav.term'), active_nav == :advance_availability_term ? '#' : rules_advance_availability_by_term_url, class: "#{'active-tab' if active_nav == :advance_availability_term}")
+      %span<>
+        =link_to(t('admin.advance_availability.nav.member'), active_nav == :advance_availability_member ? '#' : rules_advance_availability_by_member_url, class: "#{'active-tab' if active_nav == :advance_availability_member}")
+    .tabbed-content-main
+      = yield

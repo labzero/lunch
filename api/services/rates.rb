@@ -534,6 +534,17 @@ module MAPI
               end
             end
           end
+
+          # Fetch rate band info
+          api do
+            key :path, '/rate_bands'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve rate band info for all terms.'
+              key :nickname, :RateBands
+              key :type, :RateBands
+            end
+          end
         end
 
         relative_get "/historic/overnight" do
@@ -875,6 +886,11 @@ module MAPI
           MAPI::Services::Rates::PriceIndicationHistorical.price_indication_historical(self, start_date, end_date, collateral_type, credit_type).to_json
         end
 
+        relative_get '/rate_bands' do
+          MAPI::Services::Rates.rescued_json_response(self) do
+            MAPI::Services::Rates::RateBands.rate_bands(logger, settings.environment)
+          end
+        end
 
       end
     end

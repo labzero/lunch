@@ -509,7 +509,7 @@ class DashboardController < ApplicationController
         activity_data.push(result)
       end
     end
-    activity_data
+    activity_data.sort_by { |item| item[:transaction_number] }.reverse
   end
 
   def process_patterns(patterns, entry)

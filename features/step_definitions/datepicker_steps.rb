@@ -117,6 +117,20 @@ When(/^I write "(.*?)" in the datepicker (start|end) input field$/) do |date, in
   page.fill_in("daterangepicker_#{input}", with: date.to_s)
 end
 
+When(/^I enter the date for next Saturday in the datepicker start input field$/) do
+  date = Time.zone.today
+  until date.saturday?  do date = date + 1.day end
+  page.fill_in("daterangepicker_start", with: date.strftime('%m/%d/%Y'))
+end
+
+
+Then(/^I should see the next business day after Saturday in the datepicker start input field$/) do
+  date = Time.zone.today
+  until date.saturday?  do date = date + 1.day end
+  date = CalendarService.new(ActionDispatch::TestRequest.new).find_next_business_day(date, 1.day).to_s
+  page.find("input[name=daterangepicker_start]").value.should eq date.to_date.strftime('%m/%d/%Y')
+end
+
 When(/^I write (today|tomorrow)'s date in the datepicker end input field$/) do |day|
   today = Time.zone.today
   time = case day

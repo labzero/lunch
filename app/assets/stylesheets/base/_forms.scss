@@ -348,15 +348,13 @@ $horizontal-field-input-width: 180px;
   @extend %list-summary-data;
 }
 
-.form-error-section {
+%form-message-section {
   position: relative;
   padding-left: 50px;
-  color: $alert-red;
   margin: 20px 0;
   min-height: 30px;
   &:before {
     @extend %icon-font;
-    content: "#{$icon-error}";
     @extend %vertical-center;
     left: 0;
     font-size: 30px;
@@ -366,5 +364,21 @@ $horizontal-field-input-width: 180px;
   }
   p:not(:first-child) {
     margin-top: 0;
+  }
+}
+
+.form-error-section {
+  @extend %form-message-section;
+  color: $alert-red;
+  &:before {
+    content: "#{$icon-error}";
+  }
+}
+
+.form-success-section {
+  @extend %form-message-section;
+  &:before {
+    color: $approval-green;
+    content: $icon-success;
   }
 }

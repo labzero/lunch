@@ -975,6 +975,19 @@ RSpec.describe DashboardController, :type => :controller do
         expect(call_method.length).to eq(DashboardController::CURRENT_ACTIVITY_COUNT)
       end
     end
+    describe 'sorted entries' do
+      let(:activity1) { { description: description, amount: amount, event: event, transaction_number: 1 } }
+      let(:activity2) { { description: description, amount: amount, event: event, transaction_number: 2 } }
+      let(:activity3) { { description: description, amount: amount, event: event, transaction_number: 3 } }
+      let(:activity_data) { [ activity2, activity3, activity1 ] }
+      let(:reverse_sorted_activity_data) { [ activity3, activity2, activity1 ] }
+      before do
+        allow(subject).to receive(:process_patterns).and_return(*activity_data)
+      end
+      it 'sorts the activity data by transaction_number' do
+        expect(subject.send(:process_activity_entries, activity_data)).to eq(reverse_sorted_activity_data)
+      end
+    end
     describe '`Letters of Credit` entries' do
       before do
         allow(subject).to receive(:process_patterns).and_call_original

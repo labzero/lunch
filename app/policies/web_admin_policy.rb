@@ -8,4 +8,8 @@ class WebAdminPolicy < ApplicationPolicy
     user && user.roles.include?(::User::Roles::ADMIN)
   end
 
+  def edit_trade_rules?
+    user && user.roles.include?(::User::Roles::ADMIN)
+  end
+
 end

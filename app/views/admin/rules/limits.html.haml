@@ -1,0 +1,9 @@
+=render layout: 'term', locals: {active_nav: :daily_limit, classes: 'limits'} do
+  =form_tag(rules_update_term_limits_url, {class: 'rules-limits-form', method: :put}) do
+    %section.limits-global
+      %h2= t('admin.term_rules.daily_limit.global_limits')
+      =render 'reports/reports_table', table_data: @global_limits
+    %section.limits-term
+      %h2= t('admin.term_rules.daily_limit.term_limits')
+      =render 'reports/reports_table', table_data: @term_limits
+    =submit_tag(t('admin.term_rules.save'), class: 'primary-button') if @can_edit_trade_rules

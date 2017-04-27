@@ -43,6 +43,11 @@ Given(/^I am logged into the admin panel$/) do
   step %{I visit the admin dashboard}
 end
 
+Given(/^I am logged into the admin panel but do not have web admin privileges$/) do
+  step %{I am logged in as an "non-admin intranet user"}
+  step %{I visit the admin dashboard}
+end
+
 Given(/^I am logged in to a bank with data for the "([^"]*)" report$/) do |report|
   user_type = case report
   when 'Securities Services Monthly Statement'
@@ -217,8 +222,8 @@ Then(/^I should be logged in$/) do
 end
 
 Then(/^I should see the change password form$/) do
-  page.assert_selector('form legend', exact: true, visible: true, text: I18n.t('settings.change_password.title'))
-  page.assert_selector('form p', exact: true, visible: true, text: I18n.t('settings.change_password.instructions'))
+  page.assert_selector('form legend', exact: true, visible: true, text: /\A#{Regexp.quote(I18n.t('settings.change_password.title'))}\z/i )
+  page.assert_selector('form', exact: true, visible: true, text: I18n.t('settings.change_password.instructions').squish)
 end
 
 
@@ -309,6 +314,8 @@ def user_for_type(user_type)
     primary_user
   when 'intranet user'
     intranet_user
+  when 'non-admin intranet user'
+    intranet_user_no_admin
   when 'quick-advance signer'
     quick_advance_signer
   when 'quick-advance non-signer'
@@ -364,6 +371,10 @@ end
 
 def intranet_user
   CustomConfig.env_config['intranet_user']
+end
+
+def intranet_user_no_admin
+  CustomConfig.env_config['intranet_user_no_admin']
 end
 
 def extranet_user
@@ -528,3 +539,4 @@ Around('@first-time-user') do |scenario, block|
   user.delete if user
   block.call
 end
+

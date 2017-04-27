@@ -1483,4 +1483,20 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'the get `/rate_bands` endpoint' do
+    let(:call_endpoint) { get 'rates/rate_bands'}
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'rates/rate_bands', :get, MAPI::Services::Rates::RateBands, :rate_bands
+    it 'calls `MAPI::Services::Rates::RateBands.rate_bands` with the logger' do
+      logger = double('logger')
+      allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
+      expect(MAPI::Services::Rates::RateBands).to receive(:rate_bands).with(logger, anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::Rates::RateBands.rate_bands` with the environment' do
+      expect(MAPI::Services::Rates::RateBands).to receive(:rate_bands).with(anything, described_class.environment)
+      call_endpoint
+    end
+  end
+
 end

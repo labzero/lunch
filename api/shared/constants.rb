@@ -94,6 +94,23 @@ module MAPI
           }
       }.with_indifferent_access
 
+      TERM_BUCKET_MAPPING = {
+        :overnight => 1,
+        :open => 1,
+        :'1week'=> 2,
+        :'2week'=> 3,
+        :'3week'=> 4,
+        :'1month'=> 5,
+        :'2month'=> 6,
+        :'3month'=> 7,
+        :'6month'=> 8,
+        :'9month' => 9,
+        :'12month' => 10,
+        :'1year'=> 11,
+        :'2year'=> 12,
+        :'3year'=> 13,
+      }.with_indifferent_access
+
       def self.invert_term_mapping( mapping )
         mapping.each_with_object({}) do |(term, v), h|
           (h["#{v[:frequency]}#{v[:frequency_unit]}"] ||= []) << term

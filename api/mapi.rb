@@ -4,6 +4,7 @@ require 'active_support/concern'
 require 'active_support/time'
 require 'active_job'
 require 'savon'
+require 'action_view/helpers/number_helper'
 HTTPI::Adapter.use # force Savon to load its adapters
 
 require_relative '../lib/redis_helper'

@@ -17,9 +17,15 @@
       %li<>
         = link_to(t('admin.nav.secondary.institutions'), '#', class: 'nav-menu')
         .nav-dropdown
-      %li<>
+      %li{class: ('active-nav-item' if active_nav == :rules)}<>
         = link_to(t('admin.nav.secondary.trade_rules'), '#', class: 'nav-menu')
         .nav-dropdown
+          .nav-dropdown-row
+            .nav-dropdown-column
+              %h2= t('admin.nav.secondary.trade_rules')
+              %ul
+                %li= link_to(t('admin.advance_availability.title'), rules_advance_availability_path)
+                %li= link_to(t('admin.term_rules.title'), rules_term_limits_path)
       %li<>
         = link_to(t('admin.nav.secondary.data_visibility'), '#', class: 'nav-menu')
         .nav-dropdown

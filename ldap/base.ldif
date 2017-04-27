@@ -22,6 +22,22 @@ userAccountControl: 512
 lockoutTime: 0
 mail: local@example.com
 
+# local user without web admin role
+dn: sAMAccountName=local-no-admin,dc=fhlbsf-i,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Local User No Admin
+givenname: Local
+sn: User No Admin
+displayname: Local User No Admin
+sAMAccountName: local-no-admin
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+userAccountControl: 512
+lockoutTime: 0
+mail: local-no-admin@example.com
+
 # local user without signer permission
 dn: sAMAccountName=local-non-signer,dc=fhlbsf-i,dc=com
 objectClass: user

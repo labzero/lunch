@@ -1,0 +1,28 @@
+.tabbed-content {
+  .tabbed-content-main {
+    @extend %bordered-section;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+  nav {
+    @extend %default-border;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+    a {
+      @extend %typography-header-nav;
+      display: inline-block;
+      padding: 10px 50px;
+      border-right: 1px solid $light-blue;
+      color: $text-color;
+      &.active-tab {
+        @extend %typography-dropdown-selector;
+        @extend %undo-link-style;
+        color: $actionable-blue;
+        background: $light-gray;
+        font-weight: $semibold-weight;
+        cursor: default;
+      }
+    }
+  }
+}

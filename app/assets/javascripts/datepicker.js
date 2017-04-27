@@ -37,7 +37,8 @@ $(function () {
         filterOptions: filterOptions,
         today: today,
         fromLabel: fromLabel,
-        disableWeekends: disableWeekends
+        disableWeekends: disableWeekends,
+        invalidDates: invalidDates
       };
       startDate = $wrapper.data('date-picker-start-date');
       endDate = $wrapper.data('date-picker-end-date');
@@ -362,6 +363,7 @@ $(function () {
       options.singleDatePicker ? picker.setEndDate(date.format('MM/DD/YYYY')) : null;
       $el.val(date.format('MM/DD/YYYY'));
     } else if (options.singleDatePicker) {
+      availableDay('next', date, options.invalidDates, options.disableWeekends);
       picker.setEndDate(date.format('MM/DD/YYYY'));
       $el.val(date.format('MM/DD/YYYY'));
     };
@@ -387,7 +389,7 @@ $(function () {
         case options.filterOptions['end_of_quarter']:
           var endOfQuarter;
           var endOfLastQuarter;
-          var setQuarter
+          var setQuarter;
 
           if (inputMonth <= 2) {
             endOfQuarter = moment(date.year()+'/3/31');

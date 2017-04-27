@@ -467,4 +467,18 @@ Scenario: User clicks on the FRC rates and sees Add Custom Term then selects mat
   When I click on the edit button for the add advance preview
   Then I should see the add advance custom rate table
 
-
+@flip-on-add-advance-custom-term
+Scenario: User clicks on the FRC rates and sees Add Custom Term then types in an invalid maturity date in the datepicker
+  Given I am logged in as a "custom-term signer"
+  And I am on the "Add Advance" advances page
+  And I enter an amount into the add advance amount field
+  When I click to toggle to the frc rates
+  Then I should see the add advance rate table
+  Then I should see Custom Term information
+  When I click on Add Custom Term link
+  Then I should see Custom Term Calendar
+  When I click the datepicker field
+  And I enter the date for next Saturday in the datepicker start input field
+  And I press the Return key on the singledatepicker input
+  When I click the datepicker field
+  Then I should see the next business day after Saturday in the datepicker start input field

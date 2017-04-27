@@ -245,4 +245,23 @@ describe RatesService do
     end
   end
 
+  describe '`rate_bands`' do
+    let(:rate_bands) { instance_double(Hash) }
+    let(:call_method) { subject.rate_bands }
+
+    it_behaves_like 'a MAPI backed service object method', :rate_bands
+    it 'calls `get_hash` with the proper endpoint name' do
+      expect(subject).to receive(:get_hash).with(:rate_bands, any_args)
+      call_method
+    end
+    it 'calls `get_hash` with `rates/rate_bands` as the endpoint' do
+      expect(subject).to receive(:get_hash).with(anything, 'rates/rate_bands')
+      call_method
+    end
+    it 'returns the result of calling `get_hash`' do
+      allow(subject).to receive(:get_hash).and_return(rate_bands)
+      expect(call_method).to eq(rate_bands)
+    end
+  end
+
 end

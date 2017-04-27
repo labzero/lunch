@@ -22,6 +22,13 @@
 - when :checkbox
   - value = capture_haml do
     = check_box_tag(cell[:name], cell[:value], cell[:checked], {disabled: cell[:disabled], data: cell[:data]})
+- when :text_field
+  - classes = cell[:disabled] ? ['report-cell-right'] : []
+  - value = capture_haml do
+    - cell_value = case cell[:value_type]
+    - when :number
+      - fhlb_formatted_number(cell[:value], cell[:options])
+    = text_field_tag(cell[:name], cell_value, {disabled: cell[:disabled]})
 - when :list
   - value = capture_haml do
     %ul

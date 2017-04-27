@@ -16,6 +16,10 @@ default: &default
     username: <%= ENV['CUCUMBER_INTRANET_USERNAME'] || 'local' %>
     password: <%= ENV['CUCUMBER_INTRANET_PASSWORD'] || 'development' %>
     bank: <%= ENV['CUCUMBER_INTRANET_BANK'] || 'Central Valley Community Bank' %>
+  intranet_user_no_admin:
+    username: <%= ENV['CUCUMBER_INTRANET_NO_ADMIN_USERNAME'] || 'local-no-admin' %>
+    password: <%= ENV['CUCUMBER_INTRANET_NO_ADMIN_PASSWORD'] || 'development' %>
+    bank: <%= ENV['CUCUMBER_INTRANET_BANK'] || 'Chaste Manhattan' %>
   extranet_user:
     username: <%= ENV['CUCUMBER_EXTRANET_USERNAME'] || 'extra' %>
     password: <%= ENV['CUCUMBER_EXTRANET_PASSWORD'] || 'development' %>
