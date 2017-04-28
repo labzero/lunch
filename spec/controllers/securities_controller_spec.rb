@@ -975,6 +975,20 @@ RSpec.describe SecuritiesController, type: :controller do
       it_behaves_like 'an upload_securities action with a type', :transfer, floating_point_error_filename: 'securities-release-cents-floating-point-error.xlsx'
     end
 
+    [:release, :transfer].each do |type|
+      describe "when a security in the uploaded file for a `#{type}` contains a description with > 34 characters" do
+        uploaded_with_long_description = excel_fixture_file_upload('sample-securities-upload-long-description.xlsx')
+        let(:call_action) { post :upload_securities, file: uploaded_with_long_description, type: type}
+        let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
+        before do
+          allow(Security).to receive(:from_hash).and_call_original
+        end
+        it 'truncates the overlengthy description to 34 characters' do
+          expect(JSON.parse(parsed_response_body[:form_data]).first['description'].size).to be <= 34
+        end
+      end
+    end
+
     [:pledge, :safekeep].each do |type|
       describe "when the type param is `#{type}`" do
         let(:securities_rows) {[
