@@ -168,6 +168,48 @@ class Admin::RulesController < Admin::BaseController
     redirect_to action: :rate_bands
   end
 
+  # GET
+  def rate_report
+    rate_summary = RatesService.new(request).quick_advance_rates(:admin)
+    raise 'There has been an error and Admin::RulesController#rate_report has encountered nil' unless rate_summary
+    rate_summary = process_rate_summary(rate_summary)
+    column_headings = ['', '',
+      fhlb_add_unit_to_table_header(t('admin.term_rules.rate_report.opening_rate'), '%'),
+      fhlb_add_unit_to_table_header(t('admin.term_rules.rate_report.current_rate'), '%'),
+      fhlb_add_unit_to_table_header(t('admin.term_rules.rate_report.change'), 'bps'),
+      fhlb_add_unit_to_table_header(t('admin.term_rules.rate_report.low_off').html_safe, '%'),
+      fhlb_add_unit_to_table_header(t('admin.term_rules.rate_report.low_warn').html_safe, '%'),
+      fhlb_add_unit_to_table_header(t('admin.term_rules.rate_report.high_warn').html_safe, '%'),
+      fhlb_add_unit_to_table_header(t('admin.term_rules.rate_report.high_off').html_safe, '%')]
+    @vrc_rate_report = {
+      column_headings: column_headings,
+      rows: []
+    }
+    @frc_rate_report = {
+      column_headings: column_headings,
+      rows: []
+    }
+    rate_summary.each do |advance_term, advance_types|
+      next if advance_term == 'overnight'
+      advance_types.each do |type, rate_info|
+        open = advance_term == 'open'
+        term_label = open ? t('admin.term_rules.daily_limit.dates.open') : t("dashboard.quick_advance.table.axes_labels.#{advance_term}")
+        row = {columns: [
+          {value: nil}, #TODO - This will become the column that indicates if a threshold has been breached as part of MEM-2317
+          {value:  term_label + ': ' + t("dashboard.quick_advance.table.#{type}")},
+          {value: rate_info[:start_of_day_rate].to_f, type: :rate},
+          {value: rate_info[:rate].to_f, type: :rate},
+          {value: rate_info[:rate_change_bps], type: :basis_point},
+          {value: rate_info[:rate_band_info][:low_band_off_rate].to_f, type: :rate},
+          {value: rate_info[:rate_band_info][:low_band_warn_rate].to_f, type: :rate},
+          {value: rate_info[:rate_band_info][:high_band_warn_rate].to_f, type: :rate},
+          {value: rate_info[:rate_band_info][:high_band_off_rate].to_f, type: :rate}
+        ]}
+        open ? @vrc_rate_report[:rows] << row : @frc_rate_report[:rows] << row
+      end
+    end
+  end
+
   private
 
   def set_flash_message(results)
@@ -177,5 +219,17 @@ class Admin::RulesController < Admin::BaseController
     else
       flash[:notice] = t('admin.term_rules.messages.success')
     end
+  end
+
+  def process_rate_summary(rate_summary)
+    processed_summary = {}
+    rate_summary.each do |advance_type, advance_terms|
+      next if advance_type == 'timestamp'
+      advance_terms.each do |term, rate_info|
+        processed_summary[term] ||= {}
+        processed_summary[term][advance_type] = rate_info.with_indifferent_access
+      end
+    end
+    processed_summary
   end
 end

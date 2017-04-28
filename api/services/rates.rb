@@ -53,7 +53,9 @@ module MAPI
           high_band_warn_rate: high_band_warn_rate,
           high_band_off_rate: high_band_off_rate,
           min_threshold_exceeded: live_rate < low_band_off_rate,
-          max_threshold_exceeded: live_rate > high_band_off_rate
+          max_threshold_exceeded: live_rate > high_band_off_rate,
+          min_warning_exceeded: live_rate < low_band_warn_rate,
+          max_warning_exceeded: live_rate > high_band_warn_rate
         }.with_indifferent_access
       end
 
@@ -823,7 +825,6 @@ module MAPI
             live_data    = MAPI::Services::Rates.extract_market_data_from_soap_response(live_data_xml)
             start_of_day = MAPI::Services::Rates.extract_market_data_from_soap_response(start_of_day_xml)
           else
-            # We have no real data source yet.
             live_data    = MAPI::Services::Rates.fake_hash('market_data_live_rates')
             start_of_day = MAPI::Services::Rates.fake_hash('market_data_start_of_day_rates')
             holidays.each{ |holiday| holidays.delete(holiday) if MAPI::Services::Rates::BlackoutDates.fake_data_relative_to_today.include?(holiday.to_date) } # Delete holidays that overlap with our self-imposed relative blackout dates of 1 and 3 weeks from today
@@ -866,6 +867,7 @@ module MAPI
               live[:maturity_date]     = MAPI::Services::Rates.get_maturity_date(live[:maturity_date], TERM_MAPPING[term][:frequency_unit], holidays)
               live[:disabled]          = MAPI::Services::Rates.disabled?(live, term_details, blackout_dates)
               live[:end_of_day]        = !term_details[:trade_status]
+              live[:rate_change_bps]   = (live[:rate].to_f - live[:start_of_day_rate]) * 100
               if !live[:end_of_day] && term_details[:display_status] && (live[:rate_band_info][:min_threshold_exceeded] || live[:rate_band_info][:max_threshold_exceeded])
                 logger.error("Rate band threshold exceeded: type=#{type}, term=#{term}, details=#{live.to_json}")
                 NewRelic::Agent.notice_error('Rate band threshold exceeded', trace_only: true, custom_params: {term: term, type: type, details: live})

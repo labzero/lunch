@@ -1,17 +1,14 @@
 .limits {
+  @extend %table-row-headers;
   section {
     @extend %bordered-section;
-    &:last-child {
+    &:last-of-type {
       margin-bottom: 0;
     }
   }
   table {
     width: auto;
     margin-bottom: 0;
-    td:first-child {
-      @extend %typography-table-heading;
-      background-color: $light-gray;
-    }
     th, td {
       width: 240px;
       box-sizing: border-box;
@@ -30,28 +27,7 @@
 }
 
 .limits-term {
-  table {
-    border: none;
-    border-collapse: separate; // fix for IE header border bug
-    th {
-      border-top: 1px solid $light-blue;
-      &:first-child {
-        border: none;
-        background-color: $white;
-      }
-      &:nth-child(2) {
-        border-left: 1px solid $light-blue;
-      }
-    }
-    td:first-child {
-      border-left: 1px solid $light-blue;
-    }
-    tr:first-child {
-      td:first-child {
-        border-top: 1px solid $light-blue;
-      }
-    }
-  }
+  @extend %table-no-first-header-cell;
 }
 
 .term-rules form {
@@ -70,6 +46,7 @@
     }
   }
   .primary-button {
+    margin-top: 20px;
     float: right;
     width: 440px;
   }
@@ -95,10 +72,12 @@
 }
 
 .term-rules-rate-bands {
+  @extend %table-row-headers;
   table {
     width: 840px;
     border: none;
-    margin-bottom: 20px;
+    //margin-bottom: 20px;
+    margin-bottom: 0px;
   }
   thead {
     background: transparent;
@@ -121,8 +100,6 @@
     }
   }
   td:first-child {
-    @extend %typography-table-heading;
-    background-color: $light-gray;
     border-left: 1px solid $light-blue;
   }
   tr:first-child {
@@ -148,5 +125,63 @@
   }
   &.high-warning {
     background-image: image-url('fhlb-warning-large-right.svg');
+  }
+}
+
+.term-rules-rate-report {
+  @extend %table-no-first-header-cell;
+  @extend %table-row-headers;
+  h2 {
+    margin-top: 5px;
+  }
+  section:first-of-type {
+    margin-bottom: 25px;
+  }
+  table {
+    &:first-of-type {
+      margin-bottom: 25px;
+    }
+    &:last-of-type {
+      margin-bottom: 0px;
+    }
+    th, td {
+      padding: 10px;
+    }
+    td:nth-child(2) {
+      @extend %typography-table-heading;
+      background-color: $light-gray;
+    }
+    th {
+      box-sizing: border-box;
+      span {
+        display: block;
+      }
+      &:nth-child(1) {
+        width: 30px;
+      }
+      &:nth-child(2) {
+        border: none;
+        background-color: $white;
+        width: 220px;
+      }
+      &:nth-child(3) {
+        border-left: 1px solid $light-blue;
+        width: 78px;
+      }
+      &:nth-child(4) {
+        width: 78px;
+      }
+      &:nth-child(5) {
+        width: 64px;
+      }
+      &:nth-child(6), &:nth-child(7), &:nth-child(8), &:nth-child(9) {
+        width: 108px;
+      }
+    }
+    tr:first-child {
+      td:nth-child(2) {
+        border-top: 1px solid $light-blue;
+      }
+    }
   }
 }

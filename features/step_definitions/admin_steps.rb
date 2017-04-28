@@ -14,7 +14,7 @@ Then(/^I should be on the term rules (limits) page$/) do |rules_page|
   page.assert_selector('.term-rules h1', text: title, exact: true)
 end
 
-Then(/^the (term rules|add advance availability) (daily limits|status|by term|by member|rate bands) tab should be active$/) do |page_selector, active_nav|
+Then(/^the (term rules|add advance availability) (daily limits|status|by term|by member|rate bands|rate report) tab should be active$/) do |page_selector, active_nav|
   page_selector = case page_selector
   when 'term rules'
     '.term-rules'
@@ -37,7 +37,7 @@ Then(/^I should be on the add advance availability (status|by term|by member) pa
   page.assert_selector(selector)
 end
 
-When(/^I click on the (term rules|add advance availability) (daily limits|status|by term|by member|rate bands) tab$/) do |page_selector, active_nav|
+When(/^I click on the (term rules|add advance availability) (daily limits|status|by term|by member|rate bands|rate report) tab$/) do |page_selector, active_nav|
   page_selector = case page_selector
   when 'term rules'
     '.term-rules'
@@ -93,5 +93,7 @@ def translate_tab_title(nav)
     I18n.t('admin.advance_availability.nav.member')
   when 'rate bands'
     I18n.t('admin.term_rules.nav.rate_bands')
+  when 'rate report'
+    I18n.t('admin.term_rules.nav.rate_report')
   end
 end

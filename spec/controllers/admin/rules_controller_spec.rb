@@ -1,4 +1,5 @@
 require 'rails_helper'
+include CustomFormattingHelper
 
 RSpec.describe Admin::RulesController, :type => :controller do
   login_user(admin: true)
@@ -502,6 +503,273 @@ RSpec.describe Admin::RulesController, :type => :controller do
     end
   end
 
+  describe 'GET rate_report' do
+    let(:sentinel) { SecureRandom.hex }
+    let(:type) { SecureRandom.hex }
+    let(:build_advance_type_info) do
+      Proc.new do |advance_type|
+        {
+          advance_type => {
+            start_of_day_rate: instance_double(Float, to_f: nil),
+            rate: instance_double(Float, to_f: nil),
+            rate_change_bps: instance_double(Float),
+            rate_band_info: {
+              low_band_off_rate: instance_double(Float, to_f: nil),
+              low_band_warn_rate: instance_double(Float, to_f: nil),
+              high_band_warn_rate: instance_double(Float, to_f: nil),
+              high_band_off_rate: instance_double(Float, to_f: nil)
+            }
+          }
+        }
+      end
+    end
+    let(:open_rate) {{
+      open: build_advance_type_info.call(type)
+    }}
+    let(:overnight_rate) {{
+      overnight: build_advance_type_info.call(type)
+    }}
+    let(:term) { SecureRandom.hex }
+    let(:other_term_rate) {{
+      term => build_advance_type_info.call(type)
+    }}
+    let(:rates_service) { instance_double(RatesService, quick_advance_rates: {}) }
+    let(:call_action) { get :rate_report }
+
+    before do
+      allow(RatesService).to receive(:new).and_return(rates_service)
+      allow(controller).to receive(:process_rate_summary).and_return({})
+    end
+
+    it_behaves_like 'a RulesController action with before_action methods'
+    it 'creates a new instance of RatesService with the request' do
+      expect(RatesService).to receive(:new).with(request).and_return(rates_service)
+      call_action
+    end
+    it 'calls `quick_advance_rates` on the RatesService instance with `:admin` as the member id' do
+      expect(rates_service).to receive(:quick_advance_rates).with(:admin).and_return({})
+      call_action
+    end
+    it 'raises an error if `quick_advance_rates` returns nil' do
+      allow(rates_service).to receive(:quick_advance_rates).and_return(nil)
+      expect{call_action}.to raise_error('There has been an error and Admin::RulesController#rate_report has encountered nil')
+    end
+    it 'calls `process_rate_summary` with the result of `quick_advance_rates`' do
+      raw_rates = instance_double(Hash)
+      allow(rates_service).to receive(:quick_advance_rates).and_return(raw_rates)
+      expect(controller).to receive(:process_rate_summary).with(raw_rates).and_return({})
+      call_action
+    end
+    shared_examples 'a `rate_report` view instance variable with `column_headings`' do |instance_variable_name|
+      let(:translation) { instance_double(String, html_safe: nil) }
+      before do
+        allow(controller).to receive(:fhlb_add_unit_to_table_header).and_call_original
+      end
+
+      threshold_columns = {'low_off' => '%', 'low_warn' => '%', 'high_warn' => '%', 'high_off' => '%'}
+      ({'opening_rate' => '%', 'current_rate' => '%', 'change' => 'bps'}.merge(threshold_columns)).each do |header, unit|
+        it "calls `fhlb_add_unit_to_table_header` with the translation for `#{header}` and `#{unit}` as arguments" do
+          expect(controller).to receive(:fhlb_add_unit_to_table_header).with(I18n.t("admin.term_rules.rate_report.#{header}"), unit)
+          call_action
+        end
+      end
+      threshold_columns.each do |header, unit|
+        it "calls `html_safe` on the translation for `#{header}`" do
+          allow(controller).to receive(:t).with("admin.term_rules.rate_report.#{header}").and_return(translation)
+          expect(translation).to receive(:html_safe).and_return('')
+          call_action
+        end
+      end
+      it "returns the proper column_headings data for the `#{instance_variable_name}` view variable" do
+        call_action
+        expect(assigns[instance_variable_name][:column_headings]).to eq(['', '',
+          fhlb_add_unit_to_table_header(I18n.t('admin.term_rules.rate_report.opening_rate'), '%'),
+          fhlb_add_unit_to_table_header(I18n.t('admin.term_rules.rate_report.current_rate'), '%'),
+          fhlb_add_unit_to_table_header(I18n.t('admin.term_rules.rate_report.change'), 'bps'),
+          fhlb_add_unit_to_table_header(I18n.t('admin.term_rules.rate_report.low_off'), '%'),
+          fhlb_add_unit_to_table_header(I18n.t('admin.term_rules.rate_report.low_warn'), '%'),
+          fhlb_add_unit_to_table_header(I18n.t('admin.term_rules.rate_report.high_warn'), '%'),
+          fhlb_add_unit_to_table_header(I18n.t('admin.term_rules.rate_report.high_off'), '%')
+         ])
+      end
+    end
+    describe 'instance view variables' do
+      let(:rate_info) { open_rate.merge(overnight_rate).merge(other_term_rate).with_indifferent_access }
+      before do
+        allow(controller).to receive(:t).and_call_original
+        allow(controller).to receive(:t).with("dashboard.quick_advance.table.axes_labels.#{term}").and_return('')
+        allow(controller).to receive(:t).with("dashboard.quick_advance.table.#{type}").and_return('')
+        allow(controller).to receive(:process_rate_summary).and_return(rate_info)
+      end
+      shared_examples 'a rate_report instance variable with rate columns' do |&context_block|
+        describe 'the first column' do
+          it 'has a `value` that is nil' do
+            expect(columns[0][:value]).to eq(nil)
+          end
+        end
+        describe 'the third column' do
+          let(:column) { columns[2] }
+          it 'calls `to_f` on the `start_of_day_rate`' do
+            expect(rate_info[term][type][:start_of_day_rate]).to receive(:to_f)
+            call_action
+          end
+          it 'sets the `value` to the float version of `start_of_day_rate`' do
+            allow(rate_info[term][type][:start_of_day_rate]).to receive(:to_f).and_return(sentinel)
+            expect(column[:value]).to eq(sentinel)
+          end
+          it 'sets the `type` to `:rate`' do
+            expect(column[:type]).to eq(:rate)
+          end
+        end
+        describe 'the fourth column' do
+          let(:column) { columns[3] }
+          it 'calls `to_f` on the `rate`' do
+            expect(rate_info[term][type][:rate]).to receive(:to_f)
+            call_action
+          end
+          it 'sets the `value` to the float version of `rate`' do
+            allow(rate_info[term][type][:rate]).to receive(:to_f).and_return(sentinel)
+            expect(column[:value]).to eq(sentinel)
+          end
+          it 'sets the `type` to `:rate`' do
+            expect(column[:type]).to eq(:rate)
+          end
+        end
+        describe 'the fifth column' do
+          let(:column) { columns[4] }
+          it 'sets the `value` to `rate_change_bps`' do
+            expect(column[:value]).to eq(rate_info[term][type][:rate_change_bps])
+          end
+          it 'sets the `type` to `:basis_point`' do
+            expect(column[:type]).to eq(:basis_point)
+          end
+        end
+        describe 'the sixth column' do
+          let(:column) { columns[5] }
+          it 'calls `to_f` on the `[:rate_band_info][:low_band_off_rate]`' do
+            expect(rate_info[term][type][:rate_band_info][:low_band_off_rate]).to receive(:to_f)
+            call_action
+          end
+          it 'sets the `value` to the float version of `[:rate_band_info][:low_band_off_rate]`' do
+            allow(rate_info[term][type][:rate_band_info][:low_band_off_rate]).to receive(:to_f).and_return(sentinel)
+            expect(column[:value]).to eq(sentinel)
+          end
+          it 'sets the `type` to `:rate`' do
+            expect(column[:type]).to eq(:rate)
+          end
+        end
+        describe 'the seventh column' do
+          let(:column) { columns[6] }
+          it 'calls `to_f` on the `[:rate_band_info][:low_band_warn_rate]`' do
+            expect(rate_info[term][type][:rate_band_info][:low_band_warn_rate]).to receive(:to_f)
+            call_action
+          end
+          it 'sets the `value` to the float version of `[:rate_band_info][:low_band_warn_rate]`' do
+            allow(rate_info[term][type][:rate_band_info][:low_band_warn_rate]).to receive(:to_f).and_return(sentinel)
+            expect(column[:value]).to eq(sentinel)
+          end
+          it 'sets the `type` to `:rate`' do
+            expect(column[:type]).to eq(:rate)
+          end
+        end
+        describe 'the eighth column' do
+          let(:column) { columns[7] }
+          it 'calls `to_f` on the `[:rate_band_info][:high_band_warn_rate]`' do
+            expect(rate_info[term][type][:rate_band_info][:high_band_warn_rate]).to receive(:to_f)
+            call_action
+          end
+          it 'sets the `value` to the float version of `[:rate_band_info][:high_band_warn_rate]`' do
+            allow(rate_info[term][type][:rate_band_info][:high_band_warn_rate]).to receive(:to_f).and_return(sentinel)
+            expect(column[:value]).to eq(sentinel)
+          end
+          it 'sets the `type` to `:rate`' do
+            expect(column[:type]).to eq(:rate)
+          end
+        end
+        describe 'the ninth column' do
+          let(:column) { columns[8] }
+          it 'calls `to_f` on the `[:rate_band_info][:high_band_off_rate]`' do
+            expect(rate_info[term][type][:rate_band_info][:high_band_off_rate]).to receive(:to_f)
+            call_action
+          end
+          it 'sets the `value` to the float version of `[:rate_band_info][:high_band_off_rate]`' do
+            allow(rate_info[term][type][:rate_band_info][:high_band_off_rate]).to receive(:to_f).and_return(sentinel)
+            expect(column[:value]).to eq(sentinel)
+          end
+          it 'sets the `type` to `:rate`' do
+            expect(column[:type]).to eq(:rate)
+          end
+        end
+      end
+      describe '`@vrc_rate_report`' do
+        let(:vrc_rate_report_rows) { call_action; assigns[:vrc_rate_report][:rows] }
+        it_behaves_like 'a `rate_report` view instance variable with `column_headings`', :vrc_rate_report
+
+        describe '`rows`' do
+          it 'contains a row for each advance type found under the `open` advance term key' do
+            open_rates = {open: {}}
+            n = rand(2..5)
+            n.times do |i|
+              open_rates[:open] = open_rates[:open].merge(build_advance_type_info.call(i))
+            end
+            allow(controller).to receive(:process_rate_summary).and_return(open_rates.merge(overnight_rate).merge(other_term_rate).with_indifferent_access)
+            expect(vrc_rate_report_rows.length).to eq(n)
+          end
+        end
+        describe 'columns' do
+          it_behaves_like 'a rate_report instance variable with rate columns' do
+            let(:columns) { vrc_rate_report_rows[0][:columns] }
+            let(:term) { :open }
+          end
+          describe 'the second column' do
+            it 'has a value that combines the translation for `open` with the translation for the given type' do
+              allow(controller).to receive(:t).with("dashboard.quick_advance.table.#{type}").and_return(sentinel)
+              expect(vrc_rate_report_rows[0][:columns][1][:value]).to eq(I18n.t('admin.term_rules.daily_limit.dates.open') + ': ' + sentinel)
+            end
+          end
+        end
+      end
+      describe '`@frc_rate_report`' do
+        let(:frc_rate_report_rows) { call_action; assigns[:frc_rate_report][:rows] }
+        it_behaves_like 'a `rate_report` view instance variable with `column_headings`', :frc_rate_report
+
+        describe '`rows`' do
+          it 'ignores rate info for `open` and `overnight` terms' do
+            expect(frc_rate_report_rows.length).to eq(1)
+          end
+          it 'contains a rows for each advance type found under term keys that are not `open` or `overnight`' do
+            other_term_rates = {}
+            n_terms = rand(2..5)
+            n_types = rand(1..3)
+            n_terms.times do
+              term_key = SecureRandom.hex
+              other_term_rates[term_key] = {}
+              n_types.times do |i|
+                other_term_rates[term_key] = other_term_rates[term_key].merge(build_advance_type_info.call(i))
+              end
+            end
+            allow(controller).to receive(:process_rate_summary).and_return(open_rate.merge(overnight_rate).merge(other_term_rates).with_indifferent_access)
+            expect(frc_rate_report_rows.length).to eq(n_terms * n_types)
+          end
+          describe 'columns' do
+            it_behaves_like 'a rate_report instance variable with rate columns' do
+              let(:columns) { frc_rate_report_rows[0][:columns] }
+            end
+            describe 'the second column' do
+              let(:term_translation) { SecureRandom.hex }
+              let(:type_translation) { SecureRandom.hex }
+              it 'has a value that combines the translation for the term with the translation for the given type' do
+                allow(controller).to receive(:t).with("dashboard.quick_advance.table.axes_labels.#{term}").and_return(term_translation)
+                allow(controller).to receive(:t).with("dashboard.quick_advance.table.#{type}").and_return(type_translation)
+                expect(frc_rate_report_rows[0][:columns][1][:value]).to eq(term_translation + ': ' + type_translation)
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
   describe 'private methods' do
     describe '`set_flash_message`' do
       let(:result) { {} }
@@ -525,6 +793,45 @@ RSpec.describe Admin::RulesController, :type => :controller do
           subject.send(:set_flash_message, [result, result, result])
           expect(flash[:notice]).to eq(I18n.t('admin.term_rules.messages.success'))
         end
+      end
+    end
+
+    describe '`process_rate_summary`' do
+      let(:type_1) { SecureRandom.hex }
+      let(:type_2) { SecureRandom.hex }
+      let(:term_1) { SecureRandom.hex }
+      let(:term_2) { SecureRandom.hex }
+      let(:term_1_type_1_info) { instance_double(Hash) }
+      let(:term_1_type_2_info) { instance_double(Hash) }
+      let(:term_2_type_1_info) { instance_double(Hash) }
+      let(:term_2_type_2_info) { instance_double(Hash) }
+      let(:rate_summary) {{
+        'timestamp' => instance_double(DateTime),
+        type_1 => {
+          term_1 => instance_double(Hash, with_indifferent_access: term_1_type_1_info),
+          term_2 => instance_double(Hash, with_indifferent_access: term_2_type_1_info)
+        },
+        type_2 => {
+          term_1 => instance_double(Hash, with_indifferent_access: term_1_type_2_info),
+          term_2 => instance_double(Hash, with_indifferent_access: term_2_type_2_info)
+        }
+      }}
+      let(:call_method) { subject.send(:process_rate_summary, rate_summary)}
+
+      it 'does not include the `timestamp` key in the returned hash' do
+        expect(call_method.keys).not_to include('timestamp')
+      end
+      it 'organizes the hash by term at the top level, then by type' do
+        expect(call_method).to eq({
+          term_1 => {
+            type_1 => term_1_type_1_info,
+            type_2 => term_1_type_2_info
+          },
+          term_2 => {
+            type_1 => term_2_type_1_info,
+            type_2 => term_2_type_2_info
+          }
+        })
       end
     end
   end

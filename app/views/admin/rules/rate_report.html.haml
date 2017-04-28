@@ -1,0 +1,7 @@
+=render layout: 'term', locals: {active_nav: :rate_report, classes: 'term-rules-rate-report'} do
+  %section.vrc-rates-report
+    %h2= t('advances.vrc_rates')
+    =render 'reports/reports_table', table_data: @vrc_rate_report
+  %section.frc-rates-report
+    %h2= t('advances.frc_rates')
+    =render 'reports/reports_table', table_data: @frc_rate_report

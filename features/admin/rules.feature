@@ -51,3 +51,11 @@ Feature: Viewing/Modifying the Term/Credit Rules
     Then the term rules rate bands tab should be active
     And I should see 1 report tables with multiple data rows
     And I should see the term rules rate bands page in its editable mode
+
+  @jira-mem-2311
+  Scenario: Navigating to the Rate Report page as an admin
+    When I click on the trade credit rules link in the header
+    And I click on the term rules link in the header
+    And I click on the term rules rate report tab
+    Then the term rules rate report tab should be active
+    And I should see 2 report tables with multiple data rows

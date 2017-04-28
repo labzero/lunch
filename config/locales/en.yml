@@ -614,6 +614,7 @@ en:
       table:
         term: Term
         whole_loan: Whole Loan
+        whole: Whole Loan
         mortgage: mortgage
         agency: Agency
         aaa: AAA
@@ -3334,6 +3335,14 @@ en:
       messages:
         error: An error has occurred. Please try your action again.
         success: Your changes have been saved.
+      rate_report:
+        opening_rate: Opening Rate
+        current_rate: Current Rate
+        change: Change
+        low_off: <span>Low</span> Shut-Down
+        low_warn: <span>Low</span> Warning
+        high_off: <span>High</span> Shut-Down
+        high_warn: <span>High</span> Warning
     advance_availability:
       title: Add Advance Availability
       nav:
