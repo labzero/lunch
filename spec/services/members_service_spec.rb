@@ -105,6 +105,28 @@ describe MembersService do
     end
   end
 
+  describe '`quick_advance_enabled` method' do
+    let(:call_method) { subject.quick_advance_enabled }
+    let(:response) { instance_double(Array, :[] => nil) }
+
+    it_behaves_like 'a MAPI backed service object method', :quick_advance_enabled
+
+    context do
+      before { allow(subject).to receive(:get_json).and_return(response) }
+      it 'calls the `get_json` method with the proper method name' do
+        expect(subject).to receive(:get_json).with(:quick_advance_enabled, anything)
+        call_method
+      end
+      it 'calls the `get_json` method with the proper endpoint' do
+        expect(subject).to receive(:get_json).with(anything, "member/quick_advance_flags")
+        call_method
+      end
+      it 'returns the results of the `get_json` call' do
+        expect(call_method).to eq(response)
+      end
+    end
+  end
+
   describe '`all_members` method' do
     let(:cached_members) { instance_double(Array) }
     let(:call_method) { subject.all_members }
@@ -356,7 +378,7 @@ describe MembersService do
           before do
             allow_any_instance_of(RestClient::Resource).to receive(:get).and_return(double('MAPI response', body: '[]'))
           end
-          
+
           it 'returns an empty array if no users are found' do
             allow(subject).to receive(:fetch_ldap_users).and_return([])
             expect(member).to eq([])

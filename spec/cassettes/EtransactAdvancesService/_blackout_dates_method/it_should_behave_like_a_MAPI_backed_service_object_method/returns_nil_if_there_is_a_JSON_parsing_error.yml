@@ -89,4 +89,49 @@ http_interactions:
         Years"}}}}'
     http_version: 
   recorded_at: Mon, 17 Aug 2015 21:31:57 GMT
-recorded_with: VCR 2.9.3
+- request:
+    method: get
+    uri: http://localhost:3100/mapi/etransact_advances/blackout_dates
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*; q=0.5, application/xml"
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Token token="811754137f80edeec392dc03cbb5889eaf8516caf2f5bbcf348ce8f49dd269ea13644e1960ccdaa3baa3037e0f3b22d9d1ae1f8eb351fa81f8ecc03ffe892e6e"
+      X-Request-Id:
+      - '12345'
+      X-User-Id:
+      - ''
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: 'OK '
+    headers:
+      Content-Type:
+      - text/html;charset=utf-8
+      Content-Length:
+      - '27'
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server:
+      - WEBrick/1.3.1 (Ruby/2.2.5/2016-04-26)
+      Date:
+      - Thu, 27 Apr 2017 19:21:02 GMT
+      Connection:
+      - Keep-Alive
+    body:
+      encoding: UTF-8
+      string: '["2017-05-04","2017-05-18"]'
+    http_version: 
+  recorded_at: Thu, 27 Apr 2017 19:21:02 GMT
+recorded_with: VCR 3.0.3

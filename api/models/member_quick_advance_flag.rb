@@ -3,6 +3,16 @@ module MAPI
     class MemberQuickAdvanceFlag
       include Swagger::Blocks
       swagger_model :MemberQuickAdvanceFlag do
+        property :fhlb_id do
+          key :type, :integer
+          key :required, true
+          key :description, 'The `FHLB_ID` of the member institution'
+        end
+        property :member_name do
+          key :type, :boolean
+          key :required, true
+          key :description, 'The member institution name'
+        end
         property :quick_advance_enabled do
           key :type, :boolean
           key :required, true

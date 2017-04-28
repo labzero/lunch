@@ -3340,6 +3340,13 @@ en:
         status: 'Add Advance On/Off'
         term: Availability by Term
         member: Availability by Member
+      availability_by_member:
+        filter:
+          title: 'Filter:'
+          all: Show All Members
+          enabled: Show Only Enabled Members
+          disabled: Show Only Disabled Members
+        member_institutions: Member Institutions
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

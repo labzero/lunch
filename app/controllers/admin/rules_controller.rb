@@ -94,7 +94,22 @@ class Admin::RulesController < Admin::BaseController
 
   # GET
   def advance_availability_by_member
-
+    quick_advance_enabled = MembersService.new(request).quick_advance_enabled
+    raise "There has been an error and Admin::RulesController#advance_availability_by_member has encountered nil" unless quick_advance_enabled.present?
+    @advance_availability_table = {
+      rows: quick_advance_enabled.collect do |flag|
+        {
+          columns: [
+            { value: flag['member_name'] },
+            { name: 'quick_advance_enabled',
+              value:  flag['fhlb_id'],
+              checked: flag['quick_advance_enabled'],
+              type: :checkbox,
+              disabled: true }
+          ]
+        }
+      end
+    }
   end
 
   # GET

@@ -276,7 +276,69 @@ RSpec.describe Admin::RulesController, :type => :controller do
 
   describe 'GET advance_availability_by_member' do
     let(:call_action) { get :advance_availability_by_member }
+    let(:quick_advance_enabled) { instance_double(Array, :[] => nil, collect: nil) }
+    let(:flag) { instance_double(Hash, :[] => nil) }
+    let(:member_name) { SecureRandom.hex }
+    let(:fhlb_id) { rand(999..99999) }
+    let(:members_service) { instance_double(MembersService, quick_advance_enabled: [flag]) }
+    let(:enabled) { double('enabled') }
+    let(:row_hash) { instance_double(Hash, :[] => nil) }
+
+    before do
+      allow(MembersService).to receive(:new).and_return(members_service)
+    end
+
+    it 'raises an error if `MembersService.quick_advance_enabled` returns `nil`' do
+      allow(members_service).to receive(:quick_advance_enabled).and_return(nil)
+      expect { call_action }.to raise_error("There has been an error and Admin::RulesController#advance_availability_by_member has encountered nil")
+    end
+
     it_behaves_like 'a RulesController action with before_action methods'
+
+    describe 'the `@advance_availability_table`' do
+      let(:advance_availability_table) { call_action; assigns[:advance_availability_table] }
+      it 'sets `@advance_availability_table`' do
+        expect(advance_availability_table).not_to be nil
+      end
+      describe 'with rows' do
+        before do
+          allow(MembersService).to receive(:new).with(request).and_return(members_service)
+        end
+        describe 'setting the rows' do
+          before do
+            allow(quick_advance_enabled).to receive(:collect).and_return(row_hash)
+            allow(members_service).to receive(:quick_advance_enabled).and_return(quick_advance_enabled)
+          end
+          it 'sets the rows hash' do
+            expect(advance_availability_table[:rows]).to eq(row_hash)
+          end
+        end
+        describe 'each of which has columns' do
+          context 'the first column' do
+            it 'sets the first column to the `member_name`' do
+              allow(flag).to receive(:[]).with('member_name').and_return(member_name)
+              expect(advance_availability_table[:rows][0][:columns][0][:value]).to eq(member_name)
+            end
+          end
+          context 'the second column' do
+            it 'sets the name to `quick_advance_enabled`' do
+              expect(advance_availability_table[:rows][0][:columns][1][:name]).to eq('quick_advance_enabled')
+            end
+            it 'sets the value to the `fhlb_id`' do
+              allow(flag).to receive(:[]).with('fhlb_id').and_return(fhlb_id)
+              expect(advance_availability_table[:rows][0][:columns][1][:value]).to eq(fhlb_id)
+            end
+            it 'sets the checked value to the `quick_advanced_enabled` flag value' do
+              allow(flag).to receive(:[]).with('quick_advance_enabled').and_return(enabled)
+              expect(advance_availability_table[:rows][0][:columns][1][:checked]).to eq(enabled)
+            end
+            it 'sets the type to `:checkbox`' do
+              expect(advance_availability_table[:rows][0][:columns][1][:type]).to eq(:checkbox)
+            end
+          end
+        end
+      end
+    end
   end
 
   describe 'GET rate_bands' do

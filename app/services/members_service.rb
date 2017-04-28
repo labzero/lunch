@@ -66,6 +66,12 @@ class MembersService < MAPIService
     end
   end
 
+  def quick_advance_enabled
+    if data = get_json(:quick_advance_enabled, "member/quick_advance_flags")
+      data
+    end
+  end
+
   def users(member_id)
     users = nil
     Devise::LDAP::Adapter.shared_connection do

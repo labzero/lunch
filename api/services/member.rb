@@ -487,7 +487,7 @@ module MAPI
             operation do
               key :method, 'GET'
               key :summary, 'Retrieve the Quick Advance Flag for the member'
-              key :notes, 'Returns a hash whose `quick_advance_flag` property indicates whether quick advances are enabled for a given member'
+              key :notes, 'Returns a hash whose `quick_advance_enabled` property indicates whether quick advances are enabled for a given member'
               key :type, :MemberQuickAdvanceFlag
               key :nickname, :getQuickAdvanceFlagForMember
               parameter do
@@ -497,6 +497,16 @@ module MAPI
                 key :type, :string
                 key :description, 'The id to find the members from'
               end
+            end
+          end
+          api do
+            key :path, '/quick_advance_flags'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the Quick Advance Flags for all members'
+              key :notes, 'Returns an array of hashes containing `fhlb_id`s and corresponding `quick_advance_enabled` properties indicating whether quick advances are enabled for all members'
+              key :type, :MemberQuickAdvanceFlags
+              key :nickname, :getQuickAdvanceFlagsForMember
             end
           end
           api do
@@ -1374,6 +1384,13 @@ module MAPI
         relative_get '/:id/disabled_reports' do
           member_id = params[:id]
           MAPI::Services::Member::DisabledReports.disabled_report_ids(self, member_id)
+        end
+
+        # Quick Advance Flags for All Members
+        relative_get '/quick_advance_flags' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            MAPI::Services::Member::Flags.quick_advance_flags(self)
+          end
         end
 
         # Member Quick Advance Flag

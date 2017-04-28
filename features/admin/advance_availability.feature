@@ -18,3 +18,10 @@ Feature: Viewing/Modifying the Add Advance Availability settings
     | status    |
     | by term   |
     | by member |
+
+  @jira-mem-2220
+  Scenario: Viewing Add Advance Availability by member
+    When I click on the trade credit rules link in the header
+    And I click on the add advance availability link in the header
+    And I click on the add advance availability by member tab
+    Then I should see a report table with multiple data rows
