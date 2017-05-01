@@ -505,8 +505,11 @@ module MAPI
               key :method, 'GET'
               key :summary, 'Retrieve the Quick Advance Flags for all members'
               key :notes, 'Returns an array of hashes containing `fhlb_id`s and corresponding `quick_advance_enabled` properties indicating whether quick advances are enabled for all members'
-              key :type, :MemberQuickAdvanceFlags
               key :nickname, :getQuickAdvanceFlagsForMember
+              key :type, :array
+              items do
+                key :'$ref', :MemberQuickAdvanceFlagsItem
+              end
             end
           end
           api do

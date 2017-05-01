@@ -1,72 +1,72 @@
 [
     {
-        "fhlb_id": 1,
-        "cp_assoc": "Old McDonald's Leanding Window",
-        "intraday_status_flag": "n"
+        "FHLB_ID": 1,
+        "CP_ASSOC": "Old McDonald's Leanding Window",
+        "INTRADAY_STATUS_FLAG": "n"
     },
     {
-        "fhlb_id": 2,
-        "cp_assoc": "Bobby's Payday Loans",
-        "intraday_status_flag": "N"
+        "FHLB_ID": 2,
+        "CP_ASSOC": "Bobby's Payday Loans",
+        "INTRADAY_STATUS_FLAG": "N"
     },
     {
-        "fhlb_id": 3,
-        "cp_assoc": "Irish Bank",
-        "intraday_status_flag": "Y"
+        "FHLB_ID": 3,
+        "CP_ASSOC": "Irish Bank",
+        "INTRADAY_STATUS_FLAG": "Y"
     },
     {
-        "fhlb_id": 4,
-        "cp_assoc": "S'more Bank",
-        "intraday_status_flag": "y"
+        "FHLB_ID": 4,
+        "CP_ASSOC": "S'more Bank",
+        "INTRADAY_STATUS_FLAG": "y"
     },
     {
-        "fhlb_id": 5,
-        "cp_assoc": "Wells Faygo",
-        "intraday_status_flag": "y"
+        "FHLB_ID": 5,
+        "CP_ASSOC": "Wells Faygo",
+        "INTRADAY_STATUS_FLAG": "y"
     },
     {
-        "fhlb_id": 6,
-        "cp_assoc": "Chaste Manhattan",
-        "intraday_status_flag": "Y"
+        "FHLB_ID": 6,
+        "CP_ASSOC": "Chaste Manhattan",
+        "INTRADAY_STATUS_FLAG": "Y"
     },
     {
-        "fhlb_id": 7,
-        "cp_assoc": "Subprime Backalley Lenders",
-        "intraday_status_flag": "N"
+        "FHLB_ID": 7,
+        "CP_ASSOC": "Subprime Backalley Lenders",
+        "INTRADAY_STATUS_FLAG": "N"
     },
     {
-        "fhlb_id": 8,
-        "cp_assoc": "Loan Sharks Incorporated",
-        "intraday_status_flag": "n"
+        "FHLB_ID": 8,
+        "CP_ASSOC": "Loan Sharks Incorporated",
+        "INTRADAY_STATUS_FLAG": "n"
     },
     {
-        "fhlb_id": 9,
-        "cp_assoc": "Marina Bank",
-        "intraday_status_flag": "y"
+        "FHLB_ID": 9,
+        "CP_ASSOC": "Marina Bank",
+        "INTRADAY_STATUS_FLAG": "y"
     },
     {
-        "fhlb_id": 10,
-        "cp_assoc": "Overseas Bank",
-        "intraday_status_flag": "N"
+        "FHLB_ID": 10,
+        "CP_ASSOC": "Overseas Bank",
+        "INTRADAY_STATUS_FLAG": "N"
     },
     {
-        "fhlb_id": 11,
-        "cp_assoc": "Cayman Islands Holding Company",
-        "intraday_status_flag": "n"
+        "FHLB_ID": 11,
+        "CP_ASSOC": "Cayman Islands Holding Company",
+        "INTRADAY_STATUS_FLAG": "n"
     },
     {
-        "fhlb_id": 12,
-        "cp_assoc": "The Bank With The Really Really Long Name That Requires Truncation or Expansion",
-        "intraday_status_flag": "Y"
+        "FHLB_ID": 12,
+        "CP_ASSOC": "The Bank With The Really Really Long Name That Requires Truncation or Expansion",
+        "INTRADAY_STATUS_FLAG": "Y"
     },
     {
-        "fhlb_id": 13,
-        "cp_assoc": "The Bank With Disabled Signers",
-        "intraday_status_flag": "N"
+        "FHLB_ID": 13,
+        "CP_ASSOC": "The Bank With Disabled Signers",
+        "INTRADAY_STATUS_FLAG": "N"
     },
     {
-        "fhlb_id": 14,
-        "cp_assoc": "The Bank Requiring Dual Signers for Advances",
-        "intraday_status_flag": "Y"
+        "FHLB_ID": 14,
+        "CP_ASSOC": "The Bank Requiring Dual Signers for Advances",
+        "INTRADAY_STATUS_FLAG": "Y"
     }
 ]

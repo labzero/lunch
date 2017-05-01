@@ -139,9 +139,9 @@ describe MAPI::ServiceApp do
         it 'returns fake data' do
           expect(quick_advance_flags).to eq(JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'quick_advance_flags.json'))).collect do |flag|
             {
-              fhlb_id: flag['fhlb_id'],
-              member_name: flag['cp_assoc'],
-              quick_advance_enabled: flag['intraday_status_flag'].upcase == 'Y'
+              fhlb_id: flag['FHLB_ID'],
+              member_name: flag['CP_ASSOC'],
+              quick_advance_enabled: flag['INTRADAY_STATUS_FLAG'].upcase == 'Y'
             }
           end)
         end

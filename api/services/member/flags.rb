@@ -33,9 +33,9 @@ module MAPI
           flags.collect do |flag|
             flag = flag.with_indifferent_access
             {
-              fhlb_id: flag['fhlb_id'],
-              member_name: flag['cp_assoc'],
-              quick_advance_enabled: flag['intraday_status_flag'].try(:upcase) == 'Y'
+              fhlb_id: flag['FHLB_ID'],
+              member_name: flag['CP_ASSOC'],
+              quick_advance_enabled: flag['INTRADAY_STATUS_FLAG'].try(:upcase) == 'Y'
             }
           end
         end
