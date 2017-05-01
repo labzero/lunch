@@ -45,7 +45,8 @@ const About = () => (
     <p>
       Public sign-ups for Lunch are currently closed. If you try to log in with your Google account
       and you don’t already have a Lunch account, I’m not going to store any of your data, or keep
-      a record that you even tried to log in.
+      a record that you even tried to log in &mdash; but you will be prompted to sign up for an
+      invitation.
     </p>
     <p>
       For those who are already Lunch users, when you link a Google account I only store your email
@@ -93,7 +94,7 @@ const About = () => (
       you.
     </p>
     <p>
-      I last updated this page on April 11, 2017.
+      I last updated this page on May 1, 2017.
     </p>
   </Grid>
 );
