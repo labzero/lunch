@@ -66,6 +66,18 @@ const About = () => (
       sure you’re the same person from page to page, so you can see success or failure messages
       when doing things like requesting a password reset.
     </p>
+    <h4>Google Analytics</h4>
+    <p>
+      This site also uses
+      {' '}<a href="https://analytics.google.com/" rel="noopener noreferrer" target="_blank">
+        Google Analytics
+      </a> to give me an idea of what sorts of people are using Lunch, and from where.
+      {' '}<a href="https://support.google.com/analytics/answer/6004245?hl=en" rel="noopener noreferrer" target="_blank">
+        You can read more about their own policies
+      </a>, which are pretty standard (they store a few cookies as well), but it’s worth pointing
+      out that the tracking is anonymous &mdash; there’s no way they or I can tell exactly who you
+      are.
+    </p>
     <h4>Cost</h4>
     <p>
       Lunch is currently free. Unlimited users per team, and each user can create or be a part of
