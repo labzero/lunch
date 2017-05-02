@@ -65,7 +65,6 @@ class RestaurantAddForm extends Component {
           onSuggestSelect={this.handleSuggestSelect}
           getSuggestLabel={this.props.getSuggestLabel}
           ref={g => { this.geosuggest = g; }}
-          types={['establishment']}
         />
       </form>
     );

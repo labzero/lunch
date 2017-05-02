@@ -45,8 +45,11 @@ const mergeProps = (stateProps, dispatchProps) =>
       let name = suggestion.label;
       let address;
       const { placeId, location: { lat, lng } } = suggestion;
-      if (suggestCache[placeId] !== undefined) {
+      const isEstablishment = suggestion.gmaps && suggestion.gmaps.types.indexOf('establishment') > -1;
+      if (suggestCache[placeId] !== undefined && isEstablishment) {
         name = suggestCache[placeId];
+      } else if (!isEstablishment) {
+        name = name.split(',')[0];
       }
       if (suggestion.gmaps !== undefined) {
         address = suggestion.gmaps.formatted_address;
