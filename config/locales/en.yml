@@ -3356,6 +3356,13 @@ en:
           enabled: Show Only Enabled Members
           disabled: Show Only Disabled Members
         member_institutions: Member Institutions
+      availability_by_term:
+        open_label: 'Open/Overnight'
+        short_term_frc: 1 Week to 12 Month Terms
+        long_term_frc: 1 Year to 3 Year Terms
+        actions:
+          select_all: Select All
+          deselect_all: Deselect All
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

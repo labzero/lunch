@@ -185,3 +185,107 @@
     }
   }
 }
+
+.availability-by-term-form-actions {
+  @extend %equidistant-children;
+  margin-top: 10px;
+  .primary-button, .secondary-button {
+    width: 280px;
+  }
+  &:last-of-type {
+    margin: 20px 0 -10px;
+  }
+}
+
+.rules-availability-by-term-headings {
+  table {
+    border: none;
+    margin-bottom: 5px;
+    thead {
+      background: transparent;
+      th {
+        @extend %typography-table-link;
+        color: $medium-gray;
+        border: none;
+      }
+    }
+    td {
+      background-color: $light-gray;
+      border: 1px solid $light-blue;
+      &:first-child {
+        border: none;
+        background: transparent;
+      }
+    }
+  }
+  .report-table th.report-cell-narrow {
+    padding-left: 0;
+  }
+}
+
+.rules-availability-by-term-form {
+  table {
+    th, td {
+      box-sizing: border-box;
+    }
+    td:nth-child(1) {
+      width: 180px;
+    }
+    td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5) {
+      width: 176px;
+      text-align: center;
+    }
+  }
+  input[type=checkbox] {
+    & + label {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+    &:not([disabled]) {
+      & + label {
+        display: none;
+      }
+    }
+    &:disabled {
+      display: none;
+      &:not([checked]) {
+        & + label {
+          background-image: image-url('fhlb-status-off-small.svg');
+        }
+      }
+      &:checked {
+        & + label {
+          background-image: image-url('fhlb-status-on-small.svg');
+        }
+      }
+    }
+  }
+}
+
+.advance-availability-term {
+  h2 {
+    margin-bottom: 5px;
+  }
+  .text-only-button {
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    &:first-of-type {
+      padding-left: 0;
+    }
+  }
+}
+
+.rules-availability-by-term-vrc, .rules-availability-by-term-frc-short {
+  table {
+    margin-bottom: 30px;
+  }
+}
+
+.rules-availability-by-term-frc-long {
+  table {
+    margin-bottom: 0;
+  }
+}

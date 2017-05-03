@@ -6,6 +6,8 @@ class Admin::RulesController < Admin::BaseController
     :'2year', :'3year'
   ].freeze
 
+  LONG_FRC_TERMS = [:'1year', :'2year', :'3year']
+
   before_action do
     set_active_nav(:rules)
     @can_edit_trade_rules = policy(:web_admin).edit_trade_rules?
@@ -89,7 +91,71 @@ class Admin::RulesController < Admin::BaseController
 
   # GET
   def advance_availability_by_term
-
+    etransact_service = EtransactAdvancesService.new(request)
+    term_limit_data = etransact_service.limits
+    raise 'There has been an error and Admin::RulesController#advance_availability_by_term has encountered nil. Check error logs.' if term_limit_data.nil?
+    @availability_headings = {
+      column_headings: ['', t('dashboard.quick_advance.table.axes_labels.standard'), t('dashboard.quick_advance.table.axes_labels.securities_backed'), '', ''],
+      rows: [{
+        columns: [
+          {value: nil},
+          {value: t('dashboard.quick_advance.table.whole_loan')},
+          {value: t('dashboard.quick_advance.table.agency')},
+          {value: t('dashboard.quick_advance.table.aaa')},
+          {value: t('dashboard.quick_advance.table.aa')}
+        ]
+      }]
+    }
+    @vrc_availability = {rows: []}
+    @frc_availability = {rows: []}
+    @long_term_availability = {rows: []}
+    term_limit_data.each do |bucket|
+      term = bucket[:term].to_sym
+      raise "There has been an error and Admin::RulesController#advance_availability_by_term has encountered an etransact_service.limits bucket with an invalid term: #{term}" unless VALID_TERMS.include?(term)
+      term_label = term == :open ? t('admin.advance_availability.availability_by_term.open_label') : t("admin.term_rules.daily_limit.dates.#{term}")
+      row = {columns: [
+        {value: term_label},
+        {
+          name: "term_limits[#{term}][whole_loan_enabled]",
+          value: bucket[:whole_loan_enabled],
+          type: :checkbox,
+          checked: bucket[:whole_loan_enabled],
+          label: true,
+          disabled: true #TODO - change to '!@can_edit_trade_rules' as part of MEM-2201
+        },
+        {
+          name: "term_limits[#{term}][sbc_agency_enabled]",
+          value: bucket[:sbc_agency_enabled],
+          type: :checkbox,
+          checked: bucket[:sbc_agency_enabled],
+          label: true,
+          disabled: true #TODO - change to '!@can_edit_trade_rules' as part of MEM-2201
+        },
+        {
+          name: "term_limits[#{term}][sbc_aaa_enabled]",
+          value: bucket[:sbc_aaa_enabled],
+          type: :checkbox,
+          checked: bucket[:sbc_aaa_enabled],
+          label: true,
+          disabled: true #TODO - change to '!@can_edit_trade_rules' as part of MEM-2201
+        },
+        {
+          name: "term_limits[#{term}][sbc_aa_enabled]",
+          value: bucket[:sbc_aa_enabled],
+          type: :checkbox,
+          checked: bucket[:sbc_aa_enabled],
+          label: true,
+          disabled: true #TODO - change to '!@can_edit_trade_rules' as part of MEM-2201
+        }
+      ]}
+      if term == :open
+        @vrc_availability[:rows] << row
+      elsif LONG_FRC_TERMS.include?(term)
+        @long_term_availability[:rows] << row
+      else
+        @frc_availability[:rows] << row
+      end
+    end
   end
 
   # GET
