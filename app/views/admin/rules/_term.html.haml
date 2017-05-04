@@ -11,7 +11,7 @@
       %span<>
         =link_to(t('admin.term_rules.nav.rate_report'), active_nav == :rate_report ? '#' : rules_rate_report_path, class: "#{'active-tab' if active_nav == :rate_report}")
       %span<>
-        =link_to(t('admin.term_rules.nav.term_details'), '#', class: "#{'active-tab' if active_nav == :term_details}")
+        =link_to(t('admin.term_rules.nav.term_details'), active_nav == :term_details ? '#' : rules_term_details_path, class: "#{'active-tab' if active_nav == :term_details}")
     .tabbed-content-main
       - if flash[:error]
         .form-error-section

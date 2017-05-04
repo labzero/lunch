@@ -276,6 +276,28 @@ class Admin::RulesController < Admin::BaseController
     end
   end
 
+  # GET
+  def term_details
+    term_details_data = EtransactAdvancesService.new(request).limits
+    raise 'There has been an error and EtransactAdvancesService#limits has encountered nil. Check error logs.' if term_details_data.nil?
+    @term_details = {
+      column_headings: ['', t('admin.term_rules.term_details.low_days_to_maturity'), t('admin.term_rules.term_details.high_days_to_maturity')]
+    }
+    @term_details[:rows] = term_details_data.collect do |bucket|
+      term = bucket[:term]
+      raise "There has been an error and Admin::RulesController#term_details has encountered an etransact_service.limits bucket with an invalid term: #{term}" unless VALID_TERMS.include?(term.to_sym)
+      {columns: [
+        {value: t("admin.term_rules.daily_limit.dates.#{term}")},
+        {value: bucket[:low_days_to_maturity].to_i,
+         type: :number
+        },
+        {value: bucket[:high_days_to_maturity].to_i,
+         type: :number
+        }
+      ]}
+    end
+  end
+
   private
 
   def set_flash_message(results)

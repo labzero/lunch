@@ -246,6 +246,7 @@ Rails.application.routes.draw do
           get '/rate_bands' => 'admin/rules#rate_bands', as: :rules_rate_bands
           put '/rate_bands' => 'admin/rules#update_rate_bands', as: :rules_update_rate_bands
           get '/rate_report' => 'admin/rules#rate_report', as: :rules_rate_report
+          get '/term_details' => 'admin/rules#term_details', as: :rules_term_details
         end
         scope 'advance-availability' do
           get '/status' => 'admin/rules#advance_availability_status', as: :rules_advance_availability

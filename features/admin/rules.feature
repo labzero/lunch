@@ -59,3 +59,11 @@ Feature: Viewing/Modifying the Term/Credit Rules
     And I click on the term rules rate report tab
     Then the term rules rate report tab should be active
     And I should see 2 report tables with multiple data rows
+
+  @jira-mem-2307
+  Scenario: Navigating to the Term Details page as an admin
+    When I click on the trade credit rules link in the header
+    And I click on the term rules link in the header
+    And I click on the term rules term details tab
+    Then the term rules term details tab should be active
+    And I should see 1 report tables with multiple data rows

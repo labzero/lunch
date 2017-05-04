@@ -915,6 +915,92 @@ RSpec.describe Admin::RulesController, :type => :controller do
     end
   end
 
+  describe 'GET term_details' do
+    let(:term_details_data) {{
+      term: described_class::VALID_TERMS.sample,
+      low_days_to_maturity: double('low days to maturity', to_i: nil),
+      high_days_to_maturity: double('high days to maturity', to_i: nil)
+    }}
+    let(:etransact_service) { instance_double(EtransactAdvancesService, limits: [term_details_data] ) }
+    let(:sentinel) { SecureRandom.hex }
+    let(:call_action) { get :term_details }
+    before do
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+    end
+    it_behaves_like 'a RulesController action with before_action methods'
+    it 'creates a new instance of EtransactAdvancesService with the request' do
+      expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
+      call_action
+    end
+    it 'calls `limits` on the EtransactAdvancesService' do
+      expect(etransact_service).to receive(:limits).and_return({})
+      call_action
+    end
+    it 'raises an error if EtransactAdvancesService#limits returns nil' do
+      allow(etransact_service).to receive(:limits).and_return(nil)
+      expect{call_action}.to raise_error('There has been an error and EtransactAdvancesService#limits has encountered nil. Check error logs.')
+    end
+
+    describe '`@term_details`' do
+      let(:term_details) { call_action; assigns[:term_details] }
+      before { allow(controller).to receive(:t).and_call_original }
+      describe 'column_headings' do
+        it 'contains the proper column_headings' do
+          low_days_heading = I18n.t('admin.term_rules.term_details.low_days_to_maturity')
+          high_days_heading = I18n.t('admin.term_rules.term_details.high_days_to_maturity')
+          expect(term_details[:column_headings]).to eq(['', low_days_heading, high_days_heading])
+        end
+      end
+      it 'raises an error if it encounters an unrecognized `:term` in one the etransact_service.limits buckets' do
+        term_details_data[:term] = sentinel
+        expect{term_details}.to raise_error("There has been an error and Admin::RulesController#term_details has encountered an etransact_service.limits bucket with an invalid term: #{sentinel}")
+      end
+      describe 'rows' do
+        let(:term_details_data_buckets) do
+          data = []
+          described_class::VALID_TERMS.each do |term|
+            data << {
+              term: term,
+              low_days_to_maturity: instance_double(Integer, to_i: nil),
+              high_days_to_maturity: instance_double(Integer, to_i: nil)
+            }
+          end
+          data
+        end
+        before { allow(etransact_service).to receive(:limits).and_return(term_details_data_buckets) }
+        it 'contains as many rows as etransact_service.limits buckets' do
+          expect(term_details[:rows].length).to eq(term_details_data_buckets.length)
+        end
+        described_class::VALID_TERMS.each_with_index do |term, i|
+          describe "the `#{term}` term row" do
+            let(:term_row) { term_details[:rows][i] }
+            it "has a first column value with the correct translation for the `#{term}` term" do
+              expect(term_row[:columns][0][:value]).to eq(I18n.t("admin.term_rules.daily_limit.dates.#{term}"))
+            end
+            describe 'the second column' do
+              it 'has a `value_type` of :number' do
+                expect(term_row[:columns][1][:type]).to eq(:number)
+              end
+              it 'has a `value` that is the result of calling `to_i` on the bucket\'s `low_days_to_maturity`' do
+                allow(term_details_data_buckets[i][:low_days_to_maturity]).to receive(:to_i).and_return(sentinel)
+                expect(term_row[:columns][1][:value]).to eq(sentinel)
+              end
+            end
+            describe 'the third column' do
+              it 'has a `value_type` of :number' do
+                expect(term_row[:columns][2][:type]).to eq(:number)
+              end
+              it 'has a `value` that is the result of calling `to_i` on the bucket\'s `term_daily_limit`' do
+                allow(term_details_data_buckets[i][:high_days_to_maturity]).to receive(:to_i).and_return(sentinel)
+                expect(term_row[:columns][2][:value]).to eq(sentinel)
+              end
+             end
+           end
+         end
+       end
+     end
+   end
+
   describe 'private methods' do
     describe '`set_flash_message`' do
       let(:result) { {} }

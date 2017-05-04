@@ -3332,6 +3332,9 @@ en:
         low_warning_html: '<span>Low</span> Warning (bps)<span class="rate-band-notice low-warning">'
         high_shutdown_html: '<span>High</span> Shut-Down (bps)<span class="rate-band-notice high-error">'
         high_warning_html: '<span>High</span> Warning (bps)<span class="rate-band-notice high-warning">'
+      term_details:
+        low_days_to_maturity: Low Days to Maturity
+        high_days_to_maturity: High Days to Maturity
       messages:
         error: An error has occurred. Please try your action again.
         success: Your changes have been saved.
