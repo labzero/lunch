@@ -250,6 +250,16 @@ describe MAPI::ServiceApp do
             end
           end
         end
+        etransact_limits_module::LIMIT_STATUS_FIELDS.each do |field_name|
+          describe "when the passed key is `#{field_name}`" do
+            it 'returns `Y` when the value evaluates to true' do
+              expect(etransact_limits_module.process_limit_value(field_name, true)).to eq('Y')
+            end
+            it 'returns `N` when the value evaluates to false' do
+              expect(etransact_limits_module.process_limit_value(field_name, false)).to eq('N')
+            end
+          end
+        end
       end
     end
   end

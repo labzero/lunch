@@ -1,33 +1,19 @@
 =render layout: 'advance_availability', locals: {active_nav: :advance_availability_term, classes: 'advance-availability-term'} do
-  =form_tag('#', {class: 'rules-availability-by-term-form'}) do
-    - if false # TODO- change to @can_edit_trade_rules as part of MEM-2201
-      %section.availability-by-term-form-actions
-        %button.secondary-button= t('admin.advance_availability.availability_by_term.actions.select_all')
-        %button.secondary-button= t('admin.advance_availability.availability_by_term.actions.deselect_all')
-        =submit_tag(t('admin.term_rules.save'), class: 'primary-button') if @can_edit_trade_rules
+  =form_tag(rules_update_advance_availability_by_term_path, {class: 'rules-availability-by-term-form', method: :put}) do
+    =render 'availability_by_term_form_actions' if @can_edit_trade_rules
     %section.rules-availability-by-term-headings
       =render 'reports/reports_table', table_data: @availability_headings
     %section.rules-availability-by-term-vrc
       %h2= t('advances.vrc_rates')
-      - if false # TODO- change to @can_edit_trade_rules as part of MEM-2201
-        %button.text-only-button= t('admin.advance_availability.availability_by_term.actions.select_all')
-        %button.text-only-button= t('admin.advance_availability.availability_by_term.actions.deselect_all')
+      =render 'availability_by_term_select_actions', parent_class: 'rules-availability-by-term-vrc' if @can_edit_trade_rules
       =render 'reports/reports_table', table_data: @vrc_availability
     %section.rules-availability-by-term-frc-short
       %h2= t('advances.frc_rates')
       %h2= t('admin.advance_availability.availability_by_term.short_term_frc')
-      - if false # TODO- change to @can_edit_trade_rules as part of MEM-2201
-        %button.text-only-button= t('admin.advance_availability.availability_by_term.actions.select_all')
-        %button.text-only-button= t('admin.advance_availability.availability_by_term.actions.deselect_all')
+      =render 'availability_by_term_select_actions', parent_class: 'rules-availability-by-term-frc-short' if @can_edit_trade_rules
       =render 'reports/reports_table', table_data: @frc_availability
     %section.rules-availability-by-term-frc-long
       %h2= t('admin.advance_availability.availability_by_term.long_term_frc')
-      - if false # TODO- change to @can_edit_trade_rules as part of MEM-2201
-        %button.text-only-button= t('admin.advance_availability.availability_by_term.actions.select_all')
-        %button.text-only-button= t('admin.advance_availability.availability_by_term.actions.deselect_all')
+      =render 'availability_by_term_select_actions', parent_class: 'rules-availability-by-term-frc-long' if @can_edit_trade_rules
       =render 'reports/reports_table', table_data: @long_term_availability
-    - if false # TODO- change to @can_edit_trade_rules as part of MEM-2201
-      %section.availability-by-term-form-actions
-        %button.secondary-button= t('admin.advance_availability.availability_by_term.actions.select_all')
-        %button.secondary-button= t('admin.advance_availability.availability_by_term.actions.deselect_all')
-        =submit_tag(t('admin.term_rules.save'), class: 'primary-button') if @can_edit_trade_rules
+    =render 'availability_by_term_form_actions' if @can_edit_trade_rules

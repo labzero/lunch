@@ -72,6 +72,7 @@ RSpec.describe Admin::RulesController, :type => :controller do
   describe 'GET limits' do
     let(:global_limit_data) {{
       shareholder_total_daily_limit: double('total daily limit'),
+      shareholder_total_daily_limit: double('total daily limit'),
       shareholder_web_daily_limit: double('web daily limit')
     }}
     let(:term_limit_data) {{
@@ -359,11 +360,11 @@ RSpec.describe Admin::RulesController, :type => :controller do
               it "has a name that incorporates the term and `#{type}`" do
                 expect(column[:name]).to eq("term_limits[#{bucket[:term]}][#{type.to_s}]")
               end
-              it "has a value that is the `#{type}` value for the bucket" do
-                expect(column[:value]).to eq(bucket[type])
-              end
               it 'has a type of `checkbox`' do
                 expect(column[:type]).to eq(:checkbox)
+              end
+              it 'has `submit_unchecked_boxes` set to true' do
+                expect(column[:submit_unchecked_boxes]).to be true
               end
               it "has a checked value that is the `#{type}` value for the bucket" do
                 expect(column[:checked]).to eq(bucket[type])
@@ -371,8 +372,17 @@ RSpec.describe Admin::RulesController, :type => :controller do
               it 'has a label set to `true`' do
                 expect(column[:label]).to eq(true)
               end
-              it 'has disabled set to `true`' do
-                expect(column[:disabled]).to eq(true)
+              context 'when the user can edit trade rules' do
+                allow_policy :web_admin, :edit_trade_rules?
+                it 'sets `disabled` to false' do
+                  expect(column[:disabled]).to be false
+                end
+              end
+              context 'when the user cannot edit trade rules' do
+                deny_policy :web_admin, :edit_trade_rules?
+                it 'sets `disabled` to false' do
+                  expect(column[:disabled]).to be true
+                end
               end
             end
           end
@@ -417,6 +427,64 @@ RSpec.describe Admin::RulesController, :type => :controller do
           end
         end
       end
+    end
+  end
+
+  describe 'PUT update_advance_availability_by_term' do
+    allow_policy :web_admin, :edit_trade_rules?
+
+    let(:term) { SecureRandom.hex }
+    let(:type) { SecureRandom.hex }
+    let(:term_limits_param) { {term => {type => false}} }
+    let(:etransact_service) { instance_double(EtransactAdvancesService, update_term_limits: {})}
+    let(:call_action) { put(:update_advance_availability_by_term, {term_limits: term_limits_param}) }
+
+    before do
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+      allow(controller).to receive(:set_flash_message)
+    end
+
+    it_behaves_like 'a RulesController action with before_action methods'
+    it_behaves_like 'it checks the edit_trade_rules? web_admin policy'
+    it 'creates a new instance of EtransactAdvancesService with the request' do
+      expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
+      call_action
+    end
+    describe 'updating etransact limits' do
+      describe 'processing the `term_limits` param' do
+        describe 'when the value for a given term and type is `on`' do
+          it 'sets the value for that term and type to `true`' do
+            term_limits_param[term][type] = 'on'
+            expect(etransact_service).to receive(:update_term_limits).with(hash_including({term => {type => true}})).and_return({})
+            call_action
+          end
+        end
+        describe 'when the value for a given term and type is not `on`' do
+          it 'sets the value for that term and type to `false`' do
+            term_limits_param[term][type] = 'off'
+            expect(etransact_service).to receive(:update_term_limits).with(hash_including({term => {type => false}})).and_return({})
+            call_action
+          end
+        end
+      end
+      it 'calls `update_term_limits` on the EtransactAdvancesService with the `term_limits` param' do
+        expect(etransact_service).to receive(:update_term_limits).with(term_limits_param).and_return({})
+        call_action
+      end
+      it 'raises an error if the `update_term_limits` method returns nil' do
+        allow(etransact_service).to receive(:update_term_limits).with(term_limits_param).and_return(nil)
+        expect{call_action}.to raise_error("There has been an error and Admin::RulesController#update_advance_availability_by_term has encountered nil")
+      end
+    end
+    it 'calls the `set_flash_message` method with the results from `update_term_limits`' do
+      term_limits_results = instance_double(Hash)
+      allow(etransact_service).to receive(:update_term_limits).and_return(term_limits_results)
+      expect(controller).to receive(:set_flash_message).with(term_limits_results)
+      call_action
+    end
+    it 'redirects to the `rules_advance_availability_by_term_url`' do
+      call_action
+      expect(response).to redirect_to(rules_advance_availability_by_term_url)
     end
   end
 

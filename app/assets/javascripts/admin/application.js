@@ -3,4 +3,5 @@
 //= require ../nav.js
 //= require ../flyouts.js
 //= require ../utils.js
+//= require ../form.js
 //= require_directory

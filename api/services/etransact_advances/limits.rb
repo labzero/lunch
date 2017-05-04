@@ -64,6 +64,8 @@ module MAPI
           case key
           when 'MIN_ONLINE_ADVANCE', 'TERM_DAILY_LIMIT'
             value.to_s.gsub(',', '').to_i
+          when *LIMIT_STATUS_FIELDS
+            value ? 'Y' : 'N'
           else
             value
           end

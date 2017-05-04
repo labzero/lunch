@@ -251,6 +251,7 @@ Rails.application.routes.draw do
         scope 'advance-availability' do
           get '/status' => 'admin/rules#advance_availability_status', as: :rules_advance_availability
           get '/term' => 'admin/rules#advance_availability_by_term', as: :rules_advance_availability_by_term
+          put '/term' => 'admin/rules#update_advance_availability_by_term', as: :rules_update_advance_availability_by_term
           get '/member' => 'admin/rules#advance_availability_by_member', as: :rules_advance_availability_by_member
         end
       end

@@ -13,7 +13,7 @@ class Admin::RulesController < Admin::BaseController
     @can_edit_trade_rules = policy(:web_admin).edit_trade_rules?
   end
 
-  before_action only: [:update_limits, :update_rate_bands] do
+  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term] do
     authorize :web_admin, :edit_trade_rules?
   end
 
@@ -117,35 +117,35 @@ class Admin::RulesController < Admin::BaseController
         {value: term_label},
         {
           name: "term_limits[#{term}][whole_loan_enabled]",
-          value: bucket[:whole_loan_enabled],
           type: :checkbox,
+          submit_unchecked_boxes: true,
           checked: bucket[:whole_loan_enabled],
           label: true,
-          disabled: true #TODO - change to '!@can_edit_trade_rules' as part of MEM-2201
+          disabled: !@can_edit_trade_rules
         },
         {
           name: "term_limits[#{term}][sbc_agency_enabled]",
-          value: bucket[:sbc_agency_enabled],
           type: :checkbox,
+          submit_unchecked_boxes: true,
           checked: bucket[:sbc_agency_enabled],
           label: true,
-          disabled: true #TODO - change to '!@can_edit_trade_rules' as part of MEM-2201
+          disabled: !@can_edit_trade_rules
         },
         {
           name: "term_limits[#{term}][sbc_aaa_enabled]",
-          value: bucket[:sbc_aaa_enabled],
           type: :checkbox,
+          submit_unchecked_boxes: true,
           checked: bucket[:sbc_aaa_enabled],
           label: true,
-          disabled: true #TODO - change to '!@can_edit_trade_rules' as part of MEM-2201
+          disabled: !@can_edit_trade_rules
         },
         {
           name: "term_limits[#{term}][sbc_aa_enabled]",
-          value: bucket[:sbc_aa_enabled],
           type: :checkbox,
+          submit_unchecked_boxes: true,
           checked: bucket[:sbc_aa_enabled],
           label: true,
-          disabled: true #TODO - change to '!@can_edit_trade_rules' as part of MEM-2201
+          disabled: !@can_edit_trade_rules
         }
       ]}
       if term == :open
@@ -156,6 +156,21 @@ class Admin::RulesController < Admin::BaseController
         @frc_availability[:rows] << row
       end
     end
+  end
+
+  # PUT
+  def update_advance_availability_by_term
+    etransact_service = EtransactAdvancesService.new(request)
+    term_limits = params[:term_limits].with_indifferent_access
+    term_limits.each do |term, limit_data|
+      limit_data.each do |type, status|
+        term_limits[term][type] = status == 'on'
+      end
+    end
+    term_limits_results = etransact_service.update_term_limits(term_limits)
+    raise "There has been an error and Admin::RulesController#update_advance_availability_by_term has encountered nil" unless term_limits_results
+    set_flash_message(term_limits_results)
+    redirect_to action: :advance_availability_by_term
   end
 
   # GET

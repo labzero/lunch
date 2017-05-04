@@ -48,17 +48,19 @@ When(/^I click on the (term rules|add advance availability) (daily limits|status
   page.find("#{page_selector} .tabbed-content nav a", text: nav_text, exact: true).click
 end
 
-Then(/^I should see the term rules (limits|rate bands) page in its (view-only|editable) mode$/) do |form, mode|
+Then(/^I should see the (?:term rules|advance availability) (limits|rate bands|by term) page in its (view-only|editable) mode$/) do |form, mode|
   selector = case form
   when 'limits'
     '.rules-limits-form'
   when 'rate bands'
     '.rules-rate-bands-form'
-             end
+  when 'by term'
+    '.rules-availability-by-term-form'
+  end
   if mode == 'view-only'
     page.assert_no_selector("#{selector} input[type=submit]")
   else
-    expect(page.find("#{selector} input[type=submit]").value).to eq(I18n.t('admin.term_rules.save'))
+    expect(page.all("#{selector} input[type=submit]").first.value).to eq(I18n.t('admin.term_rules.save'))
   end
 end
 
@@ -81,6 +83,21 @@ Then(/^I should see the success message on the term rules limits page$/) do
   page.assert_selector('.term-rules .form-success-section p', text: I18n.t('admin.term_rules.messages.success'), exact: true)
 end
 
+When(/^I press the button to (check|uncheck) all checkboxes for the availability by term (form|vrc section|frc short section|frc long section)$/) do |status, section|
+  action = status == 'check' ? 'checked' : 'unchecked'
+  parent_selector = get_availability_by_term_selector(section)
+  page.find("#{parent_selector} button[data-select-checkboxes-status='#{action}']").click
+end
+
+Then(/^I should see only (checked|unchecked) checkboxes for the availability by term (form|vrc section|frc short section|frc long section)/) do |status, section|
+  expectation = status == 'checked' ? :to : :not_to
+  parent_selector = get_availability_by_term_selector(section, true)
+  checkboxes = page.all("#{parent_selector} input[type=checkbox]")
+  checkboxes.each do |checkbox|
+    expect(checkbox).send(expectation, be_checked)
+  end
+end
+
 def translate_tab_title(nav)
   case nav
   when 'daily limits'
@@ -97,5 +114,18 @@ def translate_tab_title(nav)
     I18n.t('admin.term_rules.nav.rate_report')
   when 'term details'
       I18n.t('admin.term_rules.nav.term_details')
+  end
+end
+
+def get_availability_by_term_selector(description, find_form=nil)
+  case description
+  when 'form'
+    find_form ? '.rules-availability-by-term-form' : '.availability-by-term-form-actions:first-of-type'
+  when 'vrc section'
+    '.rules-availability-by-term-vrc'
+  when 'frc short section'
+    '.rules-availability-by-term-frc-short'
+  when 'frc long section'
+    '.rules-availability-by-term-frc-long'
   end
 end
