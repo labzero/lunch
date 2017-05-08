@@ -27,12 +27,15 @@ module MAPI
             connection = MAPI::Services::Rates.init_cal_connection(app.settings.environment)
             if response = get_holidays_from_soap(app.logger, connection, start, finish)
               response.doc.remove_namespaces!
-              r1 = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')
-              return [] if r1.blank?
-              r1[0].css('days day date').map { |holiday| Date.parse(holiday.content) }
-            else
-              []
+              business_centers = response.doc.xpath('//Envelope//Body//holidayResponse//holidays//businessCenters')
+              return [] if business_centers.blank?
+              business_centers.each do |business_center|
+                if business_center.css('businessCenter').text == 'USNY'
+                  return business_center.css('days day date').map { |holiday| Date.parse(holiday.content) }
+                end
+              end
             end
+            []
           end
         end
       end
