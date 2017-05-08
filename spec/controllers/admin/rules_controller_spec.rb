@@ -509,10 +509,28 @@ RSpec.describe Admin::RulesController, :type => :controller do
 
     it_behaves_like 'a RulesController action with before_action methods'
 
-    describe 'the `@advance_availability_table`' do
-      let(:advance_availability_table) { call_action; assigns[:advance_availability_table] }
-      it 'sets `@advance_availability_table`' do
-        expect(advance_availability_table).not_to be nil
+    describe 'the `@advance_availability` class variable' do
+      let(:advance_availability) { call_action; assigns[:advance_availability] }
+      it 'sets `@advance_availability`' do
+        expect(advance_availability).not_to be nil
+      end
+      describe 'with the filtering dropdown' do
+        it 'sets `[:dropdown][:name]`' do
+          expect(advance_availability[:dropdown][:name]).to eq('advance-availability-by-member-dropdown')
+        end
+        it 'sets `[:dropdown][:default_text]`' do
+          expect(advance_availability[:dropdown][:default_text]).to eq(I18n.t('admin.advance_availability.availability_by_member.filter.all'))
+        end
+        it 'sets `[:dropdown][:default_value]`' do
+          expect(advance_availability[:dropdown][:default_value]).to eq('all')
+        end
+        it 'sets `[:dropdown][:options]`' do          
+          expect(advance_availability[:dropdown][:options]).to eq([
+          [ I18n.t('admin.advance_availability.availability_by_member.filter.all'), 'all' ],
+          [ I18n.t('admin.advance_availability.availability_by_member.filter.enabled'), 'enabled' ],
+          [ I18n.t('admin.advance_availability.availability_by_member.filter.disabled'), 'disabled' ] 
+        ])
+        end
       end
       describe 'with rows' do
         before do
@@ -524,30 +542,30 @@ RSpec.describe Admin::RulesController, :type => :controller do
             allow(members_service).to receive(:quick_advance_enabled).and_return(quick_advance_enabled)
           end
           it 'sets the rows hash' do
-            expect(advance_availability_table[:rows]).to eq(row_hash)
+            expect(advance_availability[:table][:rows]).to eq(row_hash)
           end
         end
         describe 'each of which has columns' do
           context 'the first column' do
             it 'sets the first column to the `member_name`' do
               allow(flag).to receive(:[]).with('member_name').and_return(member_name)
-              expect(advance_availability_table[:rows][0][:columns][0][:value]).to eq(member_name)
+              expect(advance_availability[:table][:rows][0][:columns][0][:value]).to eq(member_name)
             end
           end
           context 'the second column' do
             it 'sets the name to `quick_advance_enabled`' do
-              expect(advance_availability_table[:rows][0][:columns][1][:name]).to eq('quick_advance_enabled')
+              expect(advance_availability[:table][:rows][0][:columns][1][:name]).to eq('quick_advance_enabled')
             end
             it 'sets the value to the `fhlb_id`' do
               allow(flag).to receive(:[]).with('fhlb_id').and_return(fhlb_id)
-              expect(advance_availability_table[:rows][0][:columns][1][:value]).to eq(fhlb_id)
+              expect(advance_availability[:table][:rows][0][:columns][1][:value]).to eq(fhlb_id)
             end
             it 'sets the checked value to the `quick_advanced_enabled` flag value' do
               allow(flag).to receive(:[]).with('quick_advance_enabled').and_return(enabled)
-              expect(advance_availability_table[:rows][0][:columns][1][:checked]).to eq(enabled)
+              expect(advance_availability[:table][:rows][0][:columns][1][:checked]).to eq(enabled)
             end
             it 'sets the type to `:checkbox`' do
-              expect(advance_availability_table[:rows][0][:columns][1][:type]).to eq(:checkbox)
+              expect(advance_availability[:table][:rows][0][:columns][1][:type]).to eq(:checkbox)
             end
           end
         end

@@ -4,4 +4,5 @@
 //= require ../flyouts.js
 //= require ../utils.js
 //= require ../form.js
+//= require ../dropdown.js
 //= require_directory

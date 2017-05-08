@@ -26,6 +26,19 @@ Feature: Viewing/Modifying the Add Advance Availability settings
     And I click on the add advance availability by member tab
     Then I should see a report table with multiple data rows
 
+  @jira-mem-2196
+  Scenario Outline: Filtering Add Advance Availability by <filter> members
+    When I click on the trade credit rules link in the header
+    And I click on the add advance availability link in the header
+    When I click on the add advance availability by member tab
+    And I select <filter> from the filter dropdown
+    Then I should see <filter> members in the table
+  Examples:
+    | filter   |
+    | enabled  |
+    | disabled |
+    | all      |
+
   @jira-mem-2200
   Scenario: Viewing the Advance Availability by Term page as a non-admin intranet user
     Given I am logged into the admin panel but do not have web admin privileges

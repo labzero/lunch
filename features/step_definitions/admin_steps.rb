@@ -48,6 +48,24 @@ When(/^I click on the (term rules|add advance availability) (daily limits|status
   page.find("#{page_selector} .tabbed-content nav a", text: nav_text, exact: true).click
 end
 
+When(/^I select (enabled|disabled|all) from the filter dropdown$/) do |filter|
+  page.find('.advance-availability-member .dropdown').click
+  page.find('.advance-availability-member .dropdown li', text: filter_to_text(filter), exact: true).click
+end
+
+Then(/^I should see (enabled|disabled|all) members in the table$/) do |filter|
+  case filter
+  when 'enabled'
+    page.assert_selector('.advance-availability-member .report-table tr td input[checked]', visible: :visible)
+    page.assert_no_selector('.advance-availability-member .report-table tr td input:not([checked])', visible: :visible)
+  when 'disabled'
+    page.assert_no_selector('.advance-availability-member .report-table tr td input[checked]', visible: :visible)
+    page.assert_selector('.advance-availability-member .report-table tr td input:not([checked])', visible: :visible)
+  when 'all'
+    page.assert_no_selector('.advance-availability-member .report-table tr td input[type=checkbox]', visible: :hidden)
+ end
+end
+
 Then(/^I should see the (?:term rules|advance availability) (limits|rate bands|by term) page in its (view-only|editable) mode$/) do |form, mode|
   selector = case form
   when 'limits'
@@ -127,5 +145,16 @@ def get_availability_by_term_selector(description, find_form=nil)
     '.rules-availability-by-term-frc-short'
   when 'frc long section'
     '.rules-availability-by-term-frc-long'
+  end
+end
+
+def filter_to_text(filter)
+  case filter
+  when 'all'
+    I18n.t('admin.advance_availability.availability_by_member.filter.all')
+  when 'enabled'
+    I18n.t('admin.advance_availability.availability_by_member.filter.enabled')
+  when 'disabled'
+    I18n.t('admin.advance_availability.availability_by_member.filter.disabled')
   end
 end

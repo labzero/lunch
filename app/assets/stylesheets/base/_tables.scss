@@ -44,17 +44,37 @@
 
   tbody {
     @extend %typography-table-cell;
-    tr:nth-child(odd) {
-      background-color: $lightest-blue;
+    tr.odd {
+      background-color: $lightest-blue;    
+    }
+    tr.even {
+      background-color: transparent;
+    }
+
+    tr:not(.odd):not(.even) {
+      &:nth-child(odd) {
+        background-color: $lightest-blue;
+      }
+      &:nth-child(even) {
+        background-color: transparent;
+      }
     }
   }
 
   thead + tbody {
-    tr:nth-child(odd) {
-      background-color: transparent;
+    tr.odd {
+      background-color: transparent;    
     }
-    tr:nth-child(even) {
+    tr.even {
       background-color: $lightest-blue;
+    }
+    tr:not(.odd):not(.even) {
+      &:nth-child(odd) {
+        background-color: transparent;
+      }
+      &:nth-child(even) {
+        background-color: $lightest-blue;
+      }
     }
   }
 

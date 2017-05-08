@@ -177,19 +177,31 @@ class Admin::RulesController < Admin::BaseController
   def advance_availability_by_member
     quick_advance_enabled = MembersService.new(request).quick_advance_enabled
     raise "There has been an error and Admin::RulesController#advance_availability_by_member has encountered nil" unless quick_advance_enabled.present?
-    @advance_availability_table = {
-      rows: quick_advance_enabled.collect do |flag|
-        {
-          columns: [
-            { value: flag['member_name'] },
-            { name: 'quick_advance_enabled',
-              value:  flag['fhlb_id'],
-              checked: flag['quick_advance_enabled'],
-              type: :checkbox,
-              disabled: true }
-          ]
-        }
-      end
+    @advance_availability = {
+      dropdown: {
+        name: 'advance-availability-by-member-dropdown',
+        default_text: t('admin.advance_availability.availability_by_member.filter.all'),
+        default_value: 'all',
+        options: [
+          [ t('admin.advance_availability.availability_by_member.filter.all'), 'all' ],
+          [ t('admin.advance_availability.availability_by_member.filter.enabled'), 'enabled' ],
+          [ t('admin.advance_availability.availability_by_member.filter.disabled'), 'disabled' ] 
+        ]
+      },
+      table: {
+        rows: quick_advance_enabled.collect do |flag|
+          {
+            columns: [
+              { value: flag['member_name'] },
+              { name: 'quick_advance_enabled',
+                value:  flag['fhlb_id'],
+                checked: flag['quick_advance_enabled'],
+                type: :checkbox,
+                disabled: true }
+            ]
+          }
+        end
+      }
     }
   end
 
