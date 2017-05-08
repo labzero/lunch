@@ -141,7 +141,9 @@ class LetterOfCreditRequest
   end
 
   def issue_date_within_range
-    max_date = Time.zone.today + ISSUE_MAX_DATE_RESTRICTION
+    today = Time.zone.today
+    min_start_date = past_issue_date_restriction_window? ? today + 1.day : today
+    max_date = min_start_date + ISSUE_MAX_DATE_RESTRICTION
     errors.add(:issue_date, :invalid) unless !issue_date || date_within_range(issue_date, max_date)
   end
 
@@ -215,6 +217,10 @@ class LetterOfCreditRequest
   end
 
   def issue_date_valid_for_today
-    errors.add(:issue_date, :no_longer_valid) if Time.zone.now > (Time.zone.parse(ISSUE_DATE_TIME_RESTRICTION) + ISSUE_DATE_TIME_RESTRICTION_WINDOW)
+    errors.add(:issue_date, :no_longer_valid) if past_issue_date_restriction_window?
+  end
+
+  def past_issue_date_restriction_window?
+    Time.zone.now > (Time.zone.parse(ISSUE_DATE_TIME_RESTRICTION) + ISSUE_DATE_TIME_RESTRICTION_WINDOW)
   end
 end
