@@ -18,7 +18,7 @@ const HeaderLogin = ({ user }) => {
     content = (
       <div className={s.root}>
         <Button bsSize="small" bsStyle="primary" href="/login">
-          Log In
+          Log in
         </Button>
       </div>
     );
