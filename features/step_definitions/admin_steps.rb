@@ -116,6 +116,19 @@ Then(/^I should see only (checked|unchecked) checkboxes for the availability by 
   end
 end
 
+Then(/^I should see the advance availability by term submit button (enabled|disabled$)/) do |state|
+  if state == 'enabled'
+    page.assert_no_selector('.rules-availability-by-term-form input[type=submit][disabled]')
+    page.assert_selector('.rules-availability-by-term-form input[type=submit]', count: 2)
+  else
+    page.assert_selector('.rules-availability-by-term-form input[type=submit][disabled]', count: 2)
+  end
+end
+
+When(/^I click on the first checkbox in the vrc section of the advance availability by term form$/) do
+  page.all('.rules-availability-by-term-vrc input[type=checkbox]').first.click
+end
+
 def translate_tab_title(nav)
   case nav
   when 'daily limits'
