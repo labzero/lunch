@@ -614,6 +614,7 @@ en:
       table:
         term: Term
         whole_loan: Whole Loan
+        whole: Whole Loan
         mortgage: mortgage
         agency: Agency
         aaa: AAA
@@ -1509,6 +1510,7 @@ en:
       no_rows: Your file contains no valid rows. Edit your file and try again.
     upload_success: 'The following securities from your Excel file were validated and will be included in the securities request:'
     internal_user_error: This securities request was not completed because Bank employees are not authorized to complete securities requests via the member portal.
+    member_not_set_up_html: You must have a pledge and/or safekeeping account set up to submit this request. Contact <a href=%{email}>Securities Services</a> at %{phone}.
   letters_of_credit:
     title: Letters of Credit
     contact: 'If you need assistance or wish to request a different type of letter of credit, call or email:'
@@ -3330,15 +3332,40 @@ en:
         low_warning_html: '<span>Low</span> Warning (bps)<span class="rate-band-notice low-warning">'
         high_shutdown_html: '<span>High</span> Shut-Down (bps)<span class="rate-band-notice high-error">'
         high_warning_html: '<span>High</span> Warning (bps)<span class="rate-band-notice high-warning">'
+      term_details:
+        low_days_to_maturity: Low Days to Maturity
+        high_days_to_maturity: High Days to Maturity
       messages:
         error: An error has occurred. Please try your action again.
         success: Your changes have been saved.
+      rate_report:
+        opening_rate: Opening Rate
+        current_rate: Current Rate
+        change: Change
+        low_off: <span>Low</span> Shut-Down
+        low_warn: <span>Low</span> Warning
+        high_off: <span>High</span> Shut-Down
+        high_warn: <span>High</span> Warning
     advance_availability:
       title: Add Advance Availability
       nav:
         status: 'Add Advance On/Off'
         term: Availability by Term
         member: Availability by Member
+      availability_by_member:
+        filter:
+          title: 'Filter:'
+          all: Show All Members
+          enabled: Show Only Enabled Members
+          disabled: Show Only Disabled Members
+        member_institutions: Member Institutions
+      availability_by_term:
+        open_label: 'Open/Overnight'
+        short_term_frc: 1 Week to 12 Month Terms
+        long_term_frc: 1 Year to 3 Year Terms
+        actions:
+          select_all: Select All
+          deselect_all: Deselect All
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

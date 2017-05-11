@@ -59,18 +59,39 @@ describe MAPI::Services::Rates::Holidays do
         it 'returns an empty array if nothing is found at the xpath address' do
           expect(call_method).to eq([])
         end
+
         describe 'when a node is found at the xpath address' do
-          let(:date_node_array) { [double('node', content: date_string_1), double('node', content: date_string_2)] }
-          let(:node) { double('xml node', css: date_node_array) }
+          let(:business_centers) { instance_double(Array) }
+          let(:business_center) { double('business center', css: nil) }
+          let(:business_center_node) { double('business center node', text: nil) }
 
-          before { expect(document).to receive(:xpath).and_return([node]) }
-
-          it 'calls `css` with `days day date`' do
-            expect(node).to receive(:css).with('days day date')
-            call_method
+          before do
+            allow(document).to receive(:xpath).and_return(business_centers)
+            allow(business_centers).to receive(:each).and_yield(business_center)
+            allow(business_center).to receive(:css).and_return(business_center_node)
           end
-          it 'returns an array of dates from the strings found at `days day date`' do
-            expect(call_method).to eq(date_array)
+
+          it 'returns `[]` for any random value for business center' do
+            allow(business_center_node).to receive(:text).and_return(SecureRandom.hex)            
+            expect(call_method).to eq([])
+          end
+
+          describe 'when the business center is `USNY`' do
+            let(:date_node_array) { [double('node', content: date_string_1), double('node', content: date_string_2)] }
+
+            before do 
+              allow(business_center_node).to receive(:text).and_return('USNY')            
+              allow(business_center).to receive(:css).with('days day date').and_return(date_node_array)
+            end
+
+            it 'calls `css` with `days day date`' do
+              expect(business_center).to receive(:css).with('days day date')
+              call_method
+            end
+            
+            it 'parses dates and returns them' do
+              expect(call_method).to eq(date_array)
+            end
           end
         end
       end

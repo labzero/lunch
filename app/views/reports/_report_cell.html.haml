@@ -21,7 +21,11 @@
   - classes = [:'report-cell-narrow']
 - when :checkbox
   - value = capture_haml do
+    - if cell[:submit_unchecked_boxes]
+      = hidden_field_tag(cell[:name], 'off')
     = check_box_tag(cell[:name], cell[:value], cell[:checked], {disabled: cell[:disabled], data: cell[:data]})
+    - if cell[:label]
+      = label_tag
 - when :text_field
   - classes = cell[:disabled] ? ['report-cell-right'] : []
   - value = capture_haml do

@@ -11,4 +11,10 @@
       %span<>
         =link_to(t('admin.advance_availability.nav.member'), active_nav == :advance_availability_member ? '#' : rules_advance_availability_by_member_url, class: "#{'active-tab' if active_nav == :advance_availability_member}")
     .tabbed-content-main
+      - if flash[:error]
+        .form-error-section
+          %p= flash[:error]
+      - if flash[:notice]
+        .form-success-section
+          %p= flash[:notice]
       = yield

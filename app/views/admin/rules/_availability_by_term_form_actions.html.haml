@@ -1,0 +1,4 @@
+%section.availability-by-term-form-actions
+  %button.secondary-button{data: {select_checkboxes_parent_class: 'rules-availability-by-term-form', select_checkboxes_status: 'checked'}}= t('admin.advance_availability.availability_by_term.actions.select_all')
+  %button.secondary-button{data: {select_checkboxes_parent_class: 'rules-availability-by-term-form', select_checkboxes_status: 'unchecked'}}= t('admin.advance_availability.availability_by_term.actions.deselect_all')
+  =submit_tag(t('admin.term_rules.save'), class: 'primary-button', disabled: true)

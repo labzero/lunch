@@ -97,4 +97,8 @@ class RatesService < MAPIService
     get_hash(:rate_bands, 'rates/rate_bands')
   end
 
+  def update_rate_bands(rate_bands)
+    put_hash(:update_rate_bands, 'rates/rate_bands', rate_bands)
+  end
+
 end

@@ -116,3 +116,15 @@
     margin: 0 15px;
   }
 }
+
+%equidistant-children {
+  text-align: justify;
+  &:after {
+    content: '';
+    width: 100%;
+    display: inline-block;
+  }
+  & > * {
+    display: inline-block;
+  }
+}

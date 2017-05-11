@@ -533,6 +533,13 @@ describe MAPI::ServiceApp do
           expect(r[:start_of_day_rate]).to eq(start_of_day_rate)
           expect(r[:rate_band_info]).to eq(MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term]))
         end
+        describe "the rate info for rate_summary[#{loan_type}][#{loan_term}]" do
+          let(:live_rate) { live_hash[loan_type][loan_term][:rate].to_f }
+          let(:start_of_day_rate) { start_of_day_hash[loan_type][loan_term][:rate].to_f }
+          it 'contains a `rate_change_bps` value that is the live rate minus the start_of_day_rate multiplied by 100 to give basis points' do
+            expect(rate_summary[loan_type][loan_term][:rate_change_bps]).to eq((live_rate - start_of_day_rate) * 100)
+          end
+        end
         describe 'when a rate band violation occurs' do
           let(:rate_band_hash) {MAPI::Services::Rates.rate_band_info(live_hash[loan_type][loan_term], rate_bands_hash[loan_term])}
           before do
@@ -859,6 +866,20 @@ describe MAPI::ServiceApp do
         expect(call_method[:min_threshold_exceeded]).to eq(false)
       end
     end
+    describe 'min_warning_exceeded' do
+      before do
+        allow(band_info).to receive(:[]).with('LOW_BAND_WARN_BP').and_return(delta)
+        allow(rate_info).to receive(:[]).with(:start_of_day_rate).and_return(rate)
+      end
+      it 'is true if the live rate is less than the low_band_warn_rate' do
+        allow(rate_info).to receive(:[]).with(:rate).and_return(rate - delta)
+        expect(call_method[:min_warning_exceeded]).to eq(true)
+      end
+      it 'is false if the live rate is not less than the low_band_off_rate' do
+        allow(rate_info).to receive(:[]).with(:rate).and_return(rate + delta)
+        expect(call_method[:min_warning_exceeded]).to eq(false)
+      end
+    end
     describe 'max_threshold_exceeded' do
       before do
         allow(band_info).to receive(:[]).with('HIGH_BAND_OFF_BP').and_return(delta)
@@ -871,6 +892,20 @@ describe MAPI::ServiceApp do
       it 'is false if the live rate is not more than the high_band_off_rate' do
         allow(rate_info).to receive(:[]).with(:rate).and_return(rate - delta)
         expect(call_method[:max_threshold_exceeded]).to eq(false)
+      end
+    end
+    describe 'max_warning_exceeded' do
+      before do
+        allow(band_info).to receive(:[]).with('HIGH_BAND_WARN_BP').and_return(delta)
+        allow(rate_info).to receive(:[]).with(:start_of_day_rate).and_return(rate)
+      end
+      it 'is true if the live rate is more than the high_band_warn_rate' do
+        allow(rate_info).to receive(:[]).with(:rate).and_return(rate + delta)
+        expect(call_method[:max_warning_exceeded]).to eq(true)
+      end
+      it 'is false if the live rate is not more than the high_band_warn_rate' do
+        allow(rate_info).to receive(:[]).with(:rate).and_return(rate - delta)
+        expect(call_method[:max_warning_exceeded]).to eq(false)
       end
     end
   end
@@ -1496,6 +1531,27 @@ describe MAPI::ServiceApp do
     it 'calls `MAPI::Services::Rates::RateBands.rate_bands` with the environment' do
       expect(MAPI::Services::Rates::RateBands).to receive(:rate_bands).with(anything, described_class.environment)
       call_endpoint
+    end
+  end
+
+  describe 'put `rates/rate_bands`' do
+    let(:post_body) { {"params" => "#{SecureRandom.hex}"} }
+    let(:call_endpoint) { put 'rates/rate_bands', post_body.to_json }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'rates/rate_bands', :put, MAPI::Services::Rates::RateBands, :update_rate_bands, "{}"
+
+    it 'calls `MAPI::Services::Rates::RateBands.update_rate_bands` with the app' do
+      expect(MAPI::Services::Rates::RateBands).to receive(:update_rate_bands).with(an_instance_of(MAPI::ServiceApp), anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::Rates::RateBands.update_rate_bands` with the parsed post body' do
+      expect(MAPI::Services::Rates::RateBands).to receive(:update_rate_bands).with(an_instance_of(MAPI::ServiceApp), post_body)
+      call_endpoint
+    end
+    it 'returns a JSONd empty hash in the response body if the `update_limits` method is successful' do
+      allow(MAPI::Services::Rates::RateBands).to receive(:update_rate_bands).and_return(true)
+      call_endpoint
+      expect(last_response.body).to eq({}.to_json)
     end
   end
 

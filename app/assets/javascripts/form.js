@@ -34,4 +34,15 @@ $(function() {
       $form.data('prevent-submit-on-enter') ? null : $form.submit();
     };
   });
+
+  // Select / Deselect all checkboxes for a given parent class
+  $('[data-select-checkboxes-parent-class]').on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var formSelector = $(this).data('select-checkboxes-parent-class');
+    var status = $(this).data('select-checkboxes-status') === 'checked';
+    $('.' + formSelector).find('input[type=checkbox]').prop('checked', status).trigger('change');
+  });
+
+  Fhlb.Utils.enableSubmitWhenFormDirty($('.rules-availability-by-term-form'));
 });

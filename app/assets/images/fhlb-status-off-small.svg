@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="522.5 614.5 19 19">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fdb4b1;
+        stroke: #794947;
+      }
+
+      .cls-2 {
+        fill: #794947;
+      }
+    </style>
+  </defs>
+  <g id="Status_-_Off_-_Small" data-name="Status - Off - Small" transform="translate(53 19)">
+    <path id="Circle" class="cls-1" d="M9.5.5a9,9,0,1,1-9,9A9,9,0,0,1,9.5.5Z" transform="translate(469.5 595.5)"/>
+    <g id="X" transform="translate(11.7 79.6)">
+      <rect id="Rectangle_18" data-name="Rectangle 18" class="cls-2" width="10.837" height="1.286" transform="translate(463.909 521) rotate(45)"/>
+      <rect id="Rectangle_19" data-name="Rectangle 19" class="cls-2" width="10.837" height="1.286" transform="translate(471.572 521.909) rotate(135)"/>
+    </g>
+  </g>
+</svg>

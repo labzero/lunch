@@ -83,10 +83,6 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
           expect(subject).to receive(:date_within_range).with(issue_date, anything)
           call_validator
         end
-        it 'calls `date_within_range` with the ISSUE_MAX_DATE_RESTRICTION plus today' do
-          expect(subject).to receive(:date_within_range).with(anything, today + described_class::ISSUE_MAX_DATE_RESTRICTION)
-          call_validator
-        end
         it 'does not add an error if `date_within_range` returns true' do
           allow(subject).to receive(:date_within_range).and_return(true)
           expect(subject.errors).not_to receive(:add)
@@ -96,6 +92,24 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
           allow(subject).to receive(:date_within_range).and_return(false)
           expect(subject.errors).to receive(:add).with(:issue_date, :invalid)
           call_validator
+        end
+        it 'calls `past_issue_date_restriction_window?`' do
+          expect(subject).to receive(:past_issue_date_restriction_window?)
+          call_validator
+        end
+        context 'when `past_issue_date_restriction_window?` returns true' do
+          before { allow(subject).to receive(:past_issue_date_restriction_window?).and_return(true) }
+          it 'calls `date_within_range` with the ISSUE_MAX_DATE_RESTRICTION plus tomorrow' do
+            expect(subject).to receive(:date_within_range).with(anything, (today + 1.day) + described_class::ISSUE_MAX_DATE_RESTRICTION)
+            call_validator
+          end
+        end
+        context 'when `past_issue_date_restriction_window?` returns false' do
+          before { allow(subject).to receive(:past_issue_date_restriction_window?).and_return(false) }
+          it 'calls `date_within_range` with the ISSUE_MAX_DATE_RESTRICTION plus today' do
+            expect(subject).to receive(:date_within_range).with(anything, today + described_class::ISSUE_MAX_DATE_RESTRICTION)
+            call_validator
+          end
         end
       end
     end
@@ -291,26 +305,24 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         subject.valid?
       end
       context 'when the issue date is today' do
-        let(:time_limit) { Time.zone.parse(described_class::ISSUE_DATE_TIME_RESTRICTION) + described_class::ISSUE_DATE_TIME_RESTRICTION_WINDOW }
         before { subject.issue_date = today }
 
         it 'is called as a validator' do
           expect(subject).to receive(:issue_date_valid_for_today)
           subject.valid?
         end
-        it 'does not add an error if it is before the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
-          allow(Time.zone).to receive(:now).and_return(time_limit - 1.minute)
-          expect(subject.errors).not_to receive(:add)
+        it 'calls `past_issue_date_restriction_window?`' do
+          expect(subject).to receive(:past_issue_date_restriction_window?)
           call_validator
         end
-        it 'does not add an error if the current time is exactly the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
-          allow(Time.zone).to receive(:now).and_return(time_limit)
-          expect(subject.errors).not_to receive(:add)
-          call_validator
-        end
-        it 'adds an error if it is after the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
-          allow(Time.zone).to receive(:now).and_return(time_limit + 1.minute)
+        it 'adds an error if `past_issue_date_restriction_window?` returns true' do
+          allow(subject).to receive(:past_issue_date_restriction_window?).and_return(true)
           expect(subject.errors).to receive(:add).with(:issue_date, :no_longer_valid)
+          call_validator
+        end
+        it 'does not add an error if `past_issue_date_restriction_window?` returns false' do
+          allow(subject).to receive(:past_issue_date_restriction_window?).and_return(false)
+          expect(subject.errors).not_to receive(:add)
           call_validator
         end
       end
@@ -1000,6 +1012,23 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       it 'returns the same object on each call' do
         profile = call_method
         expect(call_method).to be(profile)
+      end
+    end
+
+    describe '`past_issue_date_restriction_window?`' do
+      let(:time_limit) { Time.zone.parse(described_class::ISSUE_DATE_TIME_RESTRICTION) + described_class::ISSUE_DATE_TIME_RESTRICTION_WINDOW }
+      let(:call_method) { subject.send(:past_issue_date_restriction_window?) }
+      it 'returns false if the current time is before the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
+        allow(Time.zone).to receive(:now).and_return(time_limit - 1.minute)
+        expect(call_method).to be false
+      end
+      it 'returns false if the current time is exactly the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
+        allow(Time.zone).to receive(:now).and_return(time_limit)
+        expect(call_method).to be false
+      end
+      it 'returns true if the current time is after the ISSUE_DATE_TIME_RESTRICTION plus the ISSUE_DATE_TIME_RESTRICTION_WINDOW' do
+        allow(Time.zone).to receive(:now).and_return(time_limit + 1.minute)
+        expect(call_method).to be true
       end
     end
   end

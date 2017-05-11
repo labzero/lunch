@@ -81,6 +81,26 @@ if (typeof Fhlb.Utils === 'undefined') {
         $pin.addClass('input-field-error');
         $token.addClass('input-field-error');
       };
+    },
+    enableSubmitWhenFormDirty: function($form) {
+      var $inputs = $($form.find('input'));
+      $inputs.each(function(i, input) {
+        var $input = $(input);
+        var originalValue = $input.prop('type') === 'checkbox' ? $input.is(':checked') : $input.val();
+        $input.data('original-value', originalValue);
+      });
+      $inputs.on('change', function(e) {
+        var formClean = true;
+        $inputs.each(function(i, input) {
+          var $input = $(input);
+          var currentValue = $input.prop('type') === 'checkbox' ? $input.is(':checked') : $input.val();
+          if ($input.data('original-value') !== currentValue) {
+            formClean = false;
+          };
+          return formClean;
+        });
+        $form.find('input[type=submit]').prop('disabled', formClean);
+      });
     }
   };
 };

@@ -1,17 +1,14 @@
 .limits {
+  @extend %table-row-headers;
   section {
     @extend %bordered-section;
-    &:last-child {
+    &:last-of-type {
       margin-bottom: 0;
     }
   }
   table {
     width: auto;
     margin-bottom: 0;
-    td:first-child {
-      @extend %typography-table-heading;
-      background-color: $light-gray;
-    }
     th, td {
       width: 240px;
       box-sizing: border-box;
@@ -20,6 +17,9 @@
       }
     }
   }
+}
+
+.limits, .advance-availability {
   .form-error-section, .form-success-section {
     margin-top: 0;
     p {
@@ -30,36 +30,32 @@
 }
 
 .limits-term {
+  @extend %table-no-first-header-cell;
+}
+
+.rules-term-details{
+  @extend %table-no-first-header-cell;
+  @extend %table-row-headers;
   table {
-    border: none;
-    border-collapse: separate; // fix for IE header border bug
-    th {
-      border-top: 1px solid $light-blue;
+    width: auto;
+    margin-bottom: 0;
+    th, td {
+      width: 150px;
+      box-sizing: border-box;
       &:first-child {
-        border: none;
-        background-color: $white;
-      }
-      &:nth-child(2) {
-        border-left: 1px solid $light-blue;
-      }
-    }
-    td:first-child {
-      border-left: 1px solid $light-blue;
-    }
-    tr:first-child {
-      td:first-child {
-        border-top: 1px solid $light-blue;
+        width: 160px;
       }
     }
   }
 }
 
-.rules-limits-form {
+.term-rules form {
   @extend %clearfix;
   input[type=text] {
     @extend %typography-field-placeholder;
+    @extend %default-border;
+    border-color: $actionable-blue;
     box-sizing: border-box;
-    width: 140px;
     text-align: right;
     padding: 5px 15px;
     &:disabled {
@@ -69,15 +65,38 @@
     }
   }
   .primary-button {
+    margin-top: 20px;
     float: right;
     width: 440px;
   }
 }
 
+.rules-limits-form {
+  input[type=text] {
+    width: 140px;
+  }
+  input[type=submit] {
+    margin-bottom: 10px;
+  }
+}
+
+.rules-rate-bands-form {
+  input[type=text] {
+    width: 60px;
+    margin-left: 55px;
+    &:disabled {
+      margin-left: 80px;
+    }
+  }
+}
+
 .term-rules-rate-bands {
+  @extend %table-row-headers;
   table {
     width: 840px;
     border: none;
+    //margin-bottom: 20px;
+    margin-bottom: 0px;
   }
   thead {
     background: transparent;
@@ -100,8 +119,6 @@
     }
   }
   td:first-child {
-    @extend %typography-table-heading;
-    background-color: $light-gray;
     border-left: 1px solid $light-blue;
   }
   tr:first-child {
@@ -127,5 +144,167 @@
   }
   &.high-warning {
     background-image: image-url('fhlb-warning-large-right.svg');
+  }
+}
+
+.term-rules-rate-report {
+  @extend %table-no-first-header-cell;
+  @extend %table-row-headers;
+  h2 {
+    margin-top: 5px;
+  }
+  section:first-of-type {
+    margin-bottom: 25px;
+  }
+  table {
+    &:first-of-type {
+      margin-bottom: 25px;
+    }
+    &:last-of-type {
+      margin-bottom: 0px;
+    }
+    th, td {
+      padding: 10px;
+    }
+    td:nth-child(2) {
+      @extend %typography-table-heading;
+      background-color: $light-gray;
+    }
+    th {
+      box-sizing: border-box;
+      span {
+        display: block;
+      }
+      &:nth-child(1) {
+        width: 30px;
+      }
+      &:nth-child(2) {
+        border: none;
+        background-color: $white;
+        width: 220px;
+      }
+      &:nth-child(3) {
+        border-left: 1px solid $light-blue;
+        width: 78px;
+      }
+      &:nth-child(4) {
+        width: 78px;
+      }
+      &:nth-child(5) {
+        width: 64px;
+      }
+      &:nth-child(6), &:nth-child(7), &:nth-child(8), &:nth-child(9) {
+        width: 108px;
+      }
+    }
+    tr:first-child {
+      td:nth-child(2) {
+        border-top: 1px solid $light-blue;
+      }
+    }
+  }
+}
+
+.availability-by-term-form-actions {
+  @extend %equidistant-children;
+  margin-top: 10px;
+  .primary-button, .secondary-button {
+    width: 280px;
+  }
+  &:last-of-type {
+    margin: 20px 0 -10px;
+  }
+}
+
+.rules-availability-by-term-headings {
+  table {
+    border: none;
+    margin-bottom: 5px;
+    thead {
+      background: transparent;
+      th {
+        @extend %typography-table-link;
+        color: $medium-gray;
+        border: none;
+      }
+    }
+    td {
+      background-color: $light-gray;
+      border: 1px solid $light-blue;
+      &:first-child {
+        border: none;
+        background: transparent;
+      }
+    }
+  }
+  .report-table th.report-cell-narrow {
+    padding-left: 0;
+  }
+}
+
+.rules-availability-by-term-form {
+  table {
+    th, td {
+      box-sizing: border-box;
+    }
+    td:nth-child(1) {
+      width: 180px;
+    }
+    td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5) {
+      width: 176px;
+      text-align: center;
+    }
+  }
+  input[type=checkbox] {
+    & + label {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+    &:not([disabled]) {
+      & + label {
+        display: none;
+      }
+    }
+    &:disabled {
+      display: none;
+      &:not([checked]) {
+        & + label {
+          background-image: image-url('fhlb-status-off-small.svg');
+        }
+      }
+      &:checked {
+        & + label {
+          background-image: image-url('fhlb-status-on-small.svg');
+        }
+      }
+    }
+  }
+}
+
+.advance-availability-term {
+  h2 {
+    margin-bottom: 5px;
+  }
+  .text-only-button {
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    &:first-of-type {
+      padding-left: 0;
+    }
+  }
+}
+
+.rules-availability-by-term-vrc, .rules-availability-by-term-frc-short {
+  table {
+    margin-bottom: 30px;
+  }
+}
+
+.rules-availability-by-term-frc-long {
+  table {
+    margin-bottom: 0;
   }
 }

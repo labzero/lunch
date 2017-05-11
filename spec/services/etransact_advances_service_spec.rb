@@ -126,7 +126,7 @@ describe EtransactAdvancesService do
     let(:post_response) { double('response from post_hash', :[]= => nil) }
     let(:now) { double('now') }
     let(:call_method) { subject.quick_advance_execute(member_id, amount, advance_type, advance_term, advance_rate, signer, maturity_date, allow_grace_period, nil) }
-    
+
     before do
       allow(subject).to receive(:calypso_error_handler)
     end
@@ -337,7 +337,7 @@ describe EtransactAdvancesService do
 
   describe '`blackout_dates` method', :vcr do
     let(:call_method) {subject.blackout_dates}
-    it_should_behave_like 'a MAPI backed service object method', :status
+    it_should_behave_like 'a MAPI backed service object method', :blackout_dates
     it 'should return the MAPI response object' do
       response_object = double('A MAPI Response Object')
       allow(JSON).to receive(:parse).and_return(response_object)

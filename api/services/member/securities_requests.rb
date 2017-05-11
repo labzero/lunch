@@ -621,7 +621,12 @@ module MAPI
           unless should_fake?(app)
             header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
             ActiveRecord::Base.transaction do
-              adx_id = execute_sql_single_result(app, adx_query(member_id, pledged_or_unpledged), "ADX ID")
+              begin
+                adx_id = execute_sql_single_result(app, adx_query(member_id, pledged_or_unpledged), "ADX ID")
+                raise MAPI::Shared::Errors::SQLError unless adx_id.present?
+              rescue MAPI::Shared::Errors::SQLError => e
+                raise MAPI::Shared::Errors::ValidationError.new('Member does not have an ADX ID', 'member')
+              end
               insert_header_sql = insert_intake_header_query( member_id, header_id, user_name, full_name, session_id,
                                                               adx_id, processed_delivery_instructions[:delivery_columns],
                                                               broker_instructions, processed_delivery_instructions[:delivery_type],
@@ -650,7 +655,12 @@ module MAPI
             ActiveRecord::Base.transaction(isolation: :read_committed) do
               cusips = securities.collect{|x| x['cusip']}
               raise MAPI::Shared::Errors::SQLError, 'Failed to delete old security release request detail by CUSIP' unless execute_sql(app.logger, delete_request_securities_by_cusip_query(request_id, cusips))
-              adx_id = execute_sql_single_result(app, adx_query(member_id, pledged_or_unpledged), 'Get ADX ID from ADX Type')
+              begin
+                adx_id = execute_sql_single_result(app, adx_query(member_id, pledged_or_unpledged), 'Get ADX ID from ADX Type')
+                raise MAPI::Shared::Errors::SQLError unless adx_id.present?
+              rescue MAPI::Shared::Errors::SQLError => e
+                raise MAPI::Shared::Errors::ValidationError.new('Member does not have an ADX ID', 'member')
+              end
               existing_securities = format_securities(fetch_hashes(app.logger, release_request_securities_query(request_id)))
               securities.each do |security|
                 existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
@@ -690,7 +700,12 @@ module MAPI
           unless should_fake?(app)
             header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
             ActiveRecord::Base.transaction do
-              adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), "ADX ID")
+              begin
+                adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), "ADX ID")
+                raise MAPI::Shared::Errors::SQLError unless adx_id.present?
+              rescue MAPI::Shared::Errors::SQLError => e
+                raise MAPI::Shared::Errors::ValidationError.new('Member does not have an ADX ID', 'member')
+              end
               insert_header_sql = insert_release_header_query(member_id,
                                                               header_id,
                                                               user_name,
@@ -729,7 +744,12 @@ module MAPI
             ActiveRecord::Base.transaction(isolation: :read_committed) do
               cusips = securities.collect{|x| x['cusip']}
               raise MAPI::Shared::Errors::SQLError, 'Failed to delete old security release request detail by CUSIP' unless execute_sql(app.logger, delete_request_securities_by_cusip_query(request_id, cusips))
-              adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), 'Get ADX ID from ADX Type')
+              begin
+                adx_id = execute_sql_single_result(app, adx_query(member_id, adx_type), 'Get ADX ID from ADX Type')
+                raise MAPI::Shared::Errors::SQLError unless adx_id.present?
+              rescue MAPI::Shared::Errors::SQLError => e
+                raise MAPI::Shared::Errors::ValidationError.new('Member does not have an ADX ID', 'member')
+              end
               existing_securities = format_securities(fetch_hashes(app.logger, release_request_securities_query(request_id)))
               securities.each do |security|
                 existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }
@@ -780,8 +800,13 @@ module MAPI
           unless should_fake?(app)
             header_id = execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i
             ActiveRecord::Base.transaction do
-              adx_id = execute_sql_single_result(app, adx_query(member_id, :pledged), "ADX ID")
-              un_adx_id = execute_sql_single_result(app, adx_query(member_id, :unpledged), "ADX ID")
+              begin
+                adx_id = execute_sql_single_result(app, adx_query(member_id, :pledged), "ADX ID")
+                un_adx_id = execute_sql_single_result(app, adx_query(member_id, :unpledged), "UN_ADX ID")
+                raise MAPI::Shared::Errors::SQLError unless adx_id.present? && un_adx_id.present?
+              rescue MAPI::Shared::Errors::SQLError => e
+                raise MAPI::Shared::Errors::ValidationError.new('Member does not have an ADX ID', 'member')
+              end
               insert_header_sql = insert_transfer_header_query(member_id,
                                                               header_id,
                                                               user_name,
@@ -816,8 +841,13 @@ module MAPI
             ActiveRecord::Base.transaction(isolation: :read_committed) do
               cusips = securities.collect{|x| x['cusip']}
               raise MAPI::Shared::Errors::SQLError, 'Failed to delete old security transfer request detail by CUSIP' unless execute_sql(app.logger, delete_request_securities_by_cusip_query(request_id, cusips))
-              adx_id = execute_sql_single_result(app, adx_query(member_id, :pledged), "ADX ID")
-              un_adx_id = execute_sql_single_result(app, adx_query(member_id, :unpledged), "UN_ADX ID")
+              begin
+                adx_id = execute_sql_single_result(app, adx_query(member_id, :pledged), "ADX ID")
+                un_adx_id = execute_sql_single_result(app, adx_query(member_id, :unpledged), "UN_ADX ID")
+                raise MAPI::Shared::Errors::SQLError unless adx_id.present? && un_adx_id.present?
+              rescue MAPI::Shared::Errors::SQLError => e
+                raise MAPI::Shared::Errors::ValidationError.new('Member does not have an ADX ID', 'member')
+              end
               existing_securities = format_securities(fetch_hashes(app.logger, release_request_securities_query(request_id)))
               securities.each do |security|
                 existing_security = existing_securities.find { |old_security| old_security[:cusip] == security['cusip'] }

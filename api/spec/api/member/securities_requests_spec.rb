@@ -297,8 +297,8 @@ describe MAPI::ServiceApp do
       let(:user_name) {  SecureRandom.hex }
       let(:full_name) { SecureRandom.hex }
       let(:session_id) { SecureRandom.hex }
-      let(:adx_id) { [1000..10000].sample }
-      let(:ssk_id) { [1000..10000].sample }
+      let(:adx_id) { rand(1000..10000) }
+      let(:ssk_id) { rand(1000..10000) }
 
       describe '`delivery_keys_for_delivery_type`' do
         it 'returns the correct delivery types for `SSKDeliverTo::FED`' do
@@ -871,6 +871,23 @@ describe MAPI::ServiceApp do
           it 'returns the inserted request ID' do
             allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
             expect(call_method).to be(next_id)
+          end
+
+          describe 'when the member is not set up' do
+            it 'raises a validation error when the `adx_id` is `nil`' do
+              allow(securities_request_module).to receive(:execute_sql_single_result).with(
+                    app,
+                    anything,
+                    "ADX ID").and_return(nil)
+              expect { call_method }.to raise_error(ValidationError)
+            end
+            it 'raises a validation error when the adx query throws an error' do
+              allow(securities_request_module).to receive(:execute_sql_single_result).with(
+                    app,
+                    anything,
+                    "ADX ID").and_raise(MAPI::Shared::Errors::SQLError.new)
+              expect { call_method }.to raise_error(ValidationError)
+            end
           end
 
           context 'prepares SQL' do
@@ -2470,6 +2487,24 @@ describe MAPI::ServiceApp do
               expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, adx_query, any_args)
               call_method
             end
+            describe 'when a member is not set up' do
+              describe 'because the `adx_id` is `nil`' do
+                before do
+                  allow(securities_request_module).to receive(:execute_sql_single_result).and_return(nil)
+                end
+                it 'raises `Errors::ValidationError`' do
+                  expect { call_method }.to raise_error(MAPI::Shared::Errors::ValidationError)
+                end
+              end
+              describe 'because of a `SQLError`' do                              
+                before do
+                  allow(securities_request_module).to receive(:execute_sql_single_result).and_raise(MAPI::Shared::Errors::SQLError.new)
+                end
+                it 'raises `Errors::ValidationError`' do
+                  expect { call_method }.to raise_error(MAPI::Shared::Errors::ValidationError)
+                end
+              end
+            end
           end
           describe 'fetching `existing_securities`' do
             it 'constructs the `release_request_securities_query` with the `request_id`' do
@@ -3015,7 +3050,6 @@ describe MAPI::ServiceApp do
             end
           end
           describe 'fetching the `adx_id`' do
-
             describe 'adx account' do
               before do
                 allow(securities_request_module).to receive(:validate_kind).and_return(true)
@@ -3036,6 +3070,24 @@ describe MAPI::ServiceApp do
             it 'calls `execute_sql_single_result` with the results of `adx_query`' do
               expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, adx_query, any_args)
               call_method
+            end
+            describe 'when a member is not set up' do
+              describe 'because the `adx_id` is `nil`' do
+                before do
+                  allow(securities_request_module).to receive(:execute_sql_single_result).and_return(nil)
+                end
+                it 'raises `Errors::ValidationError`' do
+                  expect { call_method }.to raise_error(MAPI::Shared::Errors::ValidationError)
+                end
+              end
+              describe 'because of a `SQLError`' do                              
+                before do
+                  allow(securities_request_module).to receive(:execute_sql_single_result).and_raise(MAPI::Shared::Errors::SQLError)
+                end
+                it 'raises `Errors::ValidationError`' do
+                  expect { call_method }.to raise_error(MAPI::Shared::Errors::ValidationError)
+                end
+              end
             end
           end
           describe 'fetching `existing_securities`' do
@@ -3507,9 +3559,9 @@ describe MAPI::ServiceApp do
       let(:user_name) {  SecureRandom.hex }
       let(:full_name) { SecureRandom.hex }
       let(:session_id) { SecureRandom.hex }
-      let(:adx_id) { [1000..10000].sample }
-      let(:un_adx_id) { [1000..10000].sample }
-      let(:ssk_id) { [1000..10000].sample }
+      let(:adx_id) { rand(1000..10000) }
+      let(:un_adx_id) { rand(1000..10000) }
+      let(:ssk_id) { rand(1000..10000) }
       let(:pledge_type) { 50 }
       let(:kind) {  SecureRandom.hex }
       let(:delivery_type) {  32 }
@@ -3769,7 +3821,7 @@ describe MAPI::ServiceApp do
             allow(securities_request_module).to receive(:execute_sql_single_result).with(
                                                   app,
                                                   un_adx_sql,
-                                                  "ADX ID").and_return(un_adx_id)
+                                                  "UN_ADX ID").and_return(un_adx_id)
             allow(securities_request_module).to receive(:execute_sql_single_result).with(
                                                   app,
                                                   ssk_sql,
@@ -3779,6 +3831,23 @@ describe MAPI::ServiceApp do
           it 'returns the inserted request ID' do
             allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
             expect(call_method).to be(next_id)
+          end
+
+          describe 'when the member is not set up' do
+            it 'raises a validation error when the `adx_id` is `nil`' do
+              allow(securities_request_module).to receive(:execute_sql_single_result).with(
+                    app,
+                    anything,
+                    "ADX ID").and_return(nil)
+              expect { call_method }.to raise_error(ValidationError)
+            end
+            it 'raises a validation error when the adx query throws an error' do
+              allow(securities_request_module).to receive(:execute_sql_single_result).with(
+                    app,
+                    anything,
+                    "ADX ID").and_raise(MAPI::Shared::Errors::SQLError.new)
+              expect { call_method }.to raise_error(ValidationError)
+            end
           end
 
           context 'prepares SQL' do
@@ -4226,6 +4295,34 @@ describe MAPI::ServiceApp do
                 expect(securities_request_module).to receive(:execute_sql_single_result).with(anything, adx_query, any_args)
                 call_method
               end
+              describe 'when a member is not set up' do
+                describe 'because the `adx_id` is `nil`' do
+                  before do
+                    allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, anything, "ADX ID").and_return(nil)
+                    allow(securities_request_module).to receive(:execute_sql_single_result).with(any_args)
+                  end
+                  it 'raises `Errors::ValidationError`' do
+                    expect { call_method }.to raise_error(MAPI::Shared::Errors::ValidationError)
+                  end
+                end
+                describe 'because the `un_adx_id` is `nil`' do
+                  before do
+                    allow(securities_request_module).to receive(:execute_sql_single_result).with(anything, anything, "UN_ADX ID").and_return(nil)
+                    allow(securities_request_module).to receive(:execute_sql_single_result).with(any_args)
+                  end
+                  it 'raises `Errors::ValidationError`' do
+                    expect { call_method }.to raise_error(MAPI::Shared::Errors::ValidationError)
+                  end
+                end
+                describe 'because of a `SQLError`' do                              
+                  before do
+                    allow(securities_request_module).to receive(:execute_sql_single_result).and_raise(MAPI::Shared::Errors::SQLError)
+                  end
+                  it 'raises `Errors::ValidationError`' do
+                    expect { call_method }.to raise_error(MAPI::Shared::Errors::ValidationError)
+                  end
+                end
+              end
             end
             describe 'fetching `existing_securities`' do
               it 'constructs the `release_request_securities_query` with the `request_id`' do
@@ -4660,7 +4757,7 @@ describe MAPI::ServiceApp do
       let(:user_name) {  SecureRandom.hex }
       let(:full_name) { SecureRandom.hex }
       let(:session_id) { SecureRandom.hex }
-      let(:adx_id) { [1000..10000].sample }
+      let(:adx_id) { rand(1000..10000) }
       let(:trade_date) { (Time.zone.today - rand(1..10).days).strftime }
       let(:settlement_date) { (Time.zone.today - rand(1..10).days).strftime }
       let(:broker_instructions) { { 'transaction_code' => rand(0..1) == 0 ? 'standard' : 'repo',
@@ -4887,6 +4984,23 @@ describe MAPI::ServiceApp do
           it 'returns the inserted request ID' do
             allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
             expect(call_method).to be(next_id)
+          end
+
+          describe 'errors fetching the `adx_id`' do
+            it 'raises a validation error when the `adx_id` is `nil`' do
+              allow(securities_request_module).to receive(:execute_sql_single_result).with(
+                    app,
+                    adx_sql,
+                    "ADX ID").and_return(nil)
+              expect { call_method }.to raise_error(ValidationError)
+            end
+            it 'raises a validation error when the adx query throws an error' do
+              allow(securities_request_module).to receive(:execute_sql_single_result).with(
+                    app,
+                    adx_sql,
+                    "ADX ID").and_raise(MAPI::Shared::Errors::SQLError.new)
+              expect { call_method }.to raise_error(ValidationError)
+            end
           end
 
           context 'prepares SQL' do
@@ -5493,5 +5607,30 @@ describe MAPI::ServiceApp do
         end
       end
     end
+  end
+end
+RSpec.shared_examples 'a securities endpoint that raises a member validation error' do |endpoint, action, module_method, params={}|
+  let(:logger) { double('MAPI logger', error: nil) }
+  let(:error_message) { SecureRandom.hex }
+  let(:error_code) { SecureRandom.hex }
+  let(:error) { MAPI::Shared::Errors::ValidationError.new('Member does not have an ADX ID', 'member') }
+  let(:make_request) { send(action, endpoint, params) }
+  let(:response_body) { make_request; JSON.parse(last_response.body).with_indifferent_access }
+  let(:response_status) { make_request; last_response.status }
+  
+  before do
+    allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
+  end
+
+  describe "when the `MAPI::Services::Member::SecuritiesRequests.#{module_method}` raises a `ValidationError`" do
+    before do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(module_method).and_raise(error)
+    end
+    it 'raises a validation error with code `member`' do
+      expect(response_body[:error][:type]).to eq('validation')
+    end
+    it 'raises an error with code `member`' do
+      expect(response_body[:error][:code]).to eq('member')
+    end      
   end
 end

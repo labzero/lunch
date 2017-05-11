@@ -1,0 +1,72 @@
+[
+    {
+        "FHLB_ID": 1,
+        "CP_ASSOC": "Old McDonald's Leanding Window",
+        "INTRADAY_STATUS_FLAG": "n"
+    },
+    {
+        "FHLB_ID": 2,
+        "CP_ASSOC": "Bobby's Payday Loans",
+        "INTRADAY_STATUS_FLAG": "N"
+    },
+    {
+        "FHLB_ID": 3,
+        "CP_ASSOC": "Irish Bank",
+        "INTRADAY_STATUS_FLAG": "Y"
+    },
+    {
+        "FHLB_ID": 4,
+        "CP_ASSOC": "S'more Bank",
+        "INTRADAY_STATUS_FLAG": "y"
+    },
+    {
+        "FHLB_ID": 5,
+        "CP_ASSOC": "Wells Faygo",
+        "INTRADAY_STATUS_FLAG": "y"
+    },
+    {
+        "FHLB_ID": 6,
+        "CP_ASSOC": "Chaste Manhattan",
+        "INTRADAY_STATUS_FLAG": "Y"
+    },
+    {
+        "FHLB_ID": 7,
+        "CP_ASSOC": "Subprime Backalley Lenders",
+        "INTRADAY_STATUS_FLAG": "N"
+    },
+    {
+        "FHLB_ID": 8,
+        "CP_ASSOC": "Loan Sharks Incorporated",
+        "INTRADAY_STATUS_FLAG": "n"
+    },
+    {
+        "FHLB_ID": 9,
+        "CP_ASSOC": "Marina Bank",
+        "INTRADAY_STATUS_FLAG": "y"
+    },
+    {
+        "FHLB_ID": 10,
+        "CP_ASSOC": "Overseas Bank",
+        "INTRADAY_STATUS_FLAG": "N"
+    },
+    {
+        "FHLB_ID": 11,
+        "CP_ASSOC": "Cayman Islands Holding Company",
+        "INTRADAY_STATUS_FLAG": "n"
+    },
+    {
+        "FHLB_ID": 12,
+        "CP_ASSOC": "The Bank With The Really Really Long Name That Requires Truncation or Expansion",
+        "INTRADAY_STATUS_FLAG": "Y"
+    },
+    {
+        "FHLB_ID": 13,
+        "CP_ASSOC": "The Bank With Disabled Signers",
+        "INTRADAY_STATUS_FLAG": "N"
+    },
+    {
+        "FHLB_ID": 14,
+        "CP_ASSOC": "The Bank Requiring Dual Signers for Advances",
+        "INTRADAY_STATUS_FLAG": "Y"
+    }
+]

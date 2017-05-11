@@ -44,17 +44,37 @@
 
   tbody {
     @extend %typography-table-cell;
-    tr:nth-child(odd) {
-      background-color: $lightest-blue;
+    tr.odd {
+      background-color: $lightest-blue;    
+    }
+    tr.even {
+      background-color: transparent;
+    }
+
+    tr:not(.odd):not(.even) {
+      &:nth-child(odd) {
+        background-color: $lightest-blue;
+      }
+      &:nth-child(even) {
+        background-color: transparent;
+      }
     }
   }
 
   thead + tbody {
-    tr:nth-child(odd) {
-      background-color: transparent;
+    tr.odd {
+      background-color: transparent;    
     }
-    tr:nth-child(even) {
+    tr.even {
       background-color: $lightest-blue;
+    }
+    tr:not(.odd):not(.even) {
+      &:nth-child(odd) {
+        background-color: transparent;
+      }
+      &:nth-child(even) {
+        background-color: $lightest-blue;
+      }
     }
   }
 
@@ -162,6 +182,40 @@ table.table-error  {
     &.active {
       color: $actionable-blue;
       cursor: default;
+    }
+  }
+}
+
+%table-no-first-header-cell {
+  table {
+    border: none;
+    border-collapse: separate; // fix for IE header border bug
+    th {
+      border-top: 1px solid $light-blue;
+      &:first-child {
+        border: none;
+        background-color: $white;
+      }
+      &:nth-child(2) {
+        border-left: 1px solid $light-blue;
+      }
+    }
+    td:first-child {
+      border-left: 1px solid $light-blue;
+    }
+    tr:first-child {
+      td:first-child {
+        border-top: 1px solid $light-blue;
+      }
+    }
+  }
+}
+
+%table-row-headers {
+  table {
+    td:first-child {
+      @extend %typography-table-heading;
+      background-color: $light-gray;
     }
   }
 }

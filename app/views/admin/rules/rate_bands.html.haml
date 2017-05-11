@@ -1,3 +1,5 @@
 =render layout: 'term', locals: {active_nav: :rate_bands, classes: 'term-rules-rate-bands'} do
   %section
-    =render 'reports/reports_table', table_data: @rate_bands
+    =form_tag(rules_update_rate_bands_url, {class: 'rules-rate-bands-form', method: :put}) do
+      =render 'reports/reports_table', table_data: @rate_bands
+      =submit_tag(t('admin.term_rules.save'), class: 'primary-button') if @can_edit_trade_rules

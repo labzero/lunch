@@ -9,6 +9,8 @@ module MAPI
           LOW_DAYS_TO_MATURITY HIGH_DAYS_TO_MATURITY MIN_ONLINE_ADVANCE TERM_DAILY_LIMIT PRODUCT_TYPE END_TIME OVERRIDE_END_DATE
           OVERRIDE_END_TIME)
 
+        LIMIT_STATUS_FIELDS = %w(WHOLE_LOAN_ENABLED SBC_AGENCY_ENABLED SBC_AAA_ENABLED SBC_AA_ENABLED)
+
         def self.get_limits(app)
           etransact_limits = <<-SQL
             SELECT AO_TERM_BUCKET_ID, WHOLE_LOAN_ENABLED, SBC_AGENCY_ENABLED, SBC_AAA_ENABLED, SBC_AA_ENABLED, LOW_DAYS_TO_MATURITY,
@@ -16,13 +18,16 @@ module MAPI
             OVERRIDE_END_TIME FROM WEB_ADM.AO_TERM_BUCKETS
           SQL
           etransact_limits_array = if should_fake?(app)
-            JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_limits.json')))
+            fake('etransact_limits')
           else
             MAPI::Services::EtransactAdvances.fetch_hashes(app.logger, etransact_limits)
           end
           reverse_bucket_mapping = TERM_BUCKET_MAPPING.invert
           etransact_limits_array.each do |bucket|
             bucket['TERM'] = reverse_bucket_mapping[bucket['AO_TERM_BUCKET_ID']]
+            LIMIT_STATUS_FIELDS.each do |key|
+              bucket[key] = bucket[key].try(:upcase) == 'Y'
+            end
           end
           etransact_limits_array
         end
@@ -59,6 +64,8 @@ module MAPI
           case key
           when 'MIN_ONLINE_ADVANCE', 'TERM_DAILY_LIMIT'
             value.to_s.gsub(',', '').to_i
+          when *LIMIT_STATUS_FIELDS
+            value ? 'Y' : 'N'
           else
             value
           end

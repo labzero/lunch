@@ -1,2 +1,6 @@
 =render layout: 'advance_availability', locals: {active_nav: :advance_availability_member, classes: 'advance-availability-member'} do
-  %section
+  %section.form-fields-section-column-2
+    .row
+      .input-field-container-horizontal
+        = render 'shared/dropdown', dropdown_name: @advance_availability[:dropdown][:name], default_value: @advance_availability[:dropdown][:default_value], default_text: @advance_availability[:dropdown][:default_text], dropdown_options: @advance_availability[:dropdown][:options]
+      = render 'reports/reports_table', table_data: @advance_availability[:table], sortable: false, disable_auto_width: true, no_wrapping: true, table_class: 'report-table-vertical-headers'

@@ -20,7 +20,6 @@ describe MAPI::ServiceApp do
         end
 
         it 'calls `fetch_hashes` with the logger' do
-          logger = instance_double(Logger)
           expect(MAPI::Services::EtransactAdvances).to receive(:fetch_hashes).with(app.logger, anything)
           call_method
         end
@@ -45,20 +44,33 @@ describe MAPI::ServiceApp do
       context 'when `should_fake?` returns true' do
         before { allow(etransact_limits_module).to receive(:should_fake?).and_return(true) }
         it 'parses the fake data file' do
-          fake_file = double('fake data')
-          allow(File).to receive(:read).with(File.join(MAPI.root, 'fakes', 'etransact_limits.json')).and_return(fake_file)
-          expect(JSON).to receive(:parse).with(fake_file).and_return([])
+          expect(etransact_limits_module).to receive(:fake).with('etransact_limits').and_return([])
           call_method
         end
       end
       describe 'adding the TERM to each bucket' do
-        before { allow(JSON).to receive(:parse).and_call_original }
         etransact_limits_module::TERM_BUCKET_MAPPING.invert.each do |bucket_id, term|
           it "adds a TERM of `#{term}` when the `AO_TERM_BUCKET_ID` is `#{bucket_id}`" do
             allow(JSON).to receive(:parse).and_return([{'AO_TERM_BUCKET_ID' => bucket_id}])
             expect(call_method.length).to be > 0
             call_method.each do |bucket|
               expect(bucket['TERM']).to eq(term.to_s)
+            end
+          end
+        end
+      end
+      describe 'post-processing of the status fields' do
+        etransact_limits_module::LIMIT_STATUS_FIELDS.each do |field|
+          ['y', 'Y'].each do |status|
+            it "sets `#{field}` to `true` when the returned status is `#{status}`" do
+              allow(etransact_limits_module).to receive(:fake).and_return([{field => status}])
+              expect(call_method.first[field]).to be true
+            end
+          end
+          ['n', 'N', nil].each do |status|
+            it "sets `#{field}` to `false` when the returned status is `#{status}`" do
+              allow(etransact_limits_module).to receive(:fake).and_return([{field => status}])
+              expect(call_method.first[field]).to be false
             end
           end
         end
@@ -235,6 +247,16 @@ describe MAPI::ServiceApp do
               value = rand(1000..100000000)
               string_value = number_with_delimiter(value)
               expect(etransact_limits_module.process_limit_value(field_name, string_value)).to eq(value)
+            end
+          end
+        end
+        etransact_limits_module::LIMIT_STATUS_FIELDS.each do |field_name|
+          describe "when the passed key is `#{field_name}`" do
+            it 'returns `Y` when the value evaluates to true' do
+              expect(etransact_limits_module.process_limit_value(field_name, true)).to eq('Y')
+            end
+            it 'returns `N` when the value evaluates to false' do
+              expect(etransact_limits_module.process_limit_value(field_name, false)).to eq('N')
             end
           end
         end
