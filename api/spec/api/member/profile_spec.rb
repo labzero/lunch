@@ -309,6 +309,7 @@ describe MAPI::ServiceApp do
         allow(ActiveRecord::Base.connection).to receive(:execute).and_return(member_name_cursor, sta_number_cursor, customer_signature_card_cursor)
         allow(MAPI::Services::Member::Profile).to receive(:fetch_hash)
         allow(MAPI::Services::Member::Profile).to receive(:get_account_numbers)
+        allow(MAPI::Services::Member::Profile).to receive(:execute_sql_single_result)
       end
 
       it 'succeeds' do
@@ -374,6 +375,31 @@ describe MAPI::ServiceApp do
           end
         end
       end
+      describe 'the SQL query for the customer lc agreement flag' do
+        it '`SELECT`s the `cu_lc_agreement_flag`' do
+          matcher = Regexp.new(/\s+SELECT\s+cu_lc_agreement_flag\s+.*/i)
+          expect(MAPI::Services::Member::Profile).to receive(:execute_sql_single_result).with(app, matcher, anything)
+          make_request
+        end
+        it 'selects from `portfolios.customers`' do
+          matcher = Regexp.new(/\s+SELECT\s+cu_lc_agreement_flag\s+FROM\s+portfolios.customers\s+.*/i)
+          expect(MAPI::Services::Member::Profile).to receive(:execute_sql_single_result).with(app, matcher, anything)
+          make_request
+        end
+        describe 'the WHERE clause' do
+          before { allow(MAPI::Services::Member::Profile).to receive(:quote) }
+          it 'quotes the member_id' do
+            expect(MAPI::Services::Member::Profile).to receive(:quote).with(member_id.to_s)
+            make_request
+          end
+          it 'ensures the fhlb_id is the member_id' do
+            allow(MAPI::Services::Member::Profile).to receive(:quote).with(member_id.to_s).and_return(member_id)
+            matcher = Regexp.new(/\s+SELECT\s+cu_lc_agreement_flag\s+FROM\s+portfolios.customers\s+WHERE\s+fhlb_id\s+=\s+#{member_id}/i)
+            expect(MAPI::Services::Member::Profile).to receive(:execute_sql_single_result).with(app, matcher, anything)
+            make_request
+          end
+        end
+      end
     end
     [:production, :development].each do |env|
       describe "in the `#{env}` environment" do
@@ -385,6 +411,7 @@ describe MAPI::ServiceApp do
           allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(member_name_cursor, sta_number_cursor, customer_signature_card_cursor)
           allow(MAPI::Services::Member::Profile).to receive(:fetch_hash).and_return(address_data_response)
           allow(MAPI::Services::Member::Profile).to receive(:get_account_numbers).and_return(account_numbers)
+          allow(MAPI::Services::Member::Profile).to receive(:execute_sql_single_result).with(app, anything, anything).and_return(nil)
         end
         it 'returns a 404 if the member name isn\'t found' do
           allow(member_name_cursor).to receive(:fetch).and_return(nil)

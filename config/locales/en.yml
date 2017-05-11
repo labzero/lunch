@@ -1519,6 +1519,7 @@ en:
       request: Request letter of credit
       expiration_date: Expiration Date
       maintenance_fee: Annual Maintenance Fee (bps)
+      not_authorized: 'Your institution is not authorized to request a Letter of Credit. A <a href="%{url}">Letter of Credit Reimbursement Agreement</a> must be on file.'
     request:
       title: Request Letter of Credit
       support_html: "The member portal only supports requests for Public Unit Deposit letters of credit. For other requests, contact your Relationship Manager: %{rm_email}, %{rm_phone_number}. If your request is not received by 11:00 am, your request will not be processed until the following business day."

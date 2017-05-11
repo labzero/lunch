@@ -6,9 +6,18 @@ RSpec.describe LettersOfCreditController, :type => :controller do
   login_user
 
   let(:member_id) { double('A Member ID') }
+  let(:member) {{
+    name: double('name'),
+    fhla_number: double('fhla number'),
+    customer_lc_agreement_flag: double('customer lc agreement flag') 
+  }}
   let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest, save: nil, :attributes= => nil, beneficiary_name: nil, owners: instance_double(Set, add: nil), lc_number: nil, id: nil) }
+  let(:members_service) { double("A Member Service") }
+
   before do
     allow(controller).to receive(:current_member_id).and_return(member_id)
+    allow(MembersService).to receive(:new).and_return(members_service)
+    allow(members_service).to receive(:member).with(member_id).and_return(member)
     allow(controller).to receive(:sanitized_profile)
     allow(controller).to receive(:member_contacts)
   end
@@ -72,6 +81,26 @@ RSpec.describe LettersOfCreditController, :type => :controller do
     end
   end
 
+  shared_examples 'a LettersOfCreditController action that sets the customer LC agreement flag' do
+   it 'creates a new instance of MembersService with the request' do
+      expect(MembersService).to receive(:new).with(request).and_return(members_service)
+      call_action
+    end
+    it 'calls `member` on the instance of MembersService with the current_member_id' do
+      allow(controller).to receive(:current_member_id).and_return(member_id)
+      expect(members_service).to receive(:member).with(member_id).and_return(member)
+      call_action
+    end
+    it 'raises an error if no member is found' do
+      allow(members_service).to receive(:member).with(member_id).and_return(nil)
+      expect{call_action}.to raise_error(ActionController::RoutingError)
+    end
+    it 'sets the `@customer_lc_agreement_flag` to the customer_lc_agreement_flag value of the member hash' do
+      call_action
+      expect(assigns[:lc_agreement_flag]).to eq(member[:customer_lc_agreement_flag])
+    end
+  end
+
   describe 'GET manage' do
     let(:historic_locs) { instance_double(Array) }
     let(:member_balance_service) { instance_double(MemberBalanceService, letters_of_credit: {credits: []}, todays_credit_activity: []) }
@@ -85,6 +114,8 @@ RSpec.describe LettersOfCreditController, :type => :controller do
 
     it_behaves_like 'a user required action', :get, :manage
     it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
+    it_behaves_like 'a LettersOfCreditController action that sets the customer LC agreement flag'
+
     it 'calls `set_titles` with its title' do
       expect(controller).to receive(:set_titles).with(I18n.t('letters_of_credit.manage.title'))
       call_action
@@ -193,10 +224,6 @@ RSpec.describe LettersOfCreditController, :type => :controller do
 
   describe 'GET view' do
     let(:id) { SecureRandom.hex }
-    let(:member) {{
-      name: double('name'),
-      fhla_number: double('fhla number')
-    }}
     let(:members_service) { instance_double(MembersService, member: member) }
     let(:call_action) { get :view, letter_of_credit_request: {id: id} }
 
@@ -306,6 +333,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       allow_policy :letters_of_credit, :request?
 
       it_behaves_like 'a user required action', :get, :new
+      it_behaves_like 'a LettersOfCreditController action that sets the customer LC agreement flag'
       it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
       it_behaves_like 'a LettersOfCreditController action that sets sidebar view variables with a before filter'
       it_behaves_like 'a LettersOfCreditController action that fetches a letter of credit request'

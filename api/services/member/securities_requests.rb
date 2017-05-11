@@ -454,20 +454,6 @@ module MAPI
           username.downcase
         end
 
-        def self.execute_sql_single_result(app, sql, description)
-          cursor = execute_sql(app.logger, sql)
-          if cursor
-            records = cursor.fetch
-            if records
-              first_record = records.first
-              return first_record if first_record
-            end
-          else
-            raise MAPI::Shared::Errors::SQLError, "#{description} returned `nil` for the cursor"
-          end
-          nil
-        end
-
         def self.validate_broker_instructions(broker_instructions, app, kind)
           raise MAPI::Shared::Errors::MissingFieldError.new('broker_instructions must be a non-empty hash', :broker_instructions) unless !broker_instructions.nil? && broker_instructions.is_a?(Hash) && !broker_instructions.empty?
           broker_instructions_mapping = BROKER_INSTRUCTIONS_MAPPING
