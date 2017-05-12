@@ -1424,7 +1424,7 @@ td.dataTables_empty {
     margin-bottom: 15px;
     thead + tbody tr:nth-child(even), &.table-dividend-summary tbody tr:nth-child(even), &.securities-services-table tr:nth-child(even),
     thead, .sorting_asc, .sorting_desc, tbody tr:nth-child(odd), tfoot, td, th {
-      background-color: transparent;
+      background-color: transparent !important;
       border: none;
       min-width: 0 !important;
     }
