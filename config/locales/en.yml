@@ -449,7 +449,7 @@ en:
       help_html: To request a new SecurID token or get help with an existing one, contact <a href="%{url}">Web Support</a> at %{phone_number}.
       new_pin:
         title: Create Token PIN for a New SecurID Token
-        description_html: Contact <a href="%{url}">Web Support</a> at %{phone_number} to activate a new SecurID token. Once activated, you may set your PIN.
+        received_new: If you have received a new token, you need to create a new PIN.
         description: If you just got a new SecurID token and need to set the PIN for it. Use Reset Token PIN if you forgot your PIN.
         cta: Create New Token PIN
         prompt_current: Enter the 6-digit code shown on your token.

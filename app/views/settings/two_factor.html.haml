@@ -6,7 +6,7 @@
       %h2= t('settings.two_factor.new_pin.title')
       .form-flash-message{data: {type: 'success'}}= t('settings.two_factor.new_pin.success')
       .form-flash-message{data: {type: 'error'}}= t('settings.two_factor.new_pin.error_html', phone_number: web_support_phone_number, url: web_support_email)
-      %p= t('settings.two_factor.new_pin.description_html', phone_number: web_support_phone_number, url: web_support_email)
+      %p= t('settings.two_factor.new_pin.received_new')
       .settings-inactive-view
         = link_to(t('settings.two_factor.new_pin.cta'), '#', class: 'settings-group-cta')
       = form_tag settings_two_factor_pin_path, method: :post, remote: true, class: 'settings-active-view' do
