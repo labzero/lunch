@@ -69,9 +69,42 @@ RSpec.describe Admin::RulesController, :type => :controller do
     end
   end
 
+  RSpec.shared_examples 'a RulesController action that sets a `@availability_headings` instance variable' do
+    describe '`@availability_headings`' do
+      let(:availability_headings) { call_action; assigns[:availability_headings]}
+
+      it 'contains the appropriate `column_headings`' do
+        expect(availability_headings[:column_headings]).to eq(['', I18n.t('dashboard.quick_advance.table.axes_labels.standard'), I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed'), '', ''])
+      end
+      describe '`rows`' do
+        let(:rows) { availability_headings[:rows] }
+        it 'contains one row' do
+          expect(rows.length).to eq(1)
+        end
+        describe '`columns`' do
+          let(:columns) { rows.first[:columns]}
+          it 'has a first column with a nil value' do
+            expect(columns[0][:value]).to be nil
+          end
+          it 'has a second column with a value that is the translation for whole loans' do
+            expect(columns[1][:value]).to eq(I18n.t('dashboard.quick_advance.table.whole_loan'))
+          end
+          it 'has a third column with a value that is the translation for agency loans' do
+            expect(columns[2][:value]).to eq(I18n.t('dashboard.quick_advance.table.agency'))
+          end
+          it 'has a second column with a value that is the translation for aaa loans' do
+            expect(columns[3][:value]).to eq(I18n.t('dashboard.quick_advance.table.aaa'))
+          end
+          it 'has a second column with a value that is the translation for aa loans' do
+            expect(columns[4][:value]).to eq(I18n.t('dashboard.quick_advance.table.aa'))
+          end
+        end
+      end
+    end
+  end
+
   describe 'GET limits' do
     let(:global_limit_data) {{
-      shareholder_total_daily_limit: double('total daily limit'),
       shareholder_total_daily_limit: double('total daily limit'),
       shareholder_web_daily_limit: double('web daily limit')
     }}
@@ -267,8 +300,162 @@ RSpec.describe Admin::RulesController, :type => :controller do
   end
 
   describe 'GET advance_availability_status' do
+    let(:etransact_service) { instance_double(EtransactAdvancesService, limits: [], status: {}, shutoff_times_by_type: {}) }
     let(:call_action) { get :advance_availability_status }
+
+    before do
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+    end
+
     it_behaves_like 'a RulesController action with before_action methods'
+    it_behaves_like 'a RulesController action that sets a `@availability_headings` instance variable'
+    it 'creates a new instance of EtransactAdvancesService with the request' do
+      expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
+      call_action
+    end
+    {limits: [], status: {}, shutoff_times_by_type: {}}.each do |method, return_value|
+      it "calls `#{method}` on the EtransactAdvancesService instance" do
+        expect(etransact_service).to receive(method).and_return(return_value)
+        call_action
+      end
+      it "raises an error if `#{method}` returns nil" do
+        allow(etransact_service).to receive(method).and_return(nil)
+        expect{call_action}.to raise_error('There has been an error and Admin::RulesController#advance_availability_status has encountered nil')
+      end
+    end
+
+    describe 'instance variables' do
+      describe '`@etransact_enabled`' do
+        let(:status_hash) { {enabled: double('some enabled status')} }
+        before { allow(etransact_service).to receive(:status).and_return(status_hash) }
+        it 'is set to the `enabled` value from the status hash' do
+          call_action
+          expect(assigns[:etransact_enabled]).to eq(status_hash[:enabled])
+        end
+      end
+
+      describe '`@shutoff_times`' do
+        let(:shutoff_times_hash) {{
+          vrc: double('vrc shutoff time'),
+          frc: double('frc shutoff time')
+        }}
+        let(:shutoff_times) { call_action; assigns[:shutoff_times]
+        }
+        before { allow(etransact_service).to receive(:shutoff_times_by_type).and_return(shutoff_times_hash) }
+
+        describe 'the first row' do
+          describe 'the first column' do
+            it 'has a value that is the translation string for vrc' do
+              expect(shutoff_times[:rows][0][:columns][0][:value]).to eq(I18n.t('dashboard.quick_advance.table.axes_labels.variable_rate'))
+            end
+          end
+          describe 'the second column' do
+            it 'has a value that is the `vrc` value of the shutoff times hash' do
+              expect(shutoff_times[:rows][0][:columns][1][:value]).to eq(shutoff_times_hash[:vrc])
+            end
+            it 'hash a type that is `:time`' do
+              expect(shutoff_times[:rows][0][:columns][1][:type]).to eq(:time)
+            end
+          end
+        end
+        describe 'the second row' do
+          describe 'the first column' do
+            it 'has a value that is the translation string for frc' do
+              expect(shutoff_times[:rows][1][:columns][0][:value]).to eq(I18n.t('dashboard.quick_advance.table.axes_labels.fixed_rate'))
+            end
+          end
+          describe 'the second column' do
+            it 'has a value that is the `frc` value of the shutoff times hash' do
+              expect(shutoff_times[:rows][1][:columns][1][:value]).to eq(shutoff_times_hash[:frc])
+            end
+            it 'hash a type that is `:time`' do
+              expect(shutoff_times[:rows][1][:columns][1][:type]).to eq(:time)
+            end
+          end
+        end
+      end
+      describe '`@disabled_terms`' do
+        let(:raw_term_limit_data) {[double('bucket')]}
+        let(:unchecked_row) {
+          {columns: [
+            {value: 'term_label'},
+            {
+              name: double('whole loan'),
+              checked: true
+            },
+            {
+              name: double('sbc_agency_enabled'),
+              checked: true
+            },
+            {
+              name: double('sbc_aaa_enabled'),
+              checked: false
+            },
+            {
+              name: double('sbc_aa_enabled'),
+              checked: true
+            }
+          ]}
+        }
+        let(:checked_row) {
+          {columns: [
+            {value: 'term_label'},
+            {
+              name: double('whole loan'),
+              checked: true
+            },
+            {
+              name: double('sbc_agency_enabled'),
+              checked: true
+            },
+            {
+              name: double('sbc_aaa_enabled'),
+              checked: true
+            },
+            {
+              name: double('sbc_aa_enabled'),
+              checked: true
+            }
+          ]}
+        }
+        before do
+          allow(etransact_service).to receive(:limits).and_return(raw_term_limit_data)
+        end
+        it 'calls `availability_row_from_bucket` with each of the term buckets from EtransactAdvancesService#limits' do
+          expect(controller).to receive(:availability_row_from_bucket).with(raw_term_limit_data[0]).and_return({columns:[]})
+          call_action
+        end
+        it 'is not set if none of the returned term buckets are disabled' do
+          allow(etransact_service).to receive(:limits).and_return([double('bucket'), double('bucket')])
+          allow(controller).to receive(:availability_row_from_bucket).and_return(checked_row, checked_row)
+          call_action
+          expect(assigns[:disabled_terms]).to be nil
+        end
+        context 'when at one of the processed rows has at least one disabled term' do
+          it 'adds a row only if the processed row has at least one disabled term' do
+            n_disabled = rand(2..4)
+            n_enabled = rand(2..4)
+            raw_terms = Array.new(n_disabled + n_enabled, double('bucket'))
+            allow(etransact_service).to receive(:limits).and_return(raw_terms)
+            allow(controller).to receive(:availability_row_from_bucket).and_return(*Array.new(n_disabled, unchecked_row), *Array.new(n_enabled, checked_row))
+            call_action
+            expect(assigns[:disabled_terms][:rows].length).to eq(n_disabled)
+          end
+          it 'sets the `disabled` attribute of each column in each row to true' do
+            allow(etransact_service).to receive(:limits).and_return([double('bucket')])
+            allow(controller).to receive(:availability_row_from_bucket).and_return(unchecked_row)
+            call_action
+            expect(assigns[:disabled_terms][:rows].length).to be > 0
+            assigns[:disabled_terms][:rows].each do |row|
+              expect(row[:columns].length).to be > 0
+              row[:columns].each do |column|
+                expect(column[:disabled]).to be true
+              end
+            end
+          end
+        end
+      end
+    end
   end
 
   describe 'GET advance_availability_by_term' do
@@ -282,6 +469,7 @@ RSpec.describe Admin::RulesController, :type => :controller do
     end
 
     it_behaves_like 'a RulesController action with before_action methods'
+    it_behaves_like 'a RulesController action that sets a `@availability_headings` instance variable'
     it 'creates a new instance of EtransactAdvancesService with the request' do
       expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
       call_action
@@ -295,37 +483,6 @@ RSpec.describe Admin::RulesController, :type => :controller do
       expect{call_action}.to raise_error('There has been an error and Admin::RulesController#advance_availability_by_term has encountered nil. Check error logs.')
     end
     describe 'view instance variables' do
-      describe '`@availability_headings`' do
-        let(:availability_headings) { call_action; assigns[:availability_headings]}
-
-        it 'contains the appropriate `column_headings`' do
-          expect(availability_headings[:column_headings]).to eq(['', I18n.t('dashboard.quick_advance.table.axes_labels.standard'), I18n.t('dashboard.quick_advance.table.axes_labels.securities_backed'), '', ''])
-        end
-        describe '`rows`' do
-          let(:rows) { availability_headings[:rows] }
-          it 'contains one row' do
-            expect(rows.length).to eq(1)
-          end
-          describe '`columns`' do
-            let(:columns) { rows.first[:columns]}
-            it 'has a first column with a nil value' do
-              expect(columns[0][:value]).to be nil
-            end
-            it 'has a second column with a value that is the translation for whole loans' do
-              expect(columns[1][:value]).to eq(I18n.t('dashboard.quick_advance.table.whole_loan'))
-            end
-            it 'has a third column with a value that is the translation for agency loans' do
-              expect(columns[2][:value]).to eq(I18n.t('dashboard.quick_advance.table.agency'))
-            end
-            it 'has a second column with a value that is the translation for aaa loans' do
-              expect(columns[3][:value]).to eq(I18n.t('dashboard.quick_advance.table.aaa'))
-            end
-            it 'has a second column with a value that is the translation for aa loans' do
-              expect(columns[4][:value]).to eq(I18n.t('dashboard.quick_advance.table.aa'))
-            end
-          end
-        end
-      end
       describe 'term instance variables' do
         let(:term_limit_data_buckets) do
           data = []
@@ -340,63 +497,23 @@ RSpec.describe Admin::RulesController, :type => :controller do
           end
           data
         end
+        let(:row_sentinel) { double('term bucket row') }
 
-        before { allow(etransact_service).to receive(:limits).and_return(term_limit_data_buckets) }
-
-        it 'raises an error if it encounters an unrecognized `:term` in one the etransact_service.limits buckets' do
-          term_limit_data_buckets.first[:term] = sentinel
-          expect{call_action}.to raise_error("There has been an error and Admin::RulesController#advance_availability_by_term has encountered an etransact_service.limits bucket with an invalid term: #{sentinel}")
-        end
-
-        shared_examples 'a RulesController#advance_availability_by_term instance variable term-table row' do |term_label, &context_block|
-          let(:columns) { row[:columns] }
-          it 'has a first column whose value is the appropriate term_label' do
-            expect(columns[0][:value]).to eq(term_label)
-          end
-          [['second', :whole_loan_enabled], ['third', :sbc_agency_enabled], ['fourth', :sbc_aaa_enabled], ['fifth', :sbc_aa_enabled]].each_with_index do |term_data, i|
-            describe "the #{term_data.first} column" do
-              type = term_data.last
-              let(:column) { columns[i + 1] }
-              it "has a name that incorporates the term and `#{type}`" do
-                expect(column[:name]).to eq("term_limits[#{bucket[:term]}][#{type.to_s}]")
-              end
-              it 'has a type of `checkbox`' do
-                expect(column[:type]).to eq(:checkbox)
-              end
-              it 'has `submit_unchecked_boxes` set to true' do
-                expect(column[:submit_unchecked_boxes]).to be true
-              end
-              it "has a checked value that is the `#{type}` value for the bucket" do
-                expect(column[:checked]).to eq(bucket[type])
-              end
-              it 'has a label set to `true`' do
-                expect(column[:label]).to eq(true)
-              end
-              context 'when the user can edit trade rules' do
-                allow_policy :web_admin, :edit_trade_rules?
-                it 'sets `disabled` to false' do
-                  expect(column[:disabled]).to be false
-                end
-              end
-              context 'when the user cannot edit trade rules' do
-                deny_policy :web_admin, :edit_trade_rules?
-                it 'sets `disabled` to false' do
-                  expect(column[:disabled]).to be true
-                end
-              end
-            end
-          end
+        before do
+          allow(etransact_service).to receive(:limits).and_return(term_limit_data_buckets)
+          allow(subject).to receive(:availability_row_from_bucket).and_return({})
         end
 
         describe '`@vrc_availability`' do
           let(:vrc_availability) { call_action; assigns[:vrc_availability] }
-          it_behaves_like 'a RulesController#advance_availability_by_term instance variable term-table row', I18n.t('admin.advance_availability.availability_by_term.open_label') do
-            let(:row) { vrc_availability[:rows].first }
-            let(:bucket) { term_limit_data_buckets.select{|bucket| bucket[:term] == :open}.first }
-          end
 
           it 'has one row' do
             expect(vrc_availability[:rows].length).to eq(1)
+          end
+          it 'contains the `availability_row_from_bucket` that was processed from the bucket with a term of `open`' do
+            bucket = term_limit_data_buckets.select{|bucket| bucket[:term] == :open}.first
+            expect(subject).to receive(:availability_row_from_bucket).with(bucket).and_return(row_sentinel)
+            expect(vrc_availability[:rows]).to eq([row_sentinel])
           end
         end
         describe '`@long_term_availability`' do
@@ -406,9 +523,10 @@ RSpec.describe Admin::RulesController, :type => :controller do
             expect(long_term_availability[:rows].length).to eq(described_class::LONG_FRC_TERMS.length)
           end
           described_class::LONG_FRC_TERMS.each_with_index do |term, j|
-            it_behaves_like 'a RulesController#advance_availability_by_term instance variable term-table row', I18n.t("admin.term_rules.daily_limit.dates.#{term}") do
-              let(:row) { long_term_availability[:rows][j] }
-              let(:bucket) { term_limit_data_buckets.select{|bucket| bucket[:term] == term}.first }
+            it "contains the `availability_row_from_bucket` that was processed from the bucket with a term of `#{term}`" do
+              bucket = term_limit_data_buckets.select{|bucket| bucket[:term] == term}.first
+              expect(subject).to receive(:availability_row_from_bucket).with(bucket).and_return(row_sentinel)
+              expect(long_term_availability[:rows][j]).to eq(row_sentinel)
             end
           end
         end
@@ -419,10 +537,11 @@ RSpec.describe Admin::RulesController, :type => :controller do
           it "has #{short_term_rows.length} rows" do
             expect(frc_availability[:rows].length).to eq(short_term_rows.length)
           end
-          short_term_rows.each_with_index do |term, k|
-            it_behaves_like 'a RulesController#advance_availability_by_term instance variable term-table row', I18n.t("admin.term_rules.daily_limit.dates.#{term}") do
-              let(:row) { frc_availability[:rows][k] }
-              let(:bucket) { term_limit_data_buckets.select{|bucket| bucket[:term] == term}.first }
+          short_term_rows.each_with_index do |term, j|
+            it "contains the `availability_row_from_bucket` that was processed from the bucket with a term of `#{term}`" do
+              bucket = term_limit_data_buckets.select{|bucket| bucket[:term] == term}.first
+              expect(subject).to receive(:availability_row_from_bucket).with(bucket).and_return(row_sentinel)
+              expect(frc_availability[:rows][j]).to eq(row_sentinel)
             end
           end
         end
@@ -1149,6 +1268,67 @@ RSpec.describe Admin::RulesController, :type => :controller do
             type_2 => term_2_type_2_info
           }
         })
+      end
+    end
+
+    describe '`availability_row_from_bucket`' do
+      let(:bucket) {{
+        term: described_class::VALID_TERMS.sample,
+        whole_loan_enabled: double('boolean'),
+        sbc_agency_enabled: double('boolean'),
+        sbc_aaa_enabled: double('boolean'),
+        sbc_aa_enabled: double('boolean')
+      }}
+      let(:columns) { subject.send(:availability_row_from_bucket, bucket)[:columns] }
+
+      describe 'the first column' do
+        (described_class::VALID_TERMS - [:open]).each do |term|
+          context "when the term is `#{term}`" do
+            before { bucket[:term] = term }
+            it 'has a value with the appropriate term_label translation' do
+              expect(columns[0][:value]).to eq(I18n.t("admin.term_rules.daily_limit.dates.#{term}"))
+            end
+          end
+        end
+        context 'when the term is `open`' do
+          before { bucket[:term] = :open }
+          it 'has a value with the appropriate term_label translation' do
+            expect(columns[0][:value]).to eq(I18n.t('admin.advance_availability.availability_by_term.open_label'))
+          end
+        end
+      end
+      [['second', :whole_loan_enabled], ['third', :sbc_agency_enabled], ['fourth', :sbc_aaa_enabled], ['fifth', :sbc_aa_enabled]].each_with_index do |term_data, i|
+        describe "the #{term_data.first} column" do
+          type = term_data.last
+          let(:column) { columns[i + 1] }
+          it "has a name that incorporates the term and `#{type}`" do
+            expect(column[:name]).to eq("term_limits[#{bucket[:term]}][#{type.to_s}]")
+          end
+          it 'has a type of `checkbox`' do
+            expect(column[:type]).to eq(:checkbox)
+          end
+          it 'has `submit_unchecked_boxes` set to true' do
+            expect(column[:submit_unchecked_boxes]).to be true
+          end
+          it "has a checked value that is the `#{type}` value for the bucket" do
+            expect(column[:checked]).to eq(bucket[type])
+          end
+          it 'has a label set to `true`' do
+            expect(column[:label]).to eq(true)
+          end
+          context 'when the user can edit trade rules' do
+            before { subject.instance_variable_set(:@can_edit_trade_rules, true) }
+            it 'sets `disabled` to false' do
+              expect(column[:disabled]).to be false
+            end
+          end
+          context 'when the user cannot edit trade rules' do
+            before { subject.instance_variable_set(:@can_edit_trade_rules, false) }
+            it 'sets `disabled` to false' do
+              expect(column[:disabled]).to be true
+            end
+          end
+        end
       end
     end
   end

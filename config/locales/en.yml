@@ -129,6 +129,8 @@ en:
     cancel_upload: Cancel Upload
     optional_field: (optional)
     member_portal: Member Portal
+    off_status: 'Off'
+    on_status: 'On'
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -3353,6 +3355,15 @@ en:
         status: 'Add Advance On/Off'
         term: Availability by Term
         member: Availability by Member
+      availability_status:
+        status: 'Add Advance is %{status}'
+        button: 'Turn %{status} Add Advance'
+        disabled_terms: Disabled Terms
+        todays_shutoff: Today's End of Day Shutoff
+        manage_availability: Manage Availability by Term
+        view_availability: View Availability by Term
+        schedule_shutoff: Schedule Early End of Day Shutoff
+        view_shutoff: View Early End of Day Shutoff
       availability_by_member:
         filter:
           title: 'Filter:'

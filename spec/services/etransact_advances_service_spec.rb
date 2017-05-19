@@ -579,6 +579,54 @@ describe EtransactAdvancesService do
     end
   end
 
+  describe '`shutoff_times_by_type`' do
+    let(:shutoff_times) {{
+      'frc' => double('end time'),
+      'vrc' => double('end time')
+    }}
+    let(:vrc_sentinel) { double('processed vrc end time') }
+    let(:frc_sentinel) { double('processed frc end time') }
+    let(:call_method) { subject.shutoff_times_by_type }
+    before do
+      allow(subject).to receive(:get_hash).and_return(shutoff_times)
+      allow(subject).to receive(:parse_24_hour_time)
+    end
+
+    it 'calls `get_hash` with the proper name and endpoint' do
+      expect(subject).to receive(:get_hash).with(:shutoff_times_by_type, 'etransact_advances/shutoff_times_by_type').and_return({})
+      call_method
+    end
+    it 'returns nil if `get_hash` returns nil' do
+      allow(subject).to receive(:get_hash).and_return(nil)
+      expect(call_method).to be nil
+    end
+    it 'returns an empty hash if `get_hash` returns an empty hash' do
+      allow(subject).to receive(:get_hash).and_return({})
+      expect(call_method).to eq({})
+    end
+    describe 'processing the end times' do
+      let(:end_time) { double('end time') }
+      it 'passes the values from the returned hash to the `parse_24_hour_time` method' do
+        shutoff_times_results = {}
+        n = rand(2..5)
+        n.times do |i|
+          shutoff_times_results[i] = end_time
+        end
+        allow(subject).to receive(:get_hash).and_return(shutoff_times_results)
+        expect(subject).to receive(:parse_24_hour_time).exactly(n).times.with(end_time)
+        call_method
+      end
+      it 'sets the value of each key to the result of `parse_24_hour_time`' do
+        allow(subject).to receive(:parse_24_hour_time).with(shutoff_times['frc']).and_return(frc_sentinel)
+        allow(subject).to receive(:parse_24_hour_time).with(shutoff_times['vrc']).and_return(vrc_sentinel)
+        expect(call_method).to eq({
+          'frc' => frc_sentinel,
+          'vrc' => vrc_sentinel
+        })
+      end
+    end
+  end
+
   describe 'days_until' do
     let(:today) { Time.zone.today }
     it 'should map today to 0' do

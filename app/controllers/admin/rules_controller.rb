@@ -17,6 +17,21 @@ class Admin::RulesController < Admin::BaseController
     authorize :web_admin, :edit_trade_rules?
   end
 
+  before_action only: [:advance_availability_status, :advance_availability_by_term] do
+    @availability_headings = {
+      column_headings: ['', t('dashboard.quick_advance.table.axes_labels.standard'), t('dashboard.quick_advance.table.axes_labels.securities_backed'), '', ''],
+      rows: [{
+        columns: [
+          {value: nil},
+          {value: t('dashboard.quick_advance.table.whole_loan')},
+          {value: t('dashboard.quick_advance.table.agency')},
+          {value: t('dashboard.quick_advance.table.aaa')},
+          {value: t('dashboard.quick_advance.table.aa')}
+        ]
+      }]
+    }
+  end
+
   # GET
   def limits
     etransact_service = EtransactAdvancesService.new(request)
@@ -86,7 +101,39 @@ class Admin::RulesController < Admin::BaseController
 
   # GET
   def advance_availability_status
+    etransact_service = EtransactAdvancesService.new(request)
+    term_limit_data = etransact_service.limits
+    etransact_status = etransact_service.status
+    shutoff_times = etransact_service.shutoff_times_by_type
+    raise "There has been an error and Admin::RulesController#advance_availability_status has encountered nil" unless term_limit_data && etransact_status && shutoff_times
+    @etransact_enabled = etransact_status[:enabled]
 
+    # Determine if any terms are disabled
+    disabled_term_rows = []
+    term_limit_data.each do |bucket|
+      row = availability_row_from_bucket(bucket)
+      disabled_row = false
+      row[:columns].each_with_index do |column, i|
+        next if i == 0
+        disabled_row = !column[:checked]
+        break if disabled_row
+      end
+      row[:columns].map { |column| column[:disabled] = true }
+      disabled_term_rows << row if disabled_row
+    end
+    @disabled_terms = { rows: disabled_term_rows } if disabled_term_rows.present?
+    @shutoff_times = {
+      rows: [
+        {columns: [
+          {value: t('dashboard.quick_advance.table.axes_labels.variable_rate')},
+          {value: shutoff_times[:vrc], type: :time}
+        ]},
+        {columns: [
+          {value: t('dashboard.quick_advance.table.axes_labels.fixed_rate')},
+          {value: shutoff_times[:frc], type: :time}
+        ]}
+      ]
+    }
   end
 
   # GET
@@ -94,60 +141,12 @@ class Admin::RulesController < Admin::BaseController
     etransact_service = EtransactAdvancesService.new(request)
     term_limit_data = etransact_service.limits
     raise 'There has been an error and Admin::RulesController#advance_availability_by_term has encountered nil. Check error logs.' if term_limit_data.nil?
-    @availability_headings = {
-      column_headings: ['', t('dashboard.quick_advance.table.axes_labels.standard'), t('dashboard.quick_advance.table.axes_labels.securities_backed'), '', ''],
-      rows: [{
-        columns: [
-          {value: nil},
-          {value: t('dashboard.quick_advance.table.whole_loan')},
-          {value: t('dashboard.quick_advance.table.agency')},
-          {value: t('dashboard.quick_advance.table.aaa')},
-          {value: t('dashboard.quick_advance.table.aa')}
-        ]
-      }]
-    }
     @vrc_availability = {rows: []}
     @frc_availability = {rows: []}
     @long_term_availability = {rows: []}
     term_limit_data.each do |bucket|
       term = bucket[:term].to_sym
-      raise "There has been an error and Admin::RulesController#advance_availability_by_term has encountered an etransact_service.limits bucket with an invalid term: #{term}" unless VALID_TERMS.include?(term)
-      term_label = term == :open ? t('admin.advance_availability.availability_by_term.open_label') : t("admin.term_rules.daily_limit.dates.#{term}")
-      row = {columns: [
-        {value: term_label},
-        {
-          name: "term_limits[#{term}][whole_loan_enabled]",
-          type: :checkbox,
-          submit_unchecked_boxes: true,
-          checked: bucket[:whole_loan_enabled],
-          label: true,
-          disabled: !@can_edit_trade_rules
-        },
-        {
-          name: "term_limits[#{term}][sbc_agency_enabled]",
-          type: :checkbox,
-          submit_unchecked_boxes: true,
-          checked: bucket[:sbc_agency_enabled],
-          label: true,
-          disabled: !@can_edit_trade_rules
-        },
-        {
-          name: "term_limits[#{term}][sbc_aaa_enabled]",
-          type: :checkbox,
-          submit_unchecked_boxes: true,
-          checked: bucket[:sbc_aaa_enabled],
-          label: true,
-          disabled: !@can_edit_trade_rules
-        },
-        {
-          name: "term_limits[#{term}][sbc_aa_enabled]",
-          type: :checkbox,
-          submit_unchecked_boxes: true,
-          checked: bucket[:sbc_aa_enabled],
-          label: true,
-          disabled: !@can_edit_trade_rules
-        }
-      ]}
+      row = availability_row_from_bucket(bucket)
       if term == :open
         @vrc_availability[:rows] << row
       elsif LONG_FRC_TERMS.include?(term)
@@ -346,5 +345,46 @@ class Admin::RulesController < Admin::BaseController
       end
     end
     processed_summary
+  end
+
+  def availability_row_from_bucket(bucket)
+    term = bucket[:term].try(:to_sym)
+    raise "There has been an error and Admin::RulesController#advance_availability_by_term has encountered an etransact_service.limits bucket with an invalid term: #{term}" unless VALID_TERMS.include?(term)
+    term_label = term == :open ? t('admin.advance_availability.availability_by_term.open_label') : t("admin.term_rules.daily_limit.dates.#{term}")
+    {columns: [
+      {value: term_label},
+      {
+        name: "term_limits[#{term}][whole_loan_enabled]",
+        type: :checkbox,
+        submit_unchecked_boxes: true,
+        checked: bucket[:whole_loan_enabled],
+        label: true,
+        disabled: !@can_edit_trade_rules
+      },
+      {
+        name: "term_limits[#{term}][sbc_agency_enabled]",
+        type: :checkbox,
+        submit_unchecked_boxes: true,
+        checked: bucket[:sbc_agency_enabled],
+        label: true,
+        disabled: !@can_edit_trade_rules
+      },
+      {
+        name: "term_limits[#{term}][sbc_aaa_enabled]",
+        type: :checkbox,
+        submit_unchecked_boxes: true,
+        checked: bucket[:sbc_aaa_enabled],
+        label: true,
+        disabled: !@can_edit_trade_rules
+      },
+      {
+        name: "term_limits[#{term}][sbc_aa_enabled]",
+        type: :checkbox,
+        submit_unchecked_boxes: true,
+        checked: bucket[:sbc_aa_enabled],
+        label: true,
+        disabled: !@can_edit_trade_rules
+      }
+    ]}
   end
 end

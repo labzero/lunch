@@ -95,7 +95,6 @@
   table {
     width: 840px;
     border: none;
-    //margin-bottom: 20px;
     margin-bottom: 0px;
   }
   thead {
@@ -229,6 +228,7 @@
       }
     }
     td {
+      @extend %typography-table-heading;
       background-color: $light-gray;
       border: 1px solid $light-blue;
       &:first-child {
@@ -242,7 +242,8 @@
   }
 }
 
-.rules-availability-by-term-form {
+.rules-availability-by-term-form, .rules-availability-by-term-body {
+  @extend %table-row-headers;
   table {
     th, td {
       box-sizing: border-box;
@@ -306,5 +307,77 @@
 .rules-availability-by-term-frc-long {
   table {
     margin-bottom: 0;
+  }
+}
+
+.advance-availability-status {
+  .rules-availability-by-term-headings {
+    table {
+      margin-bottom: 0;
+      td {
+        @extend %typography-table-heading;
+        border-bottom: none;
+        text-align: center;
+      }
+    }
+  }
+  table {
+    th, td {
+      box-sizing: border-box;
+      &:first-child {
+        width: 148px;
+      }
+      &:nth-child(2), &:nth-child(3), &:nth-child(4), &:nth-child(5) {
+        width: 178px;
+      }
+    }
+  }
+  section {
+    @extend %bordered-section;
+    h2 {
+      display: inline-block;
+    }
+    a {
+      @extend %typography-table-button;
+      float: right;
+      text-transform: uppercase;
+    }
+    &:first-of-type {
+      position: relative;
+      button {
+        @extend %vertical-center;
+        right: 20px;
+        width: 200px;
+      }
+    }
+    &:last-of-type {
+      margin-bottom: 0;
+      @extend %table-row-headers;
+      table {
+        td:last-child {
+          @extend %typography-field-placeholder;
+          width: auto;
+          text-align: left;
+          padding-left: 20px;
+        }
+      }
+    }
+  }
+  .add-advance-on, .add-advance-off {
+    position: relative;
+    padding-left: 50px;
+    &:before {
+      @extend %absolute-pseudoelement;
+      @extend %vertical-center;
+      left: 0;
+      width: 30px;
+      height: 30px;
+    }
+  }
+  .add-advance-on:before {
+    background-image: image-url('fhlb-status-on-small.svg');
+  }
+  .add-advance-off:before {
+    background-image: image-url('fhlb-status-off-small.svg');
   }
 }

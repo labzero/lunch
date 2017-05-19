@@ -82,6 +82,14 @@ Then(/^I should see the (?:term rules|advance availability) (limits|rate bands|b
   end
 end
 
+Then(/^I should see the advance availabiltiy status page in its (view-only|editable) mode$/) do |mode|
+  if mode == 'view-only'
+    page.assert_no_selector('.advance-availability-status section:first-of-type button')
+  else
+    page.assert_selector('.advance-availability-status section:first-of-type button')
+  end
+end
+
 When(/^I am on the term rules (limits) page$/) do |rules_page|
   step %{I am logged into the admin panel}
   case rules_page

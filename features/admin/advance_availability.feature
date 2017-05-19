@@ -76,3 +76,19 @@ Feature: Viewing/Modifying the Add Advance Availability settings
     Then I should see only unchecked checkboxes for the availability by term frc long section
     When I press the button to check all checkboxes for the availability by term frc long section
     Then I should see only checked checkboxes for the availability by term frc long section
+
+  @jira-mem-2205
+  Scenario: The Add Advance Availability status page is the default Add Advance page in the admin panel
+    When I click on the trade credit rules link in the header
+    And I click on the add advance availability link in the header
+    Then I should be on the add advance availability status page
+    And the add advance availability status tab should be active
+    Then I should see the advance availabiltiy status page in its editable mode
+
+  @jira-mem-2205
+  Scenario: Viewing the Advance Availability status page as a non-admin intranet user
+    Given I am logged into the admin panel but do not have web admin privileges
+    When I click on the trade credit rules link in the header
+    And I click on the add advance availability link in the header
+    Then I should be on the add advance availability status page
+    And I should see the advance availabiltiy status page in its view-only mode

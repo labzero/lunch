@@ -3,6 +3,7 @@ require_relative 'rates/loan_terms'
 require_relative 'rates/market_data_rates'
 require_relative 'etransact_advances/settings'
 require_relative 'etransact_advances/limits'
+require_relative 'etransact_advances/shutoff_times'
 
 module MAPI
   module Services
@@ -265,6 +266,15 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/shutoff_times_by_type'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Fetches the general shutoff times for VRC and FRC advances'
+              key :type, :ShutoffTimesByType
+              key :nickname, :FetchShutoffTimesByType
+            end
+          end
         end
 
         # etransact advances limits
@@ -359,7 +369,7 @@ module MAPI
 
           {
             eod_reached: false,
-            disabled: false,
+            enabled: !etransact_disabled,
             etransact_advances_status: etransact_status,
             wl_vrc_status: wl_vrc_status,
             all_loan_status: MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment)
@@ -429,6 +439,12 @@ module MAPI
             halt 503, 'Internal Service Error'
           end
           result.to_json
+        end
+
+        relative_get '/shutoff_times_by_type' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            MAPI::Services::EtransactAdvances::ShutoffTimes.get_shutoff_times_by_type(self)
+          end
         end
       end
 

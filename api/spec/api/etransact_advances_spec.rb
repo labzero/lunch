@@ -40,7 +40,7 @@ describe MAPI::ServiceApp do
       expect(etransact_advances_status['etransact_advances_status']).to be_boolean
       expect(etransact_advances_status['wl_vrc_status']).to be_boolean
       expect(etransact_advances_status['eod_reached']).to be_boolean
-      expect(etransact_advances_status['disabled']).to be_boolean
+      expect(etransact_advances_status['enabled']).to be_boolean
     end
     it 'should return all_loan_status hash' do
       expect(etransact_advances_status['all_loan_status'].length).to be >=1
@@ -255,6 +255,17 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(results)
       make_request
       expect(last_response.body).to eq(json_results)
+    end
+  end
+
+  describe 'get `etransact_advances/shutoff_times_by_type`' do
+    let(:call_endpoint) { get 'etransact_advances/shutoff_times_by_type' }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'etransact_advances/shutoff_times_by_type', :get, MAPI::Services::EtransactAdvances::ShutoffTimes, :get_shutoff_times_by_type
+
+    it 'calls `MAPI::Services::EtransactAdvances::ShutoffTimes.get_shutoff_times_by_type` with the app' do
+      expect(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:get_shutoff_times_by_type).with(an_instance_of(MAPI::ServiceApp))
+      call_endpoint
     end
   end
 end
