@@ -268,9 +268,7 @@ $(function () {
   //event listener and handler for .btn-success button click
   function bindApplyHandler() {
     $formPreview.find('.datepicker-trigger').on('apply.daterangepicker', function() {
-      var $viewCustomRates = $('.view-custom-rates');
-      $viewCustomRates.addClass('active');
-      $viewCustomRates.attr('disabled', false);
+      toggleViewCustomRates();
     });
 
     // Edit Custom Date Selector
@@ -330,6 +328,31 @@ $(function () {
     e.stopPropagation();
     e.preventDefault();
   });
+
+  // event listener and handler for maturity date input keystrokes
+  $('.datepicker-trigger').on('keyup', function (e) {
+    var $datePickerTrigger = $($formPreview.find('.datepicker-trigger'));
+    var maturityDateInput = $datePickerTrigger.find('input').val();
+    if (moment(maturityDateInput, "M/D/YYYY", true).isValid() ||
+        moment(maturityDateInput, "M/D/YY", true).isValid() ) {
+       toggleViewCustomRates();
+    }
+  });
+
+  function toggleViewCustomRates() {
+    var $viewCustomRates = $('.view-custom-rates');
+    var fundingDate = new Date(getFundingDate());
+    var maturityDate = new Date(getMaturityDate());
+    var diffDays = (maturityDate - fundingDate)/(1000 * 3600 * 24);
+    if (diffDays >=1) {
+        $viewCustomRates.addClass('active');
+        $viewCustomRates.attr('disabled', false);
+    }
+    else {
+        $viewCustomRates.removeClass('active');
+        $viewCustomRates.attr('disabled', true);
+    }
+  }
 
   // Google Analytics -
   $('.add-advance-preview').length ? Fhlb.Track.advance_preview() : null;
