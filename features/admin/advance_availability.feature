@@ -92,3 +92,11 @@ Feature: Viewing/Modifying the Add Advance Availability settings
     And I click on the add advance availability link in the header
     Then I should be on the add advance availability status page
     And I should see the advance availabiltiy status page in its view-only mode
+
+  @jira-mem-2206 @local-only
+  Scenario: The Add Advance Availability status page is the default Add Advance page in the admin panel
+    Given I click on the trade credit rules link in the header
+    And I click on the add advance availability link in the header
+    And I should see the advance availabiltiy status page in its editable mode
+    When I click on the button to change the add advance availability status
+    Then I should see the success message on the add advance availability status page

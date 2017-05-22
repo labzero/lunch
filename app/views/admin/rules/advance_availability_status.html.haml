@@ -1,10 +1,12 @@
 - current_status_string = @etransact_enabled ? t('global.on_status') : t('global.off_status')
 - switch_status_string = @etransact_enabled ? t('global.off_status') : t('global.on_status')
+- switch_status_path = @etransact_enabled ?  rules_disable_etransact_service_path : rules_enable_etransact_service_path
 =render layout: 'advance_availability', locals: {active_nav: :advance_availability_status, classes: 'advance-availability-status'} do
   %section
     %p{class: "add-advance-#{current_status_string.downcase}"}= t('admin.advance_availability.availability_status.status', status: current_status_string)
     - if @can_edit_trade_rules
-      %button.primary-button= t('admin.advance_availability.availability_status.button', status: switch_status_string)
+      =link_to(t('admin.advance_availability.availability_status.button', status: switch_status_string), switch_status_path, class: 'primary-button', method: :put)
+      -#%button.primary-button= t('admin.advance_availability.availability_status.button', status: switch_status_string)
   - if @disabled_terms
     %section
       %h2= t('admin.advance_availability.availability_status.disabled_terms')

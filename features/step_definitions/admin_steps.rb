@@ -84,9 +84,9 @@ end
 
 Then(/^I should see the advance availabiltiy status page in its (view-only|editable) mode$/) do |mode|
   if mode == 'view-only'
-    page.assert_no_selector('.advance-availability-status section:first-of-type button')
+    page.assert_no_selector('.advance-availability-status section:first-of-type a')
   else
-    page.assert_selector('.advance-availability-status section:first-of-type button')
+    page.assert_selector('.advance-availability-status section:first-of-type a')
   end
 end
 
@@ -105,8 +105,14 @@ When(/^I click the save changes button for the rules limits form$/) do
   page.find('.rules-limits-form input[type=submit]').click
 end
 
-Then(/^I should see the success message on the term rules limits page$/) do
-  page.assert_selector('.term-rules .form-success-section p', text: I18n.t('admin.term_rules.messages.success'), exact: true)
+Then(/^I should see the success message on the (term rules limits|add advance availability status) page$/) do |admin_page|
+  parent_selector = case admin_page
+  when 'term rules limits'
+    '.term-rules'
+  when 'add advance availability status'
+    '.advance-availability-status'
+  end
+  page.assert_selector("#{parent_selector} .form-success-section p", text: I18n.t('admin.term_rules.messages.success'), exact: true)
 end
 
 When(/^I press the button to (check|uncheck) all checkboxes for the availability by term (form|vrc section|frc short section|frc long section)$/) do |status, section|
@@ -135,6 +141,10 @@ end
 
 When(/^I click on the first checkbox in the vrc section of the advance availability by term form$/) do
   page.all('.rules-availability-by-term-vrc input[type=checkbox]').first.click
+end
+
+When(/^I click on the button to change the add advance availability status$/) do
+  page.find('.advance-availability-status section:first-of-type a').click
 end
 
 def translate_tab_title(nav)

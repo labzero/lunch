@@ -425,6 +425,52 @@ describe EtransactAdvancesService do
     end
   end
 
+  describe '`enable_etransact_service` method' do
+    let(:results) { double('some results') }
+    let(:call_method) { subject.enable_etransact_service }
+
+    it_behaves_like 'a MAPI backed service object method', :enable_etransact_service, nil, :put, nil, true
+    it 'calls `put_hash` with the proper endpoint name' do
+      expect(subject).to receive(:put_hash).with(:enable_etransact_service, any_args)
+      call_method
+    end
+    it 'calls `put_hash` with `etransact_advances/settings/enable_service` as the endpoint' do
+      expect(subject).to receive(:put_hash).with(anything, 'etransact_advances/settings/enable_service', anything)
+      call_method
+    end
+    it 'calls `put_hash` with an empty hash' do
+      expect(subject).to receive(:put_hash).with(anything, anything, {})
+      call_method
+    end
+    it 'returns the result of calling `put_hash`' do
+      allow(subject).to receive(:put_hash).and_return(results)
+      expect(call_method).to eq(results)
+    end
+  end
+
+  describe '`disable_etransact_service` method' do
+    let(:results) { double('some results') }
+    let(:call_method) { subject.disable_etransact_service }
+
+    it_behaves_like 'a MAPI backed service object method', :disable_etransact_service, nil, :put, nil, true
+    it 'calls `put_hash` with the proper endpoint name' do
+      expect(subject).to receive(:put_hash).with(:disable_etransact_service, any_args)
+      call_method
+    end
+    it 'calls `put_hash` with `etransact_advances/settings/disable_service` as the endpoint' do
+      expect(subject).to receive(:put_hash).with(anything, 'etransact_advances/settings/disable_service', anything)
+      call_method
+    end
+    it 'calls `put_hash` with an empty hash' do
+      expect(subject).to receive(:put_hash).with(anything, anything, {})
+      call_method
+    end
+    it 'returns the result of calling `put_hash`' do
+      allow(subject).to receive(:put_hash).and_return(results)
+      expect(call_method).to eq(results)
+    end
+  end
+
   describe '`has_terms?` method', :vcr do
     let(:call_method) {subject.has_terms?(status_object)}
     let(:status_object) { {all_loan_status: {foo: {bar: {trade_status: true, display_status: true}}}} }

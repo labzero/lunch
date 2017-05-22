@@ -270,9 +270,10 @@ RSpec.describe Admin::RulesController, :type => :controller do
         expect(etransact_service).to receive(:update_settings).with(global_limits_param).and_return({})
         call_action
       end
-      it 'raises an error if the `update_settings` method returns nil' do
+      it 'sets an error message if the `update_settings` method returns nil' do
         allow(etransact_service).to receive(:update_settings).with(global_limits_param).and_return(nil)
-        expect{call_action}.to raise_error("There has been an error and Admin::RulesController#update_limits has encountered nil")
+        expect(controller).to receive(:set_flash_message).with(include({error: 'There has been an error and Admin::RulesController#update_limits has encountered nil'}))
+        call_action
       end
     end
     describe 'updating etransact limits' do
@@ -280,9 +281,10 @@ RSpec.describe Admin::RulesController, :type => :controller do
         expect(etransact_service).to receive(:update_term_limits).with(term_limits_param).and_return({})
         call_action
       end
-      it 'raises an error if the `update_term_limits` method returns nil' do
+      it 'sets an error message if the `update_term_limits` method returns nil' do
         allow(etransact_service).to receive(:update_term_limits).with(term_limits_param).and_return(nil)
-        expect{call_action}.to raise_error("There has been an error and Admin::RulesController#update_limits has encountered nil")
+        expect(controller).to receive(:set_flash_message).with(include({error: 'There has been an error and Admin::RulesController#update_limits has encountered nil'}))
+        call_action
       end
     end
     it 'calls the `set_flash_message` method with the results from `update_term_limits` and `update_settings`' do
@@ -458,6 +460,80 @@ RSpec.describe Admin::RulesController, :type => :controller do
     end
   end
 
+  describe 'PUT enable_etransact_service' do
+    allow_policy :web_admin, :edit_trade_rules?
+
+    let(:etransact_service) { instance_double(EtransactAdvancesService, enable_etransact_service: {}) }
+    let(:call_action) {put :enable_etransact_service }
+
+    before do
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+    end
+
+    it_behaves_like 'a RulesController action with before_action methods'
+    it_behaves_like 'it checks the edit_trade_rules? web_admin policy'
+    it 'creates a new instance of EtransactAdvancesService with the request' do
+      expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
+      call_action
+    end
+    it 'calls `enable_etransact_service` on the EtransactAdvancesService instance' do
+      expect(etransact_service).to receive(:enable_etransact_service).and_return({})
+      call_action
+    end
+    it 'sets an error message an error if the `enable_etransact_service` method returns nil' do
+      allow(etransact_service).to receive(:enable_etransact_service).and_return(nil)
+      expect(controller).to receive(:set_flash_message).with(include({error: 'There has been an error and Admin::RulesController#enable_etransact_service has encountered nil'}))
+      call_action
+    end
+    it 'calls the `set_flash_message` method with the results from `enable_etransact_service`' do
+      results = instance_double(Hash)
+      allow(etransact_service).to receive(:enable_etransact_service).and_return(results)
+      expect(controller).to receive(:set_flash_message).with(results)
+      call_action
+    end
+    it 'redirects to the `rules_advance_availability_url`' do
+      call_action
+      expect(response).to redirect_to(rules_advance_availability_url)
+    end
+  end
+
+  describe 'PUT disable_etransact_service' do
+    allow_policy :web_admin, :edit_trade_rules?
+
+    let(:etransact_service) { instance_double(EtransactAdvancesService, disable_etransact_service: {}) }
+    let(:call_action) {put :disable_etransact_service }
+
+    before do
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+    end
+
+    it_behaves_like 'a RulesController action with before_action methods'
+    it_behaves_like 'it checks the edit_trade_rules? web_admin policy'
+    it 'creates a new instance of EtransactAdvancesService with the request' do
+      expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
+      call_action
+    end
+    it 'calls `disable_etransact_service` on the EtransactAdvancesService instance' do
+      expect(etransact_service).to receive(:disable_etransact_service).and_return({})
+      call_action
+    end
+    it 'sets an error message an error if the `disable_etransact_service` method returns nil' do
+      allow(etransact_service).to receive(:disable_etransact_service).and_return(nil)
+      expect(controller).to receive(:set_flash_message).with(include({error: 'There has been an error and Admin::RulesController#disable_etransact_service has encountered nil'}))
+      call_action
+    end
+    it 'calls the `set_flash_message` method with the results from `disable_etransact_service`' do
+      results = instance_double(Hash)
+      allow(etransact_service).to receive(:disable_etransact_service).and_return(results)
+      expect(controller).to receive(:set_flash_message).with(results)
+      call_action
+    end
+    it 'redirects to the `rules_advance_availability_url`' do
+      call_action
+      expect(response).to redirect_to(rules_advance_availability_url)
+    end
+  end
+
   describe 'GET advance_availability_by_term' do
     let(:sentinel) { SecureRandom.hex }
     let(:term_limit_data) { {term: described_class::VALID_TERMS.sample} }
@@ -590,9 +666,10 @@ RSpec.describe Admin::RulesController, :type => :controller do
         expect(etransact_service).to receive(:update_term_limits).with(term_limits_param).and_return({})
         call_action
       end
-      it 'raises an error if the `update_term_limits` method returns nil' do
+      it 'sets an error message if the `update_term_limits` method returns nil' do
         allow(etransact_service).to receive(:update_term_limits).with(term_limits_param).and_return(nil)
-        expect{call_action}.to raise_error("There has been an error and Admin::RulesController#update_advance_availability_by_term has encountered nil")
+        expect(controller).to receive(:set_flash_message).with(include({error: 'There has been an error and Admin::RulesController#update_advance_availability_by_term has encountered nil'}))
+        call_action
       end
     end
     it 'calls the `set_flash_message` method with the results from `update_term_limits`' do
@@ -836,9 +913,10 @@ RSpec.describe Admin::RulesController, :type => :controller do
         expect(rates_service).to receive(:update_rate_bands).with(rate_bands_param).and_return({})
         call_action
       end
-      it 'raises an error if the `update_term_limits` method returns nil' do
+      it 'sets an error message if the `update_rate_bands` method returns nil' do
         allow(rates_service).to receive(:update_rate_bands).with(rate_bands_param).and_return(nil)
-        expect{call_action}.to raise_error("There has been an error and Admin::RulesController#update_rate_bands has encountered nil")
+        expect(controller).to receive(:set_flash_message).with(include({error: 'There has been an error and Admin::RulesController#update_rate_bands has encountered nil'}))
+        call_action
       end
     end
     it 'calls the `set_flash_message` method with the results from `update_rate_bands`' do
@@ -1209,11 +1287,16 @@ RSpec.describe Admin::RulesController, :type => :controller do
   describe 'private methods' do
     describe '`set_flash_message`' do
       let(:result) { {} }
-      let(:result_with_errors) {{error: double('some error')}}
+      let(:error_message) { double('some error message') }
+      let(:result_with_errors) {{error: error_message}}
       context 'when a single result set is passed' do
         it 'sets the `flash[:error]` message if the result set contains an error message' do
           subject.send(:set_flash_message, result_with_errors)
           expect(flash[:error]).to eq(I18n.t('admin.term_rules.messages.error'))
+        end
+        it 'logs the error' do
+          expect(Rails.logger).to receive(:error).with(error_message)
+          subject.send(:set_flash_message, result_with_errors)
         end
         it 'sets the `flash[:notice] message` if the result set does not contain an error message' do
           subject.send(:set_flash_message, result)
@@ -1224,6 +1307,10 @@ RSpec.describe Admin::RulesController, :type => :controller do
         it 'sets the `flash[:error]` message if any of the passed result sets contains an error message' do
           subject.send(:set_flash_message, [result, result_with_errors, result])
           expect(flash[:error]).to eq(I18n.t('admin.term_rules.messages.error'))
+        end
+        it 'logs all of the errors' do
+          expect(Rails.logger).to receive(:error).exactly(2).times.with(error_message)
+          subject.send(:set_flash_message, [result, result_with_errors, result_with_errors])
         end
         it 'sets the `flash[:notice] message` if none of the result sets contain an error message' do
           subject.send(:set_flash_message, [result, result, result])

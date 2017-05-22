@@ -92,6 +92,24 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/enable_service'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Enables the eTransact service'
+              key :note, "Enables service by setting the 'StartUp' value in the settings table to today's date"
+              key :nickname, :enableEtransactService
+            end
+          end
+          api do
+            key :path, '/disable_service'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Disables the eTransact service'
+              key :note, "Disables service by setting the 'StartUp' value in the settings table to null"
+              key :nickname, :disableEtransactService
+            end
+          end
           # etransact advances limits endpoint
           api do
             key :path, '/limits'
@@ -305,6 +323,18 @@ module MAPI
           MAPI::Services::EtransactAdvances.rescued_json_response(self) do
             settings_hash = JSON.parse(request.body.read)
             {} if MAPI::Services::EtransactAdvances::Settings.update_settings(self, settings_hash)
+          end
+        end
+
+        relative_put '/settings/enable_service' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            {} if MAPI::Services::EtransactAdvances::Settings.enable_service(self)
+          end
+        end
+
+        relative_put '/settings/disable_service' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            {} if MAPI::Services::EtransactAdvances::Settings.disable_service(self)
           end
         end
 

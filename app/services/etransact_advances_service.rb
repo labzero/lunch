@@ -163,6 +163,14 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
+  def enable_etransact_service
+    put_hash(:enable_etransact_service, 'etransact_advances/settings/enable_service', {})
+  end
+
+  def disable_etransact_service
+    put_hash(:disable_etransact_service, 'etransact_advances/settings/disable_service', {})
+  end
+
   protected
 
   def days_until(date)

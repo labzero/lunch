@@ -13,7 +13,7 @@ class Admin::RulesController < Admin::BaseController
     @can_edit_trade_rules = policy(:web_admin).edit_trade_rules?
   end
 
-  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term] do
+  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :enable_etransact_service, :disable_etransact_service] do
     authorize :web_admin, :edit_trade_rules?
   end
 
@@ -92,9 +92,8 @@ class Admin::RulesController < Admin::BaseController
     etransact_service = EtransactAdvancesService.new(request)
     global_limits = params[:global_limits].with_indifferent_access
     term_limits = params[:term_limits].with_indifferent_access
-    settings_results = etransact_service.update_settings(global_limits)
-    term_limits_results = etransact_service.update_term_limits(term_limits)
-    raise "There has been an error and Admin::RulesController#update_limits has encountered nil" unless settings_results && term_limits_results
+    settings_results = etransact_service.update_settings(global_limits) || {error: 'There has been an error and Admin::RulesController#update_limits has encountered nil'}
+    term_limits_results = etransact_service.update_term_limits(term_limits) || {error: 'There has been an error and Admin::RulesController#update_limits has encountered nil'}
     set_flash_message([settings_results, term_limits_results])
     redirect_to action: :limits
   end
@@ -136,6 +135,20 @@ class Admin::RulesController < Admin::BaseController
     }
   end
 
+  # PUT
+  def enable_etransact_service
+    enable_etransact_results = EtransactAdvancesService.new(request).enable_etransact_service || {error: 'There has been an error and Admin::RulesController#enable_etransact_service has encountered nil'}
+    set_flash_message(enable_etransact_results)
+    redirect_to action: :advance_availability_status
+  end
+
+  # PUT
+  def disable_etransact_service
+    disable_etransact_results = EtransactAdvancesService.new(request).disable_etransact_service || {error: 'There has been an error and Admin::RulesController#disable_etransact_service has encountered nil'}
+    set_flash_message(disable_etransact_results)
+    redirect_to action: :advance_availability_status
+  end
+
   # GET
   def advance_availability_by_term
     etransact_service = EtransactAdvancesService.new(request)
@@ -166,8 +179,7 @@ class Admin::RulesController < Admin::BaseController
         term_limits[term][type] = status == 'on'
       end
     end
-    term_limits_results = etransact_service.update_term_limits(term_limits)
-    raise "There has been an error and Admin::RulesController#update_advance_availability_by_term has encountered nil" unless term_limits_results
+    term_limits_results = etransact_service.update_term_limits(term_limits) || {error: 'There has been an error and Admin::RulesController#update_advance_availability_by_term has encountered nil'}
     set_flash_message(term_limits_results)
     redirect_to action: :advance_availability_by_term
   end
@@ -254,8 +266,7 @@ class Admin::RulesController < Admin::BaseController
   # PUT
   def update_rate_bands
     rate_bands = params[:rate_bands].with_indifferent_access
-    rate_bands_result = RatesService.new(request).update_rate_bands(rate_bands)
-    raise "There has been an error and Admin::RulesController#update_rate_bands has encountered nil" unless rate_bands_result
+    rate_bands_result = RatesService.new(request).update_rate_bands(rate_bands) || {error: 'There has been an error and Admin::RulesController#update_rate_bands has encountered nil'}
     set_flash_message(rate_bands_result)
     redirect_to action: :rate_bands
   end
@@ -329,6 +340,7 @@ class Admin::RulesController < Admin::BaseController
   def set_flash_message(results)
     errors = Array.wrap(results).collect{ |result| result[:error] }.compact
     if errors.present?
+      errors.each { |error| logger.error(error) }
       flash[:error] = t('admin.term_rules.messages.error')
     else
       flash[:notice] = t('admin.term_rules.messages.success')

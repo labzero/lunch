@@ -344,7 +344,8 @@
     }
     &:first-of-type {
       position: relative;
-      button {
+      a {
+        display: inline-block;
         @extend %vertical-center;
         right: 20px;
         width: 200px;

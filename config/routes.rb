@@ -253,6 +253,8 @@ Rails.application.routes.draw do
           get '/term' => 'admin/rules#advance_availability_by_term', as: :rules_advance_availability_by_term
           put '/term' => 'admin/rules#update_advance_availability_by_term', as: :rules_update_advance_availability_by_term
           get '/member' => 'admin/rules#advance_availability_by_member', as: :rules_advance_availability_by_member
+          put '/enable_service' => 'admin/rules#enable_etransact_service', as: :rules_enable_etransact_service
+          put '/disable_service' => 'admin/rules#disable_etransact_service', as: :rules_disable_etransact_service
         end
       end
       constraints Constraints::WebAdmin.new(:edit_features?) do

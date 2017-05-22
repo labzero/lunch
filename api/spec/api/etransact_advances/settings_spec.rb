@@ -183,5 +183,127 @@ describe MAPI::ServiceApp do
         end
       end
     end
+
+    describe '`enable_service`' do
+      let(:call_method) { etransact_settings_module.enable_service(app) }
+      before do
+        allow(etransact_settings_module).to receive(:should_fake?).and_return(true)
+        allow(etransact_settings_module).to receive(:execute_sql).and_return(true)
+        allow(etransact_settings_module).to receive(:quote)
+      end
+
+      context 'when `should_fake?` returns true' do
+        before { allow(etransact_settings_module).to receive(:should_fake?).and_return(true) }
+        it 'returns true' do
+          expect(call_method).to be true
+        end
+      end
+      context 'when `should_fake?` returns true' do
+        before { allow(etransact_settings_module).to receive(:should_fake?).and_return(false) }
+
+        it 'executes code within a transaction where the `isolation` has been set to `:read_committed`' do
+          expect(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+          call_method
+        end
+        it 'returns true if the transaction block executes without error' do
+          allow(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+          expect(call_method).to be true
+        end
+        describe 'the transaction block' do
+          it 'raises an `MAPI::Shared::Errors::SQLError` if `execute_sql` does not succeed' do
+            allow(etransact_settings_module).to receive(:execute_sql).and_return(false)
+            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, 'Failed to enable etransact service')
+          end
+          it 'calls `execute_sql` with the logger' do
+            expect(etransact_settings_module).to receive(:execute_sql).with(app.logger, anything).and_return(true)
+            call_method
+          end
+          describe 'the update_settings_sql' do
+            it 'updates the `WEB_ADM.AO_SETTINGS` table' do
+              matcher = Regexp.new(/\A\s*UPDATE.+WEB_ADM.AO_SETTINGS\s+/im)
+              expect(etransact_settings_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+            it 'SETs the SETTING_VALUE to the string representation of the system date' do
+              matcher = Regexp.new(/\A\s*UPDATE.+WEB_ADM.AO_SETTINGS\s+.*SET\s+SETTING_VALUE\s+=\s+TO_CHAR\s*\(\s*sysdate\s*,\s*'MM\/dd\/yyyy'\s*\)\s+/im)
+              expect(etransact_settings_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+            it 'quotes the SERVICE_STATUS_SETTING' do
+              expect(etransact_settings_module).to receive(:quote).with(etransact_settings_module::SERVICE_STATUS_SETTING)
+              call_method
+            end
+            it 'updates the row WHERE the SETTING_NAME is the quoted SERVICE_STATUS_SETTING' do
+              sentinel = SecureRandom.hex
+              allow(etransact_settings_module).to receive(:quote).with(etransact_settings_module::SERVICE_STATUS_SETTING).and_return(sentinel)
+              matcher = Regexp.new(/\A\s*UPDATE.+WEB_ADM.AO_SETTINGS\s+.*SET\s+.+WHERE\s+SETTING_NAME\s+=\s+#{sentinel}\s*\z/im)
+              expect(etransact_settings_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+          end
+        end
+      end
+    end
+
+    describe '`disable_service`' do
+      let(:call_method) { etransact_settings_module.disable_service(app) }
+      before do
+        allow(etransact_settings_module).to receive(:should_fake?).and_return(true)
+        allow(etransact_settings_module).to receive(:execute_sql).and_return(true)
+        allow(etransact_settings_module).to receive(:quote)
+      end
+
+      context 'when `should_fake?` returns true' do
+        before { allow(etransact_settings_module).to receive(:should_fake?).and_return(true) }
+        it 'returns true' do
+          expect(call_method).to be true
+        end
+      end
+      context 'when `should_fake?` returns true' do
+        before { allow(etransact_settings_module).to receive(:should_fake?).and_return(false) }
+
+        it 'executes code within a transaction where the `isolation` has been set to `:read_committed`' do
+          expect(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+          call_method
+        end
+        it 'returns true if the transaction block executes without error' do
+          allow(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+          expect(call_method).to be true
+        end
+        describe 'the transaction block' do
+          it 'raises an `MAPI::Shared::Errors::SQLError` if `execute_sql` does not succeed' do
+            allow(etransact_settings_module).to receive(:execute_sql).and_return(false)
+            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, 'Failed to disable etransact service')
+          end
+          it 'calls `execute_sql` with the logger' do
+            expect(etransact_settings_module).to receive(:execute_sql).with(app.logger, anything).and_return(true)
+            call_method
+          end
+          describe 'the update_settings_sql' do
+            it 'updates the `WEB_ADM.AO_SETTINGS` table' do
+              matcher = Regexp.new(/\A\s*UPDATE.+WEB_ADM.AO_SETTINGS\s+/im)
+              expect(etransact_settings_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+            it 'SETs the SETTING_VALUE to NULL' do
+              matcher = Regexp.new(/\A\s*UPDATE.+WEB_ADM.AO_SETTINGS\s+.*SET\s+SETTING_VALUE\s+=\s+NULL\s+/im)
+              expect(etransact_settings_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+            it 'quotes the SERVICE_STATUS_SETTING' do
+              expect(etransact_settings_module).to receive(:quote).with(etransact_settings_module::SERVICE_STATUS_SETTING)
+              call_method
+            end
+            it 'updates the row WHERE the SETTING_NAME is the quoted SERVICE_STATUS_SETTING' do
+              sentinel = SecureRandom.hex
+              allow(etransact_settings_module).to receive(:quote).with(etransact_settings_module::SERVICE_STATUS_SETTING).and_return(sentinel)
+              matcher = Regexp.new(/\A\s*UPDATE.+WEB_ADM.AO_SETTINGS\s+.*SET\s+.+WHERE\s+SETTING_NAME\s+=\s+#{sentinel}\s*\z/im)
+              expect(etransact_settings_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+          end
+        end
+      end
+    end
   end
 end
