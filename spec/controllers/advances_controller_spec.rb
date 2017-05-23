@@ -421,6 +421,33 @@ RSpec.describe AdvancesController, :type => :controller do
         make_request
         expect(assigns[:future_funding_date]).to eq(nil)
       end
+      it 'assigns @funding_date_today to true, if future_funding_date is today, sets other variables to false' do
+        allow(calendar_service_instance).to receive(:find_next_business_day).with(today+1, 1.day).and_return(next_day)
+        allow(calendar_service_instance).to receive(:find_next_business_day).with(next_day+1, 1.day).and_return(skip_day)
+        allow(advance_request).to receive(:funding_date).and_return(today)
+        make_request
+        expect(assigns[:funding_date_today]).to eq(true)
+        expect(assigns[:funding_date_next]).to eq(false)
+        expect(assigns[:funding_date_skip]).to eq(false)
+      end
+      it 'assigns @funding_date_next to true, if future_funding_date is next business day, sets other variables to false' do
+        allow(calendar_service_instance).to receive(:find_next_business_day).with(today+1, 1.day).and_return(next_day)
+        allow(calendar_service_instance).to receive(:find_next_business_day).with(next_day+1, 1.day).and_return(skip_day)
+        allow(advance_request).to receive(:funding_date).and_return(next_day)
+        make_request
+        expect(assigns[:funding_date_today]).to eq(false)
+        expect(assigns[:funding_date_next]).to eq(true)
+        expect(assigns[:funding_date_skip]).to eq(false)
+      end
+      it 'assigns @funding_date_skip to true, if future_funding_date is skip business day, sets other variables to false' do
+        allow(calendar_service_instance).to receive(:find_next_business_day).with(today+1, 1.day).and_return(next_day)
+        allow(calendar_service_instance).to receive(:find_next_business_day).with(next_day+1, 1.day).and_return(skip_day)
+        allow(advance_request).to receive(:funding_date).and_return(skip_day)
+        make_request
+        expect(assigns[:funding_date_today]).to eq(false)
+        expect(assigns[:funding_date_next]).to eq(false)
+        expect(assigns[:funding_date_skip]).to eq(true)
+      end
     end
   end
 
@@ -552,13 +579,19 @@ RSpec.describe AdvancesController, :type => :controller do
     let(:rate_service_instance) {double("rate service instance", quick_advance_rates: nil)}
     let(:advance_type) { double('advance type') }
     let(:advance_term) { double('advance term') }
-    let(:advance_request) { double(AdvanceRequest, rates: rate_data, type: advance_type, term: advance_term, errors: [], id: SecureRandom.uuid, :allow_grace_period= => nil, :funding_date => nil, :custom_maturity_date= => nil) }
     let(:make_request) { get :fetch_custom_rates }
     let(:today) { Time.zone.today }
     let(:maturity_date) { today + rand(3..1095).days }
+    let(:advance_request) { double(AdvanceRequest, rates: rate_data, type: advance_type, term: advance_term, errors: [], id: SecureRandom.uuid, :allow_grace_period= => nil, :funding_date => today, :custom_maturity_date => maturity_date, save: false) }
     let(:make_request_with_maturity_date) { get :fetch_custom_rates, maturity_date: maturity_date}
 
     before do
+      member_id = double('A Member ID')
+      signer = double('A Signer')
+      allow(subject).to receive(:current_member_id).and_return(member_id)
+      allow(subject).to receive(:signer_full_name).and_return(signer)
+      allow(AdvanceRequest).to receive(:new).with(member_id, signer, subject.request).and_return(advance_request)
+      allow(AdvanceRequest).to receive(:new).and_return(advance_request)
       allow(controller).to receive(:fetch_advance_request)
       allow(subject).to receive(:advance_request).and_return(advance_request)
       allow(subject).to receive(:date_restrictions).and_return({})
@@ -624,7 +657,7 @@ RSpec.describe AdvancesController, :type => :controller do
         make_request_with_maturity_date
       end
       it 'populate the fetch custom rates parameters' do
-        expect(subject).to receive(:populate_fetch_custom_rates_parameters).with({maturity_date: maturity_date, funding_date: anything})
+        expect(subject).to receive(:populate_fetch_custom_rates_parameters).with({maturity_date: maturity_date, funding_date: nil})
         make_request_with_maturity_date
       end
     end

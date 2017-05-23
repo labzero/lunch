@@ -99,7 +99,7 @@ $(function () {
       $('.advance-alternate-funding-date-close').attr('disabled', false);
       bindApplyHandler();
       bindRateTableCells($rateTable);
-      $idField.val(data.id);
+      maturity_date ? null : $idField.val(data.id);
       Fhlb.Track.advance_rate_table();
       selectColumnLabelIfRatePreSelected($rateTable);
       enableCustomFunding($rateTable);
@@ -311,7 +311,7 @@ $(function () {
     $('.advance-select-custom-date-wrapper').hide();
     $('.advance-alternate-funding-date-close').attr('disabled', true);
     showRatesLoadingState($rateTable);
-    showAdvanceRates(funding_date, null);
+    showAdvanceRates(funding_date, getMaturityDate());
   });
 
   // event listener and handler for custom date button click

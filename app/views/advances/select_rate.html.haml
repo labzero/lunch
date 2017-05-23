@@ -28,16 +28,16 @@
                 %p= t('advances.funding.alert_message')
                 %ul
                   %li
-                    = render 'shared/radio_button', id: 'funding_date_today', name: 'alternate-funding-date', checked: true, text:fhlb_date_standard_numeric(@today), value: @today.iso8601
+                    = render 'shared/radio_button', id: 'funding_date_today', name: 'alternate-funding-date', checked: @funding_date_today, text:fhlb_date_standard_numeric(@today), value: @today.iso8601
                     %label{for: :funding_date_today}
                       %span= t('global.today')
                       = t('advances.funding.default')
                   %li
-                    = render 'shared/radio_button', id: 'funding_date_next', name: 'alternate-funding-date', checked: false, text:fhlb_date_standard_numeric(@next_day), value: @next_day.iso8601
+                    = render 'shared/radio_button', id: 'funding_date_next', name: 'alternate-funding-date', checked: @funding_date_next, text:fhlb_date_standard_numeric(@next_day), value: @next_day.iso8601
                     %label{for: :funding_date_next}
                       %span= t('advances.funding.next_business')
                   %li
-                    = render 'shared/radio_button', id: 'funding_date_skip', name: 'alternate-funding-date', checked: false, text:fhlb_date_standard_numeric(@skip_day), value: @skip_day.iso8601
+                    = render 'shared/radio_button', id: 'funding_date_skip', name: 'alternate-funding-date', checked: @funding_date_skip, text:fhlb_date_standard_numeric(@skip_day), value: @skip_day.iso8601
                     %label{for: :funding_date_skip}
                       %span= t('advances.funding.skip_day')
             %table.advance-rates-table.add-advance-table-loading{data: {fetch_rates_url: advances_fetch_rates_path({advance_request: {id: @advance_request_id}})}}
@@ -59,7 +59,7 @@
               %tbody
                 = render 'rates_table', advance_terms: @advance_terms, advance_types: @advance_types, loading: true, selected_type: @selected_type, selected_term: @selected_term
             - if feature_enabled?('add-advance-custom-term')
-              .advance-custom-date-wrapper
+              .advance-custom-date-wrapper{style: (@active_term_type==:frc && !@maturity_date) ? 'display: block;' : nil}
                 %button.advance-custom-date-add.text-only-button{disabled: true}= t('advances.custom_term.add')
               .advance-create-custom-date-wrapper
                 %span= t('advances.custom_term.create')

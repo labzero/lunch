@@ -132,6 +132,17 @@ class AdvancesController < ApplicationController
       @date_restrictions = date_restrictions(request, AdvanceRequest::MAX_CUSTOM_TERM_DATE_RESTRICTION, advance_request.funding_date, true)
       @custom_term = ['custom']
       future_funding_date = advance_request.funding_date.try(:to_date)
+      @funding_date_today = false
+      @funding_date_next = false
+      @funding_date_skip = false
+      case future_funding_date
+        when @next_day
+          @funding_date_next = true
+        when @skip_day
+          @funding_date_skip = true
+        else
+          @funding_date_today = true
+      end
       @future_funding_date = future_funding_date if future_funding_date && future_funding_date > Time.zone.today
       @maturity_date = advance_request.custom_maturity_date if advance_request.custom_maturity_date
     end
@@ -171,8 +182,12 @@ class AdvancesController < ApplicationController
   # GET
   def fetch_custom_rates
     funding_date = params[:funding_date].try(:to_date)
+    maturity_date = params[:maturity_date].try(:to_date)
+    if ((maturity_date != advance_request.custom_maturity_date.try(:to_date)) || (funding_date != advance_request.funding_date.try(:to_date)))
+      @advance_request = AdvanceRequest.new(current_member_id, signer_full_name, request)
+    end
     advance_request.funding_date = funding_date if funding_date
-    populate_fetch_custom_rates_parameters(maturity_date: params[:maturity_date].try(:to_date), funding_date: funding_date)
+    populate_fetch_custom_rates_parameters(maturity_date: maturity_date, funding_date: funding_date)
     populate_fetch_rates_parameters
 
     render json: {html: render_to_string(layout: false), id: advance_request.id}
