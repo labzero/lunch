@@ -382,3 +382,33 @@ $horizontal-field-input-width: 180px;
     content: $icon-success;
   }
 }
+
+%form-stylized-disabled-checkboxes {
+  input[type=checkbox] {
+    & + label {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+    &:not([disabled]) {
+      & + label {
+        display: none;
+      }
+    }
+    &:disabled {
+      display: none;
+      &:not([checked]) {
+        & + label {
+          background-image: image-url('fhlb-status-off-small.svg');
+        }
+      }
+      &:checked {
+        & + label {
+          background-image: image-url('fhlb-status-on-small.svg');
+        }
+      }
+    }
+  }
+}

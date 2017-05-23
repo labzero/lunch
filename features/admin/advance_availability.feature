@@ -20,19 +20,48 @@ Feature: Viewing/Modifying the Add Advance Availability settings
     | by member |
 
   @jira-mem-2220
-  Scenario: Viewing Add Advance Availability by member
+  Scenario: Viewing Add Advance Availability by member as a non-admin intranet user
+    Given I am logged into the admin panel but do not have web admin privileges
     When I click on the trade credit rules link in the header
     And I click on the add advance availability link in the header
     And I click on the add advance availability by member tab
     Then I should see a report table with multiple data rows
+    And I should see the advance availability by member page in its view-only mode
+
+  @jira-mem-2197 @jira-mem-2333
+  Scenario: Viewing and manipulating the Add Advance Availability by member page as an admin
+    When I click on the trade credit rules link in the header
+    And I click on the add advance availability link in the header
+    And I click on the add advance availability by member tab
+    Then I should see a report table with multiple data rows
+    And I should see the advance availability by member page in its editable mode
+    And I should see the advance availability by member submit button disabled
+    When I click on the checkbox to toggle the advance availability state of the first member
+    Then I should see the advance availability by member submit button enabled
+    When I click on the checkbox to toggle the advance availability state of the first member
+    And I should see the advance availability by member submit button disabled
+
+  @jira-mem-2197 @local-only
+  Scenario: Successfully submitting the form to toggle Add Advance Availability by member
+    Given I am on the advance availability by member admin page
+    When I click on the checkbox to toggle the advance availability state of the first member
+    And I submit the form for advance availability by member
+    Then I should see the success message on the advance availability by member page
+
+  @jira-mem-2197 @local-only
+  Scenario: Submitting the form to toggle Add Advance Availability by member and receiving an error
+    Given I am on the advance availability by member admin page
+    When I click on the checkbox to toggle the advance availability state of the first member
+    And I submit the form for advance availability by member and there is an error
+    Then I should see the error message on the advance availability by member page
 
   @jira-mem-2196
   Scenario Outline: Filtering Add Advance Availability by <filter> members
     When I click on the trade credit rules link in the header
     And I click on the add advance availability link in the header
     When I click on the add advance availability by member tab
-    And I select <filter> from the filter dropdown
-    Then I should see <filter> members in the table
+    And I select the <filter> filter from the advance availability by member dropdown
+    Then I should see <filter> members in the advance availability by member table
   Examples:
     | filter   |
     | enabled  |
@@ -99,4 +128,4 @@ Feature: Viewing/Modifying the Add Advance Availability settings
     And I click on the add advance availability link in the header
     And I should see the advance availabiltiy status page in its editable mode
     When I click on the button to change the add advance availability status
-    Then I should see the success message on the add advance availability status page
+    Then I should see the success message on the advance availability status page

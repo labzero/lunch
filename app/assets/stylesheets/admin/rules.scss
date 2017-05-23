@@ -244,6 +244,7 @@
 
 .rules-availability-by-term-form, .rules-availability-by-term-body {
   @extend %table-row-headers;
+  @extend %form-stylized-disabled-checkboxes;
   table {
     th, td {
       box-sizing: border-box;
@@ -254,33 +255,6 @@
     td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5) {
       width: 176px;
       text-align: center;
-    }
-  }
-  input[type=checkbox] {
-    & + label {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      background-repeat: no-repeat;
-      background-size: cover;
-    }
-    &:not([disabled]) {
-      & + label {
-        display: none;
-      }
-    }
-    &:disabled {
-      display: none;
-      &:not([checked]) {
-        & + label {
-          background-image: image-url('fhlb-status-off-small.svg');
-        }
-      }
-      &:checked {
-        & + label {
-          background-image: image-url('fhlb-status-on-small.svg');
-        }
-      }
     }
   }
 }
@@ -382,5 +356,44 @@
   }
   .add-advance-off:before {
     background-image: image-url('fhlb-status-off-small.svg');
+  }
+}
+
+.availability-by-member-form-actions {
+  height: 30px;
+  .dropdown, .dropdown-selection {
+    width: 280px;
+  }
+  .primary-button {
+    display: inline-block;
+    float: right;
+    height: 30px;
+    width: 300px;
+  }
+}
+
+.rules-availability-by-member-form {
+  @extend %form-stylized-disabled-checkboxes;
+  width: 600px;
+  table {
+    margin: 20px 0;
+    td {
+      box-sizing: border-box;
+      &:first-child {
+        width: 440px;
+        max-width: 440px;
+        overflow: hidden;
+      }
+      &:last-child {
+        min-width: 160px;
+        text-align: center;
+      }
+    }
+  }
+  .top-anchor {
+    text-transform: uppercase;
+    text-align: center;
+    display: block;
+    margin-top: 16px;
   }
 }

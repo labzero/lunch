@@ -13,7 +13,7 @@ class Admin::RulesController < Admin::BaseController
     @can_edit_trade_rules = policy(:web_admin).edit_trade_rules?
   end
 
-  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :enable_etransact_service, :disable_etransact_service] do
+  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :update_advance_availability_by_member, :enable_etransact_service, :disable_etransact_service] do
     authorize :web_admin, :edit_trade_rules?
   end
 
@@ -204,16 +204,30 @@ class Admin::RulesController < Admin::BaseController
           {
             columns: [
               { value: flag['member_name'] },
-              { name: 'quick_advance_enabled',
-                value:  flag['fhlb_id'],
+              { name: "member_id[#{flag['fhlb_id']}]",
                 checked: flag['quick_advance_enabled'],
                 type: :checkbox,
-                disabled: true }
+                label: true,
+                submit_unchecked_boxes: true,
+                disabled: !@can_edit_trade_rules
+              }
             ]
           }
         end
       }
     }
+  end
+
+  # PUT
+  def update_advance_availability_by_member
+    etransact_members_hash = {}
+    members_advance_status = params[:member_id].with_indifferent_access
+    members_advance_status.each do |member_id, status|
+      etransact_members_hash[member_id] = status == 'on'
+    end
+    etransact_members_results = MembersService.new(request).update_quick_advance_flags_for_members(etransact_members_hash) || {error: 'There has been an error and Admin::RulesController#update_advance_availability_by_member has encountered nil'}
+    set_flash_message(etransact_members_results)
+    redirect_to action: :advance_availability_by_member
   end
 
   # GET

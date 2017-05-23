@@ -391,4 +391,30 @@ describe MembersService do
       end
     end
   end
+
+  describe '`update_quick_advance_flags_for_members` method' do
+    let(:etransact_members_hash) { double('a hash of member ids and statuses') }
+    let(:results) { double('some results') }
+    let(:call_method) { subject.update_quick_advance_flags_for_members(etransact_members_hash) }
+
+    it_behaves_like 'a MAPI backed service object method', :update_quick_advance_flags_for_members, nil, :put, nil, true do
+      let(:call_method) { subject.update_quick_advance_flags_for_members(etransact_members_hash) }
+    end
+    it 'calls `put_hash` with the proper endpoint name' do
+      expect(subject).to receive(:put_hash).with(:update_quick_advance_flags_for_members, any_args)
+      call_method
+    end
+    it 'calls `put_hash` with `member/quick_advance_flags` as the endpoint' do
+      expect(subject).to receive(:put_hash).with(anything, 'member/quick_advance_flags', anything)
+      call_method
+    end
+    it 'calls `put_hash` with the provided etransact members hash' do
+      expect(subject).to receive(:put_hash).with(anything, anything, etransact_members_hash)
+      call_method
+    end
+    it 'returns the result of calling `put_hash`' do
+      allow(subject).to receive(:put_hash).and_return(results)
+      expect(call_method).to eq(results)
+    end
+  end
 end

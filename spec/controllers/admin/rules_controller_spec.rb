@@ -749,12 +749,9 @@ RSpec.describe Admin::RulesController, :type => :controller do
             end
           end
           context 'the second column' do
-            it 'sets the name to `quick_advance_enabled`' do
-              expect(advance_availability[:table][:rows][0][:columns][1][:name]).to eq('quick_advance_enabled')
-            end
-            it 'sets the value to the `fhlb_id`' do
+            it 'sets the name to a string including the `fhlb_id` of the member' do
               allow(flag).to receive(:[]).with('fhlb_id').and_return(fhlb_id)
-              expect(advance_availability[:table][:rows][0][:columns][1][:value]).to eq(fhlb_id)
+              expect(advance_availability[:table][:rows][0][:columns][1][:name]).to eq("member_id[#{fhlb_id}]")
             end
             it 'sets the checked value to the `quick_advanced_enabled` flag value' do
               allow(flag).to receive(:[]).with('quick_advance_enabled').and_return(enabled)
@@ -763,9 +760,85 @@ RSpec.describe Admin::RulesController, :type => :controller do
             it 'sets the type to `:checkbox`' do
               expect(advance_availability[:table][:rows][0][:columns][1][:type]).to eq(:checkbox)
             end
+            it 'sets `label` to true' do
+              expect(advance_availability[:table][:rows][0][:columns][1][:label]).to be true
+            end
+            it 'sets `submit_unchecked_boxes` to true' do
+              expect(advance_availability[:table][:rows][0][:columns][1][:submit_unchecked_boxes]).to be true
+            end
+            context 'when the user can edit trade rules' do
+              allow_policy :web_admin, :edit_trade_rules?
+              it 'sets `disabled` to false' do
+                expect(advance_availability[:table][:rows][0][:columns][1][:disabled]).to be false
+              end
+            end
+            context 'when the user cannot edit trade rules' do
+              deny_policy :web_admin, :edit_trade_rules?
+              it 'sets `disabled` to true' do
+                expect(advance_availability[:table][:rows][0][:columns][1][:disabled]).to be true
+              end
+            end
           end
         end
       end
+    end
+  end
+
+  describe 'PUT update_advance_availability_by_member' do
+    allow_policy :web_admin, :edit_trade_rules?
+
+    let(:member_id) { SecureRandom.hex }
+    let(:member_advance_status_param) { {member_id => false} }
+    let(:members_service) { instance_double(MembersService, update_quick_advance_flags_for_members: {})}
+    let(:call_action) { put(:update_advance_availability_by_member, {member_id: member_advance_status_param}) }
+
+    before do
+      allow(MembersService).to receive(:new).and_return(members_service)
+      allow(controller).to receive(:set_flash_message)
+    end
+
+    it_behaves_like 'a RulesController action with before_action methods'
+    it_behaves_like 'it checks the edit_trade_rules? web_admin policy'
+    it 'creates a new instance of MembersService with the request' do
+      expect(MembersService).to receive(:new).with(request).and_return(members_service)
+      call_action
+    end
+    describe 'updating advance availability by member' do
+      describe 'processing the `member_id` param' do
+        describe 'when the value for a given member_id is `on`' do
+          it 'sets the value for that member_id to `true`' do
+            member_advance_status_param[member_id] = 'on'
+            expect(members_service).to receive(:update_quick_advance_flags_for_members).with(hash_including({member_id => true})).and_return({})
+            call_action
+          end
+        end
+        describe 'when the value for a given term and type is not `on`' do
+          it 'sets the value for that member_id to `false`' do
+            member_advance_status_param[member_id] = 'off'
+            expect(members_service).to receive(:update_quick_advance_flags_for_members).with(hash_including({member_id => false})).and_return({})
+            call_action
+          end
+        end
+      end
+      it 'calls `update_quick_advance_flags_for_members` on the MembersService with the `member_id` param' do
+        expect(members_service).to receive(:update_quick_advance_flags_for_members).with(member_advance_status_param).and_return({})
+        call_action
+      end
+      it 'sets an error message an error if the `update_quick_advance_flags_for_members` method returns nil' do
+        allow(members_service).to receive(:update_quick_advance_flags_for_members).with(member_advance_status_param).and_return(nil)
+        expect(controller).to receive(:set_flash_message).with(include({error: 'There has been an error and Admin::RulesController#update_advance_availability_by_member has encountered nil'}))
+        call_action
+      end
+    end
+    it 'calls the `set_flash_message` method with the results from `update_quick_advance_flags_for_members`' do
+      results = instance_double(Hash)
+      allow(members_service).to receive(:update_quick_advance_flags_for_members).and_return(results)
+      expect(controller).to receive(:set_flash_message).with(results)
+      call_action
+    end
+    it 'redirects to the `rules_advance_availability_by_member_url`' do
+      call_action
+      expect(response).to redirect_to(rules_advance_availability_by_member_url)
     end
   end
 

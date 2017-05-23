@@ -513,6 +513,22 @@ module MAPI
             end
           end
           api do
+            key :path, '/quick_advance_flags'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Updates the Quick Advance Flags for all members contained in the posted body'
+              key :notes, 'Post body should be a hash with member_id as the key and etransact status as a value, where the boolean value signifies whether etransact is enabled.'
+              key :nickname, :updateQuickAdvanceFlags
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :description, "The hash of the etransact statuses for members."
+              end
+            end
+          end
+          api do
             key :path, '/{id}/cash_projections'
             operation do
               key :method, 'GET'
@@ -1393,6 +1409,13 @@ module MAPI
         relative_get '/quick_advance_flags' do
           MAPI::Services::Member.rescued_json_response(self) do
             MAPI::Services::Member::Flags.quick_advance_flags(self)
+          end
+        end
+
+        relative_put '/quick_advance_flags' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            etransact_members_hash = JSON.parse(request.body.read)
+            {} if MAPI::Services::Member::Flags.update_quick_advance_flags(self, etransact_members_hash)
           end
         end
 

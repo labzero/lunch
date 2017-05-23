@@ -3357,6 +3357,7 @@ en:
         status: 'Add Advance On/Off'
         term: Availability by Term
         member: Availability by Member
+        top_anchor: Back to Top
       availability_status:
         status: 'Add Advance is %{status}'
         button: 'Turn %{status} Add Advance'

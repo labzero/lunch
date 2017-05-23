@@ -48,12 +48,12 @@ When(/^I click on the (term rules|add advance availability) (daily limits|status
   page.find("#{page_selector} .tabbed-content nav a", text: nav_text, exact: true).click
 end
 
-When(/^I select (enabled|disabled|all) from the filter dropdown$/) do |filter|
-  page.find('.advance-availability-member .dropdown').click
-  page.find('.advance-availability-member .dropdown li', text: filter_to_text(filter), exact: true).click
+When(/^I select the (enabled|disabled|all) filter from the advance availability by member dropdown$/) do |filter|
+  page.all('.advance-availability-member .dropdown').first.click
+  page.all('.advance-availability-member .dropdown li', text: filter_to_text(filter), exact: true).first.click
 end
 
-Then(/^I should see (enabled|disabled|all) members in the table$/) do |filter|
+Then(/^I should see (enabled|disabled|all) members in the advance availability by member table$/) do |filter|
   case filter
   when 'enabled'
     page.assert_selector('.advance-availability-member .report-table tr td input[checked]', visible: :visible)
@@ -66,7 +66,7 @@ Then(/^I should see (enabled|disabled|all) members in the table$/) do |filter|
  end
 end
 
-Then(/^I should see the (?:term rules|advance availability) (limits|rate bands|by term) page in its (view-only|editable) mode$/) do |form, mode|
+Then(/^I should see the (?:term rules|advance availability) (limits|rate bands|by term|by member) page in its (view-only|editable) mode$/) do |form, mode|
   selector = case form
   when 'limits'
     '.rules-limits-form'
@@ -74,6 +74,8 @@ Then(/^I should see the (?:term rules|advance availability) (limits|rate bands|b
     '.rules-rate-bands-form'
   when 'by term'
     '.rules-availability-by-term-form'
+  when 'by member'
+    '.rules-availability-by-member-form'
   end
   if mode == 'view-only'
     page.assert_no_selector("#{selector} input[type=submit]")
@@ -105,14 +107,20 @@ When(/^I click the save changes button for the rules limits form$/) do
   page.find('.rules-limits-form input[type=submit]').click
 end
 
-Then(/^I should see the success message on the (term rules limits|add advance availability status) page$/) do |admin_page|
-  parent_selector = case admin_page
-  when 'term rules limits'
+Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status) page$/) do |result, form|
+  parent_selector = case form
+  when 'limits'
     '.term-rules'
-  when 'add advance availability status'
+  when 'by member'
+    '.advance-availability-member'
+  when 'status'
     '.advance-availability-status'
   end
-  page.assert_selector("#{parent_selector} .form-success-section p", text: I18n.t('admin.term_rules.messages.success'), exact: true)
+  if result == 'success'
+    page.assert_selector("#{parent_selector} .form-success-section p", text: I18n.t('admin.term_rules.messages.success'), exact: true)
+  else
+    page.assert_selector("#{parent_selector} .form-error-section p", text: I18n.t('admin.term_rules.messages.error'), exact: true)
+  end
 end
 
 When(/^I press the button to (check|uncheck) all checkboxes for the availability by term (form|vrc section|frc short section|frc long section)$/) do |status, section|
@@ -130,12 +138,18 @@ Then(/^I should see only (checked|unchecked) checkboxes for the availability by 
   end
 end
 
-Then(/^I should see the advance availability by term submit button (enabled|disabled$)/) do |state|
+Then(/^I should see the advance availability (by term|by member) submit button (enabled|disabled$)/) do |form, state|
+  form_selector = case form
+  when 'by term'
+    '.rules-availability-by-term-form'
+  when 'by member'
+    '.rules-availability-by-member-form'
+  end
   if state == 'enabled'
-    page.assert_no_selector('.rules-availability-by-term-form input[type=submit][disabled]')
-    page.assert_selector('.rules-availability-by-term-form input[type=submit]', count: 2)
+    page.assert_no_selector("#{form_selector} input[type=submit][disabled]")
+    page.assert_selector("#{form_selector} input[type=submit]", count: 2)
   else
-    page.assert_selector('.rules-availability-by-term-form input[type=submit][disabled]', count: 2)
+    page.assert_selector("#{form_selector} input[type=submit][disabled]", count: 2)
   end
 end
 
@@ -145,6 +159,23 @@ end
 
 When(/^I click on the button to change the add advance availability status$/) do
   page.find('.advance-availability-status section:first-of-type a').click
+end
+
+When(/^I click on the checkbox to toggle the advance availability state of the first member$/) do
+  page.all('.rules-availability-by-member-form input[type=checkbox]').first.click
+end
+
+When(/^I am on the advance availability by member admin page$/) do
+  visit('/admin/rules/advance-availability/member')
+end
+
+When(/^I submit the form for advance availability by member$/) do
+  page.all('.rules-availability-by-member-form input[type=submit]').first.click
+end
+
+When(/^I submit the form for advance availability by member and there is an error$/) do
+  allow_any_instance_of(MembersService).to receive(:update_quick_advance_flags_for_members).and_return(nil)
+  step 'I submit the form for advance availability by member'
 end
 
 def translate_tab_title(nav)
