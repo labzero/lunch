@@ -322,6 +322,7 @@
     }
   }
   table {
+    margin-bottom: 0;
     th, td {
       box-sizing: border-box;
       &:first-child {
@@ -367,6 +368,7 @@
   .add-advance-on, .add-advance-off {
     position: relative;
     padding-left: 50px;
+    margin: 0;
     &:before {
       @extend %absolute-pseudoelement;
       @extend %vertical-center;
