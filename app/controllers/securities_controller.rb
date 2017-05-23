@@ -282,7 +282,12 @@ class SecuritiesController < ApplicationController
       column_headings: [ t('common_table_headings.cusip'),
                          t('common_table_headings.description'),
                          fhlb_add_unit_to_table_header(t('common_table_headings.original_par'), '$') ],
-      rows: rows
+      rows: rows,
+      footer: [
+        { value: t('securities.requests.view.securities.securities_in_request', count: @securities_request.securities.size) },
+        { value: t('global.total_with_colon'), classes: ['report-cell-right'] },
+        { value: @securities_request.securities.inject(0) { |sum, security| sum + security.original_par }, type: :currency },
+        { value: @securities_request.securities.inject(0) { |sum, security| sum + security.payment_amount }, type: :currency }]
     }
     @securities_table_data[:column_headings] <<
       t('securities.requests.view.securities.settlement_amount',

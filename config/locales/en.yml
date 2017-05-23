@@ -38,6 +38,7 @@ en:
     date: Date
     issue_date: Issue Date
     total: Total
+    total_with_colon: 'Total:'
     totals: Totals
     transaction_type: Transaction Type
     apply: Apply
@@ -1326,6 +1327,7 @@ en:
           description: Description
           original_par: 'Original Par ($)'
           settlement_amount: 'Settlement Amount ($)%{footnote_marker}'
+          securities_in_request: '%{count} Securities in Request'
           vs_payment_footnote: '%{footnote_marker}If Vs. Payment'
           custodian_name_footnote: '%{footnote_marker}The name of the custodian is required for all non-agency mortgage-backed securities (MBS). If the custodian of the note supporting the MBS transaction is the Issuer or a related party and the mortgage notes have not been endorsed to the trustee, the Bank requires that the party that has control over the mortgage notes (as determined by the Bank) have a long-term debt rating of at least BBB.'
         legal:
