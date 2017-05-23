@@ -52,10 +52,10 @@
               %thead
                 %tr
                   %th.report-profile-table-cutout
-                  %th=t('reports.pages.member_profile.excess')
-                  %th=t('reports.pages.member_profile.total')
-                  %th=t('reports.pages.member_profile.excess')
-                  %th=t('reports.pages.member_profile.total')
+                  %th.print-report-cell-right=t('reports.pages.member_profile.excess')
+                  %th.print-report-cell-right=t('reports.pages.member_profile.total')
+                  %th.print-report-cell-right=t('reports.pages.member_profile.excess')
+                  %th.print-report-cell-right=t('reports.pages.member_profile.total')
               %tbody
                 - if @collateral_table[:standard].to_h.length > 0
                   %tr

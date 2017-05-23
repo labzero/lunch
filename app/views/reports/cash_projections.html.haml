@@ -2,10 +2,10 @@
 - @page_title = t('reports.meta_title')
 .report.cash-projections-report.expanding-row-table.row
   .report-header
-    %h1= t('reports.pages.cash_projections.title')
     - if @print_layout
-      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@as_of_date))
+      = render 'print_details', report_name: t('reports.pages.cash_projections.title'), name: @member_name, date: t('datepicker.single.inline_input', date: fhlb_date_standard_numeric(@as_of_date))
     - else
+      %h1= t('reports.pages.cash_projections.title')
       = render 'reports_header_buttons', download_formats: [:xlsx, :pdf]
       = render 'report_details', name: @member_name, freshness: t('reports.freshness.prior_day'), availability: t('reports.availability.current')
   .report-main-body
@@ -28,12 +28,12 @@
           %th.report-cell-narrow= t('common_table_headings.settlement_date')
           %th.report-cell-narrow{data: {unsortable: true}}= t('common_table_headings.cusip')
           %th.report-cell-narrow{data: {unsortable: true}}= t('common_table_headings.security_description')
-          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('common_table_headings.original_par_value'), '$')
-          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('common_table_headings.coupon_rate'), '%')
+          %th.report-cell-narrow.print-report-cell-right{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('common_table_headings.original_par_value'), '$')
+          %th.report-cell-narrow.print-report-cell-right{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('common_table_headings.coupon_rate'), '%')
           %th.report-cell-narrow{data: {unsortable: true}}= t('common_table_headings.maturity_date')
-          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.principal'), '$')
-          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.interest'), '$')
-          %th.report-cell-narrow{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.total'), '$')
+          %th.report-cell-narrow.print-report-cell-right{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.principal'), '$')
+          %th.report-cell-narrow.print-report-cell-right{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.interest'), '$')
+          %th.report-cell-narrow.print-report-cell-right{data: {unsortable: true}}= fhlb_add_unit_to_table_header(t('global.total'), '$')
           %th.report-cell-narrow{data: {unsortable: true}}= t('global.details')
           %th
       %tbody

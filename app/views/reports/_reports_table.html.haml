@@ -34,15 +34,18 @@
             %tr
               - table_data[:column_headings].each_with_index do |heading, index|
                 - if heading.is_a?(Hash) && !heading[:title]
+                  - heading[:classes] = heading[:type] == :numeric_header ? [:'print-report-cell-right'] : []
                   = render 'reports/report_cell', cell: heading, header_row: true
                 - else
+                  - css_class = ''
                   - unsortable = index != 0
                   - if heading.is_a?(String)
                     - title = heading
                   - else
                     - title = heading[:title]
                     - unsortable = !heading[:sortable] if heading.has_key?(:sortable)
-                  %th.report-cell-narrow{data: {unsortable: unsortable}}= title
+                    - css_class = heading[:type] == :numeric_header ? 'print-report-cell-right' : ''
+                  %th.report-cell-narrow{data: {unsortable: unsortable}, class: css_class}= title
         - else
           %tr.table-heading-row
             %th{data: {unsortable: true}}

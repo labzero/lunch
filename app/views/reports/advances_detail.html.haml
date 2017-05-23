@@ -3,10 +3,10 @@
 - deferred_load = @advances_detail[:deferred]
 .report.advances-detail-report.row{data: {deferred: @job_status_url, 'deferred-load' => @load_url}}
   .report-header
-    %h1= @report_name
     - if @print_layout
-      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@start_date))
+      = render 'print_details', report_name: @report_name, name: @member_name, date: t('datepicker.single.inline_input', date: fhlb_date_standard_numeric(@start_date))
     - else
+      %h1=@report_name
       = render 'reports_header_buttons', allowed_params: :start_date, download_formats: [:pdf, :xlsx]
       = render 'report_details', name: @member_name, freshness: t('reports.freshness.previous_day'), availability: t('reports.availability.months', months: 18)
     .report-inputs
@@ -23,13 +23,13 @@
           %th.report-cell-narrow= t('common_table_headings.trade_date')
           %th.report-cell-narrow= t('common_table_headings.funding_date')
           %th.report-cell-narrow= t('common_table_headings.maturity_date')
-          %th.report-cell-narrow= t('common_table_headings.advance_number')
+          %th.report-cell-narrow.print-report-cell-right= t('common_table_headings.advance_number')
           %th.report-cell-narrow= t('common_table_headings.advance_type')
-          %th.report-cell-narrow= fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$')
-          %th.report-cell-narrow{class: ('report-cell-right' if @print_layout)}= fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%')
+          %th.report-cell-narrow.print-report-cell-right= fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$')
+          %th.report-cell-narrow.print-report-cell-right= fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%')
           %th.report-cell-narrow= t('reports.pages.advances_detail.next_interest_payment_date')
-          %th.report-cell-narrow{class: ('report-cell-right' if @print_layout)}= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.accrued_interest_heading'), '$')
-          %th.report-cell-narrow{class: ('report-cell-right' if @print_layout)}= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.estimated_next_payment_table_heading'), '$')
+          %th.report-cell-narrow.print-report-cell-right= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.accrued_interest_heading'), '$')
+          %th.report-cell-narrow.print-report-cell-right= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.estimated_next_payment_table_heading'), '$')
           - if @print_layout
             %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('reports.pages.advances_detail.prepayment_fee_indication'), '$')
           - else

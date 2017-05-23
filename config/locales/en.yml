@@ -221,6 +221,7 @@ en:
       input: "As of %{date}"
       end_of: "End of %{date}"
       from_label: As of
+      inline_input: "as of %{date}"
   activemodel:
     errors:
       models:

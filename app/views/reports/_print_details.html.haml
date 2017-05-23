@@ -1,11 +1,11 @@
 - filter_text ||= nil
+%h1="#{report_name} #{date}"
 .report-print-details
   .report-print-date
-    = date
   - if filter_text
     .report-print-filter-text
       = filter_text
   .report-print-bank
     = name
   .report-print-sta
-    = t('global.sta_number', sta_number: @sta_number)
+    = t('global.sta_number', sta_number: @sta_number) 
