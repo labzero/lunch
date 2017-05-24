@@ -119,3 +119,7 @@ end
 When(/^I set the Letter of Credit Request issue date to today$/) do
   page.execute_script("$('input[name=\"letter_of_credit_request[issue_date]\"]').val(\"#{Time.zone.today.to_s}\")")
 end
+
+Then(/^I should see that my bank is not authorized to request a Letter of Credit$/) do
+  page.assert_text(ActionView::Base.full_sanitizer.sanitize(I18n.t('letters_of_credit.manage.not_authorized', url: '#').html_safe))
+end

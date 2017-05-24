@@ -39,6 +39,22 @@ module MAPI
             }
           end
         end
+
+        def self.update_quick_advance_flags(app, flags)
+          unless should_fake?(app)
+            ActiveRecord::Base.transaction(isolation: :read_committed) do
+              flags.each do |member_id, etransact_enabled|
+                update_quick_advance_flags_sql = <<-SQL
+                  UPDATE  WEB_ADM.WEB_MEMBER_DATA
+                  SET INTRADAY_STATUS_FLAG = #{quote(etransact_enabled ? 'Y' : 'N')}
+                  WHERE FHLB_ID = #{quote(member_id)}
+                SQL
+                raise MAPI::Shared::Errors::SQLError, "Failed to update quick advance flag for member with id: #{member_id}" unless execute_sql(app.logger, update_quick_advance_flags_sql)
+              end
+            end
+          end
+          true
+        end
       end
     end
   end

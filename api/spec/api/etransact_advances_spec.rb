@@ -40,7 +40,7 @@ describe MAPI::ServiceApp do
       expect(etransact_advances_status['etransact_advances_status']).to be_boolean
       expect(etransact_advances_status['wl_vrc_status']).to be_boolean
       expect(etransact_advances_status['eod_reached']).to be_boolean
-      expect(etransact_advances_status['disabled']).to be_boolean
+      expect(etransact_advances_status['enabled']).to be_boolean
     end
     it 'should return all_loan_status hash' do
       expect(etransact_advances_status['all_loan_status'].length).to be >=1
@@ -212,6 +212,38 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'put `etransact_advances/settings/enable_service`' do
+    let(:call_endpoint) { put 'etransact_advances/settings/enable_service' }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'etransact_advances/settings/enable_service', :put, MAPI::Services::EtransactAdvances::Settings, :enable_service
+
+    it 'calls `MAPI::Services::EtransactAdvances::Settings.enable_service` with the app' do
+      expect(MAPI::Services::EtransactAdvances::Settings).to receive(:enable_service).with(an_instance_of(MAPI::ServiceApp))
+      call_endpoint
+    end
+    it 'returns a JSONd empty hash in the response body if the `enable_service` method is successful' do
+      allow(MAPI::Services::EtransactAdvances::Settings).to receive(:enable_service).and_return(true)
+      call_endpoint
+      expect(last_response.body).to eq({}.to_json)
+    end
+  end
+
+  describe 'put `etransact_advances/settings/disable_service`' do
+    let(:call_endpoint) { put 'etransact_advances/settings/disable_service' }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'etransact_advances/settings/disable_service', :put, MAPI::Services::EtransactAdvances::Settings, :disable_service
+
+    it 'calls `MAPI::Services::EtransactAdvances::Settings.enable_service` with the app' do
+      expect(MAPI::Services::EtransactAdvances::Settings).to receive(:disable_service).with(an_instance_of(MAPI::ServiceApp))
+      call_endpoint
+    end
+    it 'returns a JSONd empty hash in the response body if the `enable_service` method is successful' do
+      allow(MAPI::Services::EtransactAdvances::Settings).to receive(:disable_service).and_return(true)
+      call_endpoint
+      expect(last_response.body).to eq({}.to_json)
+    end
+  end
+
   describe 'put `etransact_advances/settings`' do
     let(:post_body) { {"params" => "#{SecureRandom.hex}"} }
     let(:call_endpoint) { put 'etransact_advances/settings', post_body.to_json }
@@ -255,6 +287,17 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::Rates::BlackoutDates).to receive(:blackout_dates).and_return(results)
       make_request
       expect(last_response.body).to eq(json_results)
+    end
+  end
+
+  describe 'get `etransact_advances/shutoff_times_by_type`' do
+    let(:call_endpoint) { get 'etransact_advances/shutoff_times_by_type' }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'etransact_advances/shutoff_times_by_type', :get, MAPI::Services::EtransactAdvances::ShutoffTimes, :get_shutoff_times_by_type
+
+    it 'calls `MAPI::Services::EtransactAdvances::ShutoffTimes.get_shutoff_times_by_type` with the app' do
+      expect(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:get_shutoff_times_by_type).with(an_instance_of(MAPI::ServiceApp))
+      call_endpoint
     end
   end
 end

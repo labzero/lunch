@@ -449,4 +449,12 @@ describe MAPIService do
       end
     end
   end
+
+  describe '`parse_24_hour_time`' do
+    it 'treats the first 2 digits of the time as hours and the last two digits as minutes' do
+      time = rand(0..2400).to_s.rjust(4, '0')
+      expect(Time.zone).to receive(:parse).with(include("#{time[0..1]}:#{time[2..3]}"))
+      subject.parse_24_hour_time(time)
+    end
+  end
 end

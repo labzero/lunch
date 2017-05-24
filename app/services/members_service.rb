@@ -72,6 +72,10 @@ class MembersService < MAPIService
     end
   end
 
+  def update_quick_advance_flags_for_members(etransact_members_hash)
+    put_hash(:update_quick_advance_flags_for_members, 'member/quick_advance_flags', etransact_members_hash)
+  end
+
   def users(member_id)
     users = nil
     Devise::LDAP::Adapter.shared_connection do

@@ -1,0 +1,3 @@
+%section.availability-by-member-form-actions
+  = render 'shared/dropdown', dropdown_name: @advance_availability[:dropdown][:name], default_value: @advance_availability[:dropdown][:default_value], default_text: @advance_availability[:dropdown][:default_text], dropdown_options: @advance_availability[:dropdown][:options]
+  = submit_tag(t('admin.term_rules.save'), class: 'primary-button', disabled: true) if @can_edit_trade_rules

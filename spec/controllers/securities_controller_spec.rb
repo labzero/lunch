@@ -1610,7 +1610,11 @@ RSpec.describe SecuritiesController, type: :controller do
                                { value: security.description },
                                { value: security.original_par, type: :currency, options: { unit: '' } },
                                { value: security.payment_amount, type: :currency, options: { unit: '' } },
-                               { value: security.custodian_name } ] } ] }
+                               { value: security.custodian_name } ] } ],
+          footer: [ { value: I18n.t('securities.requests.view.securities.securities_in_request', count: 1) },
+                    { value: I18n.t('global.total_with_colon'), classes: ['report-cell-right'] },
+                    { value: security.original_par, type: :currency },
+                    { value: security.payment_amount, type: :currency }]}                  
         call_action
         expect(subject.instance_variable_get(:@securities_table_data)).to eq(table_data)
       end
@@ -1655,7 +1659,11 @@ RSpec.describe SecuritiesController, type: :controller do
                         rows: [ { columns: [ { value: security.cusip },
                                              { value: security.description },
                                              { value: security.original_par, type: :currency, options: { unit: '' } },
-                                             { value: security.payment_amount, type: :currency, options: { unit: '' } } ] } ] }
+                                             { value: security.payment_amount, type: :currency, options: { unit: '' } } ] } ],
+                        footer: [ { value: I18n.t('securities.requests.view.securities.securities_in_request', count: 1) },
+                                  { value: I18n.t('global.total_with_colon'), classes: ['report-cell-right'] },
+                                  { value: security.original_par, type: :currency },
+                                  { value: security.payment_amount, type: :currency } ] }        
         call_action
         expect(subject.instance_variable_get(:@securities_table_data)).to eq(table_data)
       end

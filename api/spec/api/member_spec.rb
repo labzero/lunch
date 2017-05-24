@@ -702,4 +702,25 @@ describe MAPI::ServiceApp do
       expect(last_response.body).to eq(json_value)
     end
   end
+
+  describe 'put `member/quick_advance_flags`' do
+    let(:post_body) { {"params" => "#{SecureRandom.hex}"} }
+    let(:call_endpoint) { put 'member/quick_advance_flags', post_body.to_json }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'member/quick_advance_flags', :put, MAPI::Services::Member::Flags, :update_quick_advance_flags, "{}"
+
+    it 'calls `MAPI::Services::EtransactAdvances::Limits.update_quick_advance_flags` with the app' do
+      expect(MAPI::Services::Member::Flags).to receive(:update_quick_advance_flags).with(an_instance_of(MAPI::ServiceApp), anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::EtransactAdvances::Limits.update_quick_advance_flags` with the parsed post body' do
+      expect(MAPI::Services::Member::Flags).to receive(:update_quick_advance_flags).with(an_instance_of(MAPI::ServiceApp), post_body)
+      call_endpoint
+    end
+    it 'returns a JSONd empty hash in the response body if the `update_quick_advance_flags` method is successful' do
+      allow(MAPI::Services::Member::Flags).to receive(:update_quick_advance_flags).and_return(true)
+      call_endpoint
+      expect(last_response.body).to eq({}.to_json)
+    end
+  end
 end

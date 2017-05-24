@@ -136,4 +136,9 @@ class MAPIService
     data
   end
 
+  def parse_24_hour_time(time)
+    time = time.to_s
+    Time.zone.parse("#{Time.zone.today.to_s} #{time[0..1]}:#{time[2..3]}")
+  end
+
 end

@@ -385,6 +385,15 @@ When(/^I click on Edit Custom Term link$/) do
   page.find('.advance-custom-date-edit').click
 end
 
+Then(/^I should see the View Rates For This Term button in its (enabled|disabled) state$/) do |state|
+  if state == 'enabled'
+    page.assert_no_selector('.view-custom-rates:disabled')
+    page.assert_selector('.view-custom-rates')
+  else
+    page.assert_selector('.view-custom-rates:disabled')
+  end
+end
+
 Then(/^I should see an Advance Confirmation column in the data table$/) do
   page.assert_selector('.manage-advances-table th', text: I18n.t('advances.confirmation.title'), exact: true)
 end

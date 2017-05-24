@@ -31,6 +31,20 @@ module MAPI
           end
         end
 
+        def execute_sql_single_result(app, sql, description)
+          cursor = execute_sql(app.logger, sql)
+          if cursor
+            records = cursor.fetch
+            if records
+              first_record = records.first
+              return first_record if first_record
+            end
+          else
+            raise MAPI::Shared::Errors::SQLError, "#{description} returned `nil` for the cursor"
+          end
+          nil
+        end
+
         def fetch_hash(logger, sql)
           begin
             cursor = execute_sql(logger, sql)

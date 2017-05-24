@@ -6,6 +6,8 @@
       - if @error_message
         .form-error-section
           %p= @error_message
+      -if !@lc_agreement_flag
+        %p= t('letters_of_credit.manage.not_authorized', url: resources_download_path(file: :form_1465)).html_safe
       %p= t('letters_of_credit.request.support_html', rm_email: mail_to(relationship_manager[:email], relationship_manager[:full_name]), rm_phone_number: fhlb_formatted_phone_number(relationship_manager[:phone_number]))
   .row
     = content_with_sidebar([{name: 'borrowing_capacity', locals: {profile: @profile}}, {name: 'contact', locals: {relationship_manager: relationship_manager, text: t('letters_of_credit.contact')}}]) do

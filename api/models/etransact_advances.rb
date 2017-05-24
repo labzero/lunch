@@ -3,6 +3,11 @@ module MAPI
     class EtransactAdvances
       include Swagger::Blocks
       swagger_model :etransactAdvancesStatus do
+        key :required, [:enabled, :etransact_advances_status, :wl_vrc_status, :all_loan_status]
+        property :enabled do
+          key :type, :boolean
+          key :description, 'Indicates whether etransact has been manually enabled or disabled.'
+        end
         property :etransact_advances_status do
           key :type, :boolean
           key :description, 'indicate etransact advances is turn on and at least one proudct/term not reach End Time for today'

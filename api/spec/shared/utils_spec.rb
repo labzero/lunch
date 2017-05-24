@@ -489,4 +489,65 @@ describe MAPI::Shared::Utils::ClassMethods do
       expect(subject.flat_unique_array(array)).to eq([1, 2, 3, 4, 5, 6, 7])
     end
   end
+
+  context 'executing a single result sql statement' do
+    let(:logger) { double('Logger') }
+    let(:app) { instance_double(MAPI::ServiceApp, logger: logger) }
+    let(:sql) { double('SQL Statement') }
+    let(:description) { SecureRandom.hex }
+    let(:single_result) { double('The Single Result') }
+    let(:results_array) { instance_double(Array, first: single_result) }
+    let(:cursor) { double('cursor', fetch: results_array) }
+    let(:call_method) { MAPI::Services::Member::SecuritiesRequests.execute_sql_single_result(app, sql, description) }
+
+    before do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger, sql).and_return(cursor)
+    end
+
+    it 'raises an error if SQL query call returns nil' do
+      allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(app.logger, sql).and_return(nil)
+      expect { call_method }.to raise_error(Exception)
+    end
+
+    it 'calls `fetch` on the cusor' do
+      expect(cursor).to receive(:fetch).and_return(results_array)
+      call_method
+    end
+
+    it 'does not raise an error if `fetch` returns nil' do
+      allow(cursor).to receive(:fetch).and_return(nil)
+      expect { call_method }.to_not raise_error
+    end
+
+    context 'handling the results array' do
+      before do
+        allow(cursor).to receive(:fetch).and_return(results_array)
+      end
+
+      it 'calls `first` on the results array' do
+        expect(results_array).to receive(:first).and_return(single_result)
+        call_method
+      end
+
+      it 'does not raise an error if calling `first` on results returns nil' do
+        allow(results_array).to receive(:first).and_return(nil)
+        expect { call_method }.to_not raise_error
+      end
+
+      it 'does not raise an error if calling `first` on results returns nil and `raise_error_if_nil` is false' do
+        allow(results_array).to receive(:first).and_return(nil)
+        expect { call_method }.to_not raise_error
+      end
+
+      context 'gets the record' do
+        before do
+          allow(results_array).to receive(:first).and_return(single_result)
+        end
+
+        it 'returns result' do
+          expect(call_method).to eq(single_result)
+        end
+      end
+    end
+  end
 end

@@ -13,8 +13,23 @@ class Admin::RulesController < Admin::BaseController
     @can_edit_trade_rules = policy(:web_admin).edit_trade_rules?
   end
 
-  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term] do
+  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :update_advance_availability_by_member, :enable_etransact_service, :disable_etransact_service] do
     authorize :web_admin, :edit_trade_rules?
+  end
+
+  before_action only: [:advance_availability_status, :advance_availability_by_term] do
+    @availability_headings = {
+      column_headings: ['', t('dashboard.quick_advance.table.axes_labels.standard'), t('dashboard.quick_advance.table.axes_labels.securities_backed'), '', ''],
+      rows: [{
+        columns: [
+          {value: nil},
+          {value: t('dashboard.quick_advance.table.whole_loan')},
+          {value: t('dashboard.quick_advance.table.agency')},
+          {value: t('dashboard.quick_advance.table.aaa')},
+          {value: t('dashboard.quick_advance.table.aa')}
+        ]
+      }]
+    }
   end
 
   # GET
@@ -77,16 +92,61 @@ class Admin::RulesController < Admin::BaseController
     etransact_service = EtransactAdvancesService.new(request)
     global_limits = params[:global_limits].with_indifferent_access
     term_limits = params[:term_limits].with_indifferent_access
-    settings_results = etransact_service.update_settings(global_limits)
-    term_limits_results = etransact_service.update_term_limits(term_limits)
-    raise "There has been an error and Admin::RulesController#update_limits has encountered nil" unless settings_results && term_limits_results
+    settings_results = etransact_service.update_settings(global_limits) || {error: 'There has been an error and Admin::RulesController#update_limits has encountered nil'}
+    term_limits_results = etransact_service.update_term_limits(term_limits) || {error: 'There has been an error and Admin::RulesController#update_limits has encountered nil'}
     set_flash_message([settings_results, term_limits_results])
     redirect_to action: :limits
   end
 
   # GET
   def advance_availability_status
+    etransact_service = EtransactAdvancesService.new(request)
+    term_limit_data = etransact_service.limits
+    etransact_status = etransact_service.status
+    shutoff_times = etransact_service.shutoff_times_by_type
+    raise "There has been an error and Admin::RulesController#advance_availability_status has encountered nil" unless term_limit_data && etransact_status && shutoff_times
+    @etransact_enabled = etransact_status[:enabled]
 
+    # Determine if any terms are disabled
+    disabled_term_rows = []
+    term_limit_data.each do |bucket|
+      row = availability_row_from_bucket(bucket)
+      disabled_row = false
+      row[:columns].each_with_index do |column, i|
+        next if i == 0
+        disabled_row = !column[:checked]
+        break if disabled_row
+      end
+      row[:columns].map { |column| column[:disabled] = true }
+      disabled_term_rows << row if disabled_row
+    end
+    @disabled_terms = { rows: disabled_term_rows } if disabled_term_rows.present?
+    @shutoff_times = {
+      rows: [
+        {columns: [
+          {value: t('dashboard.quick_advance.table.axes_labels.variable_rate')},
+          {value: shutoff_times[:vrc], type: :time}
+        ]},
+        {columns: [
+          {value: t('dashboard.quick_advance.table.axes_labels.fixed_rate')},
+          {value: shutoff_times[:frc], type: :time}
+        ]}
+      ]
+    }
+  end
+
+  # PUT
+  def enable_etransact_service
+    enable_etransact_results = EtransactAdvancesService.new(request).enable_etransact_service || {error: 'There has been an error and Admin::RulesController#enable_etransact_service has encountered nil'}
+    set_flash_message(enable_etransact_results)
+    redirect_to action: :advance_availability_status
+  end
+
+  # PUT
+  def disable_etransact_service
+    disable_etransact_results = EtransactAdvancesService.new(request).disable_etransact_service || {error: 'There has been an error and Admin::RulesController#disable_etransact_service has encountered nil'}
+    set_flash_message(disable_etransact_results)
+    redirect_to action: :advance_availability_status
   end
 
   # GET
@@ -94,60 +154,12 @@ class Admin::RulesController < Admin::BaseController
     etransact_service = EtransactAdvancesService.new(request)
     term_limit_data = etransact_service.limits
     raise 'There has been an error and Admin::RulesController#advance_availability_by_term has encountered nil. Check error logs.' if term_limit_data.nil?
-    @availability_headings = {
-      column_headings: ['', t('dashboard.quick_advance.table.axes_labels.standard'), t('dashboard.quick_advance.table.axes_labels.securities_backed'), '', ''],
-      rows: [{
-        columns: [
-          {value: nil},
-          {value: t('dashboard.quick_advance.table.whole_loan')},
-          {value: t('dashboard.quick_advance.table.agency')},
-          {value: t('dashboard.quick_advance.table.aaa')},
-          {value: t('dashboard.quick_advance.table.aa')}
-        ]
-      }]
-    }
     @vrc_availability = {rows: []}
     @frc_availability = {rows: []}
     @long_term_availability = {rows: []}
     term_limit_data.each do |bucket|
       term = bucket[:term].to_sym
-      raise "There has been an error and Admin::RulesController#advance_availability_by_term has encountered an etransact_service.limits bucket with an invalid term: #{term}" unless VALID_TERMS.include?(term)
-      term_label = term == :open ? t('admin.advance_availability.availability_by_term.open_label') : t("admin.term_rules.daily_limit.dates.#{term}")
-      row = {columns: [
-        {value: term_label},
-        {
-          name: "term_limits[#{term}][whole_loan_enabled]",
-          type: :checkbox,
-          submit_unchecked_boxes: true,
-          checked: bucket[:whole_loan_enabled],
-          label: true,
-          disabled: !@can_edit_trade_rules
-        },
-        {
-          name: "term_limits[#{term}][sbc_agency_enabled]",
-          type: :checkbox,
-          submit_unchecked_boxes: true,
-          checked: bucket[:sbc_agency_enabled],
-          label: true,
-          disabled: !@can_edit_trade_rules
-        },
-        {
-          name: "term_limits[#{term}][sbc_aaa_enabled]",
-          type: :checkbox,
-          submit_unchecked_boxes: true,
-          checked: bucket[:sbc_aaa_enabled],
-          label: true,
-          disabled: !@can_edit_trade_rules
-        },
-        {
-          name: "term_limits[#{term}][sbc_aa_enabled]",
-          type: :checkbox,
-          submit_unchecked_boxes: true,
-          checked: bucket[:sbc_aa_enabled],
-          label: true,
-          disabled: !@can_edit_trade_rules
-        }
-      ]}
+      row = availability_row_from_bucket(bucket)
       if term == :open
         @vrc_availability[:rows] << row
       elsif LONG_FRC_TERMS.include?(term)
@@ -167,8 +179,7 @@ class Admin::RulesController < Admin::BaseController
         term_limits[term][type] = status == 'on'
       end
     end
-    term_limits_results = etransact_service.update_term_limits(term_limits)
-    raise "There has been an error and Admin::RulesController#update_advance_availability_by_term has encountered nil" unless term_limits_results
+    term_limits_results = etransact_service.update_term_limits(term_limits) || {error: 'There has been an error and Admin::RulesController#update_advance_availability_by_term has encountered nil'}
     set_flash_message(term_limits_results)
     redirect_to action: :advance_availability_by_term
   end
@@ -193,16 +204,30 @@ class Admin::RulesController < Admin::BaseController
           {
             columns: [
               { value: flag['member_name'] },
-              { name: 'quick_advance_enabled',
-                value:  flag['fhlb_id'],
+              { name: "member_id[#{flag['fhlb_id']}]",
                 checked: flag['quick_advance_enabled'],
                 type: :checkbox,
-                disabled: true }
+                label: true,
+                submit_unchecked_boxes: true,
+                disabled: !@can_edit_trade_rules
+              }
             ]
           }
         end
       }
     }
+  end
+
+  # PUT
+  def update_advance_availability_by_member
+    etransact_members_hash = {}
+    members_advance_status = params[:member_id].with_indifferent_access
+    members_advance_status.each do |member_id, status|
+      etransact_members_hash[member_id] = status == 'on'
+    end
+    etransact_members_results = MembersService.new(request).update_quick_advance_flags_for_members(etransact_members_hash) || {error: 'There has been an error and Admin::RulesController#update_advance_availability_by_member has encountered nil'}
+    set_flash_message(etransact_members_results)
+    redirect_to action: :advance_availability_by_member
   end
 
   # GET
@@ -255,8 +280,7 @@ class Admin::RulesController < Admin::BaseController
   # PUT
   def update_rate_bands
     rate_bands = params[:rate_bands].with_indifferent_access
-    rate_bands_result = RatesService.new(request).update_rate_bands(rate_bands)
-    raise "There has been an error and Admin::RulesController#update_rate_bands has encountered nil" unless rate_bands_result
+    rate_bands_result = RatesService.new(request).update_rate_bands(rate_bands) || {error: 'There has been an error and Admin::RulesController#update_rate_bands has encountered nil'}
     set_flash_message(rate_bands_result)
     redirect_to action: :rate_bands
   end
@@ -330,6 +354,7 @@ class Admin::RulesController < Admin::BaseController
   def set_flash_message(results)
     errors = Array.wrap(results).collect{ |result| result[:error] }.compact
     if errors.present?
+      errors.each { |error| logger.error(error) }
       flash[:error] = t('admin.term_rules.messages.error')
     else
       flash[:notice] = t('admin.term_rules.messages.success')
@@ -346,5 +371,46 @@ class Admin::RulesController < Admin::BaseController
       end
     end
     processed_summary
+  end
+
+  def availability_row_from_bucket(bucket)
+    term = bucket[:term].try(:to_sym)
+    raise "There has been an error and Admin::RulesController#advance_availability_by_term has encountered an etransact_service.limits bucket with an invalid term: #{term}" unless VALID_TERMS.include?(term)
+    term_label = term == :open ? t('admin.advance_availability.availability_by_term.open_label') : t("admin.term_rules.daily_limit.dates.#{term}")
+    {columns: [
+      {value: term_label},
+      {
+        name: "term_limits[#{term}][whole_loan_enabled]",
+        type: :checkbox,
+        submit_unchecked_boxes: true,
+        checked: bucket[:whole_loan_enabled],
+        label: true,
+        disabled: !@can_edit_trade_rules
+      },
+      {
+        name: "term_limits[#{term}][sbc_agency_enabled]",
+        type: :checkbox,
+        submit_unchecked_boxes: true,
+        checked: bucket[:sbc_agency_enabled],
+        label: true,
+        disabled: !@can_edit_trade_rules
+      },
+      {
+        name: "term_limits[#{term}][sbc_aaa_enabled]",
+        type: :checkbox,
+        submit_unchecked_boxes: true,
+        checked: bucket[:sbc_aaa_enabled],
+        label: true,
+        disabled: !@can_edit_trade_rules
+      },
+      {
+        name: "term_limits[#{term}][sbc_aa_enabled]",
+        type: :checkbox,
+        submit_unchecked_boxes: true,
+        checked: bucket[:sbc_aa_enabled],
+        label: true,
+        disabled: !@can_edit_trade_rules
+      }
+    ]}
   end
 end

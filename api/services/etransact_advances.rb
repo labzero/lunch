@@ -3,6 +3,7 @@ require_relative 'rates/loan_terms'
 require_relative 'rates/market_data_rates'
 require_relative 'etransact_advances/settings'
 require_relative 'etransact_advances/limits'
+require_relative 'etransact_advances/shutoff_times'
 
 module MAPI
   module Services
@@ -89,6 +90,24 @@ module MAPI
                 key :type, :EtransactSettings
                 key :description, "The hash of etransact setting names and setting values to update."
               end
+            end
+          end
+          api do
+            key :path, '/enable_service'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Enables the eTransact service'
+              key :note, "Enables service by setting the 'StartUp' value in the settings table to today's date"
+              key :nickname, :enableEtransactService
+            end
+          end
+          api do
+            key :path, '/disable_service'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Disables the eTransact service'
+              key :note, "Disables service by setting the 'StartUp' value in the settings table to null"
+              key :nickname, :disableEtransactService
             end
           end
           # etransact advances limits endpoint
@@ -265,6 +284,15 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/shutoff_times_by_type'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Fetches the general shutoff times for VRC and FRC advances'
+              key :type, :ShutoffTimesByType
+              key :nickname, :FetchShutoffTimesByType
+            end
+          end
         end
 
         # etransact advances limits
@@ -295,6 +323,18 @@ module MAPI
           MAPI::Services::EtransactAdvances.rescued_json_response(self) do
             settings_hash = JSON.parse(request.body.read)
             {} if MAPI::Services::EtransactAdvances::Settings.update_settings(self, settings_hash)
+          end
+        end
+
+        relative_put '/settings/enable_service' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            {} if MAPI::Services::EtransactAdvances::Settings.enable_service(self)
+          end
+        end
+
+        relative_put '/settings/disable_service' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            {} if MAPI::Services::EtransactAdvances::Settings.disable_service(self)
           end
         end
 
@@ -359,7 +399,7 @@ module MAPI
 
           {
             eod_reached: false,
-            disabled: false,
+            enabled: !etransact_disabled,
             etransact_advances_status: etransact_status,
             wl_vrc_status: wl_vrc_status,
             all_loan_status: MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment)
@@ -429,6 +469,12 @@ module MAPI
             halt 503, 'Internal Service Error'
           end
           result.to_json
+        end
+
+        relative_get '/shutoff_times_by_type' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            MAPI::Services::EtransactAdvances::ShutoffTimes.get_shutoff_times_by_type(self)
+          end
         end
       end
 

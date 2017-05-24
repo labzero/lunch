@@ -20,6 +20,8 @@ module MAPI
           rate_stale_check: 'RateStaleCheck'
         }.with_indifferent_access
 
+        SERVICE_STATUS_SETTING = 'StartUp'
+
         def self.settings(environment)
           settings = {}
 
@@ -56,6 +58,34 @@ module MAPI
                 SQL
                 raise MAPI::Shared::Errors::SQLError, "Failed to update settings with setting name: #{setting_name}" unless execute_sql(app.logger, update_settings_sql)
               end
+            end
+          end
+          true
+        end
+
+        def self.enable_service(app)
+          unless should_fake?(app)
+            ActiveRecord::Base.transaction(isolation: :read_committed) do
+              enable_service_sql = <<-SQL
+              UPDATE WEB_ADM.AO_SETTINGS
+              SET SETTING_VALUE = TO_CHAR(sysdate, 'MM/dd/yyyy')
+              WHERE SETTING_NAME = #{quote(SERVICE_STATUS_SETTING)}
+              SQL
+              raise MAPI::Shared::Errors::SQLError, 'Failed to enable etransact service' unless execute_sql(app.logger, enable_service_sql)
+            end
+          end
+          true
+        end
+
+        def self.disable_service(app)
+          unless should_fake?(app)
+            ActiveRecord::Base.transaction(isolation: :read_committed) do
+              disable_service_sql = <<-SQL
+              UPDATE WEB_ADM.AO_SETTINGS
+              SET SETTING_VALUE = NULL
+              WHERE SETTING_NAME = #{quote(SERVICE_STATUS_SETTING)}
+              SQL
+              raise MAPI::Shared::Errors::SQLError, 'Failed to disable etransact service' unless execute_sql(app.logger, disable_service_sql)
             end
           end
           true

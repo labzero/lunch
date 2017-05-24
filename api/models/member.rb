@@ -19,7 +19,7 @@ module MAPI
         end
       end
       swagger_model :MemberDetails do
-        key :required, [:name, :fhfa_number, :sta_number, :dual_signers_required, :street, :city, :state, :postal_code]
+        key :required, [:name, :fhfa_number, :sta_number, :dual_signers_required, :customer_lc_agreement_flag, :street, :city, :state, :postal_code]
         property :name do
           key :type, :string
           key :description, 'The name of the member.'
@@ -35,6 +35,10 @@ module MAPI
         property :dual_signers_required do
           key :type, :boolean
           key :description, 'Indicates whether this member requires multiple signers to take out advances.'
+        end
+        property :customer_lc_agreement_flag do
+          key :type, :boolean
+          key :description, 'Indicates whether this member has signed an LOC reimbursement agreement.'
         end
         property :street do
           key :type, :string

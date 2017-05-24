@@ -68,16 +68,3 @@ $partial-enabled-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3
 .row-elements-equal-height {
   display: flex;
 }
-.advance-availability-member {
-  table {
-    width: 600px;
-  }
-  tr {
-    td:first-child {
-      width: 75%;
-    }
-    td:last-child {
-      text-align: center;
-    }
-  }
-}

@@ -482,3 +482,32 @@ Scenario: User clicks on the FRC rates and sees Add Custom Term then types in an
   And I press the Return key on the singledatepicker input
   When I click the datepicker field
   Then I should see the next business day after Saturday in the datepicker start input field
+
+@flip-on-add-advance-custom-term
+Scenario: User clicks on the FRC rates and sees Add Custom Term, then into the date input field a maturity date less than one day later than the funding date
+  Given I am logged in as a "custom-term signer"
+  And I am on the "Add Advance" advances page
+  And I enter an amount into the add advance amount field
+  When I click to toggle to the frc rates
+  Then I should see the add advance rate table
+  Then I should see Custom Term information
+  When I click on Add Custom Term link
+  Then I should see Custom Term Calendar
+  When I click the datepicker field
+  When I write today's date in the date input field
+  Then I should see the View Rates For This Term button in its disabled state
+
+@flip-on-add-advance-custom-term
+Scenario: User clicks on the FRC rates and sees Add Custom Term, then enters a maturity date at least one day later than the funding date in the datepicker input field
+  Given I am logged in as a "custom-term signer"
+  And I am on the "Add Advance" advances page
+  And I enter an amount into the add advance amount field
+  When I click to toggle to the frc rates
+  Then I should see the add advance rate table
+  Then I should see Custom Term information
+  When I click on Add Custom Term link
+  Then I should see Custom Term Calendar
+  When I click the datepicker field
+  When I write tomorrow's date in the datepicker start input field
+  And I press the Return key on the singledatepicker input
+  Then I should see the View Rates For This Term button in its enabled state

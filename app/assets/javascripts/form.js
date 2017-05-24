@@ -44,5 +44,8 @@ $(function() {
     $('.' + formSelector).find('input[type=checkbox]').prop('checked', status).trigger('change');
   });
 
-  Fhlb.Utils.enableSubmitWhenFormDirty($('.rules-availability-by-term-form'));
+  // Enable/Disable submit based on form state (clean/dirty)
+  $(['.rules-availability-by-term-form', '.rules-availability-by-member-form']).each(function(i, formClass) {
+    Fhlb.Utils.enableSubmitWhenFormDirty($(formClass));
+  });
 });

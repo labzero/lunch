@@ -123,7 +123,6 @@ When(/^I enter the date for next Saturday in the datepicker start input field$/)
   page.fill_in("daterangepicker_start", with: date.strftime('%m/%d/%Y'))
 end
 
-
 Then(/^I should see the next business day after Saturday in the datepicker start input field$/) do
   date = Time.zone.today
   until date.saturday?  do date = date + 1.day end
@@ -155,6 +154,19 @@ When(/^I write tomorrow's date in the datepicker start input field$/) do
   date = Time.zone.today + 1.day
   page.fill_in('daterangepicker_start', with: ' ') # Capybara doesn't always clear input
   page.fill_in('daterangepicker_start', with: date.strftime('%_m/%-d/%Y'))
+end
+
+When(/^I write (today|tomorrow)'s date in the date input field$/) do |day|
+  today = Time.zone.today
+  date = case day
+    when 'today'
+      today
+    when 'tomorrow'
+      today + 1.day
+    else
+      raise 'Unknown day given as argument'
+    end
+  page.find('.datepicker-trigger').find('input').send_keys( date.strftime('%_m/%-d/%Y') + "\n")
 end
 
 When(/^that today's date is the (last day of last month|first day of this month)$/) do |date|

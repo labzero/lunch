@@ -112,3 +112,9 @@ Feature: Requesting a New Letter of Credit
     And I enter 150000000 in the letter of credit amount field
     When I click the Preview Request button
     Then I should see the "exceeds financing availability of 149,603,250" form error
+
+  @jira-mem-2152
+  Scenario: Member institutions ineligible for letters of credit see a special error message
+    Given I am signed in as a Chaste Manhattan signer
+    And I visit the Request Letter of Credit page
+    Then I should see that my bank is not authorized to request a Letter of Credit

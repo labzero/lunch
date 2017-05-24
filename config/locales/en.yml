@@ -38,6 +38,7 @@ en:
     date: Date
     issue_date: Issue Date
     total: Total
+    total_with_colon: 'Total:'
     totals: Totals
     transaction_type: Transaction Type
     apply: Apply
@@ -129,6 +130,8 @@ en:
     cancel_upload: Cancel Upload
     optional_field: (optional)
     member_portal: Member Portal
+    off_status: 'Off'
+    on_status: 'On'
     dates:
       1_day: 1 day
       1_month: 1 mo
@@ -449,7 +452,7 @@ en:
       help_html: To request a new SecurID token or get help with an existing one, contact <a href="%{url}">Web Support</a> at %{phone_number}.
       new_pin:
         title: Create Token PIN for a New SecurID Token
-        description_html: Contact <a href="%{url}">Web Support</a> at %{phone_number} to activate a new SecurID token. Once activated, you may set your PIN.
+        received_new: If you have received a new token, you need to create a new PIN.
         description: If you just got a new SecurID token and need to set the PIN for it. Use Reset Token PIN if you forgot your PIN.
         cta: Create New Token PIN
         prompt_current: Enter the 6-digit code shown on your token.
@@ -1324,6 +1327,7 @@ en:
           description: Description
           original_par: 'Original Par ($)'
           settlement_amount: 'Settlement Amount ($)%{footnote_marker}'
+          securities_in_request: '%{count} Securities in Request'
           vs_payment_footnote: '%{footnote_marker}If Vs. Payment'
           custodian_name_footnote: '%{footnote_marker}The name of the custodian is required for all non-agency mortgage-backed securities (MBS). If the custodian of the note supporting the MBS transaction is the Issuer or a related party and the mortgage notes have not been endorsed to the trustee, the Bank requires that the party that has control over the mortgage notes (as determined by the Bank) have a long-term debt rating of at least BBB.'
         legal:
@@ -1519,6 +1523,7 @@ en:
       request: Request letter of credit
       expiration_date: Expiration Date
       maintenance_fee: Annual Maintenance Fee (bps)
+      not_authorized: 'Your institution is not authorized to request a Letter of Credit. A <a href="%{url}">Letter of Credit Reimbursement Agreement</a> must be on file.'
     request:
       title: Request Letter of Credit
       support_html: "The member portal only supports requests for Public Unit Deposit letters of credit. For other requests, contact your Relationship Manager: %{rm_email}, %{rm_phone_number}. If your request is not received by 11:00 am, your request will not be processed until the following business day."
@@ -3352,6 +3357,16 @@ en:
         status: 'Add Advance On/Off'
         term: Availability by Term
         member: Availability by Member
+        top_anchor: Back to Top
+      availability_status:
+        status: 'Add Advance is %{status}'
+        button: 'Turn %{status} Add Advance'
+        disabled_terms: Disabled Terms
+        todays_shutoff: Today's End of Day Shutoff
+        manage_availability: Manage Availability by Term
+        view_availability: View Availability by Term
+        schedule_shutoff: Schedule Early End of Day Shutoff
+        view_shutoff: View Early End of Day Shutoff
       availability_by_member:
         filter:
           title: 'Filter:'

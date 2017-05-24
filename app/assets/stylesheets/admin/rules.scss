@@ -95,7 +95,6 @@
   table {
     width: 840px;
     border: none;
-    //margin-bottom: 20px;
     margin-bottom: 0px;
   }
   thead {
@@ -229,6 +228,7 @@
       }
     }
     td {
+      @extend %typography-table-heading;
       background-color: $light-gray;
       border: 1px solid $light-blue;
       &:first-child {
@@ -242,7 +242,9 @@
   }
 }
 
-.rules-availability-by-term-form {
+.rules-availability-by-term-form, .rules-availability-by-term-body {
+  @extend %table-row-headers;
+  @extend %form-stylized-disabled-checkboxes;
   table {
     th, td {
       box-sizing: border-box;
@@ -253,33 +255,6 @@
     td:nth-child(2), td:nth-child(3), td:nth-child(4), td:nth-child(5) {
       width: 176px;
       text-align: center;
-    }
-  }
-  input[type=checkbox] {
-    & + label {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      background-repeat: no-repeat;
-      background-size: cover;
-    }
-    &:not([disabled]) {
-      & + label {
-        display: none;
-      }
-    }
-    &:disabled {
-      display: none;
-      &:not([checked]) {
-        & + label {
-          background-image: image-url('fhlb-status-off-small.svg');
-        }
-      }
-      &:checked {
-        & + label {
-          background-image: image-url('fhlb-status-on-small.svg');
-        }
-      }
     }
   }
 }
@@ -306,5 +281,119 @@
 .rules-availability-by-term-frc-long {
   table {
     margin-bottom: 0;
+  }
+}
+
+.advance-availability-status {
+  .rules-availability-by-term-headings {
+    table {
+      margin-bottom: 0;
+      td {
+        @extend %typography-table-heading;
+        border-bottom: none;
+        text-align: center;
+      }
+    }
+  }
+  table {
+    margin-bottom: 0;
+    th, td {
+      box-sizing: border-box;
+      &:first-child {
+        width: 148px;
+      }
+      &:nth-child(2), &:nth-child(3), &:nth-child(4), &:nth-child(5) {
+        width: 178px;
+      }
+    }
+  }
+  section {
+    @extend %bordered-section;
+    h2 {
+      display: inline-block;
+    }
+    a {
+      @extend %typography-table-button;
+      float: right;
+      text-transform: uppercase;
+    }
+    &:first-of-type {
+      position: relative;
+      a {
+        display: inline-block;
+        @extend %vertical-center;
+        right: 20px;
+        width: 200px;
+      }
+    }
+    &:last-of-type {
+      margin-bottom: 0;
+      @extend %table-row-headers;
+      table {
+        td:last-child {
+          @extend %typography-field-placeholder;
+          width: auto;
+          text-align: left;
+          padding-left: 20px;
+        }
+      }
+    }
+  }
+  .add-advance-on, .add-advance-off {
+    position: relative;
+    padding-left: 50px;
+    margin: 0;
+    &:before {
+      @extend %absolute-pseudoelement;
+      @extend %vertical-center;
+      left: 0;
+      width: 30px;
+      height: 30px;
+    }
+  }
+  .add-advance-on:before {
+    background-image: image-url('fhlb-status-on-small.svg');
+  }
+  .add-advance-off:before {
+    background-image: image-url('fhlb-status-off-small.svg');
+  }
+}
+
+.availability-by-member-form-actions {
+  height: 30px;
+  .dropdown, .dropdown-selection {
+    width: 280px;
+  }
+  .primary-button {
+    display: inline-block;
+    float: right;
+    height: 30px;
+    width: 300px;
+  }
+}
+
+.rules-availability-by-member-form {
+  @extend %form-stylized-disabled-checkboxes;
+  width: 600px;
+  table {
+    margin: 20px 0;
+    td {
+      box-sizing: border-box;
+      &:first-child {
+        width: 440px;
+        max-width: 440px;
+        overflow: hidden;
+      }
+      &:last-child {
+        min-width: 160px;
+        text-align: center;
+      }
+    }
+  }
+  .top-anchor {
+    text-transform: uppercase;
+    text-align: center;
+    display: block;
+    margin-top: 16px;
   }
 }

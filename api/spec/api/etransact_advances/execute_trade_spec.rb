@@ -1149,7 +1149,7 @@ describe MAPI::ServiceApp do
     end
     it 'returns the passed stock value rounded to the next multiple of 100 if passed a stock value that is not a multiple of 100' do
       stock_base = rand(1..100)
-      stock = (stock_base * 100) + rand(0..99)
+      stock = (stock_base * 100) + rand(1..99)
       expect(MAPI::Services::EtransactAdvances::ExecuteTrade.round_up_stock(stock)).to be((stock_base + 1) * 100)
     end
   end

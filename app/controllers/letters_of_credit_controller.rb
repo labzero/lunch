@@ -18,6 +18,12 @@ class LettersOfCreditController < ApplicationController
     authorize :letters_of_credit, :request?
   end
 
+  before_action only: [:new, :manage] do
+    member = MembersService.new(request).member(current_member_id)
+    raise ActionController::RoutingError.new("There has been an error and LettersOfCreditController#view has encountered nil calling MembersService. Check error logs.") if member.nil?
+    @lc_agreement_flag = member[:customer_lc_agreement_flag]
+  end
+
   before_action :fetch_letter_of_credit_request, except: [:manage, :view]
   after_action :save_letter_of_credit_request, except: [:manage, :view]
 

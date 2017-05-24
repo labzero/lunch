@@ -157,6 +157,20 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
+  def shutoff_times_by_type
+    if shutoff_times = get_hash(:shutoff_times_by_type, 'etransact_advances/shutoff_times_by_type')
+      shutoff_times.each {|product_type, end_time| shutoff_times[product_type] = parse_24_hour_time(end_time) }
+    end
+  end
+
+  def enable_etransact_service
+    put_hash(:enable_etransact_service, 'etransact_advances/settings/enable_service', {})
+  end
+
+  def disable_etransact_service
+    put_hash(:disable_etransact_service, 'etransact_advances/settings/disable_service', {})
+  end
+
   protected
 
   def days_until(date)

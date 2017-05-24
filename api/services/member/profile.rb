@@ -260,6 +260,15 @@ module MAPI
               cu.fhlb_id = #{quote(member_id)}
           SQL
 
+          customer_lc_agreement_sql = <<-SQL
+            SELECT
+               cu_lc_agreement_flag
+            FROM
+              portfolios.customers 
+            WHERE
+              fhlb_id = #{quote(member_id)}
+          SQL
+
           address_sql = <<-SQL
             select
               shippingstreet,
@@ -284,6 +293,7 @@ module MAPI
               fhfa_number = customer_signature_card_data['CU_FHFB_ID']
               dual_signers_required = (customer_signature_card_data['NEEDSTWOSIGNERS'].try(:to_i) == -1)
             end
+            customer_lc_agreement_flag = execute_sql_single_result(app, customer_lc_agreement_sql, 'Get Customer Letter of Credit Agreement Flag')
             address_data = self.fetch_hash(logger, address_sql)
             if address_data
               member_street = address_data['SHIPPINGSTREET'].try(:read)
@@ -301,6 +311,7 @@ module MAPI
               fhfa_number = member['fhfa_number']
               sta_number = member['sta_number']
               dual_signers_required = member['dual_signers_required']
+              customer_lc_agreement_flag = member['customer_lc_agreement_flag']
               member_street = member['street']
               member_city = member['city']
               member_state = member['state']
@@ -317,6 +328,7 @@ module MAPI
             fhfa_number: fhfa_number,
             sta_number: sta_number,
             dual_signers_required: dual_signers_required,
+            customer_lc_agreement_flag: customer_lc_agreement_flag,
             street: member_street,
             city: member_city,
             state: member_state,
