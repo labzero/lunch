@@ -430,6 +430,15 @@
             border-bottom: 1px solid $medium-gray;
           }
         }
+        td:nth-child(2) {
+          width: 40%;
+        }
+        td:first-child {
+          width: 25%;
+        }
+        td:nth-child(3), td:nth-child(4), td:nth-child(5) {
+          width: 12%;
+        }
       }
     }
     .securities-table-safekept-transfer, .securities-table-pledge-transfer {
