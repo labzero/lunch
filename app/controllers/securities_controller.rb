@@ -286,9 +286,10 @@ class SecuritiesController < ApplicationController
       footer: [
         { value: t('securities.requests.view.securities.securities_in_request', count: @securities_request.securities.size) },
         { value: t('global.total_with_colon'), classes: ['report-cell-right'] },
-        { value: @securities_request.securities.inject(0) { |sum, security| sum + security.original_par }, type: :currency },
-        { value: @securities_request.securities.inject(0) { |sum, security| sum + security.payment_amount }, type: :currency }]
+        { value: @securities_request.securities.inject(0) { |sum, security| sum + security.original_par }, type: :currency }]
     }
+    @securities_table_data[:footer] << { value: @securities_request.securities.inject(0) { |sum, security| sum + security.payment_amount }, type: :currency } unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
+
     @securities_table_data[:column_headings] <<
       t('securities.requests.view.securities.settlement_amount',
         footnote_marker: fhlb_footnote_marker) unless SecuritiesRequest::TRANSFER_KINDS.include?(@securities_request.kind)
