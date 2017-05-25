@@ -38,7 +38,7 @@ class AdvancesController < ApplicationController
   end
 
   def manage
-    column_headings = [{title: t('common_table_headings.trade_date')}, {title: t('common_table_headings.funding_date')}, {title: t('common_table_headings.maturity_date')}, {title: t('common_table_headings.advance_number')}, {title: t('common_table_headings.advance_type')}, {title: t('global.footnoted_string', string: t('advances.rate'))}, {title: t('common_table_headings.current_par') + ' ($)'}]
+    column_headings = [{title: t('common_table_headings.trade_date')}, {title: t('common_table_headings.funding_date')}, {title: t('common_table_headings.maturity_date')}, {title: t('common_table_headings.advance_number')}, {title: t('common_table_headings.advance_type')}, {title: t('global.footnoted_string', string: t('advances.rate'))}, {title: fhlb_add_unit_to_table_header(t('common_table_headings.original_par'), '$')}, {title: fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$')}]
     column_headings.each {|col| col[:sortable] = true }
     column_headings << {title: t('advances.confirmation.title'), sortable: false} if feature_enabled?('advance-confirmation')
     outstanding_only = params[:maturity] == ADVANCES_OUTSTANDING || params[:maturity].nil?
@@ -70,6 +70,7 @@ class AdvancesController < ApplicationController
       {orderData: [4, 3], orderSequence: [:desc, :asc], targets: [4]},
       {orderData: [5, 3], orderSequence: [:desc, :asc], targets: [5]},
       {orderData: [6, 3], orderSequence: [:desc, :asc], targets: [6]},
+      {orderData: [7, 3], orderSequence: [:desc, :asc], targets: [7]},
       {type: :date, targets: [0, 1, 2]}
     ]
     if params[:job_id]
@@ -80,12 +81,17 @@ class AdvancesController < ApplicationController
       active_advances_response = JSON.parse(json).collect! {|o| o.with_indifferent_access}
       job_status.destroy
       current_par_sum = 0
+      original_par_sum = 0
       rows = active_advances_response.collect do |row|
         columns = []
-        [:trade_date, :funding_date, :maturity_date, :advance_number, :advance_type, :interest_rate, :current_par, :advance_confirmation].each do |key|
+        [:trade_date, :funding_date, :maturity_date, :advance_number, :advance_type, :interest_rate, :original_par, :current_par, :advance_confirmation].each do |key|
           value = row[key]
           if key == :interest_rate
             columns << {type: :index, value: value}
+          elsif key == :original_par
+            original_par = value || row[:current_par]
+            original_par_sum += original_par if original_par
+            columns << {type: :number, value: original_par}
           elsif key == :current_par
             current_par_sum += value if value
             columns << {type: :number, value: value}
@@ -109,8 +115,11 @@ class AdvancesController < ApplicationController
         {columns: columns}
       end
       @advances_data_table[:rows] = rows
-      @advances_data_table[:footer] = [ {value: t('global.total'), colspan: 6 },
-                                        { value: current_par_sum, type: :currency_whole } ]
+      @advances_data_table[:footer] = [
+        {value: t('global.total'), colspan: 6 },
+        { value: original_par_sum, type: :currency_whole },
+        { value: current_par_sum, type: :currency_whole }
+      ]
       render layout: false if request.xhr?
     else
       job_method = outstanding_only ? 'active_advances' : 'advances'
