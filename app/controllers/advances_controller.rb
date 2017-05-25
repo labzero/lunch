@@ -66,7 +66,7 @@ class AdvancesController < ApplicationController
       {orderData: [0, 3], orderSequence: [:desc, :asc], targets: [0]},
       {orderData: [1, 3], orderSequence: [:desc, :asc], targets: [1]},
       {orderData: [2, 3], orderSequence: [:desc, :asc], targets: [2]},
-      {orderSequence: [:desc], targets: [3]},
+      {},
       {orderData: [4, 3], orderSequence: [:desc, :asc], targets: [4]},
       {orderData: [5, 3], orderSequence: [:desc, :asc], targets: [5]},
       {orderData: [6, 3], orderSequence: [:desc, :asc], targets: [6]},
