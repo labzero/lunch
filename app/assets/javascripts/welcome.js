@@ -16,7 +16,7 @@ $(function() {
         $welcomeForm.removeAttr('target');
         $visitProfileField.attr('disabled', 'disabled');
         $welcomeForm.get(0).submit();
-      }, 1);
+      }, 5);
     });
   };
 });
