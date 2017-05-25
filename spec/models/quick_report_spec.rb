@@ -59,7 +59,7 @@ RSpec.describe QuickReport, type: :model do
         good_report_set.quick_reports.create(report_name: 'foo', report_file_name: 'foo.pdf')
         good_report_set.quick_reports.create(report_name: 'bar', report_file_name: 'bar.pdf')
         good_report_set.quick_reports.create(report_name: 'woo', report_file_name: nil)
-        expect(call_method.all).to match(good_report_set.quick_reports)
+        expect(call_method.all.sort).to match(good_report_set.quick_reports.sort)
       end
     end
   end
