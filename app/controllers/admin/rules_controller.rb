@@ -188,6 +188,7 @@ class Admin::RulesController < Admin::BaseController
   def advance_availability_by_member
     quick_advance_enabled = MembersService.new(request).quick_advance_enabled
     raise "There has been an error and Admin::RulesController#advance_availability_by_member has encountered nil" unless quick_advance_enabled.present?
+    quick_advance_enabled.sort_by! { |flag| flag['member_name'] }
     @advance_availability = {
       dropdown: {
         name: 'advance-availability-by-member-dropdown',
