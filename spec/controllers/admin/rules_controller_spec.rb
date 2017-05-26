@@ -686,7 +686,7 @@ RSpec.describe Admin::RulesController, :type => :controller do
 
   describe 'GET advance_availability_by_member' do
     let(:call_action) { get :advance_availability_by_member }
-    let(:quick_advance_enabled) { instance_double(Array, :[] => nil, collect: nil) }
+    let(:quick_advance_enabled) { instance_double(Array, :[] => nil, collect: nil, sort_by!: nil) }
     let(:flag) { instance_double(Hash, :[] => nil) }
     let(:member_name) { SecureRandom.hex }
     let(:fhlb_id) { rand(999..99999) }
@@ -720,11 +720,11 @@ RSpec.describe Admin::RulesController, :type => :controller do
         it 'sets `[:dropdown][:default_value]`' do
           expect(advance_availability[:dropdown][:default_value]).to eq('all')
         end
-        it 'sets `[:dropdown][:options]`' do          
+        it 'sets `[:dropdown][:options]`' do
           expect(advance_availability[:dropdown][:options]).to eq([
           [ I18n.t('admin.advance_availability.availability_by_member.filter.all'), 'all' ],
           [ I18n.t('admin.advance_availability.availability_by_member.filter.enabled'), 'enabled' ],
-          [ I18n.t('admin.advance_availability.availability_by_member.filter.disabled'), 'disabled' ] 
+          [ I18n.t('admin.advance_availability.availability_by_member.filter.disabled'), 'disabled' ]
         ])
         end
       end
@@ -734,8 +734,17 @@ RSpec.describe Admin::RulesController, :type => :controller do
         end
         describe 'setting the rows' do
           before do
-            allow(quick_advance_enabled).to receive(:collect).and_return(row_hash)
             allow(members_service).to receive(:quick_advance_enabled).and_return(quick_advance_enabled)
+            allow(quick_advance_enabled).to receive(:sort_by!).and_yield(flag)
+            allow(quick_advance_enabled).to receive(:collect).and_return(row_hash)
+          end
+          it 'calls sort on the flags' do
+            expect(quick_advance_enabled).to receive(:sort_by!)
+            call_action
+          end
+          it 'sorts the flags by `member_name`' do
+            expect(flag).to receive(:[]).with('member_name')
+            call_action
           end
           it 'sets the rows hash' do
             expect(advance_availability[:table][:rows]).to eq(row_hash)
