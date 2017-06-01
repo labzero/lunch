@@ -81,7 +81,7 @@ class SecuritiesController < ApplicationController
   def manage
     @title = t('securities.manage.title')
     member_balances = MemberBalanceService.new(current_member_id, request)
-    securities = member_balances.managed_securities
+    securities = member_balances.managed_securities.sort_by!{|e| [ e[:custody_account_type], e[:cusip] ]}
     raise StandardError, "There has been an error and SecuritiesController#manage has encountered nil. Check error logs." if securities.nil?
 
     securities.collect! { |security| Security.from_hash(security) }
@@ -106,8 +106,17 @@ class SecuritiesController < ApplicationController
         columns: columns
       }
     end
-    column_headings = [{value: 'check_all', type: :checkbox, name: 'check_all'}, t('common_table_headings.cusip'), t('common_table_headings.description'), t('common_table_headings.status'), t('securities.manage.eligibility'), t('common_table_headings.maturity_date'), t('common_table_headings.authorized_by'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('global.borrowing_capacity'), '$')]
-    column_headings.insert(4, t('securities.manage.delivery')) if feature_enabled?('securities-delivery-method')
+    column_headings = [
+      {value: 'check_all', type: :checkbox, name: 'check_all', sortable: false },
+      {title: t('common_table_headings.cusip'), sortable: true},
+      {title: t('common_table_headings.description'), sortable: true},
+      {title: t('common_table_headings.status'), sortable: true},
+      {title: t('securities.manage.eligibility'), sortable: true},
+      {title: t('common_table_headings.maturity_date'), sortable: true},
+      {title: t('common_table_headings.authorized_by'), sortable: true},
+      {title: fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), sortable: true},
+      {title: fhlb_add_unit_to_table_header(t('global.borrowing_capacity'), '$'), sortable: true}]
+    column_headings.insert(4, {title: t('securities.manage.delivery'), sortable: true} ) if feature_enabled?('securities-delivery-method')
     @securities_table_data = {
       filter: {
         name: 'securities-status-filter',
