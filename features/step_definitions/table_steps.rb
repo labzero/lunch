@@ -33,6 +33,8 @@ def get_selector_for_table_section(table_type)
       selector = '.table-dividend-details'
     when 'Manage Advances'
       selector = '.manage-advances-table'
+    when 'Manage Securities'
+      selector = '.manage-securities-table'
     else
       raise 'table title not recognized'
   end
@@ -58,9 +60,9 @@ def compare_sort_order(column_name, sort_order, table_selector='.report-table')
           value = element.text.delete('$,').to_f
         when 'Average Shares Outstanding'
           value = element.text.delete(',').to_f
-        when 'Shares Outstanding', 'Current Par ($)'
+        when 'Shares Outstanding', 'Current Par ($)', 'Borrowing Capacity ($)'
           value = element.text.delete(',').to_i
-        when 'Advance Type'
+        when 'Advance Type', 'CUSIP', 'Description', 'Status', 'Eligibility', 'Authorized By'
           value = element.text
         else
           raise 'column_name not recognized'
