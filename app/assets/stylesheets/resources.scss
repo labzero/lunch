@@ -195,6 +195,27 @@ $resource-page-padding: 140px !default;
       margin-top: 0;
     }
   }
+  .resource-form-table {
+    td {
+      @extend %typography-table-heading;
+      p {
+        @extend %typography-field-placeholder;
+        margin: 10px 0 0;
+      }
+      span {
+        margin-left: 20px;
+      }
+      &:first-child {
+        padding-right: 0;
+      }
+      &:nth-child(2) {
+        display: none;
+      }
+      &:last-child {
+        vertical-align: top;
+      }
+    }
+  }
 }
 
 .docusign-form{

@@ -1,5 +1,8 @@
 class ResourcesController < ApplicationController
   include CustomFormattingHelper
+  include ContactInformationHelper
+  include ActionView::Helpers::UrlHelper
+  include ResourceHelper
 
   APPLICATION_FORM_IDS = {
     commercial: {
@@ -27,6 +30,8 @@ class ResourcesController < ApplicationController
       access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
     }
   }.freeze
+
+  FORMS_WITHOUT_LINKS = [1973]
 
   before_action do
     set_active_nav(:resources)
@@ -505,22 +510,22 @@ class ResourcesController < ApplicationController
 
   # GET
   def commercial_application
-    @form_ids = APPLICATION_FORM_IDS[:commercial]
+    @application_table_rows = application_table_rows(APPLICATION_FORM_IDS[:commercial])
   end
 
   # GET
   def community_development_application
-    @form_ids = APPLICATION_FORM_IDS[:community_development]
+    @application_table_rows = application_table_rows(APPLICATION_FORM_IDS[:community_development])
   end
 
   #GET
   def credit_union_application
-    @form_ids = APPLICATION_FORM_IDS[:credit_union]
+    @application_table_rows = application_table_rows(APPLICATION_FORM_IDS[:credit_union])
   end
 
   #GET
   def insurance_company_application
-    @form_ids = APPLICATION_FORM_IDS[:insurance_company]
+    @application_table_rows = application_table_rows(APPLICATION_FORM_IDS[:insurance_company])
   end
 
   private
@@ -548,6 +553,48 @@ class ResourcesController < ApplicationController
       )
     end
     table_data
+  end
+
+  def form_description_from_id(form_id)
+    description = case form_id
+    when 2104, 2112, 2178
+      t("resources.membership.forms.id_#{form_id.to_s}.description_html", link: link_to(ContactInformationHelper::MEMBERSHIP_EMAIL, membership_email))
+    when 2136
+      t("resources.membership.forms.id_#{form_id.to_s}.description_html", download_link: link_to_download_resource(t('resources.membership.forms.id_2135.title'), resources_download_path(file: :form_2135)))
+    when 2349
+      t("resources.membership.forms.id_#{form_id.to_s}.description_html", download_link: link_to_download_resource(t('resources.membership.forms.id_2127.title'), resources_download_path(file: :form_2127)))
+    when 1973
+      t("resources.membership.forms.id_1973.description_html", link: link_to(ContactInformationHelper::MEMBERSHIP_EMAIL, membership_email))
+    else
+      t("resources.membership.forms.id_#{form_id.to_s}.description")
+    end
+    description.html_safe
+  end
+
+  def add_link_to_row(row)
+    form_id = row[:form_number]
+    case form_id.to_i
+    when *FORMS_WITHOUT_LINKS
+      nil
+    else
+      row[:pdf_link] = resources_download_path(file: :"form_#{form_id}")
+    end
+    row
+  end
+
+  def application_table_rows(form_id_hash)
+    rows_hash = {}
+    form_id_hash.each do |row_type, form_ids|
+      rows_hash[row_type] = form_ids.collect do |form_id|
+        row = {
+          title: t("resources.membership.forms.id_#{form_id.to_s}.title"),
+          description: form_description_from_id(form_id),
+          form_number: form_id
+        }
+        add_link_to_row(row)
+      end
+    end
+    rows_hash
   end
 
 end

@@ -1,5 +1,8 @@
 require 'rails_helper'
 include CustomFormattingHelper
+include ContactInformationHelper
+include ActionView::Helpers::UrlHelper
+include ResourceHelper
 
 RSpec.describe ResourcesController, type: :controller do
   login_user
@@ -480,11 +483,28 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   RSpec.shared_examples 'a resource membership action' do |action|
+    let(:call_action) { get action }
     it_behaves_like 'a controller action with an active nav setting', action, :resources
     it_behaves_like 'a user required action', :get, action
-    it "should render the #{action.to_s} view" do
-      get action
+    it "renders the #{action.to_s} view" do
+      call_action
       expect(response.body).to render_template(action.to_s)
+    end
+  end
+
+  RSpec.shared_examples 'a resource membership action with application forms tables' do |action, application_type|
+    let(:processed_rows) { double('processed rows') }
+    let(:call_action) { get action }
+
+    it_behaves_like 'a resource membership action', action
+    it "calls `application_table_rows` with the form id hash for the `#{application_type}`" do
+      expect(controller).to receive(:application_table_rows).with(described_class::APPLICATION_FORM_IDS[application_type])
+      call_action
+    end
+    it 'sets `@application_table_rows` to the result of calling `application_table_rows`' do
+      allow(controller).to receive(:application_table_rows).and_return(processed_rows)
+      call_action
+      expect(assigns[:application_table_rows]).to eq(processed_rows)
     end
   end
 
@@ -497,35 +517,19 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET :commercial_application' do
-    it_behaves_like 'a resource membership action', :commercial_application
-    it 'sets @form_ids to the proper value' do
-      get :commercial_application
-      expect(assigns[:form_ids]).to eq(ResourcesController::APPLICATION_FORM_IDS[:commercial])
-    end
+    it_behaves_like 'a resource membership action with application forms tables', :commercial_application, :commercial
   end
 
   describe 'GET :community_development_application' do
-    it_behaves_like 'a resource membership action', :community_development_application
-    it 'sets @form_ids to the proper value' do
-      get :community_development_application
-      expect(assigns[:form_ids]).to eq(ResourcesController::APPLICATION_FORM_IDS[:community_development])
-    end
+    it_behaves_like 'a resource membership action with application forms tables', :community_development_application, :community_development
   end
 
   describe 'GET :credit_union_application' do
-    it_behaves_like 'a resource membership action', :credit_union_application
-    it 'sets @form_ids to the proper value' do
-      get :credit_union_application
-      expect(assigns[:form_ids]).to eq(ResourcesController::APPLICATION_FORM_IDS[:credit_union])
-    end
+    it_behaves_like 'a resource membership action with application forms tables', :credit_union_application, :credit_union
   end
 
   describe 'GET :insurance_company_application' do
-    it_behaves_like 'a resource membership action', :insurance_company_application
-    it 'sets @form_ids to the proper value' do
-      get :insurance_company_application
-      expect(assigns[:form_ids]).to eq(ResourcesController::APPLICATION_FORM_IDS[:insurance_company])
-    end
+    it_behaves_like 'a resource membership action with application forms tables', :insurance_company_application, :insurance_company
   end
 
   describe 'the `fee_schedule_table_hash` private method' do
@@ -640,6 +644,133 @@ RSpec.describe ResourcesController, type: :controller do
         expect{make_request}.to raise_error(/encountered nil/i)
       end
     end
-  end
 
+    describe '`form_description_from_id`' do
+      let(:form_id) { SecureRandom.hex }
+      let(:translation) { instance_double(String, html_safe: nil) }
+      let(:call_method) { controller.send(:form_description_from_id, form_id) }
+
+      [2104, 2112, 2178].each do |form_id|
+        context "when the form_id is `#{form_id}`" do
+          let(:form_id) { form_id }
+          it "returns the proper description for the form with id `#{form_id}`" do
+            expect(call_method).to eq(I18n.t("resources.membership.forms.id_#{form_id.to_s}.description_html", link: link_to(ContactInformationHelper::MEMBERSHIP_EMAIL, membership_email)))
+          end
+        end
+      end
+      context 'when the form_id is `2136`' do
+        let(:form_id) { 2136 }
+        it 'returns the proper description for the form with id `2136`' do
+          expect(call_method).to eq(I18n.t("resources.membership.forms.id_#{form_id.to_s}.description_html", download_link: link_to_download_resource(I18n.t('resources.membership.forms.id_2135.title'), resources_download_path(file: :form_2135))))
+        end
+      end
+      context 'when the form_id is `2349`' do
+        let(:form_id) { 2349 }
+        it 'returns the proper description for the form with id `2349`' do
+          expect(call_method).to eq(I18n.t("resources.membership.forms.id_#{form_id.to_s}.description_html", download_link: link_to_download_resource(I18n.t('resources.membership.forms.id_2127.title'), resources_download_path(file: :form_2127))))
+        end
+      end
+      context 'when the form_id is `1973`' do
+        let(:form_id) { 1973 }
+        it 'returns the proper description for the form with id `1973`' do
+          expect(call_method).to eq(I18n.t("resources.membership.forms.id_1973.description_html", link: link_to(ContactInformationHelper::MEMBERSHIP_EMAIL, membership_email)))
+        end
+      end
+      context 'when the the form_id is not explicitly called out in the case statement' do
+        it 'calls the I18n localization method with a string containing the form id' do
+          expect(controller).to receive(:t).with("resources.membership.forms.id_#{form_id}.description").and_return(translation)
+          call_method
+        end
+        it 'returns the proper description for the provided form id' do
+          allow(controller).to receive(:t).with("resources.membership.forms.id_#{form_id}.description").and_return(translation)
+          allow(translation).to receive(:html_safe).and_return(translation)
+          expect(call_method).to eq(translation)
+        end
+      end
+      it 'ensures the translated string is html_safe' do
+        allow(controller).to receive(:t).with("resources.membership.forms.id_#{form_id}.description").and_return(translation)
+        expect(translation).to receive(:html_safe)
+        call_method
+      end
+    end
+
+    describe '`add_link_to_row`' do
+      let(:row) { {form_number: SecureRandom.hex} }
+      let(:call_method) { controller.send(:add_link_to_row, row) }
+      context 'form_numbers without a link associated with them' do
+        described_class::FORMS_WITHOUT_LINKS.each do |form_id|
+          context "when the form_id is `#{form_id}`" do
+            let(:row) { {form_number: form_id} }
+            it 'does not add a link to the row' do
+              expect(call_method[:pdf_link]).to be nil
+            end
+          end
+        end
+      end
+      context 'when the form_number of the form is not `1973`' do
+        let(:download_path) { instance_double(String) }
+        it 'calls `resources_download_path` with an argument including the form_number of the row' do
+          expect(controller).to receive(:resources_download_path).with(file: :"form_#{row[:form_number]}")
+          call_method
+        end
+        it 'sets the `pdf_link` key of the row to the value returned by `resources_download_path`' do
+          expect(controller).to receive(:resources_download_path).with(file: :"form_#{row[:form_number]}").and_return(download_path)
+          call_method
+          expect(row[:pdf_link]).to eq(download_path)
+        end
+      end
+    end
+
+    describe '`application_table_rows`' do
+      before do
+        allow(controller).to receive(:t)
+        allow(controller).to receive(:form_description_from_id)
+        allow(controller).to receive(:add_link_to_row) { |row| row}
+      end
+      it 'returns a hash with a key for each key it was passed' do
+        keys = %w(a b c d e f g).sample(3)
+        argument_hash = Hash[keys.collect{ |key| [key, []] }]
+        expect(controller.send(:application_table_rows, argument_hash).keys).to eq(keys)
+      end
+      it 'contains a row for every form_id it is passed' do
+        n = rand(2..5)
+        form_ids = [1, 2, 3, 4, 5, 6, 7]
+        argument_hash = {some_application_type: form_ids.sample(n)}
+        expect(controller.send(:application_table_rows, argument_hash)[:some_application_type].length).to eq(n)
+      end
+      describe 'constructing a row from a form_id' do
+        let(:form_id) { SecureRandom.hex }
+        let(:title) { instance_double(String) }
+        let(:description) { instance_double(String) }
+        let(:call_method) { controller.send(:application_table_rows, {some_application_type: [form_id]}) }
+        let(:row) { call_method[:some_application_type][0] }
+        it 'uses the form_id when translating the title' do
+          expect(controller).to receive(:t).with("resources.membership.forms.id_#{form_id.to_s}.title")
+          call_method
+        end
+        it 'sets the `title` of the row to the result of the translation' do
+          allow(controller).to receive(:t).with("resources.membership.forms.id_#{form_id.to_s}.title").and_return(title)
+          expect(row[:title]).to eq(title)
+        end
+        it 'calls `form_description_from_id` with the form_id' do
+          expect(controller).to receive(:form_description_from_id).with(form_id)
+          call_method
+        end
+        it 'sets the `description` of the row to the result of `form_description_from_id`' do
+          expect(controller).to receive(:form_description_from_id).with(form_id).and_return(description)
+          expect(row[:description]).to eq(description)
+        end
+        it 'sets the `form_number` of the row to the form_id' do
+          expect(row[:form_number]).to eq(form_id)
+        end
+        it 'calls `add_link_to_row` with the row' do
+          allow(controller).to receive(:t).and_return(title)
+          expect(controller).to receive(:form_description_from_id).and_return(description)
+          processed_row = {title: title, description: description, form_number: form_id}
+          expect(controller).to receive(:add_link_to_row).with(processed_row)
+          call_method
+        end
+      end
+    end
+  end
 end
