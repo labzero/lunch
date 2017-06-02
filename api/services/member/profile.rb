@@ -328,7 +328,7 @@ module MAPI
             fhfa_number: fhfa_number,
             sta_number: sta_number,
             dual_signers_required: dual_signers_required,
-            customer_lc_agreement_flag: customer_lc_agreement_flag,
+            customer_lc_agreement_flag: customer_lc_agreement_flag.eql?('Y'),
             street: member_street,
             city: member_city,
             state: member_state,

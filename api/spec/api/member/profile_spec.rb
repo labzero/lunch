@@ -493,6 +493,14 @@ describe MAPI::ServiceApp do
             make_request
             expect(last_response.status).to be(200)
           end
+          it 'returns true for the `customer_lc_agreement_flag` value if the SQL query returns `[\'Y\']`' do
+            allow(MAPI::Services::Member::Profile).to receive(:execute_sql_single_result).and_return('Y')
+            expect(member_details['customer_lc_agreement_flag']).to eq(true)
+          end
+          it 'returns false for the `customer_lc_agreement_flag` value if the SQL query returns `[\'N\']`' do
+            allow(MAPI::Services::Member::Profile).to receive(:execute_sql_single_result).and_return('N')
+            expect(member_details['customer_lc_agreement_flag']).to eq(false)
+          end
         end
         it 'returns the member name' do
           expect(member_details['name']).to eq(member_name)
