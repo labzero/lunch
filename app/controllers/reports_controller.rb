@@ -1312,7 +1312,7 @@ class ReportsController < ApplicationController
 
   def dividend_statement
     @div_id = params[:dividend_transaction_filter]
-    downloadable_report(:pdf, dividend_transaction_filter: @div_id) do
+    downloadable_report([ :xlsx, :pdf], dividend_transaction_filter: @div_id) do
       @report_name = t('reports.capital_stock.dividend_statement.title')
       member_balances = MemberBalanceService.new(current_member_id, request)
       @dividend_statement_details = {
