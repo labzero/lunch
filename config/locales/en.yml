@@ -1657,6 +1657,7 @@ en:
       dividend_statement:
         title: Dividend Transaction Statement
         summary: Includes the most recent dividend payment date, dividend rate, amount of cash dividend paid, and detailed dividend calculation for each certificate owned during the dividend period.
+        xlsx_worksheet_name: Dividend Statement
     securities:
       title: Securities
       transactions:

@@ -681,7 +681,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :dividend_statement
       it_behaves_like 'a report with instance variables set in a before_filter', :dividend_statement
       it_behaves_like 'a controller action with an active nav setting', :dividend_statement, :reports
-      it_behaves_like 'a report that can be downloaded', :dividend_statement, [:pdf]
+      it_behaves_like 'a report that can be downloaded', :dividend_statement, [:xlsx, :pdf]
 
       it 'assigns @report_name' do
         make_request
