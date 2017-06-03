@@ -273,6 +273,10 @@ RSpec.describe ReportsController, :type => :controller do
         get :capital_stock_trial_balance, start_date: start_date
         expect(assigns[:picker_presets]).to eq(date_picker_presets)
       end
+      it 'sets @as_of to `@start_date`' do
+        call_action
+        expect(assigns[:as_of]).to eq(start_date)
+      end
       it 'assigns @number_of_shares and @number_of_certificates' do
         call_action
         expect(assigns[:number_of_shares]).to eq(number_of_shares)

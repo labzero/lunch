@@ -346,6 +346,7 @@ class ReportsController < ApplicationController
     @report_name = ReportConfiguration.report_title(:capital_stock_trial_balance)
     initialize_dates(:capital_stock_trial_balance, params[:start_date])
     report_download_name = "capital_stock_trial_balance-#{fhlb_report_date_numeric(@start_date)}"
+    @as_of = @start_date # for `reports/pdf_footer.html.haml`
     downloadable_report(DOWNLOAD_FORMATS, {start_date: @start_date.to_s}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
