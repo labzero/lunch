@@ -1868,7 +1868,9 @@ class ReportsController < ApplicationController
           member_profile = DEFAULT_MEMBER_PROFILE
           member_details = {}
         end
-        @collateral_notice = member_profile[:collateral_delivery_status] == 'Y'
+        if member_profile[:collateral_delivery_status] == 'Y'
+          @collateral_notice = 'Y'
+        end
         @sta_number = member_details[:sta_number]
         @fhfa_number = member_details[:fhfa_number]
         @member_name = member_details[:name]

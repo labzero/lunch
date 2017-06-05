@@ -14,7 +14,7 @@
       %dd= @sta_number
       %dt= t('reports.pages.account_summary.institution_details.fhfa_number')
       %dd= @fhfa_number
-  - if @collateral_notice
+  - if @collateral_notice == 'Y'
     %section.account-summary-collateral-notice.icon-info-before
       = t('reports.pages.account_summary.collateral_delivery_required')
   .report-main-body

@@ -3548,7 +3548,7 @@ RSpec.describe ReportsController, :type => :controller do
       context '@collateral_notice' do
         it 'assigns `@collateral_notice` to true if the collateral_delivery_status flag is `Y`' do
           make_request_shared_example
-          expect(assigns[:collateral_notice]).to eq(true)
+          expect(assigns[:collateral_notice]).to eq('Y')
         end
       end
 
@@ -3556,7 +3556,7 @@ RSpec.describe ReportsController, :type => :controller do
         let(:collateral_delivery_status) { 'N' }
         it 'assigns `@collateral_notice` to false if the collateral_delivery_status flag is `N`' do
           make_request_shared_example
-          expect(assigns[:collateral_notice]).to eq(false)
+          expect(assigns[:collateral_notice]).to eq('N')
         end
       end
 
@@ -3759,9 +3759,9 @@ RSpec.describe ReportsController, :type => :controller do
         before do
           allow(subject).to receive(:report_disabled?).with(described_class::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
         end
-        it 'sets @collateral_notice to false' do
+        it 'sets @collateral_notice to N' do
           make_request_shared_example
-          expect(assigns[:collateral_notice]).to be(false)
+          expect(assigns[:collateral_notice]).to eq('N')
         end
         [ :sta_number, :fhfa_number, :member_name ].each do |instance_var|
           it "sets @#{instance_var} to nil" do
