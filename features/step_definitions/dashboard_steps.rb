@@ -131,7 +131,7 @@ Then (/^I should see the limited pricing information message$/) do
 end
 
 Then(/^I should see an add advances disabled message$/) do
-  page.assert_selector('.etransact-status-message p', text: strip_tags(I18n.t('dashboard.quick_advance.advance_desk_unavailable_html', phone_number: service_desk_phone_number)))
+  page.assert_selector('.etransact-status-message p', text: strip_tags(I18n.t('dashboard.quick_advance.advances_desk_unavailable_html', phone_number: service_desk_phone_number)))
 end
 
 Then(/^I should see a no terms message$/) do

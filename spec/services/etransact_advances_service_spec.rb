@@ -619,8 +619,20 @@ describe EtransactAdvancesService do
       end
     end
     describe 'when etransact is not active' do
-      it 'returns a value of :closed' do
+      it 'returns a value of `:closed` after desk closing time' do
+        allow(subject).to receive(:etransact_active?).and_return(false)
+        allow(Time).to receive_message_chain(:zone, :now, :hour).and_return(rand(14..23))
         expect(call_method).to eq(:closed)
+      end
+      it 'returns a value of `:closed` before desk opening time' do
+        allow(subject).to receive(:etransact_active?).and_return(false)
+        allow(Time).to receive_message_chain(:zone, :now, :hour).and_return(rand(0..7))
+        expect(call_method).to eq(:closed)
+      end
+      it 'returns a value of `:unavailable` during normal desk hours' do
+        allow(subject).to receive(:etransact_active?).and_return(false)
+        allow(Time).to receive_message_chain(:zone, :now, :hour).and_return(rand(8..13))
+        expect(call_method).to eq(:unavailable)
       end
     end
   end

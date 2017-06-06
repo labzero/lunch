@@ -361,7 +361,7 @@ module MAPI
             WHERE WHOLE_LOAN_ENABLED = 'Y' AND AO_TERM_BUCKET_ID = 1
           SQL
 
-          etransact_status = false  #indicat if etransact is turn on and at least one product has not reach End Time
+          etransact_status = false  #indicate if etransact is turn on and at least one product has not reach End Time
           wl_vrc_status = false   #indicate if WL VRC is enabled regardless of if etransact is turn on
           etransact_eod = false # indicates that we have reached EOD on the global eTransact flag
           etransact_disabled = false # indiciates that eTransact has been globally disabled

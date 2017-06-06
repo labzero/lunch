@@ -136,6 +136,8 @@ class EtransactAdvancesService < MAPIService
     put_hash(:update_term_limits, 'etransact_advances/limits', limits)
   end
 
+  MEMBER_SERVICES_DESK_HOURS = 8..14
+
   def etransact_status(member_id, status_object=nil)
     enabled_for_member = MembersService.new(request).quick_advance_enabled_for_member?(member_id)
     status_object = self.status unless status_object
@@ -153,7 +155,7 @@ class EtransactAdvancesService < MAPIService
         :no_terms
       end
     else
-      :closed
+      MEMBER_SERVICES_DESK_HOURS.cover?(Time.zone.now.hour) ? :unavailable : :closed
     end
   end
 
