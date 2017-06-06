@@ -68,6 +68,8 @@ RSpec.describe SecuritiesController, type: :controller do
       before do
         allow(member_balance_service_instance).to receive(:managed_securities).and_return(securities)
         allow(security[:cusip]).to receive(:upcase).and_return(security[:cusip])
+        allow(security[:description]).to receive(:gsub!).and_return(security[:description])
+        allow(security[:description]).to receive(:truncate).and_return(security[:description])
         allow(controller).to receive(:feature_enabled?).and_call_original
         allow(controller).to receive(:feature_enabled?).with('securities-delivery-method').and_return(false)
         stub_const('SecuritiesController::DELIVER_TO_MAPPING', { reg_id => deliver_to })
@@ -1026,6 +1028,17 @@ RSpec.describe SecuritiesController, type: :controller do
         end
         it 'truncates the overlengthy description to 34 characters' do
           expect(JSON.parse(parsed_response_body[:form_data]).first['description'].size).to be <= 34
+        end
+      end
+      describe "when a security in the uploaded file for a `#{type}` contains a description with % character" do
+        uploaded_with_percent_sign_description = excel_fixture_file_upload('sample-securities-upload-with-percent-sign-in-description.xlsx')
+        let(:call_action) { post :upload_securities, file: uploaded_with_percent_sign_description, type: type}
+        let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
+        before do
+          allow(Security).to receive(:from_hash).and_call_original
+        end
+        it 'removes `%` from description' do
+          expect(JSON.parse(parsed_response_body[:form_data]).first['description']).not_to include('%')
         end
       end
     end

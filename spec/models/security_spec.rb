@@ -150,7 +150,7 @@ RSpec.describe Security, :type => :model do
 
   describe '`attributes`' do
     let(:call_method) { subject.attributes }
-    let(:sample_attrs) { (described_class::ACCESSIBLE_ATTRS - [:cusip]).sample(5) }
+    let(:sample_attrs) { (described_class::ACCESSIBLE_ATTRS - [:cusip, :description]).sample(5) }
 
     before do
       sample_attrs.each do |attr|
@@ -176,7 +176,7 @@ RSpec.describe Security, :type => :model do
     let(:value) { double('some value', is_a?: nil, nil?: nil) }
     let(:call_method) { subject.send(:attributes=, hash) }
 
-    (described_class::ACCESSIBLE_ATTRS - described_class::CURRENCY_ATTRIBUTES - [:cusip]).each do |key|
+    (described_class::ACCESSIBLE_ATTRS - described_class::CURRENCY_ATTRIBUTES - [:cusip, :description]).each do |key|
       it "assigns the value found under `#{key}` to the attribute `#{key}`" do
         hash[key.to_s] = value
         call_method
@@ -207,6 +207,11 @@ RSpec.describe Security, :type => :model do
       expect(subject).to receive(:cusip=).with(value)
       call_method
     end
+    it 'calls the `description=` setter with the value found under `description`' do
+      hash['description'] = value
+      expect(subject).to receive(:description=).with(value)
+      call_method
+    end
     it 'raises an exception if the hash contains keys that are not Security attributes' do
       hash[:foo] = 'bar'
       expect{call_method}.to raise_error(ArgumentError, "unknown attribute: 'foo'")
@@ -222,6 +227,22 @@ RSpec.describe Security, :type => :model do
     it "assigns nil for the attribute `:cusip` if the passed value for `:cusip` is nil" do
       subject.cusip = nil
       expect(subject.cusip).to be(nil)
+    end
+  end
+  describe '`description`' do
+    it "removes % from passed value to description" do
+      value = "123%4567"
+      subject.description = value
+      expect(subject.description).to eq("1234567")
+    end
+    it "truncates the value to 34 characters" do
+      value = "12345678901234567890123456789012345"
+      subject.description = value
+      expect(subject.description).to eq("1234567890123456789012345678901234")
+    end
+    it "assigns nil for the attribute `:description` if the passed value for `:description` is nil" do
+      subject.description = nil
+      expect(subject.description).to be(nil)
     end
   end
 end
