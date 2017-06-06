@@ -24,8 +24,14 @@ workbook.styles do |styles|
       styles = daily_prime_styles
       column_headings = [@table_data[:column_sub_headings_first]]
       @table_data[:column_headings].each do |heading|
-        column_headings << "#{heading} #{@table_data[:column_sub_headings].first}"
-        column_headings << "#{heading} #{@table_data[:column_sub_headings].last}"
+        [@table_data[:column_sub_headings].first, @table_data[:column_sub_headings].last].each do |sub_heading| 
+          if sub_heading.present?
+            sub_heading = sub_heading[:value] if sub_heading.is_a?(Hash)
+            column_headings << "#{heading} #{sub_heading}"
+          else
+            column_headings << "#{heading}"
+          end
+        end
       end
     else
       raise 'Unknown @credit_type'
