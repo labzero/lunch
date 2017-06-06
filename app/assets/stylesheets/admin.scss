@@ -7,6 +7,7 @@ $partial-enabled-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3
 .admin {
   h1 {
     @extend %typography-page-title;
+    margin: 32px 0 42px;
     span {
       vertical-align: middle;
       line-height: 1;

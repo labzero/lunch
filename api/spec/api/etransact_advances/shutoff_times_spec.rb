@@ -76,6 +76,74 @@ describe MAPI::ServiceApp do
           })
         end
       end
+
+      describe '`get_early_shutoffs`' do
+        let(:call_method) { shutoff_times_module.get_early_shutoffs(app) }
+        before { allow(shutoff_times_module).to receive(:should_fake?).and_return(true) }
+
+        it 'calls `should_fake?` with the app passed as an argument' do
+          expect(shutoff_times_module).to receive(:should_fake?).with(app).and_return(true)
+          call_method
+        end
+
+        context 'when `should_fake?` returns true' do
+          before { allow(shutoff_times_module).to receive(:should_fake?).and_return(true) }
+          it 'calls `fake_hashes` with `etransact_early_shutoff_times`' do
+            expect(shutoff_times_module).to receive(:fake_hashes).with('etransact_early_shutoff_times').and_return([])
+            call_method
+          end
+        end
+        context 'when `should_fake?` returns false' do
+          before { allow(shutoff_times_module).to receive(:should_fake?).and_return(false) }
+          it 'calls `fetch_hashes` with the app logger' do
+            expect(shutoff_times_module).to receive(:fetch_hashes).with(app.logger, any_args).and_return([])
+            call_method
+          end
+          it 'calls `fetch_hashes` with an empty hash for the mapping arg' do
+            expect(shutoff_times_module).to receive(:fetch_hashes).with(anything, anything, {}, anything).and_return([])
+            call_method
+          end
+          it 'calls `fetch_hashes` with true for the downcase keys arg' do
+            expect(shutoff_times_module).to receive(:fetch_hashes).with(anything, anything, anything, true).and_return([])
+            call_method
+          end
+          describe 'the SQL query' do
+            describe 'the selected fields' do
+              ['EARLY_SHUTOFF_DATE', 'FRC_SHUTOFF_TIME', 'VRC_SHUTOFF_TIME', 'DAY_OF_MESSAGE', 'DAY_BEFORE_MESSAGE'].each do |field|
+                it "selects the `#{field}` field" do
+                  matcher = Regexp.new(/\A\s*SELECT.*\s+#{field}(?:,|\s+)/im)
+                  expect(shutoff_times_module).to receive(:fetch_hashes).with(anything, matcher, anything, anything).and_return([])
+                  call_method
+                end
+              end
+            end
+            it 'selects from `WEB_ADM.AO_TYPE_EARLY_SHUTOFF`' do
+              matcher = Regexp.new(/\A\s*SELECT.+FROM\s+WEB_ADM.AO_TYPE_EARLY_SHUTOFF/im)
+              expect(shutoff_times_module).to receive(:fetch_hashes).with(anything, matcher, anything, anything).and_return([])
+              call_method
+            end
+          end
+        end
+        describe 'formatting the `early_shutoff_date`' do
+          let(:early_shutoff_iso8601) { double('early shutoff date') }
+          let(:early_shutoff_date) { instance_double(Date, iso8601: early_shutoff_iso8601) }
+          let(:early_shutoff_string) { instance_double(String, to_date: early_shutoff_date) }
+          let(:early_shutoff) {{'early_shutoff_date' => early_shutoff_string}}
+          before { allow(shutoff_times_module).to receive(:fake_hashes).and_return([early_shutoff]) }
+
+          it 'calls `to_date` on the `early_shutoff_date` value for each scheduled shutoff' do
+            expect(early_shutoff_string).to receive(:to_date).and_return(early_shutoff_date)
+            call_method
+          end
+          it 'calls `iso8601` on the datified `early_shutoff_date` value' do
+            expect(early_shutoff_date).to receive(:iso8601)
+            call_method
+          end
+          it 'sets the `early_shutoff_date` value to the iso8601-formatted date' do
+            expect(call_method.first['early_shutoff_date']).to eq(early_shutoff_iso8601)
+          end
+        end
+      end
     end
   end
 end

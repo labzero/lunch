@@ -19,7 +19,7 @@
   }
 }
 
-.limits, .advance-availability {
+.limits, .advance-availability, .advance-shutoff-times {
   .form-error-section, .form-success-section {
     margin-top: 0;
     p {
@@ -395,5 +395,71 @@
     text-align: center;
     display: block;
     margin-top: 16px;
+  }
+}
+
+.advance-shutoff-times {
+  table {
+    margin-bottom: 0;
+  }
+}
+
+.advance-shutoff-times-early {
+  button {
+    float: right;
+    margin-bottom: 20px;
+    width: 436px;
+  }
+  table {
+    td, th {
+      box-sizing: border-box;
+    }
+    th {
+      &:nth-child(1) {
+        width: 15%;
+      }
+      &:nth-child(2) {
+        width: 21%;
+      }
+      &:nth-child(3) {
+        width: auto;
+      }
+      &:nth-child(4) {
+        width: 12%;
+      }
+    }
+    td {
+      vertical-align: top;
+      &:nth-child(2) {
+        p {
+          margin-top: 0;
+        }
+      }
+      &:nth-child(3) {
+        h2 {
+          @extend %typography-table-total;
+          margin: 0;
+        }
+        p {
+          margin: 10px 0 30px;
+          line-height: $tight-line-height;
+          &:last-of-type {
+            margin-bottom: 10px;
+          }
+        }
+      }
+      &:nth-child(4) {
+        span {
+          @extend %link-style;
+          text-transform: uppercase;
+          &:first-child {
+            float: left;
+          }
+          &:last-child {
+            float: right;
+          }
+        }
+      }
+    }
   }
 }

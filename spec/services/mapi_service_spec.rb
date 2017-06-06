@@ -262,6 +262,51 @@ describe MAPIService do
     end
   end
 
+  shared_examples_for 'a MAPI JSON REST request with a response that is an array of hashes' do |rest_action, *args|
+    let(:endpoint) { double('An Endpoint', to_s: '/') }
+    let(:name) { double('A Name') }
+    let(:error_handler) { -> (name, err_str, err) { } }
+    let(:result_hash) { instance_double(Hash) }
+    let(:indifferent_result_hash) { instance_double(Hash) }
+    let(:call_method) { subject.send(:"#{rest_action}_hashes", name, endpoint, *args) }
+    let(:call_method_with_error_handler) { subject.send(:"#{rest_action}_hashes", name, endpoint, *args, &error_handler) }
+    let(:anythings) { Array.new(args.length, anything) }
+
+    it "calls `#{rest_action}_json`" do
+      expect(subject).to receive(:"#{rest_action}_json").with(name, endpoint, *args).and_return([])
+      call_method
+    end
+    it "converts each hash in the `#{rest_action}_json` array result to an indifferent hash" do
+      result_array = []
+      n = rand(2..5)
+      n.times do
+        result_array << result_hash
+      end
+      allow(subject).to receive(:"#{rest_action}_json").and_return(result_array)
+      expect(result_hash).to receive(:try).with(:with_indifferent_access).exactly(n).times
+      call_method
+    end
+    it 'returns array of indifferent hashes' do
+      result_array = []
+      processed_array = []
+      n = rand(2..5)
+      n.times do
+        result_array << result_hash
+        processed_array << indifferent_result_hash
+      end
+      allow(subject).to receive(:"#{rest_action}_json").and_return(result_array)
+      allow(result_hash).to receive(:try).with(:with_indifferent_access).and_return(indifferent_result_hash)
+      expect(call_method).to eq(processed_array)
+    end
+    it "passes the error handler to `#{rest_action}_json`" do
+      allow(subject).to receive(:"#{rest_action}_json").with(anything, anything, *anythings) do |*args, &block|
+        expect(block).to be(error_handler)
+        []
+      end
+      call_method_with_error_handler
+    end
+  end
+
   [:get, :delete].each do |action|
     describe "`#{action}` method" do
       let(:endpoint) { double('An Endpoint', to_s: '/') }
@@ -342,6 +387,10 @@ describe MAPIService do
 
   describe '`get_hash` method' do
     it_behaves_like 'a MAPI JSON REST request with Hash response', :get, {SecureRandom.hex => SecureRandom.hex}
+  end
+
+  describe '`get_hashes` method' do
+    it_behaves_like 'a MAPI JSON REST request with a response that is an array of hashes', :get, [{SecureRandom.hex => SecureRandom.hex}]
   end
 
   describe '`get_fake_hash` method'

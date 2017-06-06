@@ -350,6 +350,21 @@ class Admin::RulesController < Admin::BaseController
     end
   end
 
+  # GET
+  def early_shutoff
+    @early_shutoff_data = EtransactAdvancesService.new(request).early_shutoffs
+    raise 'There has been an error and EtransactAdvancesService#early_shutoff has encountered nil. Check error logs.' if @early_shutoff_data.nil?
+    calendar_service = CalendarService.new(request)
+    @early_shutoff_data.each { |early_shutoff| early_shutoff[:day_before_date] = calendar_service.find_previous_business_day(early_shutoff[:early_shutoff_date] - 1.day, 1.day) }
+    @column_headings = [t('admin.shutoff_times.early.date'), t('admin.shutoff_times.early.time'), t('admin.shutoff_times.early.messages')]
+    @column_headings << t('global.actions') if @can_edit_trade_rules
+  end
+
+  # GET
+  def typical_shutoff
+
+  end
+
   private
 
   def set_flash_message(results)

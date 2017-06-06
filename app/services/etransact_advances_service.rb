@@ -165,6 +165,16 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
+  def early_shutoffs
+    if early_shutoffs = get_hashes(:early_shutoffs, 'etransact_advances/early_shutoffs')
+      early_shutoffs.each do |early_shutoff|
+        fix_date(early_shutoff, :early_shutoff_date)
+        early_shutoff[:frc_shutoff_time] = parse_24_hour_time(early_shutoff[:frc_shutoff_time])
+        early_shutoff[:vrc_shutoff_time] = parse_24_hour_time(early_shutoff[:vrc_shutoff_time])
+      end
+    end
+  end
+
   def enable_etransact_service
     put_hash(:enable_etransact_service, 'etransact_advances/settings/enable_service', {})
   end

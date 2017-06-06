@@ -685,6 +685,96 @@ describe EtransactAdvancesService do
     end
   end
 
+  describe '`early_shutoffs`' do
+    let(:early_shutoff) {{
+      frc_shutoff_time: double('frc shutoff time'),
+      vrc_shutoff_time: double('vrc shutoff time')
+    }}
+    let(:processed_early_shutoff) {{
+      frc_shutoff_time: frc_sentinel,
+      vrc_shutoff_time: vrc_sentinel,
+      early_shutoff_date: early_shutoff_date
+    }}
+    let(:early_shutoff_date) { instance_double(Date) }
+    let(:vrc_sentinel) { double('processed vrc shutoff time') }
+    let(:frc_sentinel) { double('processed frc shutoff time') }
+    let(:call_method) { subject.early_shutoffs }
+    before do
+      allow(subject).to receive(:get_hashes).and_return([early_shutoff])
+      allow(subject).to receive(:parse_24_hour_time)
+      allow(subject).to receive(:fix_date)
+    end
+
+    it 'calls `get_hashes` with the proper name and endpoint' do
+      expect(subject).to receive(:get_hashes).with(:early_shutoffs, 'etransact_advances/early_shutoffs').and_return([])
+      call_method
+    end
+    it 'returns nil if `get_hashes` returns nil' do
+      allow(subject).to receive(:get_hashes).and_return(nil)
+      expect(call_method).to be nil
+    end
+    it 'returns an empty hash if `get_hashes` returns an empty hash' do
+      allow(subject).to receive(:get_hashes).and_return([])
+      expect(call_method).to eq([])
+    end
+    describe 'processing the scheduled shutoff times' do
+      describe 'per row' do
+        let(:n) { rand(2..5) }
+        let(:scheduled_shutoffs) do
+          shutoffs = []
+          n.times do |i|
+            shutoffs << early_shutoff
+          end
+          shutoffs
+        end
+        before do
+          allow(subject).to receive(:get_hashes).and_return(scheduled_shutoffs)
+        end
+
+        it 'calls `parse_24_hour_time` twice for each scheduled shutoff' do
+          expect(subject).to receive(:parse_24_hour_time).exactly(n * 2).times
+          call_method
+        end
+        it 'calls `fix_date` once for each scheduled shutoff' do
+          expect(subject).to receive(:fix_date).exactly(n).times
+          call_method
+        end
+      end
+      it 'calls `fix_date` with the early shutoff hash' do
+        expect(subject).to receive(:fix_date).with(early_shutoff, anything)
+        call_method
+      end
+      it 'calls `fix_date` with the key name `early_shutoff_date`' do
+        expect(subject).to receive(:fix_date).with(anything, :early_shutoff_date)
+        call_method
+      end
+      it 'calls `parse_24_hour_time` with the `frc_shutoff_time` value for the early shutoff hash' do
+        expect(subject).to receive(:parse_24_hour_time).with(early_shutoff[:frc_shutoff_time])
+        call_method
+      end
+      it 'sets the `frc_shutoff_time` value to the result of `parse_24_hour_time`' do
+        allow(subject).to receive(:parse_24_hour_time).with(early_shutoff[:frc_shutoff_time]).and_return(frc_sentinel)
+        expect(call_method.first[:frc_shutoff_time]).to eq(frc_sentinel)
+      end
+      it 'calls `parse_24_hour_time` with the `vrc_shutoff_time` value for the early shutoff hash' do
+        expect(subject).to receive(:parse_24_hour_time).with(early_shutoff[:vrc_shutoff_time])
+        call_method
+      end
+      it 'sets the `vrc_shutoff_time` value to the result of `parse_24_hour_time`' do
+        allow(subject).to receive(:parse_24_hour_time).with(early_shutoff[:vrc_shutoff_time]).and_return(vrc_sentinel)
+        expect(call_method.first[:vrc_shutoff_time]).to eq(vrc_sentinel)
+      end
+      it 'returns the processed early shutoff times' do
+        allow(subject).to receive(:parse_24_hour_time).with(early_shutoff[:frc_shutoff_time]).and_return(frc_sentinel)
+        allow(subject).to receive(:parse_24_hour_time).with(early_shutoff[:vrc_shutoff_time]).and_return(vrc_sentinel)
+        allow(subject).to receive(:fix_date) do |shutoff_hash|
+          shutoff_hash[:early_shutoff_date] = early_shutoff_date
+        end
+        expect(call_method).to eq([processed_early_shutoff])
+      end
+    end
+  end
+
   describe 'days_until' do
     let(:today) { Time.zone.today }
     it 'should map today to 0' do

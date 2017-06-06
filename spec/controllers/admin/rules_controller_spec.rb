@@ -1364,7 +1364,81 @@ RSpec.describe Admin::RulesController, :type => :controller do
          end
        end
      end
-   end
+  end
+
+  describe 'GET early_shutoff' do
+    let(:early_shutoff) {{
+      early_shutoff_date: instance_double(Date, :- => nil)
+    }}
+    let(:processed_early_shutoff) {early_shutoff[:day_before_date] = day_before_date; early_shutoff}
+    let(:etransact_service) { instance_double(EtransactAdvancesService, early_shutoffs: [early_shutoff] ) }
+    let(:calendar_service) { instance_double(CalendarService, find_previous_business_day: nil ) }
+    let(:day_before_date) { instance_double(Date) }
+    let(:call_action) { get :early_shutoff }
+    before do
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+      allow(CalendarService).to receive(:new).and_return(calendar_service)
+    end
+
+    it_behaves_like 'a RulesController action with before_action methods'
+    it 'creates a new instance of CalendarService with the request' do
+      expect(CalendarService).to receive(:new).and_return(calendar_service)
+      call_action
+    end
+    it 'creates a new instance of EtransactAdvancesService with the request' do
+      expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
+      call_action
+    end
+    it 'calls `early_shutoffs` on the EtransactAdvancesService' do
+      expect(etransact_service).to receive(:early_shutoffs).and_return([])
+      call_action
+    end
+    it 'raises an error if EtransactAdvancesService#early_shutoffs returns nil' do
+      allow(etransact_service).to receive(:early_shutoffs).and_return(nil)
+      expect{call_action}.to raise_error('There has been an error and EtransactAdvancesService#early_shutoff has encountered nil. Check error logs.')
+    end
+    describe 'setting the `day_before_date` for each early shutoff' do
+      it 'calls `find_previous_business_day` on the calendar service with the day before the `early_shutoff_date` for each early shutoff' do
+        allow(early_shutoff[:early_shutoff_date]).to receive(:-).with(1.day).and_return(day_before_date)
+        expect(calendar_service).to receive(:find_previous_business_day).with(day_before_date, anything)
+        call_action
+      end
+      it 'calls `find_previous_business_day` on the calendar service with an interval of 1.day' do
+        expect(calendar_service).to receive(:find_previous_business_day).with(anything, 1.day)
+        call_action
+      end
+      it 'sets the `day_before_date` value to the result of calling `find_previous_business_day` on the calendar service' do
+        allow(calendar_service).to receive(:find_previous_business_day).and_return(day_before_date)
+        call_action
+        expect(assigns[:early_shutoff_data].first[:day_before_date]).to eq(day_before_date)
+      end
+    end
+    it 'sets `@early_shutoff_data` to the result of EtransactAdvancesService#early_shutoffs after adding the `day_before_date`' do
+      allow(calendar_service).to receive(:find_previous_business_day).and_return(day_before_date)
+      call_action
+      expect(assigns[:early_shutoff_data]).to eq([processed_early_shutoff])
+    end
+    context 'when the current user cannot edit trade rules' do
+      deny_policy :web_admin, :edit_trade_rules?
+      it 'sets the `@column_headings` appropriately' do
+        call_action
+        expect(assigns[:column_headings]).to eq([I18n.t('admin.shutoff_times.early.date'), I18n.t('admin.shutoff_times.early.time'), I18n.t('admin.shutoff_times.early.messages')])
+      end
+    end
+    context 'when the current user can edit trade rules' do
+      allow_policy :web_admin, :edit_trade_rules?
+      it 'sets the `@column_headings` appropriately' do
+        call_action
+        expect(assigns[:column_headings]).to eq([I18n.t('admin.shutoff_times.early.date'), I18n.t('admin.shutoff_times.early.time'), I18n.t('admin.shutoff_times.early.messages'), I18n.t('global.actions')])
+      end
+    end
+  end
+
+  describe 'GET typical_shutoff' do
+    let(:call_action) { get :typical_shutoff }
+
+    it_behaves_like 'a RulesController action with before_action methods'
+  end
 
   describe 'private methods' do
     describe '`set_flash_message`' do

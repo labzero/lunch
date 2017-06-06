@@ -98,6 +98,7 @@ en:
     role: Role
     name: Name
     edit: Edit
+    remove: Remove
     phone: Phone
     fax: Fax
     copyright_html: "&copy;"
@@ -3384,6 +3385,22 @@ en:
         actions:
           select_all: Select All
           deselect_all: Deselect All
+    shutoff_times:
+      title: End of Day Shutoff
+      nav:
+        early: Scheduled Early Shutoffs
+        typical: Typical Shutoff
+      actions:
+        schedule_new: Schedule New Early Shutoff
+      early:
+        date: Early Shutoff Date
+        time: Early Shutoff Times by Term
+        messages: 'Message(s)'
+        day_of_message: Early Shutoff Message on %{date}
+        day_before_message: Plan Ahead Message on %{date}
+        none_scheduled: There are no scheduled early shut offs to display.
+        vrc_terms: VRC Terms
+        frc_terms: FRC Terms
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

@@ -293,6 +293,18 @@ module MAPI
               key :nickname, :FetchShutoffTimesByType
             end
           end
+          api do
+            key :path, '/early_shutoffs'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Fetches all scheduled early shutoffs for advances'
+              key :nickname, :FetchEarlyShutoffs
+              key :type, :array
+              items do
+                key :'$ref', :EarlyShutoff
+              end
+            end
+          end
         end
 
         # etransact advances limits
@@ -474,6 +486,12 @@ module MAPI
         relative_get '/shutoff_times_by_type' do
           MAPI::Services::EtransactAdvances.rescued_json_response(self) do
             MAPI::Services::EtransactAdvances::ShutoffTimes.get_shutoff_times_by_type(self)
+          end
+        end
+
+        relative_get '/early_shutoffs' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            MAPI::Services::EtransactAdvances::ShutoffTimes.get_early_shutoffs(self)
           end
         end
       end

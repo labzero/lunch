@@ -257,6 +257,10 @@ Rails.application.routes.draw do
           put '/disable_service' => 'admin/rules#disable_etransact_service', as: :rules_disable_etransact_service
           put '/member' => 'admin/rules#update_advance_availability_by_member', as: :rules_update_advance_availability_by_member
         end
+        scope 'advance-shutoff-times' do
+          get '/early' => 'admin/rules#early_shutoff', as: :rules_advance_early_shutoff
+          get '/typical' => 'admin/rules#typical_shutoff', as: :rules_advance_typical_shutoff
+        end
       end
       constraints Constraints::WebAdmin.new(:edit_features?) do
         mount Flipper::UI.app(Rails.application.flipper) => '/flipper-features', as: :flipper_features_admin

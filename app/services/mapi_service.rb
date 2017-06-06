@@ -107,6 +107,10 @@ class MAPIService
   def get_hash(name, endpoint, params={}, &error_handler)
     get_json(name, endpoint, params, &error_handler).try(:with_indifferent_access)
   end
+
+  def get_hashes(name, endpoint, params={}, &error_handler)
+    get_json(name, endpoint, params, &error_handler).collect { |result_hash| result_hash.try(:with_indifferent_access) }
+  end
   
   def get_json(name, endpoint, params={}, &error_handler)
     parse(name, get(name, endpoint, params, &error_handler), &error_handler)

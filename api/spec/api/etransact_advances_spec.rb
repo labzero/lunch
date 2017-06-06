@@ -300,4 +300,15 @@ describe MAPI::ServiceApp do
       call_endpoint
     end
   end
+
+  describe 'get `etransact_advances/early_shutoffs`' do
+    let(:call_endpoint) { get 'etransact_advances/early_shutoffs' }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'etransact_advances/early_shutoffs', :get, MAPI::Services::EtransactAdvances::ShutoffTimes, :get_early_shutoffs
+
+    it 'calls `MAPI::Services::EtransactAdvances::ShutoffTimes.get_early_shutoffs` with the app' do
+      expect(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:get_early_shutoffs).with(an_instance_of(MAPI::ServiceApp))
+      call_endpoint
+    end
+  end
 end

@@ -17,6 +17,19 @@ module MAPI
           end
           Hash[shutoff_times.collect {|shutoff_time| [shutoff_time['product_type'].downcase, shutoff_time['end_time']]}]
         end
+
+        def self.get_early_shutoffs(app)
+          early_shutoffs_query = <<-SQL
+            SELECT EARLY_SHUTOFF_DATE, FRC_SHUTOFF_TIME, VRC_SHUTOFF_TIME, DAY_OF_MESSAGE, DAY_BEFORE_MESSAGE
+            FROM WEB_ADM.AO_TYPE_EARLY_SHUTOFF
+          SQL
+          shutoffs = if should_fake?(app)
+            fake_hashes('etransact_early_shutoff_times')
+          else
+            fetch_hashes(app.logger, early_shutoffs_query, {}, true)
+          end
+          shutoffs.each { |shutoff| shutoff['early_shutoff_date'] = shutoff['early_shutoff_date'].to_date.iso8601 }
+        end
       end
     end
   end
