@@ -1,0 +1,16 @@
+- if heading.is_a?(Hash) && !heading[:title]
+  - heading[:classes] = heading[:type] == :numeric_header ? [:'print-report-cell-right'] : []
+  = render 'reports/report_cell', cell: heading, header_row: true
+- else
+  - css_class = ''
+  - unsortable = index != 0
+  - if heading.is_a?(String)
+    - title = heading
+  - else
+    - title = heading[:title]
+    - unsortable = !heading[:sortable] if heading.has_key?(:sortable)
+    - css_class = heading[:type] == :numeric_header ? 'print-report-cell-right' : ''
+  -if colspan.present?
+    %th{colspan: colspan, data: {unsortable: unsortable}}= title
+  - else
+    %th.report-cell-narrow{data: {unsortable: unsortable}, class: css_class}= title
