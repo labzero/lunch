@@ -1418,6 +1418,16 @@ RSpec.describe Admin::RulesController, :type => :controller do
       call_action
       expect(assigns[:early_shutoff_data]).to eq([processed_early_shutoff])
     end
+    it 'sorts `early_shutoff_data` by `early_shutoff_date`' do
+      today = Time.zone.today
+      shutoff_1 = {early_shutoff_date: today}
+      shutoff_2 = {early_shutoff_date: today + 3.days}
+      shutoff_3 = {early_shutoff_date: today - 3.days}
+      allow(calendar_service).to receive(:find_previous_business_day)
+      allow(etransact_service).to receive(:early_shutoffs).and_return([shutoff_1, shutoff_2, shutoff_3])
+      call_action
+      expect(assigns[:early_shutoff_data]).to eq([shutoff_3, shutoff_1, shutoff_2])
+    end
     context 'when the current user cannot edit trade rules' do
       deny_policy :web_admin, :edit_trade_rules?
       it 'sets the `@column_headings` appropriately' do

@@ -4,27 +4,27 @@
     "frc_shutoff_time": "0930",
     "vrc_shutoff_time": "1400",
     "day_of_message": "Because of the Independence Day holiday, term credit will not be available after 9:30 am Pacific Time today. The deadline to request overnight credit remains 2:00 pm.",
-    "day_before_message": "Plan Ahead for Funding on Monday, July 3, 2017\n\nBecause of the Independence Day holiday, the deadline to request term credit on Monday, July 3, is 9:30 am Pacific Time."
-  },
-  {
-    "early_shutoff_date": "2017-11-24",
-    "frc_shutoff_time": "0930",
-    "vrc_shutoff_time": "1400",
-    "day_of_message": "Because of the Thanksgiving Day holiday, term credit will not be available after 9:30 am Pacific Time today. The deadline to request overnight credit remains 2:00 pm.",
-    "day_before_message": "Plan Ahead for Funding on Friday, November 24, 2017\n\nBecause of the Thanksgiving Day holiday, the deadline to request term credit on Friday, November 24, is 9:30 am Pacific Time."
+    "day_before_message": "Plan Ahead for Funding on Monday, July 3, 2017\\n\\nBecause of the Independence Day holiday, the deadline to request term credit on Monday, July 3, is 9:30 am Pacific Time."
   },
   {
     "early_shutoff_date": "2017-12-22",
     "frc_shutoff_time": "0930",
     "vrc_shutoff_time": "1400",
     "day_of_message": "Because of the Christmas Day holiday, term credit will not be available after 9:30 am today. The deadline to request overnight credit remains 2:00 pm.",
-    "day_before_message": "Plan Ahead for Funding on Friday, December 22\n\nBecause of the Christmas Day holiday, the deadline to request term credit on Friday, December 22, is  9:30 am PST. The deadline to request overnight credit remains 2:00 pm."
+    "day_before_message": "Plan Ahead for Funding on Friday, December 22\\n\\nBecause of the Christmas Day holiday, the deadline to request term credit on Friday, December 22, is  9:30 am PST. The deadline to request overnight credit remains 2:00 pm."
   },
   {
     "early_shutoff_date": "2017-12-29",
     "frc_shutoff_time": "0930",
     "vrc_shutoff_time": "1400",
     "day_of_message": "Because of the New Year's Day holiday, term credit will not be available after 9:30 am today. The deadline to request overnight funding remains 2:00 pm.",
-    "day_before_message": "Plan Ahead for Funding on Friday, December 29\n\nBecause of the New Year's Day holiday, the deadline to request term credit on Friday, December 29, is 9:30 am PST. The deadline to request overnight credit remains 2:00 pm."
+    "day_before_message": "Plan Ahead for Funding on Friday, December 29\\n\\nBecause of the New Year's Day holiday, the deadline to request term credit on Friday, December 29, is 9:30 am PST. The deadline to request overnight credit remains 2:00 pm."
+  },
+  {
+    "early_shutoff_date": "2017-11-24",
+    "frc_shutoff_time": "0930",
+    "vrc_shutoff_time": "1400",
+    "day_of_message": "Because of the Thanksgiving Day holiday, term credit will not be available after 9:30 am Pacific Time today. The deadline to request overnight credit remains 2:00 pm.",
+    "day_before_message": "Plan Ahead for Funding on Friday, November 24, 2017\\n\\nBecause of the Thanksgiving Day holiday, the deadline to request term credit on Friday, November 24, is 9:30 am Pacific Time."
   }
 ]

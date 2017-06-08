@@ -143,6 +143,27 @@ describe MAPI::ServiceApp do
             expect(call_method.first['early_shutoff_date']).to eq(early_shutoff_iso8601)
           end
         end
+        ['day_of_message', 'day_before_message'].each do |message|
+          describe "formatting the `#{message}`" do
+            let(:p1) { SecureRandom.hex }
+            let(:p2) { SecureRandom.hex }
+            let(:escaped_newline_string) { "#{p1}\\n#{p2}" }
+            let(:unescaped_newline_string) { "#{p1}\n#{p2}" }
+
+            it 'unescapes newline characters it finds in the message' do
+              allow(shutoff_times_module).to receive(:fake_hashes).and_return([{message => escaped_newline_string}])
+              expect(call_method.first[message]).to eq(unescaped_newline_string)
+            end
+            it 'does nothing to unescaped newline characters it finds in the message' do
+              allow(shutoff_times_module).to receive(:fake_hashes).and_return([{message => unescaped_newline_string}])
+              expect(call_method.first[message]).to eq(unescaped_newline_string)
+            end
+            it 'does nothing if the value is nil' do
+              allow(shutoff_times_module).to receive(:fake_hashes).and_return([{message => nil}])
+              expect(call_method.first[message]).to be nil
+            end
+          end
+        end
       end
     end
   end

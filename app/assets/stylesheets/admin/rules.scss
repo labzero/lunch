@@ -439,10 +439,13 @@
         h2 {
           @extend %typography-table-total;
           margin: 0;
+          &:nth-of-type(2) {
+            margin-top: 30px;
+          }
         }
         p {
-          margin: 10px 0 30px;
-          line-height: $tight-line-height;
+          margin-top: 4px;
+          line-height: $loose-line-height;
           &:last-of-type {
             margin-bottom: 10px;
           }

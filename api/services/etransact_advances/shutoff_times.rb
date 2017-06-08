@@ -28,7 +28,11 @@ module MAPI
           else
             fetch_hashes(app.logger, early_shutoffs_query, {}, true)
           end
-          shutoffs.each { |shutoff| shutoff['early_shutoff_date'] = shutoff['early_shutoff_date'].to_date.iso8601 }
+          shutoffs.each do |shutoff|
+            shutoff['early_shutoff_date'] = shutoff['early_shutoff_date'].to_date.iso8601 if shutoff['early_shutoff_date']
+            shutoff['day_of_message'] = shutoff['day_of_message'].gsub("\\n", "\n") if shutoff['day_of_message']
+            shutoff['day_before_message'] = shutoff['day_before_message'].gsub("\\n", "\n") if shutoff['day_before_message']
+          end
         end
       end
     end
