@@ -3,10 +3,10 @@
 - show_yesterdays_report = @yesterdays_report && !@print_layout
 .report.row.securities-transactions-report
   .report-header
-    %h1= @report_name
     - if @print_layout
-      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@start_date))
+      = render 'print_details', report_name: @report_name, name: @member_name, date: t('datepicker.single.inline_input', date: fhlb_date_standard_numeric(@start_date))
     - else
+      %h1= @report_name
       = render 'reports_header_buttons', download_formats: [:pdf, :xlsx]
       = render 'report_details', name: @member_name, freshness: t('reports.pages.securities_transactions.freshness'), availability: t('reports.availability.current')
     .report-inputs{style: "#{'height: auto' if show_yesterdays_report}"}

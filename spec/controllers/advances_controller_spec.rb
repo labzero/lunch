@@ -155,14 +155,6 @@ RSpec.describe AdvancesController, :type => :controller do
           end
         end
       end
-      describe 'the column with index 3' do
-        it 'orders itself in descending sequence' do
-          expect(column_definitions[3][:orderSequence]).to eq([:desc])
-        end
-        it "sets its target to itself" do
-          expect(column_definitions[3][:targets]).to eq([3])
-        end
-      end
       it 'calls out which columns are dates' do
         expect(column_definitions).to include({type: :date, targets: [0, 1, 2]})
       end

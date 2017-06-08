@@ -7,6 +7,7 @@
         .add-advance-body
           .add-advance-icon-section.icon-error-before
             %p= t('dashboard.quick_advance.capitalstock.intro')
+          .add-advance-capstock-selection
             = render 'shared/radio_button', id: 'continue_transaction', name: 'stock_choice', checked: true, text: t('dashboard.quick_advance.capitalstock.continue_transaction'), value: :continue
             .add-advance-summary
               %dl.large_dl

@@ -3,11 +3,11 @@
 - @print_layout ||= false
 .report.report-dividend-statement.row
   .report-header
-    %h1= @report_name
     - if @print_layout
-      = render 'print_details', name: @member_name, date: @as_of
+      = render 'print_details', report_name: @report_name, name: @member_name, date: t('datepicker.single.inline_input', date: @as_of)
     - else
-      - formats = feature_enabled?('report-pdf-dividend-transaction') ? [:pdf] : []
+      %h1= @report_name
+      - formats = feature_enabled?('report-download-dividend-transaction') ? [:pdf, :xlsx] : []
       = render 'reports_header_buttons', allowed_params: :dividend_transaction_filter, download_formats: formats
       = render 'report_details', name: @member_name, freshness: t('reports.pages.dividend_statement.freshness'), availability: t('reports.availability.months', months: 36)
       .report-inputs

@@ -42,9 +42,34 @@ RSpec.describe SecuritiesController, type: :controller do
       let(:status) { double('status') }
       let(:reg_id) { double('reg_id') }
       let(:deliver_to) { double('deliver_to') }
+      let(:column_headings) { [
+        { value: 'check_all', type: :checkbox, name: 'check_all', :sortable=>false},
+        { title: I18n.t('common_table_headings.cusip'), :sortable=>true},
+        { title: I18n.t('common_table_headings.description'), :sortable=>true},
+        { title: I18n.t('common_table_headings.status'), :sortable=>true},
+        { title: I18n.t('securities.manage.eligibility'), :sortable=>true},
+        { title: I18n.t('common_table_headings.maturity_date'), :sortable=>true},
+        { title: I18n.t('common_table_headings.authorized_by'), :sortable=>true},
+        { title: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), :sortable=>true},
+        { title: fhlb_add_unit_to_table_header(I18n.t('global.borrowing_capacity'), '$'), :sortable=>true}
+      ]}
+      let(:column_headings_delivery_method_enabled) { [
+        { value: 'check_all', type: :checkbox, name: 'check_all', :sortable=>false},
+        { title: I18n.t('common_table_headings.cusip'), :sortable=>true},
+        { title: I18n.t('common_table_headings.description'), :sortable=>true},
+        { title: I18n.t('common_table_headings.status'), :sortable=>true},
+        { title: I18n.t('securities.manage.delivery'), :sortable=>true},
+        { title: I18n.t('securities.manage.eligibility'), :sortable=>true},
+        { title: I18n.t('common_table_headings.maturity_date'), :sortable=>true},
+        { title: I18n.t('common_table_headings.authorized_by'), :sortable=>true},
+        { title: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), :sortable=>true},
+        { title: fhlb_add_unit_to_table_header(I18n.t('global.borrowing_capacity'), '$'), :sortable=>true}
+      ]}
       before do
         allow(member_balance_service_instance).to receive(:managed_securities).and_return(securities)
         allow(security[:cusip]).to receive(:upcase).and_return(security[:cusip])
+        allow(security[:description]).to receive(:gsub!).and_return(security[:description])
+        allow(security[:description]).to receive(:truncate).and_return(security[:description])
         allow(controller).to receive(:feature_enabled?).and_call_original
         allow(controller).to receive(:feature_enabled?).with('securities-delivery-method').and_return(false)
         stub_const('SecuritiesController::DELIVER_TO_MAPPING', { reg_id => deliver_to })
@@ -54,6 +79,20 @@ RSpec.describe SecuritiesController, type: :controller do
       it 'renders the `manage` view' do
         call_action
         expect(response.body).to render_template('manage')
+      end
+      describe 'sorted securities' do
+        let(:security1) { { cusip: 'B',   custody_account_type: 'P' } }
+        let(:security2) { { cusip: 'C',   custody_account_type: 'U' } }
+        let(:security3) { { cusip: 'A',   custody_account_type: 'P' } }
+        let(:securities_array) { [ security1, security2, security3 ] }
+        let(:sorted_securities) { [ security3, security1, security2 ] }
+        before do
+          allow(member_balance_service_instance).to receive(:managed_securities).and_return(securities_array)
+        end
+        it 'sorts the securities first by `custody_account_type`, then by `cusip`' do
+          call_action
+          expect(securities_array.map { |s| { cusip: s.cusip, custody_account_type: s.custody_account_type } }).to eq(sorted_securities)
+        end
       end
       it 'raises an error if the managed_securities endpoint returns nil' do
         allow(member_balance_service_instance).to receive(:managed_securities).and_return(nil)
@@ -65,9 +104,13 @@ RSpec.describe SecuritiesController, type: :controller do
       end
       it 'assigns @securities_table_data the correct column_headings' do
         call_action
-        expect(assigns[:securities_table_data][:column_headings]).to eq([{value: 'check_all', type: :checkbox, name: 'check_all'}, I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.description'), I18n.t('common_table_headings.status'), I18n.t('securities.manage.eligibility'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.authorized_by'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(I18n.t('global.borrowing_capacity'), '$')])
+        expect(assigns[:securities_table_data][:column_headings]).to eq(column_headings)
       end
       describe 'the `columns` array in each row of @securities_table_data[:rows]' do
+        it 'should contain a `column_headings` array containing hashes with a `sortable` key' do
+          call_action
+          assigns[:securities_table_data][:column_headings].each {|heading| expect(heading[:sortable]).to eq(true) unless heading[:name].eql?('check_all')}
+        end
         describe 'the checkbox object at the first index' do
           it 'has a `type` of `checkbox`' do
             call_action
@@ -178,7 +221,7 @@ RSpec.describe SecuritiesController, type: :controller do
         end
         it 'assigns @securities_table_data the correct column_headings' do
           call_action
-          expect(assigns[:securities_table_data][:column_headings]).to eq([{value: 'check_all', type: :checkbox, name: 'check_all'}, I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.description'), I18n.t('common_table_headings.status'), I18n.t('securities.manage.delivery'), I18n.t('securities.manage.eligibility'), I18n.t('common_table_headings.maturity_date'), I18n.t('common_table_headings.authorized_by'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(I18n.t('global.borrowing_capacity'), '$')])
+          expect(assigns[:securities_table_data][:column_headings]).to eq(column_headings_delivery_method_enabled)
         end
         it 'contains an object at the 4 index with the correct value for delivery method' do
           call_action
@@ -985,6 +1028,17 @@ RSpec.describe SecuritiesController, type: :controller do
         end
         it 'truncates the overlengthy description to 34 characters' do
           expect(JSON.parse(parsed_response_body[:form_data]).first['description'].size).to be <= 34
+        end
+      end
+      describe "when a security in the uploaded file for a `#{type}` contains a description with % character" do
+        uploaded_with_percent_sign_description = excel_fixture_file_upload('sample-securities-upload-with-percent-sign-in-description.xlsx')
+        let(:call_action) { post :upload_securities, file: uploaded_with_percent_sign_description, type: type}
+        let(:parsed_response_body) { call_action; JSON.parse(response.body).with_indifferent_access }
+        before do
+          allow(Security).to receive(:from_hash).and_call_original
+        end
+        it 'removes `%` from description' do
+          expect(JSON.parse(parsed_response_body[:form_data]).first['description']).not_to include('%')
         end
       end
     end

@@ -22,7 +22,7 @@
           - else
             %p= t('letters_of_credit.preview.review_details')
           - unless @session_elevated || walkthrough_mode
-            = render 'shared/securid_module', autofocus: true
+            = render 'shared/securid_module'
           .request-form-actions
             = link_to(t('global.cancel'), letters_of_credit_manage_path, class: 'secondary-button')
             = link_to(t('letters_of_credit.preview.edit'), letters_of_credit_request_path(letter_of_credit_request: {id: @letter_of_credit_request.id}), class: 'secondary-button')

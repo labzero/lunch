@@ -1,0 +1,19 @@
+xlsx_package.use_shared_strings = true
+workbook = xlsx_package.workbook
+workbook.styles do |styles|
+  integer_format = styles.add_style num_fmt: 1
+  currency_format = styles.add_style num_fmt: 2
+  date_format = styles.add_style format_code: 'mm/dd/yyyy'
+
+  styles = [date_format, integer_format, date_format, date_format, integer_format, integer_format, nil, currency_format]
+
+  column_headings = format_column_headings_for_excel(@dividend_statement_details[:column_headings].collect{ |row| row[:title] })
+  workbook_name = I18n.t('reports.capital_stock.dividend_statement.xlsx_worksheet_name')
+  workbook.add_worksheet(name: workbook_name) do |sheet|
+    sheet.add_row column_headings
+    @dividend_statement_details[:rows].each do |row|
+      values = row[:columns].collect { |column| column[:type] == :date ? column[:value].to_date : column[:value]}
+      sheet.add_row values, style: styles
+    end
+  end
+end

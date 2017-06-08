@@ -66,6 +66,11 @@ class Security
     @cusip = cusip.try(:upcase)
   end
 
+  def description=(description)
+    description.try(:gsub!, '%', '')
+    @description = description.try(:truncate, 34, omission: '')
+  end
+
   private
 
   def cusip_format

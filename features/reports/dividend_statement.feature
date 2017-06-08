@@ -50,10 +50,16 @@ Scenario: Member sorts the Dividend Transaction Statement
   And I click the "Dividend" column heading
   Then I should see the "Dividend" column values in "descending" order on the "Dividend Details" table
 
-@resque-backed @smoke @jira-mem-810 @flip-on-report-pdf-dividend-transaction
-Scenario: Member downloads an PDF of the current securities position report
+@resque-backed @smoke @jira-mem-810 @flip-on-report-download-dividend-transaction
+Scenario: Member downloads an PDF of the dividend transaction statement report
   Given I am on the "Dividend Transaction Statement" report page
   When I request a PDF
+  Then I should begin downloading a file
+
+@resque-backed @smoke @jira-mem-811 @flip-on-report-download-dividend-transaction
+Scenario: Member downloads an XLSX of the dividend transaction statement report
+  Given I am on the "Dividend Transaction Statement" report page
+  When I request an XLSX
   Then I should begin downloading a file
 
 @smoke @jira-mem-787

@@ -2,10 +2,10 @@
 - @page_title = t('reports.meta_title')
 .report.authorizations-report.row{data: {deferred: @job_status_url, 'deferred-load' => @load_url}}
   .report-header
-    %h1= @report_name
     - if @print_layout
-      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@today))
+      = render 'print_details', report_name: @report_name, name: @member_name, date: t('datepicker.single.inline_input', date: fhlb_date_standard_numeric(@today))
     - else
+      %h1= @report_name
       = render 'reports_header_buttons', allowed_params: :authorizations_filter, download_formats: [:pdf, :xlsx]
       = render 'report_details', name: @member_name, freshness: t('reports.freshness.current'), availability: t('reports.availability.current')
     %p= t('reports.pages.authorizations.intro_html', url: forms_path(anchor: 'authorizations'))

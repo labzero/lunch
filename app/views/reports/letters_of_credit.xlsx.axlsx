@@ -5,7 +5,7 @@ workbook.styles do |styles|
   integer_format = styles.add_style num_fmt: 1
 
   workbook.add_worksheet(name: t('reports.pages.letters_of_credit.title')) do |sheet|
-    sheet.add_row @loc_table_data[:column_headings]
+    sheet.add_row format_column_headings_for_excel(@loc_table_data[:column_headings])
     @loc_table_data[:rows].each do |row|
       values = row[:columns].collect { |column| column[:value]}
       sheet.add_row values, style: [nil, integer_format, integer_format, date_format, date_format, nil]

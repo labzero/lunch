@@ -62,7 +62,8 @@
   - value = cell[:value]
   - classes = [:'report-cell-narrow']
 - if header_row
-  %th{class: cell[:classes] || classes, colspan: cell[:colspan]}
+  - unsortable = !cell[:sortable] if cell.has_key?(:sortable)
+  %th{class: cell[:classes] || classes, colspan: cell[:colspan], data: {unsortable: unsortable} }
     = value
 - else
   %td{class: cell[:classes] || classes, colspan: cell[:colspan], data: {order: cell[:order]}}

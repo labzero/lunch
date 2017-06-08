@@ -144,6 +144,9 @@
   .request-form-actions {
     text-align: left;
   }
+  .add-advance-summary {
+    @extend %bordered-section;
+  }
 }
 
 .add-advance-limited-pricing-notice {
@@ -374,6 +377,8 @@
 
 .add-advance-body {
   @extend %list-summary-data;
+  border: none;
+  padding: 0;
   .add-advance-icon-section {
     @extend %clearfix;
     position: relative;
@@ -508,10 +513,8 @@
   }
 }
 
-.add-advance-capstock {
-  .add-advance-body {
-    @extend %bordered-section;
-  }
+.add-advance-capstock-selection {
+  @extend %bordered-section;
 }
 
 .add-advance-preview {
@@ -521,17 +524,16 @@
 }
 
 .add-advance-financing-availability-limit {
-  .add-advance-body {
+  .add-advance-summary {
     @extend %bordered-section;
+    p {
+      font-size: 1rem;
+      font-weight: $semibold-weight;
+    }
+  }
+  .add-advance-body {
     dd {
       text-align: right;
-    }
-    .add-advance-summary {
-      width: 400px;
-      p {
-        font-size: 1rem;
-        font-weight: $semibold-weight;
-      }
     }
   }
 }

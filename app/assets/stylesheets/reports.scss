@@ -1318,6 +1318,9 @@ td.dataTables_empty {
 }
 
 @media print {
+  %table-footer-cell {
+    min-width: 99px;
+  }
   .report {
     padding: 0 2px;
   }
@@ -1355,7 +1358,7 @@ td.dataTables_empty {
       @include typography-print-table-total;
       border-bottom: 1px solid $light-gray;
     }
-    
+
     dt, dd  {
       @include typography-print-details;
       color: $print-color;
@@ -1366,11 +1369,14 @@ td.dataTables_empty {
   }
   .report {
     color: $print-color;
-
     h1 {
       @include typography-print-header;
       float: none;
+      margin-top: 9px;
       margin-bottom: 0px;
+    }
+    .report-sta-number {
+      margin-bottom: 0;
     }
   }
   .report-header-buttons, .report-inputs {
@@ -1401,11 +1407,12 @@ td.dataTables_empty {
       }
     }
     .report-table-title {
-      margin-bottom: 25px;
+      margin-bottom: 15px;
     }
   }
   .report-summary-data {
-    width: 30%;
+    width: 30%; 
+    margin-bottom: 30px;
     margin-right: 4%;
     p {
       color: $print-color;
@@ -1431,6 +1438,12 @@ td.dataTables_empty {
     thead + tbody tr:nth-child(even), &.table-dividend-summary tbody tr:nth-child(even), &.securities-services-table tr:nth-child(even) {
       background-color: transparent;
     }
+    .print-report-cell-right {
+      text-align: right;
+    }
+    td, th {
+      padding: 6px;
+    }
     tbody td {
       @include typography-print-table-cell;
     }
@@ -1442,12 +1455,6 @@ td.dataTables_empty {
       @include typography-print-table-total;
       color: $print-color;
     }
-    .report-cell-narrow {
-      padding: 6px 8px;
-    }
-    .report-cell-right {
-      padding: 6px 8px;
-    }
     tr, td, th, thead, tfoot {
       page-break-inside: avoid;
     }
@@ -1457,7 +1464,6 @@ td.dataTables_empty {
     tfoot {
       display: table-row-group;
     }
-
     tbody tr {
       td {
         padding: 6px 0px;
@@ -1528,6 +1534,7 @@ td.dataTables_empty {
     border-top: 1px solid $print-color;
     span {
       padding-left: 10px;
+      padding-top: 3px;
     }
     .page {
       float: right;
@@ -1541,7 +1548,7 @@ td.dataTables_empty {
     margin-top: 10px;
   }
   .report-print-details {
-    margin-bottom: 50px;
+    margin-bottom: 30px;
   }
   .sbc-borrowing-capacity-tables, .securities-services-table-wrapper {
     page-break-inside: avoid;

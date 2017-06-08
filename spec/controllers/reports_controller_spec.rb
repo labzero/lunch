@@ -121,7 +121,12 @@ RSpec.describe ReportsController, :type => :controller do
           end
           it 'contains an array of appropriate column headings' do
             capital_stock_activity
-            expect(assigns[:capital_stock_activity_table_data][:column_headings]).to eq([I18n.t("global.issue_date"), I18n.t('reports.pages.capital_stock_activity.certificate_sequence'), I18n.t('global.transaction_type'), I18n.t('reports.pages.capital_stock_activity.debit_shares'), I18n.t('reports.pages.capital_stock_activity.credit_shares'), I18n.t('reports.pages.capital_stock_activity.shares_outstanding')])
+            expect(assigns[:capital_stock_activity_table_data][:column_headings]).to eq([I18n.t("global.issue_date"), 
+              I18n.t('reports.pages.capital_stock_activity.certificate_sequence'), 
+              I18n.t('global.transaction_type'), 
+              {value: I18n.t('reports.pages.capital_stock_activity.debit_shares'), :type=>:numeric_header},
+              {value: I18n.t('reports.pages.capital_stock_activity.credit_shares'), :type=>:numeric_header},
+              {value: I18n.t('reports.pages.capital_stock_activity.shares_outstanding'), :type=>:numeric_header}])
           end
           describe 'the `rows` array' do
             it 'returns an empty array if the report has been disabled' do
@@ -267,6 +272,10 @@ RSpec.describe ReportsController, :type => :controller do
         allow(controller).to receive(:date_picker_presets).with(start_date, nil, nil, max_date).and_return(date_picker_presets)
         get :capital_stock_trial_balance, start_date: start_date
         expect(assigns[:picker_presets]).to eq(date_picker_presets)
+      end
+      it 'sets @as_of to `@start_date`' do
+        call_action
+        expect(assigns[:as_of]).to eq(start_date)
       end
       it 'assigns @number_of_shares and @number_of_certificates' do
         call_action
@@ -676,7 +685,7 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a user required action', :get, :dividend_statement
       it_behaves_like 'a report with instance variables set in a before_filter', :dividend_statement
       it_behaves_like 'a controller action with an active nav setting', :dividend_statement, :reports
-      it_behaves_like 'a report that can be downloaded', :dividend_statement, [:pdf]
+      it_behaves_like 'a report that can be downloaded', :dividend_statement, [:xlsx, :pdf]
 
       it 'assigns @report_name' do
         make_request
@@ -874,9 +883,13 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'sets @loc_table_data[:column_headings] to an array of column heading strings' do
           make_request
-          assigns[:loc_table_data][:column_headings].each do |heading|
-            expect(heading).to be_kind_of(String)
-          end
+          expect(assigns[:loc_table_data][:column_headings]).to eq([
+            {value: I18n.t('reports.pages.letters_of_credit.headers.lc_number'), type: :numeric_header},
+            {value: fhlb_add_unit_to_table_header(I18n.t('reports.pages.letters_of_credit.headers.current_amount'), '$'), type: :numeric_header},
+            {value: I18n.t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), type: :numeric_header},
+            I18n.t('reports.pages.letters_of_credit.headers.issuance_date'), 
+            I18n.t('common_table_headings.maturity_date'),
+            I18n.t('reports.pages.letters_of_credit.headers.credit_program')])
         end
         it 'sets @loc_table_data[:rows] to the formatted value returned by MemberBalanceService.letters_of_credit' do
           credit_keys = [:lc_number, :current_par, :maintenance_charge, :trade_date, :maturity_date, :description]
@@ -987,7 +1000,11 @@ RSpec.describe ReportsController, :type => :controller do
             make_request
           end
           it 'returns a hash with `column_headings`' do
-            expect(assigns[:parallel_shift_table_data][:column_headings]).to eq([I18n.t('common_table_headings.advance_number'), I18n.t('global.issue_date'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.interest_rate'), '%'), [-300,-200,-100,0,100,200,300].collect{|x| fhlb_formatted_number(x)}].flatten)
+            expect(assigns[:parallel_shift_table_data][:column_headings]).to eq([
+              {value: I18n.t('common_table_headings.advance_number'), type: :numeric_header }, 
+              I18n.t('global.issue_date'), 
+              {value: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.interest_rate'), '%'), type: :numeric_header },
+              [-300,-200,-100,0,100,200,300].collect{|x| {value: fhlb_formatted_number(x), type: :numeric_header}}].flatten)
           end
           describe '`rows`' do
             it 'is an array containing a `columns` hash' do
@@ -1117,12 +1134,22 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'sets @report_download_column_headings to an array of column headings' do
           column_headings = [
-            I18n.t('common_table_headings.custody_account_number'), I18n.t('reports.pages.securities_position.custody_account_type'), I18n.t('reports.pages.securities_position.security_pledge_type'),
-            I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.security_description'), I18n.t('reports.pages.securities_position.reg_id'),
-            I18n.t('common_table_headings.pool_number'), I18n.t('common_table_headings.coupon_rate'), I18n.t('common_table_headings.maturity_date'),
-            I18n.t('common_table_headings.original_par_value'), I18n.t('reports.pages.securities_position.factor'), I18n.t('reports.pages.securities_position.factor_date'),
-            I18n.t('common_table_headings.current_par'), I18n.t('common_table_headings.price'), I18n.t('common_table_headings.price_date'),
-            I18n.t('reports.pages.securities_position.market_value')
+            {value: I18n.t('common_table_headings.custody_account_number'), type: :numeric_header},
+            I18n.t('reports.pages.securities_position.custody_account_type'), 
+            I18n.t('reports.pages.securities_position.security_pledge_type'),
+            I18n.t('common_table_headings.cusip'), 
+            I18n.t('common_table_headings.security_description'), 
+            I18n.t('reports.pages.securities_position.reg_id'),
+            {value: I18n.t('common_table_headings.pool_number'), type: :numeric_header}, 
+            {value: I18n.t('common_table_headings.coupon_rate'), type: :numeric_header},
+            I18n.t('common_table_headings.maturity_date'),
+            {value: I18n.t('common_table_headings.original_par_value'), type: :numeric_header},
+            I18n.t('reports.pages.securities_position.factor'), 
+            I18n.t('reports.pages.securities_position.factor_date'),
+            {value: I18n.t('common_table_headings.current_par'), type: :numeric_header},
+            {value: I18n.t('common_table_headings.price'), type: :numeric_header},
+            I18n.t('common_table_headings.price_date'),
+            {value: I18n.t('reports.pages.securities_position.market_value'), type: :numeric_header}
           ]
           get :current_securities_position
           expect(assigns[:report_download_column_headings]).to eq(column_headings)
@@ -1211,12 +1238,22 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'sets @report_download_column_headings to an array of column headings' do
           column_headings = [
-            I18n.t('common_table_headings.custody_account_number'), I18n.t('reports.pages.securities_position.custody_account_type'), I18n.t('reports.pages.securities_position.security_pledge_type'),
-            I18n.t('common_table_headings.cusip'), I18n.t('common_table_headings.security_description'), I18n.t('reports.pages.securities_position.reg_id'),
-            I18n.t('common_table_headings.pool_number'), I18n.t('common_table_headings.coupon_rate'), I18n.t('common_table_headings.maturity_date'),
-            I18n.t('common_table_headings.original_par_value'), I18n.t('reports.pages.securities_position.factor'), I18n.t('reports.pages.securities_position.factor_date'),
-            I18n.t('common_table_headings.current_par'), I18n.t('common_table_headings.price'), I18n.t('common_table_headings.price_date'),
-            I18n.t('reports.pages.securities_position.market_value')
+            {value: I18n.t('common_table_headings.custody_account_number'), type: :numeric_header},
+            I18n.t('reports.pages.securities_position.custody_account_type'), 
+            I18n.t('reports.pages.securities_position.security_pledge_type'),
+            I18n.t('common_table_headings.cusip'), 
+            I18n.t('common_table_headings.security_description'), 
+            I18n.t('reports.pages.securities_position.reg_id'),
+            {value: I18n.t('common_table_headings.pool_number'), type: :numeric_header},
+            {value: I18n.t('common_table_headings.coupon_rate'), type: :numeric_header},
+            I18n.t('common_table_headings.maturity_date'),
+            {value: I18n.t('common_table_headings.original_par_value'), type: :numeric_header},
+            I18n.t('reports.pages.securities_position.factor'),
+            I18n.t('reports.pages.securities_position.factor_date'),
+            {value: I18n.t('common_table_headings.current_par'), type: :numeric_header},
+            {value: I18n.t('common_table_headings.price'), type: :numeric_header},
+            I18n.t('common_table_headings.price_date'),
+            {value: I18n.t('reports.pages.securities_position.market_value'), type: :numeric_header}
           ]
           get :monthly_securities_position
           expect(assigns[:report_download_column_headings]).to eq(column_headings)
@@ -1258,10 +1295,6 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[:total_current_par]).to eq(total_current_par)
         end
         describe '@table_data' do
-          it 'should contain a `column_headings` array containing hashes with a `title` key' do
-            forward_commitments
-            assigns[:table_data][:column_headings].each {|heading| expect(heading[:title]).to be_kind_of(String)}
-          end
           it 'should contain a `column_headings` array containing hashes with a `sortable` key' do
             forward_commitments
             assigns[:table_data][:column_headings].each {|heading| expect(heading[:sortable]).to eq(true)}
@@ -1335,11 +1368,6 @@ RSpec.describe ReportsController, :type => :controller do
       it_behaves_like 'a controller action with an active nav setting', :capital_stock_and_leverage, :reports
       %w(position_table_data leverage_table_data).each do |table|
         describe "the @#{table} view instance variable" do
-          it 'contains a `column_headings` array containing strings' do
-            capital_stock_and_leverage
-            assigns[table.to_sym][:column_headings].each {|heading| expect(heading).to be_kind_of(String)}
-          end
-
           it "sets @#{table}[:rows] column object value to the value returned by MemberBalanceService.capital_stock_and_leverage" do
             row_keys = [:stock_owned, :minimum_requirement, :excess_stock, :surplus_stock, :stock_owned, :activity_based_requirement, :remaining_stock, :remaining_leverage]
             row = {}
@@ -1426,12 +1454,6 @@ RSpec.describe ReportsController, :type => :controller do
         it 'sets the @irr_table_data row attribute' do
           interest_rate_resets
           expect(assigns[:irr_table_data][:rows][0][:columns]).to eq([{:type=>:date, :value=>effective_date}, {:value=>advance_number}, {:type=>:index, :value=>prior_rate}, {:type=>:index, :value=>new_rate}, {:type=>:date, :value=>next_reset}])
-        end
-        it 'sets the @irr_table_data column_headings attribute' do
-          interest_rate_resets
-          assigns[:irr_table_data][:column_headings].each do |heading|
-            expect(heading).to be_kind_of(String)
-          end
         end
         it 'sets @date_processed' do
           interest_rate_resets
@@ -1543,12 +1565,6 @@ RSpec.describe ReportsController, :type => :controller do
           todays_credit
           expect(assigns[:todays_credit][:rows][0][:columns]).to eq([{value: credit_activity[:transaction_number]}, {type: :number, value: credit_activity[:current_par]}, {type: :index, value: credit_activity[:interest_rate]}, {type: :date, value: credit_activity[:funding_date]}, {type: :date, value: credit_activity[:maturity_date]}, {value: financial_instrument_standardize(credit_activity[:product_description])}])
         end
-        it 'sets the @todays_credit column_headings attribute' do
-          todays_credit
-          assigns[:todays_credit][:column_headings].each do |heading|
-            expect(heading).to be_kind_of(String)
-          end
-        end
         it "sets the `maturity_date` attribute of a given activity to #{I18n.t('global.open')} and its type to nil if the activity is an advance with no maturity date" do
           allow(member_balance_service_instance).to receive(:todays_credit_activity).and_return([credit_activity_advance])
           todays_credit
@@ -1592,7 +1608,10 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     describe 'GET mortgage_collateral_update' do
-      column_headings = [I18n.t('common_table_headings.transaction'), I18n.t('common_table_headings.loan_count'), fhlb_add_unit_to_table_header(I18n.t('common_table_headings.unpaid_balance'), '$'), fhlb_add_unit_to_table_header(I18n.t('global.original_amount'), '$')]
+      column_headings = [I18n.t('common_table_headings.transaction'), 
+                         {value: I18n.t('common_table_headings.loan_count'), type: :numeric_header}, 
+                         {value: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.unpaid_balance'), '$'), type: :numeric_header},
+                         {value: fhlb_add_unit_to_table_header(I18n.t('global.original_amount'), '$'), type: :numeric_header}]
       accepted_loans_hash = {
         instance_variable: :accepted_loans_table_data,
         table_row_arg: %w(updated pledged renumbered),
@@ -2722,7 +2741,7 @@ RSpec.describe ReportsController, :type => :controller do
             let(:vrc_column_headings)  {[I18n.t('global.date'), I18n.t('global.dates.1_day')]}
             let(:arc_column_headings) {[I18n.t('global.date'), I18n.t('global.dates.1_year'), I18n.t('global.dates.2_years'), I18n.t('global.dates.3_years'), I18n.t('global.dates.5_years')]}
             let(:arc_daily_prime_column_headings) {[I18n.t('global.full_dates.1_year'), I18n.t('global.full_dates.2_years'), I18n.t('global.full_dates.3_years'), I18n.t('global.full_dates.5_years')]}
-            let(:sta_column_headings)  {[I18n.t('global.date'), I18n.t('advances.rate')]}
+            let(:sta_column_headings)  {[I18n.t('global.date'), {value: I18n.t('advances.rate'), type: :numeric_header}]}
             it 'sets column_headings for the `frc` credit type' do
               get :historical_price_indications, historical_price_credit_type: 'frc', job_id: job_id
               expect((assigns[:table_data])[:column_headings]).to eq(frc_column_headings)
@@ -3529,7 +3548,7 @@ RSpec.describe ReportsController, :type => :controller do
       context '@collateral_notice' do
         it 'assigns `@collateral_notice` to true if the collateral_delivery_status flag is `Y`' do
           make_request_shared_example
-          expect(assigns[:collateral_notice]).to eq(true)
+          expect(assigns[:collateral_notice]).to eq('Y')
         end
       end
 
@@ -3537,7 +3556,7 @@ RSpec.describe ReportsController, :type => :controller do
         let(:collateral_delivery_status) { 'N' }
         it 'assigns `@collateral_notice` to false if the collateral_delivery_status flag is `N`' do
           make_request_shared_example
-          expect(assigns[:collateral_notice]).to eq(false)
+          expect(assigns[:collateral_notice]).to eq('N')
         end
       end
 
@@ -3740,9 +3759,9 @@ RSpec.describe ReportsController, :type => :controller do
         before do
           allow(subject).to receive(:report_disabled?).with(described_class::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
         end
-        it 'sets @collateral_notice to false' do
+        it 'sets @collateral_notice to N' do
           make_request_shared_example
-          expect(assigns[:collateral_notice]).to be(false)
+          expect(assigns[:collateral_notice]).to eq('N')
         end
         [ :sta_number, :fhfa_number, :member_name ].each do |instance_var|
           it "sets @#{instance_var} to nil" do
@@ -4304,7 +4323,7 @@ RSpec.describe ReportsController, :type => :controller do
           describe 'the first tertiary array' do
             it 'contains a first member with appropriate details for `custody_account_number`' do
               details = {
-                heading: I18n.t('common_table_headings.custody_account_number'),
+                heading: {value: I18n.t('common_table_headings.custody_account_number'), type: :numeric_header},
                 value: custody_account_number,
                 raw_value: custody_account_number
               }
@@ -4356,7 +4375,7 @@ RSpec.describe ReportsController, :type => :controller do
             end
             it 'contains a second member with appropriate details for `pool_number`' do
               details = {
-                heading: I18n.t('common_table_headings.pool_number'),
+                heading: {value: I18n.t('common_table_headings.pool_number'), type: :numeric_header},
                 value: pool_number,
                 raw_value: pool_number
               }
@@ -4365,7 +4384,7 @@ RSpec.describe ReportsController, :type => :controller do
             it 'contains a third member with appropriate details for `coupon_rate`' do
               allow(subject).to receive(:fhlb_formatted_percentage).with(coupon_rate, 3).and_return(formatted_value)
               details = {
-                heading: I18n.t('common_table_headings.coupon_rate'),
+                heading: {value: I18n.t('common_table_headings.coupon_rate'), type: :numeric_header},
                 value: formatted_value,
                 raw_value: coupon_rate
               }
@@ -4386,7 +4405,7 @@ RSpec.describe ReportsController, :type => :controller do
             it 'contains a second member with appropriate details for `original_par`' do
               allow(subject).to receive(:fhlb_formatted_currency).with(original_par, force_unit: true, precision: 2).and_return(formatted_value)
               details = {
-                heading: I18n.t('common_table_headings.original_par_value'),
+                heading: {value: I18n.t('common_table_headings.original_par_value'), type: :numeric_header},
                 value: formatted_value,
                 raw_value: original_par
               }
@@ -4399,7 +4418,7 @@ RSpec.describe ReportsController, :type => :controller do
             it 'contains a first member with appropriate details for `coupon_rate`' do
               allow(subject).to receive(:fhlb_formatted_percentage).with(factor, 8).and_return(formatted_value)
               details = {
-                heading: I18n.t('reports.pages.securities_position.factor'),
+                heading: {value: I18n.t('reports.pages.securities_position.factor'), type: :numeric_header},
                 value: formatted_value,
                 raw_value: factor
               }
@@ -4420,7 +4439,7 @@ RSpec.describe ReportsController, :type => :controller do
             it 'contains a member with appropriate details for `current_par`' do
               allow(subject).to receive(:fhlb_formatted_currency).with(current_par, force_unit: true, precision: 2).and_return(formatted_value)
               details = {
-                heading: I18n.t('common_table_headings.current_par'),
+                heading: {value: I18n.t('common_table_headings.current_par'), type: :numeric_header},
                 value: formatted_value,
                 raw_value: current_par
               }
@@ -4431,7 +4450,7 @@ RSpec.describe ReportsController, :type => :controller do
             it 'contains a first member with appropriate details for `price`' do
               allow(subject).to receive(:fhlb_formatted_currency).with(price, force_unit: true, precision: 2).and_return(formatted_value)
               details = {
-                heading: I18n.t('common_table_headings.price'),
+                heading: {value: I18n.t('common_table_headings.price'), type: :numeric_header},
                 value: formatted_value,
                 raw_value: price
               }
@@ -4452,7 +4471,7 @@ RSpec.describe ReportsController, :type => :controller do
             it 'contains a member with appropriate details for `market_value`' do
               allow(subject).to receive(:fhlb_formatted_currency).with(market_value, force_unit: true, precision: 2).and_return(formatted_value)
               details = {
-                heading: I18n.t('reports.pages.securities_position.market_value'),
+                heading: {value: I18n.t('reports.pages.securities_position.market_value'), type: :numeric_header},
                 value: formatted_value,
                 raw_value: market_value
               }

@@ -317,7 +317,12 @@ class ReportsController < ApplicationController
         @capital_stock_activity = member_balances.capital_stock_activity(@start_date, @end_date)
         raise StandardError, "There has been an error and ReportsController#capital_stock_activity has encountered nil. Check error logs." if @capital_stock_activity.nil?
       end
-      column_headings = [t("global.issue_date"), t('reports.pages.capital_stock_activity.certificate_sequence'), t('global.transaction_type'), t('reports.pages.capital_stock_activity.debit_shares'), t('reports.pages.capital_stock_activity.credit_shares'), t('reports.pages.capital_stock_activity.shares_outstanding')]
+      column_headings = [t("global.issue_date"), 
+                         t('reports.pages.capital_stock_activity.certificate_sequence'), 
+                         t('global.transaction_type'), 
+                         { value: t('reports.pages.capital_stock_activity.debit_shares'), type: :numeric_header },
+                         { value: t('reports.pages.capital_stock_activity.credit_shares'), type: :numeric_header },
+                         { value: t('reports.pages.capital_stock_activity.shares_outstanding'), type: :numeric_header }]
       rows = @capital_stock_activity[:activities].map do |activity|
         {columns: [
           {value: activity[:trans_date], type: :date},
@@ -341,6 +346,7 @@ class ReportsController < ApplicationController
     @report_name = ReportConfiguration.report_title(:capital_stock_trial_balance)
     initialize_dates(:capital_stock_trial_balance, params[:start_date])
     report_download_name = "capital_stock_trial_balance-#{fhlb_report_date_numeric(@start_date)}"
+    @as_of = @start_date # for `reports/pdf_footer.html.haml`
     downloadable_report(DOWNLOAD_FORMATS, {start_date: @start_date.to_s}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
@@ -356,7 +362,7 @@ class ReportsController < ApplicationController
       column_headings = [t('reports.pages.capital_stock_trial_balance.certificate_sequence'),
                          t("global.issue_date"),
                          t('reports.pages.capital_stock_trial_balance.transaction_type'),
-                         t('reports.pages.capital_stock_trial_balance.shares_outstanding')]
+                         {value: t('reports.pages.capital_stock_trial_balance.shares_outstanding'), type: :numeric_header }]
       summary[:certificates] = sort_report_data(summary[:certificates], :certificate_sequence)
       certificates = summary[:certificates].map do |certificate|
         certificate[:transaction_type] = t('global.missing_value') if certificate[:transaction_type] == 'undefined'
@@ -855,24 +861,24 @@ class ReportsController < ApplicationController
 
       vrc_column_headings = [
         t('reports.pages.price_indications.current.advance_maturity'),
-        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')
+        {value: fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%'), type: :numeric_header } 
       ]
       frc_column_headings = [
         t('reports.pages.price_indications.current.advance_maturity'),
-        fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%')
+        {value: fhlb_add_unit_to_table_header(t('reports.pages.price_indications.current.advance_rate'), '%'), type: :numeric_header }
       ]
       standard_arc_column_headings = [
         t('reports.pages.price_indications.current.advance_maturity'),
-        t('reports.pages.price_indications.current.1_month_libor_header'),
-        t('reports.pages.price_indications.current.3_month_libor_header'),
-        t('reports.pages.price_indications.current.6_month_libor_header'),
-        t('reports.pages.price_indications.current.prime_header')
+        {value: t('reports.pages.price_indications.current.1_month_libor_header'), type: :numeric_header },
+        {value: t('reports.pages.price_indications.current.3_month_libor_header'), type: :numeric_header },
+        {value: t('reports.pages.price_indications.current.6_month_libor_header'), type: :numeric_header },
+        {value: t('reports.pages.price_indications.current.prime_header'), type: :numeric_header }
       ]
       sbc_arc_column_headings = [
         t('reports.pages.price_indications.current.advance_maturity'),
-        t('reports.pages.price_indications.current.1_month_libor_header'),
-        t('reports.pages.price_indications.current.3_month_libor_header'),
-        t('reports.pages.price_indications.current.6_month_libor_header')
+        {value: t('reports.pages.price_indications.current.1_month_libor_header'), type: :numeric_header },
+        {value: t('reports.pages.price_indications.current.3_month_libor_header'), type: :numeric_header },
+        {value: t('reports.pages.price_indications.current.6_month_libor_header'), type: :numeric_header }
       ]
 
       @sta_table_data = {}
@@ -1156,7 +1162,7 @@ class ReportsController < ApplicationController
           column_headings = []
           column_sub_headings = []
           column_headings.insert(0, I18n.t('global.date'))
-          column_headings.insert(1, I18n.t('advances.rate'))
+          column_headings.insert(1, {value: I18n.t('advances.rate'), type: :numeric_header})
           rows = if data[:rates_by_date]
             data[:rates_by_date].collect do |row|
               {date: row[:date], columns: [{type: :index, value: row[:rate] }] }
@@ -1184,7 +1190,8 @@ class ReportsController < ApplicationController
           if (@credit_type.to_sym == :daily_prime)
             column_heading_keys.each do |key|
               column_headings << I18n.t("global.full_dates.#{key}")
-              column_sub_headings = [fhlb_add_unit_to_table_header(I18n.t("reports.pages.price_indications.daily_prime.benchmark_index"), '%'), I18n.t("reports.pages.price_indications.daily_prime.basis_point_spread")]
+              column_sub_headings = [{value: fhlb_add_unit_to_table_header(I18n.t("reports.pages.price_indications.daily_prime.benchmark_index"), '%'), type: :numeric_header},
+                                     {value: I18n.t("reports.pages.price_indications.daily_prime.basis_point_spread"), type: :numeric_header}]
             end
             column_sub_headings_first =  I18n.t('global.date')
           else
@@ -1268,7 +1275,11 @@ class ReportsController < ApplicationController
 
   def interest_rate_resets
     member_balances = MemberBalanceService.new(current_member_id, request)
-    column_headings = [t('reports.pages.interest_rate_resets.effective_date'), t('common_table_headings.advance_number'), t('reports.pages.interest_rate_resets.prior_rate'), t('reports.pages.interest_rate_resets.new_rate'), t('reports.pages.interest_rate_resets.next_reset')]
+    column_headings = [t('reports.pages.interest_rate_resets.effective_date'), 
+                       {value: t('common_table_headings.advance_number'), type: :numeric_header},
+                       {value: t('reports.pages.interest_rate_resets.prior_rate'), type: :numeric_header},
+                       {value: t('reports.pages.interest_rate_resets.new_rate'), type: :numeric_header},
+                       t('reports.pages.interest_rate_resets.next_reset')]
     irr_data = member_balances.interest_rate_resets
     if report_disabled?(INTEREST_RATE_RESETS_WEB_FLAGS)
       rows = []
@@ -1302,7 +1313,7 @@ class ReportsController < ApplicationController
 
   def dividend_statement
     @div_id = params[:dividend_transaction_filter]
-    downloadable_report(:pdf, dividend_transaction_filter: @div_id) do
+    downloadable_report([ :xlsx, :pdf], dividend_transaction_filter: @div_id) do
       @report_name = t('reports.capital_stock.dividend_statement.title')
       member_balances = MemberBalanceService.new(current_member_id, request)
       @dividend_statement_details = {
@@ -1311,10 +1322,10 @@ class ReportsController < ApplicationController
           {title: t('global.certificate_sequence'), sortable: true},
           {title: t('global.start_date'), sortable: true},
           {title: t('global.end_date'), sortable: true},
-          {title: t('global.shares_outstanding'), sortable: true},
-          {title: t('reports.pages.dividend_statement.headers.days_outstanding'), sortable: true},
-          {title: t('reports.pages.dividend_statement.headers.average_shares'), sortable: true},
-          {title: t('reports.pages.dividend_statement.headers.dividend'), sortable: true}
+          {title: t('global.shares_outstanding'), sortable: true, type: :numeric_header},
+          {title: t('reports.pages.dividend_statement.headers.days_outstanding'), sortable: true, type: :numeric_header},
+          {title: t('reports.pages.dividend_statement.headers.average_shares'), sortable: true, type: :numeric_header},
+          {title: t('reports.pages.dividend_statement.headers.dividend'), sortable: true, type: :numeric_header}
         ]
       }
       if report_disabled?(DIVIDEND_STATEMENT_WEB_FLAGS)
@@ -1424,7 +1435,12 @@ class ReportsController < ApplicationController
         []
       end
       @loc_table_data = {
-        column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('reports.pages.letters_of_credit.headers.issuance_date'), t('common_table_headings.maturity_date'), t('reports.pages.letters_of_credit.headers.credit_program')],
+        column_headings: [{value: t('reports.pages.letters_of_credit.headers.lc_number'), type: :numeric_header},
+                          {value: fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'), type: :numeric_header},
+                          {value: t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), type: :numeric_header},
+                          t('reports.pages.letters_of_credit.headers.issuance_date'), 
+                          t('common_table_headings.maturity_date'),
+                          t('reports.pages.letters_of_credit.headers.credit_program')],
         rows: rows,
         footer: [{value: t('global.total')}, {value: @total_current_par, type: :currency_whole}, {value: nil, colspan: 4}]
       }
@@ -1450,7 +1466,15 @@ class ReportsController < ApplicationController
       @total_credits = securities_transactions[:total_credits]
       @total_debits = securities_transactions[:total_debits]
       @final = securities_transactions[:final]
-      column_headings = [t('reports.pages.securities_transactions.custody_account_no'), t('common_table_headings.cusip'), t('reports.pages.securities_transactions.transaction_code'), t('common_table_headings.security_description'), t('reports.pages.securities_transactions.units'), t('reports.pages.securities_transactions.maturity_date'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$')]
+      column_headings = [ { value: t('reports.pages.securities_transactions.custody_account_no'), type: :numeric_header},
+                          t('common_table_headings.cusip'), 
+                          t('reports.pages.securities_transactions.transaction_code'), 
+                          t('common_table_headings.security_description'), 
+                          { value: t('reports.pages.securities_transactions.units'), type: :numeric_header },
+                          t('reports.pages.securities_transactions.maturity_date'), 
+                          { value: fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.payment_or_principal'), '$'), type: :numeric_header },
+                          { value: fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.interest'), '$'), type: :numeric_header },
+                          { value: fhlb_add_unit_to_table_header(t('reports.pages.securities_transactions.total'), '$'), type: :numeric_header }]
       rows = securities_transactions[:transactions].sort { |a, b| [a['custody_account_no'], a['cusip']] <=> [b['custody_account_no'], b['cusip']] }.collect do |row|
         is_new = row['new_transaction']
         { columns: row.map{ |field,value| map_securities_transactions_column(field, value, is_new) }.compact }
@@ -1583,7 +1607,10 @@ class ReportsController < ApplicationController
       }
     end
     @parallel_shift_table_data = {
-      column_headings: [t('common_table_headings.advance_number'), t('global.issue_date'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), [-300,-200,-100,0,100,200,300].collect{|x| fhlb_formatted_number(x)}].flatten,
+      column_headings: [{value: t('common_table_headings.advance_number'), type: :numeric_header}, 
+                        t('global.issue_date'), 
+                        {value: fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), type: :numeric_header},
+                        [-300,-200,-100,0,100,200,300].collect{|x| {value: fhlb_formatted_number(x), type: :numeric_header}}].flatten,
       rows: rows
     }
   end
@@ -1666,7 +1693,13 @@ class ReportsController < ApplicationController
       @as_of_date = forward_commitments[:as_of_date]
       @total_current_par = forward_commitments[:total_current_par]
       @table_data = {
-          column_headings: [t('common_table_headings.trade_date'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.advance_number'), t('common_table_headings.advance_type'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%')].collect { |x| {title: x, sortable: true} },
+          column_headings: [{t('common_table_headings.trade_date') => false},
+                            {t('common_table_headings.funding_date') => false},
+                            {t('common_table_headings.maturity_date') => false},
+                            {t('common_table_headings.advance_number') => true},
+                            {t('common_table_headings.advance_type') => false}, 
+                            {fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$') => true},
+                            {fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%') => true}].collect { |x| {value: x.keys[0], sortable: true, type: x.values[0] ? :numeric_header : nil} },
           rows: rows,
           footer: [{value: t('global.total'), colspan: 5}, {value: @total_current_par, type: :currency_whole, classes: [:'report-cell-right']}, {value: ''}]
       }
@@ -1682,12 +1715,18 @@ class ReportsController < ApplicationController
       raise StandardError, "There has been an error and ReportsController#capital_stock_and_leverage has encountered nil. Check error logs." if cap_stock_and_leverage.nil?
     end
 
-    position_table_headings = [t('reports.pages.capital_stock_and_leverage.stock_owned'), t('reports.pages.capital_stock_and_leverage.minimum_requirement'), t('reports.pages.capital_stock_and_leverage.excess_stock'), t('reports.pages.capital_stock_and_leverage.surplus_stock')]
-    leverage_table_headings = [t('reports.pages.capital_stock_and_leverage.stock_owned'), t('reports.pages.capital_stock_and_leverage.activity_based_requirement'), t('reports.pages.capital_stock_and_leverage.remaining_stock_html').html_safe, t('reports.pages.capital_stock_and_leverage.remaining_leverage')]
+    position_table_headings = [t('reports.pages.capital_stock_and_leverage.stock_owned'), 
+                               t('reports.pages.capital_stock_and_leverage.minimum_requirement'), 
+                               t('reports.pages.capital_stock_and_leverage.excess_stock'), 
+                               t('reports.pages.capital_stock_and_leverage.surplus_stock')]
+    leverage_table_headings = [t('reports.pages.capital_stock_and_leverage.stock_owned'), 
+                               t('reports.pages.capital_stock_and_leverage.activity_based_requirement'), 
+                               t('reports.pages.capital_stock_and_leverage.remaining_stock_html').html_safe, 
+                               t('reports.pages.capital_stock_and_leverage.remaining_leverage')]
 
     surplus_stock = [cap_stock_and_leverage[:surplus_stock], 0].max if cap_stock_and_leverage[:surplus_stock]
     @position_table_data = {
-      column_headings: position_table_headings.collect{|heading| fhlb_add_unit_to_table_header(heading, '$')},
+      column_headings: position_table_headings.collect{|heading| { value: fhlb_add_unit_to_table_header(heading, '$'), type: :numeric_header }},
       rows: [
         {
           columns: [
@@ -1701,7 +1740,7 @@ class ReportsController < ApplicationController
     }
 
     @leverage_table_data = {
-      column_headings: leverage_table_headings.collect{|heading| fhlb_add_unit_to_table_header(heading, '$')},
+      column_headings: leverage_table_headings.collect{|heading| { value: fhlb_add_unit_to_table_header(heading, '$'), type: :numeric_header }},
       rows: [
         {
           columns: [
@@ -1829,7 +1868,9 @@ class ReportsController < ApplicationController
           member_profile = DEFAULT_MEMBER_PROFILE
           member_details = {}
         end
-        @collateral_notice = member_profile[:collateral_delivery_status] == 'Y'
+        if member_profile[:collateral_delivery_status] == 'Y'
+          @collateral_notice = 'Y'
+        end
         @sta_number = member_details[:sta_number]
         @fhfa_number = member_details[:fhfa_number]
         @member_name = member_details[:name]
@@ -2062,7 +2103,12 @@ class ReportsController < ApplicationController
       }
       rows.last[:columns].push({value: activity[:life_cycle_event]}) if feature_enabled?('report-todays-credit-activity-description')
     end
-    column_headings = [t('common_table_headings.transaction_number'), fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), t('common_table_headings.funding_date'), t('common_table_headings.maturity_date'), t('common_table_headings.product_type')]
+    column_headings = [{value: t('common_table_headings.transaction_number'), type: :numeric_header},
+                       {value: fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), type: :numeric_header},
+                       {value: fhlb_add_unit_to_table_header(t('common_table_headings.interest_rate'), '%'), type: :numeric_header},
+                       t('common_table_headings.funding_date'), 
+                       t('common_table_headings.maturity_date'), 
+                       t('common_table_headings.product_type')]
     column_headings << t('common_table_headings.description') if feature_enabled?('report-todays-credit-activity-description')
     @todays_credit = {
       column_headings: column_headings,
@@ -2076,7 +2122,10 @@ class ReportsController < ApplicationController
       @mcu_data = report_disabled?(MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS) ? {} : MemberBalanceService.new(current_member_id, request).mortgage_collateral_update
       raise StandardError, "There has been an error and ReportsController#mortgage_collateral_update has encountered nil. Check error logs." if @mcu_data.nil?
 
-      column_headings = [t('common_table_headings.transaction'), t('common_table_headings.loan_count'), fhlb_add_unit_to_table_header(t('common_table_headings.unpaid_balance'), '$'), fhlb_add_unit_to_table_header(t('global.original_amount'), '$')]
+      column_headings = [t('common_table_headings.transaction'), 
+                         {value: t('common_table_headings.loan_count'), type: :numeric_header}, 
+                         {value: fhlb_add_unit_to_table_header(t('common_table_headings.unpaid_balance'), '$'), type: :numeric_header},
+                         {value: fhlb_add_unit_to_table_header(t('global.original_amount'), '$'), type: :numeric_header}]
       # Loans Accepted Table
       @accepted_loans_table_data = {
         column_headings: column_headings,
@@ -2143,12 +2192,22 @@ class ReportsController < ApplicationController
       end
     end
     @report_download_column_headings = [
-      t('common_table_headings.custody_account_number'), t('reports.pages.securities_position.custody_account_type'), t('reports.pages.securities_position.security_pledge_type'),
-      t('common_table_headings.cusip'), t('common_table_headings.security_description'), t('reports.pages.securities_position.reg_id'),
-      t('common_table_headings.pool_number'), t('common_table_headings.coupon_rate'), t('common_table_headings.maturity_date'),
-      t('common_table_headings.original_par_value'), t('reports.pages.securities_position.factor'), t('reports.pages.securities_position.factor_date'),
-      t('common_table_headings.current_par'), t('common_table_headings.price'), t('common_table_headings.price_date'),
-      t('reports.pages.securities_position.market_value')
+      {value: t('common_table_headings.custody_account_number'), type: :numeric_header},
+      t('reports.pages.securities_position.custody_account_type'), 
+      t('reports.pages.securities_position.security_pledge_type'),
+      t('common_table_headings.cusip'), 
+      t('common_table_headings.security_description'), 
+      t('reports.pages.securities_position.reg_id'),
+      {value: t('common_table_headings.pool_number'), type: :numeric_header}, 
+      {value: t('common_table_headings.coupon_rate'), type: :numeric_header},
+      t('common_table_headings.maturity_date'),
+      {value: t('common_table_headings.original_par_value'), type: :numeric_header},
+      t('reports.pages.securities_position.factor'), 
+      t('reports.pages.securities_position.factor_date'),
+      {value: t('common_table_headings.current_par'), type: :numeric_header},
+      {value: t('common_table_headings.price'), type: :numeric_header},
+      t('common_table_headings.price_date'),
+      {value: t('reports.pages.securities_position.market_value'), type: :numeric_header},
     ]
   end
 
@@ -2268,7 +2327,7 @@ class ReportsController < ApplicationController
         [
           [
             {
-              heading: t('common_table_headings.custody_account_number'),
+              heading: {value: t('common_table_headings.custody_account_number'), type: :numeric_header},
               value: security[:custody_account_number] || t('global.missing_value'),
               raw_value: security[:custody_account_number]
             },
@@ -2302,12 +2361,12 @@ class ReportsController < ApplicationController
               raw_value: security[:reg_id]
             },
             {
-              heading: t('common_table_headings.pool_number'),
+              heading: {value: t('common_table_headings.pool_number'), type: :numeric_header},
               value: security[:pool_number] || t('global.missing_value'),
               raw_value: security[:pool_number]
             },
             {
-              heading: t('common_table_headings.coupon_rate'),
+              heading: {value: t('common_table_headings.coupon_rate'), type: :numeric_header}, 
               value: fhlb_formatted_percentage(security[:coupon_rate], 3),
               raw_value: security[:coupon_rate]
             }
@@ -2320,7 +2379,7 @@ class ReportsController < ApplicationController
               type: :date
             },
             {
-              heading: t('common_table_headings.original_par_value'),
+              heading: {value: t('common_table_headings.original_par_value'), type: :numeric_header},
               value: fhlb_formatted_currency(security[:original_par], force_unit: true, precision: 2),
               raw_value: security[:original_par]
             }
@@ -2329,7 +2388,7 @@ class ReportsController < ApplicationController
         [
           [
             {
-              heading: t('reports.pages.securities_position.factor'),
+              heading: {value: t('reports.pages.securities_position.factor'), type: :numeric_header},
               value: fhlb_formatted_percentage(security[:factor], 8),
               raw_value: security[:factor]
             },
@@ -2342,14 +2401,14 @@ class ReportsController < ApplicationController
           ],
           [
             {
-              heading: t('common_table_headings.current_par'),
+              heading: {value: t('common_table_headings.current_par'), type: :numeric_header},
               value: fhlb_formatted_currency(security[:current_par], force_unit: true, precision: 2),
               raw_value: security[:current_par]
             }
           ],
           [
             {
-              heading: t('common_table_headings.price'),
+              heading: {value: t('common_table_headings.price'), type: :numeric_header},
               value: fhlb_formatted_currency(security[:price], force_unit: true,  precision: 2),
               raw_value: security[:price]
             },
@@ -2362,7 +2421,7 @@ class ReportsController < ApplicationController
           ],
           [
             {
-              heading: t('reports.pages.securities_position.market_value'),
+              heading: {value: t('reports.pages.securities_position.market_value'), type: :numeric_header},
               value: fhlb_formatted_currency(security[:market_value], force_unit: true, precision: 2),
               raw_value: security[:market_value]
             }

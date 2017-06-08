@@ -2,8 +2,6 @@ class RenderPDFJob < FhlbJob
   include CustomFormattingHelper
   queue_as :high_priority
 
-  MARGIN = 19.05 # in mm
-
   attr_reader :controller, :member
 
   def perform(member_id, action_name, filename=nil, params={}, view=nil)
@@ -61,23 +59,19 @@ class RenderPDFJob < FhlbJob
       page_size: 'Letter',
       print_media_type: true,
       disable_external_links: true,
-      margin: {
-        top: MARGIN,
-        left: MARGIN,
-        right: MARGIN,
-        bottom: MARGIN
+      margin: { #in millimeters
+        top: 8.6195,
+        left: 15.875,
+        right: 15.875,
+        bottom: 17.907
       },
       disable_smart_shrinking: false,
       footer: { content: render_footer_html },
-      orientation: pdf_orientation
+      orientation: :portrait
     )
   end
 
   private
   def initialize_controller # Placeholder for testing: method overwritten in children
-  end
-
-  def pdf_orientation
-    :portrait
   end
 end

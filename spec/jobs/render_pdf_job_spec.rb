@@ -18,7 +18,6 @@ RSpec.describe RenderPDFJob, type: :job do
     before do
       allow(subject).to receive(:job_status).and_return(job_status)
       allow(subject).to receive(:initialize_controller) { subject.instance_variable_set(:@controller, controller) }
-      allow(subject).to receive(:pdf_orientation)
     end
     describe '`perform`' do
       let(:file) { instance_double(StringIOWithFilename, :content_type= => nil, :original_filename= => nil, rewind: nil) }
@@ -290,10 +289,10 @@ RSpec.describe RenderPDFJob, type: :job do
             print_media_type: true,
             disable_external_links: true,
             margin: {
-              top: described_class::MARGIN,
-              left: described_class::MARGIN,
-              right: described_class::MARGIN,
-              bottom: described_class::MARGIN
+              top: 8.6195,
+              left: 15.875,
+              right: 15.875,
+              bottom: 17.907
             },
             disable_smart_shrinking: false
           }.each do |key, value|
@@ -312,16 +311,6 @@ RSpec.describe RenderPDFJob, type: :job do
             expect(wicked_pdf).to receive(:pdf_from_string).with(anything, hash_including(footer: {content: rendered_footer}))
             call_method
           end
-          it 'calls `pdf_orientation`' do
-            expect(subject).to receive(:pdf_orientation)
-            call_method
-          end
-          it 'calls `pdf_from_string` with the `orientation` option that is the result of calling `pdf_orientation`' do
-            orientation = double('orientation')
-            allow(subject).to receive(:pdf_orientation).and_return(orientation)
-            expect(wicked_pdf).to receive(:pdf_from_string).with(anything, hash_including(orientation: orientation))
-            call_method
-          end
         end
       end
     end
@@ -333,11 +322,6 @@ RSpec.describe RenderPDFJob, type: :job do
         it 'returns nil' do
           expect(subject.send(:initialize_controller)).to be nil
         end
-      end
-    end
-    describe '`pdf_orientation`' do
-      it 'returns :portrait' do
-        expect(subject.send(:pdf_orientation)).to eq(:portrait)
       end
     end
   end

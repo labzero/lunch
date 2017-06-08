@@ -2,10 +2,10 @@
 - @page_title = t('reports.meta_title')
 .report.report-securities-services-statement.row
   .report-header
-    %h1= @report_name
     - if @print_layout
-      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@start_date))
+      = render 'print_details', report_name: @report_name, name: @member_name, date: t('datepicker.single.inline_input', date: fhlb_date_standard_numeric(@start_date))
     - else
+      %h1= @report_name
       = render 'reports_header_buttons', allowed_params: :start_date, download_formats: [:pdf] if @data_available
       = render 'report_details', name: @member_name, freshness: t('reports.pages.securities_services_statement.freshness'), availability: t('reports.pages.securities_services_statement.availability')
     - if @data_available

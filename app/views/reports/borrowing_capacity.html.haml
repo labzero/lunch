@@ -3,10 +3,10 @@
 - deferred_load = @borrowing_capacity_summary[:deferred]
 .report.row{data: {deferred: @job_status_url, 'deferred-load' => @load_url}}
   .report-header
-    %h1= @report_name
     - if @print_layout
-      = render 'print_details', name: @member_name, date: t('datepicker.single.input', date: fhlb_date_standard_numeric(@end_date))
+      = render 'print_details', report_name: @report_name, name: @member_name, date: t('datepicker.single.inline_input', date: fhlb_date_standard_numeric(@end_date))
     - else
+      %h1= @report_name
       = render 'reports_header_buttons', download_formats: :pdf
       = render 'report_details', name: @member_name, freshness: t('reports.pages.borrowing_capacity.freshness'), availability: t('reports.availability.current')
   .report-main-body
@@ -30,7 +30,7 @@
             %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('global.unpaid_principal'), '$')
             %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity.market_value'), '$')
             %th.report-cell-narrow.report-cell-right= fhlb_add_unit_to_table_header(t('reports.pages.borrowing_capacity.bc_upb'), '%')
-            %th.report-cell-narrow.report-cell-expanding= fhlb_add_unit_to_table_header(t('global.borrowing_capacity'), '$')
+            %th.report-cell-narrow.report-cell-expanding.print-report-cell-right= fhlb_add_unit_to_table_header(t('global.borrowing_capacity'), '$')
         - if deferred_load
           %tbody
             = render 'deferred_table_row', colspan: 7
