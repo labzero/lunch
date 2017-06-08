@@ -9,7 +9,7 @@ workbook.styles do |styles|
 
   workbook_name = I18n.t('reports.pages.forward_commitments.title')
   workbook.add_worksheet(name: workbook_name) do |sheet|
-    sheet.add_row @table_data[:column_headings].map{ |ch| ch[:title] }
+    sheet.add_row format_column_headings_for_excel(@table_data[:column_headings])
     @table_data[:rows].sort_by{ |row| row[:columns][1][:value] }.each do |row|
       sheet.add_row row[:columns].collect { |column| column[:value]}, style: styles
     end

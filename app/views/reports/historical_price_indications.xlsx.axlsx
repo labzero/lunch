@@ -13,20 +13,19 @@ workbook.styles do |styles|
   case @credit_type
     when 'frc'
       styles = frc_styles
-      column_headings = @table_data[:column_headings]
+      column_headings = format_column_headings_for_excel(@table_data[:column_headings])
     when 'vrc', 'sta'
       styles = vrc_styles
-      column_headings = @table_data[:column_headings]
+      column_headings = format_column_headings_for_excel(@table_data[:column_headings])
     when /libor/
       styles = libor_styles
-      column_headings = @table_data[:column_headings]
+      column_headings = format_column_headings_for_excel(@table_data[:column_headings])
     when 'daily_prime'
       styles = daily_prime_styles
-      column_headings = [@table_data[:column_sub_headings_first]]
+      column_headings = format_column_headings_for_excel([@table_data[:column_sub_headings_first]])
       @table_data[:column_headings].each do |heading|
-        [@table_data[:column_sub_headings].first, @table_data[:column_sub_headings].last].each do |sub_heading| 
+        [@table_data[:column_sub_headings].first, @table_data[:column_sub_headings].last].each do |sub_heading|
           if sub_heading.present?
-            sub_heading = sub_heading[:value] if sub_heading.is_a?(Hash)
             column_headings << "#{heading} #{sub_heading}"
           else
             column_headings << "#{heading}"

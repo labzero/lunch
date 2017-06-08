@@ -7,7 +7,7 @@ workbook.styles do |styles|
 
   styles = [date_format, integer_format, date_format, date_format, integer_format, integer_format, nil, currency_format]
 
-  column_headings = @dividend_statement_details[:column_headings].collect{ |row| row[:title] }
+  column_headings = format_column_headings_for_excel(@dividend_statement_details[:column_headings].collect{ |row| row[:title] })
   workbook_name = I18n.t('reports.capital_stock.dividend_statement.xlsx_worksheet_name')
   workbook.add_worksheet(name: workbook_name) do |sheet|
     sheet.add_row column_headings
