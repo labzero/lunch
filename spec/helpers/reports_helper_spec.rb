@@ -294,4 +294,19 @@ describe ReportsHelper do
       expect(call_method).to eq(sanitized_profile)
     end
   end
+
+  describe 'the `format_column_headings_for_excel` method' do
+    let(:helper_instance) { mock_context(described_class, instance_methods: [:current_member_id, :request]) }
+    let(:column_heading) { SecureRandom.hex }
+    let(:column_heading_string_array) { [column_heading] }
+    let(:column_heading_hash_array) { [{ value: column_heading }] }
+
+    it 'pulls the value from the hash' do
+      expect(helper_instance.format_column_headings_for_excel(column_heading_hash_array)).to eq([column_heading])
+    end
+
+    it 'skips over strings' do
+      expect(helper_instance.format_column_headings_for_excel(column_heading_string_array)).to eq([column_heading])
+    end
+  end
 end

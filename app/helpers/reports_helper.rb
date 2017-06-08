@@ -59,6 +59,10 @@ module ReportsHelper
     sort_order == 'asc' ? data : data.reverse
   end
 
+  def format_column_headings_for_excel(column_headings)
+    column_headings.collect {|column_heading| column_heading.is_a?(Hash) ? column_heading[:value] : column_heading}
+  end
+
   private
 
   def translation_with_span(i18n, span_key, span_value, klass, substitutions, missing_data_message)

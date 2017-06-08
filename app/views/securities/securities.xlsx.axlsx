@@ -33,7 +33,7 @@ workbook.styles do |styles|
       sheet.add_row [I18n.t('securities.download.settlement_amount_footnote', footnote_marker: fhlb_footnote_marker)], style: styles.add_style(sz: 11)
     end
     sheet.add_row
-    sheet.add_row @securities_table_data[:column_headings], style: header_style
+    sheet.add_row format_column_headings_for_excel(@securities_table_data[:column_headings]), style: header_style
     @securities_table_data[:rows].each_with_index do |row, i|
       values = row[:columns].collect { |column| column[:value] }
       sheet.add_row values, types: [:string, :string, :float, :float]
