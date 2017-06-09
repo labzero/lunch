@@ -136,14 +136,14 @@ class EtransactAdvancesService < MAPIService
     put_hash(:update_term_limits, 'etransact_advances/limits', limits)
   end
 
-  MEMBER_SERVICES_DESK_HOURS = 8..14
+  MEMBER_SERVICES_DESK_HOURS = 8..13
 
   def etransact_status(member_id, status_object=nil)
     enabled_for_member = MembersService.new(request).quick_advance_enabled_for_member?(member_id)
     status_object = self.status unless status_object
     etransact_active = self.etransact_active?(status_object)
     etransact_has_terms = self.has_terms?(status_object)
-    # Priority Order: Closed, No Terms, Disabled, Open
+    # Priority Order: Closed/Unavailable, No Terms, Disabled, Open
     if etransact_active
       if etransact_has_terms
         if enabled_for_member
