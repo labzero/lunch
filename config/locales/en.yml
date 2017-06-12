@@ -2023,6 +2023,7 @@ en:
         total_current_par_summary_without_data: 'Total Current Amount:'
         headers:
           lc_number: LC Number
+          beneficiary: Beneficiary
           current_amount: Current Amount
           annual_maintenance_charge: Annual Maintenance Charge (bps)*
           issuance_date: Issuance Date

@@ -3,31 +3,34 @@
   "total_current_par": 500100000,
   "credits": [
     {
-    "lc_number": "2015-028",
-    "current_par": 110000000,
-    "maintenance_charge": 10,
-    "trade_date": "2015-03-13",
-    "settlement_date": "2015-03-13",
-    "maturity_date": "2015-12-15",
-    "description": "LC"
+      "lc_number": "2015-028",
+      "current_par": 110000000,
+      "maintenance_charge": 10,
+      "trade_date": "2015-03-13",
+      "settlement_date": "2015-03-13",
+      "maturity_date": "2015-12-15",
+      "description": "LC",
+      "beneficiary": "Texas Comptroller of Public Accounts, Texas State Comptroller, Rusk State Office Building, Cash & Securities Management Division, 208 East 10th Street, Room 636, Austin, TX 78711, Attention: Jonathan Gonzales"
     },
     {
-    "lc_number": "2015-022",
-    "current_par": 242600000,
-    "maintenance_charge": 10,
-    "trade_date": "2015-03-04",
-    "settlement_date": "2015-03-04",
-    "maturity_date": "2015-12-15",
-    "description": "LC"
+      "lc_number": "2015-022",
+      "current_par": 242600000,
+      "maintenance_charge": 10,
+      "trade_date": "2015-03-04",
+      "settlement_date": "2015-03-04",
+      "maturity_date": "2015-12-15",
+      "description": "LC",
+      "beneficiary": "Administrator of Local Agency Security Program, Department of Business Oversight, Division of Financial Institutions, 1515 K Street, Suite 200, Sacramento, CA 95814"
     },
     {
-    "lc_number": "2014-011",
-    "current_par": 147500000,
-    "maintenance_charge": 10,
-    "trade_date": "2014-01-29",
-    "settlement_date": "2014-01-29",
-    "maturity_date": "2015-07-30",
-    "description": "LC"
+      "lc_number": "2014-011",
+      "current_par": 147500000,
+      "maintenance_charge": 10,
+      "trade_date": "2014-01-29",
+      "settlement_date": "2014-01-29",
+      "maturity_date": "2015-07-30",
+      "description": "LC",
+      "beneficiary": "Union Investment Real Estate GmbH, Asset Management International, Asset Management USA, Attn: Berit Emme, Valentinskamp 70/EMPORIO, 20355 Hamburg, Germany"
     }
   ]
 }

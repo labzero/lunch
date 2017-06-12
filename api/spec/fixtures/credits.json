@@ -7,7 +7,8 @@
     "LC_SETTLEMENT_DATE": "06-MAY-15",
     "LC_MATURITY_DATE": "16-JUN-15",
     "LC_ISSUE_NUMBER": "ACE",
-    "LCX_UPDATE_DATE": "25-MAY-15"
+    "LCX_UPDATE_DATE": "25-MAY-15",
+    "LC_BENEFICIARY": "Texas Comptroller of Public Accounts, Texas State Comptroller, Rusk State Office Building, Cash & Securities Management Division, 208 East 10th Street, Room 636, Austin, TX 78711, Attention: Jonathan Gonzales"
   },
   {
     "LC_LC_NUMBER": "2015-993",
@@ -17,7 +18,8 @@
     "LC_SETTLEMENT_DATE": "06-MAY-15",
     "LC_MATURITY_DATE": "16-JUN-15",
     "LC_ISSUE_NUMBER": "ACE",
-    "LCX_UPDATE_DATE": "25-MAY-15"
+    "LCX_UPDATE_DATE": "25-MAY-15",
+    "LC_BENEFICIARY": "Texas Comptroller of Public Accounts, Texas State Comptroller, Rusk State Office Building, Cash & Securities Management Division, 208 East 10th Street, Room 636, Austin, TX 78711, Attention: Jonathan Gonzales"
   },
   {
     "LC_LC_NUMBER": "2015-993",
@@ -27,6 +29,7 @@
     "LC_SETTLEMENT_DATE": "06-MAY-15",
     "LC_MATURITY_DATE": "16-JUN-15",
     "LC_ISSUE_NUMBER": "ACE",
-    "LCX_UPDATE_DATE": "25-MAY-15"
+    "LCX_UPDATE_DATE": "25-MAY-15",
+    "LC_BENEFICIARY": "Texas Comptroller of Public Accounts, Texas State Comptroller, Rusk State Office Building, Cash & Securities Management Division, 208 East 10th Street, Room 636, Austin, TX 78711, Attention: Jonathan Gonzales"
   }
 ]

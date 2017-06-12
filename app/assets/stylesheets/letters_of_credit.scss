@@ -21,6 +21,9 @@
     margin-bottom: 10px;
   }
   table {
+    td:nth-child(2) {
+      width: 250px;
+    }
     td:last-child:not(.dataTables_empty) {
       text-transform: uppercase;
       color: $medium-gray;

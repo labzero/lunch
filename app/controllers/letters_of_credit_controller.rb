@@ -42,6 +42,7 @@ class LettersOfCreditController < ApplicationController
         {
           columns: [
             {value: credit[:lc_number], type: nil},
+            {value: credit[:beneficiary].try(:truncate, 50, omission: ''), type: nil},
             {value: credit[:current_par], type: :currency_whole},
             {value: credit[:trade_date], type: :date},
             {value: credit[:maturity_date], type: :date},
@@ -55,7 +56,7 @@ class LettersOfCreditController < ApplicationController
       []
     end
     @table_data = {
-      column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'), t('global.issue_date'), t('letters_of_credit.manage.expiration_date'), t('reports.pages.letters_of_credit.headers.credit_program'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('global.actions')],
+      column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), t('reports.pages.letters_of_credit.headers.beneficiary'), fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'), t('global.issue_date'), t('letters_of_credit.manage.expiration_date'), t('reports.pages.letters_of_credit.headers.credit_program'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('global.actions')],
       rows: rows
     }
   end
