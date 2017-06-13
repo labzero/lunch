@@ -311,4 +311,25 @@ describe MAPI::ServiceApp do
       call_endpoint
     end
   end
+
+  describe 'post `etransact_advances/early_shutoff`' do
+    let(:post_body) { {"params" => "#{SecureRandom.hex}"} }
+    let(:call_endpoint) { post 'etransact_advances/early_shutoff', post_body.to_json }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'etransact_advances/early_shutoff', :post, MAPI::Services::EtransactAdvances::ShutoffTimes, :schedule_early_shutoff, "{}"
+
+    it 'calls `MAPI::Services::EtransactAdvances::ShutoffTimes.schedule_early_shutoff` with the app' do
+      expect(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:schedule_early_shutoff).with(an_instance_of(MAPI::ServiceApp), anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::EtransactAdvances::ShutoffTimes.schedule_early_shutoff` with the parsed post body' do
+      expect(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:schedule_early_shutoff).with(an_instance_of(MAPI::ServiceApp), post_body)
+      call_endpoint
+    end
+    it 'returns a JSONd empty hash in the response body if the `schedule_early_shutoff` method is successful' do
+      allow(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:schedule_early_shutoff).and_return(true)
+      call_endpoint
+      expect(last_response.body).to eq({}.to_json)
+    end
+  end
 end

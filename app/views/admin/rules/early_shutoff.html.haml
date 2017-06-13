@@ -1,6 +1,6 @@
 =render layout: 'shutoff_times', locals: {active_nav: :advance_early_shutoff, classes: 'advance-shutoff-times-early'} do
   - if @can_edit_trade_rules
-    %button.secondary-button= t('admin.shutoff_times.actions.schedule_new')
+    =link_to(t('admin.shutoff_times.actions.schedule_new'), rules_advance_new_early_shutoff_path, class: 'secondary-button')
   %table.report-table.table-allow-wrapping{data: {loaded: true, sortable: false, :'disable-auto-width' => true, :'missing-data-message' => t('admin.shutoff_times.early.none_scheduled')}}
     %thead
       %tr

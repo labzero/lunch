@@ -405,7 +405,7 @@
 }
 
 .advance-shutoff-times-early {
-  button {
+  .secondary-button {
     float: right;
     margin-bottom: 20px;
     width: 436px;
@@ -464,5 +464,82 @@
         }
       }
     }
+  }
+}
+
+.advance-shutoff-times-view-early {
+  section {
+    @extend %bordered-section;
+    &:first-of-type {
+      h3 {
+        margin-bottom: 25px;
+      }
+    }
+  }
+  h3 {
+    @extend %typography-subtitle;
+    margin: 0;
+  }
+  h4 {
+    @extend %typography-field-label;
+    color: $medium-gray;
+    margin: 30px 0 20px;
+  }
+  .datepicker-trigger {
+    width: 200px;
+    input {
+      background: transparent;
+    }
+  }
+  .datepicker-wrapper {
+    width: 200px;
+  }
+  .textarea {
+    @extend %input-field-styling;
+    width: 100%;
+    height: auto;
+    min-height: 30px;
+  }
+  .input-field-container-textarea {
+    display: block;
+    width: auto;
+    height: 100px;
+    textarea {
+      resize: none;
+      overflow: hidden;
+      height: 100px;
+    }
+  }
+  .input-field-container-horizontal {
+    label {
+      margin-right: 0;
+      width: 130px;
+      display: inline-block;
+    }
+  }
+  .dropdown-hour {
+    width: 110px;
+    margin-right: 7px;
+  }
+  .dropdown-minute {
+    width: 80px;
+  }
+  .input-field-container-textarea-wrapper {
+    label {
+      display: block;
+      margin: 20px 0 10px;
+      &.label-error {
+        display: none;
+      }
+    }
+  }
+}
+
+.rules-early-shutoff-form-actions {
+  .primary-button, .secondary-button {
+    width: 437px;
+  }
+  .primary-button {
+    margin-left: 20px;
   }
 }

@@ -59,4 +59,20 @@ RSpec.describe WebAdminPolicy, :type => :policy do
   describe '`edit_trade_rules?` method' do
     it_behaves_like 'a web_admin policy that checks to see if the user has the web_admin role', :edit_trade_rules
   end
+
+  describe '`modify_early_shutoff_request?` method' do
+    let(:early_shutoff_request) { instance_double(EarlyShutoffRequest) }
+    subject { WebAdminPolicy.new(user, early_shutoff_request) }
+    before do
+      allow(early_shutoff_request).to receive(:owners).and_return(Set.new)
+    end
+    it 'returns true if the user is an owner of the early shutoff request' do
+      early_shutoff_request.owners.add(user.id)
+      expect(subject).to permit_action(:modify_early_shutoff_request)
+    end
+    it 'returns false if the user is not an owner of the letter of credit request' do
+      expect(subject).to_not permit_action(:modify_early_shutoff_request)
+    end
+  end
+
 end

@@ -775,6 +775,38 @@ describe EtransactAdvancesService do
     end
   end
 
+  describe '`schedule_early_shutoff`' do
+    let(:early_shutoff) { instance_double(EarlyShutoffRequest, early_shutoff_date: instance_double(String), vrc_shutoff_time: instance_double(String), frc_shutoff_time: instance_double(String), day_of_message_simple_format: instance_double(String), day_before_message_simple_format: instance_double(String)) }
+    let(:result) { double('some result') }
+    let(:call_method) { subject.schedule_early_shutoff(early_shutoff) }
+    it 'calls `post_hash` with the endpoint name' do
+      expect(subject).to receive(:post_hash).with(:schedule_early_shutoff, any_args)
+      call_method
+    end
+    it 'calls `post_hash` with the proper endpoint' do
+      expect(subject).to receive(:post_hash).with(anything, 'etransact_advances/early_shutoff', anything)
+      call_method
+    end
+    describe 'the `post_hash` body' do
+      [:early_shutoff_date, :vrc_shutoff_time, :frc_shutoff_time].each do |attr|
+        it "includes the `#{attr}` of the early_shutoff_request" do
+          expect(subject).to receive(:post_hash).with(anything, anything, hash_including(attr => early_shutoff.send(attr)))
+          call_method
+        end
+      end
+      [:day_of_message, :day_before_message].each do |attr|
+        it "includes the `#{attr}_simple_format` of the early_shutoff_request" do
+          expect(subject).to receive(:post_hash).with(anything, anything, hash_including(attr => early_shutoff.send(:"#{attr}_simple_format")))
+          call_method
+        end
+      end
+    end
+    it 'returns the result of calling `post_hash`' do
+      allow(subject).to receive(:post_hash).and_return(result)
+      expect(call_method).to eq(result)
+    end
+  end
+
   describe 'days_until' do
     let(:today) { Time.zone.today }
     it 'should map today to 0' do

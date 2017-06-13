@@ -1,0 +1,33 @@
+
+- today = Time.zone.today
+=render layout: 'shutoff_times', locals: {active_nav: :advance_early_shutoff, classes: 'advance-shutoff-times-view-early'} do
+  = form_for(@early_shutoff_request, url: rules_advance_new_early_shutoff_url, html: {class: 'rules-early-shutoff-form', method: :post}) do |f|
+    =f.hidden_field(:id)
+    =f.hidden_field(:early_shutoff_date)
+    =f.hidden_field(:vrc_shutoff_time)
+    =f.hidden_field(:frc_shutoff_time)
+    %h2= t('admin.shutoff_times.schedule_early.title')
+    %section
+      %h3= t('admin.shutoff_times.schedule_early.day_of_info.title')
+      .form-fields-section-column-2
+        .input-field-container-horizontal
+          %label= t('admin.shutoff_times.schedule_early.day_of_info.date')
+          = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'early_shutoff_request[early_shutoff_date]', start_date: @early_shutoff_request.early_shutoff_date, min_date: today, max_date: today + 30.years, disable_weekends: true
+        %h4= t('admin.shutoff_times.schedule_early.day_of_info.times')
+        .input-field-container-horizontal
+          %label= t('admin.shutoff_times.early.vrc_terms')
+          = render 'shared/dropdown', dropdown_name: 'vrc_shutoff_time_hour', default_value: @dropdown_defaults[:vrc][:hour][:value], default_text: @dropdown_defaults[:vrc][:hour][:text], dropdown_options: @hour_dropdown_options, classes: 'dropdown-hour'
+          = render 'shared/dropdown', dropdown_name: 'vrc_shutoff_time_minute', default_value: @dropdown_defaults[:vrc][:minute][:value], default_text: @dropdown_defaults[:vrc][:minute][:text], dropdown_options: @minute_dropdown_options, classes: 'dropdown-minute'
+        .input-field-container-horizontal
+          %label= t('admin.shutoff_times.early.frc_terms')
+          = render 'shared/dropdown', dropdown_name: 'frc_shutoff_time_hour', default_value: @dropdown_defaults[:frc][:hour][:value], default_text: @dropdown_defaults[:frc][:hour][:text], dropdown_options: @hour_dropdown_options, classes: 'dropdown-hour'
+          = render 'shared/dropdown', dropdown_name: 'frc_shutoff_time_minute', default_value: @dropdown_defaults[:frc][:minute][:value], default_text: @dropdown_defaults[:frc][:minute][:text], dropdown_options: @minute_dropdown_options, classes: 'dropdown-minute'
+        .input-field-container-textarea-wrapper
+          = render 'shared/input_field', form_builder: f, field_type: :text_area, field_name: :day_of_message, label: t('admin.shutoff_times.schedule_early.day_of_info.message')
+    %section
+      %h3= t('admin.shutoff_times.schedule_early.day_before_info.title')
+      .input-field-container-textarea-wrapper
+        = render 'shared/input_field', form_builder: f, field_type: :text_area, field_name: :day_before_message, label: t('admin.shutoff_times.schedule_early.day_before_info.message')
+    .rules-early-shutoff-form-actions
+      =link_to(t('global.cancel'), rules_advance_early_shutoff_path, {class: 'secondary-button'})
+      =submit_tag(t('admin.shutoff_times.schedule_early.action'), class: 'primary-button')

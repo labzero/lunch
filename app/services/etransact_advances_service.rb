@@ -175,6 +175,17 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
+  def schedule_early_shutoff(early_shutoff)
+    shutoff_hash = {
+      early_shutoff_date: early_shutoff.early_shutoff_date,
+      vrc_shutoff_time: early_shutoff.vrc_shutoff_time,
+      frc_shutoff_time: early_shutoff.frc_shutoff_time,
+      day_of_message: early_shutoff.day_of_message_simple_format,
+      day_before_message: early_shutoff.day_before_message_simple_format
+    }
+    post_hash(:schedule_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash)
+  end
+
   def enable_etransact_service
     put_hash(:enable_etransact_service, 'etransact_advances/settings/enable_service', {})
   end

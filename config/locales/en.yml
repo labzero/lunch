@@ -169,6 +169,33 @@ en:
       "2": Second Quarter %{year}
       "3": Third Quarter %{year}
       "4": Fourth Quarter %{year}
+  times:
+    "00": 12 midnight
+    "01": 1 am
+    "02": 2 am
+    "03": 3 am
+    "04": 4 am
+    "05": 5 am
+    "06": 6 am
+    "07": 7 am
+    "08": 8 am
+    "09": 9 am
+    "10": 10 am
+    "11": 11 am
+    "12": 12 noon
+    "13": 1 pm
+    "14": 2 pm
+    "15": 3 pm
+    "16": 4 pm
+    "17": 5 pm
+    "18": 6 pm
+    "19": 7 pm
+    "20": 8 pm
+    "21": 9 pm
+    "22": 10 pm
+    "23": 11 pm
+    full_hour: ':00'
+    half_hour: ':30'
   nav:
     primary:
       welcome: Hi %{name}
@@ -3402,6 +3429,18 @@ en:
         none_scheduled: There are no scheduled early shut offs to display.
         vrc_terms: VRC Terms
         frc_terms: FRC Terms
+      schedule_early:
+        title: Schedule or Edit an Early Shut Off
+        action: Schedule Early Shutoff
+        day_of_info:
+          title: Early Shutoff Date, Time and Message
+          date: Shutoff Date
+          times: Shutoff Times
+          message: Message to be displayed starting at midnight on the early shutoff day
+        day_before_info:
+          title: Plan Ahead Message
+          message: Message to be displayed starting at midnight the business day before the early shutoff day
+        success: Your new early shutoff has been scheduled.
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

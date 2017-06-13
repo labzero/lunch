@@ -22,3 +22,17 @@ Feature: Viewing/Modifying the End of Day Shutoffs for ETransact
     Then I should be on the end of day shutoff page
     And I should see the table of scheduled early shutoffs
     And I should see the end of day shutoff early shutoffs page in its editable mode
+
+  @jira-mem-2367 @local-only
+  Scenario: Scheduling a new early shutoff
+    Given I visit the admin early shutoff summary page
+    When I click the button to schedule a new early shutoff
+    Then I should see the form to schedule a new early shutoff
+    When I input "This is a test message" in the field for the early shutoff day of message
+    And I click the button to confirm the scheduling of the new early shutoff
+    Then I should see the table of scheduled early shutoffs
+    And I should see the success message on the advance availability early shutoff page
+    When I click the button to schedule a new early shutoff
+    And I input "This is a test message" in the field for the early shutoff day of message
+    And I click the button to confirm the scheduling of the new early shutoff but there is an error
+    Then I should see the error message on the advance availability early shutoff page
