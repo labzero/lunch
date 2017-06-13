@@ -1323,6 +1323,7 @@ en:
         title: Authorized Requests
         description: Authorized requests are displayed for %{display_history} after settlement.
       view:
+        fhfa_number: 'FHFA Number:'
         request_id: 'Request ID:'
         authorization_date: 'Authorization Date:'
         pledged_account: 'To Pledged Account:'
