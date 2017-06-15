@@ -321,6 +321,22 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/early_shutoff'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Update a new early shutoff for a given date'
+              key :nickname, :UpdateEarlyShutoff
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :EarlyShutoff
+                key :description, 'The hash containing all relevant data for the early shutoff to be updated.'
+              end
+            end
+          end
         end
 
         # etransact advances limits
@@ -515,6 +531,13 @@ module MAPI
           MAPI::Services::EtransactAdvances.rescued_json_response(self) do
             early_shutoff = JSON.parse(request.body.read)
             {} if MAPI::Services::EtransactAdvances::ShutoffTimes.schedule_early_shutoff(self, early_shutoff)
+          end
+        end
+
+        relative_put '/early_shutoff' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            early_shutoff = JSON.parse(request.body.read)
+            {} if MAPI::Services::EtransactAdvances::ShutoffTimes.update_early_shutoff(self, early_shutoff)
           end
         end
       end

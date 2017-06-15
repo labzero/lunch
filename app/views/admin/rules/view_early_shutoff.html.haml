@@ -1,8 +1,9 @@
 
 - today = Time.zone.today
 =render layout: 'shutoff_times', locals: {active_nav: :advance_early_shutoff, classes: 'advance-shutoff-times-view-early'} do
-  = form_for(@early_shutoff_request, url: rules_advance_new_early_shutoff_url, html: {class: 'rules-early-shutoff-form', method: :post}) do |f|
+  = form_for(@early_shutoff_request, url: @form_data[:url], html: {class: 'rules-early-shutoff-form', method: @form_data[:method]}) do |f|
     =f.hidden_field(:id)
+    =f.hidden_field(:original_early_shutoff_date)
     =f.hidden_field(:early_shutoff_date)
     =f.hidden_field(:vrc_shutoff_time)
     =f.hidden_field(:frc_shutoff_time)

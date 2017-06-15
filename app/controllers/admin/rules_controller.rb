@@ -33,7 +33,7 @@ class Admin::RulesController < Admin::BaseController
     @can_edit_trade_rules = policy(:web_admin).edit_trade_rules?
   end
 
-  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :update_advance_availability_by_member, :enable_etransact_service, :disable_etransact_service, :view_early_shutoff, :new_early_shutoff] do
+  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :update_advance_availability_by_member, :enable_etransact_service, :disable_etransact_service, :view_early_shutoff, :new_early_shutoff, :update_early_shutoff] do
     authorize :web_admin, :edit_trade_rules?
   end
 
@@ -52,8 +52,8 @@ class Admin::RulesController < Admin::BaseController
     }
   end
 
-  before_action :fetch_early_shutoff_request, only: [:view_early_shutoff, :new_early_shutoff]
-  after_action :save_early_shutoff_request, only: [:view_early_shutoff, :new_early_shutoff]
+  before_action :fetch_early_shutoff_request, only: [:view_early_shutoff, :new_early_shutoff, :update_early_shutoff]
+  after_action :save_early_shutoff_request, only: [:view_early_shutoff, :new_early_shutoff, :update_early_shutoff]
 
   # GET
   def limits
@@ -375,11 +375,17 @@ class Admin::RulesController < Admin::BaseController
 
   # GET
   def early_shutoff
-    @early_shutoff_data = EtransactAdvancesService.new(request).early_shutoffs
-    raise 'There has been an error and EtransactAdvancesService#early_shutoff has encountered nil. Check error logs.' if @early_shutoff_data.nil?
-    calendar_service = CalendarService.new(request)
-    @early_shutoff_data.sort_by! { |shutoff| shutoff[:early_shutoff_date]}
-    @early_shutoff_data.each { |early_shutoff| early_shutoff[:day_before_date] = calendar_service.find_previous_business_day(early_shutoff[:early_shutoff_date] - 1.day, 1.day) }
+    early_shutoff_data = EtransactAdvancesService.new(request).early_shutoffs
+    raise 'There has been an error and EtransactAdvancesService#early_shutoff has encountered nil. Check error logs.' if early_shutoff_data.nil?
+    @early_shutoff_data = early_shutoff_data.collect do |early_shutoff|
+      shutoff = EarlyShutoffRequest.new(request)
+      shutoff.attributes = early_shutoff
+      shutoff.original_early_shutoff_date = shutoff.early_shutoff_date
+      shutoff.owners.add(current_user.id)
+      shutoff.save
+      shutoff
+    end
+    @early_shutoff_data.sort_by! { |shutoff| shutoff.early_shutoff_date}
     @column_headings = [t('admin.shutoff_times.early.date'), t('admin.shutoff_times.early.time'), t('admin.shutoff_times.early.messages')]
     @column_headings << t('global.actions') if @can_edit_trade_rules
   end
@@ -410,6 +416,17 @@ class Admin::RulesController < Admin::BaseController
         }
       }
     }
+    @form_data = if params[:edit_request]
+      {
+        url: rules_advance_update_early_shutoff_url,
+        method: :put
+      }
+    else
+      {
+        url: rules_advance_new_early_shutoff_url,
+        method: :post
+      }
+    end
   end
 
   # POST
@@ -417,6 +434,14 @@ class Admin::RulesController < Admin::BaseController
     early_shutoff_request.attributes = params[:early_shutoff_request]
     early_shutoff_result = EtransactAdvancesService.new(request).schedule_early_shutoff(early_shutoff_request) || {error: 'There has been an error and Admin::RulesController#new_early_shutoff has encountered nil'}
     set_flash_message(early_shutoff_result, t('admin.shutoff_times.schedule_early.success'))
+    redirect_to action: :early_shutoff
+  end
+
+  # PUT
+  def update_early_shutoff
+    early_shutoff_request.attributes = params[:early_shutoff_request]
+    early_shutoff_result = EtransactAdvancesService.new(request).update_early_shutoff(early_shutoff_request) || {error: 'There has been an error and Admin::RulesController#update_early_shutoff has encountered nil'}
+    set_flash_message(early_shutoff_result, t('admin.shutoff_times.schedule_early.update_success'))
     redirect_to action: :early_shutoff
   end
 

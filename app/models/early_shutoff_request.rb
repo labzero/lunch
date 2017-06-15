@@ -8,9 +8,9 @@ class EarlyShutoffRequest
   DEFAULT_VRC_SHUTOFF_TIME = '1400'
 
   REQUIRED_ATTRS = [:early_shutoff_date, :frc_shutoff_time, :vrc_shutoff_time, :day_of_message].freeze
-  OPTIONAL_ATTRS = [:day_before_message].freeze
+  OPTIONAL_ATTRS = [:day_before_message, :original_early_shutoff_date].freeze
   ACCESSIBLE_ATTRS = REQUIRED_ATTRS + OPTIONAL_ATTRS
-  READ_ONLY_ATTRS = [:id, :owners, :request].freeze
+  READ_ONLY_ATTRS = [:id, :owners, :request, :day_before_date].freeze
   SERIALIZATION_EXCLUDE_ATTRS = [:request].freeze
 
   attr_accessor *ACCESSIBLE_ATTRS
@@ -109,6 +109,10 @@ class EarlyShutoffRequest
 
   def day_before_message_simple_format
     simple_format_for(day_before_message) if day_before_message
+  end
+
+  def day_before_date
+    @day_before_date ||= CalendarService.new(request).find_previous_business_day(early_shutoff_date - 1.day, 1.day)
   end
 
   private

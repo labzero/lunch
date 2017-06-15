@@ -15,6 +15,12 @@ module MAPI
       end
       swagger_model :EarlyShutoff do
         key :required, [:early_shutoff_date, :vrc_shutoff_time, :frc_shutoff_time, :day_of_message, :day_before_message]
+        property :original_early_shutoff_date do
+          key :required, false
+          key :type, :string
+          key :description, 'The ISO-8601 string representation of the original date for the early shutoff that is to be updated. Format is YYYY-MM-DD'
+          key :notes, 'Only applies to the PUT `etransact_advances\early_shutoff` endpoint.'
+        end
         property :early_shutoff_date do
           key :type, :string
           key :description, 'The ISO-8601 string representation of the date for the early shutoff. Format is YYYY-MM-DD'

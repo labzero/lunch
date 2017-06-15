@@ -260,6 +260,102 @@ describe MAPI::ServiceApp do
         end
       end
 
+      describe '`update_early_shutoff`' do
+        let(:early_shutoff) { instance_double(Hash, with_indifferent_access: nil) }
+        let(:call_method) { shutoff_times_module.update_early_shutoff(app, early_shutoff) }
+        before do
+          allow(shutoff_times_module).to receive(:should_fake?).and_return(true)
+          allow(shutoff_times_module).to receive(:validate_early_shutoff)
+        end
+
+        context 'operations independent of the result of `should_fake?`' do
+          it 'ensures the `early_shutoff` arg can be queried with indifferent access' do
+            expect(early_shutoff).to receive(:with_indifferent_access)
+            call_method
+          end
+          it 'validates the `early_shutoff` arg' do
+            allow(early_shutoff).to receive(:with_indifferent_access).and_return(early_shutoff)
+            expect(shutoff_times_module).to receive(:validate_early_shutoff).with(early_shutoff)
+            call_method
+          end
+          it 'calls `should_fake?` with the app passed as an argument' do
+            expect(shutoff_times_module).to receive(:should_fake?).with(app).and_return(true)
+            call_method
+          end
+        end
+        context 'when `should_fake?` returns true' do
+          before { allow(shutoff_times_module).to receive(:should_fake?).and_return(true) }
+          it 'calls returns true' do
+            expect(call_method).to be true
+          end
+        end
+        context 'when `should_fake?` returns false' do
+          let(:early_shutoff) {{
+            original_early_shutoff_date: instance_double(String),
+            early_shutoff_date: instance_double(String),
+            frc_shutoff_time: instance_double(String),
+            vrc_shutoff_time: instance_double(String),
+            day_of_message: instance_double(String),
+            day_before_message: instance_double(String)
+          }}
+          let(:sentinel) { SecureRandom.hex }
+          let(:call_method) { shutoff_times_module.update_early_shutoff(app, early_shutoff) }
+          before do
+            allow(shutoff_times_module).to receive(:should_fake?).and_return(false)
+            allow(shutoff_times_module).to receive(:execute_sql).and_return(true)
+            allow(shutoff_times_module).to receive(:quote)
+          end
+          it 'returns true if `execute_sql` is successful' do
+            expect(call_method).to be true
+          end
+          it 'raises an error containing the `early_shutoff_date` and the `original_early_shutoff_date` if `execute_sql` is nil' do
+            allow(shutoff_times_module).to receive(:execute_sql).and_return(nil)
+            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to update the early shutoff for original date: #{early_shutoff[:original_early_shutoff_date]}, updated date: #{early_shutoff[:early_shutoff_date]}")
+          end
+          it 'raises an error containing the `early_shutoff_date` if `execute_sql` is false' do
+            allow(shutoff_times_module).to receive(:execute_sql).and_return(false)
+            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to update the early shutoff for original date: #{early_shutoff[:original_early_shutoff_date]}, updated date: #{early_shutoff[:early_shutoff_date]}")
+          end
+          it 'calls `execute_sql` with the logger' do
+            expect(shutoff_times_module).to receive(:execute_sql).with(app.logger, anything).and_return(true)
+            call_method
+          end
+          describe 'the SQL passed to `execute_sql`' do
+            [:original_early_shutoff_date, :early_shutoff_date, :frc_shutoff_time, :vrc_shutoff_time, :day_of_message, :day_before_message].each do |attr|
+              it "calls `quote` with the `#{attr}` from the passed hash" do
+                expect(shutoff_times_module).to receive(:quote).with(early_shutoff[attr])
+                call_method
+              end
+            end
+            it 'UPDATES the WEB_ADM.AO_TYPE_EARLY_SHUTOFF table' do
+              matcher = Regexp.new(/\A\s*UPDATE\s+WEB_ADM\.AO_TYPE_EARLY_SHUTOFF\s+/im)
+              expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+            it 'SETs the EARLY_SHUTOFF_DATE to the early_shutoff_date of the passed hash after converting the quoted value to a date' do
+              allow(shutoff_times_module).to receive(:quote).with(early_shutoff[:early_shutoff_date]).and_return(sentinel)
+              matcher = Regexp.new(/\A\s*UPDATE.+SET\s+.*\s*EARLY_SHUTOFF_DATE\s*=\s*TO_DATE\s*\(\s*#{sentinel}\s*,\s*'YYYY-MM-DD'\s*\)\s*(,|\s+).+WHERE/im)
+              expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+            [:frc_shutoff_time, :vrc_shutoff_time, :day_of_message, :day_before_message].each do |attr|
+              it "SETs the #{attr.to_s.upcase} to the quoted #{attr} value of the passed hash" do
+                allow(shutoff_times_module).to receive(:quote).with(early_shutoff[attr]).and_return(sentinel)
+                matcher = Regexp.new(/\A\s*UPDATE.+SET\s+.*\s*#{attr.to_s.upcase}\s*=\s*#{sentinel}\s*(,|\s+).+WHERE/im)
+                expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                call_method
+              end
+            end
+            it 'updates the row WHERE the iso8601 format of the EARLY_SHUTOFF_DATE matches the quoted original_early_shutoff_date of the passed hash' do
+              allow(shutoff_times_module).to receive(:quote).with(early_shutoff[:original_early_shutoff_date]).and_return(sentinel)
+              matcher = Regexp.new(/\A\s*UPDATE.+\s+SET.+\s+WHERE\s+TO_CHAR\s*\(\s*EARLY_SHUTOFF_DATE\s*,\s*'YYYY-MM-DD'\s*\)\s*=\s*#{sentinel}\s*\z/im)
+              expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+          end
+        end
+      end
+
       describe '`validate_early_shutoff`' do
         let(:shutoff) {{
           early_shutoff_date: instance_double(String, to_s: instance_double(String, match: true)),

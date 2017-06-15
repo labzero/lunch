@@ -260,6 +260,51 @@ RSpec.describe EarlyShutoffRequest, :type => :model do
         end
       end
     end
+
+    describe '`day_before_date`' do
+      let(:request) { double('request') }
+      let(:calendar_service) { instance_double(CalendarService, find_previous_business_day: nil)}
+      let(:early_shutoff_date) { instance_double(Date, :- => nil) }
+      let(:day_before_early_shutoff) { instance_double(Date) }
+      let(:previous_business_day) { instance_double(Date) }
+      let(:call_method) { subject.day_before_date }
+      before do
+        allow(subject).to receive(:request).and_return(request)
+        allow(CalendarService).to receive(:new).and_return(calendar_service)
+      end
+
+      context 'when the `day_before_date` attribute already exists' do
+        before { subject.instance_variable_set(:@day_before_date, previous_business_day) }
+
+        it 'does not create a new instance of the CalendarService' do
+          expect(CalendarService).not_to receive(:new)
+          call_method
+        end
+        it 'returns the attribute' do
+          expect(call_method).to eq(previous_business_day)
+        end
+      end
+      context 'when the `day_before_date` attribute does not yet exist' do
+        it 'creates a new instance of the CalendarService with the request' do
+          expect(CalendarService).to receive(:new).with(request).and_return(calendar_service)
+          call_method
+        end
+        it 'calls `find_previous_business_day` on the CalendarService with one day prior to the early_shutoff_date' do
+          allow(subject).to receive(:early_shutoff_date).and_return(early_shutoff_date)
+          allow(early_shutoff_date).to receive(:-).with(1.day).and_return(day_before_early_shutoff)
+          expect(calendar_service).to receive(:find_previous_business_day).with(day_before_early_shutoff, anything)
+          call_method
+        end
+        it 'calls `find_previous_business_day` on the CalendarService with an interval of 1 day' do
+          expect(calendar_service).to receive(:find_previous_business_day).with(anything, 1.day)
+          call_method
+        end
+        it 'returns the result of calling `find_previous_business_day` on the CalendarService' do
+          allow(calendar_service).to receive(:find_previous_business_day).and_return(previous_business_day)
+          expect(call_method).to eq(previous_business_day)
+        end
+      end
+    end
   end
 
   describe 'private methods' do
