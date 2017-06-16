@@ -150,7 +150,7 @@ RSpec.describe MemberMailer, :type => :mailer do
     end
     it 'sets the `from` of the email' do
       build_mail
-      expect(response.from.first).to eq(ContactInformationHelper::WEB_SUPPORT_EMAIL)
+      expect(response.from.first).to eq(ContactInformationHelper::NO_REPLY_EMAIL)
     end
     it 'sets the `subject` of the email' do
       build_mail

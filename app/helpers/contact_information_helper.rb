@@ -7,6 +7,7 @@ module ContactInformationHelper
   ACCOUNTING_EMAIL = 'capitalstock@fhlbsf.com'
   SECURITIES_SERVICES_EMAIL = 'securitiesservices@fhlbsf.com'
   COLLATERAL_OPERATIONS_EMAIL = 'collateraloperations@fhlbsf.com'
+  NO_REPLY_EMAIL = 'no-reply@fhlbsf.com'
   WEB_SUPPORT_PHONE_NUMBER = '4156162610'
   SERVICE_DESK_PHONE_NUMBER = '8004443452'
   OPERATIONS_PHONE_NUMBER = '4156162559'
