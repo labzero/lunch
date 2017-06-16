@@ -1561,9 +1561,9 @@ td.dataTables_empty {
     color: $print-color;
     border-top: 1px solid $print-color;
     margin-top: 10px;
-    span {
+    padding-top: 4px;
+    .report-bank-name {
       padding-left: 10px;
-      padding-top: 7px;
     }
     .page {
       float: right;
