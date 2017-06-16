@@ -119,6 +119,7 @@ RSpec.describe MemberMailer, :type => :mailer do
                       beneficiary_name: nil,
                       beneficiary_address: nil,
                       amount: nil,
+                      attention: nil,
                       issue_date: nil,
                       expiration_date: nil,
                       issuance_fee: nil,
@@ -202,7 +203,7 @@ RSpec.describe MemberMailer, :type => :mailer do
         allow(letter_of_credit_request).to receive(:created_at).and_return(datetime_sentinel)
         expect(email_body).to include(fhlb_datetime_standard_numeric_with_at(datetime_sentinel))
       end
-      [:created_by, :lc_number, :beneficiary_name, :beneficiary_address, :maintenance_fee].each do |attr|
+      [:created_by, :lc_number, :beneficiary_name, :beneficiary_address, :maintenance_fee, :attention].each do |attr|
         it "includes the `#{attr}` attribute" do
           allow(letter_of_credit_request).to receive(attr).and_return(string_sentinel)
           expect(email_body).to include(string_sentinel)

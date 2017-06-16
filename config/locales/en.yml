@@ -1561,6 +1561,8 @@ en:
       public_unit: Public Unit Deposit Request
       beneficiary: Beneficiary
       amount: Amount
+      attention: Attention
+      attention_html: "Attention <span>(optional)</span>"
       fees:
         title: Fees
         explanation: 'Based on the request details input above, the following fees will be applied:'

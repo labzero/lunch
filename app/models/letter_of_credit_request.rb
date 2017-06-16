@@ -15,7 +15,7 @@ class LetterOfCreditRequest
 
   READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners, :member_id,
                      :standard_borrowing_capacity, :max_term, :remaining_financing_available].freeze
-  ACCESSIBLE_ATTRS = [:beneficiary_name, :beneficiary_address, :amount, :issue_date, :expiration_date, :created_at, :created_by].freeze
+  ACCESSIBLE_ATTRS = [:beneficiary_name, :beneficiary_address, :amount, :attention, :issue_date, :expiration_date, :created_at, :created_by].freeze
   DATE_ATTRS = [:issue_date, :expiration_date, :created_at].freeze
   REQUIRED_ATTRS = [:beneficiary_name, :amount, :issue_date, :expiration_date].freeze
   SERIALIZATION_EXCLUDE_ATTRS = [:request].freeze
