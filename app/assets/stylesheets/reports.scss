@@ -770,6 +770,11 @@
       text-align: center;
     }
   }
+  tr:not(.table-heading-row) {
+    th:not(:first-child) {
+      min-width: 50px;
+    }
+  }
 }
 
 td .currency-alignment {
