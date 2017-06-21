@@ -262,6 +262,7 @@ Rails.application.routes.draw do
           get '/schedule-early-shutoff' => 'admin/rules#view_early_shutoff', as: :rules_advance_view_early_shutoff
           post '/schedule-early-shutoff' => 'admin/rules#new_early_shutoff', as: :rules_advance_new_early_shutoff
           put '/update-early-shutoff' => 'admin/rules#update_early_shutoff', as: :rules_advance_update_early_shutoff
+          delete '/remove-early-shutoff' => 'admin/rules#remove_early_shutoff', as: :rules_advance_remove_early_shutoff
           get '/typical' => 'admin/rules#typical_shutoff', as: :rules_advance_typical_shutoff
         end
       end

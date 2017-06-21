@@ -48,3 +48,11 @@ Feature: Viewing/Modifying the End of Day Shutoffs for ETransact
     When I click to edit the first scheduled early shutoff
     And I click the button to confirm the scheduling of the edited early shutoff but there is an error
     Then I should see the error message on the advance availability early shutoff page
+
+  @jira-mem-2463 @local-only
+  Scenario: Removing an existing early shutoff
+    Given I visit the admin early shutoff summary page
+    When I click to remove the first scheduled early shutoff
+    Then I should see the success message on the advance availability remove early shutoff page
+    When I click to remove the first scheduled early shutoff but there is an error
+    Then I should see the error message on the advance availability early shutoff page

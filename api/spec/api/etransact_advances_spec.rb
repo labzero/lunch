@@ -353,4 +353,25 @@ describe MAPI::ServiceApp do
       expect(last_response.body).to eq({}.to_json)
     end
   end
+
+  describe 'delete `etransact_advances/early_shutoff`' do
+    let(:shutoff_date) { SecureRandom.hex }
+    let(:call_endpoint) { delete "etransact_advances/early_shutoff/#{shutoff_date}" }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', "etransact_advances/early_shutoff/2017-06-20", :delete, MAPI::Services::EtransactAdvances::ShutoffTimes, :remove_early_shutoff
+
+    it 'calls `MAPI::Services::EtransactAdvances::ShutoffTimes.remove_early_shutoff` with the app' do
+      expect(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:remove_early_shutoff).with(an_instance_of(MAPI::ServiceApp), anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::EtransactAdvances::ShutoffTimes.remove_early_shutoff` with the shutoff_date parameter' do
+      expect(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:remove_early_shutoff).with(anything, shutoff_date)
+      call_endpoint
+    end
+    it 'returns a JSONd empty hash in the response body if the `remove_early_shutoff` method is successful' do
+      allow(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:remove_early_shutoff).and_return(true)
+      call_endpoint
+      expect(last_response.body).to eq({}.to_json)
+    end
+  end
 end

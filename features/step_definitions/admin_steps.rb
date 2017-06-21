@@ -121,7 +121,7 @@ When(/^I click the save changes button for the rules limits form$/) do
   page.find('.rules-limits-form input[type=submit]').click
 end
 
-Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status|early shutoff|edit early shutoff) page$/) do |result, form|
+Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status|early shutoff|edit early shutoff|remove early shutoff) page$/) do |result, form|
   parent_selector = case form
   when 'limits'
     '.term-rules'
@@ -137,6 +137,8 @@ Then(/^I should see the (success|error) message on the (?:term rules|advance ava
     I18n.t('admin.shutoff_times.schedule_early.success')
   when 'edit early shutoff'
     I18n.t('admin.shutoff_times.schedule_early.update_success')
+  when 'remove early shutoff'
+    I18n.t('admin.shutoff_times.schedule_early.remove_success')
   else
     I18n.t('admin.term_rules.messages.success')
   end
@@ -235,6 +237,11 @@ When(/^I click to edit the first scheduled early shutoff$/) do
   @early_shutoff_id
   @early_shutoff_date = Date.strptime(first_row.find('td:first-child').text, '%m/%d/%Y')
   first_row.find('td:last-child a', text: /\A#{I18n.t('global.edit')}\z/i).click
+end
+
+When(/^I click to remove the first scheduled early shutoff( but there is an error)?$/) do |error|
+  allow_any_instance_of(EtransactAdvancesService).to receive(:remove_early_shutoff).and_return({error: 'some error message'}) if error
+  page.find('.advance-shutoff-times-early table tbody tr:first-child td:last-child a', text: /\A#{I18n.t('global.remove')}\z/i).click
 end
 
 Then(/^I should be on the edit page for that early shutoff$/) do

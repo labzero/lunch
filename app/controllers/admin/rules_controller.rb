@@ -33,7 +33,7 @@ class Admin::RulesController < Admin::BaseController
     @can_edit_trade_rules = policy(:web_admin).edit_trade_rules?
   end
 
-  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :update_advance_availability_by_member, :enable_etransact_service, :disable_etransact_service, :view_early_shutoff, :new_early_shutoff, :update_early_shutoff] do
+  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :update_advance_availability_by_member, :enable_etransact_service, :disable_etransact_service, :view_early_shutoff, :new_early_shutoff, :update_early_shutoff, :remove_early_shutoff] do
     authorize :web_admin, :edit_trade_rules?
   end
 
@@ -52,8 +52,8 @@ class Admin::RulesController < Admin::BaseController
     }
   end
 
-  before_action :fetch_early_shutoff_request, only: [:view_early_shutoff, :new_early_shutoff, :update_early_shutoff]
-  after_action :save_early_shutoff_request, only: [:view_early_shutoff, :new_early_shutoff, :update_early_shutoff]
+  before_action :fetch_early_shutoff_request, only: [:view_early_shutoff, :new_early_shutoff, :update_early_shutoff, :remove_early_shutoff]
+  after_action :save_early_shutoff_request, only: [:view_early_shutoff, :new_early_shutoff, :update_early_shutoff, :remove_early_shutoff]
 
   # GET
   def limits
@@ -442,6 +442,14 @@ class Admin::RulesController < Admin::BaseController
     early_shutoff_request.attributes = params[:early_shutoff_request]
     early_shutoff_result = EtransactAdvancesService.new(request).update_early_shutoff(early_shutoff_request) || {error: 'There has been an error and Admin::RulesController#update_early_shutoff has encountered nil'}
     set_flash_message(early_shutoff_result, t('admin.shutoff_times.schedule_early.update_success'))
+    redirect_to action: :early_shutoff
+  end
+
+  # DELETE
+  def remove_early_shutoff
+    early_shutoff_request.attributes = params[:early_shutoff_request]
+    early_shutoff_result = EtransactAdvancesService.new(request).remove_early_shutoff(early_shutoff_request) || {error: 'There has been an error and Admin::RulesController#remove_early_shutoff has encountered nil'}
+    set_flash_message(early_shutoff_result, t('admin.shutoff_times.schedule_early.remove_success'))
     redirect_to action: :early_shutoff
   end
 

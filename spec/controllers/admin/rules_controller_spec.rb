@@ -1635,6 +1635,12 @@ RSpec.describe Admin::RulesController, :type => :controller do
     it_behaves_like 'a RulesController action that alters the state of an early shutoff request', :update_early_shutoff, 'There has been an error and Admin::RulesController#update_early_shutoff has encountered nil', I18n.t('admin.shutoff_times.schedule_early.update_success')
   end
 
+  describe 'DELETE remove_early_shutoff' do
+    let(:early_shutoff_date) { SecureRandom.hex }
+    let(:call_action) { delete :remove_early_shutoff, early_shutoff_request: early_shutoff_params }
+    it_behaves_like 'a RulesController action that alters the state of an early shutoff request', :remove_early_shutoff, 'There has been an error and Admin::RulesController#remove_early_shutoff has encountered nil', I18n.t('admin.shutoff_times.schedule_early.remove_success')
+  end
+
   describe 'private methods' do
     describe '`set_flash_message`' do
       let(:result) { {} }

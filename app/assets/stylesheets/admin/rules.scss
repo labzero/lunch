@@ -452,8 +452,7 @@
         }
       }
       &:nth-child(4) {
-        span, a {
-          @extend %link-style;
+        a {
           text-transform: uppercase;
           &:first-child {
             float: left;

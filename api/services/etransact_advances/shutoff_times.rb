@@ -84,6 +84,18 @@ module MAPI
           true
         end
 
+        def self.remove_early_shutoff(app, early_shutoff_date)
+          raise InvalidFieldError.new('early_shutoff_date must follow ISO8601 standards: YYYY-MM-DD', :early_shutoff_date, early_shutoff_date) unless early_shutoff_date.to_s.match(REPORT_PARAM_DATE_FORMAT)
+          unless should_fake?(app)
+            remove_early_shutoff_sql = <<-SQL
+              DELETE FROM WEB_ADM.AO_TYPE_EARLY_SHUTOFF 
+              WHERE TO_CHAR(EARLY_SHUTOFF_DATE, 'YYYY-MM-DD') = #{quote(early_shutoff_date)}
+            SQL
+            raise MAPI::Shared::Errors::SQLError, "Failed to remove the early shutoff for date: #{early_shutoff_date}" unless execute_sql(app.logger, remove_early_shutoff_sql)
+          end
+          true
+        end
+
         def self.validate_early_shutoff(shutoff)
           raise InvalidFieldError.new('early_shutoff_date must follow ISO8601 standards: YYYY-MM-DD', :early_shutoff_date, shutoff[:early_shutoff_date]) unless shutoff[:early_shutoff_date].to_s.match(REPORT_PARAM_DATE_FORMAT)
           raise InvalidFieldError.new('frc_shutoff_time must be a 4-digit, 24-hour time representation with values between `0000` and `2359`', :frc_shutoff_time, shutoff[:frc_shutoff_time]) unless shutoff[:frc_shutoff_time].to_s.match(TIME_24_HOUR_FORMAT)

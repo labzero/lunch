@@ -784,6 +784,25 @@ describe EtransactAdvancesService do
     it_behaves_like 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`', :put_hash, :update_early_shutoff
   end
 
+  describe '`remove_early_shutoff`' do
+    let(:early_shutoff) { instance_double(EarlyShutoffRequest, early_shutoff_date: SecureRandom.hex) }
+    let(:result) { double('some result') }
+    let(:call_method) { subject.remove_early_shutoff(early_shutoff) }
+
+    it 'calls `delete_hash` with the endpoint name' do
+      expect(subject).to receive(:delete_hash).with(:remove_early_shutoff, anything)
+      call_method
+    end
+    it 'calls `delete_hash` with the endpoint containing the early_shutoff_date of the passed early_shutoff' do
+      expect(subject).to receive(:delete_hash).with(anything, "etransact_advances/early_shutoff/#{early_shutoff.early_shutoff_date}")
+      call_method
+    end
+    it 'returns the result of calling `delete_hash`' do
+      allow(subject).to receive(:delete_hash).and_return(result)
+      expect(call_method).to eq(result)
+    end
+  end
+
   describe 'days_until' do
     let(:today) { Time.zone.today }
     it 'should map today to 0' do

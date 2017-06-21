@@ -26,4 +26,4 @@
           - if @can_edit_trade_rules
             %td
               =link_to(t('global.edit'), rules_advance_view_early_shutoff_path({early_shutoff_request: {id: early_shutoff.id}, edit_request: true}))
-              %span= t('global.remove')
+              =link_to(t('global.remove'), rules_advance_remove_early_shutoff_path({early_shutoff_request: {id: early_shutoff.id}}), method: :delete)

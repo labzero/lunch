@@ -467,8 +467,16 @@ describe MAPIService do
     it_behaves_like 'a MAPI JSON REST request', :post, 'Data to POST'
   end
 
+  describe '`delete_json` method' do
+    it_behaves_like 'a MAPI JSON REST request', :delete, 'Data to DELETE'
+  end
+
   describe '`post_hash` method' do
     it_behaves_like 'a MAPI JSON REST request with Hash response', :post, 'Data to POST'
+  end
+
+  describe '`delete_hash` method' do
+    it_behaves_like 'a MAPI JSON REST request with Hash response', :delete, 'Data to DELETE'
   end
 
   describe '`put_json` method' do

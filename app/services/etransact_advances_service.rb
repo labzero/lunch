@@ -179,6 +179,10 @@ class EtransactAdvancesService < MAPIService
     put_hash(:update_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash(early_shutoff))
   end
 
+  def remove_early_shutoff(early_shutoff)
+    delete_hash(:remove_early_shutoff, "etransact_advances/early_shutoff/#{early_shutoff.early_shutoff_date}")
+  end
+
   def enable_etransact_service
     put_hash(:enable_etransact_service, 'etransact_advances/settings/enable_service', {})
   end
