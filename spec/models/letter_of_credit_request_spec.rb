@@ -521,8 +521,9 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       end
       date_attrs.each do |key|
         it "assigns a datefied value found under `#{key}` to the attribute `#{key}`" do
-          datefied_value = instance_double(DateTime)
-          allow(DateTime).to receive(:parse).with(value).and_return(datefied_value)
+          datefied_value = instance_double(ActiveSupport::TimeWithZone)
+          allow(Time.zone).to receive(:parse).and_call_original
+          allow(Time.zone).to receive(:parse).with(value).and_return(datefied_value)
           hash[key.to_s] = value
           call_method
           expect(subject.send(key)).to be(datefied_value)
