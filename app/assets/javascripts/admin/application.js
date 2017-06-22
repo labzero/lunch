@@ -1,8 +1,13 @@
 //= require jquery
 //= require jquery_ujs
+//= require dataTables/jquery.dataTables
+//= require moment
+//= require daterangepicker
 //= require ../nav.js
 //= require ../flyouts.js
 //= require ../utils.js
 //= require ../form.js
 //= require ../dropdown.js
+//= require ../tables.js
+//= require ../datepicker.js
 //= require_directory

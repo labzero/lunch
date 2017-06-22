@@ -55,6 +55,7 @@ RSpec.describe DashboardController, :type => :controller do
       }
     end
     before do
+      allow(Time).to receive_message_chain(:zone, :now, :hour)
       allow(Time).to receive_message_chain(:zone, :now, :to_date).and_return(Date.new(2015, 6, 24))
       allow_any_instance_of(MembersService).to receive(:member_contacts)
       allow(MessageService).to receive(:new).and_return(double('service instance', todays_quick_advance_message: nil))
@@ -330,21 +331,21 @@ RSpec.describe DashboardController, :type => :controller do
       allow_policy :advance, :show?
       it 'enqueues a rate fetch job' do
         expect(RatesServiceJob).to receive(:perform_later).with('quick_advance_rates', any_args)
-        make_request 
+        make_request
       end
       it 'uses the current_member_id for the rate fetch job' do
         expect(RatesServiceJob).to receive(:perform_later).with(anything, anything, anything, member_id)
-        make_request 
+        make_request
       end
       it 'uses the current request UUID for the rate fetch job' do
         uuid = SecureRandom.hex
         allow(request).to receive(:uuid).and_return(uuid)
         expect(RatesServiceJob).to receive(:perform_later).with(anything, uuid, anything, anything)
-        make_request 
+        make_request
       end
       it 'uses the current user ID for the rate fetch job' do
         expect(RatesServiceJob).to receive(:perform_later).with(anything, anything, controller.current_user.id, anything)
-        make_request 
+        make_request
       end
     end
     describe 'when the user is not an advance signer' do

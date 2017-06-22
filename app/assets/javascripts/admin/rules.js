@@ -56,5 +56,13 @@ $(function() {
         }
       }
     })
-  }
+  };
+
+  var $earlyShutoffForm = $('.rules-early-shutoff-form');
+  $earlyShutoffForm.on('submit', function(e) {
+    var frc_shutoff_time = $earlyShutoffForm.find('select[name=frc_shutoff_time_hour]').val() + $earlyShutoffForm.find('select[name=frc_shutoff_time_minute]').val();
+    $earlyShutoffForm.find('input[name="early_shutoff_request[frc_shutoff_time]"]').val(frc_shutoff_time);
+    var vrc_shutoff_time = $earlyShutoffForm.find('select[name=vrc_shutoff_time_hour]').val() + $earlyShutoffForm.find('select[name=vrc_shutoff_time_minute]').val();
+    $earlyShutoffForm.find('input[name="early_shutoff_request[vrc_shutoff_time]"]').val(vrc_shutoff_time);    
+  });
 });

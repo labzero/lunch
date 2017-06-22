@@ -183,11 +183,15 @@ AfterConfiguration do
       break
     end
     wait_time = ENV['WAIT_TIME'] ? ENV['WAIT_TIME'].to_i : 3
-    log "App not serving heartbeat (#{url})... waiting #{wait_time}s (#{i + 1} tr"+(i==0 ? "y" : "ies")+")"
+    log "App not serving heartbeat (#{url}, #{result})... waiting #{wait_time}s (#{i + 1} tr"+(i==0 ? "y" : "ies")+")"
     STDOUT.flush
     sleep wait_time
   end
-  raise Capybara::CapybaraError.new('Server failed to serve heartbeat') unless result == '200'
+  unless result == '200'
+    error = %x[curl -m 3 -sL #{url}]
+    log(error)
+    raise Capybara::CapybaraError.new('Server failed to serve heartbeat')
+  end
   sleep 10 #sleep 10 more seconds after we get our first 200 response to let the app come up more
   if !is_parallel || is_parallel_primary
     require Rails.root.join('db', 'seeds.rb') unless custom_host

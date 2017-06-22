@@ -335,7 +335,7 @@
 
   .sorting_asc, .sorting_desc {
     &:not([data-unsortable]) {
-      background-color: $secondary-gray;      
+      background-color: $secondary-gray;
     }
   }
 
@@ -766,8 +766,13 @@
       border: none;
       background-color: $white;
     }
-    th:last-child {
+    th {
       text-align: center;
+    }
+  }
+  tr:not(.table-heading-row) {
+    th:not(:first-child) {
+      min-width: 50px;
     }
   }
 }
@@ -1318,6 +1323,31 @@ td.dataTables_empty {
 }
 
 @media print {
+  .logo {
+    &.print-logo {
+      margin-left: 2px;
+    }
+  }
+  .report-details {
+    margin-bottom: 0;
+    h2 {
+      margin-bottom: 10px;
+    }
+    p {
+      &.report-details-freshness, &.report-details-availability {
+        margin: 0;
+        padding: 0;
+        display: none;
+      }
+    }
+  }
+  .report-print-sta {
+    margin: 0;
+    padding: 0;
+  }
+  h4 {
+    @include typography-print-summary-title;
+  }
   %table-footer-cell {
     min-width: 99px;
   }
@@ -1327,7 +1357,6 @@ td.dataTables_empty {
   .page-footer {
     display: none;
   }
-
   .account-summary-report tfoot,
   .account-summary-collateral-totals tbody td {
     color: $print-color;
@@ -1340,18 +1369,18 @@ td.dataTables_empty {
     }
   }
   .account-summary-report {
-    h2.header-with-action {
-      text-align: left;
-      a {
-        display: none;
-      }
-      span {
-        display: block;
-        float: none;
-      }
-    }
     h2 {
       @include typography-print-subheader;
+      &.header-with-action {
+        text-align: left;
+        a {
+         display: none;
+        }
+        span {
+          display: block;
+          float: none;
+        }
+      }
     }
     tfoot td, .account-summary-collateral-totals tbody td {
       color: $print-color;
@@ -1379,7 +1408,7 @@ td.dataTables_empty {
       margin-bottom: 0;
     }
   }
-  .report-header-buttons, .report-inputs {
+  .report-header-buttons, .report-inputs, .loading-flyout {
     display: none;
   }
   .report-header {
@@ -1407,13 +1436,17 @@ td.dataTables_empty {
       }
     }
     .report-table-title {
-      margin-bottom: 15px;
+      @include typography-print-subheader;
+      margin-bottom: 4px;
     }
   }
   .report-summary-data {
-    width: 30%; 
-    margin-bottom: 30px;
+    width: 30%;
+    margin-bottom: 20px;
     margin-right: 4%;
+    h2 {
+      margin-bottom: 0;
+    }
     p {
       color: $print-color;
       @include typography-print-summary-data;
@@ -1466,7 +1499,7 @@ td.dataTables_empty {
     }
     tbody tr {
       td {
-        padding: 6px 0px;
+        padding: 6px;
         border-bottom: 1px solid $light-gray;
         box-sizing: border-box;
       }
@@ -1532,9 +1565,10 @@ td.dataTables_empty {
     @include typography-print-footer;
     color: $print-color;
     border-top: 1px solid $print-color;
-    span {
+    margin-top: 10px;
+    padding-top: 4px;
+    .report-bank-name {
       padding-left: 10px;
-      padding-top: 3px;
     }
     .page {
       float: right;
@@ -1544,11 +1578,11 @@ td.dataTables_empty {
     @include typography-print-details;
   }
   .report-print-bank {
-    @include typography-print-subheader;
-    margin-top: 10px;
+    @include typography-print-summary-title;
+    margin-top: 5px;
   }
   .report-print-details {
-    margin-bottom: 30px;
+    margin-bottom: 20px;
   }
   .sbc-borrowing-capacity-tables, .securities-services-table-wrapper {
     page-break-inside: avoid;
@@ -1667,6 +1701,7 @@ td.dataTables_empty {
           }
           .report-cell-right {
             @include typography-print-table-cell;
+            padding-right: 6px;
           }
         }
         thead {

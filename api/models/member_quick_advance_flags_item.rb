@@ -18,6 +18,13 @@ module MAPI
           key :description, 'Whether or not quick advance is enabled for this member institution'
         end
       end
+      swagger_model :MemberQuickAdvanceFlagsHash do
+        property :fhlb_id do
+          key :required, true
+          key :type, :boolean
+          key :description, 'The key is the actual fhlb_id of the member, while the value is a boolean indicating if eTransact is enabled for that member.'
+        end
+      end
     end
   end
 end

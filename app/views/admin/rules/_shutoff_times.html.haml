@@ -1,0 +1,18 @@
+-classes ||= nil
+.advance-shutoff-times{class: classes}
+  .row
+    %h1= t('admin.shutoff_times.title')
+  .row.tabbed-content
+    %nav
+      %span<>
+        =link_to(t('admin.shutoff_times.nav.early'), active_nav == :advance_early_shutoff ? '#' : rules_advance_early_shutoff_url, class: "#{'active-tab' if active_nav == :advance_early_shutoff}")
+      %span<>
+        =link_to(t('admin.shutoff_times.nav.typical'), active_nav == :advance_typical_shutoff ? '#' : rules_advance_typical_shutoff_url, class: "#{'active-tab' if active_nav == :advance_typical_shutoff}")
+    .tabbed-content-main
+      - if flash[:error]
+        .form-error-section
+          %p= flash[:error]
+      - if flash[:notice]
+        .form-success-section
+          %p= flash[:notice]
+      = yield

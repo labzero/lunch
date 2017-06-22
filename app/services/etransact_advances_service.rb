@@ -136,12 +136,14 @@ class EtransactAdvancesService < MAPIService
     put_hash(:update_term_limits, 'etransact_advances/limits', limits)
   end
 
+  MEMBER_SERVICES_DESK_HOURS = 8..13
+
   def etransact_status(member_id, status_object=nil)
     enabled_for_member = MembersService.new(request).quick_advance_enabled_for_member?(member_id)
     status_object = self.status unless status_object
     etransact_active = self.etransact_active?(status_object)
     etransact_has_terms = self.has_terms?(status_object)
-    # Priority Order: Closed, No Terms, Disabled, Open
+    # Priority Order: Closed/Unavailable, No Terms, Disabled, Open
     if etransact_active
       if etransact_has_terms
         if enabled_for_member
@@ -153,7 +155,7 @@ class EtransactAdvancesService < MAPIService
         :no_terms
       end
     else
-      :closed
+      MEMBER_SERVICES_DESK_HOURS.cover?(Time.zone.now.hour) ? :unavailable : :closed
     end
   end
 
@@ -161,6 +163,20 @@ class EtransactAdvancesService < MAPIService
     if shutoff_times = get_hash(:shutoff_times_by_type, 'etransact_advances/shutoff_times_by_type')
       shutoff_times.each {|product_type, end_time| shutoff_times[product_type] = parse_24_hour_time(end_time) }
     end
+  end
+
+  def early_shutoffs
+    if early_shutoffs = get_hashes(:early_shutoffs, 'etransact_advances/early_shutoffs')
+      early_shutoffs.each { |early_shutoff| fix_date(early_shutoff, :early_shutoff_date) }
+    end
+  end
+
+  def schedule_early_shutoff(early_shutoff)
+    post_hash(:schedule_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash(early_shutoff))
+  end
+
+  def update_early_shutoff(early_shutoff)
+    put_hash(:update_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash(early_shutoff))
   end
 
   def enable_etransact_service
@@ -210,6 +226,17 @@ class EtransactAdvancesService < MAPIService
 
   def member_id_to_name(member_id)
     (member_id == request.member_id ? request.member_name : nil) || member_id
+  end
+
+  def shutoff_hash(early_shutoff)
+    {
+      original_early_shutoff_date: early_shutoff.original_early_shutoff_date,
+      early_shutoff_date: early_shutoff.early_shutoff_date,
+      vrc_shutoff_time: early_shutoff.vrc_shutoff_time,
+      frc_shutoff_time: early_shutoff.frc_shutoff_time,
+      day_of_message: early_shutoff.day_of_message_simple_format,
+      day_before_message: early_shutoff.day_before_message_simple_format
+    }
   end
 
 end

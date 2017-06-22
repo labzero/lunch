@@ -6,14 +6,34 @@ class Admin::RulesController < Admin::BaseController
     :'2year', :'3year'
   ].freeze
 
-  LONG_FRC_TERMS = [:'1year', :'2year', :'3year']
+  LONG_FRC_TERMS = [:'1year', :'2year', :'3year'].freeze
+
+  HOUR_DROPDOWN_OPTIONS = [
+    [I18n.t('times.07'), '07'],
+    [I18n.t('times.08'), '08'],
+    [I18n.t('times.09'), '09'],
+    [I18n.t('times.10'), '10'],
+    [I18n.t('times.11'), '11'],
+    [I18n.t('times.12'), '12'],
+    [I18n.t('times.13'), '13'],
+    [I18n.t('times.14'), '14'],
+    [I18n.t('times.15'), '15'],
+    [I18n.t('times.16'), '16'],
+    [I18n.t('times.17'), '17'],
+    [I18n.t('times.18'), '18']
+  ].freeze
+
+  MINUTE_DROPDOWN_OPTIONS = [
+    [I18n.t('times.full_hour'), '00'],
+    [I18n.t('times.half_hour'), '30']
+  ].freeze
 
   before_action do
     set_active_nav(:rules)
     @can_edit_trade_rules = policy(:web_admin).edit_trade_rules?
   end
 
-  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :update_advance_availability_by_member, :enable_etransact_service, :disable_etransact_service] do
+  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :update_advance_availability_by_member, :enable_etransact_service, :disable_etransact_service, :view_early_shutoff, :new_early_shutoff, :update_early_shutoff] do
     authorize :web_admin, :edit_trade_rules?
   end
 
@@ -31,6 +51,9 @@ class Admin::RulesController < Admin::BaseController
       }]
     }
   end
+
+  before_action :fetch_early_shutoff_request, only: [:view_early_shutoff, :new_early_shutoff, :update_early_shutoff]
+  after_action :save_early_shutoff_request, only: [:view_early_shutoff, :new_early_shutoff, :update_early_shutoff]
 
   # GET
   def limits
@@ -350,15 +373,92 @@ class Admin::RulesController < Admin::BaseController
     end
   end
 
+  # GET
+  def early_shutoff
+    early_shutoff_data = EtransactAdvancesService.new(request).early_shutoffs
+    raise 'There has been an error and EtransactAdvancesService#early_shutoff has encountered nil. Check error logs.' if early_shutoff_data.nil?
+    @early_shutoff_data = early_shutoff_data.collect do |early_shutoff|
+      shutoff = EarlyShutoffRequest.new(request)
+      shutoff.attributes = early_shutoff
+      shutoff.original_early_shutoff_date = shutoff.early_shutoff_date
+      shutoff.owners.add(current_user.id)
+      shutoff.save
+      shutoff
+    end
+    @early_shutoff_data.sort_by! { |shutoff| shutoff.early_shutoff_date}
+    @column_headings = [t('admin.shutoff_times.early.date'), t('admin.shutoff_times.early.time'), t('admin.shutoff_times.early.messages')]
+    @column_headings << t('global.actions') if @can_edit_trade_rules
+  end
+
+  # GET
+  def view_early_shutoff
+    @hour_dropdown_options = HOUR_DROPDOWN_OPTIONS
+    @minute_dropdown_options = MINUTE_DROPDOWN_OPTIONS
+    @dropdown_defaults = {
+      frc: {
+        hour: {
+          text: (HOUR_DROPDOWN_OPTIONS.select{ |option| option.last == early_shutoff_request.frc_shutoff_time_hour}.first.first),
+          value: early_shutoff_request.frc_shutoff_time_hour
+        },
+        minute: {
+          text: (MINUTE_DROPDOWN_OPTIONS.select{ |option| option.last == early_shutoff_request.frc_shutoff_time_minute}.first.first),
+          value: early_shutoff_request.frc_shutoff_time_minute
+        }
+      },
+      vrc: {
+        hour: {
+          text: (HOUR_DROPDOWN_OPTIONS.select{ |option| option.last == early_shutoff_request.vrc_shutoff_time_hour}.first.first),
+          value: early_shutoff_request.vrc_shutoff_time_hour
+        },
+        minute: {
+          text: (MINUTE_DROPDOWN_OPTIONS.select{ |option| option.last == early_shutoff_request.vrc_shutoff_time_minute}.first.first),
+          value: early_shutoff_request.vrc_shutoff_time_minute
+        }
+      }
+    }
+    @form_data = if params[:edit_request]
+      {
+        url: rules_advance_update_early_shutoff_url,
+        method: :put
+      }
+    else
+      {
+        url: rules_advance_new_early_shutoff_url,
+        method: :post
+      }
+    end
+  end
+
+  # POST
+  def new_early_shutoff
+    early_shutoff_request.attributes = params[:early_shutoff_request]
+    early_shutoff_result = EtransactAdvancesService.new(request).schedule_early_shutoff(early_shutoff_request) || {error: 'There has been an error and Admin::RulesController#new_early_shutoff has encountered nil'}
+    set_flash_message(early_shutoff_result, t('admin.shutoff_times.schedule_early.success'))
+    redirect_to action: :early_shutoff
+  end
+
+  # PUT
+  def update_early_shutoff
+    early_shutoff_request.attributes = params[:early_shutoff_request]
+    early_shutoff_result = EtransactAdvancesService.new(request).update_early_shutoff(early_shutoff_request) || {error: 'There has been an error and Admin::RulesController#update_early_shutoff has encountered nil'}
+    set_flash_message(early_shutoff_result, t('admin.shutoff_times.schedule_early.update_success'))
+    redirect_to action: :early_shutoff
+  end
+
+  # GET
+  def typical_shutoff
+
+  end
+
   private
 
-  def set_flash_message(results)
+  def set_flash_message(results, success_message=nil)
     errors = Array.wrap(results).collect{ |result| result[:error] }.compact
     if errors.present?
       errors.each { |error| logger.error(error) }
       flash[:error] = t('admin.term_rules.messages.error')
     else
-      flash[:notice] = t('admin.term_rules.messages.success')
+      flash[:notice] = success_message || t('admin.term_rules.messages.success')
     end
   end
 
@@ -413,5 +513,23 @@ class Admin::RulesController < Admin::BaseController
         disabled: !@can_edit_trade_rules
       }
     ]}
+  end
+
+  def early_shutoff_request
+    @early_shutoff_request ||= EarlyShutoffRequest.new(request)
+    @early_shutoff_request.owners.add(current_user.id)
+    @early_shutoff_request
+  end
+
+  def fetch_early_shutoff_request
+    early_shutoff_params = (request.params[:early_shutoff_request] || {}).with_indifferent_access
+    id = early_shutoff_params[:id]
+    @early_shutoff_request = id ? EarlyShutoffRequest.find(id, request) : early_shutoff_request
+    authorize @early_shutoff_request, :modify_early_shutoff_request?
+    @early_shutoff_request
+  end
+
+  def save_early_shutoff_request
+    @early_shutoff_request.save if @early_shutoff_request
   end
 end

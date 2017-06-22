@@ -47,7 +47,7 @@ $form-input-field-height: 30px !default;
     border-bottom-right-radius: $default-border-radius;
     border-top-right-radius: $default-border-radius;
   }
-  input {
+  input, textarea {
     @extend %input-field-styling;
     &.input-field-error {
       border-color: $alert-red;

@@ -63,6 +63,7 @@ module FhlbMember
 
     config.x.advance_request.key_expiration = 1.hour
     config.x.letter_of_credit_request.key_expiration = 1.hour
+    config.x.early_shutoff_request.key_expiration = 1.hour
 
     # Configure our cache
     config.before_configuration do

@@ -293,6 +293,50 @@ module MAPI
               key :nickname, :FetchShutoffTimesByType
             end
           end
+          api do
+            key :path, '/early_shutoffs'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Fetches all scheduled early shutoffs for advances'
+              key :nickname, :FetchEarlyShutoffs
+              key :type, :array
+              items do
+                key :'$ref', :EarlyShutoff
+              end
+            end
+          end
+          api do
+            key :path, '/early_shutoff'
+            operation do
+              key :method, 'POST'
+              key :summary, 'Schedule a new early shutoff for a given date'
+              key :nickname, :NewEarlyShutoff
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :EarlyShutoff
+                key :description, 'The hash containing all relevant data for the early shutoff to be scheduled.'
+              end
+            end
+          end
+          api do
+            key :path, '/early_shutoff'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Update a new early shutoff for a given date'
+              key :nickname, :UpdateEarlyShutoff
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :EarlyShutoff
+                key :description, 'The hash containing all relevant data for the early shutoff to be updated.'
+              end
+            end
+          end
         end
 
         # etransact advances limits
@@ -361,7 +405,7 @@ module MAPI
             WHERE WHOLE_LOAN_ENABLED = 'Y' AND AO_TERM_BUCKET_ID = 1
           SQL
 
-          etransact_status = false  #indicat if etransact is turn on and at least one product has not reach End Time
+          etransact_status = false  #indicate if etransact is turn on and at least one product has not reach End Time
           wl_vrc_status = false   #indicate if WL VRC is enabled regardless of if etransact is turn on
           etransact_eod = false # indicates that we have reached EOD on the global eTransact flag
           etransact_disabled = false # indiciates that eTransact has been globally disabled
@@ -474,6 +518,26 @@ module MAPI
         relative_get '/shutoff_times_by_type' do
           MAPI::Services::EtransactAdvances.rescued_json_response(self) do
             MAPI::Services::EtransactAdvances::ShutoffTimes.get_shutoff_times_by_type(self)
+          end
+        end
+
+        relative_get '/early_shutoffs' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            MAPI::Services::EtransactAdvances::ShutoffTimes.get_early_shutoffs(self)
+          end
+        end
+
+        relative_post '/early_shutoff' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            early_shutoff = JSON.parse(request.body.read)
+            {} if MAPI::Services::EtransactAdvances::ShutoffTimes.schedule_early_shutoff(self, early_shutoff)
+          end
+        end
+
+        relative_put '/early_shutoff' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            early_shutoff = JSON.parse(request.body.read)
+            {} if MAPI::Services::EtransactAdvances::ShutoffTimes.update_early_shutoff(self, early_shutoff)
           end
         end
       end

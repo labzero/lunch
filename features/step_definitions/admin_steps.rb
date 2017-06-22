@@ -6,20 +6,24 @@ Then(/^I see the admin dashboard$/) do
   page.assert_selector('.admin header h1', text: I18n.t('admin.title'), exact: true)
 end
 
-Then(/^I should be on the term rules (limits) page$/) do |rules_page|
+Then(/^I should be on the (term rules limits|end of day shutoff) page$/) do |rules_page|
   title = case rules_page
-  when 'limits'
+  when 'term rules limits'
     I18n.t('admin.term_rules.title')
+  when 'end of day shutoff'
+    I18n.t('admin.shutoff_times.title')
   end
-  page.assert_selector('.term-rules h1', text: title, exact: true)
+  page.assert_selector('.admin h1', text: title, exact: true)
 end
 
-Then(/^the (term rules|add advance availability) (daily limits|status|by term|by member|rate bands|rate report|term details) tab should be active$/) do |page_selector, active_nav|
+Then(/^the (term rules|add advance availability|end of day shutoff) (daily limits|status|by term|by member|rate bands|rate report|term details|early shutoffs) tab should be active$/) do |page_selector, active_nav|
   page_selector = case page_selector
   when 'term rules'
     '.term-rules'
   when 'add advance availability'
     '.advance-availability'
+  when 'end of day shutoff'
+    '.advance-shutoff-times'
   end
   nav_text = translate_tab_title(active_nav)
   page.assert_selector("#{page_selector} .tabbed-content nav .active-tab", text: nav_text, exact: true)
@@ -66,7 +70,7 @@ Then(/^I should see (enabled|disabled|all) members in the advance availability b
  end
 end
 
-Then(/^I should see the (?:term rules|advance availability) (limits|rate bands|by term|by member) page in its (view-only|editable) mode$/) do |form, mode|
+Then(/^I should see the (?:term rules|advance availability|) (limits|rate bands|by term|by member) page in its (view-only|editable) mode$/) do |form, mode|
   selector = case form
   when 'limits'
     '.rules-limits-form'
@@ -81,6 +85,16 @@ Then(/^I should see the (?:term rules|advance availability) (limits|rate bands|b
     page.assert_no_selector("#{selector} input[type=submit]")
   else
     expect(page.all("#{selector} input[type=submit]").first.value).to eq(I18n.t('admin.term_rules.save'))
+  end
+end
+
+Then(/^I should see the end of day shutoff early shutoffs page in its (view-only|editable) mode$/) do |mode|
+  if mode == 'view-only'
+    page.assert_no_selector('.advance-shutoff-times-early a', text: /\A#{I18n.t('admin.shutoff_times.actions.schedule_new')}\z/i)
+    page.assert_no_selector('.advance-shutoff-times-early table th:nth-child(4)')
+  else
+    page.assert_selector('.advance-shutoff-times-early a', text: /\A#{I18n.t('admin.shutoff_times.actions.schedule_new')}\z/i)
+    page.assert_selector('.advance-shutoff-times-early table th:nth-child(4)', text: I18n.t('global.actions'), exact: true)
   end
 end
 
@@ -107,7 +121,7 @@ When(/^I click the save changes button for the rules limits form$/) do
   page.find('.rules-limits-form input[type=submit]').click
 end
 
-Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status) page$/) do |result, form|
+Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status|early shutoff|edit early shutoff) page$/) do |result, form|
   parent_selector = case form
   when 'limits'
     '.term-rules'
@@ -115,9 +129,19 @@ Then(/^I should see the (success|error) message on the (?:term rules|advance ava
     '.advance-availability-member'
   when 'status'
     '.advance-availability-status'
+  when 'early shutoff'
+    '.advance-shutoff-times-early'
+  end
+  success_message = case form
+  when 'early shutoff'
+    I18n.t('admin.shutoff_times.schedule_early.success')
+  when 'edit early shutoff'
+    I18n.t('admin.shutoff_times.schedule_early.update_success')
+  else
+    I18n.t('admin.term_rules.messages.success')
   end
   if result == 'success'
-    page.assert_selector("#{parent_selector} .form-success-section p", text: I18n.t('admin.term_rules.messages.success'), exact: true)
+    page.assert_selector("#{parent_selector} .form-success-section p", text: success_message, exact: true)
   else
     page.assert_selector("#{parent_selector} .form-error-section p", text: I18n.t('admin.term_rules.messages.error'), exact: true)
   end
@@ -178,6 +202,45 @@ When(/^I submit the form for advance availability by member and there is an erro
   step 'I submit the form for advance availability by member'
 end
 
+Then(/^I should see the table of scheduled early shutoffs$/) do
+  page.assert_selector('.advance-shutoff-times-early table')
+end
+
+When(/^I visit the admin early shutoff summary page$/) do
+  visit('/admin/rules/advance-shutoff-times/early')
+end
+
+When(/^I click the button to schedule a new early shutoff$/) do
+  page.find('.advance-shutoff-times-early a', text: /\A#{I18n.t('admin.shutoff_times.actions.schedule_new')}\z/i).click
+end
+
+Then(/^I should see the form to schedule a new early shutoff$/) do
+  page.assert_selector('.rules-early-shutoff-form')
+end
+
+When(/^I input "(.*?)" in the field for the early shutoff day of message$/) do |text|
+  page.find('.rules-early-shutoff-form section:first-of-type .input-field-container-textarea-wrapper textarea').set(text)
+end
+
+When(/^I click the button to confirm the scheduling of the (?:new|edited) early shutoff( but there is an error)?$/) do |error|
+  if error
+    allow_any_instance_of(EtransactAdvancesService).to receive(:schedule_early_shutoff).and_return({error: 'some error message'})
+    allow_any_instance_of(EtransactAdvancesService).to receive(:update_early_shutoff).and_return({error: 'some error message'})
+  end
+  page.find('.rules-early-shutoff-form input[type=submit]').click
+end
+
+When(/^I click to edit the first scheduled early shutoff$/) do
+  first_row = page.find('.advance-shutoff-times-early table tbody tr:first-child')
+  @early_shutoff_id
+  @early_shutoff_date = Date.strptime(first_row.find('td:first-child').text, '%m/%d/%Y')
+  first_row.find('td:last-child a', text: /\A#{I18n.t('global.edit')}\z/i).click
+end
+
+Then(/^I should be on the edit page for that early shutoff$/) do
+  expect(page.find(".rules-early-shutoff-form input[name='early_shutoff_request[early_shutoff_date]']", visible: :hidden).value).to eq(@early_shutoff_date.iso8601)
+end
+
 def translate_tab_title(nav)
   case nav
   when 'daily limits'
@@ -194,6 +257,8 @@ def translate_tab_title(nav)
     I18n.t('admin.term_rules.nav.rate_report')
   when 'term details'
       I18n.t('admin.term_rules.nav.term_details')
+  when 'early shutoffs'
+    t('admin.shutoff_times.nav.early')
   end
 end
 

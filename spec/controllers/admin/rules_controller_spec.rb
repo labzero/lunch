@@ -3,6 +3,8 @@ include CustomFormattingHelper
 
 RSpec.describe Admin::RulesController, :type => :controller do
   login_user(admin: true)
+  let(:early_shutoff_request) { instance_double(EarlyShutoffRequest, save: nil, :attributes= => nil, owners: instance_double(Set, add: nil), id: nil, frc_shutoff_time_hour: '07', vrc_shutoff_time_hour: '07', frc_shutoff_time_minute: '00', vrc_shutoff_time_minute: '00', early_shutoff_date: nil, :original_early_shutoff_date= => nil) }
+
   it_behaves_like 'an admin controller'
 
   RSpec.shared_examples 'a RulesController action with before_action methods' do
@@ -100,6 +102,22 @@ RSpec.describe Admin::RulesController, :type => :controller do
           end
         end
       end
+    end
+  end
+
+  RSpec.shared_examples 'a RulesController action that fetches an early shutoff request' do
+    it 'fetches the letter of credit request' do
+      expect(controller).to receive(:fetch_early_shutoff_request) do
+        controller.instance_variable_set(:@early_shutoff_request, early_shutoff_request)
+      end
+      call_action
+    end
+  end
+
+  RSpec.shared_examples 'a RulesController action that saves an early shutoff request' do
+    it 'saves the letter of credit request' do
+      expect(controller).to receive(:save_early_shutoff_request)
+      call_action
     end
   end
 
@@ -1364,12 +1382,264 @@ RSpec.describe Admin::RulesController, :type => :controller do
          end
        end
      end
-   end
+  end
+
+  describe 'GET early_shutoff' do
+    let(:early_shutoff_hash) { instance_double(Hash) }
+    let(:etransact_service) { instance_double(EtransactAdvancesService, early_shutoffs: [early_shutoff_hash] ) }
+    let(:call_action) { get :early_shutoff }
+    before do
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+      allow(EarlyShutoffRequest).to receive(:new).and_return(early_shutoff_request)
+    end
+
+    it_behaves_like 'a RulesController action with before_action methods'
+    it 'creates a new instance of EtransactAdvancesService with the request' do
+      expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
+      call_action
+    end
+    it 'calls `early_shutoffs` on the EtransactAdvancesService' do
+      expect(etransact_service).to receive(:early_shutoffs).and_return([])
+      call_action
+    end
+    it 'raises an error if EtransactAdvancesService#early_shutoffs returns nil' do
+      allow(etransact_service).to receive(:early_shutoffs).and_return(nil)
+      expect{call_action}.to raise_error('There has been an error and EtransactAdvancesService#early_shutoff has encountered nil. Check error logs.')
+    end
+    it 'creates a new EarlyShutoffRequest instance for each hash returned from EtransactAdvancesService#early_shutoff' do
+      results = []
+      n = rand(2..5)
+      n.times { results << early_shutoff_hash }
+      allow(etransact_service).to receive(:early_shutoffs).and_return(results)
+      expect(EarlyShutoffRequest).to receive(:new).exactly(n).times.and_return(early_shutoff_request)
+      call_action
+    end
+    describe 'creating a new instance of EarlyShutoffRequest' do
+      it 'sets the attributes to the hash returned by the EtransactAdvancesService#early_shutoff endpoint' do
+        expect(early_shutoff_request).to receive(:attributes=).with(early_shutoff_hash)
+        call_action
+      end
+      it 'sets the original_early_shutoff_date to the early_shutoff_date of the request' do
+        date = double('some date')
+        allow(early_shutoff_request).to receive(:early_shutoff_date).and_return(date)
+        expect(early_shutoff_request).to receive(:original_early_shutoff_date=).with(date)
+        call_action
+      end
+      it 'adds the current user to the owners list' do
+        expect(early_shutoff_request.owners).to receive(:add).with(subject.current_user.id)
+        call_action
+      end
+      it 'saves the new EarlyShutoffRequest instance' do
+        expect(early_shutoff_request).to receive(:save)
+        call_action
+      end
+    end
+    it 'sets `@early_shutoff_data` to the array of EarlyShutoffRequests' do
+      call_action
+      expect(assigns[:early_shutoff_data]).to eq([early_shutoff_request])
+    end
+    it 'sorts `@early_shutoff_data` by `early_shutoff_date`' do
+      today = Time.zone.today
+      shutoff_1 = instance_double(EarlyShutoffRequest, early_shutoff_date: today, :attributes= => nil, :original_early_shutoff_date= => nil, owners: instance_double(Set, add: nil), save: nil)
+      shutoff_2 = instance_double(EarlyShutoffRequest, early_shutoff_date: today + 3.days, :attributes= => nil, :original_early_shutoff_date= => nil, owners: instance_double(Set, add: nil), save: nil)
+      shutoff_3 = instance_double(EarlyShutoffRequest, early_shutoff_date: today - 3.days, :attributes= => nil, :original_early_shutoff_date= => nil, owners: instance_double(Set, add: nil), save: nil)
+      allow(etransact_service).to receive(:early_shutoffs).and_return([early_shutoff_hash, early_shutoff_hash, early_shutoff_hash])
+      allow(EarlyShutoffRequest).to receive(:new).and_return(shutoff_1, shutoff_2, shutoff_3)
+      call_action
+      expect(assigns[:early_shutoff_data]).to eq([shutoff_3, shutoff_1, shutoff_2])
+    end
+    context 'when the current user cannot edit trade rules' do
+      deny_policy :web_admin, :edit_trade_rules?
+      it 'sets the `@column_headings` appropriately' do
+        call_action
+        expect(assigns[:column_headings]).to eq([I18n.t('admin.shutoff_times.early.date'), I18n.t('admin.shutoff_times.early.time'), I18n.t('admin.shutoff_times.early.messages')])
+      end
+    end
+    context 'when the current user can edit trade rules' do
+      allow_policy :web_admin, :edit_trade_rules?
+      it 'sets the `@column_headings` appropriately' do
+        call_action
+        expect(assigns[:column_headings]).to eq([I18n.t('admin.shutoff_times.early.date'), I18n.t('admin.shutoff_times.early.time'), I18n.t('admin.shutoff_times.early.messages'), I18n.t('global.actions')])
+      end
+    end
+  end
+
+  describe 'GET typical_shutoff' do
+    let(:call_action) { get :typical_shutoff }
+
+    it_behaves_like 'a RulesController action with before_action methods'
+  end
+
+  describe 'GET view_early_shutoff' do
+    allow_policy :web_admin, :edit_trade_rules?
+    let(:call_action) { get :view_early_shutoff }
+    before do
+      allow(controller).to receive(:fetch_early_shutoff_request) do
+        controller.instance_variable_set(:@early_shutoff_request, early_shutoff_request)
+      end
+    end
+
+    it_behaves_like 'a RulesController action with before_action methods'
+    it_behaves_like 'it checks the edit_trade_rules? web_admin policy'
+    it_behaves_like 'a RulesController action that fetches an early shutoff request'
+    it_behaves_like 'a RulesController action that saves an early shutoff request'
+    describe 'view instance variables' do
+      it 'assigns the `HOUR_DROPDOWN_OPTIONS` array to `@hour_dropdown_options`' do
+        call_action
+        expect(assigns[:hour_dropdown_options]).to eq(described_class::HOUR_DROPDOWN_OPTIONS)
+      end
+      it 'assigns the `MINUTE_DROPDOWN_OPTIONS` array to `@minute_dropdown_options`' do
+        call_action
+        expect(assigns[:minute_dropdown_options]).to eq(described_class::MINUTE_DROPDOWN_OPTIONS)
+      end
+      describe 'the `@dropdown_defaults` hash' do
+        let(:selected_hour_option) { described_class::HOUR_DROPDOWN_OPTIONS.sample }
+        let(:selected_minute_option) { described_class::MINUTE_DROPDOWN_OPTIONS.sample }
+        describe 'the `frc` subhash' do
+          describe 'the `hour` subhash' do
+            before { allow(early_shutoff_request).to receive(:frc_shutoff_time_hour).and_return(selected_hour_option.last) }
+            it 'has a `text` value that is equal to the first value in the HOUR_DROPDOWN_OPTIONS that matches the `frc_shutoff_time_hour` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:frc][:hour][:text]).to eq(selected_hour_option.first)
+            end
+            it 'hash a `value` value that is equal to the `frc_shutoff_time_hour` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:frc][:hour][:value]).to eq(early_shutoff_request.frc_shutoff_time_hour)
+            end
+          end
+          describe 'the `minute` subhash' do
+            before { allow(early_shutoff_request).to receive(:frc_shutoff_time_minute).and_return(selected_minute_option.last) }
+            it 'has a `text` value that is equal to the first value in the MINUTE_DROPDOWN_OPTIONS that matches the `frc_shutoff_time_minute` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:frc][:minute][:text]).to eq(selected_minute_option.first)
+            end
+            it 'hash a `value` value that is equal to the `frc_shutoff_time_minute` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:frc][:minute][:value]).to eq(early_shutoff_request.frc_shutoff_time_minute)
+            end
+          end
+        end
+        describe 'the `vrc` subhash' do
+          describe 'the `hour` subhash' do
+            before { allow(early_shutoff_request).to receive(:vrc_shutoff_time_hour).and_return(selected_hour_option.last) }
+            it 'has a `text` value that is equal to the first value in the HOUR_DROPDOWN_OPTIONS that matches the `vrc_shutoff_time_hour` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:vrc][:hour][:text]).to eq(selected_hour_option.first)
+            end
+            it 'hash a `value` value that is equal to the `vrc_shutoff_time_hour` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:vrc][:hour][:value]).to eq(early_shutoff_request.vrc_shutoff_time_hour)
+            end
+          end
+          describe 'the `minute` subhash' do
+            before { allow(early_shutoff_request).to receive(:vrc_shutoff_time_minute).and_return(selected_minute_option.last) }
+            it 'has a `text` value that is equal to the first value in the MINUTE_DROPDOWN_OPTIONS that matches the `vrc_shutoff_time_minute` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:vrc][:minute][:text]).to eq(selected_minute_option.first)
+            end
+            it 'hash a `value` value that is equal to the `vrc_shutoff_time_minute` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:vrc][:minute][:value]).to eq(early_shutoff_request.vrc_shutoff_time_minute)
+            end
+          end
+        end
+      end
+      describe 'the `@form_data` hash' do
+        context 'when the `edit_request` is true' do
+          let(:call_action) { get :view_early_shutoff, edit_request: true }
+          it 'sets `@form_data[:url]` to the url for the `update_early_shutoff` action' do
+            call_action
+            expect(assigns[:form_data][:url]).to eq(rules_advance_update_early_shutoff_url)
+          end
+          it 'sets `@form_data[:method]` to `:put`' do
+            call_action
+            expect(assigns[:form_data][:method]).to eq(:put)
+          end
+        end
+        context 'when the `edit_request` is not true' do
+          it 'sets `@form_data[:url]` to the url for the `new_early_shutoff` action' do
+            call_action
+            expect(assigns[:form_data][:url]).to eq(rules_advance_new_early_shutoff_url)
+          end
+          it 'sets `@form_data[:method]` to `:post`' do
+            call_action
+            expect(assigns[:form_data][:method]).to eq(:post)
+          end
+        end
+      end
+    end
+  end
+
+  shared_examples 'a RulesController action that alters the state of an early shutoff request' do |service_method, error_message, success_message|
+    allow_policy :web_admin, :edit_trade_rules?
+    let(:early_shutoff_params) { SecureRandom.hex }
+    let(:etransact_service) { instance_double(EtransactAdvancesService, service_method => {}) }
+    before do
+      allow(controller).to receive(:fetch_early_shutoff_request) do
+        controller.instance_variable_set(:@early_shutoff_request, early_shutoff_request)
+      end
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+      allow(controller).to receive(:set_flash_message)
+    end
+
+    it_behaves_like 'a RulesController action with before_action methods'
+    it_behaves_like 'it checks the edit_trade_rules? web_admin policy'
+    it_behaves_like 'a RulesController action that fetches an early shutoff request'
+    it_behaves_like 'a RulesController action that saves an early shutoff request'
+    it 'sets the attributes on the early_shutoff_request using the `early_shutoff_request` params' do
+      expect(early_shutoff_request).to receive(:attributes=).with(early_shutoff_params)
+      call_action
+    end
+    it 'creates a new instance of EtransactAdvancesService with the request' do
+      expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
+      call_action
+    end
+    it "calls `#{service_method}` on the etransact service with the early_shutoff_request" do
+      expect(etransact_service).to receive(service_method).with(early_shutoff_request)
+      call_action
+    end
+    context "when EtransactAdvancesService##{service_method} returns nil" do
+      before { allow(etransact_service).to receive(service_method).and_return(nil) }
+
+      it 'calls `set_flash_message` with an error hash' do
+        expect(controller).to receive(:set_flash_message).with({error: error_message}, anything)
+        call_action
+      end
+    end
+    context "when EtransactAdvancesService##{service_method} does not return nil" do
+      let(:result) { double('some result') }
+      before { allow(etransact_service).to receive(service_method).and_return(result) }
+
+      it "calls `set_flash_message` with the result of `#{service_method}`" do
+        expect(controller).to receive(:set_flash_message).with(result, anything)
+        call_action
+      end
+    end
+    it 'calls `set_flash_message` with the success message' do
+      expect(controller).to receive(:set_flash_message).with(anything, success_message)
+      call_action
+    end
+    it 'redirects to the `rules_advance_early_shutoff_url`' do
+      call_action
+      expect(response).to redirect_to(rules_advance_early_shutoff_url)
+    end
+  end
+
+  describe 'POST new_early_shutoff' do
+    let(:call_action) { post :new_early_shutoff, early_shutoff_request: early_shutoff_params }
+    it_behaves_like 'a RulesController action that alters the state of an early shutoff request', :schedule_early_shutoff, 'There has been an error and Admin::RulesController#new_early_shutoff has encountered nil', I18n.t('admin.shutoff_times.schedule_early.success')
+  end
+
+  describe 'PUT update_early_shutoff' do
+    let(:call_action) { put :update_early_shutoff, early_shutoff_request: early_shutoff_params }
+    it_behaves_like 'a RulesController action that alters the state of an early shutoff request', :update_early_shutoff, 'There has been an error and Admin::RulesController#update_early_shutoff has encountered nil', I18n.t('admin.shutoff_times.schedule_early.update_success')
+  end
 
   describe 'private methods' do
     describe '`set_flash_message`' do
       let(:result) { {} }
       let(:error_message) { double('some error message') }
+      let(:success_message) { double('some success message') }
       let(:result_with_errors) {{error: error_message}}
       context 'when a single result set is passed' do
         it 'sets the `flash[:error]` message if the result set contains an error message' do
@@ -1384,6 +1654,10 @@ RSpec.describe Admin::RulesController, :type => :controller do
           subject.send(:set_flash_message, result)
           expect(flash[:notice]).to eq(I18n.t('admin.term_rules.messages.success'))
         end
+        it 'sets the `flash[:notice] message` to a custom success message if one was passed' do
+          subject.send(:set_flash_message, result, success_message)
+          expect(flash[:notice]).to eq(success_message)
+        end
       end
       context 'when multiple result sets are passed' do
         it 'sets the `flash[:error]` message if any of the passed result sets contains an error message' do
@@ -1397,6 +1671,10 @@ RSpec.describe Admin::RulesController, :type => :controller do
         it 'sets the `flash[:notice] message` if none of the result sets contain an error message' do
           subject.send(:set_flash_message, [result, result, result])
           expect(flash[:notice]).to eq(I18n.t('admin.term_rules.messages.success'))
+        end
+        it 'sets the `flash[:notice] message` to a custom success message if one was passed' do
+          subject.send(:set_flash_message, result, success_message)
+          expect(flash[:notice]).to eq(success_message)
         end
       end
     end
@@ -1497,6 +1775,116 @@ RSpec.describe Admin::RulesController, :type => :controller do
               expect(column[:disabled]).to be true
             end
           end
+        end
+      end
+    end
+
+    describe '`early_shutoff_request`' do
+      let(:call_method) { controller.send(:early_shutoff_request) }
+
+      context 'when the `@early_shutoff_request` instance variable already exists' do
+        before { controller.instance_variable_set(:@early_shutoff_request, early_shutoff_request) }
+
+        it 'does not create a new `EarlyShutoffRequest`' do
+          expect(EarlyShutoffRequest).not_to receive(:new)
+          call_method
+        end
+        it 'returns the existing `@early_shutoff_request`' do
+          expect(call_method).to eq(early_shutoff_request)
+        end
+      end
+      context 'when the `@early_shutoff_request` instance variable does not yet exist' do
+        before { allow(EarlyShutoffRequest).to receive(:new).and_return(early_shutoff_request) }
+
+        it 'creates a new `EarlyShutoffRequest` with the request' do
+          expect(EarlyShutoffRequest).to receive(:new).with(request)
+          call_method
+        end
+        it 'sets `@early_shutoff_request` to the new EarlyShutoffRequest instance' do
+          call_method
+          expect(controller.instance_variable_get(:@early_shutoff_request)).to eq(early_shutoff_request)
+        end
+        it 'returns the newly created `@early_shutoff_request`' do
+          expect(call_method).to eq(early_shutoff_request)
+        end
+      end
+      it 'adds the current user to the owners list' do
+        allow(EarlyShutoffRequest).to receive(:new).and_return(early_shutoff_request)
+        expect(early_shutoff_request.owners).to receive(:add).with(subject.current_user.id)
+        call_method
+      end
+    end
+
+    describe '`fetch_early_shutoff_request`' do
+      let(:id) { double('id') }
+      let(:request) { double('request', params: {early_shutoff_request: {id: id}}) }
+      let(:call_method) { controller.send(:fetch_early_shutoff_request) }
+      before { allow(subject).to receive(:authorize) }
+      shared_examples 'it checks the modify authorization' do
+        it 'checks if the current user is allowed to modify the request' do
+          expect(subject).to receive(:authorize).with(early_shutoff_request, :modify_early_shutoff_request?)
+          call_method
+        end
+        it 'raises any errors raised by checking to see if the user is authorized to modify the advance' do
+          error = Pundit::NotAuthorizedError
+          allow(subject).to receive(:authorize).and_raise(error)
+          expect{ call_method }.to raise_error(error)
+        end
+      end
+      context 'when there is an `id` in the `early_shutoff_request` params hash' do
+        let(:id) { double('id') }
+        before do
+          allow(controller).to receive(:request).and_return(request)
+          allow(EarlyShutoffRequest).to receive(:find).and_return(early_shutoff_request)
+        end
+        it_behaves_like 'it checks the modify authorization'
+        it 'calls `EarlyShutoffRequest#find` with the id and the request' do
+          expect(EarlyShutoffRequest).to receive(:find).with(id, request)
+          call_method
+        end
+        it 'sets `@early_shutoff_request` to the result of `EarlyShutoffRequest#find`' do
+          call_method
+          expect(controller.instance_variable_get(:@early_shutoff_request)).to eq(early_shutoff_request)
+        end
+        it 'returns the found request' do
+          expect(call_method).to eq(early_shutoff_request)
+        end
+      end
+      context 'when there is no `id` in the `early_shutoff_request` params hash' do
+        before { allow(controller).to receive(:early_shutoff_request).and_return(early_shutoff_request) }
+        it_behaves_like 'it checks the modify authorization'
+        it 'calls `letter_of_credit_request` method' do
+          expect(controller).to receive(:early_shutoff_request)
+          call_method
+        end
+        it 'sets `@early_shutoff_request` to the result of `early_shutoff_request`' do
+          call_method
+          expect(controller.instance_variable_get(:@early_shutoff_request)).to eq(early_shutoff_request)
+        end
+        it 'returns the result of `early_shutoff_request`' do
+          expect(call_method).to eq(early_shutoff_request)
+        end
+      end
+    end
+
+    describe '`save_early_shutoff_request`' do
+      let(:call_method) { controller.send(:save_early_shutoff_request) }
+      context 'when the `@early_shutoff_request` instance variable exists' do
+        before { controller.instance_variable_set(:@early_shutoff_request, early_shutoff_request) }
+
+        it 'calls `save` on the @early_shutoff_request' do
+          expect(early_shutoff_request).to receive(:save)
+          call_method
+        end
+        it 'returns the result of calling `save`' do
+          save_result = double('result')
+          allow(early_shutoff_request).to receive(:save).and_return(save_result)
+          expect(call_method).to eq(save_result)
+        end
+      end
+      context 'when the `@early_shutoff_request` instance variable does not exist' do
+        it 'returns nil' do
+          expect(call_method).to be nil
         end
       end
     end

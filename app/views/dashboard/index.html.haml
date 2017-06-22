@@ -24,7 +24,7 @@
   .column-3
     - if policy(:advance).show?
       - classes = ['dashboard-module-advances']
-      - classes << 'dashboard-module-advances-closed' if @etransact_status == :closed
+      - classes << 'dashboard-module-advances-closed' if @etransact_status == :closed || @etransact_status == :unavailable
       =render layout: 'dashboard/dashboard_module', locals: {title: t('advances.add_advance.titles.add'), classes: classes} do
         = form_for(:advance_request, as: :advance_request, url: advances_select_rate_path, html: {method: :get, class: 'dashboard-module-add-advance-form'}) do |f|
           = f.hidden_field(:type, value: 'whole')
@@ -33,8 +33,13 @@
             -# Rendered when the status is :open
             = render 'shared/input_field', icon: :dollar, placeholder: t('dashboard.quick_advance.advance_placeholder'), field_name: 'advance_request[amount]', html_attributes: {autofocus: true}
             .etransact-status-message.etransact-status-message-closed
-              = t('dashboard.quick_advance.advances_desk_closed_html', phone_number: service_desk_phone_number)
-              = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
+              -case @etransact_status
+              -when :closed
+                = t('dashboard.quick_advance.advances_desk_closed')
+                = link_to t('dashboard.quick_advance.advances_desk_closed_link'), reports_current_price_indications_path
+              -when :unavailable
+                = t('dashboard.quick_advance.advances_desk_unavailable_html', phone_number: service_desk_phone_number)
+                = link_to t('dashboard.quick_advance.advances_desk_unavailable_link'), reports_current_price_indications_path
           -# Limited Pricing Message always rendered if present, regardless of etransact_status
           - if @limited_pricing_message
             = link_to(t('dashboard.quick_advance.limited_pricing'), advances_select_rate_path, class: 'dashboard-module-limited-pricing-notice')

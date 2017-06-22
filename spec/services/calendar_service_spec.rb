@@ -84,4 +84,21 @@ describe CalendarService do
       expect(call_method).to eq(candidate)
     end
   end
+
+  describe 'the `find_previous_business_day` method' do
+    let(:candidate) { instance_double(Date) }
+    let(:negative_delta) { instance_double(ActiveSupport::Duration) }
+    let(:delta) { instance_double(ActiveSupport::Duration, :-@ => nil) }
+    let(:call_method) { subject.find_previous_business_day(candidate, delta) }
+
+    it 'calls `find_next_business_day` with the given candidate' do
+      expect(subject).to receive(:find_next_business_day).with(candidate, anything)
+      call_method
+    end
+    it 'calls `find_next_business_day` with the negative value of the given delta' do
+      allow(delta).to receive(:-@).and_return(negative_delta)
+      expect(subject).to receive(:find_next_business_day).with(anything, negative_delta)
+      call_method
+    end
+  end
 end

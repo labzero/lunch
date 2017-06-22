@@ -524,6 +524,7 @@ module MAPI
                 key :paramType, :body
                 key :name, :body
                 key :required, true
+                key :type, :MemberQuickAdvanceFlagsHash
                 key :description, "The hash of the etransact statuses for members."
               end
             end
