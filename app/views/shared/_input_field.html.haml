@@ -28,6 +28,7 @@
   - classes = []
   - classes << "icon-#{icon}-#{location}" if icon
   - classes << 'input-field-container-error' if error.present?
+  - classes << 'input-field-container-textarea' if field_type == :text_area
   %span.input-field-container{class: classes}<>
     - if form_builder
       = form_builder.send field_type, field_name, {placeholder: placeholder, class: field_class, data: field_data}.merge(html_attributes)

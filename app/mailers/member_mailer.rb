@@ -29,7 +29,7 @@ class MemberMailer < Devise::Mailer
     mail(subject: I18n.t('letters_of_credit.email.subject'),
          to: "#{user.display_name} <#{user.email}>",
          bcc: InternalMailer::LETTER_OF_CREDIT_ADDRESS,
-         from: t('emails.new_user.sender', email: ContactInformationHelper::WEB_SUPPORT_EMAIL)
+         from: t('emails.new_user.sender', email: ContactInformationHelper::NO_REPLY_EMAIL)
     )
   end
 end

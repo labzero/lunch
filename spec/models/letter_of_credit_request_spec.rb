@@ -499,7 +499,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
     describe '`attributes=`' do
       read_only_attrs = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id]
       date_attrs = [:issue_date, :expiration_date, :created_at]
-      custom_attrs = [:amount, :beneficiary_name]
+      custom_attrs = [:amount, :beneficiary_name, :attention]
       serialization_exclude_attrs = [:request]
       let(:hash) { {} }
       let(:value) { double('some value') }

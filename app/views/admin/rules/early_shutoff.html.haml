@@ -1,6 +1,6 @@
 =render layout: 'shutoff_times', locals: {active_nav: :advance_early_shutoff, classes: 'advance-shutoff-times-early'} do
   - if @can_edit_trade_rules
-    %button.secondary-button= t('admin.shutoff_times.actions.schedule_new')
+    =link_to(t('admin.shutoff_times.actions.schedule_new'), rules_advance_new_early_shutoff_path, class: 'secondary-button')
   %table.report-table.table-allow-wrapping{data: {loaded: true, sortable: false, :'disable-auto-width' => true, :'missing-data-message' => t('admin.shutoff_times.early.none_scheduled')}}
     %thead
       %tr
@@ -9,21 +9,21 @@
     %tbody
       - @early_shutoff_data.each do |early_shutoff|
         %tr
-          %td= fhlb_date_standard_numeric(early_shutoff[:early_shutoff_date])
+          %td= fhlb_date_standard_numeric(early_shutoff.early_shutoff_date)
           %td
             %p
-              %span= fhlb_formatted_time(early_shutoff[:vrc_shutoff_time])
+              %span= fhlb_formatted_time(Time.zone.parse("#{early_shutoff.vrc_shutoff_time_hour}:#{early_shutoff.vrc_shutoff_time_minute}"))
               %span= t('admin.shutoff_times.early.vrc_terms')
             %p
-              %span= fhlb_formatted_time(early_shutoff[:frc_shutoff_time])
+              %span= fhlb_formatted_time(Time.zone.parse("#{early_shutoff.frc_shutoff_time_hour}:#{early_shutoff.frc_shutoff_time_minute}"))
               %span= t('admin.shutoff_times.early.frc_terms')
           %td
-            - if early_shutoff[:day_before_message]
-              %h2= t('admin.shutoff_times.early.day_before_message', date: fhlb_date_standard_numeric(early_shutoff[:day_before_date]))
-              = simple_format(early_shutoff[:day_before_message].html_safe)
-            %h2= t('admin.shutoff_times.early.day_of_message', date: fhlb_date_standard_numeric(early_shutoff[:early_shutoff_date]))
-            = simple_format(early_shutoff[:day_of_message].html_safe)
+            - if early_shutoff.day_before_message
+              %h2= t('admin.shutoff_times.early.day_before_message', date: fhlb_date_standard_numeric(early_shutoff.day_before_date))
+              = simple_format(early_shutoff.day_before_message.html_safe)
+            %h2= t('admin.shutoff_times.early.day_of_message', date: fhlb_date_standard_numeric(early_shutoff.early_shutoff_date))
+            = simple_format(early_shutoff.day_of_message.html_safe)
           - if @can_edit_trade_rules
             %td
-              %span= t('global.edit')
+              =link_to(t('global.edit'), rules_advance_view_early_shutoff_path({early_shutoff_request: {id: early_shutoff.id}, edit_request: true}))
               %span= t('global.remove')

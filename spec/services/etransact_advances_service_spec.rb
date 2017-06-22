@@ -686,22 +686,14 @@ describe EtransactAdvancesService do
   end
 
   describe '`early_shutoffs`' do
-    let(:early_shutoff) {{
-      frc_shutoff_time: double('frc shutoff time'),
-      vrc_shutoff_time: double('vrc shutoff time')
-    }}
+    let(:early_shutoff) { {} }
     let(:processed_early_shutoff) {{
-      frc_shutoff_time: frc_sentinel,
-      vrc_shutoff_time: vrc_sentinel,
       early_shutoff_date: early_shutoff_date
     }}
     let(:early_shutoff_date) { instance_double(Date) }
-    let(:vrc_sentinel) { double('processed vrc shutoff time') }
-    let(:frc_sentinel) { double('processed frc shutoff time') }
     let(:call_method) { subject.early_shutoffs }
     before do
       allow(subject).to receive(:get_hashes).and_return([early_shutoff])
-      allow(subject).to receive(:parse_24_hour_time)
       allow(subject).to receive(:fix_date)
     end
 
@@ -731,10 +723,6 @@ describe EtransactAdvancesService do
           allow(subject).to receive(:get_hashes).and_return(scheduled_shutoffs)
         end
 
-        it 'calls `parse_24_hour_time` twice for each scheduled shutoff' do
-          expect(subject).to receive(:parse_24_hour_time).exactly(n * 2).times
-          call_method
-        end
         it 'calls `fix_date` once for each scheduled shutoff' do
           expect(subject).to receive(:fix_date).exactly(n).times
           call_method
@@ -748,31 +736,52 @@ describe EtransactAdvancesService do
         expect(subject).to receive(:fix_date).with(anything, :early_shutoff_date)
         call_method
       end
-      it 'calls `parse_24_hour_time` with the `frc_shutoff_time` value for the early shutoff hash' do
-        expect(subject).to receive(:parse_24_hour_time).with(early_shutoff[:frc_shutoff_time])
-        call_method
-      end
-      it 'sets the `frc_shutoff_time` value to the result of `parse_24_hour_time`' do
-        allow(subject).to receive(:parse_24_hour_time).with(early_shutoff[:frc_shutoff_time]).and_return(frc_sentinel)
-        expect(call_method.first[:frc_shutoff_time]).to eq(frc_sentinel)
-      end
-      it 'calls `parse_24_hour_time` with the `vrc_shutoff_time` value for the early shutoff hash' do
-        expect(subject).to receive(:parse_24_hour_time).with(early_shutoff[:vrc_shutoff_time])
-        call_method
-      end
-      it 'sets the `vrc_shutoff_time` value to the result of `parse_24_hour_time`' do
-        allow(subject).to receive(:parse_24_hour_time).with(early_shutoff[:vrc_shutoff_time]).and_return(vrc_sentinel)
-        expect(call_method.first[:vrc_shutoff_time]).to eq(vrc_sentinel)
-      end
       it 'returns the processed early shutoff times' do
-        allow(subject).to receive(:parse_24_hour_time).with(early_shutoff[:frc_shutoff_time]).and_return(frc_sentinel)
-        allow(subject).to receive(:parse_24_hour_time).with(early_shutoff[:vrc_shutoff_time]).and_return(vrc_sentinel)
         allow(subject).to receive(:fix_date) do |shutoff_hash|
           shutoff_hash[:early_shutoff_date] = early_shutoff_date
         end
         expect(call_method).to eq([processed_early_shutoff])
       end
     end
+  end
+
+  shared_examples 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`' do |http_method, endpoint_name|
+    let(:early_shutoff) { instance_double(EarlyShutoffRequest) }
+    let(:shutoff_hash) { instance_double(Hash) }
+    let(:result) { double('some result') }
+    before { allow(subject).to receive(:shutoff_hash) }
+
+    it "calls `#{http_method}` with the endpoint name" do
+      expect(subject).to receive(http_method).with(endpoint_name, any_args)
+      call_method
+    end
+    it "calls `#{http_method}` with the proper endpoint" do
+      expect(subject).to receive(http_method).with(anything, 'etransact_advances/early_shutoff', anything)
+      call_method
+    end
+    it 'calls `shutoff_hash` with the passed early shutoff arg' do
+      expect(subject).to receive(:shutoff_hash).with(early_shutoff)
+      call_method
+    end
+    it "calls `#{http_method}` with the result of `shutoff_hash`" do
+      allow(subject).to receive(:shutoff_hash).and_return(shutoff_hash)
+      expect(subject).to receive(http_method).with(anything, anything, shutoff_hash)
+      call_method
+    end
+    it "returns the result of calling `#{http_method}`" do
+      allow(subject).to receive(http_method).and_return(result)
+      expect(call_method).to eq(result)
+    end
+  end
+
+  describe '`schedule_early_shutoff`' do
+    let(:call_method) { subject.schedule_early_shutoff(early_shutoff) }
+    it_behaves_like 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`', :post_hash, :schedule_early_shutoff
+  end
+
+  describe '`update_early_shutoff`' do
+    let(:call_method) { subject.update_early_shutoff(early_shutoff) }
+    it_behaves_like 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`', :put_hash, :update_early_shutoff
   end
 
   describe 'days_until' do
@@ -833,6 +842,21 @@ describe EtransactAdvancesService do
     end
     it 'returns the member ID if the name cant be found' do
       expect(call_method).to be(member_id)
+    end
+  end
+
+  describe 'the `shutoff_hash` protected method' do
+    let(:early_shutoff) { instance_double(EarlyShutoffRequest, original_early_shutoff_date: instance_double(String), early_shutoff_date: instance_double(String), vrc_shutoff_time: instance_double(String), frc_shutoff_time: instance_double(String), day_of_message_simple_format: instance_double(String), day_before_message_simple_format: instance_double(String)) }
+    let(:call_method) { subject.send(:shutoff_hash, early_shutoff) }
+    [:original_early_shutoff_date, :early_shutoff_date, :vrc_shutoff_time, :frc_shutoff_time].each do |attr|
+      it "returns a hash that includes the `#{attr}` of the early_shutoff_request" do
+        expect(call_method).to include(attr => early_shutoff.send(attr))
+      end
+    end
+    [:day_of_message, :day_before_message].each do |attr|
+      it "returns a hash that includes the `#{attr}_simple_format` of the early_shutoff_request" do
+        expect(call_method).to include(attr => early_shutoff.send(:"#{attr}_simple_format"))
+      end
     end
   end
 end

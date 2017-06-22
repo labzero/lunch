@@ -1179,7 +1179,7 @@ class ReportsController < ApplicationController
               column_heading_keys = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.values
               terms = RatesService::HISTORICAL_VRC_TERM_MAPPINGS.keys
             when *RatesService::ARC_CREDIT_TYPES
-              table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading") unless @credit_type == :daily_prime
+              table_heading = I18n.t("reports.pages.price_indications.#{@credit_type}.table_heading") unless @credit_type.to_sym == :daily_prime
               column_heading_keys = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.values
               terms = RatesService::HISTORICAL_ARC_TERM_MAPPINGS.keys
             # TODO add statement for 'embedded_cap' when it is rigged up

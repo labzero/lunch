@@ -5,7 +5,7 @@
     %h1= @title
     .report-print-details
       .report-print-bank= @member[:name]
-      .report-print-sta= @member[:fhfa_number]
+      .report-print-sta="#{t('securities.requests.view.fhfa_number')} #{@member[:fhfa_number]}"
   .report-main-body
     .request-summary-row
       .report-summary-data

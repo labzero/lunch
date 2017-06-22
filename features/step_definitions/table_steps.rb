@@ -23,6 +23,14 @@ When(/^I click the "(.*?)" column heading on the "(.*?)" (?:parent )?table$/) do
   page.find("#{parent_selector} th", text: heading).click
 end
 
+Then (/^I should see the table heading "(.*?)" on the table "(.*?)"$/) do |table_heading, table|
+  page.assert_selector(".#{table} tr.table-heading-row", text: table_heading, exact: true)
+end
+
+Then (/^I should not see a table heading row on the table "(.*?)"$/) do |table|
+  page.assert_no_selector(".#{table} tr.table-heading-row")
+end
+
 def get_selector_for_table_section(table_type)
   case table_type
     when "Standard Credit Program"

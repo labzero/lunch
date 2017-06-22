@@ -158,7 +158,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
     end
     describe '`@table_data`' do
       it 'has the proper `column_headings`' do
-        column_headings = [I18n.t('reports.pages.letters_of_credit.headers.lc_number'), fhlb_add_unit_to_table_header(I18n.t('reports.pages.letters_of_credit.headers.current_amount'), '$'), I18n.t('global.issue_date'), I18n.t('letters_of_credit.manage.expiration_date'), I18n.t('reports.pages.letters_of_credit.headers.credit_program'), I18n.t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), I18n.t('global.actions')]
+        column_headings = [I18n.t('reports.pages.letters_of_credit.headers.lc_number'), I18n.t('reports.pages.letters_of_credit.headers.beneficiary'), fhlb_add_unit_to_table_header(I18n.t('reports.pages.letters_of_credit.headers.current_amount'), '$'), I18n.t('global.issue_date'), I18n.t('letters_of_credit.manage.expiration_date'), I18n.t('reports.pages.letters_of_credit.headers.credit_program'), I18n.t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), I18n.t('global.actions')]
         call_action
         expect(assigns[:table_data][:column_headings]).to eq(column_headings)
       end
@@ -176,26 +176,31 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           call_action
           expect(assigns[:table_data][:rows].length).to eq(n)
         end
-        loc_value_types = [[:lc_number, nil], [:current_par, :currency_whole], [:trade_date, :date], [:maturity_date, :date], [:description, nil], [:maintenance_charge, :basis_point]]
-        loc_value_types.each_with_index do |attr, i|
-          attr_name = attr.first
-          attr_type = attr.last
-          describe "columns with cells based on the LC attribute `#{attr_name}`" do
-            let(:credit) { {attr_name => double(attr_name.to_s)} }
-            before { allow(controller).to receive(:dedupe_locs).and_return([credit]) }
+        describe "populated rows" do
+          let(:credit) { {lc_number: double('lc_number'), beneficiary: double('beneficiary'), current_par: double('current_par'), trade_date: double('trade_date'), maturity_date: double('maturity_date'), description: double('description'), maintenance_charge: double('maintenance_charge') } }
+          before {
+            allow(controller).to receive(:dedupe_locs).and_return([credit])
+            allow(credit[:beneficiary]).to receive(:truncate).and_return(credit[:beneficiary])
+          }
 
-            it "builds a cell with a `value` of `#{attr_name}`" do
-              call_action
-              expect(assigns[:table_data][:rows].length).to be > 0
-              assigns[:table_data][:rows].each do |row|
-                expect(row[:columns][i][:value]).to eq(credit[attr_name])
+          loc_value_types = [[:lc_number, nil], [:beneficiary, nil], [:current_par, :currency_whole], [:trade_date, :date], [:maturity_date, :date], [:description, nil], [:maintenance_charge, :basis_point]]
+          loc_value_types.each_with_index do |attr, i|
+            attr_name = attr.first
+            attr_type = attr.last
+            describe "columns with cells based on the LC attribute `#{attr_name}`" do
+              it "builds a cell with a `value` of `#{attr_name}`" do
+                call_action
+                expect(assigns[:table_data][:rows].length).to be > 0
+                assigns[:table_data][:rows].each do |row|
+                  expect(row[:columns][i][:value]).to eq(credit[attr_name])
+                end
               end
-            end
-            it "builds a cell with a `type` of `#{attr_type}`" do
-              call_action
-              expect(assigns[:table_data][:rows].length).to be > 0
-              assigns[:table_data][:rows].each do |row|
-                expect(row[:columns][i][:type]).to eq(attr_type)
+              it "builds a cell with a `type` of `#{attr_type}`" do
+                call_action
+                expect(assigns[:table_data][:rows].length).to be > 0
+                assigns[:table_data][:rows].each do |row|
+                  expect(row[:columns][i][:type]).to eq(attr_type)
+                end
               end
             end
           end

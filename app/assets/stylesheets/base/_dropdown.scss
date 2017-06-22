@@ -44,7 +44,6 @@
     box-sizing: border-box;
     background: $white;
     z-index: 1;
-    overflow-y: scroll;
   }
   li {
     @extend %truncate-text;

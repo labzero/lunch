@@ -21,6 +21,9 @@
     margin-bottom: 10px;
   }
   table {
+    td:nth-child(2) {
+      width: 250px;
+    }
     td:last-child:not(.dataTables_empty) {
       text-transform: uppercase;
       color: $medium-gray;
@@ -37,6 +40,26 @@
     }
     .amount-field {
       height: 35px;
+    }
+    .attention-field {
+      height: 35px;
+      span {
+        font-style: italic;
+        margin-right: 0;
+        input {
+          font-style: normal;
+        }
+      }
+    }
+    .beneficiary-name {
+      width: 100%;
+    }
+    .dropdown-beneficiary {
+      width: 500px;
+      div {
+        width: 500px;
+        max-width: 500px;
+      }
     }
   }
 }

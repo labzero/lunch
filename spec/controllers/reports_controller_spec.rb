@@ -2735,6 +2735,10 @@ RSpec.describe ReportsController, :type => :controller do
                 expect((assigns[:table_data])[:table_heading]).to eq(I18n.t("reports.pages.price_indications.#{credit_type}.table_heading"))
               end
             end
+            it 'has no table_header row when the credit type is `daily_prime`' do
+              get :historical_price_indications, historical_price_credit_type: :daily_prime, job_id: job_id
+              expect(assigns[:table_data][:table_heading]).to be nil
+            end
           end
           describe 'column_headings' do
             let(:frc_column_headings) {[I18n.t('global.date'), I18n.t('global.dates.1_month'), I18n.t('global.dates.2_months'), I18n.t('global.dates.3_months'), I18n.t('global.dates.6_months'), I18n.t('global.dates.1_year'), I18n.t('global.dates.2_years'), I18n.t('global.dates.3_years'), I18n.t('global.dates.5_years'), I18n.t('global.dates.7_years'), I18n.t('global.dates.10_years'), I18n.t('global.dates.15_years'), I18n.t('global.dates.20_years'), I18n.t('global.dates.30_years')]}

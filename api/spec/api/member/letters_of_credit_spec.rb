@@ -84,7 +84,7 @@ describe MAPI::ServiceApp do
             end
           end
         end
-        [:lc_number, :description].each do |property|
+        [:lc_number, :description, :beneficiary].each do |property|
           it "returns an object with a `#{property}` formatted as a string" do
             formatted_credits.each do |credit|
               expect(credit[property]).to be_kind_of(String)
@@ -92,7 +92,7 @@ describe MAPI::ServiceApp do
           end
         end
         describe 'handling nil values' do
-          [:maturity_date, :trade_date, :trade_date, :current_par, :maintenance_charge, :lc_number, :description].each do |property|
+          [:maturity_date, :trade_date, :trade_date, :current_par, :maintenance_charge, :lc_number, :description, :beneficiary].each do |property|
             it "returns an object with a nil value for `#{property}` if that property doesn't have a value" do
               MAPI::Services::Member::LettersOfCredit::Private.format_credits([{}, {}]).each do |credit|
                 expect(credit[property]).to be_nil

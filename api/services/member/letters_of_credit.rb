@@ -12,8 +12,9 @@ module MAPI
               LC_TRADE_DATE,
               LC_SETTLEMENT_DATE,
               LC_MATURITY_DATE,
-              LC_ISSUE_NUMBER ,
-              LCX_UPDATE_DATE
+              LC_ISSUE_NUMBER,
+              LCX_UPDATE_DATE,
+              LC_BENEFICIARY
               FROM web_inet.WEB_LC_LATESTDATE_RPT
               WHERE FHLB_ID = #{ ActiveRecord::Base.connection.quote(member_id)}
             SQL
@@ -49,7 +50,8 @@ module MAPI
                 trade_date: (credit[:LC_TRADE_DATE].to_date if credit[:LC_TRADE_DATE]),
                 settlement_date: (credit[:LC_SETTLEMENT_DATE].to_date if credit[:LC_SETTLEMENT_DATE]),
                 maturity_date: (credit[:LC_MATURITY_DATE].to_date if credit[:LC_MATURITY_DATE]),
-                description: (credit[:LC_ISSUE_NUMBER].to_s if credit[:LC_ISSUE_NUMBER])
+                description: (credit[:LC_ISSUE_NUMBER].to_s if credit[:LC_ISSUE_NUMBER]),
+                beneficiary: (credit[:LC_BENEFICIARY].to_s if credit[:LC_BENEFICIARY])
               }
             end
           end

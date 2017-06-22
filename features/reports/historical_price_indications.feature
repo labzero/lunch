@@ -39,18 +39,30 @@ Scenario Outline: Choosing different historic price indication reports
   When I select "<credit_type>" from the <credit_selector> type selector
   And I wait for the report to load
   Then I should see "<credit_type>"
-  And I should see "<table_heading>"
+  Then I should see the table heading "<table_heading>" on the table "<table>"
   Examples:
-  | collateral_type                  | collateral_selector | credit_type                                | credit_selector | table_heading                |
-  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR                   |
-  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR                   |
-  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR                   |
-  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) Daily Prime   | credit          | Daily Prime                  |
-  | Standard Credit Program          | collateral          | Variable Rate Credit (VRC)                 | credit          | Variable Rate Credit (VRC)   |
-  | Securities-Backed Credit Program | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR                   |
-  | Securities-Backed Credit Program | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR                   |
-  | Securities-Backed Credit Program | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR                   |
-  | Securities-Backed Credit Program | collateral          | Variable Rate Credit (VRC)                 | credit          | Variable Rate Credit (VRC)   |
+  | collateral_type                  | collateral_selector | credit_type                                | credit_selector | table_heading                | table                      |
+  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR                   | standard-1m_libor-table    |
+  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR                   | standard-3m_libor-table    |
+  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR                   | standard-6m_libor-table    |
+  | Standard Credit Program          | collateral          | Adjustable Rate Credit (ARC) Daily Prime   | credit          | 1 year 2 year 3 year 5 year  | standard-daily_prime-table |
+  | Securities-Backed Credit Program | collateral          | Adjustable Rate Credit (ARC) 1 month LIBOR | credit          | 1 mo LIBOR                   | sbc-1m_libor-table         |
+  | Securities-Backed Credit Program | collateral          | Adjustable Rate Credit (ARC) 3 month LIBOR | credit          | 3 mo LIBOR                   | sbc-3m_libor-table         |
+  | Securities-Backed Credit Program | collateral          | Adjustable Rate Credit (ARC) 6 month LIBOR | credit          | 6 mo LIBOR                   | sbc-6m_libor-table         |
+
+@jira-mem-318 @jira-mem-402 @jira-mem-358
+Scenario Outline: Choosing different historic price indication reports
+  Given I am on the "Historical Price Indications" report page
+  When I select "<collateral_type>" from the <collateral_selector> type selector
+  And I wait for the report to load
+  When I select "<credit_type>" from the <credit_selector> type selector
+  And I wait for the report to load
+  Then I should see "<credit_type>"
+  Then I should not see a table heading row on the table "<table>"
+  Examples:
+  | collateral_type                  | collateral_selector | credit_type                                | credit_selector | table                      |
+  | Standard Credit Program          | collateral          | Variable Rate Credit (VRC)                 | credit          | standard-vrc-table         |
+  | Securities-Backed Credit Program | collateral          | Variable Rate Credit (VRC)                 | credit          | sbc-vrc-table              |
 
 @smoke @jira-mem-1287
 Scenario: Choosing sta option on historic price indication reports
