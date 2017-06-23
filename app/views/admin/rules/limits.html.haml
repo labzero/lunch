@@ -5,5 +5,5 @@
       =render 'reports/reports_table', table_data: @global_limits
     %section.limits-term
       %h2= t('admin.term_rules.daily_limit.term_limits')
-      =render 'reports/reports_table', table_data: @term_limits
+      =render 'reports/reports_table', table_data: @term_limits, sortable: false
     =submit_tag(t('admin.term_rules.save'), class: 'primary-button') if @can_edit_trade_rules

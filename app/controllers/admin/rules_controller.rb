@@ -126,8 +126,8 @@ class Admin::RulesController < Admin::BaseController
     etransact_service = EtransactAdvancesService.new(request)
     term_limit_data = etransact_service.limits
     etransact_status = etransact_service.status
-    shutoff_times = etransact_service.shutoff_times_by_type
-    raise "There has been an error and Admin::RulesController#advance_availability_status has encountered nil" unless term_limit_data && etransact_status && shutoff_times
+    set_typical_shutoff_table_var(etransact_service)
+    raise "There has been an error and Admin::RulesController#advance_availability_status has encountered nil" unless term_limit_data && etransact_status
     @etransact_enabled = etransact_status[:enabled]
 
     # Determine if any terms are disabled
@@ -144,18 +144,6 @@ class Admin::RulesController < Admin::BaseController
       disabled_term_rows << row if disabled_row
     end
     @disabled_terms = { rows: disabled_term_rows } if disabled_term_rows.present?
-    @shutoff_times = {
-      rows: [
-        {columns: [
-          {value: t('dashboard.quick_advance.table.axes_labels.variable_rate')},
-          {value: shutoff_times[:vrc], type: :time}
-        ]},
-        {columns: [
-          {value: t('dashboard.quick_advance.table.axes_labels.fixed_rate')},
-          {value: shutoff_times[:frc], type: :time}
-        ]}
-      ]
-    }
   end
 
   # PUT
@@ -455,7 +443,7 @@ class Admin::RulesController < Admin::BaseController
 
   # GET
   def typical_shutoff
-
+    set_typical_shutoff_table_var
   end
 
   private
@@ -539,5 +527,23 @@ class Admin::RulesController < Admin::BaseController
 
   def save_early_shutoff_request
     @early_shutoff_request.save if @early_shutoff_request
+  end
+
+  def set_typical_shutoff_table_var(etransact_service=nil)
+    etransact_service ||= EtransactAdvancesService.new(request)
+    shutoff_times = etransact_service.shutoff_times_by_type
+    raise "There has been an error and Admin::RulesController##{action_name} has encountered nil" unless shutoff_times
+    @typical_shutoff_times = {
+      rows: [
+        {columns: [
+          {value: t('admin.shutoff_times.early.vrc_terms')},
+          {value: shutoff_times[:vrc], type: :time}
+        ]},
+        {columns: [
+          {value: t('admin.shutoff_times.early.frc_terms')},
+          {value: shutoff_times[:frc], type: :time}
+        ]}
+      ]
+    }
   end
 end

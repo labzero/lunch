@@ -542,3 +542,13 @@
     margin-left: 20px;
   }
 }
+
+.advance-shutoff-times-typical {
+  @extend %table-row-headers;
+  table {
+    width: 275px;
+    td:first-child {
+      width: 55%;
+    }
+  }
+}

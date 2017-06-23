@@ -12,10 +12,10 @@
       %h2= t('admin.advance_availability.availability_status.disabled_terms')
       =link_to(@can_edit_trade_rules ? t('admin.advance_availability.availability_status.manage_availability') : t('admin.advance_availability.availability_status.view_availability'), rules_advance_availability_by_term_path)
       .rules-availability-by-term-headings
-        =render 'reports/reports_table', table_data: @availability_headings
+        =render 'reports/reports_table', table_data: @availability_headings, sortable: false
       .rules-availability-by-term-body
         =render 'reports/reports_table', table_data: @disabled_terms
   %section
     %h2= t('admin.advance_availability.availability_status.todays_shutoff')
-    =link_to(@can_edit_trade_rules ? t('admin.advance_availability.availability_status.schedule_shutoff') : t('admin.advance_availability.availability_status.view_shutoff'), '#')
-    =render 'reports/reports_table', table_data: @shutoff_times
+    =link_to(@can_edit_trade_rules ? t('admin.advance_availability.availability_status.schedule_shutoff') : t('admin.advance_availability.availability_status.view_shutoff'), rules_advance_typical_shutoff_path)
+    =render 'reports/reports_table', table_data: @typical_shutoff_times

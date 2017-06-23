@@ -12,6 +12,7 @@ Feature: Viewing/Modifying the End of Day Shutoffs for ETransact
     When I click on the trade credit rules link in the header
     And I click on the end of day shutoff link in the header
     Then I should be on the end of day shutoff page
+    And the end of day shutoff early shutoffs tab should be active
     And I should see the table of scheduled early shutoffs
     And I should see the end of day shutoff early shutoffs page in its view-only mode
 
@@ -20,6 +21,7 @@ Feature: Viewing/Modifying the End of Day Shutoffs for ETransact
     When I click on the trade credit rules link in the header
     And I click on the end of day shutoff link in the header
     Then I should be on the end of day shutoff page
+    And the end of day shutoff early shutoffs tab should be active
     And I should see the table of scheduled early shutoffs
     And I should see the end of day shutoff early shutoffs page in its editable mode
 
@@ -56,3 +58,13 @@ Feature: Viewing/Modifying the End of Day Shutoffs for ETransact
     Then I should see the success message on the advance availability remove early shutoff page
     When I click to remove the first scheduled early shutoff but there is an error
     Then I should see the error message on the advance availability early shutoff page
+
+  @jira-mem-2371
+  Scenario: Navigating to the Typical Early Shutoffs page from the admin nav as a non-admin intranet user
+    Given I am logged into the admin panel but do not have web admin privileges
+    When I click on the trade credit rules link in the header
+    And I click on the end of day shutoff link in the header
+    And I click on the end of day shutoff typical shutoffs tab
+    Then I should be on the end of day shutoff page
+    And the end of day shutoff typical shutoffs tab should be active
+    And I should see the end of day shutoff typical shutoffs page in its view-only mode

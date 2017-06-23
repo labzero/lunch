@@ -325,6 +325,7 @@ RSpec.describe Admin::RulesController, :type => :controller do
 
     before do
       allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+      allow(controller).to receive(:set_typical_shutoff_table_var)
     end
 
     it_behaves_like 'a RulesController action with before_action methods'
@@ -333,7 +334,7 @@ RSpec.describe Admin::RulesController, :type => :controller do
       expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
       call_action
     end
-    {limits: [], status: {}, shutoff_times_by_type: {}}.each do |method, return_value|
+    {limits: [], status: {}}.each do |method, return_value|
       it "calls `#{method}` on the EtransactAdvancesService instance" do
         expect(etransact_service).to receive(method).and_return(return_value)
         call_action
@@ -345,53 +346,16 @@ RSpec.describe Admin::RulesController, :type => :controller do
     end
 
     describe 'instance variables' do
+      it 'calls `set_typical_shutoff_table_var` with the etransact service' do
+        expect(controller).to receive(:set_typical_shutoff_table_var).with(etransact_service)
+        call_action
+      end
       describe '`@etransact_enabled`' do
         let(:status_hash) { {enabled: double('some enabled status')} }
         before { allow(etransact_service).to receive(:status).and_return(status_hash) }
         it 'is set to the `enabled` value from the status hash' do
           call_action
           expect(assigns[:etransact_enabled]).to eq(status_hash[:enabled])
-        end
-      end
-
-      describe '`@shutoff_times`' do
-        let(:shutoff_times_hash) {{
-          vrc: double('vrc shutoff time'),
-          frc: double('frc shutoff time')
-        }}
-        let(:shutoff_times) { call_action; assigns[:shutoff_times]
-        }
-        before { allow(etransact_service).to receive(:shutoff_times_by_type).and_return(shutoff_times_hash) }
-
-        describe 'the first row' do
-          describe 'the first column' do
-            it 'has a value that is the translation string for vrc' do
-              expect(shutoff_times[:rows][0][:columns][0][:value]).to eq(I18n.t('dashboard.quick_advance.table.axes_labels.variable_rate'))
-            end
-          end
-          describe 'the second column' do
-            it 'has a value that is the `vrc` value of the shutoff times hash' do
-              expect(shutoff_times[:rows][0][:columns][1][:value]).to eq(shutoff_times_hash[:vrc])
-            end
-            it 'hash a type that is `:time`' do
-              expect(shutoff_times[:rows][0][:columns][1][:type]).to eq(:time)
-            end
-          end
-        end
-        describe 'the second row' do
-          describe 'the first column' do
-            it 'has a value that is the translation string for frc' do
-              expect(shutoff_times[:rows][1][:columns][0][:value]).to eq(I18n.t('dashboard.quick_advance.table.axes_labels.fixed_rate'))
-            end
-          end
-          describe 'the second column' do
-            it 'has a value that is the `frc` value of the shutoff times hash' do
-              expect(shutoff_times[:rows][1][:columns][1][:value]).to eq(shutoff_times_hash[:frc])
-            end
-            it 'hash a type that is `:time`' do
-              expect(shutoff_times[:rows][1][:columns][1][:type]).to eq(:time)
-            end
-          end
         end
       end
       describe '`@disabled_terms`' do
@@ -1466,8 +1430,13 @@ RSpec.describe Admin::RulesController, :type => :controller do
 
   describe 'GET typical_shutoff' do
     let(:call_action) { get :typical_shutoff }
+    before { allow(controller).to receive(:set_typical_shutoff_table_var) }
 
     it_behaves_like 'a RulesController action with before_action methods'
+    it 'calls `set_typical_shutoff_table_var`' do
+      expect(controller).to receive(:set_typical_shutoff_table_var)
+      call_action
+    end
   end
 
   describe 'GET view_early_shutoff' do
@@ -1891,6 +1860,79 @@ RSpec.describe Admin::RulesController, :type => :controller do
       context 'when the `@early_shutoff_request` instance variable does not exist' do
         it 'returns nil' do
           expect(call_method).to be nil
+        end
+      end
+    end
+
+    describe '`set_typical_shutoff_table_var`' do
+      let(:action_name) { double('action name') }
+      let(:request) { double('request') }
+      let(:etransact_service) { instance_double(EtransactAdvancesService, shutoff_times_by_type: {})}
+      let(:call_method) { subject.send(:set_typical_shutoff_table_var, etransact_service)}
+      before do
+        allow(subject).to receive(:request).and_return(request)
+        allow(subject).to receive(:action_name).and_return(action_name)
+      end
+
+      context 'when an EtransactAdvancesService instance is passed' do
+        it 'does not create a new instance of EtransactAdvancesService' do
+          expect(EtransactAdvancesService).not_to receive(:new)
+          call_method
+        end
+      end
+      context 'when an EtransactAdvancesService instance is not passed' do
+        let(:call_method) { subject.send(:set_typical_shutoff_table_var) }
+        it 'creates a new instance of EtransactAdvancesService with the request' do
+          expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
+          call_method
+        end
+      end
+
+      it 'calls `shutoff_times_by_type` on the EtransactAdvancesService instance' do
+        expect(etransact_service).to receive(:shutoff_times_by_type).and_return({})
+        call_method
+      end
+      it 'raises an error containing the action name if `shutoff_times_by_type` returns nil' do
+        allow(etransact_service).to receive(:shutoff_times_by_type).and_return(nil)
+        expect{call_method}.to raise_error("There has been an error and Admin::RulesController##{action_name} has encountered nil")
+      end
+      describe 'the `@typical_shutoff_times` instance variable' do
+        let(:shutoff_times_hash) {{
+          vrc: double('vrc shutoff time'),
+          frc: double('frc shutoff time')
+        }}
+        let(:shutoff_times) { call_method; assigns[:typical_shutoff_times] }
+        before { allow(etransact_service).to receive(:shutoff_times_by_type).and_return(shutoff_times_hash) }
+
+        describe 'the first row' do
+          describe 'the first column' do
+            it 'has a value that is the translation string for vrc' do
+              expect(shutoff_times[:rows][0][:columns][0][:value]).to eq(I18n.t('admin.shutoff_times.early.vrc_terms'))
+            end
+          end
+          describe 'the second column' do
+            it 'has a value that is the `vrc` value of the shutoff times hash' do
+              expect(shutoff_times[:rows][0][:columns][1][:value]).to eq(shutoff_times_hash[:vrc])
+            end
+            it 'hash a type that is `:time`' do
+              expect(shutoff_times[:rows][0][:columns][1][:type]).to eq(:time)
+            end
+          end
+        end
+        describe 'the second row' do
+          describe 'the first column' do
+            it 'has a value that is the translation string for frc' do
+              expect(shutoff_times[:rows][1][:columns][0][:value]).to eq(I18n.t('admin.shutoff_times.early.frc_terms'))
+            end
+          end
+          describe 'the second column' do
+            it 'has a value that is the `frc` value of the shutoff times hash' do
+              expect(shutoff_times[:rows][1][:columns][1][:value]).to eq(shutoff_times_hash[:frc])
+            end
+            it 'hash a type that is `:time`' do
+              expect(shutoff_times[:rows][1][:columns][1][:type]).to eq(:time)
+            end
+          end
         end
       end
     end
