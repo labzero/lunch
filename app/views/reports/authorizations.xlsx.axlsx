@@ -1,13 +1,20 @@
 xlsx_package.use_shared_strings = true
 workbook = xlsx_package.workbook
 workbook.styles do |styles|
+  authorizations_mapping = ReportsController::AUTHORIZATIONS_MAPPING
   workbook.add_worksheet(name: t('reports.pages.authorizations.title')) do |sheet|
-    sheet.add_row [t('user_roles.user.title')] + @authorizations_dropdown_mapping.values
-	column_placeholders = []
-	@authorizations_dropdown_mapping.keys.size.times { column_placeholders << nil }
+    sheet.add_row [t('user_roles.user.title')] + authorizations_mapping.values
+	  column_placeholders = []
+	  authorizations_mapping.keys.size.times { column_placeholders << nil }
     @authorizations_table_data[:raw_roles].each do |user|
    	  row = [user[0][:display_name]] + column_placeholders
-   	  user[2].each { |role| row[@authorizations_dropdown_mapping.keys.index(role) + 1] = t('reports.pages.authorizations.xlsx_column_marker') }
+      user[2].each do |role|
+        if [User::Roles::SIGNER_MANAGER, User::Roles::SIGNER_ENTIRE_AUTHORITY].include?(role)
+          [3,4,5,6,7,8,10].each { |index| row[index] = t('reports.pages.authorizations.xlsx_column_marker') }
+        end
+        row[11] = t('reports.pages.authorizations.xlsx_column_marker') if [ReportsController::TOKEN_ADVANCES, ReportsController::TOKEN_SECURITIES, ReportsController::TOKEN_WIRES].include?(role)
+        row[authorizations_mapping.keys.index(role) + 1] = t('reports.pages.authorizations.xlsx_column_marker')
+      end
    	  sheet.add_row row
    	end
   end
