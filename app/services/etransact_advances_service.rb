@@ -171,12 +171,16 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
-  def schedule_early_shutoff(early_shutoff)
-    post_hash(:schedule_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash(early_shutoff))
+  def schedule_early_shutoff(early_shutoff, &error_handler)
+    post_hash(:schedule_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash(early_shutoff)) do |name, msg, err|
+      error_handler.call(err) if error_handler
+    end
   end
 
-  def update_early_shutoff(early_shutoff)
-    put_hash(:update_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash(early_shutoff))
+  def update_early_shutoff(early_shutoff, &error_handler)
+    put_hash(:update_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash(early_shutoff)) do |name, msg, err|
+      error_handler.call(err) if error_handler
+    end
   end
 
   def remove_early_shutoff(early_shutoff)

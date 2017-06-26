@@ -37,7 +37,7 @@ Feature: Viewing/Modifying the End of Day Shutoffs for ETransact
     When I click the button to schedule a new early shutoff
     And I input "This is a test message" in the field for the early shutoff day of message
     And I click the button to confirm the scheduling of the new early shutoff but there is an error
-    Then I should see the error message on the advance availability early shutoff page
+    Then I should see the error message on the advance availability view early shutoff page
 
   @jira-mem-2375 @local-only
   Scenario: Editing an existing early shutoff
@@ -49,7 +49,7 @@ Feature: Viewing/Modifying the End of Day Shutoffs for ETransact
     Then I should see the success message on the advance availability edit early shutoff page
     When I click to edit the first scheduled early shutoff
     And I click the button to confirm the scheduling of the edited early shutoff but there is an error
-    Then I should see the error message on the advance availability early shutoff page
+    Then I should see the error message on the advance availability view early shutoff page
 
   @jira-mem-2463 @local-only
   Scenario: Removing an existing early shutoff

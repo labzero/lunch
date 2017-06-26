@@ -420,17 +420,19 @@ class Admin::RulesController < Admin::BaseController
   # POST
   def new_early_shutoff
     early_shutoff_request.attributes = params[:early_shutoff_request]
-    early_shutoff_result = EtransactAdvancesService.new(request).schedule_early_shutoff(early_shutoff_request) || {error: 'There has been an error and Admin::RulesController#new_early_shutoff has encountered nil'}
-    set_flash_message(early_shutoff_result, t('admin.shutoff_times.schedule_early.success'))
-    redirect_to action: :early_shutoff
+    if EtransactAdvancesService.new(request).schedule_early_shutoff(early_shutoff_request, &early_shutoff_error_handler)
+      set_flash_message({}, t('admin.shutoff_times.schedule_early.success'))
+      redirect_to action: :early_shutoff
+    end
   end
 
   # PUT
   def update_early_shutoff
     early_shutoff_request.attributes = params[:early_shutoff_request]
-    early_shutoff_result = EtransactAdvancesService.new(request).update_early_shutoff(early_shutoff_request) || {error: 'There has been an error and Admin::RulesController#update_early_shutoff has encountered nil'}
-    set_flash_message(early_shutoff_result, t('admin.shutoff_times.schedule_early.update_success'))
-    redirect_to action: :early_shutoff
+    if EtransactAdvancesService.new(request).update_early_shutoff(early_shutoff_request, &early_shutoff_error_handler)
+      set_flash_message({}, t('admin.shutoff_times.schedule_early.update_success'))
+      redirect_to action: :early_shutoff
+    end
   end
 
   # DELETE
@@ -545,5 +547,17 @@ class Admin::RulesController < Admin::BaseController
         ]}
       ]
     }
+  end
+
+  def early_shutoff_error_handler
+    ->(error) do
+      message = if error && error.http_body
+        JSON.parse(error.http_body).with_indifferent_access
+      else
+        {error: "There has been an error and Admin::RulesController##{action_name} has encountered nil"}
+      end
+      set_flash_message(message)
+      redirect_to action: :view_early_shutoff, early_shutoff_request: {id: early_shutoff_request.id}
+    end
   end
 end

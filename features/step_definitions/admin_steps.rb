@@ -119,7 +119,7 @@ When(/^I click the save changes button for the rules limits form$/) do
   page.find('.rules-limits-form input[type=submit]').click
 end
 
-Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status|early shutoff|edit early shutoff|remove early shutoff) page$/) do |result, form|
+Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status|early shutoff|edit early shutoff|remove early shutoff|view early shutoff) page$/) do |result, form|
   parent_selector = case form
   when 'limits'
     '.term-rules'
@@ -129,6 +129,8 @@ Then(/^I should see the (success|error) message on the (?:term rules|advance ava
     '.advance-availability-status'
   when 'early shutoff'
     '.advance-shutoff-times-early'
+  when 'view early shutoff'
+    '.advance-shutoff-times-view-early'
   end
   success_message = case form
   when 'early shutoff'
@@ -229,8 +231,8 @@ end
 
 When(/^I click the button to confirm the scheduling of the (?:new|edited) early shutoff( but there is an error)?$/) do |error|
   if error
-    allow_any_instance_of(EtransactAdvancesService).to receive(:schedule_early_shutoff).and_return({error: 'some error message'})
-    allow_any_instance_of(EtransactAdvancesService).to receive(:update_early_shutoff).and_return({error: 'some error message'})
+    allow_any_instance_of(RestClient::Resource).to receive(:post).and_raise(RestClient::Exception)
+    allow_any_instance_of(RestClient::Resource).to receive(:put).and_raise(RestClient::Exception)
   end
   page.find('.rules-early-shutoff-form input[type=submit]').click
 end
@@ -243,7 +245,7 @@ When(/^I click to edit the first scheduled early shutoff$/) do
 end
 
 When(/^I click to remove the first scheduled early shutoff( but there is an error)?$/) do |error|
-  allow_any_instance_of(EtransactAdvancesService).to receive(:remove_early_shutoff).and_return({error: 'some error message'}) if error
+  allow_any_instance_of(RestClient::Resource).to receive(:delete).and_raise(RestClient::Exception) if error
   page.find('.advance-shutoff-times-early table tbody tr:first-child td:last-child a', text: /\A#{I18n.t('global.remove')}\z/i).click
 end
 

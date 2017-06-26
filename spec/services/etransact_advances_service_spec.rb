@@ -745,10 +745,11 @@ describe EtransactAdvancesService do
     end
   end
 
-  shared_examples 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`' do |http_method, endpoint_name|
+  shared_examples 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`' do |http_method, endpoint_name, restclient_method|
     let(:early_shutoff) { instance_double(EarlyShutoffRequest) }
     let(:shutoff_hash) { instance_double(Hash) }
     let(:result) { double('some result') }
+    let(:error_handler) { -> (n, m, e) {} }
     before { allow(subject).to receive(:shutoff_hash) }
 
     it "calls `#{http_method}` with the endpoint name" do
@@ -772,16 +773,27 @@ describe EtransactAdvancesService do
       allow(subject).to receive(http_method).and_return(result)
       expect(call_method).to eq(result)
     end
+    context 'when there is a RestClient error' do
+      let(:status) { rand(400...500) }
+      let(:error) { RestClient::Exception.new(nil, status) }
+      before { allow_any_instance_of(RestClient::Resource).to receive(restclient_method).and_raise(error) }
+      it 'calls the error handler with the error if an error handler was supplied' do
+        expect{|error_handler| subject.send(endpoint_name, early_shutoff, &error_handler)}.to yield_with_args(error)
+      end
+      it 'returns nil' do
+        expect(call_method).to be(nil)
+      end
+    end
   end
 
   describe '`schedule_early_shutoff`' do
     let(:call_method) { subject.schedule_early_shutoff(early_shutoff) }
-    it_behaves_like 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`', :post_hash, :schedule_early_shutoff
+    it_behaves_like 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`', :post_hash, :schedule_early_shutoff, :post
   end
 
   describe '`update_early_shutoff`' do
     let(:call_method) { subject.update_early_shutoff(early_shutoff) }
-    it_behaves_like 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`', :put_hash, :update_early_shutoff
+    it_behaves_like 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`', :put_hash, :update_early_shutoff, :put
   end
 
   describe '`remove_early_shutoff`' do

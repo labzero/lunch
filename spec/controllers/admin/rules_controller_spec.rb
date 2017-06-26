@@ -1539,18 +1539,7 @@ RSpec.describe Admin::RulesController, :type => :controller do
     end
   end
 
-  shared_examples 'a RulesController action that alters the state of an early shutoff request' do |service_method, error_message, success_message|
-    allow_policy :web_admin, :edit_trade_rules?
-    let(:early_shutoff_params) { SecureRandom.hex }
-    let(:etransact_service) { instance_double(EtransactAdvancesService, service_method => {}) }
-    before do
-      allow(controller).to receive(:fetch_early_shutoff_request) do
-        controller.instance_variable_set(:@early_shutoff_request, early_shutoff_request)
-      end
-      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
-      allow(controller).to receive(:set_flash_message)
-    end
-
+  shared_examples 'a RulesController action that alters the state of an early shutoff request' do |service_method|
     it_behaves_like 'a RulesController action with before_action methods'
     it_behaves_like 'it checks the edit_trade_rules? web_admin policy'
     it_behaves_like 'a RulesController action that fetches an early shutoff request'
@@ -1567,47 +1556,127 @@ RSpec.describe Admin::RulesController, :type => :controller do
       expect(etransact_service).to receive(service_method).with(early_shutoff_request)
       call_action
     end
-    context "when EtransactAdvancesService##{service_method} returns nil" do
-      before { allow(etransact_service).to receive(service_method).and_return(nil) }
+  end
 
-      it 'calls `set_flash_message` with an error hash' do
-        expect(controller).to receive(:set_flash_message).with({error: error_message}, anything)
+  describe 'POST new_early_shutoff' do
+    allow_policy :web_admin, :edit_trade_rules?
+    let(:early_shutoff_params) { SecureRandom.hex }
+    let(:etransact_service) { instance_double(EtransactAdvancesService, schedule_early_shutoff: {}) }
+    let(:call_action) { post :new_early_shutoff, early_shutoff_request: early_shutoff_params }
+    before do
+      allow(controller).to receive(:fetch_early_shutoff_request) do
+        controller.instance_variable_set(:@early_shutoff_request, early_shutoff_request)
+      end
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+      allow(controller).to receive(:set_flash_message)
+    end
+
+    it_behaves_like 'a RulesController action that alters the state of an early shutoff request', :schedule_early_shutoff, 'There has been an error and Admin::RulesController#new_early_shutoff has encountered nil', I18n.t('admin.shutoff_times.schedule_early.success')
+    context "when EtransactAdvancesService#schedule_early_shutoff raises an error" do
+      it 'handles the exception with the `early_shutoff_error_handler`' do
+        error_handler = -> (n, m, e) {}
+        allow(subject).to receive(:early_shutoff_error_handler).and_return(error_handler)
+        allow(etransact_service).to receive(:schedule_early_shutoff).with(anything) do |*args, &block|
+          expect(block).to be(error_handler)
+        end
         call_action
       end
     end
-    context "when EtransactAdvancesService##{service_method} does not return nil" do
-      let(:result) { double('some result') }
-      before { allow(etransact_service).to receive(service_method).and_return(result) }
+    context "when EtransactAdvancesService#schedule_early_shutoff does not raise an error" do
+      it 'calls `set_flash_message` with an empty error hash' do
+        expect(controller).to receive(:set_flash_message).with({}, anything)
+        call_action
+      end
+      it 'calls `set_flash_message` with the success message' do
+        expect(controller).to receive(:set_flash_message).with(anything, I18n.t('admin.shutoff_times.schedule_early.success'))
+        call_action
+      end
+      it 'redirects to the `rules_advance_early_shutoff_url`' do
+        call_action
+        expect(response).to redirect_to(rules_advance_early_shutoff_url)
+      end
+    end
+  end
 
-      it "calls `set_flash_message` with the result of `#{service_method}`" do
+  describe 'PUT update_early_shutoff' do
+    allow_policy :web_admin, :edit_trade_rules?
+    let(:early_shutoff_params) { SecureRandom.hex }
+    let(:etransact_service) { instance_double(EtransactAdvancesService, update_early_shutoff: {}) }
+    let(:call_action) { put :update_early_shutoff, early_shutoff_request: early_shutoff_params }
+    before do
+      allow(controller).to receive(:fetch_early_shutoff_request) do
+        controller.instance_variable_set(:@early_shutoff_request, early_shutoff_request)
+      end
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+      allow(controller).to receive(:set_flash_message)
+    end
+
+    it_behaves_like 'a RulesController action that alters the state of an early shutoff request', :update_early_shutoff, 'There has been an error and Admin::RulesController#update_early_shutoff has encountered nil', I18n.t('admin.shutoff_times.schedule_early.update_success')
+    context "when EtransactAdvancesService#update_early_shutoff raises an error" do
+      it 'handles the exception with the `early_shutoff_error_handler`' do
+        error_handler = -> (n, m, e) {}
+        allow(subject).to receive(:early_shutoff_error_handler).and_return(error_handler)
+        allow(etransact_service).to receive(:update_early_shutoff).with(anything) do |*args, &block|
+          expect(block).to be(error_handler)
+        end
+        call_action
+      end
+    end
+    context "when EtransactAdvancesService#update_early_shutoff does not raise an error" do
+      it 'calls `set_flash_message` with an empty error hash' do
+        expect(controller).to receive(:set_flash_message).with({}, anything)
+        call_action
+      end
+      it 'calls `set_flash_message` with the success message' do
+        expect(controller).to receive(:set_flash_message).with(anything, I18n.t('admin.shutoff_times.schedule_early.update_success'))
+        call_action
+      end
+      it 'redirects to the `rules_advance_early_shutoff_url`' do
+        call_action
+        expect(response).to redirect_to(rules_advance_early_shutoff_url)
+      end
+    end
+  end
+
+  describe 'DELETE remove_early_shutoff' do
+    allow_policy :web_admin, :edit_trade_rules?
+    let(:early_shutoff_params) { SecureRandom.hex }
+    let(:etransact_service) { instance_double(EtransactAdvancesService, remove_early_shutoff: {}) }
+    let(:call_action) { delete :remove_early_shutoff, early_shutoff_request: early_shutoff_params }
+    before do
+      allow(controller).to receive(:fetch_early_shutoff_request) do
+        controller.instance_variable_set(:@early_shutoff_request, early_shutoff_request)
+      end
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+      allow(controller).to receive(:set_flash_message)
+    end
+
+    it_behaves_like 'a RulesController action that alters the state of an early shutoff request', :remove_early_shutoff
+    context "when EtransactAdvancesService#remove_early_shutoff returns nil" do
+      before { allow(etransact_service).to receive(:remove_early_shutoff).and_return(nil) }
+
+      it 'calls `set_flash_message` with an error hash' do
+        expect(controller).to receive(:set_flash_message).with({error: 'There has been an error and Admin::RulesController#remove_early_shutoff has encountered nil'}, anything)
+        call_action
+      end
+    end
+    context "when EtransactAdvancesService#remove_early_shutoff does not return nil" do
+      let(:result) { double('some result') }
+      before { allow(etransact_service).to receive(:remove_early_shutoff).and_return(result) }
+
+      it "calls `set_flash_message` with the result of `remove_early_shutoff`" do
         expect(controller).to receive(:set_flash_message).with(result, anything)
         call_action
       end
     end
     it 'calls `set_flash_message` with the success message' do
-      expect(controller).to receive(:set_flash_message).with(anything, success_message)
+      expect(controller).to receive(:set_flash_message).with(anything, I18n.t('admin.shutoff_times.schedule_early.remove_success'))
       call_action
     end
     it 'redirects to the `rules_advance_early_shutoff_url`' do
       call_action
       expect(response).to redirect_to(rules_advance_early_shutoff_url)
     end
-  end
-
-  describe 'POST new_early_shutoff' do
-    let(:call_action) { post :new_early_shutoff, early_shutoff_request: early_shutoff_params }
-    it_behaves_like 'a RulesController action that alters the state of an early shutoff request', :schedule_early_shutoff, 'There has been an error and Admin::RulesController#new_early_shutoff has encountered nil', I18n.t('admin.shutoff_times.schedule_early.success')
-  end
-
-  describe 'PUT update_early_shutoff' do
-    let(:call_action) { put :update_early_shutoff, early_shutoff_request: early_shutoff_params }
-    it_behaves_like 'a RulesController action that alters the state of an early shutoff request', :update_early_shutoff, 'There has been an error and Admin::RulesController#update_early_shutoff has encountered nil', I18n.t('admin.shutoff_times.schedule_early.update_success')
-  end
-
-  describe 'DELETE remove_early_shutoff' do
-    let(:early_shutoff_date) { SecureRandom.hex }
-    let(:call_action) { delete :remove_early_shutoff, early_shutoff_request: early_shutoff_params }
-    it_behaves_like 'a RulesController action that alters the state of an early shutoff request', :remove_early_shutoff, 'There has been an error and Admin::RulesController#remove_early_shutoff has encountered nil', I18n.t('admin.shutoff_times.schedule_early.remove_success')
   end
 
   describe 'private methods' do
@@ -1933,6 +2002,45 @@ RSpec.describe Admin::RulesController, :type => :controller do
               expect(shutoff_times[:rows][1][:columns][1][:type]).to eq(:time)
             end
           end
+        end
+      end
+    end
+
+    describe '`early_shutoff_error_handler`' do
+      let(:error_handler) { subject.send(:early_shutoff_error_handler) }
+      let(:call_error_handler) { error_handler.call(error) }
+      let(:error) { double('An Error', http_body: nil) }
+      let(:request_id) { SecureRandom.hex }
+      before do
+        allow(subject).to receive(:redirect_to)
+        allow(subject).to receive(:early_shutoff_request).and_return(instance_double(EarlyShutoffRequest, id: request_id))
+      end
+
+      it 'returns a Proc' do
+        expect(error_handler).to be_kind_of(Proc)
+      end
+      it 'redirects to the `view_early_shutoff` action with the request id as a param' do
+        expect(subject).to receive(:redirect_to).with(action: :view_early_shutoff, early_shutoff_request: {id: request_id})
+        call_error_handler
+      end
+      context 'when the error has an http_body' do
+        let(:http_body_json) { {error: SecureRandom.hex}.to_json }
+        let(:http_body) { JSON.parse(http_body_json)}
+        before { allow(error).to receive(:http_body).and_return(http_body_json) }
+        it 'sets the flash message with the parsed http_body of the error' do
+          expect(subject).to receive(:set_flash_message).with(http_body)
+          call_error_handler
+        end
+      end
+      context 'when the error has no http_body' do
+        let(:action_name) { SecureRandom.hex }
+        before do
+          allow(error).to receive(:http_body).and_return(nil)
+          allow(subject).to receive(:action_name).and_return(action_name)
+        end
+        it 'sets the flash message with an error including the action_name' do
+          expect(subject).to receive(:set_flash_message).with({error: "There has been an error and Admin::RulesController##{action_name} has encountered nil"})
+          call_error_handler
         end
       end
     end
