@@ -294,6 +294,21 @@ module MAPI
             end
           end
           api do
+            key :path, '/shutoff_times_by_type'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Edits the general shutoff times for VRC and FRC advances'
+              key :nickname, :EditShutoffTimesByType
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :ShutoffTimesByType
+                key :description, 'The hash containing the frc and vrc shutoff times.'
+              end
+            end
+          end
+          api do
             key :path, '/early_shutoffs'
             operation do
               key :method, 'GET'
@@ -534,6 +549,13 @@ module MAPI
         relative_get '/shutoff_times_by_type' do
           MAPI::Services::EtransactAdvances.rescued_json_response(self) do
             MAPI::Services::EtransactAdvances::ShutoffTimes.get_shutoff_times_by_type(self)
+          end
+        end
+
+        relative_put '/shutoff_times_by_type' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            shutoff_times = JSON.parse(request.body.read)
+            {} if MAPI::Services::EtransactAdvances::ShutoffTimes.edit_shutoff_times_by_type(self, shutoff_times)
           end
         end
 

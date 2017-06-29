@@ -505,6 +505,18 @@
       height: 100px;
     }
   }
+  .input-field-container-textarea-wrapper {
+    label {
+      display: block;
+      margin: 20px 0 10px;
+      &.label-error {
+        display: none;
+      }
+    }
+  }
+}
+
+.advance-shutoff-times-typical, .advance-shutoff-times-view-early {
   .input-field-container-horizontal {
     label {
       margin-right: 0;
@@ -518,15 +530,6 @@
   }
   .dropdown-minute {
     width: 80px;
-  }
-  .input-field-container-textarea-wrapper {
-    label {
-      display: block;
-      margin: 20px 0 10px;
-      &.label-error {
-        display: none;
-      }
-    }
   }
 }
 
@@ -546,5 +549,12 @@
     td:first-child {
       width: 55%;
     }
+  }
+  input[type=submit] {
+    width: 440px;
+    margin-top: 10px;
+  }
+  .row {
+    overflow: visible;
   }
 }

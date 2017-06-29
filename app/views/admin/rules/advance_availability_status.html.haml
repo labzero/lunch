@@ -18,4 +18,4 @@
   %section
     %h2= t('admin.advance_availability.availability_status.todays_shutoff')
     =link_to(@can_edit_trade_rules ? t('admin.advance_availability.availability_status.schedule_shutoff') : t('admin.advance_availability.availability_status.view_shutoff'), rules_advance_typical_shutoff_path)
-    =render 'reports/reports_table', table_data: @typical_shutoff_times
+    =render 'reports/reports_table', table_data: @typical_shutoff_times_table

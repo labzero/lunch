@@ -119,7 +119,7 @@ When(/^I click the save changes button for the rules limits form$/) do
   page.find('.rules-limits-form input[type=submit]').click
 end
 
-Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status|early shutoff|edit early shutoff|remove early shutoff|view early shutoff) page$/) do |result, form|
+Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status|early shutoff|edit early shutoff|remove early shutoff|view early shutoff|typical shutoff) page$/) do |result, form|
   parent_selector = case form
   when 'limits'
     '.term-rules'
@@ -131,6 +131,8 @@ Then(/^I should see the (success|error) message on the (?:term rules|advance ava
     '.advance-shutoff-times-early'
   when 'view early shutoff'
     '.advance-shutoff-times-view-early'
+  when 'typical shutoff'
+    '.advance-shutoff-times-typical'
   end
   success_message = case form
   when 'early shutoff'
@@ -235,6 +237,11 @@ When(/^I click the button to confirm the scheduling of the (?:new|edited) early 
     allow_any_instance_of(RestClient::Resource).to receive(:put).and_raise(RestClient::Exception)
   end
   page.find('.rules-early-shutoff-form input[type=submit]').click
+end
+
+When(/^I click on the button to edit the typical shutoff times( but there is an error)?$/) do |error|
+  allow_any_instance_of(RestClient::Resource).to receive(:put).and_raise(RestClient::Exception) if error
+  page.find('.rules-typical-shutoff-form input[type=submit]').click
 end
 
 When(/^I click to edit the first scheduled early shutoff$/) do

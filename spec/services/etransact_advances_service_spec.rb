@@ -685,6 +685,54 @@ describe EtransactAdvancesService do
     end
   end
 
+  describe '`edit_shutoff_times_by_type`' do
+    let(:shutoff_times) {{
+      frc: instance_double(String, match: true),
+      vrc: instance_double(String, match: true)
+    }}
+    let(:call_method) { subject.edit_shutoff_times_by_type(shutoff_times) }
+
+    [:frc, :vrc].each do |attr|
+      it "checks to see if the `#{attr}` time is properly formatted" do
+        expect(shutoff_times[attr]).to receive(:match).with(EarlyShutoffRequest::TIME_24_HOUR_FORMAT)
+        call_method
+      end
+      context "when the `#{attr}` time value is not properly formatted" do
+        before { allow(shutoff_times[attr]).to receive(:match).and_return(false) }
+        it 'returns an error hash' do
+          expect(call_method).to eq({error: "shutoff times must be a 4-digit, 24-hour time representation with values between `0000` and `2359`: vrc: `#{shutoff_times[:vrc]}`, frc: `#{shutoff_times[:frc]}`"})
+        end
+      end
+    end
+    context 'when both the `frc` and `vrc` times are properly formatted' do
+      it 'calls `put_hash` with the proper name' do
+        expect(subject).to receive(:put_hash).with(:edit_shutoff_times_by_type, any_args).and_return({})
+        call_method
+      end
+      it 'calls `put_hash` with the proper endpoint' do
+        expect(subject).to receive(:put_hash).with(anything, 'etransact_advances/shutoff_times_by_type', anything).and_return({})
+        call_method
+      end
+      it 'calls `put_hash` with the shutoff_times hash' do
+        expect(subject).to receive(:put_hash).with(anything, anything, shutoff_times).and_return({})
+        call_method
+      end
+      it 'returns nil if `put_hash` returns nil' do
+        allow(subject).to receive(:put_hash).and_return(nil)
+        expect(call_method).to be nil
+      end
+      it 'returns an empty hash if `put_hash` returns an empty hash' do
+        allow(subject).to receive(:put_hash).and_return({})
+        expect(call_method).to eq({})
+      end
+      it 'returns the result of calling `put_hash`' do
+        result = double('some result')
+        allow(subject).to receive(:put_hash).and_return(result)
+        expect(call_method).to eq(result)
+      end
+    end
+  end
+
   describe '`early_shutoffs`' do
     let(:early_shutoff) { {} }
     let(:processed_early_shutoff) {{

@@ -33,7 +33,7 @@ class Admin::RulesController < Admin::BaseController
     @can_edit_trade_rules = policy(:web_admin).edit_trade_rules?
   end
 
-  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :update_advance_availability_by_member, :enable_etransact_service, :disable_etransact_service, :view_early_shutoff, :new_early_shutoff, :update_early_shutoff, :remove_early_shutoff] do
+  before_action only: [:update_limits, :update_rate_bands, :update_advance_availability_by_term, :update_advance_availability_by_member, :enable_etransact_service, :disable_etransact_service, :view_early_shutoff, :new_early_shutoff, :update_early_shutoff, :remove_early_shutoff, :edit_typical_shutoff] do
     authorize :web_admin, :edit_trade_rules?
   end
 
@@ -446,6 +446,45 @@ class Admin::RulesController < Admin::BaseController
   # GET
   def typical_shutoff
     set_typical_shutoff_table_var
+    @hour_dropdown_options = HOUR_DROPDOWN_OPTIONS
+    @minute_dropdown_options = MINUTE_DROPDOWN_OPTIONS
+    frc_hour = sprintf('%02d', @typical_shutoff_times[:frc].hour)
+    frc_minute = sprintf('%02d', @typical_shutoff_times[:frc].min)
+    vrc_hour = sprintf('%02d', @typical_shutoff_times[:vrc].hour)
+    vrc_minute = sprintf('%02d', @typical_shutoff_times[:vrc].min)
+    @dropdown_defaults = {
+      frc: {
+        hour: {
+          text: (HOUR_DROPDOWN_OPTIONS.select{ |option| option.last == frc_hour}.first.first),
+          value: frc_hour
+        },
+        minute: {
+          text: (MINUTE_DROPDOWN_OPTIONS.select{ |option| option.last == frc_minute}.first.first),
+          value: frc_minute
+        }
+      },
+      vrc: {
+        hour: {
+          text: (HOUR_DROPDOWN_OPTIONS.select{ |option| option.last == vrc_hour}.first.first),
+          value: vrc_hour
+        },
+        minute: {
+          text: (MINUTE_DROPDOWN_OPTIONS.select{ |option| option.last == vrc_minute}.first.first),
+          value: vrc_minute
+        }
+      }
+    }
+  end
+
+  # PUT
+  def edit_typical_shutoff
+    shutoff_times = {
+      vrc: params[:vrc_shutoff_time_hour] + params[:vrc_shutoff_time_minute],
+      frc: params[:frc_shutoff_time_hour] + params[:frc_shutoff_time_minute]
+    }
+    shutoff_times_result = EtransactAdvancesService.new(request).edit_shutoff_times_by_type(shutoff_times) || {error: 'There has been an error and Admin::RulesController#edit_typical_shutoff has encountered nil'}
+    set_flash_message(shutoff_times_result)
+    redirect_to action: :typical_shutoff
   end
 
   private
@@ -533,17 +572,17 @@ class Admin::RulesController < Admin::BaseController
 
   def set_typical_shutoff_table_var(etransact_service=nil)
     etransact_service ||= EtransactAdvancesService.new(request)
-    shutoff_times = etransact_service.shutoff_times_by_type
-    raise "There has been an error and Admin::RulesController##{action_name} has encountered nil" unless shutoff_times
-    @typical_shutoff_times = {
+    @typical_shutoff_times = etransact_service.shutoff_times_by_type
+    raise "There has been an error and Admin::RulesController##{action_name} has encountered nil" unless @typical_shutoff_times
+    @typical_shutoff_times_table = {
       rows: [
         {columns: [
           {value: t('admin.shutoff_times.early.vrc_terms')},
-          {value: shutoff_times[:vrc], type: :time}
+          {value: @typical_shutoff_times[:vrc], type: :time}
         ]},
         {columns: [
           {value: t('admin.shutoff_times.early.frc_terms')},
-          {value: shutoff_times[:frc], type: :time}
+          {value: @typical_shutoff_times[:frc], type: :time}
         ]}
       ]
     }

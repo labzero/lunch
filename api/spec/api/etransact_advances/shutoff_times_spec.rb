@@ -80,6 +80,91 @@ describe MAPI::ServiceApp do
         end
       end
 
+      describe '`edit_shutoff_times_by_type`' do
+        let(:sentinel) { instance_double(String, match: true) }
+        let(:shutoff_times) {{
+          vrc: instance_double(String, to_s: instance_double(String, match: true)),
+          frc: instance_double(String, to_s: instance_double(String, match: true))
+        }}
+        let(:call_method) { shutoff_times_module.edit_shutoff_times_by_type(app, shutoff_times) }
+        before { allow(shutoff_times_module).to receive(:should_fake?).and_return(true) }
+
+        [:vrc, :frc].each do |attr|
+          describe "ensuring the `#{attr}` time is properly formatted" do
+            before { allow(shutoff_times[attr]).to receive(:to_s).and_return(sentinel) }
+
+            it "ensures the `#{attr}` is a string" do
+              expect(shutoff_times[attr]).to receive(:to_s).and_return(sentinel)
+              call_method
+            end
+            it "checks to see if the `#{attr}` matches the `TIME_24_HOUR_FORMAT` format" do
+              expect(sentinel).to receive(:match).with(shutoff_times_module::TIME_24_HOUR_FORMAT).and_return(true)
+              call_method
+            end
+            it "raises an error if `#{attr}` does not match the format" do
+              allow(sentinel).to receive(:match).and_return(false)
+              expect{call_method}.to raise_error(shutoff_times_module::InvalidFieldError, "#{attr}_shutoff_time must be a 4-digit, 24-hour time representation with values between `0000` and `2359`") do |error|
+                expect(error.code).to eq(attr)
+                expect(error.value).to eq(shutoff_times[attr])
+              end
+            end
+          end
+        end
+        context 'when `should_fake?` returns true' do
+          before { allow(shutoff_times_module).to receive(:should_fake?).and_return(true) }
+          it 'returns true' do
+            expect(call_method).to be true
+          end
+        end
+        context 'when `should_fake?` returns false' do
+          before do
+            allow(shutoff_times_module).to receive(:should_fake?).and_return(false)
+            allow(shutoff_times_module).to receive(:quote)
+            allow(shutoff_times_module).to receive(:execute_sql).and_return(true)
+          end
+          it 'executes code within a transaction where the `isolation` has been set to `:read_committed`' do
+            expect(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+            call_method
+          end
+          it 'returns true if the transaction block executes without error' do
+            allow(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+            expect(call_method).to be true
+          end
+          describe 'the transaction block' do
+            let(:sentinel) { SecureRandom.hex }
+            [:vrc, :frc].each do |attr|
+              it "quotes the `#{attr}` value" do
+                expect(shutoff_times_module).to receive(:quote).with(shutoff_times[attr])
+                call_method
+              end
+              describe "the sql for updating the `#{attr}` value" do
+                it 'UPDATES the WEB_ADM.AO_TYPE_SHUTOFF table' do
+                  matcher = Regexp.new(/\A\s*UPDATE\s+WEB_ADM\.AO_TYPE_SHUTOFF\s+/im)
+                  expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                  call_method
+                end
+                it "SETs the END_TIME to the quoted `#{attr}` value" do
+                  allow(shutoff_times_module).to receive(:quote).with(shutoff_times[attr]).and_return(sentinel)
+                  matcher = Regexp.new(/\A\s*UPDATE\s+.+\s+SET\s+END_TIME\s*=\s*#{sentinel}\s+/im)
+                  expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                  call_method
+                end
+                it "updates the row WHERE the PRODUCT_TYPE is #{attr.to_s.upcase}" do
+                  matcher = Regexp.new(/\A\s*UPDATE\s+.+\s+SET\s+.+\s+WHERE\s+PRODUCT_TYPE\s*=\s*'#{attr.to_s.upcase}'\s*\z/im)
+                  expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                  call_method
+                end
+                it "raises an error if the `#{attr}` time fails to update" do
+                  matcher = Regexp.new(/\A\s*UPDATE\s+.+\s+SET\s+.+\s+WHERE\s+PRODUCT_TYPE\s*=\s*'#{attr.to_s.upcase}'\s*\z/im)
+                  allow(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(false)
+                  expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to update the #{attr.to_s.upcase} typical shutoff time to `#{shutoff_times[attr]}`")
+                end
+              end
+            end
+          end
+        end
+      end
+
       describe '`get_early_shutoffs`' do
         let(:call_method) { shutoff_times_module.get_early_shutoffs(app) }
         before { allow(shutoff_times_module).to receive(:should_fake?).and_return(true) }

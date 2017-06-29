@@ -264,6 +264,7 @@ Rails.application.routes.draw do
           put '/update-early-shutoff' => 'admin/rules#update_early_shutoff', as: :rules_advance_update_early_shutoff
           delete '/remove-early-shutoff' => 'admin/rules#remove_early_shutoff', as: :rules_advance_remove_early_shutoff
           get '/typical' => 'admin/rules#typical_shutoff', as: :rules_advance_typical_shutoff
+          put '/typical' => 'admin/rules#edit_typical_shutoff', as: :rules_advance_edit_typical_shutoff
         end
       end
       constraints Constraints::WebAdmin.new(:edit_features?) do

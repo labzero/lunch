@@ -1429,13 +1429,162 @@ RSpec.describe Admin::RulesController, :type => :controller do
   end
 
   describe 'GET typical_shutoff' do
+    let(:shutoff_times_hash) {{
+      frc: instance_double(DateTime, hour: instance_double(Integer), min: instance_double(Integer)),
+      vrc: instance_double(DateTime, hour: instance_double(Integer), min: instance_double(Integer))
+    }}
+    let(:frc_hour) { described_class::HOUR_DROPDOWN_OPTIONS.sample }
+    let(:vrc_hour) { described_class::HOUR_DROPDOWN_OPTIONS.sample }
+    let(:frc_minute) { described_class::MINUTE_DROPDOWN_OPTIONS.sample }
+    let(:vrc_minute) { described_class::MINUTE_DROPDOWN_OPTIONS.sample }
     let(:call_action) { get :typical_shutoff }
-    before { allow(controller).to receive(:set_typical_shutoff_table_var) }
+    before do
+      allow(controller).to receive(:set_typical_shutoff_table_var) { controller.instance_variable_set(:@typical_shutoff_times, shutoff_times_hash)}
+      allow(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:frc].hour).and_return(frc_hour.last)
+      allow(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:frc].min).and_return(frc_minute.last)
+      allow(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:vrc].hour).and_return(vrc_hour.last)
+      allow(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:vrc].min).and_return(vrc_minute.last)
+    end
 
     it_behaves_like 'a RulesController action with before_action methods'
     it 'calls `set_typical_shutoff_table_var`' do
       expect(controller).to receive(:set_typical_shutoff_table_var)
       call_action
+    end
+    describe 'view instance variables' do
+      it 'assigns the `HOUR_DROPDOWN_OPTIONS` array to `@hour_dropdown_options`' do
+        call_action
+        expect(assigns[:hour_dropdown_options]).to eq(described_class::HOUR_DROPDOWN_OPTIONS)
+      end
+      it 'assigns the `MINUTE_DROPDOWN_OPTIONS` array to `@minute_dropdown_options`' do
+        call_action
+        expect(assigns[:minute_dropdown_options]).to eq(described_class::MINUTE_DROPDOWN_OPTIONS)
+      end
+      describe 'the `@dropdown_defaults` hash' do
+        describe 'the `frc` subhash' do
+          describe 'the `hour` subhash' do
+            it 'has a `text` value that is equal to the first value in the HOUR_DROPDOWN_OPTIONS that matches the `frc_shutoff_time_hour` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:frc][:hour][:text]).to eq(frc_hour.first)
+            end
+            it 'calls `sprintf` with `%02d` and the frc hour value' do
+              expect(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:frc].hour).and_return(frc_hour.last)
+              call_action
+            end
+            it 'has a `value` value that is equal to the result of calling `sprintf`' do
+              allow(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:frc].hour).and_return(frc_hour.last)
+              call_action
+              expect(assigns[:dropdown_defaults][:frc][:hour][:value]).to eq(frc_hour.last)
+            end
+          end
+          describe 'the `minute` subhash' do
+            it 'has a `text` value that is equal to the first value in the MINUTE_DROPDOWN_OPTIONS that matches the `frc_shutoff_time_minute` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:frc][:minute][:text]).to eq(frc_minute.first)
+            end
+            it 'calls `sprintf` with `%02d` and the frc minute value' do
+              expect(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:frc].min).and_return(frc_minute.last)
+              call_action
+            end
+            it 'has a `value` value that is equal to the result of calling `sprintf`' do
+              allow(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:frc].min).and_return(frc_minute.last)
+              call_action
+              expect(assigns[:dropdown_defaults][:frc][:minute][:value]).to eq(frc_minute.last)
+            end
+          end
+        end
+        describe 'the `vrc` subhash' do
+          describe 'the `hour` subhash' do
+            it 'has a `text` value that is equal to the first value in the HOUR_DROPDOWN_OPTIONS that matches the `vrc_shutoff_time_hour` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:vrc][:hour][:text]).to eq(vrc_hour.first)
+            end
+            it 'calls `sprintf` with `%02d` and the vrc hour value' do
+              expect(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:vrc].hour).and_return(vrc_hour.last)
+              call_action
+            end
+            it 'has a `value` value that is equal to the result of calling `sprintf`' do
+              allow(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:vrc].hour).and_return(vrc_hour.last)
+              call_action
+              expect(assigns[:dropdown_defaults][:vrc][:hour][:value]).to eq(vrc_hour.last)
+            end
+          end
+          describe 'the `minute` subhash' do
+            it 'has a `text` value that is equal to the first value in the MINUTE_DROPDOWN_OPTIONS that matches the `vrc_shutoff_time_minute` of the early_shutoff_request' do
+              call_action
+              expect(assigns[:dropdown_defaults][:vrc][:minute][:text]).to eq(vrc_minute.first)
+            end
+            it 'calls `sprintf` with `%02d` and the vrc minute value' do
+              expect(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:vrc].min).and_return(vrc_minute.last)
+              call_action
+            end
+            it 'has a `value` value that is equal to the result of calling `sprintf`' do
+              allow(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:vrc].min).and_return(vrc_minute.last)
+              call_action
+              expect(assigns[:dropdown_defaults][:vrc][:minute][:value]).to eq(vrc_minute.last)
+            end
+          end
+        end
+      end
+    end
+  end
+  
+  describe 'PUT `edit_typical_shutoff`' do
+    allow_policy :web_admin, :edit_trade_rules?
+    let(:vrc_hour) { SecureRandom.hex }
+    let(:vrc_minute) { SecureRandom.hex }
+    let(:frc_hour) { SecureRandom.hex }
+    let(:frc_minute) { SecureRandom.hex }
+    let(:form_params) {{
+      vrc_shutoff_time_hour: vrc_hour,
+      vrc_shutoff_time_minute: vrc_minute,
+      frc_shutoff_time_hour: frc_hour,
+      frc_shutoff_time_minute: frc_minute
+    }}
+    let(:etransact_service) { instance_double(EtransactAdvancesService, edit_shutoff_times_by_type: nil)}
+    let(:call_action) { put :edit_typical_shutoff, form_params }
+    before { allow(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service) }
+
+    it_behaves_like 'a RulesController action with before_action methods'
+    it_behaves_like 'it checks the edit_trade_rules? web_admin policy'
+    it 'creates a new instance of EtransactAdvancesService with the request' do
+      expect(EtransactAdvancesService).to receive(:new).with(request).and_return(etransact_service)
+      call_action
+    end
+    it 'calls `edit_shutoff_times_by_type` on the etransact service with the early_shutoff_request' do
+      expect(etransact_service).to receive(:edit_shutoff_times_by_type)
+      call_action
+    end
+    describe 'calling `edit_shutoff_times_by_type`' do
+      it 'receives a hash with a `frc` value that joins the `vrc_shutoff_time_hour` and `vrc_shutoff_time_minute` params' do
+        expect(etransact_service).to receive(:edit_shutoff_times_by_type).with(hash_including(frc: frc_hour + frc_minute))
+        call_action
+      end
+      it 'receives a hash with a `vrc` value that joins the `vrc_shutoff_time_hour` and `vrc_shutoff_time_minute` params' do
+        expect(etransact_service).to receive(:edit_shutoff_times_by_type).with(hash_including(vrc: vrc_hour + vrc_minute))
+        call_action
+      end
+    end
+    context 'when EtransactAdvancesService#edit_shutoff_times_by_type returns nil' do
+      before { allow(etransact_service).to receive(:edit_shutoff_times_by_type).and_return(nil) }
+
+      it 'calls `set_flash_message` with an error hash' do
+        expect(controller).to receive(:set_flash_message).with({error: 'There has been an error and Admin::RulesController#edit_typical_shutoff has encountered nil'})
+        call_action
+      end
+    end
+    context 'when EtransactAdvancesService#edit_shutoff_times_by_type does not return nil' do
+      let(:result) { double('some result') }
+      before { allow(etransact_service).to receive(:edit_shutoff_times_by_type).and_return(result) }
+
+      it "calls `set_flash_message` with the result of `edit_shutoff_times_by_type`" do
+        expect(controller).to receive(:set_flash_message).with(result)
+        call_action
+      end
+    end
+    it 'redirects to the `rules_advance_typical_shutoff_url`' do
+      call_action
+      expect(response).to redirect_to(rules_advance_typical_shutoff_url)
     end
   end
 
@@ -1965,41 +2114,47 @@ RSpec.describe Admin::RulesController, :type => :controller do
         allow(etransact_service).to receive(:shutoff_times_by_type).and_return(nil)
         expect{call_method}.to raise_error("There has been an error and Admin::RulesController##{action_name} has encountered nil")
       end
-      describe 'the `@typical_shutoff_times` instance variable' do
+      describe 'setting instance variables' do
         let(:shutoff_times_hash) {{
           vrc: double('vrc shutoff time'),
           frc: double('frc shutoff time')
         }}
-        let(:shutoff_times) { call_method; assigns[:typical_shutoff_times] }
+        let(:shutoff_times) { call_method; assigns[:typical_shutoff_times_table] }
         before { allow(etransact_service).to receive(:shutoff_times_by_type).and_return(shutoff_times_hash) }
 
-        describe 'the first row' do
-          describe 'the first column' do
-            it 'has a value that is the translation string for vrc' do
-              expect(shutoff_times[:rows][0][:columns][0][:value]).to eq(I18n.t('admin.shutoff_times.early.vrc_terms'))
-            end
-          end
-          describe 'the second column' do
-            it 'has a value that is the `vrc` value of the shutoff times hash' do
-              expect(shutoff_times[:rows][0][:columns][1][:value]).to eq(shutoff_times_hash[:vrc])
-            end
-            it 'hash a type that is `:time`' do
-              expect(shutoff_times[:rows][0][:columns][1][:type]).to eq(:time)
-            end
-          end
+        it 'sets `@typical_shutoff_times` to the result of calling `shutoff_times_by_type`' do
+          call_method
+          expect(assigns[:typical_shutoff_times]).to eq(shutoff_times_hash)
         end
-        describe 'the second row' do
-          describe 'the first column' do
-            it 'has a value that is the translation string for frc' do
-              expect(shutoff_times[:rows][1][:columns][0][:value]).to eq(I18n.t('admin.shutoff_times.early.frc_terms'))
+        describe 'the `@typical_shutoff_times_table` instance variable' do
+          describe 'the first row' do
+            describe 'the first column' do
+              it 'has a value that is the translation string for vrc' do
+                expect(shutoff_times[:rows][0][:columns][0][:value]).to eq(I18n.t('admin.shutoff_times.early.vrc_terms'))
+              end
+            end
+            describe 'the second column' do
+              it 'has a value that is the `vrc` value of the shutoff times hash' do
+                expect(shutoff_times[:rows][0][:columns][1][:value]).to eq(shutoff_times_hash[:vrc])
+              end
+              it 'hash a type that is `:time`' do
+                expect(shutoff_times[:rows][0][:columns][1][:type]).to eq(:time)
+              end
             end
           end
-          describe 'the second column' do
-            it 'has a value that is the `frc` value of the shutoff times hash' do
-              expect(shutoff_times[:rows][1][:columns][1][:value]).to eq(shutoff_times_hash[:frc])
+          describe 'the second row' do
+            describe 'the first column' do
+              it 'has a value that is the translation string for frc' do
+                expect(shutoff_times[:rows][1][:columns][0][:value]).to eq(I18n.t('admin.shutoff_times.early.frc_terms'))
+              end
             end
-            it 'hash a type that is `:time`' do
-              expect(shutoff_times[:rows][1][:columns][1][:type]).to eq(:time)
+            describe 'the second column' do
+              it 'has a value that is the `frc` value of the shutoff times hash' do
+                expect(shutoff_times[:rows][1][:columns][1][:value]).to eq(shutoff_times_hash[:frc])
+              end
+              it 'hash a type that is `:time`' do
+                expect(shutoff_times[:rows][1][:columns][1][:type]).to eq(:time)
+              end
             end
           end
         end

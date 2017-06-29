@@ -22,6 +22,29 @@ module MAPI
           Hash[shutoff_times.collect {|shutoff_time| [shutoff_time['product_type'].downcase, shutoff_time['end_time']]}]
         end
 
+        def self.edit_shutoff_times_by_type(app, shutoff_times)
+          shutoff_times = shutoff_times.with_indifferent_access
+          raise InvalidFieldError.new('frc_shutoff_time must be a 4-digit, 24-hour time representation with values between `0000` and `2359`', :frc, shutoff_times[:frc]) unless shutoff_times[:frc].to_s.match(TIME_24_HOUR_FORMAT)
+          raise InvalidFieldError.new('vrc_shutoff_time must be a 4-digit, 24-hour time representation with values between `0000` and `2359`', :vrc, shutoff_times[:vrc]) unless shutoff_times[:vrc].to_s.match(TIME_24_HOUR_FORMAT)
+          unless should_fake?(app)
+            ActiveRecord::Base.transaction(isolation: :read_committed) do
+              edit_frc_shutoff_time_sql = <<-SQL
+                UPDATE WEB_ADM.AO_TYPE_SHUTOFF
+                SET END_TIME = #{quote(shutoff_times[:frc])}
+                WHERE PRODUCT_TYPE = 'FRC'
+              SQL
+              edit_vrc_shutoff_time_sql = <<-SQL
+                UPDATE WEB_ADM.AO_TYPE_SHUTOFF
+                SET END_TIME = #{quote(shutoff_times[:vrc])}
+                WHERE PRODUCT_TYPE = 'VRC'
+              SQL
+              raise MAPI::Shared::Errors::SQLError, "Failed to update the FRC typical shutoff time to `#{shutoff_times[:frc]}`" unless execute_sql(app.logger, edit_frc_shutoff_time_sql)
+              raise MAPI::Shared::Errors::SQLError, "Failed to update the VRC typical shutoff time to `#{shutoff_times[:vrc]}`" unless execute_sql(app.logger, edit_vrc_shutoff_time_sql)
+            end
+          end
+          true
+        end
+
         def self.get_early_shutoffs(app)
           early_shutoffs_query = <<-SQL
             SELECT EARLY_SHUTOFF_DATE, FRC_SHUTOFF_TIME, VRC_SHUTOFF_TIME, DAY_OF_MESSAGE, DAY_BEFORE_MESSAGE
