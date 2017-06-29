@@ -173,7 +173,8 @@ class AdvancesController < ApplicationController
     end
     populate_fetch_rates_parameters
     json = {html: render_to_string(layout: false), id: advance_request.id}
-    if feature_enabled?('add-advance-custom-term') && @future_funding_date
+    @today = Time.zone.today
+    if feature_enabled?('add-advance-custom-term')
       json[:alternate_funding_date_html] = render_to_string(partial: 'alternate_funding_date', locals: {future_funding_date: @future_funding_date}, layout: false)
     end
     render json: json
