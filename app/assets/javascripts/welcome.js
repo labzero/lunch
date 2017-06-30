@@ -8,13 +8,12 @@ $(function() {
       $memberProfileButton.removeAttr('disabled');
     });
     $memberProfileButton.click(function(e) {
-      $visitProfileField.removeAttr('disabled');
       $welcomeForm.attr('target', '_blank');
     });
     $welcomeForm.submit(function(e) {
       setTimeout(function() {
         $welcomeForm.removeAttr('target');
-        $visitProfileField.attr('disabled', 'disabled');
+        $visitProfileField.remove();
         $welcomeForm.get(0).submit();
       }, 5);
     });

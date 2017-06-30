@@ -7,4 +7,4 @@
     = submit_tag t('global.continue'), class: 'primary-button', disabled: true
     - if policy(:member_profile).show?
       = button_tag(t('welcome.view_profile'), class: 'secondary-button welcome-profile', disabled: true)
-      = hidden_field_tag(:visit_profile, true, disabled: true)
+      = hidden_field_tag(:visit_profile, true)
