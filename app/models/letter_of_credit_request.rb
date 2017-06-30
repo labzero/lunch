@@ -207,7 +207,7 @@ class LetterOfCreditRequest
   def expiration_date_before_max_term
     if expiration_date && issue_date
       fetch_member_profile
-      errors.add(:expiration_date, :after_max_term) if expiration_date > issue_date.to_date + max_term.months
+      errors.add(:expiration_date, :after_max_term) if expiration_date.to_date > issue_date.to_date + max_term.months
     end
   end
 
