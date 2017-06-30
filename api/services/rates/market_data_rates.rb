@@ -7,13 +7,13 @@ module MAPI
         include MAPI::Services::Base
         include MAPI::Shared::Constants
 
-        def self.get_market_cof_rates(environment, term, type, funding_date=nil, maturity_date=nil)
+        def self.get_market_cof_rates(environment, holidays, term, type, funding_date=nil, maturity_date=nil)
           mds_connection = MAPI::Services::Rates.init_mds_connection(environment)
           if mds_connection
             mds_connection.operations
             if term=~CUSTOM_TERM
               lookup_term = {
-                frequency: MAPI::Services::Rates.days_to_maturity(maturity_date, funding_date)[:days].to_s,
+                frequency: MAPI::Services::Rates.days_to_maturity(holidays, maturity_date, funding_date)[:days].to_s,
                 frequency_unit: 'D'
               }
             else

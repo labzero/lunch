@@ -425,8 +425,10 @@ class AdvancesController < ApplicationController
 
 
   def days_to_maturity(maturity_date, funding_date=nil)
+    calendar_service = CalendarService.new(request)
     today = Time.zone.today
-    days_to_maturity = (maturity_date.to_date - (funding_date || today).to_date).to_i
+    number_of_weekends_holidays = calendar_service.number_of_weekend_and_holiday_days((funding_date || today).to_date, maturity_date)
+    days_to_maturity = (maturity_date.to_date - (funding_date || today).to_date).to_i - number_of_weekends_holidays
     {
       days: days_to_maturity,
       term: (days_to_maturity.to_s + 'day').to_sym

@@ -101,4 +101,23 @@ describe CalendarService do
       call_method
     end
   end
+
+  describe 'the `number_of_weekend_and_holiday_days` method' do
+    let(:start_date) {  Time.zone.today  }
+    let(:end_date) {  Time.zone.today + rand(5..10).days }
+    let(:call_method) { subject.number_of_weekend_and_holiday_days(start_date, end_date) }
+    let(:holiday) { Time.zone.today + rand(3..4).days }
+    let(:number_of_weekends) { (start_date..end_date).to_a.select {|k| [0,6].include?(k.wday)} }
+    before do
+      allow(subject).to receive(:holidays).with(start_date, end_date).and_return([holiday])
+    end
+    it 'calls holidays' do
+      expect(subject).to receive(:holidays).with(start_date, end_date)
+      call_method
+    end
+    it 'returns the number of weekend and holiday days' do
+      number_of_holidays = (holiday.saturday? || holiday.sunday?) ? 0 : 1
+      expect(call_method).to eq(number_of_weekends.count() + number_of_holidays)
+    end
+  end
 end
