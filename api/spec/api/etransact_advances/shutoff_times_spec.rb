@@ -4,7 +4,7 @@ describe MAPI::ServiceApp do
   include ActionView::Helpers::NumberHelper
   describe 'MAPI::Services::EtransactAdvances::ShutoffTimes' do
     shutoff_times_module = MAPI::Services::EtransactAdvances::ShutoffTimes
-    let(:app) { instance_double(MAPI::ServiceApp, logger: double('logger')) }
+    let(:app) { instance_double(MAPI::ServiceApp, logger: double('logger', error: nil)) }
     let(:today) { Time.zone.today }
 
     before { allow(Time.zone).to receive(:today).and_return(today) }
@@ -301,33 +301,50 @@ describe MAPI::ServiceApp do
           let(:call_method) { shutoff_times_module.schedule_early_shutoff(app, early_shutoff) }
           before do
             allow(shutoff_times_module).to receive(:should_fake?).and_return(false)
-            allow(shutoff_times_module).to receive(:execute_sql).and_return(true)
+            allow(ActiveRecord::Base.connection).to receive(:execute).and_return(true)
             allow(shutoff_times_module).to receive(:quote)
           end
-          it 'returns true if `execute_sql` is successful' do
-            expect(call_method).to be true
+          context 'when `ActiveRecord::Base.connection.execute` does not raise an error' do
+            it 'returns true' do
+              expect(call_method).to be true
+            end
           end
-          it 'raises an error containing the `early_shutoff_date` if `execute_sql` is nil' do
-            allow(shutoff_times_module).to receive(:execute_sql).and_return(nil)
-            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to schedule the early shutoff for date: #{early_shutoff[:early_shutoff_date]}")
+          context 'when `ActiveRecord::Base.connection.execute` raises an ActiveRecord::RecordNotUnique error' do
+            let(:error_message) { SecureRandom.hex }
+            before { allow(ActiveRecord::Base.connection).to receive(:execute).and_raise(ActiveRecord::RecordNotUnique.new(error_message)) }
+
+            it 'logs the error message' do
+              expect(app.logger).to receive(:error).with(error_message)
+              expect{call_method}.to raise_error(shutoff_times_module::DuplicateFieldError) {}
+            end
+            it 'raises a `DuplicateFieldError` with the early_shutoff_date' do
+              expect{call_method}.to raise_error(shutoff_times_module::DuplicateFieldError) do |error|
+                expect(error.code).to eq(:early_shutoff_date)
+                expect(error.value).to eq(early_shutoff[:early_shutoff_date])
+              end
+            end
           end
-          it 'raises an error containing the `early_shutoff_date` if `execute_sql` is false' do
-            allow(shutoff_times_module).to receive(:execute_sql).and_return(false)
-            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to schedule the early shutoff for date: #{early_shutoff[:early_shutoff_date]}")
+          context 'when `ActiveRecord::Base.connection.execute` raises an error that is not an ActiveRecord::RecordNotUnique error' do
+            let(:error_message) { SecureRandom.hex }
+            before { allow(ActiveRecord::Base.connection).to receive(:execute).and_raise(ActiveRecord::StatementInvalid.new(error_message)) }
+
+            it 'logs the error message' do
+              expect(app.logger).to receive(:error).with(error_message)
+              expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError)
+            end
+            it 'raises a `MAPI::Shared::Errors::SQLError` with the early_shutoff_date' do
+              expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to schedule the early shutoff for date: #{early_shutoff[:early_shutoff_date]}")
+            end
           end
-          it 'calls `execute_sql` with the logger' do
-            expect(shutoff_times_module).to receive(:execute_sql).with(app.logger, anything).and_return(true)
-            call_method
-          end
-          describe 'the SQL passed to `execute_sql`' do
+          describe 'the SQL passed to `ActiveRecord::Base.connection.execute`' do
             it 'INSERTs INTO the WEB_ADM.AO_TYPE_EARLY_SHUTOFF table' do
               matcher = Regexp.new(/\A\s*INSERT\s+INTO\s+WEB_ADM\.AO_TYPE_EARLY_SHUTOFF\s+/im)
-              expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(true)
               call_method
             end
             it 'calls out the fields in which to insert the values in the correct order' do
               matcher = Regexp.new(/\A\s*INSERT\s+INTO\s+WEB_ADM\.AO_TYPE_EARLY_SHUTOFF\s+\(\s+EARLY_SHUTOFF_DATE\s*,\s*FRC_SHUTOFF_TIME\s*,\s*VRC_SHUTOFF_TIME\s*,\s*DAY_OF_MESSAGE\s*,\s*DAY_BEFORE_MESSAGE\s*\)/im)
-              expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(true)
               call_method
             end
             %i(early_shutoff_date frc_shutoff_time vrc_shutoff_time day_of_message day_before_message).each do |attribute|
@@ -341,7 +358,7 @@ describe MAPI::ServiceApp do
                 allow(shutoff_times_module).to receive(:quote).with(value).and_return(quoted_values[key])
               end
               matcher = Regexp.new(/\A\s*INSERT.+VALUES\s*\(\s*TO_DATE\s*\(\s*#{quoted_values[:early_shutoff_date]}\s*,\s*'YYYY-MM-DD'\s*\)\s*,\s*#{quoted_values[:frc_shutoff_time]}\s*,\s*#{quoted_values[:vrc_shutoff_time]}\s*,\s*#{quoted_values[:day_of_message]}\s*,\s*#{quoted_values[:day_before_message]}\s*\)\s*\z/im)
-              expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(true)
               call_method
             end
           end

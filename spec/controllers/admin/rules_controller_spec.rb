@@ -1870,6 +1870,22 @@ RSpec.describe Admin::RulesController, :type => :controller do
           expect(flash[:notice]).to eq(success_message)
         end
       end
+      context 'when a result set with an error hash is passed' do
+        context 'when the error `type` is `duplicate`' do
+          let(:call_method) { subject.send(:set_flash_message, {error: {type: 'duplicate'}}) }
+          it 'sets the `flash[:error]` message to the duplicate error message' do
+            call_method
+            expect(flash[:error]).to eq(I18n.t('admin.shutoff_times.schedule_early.duplicate_error'))
+          end
+        end
+        context 'when the error `type` is not `duplicate`' do
+          let(:call_method) { subject.send(:set_flash_message, {error: {type: 'invalid'}}) }
+          it 'sets the `flash[:error]` message to the generic error message' do
+            call_method
+            expect(flash[:error]).to eq(I18n.t('admin.term_rules.messages.error'))
+          end
+        end
+      end
     end
 
     describe '`process_rate_summary`' do

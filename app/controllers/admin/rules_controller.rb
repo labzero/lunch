@@ -493,7 +493,12 @@ class Admin::RulesController < Admin::BaseController
     errors = Array.wrap(results).collect{ |result| result[:error] }.compact
     if errors.present?
       errors.each { |error| logger.error(error) }
-      flash[:error] = t('admin.term_rules.messages.error')
+      error_message = if errors.first.is_a?(Hash) && errors.first[:type].to_sym == :duplicate
+        t('admin.shutoff_times.schedule_early.duplicate_error')
+      else
+        t('admin.term_rules.messages.error')
+      end
+      flash[:error] = error_message
     else
       flash[:notice] = success_message || t('admin.term_rules.messages.success')
     end

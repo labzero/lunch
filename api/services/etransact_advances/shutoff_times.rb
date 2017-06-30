@@ -82,8 +82,15 @@ module MAPI
                 #{quote(shutoff[:day_before_message])}
               )
             SQL
-            # TODO - this is already catching duplicate date entries, as that's where the unique constraint lies on the table, but you need to explicitly check for this as part of MEM-2373
-            raise MAPI::Shared::Errors::SQLError, "Failed to schedule the early shutoff for date: #{shutoff[:early_shutoff_date]}" unless execute_sql(app.logger, add_early_shutoff_sql)
+            begin
+              ActiveRecord::Base.connection.execute(add_early_shutoff_sql)
+            rescue ActiveRecord::RecordNotUnique => e
+              app.logger.error(e.message)
+              raise DuplicateFieldError.new('An early shutoff is already scheduled for this date', :early_shutoff_date, shutoff[:early_shutoff_date])
+            rescue => e
+              app.logger.error(e.message)
+              raise MAPI::Shared::Errors::SQLError, "Failed to schedule the early shutoff for date: #{shutoff[:early_shutoff_date]}"
+            end
           end
           true
         end

@@ -3446,6 +3446,7 @@ en:
         success: Your new early shutoff has been scheduled.
         update_success: Your early shutoff has been updated.
         remove_success: The early shutoff has been removed.
+        duplicate_error: "An early shutoff is already scheduled for this date.\nPlease choose a new date and try again"
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

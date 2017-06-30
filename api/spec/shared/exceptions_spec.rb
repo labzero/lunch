@@ -34,6 +34,15 @@ describe InvalidFieldError do
   end
 end
 
+describe DuplicateFieldError do
+  subject { DuplicateFieldError }
+  let(:message) { SecureRandom.hex }
+
+  it 'has a `type` set to `duplicate`' do
+    expect(subject.new(message).type).to eq(:duplicate)
+  end
+end
+
 describe CustomTypedFieldError do
   subject { CustomTypedFieldError }
   let(:message) { SecureRandom.hex }
