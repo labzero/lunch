@@ -226,6 +226,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         end
       end
       context 'when there is both an issue_date and an expiration_date' do
+        let(:ducktyped_date) { double('date') }
         let(:max_term) { double('max term', months: 12.months) }
         before do
           subject.expiration_date = expiration_date
@@ -234,6 +235,16 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         end
         it 'calls `fetch_member_profile`' do
           expect(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@max_term', max_term) }
+          call_validator
+        end
+        it 'ensures the expiration date is a date' do
+          subject.expiration_date = ducktyped_date
+          expect(ducktyped_date).to receive(:to_date).and_return(expiration_date)
+          call_validator
+        end
+        it 'ensures the issue date is a date' do
+          subject.issue_date = ducktyped_date
+          expect(ducktyped_date).to receive(:to_date).and_return(expiration_date)
           call_validator
         end
         it 'does not add an error if the expiration date is less than max_term number of months from the issue_date' do
