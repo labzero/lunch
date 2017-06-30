@@ -1548,7 +1548,7 @@ en:
     member_not_set_up_html: You must have a pledge and/or safekeeping account set up to submit this request. Contact <a href=%{email}>Securities Services</a> at %{phone}.
   letters_of_credit:
     title: Letters of Credit
-    contact: 'If you need assistance or wish to request a different type of letter of credit, call or email:'
+    contact: 'If you need assistance or want to request a different type of letter of credit, including a Variable Balance Letter of Credit, call or email:'
     manage:
       title: Manage Letters of Credit
       request: Request letter of credit
@@ -1557,15 +1557,15 @@ en:
       not_authorized: 'Your institution is not authorized to request a Letter of Credit. A <a href="%{url}">Letter of Credit Reimbursement Agreement</a> must be on file.'
     request:
       title: Request Letter of Credit
-      support_html: "The member portal only supports requests for Public Unit Deposit letters of credit. For other requests, contact your Relationship Manager: %{rm_email}, %{rm_phone_number}. If your request is not received by 11:00 am, your request will not be processed until the following business day."
-      public_unit: Public Unit Deposit Request
+      support: "The member portal only supports requests for standard Letters of Credit collateralizing public unit deposits. If your request is not received by 10:00 am, your request will not be processed until the following business day."
+      public_unit: Letter of Credit Request Public Unit Deposit
       beneficiary: Beneficiary
       amount: Amount
       attention: Attention
       attention_html: "Attention <span>(optional)</span>"
       fees:
         title: Fees
-        explanation: 'Based on the request details input above, the following fees will be applied:'
+        explanation: 'Based on your request, the following fees will be applied:'
         issuance_fee: Issuance Fee
         maintenance_fee: Annual Maintenance Fee
         footnote: The Issuance Fee will be charged to your Settlement/Transaction Account (STA) on the effective date of the Letter of Credit. The Annual Maintenance Fee is subject to a minimum annual fee of $500 and is charged to your STA monthly in advance.
