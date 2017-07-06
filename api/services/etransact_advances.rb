@@ -294,6 +294,21 @@ module MAPI
             end
           end
           api do
+            key :path, '/shutoff_times_by_type'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Edits the general shutoff times for VRC and FRC advances'
+              key :nickname, :EditShutoffTimesByType
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :ShutoffTimesByType
+                key :description, 'The hash containing the frc and vrc shutoff times.'
+              end
+            end
+          end
+          api do
             key :path, '/early_shutoffs'
             operation do
               key :method, 'GET'
@@ -334,6 +349,22 @@ module MAPI
                 key :required, true
                 key :type, :EarlyShutoff
                 key :description, 'The hash containing all relevant data for the early shutoff to be updated.'
+              end
+            end
+          end
+          api do
+            key :path, '/early_shutoff/{shutoff_date}'
+            operation do
+              key :method, 'DELETE'
+              key :summary, 'Delete an early shutoff for a given date'
+              key :nickname, :RemoveEarlyShutoff
+              parameter do
+                key :paramType, :path
+                key :name, :shutoff_date
+                key :required, true
+                key :type, :string
+                key :description, 'The iso8601-formatted shutoff date to be deleted.'
+                key :notes, 'Format is YYYY-MM-DD'
               end
             end
           end
@@ -521,6 +552,13 @@ module MAPI
           end
         end
 
+        relative_put '/shutoff_times_by_type' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            shutoff_times = JSON.parse(request.body.read)
+            {} if MAPI::Services::EtransactAdvances::ShutoffTimes.edit_shutoff_times_by_type(self, shutoff_times)
+          end
+        end
+
         relative_get '/early_shutoffs' do
           MAPI::Services::EtransactAdvances.rescued_json_response(self) do
             MAPI::Services::EtransactAdvances::ShutoffTimes.get_early_shutoffs(self)
@@ -538,6 +576,12 @@ module MAPI
           MAPI::Services::EtransactAdvances.rescued_json_response(self) do
             early_shutoff = JSON.parse(request.body.read)
             {} if MAPI::Services::EtransactAdvances::ShutoffTimes.update_early_shutoff(self, early_shutoff)
+          end
+        end
+
+        relative_delete '/early_shutoff/:shutoff_date' do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            {} if MAPI::Services::EtransactAdvances::ShutoffTimes.remove_early_shutoff(self, params[:shutoff_date])
           end
         end
       end

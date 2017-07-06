@@ -1,2 +1,16 @@
 =render layout: 'shutoff_times', locals: {active_nav: :advance_typical_shutoff, classes: 'advance-shutoff-times-typical'} do
   %section
+    - if @can_edit_trade_rules
+      =form_tag(rules_advance_edit_typical_shutoff_path, {class: 'rules-typical-shutoff-form', method: :put}) do
+        .form-fields-section-column-2
+          .input-field-container-horizontal
+            %label= t('admin.shutoff_times.early.vrc_terms')
+            = render 'shared/dropdown', dropdown_name: 'vrc_shutoff_time_hour', default_value: @dropdown_defaults[:vrc][:hour][:value], default_text: @dropdown_defaults[:vrc][:hour][:text], dropdown_options: @hour_dropdown_options, classes: 'dropdown-hour'
+            = render 'shared/dropdown', dropdown_name: 'vrc_shutoff_time_minute', default_value: @dropdown_defaults[:vrc][:minute][:value], default_text: @dropdown_defaults[:vrc][:minute][:text], dropdown_options: @minute_dropdown_options, classes: 'dropdown-minute'
+          .input-field-container-horizontal
+            %label= t('admin.shutoff_times.early.frc_terms')
+            = render 'shared/dropdown', dropdown_name: 'frc_shutoff_time_hour', default_value: @dropdown_defaults[:frc][:hour][:value], default_text: @dropdown_defaults[:frc][:hour][:text], dropdown_options: @hour_dropdown_options, classes: 'dropdown-hour'
+            = render 'shared/dropdown', dropdown_name: 'frc_shutoff_time_minute', default_value: @dropdown_defaults[:frc][:minute][:value], default_text: @dropdown_defaults[:frc][:minute][:text], dropdown_options: @minute_dropdown_options, classes: 'dropdown-minute'
+        =submit_tag(t('admin.term_rules.save'), class: 'primary-button')
+    - else
+      =render 'reports/reports_table', table_data: @typical_shutoff_times_table

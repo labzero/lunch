@@ -16,15 +16,8 @@ Then(/^I should be on the (term rules limits|end of day shutoff) page$/) do |rul
   page.assert_selector('.admin h1', text: title, exact: true)
 end
 
-Then(/^the (term rules|add advance availability|end of day shutoff) (daily limits|status|by term|by member|rate bands|rate report|term details|early shutoffs) tab should be active$/) do |page_selector, active_nav|
-  page_selector = case page_selector
-  when 'term rules'
-    '.term-rules'
-  when 'add advance availability'
-    '.advance-availability'
-  when 'end of day shutoff'
-    '.advance-shutoff-times'
-  end
+Then(/^the (term rules|add advance availability|end of day shutoff) (daily limits|status|by term|by member|rate bands|rate report|term details|early shutoffs|typical shutoffs) tab should be active$/) do |rules_section, active_nav|
+  page_selector = css_selector_from_rules_section(rules_section)
   nav_text = translate_tab_title(active_nav)
   page.assert_selector("#{page_selector} .tabbed-content nav .active-tab", text: nav_text, exact: true)
 end
@@ -41,13 +34,8 @@ Then(/^I should be on the add advance availability (status|by term|by member) pa
   page.assert_selector(selector)
 end
 
-When(/^I click on the (term rules|add advance availability) (daily limits|status|by term|by member|rate bands|rate report|term details) tab$/) do |page_selector, active_nav|
-  page_selector = case page_selector
-  when 'term rules'
-    '.term-rules'
-  when 'add advance availability'
-    '.advance-availability'
-  end
+When(/^I click on the (term rules|add advance availability|end of day shutoff) (daily limits|status|by term|by member|rate bands|rate report|term details|typical shutoffs) tab$/) do |rules_section, active_nav|
+  page_selector = css_selector_from_rules_section(rules_section)
   nav_text = translate_tab_title(active_nav)
   page.find("#{page_selector} .tabbed-content nav a", text: nav_text, exact: true).click
 end
@@ -98,6 +86,16 @@ Then(/^I should see the end of day shutoff early shutoffs page in its (view-only
   end
 end
 
+Then(/^I should see the end of day shutoff typical shutoffs page in its (view-only|editable) mode$/) do |mode|
+  if mode == 'view-only'
+    page.assert_no_selector('.rules-typical-shutoff-form')
+    page.assert_selector('.advance-shutoff-times-typical table')
+  else
+    page.assert_selector('.rules-typical-shutoff-form')
+    page.assert_no_selector('.advance-shutoff-times-typical table')
+  end
+end
+
 Then(/^I should see the advance availabiltiy status page in its (view-only|editable) mode$/) do |mode|
   if mode == 'view-only'
     page.assert_no_selector('.advance-availability-status section:first-of-type a')
@@ -121,7 +119,7 @@ When(/^I click the save changes button for the rules limits form$/) do
   page.find('.rules-limits-form input[type=submit]').click
 end
 
-Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status|early shutoff|edit early shutoff) page$/) do |result, form|
+Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status|early shutoff|edit early shutoff|remove early shutoff|view early shutoff|typical shutoff) page$/) do |result, form|
   parent_selector = case form
   when 'limits'
     '.term-rules'
@@ -131,12 +129,18 @@ Then(/^I should see the (success|error) message on the (?:term rules|advance ava
     '.advance-availability-status'
   when 'early shutoff'
     '.advance-shutoff-times-early'
+  when 'view early shutoff'
+    '.advance-shutoff-times-view-early'
+  when 'typical shutoff'
+    '.advance-shutoff-times-typical'
   end
   success_message = case form
   when 'early shutoff'
     I18n.t('admin.shutoff_times.schedule_early.success')
   when 'edit early shutoff'
     I18n.t('admin.shutoff_times.schedule_early.update_success')
+  when 'remove early shutoff'
+    I18n.t('admin.shutoff_times.schedule_early.remove_success')
   else
     I18n.t('admin.term_rules.messages.success')
   end
@@ -202,8 +206,13 @@ When(/^I submit the form for advance availability by member and there is an erro
   step 'I submit the form for advance availability by member'
 end
 
-Then(/^I should see the table of scheduled early shutoffs$/) do
-  page.assert_selector('.advance-shutoff-times-early table')
+Then(/^I should see the table of (scheduled early|typical) shutoffs$/) do |shutoff_type|
+  parent_selector = if shutoff_type == 'scheduled early'
+    '.advance-shutoff-times-early'
+  else
+    '.advance-shutoff-times-typical'
+  end
+  page.assert_selector("#{parent_selector} table")
 end
 
 When(/^I visit the admin early shutoff summary page$/) do
@@ -224,10 +233,15 @@ end
 
 When(/^I click the button to confirm the scheduling of the (?:new|edited) early shutoff( but there is an error)?$/) do |error|
   if error
-    allow_any_instance_of(EtransactAdvancesService).to receive(:schedule_early_shutoff).and_return({error: 'some error message'})
-    allow_any_instance_of(EtransactAdvancesService).to receive(:update_early_shutoff).and_return({error: 'some error message'})
+    allow_any_instance_of(RestClient::Resource).to receive(:post).and_raise(RestClient::Exception)
+    allow_any_instance_of(RestClient::Resource).to receive(:put).and_raise(RestClient::Exception)
   end
   page.find('.rules-early-shutoff-form input[type=submit]').click
+end
+
+When(/^I click on the button to edit the typical shutoff times( but there is an error)?$/) do |error|
+  allow_any_instance_of(RestClient::Resource).to receive(:put).and_raise(RestClient::Exception) if error
+  page.find('.rules-typical-shutoff-form input[type=submit]').click
 end
 
 When(/^I click to edit the first scheduled early shutoff$/) do
@@ -235,6 +249,11 @@ When(/^I click to edit the first scheduled early shutoff$/) do
   @early_shutoff_id
   @early_shutoff_date = Date.strptime(first_row.find('td:first-child').text, '%m/%d/%Y')
   first_row.find('td:last-child a', text: /\A#{I18n.t('global.edit')}\z/i).click
+end
+
+When(/^I click to remove the first scheduled early shutoff( but there is an error)?$/) do |error|
+  allow_any_instance_of(RestClient::Resource).to receive(:delete).and_raise(RestClient::Exception) if error
+  page.find('.advance-shutoff-times-early table tbody tr:first-child td:last-child a', text: /\A#{I18n.t('global.remove')}\z/i).click
 end
 
 Then(/^I should be on the edit page for that early shutoff$/) do
@@ -258,7 +277,9 @@ def translate_tab_title(nav)
   when 'term details'
       I18n.t('admin.term_rules.nav.term_details')
   when 'early shutoffs'
-    t('admin.shutoff_times.nav.early')
+    I18n.t('admin.shutoff_times.nav.early')
+  when 'typical shutoffs'
+    I18n.t('admin.shutoff_times.nav.typical')
   end
 end
 
@@ -283,5 +304,16 @@ def filter_to_text(filter)
     I18n.t('admin.advance_availability.availability_by_member.filter.enabled')
   when 'disabled'
     I18n.t('admin.advance_availability.availability_by_member.filter.disabled')
+  end
+end
+
+def css_selector_from_rules_section(rules_section)
+  case rules_section
+    when 'term rules'
+      '.term-rules'
+    when 'add advance availability'
+      '.advance-availability'
+    when 'end of day shutoff'
+      '.advance-shutoff-times'
   end
 end

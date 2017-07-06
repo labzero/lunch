@@ -2,7 +2,7 @@
   =form_tag(rules_update_advance_availability_by_term_path, {class: 'rules-availability-by-term-form', method: :put}) do
     =render 'availability_by_term_form_actions' if @can_edit_trade_rules
     %section.rules-availability-by-term-headings
-      =render 'reports/reports_table', table_data: @availability_headings
+      =render 'reports/reports_table', table_data: @availability_headings, sortable: false
     %section.rules-availability-by-term-vrc
       %h2= t('advances.vrc_rates')
       =render 'availability_by_term_select_actions', parent_class: 'rules-availability-by-term-vrc' if @can_edit_trade_rules

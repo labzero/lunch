@@ -204,7 +204,6 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
     describe '`expiration_date_before_max_term`' do
       let(:issue_date) { today }
       let(:expiration_date) { today + rand(12..36).months }
-      let(:max_term) { double('max term', months: 12.months) }
       let(:call_validator) { subject.send(:expiration_date_before_max_term) }
       context 'when there is an issue_date' do
         before do
@@ -227,6 +226,8 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         end
       end
       context 'when there is both an issue_date and an expiration_date' do
+        let(:ducktyped_date) { double('date') }
+        let(:max_term) { double('max term', months: 12.months) }
         before do
           subject.expiration_date = expiration_date
           subject.issue_date = issue_date
@@ -236,13 +237,28 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
           expect(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@max_term', max_term) }
           call_validator
         end
-        it 'does not add an error if time span between the issue_date and expiration_date is less than the max_term in months' do
-          allow(max_term).to receive(:months).and_return(120.months)
+        it 'ensures the expiration date is a date' do
+          subject.expiration_date = ducktyped_date
+          expect(ducktyped_date).to receive(:to_date).and_return(expiration_date)
+          call_validator
+        end
+        it 'ensures the issue date is a date' do
+          subject.issue_date = ducktyped_date
+          expect(ducktyped_date).to receive(:to_date).and_return(expiration_date)
+          call_validator
+        end
+        it 'does not add an error if the expiration date is less than max_term number of months from the issue_date' do
+          subject.expiration_date = (issue_date + max_term.months) - 1.day
           expect(subject.errors).not_to receive(:add).with(:expiration_date, :after_max_term)
           call_validator
         end
-        it 'adds an error if time span between the issue_date and expiration_date is more than the max_term in months' do
-          allow(max_term).to receive(:months).and_return(6.months)
+        it 'does not add an error if the expiration date is equal to the max_term number of months from the issue_date' do
+          subject.expiration_date = issue_date + max_term.months
+          expect(subject.errors).not_to receive(:add).with(:expiration_date, :after_max_term)
+          call_validator
+        end
+        it 'adds an error if the expiration date is greater than the max_term number of months from the issue_date' do
+          subject.expiration_date = (issue_date + max_term.months) + 1.day
           expect(subject.errors).to receive(:add).with(:expiration_date, :after_max_term)
           call_validator
         end
@@ -521,8 +537,9 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       end
       date_attrs.each do |key|
         it "assigns a datefied value found under `#{key}` to the attribute `#{key}`" do
-          datefied_value = instance_double(DateTime)
-          allow(DateTime).to receive(:parse).with(value).and_return(datefied_value)
+          datefied_value = instance_double(ActiveSupport::TimeWithZone)
+          allow(Time.zone).to receive(:parse).and_call_original
+          allow(Time.zone).to receive(:parse).with(value).and_return(datefied_value)
           hash[key.to_s] = value
           call_method
           expect(subject.send(key)).to be(datefied_value)

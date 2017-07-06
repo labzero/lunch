@@ -22,10 +22,6 @@
 .limits, .advance-availability, .advance-shutoff-times {
   .form-error-section, .form-success-section {
     margin-top: 0;
-    p {
-      display: inline-block;
-      vertical-align: middle;
-    }
   }
 }
 
@@ -452,8 +448,7 @@
         }
       }
       &:nth-child(4) {
-        span, a {
-          @extend %link-style;
+        a {
           text-transform: uppercase;
           &:first-child {
             float: left;
@@ -510,6 +505,18 @@
       height: 100px;
     }
   }
+  .input-field-container-textarea-wrapper {
+    label {
+      display: block;
+      margin: 20px 0 10px;
+      &.label-error {
+        display: none;
+      }
+    }
+  }
+}
+
+.advance-shutoff-times-typical, .advance-shutoff-times-view-early {
   .input-field-container-horizontal {
     label {
       margin-right: 0;
@@ -524,15 +531,6 @@
   .dropdown-minute {
     width: 80px;
   }
-  .input-field-container-textarea-wrapper {
-    label {
-      display: block;
-      margin: 20px 0 10px;
-      &.label-error {
-        display: none;
-      }
-    }
-  }
 }
 
 .rules-early-shutoff-form-actions {
@@ -541,5 +539,22 @@
   }
   .primary-button {
     margin-left: 20px;
+  }
+}
+
+.advance-shutoff-times-typical {
+  @extend %table-row-headers;
+  table {
+    width: 275px;
+    td:first-child {
+      width: 55%;
+    }
+  }
+  input[type=submit] {
+    width: 440px;
+    margin-top: 10px;
+  }
+  .row {
+    overflow: visible;
   }
 }

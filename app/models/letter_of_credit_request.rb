@@ -67,7 +67,7 @@ class LetterOfCreditRequest
       when *READ_ONLY_ATTRS
         instance_variable_set("@#{key}", value)
       when *DATE_ATTRS
-        value = DateTime.parse(value) if value
+        value = Time.zone.parse(value) if value
         send("#{key}=", value)
       when *ACCESSIBLE_ATTRS
         send("#{key}=", value)
@@ -207,8 +207,7 @@ class LetterOfCreditRequest
   def expiration_date_before_max_term
     if expiration_date && issue_date
       fetch_member_profile
-      term = (expiration_date.to_date - issue_date.to_date).to_i
-      errors.add(:expiration_date, :after_max_term) unless term.days <= max_term.months
+      errors.add(:expiration_date, :after_max_term) if expiration_date.to_date > issue_date.to_date + max_term.months
     end
   end
 

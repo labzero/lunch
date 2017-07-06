@@ -522,6 +522,10 @@ RSpec.describe AdvancesController, :type => :controller do
       expect(subject).to receive(:populate_fetch_rates_parameters)
       make_request
     end
+    it 'assigns @today to Today' do
+      make_request
+      expect(assigns[:today]).to eq(today)
+    end
     describe 'when the `add-advance-custom-term` feature is enabled' do
       before do
         allow(controller).to receive(:feature_enabled?).and_call_original

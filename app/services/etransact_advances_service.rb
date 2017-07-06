@@ -165,18 +165,35 @@ class EtransactAdvancesService < MAPIService
     end
   end
 
+  def edit_shutoff_times_by_type(shutoff_times)
+    shutoff_times = shutoff_times.with_indifferent_access
+    if shutoff_times[:vrc].match(EarlyShutoffRequest::TIME_24_HOUR_FORMAT) && shutoff_times[:frc].match(EarlyShutoffRequest::TIME_24_HOUR_FORMAT)
+      put_hash(:edit_shutoff_times_by_type, 'etransact_advances/shutoff_times_by_type', shutoff_times)
+    else
+      {error: "shutoff times must be a 4-digit, 24-hour time representation with values between `0000` and `2359`: vrc: `#{shutoff_times[:vrc]}`, frc: `#{shutoff_times[:frc]}`"}
+    end
+  end
+
   def early_shutoffs
     if early_shutoffs = get_hashes(:early_shutoffs, 'etransact_advances/early_shutoffs')
       early_shutoffs.each { |early_shutoff| fix_date(early_shutoff, :early_shutoff_date) }
     end
   end
 
-  def schedule_early_shutoff(early_shutoff)
-    post_hash(:schedule_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash(early_shutoff))
+  def schedule_early_shutoff(early_shutoff, &error_handler)
+    post_hash(:schedule_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash(early_shutoff)) do |name, msg, err|
+      error_handler.call(err) if error_handler
+    end
   end
 
-  def update_early_shutoff(early_shutoff)
-    put_hash(:update_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash(early_shutoff))
+  def update_early_shutoff(early_shutoff, &error_handler)
+    put_hash(:update_early_shutoff, 'etransact_advances/early_shutoff', shutoff_hash(early_shutoff)) do |name, msg, err|
+      error_handler.call(err) if error_handler
+    end
+  end
+
+  def remove_early_shutoff(early_shutoff)
+    delete_hash(:remove_early_shutoff, "etransact_advances/early_shutoff/#{early_shutoff.early_shutoff_date}")
   end
 
   def enable_etransact_service

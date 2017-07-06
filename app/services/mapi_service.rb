@@ -116,6 +116,14 @@ class MAPIService
     parse(name, get(name, endpoint, params, &error_handler), &error_handler)
   end
 
+  def delete_json(name, endpoint, params={}, &error_handler)
+    parse(name, delete(name, endpoint, params, &error_handler), &error_handler)
+  end
+
+  def delete_hash(name, endpoint, params={}, &error_handler)
+    delete_json(name, endpoint, params, &error_handler).try(:with_indifferent_access)
+  end
+
   def post_hash(name, endpoint, body, &error_handler)
     post_json(name, endpoint, body, &error_handler).try(:with_indifferent_access)
   end

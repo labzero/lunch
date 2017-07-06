@@ -685,6 +685,54 @@ describe EtransactAdvancesService do
     end
   end
 
+  describe '`edit_shutoff_times_by_type`' do
+    let(:shutoff_times) {{
+      frc: instance_double(String, match: true),
+      vrc: instance_double(String, match: true)
+    }}
+    let(:call_method) { subject.edit_shutoff_times_by_type(shutoff_times) }
+
+    [:frc, :vrc].each do |attr|
+      it "checks to see if the `#{attr}` time is properly formatted" do
+        expect(shutoff_times[attr]).to receive(:match).with(EarlyShutoffRequest::TIME_24_HOUR_FORMAT)
+        call_method
+      end
+      context "when the `#{attr}` time value is not properly formatted" do
+        before { allow(shutoff_times[attr]).to receive(:match).and_return(false) }
+        it 'returns an error hash' do
+          expect(call_method).to eq({error: "shutoff times must be a 4-digit, 24-hour time representation with values between `0000` and `2359`: vrc: `#{shutoff_times[:vrc]}`, frc: `#{shutoff_times[:frc]}`"})
+        end
+      end
+    end
+    context 'when both the `frc` and `vrc` times are properly formatted' do
+      it 'calls `put_hash` with the proper name' do
+        expect(subject).to receive(:put_hash).with(:edit_shutoff_times_by_type, any_args).and_return({})
+        call_method
+      end
+      it 'calls `put_hash` with the proper endpoint' do
+        expect(subject).to receive(:put_hash).with(anything, 'etransact_advances/shutoff_times_by_type', anything).and_return({})
+        call_method
+      end
+      it 'calls `put_hash` with the shutoff_times hash' do
+        expect(subject).to receive(:put_hash).with(anything, anything, shutoff_times).and_return({})
+        call_method
+      end
+      it 'returns nil if `put_hash` returns nil' do
+        allow(subject).to receive(:put_hash).and_return(nil)
+        expect(call_method).to be nil
+      end
+      it 'returns an empty hash if `put_hash` returns an empty hash' do
+        allow(subject).to receive(:put_hash).and_return({})
+        expect(call_method).to eq({})
+      end
+      it 'returns the result of calling `put_hash`' do
+        result = double('some result')
+        allow(subject).to receive(:put_hash).and_return(result)
+        expect(call_method).to eq(result)
+      end
+    end
+  end
+
   describe '`early_shutoffs`' do
     let(:early_shutoff) { {} }
     let(:processed_early_shutoff) {{
@@ -745,10 +793,11 @@ describe EtransactAdvancesService do
     end
   end
 
-  shared_examples 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`' do |http_method, endpoint_name|
+  shared_examples 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`' do |http_method, endpoint_name, restclient_method|
     let(:early_shutoff) { instance_double(EarlyShutoffRequest) }
     let(:shutoff_hash) { instance_double(Hash) }
     let(:result) { double('some result') }
+    let(:error_handler) { -> (n, m, e) {} }
     before { allow(subject).to receive(:shutoff_hash) }
 
     it "calls `#{http_method}` with the endpoint name" do
@@ -772,16 +821,46 @@ describe EtransactAdvancesService do
       allow(subject).to receive(http_method).and_return(result)
       expect(call_method).to eq(result)
     end
+    context 'when there is a RestClient error' do
+      let(:status) { rand(400...500) }
+      let(:error) { RestClient::Exception.new(nil, status) }
+      before { allow_any_instance_of(RestClient::Resource).to receive(restclient_method).and_raise(error) }
+      it 'calls the error handler with the error if an error handler was supplied' do
+        expect{|error_handler| subject.send(endpoint_name, early_shutoff, &error_handler)}.to yield_with_args(error)
+      end
+      it 'returns nil' do
+        expect(call_method).to be(nil)
+      end
+    end
   end
 
   describe '`schedule_early_shutoff`' do
     let(:call_method) { subject.schedule_early_shutoff(early_shutoff) }
-    it_behaves_like 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`', :post_hash, :schedule_early_shutoff
+    it_behaves_like 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`', :post_hash, :schedule_early_shutoff, :post
   end
 
   describe '`update_early_shutoff`' do
     let(:call_method) { subject.update_early_shutoff(early_shutoff) }
-    it_behaves_like 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`', :put_hash, :update_early_shutoff
+    it_behaves_like 'an EtransactAdvancesService endpoint that calls to `etransact_advances/early_shutoff`', :put_hash, :update_early_shutoff, :put
+  end
+
+  describe '`remove_early_shutoff`' do
+    let(:early_shutoff) { instance_double(EarlyShutoffRequest, early_shutoff_date: SecureRandom.hex) }
+    let(:result) { double('some result') }
+    let(:call_method) { subject.remove_early_shutoff(early_shutoff) }
+
+    it 'calls `delete_hash` with the endpoint name' do
+      expect(subject).to receive(:delete_hash).with(:remove_early_shutoff, anything)
+      call_method
+    end
+    it 'calls `delete_hash` with the endpoint containing the early_shutoff_date of the passed early_shutoff' do
+      expect(subject).to receive(:delete_hash).with(anything, "etransact_advances/early_shutoff/#{early_shutoff.early_shutoff_date}")
+      call_method
+    end
+    it 'returns the result of calling `delete_hash`' do
+      allow(subject).to receive(:delete_hash).and_return(result)
+      expect(call_method).to eq(result)
+    end
   end
 
   describe 'days_until' do

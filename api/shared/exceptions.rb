@@ -30,6 +30,13 @@ module MAPI
         end
       end
 
+      class DuplicateFieldError < ValidationError
+        def initialize(message, code=nil, value=nil)
+          super(message, code, value)
+          @type = :duplicate
+        end
+      end
+
       class CustomTypedFieldError < ValidationError
         def initialize(message, type, code=nil, value=nil)
           super(message, code, value)

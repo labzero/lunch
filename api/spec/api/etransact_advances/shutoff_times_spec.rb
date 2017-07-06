@@ -4,7 +4,10 @@ describe MAPI::ServiceApp do
   include ActionView::Helpers::NumberHelper
   describe 'MAPI::Services::EtransactAdvances::ShutoffTimes' do
     shutoff_times_module = MAPI::Services::EtransactAdvances::ShutoffTimes
-    let(:app) { instance_double(MAPI::ServiceApp, logger: double('logger')) }
+    let(:app) { instance_double(MAPI::ServiceApp, logger: double('logger', error: nil)) }
+    let(:today) { Time.zone.today }
+
+    before { allow(Time.zone).to receive(:today).and_return(today) }
 
     describe 'class methods' do
       describe '`get_shutoff_times_by_type`' do
@@ -74,6 +77,91 @@ describe MAPI::ServiceApp do
             product_type_1 => end_time_1,
             product_type_2 => end_time_2
           })
+        end
+      end
+
+      describe '`edit_shutoff_times_by_type`' do
+        let(:sentinel) { instance_double(String, match: true) }
+        let(:shutoff_times) {{
+          vrc: instance_double(String, to_s: instance_double(String, match: true)),
+          frc: instance_double(String, to_s: instance_double(String, match: true))
+        }}
+        let(:call_method) { shutoff_times_module.edit_shutoff_times_by_type(app, shutoff_times) }
+        before { allow(shutoff_times_module).to receive(:should_fake?).and_return(true) }
+
+        [:vrc, :frc].each do |attr|
+          describe "ensuring the `#{attr}` time is properly formatted" do
+            before { allow(shutoff_times[attr]).to receive(:to_s).and_return(sentinel) }
+
+            it "ensures the `#{attr}` is a string" do
+              expect(shutoff_times[attr]).to receive(:to_s).and_return(sentinel)
+              call_method
+            end
+            it "checks to see if the `#{attr}` matches the `TIME_24_HOUR_FORMAT` format" do
+              expect(sentinel).to receive(:match).with(shutoff_times_module::TIME_24_HOUR_FORMAT).and_return(true)
+              call_method
+            end
+            it "raises an error if `#{attr}` does not match the format" do
+              allow(sentinel).to receive(:match).and_return(false)
+              expect{call_method}.to raise_error(shutoff_times_module::InvalidFieldError, "#{attr}_shutoff_time must be a 4-digit, 24-hour time representation with values between `0000` and `2359`") do |error|
+                expect(error.code).to eq(attr)
+                expect(error.value).to eq(shutoff_times[attr])
+              end
+            end
+          end
+        end
+        context 'when `should_fake?` returns true' do
+          before { allow(shutoff_times_module).to receive(:should_fake?).and_return(true) }
+          it 'returns true' do
+            expect(call_method).to be true
+          end
+        end
+        context 'when `should_fake?` returns false' do
+          before do
+            allow(shutoff_times_module).to receive(:should_fake?).and_return(false)
+            allow(shutoff_times_module).to receive(:quote)
+            allow(shutoff_times_module).to receive(:execute_sql).and_return(true)
+          end
+          it 'executes code within a transaction where the `isolation` has been set to `:read_committed`' do
+            expect(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+            call_method
+          end
+          it 'returns true if the transaction block executes without error' do
+            allow(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+            expect(call_method).to be true
+          end
+          describe 'the transaction block' do
+            let(:sentinel) { SecureRandom.hex }
+            [:vrc, :frc].each do |attr|
+              it "quotes the `#{attr}` value" do
+                expect(shutoff_times_module).to receive(:quote).with(shutoff_times[attr])
+                call_method
+              end
+              describe "the sql for updating the `#{attr}` value" do
+                it 'UPDATES the WEB_ADM.AO_TYPE_SHUTOFF table' do
+                  matcher = Regexp.new(/\A\s*UPDATE\s+WEB_ADM\.AO_TYPE_SHUTOFF\s+/im)
+                  expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                  call_method
+                end
+                it "SETs the END_TIME to the quoted `#{attr}` value" do
+                  allow(shutoff_times_module).to receive(:quote).with(shutoff_times[attr]).and_return(sentinel)
+                  matcher = Regexp.new(/\A\s*UPDATE\s+.+\s+SET\s+END_TIME\s*=\s*#{sentinel}\s+/im)
+                  expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                  call_method
+                end
+                it "updates the row WHERE the PRODUCT_TYPE is #{attr.to_s.upcase}" do
+                  matcher = Regexp.new(/\A\s*UPDATE\s+.+\s+SET\s+.+\s+WHERE\s+PRODUCT_TYPE\s*=\s*'#{attr.to_s.upcase}'\s*\z/im)
+                  expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                  call_method
+                end
+                it "raises an error if the `#{attr}` time fails to update" do
+                  matcher = Regexp.new(/\A\s*UPDATE\s+.+\s+SET\s+.+\s+WHERE\s+PRODUCT_TYPE\s*=\s*'#{attr.to_s.upcase}'\s*\z/im)
+                  allow(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(false)
+                  expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to update the #{attr.to_s.upcase} typical shutoff time to `#{shutoff_times[attr]}`")
+                end
+              end
+            end
+          end
         end
       end
 
@@ -213,33 +301,50 @@ describe MAPI::ServiceApp do
           let(:call_method) { shutoff_times_module.schedule_early_shutoff(app, early_shutoff) }
           before do
             allow(shutoff_times_module).to receive(:should_fake?).and_return(false)
-            allow(shutoff_times_module).to receive(:execute_sql).and_return(true)
+            allow(ActiveRecord::Base.connection).to receive(:execute).and_return(true)
             allow(shutoff_times_module).to receive(:quote)
           end
-          it 'returns true if `execute_sql` is successful' do
-            expect(call_method).to be true
+          context 'when `ActiveRecord::Base.connection.execute` does not raise an error' do
+            it 'returns true' do
+              expect(call_method).to be true
+            end
           end
-          it 'raises an error containing the `early_shutoff_date` if `execute_sql` is nil' do
-            allow(shutoff_times_module).to receive(:execute_sql).and_return(nil)
-            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to schedule the early shutoff for date: #{early_shutoff[:early_shutoff_date]}")
+          context 'when `ActiveRecord::Base.connection.execute` raises an ActiveRecord::RecordNotUnique error' do
+            let(:error_message) { SecureRandom.hex }
+            before { allow(ActiveRecord::Base.connection).to receive(:execute).and_raise(ActiveRecord::RecordNotUnique.new(error_message)) }
+
+            it 'logs the error message' do
+              expect(app.logger).to receive(:error).with(error_message)
+              expect{call_method}.to raise_error(shutoff_times_module::DuplicateFieldError) {}
+            end
+            it 'raises a `DuplicateFieldError` with the early_shutoff_date' do
+              expect{call_method}.to raise_error(shutoff_times_module::DuplicateFieldError) do |error|
+                expect(error.code).to eq(:early_shutoff_date)
+                expect(error.value).to eq(early_shutoff[:early_shutoff_date])
+              end
+            end
           end
-          it 'raises an error containing the `early_shutoff_date` if `execute_sql` is false' do
-            allow(shutoff_times_module).to receive(:execute_sql).and_return(false)
-            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to schedule the early shutoff for date: #{early_shutoff[:early_shutoff_date]}")
+          context 'when `ActiveRecord::Base.connection.execute` raises an error that is not an ActiveRecord::RecordNotUnique error' do
+            let(:error_message) { SecureRandom.hex }
+            before { allow(ActiveRecord::Base.connection).to receive(:execute).and_raise(ActiveRecord::StatementInvalid.new(error_message)) }
+
+            it 'logs the error message' do
+              expect(app.logger).to receive(:error).with(error_message)
+              expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError)
+            end
+            it 'raises a `MAPI::Shared::Errors::SQLError` with the early_shutoff_date' do
+              expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to schedule the early shutoff for date: #{early_shutoff[:early_shutoff_date]}")
+            end
           end
-          it 'calls `execute_sql` with the logger' do
-            expect(shutoff_times_module).to receive(:execute_sql).with(app.logger, anything).and_return(true)
-            call_method
-          end
-          describe 'the SQL passed to `execute_sql`' do
+          describe 'the SQL passed to `ActiveRecord::Base.connection.execute`' do
             it 'INSERTs INTO the WEB_ADM.AO_TYPE_EARLY_SHUTOFF table' do
               matcher = Regexp.new(/\A\s*INSERT\s+INTO\s+WEB_ADM\.AO_TYPE_EARLY_SHUTOFF\s+/im)
-              expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(true)
               call_method
             end
             it 'calls out the fields in which to insert the values in the correct order' do
               matcher = Regexp.new(/\A\s*INSERT\s+INTO\s+WEB_ADM\.AO_TYPE_EARLY_SHUTOFF\s+\(\s+EARLY_SHUTOFF_DATE\s*,\s*FRC_SHUTOFF_TIME\s*,\s*VRC_SHUTOFF_TIME\s*,\s*DAY_OF_MESSAGE\s*,\s*DAY_BEFORE_MESSAGE\s*\)/im)
-              expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(true)
               call_method
             end
             %i(early_shutoff_date frc_shutoff_time vrc_shutoff_time day_of_message day_before_message).each do |attribute|
@@ -253,7 +358,7 @@ describe MAPI::ServiceApp do
                 allow(shutoff_times_module).to receive(:quote).with(value).and_return(quoted_values[key])
               end
               matcher = Regexp.new(/\A\s*INSERT.+VALUES\s*\(\s*TO_DATE\s*\(\s*#{quoted_values[:early_shutoff_date]}\s*,\s*'YYYY-MM-DD'\s*\)\s*,\s*#{quoted_values[:frc_shutoff_time]}\s*,\s*#{quoted_values[:vrc_shutoff_time]}\s*,\s*#{quoted_values[:day_of_message]}\s*,\s*#{quoted_values[:day_before_message]}\s*\)\s*\z/im)
-              expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              expect(ActiveRecord::Base.connection).to receive(:execute).with(matcher).and_return(true)
               call_method
             end
           end
@@ -349,6 +454,78 @@ describe MAPI::ServiceApp do
             it 'updates the row WHERE the iso8601 format of the EARLY_SHUTOFF_DATE matches the quoted original_early_shutoff_date of the passed hash' do
               allow(shutoff_times_module).to receive(:quote).with(early_shutoff[:original_early_shutoff_date]).and_return(sentinel)
               matcher = Regexp.new(/\A\s*UPDATE.+\s+SET.+\s+WHERE\s+TO_CHAR\s*\(\s*EARLY_SHUTOFF_DATE\s*,\s*'YYYY-MM-DD'\s*\)\s*=\s*#{sentinel}\s*\z/im)
+              expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+          end
+        end
+      end
+
+      describe '`remove_early_shutoff`' do
+        let(:shutoff_date) { (today + rand(1..30).days).iso8601 }
+        let(:call_method) { shutoff_times_module.remove_early_shutoff(app, shutoff_date) }
+
+        before { allow(shutoff_times_module).to receive(:should_fake?).and_return(true) }
+
+        describe 'validating the passed early_shutoff_date' do
+          let(:shutoff_date) { instance_double(String, to_s: sentinel) }
+          let(:sentinel) { instance_double(String, match: true) }
+          let(:call_method) { shutoff_times_module.remove_early_shutoff(app, shutoff_date) }
+
+          it 'ensures the `early_shutoff_date` is a string' do
+            expect(shutoff_date).to receive(:to_s).and_return(sentinel)
+            call_method
+          end
+          it 'checks to see if the `early_shutoff_date` matches the `REPORT_PARAM_DATE_FORMAT` format' do
+            expect(sentinel).to receive(:match).with(shutoff_times_module::REPORT_PARAM_DATE_FORMAT).and_return(true)
+            call_method
+          end
+          it 'raises an error if the `early_shutoff_date` does not match the format' do
+            allow(sentinel).to receive(:match).and_return(false)
+            expect{call_method}.to raise_error(shutoff_times_module::InvalidFieldError, 'early_shutoff_date must follow ISO8601 standards: YYYY-MM-DD') do |error|
+              expect(error.code).to eq(:early_shutoff_date)
+              expect(error.value).to eq(shutoff_date)
+            end
+          end
+        end
+        context 'when `should_fake?` returns true' do
+          before { allow(shutoff_times_module).to receive(:should_fake?).and_return(true) }
+          it 'returns true' do
+            expect(call_method).to be true
+          end
+        end
+        context 'when `should_fake?` returns false' do
+          let(:sentinel) { SecureRandom.hex }
+          before do
+            allow(shutoff_times_module).to receive(:should_fake?).and_return(false)
+            allow(shutoff_times_module).to receive(:execute_sql).and_return(true)
+            allow(shutoff_times_module).to receive(:quote)
+          end
+
+          it 'returns true if `execute_sql` is successful' do
+            expect(call_method).to be true
+          end
+          it 'raises an error containing the `early_shutoff_date` if `execute_sql` is nil' do
+            allow(shutoff_times_module).to receive(:execute_sql).and_return(nil)
+            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to remove the early shutoff for date: #{shutoff_date}")
+          end
+          it 'calls `execute_sql` with the logger' do
+            expect(shutoff_times_module).to receive(:execute_sql).with(app.logger, anything).and_return(true)
+            call_method
+          end
+          describe 'the SQL passed to `execute_sql`' do
+            it 'quotes the `early_shutoff_date`' do
+              expect(shutoff_times_module).to receive(:quote).with(shutoff_date)
+              call_method
+            end
+            it 'DELETEs FROM the WEB_ADM.AO_TYPE_EARLY_SHUTOFF table' do
+              matcher = Regexp.new(/\A\s*DELETE\s+FROM\s+WEB_ADM\.AO_TYPE_EARLY_SHUTOFF\s+/im)
+              expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+            it 'deletes the row WHERE the iso8601 format of the EARLY_SHUTOFF_DATE matches the quoted early_shutoff_date param' do
+              allow(shutoff_times_module).to receive(:quote).with(shutoff_date).and_return(sentinel)
+              matcher = Regexp.new(/\A\s*DELETE.+\s+WHERE\s+TO_CHAR\s*\(\s*EARLY_SHUTOFF_DATE\s*,\s*'YYYY-MM-DD'\s*\)\s*=\s*#{sentinel}\s*\z/im)
               expect(shutoff_times_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
               call_method
             end

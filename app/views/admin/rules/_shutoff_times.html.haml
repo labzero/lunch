@@ -11,8 +11,8 @@
     .tabbed-content-main
       - if flash[:error]
         .form-error-section
-          %p= flash[:error]
+          = simple_format(flash[:error])
       - if flash[:notice]
         .form-success-section
-          %p= flash[:notice]
+          = simple_format(flash[:notice])
       = yield

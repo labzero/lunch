@@ -22,6 +22,29 @@ module MAPI
           Hash[shutoff_times.collect {|shutoff_time| [shutoff_time['product_type'].downcase, shutoff_time['end_time']]}]
         end
 
+        def self.edit_shutoff_times_by_type(app, shutoff_times)
+          shutoff_times = shutoff_times.with_indifferent_access
+          raise InvalidFieldError.new('frc_shutoff_time must be a 4-digit, 24-hour time representation with values between `0000` and `2359`', :frc, shutoff_times[:frc]) unless shutoff_times[:frc].to_s.match(TIME_24_HOUR_FORMAT)
+          raise InvalidFieldError.new('vrc_shutoff_time must be a 4-digit, 24-hour time representation with values between `0000` and `2359`', :vrc, shutoff_times[:vrc]) unless shutoff_times[:vrc].to_s.match(TIME_24_HOUR_FORMAT)
+          unless should_fake?(app)
+            ActiveRecord::Base.transaction(isolation: :read_committed) do
+              edit_frc_shutoff_time_sql = <<-SQL
+                UPDATE WEB_ADM.AO_TYPE_SHUTOFF
+                SET END_TIME = #{quote(shutoff_times[:frc])}
+                WHERE PRODUCT_TYPE = 'FRC'
+              SQL
+              edit_vrc_shutoff_time_sql = <<-SQL
+                UPDATE WEB_ADM.AO_TYPE_SHUTOFF
+                SET END_TIME = #{quote(shutoff_times[:vrc])}
+                WHERE PRODUCT_TYPE = 'VRC'
+              SQL
+              raise MAPI::Shared::Errors::SQLError, "Failed to update the FRC typical shutoff time to `#{shutoff_times[:frc]}`" unless execute_sql(app.logger, edit_frc_shutoff_time_sql)
+              raise MAPI::Shared::Errors::SQLError, "Failed to update the VRC typical shutoff time to `#{shutoff_times[:vrc]}`" unless execute_sql(app.logger, edit_vrc_shutoff_time_sql)
+            end
+          end
+          true
+        end
+
         def self.get_early_shutoffs(app)
           early_shutoffs_query = <<-SQL
             SELECT EARLY_SHUTOFF_DATE, FRC_SHUTOFF_TIME, VRC_SHUTOFF_TIME, DAY_OF_MESSAGE, DAY_BEFORE_MESSAGE
@@ -59,8 +82,15 @@ module MAPI
                 #{quote(shutoff[:day_before_message])}
               )
             SQL
-            # TODO - this is already catching duplicate date entries, as that's where the unique constraint lies on the table, but you need to explicitly check for this as part of MEM-2373
-            raise MAPI::Shared::Errors::SQLError, "Failed to schedule the early shutoff for date: #{shutoff[:early_shutoff_date]}" unless execute_sql(app.logger, add_early_shutoff_sql)
+            begin
+              ActiveRecord::Base.connection.execute(add_early_shutoff_sql)
+            rescue ActiveRecord::RecordNotUnique => e
+              app.logger.error(e.message)
+              raise DuplicateFieldError.new('An early shutoff is already scheduled for this date', :early_shutoff_date, shutoff[:early_shutoff_date])
+            rescue => e
+              app.logger.error(e.message)
+              raise MAPI::Shared::Errors::SQLError, "Failed to schedule the early shutoff for date: #{shutoff[:early_shutoff_date]}"
+            end
           end
           true
         end
@@ -80,6 +110,18 @@ module MAPI
               WHERE TO_CHAR(EARLY_SHUTOFF_DATE, 'YYYY-MM-DD') = #{quote(shutoff[:original_early_shutoff_date])}
             SQL
             raise MAPI::Shared::Errors::SQLError, "Failed to update the early shutoff for original date: #{shutoff[:original_early_shutoff_date]}, updated date: #{shutoff[:early_shutoff_date]}" unless execute_sql(app.logger, update_early_shutoff_sql)
+          end
+          true
+        end
+
+        def self.remove_early_shutoff(app, early_shutoff_date)
+          raise InvalidFieldError.new('early_shutoff_date must follow ISO8601 standards: YYYY-MM-DD', :early_shutoff_date, early_shutoff_date) unless early_shutoff_date.to_s.match(REPORT_PARAM_DATE_FORMAT)
+          unless should_fake?(app)
+            remove_early_shutoff_sql = <<-SQL
+              DELETE FROM WEB_ADM.AO_TYPE_EARLY_SHUTOFF 
+              WHERE TO_CHAR(EARLY_SHUTOFF_DATE, 'YYYY-MM-DD') = #{quote(early_shutoff_date)}
+            SQL
+            raise MAPI::Shared::Errors::SQLError, "Failed to remove the early shutoff for date: #{early_shutoff_date}" unless execute_sql(app.logger, remove_early_shutoff_sql)
           end
           true
         end
