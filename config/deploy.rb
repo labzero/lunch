@@ -1,5 +1,5 @@
 # config valid only for Capistrano 3.1
-lock '3.5.0'
+lock '3.8.2'
 
 set :application, 'member'
 set :repo_url, 'git@github.com:labzero/fhlb-member.git'
