@@ -1726,6 +1726,8 @@ en:
         summary: Displays debits and credits based on your institution’s activity with the Bank. Interest earned is provided on the first business day of the following month.
         updated: Daily for current month, as of the end of the prior business day
         history: Current month to date. Prior statements are available for the previous 6 months.
+      investments:
+        title: Investments
     your_account:
       title: Your Account
     learn_more_html: <a href=%{url}>Learn more</a> about all available reports.
@@ -3450,6 +3452,11 @@ en:
         update_success: Your early shutoff has been updated.
         remove_success: The early shutoff has been removed.
         duplicate_error: "An early shutoff is already scheduled for this date.\nPlease choose a new date and try again"
+    data_visibility:
+      title: Data Visibility
+      report_visibility: Report Visibility
+      all_members: All Members
+      member_selector: 'Data Visibility for:'
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

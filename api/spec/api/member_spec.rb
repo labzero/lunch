@@ -723,4 +723,43 @@ describe MAPI::ServiceApp do
       expect(last_response.body).to eq({}.to_json)
     end
   end
+
+  describe 'get `member/{id}/disabled_reports`' do
+    let(:results) { SecureRandom.hex }
+    let(:member_id) { SecureRandom.hex }
+    let(:call_endpoint) { get "member/#{member_id}/disabled_reports" }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', "member/#{rand(1000..9999)}/disabled_reports", :get, MAPI::Services::Member::DisabledReports, :disabled_report_ids
+
+    it 'calls `MAPI::Services::Member::DisabledReports.disabled_report_ids` with the app' do
+      expect(MAPI::Services::Member::DisabledReports).to receive(:disabled_report_ids).with(an_instance_of(MAPI::ServiceApp), anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::Member::DisabledReports.disabled_report_ids` with the member_id param' do
+      expect(MAPI::Services::Member::DisabledReports).to receive(:disabled_report_ids).with(anything, member_id)
+      call_endpoint
+    end
+    it 'returns the JSONd results of calling MAPI::Services::Member::DisabledReports.disabled_report_ids' do
+      allow(MAPI::Services::Member::DisabledReports).to receive(:disabled_report_ids).and_return(results)
+      call_endpoint
+      expect(last_response.body).to eq(results.to_json)
+    end
+  end
+
+  describe 'get `member/disabled_reports`' do
+    let(:results) { SecureRandom.hex }
+    let(:call_endpoint) { get 'member/disabled_reports' }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'member/disabled_reports', :get, MAPI::Services::Member::DisabledReports, :disabled_report_ids
+
+    it 'calls `MAPI::Services::Member::DisabledReports.disabled_report_ids` with the app' do
+      expect(MAPI::Services::Member::DisabledReports).to receive(:disabled_report_ids).with(an_instance_of(MAPI::ServiceApp))
+      call_endpoint
+    end
+    it 'returns the JSONd results of calling MAPI::Services::Member::DisabledReports.disabled_report_ids' do
+      allow(MAPI::Services::Member::DisabledReports).to receive(:disabled_report_ids).and_return(results)
+      call_endpoint
+      expect(last_response.body).to eq(results.to_json)
+    end
+  end
 end

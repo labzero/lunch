@@ -1339,7 +1339,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       describe 'with the report disabled' do
         before do
-          allow(controller).to receive(:report_disabled?).with(ReportsController::FORWARD_COMMITMENTS_WEB_FLAG).and_return(true)
+          allow(controller).to receive(:report_disabled?).with(ReportsController::FORWARD_COMMITMENTS_WEB_FLAGS).and_return(true)
         end
         it 'sets @as_of_date to nil if the report is disabled' do
           forward_commitments

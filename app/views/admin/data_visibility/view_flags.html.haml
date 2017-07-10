@@ -1,0 +1,15 @@
+.data-visibility.data-visibility-flags.row
+  %a#top
+  %h1= t('admin.data_visibility.title')
+  %section
+    %h2= t('admin.data_visibility.member_selector')
+    = select_tag('data-visibility-member-dropdown', options_for_select(@member_dropdown[:options], @member_dropdown[:default_value]) )
+  %section
+    %h2= t('admin.data_visibility.report_visibility')
+    =render 'data_visibility_flags_table_section', title: t('reports.your_account.title'), table_data: @account_table
+    =render 'data_visibility_flags_table_section', title: t('reports.capital_stock.title'), table_data: @capital_stock_table
+    =render 'data_visibility_flags_table_section', title: t('reports.price_indications.title'), table_data: @price_indications_table
+    =render 'data_visibility_flags_table_section', title: t('reports.collateral.title'), table_data: @collateral_table
+    =render 'data_visibility_flags_table_section', title: t('reports.credit.title'), table_data: @credit_table
+    =render 'data_visibility_flags_table_section', title: t('reports.securities.title'), table_data: @securities_table
+  =link_to(t('admin.advance_availability.nav.top_anchor'), {anchor: 'top'}, {class: 'top-anchor'})

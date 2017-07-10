@@ -463,6 +463,19 @@ module MAPI
             end
           end
           api do
+            key :path, '/disabled_reports'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the IDs of reports flagged as disabled for all members'
+              key :type, :array
+              key :nickname, :getGlobalDisabledReportIDs
+              items do
+                key :type, :integer
+                key :description, 'The IDs of the reports and web components flagged as disabled'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/disabled_reports'
             operation do
               key :method, 'GET'
@@ -1400,10 +1413,19 @@ module MAPI
           MAPI::Services::Member::Profile.member_list(self)
         end
 
+        # Global Disabled Reports
+        relative_get '/disabled_reports' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            MAPI::Services::Member::DisabledReports.disabled_report_ids(self)
+          end
+        end
+
         # Member Disabled Reports
         relative_get '/:id/disabled_reports' do
-          member_id = params[:id]
-          MAPI::Services::Member::DisabledReports.disabled_report_ids(self, member_id)
+          MAPI::Services::Member.rescued_json_response(self) do
+            member_id = params[:id]
+            MAPI::Services::Member::DisabledReports.disabled_report_ids(self, member_id)
+          end
         end
 
         # Quick Advance Flags for All Members

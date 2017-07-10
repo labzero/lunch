@@ -40,6 +40,10 @@ class MembersService < MAPIService
     end
   end
 
+  def global_disabled_reports
+    get_json(:global_disabled_reports, "member/disabled_reports")
+  end
+
   def member(member_id)
     Rails.cache.fetch(CacheConfiguration.key(:member_data, member_id), expires_in: CacheConfiguration.expiry(:member_data)) do
       get_hash(:member, "member/#{member_id}/")

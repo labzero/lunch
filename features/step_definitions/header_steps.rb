@@ -9,8 +9,12 @@ Then(/^I should see the (reports|resources|products|securities) dropdown$/) do |
   report_menu.find(:xpath, '..').assert_selector('.nav-dropdown', visible: true)
 end
 
-When(/^I click on the (agreements|amortizing|arc|arc embedded|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance|manage securities|securities requests|resources|products|learn more|securities|safekeep new|pledge new|letters of credit|manage letters of credit|test features|features|new letter of credit|convertible|standby letters of credit|trade credit rules|term rules|add advance availability|end of day shutoff) link in the header$/) do |link|
+When(/^I click on the (agreements|amortizing|arc|arc embedded|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance|manage securities|securities requests|resources|products|learn more|securities|safekeep new|pledge new|letters of credit|manage letters of credit|test features|features|new letter of credit|convertible|standby letters of credit|trade credit rules|term rules|add advance availability|end of day shutoff|data visibility) link in the header$/) do |link|
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
+end
+
+When(/^I click on the data visibility web flags link in the header dropdown$/) do
+  page.find('.page-header .secondary-nav .nav-dropdown-column a', text: dropdown_title_regex('data visibility web flags')).click
 end
 
 When(/^I click on the switch link in the nav$/) do
@@ -137,6 +141,10 @@ def dropdown_title_regex(dropdown)
     I18n.t('admin.advance_availability.title')
   when 'end of day shutoff'
     I18n.t('admin.shutoff_times.title')
+  when 'data visibility'
+    I18n.t('admin.nav.secondary.data_visibility')
+  when 'data visibility web flags'
+    I18n.t('admin.data_visibility.title')
   else
     raise 'unknown dropdown'
   end

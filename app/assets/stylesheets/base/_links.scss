@@ -26,6 +26,13 @@ a {
   @extend %link-style;
 }
 
+.top-anchor {
+  @extend %typography-nav-dropdown-header;
+  text-transform: uppercase;
+  text-align: center;
+  display: block;
+}
+
 @media print {
   a {
     color: $print-link-color;
