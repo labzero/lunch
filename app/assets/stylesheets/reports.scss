@@ -1128,6 +1128,18 @@ td.dataTables_empty {
   }
 }
 
+.borrowing-capacity.report-header {
+  .report-inputs {
+    .report-filter {
+      margin-left: 0px;
+      .month-selector {
+        width: 210px;
+        margin: 10px 0 50px;
+      }
+    }
+  }
+}
+
 .standard-credit-borrowing-capacity-tables {
   th {
     &:nth-child(4) {

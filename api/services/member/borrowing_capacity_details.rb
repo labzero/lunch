@@ -2,34 +2,57 @@ module MAPI
   module Services
     module Member
       module BorrowingCapacity
-        # borrowing capacity details
-        def self.borrowing_capacity_details(app, member_id, as_of_date )
+        include MAPI::Shared::Utils
+
+        def self.borrowing_capacity_details(app, member_id, as_of_date)
           member_id = member_id.to_i
 
-          # ASSUMPTION is always get current position.  The Date param is for future use when allow historical data
-          bc_balances_connection_string = <<-SQL
-          SELECT UPDATE_DATE, STD_EXCL_BL_BC, STD_EXCL_BANK_BC, STD_EXCL_REG_BC, STD_SECURITIES_BC, STD_ADVANCES, STD_LETTERS_CDT_USED,
-          STD_SWAP_COLL_REQ, STD_COVER_OTHER_PT_DEF, STD_PREPAY_FEES, STD_OTHER_COLL_REQ, STD_MPF_CE_COLL_REQ, STD_COLL_EXCESS_DEF,
-          SBC_MV_AA, SBC_BC_AA, SBC_ADVANCES_AA, SBC_COVER_OTHER_AA, SBC_MV_COLL_EXCESS_DEF_AA, SBC_COLL_EXCESS_DEF_AA,
-          SBC_MV_AAA, SBC_BC_AAA, SBC_ADVANCES_AAA, SBC_COVER_OTHER_AAA, SBC_MV_COLL_EXCESS_DEF_AAA, SBC_COLL_EXCESS_DEF_AAA,
-          SBC_MV_AG, SBC_BC_AG, SBC_ADVANCES_AG, SBC_COVER_OTHER_AG, SBC_MV_COLL_EXCESS_DEF_AG, SBC_COLL_EXCESS_DEF_AG,
-          SBC_OTHER_COLL_REQ, SBC_COLL_EXCESS_DEF, STD_TOTAL_BC, SBC_BC, SBC_MV, SBC_ADVANCES, SBC_MV_COLL_EXCESS_DEF
-          FROM V_CONFIRM_SUMMARY_INTRADAY@COLAPROD_LINK.WORLD
-          WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id)}
-          SQL
+          as_of_date = Date.parse(as_of_date)
 
-          bc_std_breakdown_string = <<-SQL
-          SELECT COLLATERAL_TYPE, STD_COUNT, STD_UNPAID_BALANCE, STD_BORROWING_CAPACITY,
-          STD_ORIGINAL_AMOUNT, STD_MARKET_VALUE, COLLATERAL_SORT_ID
-          FROM V_CONFIRM_DETAIL@COLAPROD_LINK.WORLD
-          WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id)}
-          ORDER BY COLLATERAL_SORT_ID
-          SQL
+          if as_of_date.year == Time.zone.today.year && as_of_date.month == Time.zone.today.month
+            bc_balances_connection_string = <<-SQL
+            SELECT UPDATE_DATE, STD_EXCL_BL_BC, STD_EXCL_BANK_BC, STD_EXCL_REG_BC, STD_SECURITIES_BC, STD_ADVANCES, STD_LETTERS_CDT_USED,
+            STD_SWAP_COLL_REQ, STD_COVER_OTHER_PT_DEF, STD_PREPAY_FEES, STD_OTHER_COLL_REQ, STD_MPF_CE_COLL_REQ, STD_COLL_EXCESS_DEF,
+            SBC_MV_AA, SBC_BC_AA, SBC_ADVANCES_AA, SBC_COVER_OTHER_AA, SBC_MV_COLL_EXCESS_DEF_AA, SBC_COLL_EXCESS_DEF_AA,
+            SBC_MV_AAA, SBC_BC_AAA, SBC_ADVANCES_AAA, SBC_COVER_OTHER_AAA, SBC_MV_COLL_EXCESS_DEF_AAA, SBC_COLL_EXCESS_DEF_AAA,
+            SBC_MV_AG, SBC_BC_AG, SBC_ADVANCES_AG, SBC_COVER_OTHER_AG, SBC_MV_COLL_EXCESS_DEF_AG, SBC_COLL_EXCESS_DEF_AG,
+            SBC_OTHER_COLL_REQ, SBC_COLL_EXCESS_DEF, STD_TOTAL_BC, SBC_BC, SBC_MV, SBC_ADVANCES, SBC_MV_COLL_EXCESS_DEF
+            FROM V_CONFIRM_SUMMARY_INTRADAY@COLAPROD_LINK.WORLD
+            WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id)}
+            SQL
 
-          # set the expected balances value to 0 just in case it is not found, want to return 0 values
+            bc_std_breakdown_string = <<-SQL
+            SELECT COLLATERAL_TYPE, STD_COUNT, STD_UNPAID_BALANCE, STD_BORROWING_CAPACITY,
+            STD_ORIGINAL_AMOUNT, STD_MARKET_VALUE, COLLATERAL_SORT_ID
+            FROM V_CONFIRM_DETAIL@COLAPROD_LINK.WORLD
+            WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id)}
+            ORDER BY COLLATERAL_SORT_ID
+            SQL
+          else
+            bc_balances_connection_string = <<-SQL
+            SELECT CUSTOMER_MASTER_ID, STD_EXCL_BL_BC, STD_EXCL_BANK_BC, STD_EXCL_REG_BC, STD_SECURITIES_BC, STD_ADVANCES, STD_LETTERS_CDT_USED,
+            STD_SWAP_COLL_REQ, STD_COVER_OTHER_PT_DEF, STD_PREPAY_FEES, STD_OTHER_COLL_REQ, STD_MPF_CE_COLL_REQ, STD_COLL_EXCESS_DEF,
+            SBC_MV_AA, SBC_BC_AA, SBC_ADVANCES_AA, SBC_COVER_OTHER_AA, SBC_MV_COLL_EXCESS_DEF_AA, SBC_COLL_EXCESS_DEF_AA,
+            SBC_MV_AAA, SBC_BC_AAA, SBC_ADVANCES_AAA, SBC_COVER_OTHER_AAA, SBC_MV_COLL_EXCESS_DEF_AAA, SBC_COLL_EXCESS_DEF_AAA,
+            SBC_MV_AG, SBC_BC_AG, SBC_ADVANCES_AG, SBC_COVER_OTHER_AG, SBC_MV_COLL_EXCESS_DEF_AG, SBC_COLL_EXCESS_DEF_AG,
+            SBC_OTHER_COLL_REQ, SBC_COLL_EXCESS_DEF, STD_TOTAL_BC, SBC_BC, SBC_MV, SBC_ADVANCES, SBC_MV_COLL_EXCESS_DEF
+            FROM FHLBOWN.COLLATERAL_SUMMARY_TYPE_HIST@COLAPROD_LINK.WORLD
+            WHERE CUSTOMER_MASTER_ID = #{ActiveRecord::Base.connection.quote(member_id)}
+            AND PERIODVALUE = #{ActiveRecord::Base.connection.quote(as_of_date.strftime('%Y%m'))}
+            SQL
+
+            bc_std_breakdown_string = <<-SQL
+            SELECT COLLATERAL_TYPE, STD_UNPAID_BALANCE, STD_BORROWING_CAPACITY, STD_ORIGINAL_AMOUNT, STD_MARKET_VALUE, COLLATERAL_SORT_ID
+            FROM FHLBOWN.COLLATERAL_SUMMARY_TYPE_HIST@COLAPROD_LINK.WORLD
+            WHERE CUSTOMER_MASTER_ID = #{ActiveRecord::Base.connection.quote(member_id)}
+            AND PERIODVALUE = #{ActiveRecord::Base.connection.quote(as_of_date.strftime('%Y%m'))}
+            ORDER BY COLLATERAL_SORT_ID
+            SQL
+          end
+
           balance_hash = {}
           std_breakdown= []
-          if app.settings.environment == :production
+          unless should_fake?(app)
             bc_balances_cursor = ActiveRecord::Base.connection.execute(bc_balances_connection_string)
             while row = bc_balances_cursor.fetch_hash()
               balance_hash = row
@@ -55,7 +78,7 @@ module MAPI
             }
             standard_breakdown_formatted.push(reformat_hash)
           end
-          # format the SBC into an array of hash
+
           sbc_breakdown = {
               aa:
               { total_market_value: (balance_hash['SBC_MV_AA'] || 0).to_f.round,
@@ -83,7 +106,7 @@ module MAPI
               }
           }
 
-          {  date: as_of_date.to_date,
+          {  date: as_of_date,
              standard: {
                  collateral: standard_breakdown_formatted,
                  securities: (balance_hash['STD_SECURITIES_BC'] || 0).to_f.round,
@@ -110,7 +133,6 @@ module MAPI
                  }
              }
           }.to_json
-
         end
       end
     end

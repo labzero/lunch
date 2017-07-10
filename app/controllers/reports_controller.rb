@@ -742,13 +742,23 @@ class ReportsController < ApplicationController
 
   def borrowing_capacity
     @report_name = ReportConfiguration.report_title(:borrowing_capacity)
-    initialize_dates(:borrowing_capacity, nil, params[:end_date])
-    downloadable_report(:pdf, {end_date: @end_date.to_s}) do
+    current = Time.zone.today.iso8601
+    @report_filter = params['as_of_date'].blank? ? current : params['as_of_date']
+    @month_display_map = {}
+    @month_options = [*1..5].collect do |i| #display current month + five previous months
+      date = (Time.zone.today - i.months).end_of_month
+      iso_date = date.iso8601
+      @month_display_map[iso_date] = I18n.t('reports.pages.borrowing_capacity.monthend', month: date.strftime('%B'))
+      [@month_display_map[iso_date], iso_date]
+    end
+    @month_options.unshift([I18n.t('global.current'), current])
+    @month_display_map[current] = I18n.t('global.current')
+    downloadable_report(:pdf, {as_of_date: params['as_of_date']}, "borrowing_capacity_#{@report_filter}") do
       if params[:job_id] || self.skip_deferred_load
         if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
           @borrowing_capacity_summary = {}
         elsif self.skip_deferred_load
-          @borrowing_capacity_summary = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s)
+          @borrowing_capacity_summary = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @report_filter.to_s)
         else
           job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
           raise ActiveRecord::RecordNotFound unless job_status
@@ -758,10 +768,10 @@ class ReportsController < ApplicationController
         raise StandardError, "There has been an error and ReportsController#borrowing_capacity has encountered nil. Check error logs." if @borrowing_capacity_summary.nil?
         render layout: false if request.try(:xhr?)
       else
-        job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s).job_status
+        job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'borrowing_capacity_summary', request.uuid, @report_filter.to_s).job_status
         job_status.update_attributes!(user_id: current_user.id)
         @job_status_url = job_status_url(job_status)
-        @load_url = reports_borrowing_capacity_url(job_id: job_status.id)
+        @load_url = reports_borrowing_capacity_url(job_id: job_status.id, as_of_date: params['as_of_date'])
         @borrowing_capacity_summary = {deferred: true}
       end
     end

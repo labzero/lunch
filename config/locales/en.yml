@@ -34,6 +34,7 @@ en:
     quarterly: Quarterly
     semiannually: Semiannually
     all: All
+    current: Current
     current_day: Current Day
     date: Date
     issue_date: Issue Date
@@ -1932,6 +1933,7 @@ en:
         net_loan_collateral: Net Loan Collateral Borrowing Capacity
         remaining_capacity: Remaining Borrowing Capacity
         freshness: Loan collateral data reflects intraday processing of Mortgage Collateral Updates, except for Market Value. Market Value and all other data is as of close of business on the prior business day.
+        history: You may view the Current Borrowing Capacity report and historical month end reports for the previous six months.
         less_line_items:
           blanket_lien: Less Excluded Blanket Lien Borrowing Capacity
           bank_borrowing_capacity: Less Excluded Bank Borrowing Capacity
@@ -1945,6 +1947,7 @@ en:
           mpf_ce_collateral: Less MPF CE Collateral Required
         plus_line_items:
           securities: Plus Securities Borrowing Capacity
+        monthend: '%{month} Monthend'
       settlement_transaction_account:
         title: Settlement/Transaction Account (STA) Statement
         opening_balance_heading: "Beginning balance of as of %{date}:"
