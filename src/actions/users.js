@@ -1,7 +1,7 @@
 import ActionTypes from '../constants/ActionTypes';
 import { credentials, jsonHeaders, processResponse } from '../core/ApiClient';
 import { getCurrentUser } from '../selectors/user';
-import { flashError } from './flash.js';
+import { flashError } from './flash';
 
 export function invalidateUsers() {
   return { type: ActionTypes.INVALIDATE_USERS };

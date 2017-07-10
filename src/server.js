@@ -23,7 +23,7 @@ import methodOverride from 'method-override';
 import session from 'express-session';
 import connectSessionSequelize from 'connect-session-sequelize';
 import flash from 'connect-flash';
-import expressJwt from 'express-jwt';
+import expressJwt, { UnauthorizedError as Jwt401Error } from 'express-jwt';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import UniversalRouter from 'universal-router';
@@ -38,11 +38,12 @@ import generateUrl from './helpers/generateUrl';
 import hasRole from './helpers/hasRole';
 import teamRoutes from './routes/team';
 import mainRoutes from './routes/main';
+import createFetch from './createFetch';
+import passport from './passport';
 import assets from './assets.json'; // eslint-disable-line import/no-unresolved
 import configureStore from './store/configureStore';
-import { domain, bsHost, port, auth } from './config';
+import config from './config';
 import makeInitialState from './initialState';
-import passport from './core/passport';
 import invitationMiddleware from './middlewares/invitation';
 import loginMiddleware from './middlewares/login';
 import passwordMiddleware from './middlewares/password';
@@ -113,7 +114,7 @@ app.use(methodOverride((req) => {
 // -----------------------------------------------------------------------------
 app.use((req, res, next) => {
   if (req.hostname === 'lunch.labzero.com') {
-    res.redirect(301, generateUrl(req, bsHost, path));
+    res.redirect(301, generateUrl(req, config.bsHost, path));
   } else {
     next();
   }
@@ -129,11 +130,11 @@ if (__DEV__) {
 const SequelizeStore = connectSessionSequelize(session.Store);
 app.use(session({
   cookie: {
-    domain,
+    domain: config.domain,
     secure: process.env.NODE_ENV === 'production'
   },
   saveUninitialized: false,
-  secret: auth.session.secret,
+  secret: config.auth.session.secret,
   store: new SequelizeStore({
     db: sequelize
   }),
@@ -147,27 +148,25 @@ app.use(flash());
 // Authentication
 // -----------------------------------------------------------------------------
 app.use(expressJwt({
-  secret: auth.jwt.secret,
+  secret: config.auth.jwt.secret,
   credentialsRequired: false,
   getToken: req => req.cookies.id_token,
 }));
-app.use(passport.initialize());
+// Error handler for express-jwt
 app.use((err, req, res, next) => {
-  // In the case of an invalid token, attempt to remove it but also
-  // attempt to render the requested page as a logged-out user.
-  // If the cookie's domain is .lunch.pink but the current host is
-  // local.lunch.pink, the cookie might not be removed, so don't blow up.
-  if (err.name === 'UnauthorizedError') {
+  if (err instanceof Jwt401Error) {
     req.logout();
-    res.clearCookie('id_token', { domain });
+    res.clearCookie('id_token', { domain: config.domain });
     next();
   } else {
     next(err);
   }
 });
 
+app.use(passport.initialize());
+
 app.use((req, res, next) => {
-  const subdomainMatch = req.hostname.match(`^(.*)${domain.replace(/\./g, '\\.')}`);
+  const subdomainMatch = req.hostname.match(`^(.*)${config.domain.replace(/\./g, '\\.')}`);
   if (subdomainMatch && subdomainMatch[1]) {
     // eslint-disable-next-line no-param-reassign
     req.subdomain = subdomainMatch[1];
@@ -196,7 +195,7 @@ app.use('/users', usersMiddleware());
 
 app.get('/logout', (req, res) => {
   req.logout();
-  res.clearCookie('id_token', { domain });
+  res.clearCookie('id_token', { domain: config.domain });
   res.redirect('/');
 });
 
@@ -243,7 +242,7 @@ app.use('/api', api());
 const render = async (req, res, next) => {
   try {
     const stateData = {
-      host: bsHost
+      host: config.bsHost
     };
     if (req.user) {
       stateData.user = req.user;
@@ -267,13 +266,19 @@ const render = async (req, res, next) => {
         });
       });
     }
+    const css = new Set();
+
+    const fetch = createFetch({
+      baseUrl: config.api.serverUrl,
+      cookie: req.headers.cookie,
+    });
 
     const initialState = makeInitialState(stateData);
     const store = configureStore(initialState, {
       cookie: req.headers.cookie,
+      fetch,
+      // I should not use `history` on server.. but how I do redirection? follow universal-router
     });
-
-    const css = new Set();
 
     // Global (context) variables that can be easily accessed from any React component
     // https://facebook.github.io/react/docs/context.html
@@ -284,8 +289,8 @@ const render = async (req, res, next) => {
         // eslint-disable-next-line no-underscore-dangle
         styles.forEach(style => css.add(style._getCss()));
       },
-      // Initialize a new Redux store
-      // http://redux.js.org/docs/basics/UsageWithReact.html
+      fetch,
+      // You can access redux through react-redux connect
       store
     };
 
@@ -300,7 +305,9 @@ const render = async (req, res, next) => {
       ...context,
       path: req.path,
       query: req.query,
-      subdomain: req.subdomain
+      subdomain: req.subdomain,
+      fetch,
+      store
     });
 
     if (route.redirect) {
@@ -310,15 +317,22 @@ const render = async (req, res, next) => {
 
     const data = { ...route,
       apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
-      children: '',
       title: route.title || 'Lunch',
       description: 'An app for groups to decide on nearby lunch options.',
       body: '',
       root: generateUrl(req, req.get('host')),
-      state: initialState
     };
 
-    data.children = ReactDOM.renderToString(<App context={context}>{route.component}</App>);
+    data.app = {
+      apiUrl: config.api.clientUrl,
+      state: initialState,
+    };
+
+    data.children = ReactDOM.renderToString(
+      <App context={context} store={store}>
+        {route.component}
+      </App>,
+    );
 
     data.styles = [
       { id: 'css', cssText: [...css].join('') },
@@ -357,7 +371,7 @@ pe.skipNodeFiles();
 pe.skipPackage('express');
 
 app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
-  console.log(pe.render(err)); // eslint-disable-line no-console
+  console.error(pe.render(err));
   res.status(err.status || 500);
   if (req.accepts('html') === 'html') {
     const html = ReactDOM.renderToStaticMarkup(
@@ -387,7 +401,7 @@ app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
 //
 // Launch the server
 // -----------------------------------------------------------------------------
-httpServer.listen(port, () => {
+httpServer.listen(config.port, () => {
   /* eslint-disable no-console */
-  console.log(`The server is running at http://local.lunch.pink:${port}/`);
+  console.log(`The server is running at http://local.lunch.pink:${config.port}/`);
 });

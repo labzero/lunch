@@ -17,7 +17,7 @@ import bcrypt from 'bcrypt';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { User } from '../models';
+import { User } from './models';
 
 /**
  * Sign in with Google.

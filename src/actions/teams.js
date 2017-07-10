@@ -1,6 +1,6 @@
 import ActionTypes from '../constants/ActionTypes';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
-import { flashError } from './flash.js';
+import { flashError } from './flash';
 
 export function postTeam(obj) {
   return {

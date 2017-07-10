@@ -13,7 +13,7 @@ import { TEAM_SLUG_REGEX } from '../../../constants';
 import defaultCoords from '../../../constants/defaultCoords';
 import TeamGeosuggestContainer from '../../../components/TeamGeosuggest/TeamGeosuggestContainer';
 import TeamMapContainer from '../../../components/TeamMap/TeamMapContainer';
-import history from '../../../core/history';
+import history from '../../../history';
 import s from './NewTeam.scss';
 
 class NewTeam extends Component {

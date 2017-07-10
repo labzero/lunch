@@ -2,7 +2,7 @@ import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import { auth, bsHost, domain } from '../config';
 import generateUrl from '../helpers/generateUrl';
-import passport from '../core/passport';
+import passport from '../passport';
 
 const setCookie = (req, res, next) => {
   if (req.user) {

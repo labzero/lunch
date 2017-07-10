@@ -1,4 +1,4 @@
-import reservedUsernames from 'reserved-usernames';
+import reservedUsernames from 'reserved-usernames/data.json';
 
 export default [
   ...reservedUsernames,

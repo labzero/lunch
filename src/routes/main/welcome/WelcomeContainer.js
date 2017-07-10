@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { updateCurrentUser } from '../../../actions/user';
-import history from '../../../core/history';
+import history from '../../../history';
 import { getCurrentUser } from '../../../selectors/user';
 import Welcome from './Welcome';
 

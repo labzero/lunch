@@ -1,7 +1,7 @@
 import ActionTypes from '../constants/ActionTypes';
 import { getDecision } from '../selectors/decisions';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
-import { flashError } from './flash.js';
+import { flashError } from './flash';
 
 export function invalidateDecision() {
   return { type: ActionTypes.INVALIDATE_DECISION };

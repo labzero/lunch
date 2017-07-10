@@ -13,15 +13,18 @@ import es6Promise from 'es6-promise';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import FastClick from 'fastclick';
-import UniversalRouter from 'universal-router';
 import queryString from 'query-string';
 import RobustWebSocket from 'robust-websocket';
 import { createPath } from 'history/PathUtils';
-import history from './core/history';
+import Router from 'universal-router';
 import App from './components/App';
+import createFetch from './createFetch';
 import configureStore from './store/configureStore';
-import { updateMeta } from './core/DOMUtils';
-import { ErrorReporter, deepForceUpdate } from './core/devUtils';
+import history from './history';
+import { updateMeta } from './DOMUtils';
+import { ErrorReporter, deepForceUpdate } from './devUtils';
+
+/* eslint-disable global-require */
 
 es6Promise.polyfill();
 
@@ -30,16 +33,16 @@ window.RobustWebSocket = RobustWebSocket;
 let subdomain;
 
 // Undo Browsersync mangling of host
-let host = window.APP_STATE.host;
+let host = window.App.state.host;
 if (host.indexOf('//') === 0) {
   host = host.slice(2);
 }
-const teamSlug = window.APP_STATE.team.slug;
+const teamSlug = window.App.state.team.slug;
 if (teamSlug && host.indexOf(teamSlug) === 0) {
   subdomain = teamSlug;
   host = host.slice(teamSlug.length + 1); // + 1 for dot
 }
-window.APP_STATE.host = host;
+window.App.state.host = host;
 
 if (!subdomain) {
   // escape domain periods to not appear as regex wildcards
@@ -49,7 +52,7 @@ if (!subdomain) {
   }
 }
 
-const store = configureStore(window.APP_STATE, { history });
+const store = configureStore(window.App.state, { history });
 /* eslint-enable no-underscore-dangle */
 
 // Global (context) variables that can be easily accessed from any React component
@@ -62,6 +65,10 @@ const context = {
     const removeCss = styles.map(x => x._insertCss());
     return () => { removeCss.forEach(f => f()); };
   },
+  // Universal HTTP client
+  fetch: createFetch({
+    baseUrl: window.App.apiUrl,
+  }),
   // Initialize a new Redux store
   // http://redux.js.org/docs/basics/UsageWithReact.html
   store
@@ -131,7 +138,7 @@ if (subdomain) {
   routes = require('./routes/main').default; // eslint-disable-line global-require
 }
 
-const router = new UniversalRouter(routes);
+const router = new Router(routes);
 
 // Re-render the app when window.location changes
 async function onLocationChange(location, action) {
@@ -181,7 +188,7 @@ async function onLocationChange(location, action) {
       throw error;
     }
 
-    console.error(error); // eslint-disable-line no-console
+    console.error(error);
 
     // Do a full page reload if error occurs during client-side navigation
     if (action && currentLocation.key === location.key) {

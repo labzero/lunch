@@ -1,6 +1,6 @@
 import ActionTypes from '../constants/ActionTypes';
 import { credentials, jsonHeaders, processResponse } from '../core/ApiClient';
-import { flashError } from './flash.js';
+import { flashError } from './flash';
 
 export function patchCurrentUser(payload) {
   return {

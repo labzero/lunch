@@ -88,6 +88,7 @@ const RestaurantMarker = ({
   ...props
 }) => {
   const context = {
+    fetch: props.fetch,
     insertCss: props.insertCss,
     store: props.store
   };
@@ -105,6 +106,7 @@ const RestaurantMarker = ({
 };
 
 RestaurantMarker.propTypes = {
+  fetch: PropTypes.func.isRequired,
   store: PropTypes.object.isRequired,
   insertCss: PropTypes.func.isRequired,
   restaurant: PropTypes.object.isRequired

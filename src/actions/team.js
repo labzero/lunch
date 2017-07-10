@@ -1,6 +1,6 @@
 import ActionTypes from '../constants/ActionTypes';
 import { processResponse, jsonHeaders } from '../core/ApiClient';
-import { flashError } from './flash.js';
+import { flashError } from './flash';
 
 export function deleteTeam() {
   return {

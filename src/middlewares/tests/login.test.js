@@ -27,7 +27,7 @@ describe('middlewares/login', () => {
             sign: () => '12345'
           }
         }),
-        '../core/passport': mockEsmodule({
+        '../passport': mockEsmodule({
           default: {
             authenticate: authenticateStub
           }
@@ -140,7 +140,7 @@ describe('middlewares/login', () => {
         });
         flashSpy = spy();
         app = makeApp({
-          '../core/passport': mockEsmodule({
+          '../passport': mockEsmodule({
             default: {
               authenticate: authenticateStub
             }
@@ -167,7 +167,7 @@ describe('middlewares/login', () => {
         });
         logInSpy = spy(() => afterLoginNext());
         app = makeApp({
-          '../core/passport': mockEsmodule({
+          '../passport': mockEsmodule({
             default: {
               authenticate: authenticateStub
             }
