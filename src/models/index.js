@@ -24,7 +24,7 @@ Tag.addScope('orderedByRestaurant', {
     }
   ],
   group: ['tag.id'],
-  order: 'restaurant_count DESC'
+  order: [sequelize.literal('restaurant_count DESC')]
 });
 
 Restaurant.findAllWithTagIds = ({ team_id }) =>
@@ -58,13 +58,14 @@ Restaurant.findAllWithTagIds = ({ team_id }) =>
         attributes: ['id']
       }
     ],
-    order:
-      `decisions.id NULLS LAST,
-      vote_count DESC,
-      votes.created_at DESC NULLS LAST,
-      all_decision_count ASC,
-      all_vote_count DESC,
-      name ASC`,
+    order: [
+      [Restaurant.associations.decisions, 'id', 'NULLS LAST'],
+      sequelize.literal('vote_count DESC'),
+      [Restaurant.associations.votes, 'created_at', 'DESC', 'NULLS LAST'],
+      sequelize.literal('all_decision_count ASC'),
+      sequelize.literal('all_vote_count DESC'),
+      ['name', 'ASC'],
+    ],
     where: {
       team_id
     }
@@ -107,9 +108,8 @@ User.getSessionUser = id =>
 Restaurant.hasMany(Vote);
 Restaurant.hasMany(Decision);
 Restaurant.belongsToMany(Tag, {
-  through: 'restaurants_tags'
+  through: RestaurantTag
 });
-Restaurant.hasMany(RestaurantTag);
 
 Role.belongsTo(User);
 Role.belongsTo(Team);
@@ -121,7 +121,7 @@ User.belongsToMany(Team, {
 });
 
 Tag.belongsToMany(Restaurant, {
-  through: 'restaurants_tags'
+  through: RestaurantTag
 });
 Tag.hasMany(RestaurantTag);
 

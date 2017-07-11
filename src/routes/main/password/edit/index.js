@@ -12,29 +12,24 @@ import LayoutContainer from '../../../../components/Layout/LayoutContainer';
 import renderIfLoggedOut from '../../../helpers/renderIfLoggedOut';
 import Edit from './Edit';
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
 
-  path: '/edit',
+  const token = context.query.token;
 
-  action(context) {
-    const state = context.store.getState();
-
-    const token = context.query.token;
-
-    return renderIfLoggedOut(state, () => {
-      if (!token) {
-        return {
-          redirect: '/password/new'
-        };
-      }
-
+  return renderIfLoggedOut(state, () => {
+    if (!token) {
       return {
-        component: (
-          <LayoutContainer path={context.url}>
-            <Edit token={token} />
-          </LayoutContainer>
-        ),
+        redirect: '/password/new'
       };
-    });
-  },
+    }
+
+    return {
+      component: (
+        <LayoutContainer path={context.url}>
+          <Edit token={token} />
+        </LayoutContainer>
+      ),
+    };
+  });
 };

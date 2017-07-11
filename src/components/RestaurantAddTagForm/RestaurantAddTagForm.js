@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import Autosuggest from 'react-autosuggest';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
@@ -31,6 +32,8 @@ export class _RestaurantAddTagForm extends Component {
           }}
           theme={autosuggestTheme}
           onSuggestionSelected={this.props.handleSuggestionSelected}
+          onSuggestionsFetchRequested={() => {}}
+          onSuggestionsClearRequested={() => {}}
           shouldRenderSuggestions={returnTrue}
           ref={a => { this.autosuggest = a; }}
         />

@@ -10,40 +10,30 @@
 import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
 import hasRole from '../../../helpers/hasRole';
-import loadComponent from '../../../helpers/loadComponent';
 import renderIfHasName from '../../helpers/renderIfHasName';
 import render404 from '../../helpers/render404';
+import TeamContainer from './TeamContainer';
 
 const title = 'Team';
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
+  const user = state.user;
+  const team = state.team;
 
-  path: '/team',
-
-  action(context) {
-    const state = context.store.getState();
-    const user = state.user;
-    const team = state.team;
-
-    return renderIfHasName(context, async () => {
-      if (team.id && hasRole(user, team, 'member')) {
-        const TeamContainer = await loadComponent(
-          () => require.ensure([], require => require('./TeamContainer').default, 'team')
-        );
-
-        return {
-          title,
-          chunk: 'team',
-          component: (
-            <LayoutContainer path={context.url}>
-              <TeamContainer />
-            </LayoutContainer>
-          ),
-          map: hasRole(user, team, 'owner')
-        };
-      }
-      return render404;
-    });
-  },
-
+  return renderIfHasName(context, () => {
+    if (team.id && hasRole(user, team, 'member')) {
+      return {
+        title,
+        chunks: ['team'],
+        component: (
+          <LayoutContainer path={context.url}>
+            <TeamContainer />
+          </LayoutContainer>
+        ),
+        map: hasRole(user, team, 'owner')
+      };
+    }
+    return render404;
+  });
 };

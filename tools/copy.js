@@ -29,6 +29,7 @@ async function copy() {
       },
     }, null, 2)),
     copyFile('LICENSE.txt', 'build/LICENSE.txt'),
+    copyFile('yarn.lock', 'build/yarn.lock'),
     copyDir('public', 'build/public'),
     copyFile('.env.prod', 'build/.env'),
     copyFile('database.js', 'build/database.js'),
@@ -62,7 +63,7 @@ async function copy() {
       }
       const end = new Date();
       const time = end.getTime() - start.getTime();
-      console.log(`[${format(end)}] ${event} '${dist}' after ${time} ms`);
+      console.info(`[${format(end)}] ${event} '${dist}' after ${time} ms`);
     });
   }
 }

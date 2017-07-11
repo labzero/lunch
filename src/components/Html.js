@@ -7,7 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import serialize from 'serialize-javascript';
 import config from '../config';
 
@@ -65,14 +66,15 @@ class Html extends Component {
           <meta property="twitter:image" content={`${root}/tile.png`} />
           <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
           <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:400,900" />
+          {scripts.map(script => <link key={script} rel="preload" href={script} as="script" />)}
           <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-          {styles.map(style =>
+          {styles.map(style => (
             <style
               key={style.id}
               id={style.id}
               dangerouslySetInnerHTML={{ __html: style.cssText }}
-            />,
-          )}
+            />
+          ))}
         </head>
         <body>
           <div id="app" dangerouslySetInnerHTML={{ __html: children }} />

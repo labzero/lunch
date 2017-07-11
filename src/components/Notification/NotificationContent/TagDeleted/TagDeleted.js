@@ -1,6 +1,7 @@
 /* eslint-disable css-modules/no-unused-class */
 
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from '../NotificationContent.scss';
 

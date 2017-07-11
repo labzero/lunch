@@ -10,38 +10,29 @@
 import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
 import hasRole from '../../../helpers/hasRole';
-import loadComponent from '../../../helpers/loadComponent';
 import renderIfHasName from '../../helpers/renderIfHasName';
 import render404 from '../../helpers/render404';
+import TagsContainer from './TagsContainer';
 
 const title = 'Tags';
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
+  const user = state.user;
+  const team = state.team;
 
-  path: '/tags',
-
-  action(context) {
-    const state = context.store.getState();
-    const user = state.user;
-    const team = state.team;
-
-    return renderIfHasName(context, async () => {
-      if (team.id && hasRole(user, team)) {
-        const TagsContainer = await loadComponent(
-          () => require.ensure([], require => require('./TagsContainer').default, 'tags')
-        );
-
-        return {
-          title,
-          chunk: 'tags',
-          component: (
-            <LayoutContainer path={context.url}>
-              <TagsContainer title={title} />
-            </LayoutContainer>
-          ),
-        };
-      }
-      return render404;
-    });
-  }
+  return renderIfHasName(context, () => {
+    if (team.id && hasRole(user, team)) {
+      return {
+        title,
+        chunks: ['tags'],
+        component: (
+          <LayoutContainer path={context.url}>
+            <TagsContainer title={title} />
+          </LayoutContainer>
+        ),
+      };
+    }
+    return render404;
+  });
 };

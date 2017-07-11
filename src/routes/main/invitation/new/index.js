@@ -11,19 +11,14 @@ import React from 'react';
 import LayoutContainer from '../../../../components/Layout/LayoutContainer';
 import New from './New';
 
-export default {
+export default (context) => {
+  const email = context.query.email;
 
-  path: '/new',
-
-  action(context) {
-    const email = context.query.email;
-
-    return {
-      component: (
-        <LayoutContainer path={context.url}>
-          <New email={email} />
-        </LayoutContainer>
-      ),
-    };
-  },
+  return {
+    component: (
+      <LayoutContainer path={context.url}>
+        <New email={email} />
+      </LayoutContainer>
+    ),
+  };
 };

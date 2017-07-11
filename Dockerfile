@@ -1,16 +1,17 @@
-FROM node:6.7.0
+FROM node:7.9.0-alpine
 
-# Create app directory
-RUN mkdir -p /usr/src/app
+# Set a working directory
 WORKDIR /usr/src/app
 
-# Bundle app source
-ADD build /usr/src/app/
+COPY ./build/package.json .
+COPY ./build/yarn.lock .
 
-# Install Yarn and Node.js dependencies
-RUN npm install yarn --global --no-progress --silent --depth 0 && \
-    yarn install --production --no-progress
+# Install Node.js dependencies
+RUN yarn install --production --no-progress
 
 EXPOSE 3000
+
+# Copy application files
+COPY ./build .
 
 CMD [ "node", "server.js" ]

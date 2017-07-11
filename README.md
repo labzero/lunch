@@ -31,8 +31,8 @@ For `GOOGLE_CLIENT_*` env variables:
 - Enable the Google+ API, Contacts API, and Google Maps JavaScript API.
 - Go to the Credentials section and create an OAuth client ID.
 - For local development:
-  - Enter `http://local.lunch.pink:3000` and `http://local.lunch.pink:3001` as authorized JavaScript origins
-  - Enter `http://local.lunch.pink:3000/login/google/callback` and `http://local.lunch.pink:3001/login/google/callback` as authorized redirect URIs
+  - Enter `http://local.lunch.pink:3000` as an authorized JavaScript origin
+  - Enter `http://local.lunch.pink:3000/login/google/callback` as an authorized redirect URI
 - Add your deployment target(s) as additional origins/redirect URIs.
 - Go back to the Credentials section and create an API key.
   - Choose "Browser key".

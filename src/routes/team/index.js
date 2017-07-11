@@ -17,14 +17,32 @@ export default {
 
   // Keep in mind, routes are evaluated in order
   children: [
-    require('./home').default,
-    require('./team').default,
-    require('./tags').default,
-    require('./teams').default,
-    require('../login').default,
+    {
+      path: '/',
+      load: () => import(/* webpackChunkName: 'home' */ './home'),
+    },
+    {
+      path: '/team',
+      load: () => import(/* webpackChunkName: 'team' */ './team'),
+    },
+    {
+      path: '/tags',
+      load: () => import(/* webpackChunkName: 'tags' */ './tags'),
+    },
+    {
+      path: '/teams',
+      load: () => import(/* webpackChunkName: 'teams' */ './teams'),
+    },
+    {
+      path: '/login',
+      load: () => import(/* webpackChunkName: 'login' */ '../login'),
+    },
 
     // Wildcard routes, e.g. { path: '*', ... } (must go last)
-    require('../notFound').default,
+    {
+      path: '*',
+      load: () => import(/* webpackChunkName: 'not-found' */ '../not-found'),
+    }
   ],
 
   action: rootAction

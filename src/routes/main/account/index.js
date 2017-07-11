@@ -9,36 +9,26 @@
 
 import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
-import loadComponent from '../../../helpers/loadComponent';
 import redirectToLogin from '../../helpers/redirectToLogin';
+import AccountContainer from './AccountContainer';
 
 const title = 'Account';
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
+  const user = state.user;
 
-  path: '/account',
+  if (user.id) {
+    return {
+      title,
+      chunks: ['account'],
+      component: (
+        <LayoutContainer path={context.url}>
+          <AccountContainer />
+        </LayoutContainer>
+      )
+    };
+  }
 
-  async action(context) {
-    const state = context.store.getState();
-    const user = state.user;
-
-    if (user.id) {
-      const AccountContainer = await loadComponent(
-        () => require.ensure([], require => require('./AccountContainer').default, 'account')
-      );
-
-      return {
-        title,
-        chunk: 'account',
-        component: (
-          <LayoutContainer path={context.url}>
-            <AccountContainer />
-          </LayoutContainer>
-        )
-      };
-    }
-
-    return redirectToLogin(context);
-  },
-
+  return redirectToLogin(context);
 };

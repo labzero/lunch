@@ -76,8 +76,7 @@ describe('api/main/teams', () => {
   describe('POST /', () => {
     describe('before query', () => {
       beforeEach(() =>
-        request(app).post('/').send({ name: 'Something', slug: 'something' })
-      );
+        request(app).post('/').send({ name: 'Something', slug: 'something' }));
 
       it('checks for login', () => {
         expect(loggedInSpy.called).to.be.true;

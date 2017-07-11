@@ -17,6 +17,7 @@ const hostname = host.match(/^([^:]*):?[0-9]{0,}/)[1];
 
 module.exports = {
   port,
+  wsPort: port + 10,
   // API Gateway
   api: {
     // API URL to be used in the client-side code
@@ -26,7 +27,7 @@ module.exports = {
   },
   host,
   hostname,
-  bsHost: process.env.BS_RUNNING ? `${hostname}:3001` : host,
+  bsHost: host,
   domain: `.${hostname}`,
   analytics: {
     // https://analytics.google.com/

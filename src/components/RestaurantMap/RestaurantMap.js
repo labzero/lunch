@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import { GOOGLE_MAP_ZOOM } from '../../constants';
 import googleMapOptions from '../../helpers/googleMapOptions';
@@ -131,7 +132,7 @@ class RestaurantMap extends Component {
           <HereMarker lat={latLng.lat} lng={latLng.lng} />
           {googleInfoWindow}
           {tempMarkerComponent}
-          {items.map((item, index) =>
+          {items.map((item, index) => (
             <RestaurantMarkerContainer
               lat={item.lat}
               lng={item.lng}
@@ -143,7 +144,7 @@ class RestaurantMap extends Component {
               fetch={this.context.fetch}
               insertCss={this.context.insertCss}
             />
-          )}
+          ))}
         </GoogleMap>
         <div className={s.mapSettingsContainer}>
           <RestaurantMapSettingsContainer map={this.map} />

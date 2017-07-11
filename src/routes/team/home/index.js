@@ -1,38 +1,29 @@
 import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
 import hasRole from '../../../helpers/hasRole';
-import loadComponent from '../../../helpers/loadComponent';
 import renderIfHasName from '../../helpers/renderIfHasName';
 import render404 from '../../helpers/render404';
+import HomeContainer from './HomeContainer';
 
 /* eslint-disable global-require */
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
+  const user = state.user;
+  const team = state.team;
 
-  path: '/',
-
-  action(context) {
-    const state = context.store.getState();
-    const user = state.user;
-    const team = state.team;
-
-    return renderIfHasName(context, async () => {
-      if (team.id && hasRole(user, team)) {
-        const HomeContainer = await loadComponent(
-          () => require.ensure([], require => require('./HomeContainer').default, 'home')
-        );
-
-        return {
-          chunk: 'home',
-          component: (
-            <LayoutContainer path={context.url}>
-              <HomeContainer />
-            </LayoutContainer>
-          ),
-          map: true
-        };
-      }
-      return render404;
-    });
-  },
+  return renderIfHasName(context, () => {
+    if (team.id && hasRole(user, team)) {
+      return {
+        chunks: ['home'],
+        component: (
+          <LayoutContainer path={context.url}>
+            <HomeContainer />
+          </LayoutContainer>
+        ),
+        map: true
+      };
+    }
+    return render404;
+  });
 };

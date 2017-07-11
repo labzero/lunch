@@ -12,22 +12,20 @@ import LayoutContainer from '../../components/Layout/LayoutContainer';
 import renderIfLoggedOut from '../helpers/renderIfLoggedOut';
 import LoginContainer from './LoginContainer';
 
-export default {
+function action(context) {
+  const state = context.store.getState();
 
-  path: '/login',
+  const subdomain = context.subdomain;
+  const next = context.query.next;
 
-  action(context) {
-    const state = context.store.getState();
+  return renderIfLoggedOut(state, () => ({
+    chunks: ['login'],
+    component: (
+      <LayoutContainer path={context.url}>
+        <LoginContainer team={subdomain} next={next} />
+      </LayoutContainer>
+    ),
+  }));
+}
 
-    const subdomain = context.subdomain;
-    const next = context.query.next;
-
-    return renderIfLoggedOut(state, () => ({
-      component: (
-        <LayoutContainer path={context.url}>
-          <LoginContainer team={subdomain} next={next} />
-        </LayoutContainer>
-      ),
-    }));
-  },
-};
+export default action;

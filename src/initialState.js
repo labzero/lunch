@@ -1,4 +1,4 @@
-import { host, port } from './config';
+import { host, wsPort } from './config';
 
 const getInitialState = () => ({
   restaurants: {
@@ -46,7 +46,7 @@ const getInitialState = () => ({
     didInvalidate: true,
     items: []
   },
-  wsPort: process.env.BS_RUNNING ? port : 0
+  wsPort: process.env.BS_RUNNING ? wsPort : 0
 });
 
 export default (stateData) => {

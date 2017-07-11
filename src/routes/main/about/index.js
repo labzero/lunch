@@ -8,27 +8,17 @@
  */
 
 import React from 'react';
-import loadComponent from '../../../helpers/loadComponent';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
+import About from './About';
 
 const title = 'About / Privacy';
 
-export default {
-
-  path: '/about',
-
-  action(context) {
-    return loadComponent(
-      () => require.ensure([], require => require('./About').default, 'about')
-    ).then(About => ({
-      title,
-      chunk: 'about',
-      component: (
-        <LayoutContainer path={context.url}>
-          <About />
-        </LayoutContainer>
-      ),
-    }));
-  },
-
-};
+export default (context) => ({
+  title,
+  chunks: ['about'],
+  component: (
+    <LayoutContainer path={context.url}>
+      <About />
+    </LayoutContainer>
+  ),
+});

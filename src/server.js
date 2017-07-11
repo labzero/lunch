@@ -24,9 +24,9 @@ import session from 'express-session';
 import connectSessionSequelize from 'connect-session-sequelize';
 import flash from 'connect-flash';
 import expressJwt, { UnauthorizedError as Jwt401Error } from 'express-jwt';
+import nodeFetch from 'node-fetch';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
-import UniversalRouter from 'universal-router';
 import expressWs from 'express-ws';
 import Honeybadger from 'honeybadger';
 import PrettyError from 'pretty-error';
@@ -40,6 +40,7 @@ import teamRoutes from './routes/team';
 import mainRoutes from './routes/main';
 import createFetch from './createFetch';
 import passport from './passport';
+import routerCreator from './router';
 import assets from './assets.json'; // eslint-disable-line import/no-unresolved
 import configureStore from './store/configureStore';
 import config from './config';
@@ -68,7 +69,7 @@ const accessLogStream = rfs('access.log', {
   path: logDirectory
 });
 
-const httpServer = new HttpServer(app);
+export const wsServer = new HttpServer();
 
 //
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
@@ -96,7 +97,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 app.use(compression());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.resolve(__dirname, 'public')));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -159,6 +160,9 @@ app.use((err, req, res, next) => {
     res.clearCookie('id_token', { domain: config.domain });
     next();
   } else {
+    console.error('[express-jwt-error]', req.cookies.id_token);
+    // `clearCookie`, otherwise user can't use web-app until cookie expires
+    res.clearCookie('id_token');
     next(err);
   }
 });
@@ -202,8 +206,8 @@ app.get('/logout', (req, res) => {
 //
 // Register WebSockets
 // -----------------------------------------------------------------------------
-const wsInstance = expressWs(app, httpServer);
-const wss = wsInstance.getWss();
+const wsInstance = expressWs(app, wsServer);
+export const wss = wsInstance.getWss();
 
 wss.broadcast = (teamId, data) => {
   wss.clients.forEach(client => {
@@ -247,7 +251,7 @@ const render = async (req, res, next) => {
     if (req.user) {
       stateData.user = req.user;
       stateData.teams = await Team.findAll({
-        order: 'created_at ASC',
+        order: [['created_at', 'ASC']],
         where: { id: req.user.roles.map(r => r.team_id) }
       });
       stateData.team = req.team;
@@ -268,7 +272,8 @@ const render = async (req, res, next) => {
     }
     const css = new Set();
 
-    const fetch = createFetch({
+    // Universal HTTP client
+    const fetch = createFetch(nodeFetch, {
       baseUrl: config.api.serverUrl,
       cookie: req.headers.cookie,
     });
@@ -296,9 +301,9 @@ const render = async (req, res, next) => {
 
     let router;
     if (req.subdomain) {
-      router = new UniversalRouter(teamRoutes);
+      router = routerCreator(teamRoutes);
     } else {
-      router = new UniversalRouter(mainRoutes);
+      router = routerCreator(mainRoutes);
     }
 
     const route = await router.resolve({
@@ -306,8 +311,6 @@ const render = async (req, res, next) => {
       path: req.path,
       query: req.query,
       subdomain: req.subdomain,
-      fetch,
-      store
     });
 
     if (route.redirect) {
@@ -337,16 +340,14 @@ const render = async (req, res, next) => {
     data.styles = [
       { id: 'css', cssText: [...css].join('') },
     ];
-    data.scripts = [
-      assets.vendor.js,
-      assets.client.js,
-    ];
-    if (assets[route.chunk]) {
-      data.scripts.push(assets[route.chunk].js);
+    data.scripts = [assets.vendor.js];
+    if (route.chunks) {
+      data.scripts.push(...route.chunks.map(chunk => assets[chunk].js));
     }
     if (route.map) {
       data.scripts.push(assets.map.js);
     }
+    data.scripts.push(assets.client.js);
 
     const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
     res.status(route.status || 200);
@@ -401,7 +402,24 @@ app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
 //
 // Launch the server
 // -----------------------------------------------------------------------------
-httpServer.listen(config.port, () => {
+if (!module.hot) {
+  app.listen(config.port, () => {
+    /* eslint-disable no-console */
+    console.log(`The server is running at http://local.lunch.pink:${config.port}/`);
+  });
+}
+
+wsServer.listen(config.wsPort, () => {
   /* eslint-disable no-console */
-  console.log(`The server is running at http://local.lunch.pink:${config.port}/`);
+  console.log(`The websockets server is running at http://local.lunch.pink:${config.wsPort}/`);
 });
+
+//
+// Hot Module Replacement
+// -----------------------------------------------------------------------------
+if (module.hot) {
+  app.hot = module.hot;
+  module.hot.accept('./router');
+}
+
+export default app;

@@ -11,26 +11,21 @@ import React from 'react';
 import LayoutContainer from '../../../../components/Layout/LayoutContainer';
 import Create from './Create';
 
-export default {
+export default (context) => {
+  const success = context.query.success;
+  const token = context.query.token;
 
-  path: '/',
-
-  action(context) {
-    const success = context.query.success;
-    const token = context.query.token;
-
-    if (!success && !token) {
-      return {
-        redirect: '/invitation/new'
-      };
-    }
-
+  if (!success && !token) {
     return {
-      component: (
-        <LayoutContainer path={context.url}>
-          <Create success={success} token={token} />
-        </LayoutContainer>
-      ),
+      redirect: '/invitation/new'
     };
-  },
+  }
+
+  return {
+    component: (
+      <LayoutContainer path={context.url}>
+        <Create success={success} token={token} />
+      </LayoutContainer>
+    ),
+  };
 };

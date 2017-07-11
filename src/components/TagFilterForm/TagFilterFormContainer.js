@@ -2,6 +2,7 @@ import { connect } from 'react-redux';
 import { getTagUi } from '../../selectors/tagUi';
 import { getTagFilters } from '../../selectors/tagFilters';
 import { getTagExclusions } from '../../selectors/tagExclusions';
+import { getTagIds } from '../../selectors/tags';
 import { makeGetTagList } from '../../selectors';
 import {
   showTagFilterForm,
@@ -18,6 +19,7 @@ import TagFilterForm from './TagFilterForm';
 const mapStateToProps = () => {
   const getTagList = makeGetTagList();
   return (state, ownProps) => {
+    const allTagIds = getTagIds(state);
     const tagUi = getTagUi(state);
     let tagUiForm;
     let addedTags;
@@ -32,6 +34,7 @@ const mapStateToProps = () => {
     const tags = getTagList(state, { addedTags, autosuggestValue });
     return {
       ...ownProps,
+      allTagIds,
       addedTags,
       tags,
       autosuggestValue,

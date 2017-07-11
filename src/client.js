@@ -7,22 +7,20 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import 'isomorphic-fetch';
-import 'custom-event-polyfill';
+import 'whatwg-fetch';
 import es6Promise from 'es6-promise';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import FastClick from 'fastclick';
+import deepForceUpdate from 'react-deep-force-update';
 import queryString from 'query-string';
 import RobustWebSocket from 'robust-websocket';
 import { createPath } from 'history/PathUtils';
-import Router from 'universal-router';
 import App from './components/App';
 import createFetch from './createFetch';
 import configureStore from './store/configureStore';
 import history from './history';
 import { updateMeta } from './DOMUtils';
-import { ErrorReporter, deepForceUpdate } from './devUtils';
+import routerCreator from './router';
 
 /* eslint-disable global-require */
 
@@ -66,7 +64,7 @@ const context = {
     return () => { removeCss.forEach(f => f()); };
   },
   // Universal HTTP client
-  fetch: createFetch({
+  fetch: createFetch(self.fetch, {
     baseUrl: window.App.apiUrl,
   }),
   // Initialize a new Redux store
@@ -124,9 +122,6 @@ let onRenderComplete = function initialRenderComplete() {
   };
 };
 
-// Make taps on links and buttons work fast on mobiles
-FastClick.attach(document.body);
-
 const container = document.getElementById('app');
 let appInstance;
 let currentLocation = history.location;
@@ -138,7 +133,7 @@ if (subdomain) {
   routes = require('./routes/main').default; // eslint-disable-line global-require
 }
 
-const router = new Router(routes);
+const router = routerCreator(routes);
 
 // Re-render the app when window.location changes
 async function onLocationChange(location, action) {
@@ -180,11 +175,7 @@ async function onLocationChange(location, action) {
       () => onRenderComplete(route, location),
     );
   } catch (error) {
-    // Display the error in full-screen for development mode
     if (__DEV__) {
-      appInstance = null;
-      document.title = `Error: ${error.message}`;
-      ReactDOM.render(<ErrorReporter error={error} />, container);
       throw error;
     }
 
@@ -202,29 +193,12 @@ async function onLocationChange(location, action) {
 history.listen(onLocationChange);
 onLocationChange(currentLocation);
 
-// Handle errors that might happen after rendering
-// Display the error in full-screen for development mode
-if (__DEV__) {
-  window.addEventListener('error', (event) => {
-    appInstance = null;
-    document.title = `Runtime Error: ${event.error.message}`;
-    ReactDOM.render(<ErrorReporter error={event.error} />, container);
-  });
-}
-
 // Enable Hot Module Replacement (HMR)
 if (module.hot) {
   const hotUpdate = () => {
     if (appInstance) {
-      try {
-        // Force-update the whole tree, including components that refuse to update
-        deepForceUpdate(appInstance);
-      } catch (error) {
-        appInstance = null;
-        document.title = `Hot Update Error: ${error.message}`;
-        ReactDOM.render(<ErrorReporter error={error} />, container);
-        return;
-      }
+      // Force-update the whole tree, including components that refuse to update
+      deepForceUpdate(appInstance);
     }
 
     onLocationChange(currentLocation);

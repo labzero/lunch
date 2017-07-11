@@ -31,14 +31,11 @@ describe('routes/team/tags', () => {
 
   describe('when user is not on team', () => {
     let result;
-    beforeEach((done) => {
+    beforeEach(() => {
       render404 = 'render404';
       landingRewireApi.__Rewire__('render404', render404);
       landingRewireApi.__Rewire__('hasRole', () => false);
-      landing.action(context).then(r => {
-        result = r;
-        done();
-      });
+      result = landing(context);
     });
 
     it('renders 404', () => {
@@ -48,16 +45,13 @@ describe('routes/team/tags', () => {
 
   describe('when user is on team', () => {
     let result;
-    beforeEach((done) => {
+    beforeEach(() => {
       landingRewireApi.__Rewire__('hasRole', () => true);
-      landing.action(context).then(r => {
-        result = r;
-        done();
-      });
+      result = landing(context);
     });
 
     it('renders team', () => {
-      expect(result).to.have.keys('component', 'chunk', 'title');
+      expect(result).to.have.keys('component', 'chunks', 'title');
     });
   });
 });

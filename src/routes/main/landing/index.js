@@ -9,29 +9,18 @@
 
 import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
-import loadComponent from '../../../helpers/loadComponent';
 import renderIfLoggedOut from '../../helpers/renderIfLoggedOut';
+import Landing from './Landing';
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
 
-  path: '/',
-
-  async action(context) {
-    const state = context.store.getState();
-
-    return renderIfLoggedOut(state, async () => {
-      const Landing = await loadComponent(
-        () => require.ensure([], require => require('./Landing').default, 'landing')
-      );
-
-      return {
-        chunk: 'landing',
-        component: (
-          <LayoutContainer path={context.url}>
-            <Landing />
-          </LayoutContainer>
-        ),
-      };
-    });
-  },
+  return renderIfLoggedOut(state, () => ({
+    chunks: ['landing'],
+    component: (
+      <LayoutContainer path={context.url}>
+        <Landing />
+      </LayoutContainer>
+    ),
+  }));
 };

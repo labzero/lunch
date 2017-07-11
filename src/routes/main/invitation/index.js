@@ -9,16 +9,19 @@
 
 /* eslint-disable global-require */
 
-// The top-level (parent) route
-export default {
-  path: '/invitation',
+export default [
+  {
+    path: '/',
+    action: require('./create').default,
+  },
+  {
+    path: '/new',
+    action: require('./new').default,
+  },
 
-  // Keep in mind, routes are evaluated in order
-  children: [
-    require('./create').default,
-    require('./new').default,
-
-    // Wildcard routes, e.g. { path: '*', ... } (must go last)
-    require('../../notFound').default,
-  ]
-};
+  // Wildcard routes, e.g. { path: '*', ... } (must go last)
+  {
+    path: '*',
+    load: () => import(/* webpackChunkName: 'not-found' */ '../../not-found'),
+  }
+];

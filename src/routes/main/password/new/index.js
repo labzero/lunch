@@ -12,21 +12,16 @@ import LayoutContainer from '../../../../components/Layout/LayoutContainer';
 import renderIfLoggedOut from '../../../helpers/renderIfLoggedOut';
 import New from './New';
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
 
-  path: '/new',
+  const email = context.query.email;
 
-  action(context) {
-    const state = context.store.getState();
-
-    const email = context.query.email;
-
-    return renderIfLoggedOut(state, () => ({
-      component: (
-        <LayoutContainer path={context.url}>
-          <New email={email} />
-        </LayoutContainer>
-      ),
-    }));
-  },
+  return renderIfLoggedOut(state, () => ({
+    component: (
+      <LayoutContainer path={context.url}>
+        <New email={email} />
+      </LayoutContainer>
+    ),
+  }));
 };

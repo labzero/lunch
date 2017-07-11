@@ -17,21 +17,53 @@ export default {
 
   // Keep in mind, routes are evaluated in order
   children: [
-    require('./landing').default,
-    require('./teams').default,
-    require('./newTeam').default,
-    require('./account').default,
-    require('./welcome').default,
-    require('./invitation').default,
-    require('./password').default,
-    require('./users').default,
-    require('./about').default,
-    require('../login').default,
+    {
+      path: '/',
+      load: () => import(/* webpackChunkName: 'landing' */ './landing'),
+    },
+    {
+      path: '/teams',
+      load: () => import(/* webpackChunkName: 'teams' */ './teams'),
+    },
+    {
+      path: '/new-team',
+      load: () => import(/* webpackChunkName: 'new-team' */ './new-team'),
+    },
+    {
+      path: '/account',
+      load: () => import(/* webpackChunkName: 'account' */ './account'),
+    },
+    {
+      path: '/welcome',
+      load: () => import(/* webpackChunkName: 'welcome' */ './welcome'),
+    },
+    {
+      path: '/invitation',
+      children: require('./invitation').default,
+    },
+    {
+      path: '/password',
+      children: require('./password').default,
+    },
+    {
+      path: '/users',
+      children: require('./users').default,
+    },
+    {
+      path: '/about',
+      load: () => import(/* webpackChunkName: 'about' */ './about'),
+    },
+    {
+      path: '/login',
+      load: () => import(/* webpackChunkName: 'login' */ '../login'),
+    },
 
     // Wildcard routes, e.g. { path: '*', ... } (must go last)
-    require('../notFound').default,
+    {
+      path: '*',
+      load: () => import(/* webpackChunkName: 'not-found' */ '../not-found'),
+    }
   ],
 
   action: rootAction
-
 };

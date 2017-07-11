@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 /**
  * React Starter Kit (https://www.reactstarterkit.com/)
  *
@@ -7,7 +8,7 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React, { PropTypes } from 'react';
+import React from 'react';
 import { intlShape } from 'react-intl';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import Button from 'react-bootstrap/lib/Button';

@@ -7,7 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React, { Children, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Children } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import IntlProviderContainer from './IntlProvider/IntlProviderContainer';
 

@@ -12,29 +12,24 @@ import LayoutContainer from '../../../../components/Layout/LayoutContainer';
 import renderIfLoggedOut from '../../../helpers/renderIfLoggedOut';
 import Create from './Create';
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
 
-  path: '/',
+  const success = context.query.success;
 
-  action(context) {
-    const state = context.store.getState();
-
-    const success = context.query.success;
-
-    return renderIfLoggedOut(state, () => {
-      if (!success) {
-        return {
-          redirect: '/password/new'
-        };
-      }
-
+  return renderIfLoggedOut(state, () => {
+    if (!success) {
       return {
-        component: (
-          <LayoutContainer path={context.url}>
-            <Create success={success} />
-          </LayoutContainer>
-        ),
+        redirect: '/password/new'
       };
-    });
-  },
+    }
+
+    return {
+      component: (
+        <LayoutContainer path={context.url}>
+          <Create success={success} />
+        </LayoutContainer>
+      ),
+    };
+  });
 };

@@ -9,36 +9,26 @@
 
 import React from 'react';
 import LayoutContainer from '../../../components/Layout/LayoutContainer';
-import loadComponent from '../../../helpers/loadComponent';
 import redirectToLogin from '../../helpers/redirectToLogin';
+import WelcomeContainer from './WelcomeContainer';
 
 const title = 'Welcome!';
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
+  const user = state.user;
 
-  path: '/welcome',
+  if (user.id) {
+    return {
+      title,
+      chunks: ['welcome'],
+      component: (
+        <LayoutContainer path={context.url}>
+          <WelcomeContainer next={context.query.next} team={context.query.team} />
+        </LayoutContainer>
+      )
+    };
+  }
 
-  async action(context) {
-    const state = context.store.getState();
-    const user = state.user;
-
-    if (user.id) {
-      const WelcomeContainer = await loadComponent(
-        () => require.ensure([], require => require('./WelcomeContainer').default, 'welcome')
-      );
-
-      return {
-        title,
-        chunk: 'welcome',
-        component: (
-          <LayoutContainer path={context.url}>
-            <WelcomeContainer next={context.query.next} team={context.query.team} />
-          </LayoutContainer>
-        )
-      };
-    }
-
-    return redirectToLogin(context);
-  },
-
+  return redirectToLogin(context);
 };

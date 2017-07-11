@@ -9,11 +9,4 @@
 
 import render404 from '../helpers/render404';
 
-export default {
-
-  path: '*',
-
-  action() {
-    return render404;
-  },
-};
+export default () => render404;

@@ -11,24 +11,19 @@ import hasRole from '../../../helpers/hasRole';
 import renderIfHasName from '../../helpers/renderIfHasName';
 import render404 from '../../helpers/render404';
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
+  const host = state.host;
+  const team = state.team;
+  const user = state.user;
 
-  path: '/teams',
-
-  action(context) {
-    const state = context.store.getState();
-    const host = state.host;
-    const team = state.team;
-    const user = state.user;
-
-    return renderIfHasName(context, () => {
-      if (team.id && hasRole(user, team)) {
-        return {
-          redirect: `//${host}/teams`,
-          status: 301
-        };
-      }
-      return render404;
-    });
-  }
+  return renderIfHasName(context, () => {
+    if (team.id && hasRole(user, team)) {
+      return {
+        redirect: `//${host}/teams`,
+        status: 301
+      };
+    }
+    return render404;
+  });
 };

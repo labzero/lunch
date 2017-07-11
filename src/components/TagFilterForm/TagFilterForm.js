@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import Autosuggest from 'react-autosuggest';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import TagContainer from '../Tag/TagContainer';
@@ -24,6 +25,7 @@ class TagFilterForm extends Component {
     const {
       addByName,
       addedTags,
+      allTagIds,
       autosuggestValue,
       exclude,
       handleSuggestionSelected,
@@ -38,7 +40,7 @@ class TagFilterForm extends Component {
     let form;
     let showButton;
 
-    if (!tags.length) {
+    if (!allTagIds.length) {
       return null;
     }
 
@@ -57,6 +59,8 @@ class TagFilterForm extends Component {
             }}
             theme={autosuggestTheme}
             onSuggestionSelected={handleSuggestionSelected}
+            onSuggestionsFetchRequested={() => {}}
+            onSuggestionsClearRequested={() => {}}
             shouldRenderSuggestions={returnTrue}
             ref={a => { this.autosuggest = a; }}
           />
@@ -98,6 +102,7 @@ class TagFilterForm extends Component {
 TagFilterForm.propTypes = {
   exclude: PropTypes.bool,
   addByName: PropTypes.func.isRequired,
+  allTagIds: PropTypes.array.isRequired,
   handleSuggestionSelected: PropTypes.func.isRequired,
   removeTag: PropTypes.func.isRequired,
   showForm: PropTypes.func.isRequired,

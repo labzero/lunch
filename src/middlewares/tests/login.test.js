@@ -84,8 +84,7 @@ describe('middlewares/login', () => {
 
     describe('when team is in querystring', () => {
       beforeEach(() =>
-        request(app).get('/google?team=labzero')
-      );
+        request(app).get('/google?team=labzero'));
 
       it('adds team to state', () => {
         expect(authenticateStub.calledWith('google', match({ state: JSON.stringify({ team: 'labzero' }) }))).to.be.true;
