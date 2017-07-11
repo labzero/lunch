@@ -8,38 +8,60 @@ describe MembersService do
   it { expect(subject).to respond_to(:report_disabled?) }
 
   describe '`report_disabled?` method' do
-    let(:report_flags) {[5, 7]}
-    let(:report_disabled?) {subject.report_disabled?(member_id, report_flags)}
-
-    it 'should return nil if there was an API error' do
-      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(RestClient::InternalServerError)
-      expect(report_disabled?).to eq(nil)
-    end
-    it 'should return nil if there was a connection error' do
-      expect_any_instance_of(RestClient::Resource).to receive(:get).and_raise(Errno::ECONNREFUSED)
-      expect(report_disabled?).to eq(nil)
+    let(:member_id) { double('member id') }
+    let(:report_flags) { Array.new(2){rand(1..14)} }
+    let(:call_method) { subject.report_disabled?(member_id, report_flags)}
+    before do
+      allow(subject).to receive(:global_disabled_reports).and_return([])
+      allow(subject).to receive(:disabled_reports_for_member).and_return([])
     end
 
-    describe 'hitting the MAPI endpoint' do
-      let(:overlapping_response) {[7, 9].to_json}
-      let(:non_overlapping_response) {[2, 9].to_json}
+    it 'calls `global_disabled_reports`' do
+      expect(subject).to receive(:global_disabled_reports)
+      call_method
+    end
+    it 'calls `disabled_reports_for_member` with the member_id' do
+      expect(subject).to receive(:disabled_reports_for_member).with(member_id)
+      call_method
+    end
+    it 'returns nil if `global_disabled_reports` returns nil' do
+      allow(subject).to receive(:global_disabled_reports).and_return(nil)
+      expect(call_method).to be nil
+    end
+    it 'returns nil if `disabled_reports_for_member` returns nil' do
+      allow(subject).to receive(:disabled_reports_for_member).and_return(nil)
+      expect(call_method).to be nil
+    end
+    it 'returns true if the result of `global_disabled_reports` overlaps with the passed report_flags' do
+      allow(subject).to receive(:global_disabled_reports).and_return([report_flags.sample])
+      expect(call_method).to be true
+    end
+    it 'returns true if the result of `disabled_reports_for_member` overlaps with the passed report_flags' do
+      allow(subject).to receive(:disabled_reports_for_member).and_return([report_flags.sample])
+      expect(call_method).to be true
+    end
+    it 'returns false if neither the result of `global_disabled_reports` nor the result of `disabled_reports_for_member` overlaps with the passed report_flags' do
+      expect(call_method).to be false
+    end
+  end
 
-      before do
-        allow(request_object).to receive(:get).and_return(response_object)
-        allow_any_instance_of(RestClient::Resource).to receive(:[]).with("member/#{member_id}/disabled_reports").and_return(request_object)
-      end
-      it 'returns true if any of the values it was passed in the report_flags array match any values returned by MAPI' do
-        expect(response_object).to receive(:body).and_return(overlapping_response)
-        expect(report_disabled?).to be(true)
-      end
-      it 'returns false if none of the values it was passed in the report_flags array match values returned by MAPI' do
-        expect(response_object).to receive(:body).and_return(non_overlapping_response)
-        expect(report_disabled?).to be(false)
-      end
-      it 'returns false if the MAPI endpoint passes back an empty array' do
-        expect(response_object).to receive(:body).and_return([].to_json)
-        expect(report_disabled?).to be(false)
-      end
+  describe 'the `disabled_reports_for_member` method' do
+    let(:member_id) { double('member id') }
+    let(:results) { double('some results') }
+    let(:call_method) { subject.disabled_reports_for_member(member_id) }
+
+    it_behaves_like 'a MAPI backed service object method', :disabled_reports_for_member, rand(1000..9999), :get, nil, true
+    it 'calls `get_json` with the endpoint name' do
+      expect(subject).to receive(:get_json).with(:disabled_reports_for_member, anything)
+      call_method
+    end
+    it 'calls `get_json` with the proper endpoint' do
+      expect(subject).to receive(:get_json).with(anything, "member/#{member_id}/disabled_reports")
+      call_method
+    end
+    it 'returns the result of `get_json`' do
+      allow(subject).to receive(:get_json).and_return(results)
+      expect(call_method).to eq(results)
     end
   end
 

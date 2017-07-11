@@ -262,6 +262,19 @@ Then(/^I should be on the edit page for that early shutoff$/) do
   expect(page.find(".rules-early-shutoff-form input[name='early_shutoff_request[early_shutoff_date]']", visible: :hidden).value).to eq(@early_shutoff_date.iso8601)
 end
 
+When(/^I change the member selector to the (\d) value on the data visibility web flags page$/) do |selection|
+  member_selection_node = page.find('.data-visibility-select-member select')
+  member_selection_node.click
+  member_option_node = member_selection_node.all('option')[selection.to_i]
+  @data_visibility_member_id = member_option_node.value
+  member_option_node.click
+end
+
+Then(/^I should see the data visibility web flags page for that member$/) do
+  step 'I should see 6 report tables with multiple data rows'
+  expect(page.find('.data-visibility-select-member select').value).to eq(@data_visibility_member_id)
+end
+
 def translate_tab_title(nav)
   case nav
   when 'daily limits'

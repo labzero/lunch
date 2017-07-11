@@ -99,10 +99,15 @@ class Admin::DataVisibilityController < Admin::BaseController
     @can_edit_data_visibility = policy(:web_admin).edit_data_visibility?
   end
 
+  # GET
   def view_flags
-    # TODO: look for a member id parameter as part of MEM-2455. If found, look for member-specific flags. Otherwise, fetch global flags
+    member_id = params[:member_id] || 'all'
     members_service = MembersService.new(request)
-    disabled_ids = members_service.global_disabled_reports
+    disabled_ids =  if member_id == 'all'
+      members_service.global_disabled_reports
+    else
+      members_service.disabled_reports_for_member(member_id)
+    end
     members = members_service.all_members
     raise 'There has been an error and Admin::DataVisibilityController#view_flags has encountered nil. Check error logs.' if disabled_ids.nil? || members.nil?
     @account_table = data_visibility_table(disabled_ids, [:account_summary, :authorizations, :settlement_transaction_account, :investments])
@@ -113,7 +118,7 @@ class Admin::DataVisibilityController < Admin::BaseController
     @securities_table = data_visibility_table(disabled_ids, [:securities_transactions, :cash_projections, :current_securities_position, :monthly_securities_position, :securities_services])
 
     @member_dropdown = {
-      default_value: 'all',
+      default_value: member_id,
       options: [
         [ t('admin.data_visibility.all_members'), 'all' ]
       ]

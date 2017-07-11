@@ -35,9 +35,13 @@ class MembersService < MAPIService
   SECURITIESBILLSTATEMENT = 33
 
   def report_disabled?(member_id, report_flags)
-    if disabled_flags = get_json(:report_disabled, "member/#{member_id}/disabled_reports")
-      (disabled_flags & report_flags).length > 0
-    end
+    global_flags = global_disabled_reports
+    member_flags = disabled_reports_for_member(member_id)
+    ((global_flags + member_flags) & report_flags).length > 0 if global_flags && member_flags
+  end
+
+  def disabled_reports_for_member(member_id)
+    get_json(:disabled_reports_for_member, "member/#{member_id}/disabled_reports")
   end
 
   def global_disabled_reports

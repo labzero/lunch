@@ -1416,7 +1416,7 @@ module MAPI
         # Global Disabled Reports
         relative_get '/disabled_reports' do
           MAPI::Services::Member.rescued_json_response(self) do
-            MAPI::Services::Member::DisabledReports.disabled_report_ids(self)
+            MAPI::Services::Member::DisabledReports.global_disabled_ids(self)
           end
         end
 
@@ -1424,7 +1424,7 @@ module MAPI
         relative_get '/:id/disabled_reports' do
           MAPI::Services::Member.rescued_json_response(self) do
             member_id = params[:id]
-            MAPI::Services::Member::DisabledReports.disabled_report_ids(self, member_id)
+            MAPI::Services::Member::DisabledReports.disabled_ids_for_member(self, member_id)
           end
         end
 

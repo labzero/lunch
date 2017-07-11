@@ -3,7 +3,8 @@
   %h1= t('admin.data_visibility.title')
   %section
     %h2= t('admin.data_visibility.member_selector')
-    = select_tag('data-visibility-member-dropdown', options_for_select(@member_dropdown[:options], @member_dropdown[:default_value]) )
+    = form_tag data_visibility_flags_path, method: :get, class: 'data-visibility-select-member' do
+      = select_tag(:member_id, options_for_select(@member_dropdown[:options], @member_dropdown[:default_value]) )
   %section
     %h2= t('admin.data_visibility.report_visibility')
     =render 'data_visibility_flags_table_section', title: t('reports.your_account.title'), table_data: @account_table

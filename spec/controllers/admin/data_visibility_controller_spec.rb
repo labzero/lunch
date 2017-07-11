@@ -30,7 +30,7 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
   end
 
   describe 'GET view_flags' do
-    let(:members_service) { instance_double(MembersService, global_disabled_reports: [], all_members: []) }
+    let(:members_service) { instance_double(MembersService, global_disabled_reports: [], disabled_reports_for_member: [], all_members: []) }
     let(:call_action) { get :view_flags }
 
     before do
@@ -42,21 +42,43 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
       expect(MembersService).to receive(:new).and_return(members_service)
       call_action
     end
-    it 'calls `global_disabled_reports` on the instance of MembersService' do
-      expect(members_service).to receive(:global_disabled_reports).and_return([])
-      call_action
-    end
     it 'calls `all_members` on the instance of MembersService' do
       expect(members_service).to receive(:all_members).and_return([])
       call_action
     end
-    it 'raises an error if `global_disabled_reports` returns nil' do
-      allow(members_service).to receive(:global_disabled_reports).and_return(nil)
-      expect{call_action}.to raise_error('There has been an error and Admin::DataVisibilityController#view_flags has encountered nil. Check error logs.')
-    end
     it 'raises an error if `all_members` returns nil' do
       allow(members_service).to receive(:all_members).and_return(nil)
       expect{call_action}.to raise_error('There has been an error and Admin::DataVisibilityController#view_flags has encountered nil. Check error logs.')
+    end
+    context 'when a member_id param is not present' do
+      it 'calls `global_disabled_reports` on the instance of MembersService' do
+        expect(members_service).to receive(:global_disabled_reports).and_return([])
+        call_action
+      end
+      it 'raises an error if `global_disabled_reports` returns nil' do
+        allow(members_service).to receive(:global_disabled_reports).and_return(nil)
+        expect{call_action}.to raise_error('There has been an error and Admin::DataVisibilityController#view_flags has encountered nil. Check error logs.')
+      end
+      it 'sets a `@member_dropdown` instance variable with a `default_value` of `all`' do
+        call_action
+        expect(assigns[:member_dropdown][:default_value]).to eq('all')
+      end
+    end
+    context 'when a member_id param is present' do
+      let(:member_id) { SecureRandom.hex }
+      let(:call_action) { get :view_flags, member_id: member_id}
+      it 'calls `disabled_reports_for_member` with the member_id on the instance of MembersService' do
+        expect(members_service).to receive(:disabled_reports_for_member).with(member_id).and_return([])
+        call_action
+      end
+      it 'raises an error if `disabled_reports_for_member` returns nil' do
+        allow(members_service).to receive(:disabled_reports_for_member).and_return(nil)
+        expect{call_action}.to raise_error('There has been an error and Admin::DataVisibilityController#view_flags has encountered nil. Check error logs.')
+      end
+      it 'sets a `@member_dropdown` instance variable with a `default_value` that is the member_id' do
+        call_action
+        expect(assigns[:member_dropdown][:default_value]).to eq(member_id)
+      end
     end
     describe 'setting the view instance variables for the tables' do
       let(:disabled_web_flags) { double('disabled web flags') }
@@ -91,10 +113,6 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
       end
     end
     describe 'setting the `@member_dropdown` view variable' do
-      it 'has a `default_value` of `all`' do
-        call_action
-        expect(assigns[:member_dropdown][:default_value]).to eq('all')
-      end
       describe 'the `options` value' do
         let(:member) {{
           name: instance_double(String),
