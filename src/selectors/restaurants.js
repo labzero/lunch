@@ -21,3 +21,5 @@ export const getTagsForRestaurant = createSelector(
   [getRestaurantById],
   (restaurant) => restaurant.tags
 );
+
+export const getNameFilter = state => state.restaurants.nameFilter;

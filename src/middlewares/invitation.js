@@ -1,10 +1,10 @@
 import { Router } from 'express';
+import querystring from 'querystring';
 import { bsHost } from '../config';
 import generateToken from '../helpers/generateToken';
 import generateUrl from '../helpers/generateUrl';
 import { Invitation, Role, User } from '../models';
 import transporter from '../mailers/transporter';
-import querystring from 'querystring';
 
 const sendConfirmation = async (req, email, token) => {
   await transporter.sendMail({

@@ -1,71 +1,40 @@
 import { connect } from 'react-redux';
-import { getTagUi } from '../../selectors/tagUi';
+import { getRestaurantIds } from '../../selectors/restaurants';
 import { getTagFilters } from '../../selectors/tagFilters';
 import { getTagExclusions } from '../../selectors/tagExclusions';
-import { getTagIds } from '../../selectors/tags';
-import { makeGetTagList } from '../../selectors';
-import {
-  showTagFilterForm,
-  hideTagFilterForm,
-  setTagFilterAutosuggestValue,
-  showTagExclusionForm,
-  hideTagExclusionForm,
-  setTagExclusionAutosuggestValue,
-} from '../../actions/tagUi';
-import { addTagFilter, removeTagFilter } from '../../actions/tagFilters';
-import { addTagExclusion, removeTagExclusion } from '../../actions/tagExclusions';
+import { getTags } from '../../selectors/tags';
+import { addTagFilter, clearTagFilters, removeTagFilter } from '../../actions/tagFilters';
+import { addTagExclusion, clearTagExclusions, removeTagExclusion } from '../../actions/tagExclusions';
 import TagFilterForm from './TagFilterForm';
 
-const mapStateToProps = () => {
-  const getTagList = makeGetTagList();
-  return (state, ownProps) => {
-    const allTagIds = getTagIds(state);
-    const tagUi = getTagUi(state);
-    let tagUiForm;
-    let addedTags;
-    if (ownProps.exclude) {
-      tagUiForm = tagUi.exclusionForm;
-      addedTags = getTagExclusions(state);
-    } else {
-      tagUiForm = tagUi.filterForm;
-      addedTags = getTagFilters(state);
-    }
-    const autosuggestValue = tagUiForm.autosuggestValue || '';
-    const tags = getTagList(state, { addedTags, autosuggestValue });
-    return {
-      ...ownProps,
-      allTagIds,
-      addedTags,
-      tags,
-      autosuggestValue,
-      tagUiForm
-    };
+const mapStateToProps = (state, ownProps) => {
+  let addedTags;
+  if (ownProps.exclude) {
+    addedTags = getTagExclusions(state);
+  } else {
+    addedTags = getTagFilters(state);
+  }
+  return {
+    ...ownProps,
+    allTags: getTags(state),
+    addedTags,
+    restaurantIds: getRestaurantIds(state),
   };
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  showForm() {
+  clearTags() {
     if (ownProps.exclude) {
-      dispatch(showTagExclusionForm());
+      dispatch(clearTagExclusions());
     } else {
-      dispatch(showTagFilterForm());
+      dispatch(clearTagFilters());
     }
   },
-  hideForm() {
+  addTag(id) {
     if (ownProps.exclude) {
-      dispatch(hideTagExclusionForm());
+      dispatch(addTagExclusion(id));
     } else {
-      dispatch(hideTagFilterForm());
-    }
-  },
-  setAutosuggestValue(event, { newValue, method }) {
-    if (method === 'up' || method === 'down') {
-      return;
-    }
-    if (ownProps.exclude) {
-      dispatch(setTagExclusionAutosuggestValue(newValue));
-    } else {
-      dispatch(setTagFilterAutosuggestValue(newValue));
+      dispatch(addTagFilter(id));
     }
   },
   handleSuggestionSelected(event, { suggestion, method }) {

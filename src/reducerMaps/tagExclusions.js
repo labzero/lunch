@@ -10,5 +10,5 @@ export default new Map([
   [ActionTypes.REMOVE_TAG_EXCLUSION, (state, action) =>
     state.filter(t => t !== action.id)
   ],
-  [ActionTypes.HIDE_TAG_EXCLUSION_FORM, () => []]
+  [ActionTypes.CLEAR_TAG_EXCLUSIONS, () => []]
 ]);

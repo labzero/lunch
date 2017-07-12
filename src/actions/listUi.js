@@ -49,3 +49,10 @@ export function hideEditNameForm(id) {
     });
   };
 }
+
+export function setFlipMove(val) {
+  return {
+    type: ActionTypes.SET_FLIP_MOVE,
+    val,
+  };
+}

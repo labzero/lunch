@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import NameFilterFormContainer from '../../../components/NameFilterForm/NameFilterFormContainer';
 import RestaurantMapContainer from '../../../components/RestaurantMap/RestaurantMapContainer';
 import RestaurantListContainer from '../../../components/RestaurantList/RestaurantListContainer';
 import RestaurantAddFormContainer from '../../../components/RestaurantAddForm/RestaurantAddFormContainer';
@@ -71,6 +72,7 @@ export class _Home extends Component {
         <RestaurantMapContainer />
         <section className={s.forms}>
           {user.id && <RestaurantAddFormContainer />}
+          <NameFilterFormContainer />
           <TagFilterFormContainer />
           <TagFilterFormContainer exclude />
         </section>

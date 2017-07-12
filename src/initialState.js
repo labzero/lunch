@@ -2,8 +2,9 @@ import { host, wsPort } from './config';
 
 const getInitialState = () => ({
   restaurants: {
-    isFetching: false,
     didInvalidate: true,
+    nameFilter: '',
+    isFetching: false,
     items: []
   },
   decision: {
@@ -15,7 +16,9 @@ const getInitialState = () => ({
   host,
   notifications: [],
   modals: {},
-  listUi: {},
+  listUi: {
+    flipMove: true,
+  },
   locale: 'en',
   mapUi: {
     infoWindow: {},
@@ -29,10 +32,6 @@ const getInitialState = () => ({
     isFetching: false,
     didInvalidate: true,
     items: []
-  },
-  tagUi: {
-    filterForm: {},
-    exclusionForm: {}
   },
   team: {},
   teams: {

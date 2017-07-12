@@ -7,6 +7,10 @@ export function addTagExclusion(id) {
   };
 }
 
+export function clearTagExclusions() {
+  return { type: ActionTypes.CLEAR_TAG_EXCLUSIONS };
+}
+
 export function removeTagExclusion(id) {
   return {
     type: ActionTypes.REMOVE_TAG_EXCLUSION,

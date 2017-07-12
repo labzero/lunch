@@ -1,0 +1,38 @@
+@import '../../styles/_mixins.scss';
+@import '../../styles/_variables.scss';
+
+.root {
+  display: inline-block;
+  margin-right: 1em;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  button {
+    border: $default-border;
+    border-radius: $button-border-radius;
+  }
+}
+
+.form {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: -10px;
+
+  > * {
+    margin-bottom: 10px;
+  }
+}
+
+.container {
+  @include autosuggest-container;
+
+  margin-right: .5em;
+}
+
+.input {
+  border: $default-border;
+  box-shadow: inset 5px 5px 0 rgba(128, 0, 0, .1);
+}

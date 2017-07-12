@@ -290,4 +290,11 @@ export default new Map([
       }
     })
   ],
+  [ActionTypes.SET_NAME_FILTER, (state, action) =>
+    update(state, {
+      nameFilter: {
+        $set: action.val
+      }
+    })
+  ]
 ]);

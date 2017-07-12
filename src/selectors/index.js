@@ -3,6 +3,7 @@ import hasRole from '../helpers/hasRole';
 import { isDecisionLoading } from './decisions';
 import {
   areRestaurantsLoading,
+  getNameFilter,
   getRestaurantIds,
   getRestaurantEntities,
   getRestaurantById
@@ -51,14 +52,19 @@ export const getMapItems = createSelector(
 );
 
 export const getFilteredRestaurants = createSelector(
-  getRestaurantIds, getTagFilters, getTagExclusions, getRestaurantEntities,
-  (restaurantIds, tagFilters, tagExclusions, restaurantEntities) => {
-    if (tagFilters.length === 0 && tagExclusions.length === 0) { return restaurantIds; }
+  getRestaurantIds, getNameFilter, getTagFilters, getTagExclusions, getRestaurantEntities,
+  (restaurantIds, nameFilter, tagFilters, tagExclusions, restaurantEntities) => {
+    if (
+      tagFilters.length === 0 &&
+      tagExclusions.length === 0 &&
+      nameFilter.length === 0
+    ) { return restaurantIds; }
     return restaurantIds.filter(id =>
       (tagFilters.length === 0 || tagFilters.every(tagFilter =>
         restaurantEntities[id].tags.includes(tagFilter))) &&
       (tagExclusions.length === 0 || tagExclusions.every(tagExclusion =>
-        !restaurantEntities[id].tags.includes(tagExclusion)))
+        !restaurantEntities[id].tags.includes(tagExclusion))) &&
+      restaurantEntities[id].name.toLowerCase().indexOf(nameFilter) > -1
     );
   }
 );

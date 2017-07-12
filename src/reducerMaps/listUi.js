@@ -52,5 +52,12 @@ export default new Map([
     update(state, {
       $apply: target => setOrMerge(target, action.id, { isEditingName: false })
     })
+  ],
+  [ActionTypes.SET_FLIP_MOVE, (state, action) =>
+    update(state, {
+      flipMove: {
+        $set: action.val,
+      }
+    })
   ]
 ]);

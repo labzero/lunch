@@ -14,37 +14,82 @@ autosuggestTheme.input = 'form-control';
 
 const returnTrue = () => true;
 
+const escapeRegexCharacters = (str) => str.replace(/[.*+?^${}()|[\]\\]/gi, '\\$&');
+
 class TagFilterForm extends Component {
-  componentDidUpdate(prevProps) {
-    if (this.props.tagUiForm.shown !== prevProps.tagUiForm.shown && this.props.tagUiForm.shown) {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      autosuggestValue: '',
+    };
+
+    this.state.shown = !!props.addedTags.length;
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.shown !== prevState.shown && this.state.shown) {
       this.autosuggest.input.focus();
     }
+  }
+
+  setAutosuggestValue = (event, { newValue, method }) => {
+    if (method === 'up' || method === 'down') {
+      return;
+    }
+    this.setState(() => ({
+      autosuggestValue: newValue
+    }));
+  };
+
+  handleSuggestionSelected = (event, { suggestion, method }) => {
+    if (method === 'enter') {
+      event.preventDefault();
+    }
+    this.props.addTag(suggestion.id);
+  }
+
+  hideForm = () => {
+    this.props.clearTags();
+    this.setState(() => ({
+      autosuggestValue: '',
+      shown: false,
+    }));
+  }
+
+  showForm = () => {
+    this.setState(() => ({
+      shown: true,
+    }));
   }
 
   render() {
     const {
       addByName,
       addedTags,
-      allTagIds,
-      autosuggestValue,
+      allTags,
       exclude,
-      handleSuggestionSelected,
-      hideForm,
       removeTag,
-      setAutosuggestValue,
-      showForm,
-      tags,
-      tagUiForm
+      restaurantIds,
     } = this.props;
+
+    const { autosuggestValue, shown } = this.state;
 
     let form;
     let showButton;
 
-    if (!allTagIds.length) {
+    if (!allTags.length || !restaurantIds.length) {
       return null;
     }
 
-    if (tagUiForm.shown) {
+    if (shown) {
+      const escapedValue = escapeRegexCharacters(autosuggestValue.trim());
+      const regex = new RegExp(`${escapedValue}`, 'i');
+      const tags = allTags
+        .filter(tag => addedTags.indexOf(tag.id) === -1)
+        .filter(tag => regex.test(tag.name))
+        .slice(0, 10);
+
       form = (
         <form className={s.form} onSubmit={addByName}>
           <Autosuggest
@@ -55,10 +100,10 @@ class TagFilterForm extends Component {
             inputProps={{
               placeholder: exclude ? 'exclude' : 'filter',
               value: autosuggestValue,
-              onChange: setAutosuggestValue,
+              onChange: this.setAutosuggestValue,
             }}
             theme={autosuggestTheme}
-            onSuggestionSelected={handleSuggestionSelected}
+            onSuggestionSelected={this.handleSuggestionSelected}
             onSuggestionsFetchRequested={() => {}}
             onSuggestionsClearRequested={() => {}}
             shouldRenderSuggestions={returnTrue}
@@ -80,7 +125,7 @@ class TagFilterForm extends Component {
           <button
             className="btn btn-default"
             type="button"
-            onClick={hideForm}
+            onClick={this.hideForm}
           >
             cancel
           </button>
@@ -88,7 +133,7 @@ class TagFilterForm extends Component {
       );
     } else {
       showButton = (
-        <button className="btn btn-default" onClick={showForm}>
+        <button className="btn btn-default" onClick={this.showForm}>
           {exclude ? 'exclude tags' : 'filter by tag'}
         </button>
       );
@@ -102,16 +147,12 @@ class TagFilterForm extends Component {
 TagFilterForm.propTypes = {
   exclude: PropTypes.bool,
   addByName: PropTypes.func.isRequired,
-  allTagIds: PropTypes.array.isRequired,
-  handleSuggestionSelected: PropTypes.func.isRequired,
+  addTag: PropTypes.func.isRequired,
+  allTags: PropTypes.array.isRequired,
+  clearTags: PropTypes.func.isRequired,
   removeTag: PropTypes.func.isRequired,
-  showForm: PropTypes.func.isRequired,
-  hideForm: PropTypes.func.isRequired,
-  autosuggestValue: PropTypes.string.isRequired,
-  setAutosuggestValue: PropTypes.func.isRequired,
+  restaurantIds: PropTypes.array.isRequired,
   addedTags: PropTypes.array.isRequired,
-  tags: PropTypes.array.isRequired,
-  tagUiForm: PropTypes.object.isRequired
 };
 
 TagFilterForm.defaultProps = {

@@ -163,6 +163,13 @@ export function deletedTagFromRestaurant(restaurantId, id, userId) {
   };
 }
 
+export function setNameFilter(val) {
+  return {
+    type: ActionTypes.SET_NAME_FILTER,
+    val,
+  };
+}
+
 export function fetchRestaurants() {
   return dispatch => {
     dispatch(requestRestaurants());
