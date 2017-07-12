@@ -69,7 +69,7 @@ const accessLogStream = rfs('access.log', {
   path: logDirectory
 });
 
-export const wsServer = new HttpServer();
+export const wsServer = new HttpServer(app);
 
 //
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the
@@ -402,17 +402,17 @@ app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
 //
 // Launch the server
 // -----------------------------------------------------------------------------
-if (!module.hot) {
-  app.listen(config.port, () => {
+if (module.hot) {
+  wsServer.listen(config.wsPort, () => {
+    /* eslint-disable no-console */
+    console.log(`The websockets server is running at http://local.lunch.pink:${config.wsPort}/`);
+  });
+} else {
+  wsServer.listen(config.port, () => {
     /* eslint-disable no-console */
     console.log(`The server is running at http://local.lunch.pink:${config.port}/`);
   });
 }
-
-wsServer.listen(config.wsPort, () => {
-  /* eslint-disable no-console */
-  console.log(`The websockets server is running at http://local.lunch.pink:${config.wsPort}/`);
-});
 
 //
 // Hot Module Replacement
