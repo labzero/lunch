@@ -92,7 +92,7 @@ class LetterOfCreditRequest
   end
 
   def beneficiary_name=(name)
-    beneficiary_match = BeneficiariesService.new(request).all.select{|beneficiary| beneficiary[:name] == name }
+    beneficiary_match = BeneficiariesService.new(request).beneficiaries(member_id).select{|beneficiary| beneficiary[:name] == name }
     beneficiary_match.present? ? self.beneficiary_address = beneficiary_match.first[:address] : nil
     @beneficiary_name = name
   end
