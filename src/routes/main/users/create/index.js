@@ -12,24 +12,19 @@ import LayoutContainer from '../../../../components/Layout/LayoutContainer';
 import render404 from '../../../helpers/render404';
 import Create from './Create';
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
+  const user = state.user;
 
-  path: '/',
+  if (user.superuser) {
+    return {
+      component: (
+        <LayoutContainer path={context.url}>
+          <Create />
+        </LayoutContainer>
+      ),
+    };
+  }
 
-  action(context) {
-    const state = context.store.getState();
-    const user = state.user;
-
-    if (user.superuser) {
-      return {
-        component: (
-          <LayoutContainer path={context.url}>
-            <Create />
-          </LayoutContainer>
-        ),
-      };
-    }
-
-    return render404;
-  },
+  return render404;
 };

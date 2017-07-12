@@ -12,26 +12,21 @@ import LayoutContainer from '../../../../components/Layout/LayoutContainer';
 import render404 from '../../../helpers/render404';
 import New from './New';
 
-export default {
+export default (context) => {
+  const state = context.store.getState();
+  const user = state.user;
 
-  path: '/new',
+  const email = context.query.email;
 
-  action(context) {
-    const state = context.store.getState();
-    const user = state.user;
+  if (user.superuser) {
+    return {
+      component: (
+        <LayoutContainer path={context.url}>
+          <New email={email} />
+        </LayoutContainer>
+      )
+    };
+  }
 
-    const email = context.query.email;
-
-    if (user.superuser) {
-      return {
-        component: (
-          <LayoutContainer path={context.url}>
-            <New email={email} />
-          </LayoutContainer>
-        )
-      };
-    }
-
-    return render404;
-  },
+  return render404;
 };

@@ -4,6 +4,7 @@ import generateToken from '../helpers/generateToken';
 import generateUrl from '../helpers/generateUrl';
 import { Invitation, Role, User } from '../models';
 import transporter from '../mailers/transporter';
+import querystring from 'querystring';
 
 const sendConfirmation = async (req, email, token) => {
   await transporter.sendMail({
@@ -49,7 +50,7 @@ export default () => {
                     subject: 'Invitation request',
                     text: `${invitation.email} would like to be invited.
                       
-Add them here: ${generateUrl(req, bsHost, `/users/new?email=${invitation.email}`)}`
+Add them here: ${generateUrl(req, bsHost, `/users/new?email=${querystring.escape(invitation.email)}`)}`
                   });
                 }
                 next();
