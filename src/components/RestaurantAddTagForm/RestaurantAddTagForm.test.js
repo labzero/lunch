@@ -14,9 +14,7 @@ describe('RestaurantAddTagForm', () => {
     props = {
       addNewTagToRestaurant: sinon.mock(),
       handleSuggestionSelected: sinon.mock(),
-      hideAddTagForm: sinon.mock(),
       autosuggestValue: '',
-      setAddTagAutosuggestValue: sinon.mock(),
       tags: []
     };
   });

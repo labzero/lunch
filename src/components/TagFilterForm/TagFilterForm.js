@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import Autosuggest from 'react-autosuggest';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import TagContainer from '../Tag/TagContainer';
-import { getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
+import { generateTagList, getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
 import s from './TagFilterForm.scss';
 
 // eslint-disable-next-line css-modules/no-unused-class
@@ -13,8 +13,6 @@ import autosuggestTheme from './TagFilterFormAutosuggest.scss';
 autosuggestTheme.input = 'form-control';
 
 const returnTrue = () => true;
-
-const escapeRegexCharacters = (str) => str.replace(/[.*+?^${}()|[\]\\]/gi, '\\$&');
 
 class TagFilterForm extends Component {
   constructor(props) {
@@ -47,6 +45,9 @@ class TagFilterForm extends Component {
       event.preventDefault();
     }
     this.props.addTag(suggestion.id);
+    this.setState(() => ({
+      autosuggestValue: '',
+    }));
   }
 
   hideForm = () => {
@@ -83,12 +84,7 @@ class TagFilterForm extends Component {
     }
 
     if (shown) {
-      const escapedValue = escapeRegexCharacters(autosuggestValue.trim());
-      const regex = new RegExp(`${escapedValue}`, 'i');
-      const tags = allTags
-        .filter(tag => addedTags.indexOf(tag.id) === -1)
-        .filter(tag => regex.test(tag.name))
-        .slice(0, 10);
+      const tags = generateTagList(allTags, addedTags, autosuggestValue);
 
       form = (
         <form className={s.form} onSubmit={addByName}>

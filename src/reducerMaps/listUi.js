@@ -3,11 +3,6 @@ import ActionTypes from '../constants/ActionTypes';
 import setOrMerge from './helpers/setOrMerge';
 import resetRestaurant from './helpers/resetRestaurant';
 
-const resetAddTagAutosuggestValue = (state, action) =>
-  update(state, {
-    $apply: target => setOrMerge(target, action.restaurantId, { addTagAutosuggestValue: '' })
-  });
-
 export default new Map([
   [ActionTypes.RESTAURANT_RENAMED, resetRestaurant],
   [ActionTypes.RESTAURANT_POSTED, (state, action) =>
@@ -21,23 +16,6 @@ export default new Map([
     }), action)
   ],
   [ActionTypes.RESTAURANT_DELETED, resetRestaurant],
-  [ActionTypes.POSTED_TAG_TO_RESTAURANT, resetAddTagAutosuggestValue],
-  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT, resetAddTagAutosuggestValue],
-  [ActionTypes.SET_ADD_TAG_AUTOSUGGEST_VALUE, (state, action) =>
-    update(state, {
-      $apply: target => setOrMerge(target, action.id, { addTagAutosuggestValue: action.value })
-    })
-  ],
-  [ActionTypes.SHOW_ADD_TAG_FORM, (state, action) =>
-    update(state, {
-      $apply: target => setOrMerge(target, action.id, { isAddingTags: true })
-    })
-  ],
-  [ActionTypes.HIDE_ADD_TAG_FORM, (state, action) =>
-    update(state, {
-      $apply: target => setOrMerge(target, action.id, { isAddingTags: false })
-    })
-  ],
   [ActionTypes.SET_EDIT_NAME_FORM_VALUE, (state, action) =>
     update(state, {
       $apply: target => setOrMerge(target, action.id, { editNameFormValue: action.value })
