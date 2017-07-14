@@ -112,7 +112,7 @@
     color: $medium-gray;
   }
   p:last-child {
-    margin-bottom: 0px;
+    margin-bottom: 0;
   }
 }
 
@@ -217,7 +217,7 @@
       height: 66px;
       .report-datepicker, .report-filter {
         float: left;
-        margin-left: 0px;
+        margin-left: 0;
       }
       .report-filter {
         margin-right: 10px;
@@ -326,7 +326,7 @@
   }
 
   .report-cell-total {
-    border-right-width: 0px;
+    border-right-width: 0;
   }
 
   .report-cell-narrow {
@@ -1129,7 +1129,7 @@ td.dataTables_empty {
   border: solid 1px $actionable-blue;
   border-left: none;
   border-right: none;
-  padding: 15px 0px 15px 60px;
+  padding: 15px 0 15px 60px;
   position: relative;
   line-height: 30px;
   box-sizing: border-box;
@@ -1146,7 +1146,7 @@ td.dataTables_empty {
 .borrowing-capacity.report-header {
   .report-inputs {
     .report-filter {
-      margin-left: 0px;
+      margin-left: 0;
       .month-selector {
         width: 210px;
         margin: 10px 0 50px;
@@ -1429,7 +1429,7 @@ td.dataTables_empty {
       @include typography-print-header;
       float: none;
       margin-top: 9px;
-      margin-bottom: 0px;
+      margin-bottom: 0;
     }
     .report-sta-number {
       margin-bottom: 0;
@@ -1444,7 +1444,7 @@ td.dataTables_empty {
     }
   }
   .report-main-body {
-    margin-bottom: 0px;
+    margin-bottom: 0;
     h2 {
       @include typography-print-subheader;
     }
@@ -1651,6 +1651,9 @@ td.dataTables_empty {
   }
 
   .report-securities-services-statement {
+    .report-sta-number {
+      display: none;
+    }
     .report-table td {
       border-left: none;
       border-right: none;
@@ -1687,10 +1690,10 @@ td.dataTables_empty {
       }
       .report-profile-cqr {
         visibility: hidden;
-        width: 0px;
+        width: 0;
       }
       .report-profile-cqr-number {
-        margin-left: 0px;
+        margin-left: 0;
       }
     }
     .report-profile-data {
@@ -1907,7 +1910,7 @@ td.dataTables_empty {
       margin-top: 32px;
     }
     .sbc-program, .sta-rate, .general-info {
-      margin-top: 0px;
+      margin-top: 0;
     }
     .availability-details {
       @include typography-print-table-cell;
