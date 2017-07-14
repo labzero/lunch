@@ -121,9 +121,9 @@ RSpec.describe ReportsController, :type => :controller do
           end
           it 'contains an array of appropriate column headings' do
             capital_stock_activity
-            expect(assigns[:capital_stock_activity_table_data][:column_headings]).to eq([I18n.t("global.issue_date"), 
-              I18n.t('reports.pages.capital_stock_activity.certificate_sequence'), 
-              I18n.t('global.transaction_type'), 
+            expect(assigns[:capital_stock_activity_table_data][:column_headings]).to eq([I18n.t("global.issue_date"),
+              I18n.t('reports.pages.capital_stock_activity.certificate_sequence'),
+              I18n.t('global.transaction_type'),
               {value: I18n.t('reports.pages.capital_stock_activity.debit_shares'), :type=>:numeric_header},
               {value: I18n.t('reports.pages.capital_stock_activity.credit_shares'), :type=>:numeric_header},
               {value: I18n.t('reports.pages.capital_stock_activity.shares_outstanding'), :type=>:numeric_header}])
@@ -887,7 +887,7 @@ RSpec.describe ReportsController, :type => :controller do
             {value: I18n.t('reports.pages.letters_of_credit.headers.lc_number'), type: :numeric_header},
             {value: fhlb_add_unit_to_table_header(I18n.t('reports.pages.letters_of_credit.headers.current_amount'), '$'), type: :numeric_header},
             {value: I18n.t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), type: :numeric_header},
-            I18n.t('reports.pages.letters_of_credit.headers.issuance_date'), 
+            I18n.t('reports.pages.letters_of_credit.headers.issuance_date'),
             I18n.t('common_table_headings.maturity_date'),
             I18n.t('reports.pages.letters_of_credit.headers.credit_program')])
         end
@@ -1001,8 +1001,8 @@ RSpec.describe ReportsController, :type => :controller do
           end
           it 'returns a hash with `column_headings`' do
             expect(assigns[:parallel_shift_table_data][:column_headings]).to eq([
-              {value: I18n.t('common_table_headings.advance_number'), type: :numeric_header }, 
-              I18n.t('global.issue_date'), 
+              {value: I18n.t('common_table_headings.advance_number'), type: :numeric_header },
+              I18n.t('global.issue_date'),
               {value: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.interest_rate'), '%'), type: :numeric_header },
               [-300,-200,-100,0,100,200,300].collect{|x| {value: fhlb_formatted_number(x), type: :numeric_header}}].flatten)
           end
@@ -1135,16 +1135,16 @@ RSpec.describe ReportsController, :type => :controller do
         it 'sets @report_download_column_headings to an array of column headings' do
           column_headings = [
             {value: I18n.t('common_table_headings.custody_account_number'), type: :numeric_header},
-            I18n.t('reports.pages.securities_position.custody_account_type'), 
+            I18n.t('reports.pages.securities_position.custody_account_type'),
             I18n.t('reports.pages.securities_position.security_pledge_type'),
-            I18n.t('common_table_headings.cusip'), 
-            I18n.t('common_table_headings.security_description'), 
+            I18n.t('common_table_headings.cusip'),
+            I18n.t('common_table_headings.security_description'),
             I18n.t('reports.pages.securities_position.reg_id'),
-            {value: I18n.t('common_table_headings.pool_number'), type: :numeric_header}, 
+            {value: I18n.t('common_table_headings.pool_number'), type: :numeric_header},
             {value: I18n.t('common_table_headings.coupon_rate'), type: :numeric_header},
             I18n.t('common_table_headings.maturity_date'),
             {value: I18n.t('common_table_headings.original_par_value'), type: :numeric_header},
-            I18n.t('reports.pages.securities_position.factor'), 
+            I18n.t('reports.pages.securities_position.factor'),
             I18n.t('reports.pages.securities_position.factor_date'),
             {value: I18n.t('common_table_headings.current_par'), type: :numeric_header},
             {value: I18n.t('common_table_headings.price'), type: :numeric_header},
@@ -1239,10 +1239,10 @@ RSpec.describe ReportsController, :type => :controller do
         it 'sets @report_download_column_headings to an array of column headings' do
           column_headings = [
             {value: I18n.t('common_table_headings.custody_account_number'), type: :numeric_header},
-            I18n.t('reports.pages.securities_position.custody_account_type'), 
+            I18n.t('reports.pages.securities_position.custody_account_type'),
             I18n.t('reports.pages.securities_position.security_pledge_type'),
-            I18n.t('common_table_headings.cusip'), 
-            I18n.t('common_table_headings.security_description'), 
+            I18n.t('common_table_headings.cusip'),
+            I18n.t('common_table_headings.security_description'),
             I18n.t('reports.pages.securities_position.reg_id'),
             {value: I18n.t('common_table_headings.pool_number'), type: :numeric_header},
             {value: I18n.t('common_table_headings.coupon_rate'), type: :numeric_header},
@@ -1608,8 +1608,8 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     describe 'GET mortgage_collateral_update' do
-      column_headings = [I18n.t('common_table_headings.transaction'), 
-                         {value: I18n.t('common_table_headings.loan_count'), type: :numeric_header}, 
+      column_headings = [I18n.t('common_table_headings.transaction'),
+                         {value: I18n.t('common_table_headings.loan_count'), type: :numeric_header},
                          {value: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.unpaid_balance'), '$'), type: :numeric_header},
                          {value: fhlb_add_unit_to_table_header(I18n.t('global.original_amount'), '$'), type: :numeric_header}]
       accepted_loans_hash = {
@@ -1951,7 +1951,7 @@ RSpec.describe ReportsController, :type => :controller do
             get :borrowing_capacity
             expect(assigns[:month_display_map][(current - i.months).end_of_month.iso8601.to_s]).to eq(I18n.t('reports.pages.borrowing_capacity.monthend', month: (current - i.months).strftime('%B')))
           end
-          it 'sets the remaining month option ##{i}' do
+          it "sets the remaining month option ##{i}" do
             get :borrowing_capacity
             expect(assigns[:month_options][i]).to eq([I18n.t('reports.pages.borrowing_capacity.monthend',
               month: (current - i.months).strftime('%B')), (current - i.months).end_of_month.iso8601.to_s])
@@ -1961,7 +1961,7 @@ RSpec.describe ReportsController, :type => :controller do
           get :borrowing_capacity
           expect(assigns[:month_options].first).to eq([I18n.t('global.current'), current.iso8601.to_s])
         end
-        it 'sets the first kvp in the month display map to the current month' do
+        it 'sets the first KVP in the month display map to the current month' do
           get :borrowing_capacity
           expect(assigns[:month_display_map][current.iso8601.to_s]).to eq(I18n.t('global.current'))
         end

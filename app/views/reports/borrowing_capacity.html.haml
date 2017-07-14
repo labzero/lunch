@@ -9,10 +9,11 @@
       %h1= @report_name
       = render 'reports_header_buttons', allowed_params: [:as_of_date], download_formats: :pdf
       = render 'report_details', name: @member_name, freshness: t('reports.pages.borrowing_capacity.freshness'), availability: t('reports.pages.borrowing_capacity.history')
-    .report-inputs
-      = form_tag(reports_borrowing_capacity_url, method: 'GET') do
-        .report-filter
-          = render 'shared/dropdown', dropdown_name: 'as_of_date', default_value: @report_filter, default_text: @month_display_map[@report_filter], dropdown_options: @month_options, classes: 'month-selector'
+    - if feature_enabled?('report-borrowing-capacity-historical-data')
+      .report-inputs
+        = form_tag(reports_borrowing_capacity_url, method: 'GET') do
+          .report-filter
+            = render 'shared/dropdown', dropdown_name: 'as_of_date', default_value: @report_filter, default_text: @month_display_map[@report_filter], dropdown_options: @month_options, classes: 'month-selector'
   .report-main-body
     %section
       .report-summary-data
