@@ -1421,10 +1421,12 @@ class ReportsController < ApplicationController
         if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
           @statement = {}
           @debit_date = nil
+          @sta_number = nil
         else
           @statement = member_balances.securities_services_statement(@start_date)
           raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
           @debit_date = @statement[:debit_date]
+          @sta_number = @statement[:sta_account_number]
         end
       end
     end

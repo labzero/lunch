@@ -210,6 +210,22 @@
   margin: 0;
 }
 
+.report-price-indications {
+  .report-header {
+    .report-inputs {
+      clear: both;
+      height: 66px;
+      .report-datepicker, .report-filter {
+        float: left;
+        margin-left: 0px;
+      }
+      .report-filter {
+        margin-right: 10px;
+      }
+    }
+  }
+}
+
 .report-current-price-indications {
   .report-main-body {
     margin-bottom: 50px;
@@ -468,12 +484,9 @@
   clear: both;
   height: 66px;
   .report-datepicker, .report-filter {
+    margin-right: 10px;
     float: left;
   }
-}
-
-.report-filter {
-  margin-left: 10px;
 }
 
 .sta-statement {
@@ -699,15 +712,17 @@
 }
 
 .report-securities-services-statement {
-  .report-summary-data {
-    width: auto;
-  }
   .report-table {
+    width: 740px;
+    line-height: 8px;
     td:first-child {
-      width: 300px;
+      width: 210px;
+    }
+    td:second-child {
+      width: 470px;
     }
     td:last-child {
-      width: 100px;
+      width: 60px;
     }
   }
   .report-summary-right {

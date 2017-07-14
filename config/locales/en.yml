@@ -1709,7 +1709,7 @@ en:
         summary: Provides summaries and totals for pledged and unpledged securities as of the prior monthend.
         updated: Monthly, 1 business day following monthend
       services_monthly:
-        title: Securities Services Monthly Statement
+        title: Securities Services Monthly Fee Statement
         summary: Provides securities services fees for the prior month, which will be debited from your institution’s Settlement/Transaction Account on the last business day of the month.
         updated: Monthly, approximately 5 to 7 days before monthend
     account:
@@ -2024,12 +2024,15 @@ en:
           dividend: Dividend
       securities_services_statement:
         heading: 'Total amount to be debited on %{date}:'
+        statement_date: 'Statement Date:'
         footnote: '%{footnote}Fees will be charged based on the specific transaction and the amount of staff time required.'
         questions_html: 'If you have questions regarding this statement, please email <a href=%{mailto_url}>Securities Services</a> or call %{phone_number}.'
-        footer: 'Total amount to be debited from Settlement/Transaction Account No. %{account_number} on %{date}:'
+        footer: 'Total amount to be debited on %{date}:'
         freshness: This statement reflects fees for the prior month and is posted approximately 5 to 7 days before the debit date, which is the last business day of the month.
         availability: Statements are available for the previous 18 months.
-        data_unavailable: You have no Securities Services Monthly Statement for the last 18 months.
+        data_unavailable: You have no Securities Services Monthly Fee Statement for the last 18 months.
+        institution_details:
+                  sta_number_html: "<span>STA Number:</span> %{sta_number}"
         tables:
           maintenance: Monthly Account Maintenance Fee
           securities: Monthly Securities Fees
@@ -2043,7 +2046,7 @@ en:
           euroclear: 'Euroclear%{footnote}'
           disbursement: 'All Income Disbursement%{footnote}'
           pledge_status: 'Pledge Status Change (account transfer)%{footnote}'
-          certifications: 'Registration of Certifications%{footnote}'
+          certifications: 'Certificate Registration%{footnote}'
           research: 'Research Projects%{footnote}'
           handling: 'Special Handling%{footnote}'
         line_items:
