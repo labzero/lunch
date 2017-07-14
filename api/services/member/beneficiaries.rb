@@ -28,7 +28,18 @@ module MAPI
               And Ab.Isdeleted = 'false'
               And B.Isdeleted = 'false'
             SQL
-            fetch_hashes(app.logger, beneficiaries_query, {}, true)
+            begin
+              beneficiaries = []
+              cursor  = execute_sql(app.logger, beneficiaries_query)
+              while row = cursor.fetch_hash()
+                row['STREET'] = row['STREET'].try(:read)
+                beneficiaries << row.with_indifferent_access
+              end
+              beneficiaries
+            rescue => e
+              app.logger.error(e.message)
+              []
+            end
           else
             fake_hashes('beneficiaries')
           end

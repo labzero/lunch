@@ -12,12 +12,12 @@
       %dd= @letter_of_credit_request.lc_number
     %dt= t('global.defined_term', term: t('letters_of_credit.request.beneficiary'))
     %dd= @letter_of_credit_request.beneficiary_name
-  -unless @letter_of_credit_request.attention.blank?
-    %dt= t('global.defined_term', term: t('letters_of_credit.request.attention'))
-    %dd= @letter_of_credit_request.attention
   %dl
     %dt= t('global.defined_term', term: t('letters_of_credit.preview.beneficiary_address'))
     %dd= simple_format(@letter_of_credit_request.beneficiary_address)
+  -unless @letter_of_credit_request.attention.blank?
+    %dt= t('global.defined_term', term: t('letters_of_credit.request.attention'))
+    %dd= @letter_of_credit_request.attention
   %dl
     %dt= t('global.defined_term', term: t('letters_of_credit.request.amount'))
     %dd= fhlb_formatted_currency_whole(@letter_of_credit_request.amount)
