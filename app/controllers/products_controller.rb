@@ -86,7 +86,7 @@ class ProductsController < ApplicationController
 
   # GET
   def vbloc
-    @last_modified = Date.new(2017, 4, 1)
+    @last_modified = Date.new(2017, 7, 1)
   end
 
   # GET

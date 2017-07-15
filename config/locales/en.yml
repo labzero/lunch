@@ -2984,7 +2984,8 @@ en:
             annual: "The remainder of the annual maintenance fee is based on the difference between 70% of the notional amount of the letter of credit and the average daily balance of public unit deposits supported by the letter of credit during the accrual period. The accrual period is each calendar quarter. This part of the annual maintenance fee is payable on the 15th calendar day following the end of each quarter."
         fee_certification:
           title: Maintenance Fee Certification
-          description: Members will be required to report the average daily balance of public unit deposits supported by the letter of credit for the accrual period within five business days after the end of each calendar quarter and provide a certification that the numbers are true and correct.
+          subject: 'VBLOC%20Certification'
+          description_html: "Members will be required to report the average daily balance of public unit deposits supported by the letter of credit for the accrual period within five business days after the end of each calendar quarter and provide a certification that the numbers are true and correct. The certification report must include the letter of credit number and show the actual deposit balances supported by the letter of credit for each day of the accrual period. Certifications should be sent by email from an authorized signer to <a href='%{url}?subject=%{subject}'>Lettersofcredit@fhlbsf.com</a>. The subject line of the email should be: VBLOC Certification."
     section_headings:
       use: Use
       uses: Uses
