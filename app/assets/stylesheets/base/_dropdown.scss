@@ -1,4 +1,4 @@
-.dropdown {
+.dropdown, .dropdown-with-scroll {
   @extend %typography-dropdown-selector;
   -webkit-touch-callout: none; /* iOS Safari */
   user-select: none;
@@ -56,6 +56,14 @@
       color: $actionable-blue;
       font-weight: $semibold-weight;
     }
+  }
+}
+
+.dropdown-with-scroll {
+  ul {
+    overflow-y: scroll;
+    height: auto;
+    max-height: 375px;
   }
 }
 

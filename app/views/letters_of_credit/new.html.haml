@@ -19,7 +19,7 @@
           %h2= t('letters_of_credit.request.public_unit')
           .input-field-container-horizontal.beneficiary-name
             %label{for: 'letter_of_credit_beneficiary'}= t('letters_of_credit.request.beneficiary')
-            = render 'shared/dropdown', dropdown_name: 'letter_of_credit_request[beneficiary_name]', dropdown_options: @beneficiary_dropdown_options, default_value: @beneficiary_dropdown_default, default_text: @beneficiary_dropdown_default, classes: 'dropdown-beneficiary'
+            = render 'shared/dropdown', dropdown_name: 'letter_of_credit_request[beneficiary_name]', dropdown_options: @beneficiary_dropdown_options, default_value: @beneficiary_dropdown_default, default_text: @beneficiary_dropdown_default, classes: ['dropdown-beneficiary', 'dropdown-with-scroll']
           .input-field-container-horizontal.attention-field
             = render 'shared/input_field', form_builder: f, field_name: :attention, label: t('letters_of_credit.request.attention_html')
           .input-field-container-horizontal.amount-field
