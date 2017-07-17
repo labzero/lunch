@@ -1559,7 +1559,7 @@ en:
     request:
       title: Request Letter of Credit
       support: "The member portal only supports requests for standard Letters of Credit collateralizing public unit deposits. If your request is not received by 10:00 am, your request will not be processed until the following business day."
-      public_unit: Letter of Credit Request Public Unit Deposit
+      public_unit: 'Letter of Credit Request: Public Unit Deposit'
       beneficiary: Beneficiary
       amount: Amount
       attention: Attention
