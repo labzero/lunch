@@ -905,6 +905,30 @@ en:
             - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
+              date: '2017-07-28'
+              details:
+                -
+                  description: "Updated the list of eligible members to include privately insured, state-chartered credit unions (page 5)."
+                -
+                  description: "Adjusted the Community Financial Institution asset cap to $1,148 million for 2017 (pages 6 and 62)."
+                -
+                  description: "Clarified that insurance companies and non-depository CDFIs are required to pledge loan collateral under specific identification and to deliver loan collateral (pages 8, 79)."
+                -
+                  description: "Increased borrowing capacities available for certain types of securities, including GNMA HECM MBS passthrough securities, Agency CMO accrual bonds with high price sensitivity, and publicly registered private label residential MBS and home equity ABS (pages 21, 23, and 25)."
+                -
+                  description: "Added Tax-Exempt Mortgage-Backed Securities to list of eligible collateral for the Securities-Backed Credit Program (pages 21 and 29)."
+                -
+                  description: "Updated the Guide to reflect the current process for conducting securities-related transactions on the member portal and the collateral-related reports available on the member portal (pages 33-38, 66-67, 72, 73)"
+                -
+                  description: "Incorporated a variety of changes to loan collateral eligibility, pricing, and borrowing capacity that were announced on March 8, 2017, and became effective on April 20, 2017, including:"
+                  details:
+                    -
+                      description: "Revised eligibility criteria for loan collateral related to delinquency, minimum FICO scores, maximum loan-to-value ratios, and minimum debt service coverage ratios (pages 39-46, 48, 95)"
+                    -
+                      description: "Revised mortgage loan collateral borrowing capacities and loan collateral price caps (pages 79-80)."
+                    -
+                      description: "Added the Streamlined MCU as a new option for reporting updates for loan collateral already pledged to the Bank via a Standard MCU or a Pledge Only MCU (pages 65-68)"
+            -
               date: '2016-04-07'
               details:
                 -
@@ -932,17 +956,6 @@ en:
                   description: "Increased loan collateral borrowing capacities for insurance company members (page 82)."
                 -
                   description: "Updated the Field Review Discount Table (pages 94-96)."
-            -
-              date: '2015-04-22'
-              details:
-                -
-                  description: "Adjusted the Community Financial Institution asset cap to $1,123 million for 2015 (pages 7 and 62)."
-                -
-                  description: "Updated the list of ineligible loans (page 48)."
-                -
-                  description: "Clarified that members pledging mortgage loans under blanket lien with summary reporting are required to submit loan portfolio reports or other documentation every six months to support the Blanket Lien Collateral Eligibility Questionnaire or the Blanket Lien Collateral Certification (page 70)."
-                -
-                  description: "Updated the field review discount table (pages 91-93)."
       collateral_review:
         title: Collateral Field Review Process
     fee_schedules:
