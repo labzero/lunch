@@ -4,7 +4,7 @@
 .report.row{data: {deferred: @job_status_url, 'deferred-load' => @load_url}}
   .report-header.borrowing-capacity
     - if @print_layout
-      = render 'print_details', report_name: @report_name, name: @member_name, date: t('datepicker.single.inline_input', date: fhlb_date_standard_numeric(@report_filter))
+      = render 'print_details', report_name: @report_name, name: @member_name, date: t('datepicker.single.inline_input', date: fhlb_date_standard_numeric(@as_of))
     - else
       %h1= @report_name
       = render 'reports_header_buttons', allowed_params: [:as_of_date], download_formats: :pdf
@@ -13,7 +13,7 @@
       .report-inputs
         = form_tag(reports_borrowing_capacity_url, method: 'GET') do
           .report-filter
-            = render 'shared/dropdown', dropdown_name: 'as_of_date', default_value: @report_filter, default_text: @month_display_map[@report_filter], dropdown_options: @month_options, classes: 'month-selector'
+            = render 'shared/dropdown', dropdown_name: 'as_of_date', default_value: @as_of, default_text: @month_display_map[@as_of], dropdown_options: @month_options, classes: 'month-selector'
   .report-main-body
     %section
       .report-summary-data

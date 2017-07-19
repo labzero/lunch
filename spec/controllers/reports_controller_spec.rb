@@ -1936,13 +1936,13 @@ RSpec.describe ReportsController, :type => :controller do
         allow(Time.zone).to receive(:today).and_return(current).exactly(7).times
       end
       describe 'when `current` is selected' do
-        it 'should set `@report_filter` to the value `as_of_date` param' do
+        it 'should set `@as_of` to the value `as_of_date` param' do
           get :borrowing_capacity, as_of_date: alternate
-          expect(assigns[:report_filter]).to eq(alternate.iso8601)
+          expect(assigns[:as_of]).to eq(alternate.iso8601)
         end
-        it 'sets `@report_filter` to the current date if `as_of_date` not supplied' do
+        it 'sets `@as_of` to the current date if `as_of_date` not supplied' do
           call_action
-          expect(assigns[:report_filter]).to eq(current.iso8601)
+          expect(assigns[:as_of]).to eq(current.iso8601)
         end
       end
       describe 'setting up the months dropdown' do
