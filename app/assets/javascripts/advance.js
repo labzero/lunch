@@ -144,9 +144,17 @@ $(function () {
 
   function selectColumnLabelIfRatePreSelected(table) {
     var $selectedCell = table.find('td.cell-selected.selectable-cell');
+    if ($selectedCell.length && !table.hasClass('add-advance-table-loading')) {
+      var col = $selectedCell.index();
+      $($rateTable.find('tr.add-advance-column-labels th')[col]).addClass('cell-selected');
+    };
+  };
+
+  function removeColumnLabelIfRatePreSelected(table) {
+    var $selectedCell = table.find('td.cell-selected.selectable-cell');
     if ($selectedCell.length) {
       var col = $selectedCell.index();
-      $(table.find('tr.add-advance-column-labels th')[col]).addClass('cell-selected');
+      $($rateTable.find('tr.add-advance-column-labels th')[col]).removeClass('cell-selected');
     };
   };
 
@@ -222,6 +230,7 @@ $(function () {
       $('.advance-create-custom-date-wrapper').hide();
       $('.advance-select-custom-date-wrapper').hide();
     }
+
     if ($rateTableWrapper.attr('data-active-term-type') !== selectedTermType) {
       $rateTableWrapper.attr('data-active-term-type', selectedTermType);
       $rateTable.find('td, th').removeClass('cell-selected');
@@ -310,6 +319,8 @@ $(function () {
     $('.advance-create-custom-date-wrapper').hide();
     $('.advance-select-custom-date-wrapper').hide();
     $('.advance-alternate-funding-date-close').attr('disabled', true);
+    removeColumnLabelIfRatePreSelected($rateTable);
+    removeColumnLabelIfRatePreSelected($rateCustomTable);
     showRatesLoadingState($rateTable);
     showAdvanceRates(funding_date, getMaturityDate());
   });
