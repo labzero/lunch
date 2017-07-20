@@ -181,6 +181,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           before {
             allow(controller).to receive(:dedupe_locs).and_return([credit])
             allow(credit[:beneficiary]).to receive(:truncate).and_return(credit[:beneficiary])
+            allow(credit[:beneficiary]).to receive(:gsub).with(/\,..$/, '..').and_return(credit[:beneficiary])
           }
 
           loc_value_types = [[:lc_number, nil], [:beneficiary, nil], [:current_par, :currency_whole], [:trade_date, :date], [:maturity_date, :date], [:description, nil], [:maintenance_charge, :basis_point]]
