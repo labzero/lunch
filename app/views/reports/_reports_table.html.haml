@@ -50,7 +50,7 @@
         = render 'reports/deferred_table_row', colspan: table_data[:column_headings].count
       - else
         - table_data[:rows].each do |row|
-          %tr{data: {filter_data: row[:filter_data]}}
+          %tr{data: {filter_data: row[:filter_data]}, class: row[:row_class]}
             -if row[:date]
               %td.report-cell-narrow= fhlb_date_standard_numeric(row[:date])
             - row[:columns].each do |column|

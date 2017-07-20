@@ -242,7 +242,7 @@ RSpec.describe SecuritiesController, type: :controller do
   end
 
   describe 'GET `requests`' do
-    let(:authorized_requests) { [] }
+    let(:authorized_requests) { instance_double(Array, :sort! => nil, :collect => nil, :<< => nil) }
     let(:awaiting_authorization_requests) { [] }
     let(:securities_requests_service) { double(SecuritiesRequestService, authorized: authorized_requests, awaiting_authorization: awaiting_authorization_requests) }
     let(:call_action) { get :requests }
@@ -320,6 +320,20 @@ RSpec.describe SecuritiesController, type: :controller do
         end
         call_action
         expect(assigns[:authorized_requests_table][:rows]).to eq(rows)
+      end
+    end
+    describe 'sorted securities' do
+      let(:request1) { {request_id: 22222} }
+      let(:request2) { {request_id: 44444} }
+      let(:request3) { {request_id: 33333} }
+      let(:requests_array) { [ request1, request2, request3 ] }
+      let(:sorted_requests) { [ request2, request3, request1 ] }
+      before do
+        allow(securities_requests_service).to receive(:authorized).and_return(requests_array)
+      end
+      it 'sorts the authorized requests by request_id' do
+        call_action
+        expect(requests_array).to eq(sorted_requests)
       end
     end
     describe '`@awaiting_authorization_requests_table`' do

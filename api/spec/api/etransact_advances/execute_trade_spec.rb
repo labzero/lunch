@@ -210,6 +210,7 @@ describe MAPI::ServiceApp do
         allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_collateral)
         allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit)
         allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_max_term_limit)
+        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
       end
       it 'passes the allow_grace_period flag to `MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade' do
         anythings = Array.new(15, anything)
@@ -217,15 +218,19 @@ describe MAPI::ServiceApp do
         make_request
       end
       it 'calls `get_market_cof_rates` method with the environment' do
-        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(:production, anything, anything, anything, anything)
+        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(:production, anything, anything, anything, anything, anything)
+        make_request
+      end
+      it 'calls `get_market_cof_rates` method with the holidays' do
+        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, [], anything, anything, anything, anything)
         make_request
       end
       it 'calls `get_market_cof_rates` method with the term' do
-        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, advance_term, anything, anything, anything)
+        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, advance_term, anything, anything, anything)
         make_request
       end
       it 'calls `get_market_cof_rates` method with the type' do
-        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, advance_type, anything, anything)
+        expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, anything, advance_type, anything, anything)
         make_request
       end
     end
@@ -236,6 +241,7 @@ describe MAPI::ServiceApp do
     let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
     before do
       allow(subject.settings).to receive(:environment).and_return(environment)
+      allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
     end
     it 'should return expected result of validate trade' do
       expect(execute_trade['status']).to be_kind_of(Array)
@@ -257,23 +263,27 @@ describe MAPI::ServiceApp do
       get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", funding_date: nil, allow_grace_period: allow_grace_period
     end
     it 'calls `get_market_cof_rates` method with the environment' do
-      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(environment, anything, anything, anything, anything).and_return({})
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(environment, anything, anything, anything, anything, anything).and_return({})
+      execute_trade
+    end
+    it 'calls `get_market_cof_rates` method with the holidays' do
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, [], anything, anything, anything, anything).and_return({})
       execute_trade
     end
     it 'calls `get_market_cof_rates` method with the term' do
-      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, advance_term, anything, anything, anything).and_return({})
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, advance_term, anything, anything, anything).and_return({})
       execute_trade
     end
     it 'calls `get_market_cof_rates` method with the type' do
-      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, advance_type, anything, anything).and_return({})
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, anything, advance_type, anything, anything).and_return({})
       execute_trade
     end
     it 'calls `get_market_cof_rates` method with the funding_date' do
-      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, anything, funding_date, anything).and_return({})
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, anything, anything, funding_date, anything).and_return({})
       get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}", funding_date: funding_date; JSON.parse(last_response.body)
     end
     it 'calls `get_market_cof_rates` method with the maturity_date' do
-      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, anything, anything, maturity_date).and_return({})
+      expect(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).with(anything, anything, anything, anything, anything, maturity_date).and_return({})
       execute_trade
     end
     {cof_data_cleanup: MAPI::Services::EtransactAdvances, get_market_cof_rates: MAPI::Services::Rates::MarketDataRates, execute_trade: MAPI::Services::EtransactAdvances::ExecuteTrade}.each do |method, module_name|

@@ -29,5 +29,5 @@
       %li= t('products.variable_balance_loc.key_features.fees.maintenance.minimum')
       %li= t('products.variable_balance_loc.key_features.fees.maintenance.annual')
     %h3= t('products.variable_balance_loc.key_features.fee_certification.title')
-    %p= t('products.variable_balance_loc.key_features.fee_certification.description')
+    %p= t('products.variable_balance_loc.key_features.fee_certification.description_html', url: loc_email, subject: t('products.variable_balance_loc.key_features.fee_certification.subject'))
     .last-modified= t('products.section_headings.last_modified', date: fhlb_date_short_alpha(@last_modified))

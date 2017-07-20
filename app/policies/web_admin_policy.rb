@@ -12,6 +12,10 @@ class WebAdminPolicy < ApplicationPolicy
     user && user.roles.include?(::User::Roles::ADMIN)
   end
 
+  def edit_data_visibility?
+    user && user.roles.include?(::User::Roles::ADMIN)
+  end
+
   def modify_early_shutoff_request?
     record.owners.member?(user.id)
   end

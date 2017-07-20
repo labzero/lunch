@@ -3,7 +3,8 @@ require 'capistrano/setup'
 
 # Includes default deployment tasks
 require 'capistrano/deploy'
-
+require "capistrano/scm/git"
+install_plugin Capistrano::SCM::Git
 require 'capistrano/rvm'
 require 'capistrano/bundler'
 require 'capistrano/rails' #bring in all of the common rails things

@@ -17,6 +17,17 @@ Scenario: Member sees Borrowing Capacity Statement
   And I should see the "Standard Credit Program" table and "3" subtables
   And I should see the "Securities-Backed Credit Program" table and "1" subtable
 
+@jira-mem-2410 @smoke @flip-on-report-borrowing-capacity-historical-data
+Scenario: Member requests historical data on the Borrowing Capacity Statement
+  Given I visit the dashboard
+  When I select "Borrowing Capacity" from the reports dropdown
+  When I select the last entry from the month year dropdown
+  And I wait for the report to load
+  Then I should see report summary data
+  And I should see a report header
+  And I should see the "Standard Credit Program" table and "3" subtables
+  And I should see the "Securities-Backed Credit Program" table and "1" subtable
+
 Scenario: Member sorts the Standard Credit Program table on the Borrowing Capacity Statement by original amount
   Given I am on the "Borrowing Capacity Statement" report page
   When I click the "Original Amount" column heading on the "Standard Credit Program" parent table

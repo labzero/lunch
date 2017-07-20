@@ -21,6 +21,7 @@ require_relative 'member/securities_requests'
 require_relative 'member/settlement_transaction_account'
 require_relative 'member/signer_roles'
 require_relative 'member/trade_activity'
+require_relative 'member/beneficiaries'
 
 module MAPI
   module Services
@@ -460,6 +461,19 @@ module MAPI
                 key :'$ref', :Member
               end
               key :nickname, :getMembers
+            end
+          end
+          api do
+            key :path, '/disabled_reports'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the IDs of reports flagged as disabled for all members'
+              key :type, :array
+              key :nickname, :getGlobalDisabledReportIDs
+              items do
+                key :type, :integer
+                key :description, 'The IDs of the reports and web components flagged as disabled'
+              end
             end
           end
           api do
@@ -1205,6 +1219,22 @@ module MAPI
               end
             end
           end
+          api do
+            key :path, '/{id}/beneficiaries'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve Beneficiaries based on Member ID'
+              key :nickname, :getBeneficiariesForMember
+              key :type, :MemberBeneficiaries
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution to find the beneficiaries from'
+              end
+            end
+          end
         end
 
         # pledged collateral route
@@ -1400,10 +1430,19 @@ module MAPI
           MAPI::Services::Member::Profile.member_list(self)
         end
 
+        # Global Disabled Reports
+        relative_get '/disabled_reports' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            MAPI::Services::Member::DisabledReports.global_disabled_ids(self)
+          end
+        end
+
         # Member Disabled Reports
         relative_get '/:id/disabled_reports' do
-          member_id = params[:id]
-          MAPI::Services::Member::DisabledReports.disabled_report_ids(self, member_id)
+          MAPI::Services::Member.rescued_json_response(self) do
+            member_id = params[:id]
+            MAPI::Services::Member::DisabledReports.disabled_ids_for_member(self, member_id)
+          end
         end
 
         # Quick Advance Flags for All Members
@@ -1486,6 +1525,13 @@ module MAPI
         relative_get '/:id/letters_of_credit' do
           member_id = params[:id]
           MAPI::Services::Member::LettersOfCredit.letters_of_credit(self, member_id).to_json
+        end
+
+        relative_get '/:id/beneficiaries' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            member_id = params[:id]
+            MAPI::Services::Member::Beneficiaries.beneficiaries(self, member_id)
+          end
         end
 
         relative_get '/:id/interest_rate_resets' do

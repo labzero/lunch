@@ -3,10 +3,12 @@ require 'rails_helper'
 RSpec.describe LetterOfCreditRequest, :type => :model do
   let(:today) { Time.zone.today }
   let(:calendar_service) { instance_double(CalendarService, holidays: [], find_next_business_day: today) }
+  let(:beneficiary_service) { instance_double(BeneficiariesService, beneficiaries: []) }
   let(:member_id) { rand(1000..9999) }
 
   before do
     allow(CalendarService).to receive(:new).and_return(calendar_service)
+    allow(BeneficiariesService).to receive(:new).and_return(beneficiary_service)
     allow(Time.zone).to receive(:today).and_return(today)
   end
 
@@ -610,7 +612,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
     end
 
     describe '`beneficiary_name=`' do
-      let(:beneficiaries_service) { instance_double(BeneficiariesService, all: []) }
+      let(:beneficiaries_service) { instance_double(BeneficiariesService, beneficiaries: []) }
       let(:beneficiary_name) { SecureRandom.hex }
       let(:request) { double('request') }
       subject { described_class.new(member_id, request) }
@@ -625,14 +627,14 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         call_method
       end
       it 'fetches a list of all beneficiaries' do
-        expect(beneficiaries_service).to receive(:all)
+        expect(beneficiaries_service).to receive(:beneficiaries)
         call_method
       end
       describe 'when the beneficiary is found in the list of all beneficiaries' do
         let(:beneficiary_address) { SecureRandom.hex }
 
         before do
-          allow(beneficiaries_service).to receive(:all).and_return([{
+          allow(beneficiaries_service).to receive(:beneficiaries).and_return([{
             name: beneficiary_name,
             address: beneficiary_address
           }])

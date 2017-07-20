@@ -9,7 +9,7 @@ class LetterOfCreditRequest
   DEFAULT_MAINTENANCE_FEE = '10 bps'
   EXPIRATION_MAX_DATE_RESTRICTION = 15.years
   ISSUE_MAX_DATE_RESTRICTION = 1.week
-  ISSUE_DATE_TIME_RESTRICTION = '11:00:00'
+  ISSUE_DATE_TIME_RESTRICTION = '10:00:00'
   ISSUE_DATE_TIME_RESTRICTION_WINDOW = 5.minutes
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
@@ -92,7 +92,7 @@ class LetterOfCreditRequest
   end
 
   def beneficiary_name=(name)
-    beneficiary_match = BeneficiariesService.new(request).all.select{|beneficiary| beneficiary[:name] == name }
+    beneficiary_match = BeneficiariesService.new(request).beneficiaries(member_id).select{|beneficiary| beneficiary[:name] == name }
     beneficiary_match.present? ? self.beneficiary_address = beneficiary_match.first[:address] : nil
     @beneficiary_name = name
   end

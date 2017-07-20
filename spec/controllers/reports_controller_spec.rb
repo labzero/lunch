@@ -121,9 +121,9 @@ RSpec.describe ReportsController, :type => :controller do
           end
           it 'contains an array of appropriate column headings' do
             capital_stock_activity
-            expect(assigns[:capital_stock_activity_table_data][:column_headings]).to eq([I18n.t("global.issue_date"), 
-              I18n.t('reports.pages.capital_stock_activity.certificate_sequence'), 
-              I18n.t('global.transaction_type'), 
+            expect(assigns[:capital_stock_activity_table_data][:column_headings]).to eq([I18n.t("global.issue_date"),
+              I18n.t('reports.pages.capital_stock_activity.certificate_sequence'),
+              I18n.t('global.transaction_type'),
               {value: I18n.t('reports.pages.capital_stock_activity.debit_shares'), :type=>:numeric_header},
               {value: I18n.t('reports.pages.capital_stock_activity.credit_shares'), :type=>:numeric_header},
               {value: I18n.t('reports.pages.capital_stock_activity.shares_outstanding'), :type=>:numeric_header}])
@@ -887,7 +887,7 @@ RSpec.describe ReportsController, :type => :controller do
             {value: I18n.t('reports.pages.letters_of_credit.headers.lc_number'), type: :numeric_header},
             {value: fhlb_add_unit_to_table_header(I18n.t('reports.pages.letters_of_credit.headers.current_amount'), '$'), type: :numeric_header},
             {value: I18n.t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), type: :numeric_header},
-            I18n.t('reports.pages.letters_of_credit.headers.issuance_date'), 
+            I18n.t('reports.pages.letters_of_credit.headers.issuance_date'),
             I18n.t('common_table_headings.maturity_date'),
             I18n.t('reports.pages.letters_of_credit.headers.credit_program')])
         end
@@ -1001,8 +1001,8 @@ RSpec.describe ReportsController, :type => :controller do
           end
           it 'returns a hash with `column_headings`' do
             expect(assigns[:parallel_shift_table_data][:column_headings]).to eq([
-              {value: I18n.t('common_table_headings.advance_number'), type: :numeric_header }, 
-              I18n.t('global.issue_date'), 
+              {value: I18n.t('common_table_headings.advance_number'), type: :numeric_header },
+              I18n.t('global.issue_date'),
               {value: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.interest_rate'), '%'), type: :numeric_header },
               [-300,-200,-100,0,100,200,300].collect{|x| {value: fhlb_formatted_number(x), type: :numeric_header}}].flatten)
           end
@@ -1135,16 +1135,16 @@ RSpec.describe ReportsController, :type => :controller do
         it 'sets @report_download_column_headings to an array of column headings' do
           column_headings = [
             {value: I18n.t('common_table_headings.custody_account_number'), type: :numeric_header},
-            I18n.t('reports.pages.securities_position.custody_account_type'), 
+            I18n.t('reports.pages.securities_position.custody_account_type'),
             I18n.t('reports.pages.securities_position.security_pledge_type'),
-            I18n.t('common_table_headings.cusip'), 
-            I18n.t('common_table_headings.security_description'), 
+            I18n.t('common_table_headings.cusip'),
+            I18n.t('common_table_headings.security_description'),
             I18n.t('reports.pages.securities_position.reg_id'),
-            {value: I18n.t('common_table_headings.pool_number'), type: :numeric_header}, 
+            {value: I18n.t('common_table_headings.pool_number'), type: :numeric_header},
             {value: I18n.t('common_table_headings.coupon_rate'), type: :numeric_header},
             I18n.t('common_table_headings.maturity_date'),
             {value: I18n.t('common_table_headings.original_par_value'), type: :numeric_header},
-            I18n.t('reports.pages.securities_position.factor'), 
+            I18n.t('reports.pages.securities_position.factor'),
             I18n.t('reports.pages.securities_position.factor_date'),
             {value: I18n.t('common_table_headings.current_par'), type: :numeric_header},
             {value: I18n.t('common_table_headings.price'), type: :numeric_header},
@@ -1239,10 +1239,10 @@ RSpec.describe ReportsController, :type => :controller do
         it 'sets @report_download_column_headings to an array of column headings' do
           column_headings = [
             {value: I18n.t('common_table_headings.custody_account_number'), type: :numeric_header},
-            I18n.t('reports.pages.securities_position.custody_account_type'), 
+            I18n.t('reports.pages.securities_position.custody_account_type'),
             I18n.t('reports.pages.securities_position.security_pledge_type'),
-            I18n.t('common_table_headings.cusip'), 
-            I18n.t('common_table_headings.security_description'), 
+            I18n.t('common_table_headings.cusip'),
+            I18n.t('common_table_headings.security_description'),
             I18n.t('reports.pages.securities_position.reg_id'),
             {value: I18n.t('common_table_headings.pool_number'), type: :numeric_header},
             {value: I18n.t('common_table_headings.coupon_rate'), type: :numeric_header},
@@ -1339,7 +1339,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       describe 'with the report disabled' do
         before do
-          allow(controller).to receive(:report_disabled?).with(ReportsController::FORWARD_COMMITMENTS_WEB_FLAG).and_return(true)
+          allow(controller).to receive(:report_disabled?).with(ReportsController::FORWARD_COMMITMENTS_WEB_FLAGS).and_return(true)
         end
         it 'sets @as_of_date to nil if the report is disabled' do
           forward_commitments
@@ -1608,8 +1608,8 @@ RSpec.describe ReportsController, :type => :controller do
     end
 
     describe 'GET mortgage_collateral_update' do
-      column_headings = [I18n.t('common_table_headings.transaction'), 
-                         {value: I18n.t('common_table_headings.loan_count'), type: :numeric_header}, 
+      column_headings = [I18n.t('common_table_headings.transaction'),
+                         {value: I18n.t('common_table_headings.loan_count'), type: :numeric_header},
                          {value: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.unpaid_balance'), '$'), type: :numeric_header},
                          {value: fhlb_add_unit_to_table_header(I18n.t('global.original_amount'), '$'), type: :numeric_header}]
       accepted_loans_hash = {
@@ -1924,32 +1924,65 @@ RSpec.describe ReportsController, :type => :controller do
     let(:member_id) { rand(0..99999) }
     let(:call_action) { get :borrowing_capacity }
     let(:call_action_with_job_id) { get :borrowing_capacity, job_id: job_id }
-    let(:end_date) { Date.new(2016, 1, 1) }
+    let(:current) { Date.new(rand(2017..2500), rand(1..12), 1) }
+    let(:alternate) { Date.new(rand(2017..2500), rand(1..12), 1) }
 
     it 'should render the borrowing_capacity view' do
       call_action
       expect(response.body).to render_template('borrowing_capacity')
     end
-    it 'should set @end_date if supplied' do
-      get :borrowing_capacity, end_date: end_date
-      expect(assigns[:end_date]).to eq(end_date)
-    end
-
-    shared_examples 'a borrowing capacity report that passes additional arguments to the MemberBalanceServiceJob' do |job_call, deferred_job = false|
-      describe 'additional arguments' do
-        let(:job_response) {deferred_job ? response_hash : member_balance_service_job_instance}
-        before { allow(ReportConfiguration).to receive(:date_bounds).and_call_original }
-        it 'passes today as the final argument if no end_date param is provided' do
-          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, today.to_s).and_return(job_response)
-          call_action
+    context do
+      before do
+        allow(Time.zone).to receive(:today).and_return(current).exactly(7).times
+      end
+      describe 'when `current` is selected' do
+        it 'should set `@as_of` to the value `as_of_date` param' do
+          get :borrowing_capacity, as_of_date: alternate
+          expect(assigns[:as_of]).to eq(alternate.iso8601)
         end
-        it 'passes the end_date param if one is provided' do
-          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, end_date.to_s).and_return(job_response)
-          get :borrowing_capacity, end_date: end_date
+        it 'sets `@as_of` to the current date if `as_of_date` not supplied' do
+          call_action
+          expect(assigns[:as_of]).to eq(current.iso8601)
+        end
+      end
+      describe 'setting up the months dropdown' do
+        [*1..6].each do |i|
+          it 'sets the month display map value' do
+            get :borrowing_capacity
+            expect(assigns[:month_display_map][(current - i.months).end_of_month.iso8601.to_s]).to eq(I18n.t('reports.pages.borrowing_capacity.monthend', month: (current - i.months).strftime('%B')))
+          end
+          it "sets the remaining month option ##{i}" do
+            get :borrowing_capacity
+            expect(assigns[:month_options][i]).to eq([I18n.t('reports.pages.borrowing_capacity.monthend',
+              month: (current - i.months).strftime('%B')), (current - i.months).end_of_month.iso8601.to_s])
+          end
+        end
+        it 'sets the first option to the current month' do
+          get :borrowing_capacity
+          expect(assigns[:month_options].first).to eq([I18n.t('global.current'), current.iso8601.to_s])
+        end
+        it 'sets the first KVP in the month display map to the current month' do
+          get :borrowing_capacity
+          expect(assigns[:month_display_map][current.iso8601.to_s]).to eq(I18n.t('global.current'))
         end
       end
     end
-
+    shared_examples 'a borrowing capacity report that passes additional arguments to the MemberBalanceServiceJob' do |job_call, deferred_job = false|
+      describe 'additional arguments' do
+        let(:job_response) {deferred_job ? response_hash : member_balance_service_job_instance}
+        before do
+          allow(Time.zone).to receive(:today).and_return(current)
+        end
+        it 'passes today as the final argument if no `as_of_date` param is provided' do
+          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, current.to_s).and_return(job_response)
+          call_action
+        end
+        it 'passes the `as_of_date` param if one is provided' do
+          expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, alternate.to_s).and_return(job_response)
+          get :borrowing_capacity, as_of_date: alternate
+        end
+      end
+    end
     describe 'when a job_id is not present and self.skip_deferred_load is false' do
       it_behaves_like 'a MemberBalanceServiceJob backed report', 'borrowing_capacity_summary', :perform_later
       it_behaves_like 'a borrowing capacity report that passes additional arguments to the MemberBalanceServiceJob', :perform_later

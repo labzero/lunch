@@ -1,29 +1,40 @@
 require 'rails_helper'
 
 describe BeneficiariesService do
-  let(:request) { ActionDispatch::TestRequest.new }
-  let(:beneficiaries) {[
-    {'name' => SecureRandom.hex, 'address' => SecureRandom.hex},
-    {'name' => SecureRandom.hex, 'address' => SecureRandom.hex},
-    {'name' => SecureRandom.hex, 'address' => SecureRandom.hex}
-  ]}
-  subject { described_class.new(request) }
-  before { stub_const("#{described_class}::BENEFICIARIES", beneficiaries) }
+  let(:member_id) { SecureRandom.hex }
+  let(:response) {[instance_double(Hash, with_indifferent_access: nil)]}
+  let(:beneficiary) { double('Beneficiary', :[] => nil) }
 
-  it 'inherits from MAPIService' do
-    expect(described_class.superclass).to eq(MAPIService)
+  subject { BeneficiariesService.new(ActionDispatch::TestRequest.new) }
+
+  describe 'the `beneficiaries` method' do
+    let(:call_method) { subject.beneficiaries(member_id) }
+    before {
+      allow(subject).to receive(:get_json).and_return(response)
+      response.each { |member| allow(member).to receive(:with_indifferent_access).and_return(beneficiary) }
+    }
+    it 'calls the `get_json` method with the proper method name' do
+      expect(subject).to receive(:get_json).with(:beneficiaries, anything)
+      call_method
+    end
+    it 'calls the `get_json` method with the proper endpoint' do
+      expect(subject).to receive(:get_json).with(anything, "member/#{member_id}/beneficiaries")
+      call_method
+    end
+    it 'returns the array of member hashes' do
+      allow(subject).to receive(:format_beneficiaries).and_return(response)
+      expect(call_method).to eq(response)
+    end
   end
 
-  describe 'the `all` method' do
-    let(:call_method) { subject.all }
-    it 'returns an array of all beneficiaries' do
-      expect(call_method).to eq(beneficiaries)
-    end
-    it 'returns information about each beneficiary as an indifferent hash' do
-      results = call_method
-      expect(beneficiaries.length).to be > 0
-      beneficiaries.each_with_index do |beneficiary, i|
-        expect(results[i][:name]).to eq(beneficiary['name'])
+  describe 'private methods' do
+    describe '`format_beneficiaries` method' do
+      let(:beneficiaries) { JSON.parse(File.read(File.join(Rails.root, 'spec', 'fixtures', 'beneficiaries.json'))).collect{|x| x.with_indifferent_access} }
+
+      [:name, :address].each do |property|
+        it "returns an object with a `#{property}` formatted as a string" do
+          expect(subject.send(:format_beneficiaries, beneficiaries).first[property]).to be_kind_of(String)
+        end
       end
     end
   end

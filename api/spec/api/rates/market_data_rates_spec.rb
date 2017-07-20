@@ -3,7 +3,7 @@ require 'date'
 
 describe MAPI::Services::Rates::MarketDataRates do
   describe "market data rates in the development environment" do
-    let(:market_data_rates) { subject.get_market_cof_rates(:development, anything, anything)}
+    let(:market_data_rates) { subject.get_market_cof_rates(:development, anything, anything, anything)}
     it 'should return market data rates' do
       expect(market_data_rates.length).to be >=1
       expect(market_data_rates['COF_FIXED']).to be_kind_of(String)
@@ -16,7 +16,7 @@ describe MAPI::Services::Rates::MarketDataRates do
     end
   end
   describe "market data rates in the production environment" do
-    let(:market_data_rates) { subject.get_market_cof_rates(:production, '1week', 'whole')}
+    let(:market_data_rates) { subject.get_market_cof_rates(:production, [], '1week', 'whole')}
     let(:call_method) { market_data_rates }
     let(:mds_connection) { double('mds_connection', operations: nil) }
     let(:fhlbsfresponse) { double('fhlbsfresponse', at_css: nil, present?: true) }
@@ -27,7 +27,8 @@ describe MAPI::Services::Rates::MarketDataRates do
     let(:term) { double('term')}
     let(:today) { Time.zone.today }
     let(:maturity_date) { today + rand(3..1095).days }
-    let(:days_to_maturity) { (maturity_date.to_date - today).to_i.to_s + 'day' }
+    let(:number_of_weekends) { (Time.zone.today..maturity_date).to_a.select {|k| [0,6].include?(k.wday)} }
+    let(:days_to_maturity) { ((maturity_date.to_date - today).to_i - number_of_weekends.count()).to_s + 'day' }
     it 'should return market data rates', vcr: {cassette_name: 'market_data_cof_service'} do
       expect(market_data_rates.length).to be >=1
       expect(market_data_rates['COF_FIXED']).to eq('0.94')
@@ -81,14 +82,14 @@ describe MAPI::Services::Rates::MarketDataRates do
           include('v1:marketData' => [include('v12:data' => [{'v12:FhlbsfDataPoint' => ['v12:tenor' => ['v12:interval' => [{'v13:frequency' => frequency,'v13:frequencyUnit' => frequency_unit}]]]}])])
         end
         expect(mds_connection).to receive(:call).with(:get_market_data, include(message: include('v1:requests' => [{'v1:fhlbsfMarketDataRequest' => requests}])) ).and_call_original
-        subject.get_market_cof_rates(:production, term, 'whole')
+        subject.get_market_cof_rates(:production, [], term, 'whole')
       end
       it 'includes interval with frequency and frequencyUnit for custom' do
         requests = MAPI::Services::Rates::COF_TYPES.collect do
-          include('v1:marketData' => [include('v12:data' => [{'v12:FhlbsfDataPoint' => ['v12:tenor' => ['v12:interval' => [{'v13:frequency' => (maturity_date.to_date - today).to_i.to_s,'v13:frequencyUnit' => 'D'}]]]}])])
+          include('v1:marketData' => [include('v12:data' => [{'v12:FhlbsfDataPoint' => ['v12:tenor' => ['v12:interval' => [{'v13:frequency' => ((maturity_date.to_date - today).to_i - number_of_weekends.count()).to_s,'v13:frequencyUnit' => 'D'}]]]}])])
         end
         expect(mds_connection).to receive(:call).with(:get_market_data, include(message: include('v1:requests' => [{'v1:fhlbsfMarketDataRequest' => requests}])) ).and_call_original
-        subject.get_market_cof_rates(:production, days_to_maturity, 'whole', nil, maturity_date)
+        subject.get_market_cof_rates(:production, [], days_to_maturity, 'whole', nil, maturity_date)
       end
       it 'includes customRollingDay = 31 for whole loan types' do
         requests = MAPI::Services::Rates::COF_TYPES.collect do
@@ -102,21 +103,21 @@ describe MAPI::Services::Rates::MarketDataRates do
           include('v1:marketData' => [include('v12:customRollingDay' => 0)])
         end
         expect(mds_connection).to receive(:call).with(:get_market_data, include(message: include('v1:requests' => [{'v1:fhlbsfMarketDataRequest' => requests}])) ).and_call_original
-        subject.get_market_cof_rates(:production, '1week', 'agency')
+        subject.get_market_cof_rates(:production, [], '1week', 'agency')
       end
       it 'includes dayCountBasis = ACT/360 for sbc loan types' do
         requests = MAPI::Services::Rates::COF_TYPES.collect do
           include('v1:marketData' => [include('v12:dayCountBasis' => 'ACT/360')])
         end
         expect(mds_connection).to receive(:call).with(:get_market_data, include(message: include('v1:requests' => [{'v1:fhlbsfMarketDataRequest' => requests}])) ).and_call_original
-        subject.get_market_cof_rates(:production, '1week', 'agency')
+        subject.get_market_cof_rates(:production, [], '1week', 'agency')
       end
       it 'includes paymentFrequency with frequency = 6 and frequencyUnit = M for sbc loan types' do
         requests = MAPI::Services::Rates::COF_TYPES.collect do
           include('v1:marketData' => [include('v12:paymentFrequency' => [{ 'v13:frequency' => 6, 'v13:frequencyUnit'=> 'M'}])])
         end
         expect(mds_connection).to receive(:call).with(:get_market_data, include(message: include('v1:requests' => [{'v1:fhlbsfMarketDataRequest' => requests}])) ).and_call_original
-        subject.get_market_cof_rates(:production, '1week', 'agency')
+        subject.get_market_cof_rates(:production, [], '1week', 'agency')
       end
     end
     it "should raise and exception, if mds service is unavailable", vcr: {cassette_name: 'market_data_cof_service_unavailable'} do

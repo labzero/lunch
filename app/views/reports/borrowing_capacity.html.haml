@@ -2,13 +2,18 @@
 - @page_title = t('reports.meta_title')
 - deferred_load = @borrowing_capacity_summary[:deferred]
 .report.row{data: {deferred: @job_status_url, 'deferred-load' => @load_url}}
-  .report-header
+  .report-header.borrowing-capacity
     - if @print_layout
-      = render 'print_details', report_name: @report_name, name: @member_name, date: t('datepicker.single.inline_input', date: fhlb_date_standard_numeric(@end_date))
+      = render 'print_details', report_name: @report_name, name: @member_name, date: t('datepicker.single.inline_input', date: fhlb_date_standard_numeric(@as_of))
     - else
       %h1= @report_name
-      = render 'reports_header_buttons', download_formats: :pdf
-      = render 'report_details', name: @member_name, freshness: t('reports.pages.borrowing_capacity.freshness'), availability: t('reports.availability.current')
+      = render 'reports_header_buttons', allowed_params: [:as_of_date], download_formats: :pdf
+      = render 'report_details', name: @member_name, freshness: t('reports.pages.borrowing_capacity.freshness'), availability: t('reports.pages.borrowing_capacity.history')
+    - if feature_enabled?('report-borrowing-capacity-historical-data')
+      .report-inputs
+        = form_tag(reports_borrowing_capacity_url, method: 'GET') do
+          .report-filter
+            = render 'shared/dropdown', dropdown_name: 'as_of_date', default_value: @as_of, default_text: @month_display_map[@as_of], dropdown_options: @month_options, classes: 'month-selector'
   .report-main-body
     %section
       .report-summary-data
@@ -78,8 +83,8 @@
               %td.report-cell-right.report-cell-expanding= number_with_delimiter(@borrowing_capacity_summary[:standard][:securities])
           %tfoot
             %tr
-              %td= t('reports.pages.borrowing_capacity.total_borrowing_capacity')          
-              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:net_plus_securities_capacity]) 
+              %td= t('reports.pages.borrowing_capacity.total_borrowing_capacity')
+              %td.report-cell-right.report-cell-expanding= fhlb_formatted_currency_whole(@borrowing_capacity_summary[:net_plus_securities_capacity])
         %table.report-table.report-sub-table{data: {sortable: false, 'disable-auto-width' => true}}
           %tbody
             %tr

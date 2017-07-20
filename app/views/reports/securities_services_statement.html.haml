@@ -9,6 +9,7 @@
       = render 'reports_header_buttons', allowed_params: :start_date, download_formats: [:pdf] if @data_available
       = render 'report_details', name: @member_name, freshness: t('reports.pages.securities_services_statement.freshness'), availability: t('reports.pages.securities_services_statement.availability')
     - if @data_available
+      %p.report-sta-number= t('reports.pages.securities_services_statement.institution_details.sta_number_html', sta_number: @sta_number)
       .report-inputs
         = form_tag(reports_securities_services_statement_path, method: 'GET') do
           .report-filter
@@ -16,6 +17,10 @@
 
   .report-main-body
     - if @data_available
+      .report-summary-data
+        %h3
+          = report_summary_with_date('reports.pages.securities_services_statement.statement_date', fhlb_date_long_alpha(@debit_date))
+        %p= fhlb_date_standard_numeric(@debit_date)
       .report-summary-data
         %h3
           = report_summary_with_date('reports.pages.securities_services_statement.heading', fhlb_date_long_alpha(@debit_date))
@@ -33,7 +38,7 @@
         %h2.report-table-title= t('reports.pages.securities_services_statement.tables.other')
         = render 'securities_services_table', rows: [[:income_disbursement, :disbursement, :per_item_cusip], [:pledge_status_change, :pledge_status, :per_item], [:certifications, :certifications, :per_hour, '*'], [:research, :research, :per_hour, '*'], [:handling, :handling, :per_hour, '*']], data: @statement
         .report-summary-data.report-summary-right
-          %h3= report_summary_with_date('reports.pages.securities_services_statement.footer', fhlb_date_long_alpha(@debit_date), substitutions: {account_number: @statement[:sta_account_number]})
+          %h3= report_summary_with_date('reports.pages.securities_services_statement.footer', fhlb_date_long_alpha(@debit_date) )
           %p= fhlb_formatted_currency(@statement[:total])
       %small
         %p= t('reports.pages.securities_services_statement.footnote', footnote: '*')

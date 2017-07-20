@@ -146,6 +146,7 @@ class SecuritiesController < ApplicationController
     @title = t('securities.requests.title')
     service = SecuritiesRequestService.new(current_member_id, request)
     authorized_requests = service.authorized
+    authorized_requests.sort! { |a,b| b[:request_id] <=> a[:request_id]} unless authorized_requests.nil?
     awaiting_authorization_requests = service.awaiting_authorization
     raise StandardError, "There has been an error and SecuritiesController#requests has encountered nil. Check error logs." if authorized_requests.nil? || awaiting_authorization_requests.nil?
 

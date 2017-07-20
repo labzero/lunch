@@ -159,7 +159,7 @@ Given(/^I am on the "(.*?)" report page$/) do |report|
     visit '/reports/mortgage-collateral-update'
   when 'Profile'
     visit '/reports/profile'
-  when 'Securities Services Monthly Statement'
+  when 'Securities Services Monthly Fee Statement'
     visit '/reports/securities-services-statement'
   when 'Securities Transactions'
     visit '/reports/securities-transactions'
@@ -358,8 +358,6 @@ When(/^I filter the report by "(.*?)"$/) do |text|
 end
 
 Then(/^I should see a (current|monthly) securities position report for (Pledged|Unpledged) Securities$/) do |report_type, filter_type|
-  table_header = page.find('.report-table-title').text
-  expect(table_header).to include(filter_type)
   if !page.find(".report-table tbody tr:first-child td:first-child")['class'].split(' ').include?('dataTables_empty')
     filter_type = filter_type == 'Pledged' ? I18n.t('reports.pages.securities_position.pledged') : I18n.t('reports.pages.securities_position.unpledged')
     security_types = page.all(:xpath, "//*[@class='report-detail-cell']//td[text()='#{I18n.t('reports.pages.securities_position.custody_account_type')}']/following-sibling::td")
@@ -542,7 +540,7 @@ When(/^I click on the dividend transaction dropdown selector$/) do
   page.find('.report-filter .dropdown-selection').click
 end
 
-When(/^I click on the securities services monthly statement dropdown selector$/) do
+When(/^I click on the securities services monthly fee statement dropdown selector$/) do
   page.find('.report-filter .dropdown-selection').click
 end
 
@@ -565,7 +563,7 @@ Then(/^I should see a dividend summary for the last option in the dividend trans
   page.assert_selector('.table-dividend-summary tr:first-child td:last-child', text: text)
 end
 
-Then(/^I should see the has no data state for the Securities Services Monthly Statement$/) do
+Then(/^I should see the has no data state for the Securities Services Monthly Fee Statement$/) do
   page.assert_selector('p', text: I18n.t('reports.pages.securities_services_statement.data_unavailable'), exact: true)
   page.assert_no_selector('.report-header-buttons')
   page.assert_no_selector('.report-inputs')

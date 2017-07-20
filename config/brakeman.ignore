@@ -2,14 +2,47 @@
   "ignored_warnings": [
     {
       "warning_type": "Cross Site Scripting",
+      "warning_code": 102,
+      "fingerprint": "331e69e4654f158601d9a0e124304f825da4e0156d2c94759eb02611e280feaa",
+      "check_name": "ContentTag",
+      "message": "Rails 4.2.6 content_tag does not escape double quotes in attribute values (CVE-2016-6316). Upgrade to 4.2.7.1",
+      "file": "Gemfile.lock",
+      "line": 308,
+      "link": "https://groups.google.com/d/msg/ruby-security-ann/8B2iV2tPRSE/JkjCJkSoCgAJ",
+      "code": null,
+      "render_path": null,
+      "location": null,
+      "user_input": null,
+      "confidence": "High",
+      "note": ""
+    },
+    {
+      "warning_type": "SQL Injection",
+      "warning_code": 103,
+      "fingerprint": "ccf453e2ed88ce4f2116f94c1c0b7e80b4ac2b985364cd2fe50a6016ce493a30",
+      "check_name": "SQLCVEs",
+      "message": "Rails 4.2.6 contains a SQL injection vulnerability (CVE-2016-6317). Upgrade to 4.2.7.1",
+      "file": "Gemfile.lock",
+      "line": 308,
+      "link": "https://groups.google.com/d/msg/ruby-security-ann/WccgKSKiPZA/9DrsDVSoCgAJ",
+      "code": null,
+      "render_path": null,
+      "location": null,
+      "user_input": null,
+      "confidence": "High",
+      "note": ""
+    },
+    {
+      "warning_type": "Cross Site Scripting",
       "warning_code": 2,
       "fingerprint": "ecb9cfa49b0ab82676fbceeed42ee79caff88d4ae616dd8e12cc97ac541b353a",
+      "check_name": "CrossSiteScripting",
       "message": "Unescaped model attribute",
       "file": "app/views/corporate_communications/show.html.haml",
       "line": 16,
       "link": "http://brakemanscanner.org/docs/warning_types/cross_site_scripting",
       "code": "(CorporateCommunication.find(params[:id]) or CorporateCommunication.find_by!(:id => params[:id], :category => params[:category])).body.dup",
-      "render_path": [{"type":"controller","class":"CorporateCommunicationsController","method":"show","line":46,"file":"app/controllers/corporate_communications_controller.rb"}],
+      "render_path": [{"type":"controller","class":"CorporateCommunicationsController","method":"show","line":48,"file":"app/controllers/corporate_communications_controller.rb"}],
       "location": {
         "type": "template",
         "template": "corporate_communications/show"
@@ -19,6 +52,6 @@
       "note": ""
     }
   ],
-  "updated": "2016-01-25 17:24:14 -0800",
-  "brakeman_version": "3.1.4"
+  "updated": "2017-07-05 09:15:20 -0700",
+  "brakeman_version": "3.7.0"
 }

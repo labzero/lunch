@@ -48,6 +48,10 @@ describe ContactInformationHelper, type: :helper do
     it_behaves_like 'an email helper method', :collateral_operations_email, 'COLLATERAL_OPERATIONS_EMAIL'
   end
 
+  describe '`loc_email` method' do
+    it_behaves_like 'an email helper method', :loc_email, 'LOC_EMAIL'
+  end
+
   describe '`securities_services_email_text` method' do
     let(:call_method) { helper.send(:securities_services_email_text) }
     it 'responds to `securities_services_email_text`' do

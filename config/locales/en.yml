@@ -34,6 +34,7 @@ en:
     quarterly: Quarterly
     semiannually: Semiannually
     all: All
+    current: Current
     current_day: Current Day
     date: Date
     issue_date: Issue Date
@@ -904,6 +905,30 @@ en:
             - "Please refer to <a href='%{url}'>the [documentation] section of your Messages</a> for time-sensitive updates to our procedures"
           revisions:
             -
+              date: '2017-07-28'
+              details:
+                -
+                  description: "Updated the list of eligible members to include privately insured, state-chartered credit unions (page 5)."
+                -
+                  description: "Adjusted the Community Financial Institution asset cap to $1,148 million for 2017 (pages 6 and 62)."
+                -
+                  description: "Clarified that insurance companies and non-depository CDFIs are required to pledge loan collateral under specific identification and to deliver loan collateral (pages 8, 79)."
+                -
+                  description: "Increased borrowing capacities available for certain types of securities, including GNMA HECM MBS passthrough securities, Agency CMO accrual bonds with high price sensitivity, and publicly registered private label residential MBS and home equity ABS (pages 21, 23, and 25)."
+                -
+                  description: "Added Tax-Exempt Mortgage-Backed Securities to list of eligible collateral for the Securities-Backed Credit Program (pages 21 and 29)."
+                -
+                  description: "Updated the Guide to reflect the current process for conducting securities-related transactions on the member portal and the collateral-related reports available on the member portal (pages 33-38, 66-67, 72, 73)"
+                -
+                  description: "Incorporated a variety of changes to loan collateral eligibility, pricing, and borrowing capacity that were announced on March 8, 2017, and became effective on April 20, 2017, including:"
+                  details:
+                    -
+                      description: "Revised eligibility criteria for loan collateral related to delinquency, minimum FICO scores, maximum loan-to-value ratios, and minimum debt service coverage ratios (pages 39-46, 48, 95)"
+                    -
+                      description: "Revised mortgage loan collateral borrowing capacities and loan collateral price caps (pages 79-80)."
+                    -
+                      description: "Added the Streamlined MCU as a new option for reporting updates for loan collateral already pledged to the Bank via a Standard MCU or a Pledge Only MCU (pages 65-68)"
+            -
               date: '2016-04-07'
               details:
                 -
@@ -931,17 +956,6 @@ en:
                   description: "Increased loan collateral borrowing capacities for insurance company members (page 82)."
                 -
                   description: "Updated the Field Review Discount Table (pages 94-96)."
-            -
-              date: '2015-04-22'
-              details:
-                -
-                  description: "Adjusted the Community Financial Institution asset cap to $1,123 million for 2015 (pages 7 and 62)."
-                -
-                  description: "Updated the list of ineligible loans (page 48)."
-                -
-                  description: "Clarified that members pledging mortgage loans under blanket lien with summary reporting are required to submit loan portfolio reports or other documentation every six months to support the Blanket Lien Collateral Eligibility Questionnaire or the Blanket Lien Collateral Certification (page 70)."
-                -
-                  description: "Updated the field review discount table (pages 91-93)."
       collateral_review:
         title: Collateral Field Review Process
     fee_schedules:
@@ -1558,7 +1572,7 @@ en:
     request:
       title: Request Letter of Credit
       support: "The member portal only supports requests for standard Letters of Credit collateralizing public unit deposits. If your request is not received by 10:00 am, your request will not be processed until the following business day."
-      public_unit: Letter of Credit Request Public Unit Deposit
+      public_unit: 'Letter of Credit Request: Public Unit Deposit'
       beneficiary: Beneficiary
       amount: Amount
       attention: Attention
@@ -1708,7 +1722,7 @@ en:
         summary: Provides summaries and totals for pledged and unpledged securities as of the prior monthend.
         updated: Monthly, 1 business day following monthend
       services_monthly:
-        title: Securities Services Monthly Statement
+        title: Securities Services Monthly Fee Statement
         summary: Provides securities services fees for the prior month, which will be debited from your institution’s Settlement/Transaction Account on the last business day of the month.
         updated: Monthly, approximately 5 to 7 days before monthend
     account:
@@ -1725,6 +1739,8 @@ en:
         summary: Displays debits and credits based on your institution’s activity with the Bank. Interest earned is provided on the first business day of the following month.
         updated: Daily for current month, as of the end of the prior business day
         history: Current month to date. Prior statements are available for the previous 6 months.
+      investments:
+        title: Investments
     your_account:
       title: Your Account
     learn_more_html: <a href=%{url}>Learn more</a> about all available reports.
@@ -1932,6 +1948,7 @@ en:
         net_loan_collateral: Net Loan Collateral Borrowing Capacity
         remaining_capacity: Remaining Borrowing Capacity
         freshness: Loan collateral data reflects intraday processing of Mortgage Collateral Updates, except for Market Value. Market Value and all other data is as of close of business on the prior business day.
+        history: You may view the Current Borrowing Capacity report and historical month end reports for the previous six months.
         less_line_items:
           blanket_lien: Less Excluded Blanket Lien Borrowing Capacity
           bank_borrowing_capacity: Less Excluded Bank Borrowing Capacity
@@ -1945,6 +1962,7 @@ en:
           mpf_ce_collateral: Less MPF CE Collateral Required
         plus_line_items:
           securities: Plus Securities Borrowing Capacity
+        monthend: '%{month} Monthend'
       settlement_transaction_account:
         title: Settlement/Transaction Account (STA) Statement
         opening_balance_heading: "Beginning balance of as of %{date}:"
@@ -2019,12 +2037,15 @@ en:
           dividend: Dividend
       securities_services_statement:
         heading: 'Total amount to be debited on %{date}:'
+        statement_date: 'Statement Date:'
         footnote: '%{footnote}Fees will be charged based on the specific transaction and the amount of staff time required.'
         questions_html: 'If you have questions regarding this statement, please email <a href=%{mailto_url}>Securities Services</a> or call %{phone_number}.'
-        footer: 'Total amount to be debited from Settlement/Transaction Account No. %{account_number} on %{date}:'
+        footer: 'Total amount to be debited on %{date}:'
         freshness: This statement reflects fees for the prior month and is posted approximately 5 to 7 days before the debit date, which is the last business day of the month.
         availability: Statements are available for the previous 18 months.
-        data_unavailable: You have no Securities Services Monthly Statement for the last 18 months.
+        data_unavailable: You have no Securities Services Monthly Fee Statement for the last 18 months.
+        institution_details:
+                  sta_number_html: "<span>STA Number:</span> %{sta_number}"
         tables:
           maintenance: Monthly Account Maintenance Fee
           securities: Monthly Securities Fees
@@ -2038,7 +2059,7 @@ en:
           euroclear: 'Euroclear%{footnote}'
           disbursement: 'All Income Disbursement%{footnote}'
           pledge_status: 'Pledge Status Change (account transfer)%{footnote}'
-          certifications: 'Registration of Certifications%{footnote}'
+          certifications: 'Certificate Registration%{footnote}'
           research: 'Research Projects%{footnote}'
           handling: 'Special Handling%{footnote}'
         line_items:
@@ -2976,7 +2997,8 @@ en:
             annual: "The remainder of the annual maintenance fee is based on the difference between 70% of the notional amount of the letter of credit and the average daily balance of public unit deposits supported by the letter of credit during the accrual period. The accrual period is each calendar quarter. This part of the annual maintenance fee is payable on the 15th calendar day following the end of each quarter."
         fee_certification:
           title: Maintenance Fee Certification
-          description: Members will be required to report the average daily balance of public unit deposits supported by the letter of credit for the accrual period within five business days after the end of each calendar quarter and provide a certification that the numbers are true and correct.
+          subject: 'VBLOC%20Certification'
+          description_html: "Members will be required to report the average daily balance of public unit deposits supported by the letter of credit for the accrual period within five business days after the end of each calendar quarter and provide a certification that the numbers are true and correct. The certification report must include the letter of credit number and show the actual deposit balances supported by the letter of credit for each day of the accrual period. Certifications should be sent by email from an authorized signer to <a href='%{url}?subject=%{subject}'>Lettersofcredit@fhlbsf.com</a>. The subject line of the email should be: VBLOC Certification."
     section_headings:
       use: Use
       uses: Uses
@@ -3447,6 +3469,11 @@ en:
         update_success: Your early shutoff has been updated.
         remove_success: The early shutoff has been removed.
         duplicate_error: "An early shutoff is already scheduled for this date.\nPlease choose a new date and try again"
+    data_visibility:
+      title: Data Visibility
+      report_visibility: Report Visibility
+      all_members: All Members
+      member_selector: 'Data Visibility for:'
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

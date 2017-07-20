@@ -150,7 +150,7 @@ class LettersOfCreditController < ApplicationController
 
   def populate_new_request_view_variables
     set_titles(t('letters_of_credit.request.title'))
-    @beneficiary_dropdown_options = BeneficiariesService.new(request).all.collect{|beneficiary| [beneficiary[:name], beneficiary[:name]] }
+    @beneficiary_dropdown_options = BeneficiariesService.new(request).beneficiaries(current_member_id).collect{|beneficiary| [beneficiary[:name], beneficiary[:name]] }
     @beneficiary_dropdown_default = letter_of_credit_request.beneficiary_name || @beneficiary_dropdown_options.first.try(:last)
     @date_restrictions = date_restrictions
   end

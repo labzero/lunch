@@ -60,6 +60,10 @@ RSpec.describe WebAdminPolicy, :type => :policy do
     it_behaves_like 'a web_admin policy that checks to see if the user has the web_admin role', :edit_trade_rules
   end
 
+  describe '`edit_data_visibility?` method' do
+    it_behaves_like 'a web_admin policy that checks to see if the user has the web_admin role', :edit_data_visibility
+  end
+
   describe '`modify_early_shutoff_request?` method' do
     let(:early_shutoff_request) { instance_double(EarlyShutoffRequest) }
     subject { WebAdminPolicy.new(user, early_shutoff_request) }

@@ -683,10 +683,11 @@ RSpec.describe LettersOfCreditController, :type => :controller do
 
     describe '`populate_new_request_view_variables`' do
       let(:call_method) { controller.send(:populate_new_request_view_variables) }
-
+      let(:beneficiary_service) { instance_double(BeneficiariesService, beneficiaries: []) }
       before do
         allow(controller).to receive(:date_restrictions)
         allow(controller).to receive(:letter_of_credit_request).and_return(letter_of_credit_request)
+        allow(BeneficiariesService).to receive(:new).and_return(beneficiary_service)
       end
 
       it 'calls `set_titles` with its title' do
@@ -699,18 +700,16 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           {name: SecureRandom.hex},
           {name: SecureRandom.hex}
         ]}
-        let(:beneficiary_service) { instance_double(BeneficiariesService, all: []) }
-        before { allow(BeneficiariesService).to receive(:new).and_return(beneficiary_service) }
         it 'creates a new instance of `BeneficiariesService` with the request' do
           expect(BeneficiariesService).to receive(:new).with(request).and_return(beneficiary_service)
           call_method
         end
         it 'fetches `all` of the beneficiaries from the service' do
-          expect(beneficiary_service).to receive(:all).and_return([])
+          expect(beneficiary_service).to receive(:beneficiaries).and_return([])
           call_method
         end
         it 'is an array containing arrays of beneficiary names' do
-          allow(beneficiary_service).to receive(:all).and_return(beneficiaries)
+          allow(beneficiary_service).to receive(:beneficiaries).and_return(beneficiaries)
           matching_array = beneficiaries.collect{|x| [x[:name], x[:name]]}
           call_method
           expect(assigns[:beneficiary_dropdown_options]).to eq(matching_array)
@@ -735,7 +734,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           end
           context 'when the beneficiary_name of the letter_of_credit_request is nil' do
             it 'sets `@beneficiary_dropdown_default` to last value of the first member of the @beneficiary_dropdown_options array' do
-              allow(beneficiary_service).to receive(:all).and_return(beneficiaries)
+              allow(beneficiary_service).to receive(:beneficiaries).and_return(beneficiaries)
               call_method
               expect(assigns[:beneficiary_dropdown_default]).to eq(beneficiaries.first[:name])
             end

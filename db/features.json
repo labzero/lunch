@@ -12,5 +12,6 @@
   "report-download-dividend-transaction",
   "report-pdf-current-securities-position",
   "letters-of-credit",
-  "securities-delivery-method"
+  "securities-delivery-method",
+  "report-borrowing-capacity-historical-data"
 ]

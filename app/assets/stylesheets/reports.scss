@@ -112,7 +112,7 @@
     color: $medium-gray;
   }
   p:last-child {
-    margin-bottom: 0px;
+    margin-bottom: 0;
   }
 }
 
@@ -208,6 +208,22 @@
 .report-intro-details {
   width: 540px;
   margin: 0;
+}
+
+.report-price-indications {
+  .report-header {
+    .report-inputs {
+      clear: both;
+      height: 66px;
+      .report-datepicker, .report-filter {
+        float: left;
+        margin-left: 0;
+      }
+      .report-filter {
+        margin-right: 10px;
+      }
+    }
+  }
 }
 
 .report-current-price-indications {
@@ -310,7 +326,7 @@
   }
 
   .report-cell-total {
-    border-right-width: 0px;
+    border-right-width: 0;
   }
 
   .report-cell-narrow {
@@ -468,12 +484,9 @@
   clear: both;
   height: 66px;
   .report-datepicker, .report-filter {
+    margin-right: 10px;
     float: left;
   }
-}
-
-.report-filter {
-  margin-left: 10px;
 }
 
 .sta-statement {
@@ -699,15 +712,17 @@
 }
 
 .report-securities-services-statement {
-  .report-summary-data {
-    width: auto;
-  }
   .report-table {
+    width: 740px;
+    line-height: 8px;
     td:first-child {
-      width: 300px;
+      width: 210px;
+    }
+    td:second-child {
+      width: 470px;
     }
     td:last-child {
-      width: 100px;
+      width: 60px;
     }
   }
   .report-summary-right {
@@ -1114,7 +1129,7 @@ td.dataTables_empty {
   border: solid 1px $actionable-blue;
   border-left: none;
   border-right: none;
-  padding: 15px 0px 15px 60px;
+  padding: 15px 0 15px 60px;
   position: relative;
   line-height: 30px;
   box-sizing: border-box;
@@ -1125,6 +1140,18 @@ td.dataTables_empty {
     top: 15px;
     font-size: 30px;
     line-height: 30px;
+  }
+}
+
+.borrowing-capacity.report-header {
+  .report-inputs {
+    .report-filter {
+      margin-left: 0;
+      .month-selector {
+        width: 210px;
+        margin: 10px 0 50px;
+      }
+    }
   }
 }
 
@@ -1402,7 +1429,7 @@ td.dataTables_empty {
       @include typography-print-header;
       float: none;
       margin-top: 9px;
-      margin-bottom: 0px;
+      margin-bottom: 0;
     }
     .report-sta-number {
       margin-bottom: 0;
@@ -1417,7 +1444,7 @@ td.dataTables_empty {
     }
   }
   .report-main-body {
-    margin-bottom: 0px;
+    margin-bottom: 0;
     h2 {
       @include typography-print-subheader;
     }
@@ -1624,6 +1651,9 @@ td.dataTables_empty {
   }
 
   .report-securities-services-statement {
+    .report-sta-number {
+      display: none;
+    }
     .report-table td {
       border-left: none;
       border-right: none;
@@ -1660,10 +1690,10 @@ td.dataTables_empty {
       }
       .report-profile-cqr {
         visibility: hidden;
-        width: 0px;
+        width: 0;
       }
       .report-profile-cqr-number {
-        margin-left: 0px;
+        margin-left: 0;
       }
     }
     .report-profile-data {
@@ -1880,7 +1910,7 @@ td.dataTables_empty {
       margin-top: 32px;
     }
     .sbc-program, .sta-rate, .general-info {
-      margin-top: 0px;
+      margin-top: 0;
     }
     .availability-details {
       @include typography-print-table-cell;

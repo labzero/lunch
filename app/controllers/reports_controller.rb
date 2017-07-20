@@ -6,29 +6,23 @@ class ReportsController < ApplicationController
   include ActionView::Helpers::NumberHelper
   include FinancialInstrumentHelper
 
-  # Mapping of current reports onto flags defined in MembersService
-  ADVANCES_DETAIL_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA, MembersService::ADVANCES_DETAIL_HISTORY]
-  BORROWING_CAPACITY_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
-  CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MembersService::CURRENT_SECURITIES_POSITION, MembersService::CAPSTOCK_REPORT_BALANCE, MembersService::CAPSTOCK_REPORT_TRIAL_BALANCE]
-  HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
-  CURRENT_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::AUTOTRADE_RATES_DATA]
-  SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
-  CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
-  DIVIDEND_STATEMENT_WEB_FLAGS = [MembersService::CAPSTOCK_REPORT_DIVIDEND_TRANSACTION, MembersService::CAPSTOCK_REPORT_DIVIDEND_STATEMENT]
-  SECURITIES_SERVICES_STATMENT_WEB_FLAGS = [MembersService::SECURITIESBILLSTATEMENT]
-  LETTERS_OF_CREDIT_WEB_FLAGS = [MembersService::LETTERS_OF_CREDIT_DETAIL_REPORT]
-  SECURITIES_TRANSACTION_WEB_FLAGS = [MembersService::SECURITIES_TRANSACTION_DATA]
-  PARALLEL_SHIFT_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
-  CURRENT_SECURITIES_POSITION_WEB_FLAG = [MembersService::CURRENT_SECURITIES_POSITION]
-  MONTHLY_SECURITIES_WEB_FLAGS = [MembersService::MONTHLY_SECURITIES_POSITION]
-  FORWARD_COMMITMENTS_WEB_FLAG = [MembersService::ADVANCES_DETAIL_DATA]
-  CAPITAL_STOCK_AND_LEVERAGE_WEB_FLAGS = [MembersService::FHLB_STOCK_DATA]
-  ACCOUNT_SUMMARY_WEB_FLAGS = [MembersService::CREDIT_OUTSTANDING_DATA, MembersService::COLLATERAL_HIGHLIGHTS_DATA, MembersService::FHLB_STOCK_DATA]
-  INTEREST_RATE_RESETS_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
-  TODAYS_CREDIT_ACTIVITY_WEB_FLAGS = [MembersService::TODAYS_CREDIT_ACTIVITY]
-  MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
 
-  CURRENT_PRICE_INDICATIONS_WEB_FLAG_MAPPING = {
+  # ***************** BEGIN Web Flag Mapping *****************
+  # Your Account
+  ACCOUNT_SUMMARY_WEB_FLAGS = [MembersService::CREDIT_OUTSTANDING_DATA, MembersService::COLLATERAL_HIGHLIGHTS_DATA, MembersService::FHLB_STOCK_DATA]
+  AUTHORIZATIONS_WEB_FLAGS = [] # none established
+  SETTLEMENT_TRANSACTION_ACCOUNT_WEB_FLAGS = [MembersService::STA_BALANCE_AND_RATE_DATA, MembersService::STA_DETAIL_DATA]
+  INVESTMENTS_WEB_FLAGS = [MembersService::INVESTMENTS]
+
+  # Capital Stock
+  CAPITAL_STOCK_ACTIVITY_WEB_FLAGS = [MembersService::CURRENT_SECURITIES_POSITION, MembersService::CAPSTOCK_REPORT_BALANCE, MembersService::CAPSTOCK_REPORT_TRIAL_BALANCE]
+  CAPITAL_STOCK_TRIAL_BALANCE_WEB_FLAGS = [MembersService::SECURITIES_TRANSACTION_DATA] # is this right??
+  CAPITAL_STOCK_AND_LEVERAGE_WEB_FLAGS = [MembersService::FHLB_STOCK_DATA]
+  DIVIDEND_STATEMENT_WEB_FLAGS = [MembersService::CAPSTOCK_REPORT_DIVIDEND_TRANSACTION, MembersService::CAPSTOCK_REPORT_DIVIDEND_STATEMENT]
+
+  # Price Indications and STA Rates
+  CURRENT_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::AUTOTRADE_RATES_DATA]
+  CURRENT_PRICE_INDICATIONS_WEB_FLAG_MAPPING = { # Probably getting rid of these
     standard_arc_data: [MembersService::RATE_CURRENT_STANDARD_ARC],
     sbc_arc_data: [MembersService::RATE_CURRENT_SBC_ARC],
     standard_frc_data: [MembersService::RATE_CURRENT_STANDARD_FRC],
@@ -36,6 +30,28 @@ class ReportsController < ApplicationController
     standard_vrc_data: [MembersService::RATE_CURRENT_STANDARD_VRC],
     sbc_vrc_data: [MembersService::RATE_CURRENT_SBC_VRC]
   }.freeze
+  HISTORICAL_PRICE_INDICATIONS_WEB_FLAGS = [MembersService::IRDB_RATES_DATA]
+
+  # Collateral
+  BORROWING_CAPACITY_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
+  MORTGAGE_COLLATERAL_UPDATE_WEB_FLAGS = [MembersService::COLLATERAL_REPORT_DATA]
+
+  # Credit
+  TODAYS_CREDIT_ACTIVITY_WEB_FLAGS = [MembersService::TODAYS_CREDIT_ACTIVITY]
+  ADVANCES_DETAIL_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA, MembersService::ADVANCES_DETAIL_HISTORY]
+  INTEREST_RATE_RESETS_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
+  LETTERS_OF_CREDIT_WEB_FLAGS = [MembersService::LETTERS_OF_CREDIT_DETAIL_REPORT]
+  FORWARD_COMMITMENTS_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
+  PARALLEL_SHIFT_WEB_FLAGS = [MembersService::ADVANCES_DETAIL_DATA]
+
+  # Securities
+  SECURITIES_TRANSACTION_WEB_FLAGS = [MembersService::SECURITIES_TRANSACTION_DATA]
+  CASH_PROJECTIONS_WEB_FLAGS = [MembersService::CASH_PROJECTIONS_DATA]
+  CURRENT_SECURITIES_POSITION_WEB_FLAG = [MembersService::CURRENT_SECURITIES_POSITION]
+  MONTHLY_SECURITIES_WEB_FLAGS = [MembersService::MONTHLY_SECURITIES_POSITION]
+  SECURITIES_SERVICES_STATMENT_WEB_FLAGS = [MembersService::SECURITIESBILLSTATEMENT]
+  # ***************** END Web Flag Mapping *****************
+
 
   TOKEN_ADVANCES = 'token_advances'.freeze
   TOKEN_SECURITIES = 'token_securities'.freeze
@@ -742,13 +758,23 @@ class ReportsController < ApplicationController
 
   def borrowing_capacity
     @report_name = ReportConfiguration.report_title(:borrowing_capacity)
-    initialize_dates(:borrowing_capacity, nil, params[:end_date])
-    downloadable_report(:pdf, {end_date: @end_date.to_s}) do
+    current = Time.zone.today.iso8601
+    @as_of = params['as_of_date'].blank? ? current : params['as_of_date']
+    @month_display_map = {}
+    @month_options = [*1..6].collect do |i| #display current month + five previous months
+      date = (Time.zone.today - i.months).end_of_month
+      iso_date = date.iso8601
+      @month_display_map[iso_date] = I18n.t('reports.pages.borrowing_capacity.monthend', month: date.strftime('%B'))
+      [@month_display_map[iso_date], iso_date]
+    end
+    @month_options.unshift([I18n.t('global.current'), current])
+    @month_display_map[current] = I18n.t('global.current')
+    downloadable_report(:pdf, {as_of_date: params['as_of_date']}, "borrowing_capacity_#{@as_of}") do
       if params[:job_id] || self.skip_deferred_load
         if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
           @borrowing_capacity_summary = {}
         elsif self.skip_deferred_load
-          @borrowing_capacity_summary = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s)
+          @borrowing_capacity_summary = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @as_of.to_s)
         else
           job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
           raise ActiveRecord::RecordNotFound unless job_status
@@ -758,10 +784,10 @@ class ReportsController < ApplicationController
         raise StandardError, "There has been an error and ReportsController#borrowing_capacity has encountered nil. Check error logs." if @borrowing_capacity_summary.nil?
         render layout: false if request.try(:xhr?)
       else
-        job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'borrowing_capacity_summary', request.uuid, @end_date.to_s).job_status
+        job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'borrowing_capacity_summary', request.uuid, @as_of.to_s).job_status
         job_status.update_attributes!(user_id: current_user.id)
         @job_status_url = job_status_url(job_status)
-        @load_url = reports_borrowing_capacity_url(job_id: job_status.id)
+        @load_url = reports_borrowing_capacity_url(job_id: job_status.id, as_of_date: params['as_of_date'])
         @borrowing_capacity_summary = {deferred: true}
       end
     end
@@ -1395,10 +1421,12 @@ class ReportsController < ApplicationController
         if report_disabled?(SECURITIES_SERVICES_STATMENT_WEB_FLAGS)
           @statement = {}
           @debit_date = nil
+          @sta_number = nil
         else
           @statement = member_balances.securities_services_statement(@start_date)
           raise StandardError, "There has been an error and ReportsController#securities_services_statement has encountered nil. Check error logs." if @statement.nil?
           @debit_date = @statement[:debit_date]
+          @sta_number = @statement[:sta_account_number]
         end
       end
     end
@@ -1658,7 +1686,7 @@ class ReportsController < ApplicationController
     downloadable_report(:xlsx) do
       member_balances = MemberBalanceService.new(current_member_id, request)
       @report_name = ReportConfiguration.report_title(:forward_commitments)
-      if report_disabled?(FORWARD_COMMITMENTS_WEB_FLAG)
+      if report_disabled?(FORWARD_COMMITMENTS_WEB_FLAGS)
         forward_commitments = {}
       else
         forward_commitments = member_balances.forward_commitments

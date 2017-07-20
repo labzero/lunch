@@ -6,12 +6,14 @@ Then(/^I see the admin dashboard$/) do
   page.assert_selector('.admin header h1', text: I18n.t('admin.title'), exact: true)
 end
 
-Then(/^I should be on the (term rules limits|end of day shutoff) page$/) do |rules_page|
+Then(/^I should be on the (term rules limits|end of day shutoff|data visibility web flags) page$/) do |rules_page|
   title = case rules_page
   when 'term rules limits'
     I18n.t('admin.term_rules.title')
   when 'end of day shutoff'
     I18n.t('admin.shutoff_times.title')
+  when 'data visibility web flags'
+    I18n.t('admin.data_visibility.title')
   end
   page.assert_selector('.admin h1', text: title, exact: true)
 end
@@ -258,6 +260,19 @@ end
 
 Then(/^I should be on the edit page for that early shutoff$/) do
   expect(page.find(".rules-early-shutoff-form input[name='early_shutoff_request[early_shutoff_date]']", visible: :hidden).value).to eq(@early_shutoff_date.iso8601)
+end
+
+When(/^I change the member selector to the (\d) value on the data visibility web flags page$/) do |selection|
+  member_selection_node = page.find('.data-visibility-select-member select')
+  member_selection_node.click
+  member_option_node = member_selection_node.all('option')[selection.to_i]
+  @data_visibility_member_id = member_option_node.value
+  member_option_node.click
+end
+
+Then(/^I should see the data visibility web flags page for that member$/) do
+  step 'I should see 6 report tables with multiple data rows'
+  expect(page.find('.data-visibility-select-member select').value).to eq(@data_visibility_member_id)
 end
 
 def translate_tab_title(nav)

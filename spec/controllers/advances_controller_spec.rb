@@ -1413,8 +1413,12 @@ RSpec.describe AdvancesController, :type => :controller do
       let(:maturity_date) { today + (days_to_maturity + (funding_date - today)).days }
       let(:funding_date) { today + rand(1..3).days }
       let(:call_method) { subject.send(:days_to_maturity, maturity_date, funding_date) }
+      let(:number_of_weekend_and_holiday_days) { rand(1..5) }
+      let(:calendar_service_instance) { double('calendar instance') }
 
       before do
+        allow(CalendarService).to receive(:new).and_return(calendar_service_instance)
+        allow(calendar_service_instance).to receive(:number_of_weekend_and_holiday_days).and_return(number_of_weekend_and_holiday_days)
         allow(Time.zone).to receive(:today).and_return(today)
       end
 
@@ -1425,10 +1429,10 @@ RSpec.describe AdvancesController, :type => :controller do
         expect(call_method).to have_key(:term)
       end
       it 'returns the number of days between the `maturity_date` and `funding_date` in the `days` key' do
-        expect(call_method[:days]).to be(days_to_maturity)
+        expect(call_method[:days]).to be(days_to_maturity - number_of_weekend_and_holiday_days)
       end
       it 'returns a custom term token in the `term` key made up of the days to maturity and the word day' do
-        expect(call_method[:term]).to eq("#{days_to_maturity}day".to_sym)
+        expect(call_method[:term]).to eq("#{days_to_maturity - number_of_weekend_and_holiday_days}day".to_sym)
       end
       it 'returns a custom term token in the `term` key as a symbol' do
         expect(call_method[:term]).to be_kind_of(Symbol)
@@ -1438,13 +1442,13 @@ RSpec.describe AdvancesController, :type => :controller do
         call_method
       end
       it 'converts the `funding_date` to a Date' do
-        expect(funding_date).to receive(:to_date).and_call_original
+        expect(funding_date).to receive(:to_date).at_least(:once).and_call_original
         call_method
       end
       context 'if no `funding_date` is provided' do
         let(:funding_date) { today }
         it 'sets `funding_date` to today' do
-          expect(subject.send(:days_to_maturity, maturity_date)[:days]).to be(days_to_maturity)
+          expect(subject.send(:days_to_maturity, maturity_date)[:days]).to be(days_to_maturity - number_of_weekend_and_holiday_days)
         end
       end
     end
