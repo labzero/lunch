@@ -42,7 +42,7 @@ class LettersOfCreditController < ApplicationController
         {
           columns: [
             {value: credit[:lc_number], type: nil},
-            {value: credit[:beneficiary].try(:truncate, 50, omission: ''), type: nil},
+            {value: credit[:beneficiary].try(:truncate, 52, separator: ' ', omission: '..').try(:gsub, /\,..$/, '..'), type: nil},
             {value: credit[:current_par], type: :currency_whole},
             {value: credit[:trade_date], type: :date},
             {value: credit[:maturity_date], type: :date},
