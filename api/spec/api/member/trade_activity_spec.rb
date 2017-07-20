@@ -46,6 +46,7 @@ describe MAPI::ServiceApp do
       describe 'in the production environment' do
         before do
           allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
+          allow(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_current_par) { |app, member_id, activities| activities}
         end
         it 'returns active advances', vcr: {cassette_name: 'trade_activity_service'} do
           allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
@@ -101,6 +102,7 @@ describe MAPI::ServiceApp do
         it "transforms the rate in #{env}", vcr: {cassette_name: 'trade_activity_service'} do
           allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
           allow(MAPI::Services::Member::TradeActivity).to receive(:get_ods_deal_structure_code).and_return(ods_deal_structure_code)
+          allow(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_current_par) { |app, member_id, activities| activities}
           allow(MAPI::ServiceApp).to receive(:environment).and_return(env.to_sym)
           transformed_rate = double('A Tranformed Rate')
           allow(MAPI::Services::Member::TradeActivity).to receive(:decimal_to_percentage_rate).and_return(transformed_rate)
@@ -119,6 +121,27 @@ describe MAPI::ServiceApp do
           expect(MAPI::Services::Member::TradeActivity).to receive(:advance_confirmation).and_call_original
           call_method
         end
+        describe 'crosschecking the currnt par' do
+          before { allow(MAPI::Services::Member::TradeActivity).to receive(:sort_trades) }
+
+          it 'calls `crosscheck_current_par` with the app' do
+            expect(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_current_par).with(subject, any_args)
+            call_method
+          end
+          it 'calls `crosscheck_current_par` with the member_id' do
+            expect(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_current_par).with(anything, member_id, anything)
+            call_method
+          end
+          it 'calls `crosscheck_current_par` with the activities' do
+            activities = [instance_double(Hash, :[]= => nil, :[] => nil)]
+            allow(activities.first).to receive(:with_indifferent_access).and_return(activities.first)
+            allow(JSON).to receive(:parse).and_return(activities)
+            allow(MAPI::Services::Member::TradeActivity).to receive(:get_trade_activity_trades).and_return(activities)
+            allow(MAPI::Services::Member::TradeActivity).to receive(:decimal_to_percentage_rate)
+            expect(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_current_par).with(anything, anything, activities)
+            call_method
+          end
+        end
       end
       it 'adds the `advance_confirmation` to the appropriate advance, based on `advance_number`' do
         advance_number = rand(1000.99999)
@@ -132,6 +155,105 @@ describe MAPI::ServiceApp do
         allow(JSON).to receive(:parse).and_return([advance])
         allow(MAPI::Services::Member::TradeActivity).to receive(:advance_confirmation).and_return([confirmation])
         expect(call_method.first[:advance_confirmation].first).to eq(confirmation)
+      end
+    end
+
+    describe 'the `crosscheck_current_par` class method' do
+      let(:trade_activity_module) { MAPI::Services::Member::TradeActivity }
+      let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
+      let(:member_id) { rand(1000..9999) }
+      let(:activities) {[
+        {
+          'advance_number' => SecureRandom.hex,
+          'current_par' => double('current par')
+        }
+      ]}
+      let(:call_method) { trade_activity_module.crosscheck_current_par(app, member_id, activities) }
+      before do
+        allow(trade_activity_module).to receive(:should_fake?).and_return(true)
+        allow(trade_activity_module).to receive(:fake).and_return([])
+      end
+      it 'calls `should_fake?` with the app' do
+        expect(trade_activity_module).to receive(:should_fake?).and_return(true)
+        call_method
+      end
+      context 'when `should_fake` returns false' do
+        before do
+          allow(trade_activity_module).to receive(:should_fake?).and_return(false)
+          allow(trade_activity_module).to receive(:fetch_hashes).and_return([])
+        end
+
+        it 'calls `fetch_hashes` with the logger from the app' do
+          expect(trade_activity_module).to receive(:fetch_hashes).with(app.logger, any_args).and_return([])
+          call_method
+        end
+        it 'calls `fetch_hashes` with an empty hash for the mapping arg' do
+          expect(trade_activity_module).to receive(:fetch_hashes).with(anything, anything, {}, anything).and_return([])
+          call_method
+        end
+        it 'calls `fetch_hashes` with `true` for the downcase arg' do
+          expect(trade_activity_module).to receive(:fetch_hashes).with(anything, anything, anything, true).and_return([])
+          call_method
+        end
+        it 'quotes the member_id' do
+          expect(trade_activity_module).to receive(:quote).with(member_id)
+          call_method
+        end
+        describe 'the SQL for fetching the advances details' do
+          ['ADVDET_ADVANCE_NUMBER', 'ADVDET_CURRENT_PAR'].each do |field|
+            it "SELECTS the `#{field}` field" do
+              matcher = Regexp.new(/\A\s*SELECT\s+(.*,\s*|\s*)#{field}(\s*|,\s*)/im)
+              expect(trade_activity_module).to receive(:fetch_hashes).with(anything, matcher, any_args).and_return([])
+              call_method
+            end
+          end
+          it 'selects FROM `WEB_INET.WEB_ADVANCES_DETAIL_RPT`' do
+            matcher = Regexp.new(/\A\s*SELECT.+FROM\s+WEB_INET.WEB_ADVANCES_DETAIL_RPT/im)
+            expect(trade_activity_module).to receive(:fetch_hashes).with(anything, matcher, any_args).and_return([])
+            call_method
+          end
+          it 'selects rows WHERE the FHLB_ID is equal to the quoted `fhlb_id` arg' do
+            allow(trade_activity_module).to receive(:quote).with(member_id).and_return(member_id)
+            matcher = Regexp.new(/\A\s*SELECT.+FROM.+(WHERE|WHERE.*\s+AND)\s+FHLB_ID\s*=\s*#{member_id}\s+/im)
+            expect(trade_activity_module).to receive(:fetch_hashes).with(anything, matcher, any_args).and_return([])
+            call_method
+          end
+          it 'selects rows WHERE the ADVDET_ADVANCE_NUMBER is IN the set of passed activities' do
+            allow(trade_activity_module).to receive(:quote).with(member_id).and_return(member_id)
+            matcher = Regexp.new(/\A\s*SELECT.+FROM.+(WHERE|WHERE.*\s+AND)\s+ADVDET_ADVANCE_NUMBER\s*IN\s*\(\s*#{activities.first['advance_number']}\s*\)\s+/im)
+            expect(trade_activity_module).to receive(:fetch_hashes).with(anything, matcher, any_args).and_return([])
+            call_method
+          end
+        end
+      end
+      context 'when `should_fake` returns true' do
+        before { allow(trade_activity_module).to receive(:should_fake?).and_return(true) }
+
+        it 'calls `fake` with `crosschecked_active_advances`' do
+          expect(trade_activity_module).to receive(:fake).with('crosschecked_active_advances').and_return([])
+          call_method
+        end
+      end
+      context 'when overlapping advances are found in the advances details table' do
+        let(:crosschecked_current_par) { double('crosschecked current par')}
+        let(:overlapping_activities) {[
+          {
+            'advdet_advance_number' => activities.first['advance_number'],
+            'advdet_current_par' => crosschecked_current_par
+          }
+        ]}
+        before { allow(trade_activity_module).to receive(:fake).and_return(overlapping_activities) }
+
+        it 'sets the `current_par` of the overlapping advance to the value from the advances detail table' do
+          crosschecked_activity = activities.first.clone
+          crosschecked_activity['current_par'] = crosschecked_current_par
+          expect(call_method.first).to eq(crosschecked_activity)
+        end
+      end
+      context 'when no overlapping advances are found in the advances details table' do
+        it 'returns the activities array that was passed' do
+          expect(call_method).to eq(activities)
+        end
       end
     end
 
