@@ -171,29 +171,39 @@ module MAPI
             advance = data.find{ |trade| trade[:advance_number] == confirmation[:advance_number] }
             advance[:advance_confirmation] << confirmation
           end
-          data = crosscheck_current_par(app, member_id, data)
+          data = crosscheck_advances_detail(app, member_id, data).collect do |trade|
+            trade[:original_par] ||= trade[:current_par]
+            trade
+          end
           sort_trades(data)
         end
 
-        def self.crosscheck_current_par(app, member_id, activities)
+        def self.crosscheck_advances_detail(app, member_id, activities)
           activities = activities.collect(&:with_indifferent_access)
           advance_numbers = activities.collect { |trade| trade[:advance_number] }
-          crosschecked_advances = unless should_fake?(app)
-            advances_details_query = <<-SQL
-              SELECT ADVDET_ADVANCE_NUMBER, ADVDET_CURRENT_PAR
-              FROM WEB_INET.WEB_ADVANCES_DETAIL_RPT
-              WHERE FHLB_ID = #{quote(member_id)}
-              AND ADVDET_ADVANCE_NUMBER IN (#{advance_numbers.join(', ')})
-            SQL
-            fetch_hashes(app.logger, advances_details_query, {}, true)
-          else
-            fake('crosschecked_active_advances')
-          end
-          if crosschecked_advances.present?
-            activities.map! do |activity|
-              crosschecked_advance = crosschecked_advances.collect(&:with_indifferent_access).select{ |advance| advance[:advdet_advance_number] == activity[:advance_number] }.first
-              activity[:current_par] = crosschecked_advance[:advdet_current_par] if crosschecked_advance
-              activity
+          if advance_numbers.present?
+            crosschecked_advances = unless should_fake?(app)
+              advances_details_query = <<-SQL
+                SELECT ADVDET_ADVANCE_NUMBER, ADVDET_CURRENT_PAR, ORIGINAL_PAR
+                FROM WEB_INET.WEB_ADVANCES_DETAIL_RPT
+                WHERE FHLB_ID = #{quote(member_id)}
+                AND ADVDET_ADVANCE_NUMBER IN (#{advance_numbers.join(', ')})
+              SQL
+              fetch_hashes(app.logger, advances_details_query, {}, true)
+            else
+              fake('crosschecked_active_advances')
+            end
+            if crosschecked_advances.present?
+              activities.map! do |activity|
+                crosschecked_advance = crosschecked_advances.collect(&:with_indifferent_access).select{ |advance| advance[:advdet_advance_number] == activity[:advance_number] }.first
+                if crosschecked_advance
+                  activity[:current_par] = crosschecked_advance[:advdet_current_par]
+                  activity[:original_par] = crosschecked_advance[:original_par]
+                end
+                activity
+              end
+            else
+              activities
             end
           else
             activities

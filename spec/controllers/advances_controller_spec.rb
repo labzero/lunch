@@ -89,7 +89,8 @@ RSpec.describe AdvancesController, :type => :controller do
       { title: I18n.t('common_table_headings.advance_number'), sortable: true },
       { title: I18n.t('common_table_headings.advance_type'), sortable: true },
       { title: I18n.t('global.footnoted_string', string: I18n.t('advances.rate')), sortable: true },
-      { title: I18n.t('common_table_headings.current_par') + ' ($)', sortable: true }
+      { title: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.original_par'), '$'), sortable: true },
+      { title: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), sortable: true }
     ]}
     let(:active_advances_response) {[
       {
@@ -100,6 +101,7 @@ RSpec.describe AdvancesController, :type => :controller do
         'advance_type' => advance_type,
         'status' => status,
         'interest_rate' => interest_rate,
+        'original_par' => rand(10000..99999),
         'current_par' => rand(10000..99999),
         'advance_confirmation' => advance_confirmation
       },
@@ -111,6 +113,7 @@ RSpec.describe AdvancesController, :type => :controller do
         'advance_type' => advance_type,
         'status' => status,
         'interest_rate' => interest_rate,
+        'original_par' => rand(10000..99999),
         'current_par' => rand(10000..99999),
         'advance_confirmation' => advance_confirmation
       }
@@ -141,7 +144,7 @@ RSpec.describe AdvancesController, :type => :controller do
       it 'sets @column_definitions' do
         expect(column_definitions).not_to be nil
       end
-      [0,1,2,4,5,6].each do |column_index|
+      [0,1,2,4,5,6,7].each do |column_index|
         describe "the column with index #{column_index}" do
           let(:column_data) { column_definitions[column_index] }
           it "sets its order first by itself and then by the column with index 3" do
@@ -229,24 +232,35 @@ RSpec.describe AdvancesController, :type => :controller do
       end
       it 'sets @advances_data_table to the hash returned from the job status' do
         call_action_with_job_id
-        expect(assigns[:advances_data_table][:rows][0][:columns]).to eq([{:type=>:date, :value=>trade_date, order: trade_date_raw.to_i}, {:type=>:date, :value=>funding_date, order: funding_date_raw.to_i}, {:type=>:date, :value=>maturity_date, order: maturity_date_raw.to_i}, {:value=>advance_number}, {:value=>advance_type}, {:type=>:index, :value=>interest_rate}, {:type=>:number, :value=>active_advances_response[0]['current_par']}])
+        expect(assigns[:advances_data_table][:rows][0][:columns]).to eq([{:type=>:date, :value=>trade_date, order: trade_date_raw.to_i}, {:type=>:date, :value=>funding_date, order: funding_date_raw.to_i}, {:type=>:date, :value=>maturity_date, order: maturity_date_raw.to_i}, {:value=>advance_number}, {:value=>advance_type}, {:type=>:index, :value=>interest_rate}, {:type=>:number, :value=>active_advances_response[0]['original_par']}, {:type=>:number, :value=>active_advances_response[0]['current_par']}])
       end
       it 'sets the order of `Open` advances to the far future' do
         call_action_with_job_id
         expect(assigns[:advances_data_table][:rows][1][:columns]).to include({value: 'Open', order: described_class::OPEN_SORT_DATE})
       end
-      it 'adds a total footer' do
+      it 'adds a total for the original par to the footer' do
+        call_action_with_job_id
+        total = active_advances_response[0]['original_par'] + active_advances_response[1]['original_par']
+        expect(assigns[:advances_data_table][:footer][1]).to match({ value: total, type: :currency_whole })
+      end
+      it 'ignores nils when calculating the total original par' do
+        active_advances_response[0]['original_par'] = nil
+        active_advances_response[1]['original_par'] = nil
+        allow(job_status).to receive(:result_as_string).and_return(active_advances_response.to_json)
+        call_action_with_job_id
+        expect(assigns[:advances_data_table][:footer][1]).to eq({ value: 0, type: :currency_whole })
+      end
+      it 'adds a total for the current par to the footer' do
         call_action_with_job_id
         total = active_advances_response[0]['current_par'] + active_advances_response[1]['current_par']
         expect(assigns[:advances_data_table][:footer].last).to match({ value: total, type: :currency_whole })
       end
-      it 'ignores nils when calculating the total' do
+      it 'ignores nils when calculating the total current par' do
         active_advances_response[0]['current_par'] = nil
         active_advances_response[1]['current_par'] = nil
         allow(job_status).to receive(:result_as_string).and_return(active_advances_response.to_json)
         call_action_with_job_id
-        expect(assigns[:advances_data_table][:footer]).to match([{value: I18n.t('global.total'), colspan: 6 },
-                                                { value: 0, type: :currency_whole }])
+        expect(assigns[:advances_data_table][:footer].last).to eq({ value: 0, type: :currency_whole })
       end
       describe 'when the `advance-confirmation` feature is enabled' do
         let(:advance_confirmation_link) { double('advance confirmation link') }

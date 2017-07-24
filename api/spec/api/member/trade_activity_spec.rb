@@ -46,7 +46,7 @@ describe MAPI::ServiceApp do
       describe 'in the production environment' do
         before do
           allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
-          allow(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_current_par) { |app, member_id, activities| activities}
+          allow(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_advances_detail) { |app, member_id, activities| activities}
         end
         it 'returns active advances', vcr: {cassette_name: 'trade_activity_service'} do
           allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
@@ -102,7 +102,7 @@ describe MAPI::ServiceApp do
         it "transforms the rate in #{env}", vcr: {cassette_name: 'trade_activity_service'} do
           allow(MAPI::Services::Member::TradeActivity).to receive(:is_large_member).and_return(false)
           allow(MAPI::Services::Member::TradeActivity).to receive(:get_ods_deal_structure_code).and_return(ods_deal_structure_code)
-          allow(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_current_par) { |app, member_id, activities| activities}
+          allow(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_advances_detail) { |app, member_id, activities| activities}
           allow(MAPI::ServiceApp).to receive(:environment).and_return(env.to_sym)
           transformed_rate = double('A Tranformed Rate')
           allow(MAPI::Services::Member::TradeActivity).to receive(:decimal_to_percentage_rate).and_return(transformed_rate)
@@ -121,25 +121,49 @@ describe MAPI::ServiceApp do
           expect(MAPI::Services::Member::TradeActivity).to receive(:advance_confirmation).and_call_original
           call_method
         end
-        describe 'crosschecking the currnt par' do
+        describe 'crosschecking the current par' do
           before { allow(MAPI::Services::Member::TradeActivity).to receive(:sort_trades) }
 
-          it 'calls `crosscheck_current_par` with the app' do
-            expect(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_current_par).with(subject, any_args)
+          it 'calls `crosscheck_advances_detail` with the app' do
+            expect(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_advances_detail).with(subject, any_args).and_return([])
             call_method
           end
-          it 'calls `crosscheck_current_par` with the member_id' do
-            expect(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_current_par).with(anything, member_id, anything)
+          it 'calls `crosscheck_advances_detail` with the member_id' do
+            expect(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_advances_detail).with(anything, member_id, anything).and_return([])
             call_method
           end
-          it 'calls `crosscheck_current_par` with the activities' do
+          it 'calls `crosscheck_advances_detail` with the activities' do
             activities = [instance_double(Hash, :[]= => nil, :[] => nil)]
             allow(activities.first).to receive(:with_indifferent_access).and_return(activities.first)
             allow(JSON).to receive(:parse).and_return(activities)
             allow(MAPI::Services::Member::TradeActivity).to receive(:get_trade_activity_trades).and_return(activities)
             allow(MAPI::Services::Member::TradeActivity).to receive(:decimal_to_percentage_rate)
-            expect(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_current_par).with(anything, anything, activities)
+            expect(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_advances_detail).with(anything, anything, activities).and_return([])
             call_method
+          end
+        end
+        describe 'adding original par' do
+          let(:activity) {{
+            current_par: double('current_par')
+          }}
+          before do
+            allow(JSON).to receive(:parse).and_return([activity])
+            allow(MAPI::Services::Member::TradeActivity).to receive(:get_trade_activity_trades).and_return([activity])
+            allow(MAPI::Services::Member::TradeActivity).to receive(:decimal_to_percentage_rate)
+            allow(MAPI::Services::Member::TradeActivity).to receive(:crosscheck_advances_detail) { |app, member_id, activities| activities }
+          end
+          context 'when the original_par already exists for a given activity' do
+            let(:existing_original_par) { double('existing original par')}
+            before { activity[:original_par] = existing_original_par }
+
+            it 'uses the existing original_par value' do
+              expect(call_method.first[:original_par]).to eq(existing_original_par)
+            end
+          end
+          context 'when a given activity does not yet have an original_par value' do
+            it 'sets the `original_par` value of the activity to the `current_par` value for that activity' do
+              expect(call_method.first[:original_par]).to eq(activity[:current_par])
+            end
           end
         end
       end
@@ -158,7 +182,7 @@ describe MAPI::ServiceApp do
       end
     end
 
-    describe 'the `crosscheck_current_par` class method' do
+    describe 'the `crosscheck_advances_detail` class method' do
       let(:trade_activity_module) { MAPI::Services::Member::TradeActivity }
       let(:app) { double(MAPI::ServiceApp, logger: double('logger')) }
       let(:member_id) { rand(1000..9999) }
@@ -168,7 +192,7 @@ describe MAPI::ServiceApp do
           'current_par' => double('current par')
         }
       ]}
-      let(:call_method) { trade_activity_module.crosscheck_current_par(app, member_id, activities) }
+      let(:call_method) { trade_activity_module.crosscheck_advances_detail(app, member_id, activities) }
       before do
         allow(trade_activity_module).to receive(:should_fake?).and_return(true)
         allow(trade_activity_module).to receive(:fake).and_return([])
@@ -176,6 +200,13 @@ describe MAPI::ServiceApp do
       it 'calls `should_fake?` with the app' do
         expect(trade_activity_module).to receive(:should_fake?).and_return(true)
         call_method
+      end
+      it 'returns an empty array if passed an empty array for the activities arg' do
+        expect(trade_activity_module.crosscheck_advances_detail(app, member_id, [])).to eq([])
+      end
+      it 'returns the activities array unaltered if it does not contain hashes with advance_numbers' do
+        activities.first.delete('advance_number')
+        expect(call_method).to eq(activities)
       end
       context 'when `should_fake` returns false' do
         before do
@@ -235,19 +266,22 @@ describe MAPI::ServiceApp do
         end
       end
       context 'when overlapping advances are found in the advances details table' do
+        let(:original_par) { double('original par') }
         let(:crosschecked_current_par) { double('crosschecked current par')}
         let(:overlapping_activities) {[
           {
             'advdet_advance_number' => activities.first['advance_number'],
-            'advdet_current_par' => crosschecked_current_par
+            'advdet_current_par' => crosschecked_current_par,
+            'original_par' => original_par
           }
         ]}
         before { allow(trade_activity_module).to receive(:fake).and_return(overlapping_activities) }
 
         it 'sets the `current_par` of the overlapping advance to the value from the advances detail table' do
-          crosschecked_activity = activities.first.clone
-          crosschecked_activity['current_par'] = crosschecked_current_par
-          expect(call_method.first).to eq(crosschecked_activity)
+          expect(call_method.first[:current_par]).to eq(crosschecked_current_par)
+        end
+        it 'sets the `original_par` of the overlapping advance to the value from the advances detail table' do
+          expect(call_method.first[:original_par]).to eq(original_par)
         end
       end
       context 'when no overlapping advances are found in the advances details table' do
