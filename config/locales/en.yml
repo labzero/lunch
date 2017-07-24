@@ -1948,7 +1948,7 @@ en:
         net_loan_collateral: Net Loan Collateral Borrowing Capacity
         remaining_capacity: Remaining Borrowing Capacity
         freshness: Loan collateral data reflects intraday processing of Mortgage Collateral Updates, except for Market Value. Market Value and all other data is as of close of business on the prior business day.
-        history: You may view the Current Borrowing Capacity report and historical month end reports for the previous six months.
+        history: You may view the current Borrowing Capacity report and historical monthend reports for the previous six months.
         less_line_items:
           blanket_lien: Less Excluded Blanket Lien Borrowing Capacity
           bank_borrowing_capacity: Less Excluded Bank Borrowing Capacity
