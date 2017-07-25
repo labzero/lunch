@@ -2998,7 +2998,7 @@ en:
         fee_certification:
           title: Maintenance Fee Certification
           subject: 'VBLOC%20Certification'
-          description_html: "Members will be required to report the average daily balance of public unit deposits supported by the letter of credit for the accrual period within five business days after the end of each calendar quarter and provide a certification that the numbers are true and correct. The certification report must include the letter of credit number and show the actual deposit balances supported by the letter of credit for each day of the accrual period. Certifications should be sent by email from an authorized signer to <a href='%{url}?subject=%{subject}'>Lettersofcredit@fhlbsf.com</a>. The subject line of the email should be: VBLOC Certification."
+          description_html: "Members will be required to report the average daily balance of public unit deposits supported by the letter of credit for the accrual period within five business days after the end of each calendar quarter and provide a certification that the numbers are true and correct. The certification report must include the letter of credit number and show the actual deposit balances supported by the letter of credit for each day of the accrual period. Certifications should be sent by email from an authorized signer to <a href='%{url}?subject=%{subject}'>lettersofcredit@fhlbsf.com</a>. The subject line of the email should be: VBLOC Certification."
     section_headings:
       use: Use
       uses: Uses
