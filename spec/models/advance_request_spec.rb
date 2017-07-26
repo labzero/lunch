@@ -987,6 +987,26 @@ describe AdvanceRequest do
     end
   end
 
+  describe '`reset_term_and_type!` method' do
+    let(:call_method) { subject.reset_term_and_type! }
+    before do
+      subject.instance_variable_set(:@type, :whole)
+      subject.instance_variable_set(:@term, :aaa)
+    end
+    it 'resets the `stock_choice`' do
+      expect(subject).to receive(:reset_stock_choice!)
+      call_method
+    end
+    it 'sets @term to nil' do
+      call_method
+      expect(subject.instance_variable_get(:@term)).to be_nil
+    end
+    it 'sets @type to nil' do
+      call_method
+      expect(subject.instance_variable_get(:@type)).to be_nil
+    end
+  end
+
   {from_json: :from_json, from_hash: :attributes=}.each do |class_method, instance_method|
     describe "`#{class_method}` class method" do
       let(:input) { double('Some Input') }

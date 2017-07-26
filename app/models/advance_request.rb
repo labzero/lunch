@@ -394,6 +394,12 @@ class AdvanceRequest
     obj
   end
 
+  def reset_term_and_type!
+    @type = nil
+    @term = nil
+    reset_stock_choice!
+  end
+
   protected
 
   def terms_present?
