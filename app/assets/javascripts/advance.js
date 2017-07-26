@@ -30,9 +30,23 @@ $(function () {
   };
 
   function validateForm() {
-    if($amountField.val() && $('.add-advance-rate-cell.cell-selected').length > 0) {
-      $submitFieldPreview.attr('disabled', false).addClass('active');
-    } else {
+    if ($amountField.val()) {
+      var $selectedCell = $($rateTable.find('.cell-selected.add-advance-rate-cell'));
+      if ($selectedCell.length > 0) {
+        $submitFieldPreview.attr('disabled', false).addClass('active');
+      }
+      else {
+        $selectedCell = $($rateCustomTable.find('.cell-selected.add-advance-rate-cell'));
+        if ($selectedCell.length > 0) {
+          $submitFieldPreview.attr('disabled', false).addClass('active');
+        }
+        else {
+          $submitFieldPreview.attr('disabled', true);
+        }
+      }
+    }
+    else
+    {
       $submitFieldPreview.attr('disabled', true);
     };
   };
@@ -144,7 +158,7 @@ $(function () {
 
   function selectColumnLabelIfRatePreSelected(table) {
     var $selectedCell = table.find('td.cell-selected.selectable-cell');
-    if ($selectedCell.length && !table.hasClass('add-advance-table-loading')) {
+    if ($selectedCell.length) {
       var col = $selectedCell.index();
       $($rateTable.find('tr.add-advance-column-labels th')[col]).addClass('cell-selected');
     };
@@ -217,6 +231,7 @@ $(function () {
   // Rate Table Toggle Behavior
   var $rateTableWrapper = $('.advance-rates-table-wrapper');
   $('.advance-rates-table-toggle span').on('click', function(e) {
+    cleanUpRequestData();
     var selectedTermType = $(this).data('active-term-type');
     $('.advance-alternate-funding-date-wrapper').hide();
     $('.advance-create-custom-date-wrapper').hide();
@@ -230,7 +245,6 @@ $(function () {
       $('.advance-create-custom-date-wrapper').hide();
       $('.advance-select-custom-date-wrapper').hide();
     }
-
     if ($rateTableWrapper.attr('data-active-term-type') !== selectedTermType) {
       $rateTableWrapper.attr('data-active-term-type', selectedTermType);
       $rateTable.find('td, th').removeClass('cell-selected');
@@ -314,13 +328,12 @@ $(function () {
 
   // event listener and handler for alternate funding date button click
   $('input[name=alternate-funding-date]').on('click', function () {
+    cleanUpRequestData();
     var funding_date = $alternateFundingWrapper.find('input[name=alternate-funding-date]:checked').val();
     $('.advance-custom-date-wrapper').show();
     $('.advance-create-custom-date-wrapper').hide();
     $('.advance-select-custom-date-wrapper').hide();
     $('.advance-alternate-funding-date-close').attr('disabled', true);
-    removeColumnLabelIfRatePreSelected($rateTable);
-    removeColumnLabelIfRatePreSelected($rateCustomTable);
     showRatesLoadingState($rateTable);
     showAdvanceRates(funding_date, getMaturityDate());
   });
@@ -363,6 +376,13 @@ $(function () {
         $viewCustomRates.removeClass('active');
         $viewCustomRates.attr('disabled', true);
     }
+  }
+
+  function cleanUpRequestData() {
+    $('input[name="advance_request[type]"]').val(null);
+    $('input[name="advance_request[term]"]').val(null);
+    removeColumnLabelIfRatePreSelected($rateTable);
+    removeColumnLabelIfRatePreSelected($rateCustomTable);
   }
 
   // Google Analytics -

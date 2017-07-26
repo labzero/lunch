@@ -176,6 +176,9 @@ class AdvancesController < ApplicationController
   def fetch_rates
     if feature_enabled?('add-advance-custom-term')
       funding_date = params[:funding_date].try(:to_date)
+      if ((advance_request.funding_date) && (funding_date != advance_request.funding_date.try(:to_date)))
+        reset_advance_request
+      end
       advance_request.funding_date = funding_date if funding_date
       populate_fetch_custom_rates_parameters(maturity_date: params[:maturity_date].try(:to_date), funding_date: funding_date)
     end
@@ -193,12 +196,11 @@ class AdvancesController < ApplicationController
     funding_date = params[:funding_date].try(:to_date)
     maturity_date = params[:maturity_date].try(:to_date)
     if ((maturity_date != advance_request.custom_maturity_date.try(:to_date)) || (funding_date != advance_request.funding_date.try(:to_date)))
-      @advance_request = AdvanceRequest.new(current_member_id, signer_full_name, request)
+      reset_advance_request
     end
     advance_request.funding_date = funding_date if funding_date
     populate_fetch_custom_rates_parameters(maturity_date: maturity_date, funding_date: funding_date)
     populate_fetch_rates_parameters
-
     render json: {html: render_to_string(layout: false), id: advance_request.id}
   end
 
@@ -441,5 +443,13 @@ class AdvancesController < ApplicationController
       days: days_to_maturity,
       term: (days_to_maturity.to_s + 'day').to_sym
     }
+  end
+
+  def reset_advance_request
+    if advance_request
+      advance_request.reset_term_and_type!
+    end
+    @selected_type = nil
+    @selected_term = nil
   end
 end
