@@ -182,14 +182,17 @@ module MAPI
           activities = activities.collect(&:with_indifferent_access)
           advance_numbers = activities.collect { |trade| trade[:advance_number] }
           if advance_numbers.present?
+            quoted_advance_numbers = advance_numbers.collect{|advance_number| quote(advance_number)}
             crosschecked_advances = unless should_fake?(app)
               advances_details_query = <<-SQL
                 SELECT ADVDET_ADVANCE_NUMBER, ADVDET_CURRENT_PAR, ORIGINAL_PAR
                 FROM WEB_INET.WEB_ADVANCES_DETAIL_RPT
                 WHERE FHLB_ID = #{quote(member_id)}
-                AND ADVDET_ADVANCE_NUMBER IN (#{advance_numbers.join(', ')})
+                AND ADVDET_ADVANCE_NUMBER IN (#{quoted_advance_numbers.join(', ')})
               SQL
-              fetch_hashes(app.logger, advances_details_query, {}, true)
+              results = fetch_hashes(app.logger, advances_details_query, {}, true)
+              raise MAPI::Shared::Errors::SQLError, 'Failed to fetch advance details while crosschecking outstanding advances' if results.nil?
+              results
             else
               fake('crosschecked_active_advances')
             end
@@ -197,8 +200,8 @@ module MAPI
               activities.map! do |activity|
                 crosschecked_advance = crosschecked_advances.collect(&:with_indifferent_access).select{ |advance| advance[:advdet_advance_number] == activity[:advance_number] }.first
                 if crosschecked_advance
-                  activity[:current_par] = crosschecked_advance[:advdet_current_par]
-                  activity[:original_par] = crosschecked_advance[:original_par]
+                  activity[:current_par] = crosschecked_advance[:advdet_current_par].try(:round)
+                  activity[:original_par] = crosschecked_advance[:original_par].try(:round)
                 end
                 activity
               end

@@ -212,6 +212,7 @@ describe MAPI::ServiceApp do
         before do
           allow(trade_activity_module).to receive(:should_fake?).and_return(false)
           allow(trade_activity_module).to receive(:fetch_hashes).and_return([])
+          allow(trade_activity_module).to receive(:quote)
         end
 
         it 'calls `fetch_hashes` with the logger from the app' do
@@ -226,8 +227,16 @@ describe MAPI::ServiceApp do
           expect(trade_activity_module).to receive(:fetch_hashes).with(anything, anything, anything, true).and_return([])
           call_method
         end
+        it 'raises an error if `fetch_hashes` returns nil' do
+          allow(trade_activity_module).to receive(:fetch_hashes).and_return(nil)
+          expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, 'Failed to fetch advance details while crosschecking outstanding advances')
+        end
         it 'quotes the member_id' do
           expect(trade_activity_module).to receive(:quote).with(member_id)
+          call_method
+        end
+        it 'quotes the passed advance numbers' do
+          expect(trade_activity_module).to receive(:quote).with(activities.first['advance_number'])
           call_method
         end
         describe 'the SQL for fetching the advances details' do
@@ -249,8 +258,8 @@ describe MAPI::ServiceApp do
             expect(trade_activity_module).to receive(:fetch_hashes).with(anything, matcher, any_args).and_return([])
             call_method
           end
-          it 'selects rows WHERE the ADVDET_ADVANCE_NUMBER is IN the set of passed activities' do
-            allow(trade_activity_module).to receive(:quote).with(member_id).and_return(member_id)
+          it 'selects rows WHERE the ADVDET_ADVANCE_NUMBER is IN the set of quoted passed activities' do
+            allow(trade_activity_module).to receive(:quote).with(activities.first['advance_number']).and_return(activities.first['advance_number'])
             matcher = Regexp.new(/\A\s*SELECT.+FROM.+(WHERE|WHERE.*\s+AND)\s+ADVDET_ADVANCE_NUMBER\s*IN\s*\(\s*#{activities.first['advance_number']}\s*\)\s+/im)
             expect(trade_activity_module).to receive(:fetch_hashes).with(anything, matcher, any_args).and_return([])
             call_method
@@ -271,16 +280,24 @@ describe MAPI::ServiceApp do
         let(:overlapping_activities) {[
           {
             'advdet_advance_number' => activities.first['advance_number'],
-            'advdet_current_par' => crosschecked_current_par,
-            'original_par' => original_par
+            'advdet_current_par' => instance_double(BigDecimal, round: crosschecked_current_par),
+            'original_par' => instance_double(BigDecimal, round: original_par),
           }
         ]}
         before { allow(trade_activity_module).to receive(:fake).and_return(overlapping_activities) }
 
-        it 'sets the `current_par` of the overlapping advance to the value from the advances detail table' do
+        it 'tries to round the `advdet_current_par` value from the advances detail table' do
+          expect(overlapping_activities.first['advdet_current_par']).to receive(:try).with(:round)
+          call_method
+        end
+        it 'tries to round the `original_par` value from the advances detail table' do
+          expect(overlapping_activities.first['original_par']).to receive(:try).with(:round)
+          call_method
+        end
+        it 'sets the `current_par` of the overlapping advance to the rounded value from the advances detail table' do
           expect(call_method.first[:current_par]).to eq(crosschecked_current_par)
         end
-        it 'sets the `original_par` of the overlapping advance to the value from the advances detail table' do
+        it 'sets the `original_par` of the overlapping advance to the rounded value from the advances detail table' do
           expect(call_method.first[:original_par]).to eq(original_par)
         end
       end
