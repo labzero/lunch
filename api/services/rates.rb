@@ -181,7 +181,7 @@ module MAPI
           '1Y' => :'1year',  '2Y' => :'2year',  '3Y' => :'3year'
         }
 
-      def self.extract_market_data_from_soap_response(holidays, response)
+      def self.extract_market_data_from_soap_response(response)
         hash = {}.with_indifferent_access
         response.doc.remove_namespaces!
         response.doc.xpath(PATHS[:type_data]).each do |type_data|
@@ -190,7 +190,7 @@ module MAPI
           type            = LOAN_MAPPING_INVERTED[type_long]
           is_custom = !!hash[type]
           type_data.css(PATHS[:term_data]).each do |term_data|
-            term_data_result = MAPI::Services::Rates.get_term_data(holidays, type_data, term_data, is_custom)
+            term_data_result = MAPI::Services::Rates.get_term_data(type_data, term_data, is_custom)
             if term_data_result
               hash[type] ||= {}
               term = term_data_result[:term].to_sym
@@ -209,27 +209,21 @@ module MAPI
         hash
       end
 
-      def self.days_to_maturity(holidays, maturity_date, funding_date=nil)
+      def self.days_to_maturity(maturity_date, funding_date=nil)
         today = Time.zone.today
-        number_of_weekends_holidays = 0
-        current_day = (funding_date || today).to_date
-        while (current_day <= maturity_date.to_date)
-          number_of_weekends_holidays = number_of_weekends_holidays + 1 if weekend_or_holiday?(current_day, holidays)
-          current_day = current_day + 1.day
-        end
-        days_to_maturity = (maturity_date.to_date - (funding_date || today).to_date).to_i - number_of_weekends_holidays
+        days_to_maturity = (maturity_date.to_date - (funding_date || today).to_date).to_i
         {
           days: days_to_maturity,
           term: days_to_maturity.to_s + 'day'
         }
       end
 
-      def self.get_term_data(holidays, type_data, term_data, is_custom)
+      def self.get_term_data(type_data, term_data, is_custom)
         rate            = extract_text(term_data, :rate)
         maturity_string = extract_text(term_data, :maturity_string)
         if is_custom
           funding_date    = extract_text(type_data, :spot_date)
-          term            = MAPI::Services::Rates.days_to_maturity(holidays, maturity_string, funding_date)[:term]
+          term            = MAPI::Services::Rates.days_to_maturity(maturity_string, funding_date)[:term]
         else
           frequency       = extract_text(term_data, :frequency)
           unit            = extract_text(term_data, :unit)
@@ -822,14 +816,14 @@ module MAPI
           halt 503, 'Internal Service Error' unless loan_terms     = MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment)
           halt 503, 'Internal Service Error' unless rate_bands     = MAPI::Services::Rates::RateBands.rate_bands(logger,settings.environment)
           if maturity_date
-            days_to_maturity = MAPI::Services::Rates.days_to_maturity(holidays, maturity_date, funding_date)
+            days_to_maturity = MAPI::Services::Rates.days_to_maturity(maturity_date, funding_date)
             custom_term = days_to_maturity[:term].to_sym
           end
           if MAPI::Services::Rates.init_mds_connection(settings.environment)
             halt 503, 'Internal Service Error' unless live_data_xml    = MAPI::Services::Rates.get_market_data_from_soap(logger, 'Live', funding_date, maturity_date)
             halt 503, 'Internal Service Error' unless start_of_day_xml = MAPI::Services::Rates.get_market_data_from_soap(logger, 'StartOfDay', funding_date, maturity_date)
-            live_data    = MAPI::Services::Rates.extract_market_data_from_soap_response(holidays, live_data_xml)
-            start_of_day = MAPI::Services::Rates.extract_market_data_from_soap_response(holidays, start_of_day_xml)
+            live_data    = MAPI::Services::Rates.extract_market_data_from_soap_response(live_data_xml)
+            start_of_day = MAPI::Services::Rates.extract_market_data_from_soap_response(start_of_day_xml)
           else
             live_data    = MAPI::Services::Rates.fake_hash('market_data_live_rates')
             start_of_day = MAPI::Services::Rates.fake_hash('market_data_start_of_day_rates')

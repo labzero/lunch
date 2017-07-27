@@ -1363,21 +1363,22 @@ describe AdvanceRequest do
   describe '`custom_term_valid_dates_check` protected method' do
     let(:call_method) { subject.send(:custom_term_valid_dates_check) }
     let(:now) { Time.zone.now }
-
+    let(:number_of_business_days) { rand(0..1) }
+    let(:calendar_service_instance) { double('calendar instance') }
+    
     describe 'when term matches `CUSTOM_TERM`' do
       before do
         days = rand(1..1000)
         allow(subject).to receive(:term).and_return("#{days}day")
+        allow(CalendarService).to receive(:new).and_return(calendar_service_instance)
       end
-      it 'does not add a custom_term error if custom_maturity_date - funding_date >= 2' do
-        allow(subject).to receive(:custom_maturity_date).and_return(now + rand(2..1000).day)
-        allow(subject).to receive(:funding_date).and_return(now)
+      it 'does not add a custom_term error if number_of_business_days >= 2' do
+        allow(calendar_service_instance).to receive(:number_of_business_days).and_return(number_of_business_days + 2)
         expect(subject).to_not receive(:add_error).with(:date, :custom_term)
         call_method
       end
-      it 'adds a custom_term error if custom_maturity_date - funding_date < 2' do
-        allow(subject).to receive(:custom_maturity_date).and_return(now + rand(0..1).day)
-        allow(subject).to receive(:funding_date).and_return(now)
+      it 'adds a custom_term error if number_of_business_days < 2' do
+        allow(calendar_service_instance).to receive(:number_of_business_days).and_return(number_of_business_days)
         expect(subject).to receive(:add_error).with(:date, :custom_term)
         call_method
       end

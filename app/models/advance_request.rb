@@ -491,7 +491,10 @@ class AdvanceRequest
 
   def custom_term_valid_dates_check
     if self.term=~CUSTOM_TERM
-      add_error(:date, :custom_term) if self.custom_maturity_date.try(:to_date) - self.funding_date.try(:to_date) < 2
+      calendar_service = CalendarService.new(request)
+      today = Time.zone.today
+      number_of_business_days = calendar_service.number_of_business_days((self.funding_date.try(:to_date) || today).to_date, self.custom_maturity_date.try(:to_date))
+      add_error(:date, :custom_term) if number_of_business_days < 2
     end
   end
 
