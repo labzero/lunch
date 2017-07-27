@@ -18,15 +18,15 @@ class CalendarService < MAPIService
     date.saturday? || date.sunday? || holidays(date, date).include?(date)
   end
 
-  def number_of_weekend_and_holiday_days(start_date, end_date)
-    number_of_weekend_and_holiday_days = 0
+  def number_of_business_days(start_date, end_date)
+    number_of_business_days = 0
     holidays = holidays(start_date, end_date)
-    current_day = start_date
+    current_day = start_date + 1.day
     while (current_day <= end_date)
-      number_of_weekend_and_holiday_days = number_of_weekend_and_holiday_days + 1 if current_day.saturday? || current_day.sunday? || holidays.include?(current_day)
+      number_of_business_days = number_of_business_days + 1 if (!current_day.saturday? && !current_day.sunday? && !holidays.include?(current_day))
       current_day = current_day + 1.day
     end
-    number_of_weekend_and_holiday_days
+    number_of_business_days
   end
 
 end

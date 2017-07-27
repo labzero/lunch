@@ -500,10 +500,9 @@ module MAPI
           maturity_date = body[:maturity_date].to_date
           allow_grace_period = body[:allow_grace_period] || false
           funding_date = body[:funding_date].try(:to_date)
-          halt 503, 'Internal Service Error' unless holidays       = MAPI::Services::Rates::Holidays.holidays(self)
 
           begin
-            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, holidays,advance_term, advance_type, funding_date, maturity_date, ), advance_type)
+            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term, advance_type, funding_date, maturity_date), advance_type)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
@@ -530,10 +529,9 @@ module MAPI
           check_capstock = params[:check_capstock] == 'true'
           allow_grace_period = params[:allow_grace_period] == 'true'
           funding_date = params[:funding_date].try(:to_date)
-          halt 503, 'Internal Service Error' unless holidays       = MAPI::Services::Rates::Holidays.holidays(self)
 
           begin
-            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, holidays, advance_term, advance_type, funding_date, maturity_date), advance_type)
+            cof_data = MAPI::Services::EtransactAdvances.cof_data_cleanup(MAPI::Services::Rates::MarketDataRates.get_market_cof_rates(self.settings.environment, advance_term, advance_type, funding_date, maturity_date), advance_type)
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
