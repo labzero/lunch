@@ -1043,10 +1043,10 @@ module MAPI
             names = fake_data['names']
             pledge_type = TRANSACTION_CODE.values.sample(random: rng)
             request_status = SETTLEMENT_TYPE.values.sample(random: rng)
-            transfer_form_types = [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SAFEKEPT_DEPOSIT]
+            transfer_form_types = [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SECURITIES_RELEASE]
             form_type ||= rng.rand(70..73)
             delivery_type ||= (DELIVERY_TYPE.values.select {|type| type != SSKDeliverTo::INTERNAL_TRANSFER || transfer_form_types.include?(form_type) } ).sample(random: rng)
-            delivery_field = transfer_form_types.include?(form_type) ? 'RECEIVE_FROM' : 'DELIVER_TO'
+            delivery_field = [SSKFormType::SECURITIES_PLEDGED, SSKFormType::SAFEKEPT_DEPOSIT].include?(form_type) ? 'RECEIVE_FROM' : 'DELIVER_TO'
             aba_number = rng.rand(10000..99999)
             participant_number = rng.rand(10000..99999)
             account_number = rng.rand(10000..99999)

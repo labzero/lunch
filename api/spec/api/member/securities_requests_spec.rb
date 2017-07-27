@@ -2437,7 +2437,7 @@ describe MAPI::ServiceApp do
                   expect { call_method }.to raise_error(MAPI::Shared::Errors::ValidationError)
                 end
               end
-              describe 'because of a `SQLError`' do                              
+              describe 'because of a `SQLError`' do
                 before do
                   allow(securities_request_module).to receive(:execute_sql_single_result).and_raise(MAPI::Shared::Errors::SQLError.new)
                 end
@@ -3021,7 +3021,7 @@ describe MAPI::ServiceApp do
                   expect { call_method }.to raise_error(MAPI::Shared::Errors::ValidationError)
                 end
               end
-              describe 'because of a `SQLError`' do                              
+              describe 'because of a `SQLError`' do
                 before do
                   allow(securities_request_module).to receive(:execute_sql_single_result).and_raise(MAPI::Shared::Errors::SQLError)
                 end
@@ -4255,7 +4255,7 @@ describe MAPI::ServiceApp do
                     expect { call_method }.to raise_error(MAPI::Shared::Errors::ValidationError)
                   end
                 end
-                describe 'because of a `SQLError`' do                              
+                describe 'because of a `SQLError`' do
                   before do
                     allow(securities_request_module).to receive(:execute_sql_single_result).and_raise(MAPI::Shared::Errors::SQLError)
                   end
@@ -5558,7 +5558,7 @@ RSpec.shared_examples 'a securities endpoint that raises a member validation err
   let(:make_request) { send(action, endpoint, params) }
   let(:response_body) { make_request; JSON.parse(last_response.body).with_indifferent_access }
   let(:response_status) { make_request; last_response.status }
-  
+
   before do
     allow_any_instance_of(MAPI::ServiceApp).to receive(:logger).and_return(logger)
   end
@@ -5572,6 +5572,6 @@ RSpec.shared_examples 'a securities endpoint that raises a member validation err
     end
     it 'raises an error with code `member`' do
       expect(response_body[:error][:code]).to eq('member')
-    end      
+    end
   end
 end
