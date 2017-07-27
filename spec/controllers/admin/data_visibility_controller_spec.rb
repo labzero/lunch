@@ -29,6 +29,19 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
     end
   end
 
+  RSpec.shared_examples 'it checks the edit_data_visibility? web_admin policy' do
+    before { allow(subject).to receive(:authorize).and_call_original }
+    it 'checks if the current user is allowed to edit data visibility' do
+      expect(subject).to receive(:authorize).with(:web_admin, :edit_data_visibility?)
+      call_action
+    end
+    it 'raises any errors raised by checking to see if the user is authorized to edit data visibility' do
+      error = Pundit::NotAuthorizedError
+      allow(subject).to receive(:authorize).with(:web_admin, :edit_data_visibility?).and_raise(error)
+      expect{call_action}.to raise_error(error)
+    end
+  end
+
   describe 'GET view_flags' do
     let(:members_service) { instance_double(MembersService, global_disabled_reports: [], disabled_reports_for_member: [], all_members: []) }
     let(:call_action) { get :view_flags }
@@ -146,6 +159,58 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
     end
   end
 
+  describe 'PUT `update_flags`' do
+    allow_policy :web_admin, :edit_data_visibility?
+    let(:members_service) { instance_double(MembersService, update_global_data_visibility: nil) }
+    let(:flag_name) { described_class::DATA_VISIBILITY_MAPPING.keys.sample }
+    let(:results) { double('some results') }
+    let(:flags) {{
+        flag_name => SecureRandom.hex
+    }}
+    let(:call_action) { put :update_flags, data_visibility_flags: flags }
+    before do
+      allow(MembersService).to receive(:new).and_return(members_service)
+    end
+
+    it_behaves_like 'a DataVisibilityController action with before_action methods'
+    it_behaves_like 'it checks the edit_data_visibility? web_admin policy'
+
+    it 'creates a new instance of MembersService with the request' do
+      expect(MembersService).to receive(:new).and_return(members_service).with(request)
+      call_action
+    end
+    describe 'processing the `data_visibility_flags` params' do
+      it 'sets the `web_flag_id` to the `flag` value of the corresponding data source in DATA_VISIBILITY_MAPPING' do
+        expect(members_service).to receive(:update_global_data_visibility).with([hash_including(web_flag_id: described_class::DATA_VISIBILITY_MAPPING[flag_name][:flags].first)])
+        call_action
+      end
+      it 'sets the `visible` attribute to `true` if the value of the param is `on`' do
+        flags[flag_name] = 'on'
+        expect(members_service).to receive(:update_global_data_visibility).with([hash_including(visible: true)])
+        call_action
+      end
+      it 'sets the `visible` attribute to `true` if the value of the param is `off`' do
+        flags[flag_name] = 'off'
+        expect(members_service).to receive(:update_global_data_visibility).with([hash_including(visible: false)])
+        call_action
+      end
+    end
+    it 'calls `set_flash_message` with the results of `update_global_data_visibility`' do
+      allow(members_service).to receive(:update_global_data_visibility).and_return(results)
+      expect(controller).to receive(:set_flash_message).with(results)
+      call_action
+    end
+    it 'calls `set_flash_message` with a hash containing an error if `update_global_data_visibility` returns nil' do
+      allow(members_service).to receive(:update_global_data_visibility).and_return(nil)
+      expect(controller).to receive(:set_flash_message).with({error: 'There has been an error and Admin::DataVisibilityController#update_flags has encountered nil'})
+      call_action
+    end
+    it 'redirects to the `view_flags` action' do
+      call_action
+      expect(response).to redirect_to(data_visibility_flags_url)
+    end
+  end
+
   describe 'private methods' do
     describe '`data_visibility_table`' do
       visibility_mapping = described_class::DATA_VISIBILITY_MAPPING
@@ -200,6 +265,40 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
           it 'has a value that is equal to the title associated with the report_name in the DATA_VISIBILITY_MAPPING' do
             expect(column[:value]).to eq(visibility_mapping[report_name][:title])
           end
+        end
+      end
+    end
+
+    describe '`set_flash_message`' do
+      let(:result) { {} }
+      let(:error_message) { double('some error message') }
+      let(:result_with_errors) {{error: error_message}}
+      context 'when a single result set is passed' do
+        it 'sets the `flash[:error]` message if the result set contains an error message' do
+          subject.send(:set_flash_message, result_with_errors)
+          expect(flash[:error]).to eq(I18n.t('admin.term_rules.messages.error'))
+        end
+        it 'logs the error' do
+          expect(Rails.logger).to receive(:error).with(error_message)
+          subject.send(:set_flash_message, result_with_errors)
+        end
+        it 'sets the `flash[:notice] message` if the result set does not contain an error message' do
+          subject.send(:set_flash_message, result)
+          expect(flash[:notice]).to eq(I18n.t('admin.term_rules.messages.success'))
+        end
+      end
+      context 'when multiple result sets are passed' do
+        it 'sets the `flash[:error]` message if any of the passed result sets contains an error message' do
+          subject.send(:set_flash_message, [result, result_with_errors, result])
+          expect(flash[:error]).to eq(I18n.t('admin.term_rules.messages.error'))
+        end
+        it 'logs all of the errors' do
+          expect(Rails.logger).to receive(:error).exactly(2).times.with(error_message)
+          subject.send(:set_flash_message, [result, result_with_errors, result_with_errors])
+        end
+        it 'sets the `flash[:notice] message` if none of the result sets contain an error message' do
+          subject.send(:set_flash_message, [result, result, result])
+          expect(flash[:notice]).to eq(I18n.t('admin.term_rules.messages.success'))
         end
       end
     end

@@ -266,9 +266,10 @@ Rails.application.routes.draw do
           get '/typical' => 'admin/rules#typical_shutoff', as: :rules_advance_typical_shutoff
           put '/typical' => 'admin/rules#edit_typical_shutoff', as: :rules_advance_edit_typical_shutoff
         end
-        scope 'data-visibility' do
-          get '/flags' => 'admin/data_visibility#view_flags', as: :data_visibility_flags
-        end
+      end
+      scope 'data-visibility' do
+        get '/flags' => 'admin/data_visibility#view_flags', as: :data_visibility_flags
+        put '/flags' => 'admin/data_visibility#update_flags', as: :data_visibility_flags_update
       end
       constraints Constraints::WebAdmin.new(:edit_features?) do
         mount Flipper::UI.app(Rails.application.flipper) => '/flipper-features', as: :flipper_features_admin

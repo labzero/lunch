@@ -45,7 +45,7 @@ $(function() {
   });
 
   // Enable/Disable submit based on form state (clean/dirty)
-  $(['.rules-availability-by-term-form', '.rules-availability-by-member-form']).each(function(i, formClass) {
+  $(['.rules-availability-by-term-form', '.rules-availability-by-member-form', '.data-visibility-flags-form']).each(function(i, formClass) {
     Fhlb.Utils.enableSubmitWhenFormDirty($(formClass));
   });
 });

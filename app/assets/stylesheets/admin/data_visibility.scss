@@ -11,18 +11,19 @@
     color: $medium-gray;
     margin: 0 0 10px;
   }
-  section:first-of-type {
-    background-color: $light-gray;
-    padding-bottom: 30px;
-    h2 {
-      margin-bottom: 15px;
-    }
-  }
-  section:not(:first-of-type) {
+  section {
     @extend %clearfix;
   }
   select {
     width: 280px;
+  }
+}
+
+.data-visibility-select-member-section {
+  background-color: $light-gray;
+  padding-bottom: 30px;
+  h2 {
+    margin-bottom: 15px;
   }
 }
 
@@ -62,5 +63,12 @@
     table {
       margin-bottom: 0;
     }
+  }
+}
+
+.data-visibility-flags-form {
+  input[type=submit] {
+    width: 100%;
+    margin-bottom: 20px;
   }
 }

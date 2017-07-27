@@ -33,6 +33,12 @@ class MembersService < MAPIService
   ACCESS_MANAGER = 31
   INVESTMENTS = 32
   SECURITIESBILLSTATEMENT = 33
+  ACCOUNT_SUMMARY = 34
+  AUTHORIZATIONS = 35
+  INTEREST_RATE_RESETS = 36
+  FORWARD_COMMITMENTS = 37
+  PUTABLE_ADVANCE_PARALLEL_SHIFT = 38
+  BORROWING_CAPACITY = 39
 
   def report_disabled?(member_id, report_flags)
     global_flags = global_disabled_reports
@@ -46,6 +52,10 @@ class MembersService < MAPIService
 
   def global_disabled_reports
     get_json(:global_disabled_reports, "member/disabled_reports")
+  end
+
+  def update_global_data_visibility(flags)
+    put_hash(:update_global_data_visibility, 'member/disabled_reports', flags)
   end
 
   def member(member_id)
