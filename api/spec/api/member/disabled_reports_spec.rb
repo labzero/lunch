@@ -58,6 +58,89 @@ describe MAPI::ServiceApp do
       end
     end
 
+    describe '`update_global_ids`' do
+      let(:web_flag) {{
+        web_flag_id: SecureRandom.hex,
+        visible: SecureRandom.hex
+      }}
+      let(:call_method) { disabled_reports_module.update_global_ids(app, [web_flag]) }
+      before { allow(disabled_reports_module).to receive(:should_fake?).and_return(true) }
+
+      it 'calls `should_fake?` with the app' do
+        expect(disabled_reports_module).to receive(:should_fake?).with(app).and_return(true)
+        call_method
+      end
+      context 'when `should_fake?` returns false' do
+        before { allow(disabled_reports_module).to receive(:should_fake?).and_return(false) }
+
+        it 'executes code within a transaction where the `isolation` has been set to `:read_committed`' do
+          expect(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+          call_method
+        end
+        it 'returns true if the transaction block executes without error' do
+          allow(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+          expect(call_method).to be true
+        end
+        describe 'the transaction block' do
+          before do
+            allow(disabled_reports_module).to receive(:quote)
+            allow(disabled_reports_module).to receive(:execute_sql).and_return(true)
+            allow(ActiveRecord::Base).to receive(:transaction).and_yield
+          end
+
+          it 'calls `execute_sql` with the logger from the app' do
+            expect(disabled_reports_module).to receive(:execute_sql).with(app.logger, anything).and_return(true)
+            call_method
+          end
+          describe 'the SQL for updating the global flags' do
+            it 'UPDATEs the the WEB_ADM.WEB_DATA_FLAGS table' do
+              matcher = Regexp.new(/\A\s*UPDATE.*\s+WEB_ADM.WEB_DATA_FLAGS\s+/im)
+              expect(disabled_reports_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+            it 'SETs the WEB_FLAG_VALUE to `Y` if the `visible` attribute of the passed flag hash is true' do
+              web_flag[:visible] = true
+              allow(disabled_reports_module).to receive(:quote).and_call_original
+              matcher = Regexp.new(/\A\s*UPDATE.*\s+SET\s+WEB_FLAG_VALUE\s*=\s*'Y'\s+/im)
+              expect(disabled_reports_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+            it 'SETs the WEB_FLAG_VALUE to `N` if the `visible` attribute of the passed flag hash is false' do
+              web_flag[:visible] = false
+              allow(disabled_reports_module).to receive(:quote).and_call_original
+              matcher = Regexp.new(/\A\s*UPDATE.*\s+SET\s+WEB_FLAG_VALUE\s*=\s*'N'\s+/im)
+              expect(disabled_reports_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+            it 'quotes the `web_flag_id` of the passed flag hash' do
+              expect(disabled_reports_module).to receive(:quote).with(web_flag[:web_flag_id]).and_return(web_flag[:web_flag_id])
+              call_method
+            end
+            it 'updates rows WHERE the WEB_FLAG_ID is equal to the quoted `web_flag_id` of the passed flag hash' do
+              allow(disabled_reports_module).to receive(:quote).with(web_flag[:web_flag_id]).and_return(web_flag[:web_flag_id])
+              matcher = Regexp.new(/\A\s*UPDATE.*\s+SET.*\s+WHERE\s+WEB_FLAG_ID\s*=\s*#{web_flag[:web_flag_id]}\s*.*\z/im)
+              expect(disabled_reports_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+              call_method
+            end
+          end
+          it 'raises an error containing the `web_flag_id` if `execute_sql` returns nil' do
+            allow(disabled_reports_module).to receive(:execute_sql)
+            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to update data visibility flag for web flag with id: #{web_flag[:web_flag_id]}")
+          end
+          it 'returns `true` if `execute_sql` does not return nil' do
+            expect(call_method).to be true
+          end
+        end
+      end
+      context 'when `should_fake?` returns true' do
+        before { allow(disabled_reports_module).to receive(:should_fake?).and_return(true) }
+
+        it 'returns `true`' do
+          expect(call_method).to be true
+        end
+      end
+    end
+
     describe '`disabled_ids_for_member`' do
       let(:member_id) { rand(1000..9999) }
       let(:disabled_member_ids) { Array.new(4){rand(1000..9999)}.uniq }

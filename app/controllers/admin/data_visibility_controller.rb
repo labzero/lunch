@@ -92,11 +92,15 @@ class Admin::DataVisibilityController < Admin::BaseController
       flags: ReportsController::SECURITIES_SERVICES_STATMENT_WEB_FLAGS,
       title: I18n.t('reports.securities.services_monthly.title')
     }
-  }
+  }.freeze
 
   before_action do
     set_active_nav(:data_visibility)
     @can_edit_data_visibility = policy(:web_admin).edit_data_visibility?
+  end
+
+  before_action only: [:update_flags] do
+    authorize :web_admin, :edit_data_visibility?
   end
 
   # GET
@@ -110,12 +114,6 @@ class Admin::DataVisibilityController < Admin::BaseController
     end
     members = members_service.all_members
     raise 'There has been an error and Admin::DataVisibilityController#view_flags has encountered nil. Check error logs.' if disabled_ids.nil? || members.nil?
-    @account_table = data_visibility_table(disabled_ids, [:account_summary, :authorizations, :settlement_transaction_account, :investments])
-    @capital_stock_table = data_visibility_table(disabled_ids, [:cap_stock_activity, :cap_stock_trial_balance, :cap_stock_leverage, :dividend_statement])
-    @price_indications_table = data_visibility_table(disabled_ids, [:current_price_indications, :historical_price_indications])
-    @collateral_table = data_visibility_table(disabled_ids, [:borrowing_capacity, :mortgage_collateral_update])
-    @credit_table = data_visibility_table(disabled_ids, [:todays_credit, :advances, :interest_rate, :letters_of_credit, :forward_commitments, :parallel_shift])
-    @securities_table = data_visibility_table(disabled_ids, [:securities_transactions, :cash_projections, :current_securities_position, :monthly_securities_position, :securities_services])
 
     @member_dropdown = {
       default_value: member_id,
@@ -126,6 +124,30 @@ class Admin::DataVisibilityController < Admin::BaseController
     members.each do |member|
       @member_dropdown[:options] << [member[:name], member[:id]]
     end
+
+    @account_table = data_visibility_table(disabled_ids, [:account_summary, :authorizations, :settlement_transaction_account, :investments])
+    @capital_stock_table = data_visibility_table(disabled_ids, [:cap_stock_activity, :cap_stock_trial_balance, :cap_stock_leverage, :dividend_statement])
+    @price_indications_table = data_visibility_table(disabled_ids, [:current_price_indications, :historical_price_indications])
+    @collateral_table = data_visibility_table(disabled_ids, [:borrowing_capacity, :mortgage_collateral_update])
+    @credit_table = data_visibility_table(disabled_ids, [:todays_credit, :advances, :interest_rate, :letters_of_credit, :forward_commitments, :parallel_shift])
+    @securities_table = data_visibility_table(disabled_ids, [:securities_transactions, :cash_projections, :current_securities_position, :monthly_securities_position, :securities_services])
+  end
+
+  # PUT
+  def update_flags
+    flags = []
+    params[:data_visibility_flags].each do |flag_name, visible|
+      DATA_VISIBILITY_MAPPING[flag_name.to_sym][:flags].each do |id|
+        flags << {
+          web_flag_id: id,
+          visible: visible == 'on'
+        }
+      end
+    end
+    members_service = MembersService.new(request)
+    update_flags_result = members_service.update_global_data_visibility(flags) || {error: 'There has been an error and Admin::DataVisibilityController#update_flags has encountered nil'}
+    set_flash_message(update_flags_result)
+    redirect_to action: :view_flags
   end
 
   private
@@ -141,7 +163,7 @@ class Admin::DataVisibilityController < Admin::BaseController
             type: :checkbox,
             label: true,
             submit_unchecked_boxes: true,
-            disabled: true #TODO: change to !@can_edit_trade_rules as part of MEM-2455
+            disabled: !@can_edit_data_visibility || @member_dropdown[:default_value] != 'all'
           },
           {value: DATA_VISIBILITY_MAPPING[report_name][:title]}
         ]
@@ -149,5 +171,15 @@ class Admin::DataVisibilityController < Admin::BaseController
       rows.last[:row_class] = 'data-source-disabled' unless data_source_enabled
     end
     {rows: rows}
+  end
+
+  def set_flash_message(results)
+    errors = Array.wrap(results).collect{ |result| result[:error] }.compact
+    if errors.present?
+      errors.each { |error| logger.error(error) }
+      flash[:error] = t('admin.term_rules.messages.error')
+    else
+      flash[:notice] = t('admin.term_rules.messages.success')
+    end
   end
 end

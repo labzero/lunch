@@ -84,6 +84,32 @@ describe MembersService do
     end
   end
 
+  describe '`update_global_data_visibility` method' do
+    let(:flags) { double('flags array') }
+    let(:results) { double('some results') }
+    let(:call_method) { subject.update_global_data_visibility(flags) }
+
+    it_behaves_like 'a MAPI backed service object method', :update_global_data_visibility, nil, :put, nil, true do
+      let(:call_method) { subject.update_global_data_visibility(flags) }
+    end
+    it 'calls `put_hash` with the proper endpoint name' do
+      expect(subject).to receive(:put_hash).with(:update_global_data_visibility, any_args)
+      call_method
+    end
+    it 'calls `put_hash` with `member/disabled_reports` as the endpoint' do
+      expect(subject).to receive(:put_hash).with(anything, 'member/disabled_reports', anything)
+      call_method
+    end
+    it 'calls `put_hash` with the provided flags array' do
+      expect(subject).to receive(:put_hash).with(anything, anything, flags)
+      call_method
+    end
+    it 'returns the result of calling `put_hash`' do
+      allow(subject).to receive(:put_hash).and_return(results)
+      expect(call_method).to eq(results)
+    end
+  end
+
   describe 'the `member_contacts` method', :vcr do
     let(:member_contacts) { subject.member_contacts(member_id)}
     let(:cam_phone_number) {double('phone number')}

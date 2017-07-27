@@ -2,6 +2,10 @@ When(/^I visit the admin dashboard$/) do
   visit('/admin')
 end
 
+When(/^I am on the data visibility web flags page$/) do
+  visit('/admin/data-visibility/flags')
+end
+
 Then(/^I see the admin dashboard$/) do
   page.assert_selector('.admin header h1', text: I18n.t('admin.title'), exact: true)
 end
@@ -16,6 +20,11 @@ Then(/^I should be on the (term rules limits|end of day shutoff|data visibility 
     I18n.t('admin.data_visibility.title')
   end
   page.assert_selector('.admin h1', text: title, exact: true)
+end
+
+Then(/^I should see the data visibility web flags page in its (view-only|editable) mode$/) do |mode|
+  selector = '.data-visibility-flags-form input[type=submit'
+  mode == 'view-only' ? page.assert_no_selector(selector) : page.assert_selector(selector, visible: :visible)
 end
 
 Then(/^the (term rules|add advance availability|end of day shutoff) (daily limits|status|by term|by member|rate bands|rate report|term details|early shutoffs|typical shutoffs) tab should be active$/) do |rules_section, active_nav|
@@ -121,7 +130,7 @@ When(/^I click the save changes button for the rules limits form$/) do
   page.find('.rules-limits-form input[type=submit]').click
 end
 
-Then(/^I should see the (success|error) message on the (?:term rules|advance availability) (limits|by member|status|early shutoff|edit early shutoff|remove early shutoff|view early shutoff|typical shutoff) page$/) do |result, form|
+Then(/^I should see the (success|error) message on the (?:term rules|advance availability|data visibility) (limits|by member|status|early shutoff|edit early shutoff|remove early shutoff|view early shutoff|typical shutoff|flags) page$/) do |result, form|
   parent_selector = case form
   when 'limits'
     '.term-rules'
@@ -135,6 +144,8 @@ Then(/^I should see the (success|error) message on the (?:term rules|advance ava
     '.advance-shutoff-times-view-early'
   when 'typical shutoff'
     '.advance-shutoff-times-typical'
+  when 'flags'
+    '.data-visibility-flags'
   end
   success_message = case form
   when 'early shutoff'
@@ -273,6 +284,20 @@ end
 Then(/^I should see the data visibility web flags page for that member$/) do
   step 'I should see 6 report tables with multiple data rows'
   expect(page.find('.data-visibility-select-member select').value).to eq(@data_visibility_member_id)
+end
+
+When(/^I click to toggle the state of the first data source$/) do
+  page.all('.data-visibility-flags-form input[type=checkbox]').first.click
+end
+
+Then(/^I should see the first data source in its disabled state$/) do
+  first_row_classes = page.all('.data-visibility-flags-form table').first.find('tr:first-child')[:class]
+  expect(first_row_classes).to include('data-source-disabled')
+end
+
+When(/^I click to save the data visibility changes( but there is an error)?$/) do |error|
+  allow_any_instance_of(RestClient::Resource).to receive(:put).and_raise(RestClient::Exception) if error
+  page.all('.data-visibility-flags-form input[type=submit]').first.click
 end
 
 def translate_tab_title(nav)

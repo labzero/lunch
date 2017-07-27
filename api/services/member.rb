@@ -477,6 +477,22 @@ module MAPI
             end
           end
           api do
+            key :path, '/disabled_reports'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Updates the global data visibility status for all flag numbers contained in the posted body'
+              key :nickname, :updateGlobalDisabledReportIDs
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :description, "The array of data visibility status hashes for flag_ids."
+                key :type, :GlobalDisabledReports
+              end
+            end
+          end
+          api do
             key :path, '/{id}/disabled_reports'
             operation do
               key :method, 'GET'
@@ -1434,6 +1450,14 @@ module MAPI
         relative_get '/disabled_reports' do
           MAPI::Services::Member.rescued_json_response(self) do
             MAPI::Services::Member::DisabledReports.global_disabled_ids(self)
+          end
+        end
+
+        # Update Global Disabled Reports
+        relative_put '/disabled_reports' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            global_web_flags = JSON.parse(request.body.read)
+            {} if MAPI::Services::Member::DisabledReports.update_global_ids(self, global_web_flags)
           end
         end
 

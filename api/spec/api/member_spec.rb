@@ -763,6 +763,27 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'put `member/disabled_reports`' do
+    let(:post_body) { {"params" => "#{SecureRandom.hex}"} }
+    let(:call_endpoint) { put 'member/disabled_reports', post_body.to_json }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'member/disabled_reports', :put, MAPI::Services::Member::DisabledReports, :update_global_ids, "{}"
+
+    it 'calls `MAPI::Services::DisabledReports.update_global_ids` with the app' do
+      expect(MAPI::Services::Member::DisabledReports).to receive(:update_global_ids).with(an_instance_of(MAPI::ServiceApp), anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::DisabledReports.update_global_ids` with the parsed post body' do
+      expect(MAPI::Services::Member::DisabledReports).to receive(:update_global_ids).with(an_instance_of(MAPI::ServiceApp), post_body)
+      call_endpoint
+    end
+    it 'returns a JSONd empty hash in the response body if the `update_global_ids` method is successful' do
+      allow(MAPI::Services::Member::DisabledReports).to receive(:update_global_ids).and_return(true)
+      call_endpoint
+      expect(last_response.body).to eq({}.to_json)
+    end
+  end
+
   describe 'get `member/{id}/beneficiaries`' do
     let(:results) { SecureRandom.hex }
     let(:member_id) { SecureRandom.hex }
