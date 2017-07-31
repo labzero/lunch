@@ -513,6 +513,29 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/disabled_reports'
+            operation do
+              key :method, 'PUT'
+              key :summary, 'Updates the data visibility status for all flag numbers contained in the posted body for the bank with the given id'
+              key :nickname, :updateGlobalDisabledReportIDs
+              key :consumes, ['application/json']
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id of the member for which data visibility flags are to be updated.'
+              end
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :description, "The array of data visibility status hashes for flag_ids."
+                key :type, :GlobalDisabledReports
+              end
+            end
+          end
+          api do
             key :path, '/{id}/quick_advance_flag'
             operation do
               key :method, 'GET'
@@ -1466,6 +1489,15 @@ module MAPI
           MAPI::Services::Member.rescued_json_response(self) do
             member_id = params[:id]
             MAPI::Services::Member::DisabledReports.disabled_ids_for_member(self, member_id)
+          end
+        end
+
+        # Update Member Disabled Reports
+        relative_put '/:id/disabled_reports' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            member_id = params[:id]
+            web_flags = JSON.parse(request.body.read)
+            {} if MAPI::Services::Member::DisabledReports.update_ids_for_member(self, member_id, web_flags)
           end
         end
 

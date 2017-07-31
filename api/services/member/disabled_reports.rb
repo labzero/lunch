@@ -48,6 +48,30 @@ module MAPI
           end
           disabled_ids.collect{ |flag| flag.to_i }
         end
+
+        def self.update_ids_for_member(app, member_id, flags)
+          unless should_fake?(app)
+            ActiveRecord::Base.transaction(isolation: :read_committed) do
+              flags.each do |flag|
+                flag = flag.with_indifferent_access
+                update_web_flags_sql = if flag[:visible]
+                  <<-SQL
+                    DELETE FROM WEB_ADM.WEB_DATA_FLAGS_BY_INSTITUTIONS 
+                    WHERE WEB_FHLB_ID = #{quote(member_id)} 
+                    AND WEB_FLAG_ID = #{quote(flag[:web_flag_id])}
+                  SQL
+                else
+                  <<-SQL
+                    INSERT INTO WEB_ADM.WEB_DATA_FLAGS_BY_INSTITUTIONS (WEB_FHLB_ID, WEB_FLAG_ID) 
+                    VALUES (#{quote(member_id)}, #{quote(flag[:web_flag_id])})
+                  SQL
+                end
+                raise MAPI::Shared::Errors::SQLError, "Failed to update data visibility flag for web flag with id: #{flag[:web_flag_id]}, where member id is #{member_id}" unless execute_sql(app.logger, update_web_flags_sql)
+              end
+            end
+          end
+          true
+        end
       end
     end
   end

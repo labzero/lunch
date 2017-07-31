@@ -130,7 +130,7 @@ When(/^I click the save changes button for the rules limits form$/) do
   page.find('.rules-limits-form input[type=submit]').click
 end
 
-Then(/^I should see the (success|error) message on the (?:term rules|advance availability|data visibility) (limits|by member|status|early shutoff|edit early shutoff|remove early shutoff|view early shutoff|typical shutoff|flags) page$/) do |result, form|
+Then(/^I should see the (success|error) message on the (?:term rules|advance availability|data visibility) (limits|by member|status|early shutoff|edit early shutoff|remove early shutoff|view early shutoff|typical shutoff|flags) page( for that member)?$/) do |result, form, member_present|
   parent_selector = case form
   when 'limits'
     '.term-rules'
@@ -162,6 +162,7 @@ Then(/^I should see the (success|error) message on the (?:term rules|advance ava
   else
     page.assert_selector("#{parent_selector} .form-error-section p", text: I18n.t('admin.term_rules.messages.error'), exact: true)
   end
+  expect(page.find('.data-visibility-select-member select').value).to eq(@data_visibility_member_id) if member_present
 end
 
 When(/^I press the button to (check|uncheck) all checkboxes for the availability by term (form|vrc section|frc short section|frc long section)$/) do |status, section|
@@ -296,7 +297,11 @@ Then(/^I should see the first data source in its disabled state$/) do
 end
 
 When(/^I click to save the data visibility changes( but there is an error)?$/) do |error|
-  allow_any_instance_of(RestClient::Resource).to receive(:put).and_raise(RestClient::Exception) if error
+  if error
+    allow_any_instance_of(RestClient::Resource).to receive(:put).and_raise(RestClient::Exception)
+  else
+    allow_any_instance_of(RestClient::Resource).to receive(:put).and_call_original
+  end
   page.all('.data-visibility-flags-form input[type=submit]').first.click
 end
 

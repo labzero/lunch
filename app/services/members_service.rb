@@ -58,6 +58,10 @@ class MembersService < MAPIService
     put_hash(:update_global_data_visibility, 'member/disabled_reports', flags)
   end
 
+  def update_data_visibility_for_member(member_id, flags)
+    put_hash(:update_data_visibility_for_member, "member/#{member_id}/disabled_reports", flags)
+  end
+
   def member(member_id)
     Rails.cache.fetch(CacheConfiguration.key(:member_data, member_id), expires_in: CacheConfiguration.expiry(:member_data)) do
       get_hash(:member, "member/#{member_id}/")

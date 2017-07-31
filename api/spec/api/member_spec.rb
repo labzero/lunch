@@ -746,6 +746,31 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'put `member/{id}/disabled_reports`' do
+    let(:post_body) { {"params" => "#{SecureRandom.hex}"} }
+    let(:call_endpoint) { put "member/#{member_id}/disabled_reports", post_body.to_json }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', "member/#{rand(1000..9999)}/disabled_reports", :put, MAPI::Services::Member::DisabledReports, :update_ids_for_member, "{}"
+
+    it 'calls `MAPI::Services::DisabledReports.update_ids_for_member` with the app' do
+      expect(MAPI::Services::Member::DisabledReports).to receive(:update_ids_for_member).with(an_instance_of(MAPI::ServiceApp), any_args)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::DisabledReports.update_ids_for_member` with the member id' do
+      expect(MAPI::Services::Member::DisabledReports).to receive(:update_ids_for_member).with(an_instance_of(MAPI::ServiceApp), member_id.to_s, anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::DisabledReports.update_ids_for_member` with the parsed post body' do
+      expect(MAPI::Services::Member::DisabledReports).to receive(:update_ids_for_member).with(an_instance_of(MAPI::ServiceApp), anything, post_body)
+      call_endpoint
+    end
+    it 'returns a JSONd empty hash in the response body if the `update_ids_for_member` method is successful' do
+      allow(MAPI::Services::Member::DisabledReports).to receive(:update_ids_for_member).and_return(true)
+      call_endpoint
+      expect(last_response.body).to eq({}.to_json)
+    end
+  end
+
   describe 'get `member/disabled_reports`' do
     let(:results) { SecureRandom.hex }
     let(:call_endpoint) { get 'member/disabled_reports' }

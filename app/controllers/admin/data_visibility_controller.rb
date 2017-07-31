@@ -135,6 +135,7 @@ class Admin::DataVisibilityController < Admin::BaseController
 
   # PUT
   def update_flags
+    member_id = params[:member_id] || 'all'
     flags = []
     params[:data_visibility_flags].each do |flag_name, visible|
       DATA_VISIBILITY_MAPPING[flag_name.to_sym][:flags].each do |id|
@@ -145,9 +146,13 @@ class Admin::DataVisibilityController < Admin::BaseController
       end
     end
     members_service = MembersService.new(request)
-    update_flags_result = members_service.update_global_data_visibility(flags) || {error: 'There has been an error and Admin::DataVisibilityController#update_flags has encountered nil'}
-    set_flash_message(update_flags_result)
-    redirect_to action: :view_flags
+    update_flags_result = if member_id == 'all'
+      members_service.update_global_data_visibility(flags)
+    else
+      members_service.update_data_visibility_for_member(member_id, flags)
+    end
+    set_flash_message(update_flags_result || {error: 'There has been an error and Admin::DataVisibilityController#update_flags has encountered nil'})
+    redirect_to action: :view_flags, member_id: member_id
   end
 
   private
@@ -163,7 +168,7 @@ class Admin::DataVisibilityController < Admin::BaseController
             type: :checkbox,
             label: true,
             submit_unchecked_boxes: true,
-            disabled: !@can_edit_data_visibility || @member_dropdown[:default_value] != 'all'
+            disabled: !@can_edit_data_visibility
           },
           {value: DATA_VISIBILITY_MAPPING[report_name][:title]}
         ]
