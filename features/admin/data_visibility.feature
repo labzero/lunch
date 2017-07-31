@@ -27,7 +27,7 @@ Feature: Viewing/Modifying the Data Visibility of the Member Portal
     When I change the member selector to the 2 value on the data visibility web flags page
     Then I should see the data visibility web flags page for that member
 
-  @jira-mem-2455 @local-only
+  @jira-mem-2455 @jira-mem-2456 @jira-mem-2458 @local-only
   Scenario: Toggling data visibility as an admin
     Given I am on the data visibility web flags page
     When I click to toggle the state of the first data source
@@ -37,3 +37,12 @@ Feature: Viewing/Modifying the Data Visibility of the Member Portal
     When I click to toggle the state of the first data source
     And I click to save the data visibility changes but there is an error
     Then I should see the error message on the data visibility flags page
+    When I change the member selector to the 2 value on the data visibility web flags page
+    Then I should see the data visibility web flags page for that member
+    When I click to toggle the state of the first data source
+    Then I should see the first data source in its disabled state
+    When I click to save the data visibility changes
+    Then I should see the success message on the data visibility flags page for that member
+    When I click to toggle the state of the first data source
+    And I click to save the data visibility changes but there is an error
+    Then I should see the error message on the data visibility flags page for that member

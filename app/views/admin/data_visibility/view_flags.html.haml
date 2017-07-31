@@ -12,8 +12,8 @@
     = form_tag data_visibility_flags_path, method: :get, class: 'data-visibility-select-member' do
       = select_tag(:member_id, options_for_select(@member_dropdown[:options], @member_dropdown[:default_value]) )
   =form_tag(data_visibility_flags_update_path, {class: 'data-visibility-flags-form', method: :put}) do
-    =hidden_field_tag(:fhlb_id, @member_dropdown[:default_value])
-    =submit_tag(t('admin.term_rules.save'), class: 'primary-button', disabled: true) if @can_edit_data_visibility && @member_dropdown[:default_value] == 'all'
+    =hidden_field_tag(:member_id, @member_dropdown[:default_value])
+    =submit_tag(t('admin.term_rules.save'), class: 'primary-button', disabled: true) if @can_edit_data_visibility
     %section
       %h2= t('admin.data_visibility.report_visibility')
       =render 'data_visibility_flags_table_section', title: t('reports.your_account.title'), table_data: @account_table
@@ -22,5 +22,5 @@
       =render 'data_visibility_flags_table_section', title: t('reports.collateral.title'), table_data: @collateral_table
       =render 'data_visibility_flags_table_section', title: t('reports.credit.title'), table_data: @credit_table
       =render 'data_visibility_flags_table_section', title: t('reports.securities.title'), table_data: @securities_table
-    =submit_tag(t('admin.term_rules.save'), class: 'primary-button', disabled: true) if @can_edit_data_visibility && @member_dropdown[:default_value] == 'all'
+    =submit_tag(t('admin.term_rules.save'), class: 'primary-button', disabled: true) if @can_edit_data_visibility
     =link_to(t('admin.advance_availability.nav.top_anchor'), {anchor: 'top'}, {class: 'top-anchor'})

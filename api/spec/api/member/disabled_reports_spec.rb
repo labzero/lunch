@@ -194,5 +194,110 @@ describe MAPI::ServiceApp do
         end
       end
     end
+
+    describe '`update_ids_for_member`' do
+      let(:member_id) { rand(1000..9999) }
+      let(:web_flag) {{
+        web_flag_id: SecureRandom.hex,
+        visible: SecureRandom.hex
+      }}
+      let(:call_method) { disabled_reports_module.update_ids_for_member(app, member_id, [web_flag]) }
+      before { allow(disabled_reports_module).to receive(:should_fake?).and_return(true) }
+
+      it 'calls `should_fake?` with the app' do
+        expect(disabled_reports_module).to receive(:should_fake?).with(app).and_return(true)
+        call_method
+      end
+      context 'when `should_fake?` returns false' do
+        before { allow(disabled_reports_module).to receive(:should_fake?).and_return(false) }
+
+        it 'executes code within a transaction where the `isolation` has been set to `:read_committed`' do
+          expect(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+          call_method
+        end
+        it 'returns true if the transaction block executes without error' do
+          allow(ActiveRecord::Base).to receive(:transaction).with(isolation: :read_committed)
+          expect(call_method).to be true
+        end
+        describe 'the transaction block' do
+          before do
+            allow(disabled_reports_module).to receive(:quote)
+            allow(disabled_reports_module).to receive(:execute_sql).and_return(true)
+            allow(ActiveRecord::Base).to receive(:transaction).and_yield
+          end
+
+          it 'calls `execute_sql` with the logger from the app' do
+            expect(disabled_reports_module).to receive(:execute_sql).with(app.logger, anything).and_return(true)
+            call_method
+          end
+          describe 'the SQL for updating the global flags' do
+            it 'quotes the member_id' do
+              expect(disabled_reports_module).to receive(:quote).with(member_id)
+              call_method
+            end
+            it 'quotes the `web_flag_id` attribute of the passed flag hash' do
+              expect(disabled_reports_module).to receive(:quote).with(web_flag[:web_flag_id])
+              call_method
+            end
+            context 'when the `visible` attribute of the passed flag hash is set to `true`' do
+              before { web_flag[:visible] = true }
+
+              it 'DELETEs FROM WEB_ADM.WEB_DATA_FLAGS_BY_INSTITUTIONS' do
+                matcher = Regexp.new(/\A\s*DELETE\s+FROM\s+WEB_ADM.WEB_DATA_FLAGS_BY_INSTITUTIONS\s+/im)
+                expect(disabled_reports_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                call_method
+              end
+              it 'deletes rows WHERE the WEB_FHLB_ID is equal to the quoted member_id' do
+                allow(disabled_reports_module).to receive(:quote).with(member_id).and_return(member_id)
+                matcher = Regexp.new(/\A\s*DELETE.*\s+FROM.*\s+(WHERE|AND)\s+WEB_FHLB_ID\s*=\s*#{member_id}\s*.*\z/im)
+                expect(disabled_reports_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                call_method
+              end
+              it 'deletes rows WHERE the WEB_FLAG_ID is equal to the quoted `web_flag_id` attribute of the passed flag hash' do
+                allow(disabled_reports_module).to receive(:quote).with(web_flag[:web_flag_id]).and_return(web_flag[:web_flag_id])
+                matcher = Regexp.new(/\A\s*DELETE.*\s+FROM.*\s+(WHERE|AND)\s+WEB_FLAG_ID\s*=\s*#{web_flag[:web_flag_id]}\s*.*\z/im)
+                expect(disabled_reports_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                call_method
+              end
+            end
+            context 'when the `visible` attribute of the passed flag hash is set to `false`' do
+              before { web_flag[:visible] = false }
+
+              it 'INSERTs INTO WEB_ADM.WEB_DATA_FLAGS_BY_INSTITUTIONS a row with a WEB_FHLB_ID and a WEB_FLAG_ID' do
+                matcher = Regexp.new(/\A\s*INSERT\s+INTO\s+WEB_ADM.WEB_DATA_FLAGS_BY_INSTITUTIONS\s+\(\s*WEB_FHLB_ID\s*,\s+WEB_FLAG_ID\s*\)\s+/im)
+                expect(disabled_reports_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                call_method
+              end
+              it 'inserts a row with a quoted member_id value' do
+                allow(disabled_reports_module).to receive(:quote).with(member_id).and_return(member_id)
+                matcher = Regexp.new(/\A\s*INSERT.*\s+VALUES\s+\(\s*#{member_id},.*\)/im)
+                expect(disabled_reports_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                call_method
+              end
+              it 'inserts a row with a quoted `web_flag_id` value' do
+                allow(disabled_reports_module).to receive(:quote).with(web_flag[:web_flag_id]).and_return(web_flag[:web_flag_id])
+                matcher = Regexp.new(/\A\s*INSERT.*\s+VALUES\s+\(\s*.*,\s*#{web_flag[:web_flag_id]}\s*\)/im)
+                expect(disabled_reports_module).to receive(:execute_sql).with(anything, matcher).and_return(true)
+                call_method
+              end
+            end
+          end
+          it 'raises an error containing the `web_flag_id` and `member_id` if `execute_sql` returns nil' do
+            allow(disabled_reports_module).to receive(:execute_sql)
+            expect{call_method}.to raise_error(MAPI::Shared::Errors::SQLError, "Failed to update data visibility flag for web flag with id: #{web_flag[:web_flag_id]}, where member id is #{member_id}")
+          end
+          it 'returns `true` if `execute_sql` does not return nil' do
+            expect(call_method).to be true
+          end
+        end
+      end
+      context 'when `should_fake?` returns true' do
+        before { allow(disabled_reports_module).to receive(:should_fake?).and_return(true) }
+
+        it 'returns `true`' do
+          expect(call_method).to be true
+        end
+      end
+    end
   end
 end

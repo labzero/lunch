@@ -110,6 +110,33 @@ describe MembersService do
     end
   end
 
+  describe '`update_data_visibility_for_member` method' do
+    let(:member_id) { SecureRandom.hex }
+    let(:flags) { double('flags array') }
+    let(:results) { double('some results') }
+    let(:call_method) { subject.update_data_visibility_for_member(member_id, flags) }
+
+    it_behaves_like 'a MAPI backed service object method', :update_data_visibility_for_member, nil, :put, nil, true do
+      let(:call_method) { subject.update_data_visibility_for_member(member_id, flags) }
+    end
+    it 'calls `put_hash` with the proper endpoint name' do
+      expect(subject).to receive(:put_hash).with(:update_data_visibility_for_member, any_args)
+      call_method
+    end
+    it 'calls `put_hash` with `member/{member_id}/disabled_reports` as the endpoint' do
+      expect(subject).to receive(:put_hash).with(anything, "member/#{member_id}/disabled_reports", anything)
+      call_method
+    end
+    it 'calls `put_hash` with the provided flags array' do
+      expect(subject).to receive(:put_hash).with(anything, anything, flags)
+      call_method
+    end
+    it 'returns the result of calling `put_hash`' do
+      allow(subject).to receive(:put_hash).and_return(results)
+      expect(call_method).to eq(results)
+    end
+  end
+
   describe 'the `member_contacts` method', :vcr do
     let(:member_contacts) { subject.member_contacts(member_id)}
     let(:cam_phone_number) {double('phone number')}

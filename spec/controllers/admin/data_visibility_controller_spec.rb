@@ -161,7 +161,8 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
 
   describe 'PUT `update_flags`' do
     allow_policy :web_admin, :edit_data_visibility?
-    let(:members_service) { instance_double(MembersService, update_global_data_visibility: nil) }
+    let(:member_id) { rand(1000..9999) }
+    let(:members_service) { instance_double(MembersService, update_global_data_visibility: nil, update_data_visibility_for_member: nil) }
     let(:flag_name) { described_class::DATA_VISIBILITY_MAPPING.keys.sample }
     let(:results) { double('some results') }
     let(:flags) {{
@@ -175,39 +176,82 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
     it_behaves_like 'a DataVisibilityController action with before_action methods'
     it_behaves_like 'it checks the edit_data_visibility? web_admin policy'
 
-    it 'creates a new instance of MembersService with the request' do
+    it 'creates a new instance of `MembersService` with the request' do
       expect(MembersService).to receive(:new).and_return(members_service).with(request)
       call_action
     end
-    describe 'processing the `data_visibility_flags` params' do
-      it 'sets the `web_flag_id` to the `flag` value of the corresponding data source in DATA_VISIBILITY_MAPPING' do
-        expect(members_service).to receive(:update_global_data_visibility).with([hash_including(web_flag_id: described_class::DATA_VISIBILITY_MAPPING[flag_name][:flags].first)])
+    shared_examples 'it updates the data visibility flags globally' do
+      describe 'processing the `data_visibility_flags` params' do
+        it 'sets the `web_flag_id` to the `flag` value of the corresponding data source in `DATA_VISIBILITY_MAPPING`' do
+          expect(members_service).to receive(:update_global_data_visibility).with([hash_including(web_flag_id: described_class::DATA_VISIBILITY_MAPPING[flag_name][:flags].first)])
+          call_action
+        end
+        it 'sets the `visible` attribute to `true` if the value of the param is `on`' do
+          flags[flag_name] = 'on'
+          expect(members_service).to receive(:update_global_data_visibility).with([hash_including(visible: true)])
+          call_action
+        end
+        it 'sets the `visible` attribute to `true` if the value of the param is `off`' do
+          flags[flag_name] = 'off'
+          expect(members_service).to receive(:update_global_data_visibility).with([hash_including(visible: false)])
+          call_action
+        end
+      end
+      it 'calls `set_flash_message` with the results of `update_global_data_visibility`' do
+        allow(members_service).to receive(:update_global_data_visibility).and_return(results)
+        expect(controller).to receive(:set_flash_message).with(results)
         call_action
       end
-      it 'sets the `visible` attribute to `true` if the value of the param is `on`' do
-        flags[flag_name] = 'on'
-        expect(members_service).to receive(:update_global_data_visibility).with([hash_including(visible: true)])
-        call_action
-      end
-      it 'sets the `visible` attribute to `true` if the value of the param is `off`' do
-        flags[flag_name] = 'off'
-        expect(members_service).to receive(:update_global_data_visibility).with([hash_including(visible: false)])
+      it 'calls `set_flash_message` with a hash containing an error if `update_global_data_visibility` returns nil' do
+        allow(members_service).to receive(:update_global_data_visibility).and_return(nil)
+        expect(controller).to receive(:set_flash_message).with({error: 'There has been an error and Admin::DataVisibilityController#update_flags has encountered nil'})
         call_action
       end
     end
-    it 'calls `set_flash_message` with the results of `update_global_data_visibility`' do
-      allow(members_service).to receive(:update_global_data_visibility).and_return(results)
-      expect(controller).to receive(:set_flash_message).with(results)
-      call_action
+    context 'when no member_id param is passed' do
+      it_behaves_like 'it updates the data visibility flags globally'
     end
-    it 'calls `set_flash_message` with a hash containing an error if `update_global_data_visibility` returns nil' do
-      allow(members_service).to receive(:update_global_data_visibility).and_return(nil)
-      expect(controller).to receive(:set_flash_message).with({error: 'There has been an error and Admin::DataVisibilityController#update_flags has encountered nil'})
-      call_action
+    context 'when `all` is passed as the member_id param' do
+      let(:call_action) { put :update_flags, member_id: 'all', data_visibility_flags: flags }
+      it_behaves_like 'it updates the data visibility flags globally'
     end
-    it 'redirects to the `view_flags` action' do
-      call_action
-      expect(response).to redirect_to(data_visibility_flags_url)
+    context 'when a member_id param is passed' do
+      let(:call_action) { put :update_flags, member_id: member_id, data_visibility_flags: flags }
+
+      it 'calls `update_data_visibility_for_member` with the member_id string' do
+        expect(members_service).to receive(:update_data_visibility_for_member).with(member_id.to_s, anything)
+        call_action
+      end
+      describe 'processing the `data_visibility_flags` params' do
+        it 'sets the `web_flag_id` to the `flag` value of the corresponding data source in `DATA_VISIBILITY_MAPPING`' do
+          expect(members_service).to receive(:update_data_visibility_for_member).with(anything, [hash_including(web_flag_id: described_class::DATA_VISIBILITY_MAPPING[flag_name][:flags].first)])
+          call_action
+        end
+        it 'sets the `visible` attribute to `true` if the value of the param is `on`' do
+          flags[flag_name] = 'on'
+          expect(members_service).to receive(:update_data_visibility_for_member).with(anything, [hash_including(visible: true)])
+          call_action
+        end
+        it 'sets the `visible` attribute to `true` if the value of the param is `off`' do
+          flags[flag_name] = 'off'
+          expect(members_service).to receive(:update_data_visibility_for_member).with(anything, [hash_including(visible: false)])
+          call_action
+        end
+      end
+      it 'calls `set_flash_message` with the results of `update_data_visibility_for_member`' do
+        allow(members_service).to receive(:update_data_visibility_for_member).and_return(results)
+        expect(controller).to receive(:set_flash_message).with(results)
+        call_action
+      end
+      it 'calls `set_flash_message` with a hash containing an error if `update_data_visibility_for_member` returns nil' do
+        allow(members_service).to receive(:update_data_visibility_for_member).and_return(nil)
+        expect(controller).to receive(:set_flash_message).with({error: 'There has been an error and Admin::DataVisibilityController#update_flags has encountered nil'})
+        call_action
+      end
+    end
+    it 'redirects to the `view_flags` action with the member_id param' do
+      put :update_flags, member_id: member_id, data_visibility_flags: flags
+      expect(response).to redirect_to(data_visibility_flags_url(member_id: member_id))
     end
   end
 
@@ -256,8 +300,19 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
           it 'has a `submit_unchecked_boxes` attribute set to true' do
             expect(column[:submit_unchecked_boxes]).to be true
           end
-          it 'has a `disabled` attribute set to true' do
-            expect(column[:disabled]).to be true
+          context 'when the given user can edit data visibility' do
+            before { controller.instance_variable_set(:@can_edit_data_visibility, true) }
+
+            it 'has a `disabled` attribute set to false' do
+              expect(column[:disabled]).to be false
+            end
+          end
+          context 'when the given user cannot edit data visibility' do
+            before { controller.instance_variable_set(:@can_edit_data_visibility, false) }
+
+            it 'has a `disabled` attribute set to true' do
+              expect(column[:disabled]).to be true
+            end
           end
         end
         describe 'the second column in the row' do
