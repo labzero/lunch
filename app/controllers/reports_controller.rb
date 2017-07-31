@@ -241,7 +241,7 @@ class ReportsController < ApplicationController
       collateral: {
         borrowing_capacity: {
           updated: t('reports.collateral.borrowing_capacity.updated'),
-          available_history: t('reports.history.current_report'),
+          available_history: t('reports.collateral.borrowing_capacity.history'),
           route: reports_borrowing_capacity_path
         },
         mcu: {
@@ -761,7 +761,7 @@ class ReportsController < ApplicationController
     current = Time.zone.today.iso8601
     @as_of = params['as_of_date'].blank? ? current : params['as_of_date']
     @month_display_map = {}
-    @month_options = [*1..6].collect do |i| #display current month + five previous months
+    @month_options = [*1..6].collect do |i| #display current month + six previous months
       date = (Time.zone.today - i.months).end_of_month
       iso_date = date.iso8601
       @month_display_map[iso_date] = I18n.t('reports.pages.borrowing_capacity.monthend', month: date.strftime('%B'))
@@ -775,6 +775,11 @@ class ReportsController < ApplicationController
           @borrowing_capacity_summary = {}
         elsif self.skip_deferred_load
           @borrowing_capacity_summary = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @as_of.to_s)
+          if params['disable_until_data_available']
+            if Time.zone.parse(@borrowing_capacity_summary['UPDATE_DATE']) < (Date.parse(current) - 1.month).end_of_month
+               raise StandardError, "Previous month's data is not available yet"
+            end
+          end
         else
           job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
           raise ActiveRecord::RecordNotFound unless job_status
