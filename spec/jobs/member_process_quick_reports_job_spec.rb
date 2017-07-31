@@ -73,6 +73,15 @@ RSpec.describe MemberProcessQuickReportsJob, type: :job do
       end
       run_job
     end
+    describe 'when a parameter is not found in the date hash' do
+      let(:params) { { double('A Param Name') => double('A Param Value') } }
+      it 'passes the parameter value through' do
+        allow(member).to receive(:quick_report_params).with(anything).and_return(params)
+        allow(date_hash).to receive(:[]).and_return(nil)
+        expect(FhlbJob).to receive(:perform_now).with(anything, anything, anything, params).twice
+        run_job      
+      end
+    end
     it 'renders the report as a PDF' do
       reports.each do |report|
         expect(RenderReportPDFJob).to receive(:perform_now).with(member_id, report, nil, {})

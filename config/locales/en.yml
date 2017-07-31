@@ -1683,6 +1683,7 @@ en:
         title: Borrowing Capacity
         summary: Includes total and remaining borrowing capacity for both the Standard and SBC Credit Programs. Mortgage loan collateral data, except for Market Value, is updated during the day to reflect processing of new MCUs.
         updated: Intraday for newly processed MCU data, except Market Value; other data as of the end of the prior business day
+        history: 6 months
       mcu:
         title: MCU Status
         summary: Provides data from your institution’s most recently processed MCU, including information about total loans submitted, newly pledged or reported loans, rejected loans, and loans depledged or not reported. A more detailed report is emailed to your institution.

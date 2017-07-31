@@ -7,7 +7,10 @@ class Member
     advances_detail: {
       start_date: :this_month_end
     },
-    borrowing_capacity: {},
+    borrowing_capacity: {
+      as_of: :last_month_end,
+      disable_until_data_available: true
+    },
     settlement_transaction_account: {
       start_date: :this_month_start,
       end_date: :this_month_end

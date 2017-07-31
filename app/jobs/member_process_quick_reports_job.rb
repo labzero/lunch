@@ -14,7 +14,7 @@ class MemberProcessQuickReportsJob < FhlbJob
       missing_reports.each do |report_name|
         params = {}
         member.quick_report_params(report_name).each do |key, value|
-          params[key] = date_hash[value]
+          params[key] = date_hash[value] || value
         end
         report = RenderReportPDFJob.perform_now(member_id, report_name, nil, params)
         report_set.quick_reports.reports_named(report_name).first_or_create!(report: report)

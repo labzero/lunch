@@ -2020,7 +2020,6 @@ RSpec.describe ReportsController, :type => :controller do
       before { controller.skip_deferred_load = true }
       it_behaves_like 'a MemberBalanceServiceJob backed report', 'borrowing_capacity_summary', :perform_now, true
       it_behaves_like 'a borrowing capacity report that passes additional arguments to the MemberBalanceServiceJob', :perform_now, true
-
       it 'raises an error if @borrowing_capacity_summary is nil' do
         allow(MemberBalanceServiceJob).to receive(:perform_now)
         expect{call_action}.to raise_error(StandardError)
@@ -2029,6 +2028,42 @@ RSpec.describe ReportsController, :type => :controller do
         allow(MemberBalanceServiceJob).to receive(:perform_now).and_return(response_hash)
         call_action
         expect(assigns[:borrowing_capacity_summary]).to eq(response_hash)
+      end
+      describe 'when `disable_until_data_available` is set to `true`' do
+        let(:call_action) { get :borrowing_capacity, disable_until_data_available: true }
+        let(:update_date_iso8601) { instance_double(String) }
+        let(:update_date) { instance_double(Date, :< => nil) }
+        let(:current_iso8601) { instance_double(String) }
+        let(:current_date) { instance_double(Date, :- => nil, strftime: nil) }
+        let(:response_hash) { instance_double(Hash) }
+        let(:current_date) { instance_double(Date, iso8601: nil) }
+        before do
+          allow(Time.zone).to receive(:today).and_return(current_date).exactly(7).times
+          allow(current_date).to receive(:-).with(anything).and_return(current_date)
+          allow(current_date).to receive(:strftime).with('%B')
+          allow(current_date).to receive(:end_of_month).and_return(current_date)
+          allow(current_date).to receive(:iso8601).and_return(current_iso8601)
+          allow(MemberBalanceServiceJob).to receive(:perform_now).with(any_args).and_return(response_hash)
+          allow(response_hash).to receive(:[]).with('UPDATE_DATE').and_return(update_date_iso8601)
+          allow(Time.zone).to receive(:parse).with(update_date_iso8601).and_return(update_date)
+          allow(Date).to receive(:parse).with(current_iso8601).and_return(current_date)
+        end
+        describe 'the end of last month' do 
+          before { allow(current_date).to receive(:-).with(1.month).and_return(current_date) }
+          it 'gets the end of last month' do
+            expect(current_date).to receive(:end_of_month)
+            call_action
+          end
+          it 'compares `UPDATE_DATE` to the end of last month' do
+            allow(current_date).to receive(:end_of_month).and_return(current_date)
+            expect(update_date).to receive(:<).with(current_date)
+            call_action
+          end
+          it 'raises an error when no data are available' do
+            expect(update_date).to receive(:<).with(current_date).and_return(true)
+            expect { call_action }.to raise_error(StandardError, "Previous month's data is not available yet")
+          end
+        end
       end
     end
   end
