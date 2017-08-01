@@ -20,13 +20,38 @@
     float: right;
     margin-bottom: 10px;
   }
-  table {
-    td:nth-child(2) {
-      width: 250px;
-    }
-    td:last-child:not(.dataTables_empty) {
+}
+
+.letters-of-credit-manage-table {
+  td:nth-child(2) {
+    width: 250px;
+  }
+  td:nth-child(7) {
+    width: 80px;
+  }
+  td:last-child:not(.dataTables_empty) {
+    text-transform: uppercase;
+    color: $medium-gray;
+  }
+}
+
+.letters-of-credit-manage-amend-off-table {
+  td:last-child:not(.dataTables_empty) {
+    width: 50px;
+  }
+}
+
+.letters-of-credit-manage-amend-on-table {
+  td:last-child:not(.dataTables_empty) {
+    width: 100px;
+    a {
       text-transform: uppercase;
-      color: $medium-gray;
+      &:first-child {
+        float: left;
+      }
+      &:last-child {
+        float: right;
+      }
     }
   }
 }

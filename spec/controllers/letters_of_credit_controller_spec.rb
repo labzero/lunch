@@ -325,6 +325,18 @@ RSpec.describe LettersOfCreditController, :type => :controller do
     end
   end
 
+  describe 'GET amend' do
+    let(:lc_number) { instance_double(String) }
+    let(:call_action) { get :amend, lc_number: lc_number }
+
+    it_behaves_like 'a user required action', :get, :amend
+
+    it 'populates the lc_number ' do
+      call_action
+      expect(assigns[:lc_number]).to eq(lc_number.to_s)
+    end
+  end
+
   context 'controller actions that fetch a letter of credit request' do
     before do
       allow(controller).to receive(:fetch_letter_of_credit_request) do

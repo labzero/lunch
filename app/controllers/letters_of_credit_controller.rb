@@ -24,8 +24,8 @@ class LettersOfCreditController < ApplicationController
     @lc_agreement_flag = member[:customer_lc_agreement_flag]
   end
 
-  before_action :fetch_letter_of_credit_request, except: [:manage, :view]
-  after_action :save_letter_of_credit_request, except: [:manage, :view]
+  before_action :fetch_letter_of_credit_request, except: [:manage, :view, :amend]
+  after_action :save_letter_of_credit_request, except: [:manage, :view, :amend]
 
   # GET
   def manage
@@ -56,9 +56,18 @@ class LettersOfCreditController < ApplicationController
       []
     end
     @table_data = {
-      column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'), t('reports.pages.letters_of_credit.headers.beneficiary'), fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'), t('global.issue_date'), t('letters_of_credit.manage.expiration_date'), t('reports.pages.letters_of_credit.headers.credit_program'), t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), t('global.actions')],
+      column_headings: [
+        t('reports.pages.letters_of_credit.headers.lc_number'),
+        t('reports.pages.letters_of_credit.headers.beneficiary'),
+        fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'),
+        t('global.issue_date'),
+        t('letters_of_credit.manage.expiration_date'),
+        t('reports.pages.letters_of_credit.headers.credit_program'),
+        t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'),
+        t('global.actions')],
       rows: rows
     }
+    @amend_on = feature_enabled?('letters-of-credit-amend')
   end
 
   # GET
@@ -114,6 +123,12 @@ class LettersOfCreditController < ApplicationController
       raise ActionController::RoutingError.new("There has been an error and LettersOfCreditController#view has encountered nil calling MembersService. Check error logs.") if member.nil?
       @member_name, @member_fhla = member[:name], member[:fhla_number]
     end
+  end
+
+  # GET
+  def amend
+    # a stub to be completed under MEM-2497
+    @lc_number = params[:lc_number]
   end
 
   private
