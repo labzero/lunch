@@ -111,6 +111,7 @@ en:
     view_pdf: View PDF
     view_doc: View Doc
     view_report: View Report
+    amend: Amend
     tbd: TBD
     report: Report
     sta_number: Settlement/Transaction Account No. %{sta_number}
@@ -1569,6 +1570,9 @@ en:
       expiration_date: Expiration Date
       maintenance_fee: Annual Maintenance Fee (bps)
       not_authorized: 'Your institution is not authorized to request a Letter of Credit. A <a href="%{url}">Letter of Credit Reimbursement Agreement</a> must be on file.'
+      amend:
+        title: Request Letter of Credit Amendment
+        lc_number: "LC Number: %{lc_number}"
     request:
       title: Request Letter of Credit
       support: "The member portal only supports requests for standard Letters of Credit collateralizing public unit deposits. If your request is not received by 10:00 am, your request will not be processed until the following business day."

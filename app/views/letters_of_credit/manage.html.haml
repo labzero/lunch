@@ -3,4 +3,27 @@
   -if !@lc_agreement_flag
     %p= t('letters_of_credit.manage.not_authorized', url: resources_download_path(file: :form_1465)).html_safe
   =link_to(t('letters_of_credit.manage.request'), letters_of_credit_request_path, {class: 'secondary-button'}) if policy(:letters_of_credit).request?
-  = render 'reports/reports_table', table_data: @table_data, sortable: false
+  - styles = ['letters-of-credit-manage-table']
+  - styles << (@amend_on ? 'letters-of-credit-manage-amend-on-table' : 'letters-of-credit-manage-amend-off-table')
+  %table.report-table.table-allow-wrapping{ 'class':  "#{styles.join(' ')}", data: {loaded: true, sortable: false, :'disable-auto-width' => false, :'missing-data-message' => t('errors.table_data_no_records')}}
+    %thead
+      %tr
+        - @table_data[:column_headings].each do |heading|
+          %th.report-cell-narrow= heading
+    %tbody
+      - @table_data[:rows].each do |row|
+        %tr
+          = render 'reports/report_cell', cell: row[:columns][0]
+          = render 'reports/report_cell', cell: row[:columns][1]
+          = render 'reports/report_cell', cell: row[:columns][2]
+          = render 'reports/report_cell', cell: row[:columns][3]
+          = render 'reports/report_cell', cell: row[:columns][4]
+          = render 'reports/report_cell', cell: row[:columns][5]
+          = render 'reports/report_cell', cell: row[:columns][6]
+          - if @amend_on
+            %td
+              =link_to(t('global.view_pdf') )
+              =link_to(t('global.amend'), letters_of_credit_amend_path(lc_number: row[:columns][0][:value]))
+          - else
+            %td
+              =link_to(t('global.view_pdf') )

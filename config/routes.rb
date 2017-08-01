@@ -63,7 +63,6 @@ Rails.application.routes.draw do
     end
   end
 
-
   scope 'settings', as: :settings do
     get    '/'                         => 'error#not_found'
     get    '/password'                 => 'settings#change_password'
@@ -201,6 +200,7 @@ Rails.application.routes.draw do
       post 'preview' => 'letters_of_credit#preview'
       post 'execute' => 'letters_of_credit#execute'
       get 'view' => 'letters_of_credit#view'
+      get 'amend' => 'letters_of_credit#amend'
     end
   end
 
