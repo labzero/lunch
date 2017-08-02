@@ -47,6 +47,14 @@ module CustomFormattingHelper
     content_tag(:span, formatted_number, class: number_class)
   end
 
+  def fhlb_date_iso8601(date, allow_nil=true)
+    if date
+      date.to_date.strftime('%Y-%m-%d')
+    else
+      allow_nil ? nil : I18n.t('global.missing_value')
+    end
+  end
+
   def fhlb_date_standard_numeric(date)
     return I18n.t('global.missing_value') if date.nil?
     date.to_date.strftime('%m/%d/%Y')

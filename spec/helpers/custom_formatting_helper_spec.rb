@@ -389,4 +389,48 @@ describe CustomFormattingHelper do
       end
     end
   end
+
+  describe '`fhlb_date_iso8601`' do
+    let(:iso8601_date) { instance_double(String) }
+    let(:dateified_date) { instance_double(Date, strftime: iso8601_date)}
+    let(:date) { double('date', to_date: dateified_date) }
+    let(:call_method) { helper.fhlb_date_iso8601(date) }
+
+    it 'turns the passed argument into a date' do
+      expect(date).to receive(:to_date).and_return(dateified_date)
+      call_method
+    end
+    it 'calls `strftime` on the date with the `%Y-%m-%d` format' do
+      expect(dateified_date).to receive(:strftime).with('%Y-%m-%d')
+      call_method
+    end
+    it 'returns the iso8601-formatted date' do
+      expect(call_method).to eq(iso8601_date)
+    end
+    [{nil: nil}, {false: false}].each do |name, argument|
+      context "when #{name} is passed" do
+        context 'when the `allow_nil` argument is true' do
+          it 'returns nil' do
+            expect(helper.fhlb_date_iso8601(argument, true)).to be nil
+          end
+        end
+        context 'when the `allow_nil` argument is false' do
+          it 'returns the I18n value for `missing_value`' do
+            expect(helper.fhlb_date_iso8601(argument, false)).to eq(I18n.t('global.missing_value'))
+          end
+        end
+        context 'when the `allow_nil` argument is not set' do
+          it 'returns nil' do
+            expect(helper.fhlb_date_iso8601(argument)).to be nil
+          end
+        end
+      end
+    end
+    it 'handles single digit months and days' do
+      expect(helper.fhlb_date_iso8601(Date.new(2015,1,2))).to eq('2015-01-02')
+    end
+    it 'handles double digit months and days' do
+      expect(helper.fhlb_date_iso8601(Date.new(2015,11,20))).to eq('2015-11-20')
+    end
+  end
 end
