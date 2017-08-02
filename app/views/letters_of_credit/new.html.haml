@@ -37,7 +37,7 @@
             = render 'shared/input_field', form_builder: f, field_name: :issuance_fee, label: t('letters_of_credit.request.fees.issuance_fee'), field_class: ['disabled'], icon: 'dollar', location: 'before', html_attributes: { disabled: true }
           .input-field-container-horizontal
             = render 'shared/input_field', form_builder: f, field_name: :maintenance_fee, label: t('letters_of_credit.request.fees.maintenance_fee'), field_class: ['disabled'], html_attributes: { disabled: true }, value: 'foooooo'
-        %p= t('letters_of_credit.request.fees.footnote')
+          %p= t('letters_of_credit.request.fees.footnote')
         .letters-of-credit-request-actions
           = link_to(t('global.cancel'), letters_of_credit_manage_path, class: 'secondary-button')
           =  submit_tag(t('letters_of_credit.preview.action'), class: 'primary-button', disabled: !@letter_of_credit_request.amount.present?)
