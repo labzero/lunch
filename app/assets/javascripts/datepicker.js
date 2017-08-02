@@ -358,8 +358,14 @@ $(function () {
     var thisYear = moment().year();
     var $el = $(e.target);
     var date = moment($el.val());
-    if (date > maxDate || date < minDate) {
-      date = date > maxDate ? maxDate : minDate;
+    if (date > maxDate) {
+      date = maxDate;
+      availableDay('previous', date, options.invalidDates, options.disableWeekends);
+      options.singleDatePicker ? picker.setEndDate(date.format('MM/DD/YYYY')) : null;
+      $el.val(date.format('MM/DD/YYYY'));
+    } else if (date < minDate) {
+      date = minDate;
+      availableDay('next', date, options.invalidDates, options.disableWeekends);
       options.singleDatePicker ? picker.setEndDate(date.format('MM/DD/YYYY')) : null;
       $el.val(date.format('MM/DD/YYYY'));
     } else if (options.singleDatePicker) {
