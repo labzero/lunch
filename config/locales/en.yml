@@ -3456,11 +3456,11 @@ en:
         messages: 'Message(s)'
         day_of_message: Early Shutoff Message on %{date}
         day_before_message: Plan Ahead Message on %{date}
-        none_scheduled: There are no scheduled early shut offs to display.
+        none_scheduled: There are no scheduled early shutoffs to display.
         vrc_terms: VRC Terms
         frc_terms: FRC Terms
       schedule_early:
-        title: Schedule or Edit an Early Shut Off
+        title: Schedule or Edit an Early Shutoff
         action: Schedule Early Shutoff
         day_of_info:
           title: Early Shutoff Date, Time and Message
