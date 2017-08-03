@@ -1,3 +1,11 @@
+- profile ||= {}
+- profile[:collateral_borrowing_capacity] ||= {}
+- profile[:collateral_borrowing_capacity][:standard] ||= {}
+- profile[:collateral_borrowing_capacity][:sbc] ||= {}
+- profile[:collateral_borrowing_capacity][:sbc][:agency] ||= {}
+- profile[:collateral_borrowing_capacity][:sbc][:aaa] ||= {}
+- profile[:collateral_borrowing_capacity][:sbc][:aa] ||= {}
+- profile[:capital_stock] ||= {}
 .sidebar-section.sidebar-borrowing-capacity
   %section.report-summary-data
     %h3=t('advances.add_advance.borrowing_capacity.total_borrowing_capacity')
