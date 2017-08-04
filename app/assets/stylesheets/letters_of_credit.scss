@@ -86,6 +86,10 @@
         max-width: 500px;
       }
     }
+    .no_beneficiaries {
+      color: $medium-gray;
+      border-color: $light-blue;
+    }
   }
 }
 
@@ -158,6 +162,28 @@
   .primary-button {
     float: right;
   }
+}
+
+.beneficiaries-add-wrapper {
+  position: relative;
+  h2 {
+    float: left;
+  }
+  p {
+    @include typography-dashboard-account-summary;
+    width: 500px;
+    float: right;
+    text-align: left;
+    margin: 0px;
+  }
+}
+
+.beneficiaries-add {
+  position: absolute;
+  right: 5px;
+  top: 8px;
+  float: right;
+  text-transform: uppercase;
 }
 
 @media print {

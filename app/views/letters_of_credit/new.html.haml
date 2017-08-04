@@ -16,20 +16,28 @@
         = f.hidden_field(:issue_date)
         = f.hidden_field(:expiration_date)
         %section.form-fields-section-column-2.form-fields-section-column-2-multirow
-          %h2= t('letters_of_credit.request.public_unit')
-          .input-field-container-horizontal.beneficiary-name
-            %label{for: 'letter_of_credit_beneficiary'}= t('letters_of_credit.request.beneficiary')
-            = render 'shared/dropdown', dropdown_name: 'letter_of_credit_request[beneficiary_name]', dropdown_options: @beneficiary_dropdown_options, default_value: @beneficiary_dropdown_default, default_text: @beneficiary_dropdown_default, classes: ['dropdown-beneficiary', 'dropdown-with-scroll']
-          .input-field-container-horizontal.attention-field
-            = render 'shared/input_field', form_builder: f, field_name: :attention, label: t('letters_of_credit.request.attention_html')
-          .input-field-container-horizontal.amount-field
-            = render 'shared/input_field', form_builder: f, field_name: :amount, label: t('letters_of_credit.request.amount')
-          .input-field-container-horizontal
-            %span= t('global.issue_date')
-            = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'letter_of_credit_request[issue_date]', start_date: @letter_of_credit_request.issue_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:issue_max_date], invalid_dates: @date_restrictions[:invalid_dates], disable_weekends: true
-          .input-field-container-horizontal
-            %span= t('letters_of_credit.manage.expiration_date')
-            = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'letter_of_credit_request[expiration_date]', start_date: @letter_of_credit_request.expiration_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:expiration_max_date], invalid_dates: @date_restrictions[:invalid_dates], disable_weekends: true
+          .beneficiaries-add-wrapper
+            %h2= t('letters_of_credit.request.public_unit')
+            - if feature_enabled?('letters-of-credit-beneficiary')
+              = link_to(t('letters_of_credit.beneficiary.add'), letters_of_credit_beneficiary_path, class: ['text-only-button', 'beneficiaries-add'])
+            .input-field-container-horizontal.beneficiary-name
+              %label{for: 'letter_of_credit_beneficiary'}= t('letters_of_credit.request.beneficiary')
+              -if @no_beneficiaries
+                .input-field-container.dropdown-beneficiary
+                  %input{value: @beneficiary_dropdown_default, disabled: true, class: 'no_beneficiaries'}
+                %p= t('letters_of_credit.beneficiary.message', phone_number: service_desk_phone_number)
+              -else
+                = render 'shared/dropdown', dropdown_name: 'letter_of_credit_request[beneficiary_name]', dropdown_options: @beneficiary_dropdown_options, default_value: @beneficiary_dropdown_default, default_text: @beneficiary_dropdown_default, classes: ['dropdown-beneficiary', 'dropdown-with-scroll']
+            .input-field-container-horizontal.attention-field
+              = render 'shared/input_field', form_builder: f, field_name: :attention, label: t('letters_of_credit.request.attention_html')
+            .input-field-container-horizontal.amount-field
+              = render 'shared/input_field', form_builder: f, field_name: :amount, label: t('letters_of_credit.request.amount')
+            .input-field-container-horizontal
+              %span= t('global.issue_date')
+              = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'letter_of_credit_request[issue_date]', start_date: @letter_of_credit_request.issue_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:issue_max_date], invalid_dates: @date_restrictions[:invalid_dates], disable_weekends: true
+            .input-field-container-horizontal
+              %span= t('letters_of_credit.manage.expiration_date')
+              = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'letter_of_credit_request[expiration_date]', start_date: @letter_of_credit_request.expiration_date, min_date: @date_restrictions[:min_date], max_date: @date_restrictions[:expiration_max_date], invalid_dates: @date_restrictions[:invalid_dates], disable_weekends: true
         %section.letters-of-credit-fees-section
           %h2= t('letters_of_credit.request.fees.title')
           %p= t('letters_of_credit.request.fees.explanation')
@@ -40,4 +48,4 @@
           %p= t('letters_of_credit.request.fees.footnote')
         .letters-of-credit-request-actions
           = link_to(t('global.cancel'), letters_of_credit_manage_path, class: 'secondary-button')
-          =  submit_tag(t('letters_of_credit.preview.action'), class: 'primary-button', disabled: !@letter_of_credit_request.amount.present?)
+          =  submit_tag(t('letters_of_credit.preview.action'), class: 'primary-button', disabled: !@letter_of_credit_request.amount.present? || @no_beneficiaries)
