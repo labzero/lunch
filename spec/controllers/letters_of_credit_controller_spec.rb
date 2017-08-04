@@ -741,15 +741,19 @@ RSpec.describe LettersOfCreditController, :type => :controller do
 
             it 'sets `@beneficiary_dropdown_default` to the beneficiary name' do
               allow(letter_of_credit_request).to receive(:beneficiary_name).and_return(beneficiary_name)
+              allow(beneficiary_service).to receive(:beneficiaries).and_return(beneficiaries)
               call_method
               expect(assigns[:beneficiary_dropdown_default]).to eq(beneficiary_name)
             end
           end
           context 'when the beneficiary_name of the letter_of_credit_request is nil' do
-            it 'sets `@beneficiary_dropdown_default` to last value of the first member of the @beneficiary_dropdown_options array' do
-              allow(beneficiary_service).to receive(:beneficiaries).and_return(beneficiaries)
+            it 'sets `@beneficiary_dropdown_default` to `No Beneficiary on File`' do
               call_method
-              expect(assigns[:beneficiary_dropdown_default]).to eq(beneficiaries.first[:name])
+              expect(assigns[:beneficiary_dropdown_default]).to eq('No Beneficiary on File')
+            end
+            it 'sets `@no_beneficiaries` to true' do
+              call_method
+              expect(assigns[:no_beneficiaries]).to eq(true)
             end
           end
         end

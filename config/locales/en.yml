@@ -1617,6 +1617,20 @@ en:
     email:
       subject: 'FHLBank San Francisco: Letter of Credit Request Received'
       body: "We received your Letter of Credit Request. A copy of your request is attached (for all purposes, your request constitutes a “Confirmation of Letter of Credit” and a “Confirmation” as such terms are used and defined in the Letter of Credit Reimbursement Agreement).\n\nOnce issued, the original Letter of Credit will be sent to the Beneficiary on the Issue Date. Please contact Member Financial Services at %{phone_number} if you have any questions."
+    beneficiary:
+      add: Add Beneficiary
+      message: Your institution does not have any beneficiaries on file. Press Add Beneficiary above or call the Member Services Desk at %{phone_number}
+      no_beneficiary: No Beneficiary on File
+      add_message: Contact the Member Services Desk at %{phone_number} with questions.
+      name: Beneficiary Name
+      care_of: Care of
+      department: Department
+      street_address: Street Address
+      no_po_box: May not be a PO Box
+      city: City
+      state: State
+      zip: ZIP Code
+      send: Send Request
   reports:
     meta_title: FHLBSF - Reports
     title: Reports

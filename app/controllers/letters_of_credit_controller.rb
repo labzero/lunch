@@ -168,6 +168,10 @@ class LettersOfCreditController < ApplicationController
     @beneficiary_dropdown_options = BeneficiariesService.new(request).beneficiaries(current_member_id).collect{|beneficiary| [beneficiary[:name], beneficiary[:name]] }
     @beneficiary_dropdown_default = letter_of_credit_request.beneficiary_name || @beneficiary_dropdown_options.first.try(:last)
     @date_restrictions = date_restrictions
+    unless @beneficiary_dropdown_options.first.try(:last)
+      @no_beneficiaries = true
+      @beneficiary_dropdown_default = t('letters_of_credit.beneficiary.no_beneficiary')
+    end
   end
 
   def letter_of_credit_request
