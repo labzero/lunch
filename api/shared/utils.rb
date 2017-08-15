@@ -3,6 +3,8 @@ module MAPI
     module Utils
       CACHE_KEY_SEPARATOR = '.'.freeze
       CACHE_KEY_BASE = ['mapi', 'cache'].join(CACHE_KEY_SEPARATOR).freeze
+      DATE_FORMAT = '%Y-%m-%d'.freeze
+      DATETIME_FORMAT = "#{DATE_FORMAT}%H%M%Z".freeze
       extend ActiveSupport::Concern
 
       module ClassMethods
@@ -165,6 +167,14 @@ module MAPI
 
         def flat_unique_array(array)
           Array.wrap(array).flatten.uniq
+        end
+
+        def parse_time(date, time)
+          if date.respond_to?(:strftime)
+            date = date.strftime(DATE_FORMAT)
+          end
+          time = time.to_s
+          Time.zone.parse(date.to_s + ' ' + time[0..1] + ':' + time[2..3])
         end
       end
     end

@@ -2,449 +2,322 @@ require 'spec_helper'
 require 'date'
 
 describe MAPI::Services::Rates::LoanTerms do
-  describe 'production' do
-    subject { MAPI::Services::Rates::LoanTerms }
-
-    describe 'loan_terms' do
-      let(:now)                     { '2016-03-02 13:00'.to_datetime }
-      let(:now_time_string)         { now.strftime('%H%M') }
-      let(:now_date)                { now.to_date }
-      let(:long_ago_date)           { '2001-03-23'.to_date }
-      let(:hash1) do
-        {
-            "AO_TERM_BUCKET_ID"  => 1,
-            "TERM_BUCKET_LABEL"  => "Open and O/N",
-            "WHOLE_LOAN_ENABLED" => "Y",
-            "SBC_AGENCY_ENABLED" => "Y",
-            "SBC_AAA_ENABLED"    => "Y",
-            "SBC_AA_ENABLED"     => "Y",
-            "END_TIME"           => "0001",
-            "OVERRIDE_END_DATE"  => long_ago_date,
-            "OVERRIDE_END_TIME"  => "2000"
-        }
-      end
-      let(:hash2) do
-        {
-            "AO_TERM_BUCKET_ID"  => 2,
-            "TERM_BUCKET_LABEL"  => "1 Week",
-            "WHOLE_LOAN_ENABLED" => "Y",
-            "SBC_AGENCY_ENABLED" => "Y",
-            "SBC_AAA_ENABLED"    => "Y",
-            "SBC_AA_ENABLED"     => "N",
-            "END_TIME"           => "2000",
-            "OVERRIDE_END_DATE"  => long_ago_date,
-            "OVERRIDE_END_TIME"  => "0700"
-        }
-      end
-      let(:hash3) do
-        {
-            "AO_TERM_BUCKET_ID"  => 3,
-            "TERM_BUCKET_LABEL"  => "2 Weeks",
-            "WHOLE_LOAN_ENABLED" => "Y",
-            "SBC_AGENCY_ENABLED" => "Y",
-            "SBC_AAA_ENABLED"    => "Y",
-            "SBC_AA_ENABLED"     => "Y",
-            "END_TIME"           => "2000",
-            "OVERRIDE_END_DATE"  => now_date,
-            "OVERRIDE_END_TIME"  => "2359"
-        }
-      end
-      let(:result_set) { double('Oracle Result Set', fetch_hash: nil) }
-      let(:logger) { double('logger') }
-      let(:grace_period) { rand(1..10) }
-      let(:environment) { :production }
-      let(:call_method) { subject.loan_terms(logger, environment) }
-      before do
-        allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
-        allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set)
-        allow(result_set).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
-        allow(Time.zone).to receive(:now).and_return(now)
-        allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).and_return({'end_of_day_extension' => grace_period})
-      end
-
-      it 'should return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
-        result = subject.loan_terms(logger, :production)
-        MAPI::Services::Rates::LOAN_TERMS.each do |term|
-          MAPI::Services::Rates::LOAN_TYPES.each do |type|
-            expect(result[term][type]['trade_status']).to be_boolean
-            expect(result[term][type]['display_status']).to be_boolean
-            expect(result[term][type]['bucket_label']).to be_kind_of(String)
-          end
-        end
-      end
-
-      it 'should return trade status false if passed end time but display_status is true and there is no override for today' do
-        result = subject.loan_terms(logger, :production)
-        MAPI::Shared::Constants::LOAN_TYPES.each do |type|
-          expect(result[:overnight][type]['trade_status']).to be false
-          expect(result[:overnight][type]['display_status']).to be true
-          expect(result[:overnight][type]['bucket_label']).to eq('Open and O/N')
-        end
-      end
-
-      it 'should return trade status and display status to be false if type and term is disabled' do
-        result = subject.loan_terms(logger, :production)
-        MAPI::Shared::Constants::LOAN_TYPES.each do |type|
-          if type == :aa
-            expect(result['1week'][type]['trade_status']).to be false
-            expect(result['1week'][type]['display_status']).to be false
-          else
-            expect(result['1week'][type]['trade_status']).to be true
-            expect(result['1week'][type]['display_status']).to be true
-          end
-          expect(result['1week'][type]['bucket_label']).to eq('1 Week')
-        end
-      end
-
-      it 'should return trade status and display status to true if override_end_time for the override_end_date is not over regardless of end_time' do
-        result = subject.loan_terms(logger, :production)
-        MAPI::Shared::Constants::LOAN_TYPES.each do |type|
-          expect(result['2week'][type]['trade_status']).to be true
-          expect(result['2week'][type]['display_status']).to be true
-          expect(result['2week'][type]['bucket_label']).to eq('2 Weeks')
-        end
-      end
-
-      let(:result_hash4) do
-        {"AO_TERM_BUCKET_ID" => 3,
-         "TERM_BUCKET_LABEL" => "2 Week",
-         "WHOLE_LOAN_ENABLED" => "Y",
-         "SBC_AGENCY_ENABLED" => "Y",
-         "SBC_AAA_ENABLED" => "Y",
-         "SBC_AA_ENABLED" => "Y",
-         "END_TIME" => "2359",
-         "OVERRIDE_END_DATE" => now_date,
-         "OVERRIDE_END_TIME" => "0001"}
-      end
-      it 'should return trade status to false if override_end_time for the override_end_date that is set for today has passed the current time' do
-        allow(result_set).to receive(:fetch_hash).and_return(result_hash4, nil)
-        result = subject.loan_terms(logger, :production)
-        MAPI::Shared::Constants::LOAN_TYPES.each do |type|
-          expect(result['2week'][type]['trade_status']).to be false
-          expect(result['2week'][type]['display_status']).to be true
-          expect(result['2week'][type]['bucket_label']).to eq('2 Week')
-        end
-      end
-
-      it 'fetches the eTransact settings' do
-        expect(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).with(environment)
-        call_method
-      end
-      it 'passes the grace_period into the `value_for_term`' do
-        expect(subject).to receive(:value_for_term).with(anything, include(grace_period: anything)).exactly(described_class::LOAN_TERMS.count)
-        call_method
-      end
-      it 'sets the grace_period to 0 if its not allowed' do
-        expect(subject).to receive(:value_for_term).with(anything, include(grace_period: 0)).exactly(described_class::LOAN_TERMS.count)
-        call_method
-      end
-      it 'sets the grace_period to the `end_of_day_extension` if it is allowed' do
-        expect(subject).to receive(:value_for_term).with(anything, include(grace_period: grace_period)).exactly(described_class::LOAN_TERMS.count)
-        subject.loan_terms(logger, environment, true)
-      end
-    end
-
-    describe 'term_bucket_data' do
-      let (:environment) { double("environment") }
-      let (:logger) { double("logger") }
-      it 'should call term_bucket_data_production in production' do
-        expect(MAPI::Services::Rates::LoanTerms).to receive(:term_bucket_data_production).with(logger)
-        MAPI::Services::Rates::LoanTerms.term_bucket_data(logger, :production)
-      end
-
-      it 'should call term_bucket_data_development in non-production environment' do
-        allow(environment).to receive(:==).with(:production).and_return(false)
-        expect(MAPI::Services::Rates::LoanTerms).to receive(:term_bucket_data_development)
-        MAPI::Services::Rates::LoanTerms.term_bucket_data(logger, environment)
-      end
-    end
-  end
-
-  describe 'development' do
-    describe 'term_bucket_data_production' do
-      let(:connection) { double('connection') }
-      let(:cursor) { double('cursor') }
-      let(:logger) { double('logger') }
-      let(:call_method) { MAPI::Services::Rates::LoanTerms.term_bucket_data_production(logger) }
-      it 'log warnings for exceptions' do
-        allow(connection).to receive(:execute).and_return(cursor)
-        allow(ActiveRecord::Base).to receive(:connection).and_return(connection)
-        allow(cursor).to receive(:fetch_hash).and_raise(:bad_shit)
-        expect(logger).to receive(:error)
-        call_method
-      end
-      it 'maps the OVERRIDE_END_DATE to a Date object' do
-        expect(subject).to receive(:fetch_hashes).with(logger, described_class::SQL, include(to_date: include('OVERRIDE_END_DATE')))
-        call_method
-      end
-    end
-
-    describe 'term_bucket_data_development' do
-      let(:file_contents){ double( 'Fake json file' ) }
-      let(:json) { double( 'JSON' ) }
-      it "should call JSON.parse" do
-        allow(File).to receive(:read).and_return(file_contents)
-        allow(json).to receive(:each).and_return(nil)
-        allow(json).to receive(:index).and_return(0)
-        allow(json).to receive(:[]).and_return({})
-        expect(JSON).to receive(:parse).with(file_contents).and_return(json)
-        MAPI::Services::Rates::LoanTerms.term_bucket_data_development
-      end
-    end
-
-    describe 'term_bucket_data_development' do
-      let (:yes_or_no)    { /\A(n|y)\Z/i }
-      let (:compact_time) { /\A\d{4}\Z/ }
-      let (:bucket_label) { /\A(open and o\/n|\d+(-\d+)?\s+(week|month|year)(s)?)\Z/i }
-      MAPI::Services::Rates::LoanTerms.term_bucket_data_development.each do |row|
-        it 'should have the correct shape' do
-          expect(row['AO_TERM_BUCKET_ID']).to be_kind_of Numeric
-          expect(row['TERM_BUCKET_LABEL']).to  match(bucket_label)
-          expect(row['WHOLE_LOAN_ENABLED']).to match(yes_or_no)
-          expect(row['SBC_AGENCY_ENABLED']).to match(yes_or_no)
-          expect(row['SBC_AAA_ENABLED']).to    match(yes_or_no)
-          expect(row['SBC_AA_ENABLED']).to     match(yes_or_no)
-          expect(row['END_TIME']).to           match(compact_time)
-          expect(row['OVERRIDE_END_DATE']).to be_kind_of Date
-          expect(row['OVERRIDE_END_TIME']).to  match(compact_time)
-
-          expect(row['OVERRIDE_END_DATE']).to eq(Date.today) if row['TERM_BUCKET_LABEL'] == '2 years'
-        end
-      end
-    end
-
-    describe 'term_bucket_data_development' do
-      let (:override_end_date_string1) { double( 'override_end_date_string1', to_date: override_end_date1 ) }
-      let (:override_end_date_string2) { double( 'override_end_date_string2', to_date: override_end_date2 ) }
-      let (:override_end_date1) { double( 'override_end_date1' ) }
-      let (:override_end_date2) { double( 'override_end_date2' ) }
-      let (:fake_data) do
-        [{ 'TERM_BUCKET_LABEL' => '1 year',  'OVERRIDE_END_DATE' => override_end_date_string1},
-         { 'TERM_BUCKET_LABEL' => '2 years', 'OVERRIDE_END_DATE' => override_end_date_string2}]
-      end
-      let (:fake_result) do
-        [{ 'TERM_BUCKET_LABEL' => '1 year',  'OVERRIDE_END_DATE' => override_end_date1},
-         { 'TERM_BUCKET_LABEL' => '2 years', 'OVERRIDE_END_DATE' => Time.zone.today}]
-      end
-      before do
-        allow(subject).to receive(:fake).and_return(fake_data)
-      end
-      it 'should return fake_result' do
-        expect(subject.term_bucket_data_development).to eq(fake_result)
-      end
-    end
-  end
+  loan_terms_module = MAPI::Services::Rates::LoanTerms
+  let(:app) { double(MAPI::ServiceApp, logger: double('logger'), settings: double('settings', environment: double('environment'))) }
 
   describe 'class methods' do
-    let(:now) { Time.zone.local(2016, 2, 13, 1, 23) }
+    let(:now) { Time.zone.now }
     let(:grace_period) { rand(1..10) }
-    let(:now_hash) { {date: now.to_date, grace_period: grace_period} }
-
-    describe '`appropriate_end_time`' do
-      let(:now) { '2016-02-13 00:00'.to_datetime }
-      let(:now_hash) { {date: now.to_date} }
-      let(:end_time) { double('An End Time') }
-      let(:override_end_time) { now.change({hour: 12, min: 0}) }
-      let(:bucket) { double('A Term Bucket') }
-      let(:call_method) { subject.appropriate_end_time(bucket, now_hash) }
-      before do
-        allow(Time.zone).to receive(:now).and_return(now)
-        allow(subject).to receive(:end_time).and_return(end_time)
-      end
-      it 'returns the normal end time if there is no end date override' do
-        allow(subject).to receive(:override_end_time).and_return(nil)
-        expect(call_method).to eq(end_time)
-      end
-      it 'returns the normal end time if there is an end date override but its not for today' do
-        allow(subject).to receive(:override_end_time).and_return(now - 1.day)
-        expect(call_method).to eq(end_time)
-      end
-      it 'returns the override end time if there is an end date override for today' do
-        allow(subject).to receive(:override_end_time).and_return(override_end_time)
-        expect(call_method).to eq(override_end_time)
-      end
-      it 'handles nil for the `end_time`' do
-        allow(subject).to receive(:override_end_time).and_return(nil)
-        allow(subject).to receive(:end_time).and_return(nil)
-        expect(call_method).to be_nil
-      end
+    let(:now_hash) { {time: now, date: now.to_date, grace_period: grace_period} }
+    before do
+      allow(Time.zone).to receive(:now).and_return(now)
     end
 
-    describe '`override_end_time`' do
-      let(:bucket) {
-        {
-          'OVERRIDE_END_DATE' => now.to_date.to_s,
-          'OVERRIDE_END_TIME' => now.strftime('%H%M')
-        }
-      }
-      let(:call_method) { subject.override_end_time(bucket, now_hash) }
-      it 'returns the override end time + grace period' do
-        expect(call_method).to eq(now + grace_period.minutes)
+    describe '`loan_terms`' do
+      let(:settings) {{
+        'end_of_day_extension' => grace_period
+      }}
+      let(:call_method) { loan_terms_module.loan_terms(app) }
+      before do
+        allow(loan_terms_module).to receive(:value_for_term)
+        allow(loan_terms_module).to receive(:should_fake?).and_return(true)
+        allow(loan_terms_module).to receive(:term_to_id)
       end
-      it 'returns nil if the override end date is missing' do
-        bucket['OVERRIDE_END_DATE'] = ''
-        expect(call_method).to be_nil
+
+      it 'calls `should_fake?` with the app' do
+        expect(loan_terms_module).to receive(:should_fake?).and_return(true)
+        call_method
       end
-      it 'returns nil if the override end time is missing' do
-        bucket['OVERRIDE_END_TIME'] = ''
-        expect(call_method).to be_nil
+      context 'when `should_fake?` returns true' do
+        before { allow(loan_terms_module).to receive(:should_fake?).and_return(true) }
+
+        it 'calls `fake` with `etransact_advances_term_buckets_info`' do
+          expect(loan_terms_module).to receive(:fake).with('etransact_advances_term_buckets_info')
+          call_method
+        end
+      end
+      context 'when `should_fake?` returns false' do
+        before { allow(loan_terms_module).to receive(:should_fake?).and_return(false) }
+
+        it 'calls `fetch_hashes` with the logger from the app' do
+          expect(loan_terms_module).to receive(:fetch_hashes).with(app.logger, any_args)
+          call_method
+        end
+        it 'calls `fetch_hashes` with the proper SQL' do
+          expect(loan_terms_module).to receive(:fetch_hashes).with(anything, loan_terms_module::SQL, anything)
+          call_method
+        end
+        it 'calls `fetch_hashes` with a hash mapping the `OVERRIDE_END_DATE` to the `to_date` proc' do
+          expect(loan_terms_module).to receive(:fetch_hashes).with(anything, anything, {to_date: ['OVERRIDE_END_DATE']})
+          call_method
+        end
+      end
+      context 'when the `allow_grace_period` arg is `true`' do
+        let(:call_method) { loan_terms_module.loan_terms(app, true) }
+
+        it 'calls `MAPI::Services::EtransactAdvances::Settings.settings` with the app\'s environment' do
+          expect(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).with(app.settings.environment).and_return({})
+          call_method
+        end
+        it 'uses the `end_of_day_extension` from the settings for the `grace_period` when calling `value_for_term`' do
+          allow(MAPI::Services::EtransactAdvances::Settings).to receive(:settings).with(app.settings.environment).and_return(settings)
+          expect(loan_terms_module).to receive(:value_for_term).with(anything, anything, hash_including(grace_period: settings['end_of_day_extension']))
+          call_method
+        end
+      end
+      context 'when the `allow_grace_period` arg is false' do
+        let(:call_method) { loan_terms_module.loan_terms(app, false) }
+
+        it 'does not call `MAPI::Services::EtransactAdvances::Settings.settings`' do
+          expect(MAPI::Services::EtransactAdvances::Settings).not_to receive(:settings)
+          call_method
+        end
+        it 'uses `0` for the `grace_period` when calling `value_for_term`' do
+          expect(loan_terms_module).to receive(:value_for_term).with(anything, anything, hash_including(grace_period: 0))
+          call_method
+        end
+      end
+      it 'calls `value_for_term` with the app' do
+        expect(loan_terms_module).to receive(:value_for_term).with(app, any_args)
+        call_method
+      end
+      it 'calls `value_for_term` with a hash with a value for `time`' do
+        expect(loan_terms_module).to receive(:value_for_term).with(anything, anything, hash_including(time: now))
+        call_method
+      end
+      it 'calls `value_for_term` with a hash with a value for `date`' do
+        expect(loan_terms_module).to receive(:value_for_term).with(anything, anything, hash_including(date: now.to_date))
+        call_method
+      end
+      let(:buckets) do
+        buckets = []
+        loan_terms_module::TERM_BUCKET_MAPPING.values.each do |id|
+          buckets << {'AO_TERM_BUCKET_ID' => id, 'sentinel' => SecureRandom.hex}
+        end
+        buckets
+      end
+      before { allow(loan_terms_module).to receive(:fake).and_return(buckets) }
+      loan_terms_module::LOAN_TERMS.each do |term|
+        describe "buckets pertaining to the `#{term}` term" do
+          let(:bucket_value_for_term) { double('bucket value for term') }
+          let(:bucket_id) { loan_terms_module.term_to_id(term) }
+          before do
+            allow(loan_terms_module).to receive(:term_to_id).and_call_original
+          end
+
+          it "calls `term_to_id` with `#{term}`" do
+            expect(loan_terms_module).to receive(:term_to_id).with(term)
+            call_method
+          end
+          it "calls `value_for_term` with the bucket corresponding to the `#{term}` term" do
+            expect(loan_terms_module).to receive(:value_for_term).with(anything, buckets[bucket_id], anything)
+            call_method
+          end
+          it "calls `hash_from_pairs` with an array including an array with the `#{term}` and the `value_for_term` for the corresponding bucket" do
+            allow(loan_terms_module).to receive(:value_for_term).with(anything, buckets[bucket_id], anything).and_return(bucket_value_for_term)
+            expect(loan_terms_module).to receive(:hash_from_pairs).with(include([term, bucket_value_for_term]))
+            call_method
+          end
+        end
+      end
+      it 'returns the result of calling `hash_from_pairs`' do
+        result = double('result')
+        allow(loan_terms_module).to receive(:hash_from_pairs).and_return(result)
+        expect(call_method).to eq(result)
       end
     end
 
     describe '`end_time`' do
-      let(:bucket) {
-        {
-          'END_TIME' => now.strftime('%H%M')
-        }
-      }
-      let(:call_method) { subject.end_time(bucket, now_hash) }
-      it 'returns the end time + grace period' do
-        expect(call_method).to eq(now + grace_period.minutes)
-      end
-      it 'returns nil if the end time is missing' do
-        bucket['END_TIME'] = ''
-        expect(call_method).to be_nil
-      end
-      it 'returns nil if the current date is missing' do
-        now_hash.delete(:date)
-        expect(call_method).to be_nil
-      end
-    end
+      let(:bucket) { double('bucket') }
+      let(:parsed_time) { now + rand(15..99).minutes }
+      let(:call_method) { subject.end_time(app, bucket, now_hash) }
 
-    describe '`parse_time`' do
-      let(:time) { double(Time, to_s: SecureRandom.hex, length: 4, :[] => '') }
-      let(:date) { double(Date, to_s: SecureRandom.hex) }
-      let(:pst) { ActiveSupport::TimeZone.new('America/Los_Angeles') }
-      let(:est) { ActiveSupport::TimeZone.new('America/New_York') }
-      let(:other_zone) { Time.zone == pst ? est : pst }
-      let(:call_method) { subject.parse_time(date, time) }
       before do
-        allow(time).to receive(:to_s).and_return(time)
+        allow(loan_terms_module).to receive(:parse_time).and_return(now)
+        allow(loan_terms_module).to receive(:bucket_is_vrc?)
       end
-      context 'duck typing' do
-        before { allow(Time.zone).to receive(:parse) }
-        it 'converts the `date` to a string' do
-          expect(date).to receive(:to_s)
-          call_method
-        end
-        it 'converts the `time` to a string' do
-          expect(time).to receive(:to_s).and_return(time)
-          call_method
-        end
-        it 'calls `strftime` on the `date` if it responds' do
-          expect(date).to receive(:strftime).with(described_class::DATE_FORMAT).and_return(date)
-          call_method
-        end
-        it 'does not call `strftime` on the `date` if it is not supported' do
-          allow(date).to receive(:respond_to?).with(:strftime).and_return(false)
-          expect(date).to_not receive(:strftime)
-          call_method
+
+      context 'when the `date` value of the `now_hash` arg is nil' do
+        before { now_hash.delete(:date) }
+        it 'returns nil' do
+          expect(call_method).to be nil
         end
       end
-      {
-        Time.zone.local(2012, 2, 13, 13, 14) => ['2012-02-13', '1314'],
-        Time.zone.local(2000, 1, 1, 0, 13) => ['2000-01-01', '0013'],
-        Time.zone.local(2016, 2, 29, 1, 0) => ['2016-02-29', '0100']
-      }.each do |time, args|
-        it "parses #{args} into #{time}" do
-          expect(subject.parse_time(*args)).to eq(time)
+      context 'when the `date` value of the `now_hash` arg is not nil' do
+        before { allow(loan_terms_module).to receive(:early_shutoffs).with(app).and_return([]) }
+
+        it 'calls `early_shutoffs` with the app' do
+          expect(loan_terms_module).to receive(:early_shutoffs).with(app).and_return([])
+          call_method
         end
-      end
-      it 'parses the time in the current `Time.zone` timezone' do
-        Time.use_zone(other_zone) do
-          time = Time.zone.local(2012, 2, 13, 13, 14)
-          expect(subject.parse_time(time.strftime('%Y-%m-%d'), time.strftime('%H%M'))).to eq(time)
-        end
-      end
-      [[2016, 3, 15, 13, 14], [2016, 3, 15, 0, 14], [2016, 3, 15, 23, 59]].each do |time_args|
-        it "handles daylight savings time when parsing `#{time_args[0]}-#{time_args[1]}-#{time_args[2]} #{time_args[3]}:#{time_args[4]}`" do
-          Time.use_zone(other_zone) do
-            time = Time.zone.local(*time_args)
-            expect(subject.parse_time(time.strftime('%Y-%m-%d'), time.strftime('%H%M'))).to eq(time)
+
+        context 'when there is an early shutoff with the same date as the `date` value from the `now_hash`' do
+          let(:early_shutoff) {{
+            'early_shutoff_date' => now.to_date.iso8601,
+            'vrc_shutoff_time' => double('vrc_shutoff_time'),
+            'frc_shutoff_time' => double('frc_shutoff_time')
+          }}
+          before { allow(loan_terms_module).to receive(:early_shutoffs).and_return([early_shutoff]) }
+
+          it 'calls `bucket_is_vrc?` with the bucket' do
+            expect(loan_terms_module).to receive(:bucket_is_vrc?).with(bucket)
+            call_method
+          end
+
+          context 'when `bucket_is_vrc?` returns `true`' do
+            before { allow(loan_terms_module).to receive(:bucket_is_vrc?).and_return(true) }
+
+            it 'calls `parse_time` with the `date` from the `now_hash` and the `vrc_shutoff_time` from the early shutoff hash' do
+              expect(loan_terms_module).to receive(:parse_time).with(now_hash[:date], early_shutoff['vrc_shutoff_time']).and_return(parsed_time)
+              call_method
+            end
+            it 'returns the result of adding the parsed `vrc_shutoff_time` to the `grace_period` from the `now_hash`' do
+              allow(loan_terms_module).to receive(:parse_time).with(now_hash[:date], early_shutoff['vrc_shutoff_time']).and_return(parsed_time)
+              expect(call_method).to eq(parsed_time + now_hash[:grace_period].minutes)
+            end
+          end
+          context 'when `bucket_is_vrc?` returns `false`' do
+            before { allow(loan_terms_module).to receive(:bucket_is_vrc?).and_return(false) }
+
+            it 'calls `parse_time` with the `date` from the `now_hash` and the `frc_shutoff_time` from the early shutoff hash' do
+              expect(loan_terms_module).to receive(:parse_time).with(now_hash[:date], early_shutoff['frc_shutoff_time']).and_return(parsed_time)
+              call_method
+            end
+            it 'returns the result of adding the parsed `frc_shutoff_time` to the `grace_period` from the `now_hash`' do
+              allow(loan_terms_module).to receive(:parse_time).with(now_hash[:date], early_shutoff['frc_shutoff_time']).and_return(parsed_time)
+              expect(call_method).to eq(parsed_time + now_hash[:grace_period].minutes)
+            end
           end
         end
-      end
-      it 'parses the correctly when the `date` param is a Time object' do
-        time = Time.zone.local(2012, 2, 13, 13, 14)
-        time_minute = time.change(sec: 0)
-        time_date = time.change(hour: 0, min: 0, sec: 0)
-        expect(subject.parse_time(time_date, time.strftime('%H%M'))).to eq(time_minute)
-      end
-      it 'treats the first 2 digits of the time as hours and the last two digits as minutes' do
-        time = rand(0..2400).to_s.rjust(4, '0')
-        expect(Time.zone).to receive(:parse).with(include(time[0..1] + ':' + time[2..3]))
-        subject.parse_time(Time.zone.today, time)
+        context 'when there is not an early shutoff with the same date as the `date` value from the `now_hash`' do
+          let(:default_shutoffs) {{
+            'vrc' => double('vrc_shutoff_time'),
+            'frc' => double('frc_shutoff_time')
+          }}
+          before { allow(loan_terms_module).to receive(:default_shutoffs).and_return(default_shutoffs) }
+
+          it 'calls `default_shutoffs` with the app' do
+            expect(loan_terms_module).to receive(:default_shutoffs).with(app).and_return(default_shutoffs)
+            call_method
+          end
+          it 'calls `bucket_is_vrc?` with the bucket' do
+            expect(loan_terms_module).to receive(:bucket_is_vrc?).with(bucket)
+            call_method
+          end
+
+          context 'when `bucket_is_vrc?` returns `true`' do
+            before { allow(loan_terms_module).to receive(:bucket_is_vrc?).and_return(true) }
+
+            it 'calls `parse_time` with the `date` from the `now_hash` and the `vrc` shutoff time from the default shutoff hash' do
+              expect(loan_terms_module).to receive(:parse_time).with(now_hash[:date], default_shutoffs['vrc']).and_return(parsed_time)
+              call_method
+            end
+            it 'returns the result of adding the parsed `vrc` shutoff time to the `grace_period` from the `now_hash`' do
+              allow(loan_terms_module).to receive(:parse_time).with(now_hash[:date], default_shutoffs['vrc']).and_return(parsed_time)
+              expect(call_method).to eq(parsed_time + now_hash[:grace_period].minutes)
+            end
+          end
+          context 'when `bucket_is_vrc?` returns `false`' do
+            before { allow(loan_terms_module).to receive(:bucket_is_vrc?).and_return(false) }
+
+            it 'calls `parse_time` with the `date` from the `now_hash` and the `frc` shutoff time from the default shutoff hash' do
+              expect(loan_terms_module).to receive(:parse_time).with(now_hash[:date], default_shutoffs['frc']).and_return(parsed_time)
+              call_method
+            end
+            it 'returns the result of adding the parsed `frc` shutoff time to the `grace_period` from the `now_hash`' do
+              allow(loan_terms_module).to receive(:parse_time).with(now_hash[:date], default_shutoffs['frc']).and_return(parsed_time)
+              expect(call_method).to eq(parsed_time + now_hash[:grace_period].minutes)
+            end
+          end
+        end
       end
     end
 
     describe '`value_for_term`' do
       let(:now_hash) { double('A Now Hash') }
       let(:bucket) { { 'TERM_BUCKET_LABEL' => double('A Bucket Label') } }
-      let(:call_method) { subject.value_for_term(bucket, now_hash) }
+      let(:call_method) { subject.value_for_term(app, bucket, now_hash) }
       before { allow(subject).to receive(:hash_for_types) }
       it 'returns BLANK_TYPES if the bucket is nil' do
-        expect(subject.value_for_term(nil, now_hash)).to be(described_class::BLANK_TYPES)
+        expect(subject.value_for_term(app, nil, now_hash)).to be(described_class::BLANK_TYPES)
       end
       describe 'with a bucket' do
         let(:before_end_time) { double('before end time') }
         before do
           allow(subject).to receive(:before_end_time?).and_return(before_end_time)
         end
+        it 'calls `before_end_time?` with the app' do
+          expect(subject).to receive(:before_end_time?).with(app, anything, anything)
+          call_method
+        end
         it 'calls `before_end_time?` with the bucket' do
-          expect(subject).to receive(:before_end_time?).with(bucket, anything)
+          expect(subject).to receive(:before_end_time?).with(anything, bucket, anything)
           call_method
         end
         it 'calls `before_end_time?` with the now_hash' do
-          expect(subject).to receive(:before_end_time?).with(anything, now_hash)
+          expect(subject).to receive(:before_end_time?).with(anything, anything, now_hash)
+          call_method
+        end
+        it 'calls `hash_for_types` with the app' do
+          expect(subject).to receive(:hash_for_types).with(app, any_args)
           call_method
         end
         it 'calls `hash_for_types` with the bucket' do
-          expect(subject).to receive(:hash_for_types).with(bucket, any_args)
+          expect(subject).to receive(:hash_for_types).with(anything, bucket, any_args)
           call_method
         end
         it 'calls `hash_for_types` with the bucket label' do
-          expect(subject).to receive(:hash_for_types).with(anything, bucket['TERM_BUCKET_LABEL'], any_args)
+          expect(subject).to receive(:hash_for_types).with(anything, anything, bucket['TERM_BUCKET_LABEL'], any_args)
           call_method
         end
         it 'calls `hash_for_types` with the result of `before_end_time?`' do
-          expect(subject).to receive(:hash_for_types).with(anything, anything, before_end_time, anything)
+          expect(subject).to receive(:hash_for_types).with(anything, anything, anything, before_end_time, anything)
           call_method
         end
         it 'calls `hash_for_types` with the now_hash' do
-          expect(subject).to receive(:hash_for_types).with(anything, anything, anything, now_hash)
+          expect(subject).to receive(:hash_for_types).with(anything, anything, anything, anything, now_hash)
           call_method
         end
       end
     end
 
     describe '`before_end_time?`' do
-      let(:now) { Time.zone.now }
-      let(:now_hash) { { time: now } }
-      let(:bucket) { double('A Bucket Hash') }
-      let(:call_method) { subject.before_end_time?(bucket, now_hash) }
-      it 'calls `appropriate_end_time` with the bucket' do
-        expect(subject).to receive(:appropriate_end_time).with(bucket, anything)
+      let(:bucket) { double('bucket') }
+      let(:call_method) { loan_terms_module.before_end_time?(app, bucket, now_hash) }
+      before { allow(loan_terms_module).to receive(:end_time) }
+
+      it 'calls `end_time` with the `app`' do
+        expect(loan_terms_module).to receive(:end_time).with(app, anything, anything)
         call_method
       end
-      it 'calls `appropriate_end_time` with the now_hash' do
-        expect(subject).to receive(:appropriate_end_time).with(anything, now_hash)
+      it 'calls `end_time` with the `bucket`' do
+        expect(loan_terms_module).to receive(:end_time).with(anything, bucket, anything)
         call_method
       end
-      it 'returns false if the `appropriate_end_time` is nil' do
-        allow(subject).to receive(:appropriate_end_time).and_return(nil)
-        expect(call_method).to be(false)
+      it 'calls `end_time` with the `now_hash`' do
+        expect(loan_terms_module).to receive(:end_time).with(anything, anything, now_hash)
+        call_method
       end
-      it 'returns true if the now_hash time is less than the `appropriate_end_time`' do
-        allow(subject).to receive(:appropriate_end_time).and_return(now + 1.minute)
-        expect(call_method).to be(true)
+
+      context 'when `end_time` returns nil' do
+        before { allow(loan_terms_module).to receive(:end_time).and_return(nil) }
+        it 'returns `false`' do
+          expect(call_method).to be false
+        end
       end
-      it 'returns false if the now_hash time is greater than the `appropriate_end_time`' do
-        allow(subject).to receive(:appropriate_end_time).and_return(now - 1.minute)
-        expect(call_method).to be(false)
+      context 'when `end_time` returns a time that is after the `time` value of the `now_hash`' do
+        let(:end_time) { now + rand(15..99).minutes }
+        before { allow(loan_terms_module).to receive(:end_time).and_return(end_time) }
+        it 'returns `true`' do
+          expect(call_method).to be true
+        end
       end
-      it 'returns false if the now_hash time is equal to the `appropriate_end_time`' do
-        allow(subject).to receive(:appropriate_end_time).and_return(now)
-        expect(call_method).to be(false)
+      context 'when `end_time` returns a time that is before the `time` value of the `now_hash`' do
+        let(:end_time) { now - rand(15..99).minutes }
+        before { allow(loan_terms_module).to receive(:end_time).and_return(end_time) }
+        it 'returns `true`' do
+          expect(call_method).to be false
+        end
       end
     end
 
@@ -457,15 +330,15 @@ describe MAPI::Services::Rates::LoanTerms do
       let(:end_time) { instance_double(DateTime) }
       let(:display_status) { instance_double(String) }
       let(:loan_term) { instance_double(Hash) }
-      let(:call_method) { subject.hash_for_type(bucket, type, bucket_label, trade_status, now) }
+      let(:call_method) { subject.hash_for_type(app, bucket, type, bucket_label, trade_status, now) }
       before do
-        allow(subject).to receive(:appropriate_end_time).and_return(end_time)
+        allow(subject).to receive(:end_time).and_return(end_time)
         allow(subject).to receive(:display_status).and_return(display_status)
         allow(subject).to receive(:loan_term).and_return(loan_term)
       end
 
-      it 'gets the `appropriate_end_time`' do
-        expect(subject).to receive(:appropriate_end_time).with(bucket, now)
+      it 'gets the `end_time`' do
+        expect(subject).to receive(:end_time).with(app, bucket, now)
         call_method
       end
       it 'gets the `display_status`' do
@@ -478,6 +351,33 @@ describe MAPI::Services::Rates::LoanTerms do
       end
       it 'returns the result of `loan_term`' do
         expect(call_method).to eq(loan_term)
+      end
+    end
+
+    describe '`hash_for_types`' do
+      let(:bucket) { double('bucket') }
+      let(:bucket_label) { instance_double(String) }
+      let(:before_end_time) { double('before_end_time') }
+      let(:hash_for_type) { instance_double(Hash) }
+      let(:result) { double('result') }
+      let(:call_method) { subject.hash_for_types(app, bucket, bucket_label, before_end_time, now_hash) }
+
+      before { allow(loan_terms_module).to receive(:hash_for_type) }
+
+      loan_terms_module::LOAN_TYPES.each do |type|
+        it "calls `hash_for_type` with args containing the `#{type}` type" do
+          expect(loan_terms_module).to receive(:hash_for_type).with(app, bucket, type, bucket_label, before_end_time, now_hash)
+          call_method
+        end
+        it "calls `hash_from_pairs` with an array containing the `#{type}` and the corresponding hash for that type" do
+          allow(loan_terms_module).to receive(:hash_for_type).with(app, bucket, type, bucket_label, before_end_time, now_hash).and_return(hash_for_type)
+          expect(loan_terms_module).to receive(:hash_from_pairs).with(include([type, hash_for_type]))
+          call_method
+        end
+        it 'returns the result of calling `hash_from_pairs`' do
+          allow(loan_terms_module).to receive(:hash_from_pairs).and_return(result)
+          expect(call_method).to eq(result)
+        end
       end
     end
 
@@ -522,6 +422,7 @@ describe MAPI::Services::Rates::LoanTerms do
         expect(subject.loan_term(before_end_time, display_status, bucket_label, nil)[:end_time]).to be nil
       end
     end
+
     describe '`disable_term_sql` method' do
       let(:term_id) { double('A Term ID') }
       let(:quoted_term_id) { SecureRandom.hex }
@@ -548,6 +449,7 @@ describe MAPI::Services::Rates::LoanTerms do
         expect(call_method).to match(/WHERE\s+AO_TERM_BUCKET_ID\s+=\s+#{quoted_term_id}\s*$/)
       end
     end
+
     describe '`disable_term` method' do
       let(:term) { double('A Term') }
       let(:term_id) { double('A Term ID') }
@@ -602,6 +504,71 @@ describe MAPI::Services::Rates::LoanTerms do
         it 'returns true' do
           expect(call_method).to be(true)
         end
+      end
+    end
+
+    describe '`display_status`' do
+      MAPI::Services::EtransactAdvances::TYPE_BUCKET_COLUMN_NO_MAPPING.each do |type, key_mapping|
+        context "when `#{type}` is passed for the `type` argument" do
+          context "when the `#{MAPI::Services::EtransactAdvances::TYPE_BUCKET_COLUMN_NO_MAPPING[type]}` value for the bucket equals `Y`" do
+            let(:bucket) { {MAPI::Services::EtransactAdvances::TYPE_BUCKET_COLUMN_NO_MAPPING[type] => 'Y'} }
+            let(:call_method) { loan_terms_module.display_status(bucket, type) }
+            it 'returns `true`' do
+              expect(call_method).to be true
+            end
+          end
+
+          context "when the `#{MAPI::Services::EtransactAdvances::TYPE_BUCKET_COLUMN_NO_MAPPING[type]}` value for the bucket does not equal `Y`" do
+            let(:bucket) { {MAPI::Services::EtransactAdvances::TYPE_BUCKET_COLUMN_NO_MAPPING[type] => 'N'} }
+            let(:call_method) { loan_terms_module.display_status(bucket, type) }
+            it 'returns `false`' do
+              expect(call_method).to be false
+            end
+          end
+        end
+      end
+      context 'when the `type` argument is not a recognized key in the bucket' do
+        let(:call_method) { loan_terms_module.display_status({}, :foo) }
+        it 'returns `false`' do
+          expect(call_method).to be false
+        end
+      end
+    end
+
+    describe '`early_shutoffs`' do
+      let(:results) { double('results') }
+      let(:call_method) { loan_terms_module.early_shutoffs(app) }
+
+      it 'calls `MAPI::Services::EtransactAdvances::ShutoffTimes.get_early_shutoffs` with the app' do
+        expect(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:get_early_shutoffs).with(app)
+        call_method
+      end
+      it 'returns the results of calling `MAPI::Services::EtransactAdvances::ShutoffTimes.get_early_shutoffs`' do
+        allow(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:get_early_shutoffs).and_return(results)
+        expect(call_method).to eq(results)
+      end
+    end
+
+    describe '`default_shutoffs`' do
+      let(:results) { double('results') }
+      let(:call_method) { loan_terms_module.default_shutoffs(app) }
+
+      it 'calls `MAPI::Services::EtransactAdvances::ShutoffTimes.get_shutoff_times_by_type` with the app' do
+        expect(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:get_shutoff_times_by_type).with(app)
+        call_method
+      end
+      it 'returns the results of calling `MAPI::Services::EtransactAdvances::ShutoffTimes.get_shutoff_times_by_type`' do
+        allow(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:get_shutoff_times_by_type).and_return(results)
+        expect(call_method).to eq(results)
+      end
+    end
+
+    describe '`bucket_is_vrc?`' do
+      it "returns `true` if the `AO_TERM_BUCKET_ID` for the bucket is equal to `#{loan_terms_module::VRC_CREDIT_TYPE_BUCKET_ID}`" do
+        expect(loan_terms_module.bucket_is_vrc?({'AO_TERM_BUCKET_ID' => loan_terms_module::VRC_CREDIT_TYPE_BUCKET_ID})).to be true
+      end
+      it "returns `false` if the `AO_TERM_BUCKET_ID` for the bucket is not equal to `#{loan_terms_module::VRC_CREDIT_TYPE_BUCKET_ID}`" do
+        expect(loan_terms_module.bucket_is_vrc?({'AO_TERM_BUCKET_ID' => :foo})).to be false
       end
     end
   end

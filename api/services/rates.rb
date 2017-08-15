@@ -813,7 +813,7 @@ module MAPI
           maturity_date = params[:maturity_date].try(:to_date)
           halt 503, 'Internal Service Error' unless holidays       = MAPI::Services::Rates::Holidays.holidays(self)
           halt 503, 'Internal Service Error' unless blackout_dates = MAPI::Services::Rates::BlackoutDates.blackout_dates(logger,settings.environment)
-          halt 503, 'Internal Service Error' unless loan_terms     = MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment)
+          halt 503, 'Internal Service Error' unless loan_terms     = MAPI::Services::Rates::LoanTerms.loan_terms(self)
           halt 503, 'Internal Service Error' unless rate_bands     = MAPI::Services::Rates::RateBands.rate_bands(logger,settings.environment)
           if maturity_date
             days_to_maturity = MAPI::Services::Rates.days_to_maturity(maturity_date, funding_date)

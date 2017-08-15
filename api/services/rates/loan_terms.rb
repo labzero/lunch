@@ -5,9 +5,6 @@ module MAPI
         include MAPI::Shared::Utils
         include MAPI::Shared::Constants
 
-        DATE_FORMAT = '%Y-%m-%d'.freeze
-        DATETIME_FORMAT = "#{DATE_FORMAT}%H%M%Z".freeze
-
         SQL = <<-EOS
             SELECT AO_TERM_BUCKET_ID, TERM_BUCKET_LABEL,
             WHOLE_LOAN_ENABLED, SBC_AGENCY_ENABLED, SBC_AAA_ENABLED, SBC_AA_ENABLED,
@@ -15,13 +12,8 @@ module MAPI
             FROM WEB_ADM.AO_TERM_BUCKETS
         EOS
 
-        def self.appropriate_end_time(bucket, now)
-          override_time = override_end_time(bucket, now)
-          now[:date] == override_time.try(:to_date) ? override_time : end_time(bucket, now)
-        end
-
-        def self.before_end_time?(bucket, now)
-          end_time = appropriate_end_time(bucket, now)
+        def self.before_end_time?(app, bucket, now)
+          end_time = end_time(app, bucket, now)
           end_time ? (now[:time] < end_time) : false
         end
 
@@ -29,17 +21,17 @@ module MAPI
           { trade_status: display_status && before_end_time, display_status: display_status, bucket_label: bucket_label, end_time: end_time.try(:iso8601), end_time_reached: !before_end_time }.with_indifferent_access
         end
 
-        def self.hash_for_type(bucket, type, bucket_label, before_end_time, now)
-          end_time = appropriate_end_time(bucket, now)
+        def self.hash_for_type(app, bucket, type, bucket_label, before_end_time, now)
+          end_time = end_time(app, bucket, now)
           loan_term(before_end_time, display_status(bucket, type), bucket_label, end_time)
         end
 
-        def self.hash_for_types(bucket, label, before_end_time, now)
-          hash_from_pairs( LOAN_TYPES.map { |type| [type, hash_for_type(bucket, type, label, before_end_time, now)] } )
+        def self.hash_for_types(app, bucket, label, before_end_time, now)
+          hash_from_pairs( LOAN_TYPES.map { |type| [type, hash_for_type(app, bucket, type, label, before_end_time, now)] } )
         end
 
-        def self.value_for_term(bucket, now)
-          bucket.nil? ? BLANK_TYPES : hash_for_types(bucket, bucket['TERM_BUCKET_LABEL'], before_end_time?(bucket, now), now)
+        def self.value_for_term(app, bucket, now)
+          bucket.nil? ? BLANK_TYPES : hash_for_types(app, bucket, bucket['TERM_BUCKET_LABEL'], before_end_time?(app, bucket, now), now)
         end
 
         def self.display_status(bucket, type)
@@ -69,50 +61,52 @@ module MAPI
         BLANK=loan_term(false,  false, 'NotFound', nil)
         BLANK_TYPES=hash_from_pairs( LOAN_TYPES.map{ |type| [type, BLANK] } )
 
-        def self.loan_terms(logger, environment, allow_grace_period=false)
-          settings = MAPI::Services::EtransactAdvances::Settings.settings(environment)
-          now = Time.zone.now
-          grace_period = allow_grace_period ? settings['end_of_day_extension'] : 0
-          now_hash = { time: now, date: now.to_date, grace_period: grace_period.to_i }
-          data = term_bucket_data(logger, environment)
+        def self.loan_terms(app, allow_grace_period=false)
+          data = if should_fake?(app)
+            fake('etransact_advances_term_buckets_info')
+          else
+            fetch_hashes(app.logger, SQL, {to_date: ['OVERRIDE_END_DATE']})
+          end
           return nil if data.nil?
           buckets = data.index_by{ |bucket| bucket['AO_TERM_BUCKET_ID'] }
-          hash_from_pairs( LOAN_TERMS.map { |term| [term, value_for_term(buckets[term_to_id(term)], now_hash)]} )
-        end
-
-        def self.term_bucket_data(logger, environment)
-          environment == :production ? term_bucket_data_production(logger) : term_bucket_data_development
-        end
-
-        def self.term_bucket_data_production(logger)
-          fetch_hashes(logger, SQL, {to_date: ['OVERRIDE_END_DATE']})
-        end
-
-        def self.term_bucket_data_development
-          rows = fake('etransact_advances_term_buckets_info')
-          rows.each{ |row| row['OVERRIDE_END_DATE'] = row['OVERRIDE_END_DATE'].to_date }
-          rows[rows.index{ |row| /2 years/i === row['TERM_BUCKET_LABEL'] }]['OVERRIDE_END_DATE'] = Time.zone.today
-          rows
-        end
-
-        def self.parse_time(date, time)
-          if date.respond_to?(:strftime)
-            date = date.strftime(DATE_FORMAT)
+          grace_period = if allow_grace_period
+            MAPI::Services::EtransactAdvances::Settings.settings(app.settings.environment)['end_of_day_extension']
+          else
+            0
           end
-          time = time.to_s
-          Time.zone.parse(date.to_s + ' ' + time[0..1] + ':' + time[2..3])
+          now = Time.zone.now
+          now_hash = { time: now, date: now.to_date, grace_period: grace_period.to_i }
+          hash_from_pairs( LOAN_TERMS.map { |term| [term, value_for_term(app, buckets[term_to_id(term)], now_hash)]} )
         end
 
-        def self.override_end_time(bucket, now)
-          if bucket['OVERRIDE_END_DATE'].present? && bucket['OVERRIDE_END_TIME'].present?
-            parse_time(bucket['OVERRIDE_END_DATE'], bucket['OVERRIDE_END_TIME']) + now[:grace_period].minutes
+        def self.end_time(app, bucket, now)
+          if now[:date].present?
+            if early_shutoff = early_shutoffs(app).select{ |shutoff| now[:date].to_date.iso8601 == shutoff['early_shutoff_date'] }.first
+              if bucket_is_vrc?(bucket)
+                parse_time(now[:date], early_shutoff['vrc_shutoff_time']) + now[:grace_period].minutes
+              else
+                parse_time(now[:date], early_shutoff['frc_shutoff_time']) + now[:grace_period].minutes
+              end
+            else
+              if bucket_is_vrc?(bucket)
+                parse_time(now[:date], default_shutoffs(app)['vrc']) + now[:grace_period].minutes
+              else
+                parse_time(now[:date], default_shutoffs(app)['frc']) + now[:grace_period].minutes
+              end
+            end
           end
         end
 
-        def self.end_time(bucket, now)
-          if now[:date].present? && bucket['END_TIME'].present?
-            parse_time(now[:date], bucket['END_TIME']) + now[:grace_period].minutes
-          end
+        def self.early_shutoffs(app)
+          MAPI::Services::EtransactAdvances::ShutoffTimes.get_early_shutoffs(app)
+        end
+
+        def self.default_shutoffs(app)
+          MAPI::Services::EtransactAdvances::ShutoffTimes.get_shutoff_times_by_type(app)
+        end
+
+        def self.bucket_is_vrc?(bucket)
+          bucket['AO_TERM_BUCKET_ID'] == VRC_CREDIT_TYPE_BUCKET_ID
         end
       end
     end

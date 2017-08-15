@@ -341,7 +341,7 @@ module MAPI
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_capital_stock(fhlbsfresponse, response, response_hash) if check_capstock unless funding_date
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_credit(fhlbsfresponse, response, response_hash)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_collateral(fhlbsfresponse, response, response_hash) unless funding_date
-                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_enabled_product(app.logger, app.settings.environment, advance_type, advance_term, response_hash, allow_grace_period)
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_enabled_product(app, advance_type, advance_term, response_hash, allow_grace_period)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_max_term_limit(app, member_id, response_hash)
 
                 # passed all checks
@@ -497,9 +497,9 @@ module MAPI
           hash.merge(new_hash){|key, old, new| old + new }
         end
 
-        def self.check_enabled_product(logger, environment, type, term, response_hash, allow_grace_period=false)
+        def self.check_enabled_product(app, type, term, response_hash, allow_grace_period=false)
           new_hash = {'status' => []}
-          loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(logger, environment, allow_grace_period)
+          loan_terms = MAPI::Services::Rates::LoanTerms.loan_terms(app, allow_grace_period)
           raise 'MAPI::Services::Rates::LoanTerms.loan_terms returned nil' unless loan_terms
           product = (if term =~ CUSTOM_TERM
                       (loan_terms.find {|t, types| !['open', 'overnight'].include?(t) && !types[type][:trade_status] }).try(:last).try(:[], type)

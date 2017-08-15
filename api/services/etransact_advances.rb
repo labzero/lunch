@@ -422,14 +422,6 @@ module MAPI
             AND trunc(to_date(SETTING_VALUE, 'MM/dd/yyyy')) = trunc(sysdate)
           SQL
 
-          etransact_advances_eod_on_string = <<-SQL
-            SELECT count(*)
-            FROM WEB_ADM.AO_TERM_BUCKETS
-            WHERE (END_TIME || '00' > to_char(sysdate, 'HH24MISS')) OR
-            ((trunc(OVERRIDE_END_DATE) = trunc(sysdate))
-            AND (OVERRIDE_END_TIME || '00' > TO_CHAR(SYSDATE, 'HH24MISS')))
-          SQL
-
           etransact_advances_WLVRC_on_string = <<-SQL
             SELECT count(*) AS WL_VRC_status
             FROM WEB_ADM.AO_TERM_BUCKETS
@@ -438,18 +430,10 @@ module MAPI
 
           etransact_status = false  #indicate if etransact is turn on and at least one product has not reach End Time
           wl_vrc_status = false   #indicate if WL VRC is enabled regardless of if etransact is turn on
-          etransact_eod = false # indicates that we have reached EOD on the global eTransact flag
           etransact_disabled = false # indiciates that eTransact has been globally disabled
           etransact_no_rows_found = true
 
           if settings.environment == :production
-            etransact_eod_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_eod_on_string)
-            row = etransact_eod_status_on_cursor.fetch()
-            if row
-              etransact_no_rows_found = false 
-              etransact_eod = true if row[0].to_i == STATUS_ON_RECORD_NOTFOUND_COUNT
-            end
-
             etransact_status_on_cursor = ActiveRecord::Base.connection.execute(etransact_advances_turn_on_string)
             row = etransact_status_on_cursor.fetch()
             if row
@@ -465,19 +449,18 @@ module MAPI
           else
             results = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'etransact_advances_status.json'))).with_indifferent_access
             wl_vrc_status = results[:wl_vrc_status]
-            etransact_eod = results[:eod_reached]
             etransact_disabled = results[:disabled]
             etransact_no_rows_found = false
           end
 
-          etransact_status = !(etransact_no_rows_found || etransact_eod || etransact_disabled)
+          etransact_status = !(etransact_no_rows_found || MAPI::Services::EtransactAdvances.end_of_day_reached_for_all_terms(self) || etransact_disabled)
 
           {
             eod_reached: false,
             enabled: !etransact_disabled,
             etransact_advances_status: etransact_status,
             wl_vrc_status: wl_vrc_status,
-            all_loan_status: MAPI::Services::Rates::LoanTerms.loan_terms(logger,settings.environment)
+            all_loan_status: MAPI::Services::Rates::LoanTerms.loan_terms(self)
           }.to_json
         end
 
@@ -595,6 +578,16 @@ module MAPI
         }
       end
 
+      def self.end_of_day_reached_for_all_terms(app)
+        now = Time.zone.now
+        early_shutoffs = MAPI::Services::EtransactAdvances::ShutoffTimes.get_early_shutoffs(app)
+        if early_shutoff = early_shutoffs.select{ |shutoff| now.to_date.iso8601 == shutoff['early_shutoff_date'] }.first
+          parse_time(now, early_shutoff['vrc_shutoff_time']) < now && parse_time(now, early_shutoff['frc_shutoff_time']) < now
+        else
+          default_shutoffs = MAPI::Services::EtransactAdvances::ShutoffTimes.get_shutoff_times_by_type(app)
+          parse_time(now, default_shutoffs['vrc']) < now && parse_time(now, default_shutoffs['frc']) < now
+        end
+      end
     end
   end
 end

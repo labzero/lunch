@@ -111,6 +111,8 @@ module MAPI
         :'3year'=> 13,
       }.with_indifferent_access
 
+      VRC_CREDIT_TYPE_BUCKET_ID = 1
+
       def self.invert_term_mapping( mapping )
         mapping.each_with_object({}) do |(term, v), h|
           (h["#{v[:frequency]}#{v[:frequency_unit]}"] ||= []) << term

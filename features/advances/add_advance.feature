@@ -60,15 +60,6 @@ Scenario: Certain rates should be missing due to rate bands
   Then I should see a blacked out value for the "2year" term with a type of "aa" on the add advance page
   And I should see a blacked out value for the "3year" term with a type of "aa" on the add advance page
 
-Scenario: 2 year rates should be missing due to override_end_date/override_end_time
-  Given I am on the "Add Advance" advances page
-  When I enter an amount into the add advance amount field
-  And I click to toggle to the frc rates
-  Then I should see a blacked out value for the "2year" term with a type of "whole" on the add advance page
-  And I should see a blacked out value for the "2year" term with a type of "aa" on the add advance page
-  And I should see a blacked out value for the "2year" term with a type of "aaa" on the add advance page
-  And I should see a blacked out value for the "2year" term with a type of "agency" on the add advance page
-
 Scenario: Preview rate from the Add Advance rate table
   Given I am on the "Add Advance" advances page
   And I enter an amount into the add advance amount field

@@ -35,6 +35,8 @@ describe MAPI::ServiceApp do
 
   describe "etransact advances status" do
     let(:etransact_advances_status) { get '/etransact_advances/status'; JSON.parse(last_response.body) }
+
+    before { allow(MAPI::Services::EtransactAdvances).to receive(:end_of_day_reached_for_all_terms).and_return(false) }
     it "should return 2 etransact advances status" do
       expect(etransact_advances_status.length).to be >=1
       expect(etransact_advances_status['etransact_advances_status']).to be_boolean
@@ -56,17 +58,15 @@ describe MAPI::ServiceApp do
        end
     end
     describe 'in the production environment for cases when etransact is turned off' do
-      # let!(:some_status_data) {[1, 'Open and O/N', 'N', 'Y', 'Y', 'Y', '2000', '01-JAN-2006 12:00 AM', '0700']}
       let!(:some_status_data) {{"AO_TERM_BUCKET_ID" => 1, "TERM_BUCKET_LABEL"=> "Open and O/N", "WHOLE_LOAN_ENABLED"=>  "N", "SBC_AGENCY_ENABLED"=> "Y", "SBC_AAA_ENABLED" =>  "Y",
                                  "SBC_AA_ENABLED"=>  "Y", "END_TIME" => "2000",  "OVERRIDE_END_DATE" =>  "2006-01-01", "OVERRIDE_END_TIME"=>  "0700"}}
-      let(:result_set) {double('Oracle Result Set', fetch: nil)}
       let(:result_set2) {double('Oracle Result Set', fetch: nil)}
       let(:result_set3) {double('Oracle Result Set', fetch: nil)}
       let(:result_set4) {double('Oracle Result Set', fetch_hash: nil)}
       before do
         allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
         allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
-        allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set,result_set2,result_set3,result_set4)
+        allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set2,result_set3,result_set4)
       end
       it 'should still return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
         expect(etransact_advances_status.length).to be >=1
@@ -95,7 +95,7 @@ describe MAPI::ServiceApp do
          end
       end
     end
-    describe 'in the production enviroment for cases when etransact is turned on' do
+    describe 'in the production environment for cases when etransact is turned on' do
       let(:now_time_string)       { double( 'now time as HHMM')}
       let(:now)                   { double( 'Time.zone.now' ) }
       let(:now_date)              { double( 'now date') }
@@ -139,58 +139,42 @@ describe MAPI::ServiceApp do
             "OVERRIDE_END_TIME"  => "2359"
         }
       end
-      let(:result_set) {double('Oracle Result Set', fetch: nil)}
       let(:result_set2) {double('Oracle Result Set', fetch: nil)}
       let(:result_set3) {double('Oracle Result Set', fetch: nil)}
       let(:result_set4) {double('Oracle Result Set', fetch_hash: nil)}
       before do
+        allow(MAPI::Services::EtransactAdvances).to receive(:end_of_day_reached_for_all_terms)
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms)
         allow(MAPI::ServiceApp).to receive(:environment).at_least(1).times.and_return(:production)
         allow(ActiveRecord::Base).to receive(:connection).and_return(double('OCI8 Connection'))
-        allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set, result_set2, result_set3, result_set4)
-        allow(result_set).to receive(:fetch).and_return([1], nil)
+        allow(ActiveRecord::Base.connection).to receive(:execute).with(kind_of(String)).and_return(result_set2, result_set3, result_set4)
         allow(result_set2).to receive(:fetch).and_return([1], nil)
         allow(result_set3).to receive(:fetch).and_return([1], nil)
         allow(result_set4).to receive(:fetch_hash).and_return(hash1, hash2, hash3, nil)
-        allow(now).to receive(:to_date).and_return(now_date)
-        allow(now).to receive(:strftime).with("%H%M").and_return(now_time_string)
-        allow(Time.zone).to receive(:now).and_return(now)
-        allow(now_time_string).to receive(:<).with('0001').and_return(false)
-        allow(now_time_string).to receive(:<).with('1200').and_return(true)
-        allow(now_time_string).to receive(:<).with('2000').and_return(true)
-        allow(now_time_string).to receive(:<).with('2359').and_return(true)      end
+      end
 
       it 'should return the expected status type and label for ALL LOAN_TERMS, LOAN_TYPES' do
         expect(etransact_advances_status.length).to be >=1
       end
 
-      it 'should return etransact turn off as all products reach end time even though etransact is turned on' do
-        allow(result_set).to receive(:fetch).and_return([0], nil)
-        expect(etransact_advances_status['etransact_advances_status']).to be false
-        expect(etransact_advances_status['wl_vrc_status']).to be true
-      end
+      describe 'checking to see if end of day has been reached for vrc and frc advances' do
+        it 'calls `end_of_day_reached_for_all_terms` with the app as an argument' do
+          expect(MAPI::Services::EtransactAdvances).to receive(:end_of_day_reached_for_all_terms).with(an_instance_of(MAPI::ServiceApp))
+          etransact_advances_status
+        end
 
-      it 'should return etransact turn on when EOD has been enabled and EOD hasnt been reached' do
-        allow(result_set).to receive(:fetch).and_return([13], nil)
-        allow(result_set2).to receive(:fetch).and_return([1], nil)
-        expect(etransact_advances_status['etransact_advances_status']).to be true
-      end
+        context 'when etransact is turned on' do
+          before { allow(result_set2).to receive(:fetch).and_return([1], nil) }
 
-      it 'should return etransact status = false if etransact is turn on but no product is available' do
-        expect(result_set).to receive(:fetch).and_return([1], nil).at_least(1).times
-        expect(result_set2).to receive(:fetch).and_return([0], nil).at_least(1).times
-        expect(result_set3).to receive(:fetch).and_return([1], nil).at_least(1).times
-        expect(result_set4).to receive(:fetch_hash).and_return(
-                                   {"AO_TERM_BUCKET_ID" => 3,
-                                    "TERM_BUCKET_LABEL" => "2 Week",
-                                    "WHOLE_LOAN_ENABLED"=> "Y",
-                                    "SBC_AGENCY_ENABLED"=> "Y",
-                                    "SBC_AAA_ENABLED"   => "Y",
-                                    "SBC_AA_ENABLED"    => "Y",
-                                    "END_TIME"          => "1200",
-                                    "OVERRIDE_END_DATE" => long_ago_date,
-                                    "OVERRIDE_END_TIME" => "0700"}, nil).at_least(1).times
-        expect(etransact_advances_status['etransact_advances_status']).to be false
-        expect(etransact_advances_status['wl_vrc_status']).to be true
+          it 'sets `etransact_advances_status` to `true` if `end_of_day_reached_for_all_terms` returns `false`' do
+            allow(MAPI::Services::EtransactAdvances).to receive(:end_of_day_reached_for_all_terms).and_return(false)
+            expect(etransact_advances_status['etransact_advances_status']).to be true
+          end
+          it 'sets `etransact_advances_status` to `false` if `end_of_day_reached_for_all_terms` returns `true`' do
+            allow(MAPI::Services::EtransactAdvances).to receive(:end_of_day_reached_for_all_terms).and_return(true)
+            expect(etransact_advances_status['etransact_advances_status']).to be false
+          end
+        end
       end
     end
   end
@@ -393,6 +377,102 @@ describe MAPI::ServiceApp do
       allow(MAPI::Services::EtransactAdvances::ShutoffTimes).to receive(:remove_early_shutoff).and_return(true)
       call_endpoint
       expect(last_response.body).to eq({}.to_json)
+    end
+  end
+
+  describe '`end_of_day_reached_for_all_terms`' do
+    let(:now) { Time.zone.now }
+    let(:app) { instance_double(described_class) }
+    let(:shutoff_times_module) { MAPI::Services::EtransactAdvances::ShutoffTimes }
+    let(:etransact_module) { MAPI::Services::EtransactAdvances }
+    let(:call_method) { etransact_module.end_of_day_reached_for_all_terms(app) }
+    before do
+      allow(shutoff_times_module).to receive(:get_early_shutoffs).and_return([])
+      allow(shutoff_times_module).to receive(:get_shutoff_times_by_type).and_return({})
+      allow(Time.zone).to receive(:now).and_return(now)
+      allow(etransact_module).to receive(:parse_time).and_return(now - rand(15..99).minutes)
+    end
+
+    it 'retrieves the scheduled early shutoffs' do
+      expect(shutoff_times_module).to receive(:get_early_shutoffs).with(app)
+      call_method
+    end
+    context 'when there is an early shutoff scheduled for today' do
+      let(:early_shutoff) {{
+        'early_shutoff_date' => now.to_date.iso8601,
+        'vrc_shutoff_time' => double('vrc_shutoff_time'),
+        'frc_shutoff_time' => double('frc_shutoff_time')
+      }}
+      before { allow(shutoff_times_module).to receive(:get_early_shutoffs).and_return([early_shutoff]) }
+
+      it 'does not call `get_shutoff_times_by_type` on the early shutoff times module' do
+        expect(shutoff_times_module).not_to receive(:get_shutoff_times_by_type)
+        call_method
+      end
+      it 'calls `parse_time` with now and the `vrc_shutoff_time` from the early shutoff' do
+        expect(etransact_module).to receive(:parse_time).with(now, early_shutoff['vrc_shutoff_time']).and_return(now)
+        call_method
+      end
+      it 'calls `parse_time` with now and the `frc_shutoff_time` from the early shutoff' do
+        expect(etransact_module).to receive(:parse_time).with(now, early_shutoff['frc_shutoff_time']).and_return(now)
+        call_method
+      end
+      context 'when the current time is not past the parsed `vrc_shutoff_time`' do
+        before { allow(etransact_module).to receive(:parse_time).with(now, early_shutoff['vrc_shutoff_time']).and_return(now + rand(15..99).minutes) }
+        it 'returns `false`' do
+          expect(call_method).to be false
+        end
+      end
+      context 'when the current time is past the parsed `vrc_shutoff_time`' do
+        before { allow(etransact_module).to receive(:parse_time).with(now, early_shutoff['vrc_shutoff_time']).and_return(now - rand(15..99).minutes) }
+
+        it 'returns `true` if the current time is also past the parsed `frc_shutoff_time`' do
+          allow(etransact_module).to receive(:parse_time).with(now, early_shutoff['frc_shutoff_time']).and_return(now - rand(15..99).minutes)
+          expect(call_method).to be true
+        end
+        it 'returns `false` if the current time is not past the parsed `frc_shutoff_time`' do
+          allow(etransact_module).to receive(:parse_time).with(now, early_shutoff['frc_shutoff_time']).and_return(now + rand(15..99).minutes)
+          expect(call_method).to be false
+        end
+      end
+    end
+    context 'when there is not an early shutoff scheduled for today' do
+      let(:default_shutoffs) {{
+        'vrc' => double('vrc'),
+        'frc' => double('frc')
+      }}
+      before { allow(shutoff_times_module).to receive(:get_shutoff_times_by_type).with(app).and_return(default_shutoffs) }
+
+      it 'fetches the default early shutoff times by type' do
+        expect(shutoff_times_module).to receive(:get_shutoff_times_by_type).with(app).and_return({})
+        call_method
+      end
+      it 'calls `parse_time` with now and the `vrc` value from the shutoff hash' do
+        expect(etransact_module).to receive(:parse_time).with(now, default_shutoffs['vrc']).and_return(now)
+        call_method
+      end
+      it 'calls `parse_time` with now and the `frc` value from the shutoff hash' do
+        expect(etransact_module).to receive(:parse_time).with(now, default_shutoffs['frc']).and_return(now)
+        call_method
+      end
+      context 'when the current time is not past the parsed `vrc` default time' do
+        before { allow(etransact_module).to receive(:parse_time).with(now, default_shutoffs['vrc']).and_return(now + rand(15..99).minutes) }
+        it 'returns `false`' do
+          expect(call_method).to be false
+        end
+      end
+      context 'when the current time is past the parsed `vrc` default time' do
+        before { allow(etransact_module).to receive(:parse_time).with(now, default_shutoffs['vrc']).and_return(now - rand(15..99).minutes) }
+
+        it 'returns `true` if the current time is also past the parsed `frc` default time' do
+          allow(etransact_module).to receive(:parse_time).with(now, default_shutoffs['frc']).and_return(now - rand(15..99).minutes)
+          expect(call_method).to be true
+        end
+        it 'returns `false` if the current time is not past the parsed `frc` default time' do
+          allow(etransact_module).to receive(:parse_time).with(now, default_shutoffs['frc']).and_return(now + rand(15..99).minutes)
+          expect(call_method).to be false
+        end
+      end
     end
   end
 end
