@@ -397,89 +397,29 @@ describe MAPI::ServiceApp do
   end
 
   describe 'in the production environment' do
+    let(:savon_error) { Savon::Error }
+    let(:execute_trade_module) { MAPI::Services::EtransactAdvances::ExecuteTrade }
     let(:execute_trade) { post "/etransact_advances/execute_advance/#{member_id}", post_body; JSON.parse(last_response.body) }
     before do
       allow(MAPI::ServiceApp).to receive(:environment).and_return(:production)
+      allow(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates)
+      allow(MAPI::Services::EtransactAdvances).to receive(:cof_data_cleanup).and_return({})
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit) {|env, amount, hash| hash }
       allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_enabled_product) {|logger, env, type, term, hash, allow_grace_period| hash }
       allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_max_term_limit) {|app, member_id, hash| hash }
     end
-
-    describe 'agency for 1 week' do
-      let(:advance_type)  {'agency'}
-      let(:advance_term)  {'1week'}
-      it 'should return result of execute trade', vcr: {cassette_name: 'execute_trade_service_agency_1week'} do
-        expect(execute_trade['status']).to be_kind_of(Array)
-        expect(execute_trade['confirmation_number']).to be_kind_of(String)
-        expect(execute_trade['advance_rate']).to be_kind_of(Numeric)
-        expect(execute_trade['advance_amount']).to be_kind_of(Numeric)
-        expect(execute_trade['advance_term']).to be_kind_of(String)
-        expect(execute_trade['advance_type']).to be_kind_of(String)
-        expect(execute_trade['interest_day_count']).to be_kind_of(String)
-        expect(execute_trade['payment_on']).to be_kind_of(String)
-        expect(execute_trade['trade_date']).to be_kind_of(String)
-        expect(execute_trade['funding_date']).to be_kind_of(String)
-        expect(execute_trade['maturity_date']).to be_kind_of(String)
-      end
+    it 'calls `MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade` with the app' do
+      expect(execute_trade_module).to receive(:execute_trade).with(an_instance_of(described_class), any_args).and_return([])
+      execute_trade
     end
-    describe 'agency for 1 year' do
-      let(:advance_type)  {'agency'}
-      let(:advance_term)  {'1year'}
-      it 'should return result of execute trade', vcr: {cassette_name: 'execute_trade_service_agency_1year'} do
-        expect(execute_trade['status']).to be_kind_of(Array)
-        expect(execute_trade['confirmation_number']).to be_kind_of(String)
-        expect(execute_trade['advance_rate']).to be_kind_of(Numeric)
-        expect(execute_trade['advance_amount']).to be_kind_of(Numeric)
-        expect(execute_trade['advance_term']).to be_kind_of(String)
-        expect(execute_trade['advance_type']).to be_kind_of(String)
-        expect(execute_trade['interest_day_count']).to be_kind_of(String)
-        expect(execute_trade['payment_on']).to be_kind_of(String)
-        expect(execute_trade['trade_date']).to be_kind_of(String)
-        expect(execute_trade['funding_date']).to be_kind_of(String)
-        expect(execute_trade['maturity_date']).to be_kind_of(String)
-      end
-    end
-    describe 'whole overnight' do
-      let(:advance_type)  {'whole'}
-      let(:advance_term)  {'overnight'}
-      it 'should return result of execute trade', vcr: {cassette_name: 'execute_trade_service_whole_overnight'} do
-        expect(execute_trade['status']).to be_kind_of(Array)
-        expect(execute_trade['confirmation_number']).to be_kind_of(String)
-        expect(execute_trade['advance_rate']).to be_kind_of(Numeric)
-        expect(execute_trade['advance_amount']).to be_kind_of(Numeric)
-        expect(execute_trade['advance_term']).to be_kind_of(String)
-        expect(execute_trade['advance_type']).to be_kind_of(String)
-        expect(execute_trade['interest_day_count']).to be_kind_of(String)
-        expect(execute_trade['payment_on']).to be_kind_of(String)
-        expect(execute_trade['trade_date']).to be_kind_of(String)
-        expect(execute_trade['funding_date']).to be_kind_of(String)
-        expect(execute_trade['maturity_date']).to be_kind_of(String)
-      end
-    end
-    describe 'capital stock exception' do
-      let(:advance_type)  {'agency'}
-      let(:advance_term)  {'1year'}
-      let(:amount)  {'1000000'}
-      let(:execute_trade) { get "/etransact_advances/validate_advance/#{member_id}/#{amount}/#{advance_type}/#{advance_term}/#{rate}/#{check_capstock}/#{signer}/#{maturity_date.iso8601}"; JSON.parse(last_response.body) }
-      it 'should return result of execute trade', vcr: {cassette_name: 'execute_trade_service_capital_stock_purchase'} do
-        expect(execute_trade['status']).to be_kind_of(Array)
-        expect(execute_trade['authorized_amount']).to be_kind_of(Numeric)
-        expect(execute_trade['exception_message']).to be_kind_of(String)
-        expect(execute_trade['cumulative_stock_required']).to be_kind_of(Numeric)
-        expect(execute_trade['current_trade_stock_required']).to be_kind_of(Numeric)
-        expect(execute_trade['pre_trade_stock_required']).to be_kind_of(Numeric)
-        expect(execute_trade['gross_amount']).to be_kind_of(Numeric)
-        expect(execute_trade['gross_cumulative_stock_required']).to be_kind_of(Numeric)
-        expect(execute_trade['gross_current_trade_stock_required']).to be_kind_of(Numeric)
-        expect(execute_trade['gross_pre_trade_stock_required']).to be_kind_of(Numeric)
-      end
-    end
-    it 'should return Internal Service Error, if execute trade service is unavailable', vcr: {cassette_name: 'execute_trade_service_unavailable'} do
+    it 'halts Savon::Errors raised by `MAPI::Services::EtransactAdvances.cof_data_cleanup` with a 503' do
+      allow(MAPI::Services::Rates::MarketDataRates).to receive(:get_market_cof_rates).and_raise(savon_error)
       post "/etransact_advances/execute_advance/#{member_id}", post_body
       expect(last_response.status).to eq(503)
     end
-    it 'should return Internal Service Error, if execute mds service is unavailable', vcr: {cassette_name: 'execute_trade_market_data_service_unavailable'} do
+    it 'halts Savon::Errors raised by `MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade` with a 503' do
+      allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:execute_trade).and_raise(savon_error)
       post "/etransact_advances/execute_advance/#{member_id}", post_body
       expect(last_response.status).to eq(503)
     end
@@ -762,6 +702,7 @@ describe MAPI::ServiceApp do
     end
 
     describe '`check_enabled_product` method' do
+      let(:app) { instance_double(described_class) }
       let(:logger) { double(Logger) }
       let(:environment) { double('An Environment') }
       let(:type) { double('A Loan Type') }
@@ -769,14 +710,14 @@ describe MAPI::ServiceApp do
       let(:response) { {'status' => [double('A Status')]} }
       let!(:original_status) { response['status'] }
       let(:allow_grace_period) { double('Allow Grace Period Boolean') }
-      let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(logger, environment, type, term, response, allow_grace_period) }
+      let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(app, type, term, response, allow_grace_period) }
       let(:loan_term) { {display_status: false} }
       let(:loan_terms) { { term => { type => loan_term } } }
       before do
-        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(logger, environment, anything).and_return(loan_terms)
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(app, anything).and_return(loan_terms)
       end
       it 'raises an error if the `MAPI::Services::Rates::LoanTerms.loan_terms` returns `nil`' do
-        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(logger, environment, anything).and_return(nil)
+        allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(app, anything).and_return(nil)
         expect {call_method}.to raise_error('MAPI::Services::Rates::LoanTerms.loan_terms returned nil')
       end
       it 'adds a status of `DisabledProductError` if the loan term is disabled' do
@@ -787,20 +728,20 @@ describe MAPI::ServiceApp do
         expect(call_method['status']).to eq(original_status)
       end
       it 'passes the allow_grace_period argument to `loan_terms`' do
-        expect(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(anything, anything, allow_grace_period)
+        expect(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(app, allow_grace_period)
         call_method
       end
       it 'defaults the allow_grace_period argument to false' do
-        expect(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(anything, anything, false)
-        MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(logger, environment, type, term, response)
+        expect(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(app, false)
+        MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(app, type, term, response)
       end
       describe 'when term is Custom Term' do
         let(:custom_term) { '10day' }
-        let(:call_custom_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(logger, environment, type, custom_term, response, allow_grace_period) }
+        let(:call_custom_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.check_enabled_product(app, type, custom_term, response, allow_grace_period) }
         let(:open_loan_term) { {display_status: false} }
         let(:custom_loan_terms) { { term => { type => loan_term }, 'open' => { type => open_loan_term } } }
         before do
-          allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(logger, environment, anything).and_return(custom_loan_terms)
+          allow(MAPI::Services::Rates::LoanTerms).to receive(:loan_terms).with(app, anything).and_return(custom_loan_terms)
         end
         it 'leaves status unchanged if the loan term is enabled' do
           loan_term[:trade_status] = true
@@ -1006,6 +947,13 @@ describe MAPI::ServiceApp do
         allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:init_execute_trade_connection).and_call_original
         expect(execute_trade['status']).to eq(['Error'])
       end
+      it 'raises Savon errors arising from calling the trade connection service' do
+        error = Savon::Error
+        trade_service = double('trade service')
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:init_execute_trade_connection).and_return(trade_service)
+        allow(trade_service).to receive(:call).and_raise(error)
+        expect{execute_trade}.to raise_error(error)
+      end
     end
     describe 'execute' do
       let(:operation) { 'EXECUTE' }
@@ -1094,7 +1042,7 @@ describe MAPI::ServiceApp do
       end
       it 'calls `check_enabled_product` with the allow_grace_period flag' do
         allow_any_instance_of(Savon::Response).to receive(:success?).and_return(true)
-        anythings = Array.new(5, anything)
+        anythings = Array.new(4, anything)
         expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_enabled_product).with(*[*anythings, allow_grace_period]).and_return({})
         execute_trade
       end

@@ -550,4 +550,70 @@ describe MAPI::Shared::Utils::ClassMethods do
       end
     end
   end
+
+  describe '`parse_time`' do
+    let(:time) { double(Time, to_s: SecureRandom.hex, length: 4, :[] => '') }
+    let(:date) { double(Date, to_s: SecureRandom.hex) }
+    let(:pst) { ActiveSupport::TimeZone.new('America/Los_Angeles') }
+    let(:est) { ActiveSupport::TimeZone.new('America/New_York') }
+    let(:other_zone) { Time.zone == pst ? est : pst }
+    let(:call_method) { subject.parse_time(date, time) }
+    before do
+      allow(time).to receive(:to_s).and_return(time)
+    end
+    context 'duck typing' do
+      before { allow(Time.zone).to receive(:parse) }
+      it 'converts the `date` to a string' do
+        expect(date).to receive(:to_s)
+        call_method
+      end
+      it 'converts the `time` to a string' do
+        expect(time).to receive(:to_s).and_return(time)
+        call_method
+      end
+      it 'calls `strftime` on the `date` if it responds' do
+        expect(date).to receive(:strftime).with(MAPI::Shared::Utils::DATE_FORMAT).and_return(date)
+        call_method
+      end
+      it 'does not call `strftime` on the `date` if it is not supported' do
+        allow(date).to receive(:respond_to?).with(:strftime).and_return(false)
+        expect(date).to_not receive(:strftime)
+        call_method
+      end
+    end
+    {
+      Time.zone.local(2012, 2, 13, 13, 14) => ['2012-02-13', '1314'],
+      Time.zone.local(2000, 1, 1, 0, 13) => ['2000-01-01', '0013'],
+      Time.zone.local(2016, 2, 29, 1, 0) => ['2016-02-29', '0100']
+    }.each do |time, args|
+      it "parses #{args} into #{time}" do
+        expect(subject.parse_time(*args)).to eq(time)
+      end
+    end
+    it 'parses the time in the current `Time.zone` timezone' do
+      Time.use_zone(other_zone) do
+        time = Time.zone.local(2012, 2, 13, 13, 14)
+        expect(subject.parse_time(time.strftime('%Y-%m-%d'), time.strftime('%H%M'))).to eq(time)
+      end
+    end
+    [[2016, 3, 15, 13, 14], [2016, 3, 15, 0, 14], [2016, 3, 15, 23, 59]].each do |time_args|
+      it "handles daylight savings time when parsing `#{time_args[0]}-#{time_args[1]}-#{time_args[2]} #{time_args[3]}:#{time_args[4]}`" do
+        Time.use_zone(other_zone) do
+          time = Time.zone.local(*time_args)
+          expect(subject.parse_time(time.strftime('%Y-%m-%d'), time.strftime('%H%M'))).to eq(time)
+        end
+      end
+    end
+    it 'parses the correctly when the `date` param is a Time object' do
+      time = Time.zone.local(2012, 2, 13, 13, 14)
+      time_minute = time.change(sec: 0)
+      time_date = time.change(hour: 0, min: 0, sec: 0)
+      expect(subject.parse_time(time_date, time.strftime('%H%M'))).to eq(time_minute)
+    end
+    it 'treats the first 2 digits of the time as hours and the last two digits as minutes' do
+      time = rand(0..2400).to_s.rjust(4, '0')
+      expect(Time.zone).to receive(:parse).with(include(time[0..1] + ':' + time[2..3]))
+      subject.parse_time(Time.zone.today, time)
+    end
+  end
 end
