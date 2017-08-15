@@ -448,29 +448,29 @@ class Admin::RulesController < Admin::BaseController
     set_typical_shutoff_table_var
     @hour_dropdown_options = HOUR_DROPDOWN_OPTIONS
     @minute_dropdown_options = MINUTE_DROPDOWN_OPTIONS
-    frc_hour = sprintf('%02d', @typical_shutoff_times[:frc].hour)
-    frc_minute = sprintf('%02d', @typical_shutoff_times[:frc].min)
-    vrc_hour = sprintf('%02d', @typical_shutoff_times[:vrc].hour)
-    vrc_minute = sprintf('%02d', @typical_shutoff_times[:vrc].min)
+    frc_hour = sprintf('%02d', @typical_shutoff_times[:frc].hour) if @typical_shutoff_times[:frc]
+    frc_minute = sprintf('%02d', @typical_shutoff_times[:frc].min) if @typical_shutoff_times[:frc]
+    vrc_hour = sprintf('%02d', @typical_shutoff_times[:vrc].hour) if @typical_shutoff_times[:vrc]
+    vrc_minute = sprintf('%02d', @typical_shutoff_times[:vrc].min) if @typical_shutoff_times[:vrc]
     @dropdown_defaults = {
       frc: {
         hour: {
-          text: (HOUR_DROPDOWN_OPTIONS.select{ |option| option.last == frc_hour}.first.first),
-          value: frc_hour
+          text: ((HOUR_DROPDOWN_OPTIONS.select{ |option| option.last == frc_hour}.first || HOUR_DROPDOWN_OPTIONS.last).first),
+          value: frc_hour || HOUR_DROPDOWN_OPTIONS.last.last
         },
         minute: {
-          text: (MINUTE_DROPDOWN_OPTIONS.select{ |option| option.last == frc_minute}.first.first),
-          value: frc_minute
+          text: ((MINUTE_DROPDOWN_OPTIONS.select{ |option| option.last == frc_minute}.first || MINUTE_DROPDOWN_OPTIONS.last).first),
+          value: frc_minute || MINUTE_DROPDOWN_OPTIONS.last.last
         }
       },
       vrc: {
         hour: {
-          text: (HOUR_DROPDOWN_OPTIONS.select{ |option| option.last == vrc_hour}.first.first),
-          value: vrc_hour
+          text: ((HOUR_DROPDOWN_OPTIONS.select{ |option| option.last == vrc_hour}.first || HOUR_DROPDOWN_OPTIONS.last).first),
+          value: vrc_hour || HOUR_DROPDOWN_OPTIONS.last.last
         },
         minute: {
-          text: (MINUTE_DROPDOWN_OPTIONS.select{ |option| option.last == vrc_minute}.first.first),
-          value: vrc_minute
+          text: ((MINUTE_DROPDOWN_OPTIONS.select{ |option| option.last == vrc_minute}.first || MINUTE_DROPDOWN_OPTIONS.last).first),
+          value: vrc_minute || MINUTE_DROPDOWN_OPTIONS.last.last
         }
       }
     }

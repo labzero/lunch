@@ -5,30 +5,123 @@ RSpec.describe AdvanceMessage, :type => :model do
   it { should validate_presence_of(:date) }
   
   describe 'the `all` class method' do
-    it 'returns an array of AdvanceMessage instances' do
-      AdvanceMessage.all.each do |message|
-        expect(message).to be_a_kind_of(AdvanceMessage)
+    let(:early_shutoff_date) { Time.zone.today + rand(0..99).days }
+    let(:future_early_shutoff_date) { early_shutoff_date + 1.day }
+    let(:earlier_shutoff) {{
+      early_shutoff_date: early_shutoff_date,
+      day_of_message: double('some message')
+    }}
+    let(:future_shutoff) {{
+      early_shutoff_date: future_early_shutoff_date,
+      day_of_message: double('some message'),
+      day_before_message: double('some other message')
+    }}
+    let(:previous_business_day) { early_shutoff_date }
+    let(:calendar_service) { instance_double(CalendarService, find_previous_business_day: previous_business_day) }
+    let(:etransact_service) { instance_double(EtransactAdvancesService, early_shutoffs: [])}
+    let(:call_method) { AdvanceMessage.all }
+    before do
+      allow(CalendarService).to receive(:new).and_return(calendar_service)
+      allow(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+    end
+    context 'when there are no early shutoffs scheduled' do
+      it 'returns an empty array' do
+        expect(call_method).to eq([])
       end
     end
-    describe 'seeding the data' do
-      let(:date) { double('date') }
-      let(:content) { double('content') }
-      let(:seed) { [double('date string', to_date: date), content] }
-      before { allow(JSON).to receive(:parse) }
+    context 'when there are early shutoffs scheduled' do
+      before { allow(etransact_service).to receive(:early_shutoffs).and_return([earlier_shutoff]) }
+      it 'returns an array of AdvanceMessage instances' do
+        messages = call_method
+        expect(messages.size).to be > 0
+        messages.each do |message|
+          expect(message).to be_a_kind_of(AdvanceMessage)
+        end
+      end
+      it 'creates a new instance of the CalendarService with nil for the request arg' do
+        expect(CalendarService).to receive(:new).with(nil).and_return(calendar_service)
+        call_method
+      end
+      it 'creates a new instance of the EtransactAdvancesService with nil for the request arg' do
+        expect(EtransactAdvancesService).to receive(:new).and_return(etransact_service)
+        call_method
+      end
+      it 'creates a message with a date equal to the `early_shutoff_date`' do
+        expect(call_method.first.date).to eq(early_shutoff_date)
+      end
+      context 'when there is an early shutoff with a `day_of` message' do
+        context 'when there is a conflict with the `day_before` message of an early shutoff date occurring the next business day' do
+          before do
+            allow(etransact_service).to receive(:early_shutoffs).and_return([earlier_shutoff, future_shutoff])
+          end
+          it 'always sets the `content` of the message to the `day_of_message` for the given date' do
+            message = call_method.find { |message| message.date == early_shutoff_date }
+            expect(message.content).to eq(earlier_shutoff[:day_of_message])
+          end
+        end
+        context 'when there are no conflicts with any `day_before` messages from other early shutoffs' do
+          before do
+            future_shutoff[:early_shutoff_date] = early_shutoff_date + rand(2..99).days
+            allow(etransact_service).to receive(:early_shutoffs).and_return([earlier_shutoff, future_shutoff])
+          end
+          it 'always sets the `content` of the message to the `day_of_message` for the given date' do
+            message = call_method.find { |message| message.date == early_shutoff_date }
+            expect(message.content).to eq(earlier_shutoff[:day_of_message])
+          end
+        end
+      end
+      context 'when there is an early shutoff with a `day_before` message' do
+        before { allow(etransact_service).to receive(:early_shutoffs).and_return([earlier_shutoff, future_shutoff]) }
+        it 'calls `find_previous_business_day` on the instance of the CalendarService with a start date equal to the day before the `early_shutoff_date`' do
+          expect(calendar_service).to receive(:find_previous_business_day).with(future_shutoff[:early_shutoff_date] - 1.day, anything).and_return(early_shutoff_date - 1.day)
+          call_method
+        end
+        it 'calls `find_previous_business_day` with a delta of 1 day' do
+          expect(calendar_service).to receive(:find_previous_business_day).with(anything, 1.day).and_return(early_shutoff_date - 1.day)
+          call_method
+        end
+        it 'creates a message with a date equal to the previous business day from the `early_shutoff_date` of the shutoff with the `day_before_message`' do
+          message = call_method.find{ |message| message.date == previous_business_day}
+          expect(message).to be_a_kind_of(AdvanceMessage)
+        end
+        context 'when there is a conflict with the `day_of` message of an early shutoff occurring the previous business day' do
+          context 'when there are no intervening days between the `day_of` and the previous business day' do
+            let(:future_early_shutoff_date) { early_shutoff_date + 1.day}
+            before { allow(etransact_service).to receive(:early_shutoffs).and_return([earlier_shutoff, future_shutoff]) }
 
-      it 'reads the json file located at `#{Rails.root}db/service_fakes/advance_messages.json`' do
-        expect(File).to receive(:read).with(File.join(Rails.root, 'db', 'service_fakes', 'advance_messages.json'))
-        AdvanceMessage.all
-      end
-      it 'returns an empty array if no seeds are found in the file' do
-        expect(AdvanceMessage.all).to eq([])
-      end
-      it 'populates an array of AdvanceMessage instances with the seed data provided by the json file' do
-        allow(JSON).to receive(:parse).and_return([seed])
-        advance_messages = AdvanceMessage.all
-        expect(advance_messages.first).to be_a_kind_of(AdvanceMessage)
-        expect(advance_messages.first.date).to eq(date)
-        expect(advance_messages.first.content).to eq(content)
+            it 'ignores the `day_before_message` and sets the `content` of the message for conflicting day to the `day_of_message` of the earlier shutoff' do
+              message = call_method.find { |message| message.date == early_shutoff_date }
+              expect(message.content).to eq(earlier_shutoff[:day_of_message])
+            end
+          end
+          context 'when there are intervening days (e.g. weekends/holidays) between the `day_of` and the previous business day' do
+            let(:future_early_shutoff_date) { early_shutoff_date + 3.days}
+            before { allow(etransact_service).to receive(:early_shutoffs).and_return([earlier_shutoff, future_shutoff]) }
+
+            describe 'the message for the conflicting date' do
+              it 'always sets the `content` of the message to the `day_of_message` for the given date' do
+                message = call_method.find { |message| message.date == early_shutoff_date }
+                expect(message.content).to eq(earlier_shutoff[:day_of_message])
+              end
+            end
+            describe 'the message for the future date' do
+              it 'sets the `content` of the message to the `day_of_message` for the given date' do
+                message = call_method.find { |message| message.date == future_early_shutoff_date }
+                expect(message.content).to eq(future_shutoff[:day_of_message])
+              end
+            end
+            describe 'the intervening days' do
+              it 'sets the `content` of the message for the intervening days to the `day_before_message` of the shutoff occurring on the next business day' do
+                intervening_days = (early_shutoff_date...future_early_shutoff_date).to_a - [early_shutoff_date]
+                expect(intervening_days.size).to eq(2)
+                intervening_days.each do |date|
+                  message = call_method.find { |message| message.date == date }
+                  expect(message.content).to eq(future_shutoff[:day_before_message])
+                end
+              end
+            end
+          end
+        end
       end
     end
   end

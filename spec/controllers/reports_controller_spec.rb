@@ -2080,6 +2080,7 @@ RSpec.describe ReportsController, :type => :controller do
       current_price_indications
       expect(response.body).to render_template('current_price_indications')
     end
+    before { allow(MessageService).to receive(:new).and_return(instance_double(MessageService, todays_quick_advance_message: nil)) }
     describe 'when a job_id param is present' do
       let(:job_status) { double('job status', destroy: nil) }
       let(:vrc_data) {{'advance_maturity' => 'Overnight/Open','advance_rate' => 0.18, 'effective_date' => '2016-01-01'}}

@@ -1476,6 +1476,18 @@ RSpec.describe Admin::RulesController, :type => :controller do
               call_action
               expect(assigns[:dropdown_defaults][:frc][:hour][:value]).to eq(frc_hour.last)
             end
+            context 'when there is no matching `frc_shutoff_time_hour` from the early shutoff request' do
+              before { shutoff_times_hash[:frc] = nil }
+
+              it 'has a `text` value that is equal to the last hour text value in the HOUR_DROPDOWN_OPTIONS' do
+                call_action
+                expect(assigns[:dropdown_defaults][:frc][:hour][:text]).to eq(described_class::HOUR_DROPDOWN_OPTIONS.last.first)
+              end
+              it 'has a `value` value that is equal to the last hour time value in the HOUR_DROPDOWN_OPTIONS' do
+                call_action
+                expect(assigns[:dropdown_defaults][:frc][:hour][:value]).to eq(described_class::HOUR_DROPDOWN_OPTIONS.last.last)
+              end
+            end
           end
           describe 'the `minute` subhash' do
             it 'has a `text` value that is equal to the first value in the MINUTE_DROPDOWN_OPTIONS that matches the `frc_shutoff_time_minute` of the early_shutoff_request' do
@@ -1490,6 +1502,18 @@ RSpec.describe Admin::RulesController, :type => :controller do
               allow(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:frc].min).and_return(frc_minute.last)
               call_action
               expect(assigns[:dropdown_defaults][:frc][:minute][:value]).to eq(frc_minute.last)
+            end
+            context 'when there is no matching `frc_shutoff_time_minute` from the early shutoff request' do
+              before { shutoff_times_hash[:frc] = nil }
+
+              it 'has a `text` value that is equal to the last hour text value in the MINUTE_DROPDOWN_OPTIONS' do
+                call_action
+                expect(assigns[:dropdown_defaults][:frc][:minute][:text]).to eq(described_class::MINUTE_DROPDOWN_OPTIONS.last.first)
+              end
+              it 'has a `value` value that is equal to the last hour time value in the MINUTE_DROPDOWN_OPTIONS' do
+                call_action
+                expect(assigns[:dropdown_defaults][:frc][:minute][:value]).to eq(described_class::MINUTE_DROPDOWN_OPTIONS.last.last)
+              end
             end
           end
         end
@@ -1508,6 +1532,18 @@ RSpec.describe Admin::RulesController, :type => :controller do
               call_action
               expect(assigns[:dropdown_defaults][:vrc][:hour][:value]).to eq(vrc_hour.last)
             end
+            context 'when there is no matching `vrc_shutoff_time_hour` from the early shutoff request' do
+              before { shutoff_times_hash[:vrc] = nil }
+
+              it 'has a `text` value that is equal to the last hour text value in the HOUR_DROPDOWN_OPTIONS' do
+                call_action
+                expect(assigns[:dropdown_defaults][:vrc][:hour][:text]).to eq(described_class::HOUR_DROPDOWN_OPTIONS.last.first)
+              end
+              it 'has a `value` value that is equal to the last hour time value in the HOUR_DROPDOWN_OPTIONS' do
+                call_action
+                expect(assigns[:dropdown_defaults][:vrc][:hour][:value]).to eq(described_class::HOUR_DROPDOWN_OPTIONS.last.last)
+              end
+            end
           end
           describe 'the `minute` subhash' do
             it 'has a `text` value that is equal to the first value in the MINUTE_DROPDOWN_OPTIONS that matches the `vrc_shutoff_time_minute` of the early_shutoff_request' do
@@ -1522,6 +1558,18 @@ RSpec.describe Admin::RulesController, :type => :controller do
               allow(controller).to receive(:sprintf).with('%02d', shutoff_times_hash[:vrc].min).and_return(vrc_minute.last)
               call_action
               expect(assigns[:dropdown_defaults][:vrc][:minute][:value]).to eq(vrc_minute.last)
+            end
+            context 'when there is no matching `vrc_shutoff_time_minute` from the early shutoff request' do
+              before { shutoff_times_hash[:vrc] = nil }
+
+              it 'has a `text` value that is equal to the last hour text value in the MINUTE_DROPDOWN_OPTIONS' do
+                call_action
+                expect(assigns[:dropdown_defaults][:vrc][:minute][:text]).to eq(described_class::MINUTE_DROPDOWN_OPTIONS.last.first)
+              end
+              it 'has a `value` value that is equal to the last hour time value in the MINUTE_DROPDOWN_OPTIONS' do
+                call_action
+                expect(assigns[:dropdown_defaults][:vrc][:minute][:value]).to eq(described_class::MINUTE_DROPDOWN_OPTIONS.last.last)
+              end
             end
           end
         end
