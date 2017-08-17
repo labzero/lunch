@@ -9,25 +9,25 @@ class ResourcesController < ApplicationController
       required: [2093, 2094, 2090, 2091, 2065, 2089, 2104, 2290],
       requested: [2117, 2136, 2160],
       optional: [1694, 1973, 1465, 2228],
-      access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
+      access: [2066, 2067, 2153, 2068, 2109, 2108]
     },
     community_development: {
       required: [2345, 2346, 2347, 2091, 2065, 2348],
       requested: [2349, 2136, 2160],
       optional: [1694, 1465, 2228],
-      access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
+      access: [2066, 2067, 2153, 2068, 2109, 2108]
     },
     credit_union: {
       required: [2138, 2139, 2090, 2091, 2065, 2099, 2112, 2290],
       requested: [2127, 2136, 2160],
       optional: [1694, 1973, 1465, 2228],
-      access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
+      access: [2066, 2067, 2153, 2068, 2109, 2108]
     },
     insurance_company: {
       required: [2170, 2171, 2090, 2091, 2065, 2178, 2290],
       requested: [2177, 2136, 2160],
       optional: [1694, 1973, 1465, 2228],
-      access: [2066, 2067, 2153, 2068, 2070, 2109, 2108]
+      access: [2066, 2067, 2153, 2068, 2109, 2108]
     }
   }.freeze
 
@@ -116,11 +116,6 @@ class ResourcesController < ApplicationController
         title: t('resources.forms.authorizations.signature_cards.collateral'),
         form_number: 2068,
         pdf_link: resources_download_path(file: :form_2068)
-      },
-      {
-        title: t('resources.forms.authorizations.signature_cards.interest_rate'),
-        form_number: 2070,
-        pdf_link: resources_download_path(file: :form_2070)
       },
       {
         title: t('resources.forms.authorizations.signature_cards.money_market'),
