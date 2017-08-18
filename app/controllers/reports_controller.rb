@@ -769,13 +769,13 @@ class ReportsController < ApplicationController
     end
     @month_options.unshift([I18n.t('global.current'), current])
     @month_display_map[current] = I18n.t('global.current')
-    downloadable_report(:pdf, {as_of_date: params['as_of_date']}, "borrowing_capacity_#{@as_of}") do
+    downloadable_report(:pdf, {as_of_date:  @as_of}, "borrowing_capacity_#{@as_of}") do
       if params[:job_id] || self.skip_deferred_load
         if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
           @borrowing_capacity_summary = {}
         elsif self.skip_deferred_load
           @borrowing_capacity_summary = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @as_of.to_s)
-          if params['disable_until_data_available']
+          if params['disable_until_data_available'] && @borrowing_capacity_summary['UPDATE_DATE']
             if Time.zone.parse(@borrowing_capacity_summary['UPDATE_DATE']) < (Date.parse(current) - 1.month).end_of_month
                raise StandardError, "Previous month's data is not available yet"
             end
@@ -792,7 +792,7 @@ class ReportsController < ApplicationController
         job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'borrowing_capacity_summary', request.uuid, @as_of.to_s).job_status
         job_status.update_attributes!(user_id: current_user.id)
         @job_status_url = job_status_url(job_status)
-        @load_url = reports_borrowing_capacity_url(job_id: job_status.id, as_of_date: params['as_of_date'])
+        @load_url = reports_borrowing_capacity_url(job_id: job_status.id, as_of_date: @as_of)
         @borrowing_capacity_summary = {deferred: true}
       end
     end

@@ -1937,7 +1937,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       describe 'when `current` is selected' do
         it 'should set `@as_of` to the value `as_of_date` param' do
-          get :borrowing_capacity, as_of_date: alternate
+          get :borrowing_capacity, as_of_date: alternate.strftime('%Y-%m-%d')
           expect(assigns[:as_of]).to eq(alternate.iso8601)
         end
         it 'sets `@as_of` to the current date if `as_of_date` not supplied' do
@@ -1979,7 +1979,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'passes the `as_of_date` param if one is provided' do
           expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, alternate.to_s).and_return(job_response)
-          get :borrowing_capacity, as_of_date: alternate
+          get :borrowing_capacity, as_of_date: alternate.strftime('%Y-%m-%d')
         end
       end
     end
@@ -1991,7 +1991,7 @@ RSpec.describe ReportsController, :type => :controller do
 
       it 'sets the @load_url with the appropriate params' do
         call_action
-        expect(assigns[:load_url]).to eq(reports_borrowing_capacity_url(job_id: job_status.id))
+        expect(assigns[:load_url]).to eq(reports_borrowing_capacity_url(job_id: job_status.id, as_of_date: Time.zone.today))
       end
       it 'sets @borrowing_capacity_summary[:deferred] to true' do
         call_action
@@ -2062,6 +2062,10 @@ RSpec.describe ReportsController, :type => :controller do
           it 'raises an error when no data are available' do
             expect(update_date).to receive(:<).with(current_date).and_return(true)
             expect { call_action }.to raise_error(StandardError, "Previous month's data is not available yet")
+          end
+          it 'does not raise an error if `UPDATE_DATE` is nil' do
+            allow(response_hash).to receive(:[]).with('UPDATE_DATE').and_return(nil)
+            expect { call_action }.not_to raise_error
           end
         end
       end
