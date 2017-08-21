@@ -2900,6 +2900,7 @@ RSpec.describe ReportsController, :type => :controller do
       before do
         allow(MembersService).to receive(:new).and_return(member_service_instance)
         allow(member_service_instance).to receive(:signers_and_users).and_return(signers_and_users)
+        allow(controller).to receive(:report_disabled?).and_return(false)
       end
       it 'sets @authorization_filter to the `authorizations_filter` param' do
         get :authorizations, :authorizations_filter => 'my filter param'
@@ -2953,11 +2954,26 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[:authorizations_table_data][:deferred]).to eq(true)
         end
       end
+      shared_examples 'it handles the disabled state of the report' do
+        it 'calls `report_disabled?` with the `AUTHORIZATIONS_WEB_FLAGS`' do
+          expect(controller).to receive(:report_disabled?).with(described_class::AUTHORIZATIONS_WEB_FLAGS)
+          make_request
+        end
+        context 'when the report is disabled' do
+          before { allow(controller).to receive(:report_disabled?).and_return(true) }
+
+          it 'returns an empty array for `@authorizations_table_data[:rows]`' do
+            make_request
+            expect(assigns[:authorizations_table_data][:rows]).to eq([])
+          end
+        end
+      end
       describe 'when passed a Job ID' do
         let(:make_request) { get :authorizations, job_id: job_id }
         before do
           allow(JobStatus).to receive(:find_by).and_return(job_status)
         end
+        it_behaves_like 'it handles the disabled state of the report'
         it 'should look up the JobStatus related to that ID' do
           expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: subject.current_user.id, status: JobStatus.statuses[:completed]).and_return(job_status)
           make_request
@@ -2985,11 +3001,13 @@ RSpec.describe ReportsController, :type => :controller do
       end
       describe 'when the `skip_deferred_load` controller attribute is true' do
         let(:make_request) { get :authorizations }
-        let(:service_instance) { double('service instance')}
+        let(:service_instance) { double('service instance', signers_and_users: [])}
         before do
           controller.skip_deferred_load = true
           allow(MembersService).to receive(:new).and_return(service_instance)
         end
+
+        it_behaves_like 'it handles the disabled state of the report'
         it 'gets signers and users from MembersService' do
           expect(service_instance).to receive(:signers_and_users)
           make_request

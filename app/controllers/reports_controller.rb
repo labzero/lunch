@@ -1554,7 +1554,9 @@ class ReportsController < ApplicationController
       @load_url = false
 
       if params[:job_id] || self.skip_deferred_load
-        if self.skip_deferred_load
+        if report_disabled?(AUTHORIZATIONS_WEB_FLAGS)
+          users = []
+        elsif self.skip_deferred_load
           users = MembersService.new(request).signers_and_users(current_member_id) || []
         else
           job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )

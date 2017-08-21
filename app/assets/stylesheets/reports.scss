@@ -880,13 +880,13 @@ td.dataTables_empty {
 .authorizations-table {
   clear: both;
   width: auto;
-  td:first-child {
+  td:first-child:not(.dataTables_empty) {
     @extend %typography-table-heading;
     width: 160px;
     box-sizing: border-box;
     vertical-align: top;
   }
-  td:last-child {
+  td:last-child:not(.dataTables_empty) {
     text-align: left;
     width: 540px;
     box-sizing: border-box;

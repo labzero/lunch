@@ -36,7 +36,11 @@ When(/^the "(.*?)" table has no data$/) do |report|
 end
 
 When(/^the "(.*?)" report has been disabled$/) do |report|
-  # placeholder step for now in case we implement disabling reports during testing
+  flags = case report
+  when 'Authorizations'
+    ReportsController::AUTHORIZATIONS_WEB_FLAGS
+  end
+  allow_any_instance_of(ReportsController).to receive(:report_disabled?).with(flags).and_return(true)
 end
 
 Given(/^the (.+) data source has been disabled$/) do |data_source|
@@ -54,7 +58,7 @@ Then(/^I should see report summary data$/) do
 end
 
 Then(/^I should see an empty report table with Data Unavailable messaging$/) do
-  page.assert_selector('.report-table tbody tr:first-child .dataTables_empty', text: I18n.t('errors.table_data_unavailable'))
+  page.assert_selector('.report-table tbody tr:first-child .dataTables_empty', text: I18n.t('errors.table_data_no_records'))
 end
 
 Then(/^I should see an empty report table with No Records messaging$/) do
