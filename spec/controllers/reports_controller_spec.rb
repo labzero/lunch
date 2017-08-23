@@ -3851,8 +3851,9 @@ RSpec.describe ReportsController, :type => :controller do
       end
 
       shared_examples 'disabled overall report' do
-        before do
-          allow(subject).to receive(:report_disabled?).with(described_class::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
+        it 'checks to see if the `account_summary` report has been disabled' do
+          expect(subject).to receive(:report_disabled?).with(described_class::ACCOUNT_SUMMARY_WEB_FLAGS)
+          make_request_shared_example
         end
         it 'sets @collateral_notice to N' do
           make_request_shared_example
@@ -3864,19 +3865,39 @@ RSpec.describe ReportsController, :type => :controller do
             expect(assigns[instance_var]).to be(nil)
           end
         end
+        [:financing_availability, :credit_outstanding, :standard_collateral, :sbc_collateral, :capital_stock_and_leverage].each do |table|
+          it "sets the `value` of all second columns in the `@#{table}[:rows]` array to nil" do
+            make_request_shared_example
+            table_rows = assigns[table][:rows]
+            expect(table_rows.length).to be > 0
+            table_rows.each do |row|
+              expect(row[:columns][1][:value]).to be nil
+            end
+          end
+        end
+        it 'sets the `value` of all second columns in the `@collateral_totals[:footer]` array to nil' do
+          make_request_shared_example
+          footer_rows = assigns[:collateral_totals][:footer]
+          expect(footer_rows.length).to be > 0
+          footer_rows.each do |row|
+            expect(row[1][:value]).to be nil
+          end
+        end
       end
 
       shared_examples 'disabled financing availability' do
-        before do
-          allow(subject).to receive(:report_disabled?).with(MembersService::FINANCING_AVAILABLE_DATA).and_return(true)
-        end
-        it 'sets @financing_availability to {}' do
+        it 'sets the `value` of all second columns in the `@financing_availability` array to nil' do
           make_request_shared_example
-          expect(assigns[:financing_availability]).to eq({})
+          table_rows = assigns[:financing_availability][:rows]
+          expect(table_rows.length).to be > 0
+          table_rows.each do |row|
+            expect(row[:columns][1][:value]).to be nil
+          end
         end
       end
 
       describe 'report disabled in web admin' do
+        before { allow(subject).to receive(:report_disabled?).with(described_class::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true) }
         include_examples 'disabled overall report'
         it 'sets @financing_availability' do
           make_request_shared_example
@@ -3884,6 +3905,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
       describe 'financing availability is disabled in the web admin' do
+        before { allow(subject).to receive(:report_disabled?).with(MembersService::FINANCING_AVAILABLE_DATA).and_return(true) }
         include_examples 'disabled financing availability'
         [
           :collateral_notice, :sta_number, :fhfa_number, :member_name, :credit_outstanding, :standard_collateral,
@@ -3896,6 +3918,10 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
       describe 'when both the financing availability and overall report is disabled' do
+        before do
+          allow(subject).to receive(:report_disabled?).with(described_class::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
+          allow(subject).to receive(:report_disabled?).with(MembersService::FINANCING_AVAILABLE_DATA).and_return(true)
+        end
         include_examples 'disabled overall report'
         include_examples 'disabled financing availability'
       end
