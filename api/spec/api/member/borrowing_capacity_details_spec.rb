@@ -1,14 +1,113 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
+  describe 'is borrowing capacity data available' do
+    let(:logger) { double('logger') }
+    let(:app) { instance_double(MAPI::ServiceApp, logger: logger) }
+    let(:member_id) { rand(999..99999) }
+    let(:as_of_date) { '2017-07-01' }
+    let(:borrowing_capacity_data_available) { MAPI::Services::Member::BorrowingCapacity.borrowing_capacity_data_available?(app, member_id, as_of_date) }
+    let(:member_hash) { double('member hash') }
+    let(:member) { double('member') }
+    let(:date) { double('date') }
+    let(:as_of_date_obj) { instance_double(Date, strftime: nil) }
+    let(:formatted_date) { '201707' }
+    before do
+      allow(Date).to receive(:parse).and_return(as_of_date_obj)
+    end
+    describe 'when using fake data' do
+      before do
+        allow(MAPI::Services::Member::BorrowingCapacity).to receive(:should_fake?).and_return(true)
+        allow(MAPI::Services::Member::BorrowingCapacity).to receive(:fake).and_return(member_hash)
+        allow(member_hash).to receive(:[]).and_return(member)
+        allow(member).to receive(:[]).and_return(date)
+        allow(as_of_date_obj).to receive(:strftime).and_return(formatted_date)
+        allow(date).to receive(:[])
+        allow(member).to receive(:with_indifferent_access)
+      end      
+      describe 'when fake data is returned properly' do
+        it 'gets the date from the member object' do
+          expect(member).to receive(:[]).with(formatted_date)
+          borrowing_capacity_data_available
+        end
+        it 'gets the `PERIODVALUE` from the date' do
+          allow(member).to receive(:[]).with(formatted_date).and_return(date)
+          expect(date).to receive(:[]).with('PERIODVALUE')
+          borrowing_capacity_data_available
+        end
+        describe 'when date has a value' do
+          before do
+            allow(member).to receive(:[]).with(formatted_date).and_return(date)                  
+          end
+          it 'returns false if `PERIODVALUE` is nil' do
+            allow(date).to receive(:[]).with('PERIODVALUE').and_return(nil)                 
+            expect(borrowing_capacity_data_available[:data_available]).to be(false)
+          end
+          it 'returns true if `PERIODVALUE` is not nil' do
+            allow(date).to receive(:[]).with('PERIODVALUE').and_return(double('a value'))                 
+            expect(borrowing_capacity_data_available[:data_available]).to be(true)
+          end
+        end
+      end
+      describe 'when fake data results in `nil`s' do
+        it 'returns `false` if reading the fake returns `nil`' do
+          allow(member_hash).to receive(:[]).and_return(nil)
+          expect(borrowing_capacity_data_available[:data_available]).to be(false)
+        end
+        describe 'when the member is not `nil`' do
+          before do
+            allow(member_hash).to receive(:[]).and_return(member)
+          end
+          it 'returns `false` if the date object is not found' do
+            allow(member).to receive(:[]).and_return(nil)
+            expect(borrowing_capacity_data_available[:data_available]).to be(false)
+          end
+          it 'returns `false` if `PERIODVALUE` is `nil`' do
+            allow(date).to receive(:[]).with('PERIODVALUE').and_return(nil)              
+            expect(borrowing_capacity_data_available[:data_available]).to be(false)
+          end
+        end
+      end
+    end
+    describe 'when using real data' do
+      let(:results) { double('results') }
+      let(:results_hash) { instance_double(Hash, :[] => nil) }
+      before do
+        allow(MAPI::Services::Member::BorrowingCapacity).to receive(:should_fake?).and_return(false)
+        allow(ActiveRecord::Base.connection).to receive(:execute).and_return(results)
+        allow(results).to receive(:fetch_hash).and_return(results_hash)
+        allow(results_hash).to receive(:[]).and_return(double('data for period'))
+      end
+      it 'executes SQL' do
+          data_available_sql = <<-SQL
+          SELECT PERIODVALUE
+          FROM FHLBOWN.COLLATERAL_SUMMARY_TYPE_HIST@COLAPROD_LINK.WORLD
+          WHERE CUSTOMER_MASTER_ID = #{ActiveRecord::Base.connection.quote(member_id)}
+          AND PERIODVALUE = #{ActiveRecord::Base.connection.quote(as_of_date_obj.strftime('%Y%m'))}
+          SQL
+        expect(ActiveRecord::Base.connection).to receive(:execute).with(data_available_sql)
+        borrowing_capacity_data_available
+      end
+      describe 'when the results get returned' do
+        it 'calls fetch_hash' do
+          expect(results).to receive(:fetch_hash).and_return(results_hash)
+          borrowing_capacity_data_available
+        end
+        it 'gets a `PERIODVALUE` from results hash' do
+          allow(results_hash).to receive(:[]).with('PERIODVALUE').and_return(double('data for period'))
+          expect(borrowing_capacity_data_available[:data_available]).to be(true)
+        end
+        it 'does not get a `PERIODVALUE` from results hash' do
+          allow(results_hash).to receive(:[]).with('PERIODVALUE').and_return(nil)
+          expect(borrowing_capacity_data_available[:data_available]).to be(false)
+        end
+      end
+    end
+  end
+
   describe 'borrowing capacity details' do
     let(:as_of_date) {'2015-01-14'}
     let(:borrowing_capacity_details) { get "/member/#{member_id}/borrowing_capacity_details/#{as_of_date}"; JSON.parse(last_response.body) }
-
-    it 'invalid param result in 400 error message' do
-      get "/member/#{member_id}/borrowing_capacity_details/12-12-2014"
-      expect(last_response.status).to eq(400)
-    end
 
     describe 'in the dev environment' do
       before do

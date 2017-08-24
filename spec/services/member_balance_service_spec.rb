@@ -688,6 +688,26 @@ describe MemberBalanceService do
     end
   end
 
+  describe '`borrowing_capacity_data_available` method' do
+    let(:as_of_date) { Date.new(2015,1,20) }
+    let(:borrowing_capacity_data_available) { subject.borrowing_capacity_data_available?(as_of_date) }
+    let(:results_hash) { instance_double(Hash, :[] => nil) }
+    let(:result) { [true, false].sample }
+    before do
+      allow(subject).to receive(:get_hash).and_return(results_hash)
+      allow(results_hash).to receive(:[]).and_return(result)
+    end
+    it 'calls `get_hash` on the borrowing capacity data available endpoint' do
+      expect(subject).to receive(:get_hash).with(:borrowing_capacity_data_available,  "member/#{member_id}/borrowing_capacity_details/#{as_of_date}")
+      borrowing_capacity_data_available
+    end  
+
+    it 'gets the `:data_available` value from the hash' do
+      expect(results_hash).to receive(:[]).with(:data_available)
+      borrowing_capacity_data_available
+    end
+  end
+
   describe '`advances_details` method', :vcr do
     let(:as_of_date) {Date.new(2015,1,20)}
     let(:advances_details) {subject.advances_details(as_of_date)}

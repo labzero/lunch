@@ -160,6 +160,7 @@ end
 
 Given(/^I am logged in to a bank with Quick Reports$/) do
   step %{I am logged in as a "intranet user"}
+  allow_any_instance_of(MemberBalanceService).to receive(:borrowing_capacity_data_available?).and_return({ data_available: true })
   MemberProcessQuickReportsJob.perform_now(current_member_id, QuickReportSet.current_period)
 end
 

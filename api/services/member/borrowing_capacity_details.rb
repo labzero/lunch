@@ -4,9 +4,37 @@ module MAPI
       module BorrowingCapacity
         include MAPI::Shared::Utils
 
+        def self.borrowing_capacity_data_available?(app, member_id, as_of_date=Time.zone.now.to_s)
+          member_id = member_id.to_i
+          as_of_date = Date.parse(as_of_date)
+
+          data_available_sql = <<-SQL
+          SELECT PERIODVALUE
+          FROM FHLBOWN.COLLATERAL_SUMMARY_TYPE_HIST@COLAPROD_LINK.WORLD
+          WHERE CUSTOMER_MASTER_ID = #{quote(member_id)}
+          AND PERIODVALUE = #{quote(as_of_date.strftime('%Y%m'))}
+          SQL
+
+          data_for_period = unless should_fake?(app)
+            fetch_hash(app.logger, data_available_sql)['PERIODVALUE']
+          else
+            member = fake('borrowing_capacity_data_available')[member_id.to_s]
+            if member
+              date = member[as_of_date.strftime('%Y%m')] 
+              if date
+                date['PERIODVALUE']
+              else
+                nil
+              end
+            else
+              nil
+            end
+          end      
+          { data_available: !data_for_period.nil? }
+        end
+
         def self.borrowing_capacity_details(app, member_id, as_of_date)
           member_id = member_id.to_i
-
           as_of_date = Date.parse(as_of_date)
 
           if as_of_date.year == Time.zone.today.year && as_of_date.month == Time.zone.today.month
@@ -18,14 +46,14 @@ module MAPI
             SBC_MV_AG, SBC_BC_AG, SBC_ADVANCES_AG, SBC_COVER_OTHER_AG, SBC_MV_COLL_EXCESS_DEF_AG, SBC_COLL_EXCESS_DEF_AG,
             SBC_OTHER_COLL_REQ, SBC_COLL_EXCESS_DEF, STD_TOTAL_BC, SBC_BC, SBC_MV, SBC_ADVANCES, SBC_MV_COLL_EXCESS_DEF
             FROM V_CONFIRM_SUMMARY_INTRADAY@COLAPROD_LINK.WORLD
-            WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id)}
+            WHERE FHLB_ID = #{quote(member_id)}
             SQL
 
             bc_std_breakdown_string = <<-SQL
             SELECT COLLATERAL_TYPE, STD_COUNT, STD_UNPAID_BALANCE, STD_BORROWING_CAPACITY,
             STD_ORIGINAL_AMOUNT, STD_MARKET_VALUE, COLLATERAL_SORT_ID
             FROM V_CONFIRM_DETAIL@COLAPROD_LINK.WORLD
-            WHERE FHLB_ID = #{ActiveRecord::Base.connection.quote(member_id)}
+            WHERE FHLB_ID = #{quote(member_id)}
             ORDER BY COLLATERAL_SORT_ID
             SQL
           else
@@ -37,15 +65,15 @@ module MAPI
             SBC_MV_AG, SBC_BC_AG, SBC_ADVANCES_AG, SBC_COVER_OTHER_AG, SBC_MV_COLL_EXCESS_DEF_AG, SBC_COLL_EXCESS_DEF_AG,
             SBC_OTHER_COLL_REQ, SBC_COLL_EXCESS_DEF, STD_TOTAL_BC, SBC_BC, SBC_MV, SBC_ADVANCES, SBC_MV_COLL_EXCESS_DEF
             FROM FHLBOWN.COLLATERAL_SUMMARY_TYPE_HIST@COLAPROD_LINK.WORLD
-            WHERE CUSTOMER_MASTER_ID = #{ActiveRecord::Base.connection.quote(member_id)}
-            AND PERIODVALUE = #{ActiveRecord::Base.connection.quote(as_of_date.strftime('%Y%m'))}
+            WHERE CUSTOMER_MASTER_ID = #{quote(member_id)}
+            AND PERIODVALUE = #{quote(as_of_date.strftime('%Y%m'))}
             SQL
 
             bc_std_breakdown_string = <<-SQL
             SELECT COLLATERAL_TYPE, STD_UNPAID_BALANCE, STD_BORROWING_CAPACITY, STD_ORIGINAL_AMOUNT, STD_MARKET_VALUE, COLLATERAL_SORT_ID
             FROM FHLBOWN.COLLATERAL_SUMMARY_TYPE_HIST@COLAPROD_LINK.WORLD
-            WHERE CUSTOMER_MASTER_ID = #{ActiveRecord::Base.connection.quote(member_id)}
-            AND PERIODVALUE = #{ActiveRecord::Base.connection.quote(as_of_date.strftime('%Y%m'))}
+            WHERE CUSTOMER_MASTER_ID = #{quote(member_id)}
+            AND PERIODVALUE = #{quote(as_of_date.strftime('%Y%m'))}
             ORDER BY COLLATERAL_SORT_ID
             SQL
           end
