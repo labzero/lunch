@@ -39,6 +39,8 @@ When(/^the "(.*?)" report has been disabled$/) do |report|
   flags = case report
   when 'Authorizations'
     ReportsController::AUTHORIZATIONS_WEB_FLAGS
+  when 'Capital Stock Trial Balance'
+    ReportsController::CAPITAL_STOCK_TRIAL_BALANCE_WEB_FLAGS
   end
   allow_any_instance_of(ReportsController).to receive(:report_disabled?).with(flags).and_return(true)
 end

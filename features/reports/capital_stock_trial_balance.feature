@@ -24,10 +24,10 @@ Scenario: Visiting the Capital Stock Trial Balance Report Page
   Then I should see "Shares Outstanding"
   And I should see Capital Stock Trial Balance report
 
-@data-unavailable @smoke
+@local-only @jira-mem-2562
 Scenario: Capital Stock Trial Balance Report has been disabled
-  Given I am on the "Capital Stock Trial Balance" report page
-  When the "Capital Stock Trial Balance" report has been disabled
+  Given the "Capital Stock Trial Balance" report has been disabled
+  When I am on the "Capital Stock Trial Balance" report page
   Then I should see an empty report table with Data Unavailable messaging
 
 @resque-backed @smoke @jira-mem-1066

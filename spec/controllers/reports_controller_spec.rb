@@ -367,6 +367,10 @@ RSpec.describe ReportsController, :type => :controller do
           end
         end
       end
+      it 'checks to see if the report has been disabled' do
+        expect(subject).to receive(:report_disabled?).with(described_class::CAPITAL_STOCK_TRIAL_BALANCE_WEB_FLAGS)
+        call_action
+      end
       describe 'when the report is disabled' do
         before { allow(subject).to receive(:report_disabled?).and_return(true) }
         it_behaves_like 'a capital stock trial balance report with no data'

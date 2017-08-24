@@ -365,7 +365,7 @@ class ReportsController < ApplicationController
     @as_of = @start_date # for `reports/pdf_footer.html.haml`
     downloadable_report(DOWNLOAD_FORMATS, {start_date: @start_date.to_s}, report_download_name) do
       member_balances = MemberBalanceService.new(current_member_id, request)
-      if report_disabled?(SECURITIES_TRANSACTION_WEB_FLAGS)
+      if report_disabled?(CAPITAL_STOCK_TRIAL_BALANCE_WEB_FLAGS)
         summary = { certificates: [] }
       else
         summary = member_balances.capital_stock_trial_balance(@start_date)
