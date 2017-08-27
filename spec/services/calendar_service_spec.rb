@@ -117,6 +117,7 @@ describe CalendarService do
     end
     it 'returns the number of business days' do
       number_of_holidays = (holiday.saturday? || holiday.sunday?) ? 0 : 1
+      number_of_holidays -= 1 if Time.zone.today.saturday? || Time.zone.today.sunday? 
       expect(call_method).to eq((end_date - start_date).to_i - (number_of_weekends.count() + number_of_holidays))
     end
   end
