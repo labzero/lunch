@@ -698,7 +698,7 @@ describe MemberBalanceService do
       allow(results_hash).to receive(:[]).and_return(result)
     end
     it 'calls `get_hash` on the borrowing capacity data available endpoint' do
-      expect(subject).to receive(:get_hash).with(:borrowing_capacity_data_available,  "member/#{member_id}/borrowing_capacity_details/#{as_of_date}")
+      expect(subject).to receive(:get_hash).with(:borrowing_capacity_data_available,  "member/#{member_id}/borrowing_capacity_data_available/#{as_of_date}")
       borrowing_capacity_data_available
     end  
 
