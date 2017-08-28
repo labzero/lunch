@@ -220,7 +220,7 @@ class AdvanceRequest
   def validate_advance
     clear_errors
     custom_term_valid_dates_check
-    perform_limit_check
+    perform_limit_check if funding_date.nil? || funding_date == Time.zone.today.iso8601
     perform_preview
     perform_rate_check
     no_errors_present?

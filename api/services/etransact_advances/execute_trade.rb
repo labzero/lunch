@@ -305,6 +305,7 @@ module MAPI
           # Calculated values
           # True maturity date will be calculated later
           settlement_date = funding_date || Time.zone.today
+          future_funded = settlement_date != Time.zone.today
           day_count = (LOAN_MAPPING[advance_type] == 'WHOLE LOAN') ? 'ACT/ACT' : 'ACT/360'
 
           message, payment_info = MAPI::Services::EtransactAdvances::ExecuteTrade::build_message(member_id, instrument, operation, amount, advance_term, advance_type, rate, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, settlement_date, day_count)
@@ -337,10 +338,10 @@ module MAPI
               if fhlbsfresponse.at_css('transactionResult').content == 'Error'
                 response_hash['status'] = [fhlbsfresponse.at_css('transactionResult').content]
               else
-                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_total_daily_limit(app.settings.environment, amount, response_hash)
-                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_capital_stock(fhlbsfresponse, response, response_hash) if check_capstock unless funding_date
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_total_daily_limit(app.settings.environment, amount, response_hash) unless future_funded
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_capital_stock(fhlbsfresponse, response, response_hash) if check_capstock && !future_funded
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_credit(fhlbsfresponse, response, response_hash)
-                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_collateral(fhlbsfresponse, response, response_hash) unless funding_date
+                response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_collateral(fhlbsfresponse, response, response_hash) unless future_funded
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_enabled_product(app, advance_type, advance_term, response_hash, allow_grace_period)
                 response_hash = MAPI::Services::EtransactAdvances::ExecuteTrade::check_max_term_limit(app, member_id, response_hash)
 
