@@ -118,12 +118,18 @@
   }
 }
 
-.letters-of-credit-request-actions {
+.letters-of-credit-request-actions, .beneficiary-add-request-action {
   .primary-button, .secondary-button {
     width: 215px;
   }
   .primary-button {
     float: right;
+  }
+}
+
+.beneficiary-add-request-action {
+  .primary-button {
+    margin-bottom: 50px;
   }
 }
 
@@ -184,6 +190,68 @@
   top: 8px;
   float: right;
   text-transform: uppercase;
+}
+
+.beneficiary_add_input, .beneficiary_add_input_small, .beneficiary_add_textarea {
+  @extend %horizontal-label-styling;
+  display: block;
+  float: none;
+  margin: 0 0 10px;
+  text-align: right;
+  span {
+    margin-right: 5px;
+  }
+}
+
+.beneficiary_add_input {
+  width: 100%;
+  .input-field-container {
+    width: 67%;
+    float: right;
+  }
+}
+
+.beneficiary_add_textarea {
+  width: 100%;
+  .input-field-container-textarea {
+    width: auto;
+    height: 100px;
+    textarea {
+      resize: none;
+      overflow: hidden;
+      height: 100px;
+      width: 441px;
+    }
+  }
+}
+
+.beneficiary_add_input_small {
+  width: 55%;
+  .input-field-container {
+    width: 40%;
+  }
+}
+
+.beneficiary_add_dropdown {
+  @extend %horizontal-label-styling;
+  display: block;
+  float: none;
+  text-align: right;
+  width: 59%;
+  margin: 0 0 5px;
+  .input-field-container {
+    width: 176px;
+    &:after {
+      right: 32px;
+    }
+  }
+  .dropdown-with-scroll ul {
+    text-align: left;
+    max-height: 165px;
+  }
+  .dropdown-selection {
+    width: 144px;
+  }
 }
 
 @media print {

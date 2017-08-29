@@ -32,4 +32,13 @@ class MemberMailer < Devise::Mailer
          from: t('emails.new_user.sender', email: ContactInformationHelper::NO_REPLY_EMAIL)
     )
   end
+
+  def beneficiary_request(member_id, lc_as_json, user)
+    @beneficiary_request = BeneficiaryRequest.from_json(lc_as_json, nil)
+    mail(subject: '',
+         to: "#{user.display_name} <#{user.email}>",
+         bcc: InternalMailer::LETTER_OF_CREDIT_ADDRESS,
+         from: t('emails.new_user.sender', email: ContactInformationHelper::NO_REPLY_EMAIL)
+    )
+  end
 end

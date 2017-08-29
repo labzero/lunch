@@ -123,3 +123,7 @@ end
 Then(/^I should see that my bank is not authorized to request a Letter of Credit$/) do
   page.assert_text(ActionView::Base.full_sanitizer.sanitize(I18n.t('letters_of_credit.manage.not_authorized', url: '#').html_safe))
 end
+
+When(/^I click on Add Beneficiary link$/) do
+  page.find('.beneficiaries-add').click
+end

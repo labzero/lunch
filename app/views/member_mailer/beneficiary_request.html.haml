@@ -1,0 +1,16 @@
+.form-summary-data
+  %dl
+    %dt= t('global.defined_term', term: t('letters_of_credit.beneficiary.name'))
+    %dd= @beneficiary_request.name
+    %dt= t('global.defined_term', term: t('letters_of_credit.beneficiary.care_of'))
+    %dd= @beneficiary_request.care_of
+    %dt= t('global.defined_term', term: t('letters_of_credit.beneficiary.department'))
+    %dd= @beneficiary_request.department
+    %dt= t('global.defined_term', term: t('letters_of_credit.beneficiary.street_address'))
+    %dd= @beneficiary_request.street_address
+    %dt= t('global.defined_term', term: t('letters_of_credit.beneficiary.city'))
+    %dd= @beneficiary_request.city
+    %dt= t('global.defined_term', term: t('letters_of_credit.beneficiary.state'))
+    %dd= @beneficiary_request.state
+    %dt= t('global.defined_term', term: t('letters_of_credit.beneficiary.zip'))
+    %dd= @beneficiary_request.zip
