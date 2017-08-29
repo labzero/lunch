@@ -2,8 +2,9 @@ module MAPI
   module Services
     module Member
       module LettersOfCredit
+        include MAPI::Shared::Utils
         def self.letters_of_credit(app, member_id)
-          if app.settings.environment == :production
+          unless should_fake?(app)
             credits_query = <<-SQL
               SELECT FHLB_ID,
               LC_LC_NUMBER,
@@ -15,8 +16,8 @@ module MAPI
               LC_ISSUE_NUMBER,
               LCX_UPDATE_DATE,
               LC_BENEFICIARY
-              FROM web_inet.WEB_LC_LATESTDATE_RPT
-              WHERE FHLB_ID = #{ ActiveRecord::Base.connection.quote(member_id)}
+              FROM WEB_INET.WEB_LC_LATESTDATE_RPT
+              WHERE FHLB_ID = #{ quote(member_id)}
             SQL
             credits_cursor = ActiveRecord::Base.connection.execute(credits_query)
             credits = []
@@ -39,6 +40,39 @@ module MAPI
             letters_of_credit
           end
         end
+
+        def self.letter_of_credit(app, member_id, lc_number)
+          unless should_fake?(app)
+            loc_query = <<-SQL
+              SELECT FHLB_ID,
+              LC_LC_NUMBER,
+              LCX_CURRENT_PAR,
+              LCX_TRANS_SPREAD,
+              LC_TRADE_DATE,
+              LC_SETTLEMENT_DATE,
+              LC_MATURITY_DATE,
+              LC_ISSUE_NUMBER,
+              LCX_UPDATE_DATE,
+              LC_BENEFICIARY
+              FROM WEB_INET.WEB_LC_LATESTDATE_RPT
+              WHERE LC_LC_NUMBER = #{ quote(lc_number) }
+              AND FHLB_ID = #{ quote(member_id) }
+            SQL
+            fetch_hash(app.logger, loc_query)
+          else
+            locs = MAPI::Services::Member::LettersOfCredit.fake_hash('letters_of_credit')
+            letter_of_credit = (locs[:credits].select{ |v| v[:lc_number] == lc_number }.first || locs[:credits].first) if locs.any?
+            today = Time.zone.today
+            holidays = MAPI::Services::Rates::Holidays.holidays(app, today, today + 13.months)
+            settle_trade_date = MAPI::Services::Rates.find_next_business_day(today, 1.day, holidays)
+            maturity_date = MAPI::Services::Rates.find_next_business_day(today + 1.year, 1.day, holidays)
+            letter_of_credit[:trade_date] = settle_trade_date
+            letter_of_credit[:settlement_date] = settle_trade_date
+            letter_of_credit[:maturity_date] = maturity_date
+            letter_of_credit
+          end
+        end
+
         # private
         module Private
           def self.format_credits(credits)

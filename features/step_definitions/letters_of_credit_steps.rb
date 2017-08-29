@@ -9,7 +9,7 @@ Then(/^I (should|should not) see the letters of credit dropdown for Request Lett
   end
 end
 
-When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Letter of Credit|Letter of Credit Success) page$/) do |page|
+When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Letter of Credit|Letter of Credit Success|Request Letter of Credit Amendment) page$/) do |page|
   case page
   when 'Manage Letters of Credit'
     visit '/letters-of-credit/manage'
@@ -25,6 +25,8 @@ When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Le
     step 'I enter my SecurID pin'
     step 'I enter my SecurID token'
     step 'I click the Authorize Request button'
+  when 'Request Letter of Credit Amendment'
+    visit '/letters-of-credit/amend?lc_number=2014-011'
   end
 end
 
@@ -126,4 +128,22 @@ end
 
 When(/^I click on Add Beneficiary link$/) do
   page.find('.beneficiaries-add').click
+end
+
+When(/^I click the amend link on a Letter of Credit row$/) do
+  row = page.find('.letters-of-credit-manage-amend-on-table tbody tr:first-child')
+  @lc_number = row.find('td:first-child').text
+  row.find('td a', text: /\A#{I18n.t('global.amend').upcase}\z/, match: :first).click
+end
+
+Then(/^I should be on the Request Letter of Credit Amendment page$/) do
+  page.assert_selector('h1', text: I18n.t('letters_of_credit.request.amend.title'), visible: true)
+end
+
+When(/^I enter (\d+) in the letter of credit amended amount field$/) do |amount|
+  page.find('input[name="letter_of_credit_request[amended_amount]"]').set(amount)
+end
+
+When(/^I try to enter "(.*?)" in the letter of credit amended amount field$/) do |amount|
+  page.find('input[name="letter_of_credit_request[amended_amount]"]').set(amount)
 end

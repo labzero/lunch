@@ -799,6 +799,30 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/letter_of_credit/{lc_number}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve a letter of credit for the given lc_number'
+              key :notes, ''
+              key :nickname, :getLetterOfCreditForMember
+              key :type, :LettersOfCredit
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :lc_number
+                key :required, true
+                key :type, :string
+                key :description, 'The lc_number of the letter of credit to be fetched'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/interest_rate_resets'
             operation do
               key :method, 'GET'
@@ -1605,6 +1629,14 @@ module MAPI
         relative_get '/:id/letters_of_credit' do
           member_id = params[:id]
           MAPI::Services::Member::LettersOfCredit.letters_of_credit(self, member_id).to_json
+        end
+
+        relative_get '/:id/letter_of_credit/:lc_number' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            member_id = params[:id]
+            lc_number = params[:lc_number]
+            MAPI::Services::Member::LettersOfCredit.letter_of_credit(self, member_id, lc_number)
+          end
         end
 
         relative_get '/:id/beneficiaries' do

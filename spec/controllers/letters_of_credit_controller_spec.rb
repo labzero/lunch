@@ -327,14 +327,25 @@ RSpec.describe LettersOfCreditController, :type => :controller do
   end
 
   describe 'GET amend' do
-    let(:lc_number) { instance_double(String) }
-    let(:call_action) { get :amend, lc_number: lc_number }
+    let(:lc_number) { SecureRandom.hex }
+    let(:call_action) { get :amend, current_member_id: member_id, lc_number: lc_number}
+    let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest)}
+    before do
+      allow(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
+      allow(controller).to receive(:populate_amend_request_view_variables)
+    end
 
     it_behaves_like 'a user required action', :get, :amend
+    it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
+    it_behaves_like 'a LettersOfCreditController action that sets sidebar view variables with a before filter'
 
-    it 'populates the lc_number ' do
+    it 'calls the class method`find_by_lc_number`' do
+      expect(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
       call_action
-      expect(assigns[:lc_number]).to eq(lc_number.to_s)
+    end
+    it 'calls `populate_amend_request_view_variables`' do
+      expect(controller).to receive(:populate_amend_request_view_variables)
+      call_action
     end
   end
 
@@ -424,6 +435,29 @@ RSpec.describe LettersOfCreditController, :type => :controller do
     before do
       allow(controller).to receive(:fetch_letter_of_credit_request) do
         controller.instance_variable_set(:@letter_of_credit_request, letter_of_credit_request)
+      end
+    end
+
+    describe 'GET amend' do
+      let(:lc_number) { SecureRandom.hex }
+      let(:call_action) { get :amend, current_member_id: member_id, lc_number: lc_number}
+      let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest)}
+      before do
+        allow(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
+        allow(controller).to receive(:populate_amend_request_view_variables)
+      end
+
+      it_behaves_like 'a user required action', :get, :amend
+      it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
+      it_behaves_like 'a LettersOfCreditController action that sets sidebar view variables with a before filter'
+
+      it 'calls the class method`find_by_lc_number`' do
+        expect(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
+        call_action
+      end
+      it 'calls `populate_amend_request_view_variables`' do
+        expect(controller).to receive(:populate_amend_request_view_variables)
+        call_action
       end
     end
 
@@ -841,6 +875,32 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           end
         end
       end
+      describe '`@date_restrictions`' do
+        it 'calls `date_restrictions`' do
+          expect(controller).to receive(:date_restrictions)
+          call_method
+        end
+        it 'sets `@date_restrictions` to the result of the `date_restrictions` method' do
+          date_restrictions = double('date restrictions')
+          allow(controller).to receive(:date_restrictions).and_return(date_restrictions)
+          call_method
+          expect(assigns[:date_restrictions]).to eq(date_restrictions)
+        end
+      end
+    end
+
+    describe '`populate_amend_request_view_variables`' do
+      let(:call_method) { controller.send(:populate_amend_request_view_variables) }
+      before do
+        allow(controller).to receive(:date_restrictions)
+        allow(controller).to receive(:letter_of_credit_request).and_return(letter_of_credit_request)
+      end
+
+      it 'calls `set_titles` with its title' do
+        expect(controller).to receive(:set_titles).with(I18n.t('letters_of_credit.request.amend.title'))
+        call_method
+      end
+
       describe '`@date_restrictions`' do
         it 'calls `date_restrictions`' do
           expect(controller).to receive(:date_restrictions)

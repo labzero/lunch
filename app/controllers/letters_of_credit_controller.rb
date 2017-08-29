@@ -130,6 +130,12 @@ class LettersOfCreditController < ApplicationController
     populate_new_request_view_variables
   end
 
+  # GET
+  def amend
+    @letter_of_credit = LetterOfCreditRequest.find_by_lc_number(current_member_id,params[:lc_number], request)
+    populate_amend_request_view_variables
+  end
+
   # POST
   def preview
     set_titles(t('letters_of_credit.request.title'))
@@ -178,12 +184,6 @@ class LettersOfCreditController < ApplicationController
       raise ActionController::RoutingError.new("There has been an error and LettersOfCreditController#view has encountered nil calling MembersService. Check error logs.") if member.nil?
       @member_name, @member_fhla = member[:name], member[:fhla_number]
     end
-  end
-
-  # GET
-  def amend
-    # a stub to be completed under MEM-2497
-    @lc_number = params[:lc_number]
   end
 
   # GET
@@ -243,6 +243,11 @@ class LettersOfCreditController < ApplicationController
       @no_beneficiaries = true
       @beneficiary_dropdown_default = t('letters_of_credit.beneficiary.no_beneficiary')
     end
+  end
+
+  def populate_amend_request_view_variables
+    set_titles(t('letters_of_credit.request.amend.title'))
+    @date_restrictions = date_restrictions
   end
 
   def letter_of_credit_request

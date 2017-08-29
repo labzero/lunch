@@ -354,3 +354,12 @@ When(/^I choose the first available custom date$/) do
   page.find('.fa-arrow-right', visible: true).click
   calendar.first("td.available:not(.off)").click
 end
+
+When(/^I enter a valid business day after the expiration date in the datepicker$/) do
+  field_container = page.find('.input-field-container-horizontal.amended_expiration_date')
+  field_container.find('.datepicker-trigger').click
+  calendar = field_container.find('.daterangepicker .calendar')
+  page.execute_script "window.scrollBy(0,10000)"
+  page.find('.fa-arrow-right', visible: true).click
+  calendar.first("td.available:not(.off)").click
+end

@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
+
   describe 'member letters_of_credit' do
     let(:credits) do
       new_array = []
@@ -99,6 +100,98 @@ describe MAPI::ServiceApp do
               end
             end
           end
+        end
+      end
+    end
+  end
+
+  describe 'letter_of_credit' do
+    letters_of_credit_module = MAPI::Services::Member::LettersOfCredit
+    let(:locs) { instance_double(Hash, :[] => nil) }
+    let(:credits) { instance_double(Hash, select: nil) }
+    let(:app) { instance_double(MAPI::ServiceApp, settings: nil, logger: double('logger', error: nil)) }
+    let(:call_method) { MAPI::Services::Member::LettersOfCredit.letter_of_credit(app, member_id, lc_number) }
+    let(:cursor) { double(OCI8::Cursor) }
+    let(:letter_of_credit) { instance_double(Hash, :[]= => nil) }
+
+    let(:id) { SecureRandom.hex }
+    let(:lc_number) { SecureRandom.hex }
+    let(:settle_trade_date) { double(Time)}
+    let(:v) {instance_double(Hash, :[] => nil) }
+    context 'when `should_fake?` returns true' do
+      before do
+        allow(letters_of_credit_module).to receive(:fake_hash).with('letters_of_credit').and_return(locs)
+        allow(letters_of_credit_module).to receive(:should_fake?).with('letter_of_credit').and_return(true)
+        allow(letters_of_credit_module).to receive(:fake).with('letter_of_credit').and_return({})
+        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
+        allow(MAPI::Services::Rates).to receive(:find_next_business_day).with(anything, anything, anything).and_return(settle_trade_date)
+        allow(locs).to receive(:[]).and_return(credits)
+        allow(locs).to receive(:any?).and_return(true)
+        allow(credits).to receive(:select).and_yield(v).and_return(letter_of_credit)
+        allow(credits).to receive(:first).and_return(letter_of_credit)
+        allow(letter_of_credit).to receive(:first).and_return(letter_of_credit)
+        allow(letter_of_credit).to receive(:[]=).with(any_args).and_return(letter_of_credit)
+      end
+
+      it 'calls `should_fake?` with the app passed as an argument' do
+        expect(letters_of_credit_module).to receive(:should_fake?).with(app).and_return(true)
+        call_method
+      end
+    end
+
+    context 'when `should_fake?` returns false' do
+      before do
+        allow(letters_of_credit_module).to receive(:should_fake?).and_return(false)
+        allow(letters_of_credit_module).to receive(:execute_sql).with(app.logger, anything).and_return(cursor)
+        allow(cursor).to receive(:fetch_hash).and_return(*letter_of_credit)
+      end
+
+      it 'calls `fetch_hash` with the appropriate arguments' do
+        loc_query = <<-SQL
+              SELECT FHLB_ID,
+              LC_LC_NUMBER,
+              LCX_CURRENT_PAR,
+              LCX_TRANS_SPREAD,
+              LC_TRADE_DATE,
+              LC_SETTLEMENT_DATE,
+              LC_MATURITY_DATE,
+              LC_ISSUE_NUMBER,
+              LCX_UPDATE_DATE,
+              LC_BENEFICIARY
+              FROM WEB_INET.WEB_LC_LATESTDATE_RPT
+              WHERE LC_LC_NUMBER = #{ ActiveRecord::Base.connection.quote(lc_number) }
+              AND FHLB_ID = #{ ActiveRecord::Base.connection.quote(member_id) }
+        SQL
+        expect(letters_of_credit_module).to receive(:fetch_hash).with(app.logger, loc_query)
+        call_method
+      end
+
+      it 'calls `should_fake?` with the app passed as an argument' do
+        expect(letters_of_credit_module).to receive(:should_fake?).with(app).and_return(false)
+        call_method
+      end
+      it 'invokes execute sql with a logger and a sql query' do
+        expect(letters_of_credit_module).to receive(:execute_sql).with(app.logger, anything).and_return(cursor)
+        call_method
+      end
+      it 'returns an object with a hash of the`letter_of_credit` data' do
+        expect(call_method).to eq(letter_of_credit)
+      end
+
+      describe 'the SQL query' do
+        describe 'the selected fields' do
+          ['FHLB_ID','LC_LC_NUMBER', 'LCX_CURRENT_PAR', 'LCX_TRANS_SPREAD', 'LC_TRADE_DATE', 'LC_SETTLEMENT_DATE', 'LC_MATURITY_DATE', 'LC_ISSUE_NUMBER', 'LCX_UPDATE_DATE', 'LC_BENEFICIARY'].each do |field|
+            it "selects the `#{field}` field" do
+              matcher = Regexp.new(/\A\s*SELECT.*\s+#{field}(?:,|\s+)/im)
+              expect(letters_of_credit_module).to receive(:execute_sql).with(anything, matcher).and_return([])
+              call_method
+            end
+          end
+        end
+        it 'selects from `WEB_INET.WEB_LC_LATESTDATE_RPT`' do
+          matcher = Regexp.new(/\A\s*SELECT.+FROM\s+WEB_INET.WEB_LC_LATESTDATE_RPT/im)
+          expect(letters_of_credit_module).to receive(:execute_sql).with(anything, matcher).and_return([])
+          call_method
         end
       end
     end

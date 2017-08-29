@@ -56,6 +56,68 @@
   }
 }
 
+.letters-of-credit-amend-current-lc {
+  @extend %pseudoelement-clearfix;
+  @extend %bordered-section;
+
+  .input-field-container-horizontal {
+    @extend %horizontal-label-styling;
+    width: 60%;
+    text-align: right;
+    float: right;
+    margin-right: 0;
+    margin-bottom: 8px;
+    label, span {
+      color: $medium-gray;
+      line-height: 30px;
+      vertical-align: middle;
+      margin-right: 20px;
+    }
+    &:first-of-type {
+      margin-bottom: 10px;
+    }
+    .input-field-container {
+      width: 180px;
+      margin-right: 0;
+      float: right;
+    }
+  }
+  .input-field-container.icon-dollar-before {
+    input {
+      padding-left: 15px;
+    }
+    &:before {
+      z-index: 0;
+      color: $medium-gray;
+    }
+  }
+  dt {
+    float: left;
+    padding: 8px 0px 0 0;
+    margin-right: 150px;
+  }
+  dd {
+    text-align: left;
+    padding: 8px 0 0 0;
+  }
+  .letter-of-credit-amendment-current {
+    @extend %typography-subtitle;
+    dt {
+      width: 155px;
+      float: left;
+      color: $medium-gray;
+      margin-right: 20px;
+    }
+    dd {
+      margin-left: 175px;
+      margin-bottom: 8px;
+      &:last-child {
+        margin-bottom: 30px;
+      }
+    }
+  }
+}
+
 .letters-of-credit-request {
   section:not(.report-summary-data) {
     @extend %bordered-section;

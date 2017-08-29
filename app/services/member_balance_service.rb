@@ -292,6 +292,10 @@ class MemberBalanceService < MAPIService
     data
   end
 
+  def letter_of_credit(lc_number)
+    get_hash(:letter_of_credit, "member/#{@member_id}/letter_of_credit/#{lc_number}")
+  end
+
   def active_advances
     get_json(:active_advances, "member/#{@member_id}/active_advances")
   end

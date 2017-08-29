@@ -830,7 +830,6 @@ describe MAPI::ServiceApp do
       expect(last_response.body).to eq(results.to_json)
     end
   end
-
   describe 'get `member/{id}/borrowing_capacity_data_available`' do
     let(:result) { [true, false].sample }
     let(:member_id) { rand(1000..99999) }
@@ -846,6 +845,30 @@ describe MAPI::ServiceApp do
       call_endpoint
       expect(last_response.status).to be(200)
       expect(JSON.parse(last_response.body)['data_available']).to eq(result)
+    end
+  end
+  describe 'get `member/{id}/letter_of_credit{lc_number}`' do
+    letters_of_credit_module = MAPI::Services::Member::LettersOfCredit
+
+    let(:results) { SecureRandom.hex }
+    let(:id) { SecureRandom.hex }
+    let(:lc_number) { SecureRandom.hex }
+    let(:call_endpoint) { get "/member/#{id}/letter_of_credit/#{lc_number}"}
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', "member/#{rand(1000..9999)}/letter_of_credit/#{rand(1000..9999)}", :get, MAPI::Services::Member::LettersOfCredit, :letter_of_credit
+
+    it 'calls `MAPI::Services::Member::LettersOfCredit.letter_of_credit` with the app' do
+      expect(letters_of_credit_module).to receive(:letter_of_credit).with(an_instance_of(MAPI::ServiceApp), anything, anything)
+      call_endpoint
+    end
+    it 'calls `MAPI::Services::Member::LettersOfCredit.letter_of_credit` with the member_id and lc_number params' do
+      expect(letters_of_credit_module).to receive(:letter_of_credit).with(anything, id, lc_number)
+      call_endpoint
+    end
+    it 'returns the JSONd results of calling MAPI::Services::Member::Beneficiaries.beneficiaries' do
+      allow(letters_of_credit_module).to receive(:letter_of_credit).and_return(results)
+      call_endpoint
+      expect(last_response.body).to eq(results.to_json)
     end
   end
 end
