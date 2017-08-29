@@ -43,6 +43,11 @@ Given(/^I am logged into the admin panel$/) do
   step %{I visit the admin dashboard}
 end
 
+Given(/^I am logged into the admin panel as an etransact admin$/) do
+  step %{I am logged in as an "etransact admin user"}
+  step %{I visit the admin dashboard}
+end
+
 Given(/^I am logged into the admin panel but do not have web admin privileges$/) do
   step %{I am logged in as an "non-admin intranet user"}
   step %{I visit the admin dashboard}
@@ -321,6 +326,8 @@ def user_for_type(user_type)
     primary_user
   when 'intranet user'
     intranet_user
+  when 'etransact admin user'
+    etransact_admin
   when 'non-admin intranet user'
     intranet_user_no_admin
   when 'quick-advance signer'
@@ -374,6 +381,10 @@ end
 
 def quick_advance_non_signer
   CustomConfig.env_config['non_signer_advances_user']
+end
+
+def etransact_admin
+  CustomConfig.env_config['etransact_admin']
 end
 
 def intranet_user

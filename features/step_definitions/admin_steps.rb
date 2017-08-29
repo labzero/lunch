@@ -116,7 +116,7 @@ Then(/^I should see the advance availabiltiy status page in its (view-only|edita
 end
 
 When(/^I am on the term rules (limits) page$/) do |rules_page|
-  step %{I am logged into the admin panel}
+  step %{I am logged into the admin panel as an etransact admin}
   case rules_page
   when 'limits'
     step 'I click on the trade credit rules link in the header'

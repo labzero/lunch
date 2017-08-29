@@ -28,12 +28,12 @@ RSpec.describe WebAdminPolicy, :type => :policy do
     end
   end
 
-  RSpec.shared_examples 'a web_admin policy that checks to see if the user has the web_admin role' do |policy_name|
+  RSpec.shared_examples 'a web_admin policy that checks to see if the user has the given role' do |policy_name, role|
     subject { WebAdminPolicy.new(user, request) }
 
     context 'for an admin' do
       before do
-        allow(user).to receive(:roles).and_return([User::Roles::ADMIN])
+        allow(user).to receive(:roles).and_return([role])
       end
       it { should permit_action(policy_name) }
     end
@@ -53,15 +53,15 @@ RSpec.describe WebAdminPolicy, :type => :policy do
   end
 
   describe '`edit_features?` method' do
-    it_behaves_like 'a web_admin policy that checks to see if the user has the web_admin role', :edit_features
+    it_behaves_like 'a web_admin policy that checks to see if the user has the given role', :edit_features, User::Roles::ADMIN
   end
 
   describe '`edit_trade_rules?` method' do
-    it_behaves_like 'a web_admin policy that checks to see if the user has the web_admin role', :edit_trade_rules
+    it_behaves_like 'a web_admin policy that checks to see if the user has the given role', :edit_trade_rules, User::Roles::ETRANSACT_ADMIN
   end
 
   describe '`edit_data_visibility?` method' do
-    it_behaves_like 'a web_admin policy that checks to see if the user has the web_admin role', :edit_data_visibility
+    it_behaves_like 'a web_admin policy that checks to see if the user has the given role', :edit_data_visibility, User::Roles::ADMIN
   end
 
   describe '`modify_early_shutoff_request?` method' do

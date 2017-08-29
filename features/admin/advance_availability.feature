@@ -1,10 +1,10 @@
 Feature: Viewing/Modifying the Add Advance Availability settings
-  As an Admin
+  As an Etransact Admin
   I want to be able to view and control the availability of advances
   So I can easily discern what the current availability is and change it accordingly
 
   Background:
-    Given I am logged into the admin panel
+    Given I am logged into the admin panel as an etransact admin
 
   @jira-mem-2186
   Scenario Outline: Navigating to the Add Advance Availability <page_type> page from the admin nav
@@ -18,6 +18,24 @@ Feature: Viewing/Modifying the Add Advance Availability settings
     | status    |
     | by term   |
     | by member |
+
+  @jira-mem-2220
+  Scenario: Viewing Add Advance Availability by member as a non-admin intranet user
+    Given I am logged into the admin panel but do not have web admin privileges
+    When I click on the trade credit rules link in the header
+    And I click on the add advance availability link in the header
+    And I click on the add advance availability by member tab
+    Then I should see a report table with multiple data rows
+    And I should see the advance availability by member page in its view-only mode
+
+  @jira-mem-2594
+  Scenario: Viewing Add Advance Availability by member as an admin intranet user without etransact admin privileges
+    Given I am logged into the admin panel
+    When I click on the trade credit rules link in the header
+    And I click on the add advance availability link in the header
+    And I click on the add advance availability by member tab
+    Then I should see a report table with multiple data rows
+    And I should see the advance availability by member page in its view-only mode
 
   @jira-mem-2220
   Scenario: Viewing Add Advance Availability by member as a non-admin intranet user
