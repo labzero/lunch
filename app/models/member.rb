@@ -8,7 +8,7 @@ class Member
       start_date: :this_month_end
     },
     borrowing_capacity: {
-      as_of: :last_month_end,
+      as_of_date: :last_month_end,
       disable_until_data_available: true
     },
     settlement_transaction_account: {
