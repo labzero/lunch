@@ -254,6 +254,10 @@
   }
 }
 
+.letters-of-credit-view-pdf {
+  display: none;
+}
+
 @media print {
   .letters-of-credit {
     color: $print-color;

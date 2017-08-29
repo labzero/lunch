@@ -22,8 +22,8 @@
           = render 'reports/report_cell', cell: row[:columns][6]
           - if @amend_on
             %td
-              =link_to(t('global.view_pdf') )
+              =link_to(t('global.view_pdf'), nil, class: 'letters-of-credit-view-pdf')
               =link_to(t('global.amend'), letters_of_credit_amend_path(lc_number: row[:columns][0][:value]))
           - else
             %td
-              =link_to(t('global.view_pdf') )
+              =link_to(t('global.view_pdf'), nil, class: 'letters-of-credit-view-pdf')
