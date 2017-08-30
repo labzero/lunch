@@ -11,9 +11,9 @@
   %section
     %dl
       %dt= t('reports.pages.account_summary.institution_details.sta_number')
-      %dd= @sta_number
+      %dd= @sta_number || t('global.missing_value')
       %dt= t('reports.pages.account_summary.institution_details.fhfa_number')
-      %dd= @fhfa_number
+      %dd= @fhfa_number || t('global.missing_value')
   - if @collateral_notice == 'Y'
     %section.account-summary-collateral-notice.icon-info-before
       = t('reports.pages.account_summary.collateral_delivery_required')

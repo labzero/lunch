@@ -82,6 +82,21 @@ userAccountControl: 512
 lockoutTime: 0
 mail: local-extended-info@example.com
 
+# local user with etransact admin privaleges
+dn: sAMAccountName=local-etransact-admin,dc=fhlbsf-i,dc=com
+objectClass: user
+objectClass: top
+objectClass: person
+cn: Local Etransact Admin User
+sn: Etransact Admin User
+givenname: Local
+sAMAccountName: local-etransact-admin
+userPassword: {SSHA}bFprBGeSCCaDNKKLWww9nEZ8pwlP15wM
+primaryGroupID: 513
+userAccountControl: 512
+lockoutTime: 0
+mail: local-etransact-admin@example.com
+
 # FCN-MemberSite-AccessManagers-R group
 dn: CN=FCN-MemberSite-AccessManagers-R,DC=fhlbsf-i,DC=com
 cn: FCN-MemberSite-AccessManagers-R
@@ -116,6 +131,13 @@ cn: FCN-MemberSite-ExtendedInfo-User
 objectClass: group
 objectClass: top
 member: sAMAccountName=local-extended-info,dc=fhlbsf-i,dc=com
+
+# App-EtransactAdmin-MortgageFinanceSuperAdmin
+dn: CN=App-EtransactAdmin-MortgageFinanceSuperAdmin,DC=fhlbsf-i,DC=com
+cn: App-EtransactAdmin-MortgageFinanceSuperAdmin
+objectClass: group
+objectClass: top
+member: sAMAccountName=local-etransact-admin,dc=fhlbsf-i,dc=com
 
 #dn: ou=people,dc=fhlbsf-i,dc=com
 #objectClass: organizationalUnit

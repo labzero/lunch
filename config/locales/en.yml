@@ -1046,7 +1046,6 @@ en:
           advances: Advances
           affordable_housing: Affordable Housing Program
           collateral: Collateral
-          interest_rate: Interest Rate Derivatives
           money_market: Money Market Transaction
           securities_services: Securities Services
         wire_transfer:
@@ -1622,6 +1621,7 @@ en:
       message: Your institution does not have any beneficiaries on file. Press Add Beneficiary above or call the Member Services Desk at %{phone_number}
       no_beneficiary: No Beneficiary on File
       add_message: Contact the Member Services Desk at %{phone_number} with questions.
+      address: Beneficiary Address
       name: Beneficiary Name
       care_of: Care of
       department: Department
@@ -1629,8 +1629,11 @@ en:
       no_po_box: May not be a PO Box
       city: City
       state: State
+      select_state: Select State
       zip: ZIP Code
       send: Send Request
+    beneficiary_new:
+      title: Add Beneficiary Request Received
   reports:
     meta_title: FHLBSF - Reports
     title: Reports

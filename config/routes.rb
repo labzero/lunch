@@ -203,6 +203,7 @@ Rails.application.routes.draw do
       get 'amend' => 'letters_of_credit#amend'
       constraints Constraints::FeatureEnabled.new('letters-of-credit-beneficiary') do
         get 'beneficiary' => 'letters_of_credit#beneficiary'
+        post 'beneficiary_new' => 'letters_of_credit#beneficiary_new'
       end
     end
   end

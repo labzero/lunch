@@ -12,4 +12,8 @@ class LettersOfCreditPolicy < ApplicationPolicy
     record.owners.member?(user.id)
   end
 
+  def add_beneficiary?
+    record.owners.member?(user.id)
+  end
+
 end

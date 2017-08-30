@@ -5,6 +5,58 @@ class LettersOfCreditController < ApplicationController
   include SidebarHelper
   include DatePickerHelper
 
+  STATES = [ ["AK", "Alaska"],
+             ["AL", "Alabama"],
+             ["AR", "Arkansas"],
+             ["AZ", "Arizona"],
+             ["CA", "California"],
+             ["CO", "Colorado"],
+             ["CT", "Connecticut"],
+             ["DC", "District of Columbia"],
+             ["DE", "Delaware"],
+             ["FL", "Florida"],
+             ["GA", "Georgia"],
+             ["HI", "Hawaii"],
+             ["IA", "Iowa"],
+             ["ID", "Idaho"],
+             ["IL", "Illinois"],
+             ["IN", "Indiana"],
+             ["KS", "Kansas"],
+             ["KY", "Kentucky"],
+             ["LA", "Louisiana"],
+             ["MA", "Massachusetts"],
+             ["MD", "Maryland"],
+             ["ME", "Maine"],
+             ["MI", "Michigan"],
+             ["MN", "Minnesota"],
+             ["MO", "Missouri"],
+             ["MS", "Mississippi"],
+             ["MT", "Montana"],
+             ["NC", "North Carolina"],
+             ["ND", "North Dakota"],
+             ["NE", "Nebraska"],
+             ["NH", "New Hampshire"],
+             ["NJ", "New Jersey"],
+             ["NM", "New Mexico"],
+             ["NV", "Nevada"],
+             ["NY", "New York"],
+             ["OH", "Ohio"],
+             ["OK", "Oklahoma"],
+             ["OR", "Oregon"],
+             ["PA", "Pennsylvania"],
+             ["RI", "Rhode Island"],
+             ["SC", "South Carolina"],
+             ["SD", "South Dakota"],
+             ["TN", "Tennessee"],
+             ["TX", "Texas"],
+             ["UT", "Utah"],
+             ["VI", "Virgin Islands"],
+             ["VT", "Vermont"],
+             ["WA", "Washington"],
+             ["WI", "Wisconsin"],
+             ["WV", "West Virginia"],
+             ["WY", "Wyoming"] ].freeze
+
   LC_INSTRUMENT_TYPE = 'LC'.freeze
 
   before_action do
@@ -24,8 +76,11 @@ class LettersOfCreditController < ApplicationController
     @lc_agreement_flag = member[:customer_lc_agreement_flag]
   end
 
-  before_action :fetch_letter_of_credit_request, except: [:manage, :view, :amend]
-  after_action :save_letter_of_credit_request, except: [:manage, :view, :amend]
+  before_action :fetch_beneficiary_request, only: [:beneficiary, :beneficiary_new]
+  after_action :save_beneficiary_request, only: [:beneficiary]
+
+  before_action :fetch_letter_of_credit_request, except: [:manage, :view, :amend, :beneficiary, :beneficiary_new]
+  after_action :save_letter_of_credit_request, except: [:manage, :view, :amend, :beneficiary, :beneficiary_new]
 
   # GET
   def manage
@@ -131,6 +186,22 @@ class LettersOfCreditController < ApplicationController
     @lc_number = params[:lc_number]
   end
 
+  # GET
+  def beneficiary
+    set_titles(t('letters_of_credit.beneficiary.add'))
+    @states_dropdown = STATES.collect{|state| [state[0].to_s + ' - ' + state[1].to_s, state[0]]}
+    @states_dropdown_default = t('letters_of_credit.beneficiary.select_state')
+  end
+
+  # POST
+  def beneficiary_new
+    set_titles(t('letters_of_credit.beneficiary_new.title'))
+    beneficiary_request.attributes = params[:beneficiary_request]
+    if beneficiary_request.valid?
+      MemberMailer.beneficiary_request(current_member_id, @beneficiary_request.to_json, current_user).deliver_now
+    end
+  end
+
   private
 
   def set_titles(title)
@@ -190,6 +261,24 @@ class LettersOfCreditController < ApplicationController
 
   def save_letter_of_credit_request
     @letter_of_credit_request.save if @letter_of_credit_request
+  end
+
+  def beneficiary_request
+    @beneficiary_request ||= BeneficiaryRequest.new(current_member_id, request)
+    @beneficiary_request.owners.add(current_user.id)
+    @beneficiary_request
+  end
+
+  def fetch_beneficiary_request
+    beneficiary_request_params = (request.params[:beneficiary_request] || {}).with_indifferent_access
+    id = beneficiary_request_params[:id]
+    @beneficiary_request = id ? BeneficiaryRequest.find(id, request) : beneficiary_request
+    authorize @beneficiary_request, :add_beneficiary?
+    @beneficiary_request
+  end
+
+  def save_beneficiary_request
+    @beneficiary_request.save if @beneficiary_request
   end
 
   def prioritized_error_message(letter_of_credit)

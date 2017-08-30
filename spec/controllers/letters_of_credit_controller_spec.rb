@@ -12,6 +12,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
     customer_lc_agreement_flag: double('customer lc agreement flag') 
   }}
   let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest, save: nil, :attributes= => nil, beneficiary_name: nil, owners: instance_double(Set, add: nil), lc_number: nil, id: nil) }
+  let(:beneficiary_request) { instance_double(BeneficiaryRequest, save: nil, :attributes= => nil, owners: instance_double(Set, add: nil), id: nil) }
   let(:members_service) { double("A Member Service") }
 
   before do
@@ -334,6 +335,88 @@ RSpec.describe LettersOfCreditController, :type => :controller do
     it 'populates the lc_number ' do
       call_action
       expect(assigns[:lc_number]).to eq(lc_number.to_s)
+    end
+  end
+
+  context 'controller actions that fetch a beneficiary request' do
+    before do
+      allow(controller).to receive(:fetch_beneficiary_request) do
+        controller.instance_variable_set(:@beneficiary_request, beneficiary_request)
+      end
+    end
+
+    describe 'GET beneficiary' do
+      let(:call_action) { get :beneficiary }
+
+      it_behaves_like 'a user required action', :get, :beneficiary
+
+      it 'calls `set_titles` with the appropriate title' do
+        expect(controller).to receive(:set_titles).with(I18n.t('letters_of_credit.beneficiary.add'))
+        call_action
+      end
+
+      it 'sets `@states_dropdown` to a list of states' do
+        call_action
+        expect(assigns[:states_dropdown]).to eq(described_class::STATES.collect{|state| [state[0].to_s + ' - ' + state[1].to_s, state[0]]})
+      end
+
+      it 'sets `@states_dropdown_default` to `Select State`' do
+        call_action
+        expect(assigns[:states_dropdown_default]).to eq(I18n.t('letters_of_credit.beneficiary.select_state'))
+      end
+    end
+
+    describe 'POST beneficiary_new' do
+      let(:loc_params) { {sentinel: SecureRandom.hex} }
+      let(:call_action) { post :beneficiary_new, beneficiary_request: loc_params }
+      let(:beneficiary_json) { double('loc as json') }
+      let(:mailer) { double('mailer', deliver_now: nil) }
+      let(:user) { instance_double(User, display_name: nil, accepted_terms?: true, id: nil) }
+
+      before do
+        allow(beneficiary_request).to receive(:valid?).and_return(true)
+        allow(MemberMailer).to receive(:beneficiary_request).and_return(mailer)
+      end
+
+      allow_policy :letters_of_credit, :request?
+
+      it_behaves_like 'a user required action', :post, :beneficiary_new, beneficiary_request: {}
+      it 'calls `set_titles` with the appropriate title' do
+        expect(controller).to receive(:set_titles).with(I18n.t('letters_of_credit.beneficiary_new.title'))
+        call_action
+      end
+      it 'sets the attributes of the letter of credit request with the `letter_of_credit_request` params hash' do
+        expect(beneficiary_request).to receive(:attributes=).with(loc_params)
+        call_action
+      end
+      describe 'when the created LetterOfCreditRequest instance is valid' do
+        it 'renders the `preview` view' do
+          call_action
+          expect(response.body).to render_template(:beneficiary_new)
+        end
+        it 'converts the beneficiary  request to JSON' do
+          expect(beneficiary_request).to receive(:to_json)
+          call_action
+        end
+        it 'calls `InternalMailer#beneficiary_request` with the current_member_id' do
+          expect(MemberMailer).to receive(:beneficiary_request).with(member_id, any_args).and_return(mailer)
+          call_action
+        end
+        it 'calls `InternalMailer#beneficiary_request` with the beneficiary as JSON' do
+          allow(beneficiary_request).to receive(:to_json).and_return(beneficiary_json)
+          expect(MemberMailer).to receive(:beneficiary_request).with(anything, beneficiary_json, any_args).and_return(mailer)
+          call_action
+        end
+        it 'calls `InternalMailer#beneficiary_request` with the current_user' do
+          allow(controller).to receive(:current_user).and_return(user)
+          expect(MemberMailer).to receive(:beneficiary_request).with(anything, anything, user).and_return(mailer)
+          call_action
+        end
+        it 'calls `deliver_now` on the result of `InternalMailer#beneficiary_request`' do
+          expect(mailer).to receive(:deliver_now)
+          call_action
+        end
+      end
     end
   end
 
@@ -880,6 +963,116 @@ RSpec.describe LettersOfCreditController, :type => :controller do
         end
       end
     end
+
+    describe '`beneficiary_request`' do
+      let(:call_method) { controller.send(:beneficiary_request) }
+
+      context 'when the `@beneficiary_request` instance variable already exists' do
+        before { controller.instance_variable_set(:@beneficiary_request, beneficiary_request) }
+
+        it 'does not create a new `BeneficiaryRequest`' do
+          expect(BeneficiaryRequest).not_to receive(:new)
+          call_method
+        end
+        it 'returns the existing `@beneficiary_request`' do
+          expect(call_method).to eq(beneficiary_request)
+        end
+      end
+      context 'when the `@beneficiary_request` instance variable does not yet exist' do
+        before { allow(BeneficiaryRequest).to receive(:new).and_return(beneficiary_request) }
+
+        it 'creates a new `BeneficiaryRequest` with the current_member_id and request' do
+          expect(BeneficiaryRequest).to receive(:new).with(member_id, request)
+          call_method
+        end
+        it 'sets `@beneficiary_request` to the new BeneficiaryRequest instance' do
+          call_method
+          expect(controller.instance_variable_get(:@beneficiary_request)).to eq(beneficiary_request)
+        end
+        it 'returns the newly created `@beneficiary_request`' do
+          expect(call_method).to eq(beneficiary_request)
+        end
+      end
+      it 'adds the current user to the owners list' do
+        allow(BeneficiaryRequest).to receive(:new).and_return(beneficiary_request)
+        expect(beneficiary_request.owners).to receive(:add).with(subject.current_user.id)
+        call_method
+      end
+    end
+
+    describe '`fetch_beneficiary_request`' do
+      let(:request) { double('request', params: {beneficiary_request: {id: id}}) }
+      let(:call_method) { controller.send(:fetch_beneficiary_request) }
+      before { allow(subject).to receive(:authorize) }
+      shared_examples 'it checks the add_beneficiary authorization' do
+        it 'checks if the current user is allowed to add_beneficiary the advance' do
+          expect(subject).to receive(:authorize).with(beneficiary_request, :add_beneficiary?)
+          call_method
+        end
+        it 'raises any errors raised by checking to see if the user is authorized to add_beneficiary the advance' do
+          error = Pundit::NotAuthorizedError
+          allow(subject).to receive(:authorize).and_raise(error)
+          expect{ call_method }.to raise_error(error)
+        end
+      end
+      context 'when there is an `id` in the `beneficiary_request` params hash' do
+        let(:id) { double('id') }
+        before do
+          allow(controller).to receive(:request).and_return(request)
+          allow(BeneficiaryRequest).to receive(:find).and_return(beneficiary_request)
+        end
+        it_behaves_like 'it checks the add_beneficiary authorization'
+        it 'calls `BeneficiaryRequest#find` with the id and the request' do
+          expect(BeneficiaryRequest).to receive(:find).with(id, request)
+          call_method
+        end
+        it 'sets `@beneficiary_request` to the result of `BeneficiaryRequest#find`' do
+          call_method
+          expect(controller.instance_variable_get(:@beneficiary_request)).to eq(beneficiary_request)
+        end
+        it 'returns the found request' do
+          expect(call_method).to eq(beneficiary_request)
+        end
+      end
+      context 'when there is no `id` in the `beneficiary_request` params hash' do
+        before { allow(controller).to receive(:beneficiary_request).and_return(beneficiary_request) }
+        it_behaves_like 'it checks the add_beneficiary authorization'
+        it 'calls `beneficiary_request` method' do
+          expect(controller).to receive(:beneficiary_request)
+          call_method
+        end
+        it 'sets `@beneficiary_request` to the result of `beneficiary_request`' do
+          call_method
+          expect(controller.instance_variable_get(:@beneficiary_request)).to eq(beneficiary_request)
+        end
+        it 'returns the result of `beneficiary_request`' do
+          expect(call_method).to eq(beneficiary_request)
+        end
+      end
+    end
+
+    describe '`save_beneficiary_request`' do
+      let(:call_method) { controller.send(:save_beneficiary_request) }
+      context 'when the `@beneficiary_request` instance variable exists' do
+        before { controller.instance_variable_set(:@beneficiary_request, beneficiary_request) }
+
+        it 'calls `save` on the @beneficiary_request' do
+          expect(beneficiary_request).to receive(:save)
+          call_method
+        end
+        it 'returns the result of calling `save`' do
+          save_result = double('result')
+          allow(beneficiary_request).to receive(:save).and_return(save_result)
+          expect(call_method).to eq(save_result)
+        end
+      end
+      context 'when the `@beneficiary_request` instance variable does not exist' do
+        it 'returns nil' do
+          expect(call_method).to be nil
+        end
+      end
+    end
+
 
     describe '`prioritized_error_message`' do
       let(:max_term) { rand(12..120) }

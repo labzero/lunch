@@ -367,6 +367,10 @@ RSpec.describe ReportsController, :type => :controller do
           end
         end
       end
+      it 'checks to see if the report has been disabled' do
+        expect(subject).to receive(:report_disabled?).with(described_class::CAPITAL_STOCK_TRIAL_BALANCE_WEB_FLAGS)
+        call_action
+      end
       describe 'when the report is disabled' do
         before { allow(subject).to receive(:report_disabled?).and_return(true) }
         it_behaves_like 'a capital stock trial balance report with no data'
@@ -1937,7 +1941,7 @@ RSpec.describe ReportsController, :type => :controller do
       end
       describe 'when `current` is selected' do
         it 'should set `@as_of` to the value `as_of_date` param' do
-          get :borrowing_capacity, as_of_date: alternate
+          get :borrowing_capacity, as_of_date: alternate.strftime('%Y-%m-%d')
           expect(assigns[:as_of]).to eq(alternate.iso8601)
         end
         it 'sets `@as_of` to the current date if `as_of_date` not supplied' do
@@ -1979,7 +1983,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
         it 'passes the `as_of_date` param if one is provided' do
           expect(MemberBalanceServiceJob).to receive(job_call).with(anything, anything, anything, alternate.to_s).and_return(job_response)
-          get :borrowing_capacity, as_of_date: alternate
+          get :borrowing_capacity, as_of_date: alternate.strftime('%Y-%m-%d')
         end
       end
     end
@@ -1991,7 +1995,7 @@ RSpec.describe ReportsController, :type => :controller do
 
       it 'sets the @load_url with the appropriate params' do
         call_action
-        expect(assigns[:load_url]).to eq(reports_borrowing_capacity_url(job_id: job_status.id))
+        expect(assigns[:load_url]).to eq(reports_borrowing_capacity_url(job_id: job_status.id, as_of_date: Time.zone.today))
       end
       it 'sets @borrowing_capacity_summary[:deferred] to true' do
         call_action
@@ -2062,6 +2066,10 @@ RSpec.describe ReportsController, :type => :controller do
           it 'raises an error when no data are available' do
             expect(update_date).to receive(:<).with(current_date).and_return(true)
             expect { call_action }.to raise_error(StandardError, "Previous month's data is not available yet")
+          end
+          it 'does not raise an error if `UPDATE_DATE` is nil' do
+            allow(response_hash).to receive(:[]).with('UPDATE_DATE').and_return(nil)
+            expect { call_action }.not_to raise_error
           end
         end
       end
@@ -2896,6 +2904,7 @@ RSpec.describe ReportsController, :type => :controller do
       before do
         allow(MembersService).to receive(:new).and_return(member_service_instance)
         allow(member_service_instance).to receive(:signers_and_users).and_return(signers_and_users)
+        allow(controller).to receive(:report_disabled?).and_return(false)
       end
       it 'sets @authorization_filter to the `authorizations_filter` param' do
         get :authorizations, :authorizations_filter => 'my filter param'
@@ -2949,11 +2958,26 @@ RSpec.describe ReportsController, :type => :controller do
           expect(assigns[:authorizations_table_data][:deferred]).to eq(true)
         end
       end
+      shared_examples 'it handles the disabled state of the report' do
+        it 'calls `report_disabled?` with the `AUTHORIZATIONS_WEB_FLAGS`' do
+          expect(controller).to receive(:report_disabled?).with(described_class::AUTHORIZATIONS_WEB_FLAGS)
+          make_request
+        end
+        context 'when the report is disabled' do
+          before { allow(controller).to receive(:report_disabled?).and_return(true) }
+
+          it 'returns an empty array for `@authorizations_table_data[:rows]`' do
+            make_request
+            expect(assigns[:authorizations_table_data][:rows]).to eq([])
+          end
+        end
+      end
       describe 'when passed a Job ID' do
         let(:make_request) { get :authorizations, job_id: job_id }
         before do
           allow(JobStatus).to receive(:find_by).and_return(job_status)
         end
+        it_behaves_like 'it handles the disabled state of the report'
         it 'should look up the JobStatus related to that ID' do
           expect(JobStatus).to receive(:find_by).with(id: job_id.to_s, user_id: subject.current_user.id, status: JobStatus.statuses[:completed]).and_return(job_status)
           make_request
@@ -2981,11 +3005,13 @@ RSpec.describe ReportsController, :type => :controller do
       end
       describe 'when the `skip_deferred_load` controller attribute is true' do
         let(:make_request) { get :authorizations }
-        let(:service_instance) { double('service instance')}
+        let(:service_instance) { double('service instance', signers_and_users: [])}
         before do
           controller.skip_deferred_load = true
           allow(MembersService).to receive(:new).and_return(service_instance)
         end
+
+        it_behaves_like 'it handles the disabled state of the report'
         it 'gets signers and users from MembersService' do
           expect(service_instance).to receive(:signers_and_users)
           make_request
@@ -3829,8 +3855,9 @@ RSpec.describe ReportsController, :type => :controller do
       end
 
       shared_examples 'disabled overall report' do
-        before do
-          allow(subject).to receive(:report_disabled?).with(described_class::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
+        it 'checks to see if the `account_summary` report has been disabled' do
+          expect(subject).to receive(:report_disabled?).with(described_class::ACCOUNT_SUMMARY_WEB_FLAGS)
+          make_request_shared_example
         end
         it 'sets @collateral_notice to N' do
           make_request_shared_example
@@ -3842,19 +3869,39 @@ RSpec.describe ReportsController, :type => :controller do
             expect(assigns[instance_var]).to be(nil)
           end
         end
+        [:financing_availability, :credit_outstanding, :standard_collateral, :sbc_collateral, :capital_stock_and_leverage].each do |table|
+          it "sets the `value` of all second columns in the `@#{table}[:rows]` array to nil" do
+            make_request_shared_example
+            table_rows = assigns[table][:rows]
+            expect(table_rows.length).to be > 0
+            table_rows.each do |row|
+              expect(row[:columns][1][:value]).to be nil
+            end
+          end
+        end
+        it 'sets the `value` of all second columns in the `@collateral_totals[:footer]` array to nil' do
+          make_request_shared_example
+          footer_rows = assigns[:collateral_totals][:footer]
+          expect(footer_rows.length).to be > 0
+          footer_rows.each do |row|
+            expect(row[1][:value]).to be nil
+          end
+        end
       end
 
       shared_examples 'disabled financing availability' do
-        before do
-          allow(subject).to receive(:report_disabled?).with(MembersService::FINANCING_AVAILABLE_DATA).and_return(true)
-        end
-        it 'sets @financing_availability to {}' do
+        it 'sets the `value` of all second columns in the `@financing_availability` array to nil' do
           make_request_shared_example
-          expect(assigns[:financing_availability]).to eq({})
+          table_rows = assigns[:financing_availability][:rows]
+          expect(table_rows.length).to be > 0
+          table_rows.each do |row|
+            expect(row[:columns][1][:value]).to be nil
+          end
         end
       end
 
       describe 'report disabled in web admin' do
+        before { allow(subject).to receive(:report_disabled?).with(described_class::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true) }
         include_examples 'disabled overall report'
         it 'sets @financing_availability' do
           make_request_shared_example
@@ -3862,6 +3909,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
       describe 'financing availability is disabled in the web admin' do
+        before { allow(subject).to receive(:report_disabled?).with(MembersService::FINANCING_AVAILABLE_DATA).and_return(true) }
         include_examples 'disabled financing availability'
         [
           :collateral_notice, :sta_number, :fhfa_number, :member_name, :credit_outstanding, :standard_collateral,
@@ -3874,6 +3922,10 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
       describe 'when both the financing availability and overall report is disabled' do
+        before do
+          allow(subject).to receive(:report_disabled?).with(described_class::ACCOUNT_SUMMARY_WEB_FLAGS).and_return(true)
+          allow(subject).to receive(:report_disabled?).with(MembersService::FINANCING_AVAILABLE_DATA).and_return(true)
+        end
         include_examples 'disabled overall report'
         include_examples 'disabled financing availability'
       end

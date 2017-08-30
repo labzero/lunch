@@ -170,7 +170,35 @@ module MAPI
               end
             end
           end
-
+          api do
+            key :path, "/{id}/borrowing_capacity_data_available/{as_of_date}"
+            operation do
+              key :method, 'GET'
+              key :summary, 'Determine whether or not borrowing capacity data is available for the given memer and period.'
+              key :notes, ''
+              key :type, :BorrowingCapacityDataAvailable
+              key :nickname, :isDataAvailableForMemberAndPeriod
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :integer
+                key :description, 'The memberid'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :as_of_date
+                key :defaultValue, Time.zone.today
+                key :required, false
+                key :type, :date
+                key :description, 'Check for data as of this date'
+              end
+              response_message do
+                key :code, 200
+                key :message, 'OK'
+              end
+            end
+          end
           api do
             key :path, "/{id}/borrowing_capacity_details/{as_of_date}"
             operation do
@@ -1325,17 +1353,13 @@ module MAPI
 
         # borrowing capacity details
         relative_get "/:id/borrowing_capacity_details/:as_of_date" do
-          member_id = params[:id]
-          as_of_date = params[:as_of_date]
+          MAPI::Services::Member::BorrowingCapacity.borrowing_capacity_details(self, params[:id], params[:as_of_date])
+        end
 
-          #1.check that input date if provided to be valid date and expected format.
-          if as_of_date.length > 0
-            check_date_format = as_of_date.match(MAPI::Shared::Constants::REPORT_PARAM_DATE_FORMAT)
-            if !check_date_format
-              halt 400, "Invalid Start Date format of yyyy-mm-dd"
-            else
-              MAPI::Services::Member::BorrowingCapacity.borrowing_capacity_details(self, member_id, as_of_date)
-            end
+        # borrowing capacity data available
+        relative_get "/:id/borrowing_capacity_data_available/:as_of_date" do
+          MAPI::Services::EtransactAdvances.rescued_json_response(self) do
+            MAPI::Services::Member::BorrowingCapacity.borrowing_capacity_data_available?(self, params[:id], params[:as_of_date])
           end
         end
 

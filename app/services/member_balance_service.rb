@@ -94,6 +94,10 @@ class MemberBalanceService < MAPIService
     data
   end
 
+  def borrowing_capacity_data_available?(period)
+    get_hash(:borrowing_capacity_data_available, "member/#{@member_id}/borrowing_capacity_data_available/#{period}")[:data_available]
+  end
+
   def borrowing_capacity_summary(date)
     # get borrowing capacity by date
     return nil unless data = get_hash(:borrowing_capacity_summary, "member/#{@member_id}/borrowing_capacity_details/#{date}")

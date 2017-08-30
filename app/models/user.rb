@@ -57,6 +57,7 @@ class User < ActiveRecord::Base
     ACCESS_MANAGER = 'access_manager'
     USER_WITH_EXTENDED_INFO_ACCESS = 'user_with_extended_info_access'
     ADMIN = 'admin'
+    ETRANSACT_ADMIN = 'etransact_admin'
     AUTHORIZED_SIGNER = 'authorized_signer'
     SIGNER_MANAGER = 'signer_manager'
     SIGNER_ENTIRE_AUTHORITY = 'signer_entire_authority'
@@ -75,6 +76,7 @@ class User < ActiveRecord::Base
     'FCN-MemberSite-AccessManagers-R' => Roles::ACCESS_MANAGER_READ_ONLY,
     'FCN-MemberSite-AccessManagers' => Roles::ACCESS_MANAGER,
     'FCN-MemberSite-Admins' => Roles::ADMIN,
+    'App-EtransactAdmin-MortgageFinanceSuperAdmin' => Roles::ETRANSACT_ADMIN,
     'FCN-MemberSite-ExtendedInfo-User' => Roles::USER_WITH_EXTENDED_INFO_ACCESS,
     'signer' => Roles::AUTHORIZED_SIGNER,
     'signer-manager' => Roles::SIGNER_MANAGER,

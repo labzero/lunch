@@ -941,6 +941,48 @@ describe MAPI::ServiceApp do
         execute_trade
       end
     end
+    describe 'checking the results of the SOAP call to the TradeService' do
+      let(:operation) { double('some operation') }
+      let(:parsed_response) { double('parsed doc', at_css: double('status', content: 'Success')) }
+      let(:response) { double('TradeService response', :success? => true, doc: double('Nokogiri doc', :remove_namespaces! => nil, xpath: parsed_response)) }
+      let(:connection) { double('Savon connection', call: response) }
+      before do
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:init_execute_trade_connection).and_return(connection)
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_total_daily_limit).and_return({})
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_capital_stock).and_return({})
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_credit).and_return({})
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_collateral).and_return({})
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_enabled_product).and_return({})
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:check_max_term_limit).and_return({})
+        allow(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(:build_message).and_return([double('some_message'), {}])
+      end
+      context 'when the advance is not future-funded' do
+        let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, true, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period) }
+
+        [:check_total_daily_limit, :check_capital_stock, :check_credit, :check_collateral, :check_enabled_product, :check_max_term_limit].each do |method|
+          it "calls `MAPI::Services::EtransactAdvances::ExecuteTrade::#{method}`" do
+            expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(method).and_return({})
+            call_method
+          end
+        end
+      end
+      context 'when the advance is future-funded' do
+        let(:call_method) { MAPI::Services::EtransactAdvances::ExecuteTrade.execute_trade_internal(app, member_id, instrument, operation, amount, advance_term, advance_type, rate, true, signer, markup, blended_cost_of_funds, cost_of_funds, benchmark_rate, maturity_date, allow_grace_period, (Time.zone.today + 2.days)) }
+
+        [:check_total_daily_limit, :check_capital_stock, :check_collateral].each do |method|
+          it "does not call `MAPI::Services::EtransactAdvances::ExecuteTrade::#{method}`" do
+            expect(MAPI::Services::EtransactAdvances::ExecuteTrade).not_to receive(method)
+            call_method
+          end
+        end
+        [:check_credit, :check_enabled_product, :check_max_term_limit].each do |method|
+          it "calls `MAPI::Services::EtransactAdvances::ExecuteTrade::#{method}`" do
+            expect(MAPI::Services::EtransactAdvances::ExecuteTrade).to receive(method).and_return({})
+            call_method
+          end
+        end
+      end
+    end
     shared_examples 'errors' do
       it 'returns an error status is found in the SOAP transactionResult', vcr: {cassette_name: 'execute_trade_service_error'} do
         allow(app.settings).to receive(:environment).and_return(:production)

@@ -180,7 +180,7 @@ RSpec.describe Rack::Session::Redis do
     describe '`persist_session`' do
       let(:old_session) { double('An Old Session')}
       let(:call_method) { subject.send(:persist_session, redis, sid, session, options) }
-      let(:redis_transaction) { double('A Redis Transaction', hdel: nil, hmset: nil)}
+      let(:redis_transaction) { double('A Redis Transaction', hdel: nil, hmset: nil, expire: nil)}
       let(:updated_hash) { {SecureRandom.hex => [double('Some Value'), double('Some Value')], SecureRandom.hex => double('Some Value')} }
       let(:deleted_hash) { {SecureRandom.hex => false, SecureRandom.hex => false} }
 
@@ -229,6 +229,21 @@ RSpec.describe Rack::Session::Redis do
             expect(args).to include_slice([described_class::SID_KEY, sid])
           end
           call_method
+        end
+        it 'sets the sid to expire' do
+          expect(redis_transaction).to receive(:expire).with(sid, anything)
+          call_method
+        end
+        describe 'setting the expiration ttl' do
+          let(:session_ttl) { rand(1000..999999) }
+
+          [:expire_after, :expire_in, :expires_in].each do |key|
+            it "sets the ttl to the `#{key}` value in the options hash" do
+              options = {key => session_ttl}
+              expect(redis_transaction).to receive(:expire).with(anything, session_ttl)
+              subject.send(:persist_session, redis, sid, session, options)
+            end
+          end
         end
       end
       it 'returns the success code from the transaction' do

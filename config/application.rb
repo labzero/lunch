@@ -61,8 +61,10 @@ module FhlbMember
       'Cache-Control' => 'no-store'
     }
 
+    config.x.default_redis_session_store_ttl = 12.hours
     config.x.advance_request.key_expiration = 1.hour
     config.x.letter_of_credit_request.key_expiration = 1.hour
+    config.x.beneficiary_request.key_expiration = 1.hour
     config.x.early_shutoff_request.key_expiration = 1.hour
 
     # Configure our cache

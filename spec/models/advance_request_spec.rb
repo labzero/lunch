@@ -648,10 +648,32 @@ describe AdvanceRequest do
       expect(subject).to receive(:custom_term_valid_dates_check).ordered
       call_method
     end
-    it 'calls `perform_limit_check`' do
-      expect(subject).to receive(:clear_errors).ordered
-      expect(subject).to receive(:perform_limit_check).ordered
-      call_method
+    context 'when the `funding_date` is nil' do
+      before { subject.funding_date = nil }
+
+      it 'calls `perform_limit_check`' do
+        expect(subject).to receive(:clear_errors).ordered
+        expect(subject).to receive(:perform_limit_check).ordered
+        call_method
+      end
+    end
+    context 'when the `funding_date` is today' do
+      before { subject.funding_date = Time.zone.today.iso8601 }
+
+      it 'calls `perform_limit_check`' do
+        expect(subject).to receive(:clear_errors).ordered
+        expect(subject).to receive(:perform_limit_check).ordered
+        call_method
+      end
+    end
+    context 'when the `funding_date` is not today' do
+      before { subject.funding_date = (Time.zone.today + rand(1..3).days).iso8601 }
+
+      it 'does not call call `perform_limit_check`' do
+        expect(subject).to receive(:clear_errors).ordered
+        expect(subject).not_to receive(:perform_limit_check)
+        call_method
+      end
     end
     it 'calls `perform_preview`' do
       expect(subject).to receive(:clear_errors).ordered

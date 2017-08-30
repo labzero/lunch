@@ -13,6 +13,9 @@ changetype: delete
 dn: sAMAccountName=local-extended-info,dc=fhlbsf-i,dc=com
 changetype: delete
 
+dn: sAMAccountName=local-etransact-admin,dc=fhlbsf-i,dc=com
+changetype: delete
+
 dn: CN=FCN-MemberSite-AccessManagers-R,DC=fhlbsf-i,DC=com
 changetype: delete
 
@@ -26,6 +29,9 @@ dn: CN=FCN-MemberSite-ExternalAccess,DC=fhlbsf-i,DC=com
 changetype: delete
 
 dn: CN=FCN-MemberSite-ExtendedInfo-User,DC=fhlbsf-i,DC=com
+changetype: delete
+
+dn: CN=App-EtransactAdmin-MortgageFinanceSuperAdmin,DC=fhlbsf-i,DC=com
 changetype: delete
 
 dn: dc=fhlbsf-i,dc=com

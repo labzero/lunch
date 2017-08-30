@@ -830,4 +830,22 @@ describe MAPI::ServiceApp do
       expect(last_response.body).to eq(results.to_json)
     end
   end
+
+  describe 'get `member/{id}/borrowing_capacity_data_available`' do
+    let(:result) { [true, false].sample }
+    let(:member_id) { rand(1000..99999) }
+    let(:as_of) { '2017-07-01' }
+    let(:call_endpoint) { get "/member/#{member_id}/borrowing_capacity_data_available/#{as_of}" }
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 
+                    "/member/#{rand(1000..99999)}/borrowing_capacity_data_available/2017-07-01", 
+                    :get, 
+                    MAPI::Services::Member::BorrowingCapacity, 
+                    :borrowing_capacity_data_available?
+    it 'returns 200 and request_id after calling `MAPI::Services::Member::BorrowingCapacity.borrowing_capacity_data_available?`' do
+      allow(MAPI::Services::Member::BorrowingCapacity).to receive(:borrowing_capacity_data_available?).and_return({ data_available: result })
+      call_endpoint
+      expect(last_response.status).to be(200)
+      expect(JSON.parse(last_response.body)['data_available']).to eq(result)
+    end
+  end
 end

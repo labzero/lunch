@@ -41,71 +41,89 @@ RSpec.describe MemberProcessQuickReportsJob, type: :job do
     expect(report_set).to receive(:missing_reports).with(member.quick_report_list).and_return([])
     run_job
   end
-  describe 'for each missing report' do
+  describe 'when there are missing reports' do
     let(:reports) { ['foo', 'bar'] }
     let(:date_hash) { double('A Date Hash', '[]': nil) }
+    let(:member_balance_service) { double('member balance service') }
     before do
       allow(report_set).to receive(:missing_reports).and_return(reports)
       allow(report_set).to receive_message_chain(:quick_reports, :reports_named, :first_or_create!)
       allow(subject).to receive(:default_dates_hash).and_return(date_hash)
       allow(member).to receive(:quick_report_params).and_return({})
+      allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
+      allow(member_balance_service).to receive(:borrowing_capacity_data_available?)
     end
-    it 'looks up the parameters for the report' do
-      reports.each do |report|
-        expect(member).to receive(:quick_report_params).with(report).and_return({})
+    describe 'checking for borrowing capacity data' do
+      it 'raises an error if there is no borowing capacity data' do
+        allow(member_balance_service).to receive(:borrowing_capacity_data_available?).and_return(false)
+        run_job
+        expect(subject.job_status.failed?).to be(true)
       end
-      run_job
-    end
-    it 'translates the parameter values into dates' do
-      reports.each do |report|
-        params = {
-          double('A Param') => double('A Value'),
-          double('A Param') => double('A Value')
-        }
-        translated_params = {
-          params.keys.first => double('A Translated Value'),
-          params.keys.last => double('A Translated Value')
-        }
-        allow(member).to receive(:quick_report_params).with(report).and_return(params)
-        allow(date_hash).to receive(:[]).with(params.values.first).and_return(translated_params.values.first)
-        allow(date_hash).to receive(:[]).with(params.values.last).and_return(translated_params.values.last)
-        expect(FhlbJob).to receive(:perform_now).with(anything, report, anything, translated_params)
+      it 'does not raise an error if there is borrowing capacity data available' do
+        allow(member_balance_service).to receive(:borrowing_capacity_data_available?).and_return(true)
+        run_job
+        expect(subject.job_status.failed?).to be(false)
       end
-      run_job
-    end
-    describe 'when a parameter is not found in the date hash' do
-      let(:params) { { double('A Param Name') => double('A Param Value') } }
-      it 'passes the parameter value through' do
-        allow(member).to receive(:quick_report_params).with(anything).and_return(params)
-        allow(date_hash).to receive(:[]).and_return(nil)
-        expect(FhlbJob).to receive(:perform_now).with(anything, anything, anything, params).twice
-        run_job      
+      describe 'when there is borrowing capacity data available' do
+        before { allow(member_balance_service).to receive(:borrowing_capacity_data_available?).with(anything).and_return(true) }
+        it 'looks up the parameters for the report' do
+          reports.each do |report|
+            expect(member).to receive(:quick_report_params).with(report).and_return({})
+          end
+          run_job
+        end
+        it 'translates the parameter values into dates' do
+          reports.each do |report|
+            params = {
+              double('A Param') => double('A Value'),
+              double('A Param') => double('A Value')
+            }
+            translated_params = {
+              params.keys.first => double('A Translated Value'),
+              params.keys.last => double('A Translated Value')
+            }
+            allow(member).to receive(:quick_report_params).with(report).and_return(params)
+            allow(date_hash).to receive(:[]).with(params.values.first).and_return(translated_params.values.first)
+            allow(date_hash).to receive(:[]).with(params.values.last).and_return(translated_params.values.last)
+            expect(FhlbJob).to receive(:perform_now).with(anything, report, anything, translated_params)
+          end
+          run_job
+        end
+        describe 'when a parameter is not found in the date hash' do
+          let(:params) { { double('A Param Name') => double('A Param Value') } }
+          it 'passes the parameter value through' do
+            allow(member).to receive(:quick_report_params).with(anything).and_return(params)
+            allow(date_hash).to receive(:[]).and_return(nil)
+            expect(FhlbJob).to receive(:perform_now).with(anything, anything, anything, params).twice
+            run_job      
+          end
+        end
+        it 'renders the report as a PDF' do
+          reports.each do |report|
+            expect(RenderReportPDFJob).to receive(:perform_now).with(member_id, report, nil, {})
+          end
+          run_job
+        end
+        it 'saves the rendered report as a QuickReport' do
+          reports.each do |report|
+            quick_reports = double('Array of QuickReports')
+            rendered_report = double('A Rendered Report')
+            allow(RenderReportPDFJob).to receive(:perform_now).with(anything, report, anything, anything).and_return(rendered_report)
+            allow(report_set).to receive_message_chain(:quick_reports, :reports_named).with(report).and_return(quick_reports)
+            expect(quick_reports).to receive(:first_or_create!).with(report: rendered_report)
+          end
+          run_job
+        end
+        it 'continues if a report fails to render' do
+          reports.each do |report|
+            quick_reports = double('Array of QuickReports')
+            allow(RenderReportPDFJob).to receive(:perform_now).with(anything, report, anything, anything).and_return(nil)
+            allow(report_set).to receive_message_chain(:quick_reports, :reports_named).with(report).and_return(quick_reports)
+            expect(quick_reports).to receive(:first_or_create!).with(report: nil)
+          end
+          run_job
+        end
       end
-    end
-    it 'renders the report as a PDF' do
-      reports.each do |report|
-        expect(RenderReportPDFJob).to receive(:perform_now).with(member_id, report, nil, {})
-      end
-      run_job
-    end
-    it 'saves the rendered report as a QuickReport' do
-      reports.each do |report|
-        quick_reports = double('Array of QuickReports')
-        rendered_report = double('A Rendered Report')
-        allow(RenderReportPDFJob).to receive(:perform_now).with(anything, report, anything, anything).and_return(rendered_report)
-        allow(report_set).to receive_message_chain(:quick_reports, :reports_named).with(report).and_return(quick_reports)
-        expect(quick_reports).to receive(:first_or_create!).with(report: rendered_report)
-      end
-      run_job
-    end
-    it 'continues if a report fails to render' do
-      reports.each do |report|
-        quick_reports = double('Array of QuickReports')
-        allow(RenderReportPDFJob).to receive(:perform_now).with(anything, report, anything, anything).and_return(nil)
-        allow(report_set).to receive_message_chain(:quick_reports, :reports_named).with(report).and_return(quick_reports)
-        expect(quick_reports).to receive(:first_or_create!).with(report: nil)
-      end
-      run_job
     end
   end
 end

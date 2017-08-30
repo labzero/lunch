@@ -62,3 +62,9 @@ Scenario: Member sees Resolution and Authorization users when filtering by a rol
   Then I should see 3 authorized users
   And I should see user "Duffy Ruck" with the "Entire Authority" footnoted authorization and no "Securities Services" authorization
   And I should see user "Ronald Ruck" with the "Resolution and Authorization" footnoted authorization and no "Securities Services" authorization
+
+  @local-only @jira-mem-2559
+  Scenario: The authorizations report has been disabled
+    Given the "Authorizations" report has been disabled
+    When I am on the "Authorizations" report page
+    Then I should see an empty report table with Data Unavailable messaging

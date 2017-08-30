@@ -9,7 +9,7 @@ class WebAdminPolicy < ApplicationPolicy
   end
 
   def edit_trade_rules?
-    user && user.roles.include?(::User::Roles::ADMIN)
+    user && user.roles.include?(::User::Roles::ETRANSACT_ADMIN)
   end
 
   def edit_data_visibility?

@@ -50,6 +50,7 @@ class Rack::Session::Redis
     connection.multi do |multi|
       multi.hdel(sid, remove_hash.keys) if remove_hash.present?
       multi.hmset(sid, *(update_hash.to_a.flatten(1) + [options])) if update_hash.present?
+      multi.expire(sid, (options[:expire_after] || options[:expire_in] || options[:expires_in]))
     end.first
   end
 

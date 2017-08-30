@@ -223,4 +223,54 @@ RSpec.describe MemberMailer, :type => :mailer do
       end
     end
   end
+
+  describe '`beneficiary_request` email' do
+    let(:beneficiary_json) { double('loc as json') }
+    let(:member_id) { instance_double(String) }
+    let(:id) { instance_double(String) }
+    let(:beneficiary_request) do
+      instance_double(BeneficiaryRequest,
+                      id: id,
+                            name: nil,
+                            street_address: nil,
+                            city: nil,
+                            state: nil,
+                            zip: nil,
+                            care_of: nil,
+                            department: nil
+      )
+    end
+    let(:user) { instance_double(User, email: "#{SecureRandom.hex}@example.com", display_name: SecureRandom.hex) }
+    let(:build_mail) { mail :beneficiary_request, member_id, beneficiary_json, user }
+    let(:call_method) { InternalMailer.beneficiary_request(member_id, beneficiary_json, user) }
+
+    before do
+      allow(BeneficiaryRequest).to receive(:from_json).and_return(beneficiary_request)
+    end
+
+    it 'includes the display name of the user in the `to` field' do
+      build_mail
+      expect(response.header_fields.select{ |header| header.name == 'To'}.first.value).to include(user.display_name)
+    end
+    it 'sends the email to the email address of the user' do
+      build_mail
+      expect(response.to.first).to eq(user.email)
+    end
+    it 'bcc\'s the bank on the sent email' do
+      build_mail
+      expect(response.bcc.first).to eq(InternalMailer::LETTER_OF_CREDIT_ADDRESS)
+    end
+    it 'sets the `from` of the email' do
+      build_mail
+      expect(response.from.first).to eq(ContactInformationHelper::NO_REPLY_EMAIL)
+    end
+    it 'constructs a BeneficiaryRequest from the supplied JSON' do
+      expect(BeneficiaryRequest).to receive(:from_json).with(beneficiary_json, nil).and_return(beneficiary_request)
+      build_mail
+    end
+    it 'assigns the new instance of LetterOfCreditRequest to @letter_of_credit_request' do
+      build_mail
+      expect(assigns[:beneficiary_request]).to eq(beneficiary_request)
+    end
+  end
 end

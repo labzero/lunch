@@ -1,0 +1,29 @@
+.letters-of-credit.letters-of-credit-request
+  .row
+    .column-9x3-left
+      %h1= @title
+      %p= t('letters_of_credit.beneficiary.add_message', phone_number: service_desk_phone_number)
+  .row
+    = content_with_sidebar() do
+      = form_for(@beneficiary_request, url: letters_of_credit_beneficiary_new_path, html: {class: 'beneficiary-new', data: {'prevent-submit-on-enter' => true}}) do |f|
+        = f.hidden_field(:id)
+        %section.form-fields-section-column-2
+          %h2= t('letters_of_credit.beneficiary.address')
+          .beneficiary_add_input
+            = render 'shared/input_field', form_builder: f, field_name: :name, label: t('letters_of_credit.beneficiary.name')
+          .beneficiary_add_input
+            = render 'shared/input_field', form_builder: f, field_name: :care_of, optional: true, label: t('letters_of_credit.beneficiary.care_of')
+          .beneficiary_add_input
+            = render 'shared/input_field', form_builder: f, field_name: :department, optional: true, label: t('letters_of_credit.beneficiary.department')
+          .beneficiary_add_textarea
+            = render 'shared/input_field', form_builder: f, field_name: :street_address, field_type: :text_area, label: t('letters_of_credit.beneficiary.street_address')
+          .beneficiary_add_input
+            = render 'shared/input_field', form_builder: f, field_name: :city, label: t('letters_of_credit.beneficiary.city')
+          .beneficiary_add_dropdown
+            %span= t('letters_of_credit.beneficiary.state')
+            = render 'shared/dropdown', dropdown_name: 'beneficiary_request[state]', dropdown_options: @states_dropdown, default_value: @states_dropdown_default, default_text: @states_dropdown_default, classes: ['dropdown-beneficiary-state', 'dropdown-with-scroll']
+          .beneficiary_add_input_small
+            = render 'shared/input_field', form_builder: f, field_name: :zip, label: t('letters_of_credit.beneficiary.zip')
+        .beneficiary-add-request-action
+          = link_to(t('global.cancel'), letters_of_credit_request_path, class: 'secondary-button')
+          =  submit_tag(t('letters_of_credit.beneficiary.send'), class: 'primary-button', disabled: (!@beneficiary_request.name.present? || @beneficiary_request.street_address.present?))
