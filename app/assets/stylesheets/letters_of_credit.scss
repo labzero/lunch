@@ -326,7 +326,7 @@
     h1 {
       @include typography-print-header;
       float: none;
-      margin-bottom: 0px;
+      margin: 15px 0 0;
     }
     h2 {
       @include typography-print-subheader;
@@ -341,11 +341,12 @@
       margin: 0;
     }
     .report-print-details {
-      margin-bottom: 30px;
+      margin-bottom: 15px;
       h2, .report-print-sta {
         @include typography-print-details;
         display: inline-block;
         margin: 0;
+        white-space: nowrap;
       }
     }
     .form-summary-data {
