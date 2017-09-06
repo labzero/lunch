@@ -368,7 +368,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
 
       it 'sets `@states_dropdown` to a list of states' do
         call_action
-        expect(assigns[:states_dropdown]).to eq(described_class::STATES.collect{|state| [state[0].to_s + ' - ' + state[1].to_s, state[0]]})
+        expect(assigns[:states_dropdown]).to eq(described_class::STATES.collect{|state| [state[0].to_s + ' - ' + state[1].to_s, state[0]]}.unshift(I18n.t('letters_of_credit.beneficiary.select_state')))
       end
 
       it 'sets `@states_dropdown_default` to `Select State`' do
@@ -382,7 +382,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       let(:call_action) { post :beneficiary_new, beneficiary_request: loc_params }
       let(:beneficiary_json) { double('loc as json') }
       let(:mailer) { double('mailer', deliver_now: nil) }
-      let(:user) { instance_double(User, display_name: nil, accepted_terms?: true, id: nil) }
+      let(:user) { instance_double(User, display_name: nil, accepted_terms?: true, id: nil, email: nil) }
 
       before do
         allow(beneficiary_request).to receive(:valid?).and_return(true)
@@ -409,18 +409,22 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           expect(beneficiary_request).to receive(:to_json)
           call_action
         end
+        it 'calls `InternalMailer#beneficiary_request` with the request' do
+          expect(MemberMailer).to receive(:beneficiary_request).with(request, any_args).and_return(mailer)
+          call_action
+        end
         it 'calls `InternalMailer#beneficiary_request` with the current_member_id' do
-          expect(MemberMailer).to receive(:beneficiary_request).with(member_id, any_args).and_return(mailer)
+          expect(MemberMailer).to receive(:beneficiary_request).with(anything, member_id, any_args).and_return(mailer)
           call_action
         end
         it 'calls `InternalMailer#beneficiary_request` with the beneficiary as JSON' do
           allow(beneficiary_request).to receive(:to_json).and_return(beneficiary_json)
-          expect(MemberMailer).to receive(:beneficiary_request).with(anything, beneficiary_json, any_args).and_return(mailer)
+          expect(MemberMailer).to receive(:beneficiary_request).with(anything, anything, beneficiary_json, any_args).and_return(mailer)
           call_action
         end
         it 'calls `InternalMailer#beneficiary_request` with the current_user' do
           allow(controller).to receive(:current_user).and_return(user)
-          expect(MemberMailer).to receive(:beneficiary_request).with(anything, anything, user).and_return(mailer)
+          expect(MemberMailer).to receive(:beneficiary_request).with(anything, anything, anything, user).and_return(mailer)
           call_action
         end
         it 'calls `deliver_now` on the result of `InternalMailer#beneficiary_request`' do

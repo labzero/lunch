@@ -16,7 +16,7 @@
           .beneficiary_add_input
             = render 'shared/input_field', form_builder: f, field_name: :department, optional: true, label: t('letters_of_credit.beneficiary.department')
           .beneficiary_add_textarea
-            = render 'shared/input_field', form_builder: f, field_name: :street_address, field_type: :text_area, label: t('letters_of_credit.beneficiary.street_address')
+            = render 'shared/input_field', form_builder: f, field_name: :street_address, field_type: :text_area, label: t('letters_of_credit.beneficiary.street_address_html')
           .beneficiary_add_input
             = render 'shared/input_field', form_builder: f, field_name: :city, label: t('letters_of_credit.beneficiary.city')
           .beneficiary_add_dropdown

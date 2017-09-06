@@ -275,6 +275,13 @@
 
 .beneficiary_add_textarea {
   width: 100%;
+  label {
+    display: inline-block;
+    span {
+      @extend %typography-table-cell;
+      line-height: 10px;
+    }
+  }
   .input-field-container-textarea {
     width: auto;
     height: 100px;

@@ -190,7 +190,8 @@ class LettersOfCreditController < ApplicationController
   def beneficiary
     set_titles(t('letters_of_credit.beneficiary.add'))
     @states_dropdown = STATES.collect{|state| [state[0].to_s + ' - ' + state[1].to_s, state[0]]}
-    @states_dropdown_default = t('letters_of_credit.beneficiary.select_state')
+    @states_dropdown.unshift(t('letters_of_credit.beneficiary.select_state'))
+    @states_dropdown_default = @states_dropdown.first
   end
 
   # POST
@@ -198,8 +199,10 @@ class LettersOfCreditController < ApplicationController
     set_titles(t('letters_of_credit.beneficiary_new.title'))
     beneficiary_request.attributes = params[:beneficiary_request]
     if beneficiary_request.valid?
-      MemberMailer.beneficiary_request(current_member_id, @beneficiary_request.to_json, current_user).deliver_now
+      MemberMailer.beneficiary_request(request, current_member_id, @beneficiary_request.to_json, current_user).deliver_now
     end
+    @created_at = Time.zone.now
+    @user_email = current_user.email
   end
 
   private

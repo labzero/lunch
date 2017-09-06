@@ -2,6 +2,7 @@ class MemberMailer < Devise::Mailer
   helper AssetHelper
   helper CustomFormattingHelper
   helper ContactInformationHelper
+  include ContactInformationHelper
   include ActionView::Helpers::TextHelper
   layout 'mailer'
 
@@ -33,8 +34,16 @@ class MemberMailer < Devise::Mailer
     )
   end
 
-  def beneficiary_request(member_id, lc_as_json, user)
+  def beneficiary_request(request, member_id, lc_as_json, user)
     @beneficiary_request = BeneficiaryRequest.from_json(lc_as_json, nil)
+    @requested_by = user.display_name
+    @created_at = Time.zone.now
+    @contacts = member_contacts(request_obj: request, member_id: member_id)
+    member_details = MembersService.new(request).member(member_id)
+    if member_details
+      @member_name_email = member_details[:name]
+      @fhfa = member_details[:fhfa_number]
+    end
     mail(subject: '',
          to: "#{user.display_name} <#{user.email}>",
          bcc: InternalMailer::LETTER_OF_CREDIT_ADDRESS,

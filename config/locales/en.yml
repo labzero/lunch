@@ -1647,7 +1647,7 @@ en:
       care_of: Care of
       department: Department
       street_address: Street Address
-      no_po_box: May not be a PO Box
+      street_address_html: "Street Address <br><span>May not be a PO Box</span>"
       city: City
       state: State
       select_state: Select State
@@ -1655,6 +1655,15 @@ en:
       send: Send Request
     beneficiary_new:
       title: Add Beneficiary Request Received
+      received: We received your Add Beneficiary request at %{datetime}. The details of your request are listed below.
+      received_short: We received your Add Beneficiary request at %{datetime}.
+      contact: We will contact you within 24 hours to confirm that the beneficiary has been added, or to resolve any issues with your request.
+      questions_html: "If you have questions, contact the Member Services Desk at %{phone_number} or <a href=\"mailto:%{rm_email}\">%{rm_name}</a> at %{rm_phone_number}."
+      email_details_html: "An email containing the details of your request will be sent to <span>%{email}<span>"
+      another: Add another beneficiary
+      member_name: Member Name
+      fhfa_number: FHFA Number
+      requested_by: Requested By
   reports:
     meta_title: FHLBSF - Reports
     title: Reports
