@@ -58,18 +58,20 @@ module MAPI
               WHERE LC_LC_NUMBER = #{ quote(lc_number) }
               AND FHLB_ID = #{ quote(member_id) }
             SQL
-            fetch_hash(app.logger, loc_query)
+            credits = []
+            begin
+              cursor = execute_sql(app.logger, loc_query)
+              while row = cursor.fetch_hash()
+                credits << row.with_indifferent_access
+              end
+              Private.format_credits(credits).first
+            rescue => e
+              app.logger.error(e.message)
+              {}
+            end
           else
             locs = MAPI::Services::Member::LettersOfCredit.fake_hash('letters_of_credit')
-            letter_of_credit = (locs[:credits].select{ |v| v[:lc_number] == lc_number }.first || locs[:credits].first) if locs.any?
-            today = Time.zone.today
-            holidays = MAPI::Services::Rates::Holidays.holidays(app, today, today + 13.months)
-            settle_trade_date = MAPI::Services::Rates.find_next_business_day(today, 1.day, holidays)
-            maturity_date = MAPI::Services::Rates.find_next_business_day(today + 1.year, 1.day, holidays)
-            letter_of_credit[:trade_date] = settle_trade_date
-            letter_of_credit[:settlement_date] = settle_trade_date
-            letter_of_credit[:maturity_date] = maturity_date
-            letter_of_credit
+            (locs[:credits].select{ |v| v[:lc_number] == lc_number }.first || locs[:credits].first) if locs.any?
           end
         end
 

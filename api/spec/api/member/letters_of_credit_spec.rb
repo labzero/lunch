@@ -1,20 +1,21 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
+  let(:credits) do
+    new_array = []
+    credits = JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'credits.json')))
+    credits.each do |credit|
+      credit[:LCX_CURRENT_PAR] = rand(0..1000000)
+      new_array << credit.with_indifferent_access
+    end
+    new_array
+  end
+  let(:formatted_credits) { double('an array of credits') }
 
   describe 'member letters_of_credit' do
-    let(:credits) do
-      new_array = []
-      credits = JSON.parse(File.read(File.join(MAPI.root, 'spec', 'fixtures', 'credits.json')))
-      credits.each do |credit|
-        credit[:LCX_CURRENT_PAR] = rand(0..1000000)
-        new_array << credit.with_indifferent_access
-      end
-      new_array
-    end
+
     let(:total_current_par) { credits.inject(0) {|sum, credit| sum + credit[:LCX_CURRENT_PAR]} }
     let(:member_letters_of_credit) { MAPI::Services::Member::LettersOfCredit.letters_of_credit(subject, member_id) }
-    let(:formatted_credits) { double('an array of credits') }
 
     it 'calls the `letters_of_credit` method when the endpoint is hit' do
       allow(MAPI::Services::Member::LettersOfCredit).to receive(:letters_of_credit).and_return('a response')
@@ -66,65 +67,20 @@ describe MAPI::ServiceApp do
         end
       end
     end
-
-    describe 'private methods' do
-      describe '`format_credits` method' do
-        let(:formatted_credits) { MAPI::Services::Member::LettersOfCredit::Private.format_credits(credits) }
-
-        [:maturity_date, :trade_date, :trade_date].each do |property|
-          it "returns an object with a `#{property}` formatted as a date" do
-            formatted_credits.each do |credit|
-              expect(credit[property]).to be_kind_of(Date)
-            end
-          end
-        end
-        [:current_par, :maintenance_charge].each do |property|
-          it "returns an object with a `#{property}` formatted as a string" do
-            formatted_credits.each do |credit|
-              expect(credit[property]).to be_kind_of(Integer)
-            end
-          end
-        end
-        [:lc_number, :description, :beneficiary].each do |property|
-          it "returns an object with a `#{property}` formatted as a string" do
-            formatted_credits.each do |credit|
-              expect(credit[property]).to be_kind_of(String)
-            end
-          end
-        end
-        describe 'handling nil values' do
-          [:maturity_date, :trade_date, :trade_date, :current_par, :maintenance_charge, :lc_number, :description, :beneficiary].each do |property|
-            it "returns an object with a nil value for `#{property}` if that property doesn't have a value" do
-              MAPI::Services::Member::LettersOfCredit::Private.format_credits([{}, {}]).each do |credit|
-                expect(credit[property]).to be_nil
-              end
-            end
-          end
-        end
-      end
-    end
   end
 
   describe 'letter_of_credit' do
     letters_of_credit_module = MAPI::Services::Member::LettersOfCredit
-    let(:locs) { instance_double(Hash, :[] => nil) }
-    let(:credits) { instance_double(Hash, select: nil) }
-    let(:app) { instance_double(MAPI::ServiceApp, settings: nil, logger: double('logger', error: nil)) }
-    let(:call_method) { MAPI::Services::Member::LettersOfCredit.letter_of_credit(app, member_id, lc_number) }
-    let(:cursor) { double(OCI8::Cursor) }
-    let(:letter_of_credit) { instance_double(Hash, :[]= => nil) }
-
-    let(:id) { SecureRandom.hex }
     let(:lc_number) { SecureRandom.hex }
-    let(:settle_trade_date) { double(Time)}
-    let(:v) {instance_double(Hash, :[] => nil) }
+    let(:app) { instance_double(MAPI::ServiceApp, logger: double('logger', error: nil)) }
+    let(:call_method) { MAPI::Services::Member::LettersOfCredit.letter_of_credit(app, member_id, lc_number) }
+
     context 'when `should_fake?` returns true' do
+      let(:letter_of_credit) { double(Hash) }
+      let(:locs) { instance_double(Hash, :[] => nil) }
+      let(:v) {instance_double(Hash, :[] => nil) }
       before do
-        allow(letters_of_credit_module).to receive(:fake_hash).with('letters_of_credit').and_return(locs)
-        allow(letters_of_credit_module).to receive(:should_fake?).with('letter_of_credit').and_return(true)
-        allow(letters_of_credit_module).to receive(:fake).with('letter_of_credit').and_return({})
-        allow(MAPI::Services::Rates::Holidays).to receive(:holidays).and_return([])
-        allow(MAPI::Services::Rates).to receive(:find_next_business_day).with(anything, anything, anything).and_return(settle_trade_date)
+        allow(letters_of_credit_module).to receive(:should_fake?).and_return(true)
         allow(locs).to receive(:[]).and_return(credits)
         allow(locs).to receive(:any?).and_return(true)
         allow(credits).to receive(:select).and_yield(v).and_return(letter_of_credit)
@@ -137,32 +93,25 @@ describe MAPI::ServiceApp do
         expect(letters_of_credit_module).to receive(:should_fake?).with(app).and_return(true)
         call_method
       end
+      it 'calls `fake` with `letters_of_credit`' do
+        expect(letters_of_credit_module).to receive(:fake).with('letters_of_credit').and_return({})
+        call_method
+      end
+
     end
 
     context 'when `should_fake?` returns false' do
+      let(:letter_of_credit) { instance_double(Hash) }
+      let(:cursor) { double(OCI8::Cursor) }
+      let(:loc_result) { [credits[0], nil] }
       before do
         allow(letters_of_credit_module).to receive(:should_fake?).and_return(false)
         allow(letters_of_credit_module).to receive(:execute_sql).with(app.logger, anything).and_return(cursor)
-        allow(cursor).to receive(:fetch_hash).and_return(*letter_of_credit)
+        allow(cursor).to receive(:fetch_hash).and_return(*loc_result)
       end
 
-      it 'calls `fetch_hash` with the appropriate arguments' do
-        loc_query = <<-SQL
-              SELECT FHLB_ID,
-              LC_LC_NUMBER,
-              LCX_CURRENT_PAR,
-              LCX_TRANS_SPREAD,
-              LC_TRADE_DATE,
-              LC_SETTLEMENT_DATE,
-              LC_MATURITY_DATE,
-              LC_ISSUE_NUMBER,
-              LCX_UPDATE_DATE,
-              LC_BENEFICIARY
-              FROM WEB_INET.WEB_LC_LATESTDATE_RPT
-              WHERE LC_LC_NUMBER = #{ ActiveRecord::Base.connection.quote(lc_number) }
-              AND FHLB_ID = #{ ActiveRecord::Base.connection.quote(member_id) }
-        SQL
-        expect(letters_of_credit_module).to receive(:fetch_hash).with(app.logger, loc_query)
+      it 'invokes execute sql with a logger and a sql query' do
+        expect(letters_of_credit_module).to receive(:execute_sql).with(app.logger, anything).and_return(cursor)
         call_method
       end
 
@@ -170,13 +119,18 @@ describe MAPI::ServiceApp do
         expect(letters_of_credit_module).to receive(:should_fake?).with(app).and_return(false)
         call_method
       end
-      it 'invokes execute sql with a logger and a sql query' do
-        expect(letters_of_credit_module).to receive(:execute_sql).with(app.logger, anything).and_return(cursor)
-        call_method
+
+      describe 'when the database does not return the requested letter of credit' do
+        before { allow(letters_of_credit_module).to receive(:execute_sql).and_return({}) }
+        it 'returns an empty array for `beneficiaries`' do
+          expect(call_method).to eq({})
+        end
       end
-      it 'returns an object with a hash of the`letter_of_credit` data' do
-        expect(call_method).to eq(letter_of_credit)
+
+      it 'returns an object with an `letter of credit` hash' do
+        expect(call_method).to be_kind_of(Hash)
       end
+
 
       describe 'the SQL query' do
         describe 'the selected fields' do
@@ -192,6 +146,43 @@ describe MAPI::ServiceApp do
           matcher = Regexp.new(/\A\s*SELECT.+FROM\s+WEB_INET.WEB_LC_LATESTDATE_RPT/im)
           expect(letters_of_credit_module).to receive(:execute_sql).with(anything, matcher).and_return([])
           call_method
+        end
+      end
+    end
+  end
+
+  describe 'private methods' do
+    describe '`format_credits` method' do
+      let(:formatted_credits) { MAPI::Services::Member::LettersOfCredit::Private.format_credits(credits) }
+
+      [:maturity_date, :trade_date, :trade_date].each do |property|
+        it "returns an object with a `#{property}` formatted as a date" do
+          formatted_credits.each do |credit|
+            expect(credit[property]).to be_kind_of(Date)
+          end
+        end
+      end
+      [:current_par, :maintenance_charge].each do |property|
+        it "returns an object with a `#{property}` formatted as a string" do
+          formatted_credits.each do |credit|
+            expect(credit[property]).to be_kind_of(Integer)
+          end
+        end
+      end
+      [:lc_number, :description, :beneficiary].each do |property|
+        it "returns an object with a `#{property}` formatted as a string" do
+          formatted_credits.each do |credit|
+            expect(credit[property]).to be_kind_of(String)
+          end
+        end
+      end
+      describe 'handling nil values' do
+        [:maturity_date, :trade_date, :trade_date, :current_par, :maintenance_charge, :lc_number, :description, :beneficiary].each do |property|
+          it "returns an object with a nil value for `#{property}` if that property doesn't have a value" do
+            MAPI::Services::Member::LettersOfCredit::Private.format_credits([{}, {}]).each do |credit|
+              expect(credit[property]).to be_nil
+            end
+          end
         end
       end
     end
