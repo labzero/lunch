@@ -1659,6 +1659,7 @@ en:
       received_short: We received your Add Beneficiary request at %{datetime}.
       contact: We will contact you within 24 hours to confirm that the beneficiary has been added, or to resolve any issues with your request.
       questions_html: "If you have questions, contact the Member Services Desk at %{phone_number} or <a href=\"mailto:%{rm_email}\">%{rm_name}</a> at %{rm_phone_number}."
+      email_subject: "FHLBank San Francisco: Add Beneficiary Request Received: %{member}"
       email_details_html: "An email containing the details of your request will be sent to <span>%{email}<span>"
       another: Add another beneficiary
       member_name: Member Name
