@@ -43,15 +43,12 @@
 
 .letters-of-credit-manage-amend-on-table {
   td:last-child:not(.dataTables_empty) {
-    width: 100px;
+    width: 50px;
     a {
       text-transform: uppercase;
-      &:first-child {
-        float: left;
-      }
-      &:last-child {
-        float: right;
-      }
+    }
+    &:last-child {
+      float: center;
     }
   }
 }
