@@ -1503,6 +1503,71 @@ describe MemberBalanceService do
     end
   end
 
+  describe '`collateral_wire_fees_statements_available`' do
+    let(:call_method) { subject.collateral_wire_fees_statements_available }
+    it 'calls `get_json` with the proper endpoint name' do
+      expect(subject).to receive(:get_json).with(:collateral_wire_fees_statements_available, anything)
+      call_method
+    end
+    it 'calls `get_json` with the proper endpoint' do
+      expect(subject).to receive(:get_json).with(anything, "member/#{member_id}/collateral_wire_fees_statements_available")
+      call_method
+    end
+    it 'returns nil if the endpoint returns nil' do
+      allow(subject).to receive(:get_json)
+      expect(call_method).to be nil
+    end
+    it 'returns an empty hash if the endpoint returns an empty hash' do
+      allow(subject).to receive(:get_json).and_return([])
+      expect(call_method).to eq([])
+    end
+    context 'when there are results returned from the endpoint' do
+      let(:available_date) { instance_double(String, to_date: nil) }
+      let(:datified_date) { instance_double(Date) }
+      before { allow(subject).to receive(:get_json).and_return([available_date]) }
+
+      it 'turns the results into dates' do
+        expect(available_date).to receive(:to_date)
+        call_method
+      end
+      it 'returns the results' do
+        allow(available_date).to receive(:to_date).and_return(datified_date)
+        expect(call_method).to eq([datified_date])
+      end
+    end
+  end
+
+  describe '`collateral_fees_statement`' do
+    let(:date) { instance_double(Date, to_date: nil, iso8601: nil) }
+    let(:results) { double('some results') }
+    let(:call_method) { subject.collateral_fees_statement(date) }
+    before { allow(date).to receive(:to_date).and_return(date) }
+
+    it 'calls `get_hash` with the proper endpoint name' do
+      expect(subject).to receive(:get_hash).with(:collateral_fees_statement, anything)
+      call_method
+    end
+    it 'ensures the date is a date before converting it to a string' do
+      expect(date).to receive(:to_date).and_return(date)
+      call_method
+    end
+    it 'converts the date to an iso8601 string' do
+      allow(date).to receive(:to_date).and_return(date)
+      expect(date).to receive(:iso8601)
+      call_method
+    end
+    it 'calls `get_hash` with the proper endpoint containing the date' do
+      allow(date).to receive(:to_date).and_return(date)
+      allow(date).to receive(:iso8601).and_return(date)
+      expect(subject).to receive(:get_hash).with(anything, "member/#{member_id}/collateral_fees_statement/#{date}")
+      call_method
+    end
+    it 'returns the results of calling the endpoint' do
+      allow(subject).to receive(:get_hash).and_return(results)
+      expect(call_method).to eq(results)
+    end
+  end
+
   # Helper Methods
   def expect_capital_stock_balance_to_receive(date)
     expect_any_instance_of(RestClient::Resource).to receive(:[]).with( "member/#{member_id}/capital_stock_balance/#{date}" )

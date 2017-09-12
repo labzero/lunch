@@ -1736,6 +1736,8 @@ en:
         summary: Includes total and remaining borrowing capacity for both the Standard and SBC Credit Programs. Mortgage loan collateral data, except for Market Value, is updated during the day to reflect processing of new MCUs.
         updated: Intraday for newly processed MCU data, except Market Value; other data as of the end of the prior business day
         history: 6 months
+      collateral_fees:
+        title: Collateral Monthly Fee Statement
       mcu:
         title: MCU Status
         summary: Provides data from your institution’s most recently processed MCU, including information about total loans submitted, newly pledged or reported loans, rejected loans, and loans depledged or not reported. A more detailed report is emailed to your institution.
@@ -2088,6 +2090,18 @@ en:
           days_outstanding: Days Outstanding
           average_shares: Average Shares Outstanding
           dividend: Dividend
+      collateral_fees:
+        collateral_custody_fees: Loan Collateral Delivery/Custody Fees
+        questions_html: 'If you have questions regarding this statement, please call %{phone_number}.'
+        freshness: This statement reflects fees for the prior month and is typically posted 10-20 calendar days after monthend. Your institution's STA will be debited two business days after the Statement Date.
+        availability: Statements are available for the previous 18 months.
+        data_unavailable: You have no Loan Collateral Delivery/Custody Fees Statement for the last 18 months.
+        total: 'Total amount to be debited:'
+        headers:
+          custody_fee: Custody Fee
+          review_fee: Review Fee
+          release_fee: Release Fee
+          processing_fee: Processing Fee
       securities_services_statement:
         heading: 'Total amount to be debited on %{date}:'
         statement_date: 'Statement Date:'

@@ -1437,6 +1437,25 @@ class ReportsController < ApplicationController
     end
   end
 
+  def collateral_fees
+    member_balance_service = MemberBalanceService.new(current_member_id, request)
+    @report_name = t('reports.collateral.collateral_fees.title')
+    available_reports = member_balance_service.collateral_wire_fees_statements_available
+    raise StandardError, "There has been an error and ReportsController#collateral_wire_fees has encountered nil. Check error logs." if available_reports.nil?
+    available_reports = process_collateral_fees_dates(available_reports)
+
+    if available_reports.present?
+      @data_available = true
+      @dropdown_options = available_reports.map{ |date| [date.strftime('%B %Y'), date] }
+      @start_date = params[:start_date].try(:to_date) || @dropdown_options[0][1]
+      @dropdown_options_text = @dropdown_options.find{ |option| option[1] == @start_date }.try(:first)
+      @collateral_fees = member_balance_service.collateral_fees_statement(@start_date)
+      @total_fees = @collateral_fees.values.sum { |collateral_fee| collateral_fee[:total].to_f }
+    else
+      @data_available = false
+    end
+  end
+
   def letters_of_credit
     downloadable_report([:xlsx, :pdf]) do
       @report_name = ReportConfiguration.report_title(:letters_of_credit)
@@ -2484,5 +2503,10 @@ class ReportsController < ApplicationController
     rows = @sbc_frc_table_data[:rows].in_groups(2, false).to_a
     @sbc_frc_table_data_1[:rows] = rows.first
     @sbc_frc_table_data_2[:rows] = rows.last
+  end
+
+  def process_collateral_fees_dates(dates_array)
+    processed_dates = dates_array.map { |date| date if date && date > Time.zone.today - 18.months }
+    processed_dates.compact.sort.reverse
   end
 end

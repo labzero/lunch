@@ -711,7 +711,7 @@
   margin-bottom: 15px;
 }
 
-.report-securities-services-statement {
+.report-securities-services-statement, .report-collateral-fees-statement {
   .report-table {
     width: 740px;
     line-height: 8px;
@@ -1349,6 +1349,10 @@ td.dataTables_empty {
   }
 }
 
+.report-collateral-fees-statement {
+  padding-bottom: 20px; // Needed to give enough space to the lengthy dropdown selector
+}
+
 @media print {
   .logo {
     &.print-logo {
@@ -1650,7 +1654,7 @@ td.dataTables_empty {
     }
   }
 
-  .report-securities-services-statement {
+  .report-securities-services-statement, .report-collateral-fees-statement {
     .report-sta-number {
       display: none;
     }
@@ -1668,6 +1672,10 @@ td.dataTables_empty {
     .report-cell-expanding {
       white-space: normal;
     }
+  }
+
+  .report-collateral-fees-statement {
+    padding-bottom: 0px;
   }
 
   .report-profile {

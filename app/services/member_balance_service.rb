@@ -284,6 +284,16 @@ class MemberBalanceService < MAPIService
     fix_date( fix_date(get_hash(:securities_services_statements, "member/#{@member_id}/securities_services_statements/#{date.to_date.iso8601}"), 'debit_date'), 'month_ending')
   end
 
+  def collateral_wire_fees_statements_available
+    if results = get_json(:collateral_wire_fees_statements_available, "member/#{@member_id}/collateral_wire_fees_statements_available")
+      results.map { |date| date.to_date }
+    end
+  end
+
+  def collateral_fees_statement(date)
+    get_hash(:collateral_fees_statement, "member/#{@member_id}/collateral_fees_statement/#{date.to_date.iso8601}")
+  end
+
   def letters_of_credit
     if data = get_hash(:letters_of_credit, "member/#{@member_id}/letters_of_credit")
       fix_date(data)

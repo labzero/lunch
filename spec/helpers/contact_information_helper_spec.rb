@@ -76,7 +76,7 @@ describe ContactInformationHelper, type: :helper do
     end
   end
 
-  %i(web_support_phone_number service_desk_phone_number operations_phone_number mcu_phone_number accounting_phone_number securities_services_phone_number collateral_operations_phone_number member_services_phone_number).each do |helper_method|
+  %i(web_support_phone_number service_desk_phone_number operations_phone_number mcu_phone_number accounting_phone_number securities_services_phone_number collateral_operations_phone_number member_services_phone_number collateral_fees_phone_number).each do |helper_method|
     describe "`#{helper_method}` method" do
       let(:call_method) {helper.send(helper_method) }
       it "responds to `#{helper_method}`" do

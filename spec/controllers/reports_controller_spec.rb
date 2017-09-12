@@ -848,6 +848,109 @@ RSpec.describe ReportsController, :type => :controller do
       end
     end
 
+    describe 'GET collateral_fees' do
+      let(:member_balance_service) { instance_double(MemberBalanceService, collateral_wire_fees_statements_available: [], collateral_fees_statement: {}) }
+      let(:call_action) { get :collateral_fees }
+      before do
+        allow(MemberBalanceService).to receive(:new).with(member_id, request).and_return(member_balance_service)
+      end
+
+      it 'creates a new instance of MemberBalanceService with the current_member_id and the request' do
+        expect(MemberBalanceService).to receive(:new).with(member_id, request).and_return(member_balance_service)
+        call_action
+      end
+      it "sets the `@report_name` to `#{I18n.t('reports.collateral.collateral_fees.title')}`" do
+        call_action
+        expect(assigns[:report_name]).to eq(I18n.t('reports.collateral.collateral_fees.title'))
+      end
+      it 'calls `collateral_wire_fees_statements_available` on the MemberBalanceService instance' do
+        expect(member_balance_service).to receive(:collateral_wire_fees_statements_available).and_return([])
+        call_action
+      end
+      it 'raises an error if `collateral_wire_fees_statements_available` returns nil' do
+        allow(member_balance_service).to receive(:collateral_wire_fees_statements_available).and_return(nil)
+        expect{call_action}.to raise_error(StandardError, "There has been an error and ReportsController#collateral_wire_fees has encountered nil. Check error logs.")
+      end
+      it 'calls `process_collateral_fees_dates` with the results of `collateral_wire_fees_statements_available`' do
+        available_dates = double('some dates array')
+        allow(member_balance_service).to receive(:collateral_wire_fees_statements_available).and_return(available_dates)
+        expect(controller).to receive(:process_collateral_fees_dates).with(available_dates).and_return([])
+        call_action
+      end
+      context 'when there are no available reports' do
+        it 'sets `@data_available` to false' do
+          call_action
+          expect(assigns[:data_available]).to be false
+        end
+      end
+      context 'when there are available reports' do
+        let(:today) { Time.zone.today }
+        let(:processed_dates) {[
+          today,
+          today - 1.day,
+          today - 2.days
+        ]}
+
+        before { allow(controller).to receive(:process_collateral_fees_dates).and_return(processed_dates) }
+
+        it 'sets `@data_available` to true' do
+          call_action
+          expect(assigns[:data_available]).to be true
+        end
+        it 'sets `@dropdown_options` to an array containing pairs of available dates and the month-year string representation' do
+          call_action
+          expect(assigns[:dropdown_options]).to eq([
+            [today.strftime('%B %Y'), today],
+            [(today - 1.day).strftime('%B %Y'), today - 1.day],
+            [(today - 2.day).strftime('%B %Y'), today - 2.day]
+          ])
+        end
+        context 'when there is no `start_date` param passed' do
+          it 'sets `@start_date` to the first available date returned from `process_collateral_fees_dates`' do
+            call_action
+            expect(assigns[:start_date]).to eq(processed_dates.first)
+          end
+          it 'sets `@dropdown_options_text` to the month-year string representation of the first available date returned from `process_collateral_fees_dates`' do
+            call_action
+            expect(assigns[:dropdown_options_text]).to eq(processed_dates.first.strftime('%B %Y'))
+          end
+          it 'calls `collateral_fees_statement` on the MemberBalanceService instance with the first available date returned from `process_collateral_fees_dates`' do
+            expect(member_balance_service).to receive(:collateral_fees_statement).with(processed_dates.first)
+            call_action
+          end
+        end
+        context 'when there is a `start_date` param passed' do
+          let(:start_date) { processed_dates.sample }
+          let(:call_action) { get :collateral_fees, start_date: start_date.iso8601 }
+
+          it 'sets `@start_date` to the datified version of the `start_date` param' do
+            call_action
+            expect(assigns[:start_date]).to eq(start_date)
+          end
+          it 'sets `@dropdown_options_text` to the month-year string representation of the `start_date` param' do
+            call_action
+            expect(assigns[:dropdown_options_text]).to eq(start_date.strftime('%B %Y'))
+          end
+          it 'calls `collateral_fees_statement` on the MemberBalanceService instance with the `start_date` param' do
+            expect(member_balance_service).to receive(:collateral_fees_statement).with(start_date)
+            call_action
+          end
+        end
+        it 'sets `@total_fees` to the sum of all of the `total` values returned by the `collateral_fees_statement` endpoint' do
+          release_fee_total, custody_fee_total, review_fee_total, processing_fee_total = rand(1000..99999), rand(1000..99999), rand(1000..99999), rand(1000..99999)
+          collateral_fees = {
+            release_fee: {total: release_fee_total},
+            custody_fee: {total: custody_fee_total},
+            review_fee: {total: review_fee_total},
+            processing_fee: {total: processing_fee_total}
+          }
+          allow(member_balance_service).to receive(:collateral_fees_statement).and_return(collateral_fees)
+          call_action
+          expect(assigns[:total_fees]).to eq(release_fee_total + custody_fee_total + review_fee_total + processing_fee_total)
+        end
+      end
+    end
+
     describe 'GET letters_of_credit' do
       let(:make_request) { get :letters_of_credit }
       let(:as_of_date) { double('some date') }
@@ -4751,6 +4854,28 @@ RSpec.describe ReportsController, :type => :controller do
       it 'sets `@sbc_frc_table_data_2[:rows]` to the second half of the @sbc_frc_table_data[:rows] array' do
         call_method
         expect(assigns[:sbc_frc_table_data_2][:rows]).to eq(sbc_frc_table_data[:rows][2..3])
+      end
+    end
+
+    describe '`process_collateral_fees_dates`' do
+      let(:valid_date) { today - 17.months }
+      it 'eliminates dates 18 months or older than today' do
+        invalid_date = today - 18.months
+        results = controller.send(:process_collateral_fees_dates, [valid_date, invalid_date])
+        expect(results).not_to include(invalid_date)
+        expect(results).to include(valid_date)
+      end
+      it 'eliminates nil values that are passed' do
+        results = controller.send(:process_collateral_fees_dates, [nil, valid_date])
+        expect(results).not_to include(nil)
+        expect(results).to include(valid_date)
+      end
+      it 'sorts the dates in descending order' do
+        today = Time.zone.today
+        yesterday = today - 1.day
+        tomorrow = today + 1.day
+        results = controller.send(:process_collateral_fees_dates, [yesterday, tomorrow, today])
+        expect(results).to eq([tomorrow, today, yesterday])
       end
     end
   end

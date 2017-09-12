@@ -31,6 +31,9 @@ Rails.application.routes.draw do
     get '/capital-stock-and-leverage' => 'reports#capital_stock_and_leverage'
     get '/capital-stock-trial-balance' => 'reports#capital_stock_trial_balance'
     get '/cash-projections' => 'reports#cash_projections'
+    constraints Constraints::FeatureEnabled.new('report-collateral-fees') do
+      get '/collateral-fees' => 'reports#collateral_fees', as: :collateral_fees
+    end
     get '/current-securities-position' => 'reports#current_securities_position'
     get '/current-price-indications' => 'reports#current_price_indications'
     get '/dividend-statement' => 'reports#dividend_statement'
