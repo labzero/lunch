@@ -46,7 +46,7 @@ class MemberMailer < Devise::Mailer
     end
     mail(subject: I18n.t('letters_of_credit.beneficiary_new.email_subject', member: @member_name_email),
          to: "#{user.display_name} <#{user.email}>",
-         bcc: InternalMailer::LETTER_OF_CREDIT_ADDRESS,
+         bcc: InternalMailer::ADD_BENEFICIARY_ADDRESS,
          from: t('emails.new_user.sender', email: ContactInformationHelper::NO_REPLY_EMAIL)
     )
   end

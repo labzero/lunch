@@ -271,7 +271,7 @@ RSpec.describe MemberMailer, :type => :mailer do
     end
     it 'bcc\'s the bank on the sent email' do
       build_mail
-      expect(response.bcc.first).to eq(InternalMailer::LETTER_OF_CREDIT_ADDRESS)
+      expect(response.bcc.first).to eq(InternalMailer::ADD_BENEFICIARY_ADDRESS)
     end
     it 'sets the `from` of the email' do
       build_mail
