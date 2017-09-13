@@ -70,7 +70,8 @@
               %h2= t('reports.collateral.title')
               %ul
                 = header_report_nav_item(t('reports.collateral.borrowing_capacity.title'), reports_borrowing_capacity_path)
-                = header_report_nav_item(t('reports.collateral.collateral_fees.title'), reports_collateral_fees_path)
+                - if feature_enabled?('report-collateral-fees')
+                  = header_report_nav_item(t('reports.collateral.collateral_fees.title'), reports_collateral_fees_path)
                 = header_report_nav_item(t('reports.collateral.mcu.title'), reports_mortgage_collateral_update_path)
           .nav-dropdown-row
             .nav-dropdown-column
