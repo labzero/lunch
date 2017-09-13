@@ -3,7 +3,6 @@ class Member
   FLIPPER_PREFIX = 'FHLB-'.freeze
 
   DEFAULT_REPORT_LIST = {
-    account_summary: {},
     advances_detail: {
       start_date: :this_month_end
     },
