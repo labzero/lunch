@@ -1586,6 +1586,26 @@ en:
         issuance_fee: Issuance Fee
         maintenance_fee: Annual Maintenance Fee
         footnote: The Issuance Fee will be charged to your Settlement/Transaction Account (STA) on the effective date of the Letter of Credit. The Annual Maintenance Fee is subject to a minimum annual fee of $500 and is charged to your STA monthly in advance.
+      amend:
+        title: Request Letter of Credit Amendment
+        instructions: The member portal only supports requests for amendments to standard Letters of Credit collateralizing public unit deposits. If your amendment request is not received by 11:00am, your request will not be processed until the following business day. You may amend this Letter of Credit by requesting an increase in the Amount and/or an extension of the Expiration Date. For other types of amendments, please contact your Relationship Manager.
+        current:
+          title: Current Letter of Credit
+          lc_number: "LC Number:"
+          beneficiary: "Beneficiary:"
+          current_amount: "Current Amount:"
+          issue_date: "Issue Date:"
+          current_expiration: "Current Expiration Date:"
+        requested:
+          title: Amendment Request
+          explanation: You may request an increase in the Credit Amount and/or an extension of the Expiration Date.\nNo other amendments may be requested.
+          amended_amount: Amended Credit Amount
+          amended_expiration: Amended Expiration Date
+          amendment_date: Amendment Date
+        fees:
+          explanation: 'Based on the amendment(s) requested above, the following fee will be applied:'
+          fee: Amendment Fee
+          further_explanation: The Amendment Fee will be charged to your Settlement/Transaction Account (STA) on the amendment date of the Letter of Credit.
     preview:
       action: Preview Request
       review_details: If you agree with the above, including the requested Letter of Credit terms, enter your SecurID token credentials below and press “Authorize Request.” If not, press “Edit Request” or “Cancel.”
@@ -1609,6 +1629,7 @@ en:
       exceeds_borrowing_capacity: The amount you selected exceeds your institution's current whole loan borrowing capacity of %{borrowing_capacity}. You may make a request for a lower amount, or check with your Relationship Manager or Member Services Desk to adjust your collateral first.
       after_max_term: The expiration date cannot be more than %{max_term} months from the issue date. Adjust the expiration or issue date and try again.
       exceeds_financing_availability: The amount you entered exceeds your institution's current financing availability of %{financing_availability}. Submit a request for a lesser amount or contact your Relationship Manager or the Member Services Desk.
+      amended_exp_date_prior_to_original: The expiration date must be the same or later than the current expiration date.
     pdf:
       requested: Letter of Credit Request
       request_date: Request Date/Time
@@ -1626,7 +1647,7 @@ en:
       care_of: Care of
       department: Department
       street_address: Street Address
-      no_po_box: May not be a PO Box
+      street_address_html: "Street Address <br><span>May not be a PO Box</span>"
       city: City
       state: State
       select_state: Select State
@@ -1634,6 +1655,16 @@ en:
       send: Send Request
     beneficiary_new:
       title: Add Beneficiary Request Received
+      received: We received your Add Beneficiary request at %{datetime}. The details of your request are listed below.
+      received_short: We received your Add Beneficiary request at %{datetime}.
+      contact: We will contact you within 24 hours to confirm that the beneficiary has been added, or to resolve any issues with your request.
+      questions_html: "If you have questions, contact the Member Services Desk at %{phone_number} or <a href=\"mailto:%{rm_email}\">%{rm_name}</a> at %{rm_phone_number}."
+      email_subject: "FHLBank San Francisco: Add Beneficiary Request Received: %{member}"
+      email_details_html: "An email containing the details of your request will be sent to <span>%{email}<span>"
+      another: Add another beneficiary
+      member_name: Member Name
+      fhfa_number: FHFA Number
+      requested_by: Requested By
   reports:
     meta_title: FHLBSF - Reports
     title: Reports
@@ -1705,6 +1736,8 @@ en:
         summary: Includes total and remaining borrowing capacity for both the Standard and SBC Credit Programs. Mortgage loan collateral data, except for Market Value, is updated during the day to reflect processing of new MCUs.
         updated: Intraday for newly processed MCU data, except Market Value; other data as of the end of the prior business day
         history: 6 months
+      collateral_fees:
+        title: Collateral Monthly Fee Statement
       mcu:
         title: MCU Status
         summary: Provides data from your institution’s most recently processed MCU, including information about total loans submitted, newly pledged or reported loans, rejected loans, and loans depledged or not reported. A more detailed report is emailed to your institution.
@@ -2057,6 +2090,18 @@ en:
           days_outstanding: Days Outstanding
           average_shares: Average Shares Outstanding
           dividend: Dividend
+      collateral_fees:
+        collateral_custody_fees: Loan Collateral Delivery/Custody Fees
+        questions_html: 'If you have questions regarding this statement, please call %{phone_number}.'
+        freshness: This statement reflects fees for the prior month and is typically posted 10-20 calendar days after monthend. Your institution's STA will be debited two business days after the Statement Date.
+        availability: Statements are available for the previous 18 months.
+        data_unavailable: You have no Loan Collateral Delivery/Custody Fees Statement for the last 18 months.
+        total: 'Total amount to be debited:'
+        headers:
+          custody_fee: Custody Fee
+          review_fee: Review Fee
+          release_fee: Release Fee
+          processing_fee: Processing Fee
       securities_services_statement:
         heading: 'Total amount to be debited on %{date}:'
         statement_date: 'Statement Date:'

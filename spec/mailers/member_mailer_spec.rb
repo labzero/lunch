@@ -228,6 +228,12 @@ RSpec.describe MemberMailer, :type => :mailer do
     let(:beneficiary_json) { double('loc as json') }
     let(:member_id) { instance_double(String) }
     let(:id) { instance_double(String) }
+    let(:request) { instance_double(String) }
+    let(:contacts) { instance_double(String) }
+    let(:member_id) { SecureRandom.hex }
+    let(:name) { SecureRandom.hex }
+    let(:fhfa_number) { SecureRandom.hex }
+    let(:member_details) { instance_double(String) }
     let(:beneficiary_request) do
       instance_double(BeneficiaryRequest,
                       id: id,
@@ -240,12 +246,19 @@ RSpec.describe MemberMailer, :type => :mailer do
                             department: nil
       )
     end
-    let(:user) { instance_double(User, email: "#{SecureRandom.hex}@example.com", display_name: SecureRandom.hex) }
-    let(:build_mail) { mail :beneficiary_request, member_id, beneficiary_json, user }
-    let(:call_method) { InternalMailer.beneficiary_request(member_id, beneficiary_json, user) }
-
+    let(:display_name) { SecureRandom.hex }
+    let(:user) { instance_double(User, email: "#{SecureRandom.hex}@example.com", display_name: display_name) }
+    let(:build_mail) { mail :beneficiary_request, request, member_id, beneficiary_json, user }
+    let(:call_method) { InternalMailer.beneficiary_request(request, member_id, beneficiary_json, user) }
+    let(:rm) {{
+      email: SecureRandom.hex,
+      phone_number: ('1234567890'),
+      full_name: SecureRandom.hex
+    }}
     before do
       allow(BeneficiaryRequest).to receive(:from_json).and_return(beneficiary_request)
+      allow_any_instance_of(MemberMailer).to receive(:member_contacts).and_return({rm: rm})
+      allow_any_instance_of(MembersService).to receive(:member).with(member_id)
     end
 
     it 'includes the display name of the user in the `to` field' do
@@ -258,7 +271,7 @@ RSpec.describe MemberMailer, :type => :mailer do
     end
     it 'bcc\'s the bank on the sent email' do
       build_mail
-      expect(response.bcc.first).to eq(InternalMailer::LETTER_OF_CREDIT_ADDRESS)
+      expect(response.bcc.first).to eq(InternalMailer::ADD_BENEFICIARY_ADDRESS)
     end
     it 'sets the `from` of the email' do
       build_mail
@@ -271,6 +284,31 @@ RSpec.describe MemberMailer, :type => :mailer do
     it 'assigns the new instance of LetterOfCreditRequest to @letter_of_credit_request' do
       build_mail
       expect(assigns[:beneficiary_request]).to eq(beneficiary_request)
+    end
+    it 'assigns @requested_by to user.display_name' do
+      build_mail
+      expect(assigns[:requested_by]).to eq(display_name)
+    end
+    it 'assigns @created_at to now' do
+      now = Time.zone.now
+      allow(Time).to receive_message_chain(:zone, :now).and_return(now)
+      build_mail
+      expect(assigns[:created_at]).to eq(now)
+    end
+    describe 'member is found' do
+      before do
+        allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
+        allow(member_details).to receive(:[]).with(:name).and_return(name)
+        allow(member_details).to receive(:[]).with(:fhfa_number).and_return(fhfa_number)
+      end
+      it 'assigns @member_name_email to the name of the member if found' do
+        build_mail
+        expect(assigns[:member_name_email]).to be(name)
+      end
+      it 'assigns @fhfa to the fhfa_number of the member if found' do
+        build_mail
+        expect(assigns[:fhfa ]).to be(fhfa_number)
+      end
     end
   end
 end

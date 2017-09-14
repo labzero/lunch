@@ -1,9 +1,29 @@
 $(function() {
-  $letterOfCreditPreviewFormSubmit = $('.letter-of-credit-preview').find('input[type=submit]');
+  $letterOfCreditAmendFormSubmit = $('.letters-of-credit-request').find('input[type=submit]');
   $letterOfCreditRequestForm = $('.letter-of-credit-request-form');
-  var $amountField = $('input[name="letter_of_credit_request[amount]"]');
+  $letterOfCreditPreviewFormSubmit = $('.letter-of-credit-preview').find('input[type=submit]');
+
+
   var $secureIDTokenField = $('#securid_token');
   var $secureIDPinField = $('#securid_pin');
+
+  var $amountField = $('input[name="letter_of_credit_request[amount]"]');
+  var $expirationDateField = $('input[type="hidden"][name="letter_of_credit_request[expiration_date]"]');
+  var $amendedAmountField = $('input[name="letter_of_credit_request[amended_amount]"]');
+  var $amendedExpirationDateField = $(".input-field-container-horizontal.amended_expiration_date .datepicker_input_field .input-mini");
+
+  $('.amended_expiration_date .datepicker-trigger').on('showCalendar.daterangepicker', function(e) {
+    enableSubmitIfValuesChanged();
+  });
+  $amendedAmountField.on('keyup', function(e) {enableSubmitIfValuesChanged();} );
+
+  function enableSubmitIfValuesChanged() {
+    // On the Letter of Credit amendment page, submit button is enable iff user has changed the amended amount or the amended expiration date
+    var expDate = (moment)( $expirationDateField.val() ).format('MM/DD/YYYY');
+    var amendedExpDate = (moment)( $amendedExpirationDateField.last().val() ).format('MM/DD/YYYY');
+    var disable = (($amountField.val() == $amendedAmountField.val()) && (expDate == amendedExpDate));
+    $letterOfCreditAmendFormSubmit.attr('disabled', disable);
+  };
 
   $amountField.on('keypress', function(e){
     Fhlb.Utils.onlyAllowDigits(e);
@@ -12,9 +32,19 @@ $(function() {
     Fhlb.Utils.addCommasToInputField(e);
     validateForm();
   });
-
   if ($amountField.length > 0) {
     Fhlb.Utils.addCommasToInputField({target: $amountField});
+  };
+
+  $amendedAmountField.on('keypress', function(e){
+      Fhlb.Utils.onlyAllowDigits(e);
+  });
+  $amendedAmountField.on('keyup', function(e){
+      Fhlb.Utils.addCommasToInputField(e);
+      enableSubmitIfValuesChanged();
+  });
+  if ($amendedAmountField.length > 0) {
+    Fhlb.Utils.addCommasToInputField({target: $amendedAmountField});
   };
 
   function validateForm() {

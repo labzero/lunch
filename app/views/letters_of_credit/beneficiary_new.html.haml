@@ -2,6 +2,11 @@
   .row
     .column-9x3-left
       %h1= @title
-      - if @error_message
-        .form-error-section
-          %p= @error_message
+      .letters-of-credit-success-info.icon-success-before
+        %p= t('letters_of_credit.beneficiary_new.received_short', datetime: fhlb_datetime_long_alpha_with_on(@created_at))
+        %p= t('letters_of_credit.beneficiary_new.email_details_html', email: @user_email)
+        %p= t('letters_of_credit.beneficiary_new.contact')
+        %p= t('letters_of_credit.beneficiary_new.questions_html', phone_number: service_desk_phone_number, rm_email: @contacts[:rm][:email], rm_name: @contacts[:rm][:full_name], rm_phone_number: fhlb_formatted_phone_number(@contacts[:rm][:phone_number]))
+      .letters-of-credit-success-actions
+        = link_to(t('letters_of_credit.manage.title'), letters_of_credit_manage_path, class: 'secondary-button')
+        = link_to(t('letters_of_credit.beneficiary_new.another'), letters_of_credit_beneficiary_path, class: 'secondary-button')

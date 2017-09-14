@@ -5,6 +5,7 @@ require_relative 'member/capital_stock'
 require_relative 'member/capital_stock_and_leverage'
 require_relative 'member/capital_stock_trial_balance'
 require_relative 'member/cash_projections'
+require_relative 'member/collateral_fees'
 require_relative 'member/disabled_reports'
 require_relative 'member/dividend_statement'
 require_relative 'member/flags'
@@ -799,6 +800,30 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/letter_of_credit/{lc_number}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve a letter of credit for the given lc_number'
+              key :notes, ''
+              key :nickname, :getLetterOfCreditForMember
+              key :type, :LettersOfCredit
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the members from'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :lc_number
+                key :required, true
+                key :type, :string
+                key :description, 'The lc_number of the letter of credit to be fetched'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/interest_rate_resets'
             operation do
               key :method, 'GET'
@@ -1030,6 +1055,51 @@ module MAPI
                 key :required, true
                 key :type, :string
                 key :description, 'The date of the requested statement'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/collateral_wire_fees_statements_available'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the list of dates for which collateral delivery and custody fees are available.'
+              key :notes, 'Returns an array of statement dates.'
+              key :nickname, :getSecurityServicesStatements
+              key :type, :array
+              items do
+                key :type, :string
+                key :description, 'Statement date in iso8601 format ("YYYY-MM-DD").'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The id to find the list of available statement dates from.'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/collateral_fees_statement/{date}'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve the hash of collateral delivery and custody fees for the given date.'
+              key :nickname, :getCollateralFeesStatement
+              key :type, :CollateralFeesStatement
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The member id for the collateral delivery and custody fees statement.'
+              end
+              parameter do
+                key :paramType, :path
+                key :name, :date
+                key :required, true
+                key :type, :string
+                key :description, 'The date of the requested statement.'
+                key :notes, 'Date must be expressed in iso8601 format ("YYY-MM-DD").'
               end
             end
           end
@@ -1607,6 +1677,14 @@ module MAPI
           MAPI::Services::Member::LettersOfCredit.letters_of_credit(self, member_id).to_json
         end
 
+        relative_get '/:id/letter_of_credit/:lc_number' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            member_id = params[:id]
+            lc_number = params[:lc_number]
+            MAPI::Services::Member::LettersOfCredit.letter_of_credit(self, member_id, lc_number)
+          end
+        end
+
         relative_get '/:id/beneficiaries' do
           MAPI::Services::Member.rescued_json_response(self) do
             member_id = params[:id]
@@ -1707,6 +1785,18 @@ module MAPI
           id   = params[:id].to_i
           date = params[:date].to_date
           MAPI::Services::Member::SecuritiesServicesStatements.statement(logger, env, id, date).to_json
+        end
+
+        relative_get '/:id/collateral_wire_fees_statements_available' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            MAPI::Services::Member::CollateralFees.available_statements(self, params[:id].to_i)
+          end
+        end
+
+        relative_get '/:id/collateral_fees_statement/:date' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            MAPI::Services::Member::CollateralFees.collateral_fees(self, params[:id].to_i, params[:date])
+          end
         end
 
         relative_get '/:id/securities/requests' do

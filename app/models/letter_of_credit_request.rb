@@ -3,9 +3,10 @@ class LetterOfCreditRequest
   include RedisBackedObject
   include CustomFormattingHelper
 
-  # The DEFAULT_ISSUANCE_FEE and DEFAULT_MAINTENANCE_FEE may eventually come from a service, but we have been asked by
+  # The DEFAULT_ISSUANCE_FEE, DEFAULT_MAINTENANCE_FEE, and DEFAULT_AMENDMENT_FEE may eventually come from a service, but we have been asked by
   # Scott and Michael to hardcode them in until an appropriate service is built to expose this information.
   DEFAULT_ISSUANCE_FEE = 100
+  DEFAULT_AMENDMENT_FEE = 100
   DEFAULT_MAINTENANCE_FEE = '10 bps'
   EXPIRATION_MAX_DATE_RESTRICTION = 15.years
   ISSUE_MAX_DATE_RESTRICTION = 1.week
@@ -13,10 +14,11 @@ class LetterOfCreditRequest
   ISSUE_DATE_TIME_RESTRICTION_WINDOW = 5.minutes
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
-  READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :request, :lc_number, :id, :owners, :member_id,
-                     :standard_borrowing_capacity, :max_term, :remaining_financing_available].freeze
-  ACCESSIBLE_ATTRS = [:beneficiary_name, :beneficiary_address, :amount, :attention, :issue_date, :expiration_date, :created_at, :created_by].freeze
-  DATE_ATTRS = [:issue_date, :expiration_date, :created_at].freeze
+  READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :amendment_fee, :request, :lc_number, :beneficiary, :current_par, :id, :owners,
+                     :standard_borrowing_capacity, :max_term, :member_id, :remaining_financing_available].freeze
+  ACCESSIBLE_ATTRS = [:beneficiary_name, :beneficiary_address, :amount, :amended_amount, :attention,
+                      :issue_date, :expiration_date, :amended_expiration_date, :amendment_date, :created_at, :created_by].freeze
+  DATE_ATTRS = [:issue_date, :expiration_date, :amended_expiration_date, :amendment_date, :created_at].freeze
   REQUIRED_ATTRS = [:beneficiary_name, :amount, :issue_date, :expiration_date].freeze
   SERIALIZATION_EXCLUDE_ATTRS = [:request].freeze
 
@@ -32,6 +34,9 @@ class LetterOfCreditRequest
   validate :amount_does_not_exceed_borrowing_capacity
   validate :amount_does_not_exceed_financing_availability
   validate :expiration_date_before_max_term
+  validate :amended_expiration_on_or_after_original_expiration
+  validate :amended_amount_equal_or_greater_than_original_amount
+  validate :amendment_date_not_prior_to_current_date
 
   def initialize(member_id, request=ActionDispatch::TestRequest.new)
     @member_id = member_id
@@ -41,8 +46,25 @@ class LetterOfCreditRequest
     @issuance_fee = DEFAULT_ISSUANCE_FEE
     @maintenance_fee = DEFAULT_MAINTENANCE_FEE
     start_date = Time.zone.now > Time.zone.parse(ISSUE_DATE_TIME_RESTRICTION) ? today + 1.day : today
+
     @issue_date = calendar_service.find_next_business_day(start_date, 1.day)
     @expiration_date = calendar_service.find_next_business_day(@issue_date + 1.year, 1.day)
+  end
+
+  def self.find_by_lc_number(member_id, lc_number, request=nil)
+    letter_of_credit_request = LetterOfCreditRequest.new(member_id, request)
+    member_balances = MemberBalanceService.new(member_id, request)
+    lc_details = member_balances.letter_of_credit(lc_number)
+    letter_of_credit_request.instance_variable_set(:@lc_number, lc_details[:lc_number])
+    letter_of_credit_request.beneficiary_name = lc_details[:beneficiary]
+    letter_of_credit_request.amount = lc_details[:current_par]
+    letter_of_credit_request.amended_amount = lc_details[:current_par]
+    letter_of_credit_request.issue_date = lc_details[:trade_date]
+    letter_of_credit_request.expiration_date = lc_details[:maturity_date]
+    letter_of_credit_request.amended_expiration_date = lc_details[:maturity_date]
+    letter_of_credit_request.amendment_date = Time.zone.today
+    letter_of_credit_request.instance_variable_set(:@amendment_fee, DEFAULT_AMENDMENT_FEE)
+    letter_of_credit_request
   end
 
   def id
@@ -211,6 +233,24 @@ class LetterOfCreditRequest
     end
   end
 
+  def amended_expiration_on_or_after_original_expiration
+    if expiration_date && amended_expiration_date
+      errors.add(:amended_expiration_date, :amended_exp_date_prior_to_original) if amended_expiration_date.to_date < expiration_date.to_date
+    end
+  end
+
+  def amended_amount_equal_or_greater_than_original_amount
+    if amount && amended_amount
+      errors.add(:amended_amount, :amended_amount_less_than_original_amount) if amended_amount < amount
+    end
+  end
+
+  def amendment_date_not_prior_to_current_date
+    if amendment_date
+      errors.add(:amendment_date, :amendment_date_prior_to_current_date) if amendment_date.to_date < Time.zone.today
+    end
+  end
+
   def fetch_member_profile
     @member_profile ||= MemberBalanceService.new(member_id, request).profile
   end
@@ -222,4 +262,5 @@ class LetterOfCreditRequest
   def past_issue_date_restriction_window?
     Time.zone.now > (Time.zone.parse(ISSUE_DATE_TIME_RESTRICTION) + ISSUE_DATE_TIME_RESTRICTION_WINDOW)
   end
+
 end

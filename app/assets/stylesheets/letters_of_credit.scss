@@ -43,14 +43,73 @@
 
 .letters-of-credit-manage-amend-on-table {
   td:last-child:not(.dataTables_empty) {
-    width: 100px;
+    width: 50px;
     a {
       text-transform: uppercase;
-      &:first-child {
-        float: left;
-      }
+    }
+    &:last-child {
+      float: center;
+    }
+  }
+}
+
+.letters-of-credit-amend-current-lc {
+  @extend %pseudoelement-clearfix;
+  @extend %bordered-section;
+
+  .input-field-container-horizontal {
+    @extend %horizontal-label-styling;
+    width: 60%;
+    text-align: right;
+    float: right;
+    margin-right: 0;
+    margin-bottom: 8px;
+    label, span {
+      color: $medium-gray;
+      line-height: 30px;
+      vertical-align: middle;
+      margin-right: 20px;
+    }
+    &:first-of-type {
+      margin-bottom: 10px;
+    }
+    .input-field-container {
+      width: 180px;
+      margin-right: 0;
+      float: right;
+    }
+  }
+  .input-field-container.icon-dollar-before {
+    input {
+      padding-left: 15px;
+    }
+    &:before {
+      z-index: 0;
+      color: $medium-gray;
+    }
+  }
+  dt {
+    float: left;
+    padding: 8px 0px 0 0;
+    margin-right: 150px;
+  }
+  dd {
+    text-align: left;
+    padding: 8px 0 0 0;
+  }
+  .letter-of-credit-amendment-current {
+    @extend %typography-subtitle;
+    dt {
+      width: 155px;
+      float: left;
+      color: $medium-gray;
+      margin-right: 20px;
+    }
+    dd {
+      margin-left: 175px;
+      margin-bottom: 8px;
       &:last-child {
-        float: right;
+        margin-bottom: 30px;
       }
     }
   }
@@ -213,6 +272,13 @@
 
 .beneficiary_add_textarea {
   width: 100%;
+  label {
+    display: inline-block;
+    span {
+      @extend %typography-table-cell;
+      line-height: 10px;
+    }
+  }
   .input-field-container-textarea {
     width: auto;
     height: 100px;
@@ -264,7 +330,7 @@
     h1 {
       @include typography-print-header;
       float: none;
-      margin-bottom: 0px;
+      margin: 15px 0 0;
     }
     h2 {
       @include typography-print-subheader;
@@ -279,11 +345,12 @@
       margin: 0;
     }
     .report-print-details {
-      margin-bottom: 30px;
+      margin-bottom: 15px;
       h2, .report-print-sta {
         @include typography-print-details;
         display: inline-block;
         margin: 0;
+        white-space: nowrap;
       }
     }
     .form-summary-data {

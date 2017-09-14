@@ -3,12 +3,11 @@ class Member
   FLIPPER_PREFIX = 'FHLB-'.freeze
 
   DEFAULT_REPORT_LIST = {
-    account_summary: {},
     advances_detail: {
       start_date: :this_month_end
     },
     borrowing_capacity: {
-      as_of_date: :last_month_end,
+      as_of_date: :this_month_end,
       disable_until_data_available: true
     },
     settlement_transaction_account: {

@@ -1,0 +1,32 @@
+- @html_class = 'white-background'
+- @page_title = t('reports.meta_title')
+.report.report-collateral-fees-statement.row
+  .report-header
+    %h1= @report_name
+    = render 'report_details', name: @member_name, freshness: t('reports.pages.collateral_fees.freshness'), availability: t('reports.pages.collateral_fees.availability')
+    - if @data_available
+      %p.report-sta-number= t('reports.pages.securities_services_statement.institution_details.sta_number_html', sta_number: @sta_number)
+      .report-inputs
+        = form_tag(reports_collateral_fees_path, method: 'GET') do
+          .report-filter
+            = render 'shared/dropdown', dropdown_name: 'start_date', default_value: @start_date, default_text: @dropdown_options_text, dropdown_options: @dropdown_options
+  .report-main-body
+    - if @data_available
+      .report-summary-data
+        %h3
+          = report_summary_with_date('reports.pages.securities_services_statement.statement_date', fhlb_date_long_alpha(@start_date))
+        %p= fhlb_date_standard_numeric(@start_date)
+      .report-summary-data
+        %h3
+          = report_summary_with_date('reports.pages.collateral_fees.total', fhlb_date_long_alpha(@start_date))
+        %p= fhlb_formatted_currency(@total_fees)
+      .securities-services-table-wrapper
+        %h2.report-table-title= t('reports.pages.collateral_fees.collateral_custody_fees')
+        = render 'fee_table', rows: [[:custody_fee, :custody_fee, :per_item], [:review_fee, :review_fee, :per_item], [:release_fee, :release_fee, :per_item], [:processing_fee, :processing_fee, :per_item]], data: @collateral_fees, type: :collateral_fees
+        .report-summary-data.report-summary-right
+          %h3= report_summary_with_date('reports.pages.collateral_fees.total', fhlb_date_long_alpha(@start_date) )
+          %p= fhlb_formatted_currency(@total_fees)
+      %small
+        %p= t('reports.pages.collateral_fees.questions_html', phone_number: collateral_fees_phone_number)
+    - else
+      %p= t('reports.pages.collateral_fees.data_unavailable')

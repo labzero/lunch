@@ -31,6 +31,17 @@
       "maturity_date": "2015-07-30",
       "description": "LC",
       "beneficiary": "Union Investment Real Estate GmbH, Asset Management International, Asset Management USA, Attn: Berit Emme, Valentinskamp 70/EMPORIO, 20355 Hamburg, Germany"
+    },
+    {
+      "lc_number": "2016-001",
+      "sort_code": "L12 Public",
+      "current_par": 15000000,
+      "maintenance_charge": 10,
+      "trade_date": "2017-01-03",
+      "settlement_date": "2017-01-03",
+      "maturity_date": "2018-07-30",
+      "description": "LC",
+      "beneficiary": ""
     }
   ]
 }
