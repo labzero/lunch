@@ -78,6 +78,8 @@ Then(/^I should see the "(.*?)" form error$/) do |error_type|
     I18n.t('letters_of_credit.errors.after_max_term', max_term: $1)
   when /^exceeds financing availability of (\d+)$/
     I18n.t('letters_of_credit.errors.exceeds_financing_availability', financing_availability: $1)
+  when 'amended amount less than original amount'
+    I18n.t('activemodel.errors.models.letter_of_credit_request.attributes.amended_amount.amended_amount_less_than_original_amount')
   end
   page.assert_selector('.form-error-section p', text: text, exact: true)
 end

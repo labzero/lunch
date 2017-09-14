@@ -103,7 +103,8 @@ class LettersOfCreditController < ApplicationController
             {value: credit[:maturity_date], type: :date},
             {value: credit[:description], type: nil},
             {value: credit[:maintenance_charge], type: :basis_point},
-            {value: t('global.view_pdf'), type: nil}
+            {value: t('global.view_pdf'), type: nil},
+            {value: credit[:sort_code], type: nil}
           ]
         }
       end
@@ -132,8 +133,46 @@ class LettersOfCreditController < ApplicationController
 
   # GET
   def amend
-    @letter_of_credit = LetterOfCreditRequest.find_by_lc_number(current_member_id,params[:lc_number], request)
+    @letter_of_credit_request = LetterOfCreditRequest.find_by_lc_number(current_member_id,params[:lc_number], request)
     populate_amend_request_view_variables
+  end
+
+  # POST
+  def amend_preview
+    set_titles(t('letters_of_credit.request.amend.title'))
+    letter_of_credit_request.attributes = params[:letter_of_credit_request]
+    @amended_amount ||= letter_of_credit_request.amended_amount
+    @amended_expiration_date ||= letter_of_credit_request.amended_expiration_date
+    @session_elevated = session_elevated?
+    unless @letter_of_credit_request.valid?
+      @error_message = prioritized_error_message(@letter_of_credit_request)
+      populate_amend_request_view_variables
+      render :amend
+    end
+  end
+
+  # POST
+  def amend_execute
+    request_succeeded = false
+    if !policy(:letters_of_credit).amend_execute?
+      @error_message = t('letters_of_credit.errors.not_authorized')
+    else
+      securid_status = securid_perform_check
+    end
+    if !session_elevated?
+      @securid_status = securid_status
+    elsif letter_of_credit_request.valid?
+      # letter_of_credit_request.amend_execute(current_user.display_name)
+      set_titles(t('letters_of_credit.request.amend.success.title'))
+      MemberMailer.letter_of_credit_request(current_member_id, @letter_of_credit_request.to_json, current_user).deliver_later
+      request_succeeded = true
+    else
+      @error_message = t('letters_of_credit.errors.generic_html', rm_email: @contacts[:rm][:email], rm_phone_number: @contacts[:rm][:phone_number])
+    end
+    unless request_succeeded
+      set_titles(t('letters_of_credit.request.amend.title'))
+      render :amend_preview
+    end
   end
 
   # POST

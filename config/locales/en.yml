@@ -308,6 +308,8 @@ en:
               greater_than: Amount must be a positive number with no fractional cents.
               exceeds_borrowing_capacity: The amount you selected exceeds your institution's current whole loan borrowing capacity. You may make a request for a lower amount, or check with your Relationship Manager or Member Services Desk to adjust your collateral first.
               exceeds_financing_availability: The amount you entered exceeds your institution's current financing availability. Submit a request for a lesser amount or contact your Relationship Manager or the Member Services Desk.
+            amended_amount:
+              amended_amount_less_than_original_amount: The amended credit amount must be equal to or greater than the original credit amount.
             beneficiary_name:
               invalid: Please choose a valid beneficiary.
     attributes:
@@ -1606,6 +1608,15 @@ en:
           explanation: 'Based on the amendment(s) requested above, the following fee will be applied:'
           fee: Amendment Fee
           further_explanation: The Amendment Fee will be charged to your Settlement/Transaction Account (STA) on the amendment date of the Letter of Credit.
+        preview:
+          current_amount: "Current Credit Amount:"
+          effective date: "Effective Date of Amendment:"
+          review_details: If you agree with the above, including the requested Letter of Credit Amendment terms, enter your SecurID token credentials below and press “Authorize Request.” If not, press “Edit Request” or “Cancel.”
+          review_details_elevated: If you agree with the above, including the requested Letter of Credit Amendment terms, press “Authorize Request.” If not, press “Edit Request” or “Cancel.”
+          legal: "This Letter of Credit amendment is subject to your institution’s continuing compliance with the Bank’s Advances and Security Agreement and other applicable agreements, as well as with the Bank’s Credit Program and specific eligibility or documentation requirements and policies applicable to specific Bank products. Also, statutory or regulatory conditions (including regulatory limits on Bank credit to capital-deficient savings institutions) may apply.\n\nThis Letter of Credit has been issued and is being amended pursuant to the Letter of Credit Reimbursement Agreement between the Bank and the Member, which will govern the rights and obligations of the Bank and the Member with respect to each other in regard to the Letter of Credit (including any amendments). The original amendment will be provided to the Beneficiary. Your institution covenants with and represents and warrants to the Bank that the above terms are valid and are those by which your institution agrees to be bound. For all purposes, your above request constitutes a “Confirmation of Amendment of Letter of Credit” and a “Confirmation,” as the latter term is used and defined in the Letter of Credit Reimbursement Agreement."
+        success:
+          title: Letter of Credit Amendment Request Received
+          confirmation: "We received your Letter of Credit Amendment Request at %{datetime}. \n\nWe will amend your Letter of Credit on the Amendment Date. Once amended, the original amendment will be sent to the Beneficiary on the Amendment Date."
     preview:
       action: Preview Request
       review_details: If you agree with the above, including the requested Letter of Credit terms, enter your SecurID token credentials below and press “Authorize Request.” If not, press “Edit Request” or “Cancel.”

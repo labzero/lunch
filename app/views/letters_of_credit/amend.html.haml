@@ -1,5 +1,5 @@
 - relationship_manager = @contacts[:rm] || {}
-.letters-of-credit.letters-of-credit-request
+.letters-of-credit.letters-of-credit-amend-request
   .row
     .column-9x3-left
       %h1= @title
@@ -9,22 +9,27 @@
       %p= t('letters_of_credit.request.amend.instructions')
   .row
     = content_with_sidebar([{name: 'borrowing_capacity', locals: {profile: @profile}}, {name: 'contact', locals: {relationship_manager: relationship_manager, text: t('letters_of_credit.contact')}}]) do
-      = form_for(@letter_of_credit, url: letters_of_credit_amend_path, html: {class: 'letter-of-credit-amend', data: {'prevent-submit-on-enter' => true}}) do |f|
+      = form_for(@letter_of_credit_request, url: letters_of_credit_amend_preview_path, html: {class: 'letter-of-credit-amend-preview', data: {'prevent-submit-on-enter' => true}}) do |f|
         = f.hidden_field(:amount)
         = f.hidden_field(:expiration_date)
+        = f.hidden_field(:lc_number)
+        = f.hidden_field(:beneficiary_name)
+        = f.hidden_field(:amended_expiration_date)
+        = f.hidden_field(:amendment_date)
+        = f.hidden_field(:amendment_fee)
         %section.letters-of-credit-amend-current-lc
           %h2= t('letters_of_credit.request.amend.current.title')
           %dl.letter-of-credit-amendment-current
             %dt= t('letters_of_credit.request.amend.current.lc_number')
-            %dd= @letter_of_credit.lc_number
+            %dd= @letter_of_credit_request.lc_number
             %dt= t('letters_of_credit.request.amend.current.beneficiary')
-            %dd= @letter_of_credit.beneficiary_name
+            %dd= @letter_of_credit_request.beneficiary_name.to_s.length === 0  ? 'No Beneficiary Found' : @letter_of_credit_request.beneficiary_name
             %dt= t('letters_of_credit.request.amend.current.current_amount')
-            %dd= fhlb_formatted_currency_whole(@letter_of_credit.amount)
+            %dd= fhlb_formatted_currency_whole(@letter_of_credit_request.amount)
             %dt= t('letters_of_credit.request.amend.current.issue_date')
-            %dd= fhlb_date_standard_numeric(@letter_of_credit.issue_date)
+            %dd= fhlb_date_standard_numeric(@letter_of_credit_request.issue_date)
             %dt= t('letters_of_credit.request.amend.current.current_expiration')
-            %dd= fhlb_date_standard_numeric (@letter_of_credit.expiration_date)
+            %dd= fhlb_date_standard_numeric(@letter_of_credit_request.expiration_date)
         %section.letters-of-credit-amend-current-lc
           %h2= t('letters_of_credit.request.amend.requested.title')
           %p= t('letters_of_credit.request.amend.requested.explanation')
@@ -32,11 +37,10 @@
             = render 'shared/input_field', form_builder: f, field_name: :amended_amount, label: t('letters_of_credit.request.amend.requested.amended_amount'), field_class: ['enabled'], icon: 'dollar', location: 'before', html_attributes: { disabled: false }
           .input-field-container-horizontal.amended_expiration_date
             %span= t('letters_of_credit.request.amend.requested.amended_expiration')
-            = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: @letter_of_credit.amended_expiration_date,
-            start_date: @letter_of_credit.expiration_date, min_date: @letter_of_credit.expiration_date, max_date: @date_restrictions[:expiration_max_date], disable_weekends: true
+            = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'letter_of_credit_request[amended_expiration_date]', start_date: @letter_of_credit_request.expiration_date, min_date: @letter_of_credit_request.expiration_date, max_date: @date_restrictions[:expiration_max_date], disable_weekends: true
           .input-field-container-horizontal.amendment_date
             %span= t('letters_of_credit.request.amend.requested.amendment_date')
-            = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: @letter_of_credit.amendment_date, start_date: @letter_of_credit.amendment_date, min_date: Time.zone.today, max_date: Time.zone.today + 1.year
+            = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'letter_of_credit_request[amendment_date]', start_date: @letter_of_credit_request.amendment_date, min_date: Time.zone.today, max_date: Time.zone.today + 1.year
         %section.letters-of-credit-fees-section
           %h2= t('letters_of_credit.request.fees.title')
           %p= t('letters_of_credit.request.amend.fees.explanation')

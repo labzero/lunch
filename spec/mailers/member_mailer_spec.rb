@@ -209,6 +209,10 @@ RSpec.describe MemberMailer, :type => :mailer do
           expect(email_body).to include(string_sentinel)
         end
       end
+      it 'includes the `beneficiary_name` attribute' do
+        allow(letter_of_credit_request).to receive(:beneficiary_name).and_return(string_sentinel)
+        expect(email_body).to include(string_sentinel)
+      end
       [:amount, :issuance_fee].each do |attr|
         it "includes the correctly formatted `#{attr}` attribute" do
           allow(letter_of_credit_request).to receive(attr).and_return(integer_sentinel)

@@ -8,6 +8,7 @@ module MAPI
             credits_query = <<-SQL
               SELECT FHLB_ID,
               LC_LC_NUMBER,
+              LC_SORT_CODE,
               LCX_CURRENT_PAR,
               LCX_TRANS_SPREAD,
               LC_TRADE_DATE,
@@ -46,6 +47,7 @@ module MAPI
             loc_query = <<-SQL
               SELECT FHLB_ID,
               LC_LC_NUMBER,
+              LC_SORT_CODE,
               LCX_CURRENT_PAR,
               LCX_TRANS_SPREAD,
               LC_TRADE_DATE,
@@ -81,6 +83,7 @@ module MAPI
             credits.collect do |credit|
               {
                 lc_number: (credit[:LC_LC_NUMBER].to_s if credit[:LC_LC_NUMBER]),
+                sort_code: (credit[:LC_SORT_CODE].to_s if credit[:LC_SORT_CODE]),
                 current_par: (credit[:LCX_CURRENT_PAR].to_i if credit[:LCX_CURRENT_PAR]),
                 maintenance_charge: (credit[:LCX_TRANS_SPREAD].to_i if credit[:LCX_TRANS_SPREAD]),
                 trade_date: (credit[:LC_TRADE_DATE].to_date if credit[:LC_TRADE_DATE]),

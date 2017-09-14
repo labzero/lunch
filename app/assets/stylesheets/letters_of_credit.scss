@@ -53,6 +53,8 @@
   }
 }
 
+
+
 .letters-of-credit-amend-current-lc {
   @extend %pseudoelement-clearfix;
   @extend %bordered-section;
@@ -107,6 +109,22 @@
     }
     dd {
       margin-left: 175px;
+      margin-bottom: 8px;
+      &:last-child {
+        margin-bottom: 30px;
+      }
+    }
+  }
+  .letter-of-credit-amendment_preview {
+    @extend %typography-subtitle;
+    dt {
+      width: 200px;
+      float: left;
+      color: $medium-gray;
+      margin-right: 20px;
+    }
+    dd {
+      width: 300px;
       margin-bottom: 8px;
       &:last-child {
         margin-bottom: 30px;
@@ -215,6 +233,7 @@
     width: 219px;
   }
 }
+
 .letters-of-credit-success-actions {
   margin-top: 70px;
   .primary-button, .secondary-button {
@@ -323,6 +342,7 @@
 .letters-of-credit-view-pdf {
   display: none;
 }
+
 
 @media print {
   .letters-of-credit {

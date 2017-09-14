@@ -204,6 +204,9 @@ Rails.application.routes.draw do
       post 'execute' => 'letters_of_credit#execute'
       get 'view' => 'letters_of_credit#view'
       get 'amend' => 'letters_of_credit#amend'
+      post 'amend_preview' => 'letters_of_credit#amend_preview'
+      post 'amend_execute' => 'letters_of_credit#amend_execute'
+      post 'amend_view' => 'letters_of_credit#amend_view'
       constraints Constraints::FeatureEnabled.new('letters-of-credit-beneficiary') do
         get 'beneficiary' => 'letters_of_credit#beneficiary'
         post 'beneficiary_new' => 'letters_of_credit#beneficiary_new'

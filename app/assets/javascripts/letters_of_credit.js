@@ -1,7 +1,11 @@
 $(function() {
-  $letterOfCreditAmendFormSubmit = $('.letters-of-credit-request').find('input[type=submit]');
+  $letterOfCreditAmendFormSubmit = $('.letters-of-credit-amend-request').find('input[type=submit]');
   $letterOfCreditRequestForm = $('.letter-of-credit-request-form');
+  $letterOfCreditRequestPreviewForm = $('.letter-of-credit-preview');
+
   $letterOfCreditPreviewFormSubmit = $('.letter-of-credit-preview').find('input[type=submit]');
+  $letterOfCreditAmendPreviewForm = $('.letter-of-credit-amend-preview')
+  $letterOfCreditAmendPreviewFormSubmit = $('.letter-of-credit-amend-preview').find('input[type=submit]');
 
 
   var $secureIDTokenField = $('#securid_token');
@@ -56,11 +60,18 @@ $(function() {
   };
 
   // Validate length of SecurID token and pin
-  Fhlb.Utils.bindFormSubmitStateToSecureIDFields($letterOfCreditRequestForm, $secureIDPinField, $secureIDTokenField);
+  Fhlb.Utils.bindFormSubmitStateToSecureIDFields($letterOfCreditRequestPreviewForm, $secureIDPinField, $secureIDTokenField);
+  Fhlb.Utils.bindFormSubmitStateToSecureIDFields($letterOfCreditAmendPreviewForm, $secureIDPinField, $secureIDTokenField);
 
-  $letterOfCreditRequestForm.on('submit', function(e) {
+  $letterOfCreditRequestPreviewForm.on('submit', function(e) {
     if ($secureIDTokenField.length > 0 && $secureIDPinField.length > 0 && !Fhlb.Utils.validateSecurID($(this))) {
       return false;
+    };
+  });
+
+  $letterOfCreditAmendPreviewForm.on('submit', function(e) {
+    if ($secureIDTokenField.length > 0 && $secureIDPinField.length > 0 && !Fhlb.Utils.validateSecurID($(this))) {
+        return false;
     };
   });
 

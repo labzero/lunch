@@ -16,4 +16,3 @@ Feature: Requesting an Add Beneficiary
     And I should be on the New Letter of Credit Request page
     When I click on Add Beneficiary link
     Then I should be on the Add Beneficiary Request page
-

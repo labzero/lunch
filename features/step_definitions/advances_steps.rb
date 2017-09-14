@@ -264,12 +264,14 @@ Then(/^I should see an? "(.*?)" advance error(?: with amount (\d+) and type "(.*
   page.assert_selector('.add-advance-icon-section.icon-error-before p', visible: true, text: text)
 end
 
-Then(/^I should see SecurID errors on the (Add Advance|Letter of Credit) preview page$/) do |request_type|
+Then(/^I should see SecurID errors on the (Add Advance|Letter of Credit|Letter of Credit Amendment) preview page$/) do |request_type|
   css_selector = case request_type
   when 'Add Advance'
     '.add-advance-preview'
   when 'Letter of Credit'
-    '.letters-of-credit-preview'
+    '.letter-of-credit-preview'
+  when 'Letter of Credit Amendment'
+    '.letter-of-credit-amend-preview'
   end
   page.assert_selector("#{css_selector} .form-error", visible: true)
   page.assert_selector("#{css_selector} input.input-field-error", visible: true)
