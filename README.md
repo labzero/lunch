@@ -139,6 +139,9 @@ This is a summary of the options supported in our .env files:
 * `DOCUSIGN_POWERFORM_PATH`: Docusign Powerform Path
 * `DOCUSIGN_POWERFORMS`: Hash of Docusign Powerform IDs
 * `LC_BENEFICIARIES`: A JSON blob containing an array of hashes, each of which contains the name and address of a Letter of Credit beneficiary
+* `PRISMIC_REF`: This is an optional environment variable used to tell the ContentManagementService which reference branch to use when pulling content from Prismic.  If undefined, the CMS will pull from the master branch.  It is recommended to set this to 'test' locally, so that you can see unpublished changes that are part of the 'test' release in Prismic.  This value is set to 'test' in the Dev and Test regions and undefined in the Prod region.
+* `PRISMIC_ACCESS_TOKEN`: This is an optional environment variable that can be set to overwrite the default access token specified in 'config/prismic.yml'
+* `PRISMIC_URL`: This is an optional environment variable that can be set to overwrite the default Prismic api url specified in 'config/prismic.yml'
 
 
 ## Running the Tests
