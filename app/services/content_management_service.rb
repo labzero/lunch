@@ -8,7 +8,13 @@ class ContentManagementService
   end
 
   def content_by_uid(type, uid)
-    api.get_by_uid(type, uid, ref: ref)
+    begin
+      api.get_by_uid(type, uid, ref: ref)
+    rescue Prismic::Error => e
+      Rails.logger.error("Prismic CMS error for fhlb_id `#{member_id}`, request_uuid `#{request.try(:uuid)}`: #{e.class.name}")
+      Rails.logger.error e.backtrace.join("\n")
+      return nil
+    end
   end
 
   def get_pdf_url(type_name, uid)
@@ -29,7 +35,11 @@ class ContentManagementService
   end
 
   def ref
-    @ref ||= (api.ref(ENV['PRISMIC_REF']) || api.master).ref
+    @ref ||= if ENV['PRISMIC_REF']
+      api.ref(ENV['PRISMIC_REF']).ref
+    else
+      api.master.ref
+    end
   end
 
   def url

@@ -64,6 +64,20 @@ describe ContentManagementService do
         allow(subject.api).to receive(:get_by_uid).and_return(results)
         expect(call_method).to eq(results)
       end
+      context 'when a `Prismic::Error` is raised' do
+        let(:error) { Prismic::Error.new }
+        before do
+          allow(subject.api).to receive(:get_by_uid).and_raise(error)
+          allow(Rails.logger).to receive(:error)
+        end
+        it 'returns nil' do
+          expect(call_method).to be nil
+        end
+        it 'logs information about the error' do
+          expect(Rails.logger).to receive(:error).with("Prismic CMS error for fhlb_id `#{member_id}`, request_uuid `#{request.try(:uuid)}`: #{error.class.name}")
+          call_method
+        end
+      end
     end
 
     describe '`get_pdf_url`' do
@@ -189,30 +203,43 @@ describe ContentManagementService do
       context 'when the `@ref` attribute does not yet exist' do
         before { subject.instance_variable_set(:@ref, nil) }
 
-        it 'checks to see if there is an api ref using the `PRISMIC_REF` environment variable' do
-          expect(subject.api).to receive(:ref).with(ENV['PRISMIC_REF'])
-          call_method
-        end
+        context 'when there is a `PRISMIC_REF` environment variable' do
+          let(:fetched_ref) { instance_double(String) }
+          let(:env_ref) { SecureRandom.hex }
 
-        context 'when there is an api ref for the `PRISMIC_REF` environment variable' do
-          let(:env_ref) { instance_double(String) }
-          before { allow(subject.api).to receive(:ref).with(ENV['PRISMIC_REF']).and_return(ref_object) }
-
+          it 'fetches the ref from the api' do
+            cached_ref = ENV['PRISMIC_REF']
+            ENV['PRISMIC_REF'] = env_ref
+            expect(subject.api).to receive(:ref).with(env_ref).and_return(ref_object)
+            call_method
+            ENV['PRISMIC_REF'] = cached_ref
+          end
           it 'returns the result of calling `ref` on the returned object' do
-            allow(ref_object).to receive(:ref).and_return(env_ref)
-            expect(call_method).to eq(env_ref)
+            cached_ref = ENV['PRISMIC_REF']
+            ENV['PRISMIC_REF'] = env_ref
+            allow(subject.api).to receive(:ref).with(env_ref).and_return(ref_object)
+            allow(ref_object).to receive(:ref).and_return(fetched_ref)
+            expect(call_method).to eq(fetched_ref)
+            ENV['PRISMIC_REF'] = cached_ref
           end
         end
-        context 'when there is not an api ref for the `PRISMIC_REF` environment variable' do
+
+        context 'when there is not a `PRISMIC_REF` environment variable' do
           let(:master_ref) { instance_double(String) }
 
           it 'calls `master` on the api object' do
+            cached_ref = ENV['PRISMIC_REF']
+            ENV['PRISMIC_REF'] = nil
             expect(subject.api).to receive(:master).and_return(ref_object)
             call_method
+            ENV['PRISMIC_REF'] = cached_ref
           end
           it 'returns the result of calling `ref` on the returned master object' do
+            cached_ref = ENV['PRISMIC_REF']
+            ENV['PRISMIC_REF'] = nil
             allow(ref_object).to receive(:ref).and_return(master_ref)
             expect(call_method).to eq(master_ref)
+            ENV['PRISMIC_REF'] = cached_ref
           end
         end
       end
