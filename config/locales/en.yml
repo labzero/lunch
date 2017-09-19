@@ -1651,7 +1651,7 @@ en:
       exceeds_financing_availability: The amount you entered exceeds your institution's current financing availability of %{financing_availability}. Submit a request for a lesser amount or contact your Relationship Manager or the Member Services Desk.
       amended_exp_date_prior_to_original: The expiration date must be the same or later than the current expiration date.
     pdf:
-      requested: Letter of Credit Request
+      requested: Letter of Credit Request Confirmation
       request_date: Request Date/Time
       requested_by: Request Authorized By
     email:

@@ -213,7 +213,7 @@ class LettersOfCreditController < ApplicationController
   def view
     @letter_of_credit_request = LetterOfCreditRequest.find(params[:letter_of_credit_request][:id], request)
     if params[:export_format] == 'pdf'
-      pdf_name = "letter_of_credit_request_#{@letter_of_credit_request.lc_number}.pdf"
+      pdf_name = "letter_of_credit_request_confirmation_#{@letter_of_credit_request.lc_number}.pdf"
       job_status = RenderLetterOfCreditPDFJob.perform_later(current_member_id, action_name, pdf_name, { letter_of_credit_request: {id: letter_of_credit_request.id} }).job_status
       job_status.update_attributes!(user_id: current_user.id)
       render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}

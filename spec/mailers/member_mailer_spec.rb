@@ -131,7 +131,7 @@ RSpec.describe MemberMailer, :type => :mailer do
       )
     end
     let(:user) { instance_double(User, email: "#{SecureRandom.hex}@example.com", display_name: SecureRandom.hex) }
-    let(:filename) { method.to_s.eql?('letter_of_credit_request') ? "letter_of_credit_request_#{letter_of_credit_request.lc_number}" : "letter_of_credit_request_amendment_confirmation_#{letter_of_credit_request.lc_number}"}
+    let(:filename) { method.to_s.eql?('letter_of_credit_request') ? "letter_of_credit_request_confirmation_#{letter_of_credit_request.lc_number}" : "letter_of_credit_request_amendment_confirmation_#{letter_of_credit_request.lc_number}"}
     let(:file) { instance_double(StringIOWithFilename, original_filename: filename, read: File.read(Rails.root.join('spec', 'fixtures', 'letter_of_credit_request_sample.pdf'))) }
     let(:build_mail) { mail method, member_id, letter_of_credit_json, user }
 
@@ -289,13 +289,13 @@ RSpec.describe MemberMailer, :type => :mailer do
     let(:beneficiary_request) do
       instance_double(BeneficiaryRequest,
                       id: id,
-                            name: nil,
-                            street_address: nil,
-                            city: nil,
-                            state: nil,
-                            zip: nil,
-                            care_of: nil,
-                            department: nil
+                      name: nil,
+                      street_address: nil,
+                      city: nil,
+                      state: nil,
+                      zip: nil,
+                      care_of: nil,
+                      department: nil
       )
     end
     let(:display_name) { SecureRandom.hex }

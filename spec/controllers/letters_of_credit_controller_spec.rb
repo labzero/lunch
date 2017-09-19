@@ -9,7 +9,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
   let(:member) {{
     name: double('name'),
     fhfa_number: double('fhfa number'),
-    customer_lc_agreement_flag: double('customer lc agreement flag') 
+    customer_lc_agreement_flag: double('customer lc agreement flag')
   }}
   let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest, save: nil, :attributes= => nil, beneficiary_name: nil, owners: instance_double(Set, add: nil), lc_number: nil, id: nil) }
   let(:beneficiary_request) { instance_double(BeneficiaryRequest, save: nil, :attributes= => nil, owners: instance_double(Set, add: nil), id: nil) }
@@ -83,7 +83,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
   end
 
   shared_examples 'a LettersOfCreditController action that sets the customer LC agreement flag' do
-   it 'creates a new instance of MembersService with the request' do
+    it 'creates a new instance of MembersService with the request' do
       expect(MembersService).to receive(:new).with(request).and_return(members_service)
       call_action
     end
@@ -152,7 +152,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with a pdf name that includes the lc_number of the letter of credit request' do
         lc_number = SecureRandom.hex
         allow(letter_of_credit_request).to receive(:lc_number).and_return(lc_number)
-        file_name = view.to_s.eql?('amend_view') ? "letter_of_credit_request_amendment_#{lc_number}.pdf" : "letter_of_credit_request_#{lc_number}.pdf"
+        file_name = view.to_s.eql?('amend_view') ? "letter_of_credit_request_amendment_#{lc_number}.pdf" : "letter_of_credit_request_confirmation_#{lc_number}.pdf"
         expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(anything, anything, file_name, any_args).and_return(performed_job)
         call_action
       end
@@ -1031,6 +1031,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           {name: 'Here''s A Beneficiary'},
           {name: 'Yet Another Beneficiary'}
         ]}
+
         it 'creates a new instance of `BeneficiariesService` with the request' do
           expect(BeneficiariesService).to receive(:new).with(request).and_return(beneficiary_service)
           call_method
