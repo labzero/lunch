@@ -141,8 +141,8 @@ class LettersOfCreditController < ApplicationController
   def amend_preview
     set_titles(t('letters_of_credit.request.amend.title'))
     letter_of_credit_request.attributes = params[:letter_of_credit_request]
-    @amended_amount ||= letter_of_credit_request.amended_amount
-    @amended_expiration_date ||= letter_of_credit_request.amended_expiration_date
+    @amended_amount = letter_of_credit_request.amended_amount
+    @amended_expiration_date = letter_of_credit_request.amended_expiration_date
     @session_elevated = session_elevated?
     unless @letter_of_credit_request.valid?
       @error_message = prioritized_error_message(@letter_of_credit_request)
@@ -155,16 +155,15 @@ class LettersOfCreditController < ApplicationController
   def amend_execute
     request_succeeded = false
     if !policy(:letters_of_credit).amend_execute?
-      @error_message = t('letters_of_credit.errors.not_authorized')
+      @error_message = t('letters_of_credit.request.amend.errors.not_authorized')
     else
       securid_status = securid_perform_check
     end
     if !session_elevated?
       @securid_status = securid_status
-    elsif letter_of_credit_request.valid?
-      # letter_of_credit_request.amend_execute(current_user.display_name)
+    elsif letter_of_credit_request.valid? && letter_of_credit_request.amend_execute(current_user.display_name)
       set_titles(t('letters_of_credit.request.amend.success.title'))
-      MemberMailer.letter_of_credit_request(current_member_id, @letter_of_credit_request.to_json, current_user).deliver_later
+      MemberMailer.letter_of_credit_request_amendment(current_member_id, @letter_of_credit_request.to_json, current_user).deliver_later
       request_succeeded = true
     else
       @error_message = t('letters_of_credit.errors.generic_html', rm_email: @contacts[:rm][:email], rm_phone_number: @contacts[:rm][:phone_number])
@@ -221,7 +220,23 @@ class LettersOfCreditController < ApplicationController
     else
       member = MembersService.new(request).member(current_member_id)
       raise ActionController::RoutingError.new("There has been an error and LettersOfCreditController#view has encountered nil calling MembersService. Check error logs.") if member.nil?
-      @member_name, @member_fhla = member[:name], member[:fhla_number]
+      @member_name, @member_fhfa = member[:name], member[:fhfa_number]
+    end
+  end
+
+  # GET
+  def amend_view
+    @is_amendment = true
+    @letter_of_credit_request = LetterOfCreditRequest.find(params[:letter_of_credit_request][:id], request)
+    if params[:export_format] == 'pdf'
+      pdf_name = "letter_of_credit_request_amendment_#{@letter_of_credit_request.lc_number}.pdf"
+      job_status = RenderLetterOfCreditPDFJob.perform_later(current_member_id, action_name, pdf_name, { letter_of_credit_request: {id: letter_of_credit_request.id} }).job_status
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
+    else
+      member = MembersService.new(request).member(current_member_id)
+      raise ActionController::RoutingError.new("There has been an error and LettersOfCreditController#view has encountered nil calling MembersService. Check error logs.") if member.nil?
+      @member_name, @member_fhfa = member[:name], member[:fhfa_number]
     end
   end
 

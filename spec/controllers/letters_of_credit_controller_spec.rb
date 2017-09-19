@@ -8,7 +8,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
   let(:member_id) { double('A Member ID') }
   let(:member) {{
     name: double('name'),
-    fhla_number: double('fhla number'),
+    fhfa_number: double('fhfa number'),
     customer_lc_agreement_flag: double('customer lc agreement flag') 
   }}
   let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest, save: nil, :attributes= => nil, beneficiary_name: nil, owners: instance_double(Set, add: nil), lc_number: nil, id: nil) }
@@ -99,6 +99,112 @@ RSpec.describe LettersOfCreditController, :type => :controller do
     it 'sets the `@customer_lc_agreement_flag` to the customer_lc_agreement_flag value of the member hash' do
       call_action
       expect(assigns[:lc_agreement_flag]).to eq(member[:customer_lc_agreement_flag])
+    end
+  end
+
+  shared_examples 'a LettersOfCreditController action that creates a downloadable PDF of the request' do |view, file_name|
+    let(:members_service) { instance_double(MembersService, member: member) }
+    let(:id) { SecureRandom.hex }
+    let(:call_action) { get view.to_sym, letter_of_credit_request: {id: id} }
+    before do
+      allow(LetterOfCreditRequest).to receive(:find).and_return(letter_of_credit_request)
+      allow(MembersService).to receive(:new).and_return(members_service)
+      allow(subject).to receive(:authorize).with(letter_of_credit_request, :modify?)
+    end
+
+    allow_policy :letters_of_credit, :request?
+    allow_policy :letters_of_credit, :modify?
+
+    it_behaves_like 'a user required action', :get, :view
+    it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
+
+    it 'finds the LetterOfCreditRequest based on the id param and the request' do
+      expect(LetterOfCreditRequest).to receive(:find).with(id, request).and_return(letter_of_credit_request)
+      call_action
+    end
+    it 'sets the `@letter_of_credit_request` instance variable to the result `LetterOfCreditRequest.find`' do
+      call_action
+      expect(assigns[:letter_of_credit_request]).to eq(letter_of_credit_request)
+    end
+
+    it 'sets the `@is_amendment` instance variable to `true` if amending an existing LoC' do
+      call_action
+      expect(assigns[:is_amendment]).to eq(true) if view.to_s.eql?('amend_view')
+    end
+
+    describe 'when there is an `export_format` param that is `pdf`' do
+      let(:job_status) { double('job_status', :update_attributes! => nil) }
+      let(:performed_job) { double('performed job', job_status: job_status) }
+      let(:call_action) { get view.to_sym, {letter_of_credit_request: {id: id}, export_format: 'pdf'} }
+
+      before do
+        allow(RenderLetterOfCreditPDFJob).to receive(:perform_later).and_return(performed_job)
+      end
+
+      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with the current_member_id' do
+        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(member_id, any_args).and_return(performed_job)
+        call_action
+      end
+      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with the current action name' do
+        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(anything, view.to_s, any_args).and_return(performed_job)
+        call_action
+      end
+      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with a pdf name that includes the lc_number of the letter of credit request' do
+        lc_number = SecureRandom.hex
+        allow(letter_of_credit_request).to receive(:lc_number).and_return(lc_number)
+        file_name = view.to_s.eql?('amend_view') ? "letter_of_credit_request_amendment_#{lc_number}.pdf" : "letter_of_credit_request_#{lc_number}.pdf"
+        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(anything, anything, file_name, any_args).and_return(performed_job)
+        call_action
+      end
+      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with the letter_of_credit_request id' do
+        allow(letter_of_credit_request).to receive(:id).and_return(id)
+        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(anything, anything, anything, {letter_of_credit_request: {id: id}}).and_return(performed_job)
+        call_action
+      end
+      it 'calls `job_status` on the result of `perform_later`' do
+        expect(performed_job).to receive(:job_status).and_return(job_status)
+        call_action
+      end
+      it 'updates the `job_status` with the current user id' do
+        user = instance_double(User, id: SecureRandom.hex, accepted_terms?: true)
+        allow(controller).to receive(:current_user).and_return(user)
+        expect(job_status).to receive(:update_attributes!).with(user_id: user.id)
+        call_action
+      end
+      it 'renders JSON with a `job_status_url`' do
+        call_action
+        expect(JSON.parse(response.body)['job_status_url']).to eq(job_status_url(job_status))
+      end
+      it 'renders JSON with a `job_cancel_url`' do
+        call_action
+        expect(JSON.parse(response.body)['job_cancel_url']).to eq(job_cancel_url(job_status))
+      end
+    end
+    describe 'when there is no `export_format` param' do
+      it 'creates a new instance of MembersService with the request' do
+        expect(MembersService).to receive(:new).with(request).and_return(members_service)
+        call_action
+      end
+      it 'calls `member` on the instance of MembersService with the current_member_id' do
+        expect(members_service).to receive(:member).with(member_id).and_return(member)
+        call_action
+      end
+      it 'raises an error if no member is found' do
+        allow(members_service).to receive(:member)
+        expect{call_action}.to raise_error(ActionController::RoutingError)
+      end
+      it 'sets `@member_name` to the name value of the member hash' do
+        call_action
+        expect(assigns[:member_name]).to eq(member[:name])
+      end
+      it 'sets `@member_fhla` to the fhfa_number value of the member hash' do
+        call_action
+        expect(assigns[:member_fhfa]).to eq(member[:fhfa_number])
+      end
+      it 'renders its view' do
+        call_action
+        expect(response.body).to render_template(view.to_sym)
+      end
     end
   end
 
@@ -230,123 +336,11 @@ RSpec.describe LettersOfCreditController, :type => :controller do
   end
 
   describe 'GET view' do
-    let(:id) { SecureRandom.hex }
-    let(:members_service) { instance_double(MembersService, member: member) }
-    let(:call_action) { get :view, letter_of_credit_request: {id: id} }
-
-    before do
-      allow(LetterOfCreditRequest).to receive(:find).and_return(letter_of_credit_request)
-      allow(MembersService).to receive(:new).and_return(members_service)
-    end
-
-    allow_policy :letters_of_credit, :request?
-
-    it_behaves_like 'a user required action', :get, :view
-    it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
-    it 'finds the LetterOfCreditRequest based on the id param and the request' do
-      expect(LetterOfCreditRequest).to receive(:find).with(id, request).and_return(letter_of_credit_request)
-      call_action
-    end
-    it 'sets the `@letter_of_credit_request` instance variable to the result `LetterOfCreditRequest.find`' do
-      call_action
-      expect(assigns[:letter_of_credit_request]).to eq(letter_of_credit_request)
-    end
-    describe 'when there is an `export_format` param that is `pdf`' do
-      let(:job_status) { double('job_status', :update_attributes! => nil) }
-      let(:performed_job) { double('performed job', job_status: job_status) }
-      let(:call_action) { get :view, {letter_of_credit_request: {id: id}, export_format: 'pdf'} }
-
-      before do
-        allow(RenderLetterOfCreditPDFJob).to receive(:perform_later).and_return(performed_job)
-      end
-
-      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with the current_member_id' do
-        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(member_id, any_args).and_return(performed_job)
-        call_action
-      end
-      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with the current action name' do
-        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(anything, 'view', any_args).and_return(performed_job)
-        call_action
-      end
-      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with a pdf name that includes the lc_number of the letter of credit request' do
-        lc_number = SecureRandom.hex
-        allow(letter_of_credit_request).to receive(:lc_number).and_return(lc_number)
-        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(anything, anything, "letter_of_credit_request_#{lc_number}.pdf", any_args).and_return(performed_job)
-        call_action
-      end
-      it 'calls `perform_later` on the `RenderLetterOfCreditPDFJob` with the letter_of_credit_request id' do
-        allow(letter_of_credit_request).to receive(:id).and_return(id)
-        expect(RenderLetterOfCreditPDFJob).to receive(:perform_later).with(anything, anything, anything, {letter_of_credit_request: {id: id}}).and_return(performed_job)
-        call_action
-      end
-      it 'calls `job_status` on the result of `perform_later`' do
-        expect(performed_job).to receive(:job_status).and_return(job_status)
-        call_action
-      end
-      it 'updates the `job_status` with the current user id' do
-        user = instance_double(User, id: SecureRandom.hex, accepted_terms?: true)
-        allow(controller).to receive(:current_user).and_return(user)
-        expect(job_status).to receive(:update_attributes!).with(user_id: user.id)
-        call_action
-      end
-      it 'renders JSON with a `job_status_url`' do
-        call_action
-        expect(JSON.parse(response.body)['job_status_url']).to eq(job_status_url(job_status))
-      end
-      it 'renders JSON with a `job_cancel_url`' do
-        call_action
-        expect(JSON.parse(response.body)['job_cancel_url']).to eq(job_cancel_url(job_status))
-      end
-    end
-    describe 'when there is no `export_format` param' do
-      it 'creates a new instance of MembersService with the request' do
-        expect(MembersService).to receive(:new).with(request).and_return(members_service)
-        call_action
-      end
-      it 'calls `member` on the instance of MembersService with the current_member_id' do
-        expect(members_service).to receive(:member).with(member_id).and_return(member)
-        call_action
-      end
-      it 'raises an error if no member is found' do
-        allow(members_service).to receive(:member)
-        expect{call_action}.to raise_error(ActionController::RoutingError)
-      end
-      it 'sets `@member_name` to the name value of the member hash' do
-        call_action
-        expect(assigns[:member_name]).to eq(member[:name])
-      end
-      it 'sets `@member_fhla` to the fhla_number value of the member hash' do
-        call_action
-        expect(assigns[:member_fhla]).to eq(member[:fhla_number])
-      end
-      it 'renders its view' do
-        call_action
-        expect(response.body).to render_template(:view)
-      end
-    end
+    it_behaves_like 'a LettersOfCreditController action that creates a downloadable PDF of the request', :view
   end
 
-  describe 'GET amend' do
-    let(:lc_number) { SecureRandom.hex }
-    let(:call_action) { get :amend, current_member_id: member_id, lc_number: lc_number}
-    let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest)}
-    before do
-      allow(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
-      allow(controller).to receive(:populate_amend_request_view_variables)
-    end
-
-    it_behaves_like 'a user required action', :get, :amend
-    it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
-    it_behaves_like 'a LettersOfCreditController action that sets sidebar view variables with a before filter'
-
-    it 'calls the class method`find_by_lc_number`' do
-      expect(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
-      call_action
-    end
-    it 'calls `populate_amend_request_view_variables`' do
-      expect(controller).to receive(:populate_amend_request_view_variables)
-      call_action
-    end
+  describe 'GET amend_view' do
+    it_behaves_like 'a LettersOfCreditController action that creates a downloadable PDF of the request', :amend_view
   end
 
   context 'controller actions that fetch a beneficiary request' do
@@ -436,104 +430,10 @@ RSpec.describe LettersOfCreditController, :type => :controller do
   end
 
   context 'controller actions that fetch a letter of credit request' do
+
     before do
       allow(controller).to receive(:fetch_letter_of_credit_request) do
         controller.instance_variable_set(:@letter_of_credit_request, letter_of_credit_request)
-      end
-    end
-
-    describe 'GET amend' do
-      let(:lc_number) { SecureRandom.hex }
-      let(:call_action) { get :amend, current_member_id: member_id, lc_number: lc_number}
-      let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest)}
-      before do
-        allow(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
-        allow(letter_of_credit_request).to receive(:save)
-        allow(controller).to receive(:populate_amend_request_view_variables)
-      end
-
-      it_behaves_like 'a user required action', :get, :amend
-      it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
-      it_behaves_like 'a LettersOfCreditController action that sets sidebar view variables with a before filter'
-
-      it 'calls the class method`find_by_lc_number`' do
-        expect(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
-        call_action
-      end
-      it 'calls `populate_amend_request_view_variables`' do
-        expect(controller).to receive(:populate_amend_request_view_variables)
-        call_action
-      end
-    end
-
-    describe 'POST amend_preview' do
-      let(:loc_params) { {sentinel: SecureRandom.hex} }
-      let(:call_action) { post :amend_preview, letter_of_credit_request: loc_params }
-      let(:amended_amount) { rand(1000000..10000000)}
-      let(:amended_expiration_date) { double('amended expiration date')}
-      before do
-        allow(letter_of_credit_request).to receive(:valid?).and_return(true)
-        allow(controller).to receive(:member_contacts)
-        allow(letter_of_credit_request).to receive(:amended_amount) .and_return(amended_amount)
-        allow(letter_of_credit_request).to receive(:amended_expiration_date) .and_return(amended_amount)
-      end
-
-      allow_policy :letters_of_credit, :request?
-
-      it_behaves_like 'a user required action', :post, :amend_preview, letter_of_credit_request: {}
-      it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
-      it_behaves_like 'a LettersOfCreditController action that sets sidebar view variables with a before filter'
-      it_behaves_like 'a LettersOfCreditController action that fetches a letter of credit request'
-      it_behaves_like 'a LettersOfCreditController action that saves a letter of credit request'
-      it 'calls `set_titles` with the appropriate title' do
-        expect(controller).to receive(:set_titles).with(I18n.t('letters_of_credit.request.amend.title'))
-        call_action
-      end
-      it 'sets the attributes of the letter of credit request with the `letter_of_credit_request` params hash' do
-        expect(letter_of_credit_request).to receive(:attributes=).with(loc_params)
-        call_action
-      end
-      it 'checks to see if the session is elevated' do
-        expect(controller).to receive(:session_elevated?)
-        call_action
-      end
-      it 'sets `@session_elevated` to the result of calling `session_elevated?`' do
-        elevated = double('session elevated status')
-        allow(controller).to receive(:session_elevated?).and_return(elevated)
-        call_action
-        expect(assigns[:session_elevated]).to eq(elevated)
-      end
-      describe 'when the created LetterOfCreditRequest instance is valid' do
-        it 'renders the `amend_preview` view' do
-          call_action
-          expect(response.body).to render_template(:amend_preview)
-        end
-      end
-      describe 'when the created LetterOfCreditRequest instance is invalid' do
-        let(:error_message) { instance_double(String) }
-        before do
-          allow(letter_of_credit_request).to receive(:valid?).and_return(false)
-          allow(controller).to receive(:populate_amend_request_view_variables)
-          allow(controller).to receive(:prioritized_error_message)
-        end
-
-        it 'calls `prioritized_error_message` with the letter of credit request' do
-          expect(controller).to receive(:prioritized_error_message).with(letter_of_credit_request)
-          call_action
-        end
-        it 'sets `@error_message` to the result of `prioritized_error_message`' do
-          allow(controller).to receive(:prioritized_error_message).and_return(error_message)
-          call_action
-          expect(assigns[:error_message]).to eq(error_message)
-        end
-        it 'calls `populate_amend_request_view_variables`' do
-          expect(controller).to receive(:populate_amend_request_view_variables)
-          call_action
-        end
-        it 'renders the `new` view' do
-          call_action
-          expect(response.body).to render_template(:amend)
-        end
       end
     end
 
@@ -756,6 +656,101 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       end
     end
 
+    describe 'GET amend' do
+      let(:lc_number) { SecureRandom.hex }
+      let(:call_action) { get :amend, current_member_id: member_id, lc_number: lc_number}
+      let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest)}
+      before do
+        allow(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
+        allow(letter_of_credit_request).to receive(:save)
+        allow(controller).to receive(:populate_amend_request_view_variables)
+      end
+
+      it_behaves_like 'a user required action', :get, :amend
+      it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
+      it_behaves_like 'a LettersOfCreditController action that sets sidebar view variables with a before filter'
+
+      it 'calls the class method`find_by_lc_number`' do
+        expect(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
+        call_action
+      end
+      it 'calls `populate_amend_request_view_variables`' do
+        expect(controller).to receive(:populate_amend_request_view_variables)
+        call_action
+      end
+    end
+
+    describe 'POST amend_preview' do
+      let(:loc_params) { {sentinel: SecureRandom.hex} }
+      let(:call_action) { post :amend_preview, letter_of_credit_request: loc_params }
+      let(:amended_amount) { rand(1000000..10000000)}
+      let(:amended_expiration_date) { double('amended expiration date')}
+      before do
+        allow(letter_of_credit_request).to receive(:valid?).and_return(true)
+        allow(controller).to receive(:member_contacts)
+        allow(letter_of_credit_request).to receive(:amended_amount) .and_return(amended_amount)
+        allow(letter_of_credit_request).to receive(:amended_expiration_date) .and_return(amended_amount)
+      end
+
+      allow_policy :letters_of_credit, :request?
+
+      it_behaves_like 'a user required action', :post, :amend_preview, letter_of_credit_request: {}
+      it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
+      it_behaves_like 'a LettersOfCreditController action that sets sidebar view variables with a before filter'
+      it_behaves_like 'a LettersOfCreditController action that fetches a letter of credit request'
+      it_behaves_like 'a LettersOfCreditController action that saves a letter of credit request'
+      it 'calls `set_titles` with the appropriate title' do
+        expect(controller).to receive(:set_titles).with(I18n.t('letters_of_credit.request.amend.title'))
+        call_action
+      end
+      it 'sets the attributes of the letter of credit request with the `letter_of_credit_request` params hash' do
+        expect(letter_of_credit_request).to receive(:attributes=).with(loc_params)
+        call_action
+      end
+      it 'checks to see if the session is elevated' do
+        expect(controller).to receive(:session_elevated?)
+        call_action
+      end
+      it 'sets `@session_elevated` to the result of calling `session_elevated?`' do
+        elevated = double('session elevated status')
+        allow(controller).to receive(:session_elevated?).and_return(elevated)
+        call_action
+        expect(assigns[:session_elevated]).to eq(elevated)
+      end
+      describe 'when the created LetterOfCreditRequest instance is valid' do
+        it 'renders the `amend_preview` view' do
+          call_action
+          expect(response.body).to render_template(:amend_preview)
+        end
+      end
+      describe 'when the created LetterOfCreditRequest instance is invalid' do
+        let(:error_message) { instance_double(String) }
+        before do
+          allow(letter_of_credit_request).to receive(:valid?).and_return(false)
+          allow(controller).to receive(:populate_amend_request_view_variables)
+          allow(controller).to receive(:prioritized_error_message)
+        end
+
+        it 'calls `prioritized_error_message` with the letter of credit request' do
+          expect(controller).to receive(:prioritized_error_message).with(letter_of_credit_request)
+          call_action
+        end
+        it 'sets `@error_message` to the result of `prioritized_error_message`' do
+          allow(controller).to receive(:prioritized_error_message).and_return(error_message)
+          call_action
+          expect(assigns[:error_message]).to eq(error_message)
+        end
+        it 'calls `populate_amend_request_view_variables`' do
+          expect(controller).to receive(:populate_amend_request_view_variables)
+          call_action
+        end
+        it 'renders the `new` view' do
+          call_action
+          expect(response.body).to render_template(:amend)
+        end
+      end
+    end
+
     describe 'POST amend_execute' do
       let(:rm) {{
         email: SecureRandom.hex,
@@ -790,23 +785,24 @@ RSpec.describe LettersOfCreditController, :type => :controller do
         end
       end
 
-      context 'when the requester is not permitted to execute the letter of credit' do
+      context 'when the requester is not permitted to execute the letter of credit amendment' do
         deny_policy :letters_of_credit, :amend_execute?
 
         it_behaves_like 'an unsuccessful execution'
         it 'sets `@error_message` to the not-authorized message' do
           call_action
-          expect(assigns[:error_message]).to eq(I18n.t('letters_of_credit.errors.not_authorized'))
+          expect(assigns[:error_message]).to eq(I18n.t('letters_of_credit.request.amend.errors.not_authorized'))
         end
       end
 
-      context 'when the requester is permitted to execute the letter of credit' do
+      context 'when the requester is permitted to execute the letter of credit amendment' do
         allow_policy :letters_of_credit, :amend_execute?
 
         it 'performs a securid check' do
           expect(controller).to receive(:securid_perform_check)
           call_action
         end
+
         context 'when the session is not elevated' do
           before { allow(controller).to receive(:session_elevated?).and_return(false) }
 
@@ -816,10 +812,11 @@ RSpec.describe LettersOfCreditController, :type => :controller do
             expect(assigns[:securid_status]).to eq(securid_status)
           end
         end
+
         context 'when the session is elevated' do
           before { allow(controller).to receive(:session_elevated?).and_return(true) }
 
-          shared_examples 'a letter of credit request with a generic error' do
+          shared_examples 'a letter of credit amendment request with a generic error' do
 
             it_behaves_like 'an unsuccessful execution'
             it 'sets `@error_message` to the generic error message' do
@@ -830,7 +827,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
 
           context 'when the letter of credit request is not valid' do
             before { allow(letter_of_credit_request).to receive(:valid?).and_return(false) }
-            it_behaves_like 'a letter of credit request with a generic error'
+            it_behaves_like 'a letter of credit amendment request with a generic error'
           end
           context 'when the letter of credit request is valid' do
             before { allow(letter_of_credit_request).to receive(:valid?).and_return(true) }
@@ -839,8 +836,8 @@ RSpec.describe LettersOfCreditController, :type => :controller do
               let(:letter_of_credit_json) { double('loc as json') }
               let(:mailer) { double('mailer', deliver_later: nil) }
               before do
-                # allow(letter_of_credit_request).to receive(:amend_execute).and_return(true)
-                allow(MemberMailer).to receive(:letter_of_credit_request).and_return(mailer)
+                allow(letter_of_credit_request).to receive(:amend_execute).and_return(true)
+                allow(MemberMailer).to receive(:letter_of_credit_request_amendment).and_return(mailer)
               end
 
               it 'converts the letter of credit request to JSON' do
@@ -848,17 +845,17 @@ RSpec.describe LettersOfCreditController, :type => :controller do
                 call_action
               end
               it 'calls `InternalMailer#letter_of_credit_request` with the current_member_id' do
-                expect(MemberMailer).to receive(:letter_of_credit_request).with(member_id, any_args).and_return(mailer)
+                expect(MemberMailer).to receive(:letter_of_credit_request_amendment).with(member_id, any_args).and_return(mailer)
                 call_action
               end
               it 'calls `InternalMailer#letter_of_credit_request` with the letter of credit as JSON' do
                 allow(letter_of_credit_request).to receive(:to_json).and_return(letter_of_credit_json)
-                expect(MemberMailer).to receive(:letter_of_credit_request).with(anything, letter_of_credit_json, any_args).and_return(mailer)
+                expect(MemberMailer).to receive(:letter_of_credit_request_amendment).with(anything, letter_of_credit_json, any_args).and_return(mailer)
                 call_action
               end
               it 'calls `InternalMailer#letter_of_credit_request` with the current_user' do
                 allow(controller).to receive(:current_user).and_return(user)
-                expect(MemberMailer).to receive(:letter_of_credit_request).with(anything, anything, user).and_return(mailer)
+                expect(MemberMailer).to receive(:letter_of_credit_request_amendment).with(anything, anything, user).and_return(mailer)
                 call_action
               end
               it 'calls `deliver_later` on the result of `InternalMailer#letter_of_credit_request`' do

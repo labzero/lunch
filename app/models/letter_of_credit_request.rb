@@ -144,6 +144,11 @@ class LetterOfCreditRequest
     end
   end
 
+  def amend_execute(requester_name)
+    self.created_by = requester_name
+    self.created_at = Time.zone.now
+  end
+
   def owners
     @owners ||= Set.new
   end

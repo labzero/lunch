@@ -1,5 +1,5 @@
 $(function() {
-  $letterOfCreditAmendFormSubmit = $('.letters-of-credit-amend-request').find('input[type=submit]');
+  $letterOfCreditAmendFormSubmit = $('.letter-of-credit-amend-request').find('input[type=submit]');
   $letterOfCreditRequestForm = $('.letter-of-credit-request-form');
   $letterOfCreditRequestPreviewForm = $('.letter-of-credit-preview');
 

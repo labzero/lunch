@@ -105,7 +105,7 @@ RSpec.describe MemberMailer, :type => :mailer do
     end
   end
 
-  describe '`letter_of_credit_request` email' do
+  shared_examples 'a letter of credit request email' do |method|
     let(:letter_of_credit_json) { double('loc as json') }
     let(:lc_number) { SecureRandom.hex }
     let(:member_id) { instance_double(String) }
@@ -119,22 +119,50 @@ RSpec.describe MemberMailer, :type => :mailer do
                       beneficiary_name: nil,
                       beneficiary_address: nil,
                       amount: nil,
+                      amended_amount: nil,
                       attention: nil,
                       issue_date: nil,
                       expiration_date: nil,
+                      amended_expiration_date: nil,
+                      amendment_date: nil,
                       issuance_fee: nil,
-                      maintenance_fee:nil
+                      maintenance_fee:nil,
+                      amendment_fee: nil
       )
     end
     let(:user) { instance_double(User, email: "#{SecureRandom.hex}@example.com", display_name: SecureRandom.hex) }
-    let(:filename) { "letter_of_credit_request_#{letter_of_credit_request.lc_number}" }
+    let(:filename) { method.to_s.eql?('letter_of_credit_request') ? "letter_of_credit_request_#{letter_of_credit_request.lc_number}" : "letter_of_credit_request_amendment_confirmation_#{letter_of_credit_request.lc_number}"}
     let(:file) { instance_double(StringIOWithFilename, original_filename: filename, read: File.read(Rails.root.join('spec', 'fixtures', 'letter_of_credit_request_sample.pdf'))) }
-    let(:build_mail) { mail :letter_of_credit_request, member_id, letter_of_credit_json, user }
-    let(:call_method) { InternalMailer.letter_of_credit_request(member_id, letter_of_credit_json, user) }
+    let(:build_mail) { mail method, member_id, letter_of_credit_json, user }
+
+    let(:member_id) { double('A Member ID') }
+    let(:member_details) { double('Some Member Details') }
+    let(:name) { double('A Member Name') }
+    let(:fhfa_number) { rand( 1..1000) }
 
     before do
       allow(LetterOfCreditRequest).to receive(:from_json).and_return(letter_of_credit_request)
       allow(RenderLetterOfCreditPDFJob).to receive(:perform_now).and_return(file)
+      allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
+      allow(member_details).to receive(:[]).with(:name).and_return(name)
+      allow(member_details).to receive(:[]).with(:fhfa_number).and_return(fhfa_number)
+    end
+
+    describe 'fetches the member details' do
+      if method.to_s.eql?('letter_of_credit_request_amendment')
+        it 'fetches the member details' do
+          expect_any_instance_of(MembersService).to receive(:member).with(member_id)
+          build_mail
+        end
+        it 'assigns @member_name' do
+          build_mail
+          expect(assigns[:member_name]).to eq(name)
+        end
+        it 'assigns @fhfa_number' do
+          build_mail
+          expect(assigns[:member_fhfa]).to eq(fhfa_number)
+        end
+      end
     end
 
     it 'includes the display name of the user in the `to` field' do
@@ -154,8 +182,11 @@ RSpec.describe MemberMailer, :type => :mailer do
       expect(response.from.first).to eq(ContactInformationHelper::NO_REPLY_EMAIL)
     end
     it 'sets the `subject` of the email' do
+      subject = method.to_s.eql?('letter_of_credit_request') ?
+        I18n.t('letters_of_credit.email.subject') :
+        I18n.t('letters_of_credit.request.amend.email.subject', lc_number: lc_number)
       build_mail
-      expect(response.subject).to eq(I18n.t('letters_of_credit.email.subject'))
+      expect(response.subject).to eq(subject)
     end
     it 'constructs a LetterOfCreditRequest from the supplied JSON' do
       expect(LetterOfCreditRequest).to receive(:from_json).with(letter_of_credit_json, nil).and_return(letter_of_credit_request)
@@ -169,14 +200,16 @@ RSpec.describe MemberMailer, :type => :mailer do
       expect(RenderLetterOfCreditPDFJob).to receive(:perform_now).with(member_id, any_args).and_return(file)
       build_mail
     end
-    it 'calls `RenderLetterOfCreditPDFJob.perform_now` with `view` specified as its action' do
-      expect(RenderLetterOfCreditPDFJob).to receive(:perform_now).with(anything, 'view', any_args).and_return(file)
+    it 'calls `RenderLetterOfCreditPDFJob.perform_now` with the appropriate view specified as its action' do
+      view = method.to_s.eql?('letter_of_credit_request') ? 'view' : 'amend_view'
+      expect(RenderLetterOfCreditPDFJob).to receive(:perform_now).with(anything, view, any_args).and_return(file)
       build_mail
     end
     it 'calls `RenderLetterOfCreditPDFJob.perform_now` with a pdf name that includes the lc_number' do
       expect(RenderLetterOfCreditPDFJob).to receive(:perform_now).with(anything, anything, filename, any_args).and_return(file)
       build_mail
     end
+
     it 'calls `RenderLetterOfCreditPDFJob.perform_now` with the letter of credit request id parameter' do
       expect(RenderLetterOfCreditPDFJob).to receive(:perform_now).with(anything, anything, anything, { letter_of_credit_request: {id: id} }).and_return(file)
       build_mail
@@ -197,35 +230,50 @@ RSpec.describe MemberMailer, :type => :mailer do
       let(:integer_sentinel) { rand(1000..99999) }
       let(:email_body) { build_mail; response.body.parts.last.body.raw_source }
       it 'includes messaging with the `member_services_phone_number`' do
-        expect(email_body).to include(simple_format(I18n.t('letters_of_credit.email.body', phone_number: member_services_phone_number)))
+        body = method.to_s.eql?('letter_of_credit_request') ?
+          simple_format(I18n.t('letters_of_credit.email.body', phone_number: member_services_phone_number)) :
+          simple_format(I18n.t('letters_of_credit.request.amend.email.body', phone_number: member_services_phone_number))
+        expect(email_body).to include(body)
       end
-      it 'includes the correctly formatted `created_at` datetime' do
-        allow(letter_of_credit_request).to receive(:created_at).and_return(datetime_sentinel)
-        expect(email_body).to include(fhlb_datetime_standard_numeric_with_at(datetime_sentinel))
+
+      if method.to_s.eql?('letter_of_credit_request')
+        info_fields = [:created_by, :lc_number, :beneficiary_name, :beneficiary_address, :maintenance_fee, :attention]
+        amount_fields = [:amount, :issuance_fee]
+        date_fields = [:issue_date, :expiration_date]
+      else
+        info_fields = [:created_by, :lc_number, :beneficiary_name, :maintenance_fee]
+        amount_fields = [:amount, :amended_amount, :amendment_fee]
+        date_fields = [:created_at, :expiration_date, :amended_expiration_date, :amendment_date]
       end
-      [:created_by, :lc_number, :beneficiary_name, :beneficiary_address, :maintenance_fee, :attention].each do |attr|
+      info_fields.each do |attr|
         it "includes the `#{attr}` attribute" do
           allow(letter_of_credit_request).to receive(attr).and_return(string_sentinel)
           expect(email_body).to include(string_sentinel)
         end
       end
-      it 'includes the `beneficiary_name` attribute' do
-        allow(letter_of_credit_request).to receive(:beneficiary_name).and_return(string_sentinel)
-        expect(email_body).to include(string_sentinel)
-      end
-      [:amount, :issuance_fee].each do |attr|
+      amount_fields.each do |attr|
         it "includes the correctly formatted `#{attr}` attribute" do
           allow(letter_of_credit_request).to receive(attr).and_return(integer_sentinel)
           expect(email_body).to include(fhlb_formatted_currency_whole(integer_sentinel))
         end
       end
-      [:issue_date, :expiration_date].each do |attr|
+      date_fields.each do |attr|
         it "includes the correctly formatted `#{attr}` attribute" do
           allow(letter_of_credit_request).to receive(attr).and_return(datetime_sentinel)
           expect(email_body).to include(fhlb_date_standard_numeric(datetime_sentinel))
         end
       end
     end
+  end
+
+  describe '`letter_of_credit_request` email' do
+    let(:call_method) { InternalMailer.letter_of_credit_request(member_id, letter_of_credit_json, user) }
+    it_behaves_like 'a letter of credit request email', :letter_of_credit_request
+  end
+
+  describe '`letter_of_credit_amendment_request` email' do
+    let(:call_method) { InternalMailer.letter_of_credit_amendment_request(member_id, letter_of_credit_json, user) }
+    it_behaves_like 'a letter of credit request email', :letter_of_credit_request_amendment
   end
 
   describe '`beneficiary_request` email' do

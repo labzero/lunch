@@ -915,6 +915,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
     describe '`execute`' do
       let(:requester_name) { SecureRandom.hex }
       let(:call_method) { subject.execute(requester_name) }
+
       before { allow(subject).to receive(:set_lc_number) }
 
       it 'sets `created_by` to the passed requester name' do
@@ -937,6 +938,28 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       it 'returns false if `set_lc_number` raises an error' do
         allow(subject).to receive(:set_lc_number).and_raise(StandardError)
         expect(call_method).to be false
+      end
+    end
+
+    describe '`amend_execute`' do
+      let(:requester_name) { SecureRandom.hex }
+      let(:call_method) { subject.amend_execute(requester_name) }
+
+      let(:now) { instance_double(Time, :> => nil) }
+      let(:parsed_time) { instance_double(Time) }
+
+      before do
+        allow(Time.zone).to receive(:now).and_return(now)
+        allow(Time.zone).to receive(:parse).and_return(parsed_time)
+      end
+
+      it 'sets `created_by` to the passed requester name' do
+        call_method
+        expect(subject.created_by).to eq(requester_name)
+      end
+      it 'sets `created_at` to Time.zone.now' do
+        call_method
+        expect(subject.created_at).to eq(now)
       end
     end
 

@@ -1,5 +1,5 @@
 - relationship_manager = @contacts[:rm] || {}
-.letters-of-credit.letters-of-credit-amend-request
+.letters-of-credit.letter-of-credit-amend-request
   .row
     .column-9x3-left
       %h1= @title
@@ -32,7 +32,7 @@
             %dd= fhlb_date_standard_numeric(@letter_of_credit_request.expiration_date)
         %section.letters-of-credit-amend-current-lc
           %h2= t('letters_of_credit.request.amend.requested.title')
-          %p= t('letters_of_credit.request.amend.requested.explanation')
+          %p= simple_format(t('letters_of_credit.request.amend.requested.explanation'))
           .input-field-container-horizontal.amended_amount
             = render 'shared/input_field', form_builder: f, field_name: :amended_amount, label: t('letters_of_credit.request.amend.requested.amended_amount'), field_class: ['enabled'], icon: 'dollar', location: 'before', html_attributes: { disabled: false }
           .input-field-container-horizontal.amended_expiration_date

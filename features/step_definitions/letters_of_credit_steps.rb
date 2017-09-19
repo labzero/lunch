@@ -9,7 +9,7 @@ Then(/^I (should|should not) see the letters of credit dropdown for Request Lett
   end
 end
 
-When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Letter of Credit|Letter of Credit Success|Request Letter of Credit Amendment|Preview Letter of Credit Amendment) page$/) do |page|
+When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Letter of Credit|Letter of Credit Success|Request Letter of Credit Amendment|Preview Letter of Credit Amendment|Letter of Credit Amendment Success) page$/) do |page|
   case page
   when 'Manage Letters of Credit'
     visit '/letters-of-credit/manage'
@@ -32,6 +32,11 @@ When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Le
     step 'I enter 14750001 in the letter of credit amended_amount field'
     step 'I click the Preview Request button'
     step 'I should be on the Preview Letter of Credit Amendment page'
+    when 'Letter of Credit Amendment Success'
+      step 'I visit the Preview Letter of Credit Amendment page'
+      step 'I enter my SecurID pin'
+      step 'I enter my SecurID token'
+      step 'I click the Authorize Request button'
   end
 end
 
@@ -175,10 +180,14 @@ When(/^I click the amend link on a Letter of Credit row$/) do
   row.find('td a', text: /\A#{I18n.t('global.amend').upcase}\z/, match: :first).click
 end
 
-Then(/^I should be on the Request Letter of Credit Amendment page$/) do
-  page.assert_selector('.letters-of-credit-amend-request')
-end
-
-Then(/^I should be on the Preview Letter of Credit Amendment page$/) do
-  page.assert_selector('.letter-of-credit-amend-preview')
+Then(/^I should be on the (Request Letter of Credit Amendment|Preview Letter of Credit Amendment|Letter of Credit Amendment Success) page$/i) do |page_type|
+  text = case page_type
+  when /\ARequest Letter of Credit Amendment\z/i
+    '.letter-of-credit-amend-request'
+  when /\APreview Letter of Credit Amendment\z/i
+    '.letter-of-credit-amend-preview'
+  when /\Letter of Credit Amendment Success\z/i
+    '.letter-of-credit-amend-success'
+  end
+  page.assert_selector(text)
 end

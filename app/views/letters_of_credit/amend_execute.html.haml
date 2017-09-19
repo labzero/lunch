@@ -1,8 +1,8 @@
-.letters-of-credit.letters-of-credit-success.row
+.letters-of-credit.letter-of-credit-amend-success.row
   .column-9x3-left
     %h1= @title
     .letters-of-credit-success-info.icon-success-before
-      %p= simple_format(t('letters_of_credit.request.amend.success.confirmation', datetime: fhlb_datetime_long_alpha_with_on(Time.now)))
+      %p= t('letters_of_credit.request.amend.success.confirmation', datetime: fhlb_datetime_long_alpha_with_on(@letter_of_credit_request.created_at))
       %p
         = t('letters_of_credit.success.email')
         %span= current_user.email

@@ -1591,6 +1591,8 @@ en:
       amend:
         title: Request Letter of Credit Amendment
         instructions: The member portal only supports requests for amendments to standard Letters of Credit collateralizing public unit deposits. If your amendment request is not received by 11:00am, your request will not be processed until the following business day. You may amend this Letter of Credit by requesting an increase in the Amount and/or an extension of the Expiration Date. For other types of amendments, please contact your Relationship Manager.
+        member_name: Member Name
+        fhfa_number: FHFA Number
         current:
           title: Current Letter of Credit
           lc_number: "LC Number:"
@@ -1600,7 +1602,7 @@ en:
           current_expiration: "Current Expiration Date:"
         requested:
           title: Amendment Request
-          explanation: You may request an increase in the Credit Amount and/or an extension of the Expiration Date.\nNo other amendments may be requested.
+          explanation: "You may request an increase in the Credit Amount and/or an extension of the Expiration Date.\nNo other amendments may be requested."
           amended_amount: Amended Credit Amount
           amended_expiration: Amended Expiration Date
           amendment_date: Amendment Date
@@ -1617,6 +1619,13 @@ en:
         success:
           title: Letter of Credit Amendment Request Received
           confirmation: "We received your Letter of Credit Amendment Request at %{datetime}. \n\nWe will amend your Letter of Credit on the Amendment Date. Once amended, the original amendment will be sent to the Beneficiary on the Amendment Date."
+        errors:
+          not_authorized: This Letter of Credit Amendment Request was not completed because Bank employees are not authorized to request letters of credit amendments via the member portal.
+        pdf:
+          requested: Amend Letter of Credit Request Confirmation
+        email:
+          subject: 'FHLBank San Francisco: LC Amendment Request Received: %{lc_number}'
+          body: "We received your Letter of Credit Amendment Request. A copy of your request is attached (for all purposes, your request constitutes a “Confirmation of Amendment of Letter of Credit” and a “Confirmation,” as the latter term is used and defined in the Letter of Credit Reimbursement Agreement). \n\nOnce amended, the original amendment will be sent to the Beneficiary on the Amendment Date. Please contact Member Financial Services at %{phone_number} if you have any questions.\n\nThe Amendment Fee for amending the Letter of Credit will be charged to your Settlement/Transaction (STA) on the Amendment Date."
     preview:
       action: Preview Request
       review_details: If you agree with the above, including the requested Letter of Credit terms, enter your SecurID token credentials below and press “Authorize Request.” If not, press “Edit Request” or “Cancel.”

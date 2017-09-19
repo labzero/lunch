@@ -1,0 +1,41 @@
+%dl
+%dt= t('global.defined_term', term: t('letters_of_credit.request.amend.member_name'))
+= @member_name
+%dl
+%dt= t('global.defined_term', term: t('letters_of_credit.request.amend.fhfa_number'))
+= @member_fhfa
+%dl
+%dt= t('global.defined_term', term: t('letters_of_credit.pdf.request_date'))
+= fhlb_datetime_standard_numeric_with_at(@letter_of_credit_request.created_at)
+%dl
+%dt= t('global.defined_term', term: t('letters_of_credit.pdf.requested_by'))
+= @letter_of_credit_request.created_by
+%br
+%br
+%dl
+%dt= t('global.defined_term', term: t('letters_of_credit.preview.lc_number'))
+= @letter_of_credit_request.lc_number
+%dl
+%dt= t('global.defined_term', term: t('letters_of_credit.request.beneficiary'))
+= @letter_of_credit_request.beneficiary_name
+%dl
+%dt= t('letters_of_credit.request.amend.preview.current_amount')
+=fhlb_formatted_currency_whole(@letter_of_credit_request.amount)
+%dl
+%dt= t('global.defined_term', term: t('letters_of_credit.request.amend.requested.amended_amount'))
+= @letter_of_credit_request.amended_amount === @letter_of_credit_request.amount ? ' - ' : fhlb_formatted_currency_whole(@letter_of_credit_request.amended_amount)
+%dl
+%dt= t('letters_of_credit.request.amend.current.current_expiration')
+= fhlb_date_standard_numeric(@letter_of_credit_request.expiration_date)
+%dl
+%dt= t('global.defined_term', term: t('letters_of_credit.request.amend.requested.amended_expiration'))
+= @letter_of_credit_request.amended_expiration_date === @letter_of_credit_request.expiration_date ? ' - ' : fhlb_date_standard_numeric(@letter_of_credit_request.amended_expiration_date)
+%dl
+%dt= t('letters_of_credit.request.amend.preview.effective date')
+= fhlb_date_standard_numeric(@letter_of_credit_request.amendment_date)
+%dl
+%dt= t('global.defined_term', term: t('letters_of_credit.request.amend.fees.fee'))
+= fhlb_formatted_currency_whole(@letter_of_credit_request.amendment_fee.to_i)
+%dl
+%dt= t('global.defined_term', term: t('letters_of_credit.request.fees.maintenance_fee'))
+= @letter_of_credit_request.maintenance_fee
