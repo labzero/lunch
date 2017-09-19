@@ -1022,9 +1022,14 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       end
       describe '`@beneficiary_dropdown_options`' do
         let(:beneficiaries) {[
-          {name: SecureRandom.hex},
-          {name: SecureRandom.hex},
-          {name: SecureRandom.hex}
+          {name: 'Here''s A Beneficiary'},
+          {name: 'Yet Another Beneficiary'},
+          {name: 'And Here''s Another Beneficiary'}
+        ]}
+        let(:sorted_beneficiaries) {[
+          {name: 'And Here''s Another Beneficiary'},
+          {name: 'Here''s A Beneficiary'},
+          {name: 'Yet Another Beneficiary'}
         ]}
         it 'creates a new instance of `BeneficiariesService` with the request' do
           expect(BeneficiariesService).to receive(:new).with(request).and_return(beneficiary_service)
@@ -1034,9 +1039,9 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           expect(beneficiary_service).to receive(:beneficiaries).and_return([])
           call_method
         end
-        it 'is an array containing arrays of beneficiary names' do
+        it 'is an array containing arrays of beneficiary names sorted in ascending order by name' do
           allow(beneficiary_service).to receive(:beneficiaries).and_return(beneficiaries)
-          matching_array = beneficiaries.collect{|x| [x[:name], x[:name]]}
+          matching_array = sorted_beneficiaries.collect{|x| [x[:name], x[:name]]}
           call_method
           expect(assigns[:beneficiary_dropdown_options]).to eq(matching_array)
         end
