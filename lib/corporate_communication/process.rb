@@ -79,8 +79,7 @@ class CorporateCommunication
     end
 
     def self.process_email_image(image_url)
-      uri = URI.parse(image_url)
-      image = Net::HTTP.get_response(uri)
+      image = fetch_image(image_url)
       digest = Digest::SHA2.new
       {
         fingerprint: (digest << image.body).to_s,
@@ -88,6 +87,23 @@ class CorporateCommunication
         content_type: image.content_type,
         name: File.basename(image_url.to_s)
       }
+    end
+
+    def self.fetch_image(image_url, limit = 10)
+      raise ArgumentError, 'too many HTTP redirects' if limit == 0
+      uri = URI.parse(image_url)
+      response = Net::HTTP.get_response(uri)
+
+      case response
+        when Net::HTTPSuccess then
+          response
+        when Net::HTTPRedirection then
+          location = response['location']
+          warn "redirected to #{location}"
+          fetch_image(location, limit - 1)
+        else
+          response.value
+      end
     end
 
     def self.process_email_attachments(email)
