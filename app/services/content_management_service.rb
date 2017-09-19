@@ -36,7 +36,7 @@ class ContentManagementService
 
   def ref
     @ref ||= if ENV['PRISMIC_REF']
-      api.ref(ENV['PRISMIC_REF']).ref
+      api.ref(ENV['PRISMIC_REF']).try(:ref) || api.master.ref
     else
       api.master.ref
     end
