@@ -24,10 +24,11 @@ class MemberMailer < Devise::Mailer
 
   def letter_of_credit_request(member_id, lc_as_json, user)
     @letter_of_credit_request = LetterOfCreditRequest.from_json(lc_as_json, nil)
-    pdf_name = "letter_of_credit_request_confirmation_#{@letter_of_credit_request.lc_number}"
+    lc_number = @letter_of_credit_request.lc_number
+    pdf_name = "letter_of_credit_request_confirmation_#{lc_number}"
     file = RenderLetterOfCreditPDFJob.perform_now(member_id, 'view', pdf_name, { letter_of_credit_request: {id: @letter_of_credit_request.id} })
     attachments[file.original_filename] = file.read
-    mail(subject: I18n.t('letters_of_credit.email.subject', lc_number: @letter_of_credit_request.lc_number),
+    mail(subject: I18n.t('letters_of_credit.email.subject', lc_number: lc_number, member_name: user.member.name),
          to: "#{user.display_name} <#{user.email}>",
          bcc: InternalMailer::LETTER_OF_CREDIT_ADDRESS,
          from: t('emails.new_user.sender', email: ContactInformationHelper::NO_REPLY_EMAIL)

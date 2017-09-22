@@ -130,11 +130,11 @@ RSpec.describe MemberMailer, :type => :mailer do
                       amendment_fee: nil
       )
     end
-    let(:user) { instance_double(User, email: "#{SecureRandom.hex}@example.com", display_name: SecureRandom.hex) }
+    let(:user) { instance_double(User, email: "#{SecureRandom.hex}@example.com", display_name: SecureRandom.hex, member: nil) }
     let(:filename) { method.to_s.eql?('letter_of_credit_request') ? "letter_of_credit_request_confirmation_#{letter_of_credit_request.lc_number}" : "letter_of_credit_request_amendment_confirmation_#{letter_of_credit_request.lc_number}"}
     let(:file) { instance_double(StringIOWithFilename, original_filename: filename, read: File.read(Rails.root.join('spec', 'fixtures', 'letter_of_credit_request_sample.pdf'))) }
     let(:build_mail) { mail method, member_id, letter_of_credit_json, user }
-
+    let(:member) {instance_double(Member, name: nil)}
     let(:member_id) { double('A Member ID') }
     let(:member_details) { double('Some Member Details') }
     let(:name) { double('A Member Name') }
@@ -144,6 +144,8 @@ RSpec.describe MemberMailer, :type => :mailer do
       allow(LetterOfCreditRequest).to receive(:from_json).and_return(letter_of_credit_request)
       allow(RenderLetterOfCreditPDFJob).to receive(:perform_now).and_return(file)
       allow_any_instance_of(MembersService).to receive(:member).with(member_id).and_return(member_details)
+      allow(user).to receive(:member).and_return(member)
+      allow(member).to receive(:name).and_return(name)
       allow(member_details).to receive(:[]).with(:name).and_return(name)
       allow(member_details).to receive(:[]).with(:fhfa_number).and_return(fhfa_number)
     end
@@ -181,10 +183,10 @@ RSpec.describe MemberMailer, :type => :mailer do
       build_mail
       expect(response.from.first).to eq(ContactInformationHelper::NO_REPLY_EMAIL)
     end
-    it 'sets the `subject` of the email' do
-      subject = method.to_s.eql?('letter_of_credit_request') ?
-        I18n.t('letters_of_credit.email.subject') :
-        I18n.t('letters_of_credit.request.amend.email.subject', lc_number: lc_number)
+    it 'sets the `subject` of the email using the `lc_number` and `member_name`' do
+        subject = method.to_s.eql?('letter_of_credit_request') ?
+          I18n.t('letters_of_credit.email.subject', lc_number: lc_number, member_name: name) :
+          I18n.t('letters_of_credit.request.amend.email.subject', lc_number: lc_number)
       build_mail
       expect(response.subject).to eq(subject)
     end

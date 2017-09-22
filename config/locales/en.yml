@@ -1655,7 +1655,7 @@ en:
       request_date: Request Date/Time
       requested_by: Request Authorized By
     email:
-      subject: 'FHLBank San Francisco: Letter of Credit Request Received'
+      subject: "FHLBank San Francisco: LC %{lc_number} Request Received for %{member_name}"
       body: "We received your Letter of Credit Request. A copy of your request is attached (for all purposes, your request constitutes a “Confirmation of Letter of Credit” and a “Confirmation” as such terms are used and defined in the Letter of Credit Reimbursement Agreement).\n\nOnce issued, the original Letter of Credit will be sent to the Beneficiary on the Issue Date. Please contact Member Financial Services at %{phone_number} if you have any questions."
     beneficiary:
       add: Add Beneficiary
