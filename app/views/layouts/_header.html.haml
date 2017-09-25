@@ -39,6 +39,15 @@
                   - if policy(:letters_of_credit).request?
                     %li= link_to(t('letters_of_credit.request.title'), letters_of_credit_request_path)
                   %li= link_to(t('letters_of_credit.manage.title'), letters_of_credit_manage_path)
+      - if feature_enabled?('mortgages') && policy(:mortgage).request?
+        %li{class: ('active-nav-item' if active_nav == :mortgages)}<>
+          = link_to(t('mortgages.title'), '#', class: 'nav-menu')
+          .nav-dropdown
+            .nav-dropdown-row
+              .nav-dropdown-column
+                %h2= t('mortgages.title')
+                %ul
+                  %li= link_to(t('mortgages.new.title'), mcu_new_path)
       - if feature_enabled?('securities')
         %li{class: ('active-nav-item' if active_nav == :securities)}<>
           = link_to(t('securities.title'), '#', class: 'nav-menu')

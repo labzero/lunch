@@ -214,6 +214,12 @@ Rails.application.routes.draw do
     end
   end
 
+  constraints Constraints::FeatureEnabled.new('mortgages') do
+    scope 'mortgage-collateral-update', as: :mcu do
+      get 'new' => 'mortgages#new'
+    end
+  end
+
   devise_scope :user do
     get '/' => 'users/sessions#new', :as => :new_user_session
     post '/' => 'users/sessions#create', :as => :user_session

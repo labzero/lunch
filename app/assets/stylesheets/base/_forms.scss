@@ -411,3 +411,19 @@ $horizontal-field-input-width: 180px;
     }
   }
 }
+
+%upload-actions-style {
+  @extend %typography-dropdown-selector;
+  clear: both;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 30px 0;
+  span {
+    margin-right: 30px;
+  }
+  .secondary-button {
+    @extend %typography-dropdown-selector;
+    cursor: pointer;
+    padding: 7px 40px;
+  }
+}

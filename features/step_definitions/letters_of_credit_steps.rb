@@ -37,6 +37,8 @@ When(/^I visit the (Manage Letters of Credit|Request Letter of Credit|Preview Le
       step 'I enter my SecurID pin'
       step 'I enter my SecurID token'
       step 'I click the Authorize Request button'
+    when 'New Mortgage Collateral Update'
+      visit '/letters-of-credit/manage'
   end
 end
 

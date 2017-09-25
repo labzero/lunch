@@ -326,13 +326,7 @@
 }
 
 .securities-download-actions {
-  clear: both;
-  text-transform: uppercase;
-  text-align: center;
-  padding: 30px 0;
-  span {
-    margin-right: 30px;
-  }
+  @extend %upload-actions-style;
 }
 
 .securities-download-instructions-description {

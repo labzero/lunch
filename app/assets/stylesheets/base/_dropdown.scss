@@ -7,6 +7,15 @@
   select {
     display: none;
   }
+  &[disabled] {
+    .dropdown-selection {
+      color: $medium-gray;
+      border-color: $secondary-gray;
+    }
+    &.input-field-container:after {
+      background: $secondary-gray;
+    }
+  }
   &.single-item-dropdown {
     &:after {
       display: none;

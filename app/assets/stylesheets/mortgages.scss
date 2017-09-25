@@ -1,0 +1,96 @@
+.mortgage-collateral-update {
+  @extend %page-header;
+  h2 {
+    @extend %typography-section-title;
+    margin: 0 0 20px;
+  }
+}
+
+.mortgage-collateral-update-new {
+  section:not(.mcu-upload-legal-section) {
+    @extend %bordered-section;
+    @extend %pseudoelement-clearfix;
+    .input-field-container-horizontal {
+      width: 100%;
+      margin: 0 0 6px;
+      @extend %horizontal-label-styling;
+      label {
+        display: inline-block;
+        width: 140px;
+        margin-right: 0;
+      }
+      .input-field-container, .dropdown-selection {
+        width: 515px;
+      }
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+  .row {
+    overflow: visible;
+  }
+}
+
+.mortgage-collateral-update-date-wrapper {
+  &:first-child {
+    float: left;
+  }
+  &:last-child {
+    float: right;
+  }
+  span:first-child {
+    color: $medium-gray;
+    margin-right: 20px;
+  }
+  span:last-child {
+    @extend %typography-subtitle;
+  }
+}
+
+.mcu-upload-area {
+  padding: 20px;
+}
+
+.mcu-upload-actions {
+  @extend %upload-actions-style;
+}
+
+.mcu-upload-instructions {
+  p:not(:first-of-type) {
+    @extend %typography-dashboard-account-summary;
+    margin-bottom: 0;
+  }
+}
+
+.mcu-upload-legal-section {
+  display: none;
+  dt {
+    @extend %typography-subtitle;
+    float: left;
+    margin-right: 5px;
+  }
+  dd {
+    @extend %pseudoelement-clearfix;
+    margin: 0 0 15px 0;
+  }
+  .additional-legal h3 {
+    @extend %typography-subtitle;
+    margin: 0 0 5px 0;
+  }
+}
+
+.new-mortgage-collateral-update-actions {
+  @extend %clearfix;
+  margin-bottom: 50px;
+  .secondary-button {
+    float: left;
+  }
+  .primary-button {
+    float: right;
+  }
+  .primary-button, .secondary-button {
+    cursor: pointer;
+    padding: 7px 40px;
+  }
+}
