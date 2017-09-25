@@ -71,7 +71,7 @@ class AdvancesController < ApplicationController
       {orderData: [5, 3], orderSequence: [:desc, :asc], targets: [5]},
       {orderData: [6, 3], orderSequence: [:desc, :asc], targets: [6]},
       {orderData: [7, 3], orderSequence: [:desc, :asc], targets: [7]},
-      {type: :date, targets: [0, 1, 2]}
+      {type: :date, targets: [0, 1]}
     ]
     if params[:job_id]
       job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
