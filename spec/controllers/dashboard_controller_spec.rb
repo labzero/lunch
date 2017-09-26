@@ -271,12 +271,18 @@ RSpec.describe DashboardController, :type => :controller do
         make_request
         expect(assigns[:quick_reports_period]).to eq(Date.new(2015, 3, 1))
       end
-      it 'assigns @quick_reports' do
+      it 'assigns `@quick_reports` if borrowing capacity data are available' do
+        allow(controller).to receive(:borrowing_capacity_data_available?).and_return(true)
         make_request
         expect(assigns[:quick_reports].length).to be(report_list.length)
         report_list.each do |report|
           expect(assigns[:quick_reports][report]).to include(title: described_class::QUICK_REPORT_MAPPING[report])
         end
+      end
+      it 'does not assign `@quick_reports` if borrowing capacity data are unavailable' do
+        allow(controller).to receive(:borrowing_capacity_data_available?).and_return(false)
+        make_request
+        expect(assigns[:quick_reports]).to_not be_present
       end
       context 'the feature is flipped off' do
         before do
@@ -304,6 +310,7 @@ RSpec.describe DashboardController, :type => :controller do
             reports << quick_report
           end
           allow(quick_reports).to receive(:completed).and_return(reports)
+          allow(controller).to receive(:borrowing_capacity_data_available?).and_return(true)
         end
         it 'adds a URL to @quick_reports for each report has been generated' do
           make_request
@@ -1248,7 +1255,28 @@ RSpec.describe DashboardController, :type => :controller do
         expect(call_method).to be(false)
       end
     end
-
   end
+  describe '`borrowing_capacity_data_available?` method' do
+    let(:quick_reports) { double('quick reports') }
+    let(:call_method) { subject.send(:borrowing_capacity_data_available?, quick_reports) }
 
+    it 'returns `false` if the borrowing capacity report is missing' do
+      allow(quick_reports).to receive(:[]).with(:borrowing_capacity).and_return(nil)
+      expect(call_method).to eq(false)
+    end
+    context 'borrowing capacity report config exists' do
+      let(:borrowing_capacity_report_config) { double('borrowing capacity report config') }
+      before do
+        allow(quick_reports).to receive(:[]).with(:borrowing_capacity).and_return(borrowing_capacity_report_config)
+      end
+      it 'returns `false` if the borrowing capacity report url is missing' do
+        allow(borrowing_capacity_report_config).to receive(:[]).with(:url).and_return(nil)
+        expect(call_method).to eq(false)
+      end
+      it 'returns `true` if borrowing capacity data exist' do
+        allow(borrowing_capacity_report_config).to receive(:[]).with(:url).and_return(SecureRandom.hex)
+        expect(call_method).to eq(true)
+      end
+    end
+  end
 end

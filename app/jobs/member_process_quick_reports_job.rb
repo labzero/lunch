@@ -9,12 +9,12 @@ class MemberProcessQuickReportsJob < FhlbJob
     report_set = member.report_set_for_period(period)
     period_date = (period + '-01').to_date
     date_hash = default_dates_hash(period_date)
+    member_balance_service = MemberBalanceService.new(member_id, nil)
+    unless member_balance_service.borrowing_capacity_data_available?(period_date)
+      raise 'halting quick reports because borrowing capacity data is not available for the given period' 
+    end
     missing_reports = report_set.missing_reports(member.quick_report_list)
     if missing_reports.present?      
-      member_balance_service = MemberBalanceService.new(member_id, nil)
-      unless member_balance_service.borrowing_capacity_data_available?(period_date)
-        raise 'halting quick reports because borrowing capacity data is not available for the given period' 
-      end
       missing_reports.each do |report_name|
         params = {}
         member.quick_report_params(report_name).each do |key, value|
