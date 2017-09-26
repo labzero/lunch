@@ -9,7 +9,7 @@ Then(/^I should see the (reports|resources|products|securities) dropdown$/) do |
   report_menu.find(:xpath, '..').assert_selector('.nav-dropdown', visible: true)
 end
 
-When(/^I click on the (agreements|amortizing|arc|arc embedded|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance|manage securities|securities requests|resources|products|learn more|securities|safekeep new|pledge new|letters of credit|manage letters of credit|test features|features|new letter of credit|convertible|standby letters of credit|trade credit rules|term rules|add advance availability|end of day shutoff|data visibility|mortgages|new mortgage collateral update) link in the header$/) do |link|
+When(/^I click on the (agreements|amortizing|arc|arc embedded|authorizations|callable|capital plan|collateral|choice libor|credit|fee schedules|forms|frc|frc embedded|guides|knockout|mortgage partnership finance|other cash needs|products summary|putable|reports|securities|securities backed credit|variable rate credit|membership|applications|manage advances|add advance|manage securities|securities requests|resources|products|learn more|securities|safekeep new|pledge new|letters of credit|manage letters of credit|test features|features|new letter of credit|convertible|standby letters of credit|trade credit rules|term rules|add advance availability|end of day shutoff|data visibility|mortgages|new mortgage collateral update|manage mortgage collateral updates) link in the header$/) do |link|
   page.find('.page-header .secondary-nav a', text: dropdown_title_regex(link)).click
 end
 
@@ -48,10 +48,11 @@ Then(/^I should see the active state of the (securities|advances|reports|product
 end
 
 Then(/^I (should|should not) see the Mortgage Collateral Update dropdown menu in the header$/) do |permission|
+  step 'I click on the mortgages link in the header'
   if permission == 'should'
-    page.assert_selector('.page-header .secondary-nav a', text: dropdown_title_regex('mortgages'))
+    page.assert_selector('.page-header .secondary-nav a', text: I18n.t('mortgages.new.title'), exact: true)
   else
-    page.assert_no_selector('.page-header .secondary-nav a', text: dropdown_title_regex('mortgages'))
+    page.assert_no_selector('.page-header .secondary-nav a', text: I18n.t('mortgages.new.title'), exact: true)
   end
 end
 
@@ -159,6 +160,8 @@ def dropdown_title_regex(dropdown)
     I18n.t('mortgages.title')
   when 'new mortgage collateral update'
     I18n.t('mortgages.new.title')
+  when 'manage mortgage collateral updates'
+    I18n.t('mortgages.manage.title')
   else
     raise 'unknown dropdown'
   end

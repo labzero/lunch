@@ -988,6 +988,22 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/mcu_member_status'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve member status based on Member ID'
+              key :nickname, :getMCUMemberStatusForMember
+              key :type, :MCUOptions
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/capital_stock_trial_balance/{date}'
             operation do
               key :method, 'GET'
@@ -1765,6 +1781,13 @@ module MAPI
           rescue Savon::Error => error
             logger.error error
             halt 503, 'Internal Service Error'
+          end
+        end
+
+        relative_get '/:id/mcu_member_status' do
+          member_id = params[:id].to_i
+          MAPI::Services::Member.rescued_json_response(self) do
+            MAPI::Services::Member::MortgageCollateralUpdate.mcu_member_status(self, member_id)
           end
         end
 

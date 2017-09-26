@@ -10,6 +10,7 @@
   section:not(.mcu-upload-legal-section) {
     @extend %bordered-section;
     @extend %pseudoelement-clearfix;
+    clear: both;
     .input-field-container-horizontal {
       width: 100%;
       margin: 0 0 6px;
@@ -92,5 +93,71 @@
   .primary-button, .secondary-button {
     cursor: pointer;
     padding: 7px 40px;
+  }
+}
+
+.mortgages {
+  @extend %page-header;
+  h2 {
+    @extend %typography-section-title;
+    margin: 0 0 5px;
+  }
+  header {
+    margin: 0 0 15px;
+  }
+}
+
+.mortgages-header {
+  p {
+    @extend %typography-dashboard-account-summary;
+    width: $column-9-width;
+    margin-bottom: 25px;
+  }
+}
+
+.mortgages-manage {
+  .secondary-button {
+    @extend %typography-table-button;
+    float: right;
+    margin-bottom: 10px;
+    width: 215px;
+  }
+  .mortgages-manage-report-table {
+    td:nth-child(2) {
+      width: 80px;
+    }
+    td:nth-child(3) {
+      width: 120px;
+    }
+    td:nth-child(5) {
+      width: 100px;
+    }
+    td:nth-child(6) {
+      width: 20px;
+    }
+    td:nth-child(7) {
+      width: 20px;
+    }
+    td:nth-child(8) {
+      width: 100px;
+    }
+    margin-top: 10px;
+    margin-bottom: 0px;
+  }
+}
+
+.mortgage-collateral-update-date-wrapper {
+  &:first-child {
+    float: left;
+  }
+  &:last-child {
+    float: right;
+  }
+  span:first-child {
+    color: $medium-gray;
+    margin-right: 20px;
+  }
+  span:last-child {
+    @extend %typography-subtitle;
   }
 }

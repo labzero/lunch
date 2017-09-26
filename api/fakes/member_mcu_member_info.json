@@ -1,0 +1,1244 @@
+{
+  "7274" : {
+    "id" : 7274,
+    "name" : "California International Bank, N.A.",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 6,
+      "value" : "STREAMLINE",
+      "nameSpecific" : "Streamline",
+      "nameBlanketLien" : "Streamline",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "845" : {
+    "id" : 845,
+    "name" : "State Bank of India (Calif)",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "177" : {
+    "id" : 177,
+    "name" : "Monterey County Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "836" : {
+    "id" : 836,
+    "name" : "Summit Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "5025" : {
+    "id" : 5025,
+    "name" : "Seacoast Commerce Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "4985" : {
+    "id" : 4985,
+    "name" : "Town & Country Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "7394" : {
+    "id" : 7394,
+    "name" : "Americas United Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "1035" : {
+    "id" : 1035,
+    "name" : "Tustin Community Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "5905" : {
+    "id" : 5905,
+    "name" : "Pacific Valley Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "2685" : {
+    "id" : 2685,
+    "name" : "San Diego Metropolitan Credit Union",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "1017" : {
+    "id" : 1017,
+    "name" : "Merchants Bank of Calif, NA",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "5345" : {
+    "id" : 5345,
+    "name" : "Charles Schwab Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "3610" : {
+    "id" : 3610,
+    "name" : "Americas Christian Credit Union",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 6,
+      "value" : "STREAMLINE",
+      "nameSpecific" : "Streamline",
+      "nameBlanketLien" : "Streamline",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "9440" : {
+    "id" : 9440,
+    "name" : "Raza Development Fund, Inc",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "7051" : {
+    "id" : 7051,
+    "name" : "United American Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 6,
+      "value" : "STREAMLINE",
+      "nameSpecific" : "Streamline",
+      "nameBlanketLien" : "Streamline",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "7914" : {
+    "id" : 7914,
+    "name" : "American Riviera Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "8475" : {
+    "id" : 8475,
+    "name" : "RepublicBankAz, NA",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "9385" : {
+    "id" : 9385,
+    "name" : "Century Housing Corporation",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 6,
+      "value" : "STREAMLINE",
+      "nameSpecific" : "Streamline",
+      "nameBlanketLien" : "Streamline",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "6145" : {
+    "id" : 6145,
+    "name" : "American Continental Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "8034" : {
+    "id" : 8034,
+    "name" : "Valley Bank of Nevada",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 6,
+      "value" : "STREAMLINE",
+      "nameSpecific" : "Streamline",
+      "nameBlanketLien" : "Streamline",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "7694" : {
+    "id" : 7694,
+    "name" : "Folsom Lake Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "8616" : {
+    "id" : 8616,
+    "name" : "Commerce Bank of Temecula Valley",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "3560" : {
+    "id" : 3560,
+    "name" : "Universal City Studios Credit Union",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "7475" : {
+    "id" : 7475,
+    "name" : "Pacific Alliance Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 6,
+      "value" : "STREAMLINE",
+      "nameSpecific" : "Streamline",
+      "nameBlanketLien" : "Streamline",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "9276" : {
+    "id" : 9276,
+    "name" : "Grandpoint Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 6,
+      "value" : "STREAMLINE",
+      "nameSpecific" : "Streamline",
+      "nameBlanketLien" : "Streamline",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "130" : {
+    "id" : 130,
+    "name" : "Gateway Bank, F.S.B",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB", "MWL" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB", "MWL" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "4965" : {
+    "id" : 4965,
+    "name" : "Bank of Southern California, N.A.",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "604" : {
+    "id" : 604,
+    "name" : "Golden Pacific Bank, N.A.",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "45" : {
+    "id" : 45,
+    "name" : "First FS&LA of San Rafael",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "7031" : {
+    "id" : 7031,
+    "name" : "California Business Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "7874" : {
+    "id" : 7874,
+    "name" : "Community Valley Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 6,
+      "value" : "STREAMLINE",
+      "nameSpecific" : "Streamline",
+      "nameBlanketLien" : "Streamline",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "38" : {
+    "id" : 38,
+    "name" : "Provident Savings Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB", "MWL" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB", "MWL" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "9236" : {
+    "id" : 9236,
+    "name" : "New Resource Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "8235" : {
+    "id" : 8235,
+    "name" : "Bank of George",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "1494" : {
+    "id" : 1494,
+    "name" : "Neighborhood National Bank",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 6,
+      "value" : "STREAMLINE",
+      "nameSpecific" : "Streamline",
+      "nameBlanketLien" : "Streamline",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  },
+  "504" : {
+    "id" : 504,
+    "name" : "Farmers & Merchants Bk of CentralCA",
+    "blanketLien" : false,
+    "mcuuFileTypes" : [ {
+      "id" : 5,
+      "value" : "COMPLETE",
+      "nameSpecific" : "Complete",
+      "nameBlanketLien" : "Standard",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 3,
+      "value" : "DEPLEDGE",
+      "nameSpecific" : "Depledge",
+      "nameBlanketLien" : "Delete",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 1,
+      "value" : "PLEDGE",
+      "nameSpecific" : "Pledge",
+      "nameBlanketLien" : "Add",
+      "pledgeTypes" : [ "FHLB" ]
+    }, {
+      "id" : 4,
+      "value" : "RENUMBER",
+      "nameSpecific" : "Renumber",
+      "nameBlanketLien" : "Renumber",
+      "pledgeTypes" : [ "FHLB" ]
+    } ],
+    "memberPortalFileTypes" : [ ],
+    "activeMcuu" : true,
+    "activeMemberPortal" : false
+  }
+}

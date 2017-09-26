@@ -920,4 +920,20 @@ describe MAPI::ServiceApp do
       expect(last_response.body).to eq(results.to_json)
     end
   end
+
+  describe 'mcu_member_status' do
+    let(:result){ { "transaction_number" => 25100055,
+                    "upload_type" => "Standard",
+                    "authorized_by" => "John Smith",
+                    "authorized_on" => "2017-03-05",
+                    "status" => "FHLBSF Processed",
+                    "number_of_loans" => 4,
+                    "number_of_errors" => 2 }}
+    let(:id) { 750 }
+    let(:mcu_member_status) { get "/member/#{id}/mcu_member_status"; JSON.parse(last_response.body) }
+    it 'should call MortgageCollateralUpdate.mcu_member_status with appropriate types of arguments' do
+      allow(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mcu_member_status).with(anything,kind_of(Numeric)).and_return(result)
+      expect(mcu_member_status).to eq(result)
+    end
+  end
 end

@@ -1687,10 +1687,10 @@ en:
       requested_by: Requested By
   mortgages:
     title: Mortgages
+    due_date: "MCU Due Date:"
+    extension: "Approved Extension Date:"
     new:
       title: New Mortgage Collateral Update (MCU)
-      due_date: "MCU Due Date:"
-      extension: "Approved Extension Date:"
       authorize: Authorize
       transaction:
         title: Transaction Details
@@ -1737,7 +1737,19 @@ en:
         instructions_html: Upload the file by either dragging and dropping it on to this page, or selecting it from your file system.<br>Contact <a href=%{email}>Collateral Operations</a> at %{phone} with questions.
         uploaded_file: "The following file will be included in the MCU request:"
     manage:
-      title: Manage MCU Transactions
+      title: Manage Mortgage Collateral Updates (MCU)
+      recent_requests: Recent Requests
+      description: This list includes transactions which have had activity in the past 5 days.
+      transaction_number: Transaction Number
+      upload_type: Upload Type
+      authorized_by: Authorized By
+      authorized_on: Authorized On
+      status: Status
+      number_of_loans: Number of Loans
+      number_of_errors: Number of Errors
+      action: Action
+      contact_html: Contact <a href=%{email}>Collateral Operations</a> at %{phone_number} with questions.
+      new_mcu: New MCU
   reports:
     meta_title: FHLBSF - Reports
     title: Reports

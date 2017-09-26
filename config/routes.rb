@@ -216,6 +216,7 @@ Rails.application.routes.draw do
 
   constraints Constraints::FeatureEnabled.new('mortgages') do
     scope 'mortgage-collateral-update', as: :mcu do
+      get 'manage' => 'mortgages#manage'
       get 'new' => 'mortgages#new'
     end
   end

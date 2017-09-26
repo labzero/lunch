@@ -2,6 +2,9 @@ class MortgagesController < ApplicationController
   before_action do
     set_active_nav(:mortgages)
     @html_class ||= 'white-background'
+  end
+
+  before_action only: [:new] do
     authorize :mortgage, :request?
   end
 
@@ -36,6 +39,47 @@ class MortgagesController < ApplicationController
     'application/zip',
     'multipart/x-zip'
   ].freeze
+
+  # GET
+  def manage
+    @title = t('mortgages.manage.title')
+    today = Time.zone.today
+    @due_datetime = Time.zone.parse("#{(today + 7.days).iso8601} 17:00:00") # Needs to come from MCU service
+    @extension_datetime = @due_datetime + 7.days # Needs to come from MCU service
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    mcu_status = member_balances.mcu_member_status
+    rows = if mcu_status.present?
+      mcu_status.collect do |status|
+      {
+        columns: [
+          {value: status[:transaction_number], type: nil},
+          {value: status[:upload_type], type: nil},
+          {value: status[:authorized_by], type: nil},
+          {value: status[:authorized_on], type: nil},
+          {value: status[:status], type: nil},
+          {value: status[:number_of_loans], type: nil},
+          {value: status[:number_of_errors], type: nil},
+          {value: "View Details", type: nil}
+        ]
+      }
+      end
+    else
+      []
+    end
+    @table_data = {
+      column_headings: [
+        t('mortgages.manage.transaction_number'),
+        t('mortgages.manage.upload_type'),
+        t('mortgages.manage.authorized_by'),
+        t('mortgages.manage.authorized_on'),
+        t('mortgages.manage.status'),
+        t('mortgages.manage.number_of_loans'),
+        t('mortgages.manage.number_of_errors'),
+        t('mortgages.manage.action')
+      ],
+      rows: rows
+    }
+  end
 
   # GET
   def new

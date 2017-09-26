@@ -21,6 +21,10 @@ module MAPI
           end unless mcu_data.empty?
           processed_data.with_indifferent_access
         end
+
+        def self.mcu_member_status(app, member_id)
+          fake('member_mcu_status')
+        end
         
         module Private
           def self.mcu_sql(member_id)

@@ -1,0 +1,34 @@
+- @page_title = t('global.page_meta_title', title: @title)
+.mortgages.row
+  .mortgages-header
+    %h1= @title
+  .mortgages-manage
+    =link_to(t('mortgages.manage.new_mcu'), mcu_new_path, disabled: !policy(:mortgage).request?, class: 'secondary-button')
+    .mortgage-collateral-update-new
+      %section
+        .mortgage-collateral-update-date-wrapper
+          %span= t('mortgages.due_date')
+          %span= fhlb_datetime_standard_numeric_with_at(@due_datetime)
+        .mortgage-collateral-update-date-wrapper
+          %span= t('mortgages.extension')
+          %span= fhlb_datetime_standard_numeric_with_at(@extension_datetime)
+    %section
+      %h2= t('mortgages.manage.recent_requests')
+      %span= t('mortgages.manage.description')
+      %table.report-table.mortgages-manage-report-table.table-allow-wrapping{ 'class':  'letters-of-credit-manage-amend-on-table', data: {loaded: true, sortable: false, :'disable-auto-width' => false, :'missing-data-message' => t('errors.table_data_no_records')}}
+        %thead
+          %tr
+            - @table_data[:column_headings].each do |heading|
+              %th.report-cell-narrow= heading
+        %tbody
+          - @table_data[:rows].each do |row|
+            %tr
+              = render 'reports/report_cell', cell: row[:columns][0]
+              = render 'reports/report_cell', cell: row[:columns][1]
+              = render 'reports/report_cell', cell: row[:columns][2]
+              = render 'reports/report_cell', cell: row[:columns][3]
+              = render 'reports/report_cell', cell: row[:columns][4]
+              = render 'reports/report_cell', cell: row[:columns][5]
+              = render 'reports/report_cell', cell: row[:columns][6]
+              = render 'reports/report_cell', cell: row[:columns][7]
+      %p= t('mortgages.manage.contact_html', email: collateral_operations_email,  phone_number: collateral_operations_phone_number)

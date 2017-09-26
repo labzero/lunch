@@ -102,4 +102,16 @@ describe MAPI::ServiceApp do
       end
     end
   end
+
+  describe 'the `mcu_member_status` method' do
+    [:test, :development, :production].each do |environment|
+      describe "#{environment}" do
+        let(:call_method) { MAPI::Services::Member::MortgageCollateralUpdate.mcu_member_status(environment, member_id) }
+        it 'calls the shared utility function `fetch`' do
+          expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fake).with(anything)
+          call_method
+        end
+      end
+    end
+  end
 end

@@ -8,10 +8,10 @@
       =form_tag('#', class: 'mortgage-collateral-update-new-form') do |f|
         %section
           .mortgage-collateral-update-date-wrapper
-            %span= t('mortgages.new.due_date')
+            %span= t('mortgages.due_date')
             %span= fhlb_datetime_standard_numeric_with_at(@due_datetime)
           .mortgage-collateral-update-date-wrapper
-            %span= t('mortgages.new.extension')
+            %span= t('mortgages.extension')
             %span= fhlb_datetime_standard_numeric_with_at(@extension_datetime)
         %section
           %h2= t('mortgages.new.transaction.title')
