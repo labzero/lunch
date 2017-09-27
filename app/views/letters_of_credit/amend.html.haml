@@ -37,7 +37,7 @@
             = render 'shared/input_field', form_builder: f, field_name: :amended_amount, label: t('letters_of_credit.request.amend.requested.amended_amount'), field_class: ['enabled'], icon: 'dollar', location: 'before', html_attributes: { disabled: false }
           .input-field-container-horizontal.amended_expiration_date
             %span= t('letters_of_credit.request.amend.requested.amended_expiration')
-            = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'letter_of_credit_request[amended_expiration_date]', start_date: @letter_of_credit_request.expiration_date, min_date: @letter_of_credit_request.expiration_date, max_date: @date_restrictions[:expiration_max_date], disable_weekends: true
+            = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'letter_of_credit_request[amended_expiration_date]', start_date: @letter_of_credit_request.amended_expiration_date, min_date: @letter_of_credit_request.expiration_date, max_date: @date_restrictions[:expiration_max_date], disable_weekends: true
           .input-field-container-horizontal.amendment_date
             %span= t('letters_of_credit.request.amend.requested.amendment_date')
             = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'letter_of_credit_request[amendment_date]', start_date: @letter_of_credit_request.amendment_date, min_date: Time.zone.today, max_date: Time.zone.today + 1.year
@@ -49,4 +49,4 @@
           %p=  t('letters_of_credit.request.amend.fees.further_explanation')
         .letters-of-credit-request-actions
           = link_to(t('global.cancel'), letters_of_credit_manage_path, class: 'secondary-button')
-          =  submit_tag(t('letters_of_credit.preview.action'), class: 'primary-button', disabled: true )
+          =  submit_tag(t('letters_of_credit.preview.action'), class: 'primary-button', disabled: true)

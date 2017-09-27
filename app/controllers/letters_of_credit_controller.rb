@@ -80,7 +80,7 @@ class LettersOfCreditController < ApplicationController
   after_action :save_beneficiary_request, only: [:beneficiary]
 
   before_action :fetch_letter_of_credit_request, except: [:manage, :view, :amend, :beneficiary, :beneficiary_new]
-  after_action :save_letter_of_credit_request, except: [:manage, :view, :amend, :beneficiary, :beneficiary_new]
+  after_action :save_letter_of_credit_request, except: [:manage, :view, :beneficiary, :beneficiary_new]
 
   # GET
   def manage
@@ -133,7 +133,9 @@ class LettersOfCreditController < ApplicationController
 
   # GET
   def amend
-    @letter_of_credit_request = LetterOfCreditRequest.find_by_lc_number(current_member_id,params[:lc_number], request)
+    id = params[:id]
+    @letter_of_credit_request = LetterOfCreditRequest.find(id, request) if id.present?
+    @letter_of_credit_request ||= LetterOfCreditRequest.find_by_lc_number(current_member_id,params[:lc_number], request)
     populate_amend_request_view_variables
   end
 
