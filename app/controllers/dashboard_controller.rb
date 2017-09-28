@@ -253,7 +253,6 @@ class DashboardController < ApplicationController
           @quick_reports[quick_report.report_name][:url] = reports_quick_download_path(quick_report)
         end
       end
-      @quick_reports = nil unless borrowing_capacity_data_available?(@quick_reports)
     end
   end
 
@@ -543,9 +542,5 @@ class DashboardController < ApplicationController
       break unless matched
     end
     matched
-  end
-
-  def borrowing_capacity_data_available?(quick_reports)
-    quick_reports[:borrowing_capacity].present? && quick_reports[:borrowing_capacity][:url].present?
   end
 end
