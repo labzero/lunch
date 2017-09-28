@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 describe MAPI::ServiceApp do
+  mortgage_collateral_update_module = MAPI::Services::Member::MortgageCollateralUpdate
+
   describe 'the mortgage_collateral_update endpoint' do
     let(:call_endpoint) { get "/member/#{member_id}/mortgage_collateral_update" }
     let(:response) { double('response') }
@@ -103,13 +105,97 @@ describe MAPI::ServiceApp do
     end
   end
 
-  describe 'the `mcu_member_status` method' do
-    [:test, :development, :production].each do |environment|
-      describe "#{environment}" do
-        let(:call_method) { MAPI::Services::Member::MortgageCollateralUpdate.mcu_member_status(environment, member_id) }
-        it 'calls the shared utility function `fetch`' do
-          expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fake).with(anything)
+  describe 'MCU methods' do
+    let(:app) { instance_double(MAPI::ServiceApp, logger: double('logger', error: nil)) }
+    describe 'the `mcu_transaction_id` method' do
+      let(:call_method) { mortgage_collateral_update_module.mcu_transaction_id(app, member_id) }
+      describe 'when `should_fake?` returns `true`' do
+        let(:random) { SecureRandom.hex }
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
+        end
+        it 'calls for a random hexidecimal string' do
+          expect(SecureRandom).to receive(:hex)
           call_method
+        end
+        it 'returns the random value' do
+          allow(SecureRandom).to receive(:hex).and_return(random)
+          expect(call_method).to eq(random)
+        end
+      end
+      describe 'when `should_fake?` returns `false`' do
+        let(:transaction_id) { double('transaction_id') }
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
+        end
+        it 'calls `get_message` with the appropriate arguments' do
+          expect(mortgage_collateral_update_module).to receive(:get_message).with(app, 'GET_TRANSACTION_ID')
+          call_method
+        end
+        it 'returns the result of `get_message`' do
+          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(transaction_id)
+          expect(call_method).to eq(transaction_id)
+        end
+      end
+    end
+
+    describe 'the `mcu_member_info` method' do
+      let(:call_method) { mortgage_collateral_update_module.mcu_member_info(app, member_id) }
+      let(:member_info) { double('member info') }
+      let(:member_info_for_one_member) { double('member info for one member') }
+      before do
+        allow(member_info).to receive(:[]).and_return(member_info_for_one_member)
+      end
+      describe 'when `should_fake?` returns `true`' do
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
+          allow(mortgage_collateral_update_module).to receive(:fake_hash).and_return(member_info)
+        end        
+        it 'loads the fake' do
+          expect(mortgage_collateral_update_module).to receive(:fake_hash).with('member_mcu_member_info')
+          call_method
+        end
+        describe 'in the fake world' do
+          before do
+            allow(mortgage_collateral_update_module).to receive(:fake_hash).and_return(member_info)
+          end      
+          it 'gets the fake data for the given `member_id`' do
+            expect(member_info).to receive(:[]).with(member_id)
+            call_method
+          end
+          it 'returns the fake data' do
+            expect(call_method).to eq(member_info_for_one_member)            
+          end
+        end
+      end
+      describe 'when `should_fake?` returns `false`' do
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
+          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(member_info)
+        end   
+        it 'calls `get_message` with the apppriate arguments' do
+          expect(mortgage_collateral_update_module).to receive(:get_message).with(app, 'GET_MEMBER_INFO')
+          call_method
+        end
+        describe 'in the real world' do
+          it 'gets the specified member\'s info' do
+            expect(member_info).to receive(:[]).with(member_id)
+            call_method     
+          end
+          it 'return the real data' do
+            expect(call_method).to eq(member_info_for_one_member)
+          end
+        end
+      end
+    end
+    describe 'the `mcu_member_status` method' do
+      [:test, :development, :production].each do |environment|
+        describe "#{environment}" do
+          let(:call_method) { MAPI::Services::Member::MortgageCollateralUpdate.mcu_member_status(environment, member_id) }
+          it 'calls the shared utility function `fetch`' do
+            expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fake).with(anything)
+            call_method
+          end
         end
       end
     end

@@ -1434,6 +1434,44 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'the `mcu_transaction_id` method' do
+    it_behaves_like 'a MAPI backed service object method', :mcu_transaction_id
+    let(:transaction_id) { double('transaction_id') }
+    let(:call_method) { subject.mcu_transaction_id }
+    it 'returns nil if get_hash returns nil' do
+      allow(subject).to receive(:get_hash).and_return(nil)
+      expect(call_method).to eq(nil)
+    end
+    context 'with a response' do
+      before do
+        allow(subject).to receive(:get_hash).and_return(transaction_id)
+      end
+      it 'returns the result of `get_hash`' do
+        expect(call_method).to eq(transaction_id)
+      end
+    end
+  end
+
+  describe 'the `mcu_member_info` method' do
+    it_behaves_like 'a MAPI backed service object method', :mcu_member_info
+    let(:member_info) { double('mcu_member_info') }
+    let(:member_entry) { double('member_entry') }
+    let(:call_method) { subject.mcu_member_info }
+    it 'returns nil if get_hash returns nil' do
+      allow(subject).to receive(:get_hash).and_return(nil)
+      expect(call_method).to eq(nil)
+    end
+    context 'with a response' do
+      before do
+        allow(subject).to receive(:get_hash).and_return(member_info)
+        allow(member_info).to receive(:[]).with(member_id).and_return(member_entry)
+      end
+      it 'returns the result of `get_hash[@member_id]`' do
+        expect(call_method).to eq(member_entry)
+      end
+    end
+  end
+
   describe 'the `managed_securities` method' do
     let(:managed_securities) { subject.managed_securities }
     let(:securities) { double('an array of securities') }

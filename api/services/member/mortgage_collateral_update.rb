@@ -2,6 +2,7 @@ module MAPI
   module Services
     module Member
       module MortgageCollateralUpdate
+        include MAPI::Shared::EnterpriseMessaging
         include MAPI::Shared::Utils
         STRING_FIELDS  = %w(mcu_type pledge_type transaction_number).freeze
         INTEGER_FIELDS = %w(accepted_count    depledged_count    pledged_count    rejected_count    renumbered_count    total_count    updated_count).freeze
@@ -22,8 +23,25 @@ module MAPI
           processed_data.with_indifferent_access
         end
 
+
         def self.mcu_member_status(app, member_id)
           fake('member_mcu_status')
+        end
+
+        def self.mcu_transaction_id(app, member_id)
+          unless should_fake?(app)
+            get_message(app, 'GET_TRANSACTION_ID')
+          else
+            SecureRandom.hex
+          end
+        end
+
+        def self.mcu_member_info(app, member_id)
+          unless should_fake?(app)
+            get_message(app, 'GET_MEMBER_INFO')[member_id]
+          else
+            fake_hash('member_mcu_member_info')[member_id]
+          end
         end
         
         module Private
@@ -60,10 +78,8 @@ module MAPI
               WHERE FHLB_ID = #{member_id}
             SQL
           end
-        end
+        end        
       end
     end
   end
 end
-
-

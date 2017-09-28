@@ -1004,6 +1004,38 @@ module MAPI
             end
           end
           api do
+            key :path, '/{id}/mcu_transaction_id'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve transaction_id based on Member ID'
+              key :nickname, :getMCUTransactionIdForMember
+              key :type, :MCUTransactionId
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution'
+              end
+            end
+          end
+          api do
+            key :path, '/{id}/mcu_member_info'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve member info based on Member ID'
+              key :nickname, :getMCUMemberInfoForMember
+              key :type, :MCUMemberInfo
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution'
+              end
+            end
+          end
+          api do
             key :path, '/{id}/capital_stock_trial_balance/{date}'
             operation do
               key :method, 'GET'
@@ -1788,6 +1820,18 @@ module MAPI
           member_id = params[:id].to_i
           MAPI::Services::Member.rescued_json_response(self) do
             MAPI::Services::Member::MortgageCollateralUpdate.mcu_member_status(self, member_id)
+          end
+        end
+
+        relative_get '/:id/mcu_transaction_id' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            MAPI::Services::Member::MortgageCollateralUpdate.mcu_transaction_id(self, params[:id].to_i)
+          end
+        end
+
+        relative_get '/:id/mcu_member_info' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            MAPI::Services::Member::MortgageCollateralUpdate.mcu_member_info(self, params[:id].to_i)
           end
         end
 
