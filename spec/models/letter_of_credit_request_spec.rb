@@ -346,6 +346,50 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       end
     end
 
+    describe '`amended_expiration_date_before_max_term`' do
+      let(:issue_date) { today }
+      let(:expiration_date) { today + rand(12..36).months }
+      let(:amended_expiration_date) { today + rand(12..36).months}
+      let(:call_validator) { subject.send(:amended_expiration_date_before_max_term) }
+
+      let(:ducktyped_date) { double('date') }
+      let(:max_term) { double('max term', months: 12.months) }
+      before do
+        subject.amended_expiration_date = expiration_date + rand(0..30).days
+        subject.issue_date = issue_date
+        allow(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@max_term', max_term) }
+      end
+      it 'calls `fetch_member_profile`' do
+        expect(subject).to receive(:fetch_member_profile) { subject.instance_variable_set('@max_term', max_term) }
+        call_validator
+      end
+      it 'ensures the amended expiration date is a date' do
+        subject.amended_expiration_date = ducktyped_date
+        expect(ducktyped_date).to receive(:to_date).and_return(amended_expiration_date)
+        call_validator
+      end
+      it 'ensures the issue date is a date' do
+        subject.issue_date = ducktyped_date
+        expect(ducktyped_date).to receive(:to_date).and_return(issue_date)
+        call_validator
+      end
+      it 'does not add an error if the expiration date is less than max_term number of months from the issue_date' do
+        subject.amended_expiration_date = (issue_date + max_term.months) - 1.day
+        expect(subject.errors).not_to receive(:add).with(:amended_expiration_date, :after_max_term)
+        call_validator
+      end
+      it 'does not add an error if the expiration date is equal to the max_term number of months from the issue_date' do
+        subject.amended_expiration_date = issue_date + max_term.months
+        expect(subject.errors).not_to receive(:add).with(:amended_expiration_date, :after_max_term)
+        call_validator
+      end
+      it 'adds an error if the expiration date is greater than the max_term number of months from the issue_date' do
+        subject.amended_expiration_date = (issue_date + max_term.months) + 1.day
+        expect(subject.errors).to receive(:add).with(:amended_expiration_date, :after_max_term)
+        call_validator
+      end
+    end
+
     describe '`amount_does_not_exceed_financing_availability`' do
       let(:today) { Time.zone.today }
       let(:remaining_financing_available) { rand(10000..9999999) }
@@ -396,7 +440,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         expect(subject).not_to receive(:issue_date_valid_for_today)
         subject.valid?
       end
-      it 'is not caled as a validator if the issue date is not today' do
+      it 'is not called as a validator if the issue date is not today' do
         subject.issue_date = today + rand(1..6).days
         expect(subject).not_to receive(:issue_date_valid_for_today)
         subject.valid?
@@ -548,7 +592,9 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       let(:lc_number) { SecureRandom.hex }
       let(:loc) { LetterOfCreditRequest.find_by_lc_number(member_id, lc_number, request) }
       let(:lc_details) { instance_double(Hash, :[] => nil) }
-      let(:amendment_date2) { Time.zone.today}
+      let(:amendment_date) { Time.zone.today}
+      let(:now) { instance_double(Time, :> => nil) }
+      let(:parsed_time) { instance_double(Time) }
       let(:letter_of_credit_request) { instance_double( LetterOfCreditRequest,
                                                         'beneficiary_name=': nil,
                                                         'amount=': nil,
@@ -559,11 +605,18 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
                                                         'amendment_date=': nil) }
       let(:member_balance_service) { instance_double(MemberBalanceService, letter_of_credit: lc_details)}
       before do
+        allow(Time.zone).to receive(:now).and_return(now)
+        allow(Time.zone).to receive(:parse).and_return(parsed_time)
         allow(LetterOfCreditRequest).to receive(:new).with(member_id, request).and_return(letter_of_credit_request)
         allow(MemberBalanceService).to receive(:new).with(member_id, request).and_return(member_balance_service)
+        allow(member_balance_service).to receive(:letter_of_credit).with(lc_number).and_return(lc_details)
       end
       it 'creates a new `LetterOfCreditRequest` instance' do
         expect(LetterOfCreditRequest).to receive(:new).with(member_id, request).and_return(letter_of_credit_request)
+        loc
+      end
+      it 'creates a new instance of the `CalendarService`' do
+        expect(CalendarService).to receive(:new).and_return(calendar_service)
         loc
       end
       it 'creates a new instance of the `MemberBalanceService`' do
@@ -610,11 +663,26 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         expect(letter_of_credit_request).to receive(:'amended_expiration_date=').with(amended_expiration_date)
         loc
       end
-      it 'assigns `amendment_date`' do
-        today = double('today')
-        allow(Time.zone).to receive(:today).and_return(today)
-        expect(letter_of_credit_request).to receive(:'amendment_date=').with(today)
-        loc
+      describe 'initial asigment of `amendment_date`' do
+        it 'parses the LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION to create an ActiveRecord::TimeWithZone object' do
+          expect(Time.zone).to receive(:parse).with(LetterOfCreditRequest::AMENDMENT_DATE_TIME_RESTRICTION).and_return(parsed_time)
+          loc
+        end
+        it 'checks to see if the current time is greater than the time restriction' do
+          expect(now).to receive(:>).with(parsed_time)
+          loc
+        end
+        shared_examples 'it sets `amendment_date` based on `find_next_business_day`' do |day|
+          let(:start_date) { day == :today ? today : today + 1.day }
+          it "calls `find_next_business_day` with #{day} and a 1.day step" do
+            expect(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day)
+            loc
+          end
+          it 'sets `amendment_date` to the result of `find_next_business_day`' do
+            allow(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day).and_return(issue_date)
+            expect(subject.issue_date).to eq(amendment_date)
+          end
+        end
       end
     end
   end
@@ -765,6 +833,46 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       end
     end
 
+    describe '`amended_amount=`' do
+      describe 'when the amended_amount is an object that responds to the `gsub` method' do
+        let(:amended_amount) { double('amended_amount', gsub: nil, to_i: nil) }
+
+        it 'gsubs out commas' do
+          expect(amended_amount).to receive(:gsub).with(',', '')
+          subject.amended_amount = amended_amount
+        end
+        it 'turns the gsubbed value into an integer' do
+          allow(amended_amount).to receive(:gsub).and_return(amended_amount)
+          expect(amended_amount).to receive(:to_i)
+          subject.amended_amount = amended_amount
+        end
+        it 'assigns the integer value to the `amount` attribute' do
+          allow(amended_amount).to receive(:gsub).and_return(amended_amount)
+          allow(amended_amount).to receive(:to_i).and_return(amended_amount)
+          subject.amended_amount = amended_amount
+          expect(subject.amended_amount).to eq(amended_amount)
+        end
+      end
+      describe 'when the amended_amount is an object that does not respond to the `gsub` method' do
+        let(:amended_amount) { double('amended_amount', to_i: nil) }
+
+        it 'turns the amended_amount into an integer' do
+          expect(amended_amount).to receive(:to_i)
+          subject.amended_amount = amended_amount
+        end
+        it 'assigns the integer value to the `amended_amount` attribute' do
+          allow(amended_amount).to receive(:to_i).and_return(amended_amount)
+          subject.amended_amount = amended_amount
+          expect(subject.amended_amount).to eq(amended_amount)
+        end
+      end
+      it 'assigns `amended_amount` nil if it is passed nil' do
+        subject.amended_amount = rand(100..99999)
+        subject.amended_amount = nil
+        expect(subject.amended_amount).to be nil
+      end
+    end
+
     describe '`beneficiary_name=`' do
       let(:beneficiaries_service) { instance_double(BeneficiariesService, beneficiaries: []) }
       let(:beneficiary_name) { SecureRandom.hex }
@@ -807,6 +915,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
     describe '`execute`' do
       let(:requester_name) { SecureRandom.hex }
       let(:call_method) { subject.execute(requester_name) }
+
       before { allow(subject).to receive(:set_lc_number) }
 
       it 'sets `created_by` to the passed requester name' do
@@ -829,6 +938,28 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       it 'returns false if `set_lc_number` raises an error' do
         allow(subject).to receive(:set_lc_number).and_raise(StandardError)
         expect(call_method).to be false
+      end
+    end
+
+    describe '`amend_execute`' do
+      let(:requester_name) { SecureRandom.hex }
+      let(:call_method) { subject.amend_execute(requester_name) }
+
+      let(:now) { instance_double(Time, :> => nil) }
+      let(:parsed_time) { instance_double(Time) }
+
+      before do
+        allow(Time.zone).to receive(:now).and_return(now)
+        allow(Time.zone).to receive(:parse).and_return(parsed_time)
+      end
+
+      it 'sets `created_by` to the passed requester name' do
+        call_method
+        expect(subject.created_by).to eq(requester_name)
+      end
+      it 'sets `created_at` to Time.zone.now' do
+        call_method
+        expect(subject.created_at).to eq(now)
       end
     end
 

@@ -149,7 +149,7 @@ describe CorporateCommunication::Process do
     let(:attachment) { Mail.read(email_path).attachments.first }
     let(:call_method) { subject.process_email_image(image_url) }
     before do
-      allow(Net::HTTP).to receive(:get_response).with(kind_of(URI)).and_return(image_response)
+      allow(subject).to receive(:fetch_image).with(image_url).and_return(image_response)
     end
     it 'reencodes the attachment as base64' do
       expect(call_method[:data]).to eq(Base64.encode64(image_response.body))
@@ -163,6 +163,42 @@ describe CorporateCommunication::Process do
     end
     it 'includes the original attachment content type' do
       expect(call_method[:content_type]).to eq(image_response.content_type)
+    end
+  end
+
+  describe '`fetch_image` method' do
+    let(:value) { SecureRandom.hex }
+    let(:image_url) { 'http://www.example.com/foo.png' }
+    let(:image_response_success) { Net::HTTPSuccess.new(nil, nil, nil) }
+    let(:image_response_redirect) { Net::HTTPRedirection.new(nil, nil, nil) }
+    let(:image_body) { SecureRandom.hex }
+    let(:image_content_type) { double('A Content Type') }
+    let(:image_response_other) { double(Net::HTTPOK, value: value, body: image_body, content_type: image_content_type) }
+    let(:limit) { rand(2..10) }
+    let(:call_method) { subject.fetch_image(image_url, limit) }
+    let(:call_method_limit) { subject.fetch_image(image_url, 0) }
+    before do
+      allow(Net::HTTP).to receive(:get_response).with(kind_of(URI)).and_return(image_response_success)
+    end
+    it 'returns image_response if `HTTPSuccess`' do
+      expect(call_method).to eq(image_response_success)
+    end
+    it 'returns follows redirects until it gets `HTTPSuccess`' do
+      allow(image_response_redirect).to receive(:[]).with('location').and_return(value)
+      allow(Net::HTTP).to receive(:get_response).with(kind_of(URI)).and_return(image_response_redirect, image_response_success)
+      expect(call_method).to eq(image_response_success)
+    end
+    it 'throws an error if more than `limit` redirects occur' do
+      allow(image_response_redirect).to receive(:[]).with('location').and_return(value)
+      allow(Net::HTTP).to receive(:get_response).with(kind_of(URI)).and_return(*(Array.new(limit, image_response_redirect) << image_response_success))
+      expect{call_method}.to raise_error(ArgumentError)
+    end
+    it 'returns image_response.value if not `HTTPSuccess` and not `HTTPRedirection`' do
+      allow(Net::HTTP).to receive(:get_response).with(kind_of(URI)).and_return(image_response_other)
+      expect(call_method).to eq(value)
+    end
+    it 'throws an error if `limit` = 0' do
+      expect{subject.fetch_image(image_url, 0)}.to raise_error(ArgumentError)
     end
   end
 

@@ -1,6 +1,6 @@
 - relationship_manager = @contacts[:rm] || {}
 - walkthrough_mode = !policy(:letters_of_credit).execute?
-.letters-of-credit.letters-of-credit-preview
+.letters-of-credit.letter-of-credit-preview
   .row
     .column-9x3-left
       %h1= @title
@@ -9,7 +9,7 @@
           %p= @error_message
   .row
     = content_with_sidebar([{name: 'borrowing_capacity', locals: {profile: @profile}}, {name: 'contact', locals: {relationship_manager: relationship_manager, text: t('letters_of_credit.contact')}}]) do
-      = form_for(@letter_of_credit_request, url: letters_of_credit_execute_path, html: {class: 'letter-of-credit-request-form', data: {securid_status: @securid_status, 'prevent-submit-on-enter' => true}}) do |f|
+      = form_for(@letter_of_credit_request, url: letters_of_credit_execute_path, html: {class: 'letter-of-credit-request-preview', data: {securid_status: @securid_status, 'prevent-submit-on-enter' => true}}) do |f|
         = f.hidden_field(:id)
         = render 'summary_data'
         -if @error_message

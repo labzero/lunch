@@ -131,52 +131,131 @@ RSpec.describe ResourcesController, type: :controller do
     it 'should raise `ActionController::MissingFile` if an unknown form is requested' do
       expect { get :download, file: 'form_0001' }.to raise_error(ActionController::MissingFile)
     end
-    file_mapping = {
-      'creditguide' => 'creditguide.pdf',
-      'collateralguide' => 'collateralguide.pdf',
-      'collateralreviewguide' => 'mortgage-loan-collateral-field-review-process.pdf',
-      'corporation_assignment' => 'Corporate_Assignment.doc',
-      'credit_union_amendment' => 'corporate-credit-union-amendment.docx',
-      'credit_union_agreement' => 'subordination-agreement-credit-unions.pdf',
-      'capitalplan' => 'capital-plan.pdf',
-      'capitalplansummary' => 'capital-plan-summary.pdf',
-      'pfi_agreement_resolution' => 'mpf-pfi-agreement-resolution.pdf',
-      'delegation_of_authority' => 'mpf-delegation-of-authority.pdf',
-      'delegation_of_authority_requests' => 'mpf-delegation-of-authority-requests-for-files-from-custodian.pdf',
-      'delegation_of_authority_definitions' => 'mpf-delegation-of-authority-definitions.pdf',
-      'pfi_agreement' => 'mpf-pfi-agreement.pdf',
-      'pfi_application' => 'mpf-pfi-application.pdf',
-      'mortgage_operations_questionnaire' => 'mpf-mortgage-operations-questionnaire.pdf',
-      'mortgage_operations_questionnaire_addendum' => 'mpf-mortgage-operations-questionnaire-addendum.pdf',
-      'mpf_fidelity' => 'mpf-fidelity-errors-omissions-insurance-worksheet-OG2.pdf',
-      'anti_predatory' => 'mpf-anti-predatory-lending-questionnaire.pdf',
-      'in_house' => 'mpf-in-house-QC-questionnaire.pdf',
-      'collateral_file' => 'mpf-collateral-file-release-information.pdf',
-      'post_closing' => 'mpf-post-closing-information.pdf',
-      'servicer' => 'mpf-servicer-information.pdf',
-      'servicer_account_remittance' => 'mpf-PI-custodial-account-agreement-SS-or-AA-single-remittance.pdf',
-      'servicer_account_actual' => 'mpf-PI-custodial-account-agreement-AA.pdf',
-      'servicer_account' => 'mpf-TI-custodial-account-agreement.pdf',
-      'direct_gov' => 'mpf-government.pdf',
-      'xtra_agreement' => 'mpf-xtra-agreement-for-access-to-fannie-mae-du-only.pdf',
-      'xtra_addendum_mpf' => 'mpf-xtra-addendum-servicing-retained.pdf',
-      'xtra_addendum_servcer_account' => 'mpf-xtra-PI-custodial-account-agreement-mpf-bank.pdf',
-      'xtra' => 'mpf-xtra-TI-custodial-account-agreement.pdf',
-      'xtra_addendum_mpf_released' => 'mpf-xtra-addendum-servicing-released.pdf',
-      'direct_agreement' => 'mpf-direct-addendum-to-pfi-agreement.pdf',
-      'direct_questionnaire' => 'mpf-direct-operations-questionnaire.pdf'
-    }
-    [
-      2117, 2349, 2127, 2177, 1465, 1694, 2136, 2065, 2066, 2108, 2067, 2153, 2068,
-      2071, 2065, 2109, 1685, 2238, 2160, 2228, 2051, 2192, 1465, 2215, 2161, 2237, 2281,
-      2242, 2241, 2243, 2202, 2200, 2249, 1547, 2204, 1722, 449, 1227, 2143, 2194
-    ].each do |form_number|
-      file_mapping["form_#{form_number}"] = "fc#{form_number}.pdf"
+    context 'when the `content-management-system` feature is disabled' do
+      before { allow(subject).to receive(:feature_enabled?).with('content-management-system').and_return(false) }
+
+      file_mapping = {
+        'creditguide' => 'creditguide.pdf',
+        'collateralguide' => 'collateralguide.pdf',
+        'collateralreviewguide' => 'mortgage-loan-collateral-field-review-process.pdf',
+        'corporation_assignment' => 'Corporate_Assignment.doc',
+        'credit_union_amendment' => 'corporate-credit-union-amendment.docx',
+        'credit_union_agreement' => 'subordination-agreement-credit-unions.pdf',
+        'capitalplan' => 'capital-plan.pdf',
+        'capitalplansummary' => 'capital-plan-summary.pdf',
+        'pfi_agreement_resolution' => 'mpf-pfi-agreement-resolution.pdf',
+        'delegation_of_authority' => 'mpf-delegation-of-authority.pdf',
+        'delegation_of_authority_requests' => 'mpf-delegation-of-authority-requests-for-files-from-custodian.pdf',
+        'delegation_of_authority_definitions' => 'mpf-delegation-of-authority-definitions.pdf',
+        'pfi_agreement' => 'mpf-pfi-agreement.pdf',
+        'pfi_application' => 'mpf-pfi-application.pdf',
+        'mortgage_operations_questionnaire' => 'mpf-mortgage-operations-questionnaire.pdf',
+        'mortgage_operations_questionnaire_addendum' => 'mpf-mortgage-operations-questionnaire-addendum.pdf',
+        'mpf_fidelity' => 'mpf-fidelity-errors-omissions-insurance-worksheet-OG2.pdf',
+        'anti_predatory' => 'mpf-anti-predatory-lending-questionnaire.pdf',
+        'in_house' => 'mpf-in-house-QC-questionnaire.pdf',
+        'collateral_file' => 'mpf-collateral-file-release-information.pdf',
+        'post_closing' => 'mpf-post-closing-information.pdf',
+        'servicer' => 'mpf-servicer-information.pdf',
+        'servicer_account_remittance' => 'mpf-PI-custodial-account-agreement-SS-or-AA-single-remittance.pdf',
+        'servicer_account_actual' => 'mpf-PI-custodial-account-agreement-AA.pdf',
+        'servicer_account' => 'mpf-TI-custodial-account-agreement.pdf',
+        'direct_gov' => 'mpf-government.pdf',
+        'xtra_agreement' => 'mpf-xtra-agreement-for-access-to-fannie-mae-du-only.pdf',
+        'xtra_addendum_mpf' => 'mpf-xtra-addendum-servicing-retained.pdf',
+        'xtra_addendum_servcer_account' => 'mpf-xtra-PI-custodial-account-agreement-mpf-bank.pdf',
+        'xtra' => 'mpf-xtra-TI-custodial-account-agreement.pdf',
+        'xtra_addendum_mpf_released' => 'mpf-xtra-addendum-servicing-released.pdf',
+        'direct_agreement' => 'mpf-direct-addendum-to-pfi-agreement.pdf',
+        'direct_questionnaire' => 'mpf-direct-operations-questionnaire.pdf'
+      }
+      [
+        2117, 2349, 2127, 2177, 1465, 1694, 2136, 2065, 2066, 2108, 2067, 2153, 2068,
+        2071, 2065, 2109, 1685, 2238, 2160, 2228, 2051, 2192, 1465, 2215, 2161, 2237, 2281,
+        2242, 2241, 2243, 2202, 2200, 2249, 1547, 2204, 1722, 449, 1227, 2143, 2194
+      ].each do |form_number|
+        file_mapping["form_#{form_number}"] = "fc#{form_number}.pdf"
+      end
+      file_mapping.each do |name, file|
+        it "should send the file `#{file}` when `#{name}` is requested" do
+          expect(subject).to receive(:send_file).with(Rails.root.join('private', file), filename: file).and_call_original
+          get :download, file: name
+        end
+      end
     end
-    file_mapping.each do |name, file|
-      it "should send the file `#{file}` when `#{name}` is requested" do
-        expect(subject).to receive(:send_file).with(Rails.root.join('private', file), filename: file).and_call_original
-        get :download, file: name
+    context 'when the `content-management-system` feature is enabled' do
+      let(:member_id) { double('member id') }
+      let(:pdf_url) { instance_double(String) }
+      let(:cms) { instance_double(ContentManagementService, get_pdf_url: pdf_url) }
+      let(:file) { instance_double(File, close:nil )}
+      before do
+        allow(controller).to receive(:current_member_id).and_return(member_id)
+        allow(subject).to receive(:feature_enabled?).with('content-management-system').and_return(true)
+        allow(ContentManagementService).to receive(:new).and_return(cms)
+        allow(controller).to receive(:open).and_return(file)
+        allow(File).to receive(:read)
+      end
+
+      {
+        'creditguide' => {filename: 'creditguide.pdf', type: 'guide', uid: 'credit'},
+        'collateralguide' => {filename: 'collateralguide.pdf', type: 'guide', uid: 'collateral'}
+      }.each do |param_name, options|
+        context "when `#{param_name}` is requested" do
+          let(:call_action) { get :download, file: param_name}
+
+          it 'creates a new instance of the `ContentManagementService` with the member_id and request object' do
+            expect(ContentManagementService).to receive(:new).with(member_id, request).and_return(cms)
+            call_action
+          end
+          it "calls `get_pdf_url` on the instance of `ContentManagementService` with `#{options[:type]}` as the type" do
+            expect(cms).to receive(:get_pdf_url).with(options[:type], anything)
+            call_action
+          end
+          it "calls `get_pdf_url` on the instance of `ContentManagementService` with `#{options[:uid]}` as the uid" do
+            expect(cms).to receive(:get_pdf_url).with(anything, options[:uid])
+            call_action
+          end
+          context 'when a url is returned' do
+            let(:read_file) { double('file') }
+            before do
+              allow(File).to receive(:read).with(file).and_return(read_file)
+            end
+            it 'opens the returned url' do
+              expect(controller).to receive(:open).with(pdf_url)
+              call_action
+            end
+            it 'reads the data stream' do
+              expect(File).to receive(:read).with(file)
+              call_action
+            end
+            it 'calls `send_data` with the read data stream' do
+              expect(controller).to receive(:send_data).with(read_file, any_args).and_call_original
+              call_action
+            end
+            it "calls `send_data` with `#{options[:filename]}` as the filename" do
+              expect(controller).to receive(:send_data).with(anything, hash_including(filename: options[:filename])).and_call_original
+              call_action
+            end
+            it 'calls `send_data` with `application/pdf` as the `type`' do
+              expect(controller).to receive(:send_data).with(anything, hash_including(type: 'application/pdf')).and_call_original
+              call_action
+            end
+            it 'calls `send_data` with `attachment` as the `disposition`' do
+              expect(controller).to receive(:send_data).with(anything, hash_including(disposition: 'attachment')).and_call_original
+              call_action
+            end
+            it 'closes the file' do
+              expect(file).to receive(:close)
+              call_action
+            end
+          end
+          context 'when a url is not returned' do
+            before { allow(cms).to receive(:get_pdf_url).and_return(nil) }
+            it 'raises an error' do
+              expect{call_action}.to raise_error(ActionController::MissingFile)
+            end
+          end
+        end
       end
     end
   end

@@ -159,7 +159,7 @@ RSpec.describe AdvancesController, :type => :controller do
         end
       end
       it 'calls out which columns are dates' do
-        expect(column_definitions).to include({type: :date, targets: [0, 1, 2]})
+        expect(column_definitions).to include({type: :date, targets: [0, 1]})
       end
     end
     describe 'filtering' do

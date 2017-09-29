@@ -20,13 +20,13 @@
           = render 'reports/report_cell', cell: row[:columns][4]
           = render 'reports/report_cell', cell: row[:columns][5]
           = render 'reports/report_cell', cell: row[:columns][6]
-          - if @amend_on
+          - if @amend_on && policy(:letters_of_credit).request?
             %td
               =link_to(t('global.view_pdf'), nil, class: 'letters-of-credit-view-pdf')
-              - if row[:columns][1][:value].blank?
+              - if row[:columns][1][:value].blank? || (!row[:columns][8][:value].to_s.include?('L03') && !row[:columns][8][:value].to_s.include?('L12')) || (Date.parse(row[:columns][4][:value].to_s) <= Date.today)
                 =t('global.amend')
               - else
-                =link_to(t('global.amend'), letters_of_credit_amend_path(lc_number: row[:columns][0][:value]))
+                =link_to(t('global.amend'), letters_of_credit_amend_path(lc_number: row[:columns][0][:value]), class: 'amend_loc_link')
           - else
             %td
               =link_to(t('global.view_pdf'), nil, class: 'letters-of-credit-view-pdf')

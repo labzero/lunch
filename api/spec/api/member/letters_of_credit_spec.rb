@@ -69,6 +69,7 @@ describe MAPI::ServiceApp do
     end
   end
 
+
   describe 'letter_of_credit' do
     letters_of_credit_module = MAPI::Services::Member::LettersOfCredit
     let(:lc_number) { SecureRandom.hex }
@@ -97,7 +98,6 @@ describe MAPI::ServiceApp do
         expect(letters_of_credit_module).to receive(:fake).with('letters_of_credit').and_return({})
         call_method
       end
-
     end
 
     context 'when `should_fake?` returns false' do
@@ -131,20 +131,19 @@ describe MAPI::ServiceApp do
         expect(call_method).to be_kind_of(Hash)
       end
 
-
       describe 'the SQL query' do
         describe 'the selected fields' do
-          ['FHLB_ID','LC_LC_NUMBER', 'LCX_CURRENT_PAR', 'LCX_TRANS_SPREAD', 'LC_TRADE_DATE', 'LC_SETTLEMENT_DATE', 'LC_MATURITY_DATE', 'LC_ISSUE_NUMBER', 'LCX_UPDATE_DATE', 'LC_BENEFICIARY'].each do |field|
+          ['FHLB_ID','LC_LC_NUMBER', 'LC_SORT_CODE','LCX_CURRENT_PAR', 'LCX_TRANS_SPREAD', 'LC_TRADE_DATE', 'LC_SETTLEMENT_DATE', 'LC_MATURITY_DATE', 'LC_ISSUE_NUMBER', 'LCX_UPDATE_DATE', 'LC_BENEFICIARY'].each do |field|
             it "selects the `#{field}` field" do
               matcher = Regexp.new(/\A\s*SELECT.*\s+#{field}(?:,|\s+)/im)
-              expect(letters_of_credit_module).to receive(:execute_sql).with(anything, matcher).and_return([])
+              expect(letters_of_credit_module).to receive(:execute_sql).with(anything, matcher)
               call_method
             end
           end
         end
         it 'selects from `WEB_INET.WEB_LC_LATESTDATE_RPT`' do
           matcher = Regexp.new(/\A\s*SELECT.+FROM\s+WEB_INET.WEB_LC_LATESTDATE_RPT/im)
-          expect(letters_of_credit_module).to receive(:execute_sql).with(anything, matcher).and_return([])
+          expect(letters_of_credit_module).to receive(:execute_sql).with(anything, matcher)
           call_method
         end
       end

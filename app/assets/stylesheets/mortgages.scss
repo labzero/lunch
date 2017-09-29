@@ -1,0 +1,163 @@
+.mortgage-collateral-update {
+  @extend %page-header;
+  h2 {
+    @extend %typography-section-title;
+    margin: 0 0 20px;
+  }
+}
+
+.mortgage-collateral-update-new {
+  section:not(.mcu-upload-legal-section) {
+    @extend %bordered-section;
+    @extend %pseudoelement-clearfix;
+    clear: both;
+    .input-field-container-horizontal {
+      width: 100%;
+      margin: 0 0 6px;
+      @extend %horizontal-label-styling;
+      label {
+        display: inline-block;
+        width: 140px;
+        margin-right: 0;
+      }
+      .input-field-container, .dropdown-selection {
+        width: 515px;
+      }
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+  .row {
+    overflow: visible;
+  }
+}
+
+.mortgage-collateral-update-date-wrapper {
+  &:first-child {
+    float: left;
+  }
+  &:last-child {
+    float: right;
+  }
+  span:first-child {
+    color: $medium-gray;
+    margin-right: 20px;
+  }
+  span:last-child {
+    @extend %typography-subtitle;
+  }
+}
+
+.mcu-upload-area {
+  padding: 20px;
+}
+
+.mcu-upload-actions {
+  @extend %upload-actions-style;
+}
+
+.mcu-upload-instructions {
+  p:not(:first-of-type) {
+    @extend %typography-dashboard-account-summary;
+    margin-bottom: 0;
+  }
+}
+
+.mcu-upload-legal-section {
+  display: none;
+  dt {
+    @extend %typography-subtitle;
+    float: left;
+    margin-right: 5px;
+  }
+  dd {
+    @extend %pseudoelement-clearfix;
+    margin: 0 0 15px 0;
+  }
+  .additional-legal h3 {
+    @extend %typography-subtitle;
+    margin: 0 0 5px 0;
+  }
+}
+
+.new-mortgage-collateral-update-actions {
+  @extend %clearfix;
+  margin-bottom: 50px;
+  .secondary-button {
+    float: left;
+  }
+  .primary-button {
+    float: right;
+  }
+  .primary-button, .secondary-button {
+    cursor: pointer;
+    padding: 7px 40px;
+  }
+}
+
+.mortgages {
+  @extend %page-header;
+  h2 {
+    @extend %typography-section-title;
+    margin: 0 0 5px;
+  }
+  header {
+    margin: 0 0 15px;
+  }
+}
+
+.mortgages-header {
+  p {
+    @extend %typography-dashboard-account-summary;
+    width: $column-9-width;
+    margin-bottom: 25px;
+  }
+}
+
+.mortgages-manage {
+  .secondary-button {
+    @extend %typography-table-button;
+    float: right;
+    margin-bottom: 10px;
+    width: 215px;
+  }
+  .mortgages-manage-report-table {
+    td:nth-child(2) {
+      width: 80px;
+    }
+    td:nth-child(3) {
+      width: 120px;
+    }
+    td:nth-child(5) {
+      width: 100px;
+    }
+    td:nth-child(6) {
+      width: 20px;
+    }
+    td:nth-child(7) {
+      width: 20px;
+    }
+    td:nth-child(8) {
+      width: 100px;
+    }
+    margin-top: 10px;
+    margin-bottom: 0px;
+  }
+}
+
+.mortgage-collateral-update-date-wrapper {
+  &:first-child {
+    float: left;
+  }
+  &:last-child {
+    float: right;
+  }
+  span:first-child {
+    color: $medium-gray;
+    margin-right: 20px;
+  }
+  span:last-child {
+    @extend %typography-subtitle;
+  }
+}

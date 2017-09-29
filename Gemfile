@@ -90,6 +90,12 @@ gem 'ruby-prof', require: false
 # for validating CUSIPs
 gem 'security_identifiers', '~> 0.1.1'
 
+# for Prismic CMS integration
+gem 'prismic.io', require: 'prismic'
+
+# for communicating with the enterprise message bus
+gem 'stomp'
+
 group :production, :development do
   gem 'newrelic_rpm'
 end

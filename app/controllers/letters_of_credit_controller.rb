@@ -80,7 +80,7 @@ class LettersOfCreditController < ApplicationController
   after_action :save_beneficiary_request, only: [:beneficiary]
 
   before_action :fetch_letter_of_credit_request, except: [:manage, :view, :amend, :beneficiary, :beneficiary_new]
-  after_action :save_letter_of_credit_request, except: [:manage, :view, :amend, :beneficiary, :beneficiary_new]
+  after_action :save_letter_of_credit_request, except: [:manage, :view, :beneficiary, :beneficiary_new]
 
   # GET
   def manage
@@ -103,7 +103,8 @@ class LettersOfCreditController < ApplicationController
             {value: credit[:maturity_date], type: :date},
             {value: credit[:description], type: nil},
             {value: credit[:maintenance_charge], type: :basis_point},
-            {value: t('global.view_pdf'), type: nil}
+            {value: t('global.view_pdf'), type: nil},
+            {value: credit[:sort_code], type: nil}
           ]
         }
       end
@@ -132,8 +133,47 @@ class LettersOfCreditController < ApplicationController
 
   # GET
   def amend
-    @letter_of_credit = LetterOfCreditRequest.find_by_lc_number(current_member_id,params[:lc_number], request)
+    id = params[:id]
+    @letter_of_credit_request = LetterOfCreditRequest.find(id, request) if id.present?
+    @letter_of_credit_request ||= LetterOfCreditRequest.find_by_lc_number(current_member_id,params[:lc_number], request)
     populate_amend_request_view_variables
+  end
+
+  # POST
+  def amend_preview
+    set_titles(t('letters_of_credit.request.amend.title'))
+    letter_of_credit_request.attributes = params[:letter_of_credit_request]
+    @amended_amount = letter_of_credit_request.amended_amount
+    @amended_expiration_date = letter_of_credit_request.amended_expiration_date
+    @session_elevated = session_elevated?
+    unless @letter_of_credit_request.valid?
+      @error_message = prioritized_error_message(@letter_of_credit_request)
+      populate_amend_request_view_variables
+      render :amend
+    end
+  end
+
+  # POST
+  def amend_execute
+    request_succeeded = false
+    if !policy(:letters_of_credit).amend_execute?
+      @error_message = t('letters_of_credit.request.amend.errors.not_authorized')
+    else
+      securid_status = securid_perform_check
+    end
+    if !session_elevated?
+      @securid_status = securid_status
+    elsif letter_of_credit_request.valid? && letter_of_credit_request.amend_execute(current_user.display_name)
+      set_titles(t('letters_of_credit.request.amend.success.title'))
+      MemberMailer.letter_of_credit_request_amendment(current_member_id, @letter_of_credit_request.to_json, current_user).deliver_later
+      request_succeeded = true
+    else
+      @error_message = t('letters_of_credit.errors.generic_html', rm_email: @contacts[:rm][:email], rm_phone_number: @contacts[:rm][:phone_number])
+    end
+    unless request_succeeded
+      set_titles(t('letters_of_credit.request.amend.title'))
+      render :amend_preview
+    end
   end
 
   # POST
@@ -175,14 +215,30 @@ class LettersOfCreditController < ApplicationController
   def view
     @letter_of_credit_request = LetterOfCreditRequest.find(params[:letter_of_credit_request][:id], request)
     if params[:export_format] == 'pdf'
-      pdf_name = "letter_of_credit_request_#{@letter_of_credit_request.lc_number}.pdf"
+      pdf_name = "letter_of_credit_request_confirmation_#{@letter_of_credit_request.lc_number}.pdf"
       job_status = RenderLetterOfCreditPDFJob.perform_later(current_member_id, action_name, pdf_name, { letter_of_credit_request: {id: letter_of_credit_request.id} }).job_status
       job_status.update_attributes!(user_id: current_user.id)
       render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
     else
       member = MembersService.new(request).member(current_member_id)
       raise ActionController::RoutingError.new("There has been an error and LettersOfCreditController#view has encountered nil calling MembersService. Check error logs.") if member.nil?
-      @member_name, @member_fhla = member[:name], member[:fhla_number]
+      @member_name, @member_fhfa = member[:name], member[:fhfa_number]
+    end
+  end
+
+  # GET
+  def amend_view
+    @is_amendment = true
+    @letter_of_credit_request = LetterOfCreditRequest.find(params[:letter_of_credit_request][:id], request)
+    if params[:export_format] == 'pdf'
+      pdf_name = "letter_of_credit_request_amendment_#{@letter_of_credit_request.lc_number}.pdf"
+      job_status = RenderLetterOfCreditPDFJob.perform_later(current_member_id, action_name, pdf_name, { letter_of_credit_request: {id: letter_of_credit_request.id} }).job_status
+      job_status.update_attributes!(user_id: current_user.id)
+      render json: {job_status_url: job_status_url(job_status), job_cancel_url: job_cancel_url(job_status)}
+    else
+      member = MembersService.new(request).member(current_member_id)
+      raise ActionController::RoutingError.new("There has been an error and LettersOfCreditController#view has encountered nil calling MembersService. Check error logs.") if member.nil?
+      @member_name, @member_fhfa = member[:name], member[:fhfa_number]
     end
   end
 
@@ -239,7 +295,7 @@ class LettersOfCreditController < ApplicationController
 
   def populate_new_request_view_variables
     set_titles(t('letters_of_credit.request.title'))
-    @beneficiary_dropdown_options = BeneficiariesService.new(request).beneficiaries(current_member_id).collect{|beneficiary| [beneficiary[:name], beneficiary[:name]] }
+    @beneficiary_dropdown_options = BeneficiariesService.new(request).beneficiaries(current_member_id).collect{|beneficiary| [beneficiary[:name], beneficiary[:name]] }.sort!
     @beneficiary_dropdown_default = letter_of_credit_request.beneficiary_name || @beneficiary_dropdown_options.first.try(:last)
     @date_restrictions = date_restrictions
     unless @beneficiary_dropdown_options.first.try(:last)

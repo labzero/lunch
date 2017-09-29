@@ -391,6 +391,30 @@ class MemberBalanceService < MAPIService
     fix_date(get_hash(:mortgage_collateral_update, "/member/#{@member_id}/mortgage_collateral_update"), :date_processed)
   end
 
+  def mcu_member_status
+    #TODOCAB add caching
+    if data = get_json(:mcu_member_status, "/member/#{@member_id}/mcu_member_status")
+      processed_data = []
+      data.each do |status|
+        status = status.with_indifferent_access
+        processed_data.push(status)
+      end
+      processed_data
+    end
+    processed_data
+  end
+
+  def mcu_transaction_id
+    get_hash(:mcu_transaction_id, "/member/#{@member_id}/mcu_transaction_id")
+  end
+
+  def mcu_member_info
+    mcu_member_info = Rails.cache.fetch(CacheConfiguration.key(:mcu_member_info), expires_in: CacheConfiguration.expiry(:mcu_member_info)) do
+      get_hash(:mcu_member_info, "/member/#{@member_id}/mcu_member_info")
+    end
+    mcu_member_info[@member_id] if mcu_member_info
+  end
+
   def managed_securities
     get_hash(:managed_securities, "/member/#{@member_id}/managed_securities")[:securities]
   end

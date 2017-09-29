@@ -1,5 +1,5 @@
 ProcessQuickReportsJob:
-  cron: "0 2 * * * America/Los_Angeles"
+  cron: "0 16 * * * America/Los_Angeles"
 
 FetchAndProcessAnnoucements:
   class: 'RakeTaskJob'

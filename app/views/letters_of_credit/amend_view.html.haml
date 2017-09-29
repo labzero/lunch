@@ -1,0 +1,11 @@
+.letters-of-credit.letters-of-credit-amend-view
+  .row
+    .column-9x3-left
+      %h1= t('letters_of_credit.request.amend.pdf.requested')
+      .report-print-details
+        .report-print-bank= @member_name
+        %h2= t('reports.pages.member_profile.fhfa_number')
+        .report-print-sta= @member_fhfa
+  .row
+    = render 'amend_summary_data', extended_info: true
+    .letters-of-credit-legal-copy=simple_format(t'letters_of_credit.request.amend.preview.legal')

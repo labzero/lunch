@@ -13,8 +13,8 @@ Feature: Previewing a New Letter of Credit Request
     And I enter 1234567 in the letter of credit amount field
     When I click the Preview Request button
     Then I should be on the Preview Letter of Credit Request page
-    And I should see summary data for the letter of credit
-    And I should see that the amount in the preview is 1234567
+    And I should see summary data for the letter of credit on the letter of credit preview page
+    And I should see that the amount in the preview new request is 1234567
 
   @jira-mem-1972
   Scenario Outline: Viewing the SecureID fields

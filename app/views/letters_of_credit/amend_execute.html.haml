@@ -1,0 +1,13 @@
+.letters-of-credit.letter-of-credit-amend-success.row
+  .column-9x3-left
+    %h1= @title
+    .letters-of-credit-success-info.icon-success-before
+      %p= t('letters_of_credit.request.amend.success.confirmation', datetime: fhlb_datetime_long_alpha_with_on(@letter_of_credit_request.created_at))
+      %p
+        = t('letters_of_credit.success.email')
+        %span= current_user.email
+      %p= t('letters_of_credit.success.questions', phone_number: member_services_phone_number)
+    .letters-of-credit-success-actions
+      = link_to(t('letters_of_credit.manage.title'), letters_of_credit_manage_path, class: 'secondary-button')
+      = link_to(t('letters_of_credit.success.download_pdf'), letters_of_credit_amend_view_path(letter_of_credit_request: {id: @letter_of_credit_request.id}, export_format: :pdf), class: 'secondary-button letters-of-credit-download-pdf')
+  = render 'reports/report_loading_flyout'

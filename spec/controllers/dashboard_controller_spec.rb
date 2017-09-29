@@ -271,7 +271,7 @@ RSpec.describe DashboardController, :type => :controller do
         make_request
         expect(assigns[:quick_reports_period]).to eq(Date.new(2015, 3, 1))
       end
-      it 'assigns @quick_reports' do
+      it 'assigns `@quick_reports`' do
         make_request
         expect(assigns[:quick_reports].length).to be(report_list.length)
         report_list.each do |report|
@@ -1248,7 +1248,5 @@ RSpec.describe DashboardController, :type => :controller do
         expect(call_method).to be(false)
       end
     end
-
   end
-
 end

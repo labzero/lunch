@@ -3,6 +3,6 @@
   %span.report-bank-name
     = current_member_name
   %span.report-as-of
-    = I18n.t('letters_of_credit.pdf.requested')
+    = @is_amendment ? I18n.t('letters_of_credit.request.amend.pdf.requested') : I18n.t('letters_of_credit.pdf.requested')
     = fhlb_date_standard_numeric(@letter_of_credit_request.created_at)
   %span.page 1

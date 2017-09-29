@@ -80,7 +80,7 @@ $(function(){
 
   function closedDropdownClicked($dropdownEl) {
     $dropdown.removeClass('open');
-    $dropdownEl.addClass('open');
+    $dropdownEl.attr('disabled') ? null : $dropdownEl.addClass('open');
   };
 
   function openDropdownClicked($targetEl, $dropdownEl) {

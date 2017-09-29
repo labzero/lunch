@@ -12,6 +12,7 @@ class LetterOfCreditRequest
   ISSUE_MAX_DATE_RESTRICTION = 1.week
   ISSUE_DATE_TIME_RESTRICTION = '10:00:00'
   ISSUE_DATE_TIME_RESTRICTION_WINDOW = 5.minutes
+  AMENDMENT_DATE_TIME_RESTRICTION = '11:00:00'
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
   READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :amendment_fee, :request, :lc_number, :beneficiary, :current_par, :id, :owners,
@@ -35,6 +36,7 @@ class LetterOfCreditRequest
   validate :amount_does_not_exceed_financing_availability
   validate :expiration_date_before_max_term
   validate :amended_expiration_on_or_after_original_expiration
+  validate :amended_expiration_date_before_max_term
   validate :amended_amount_equal_or_greater_than_original_amount
   validate :amendment_date_not_prior_to_current_date
 
@@ -62,7 +64,10 @@ class LetterOfCreditRequest
     letter_of_credit_request.issue_date = lc_details[:trade_date]
     letter_of_credit_request.expiration_date = lc_details[:maturity_date]
     letter_of_credit_request.amended_expiration_date = lc_details[:maturity_date]
-    letter_of_credit_request.amendment_date = Time.zone.today
+    calendar_service = CalendarService.new(@request)
+    today = Time.zone.today
+    start_date = Time.zone.now > Time.zone.parse(AMENDMENT_DATE_TIME_RESTRICTION) ? today + 1.day : today
+    letter_of_credit_request.amendment_date = calendar_service.find_next_business_day(start_date, 1.day)
     letter_of_credit_request.instance_variable_set(:@amendment_fee, DEFAULT_AMENDMENT_FEE)
     letter_of_credit_request
   end
@@ -113,6 +118,15 @@ class LetterOfCreditRequest
     @amount = transformed_amount
   end
 
+  def amended_amount=(amended_amount)
+    transformed_amount = if amended_amount.respond_to?(:gsub)
+       amended_amount.gsub(',', '').to_i
+     else
+       amended_amount.to_i if amended_amount
+     end
+    @amended_amount = transformed_amount
+  end
+
   def beneficiary_name=(name)
     beneficiary_match = BeneficiariesService.new(request).beneficiaries(member_id).select{|beneficiary| beneficiary[:name] == name }
     beneficiary_match.present? ? self.beneficiary_address = beneficiary_match.first[:address] : nil
@@ -128,6 +142,11 @@ class LetterOfCreditRequest
     rescue Exception
       false
     end
+  end
+
+  def amend_execute(requester_name)
+    self.created_by = requester_name
+    self.created_at = Time.zone.now
   end
 
   def owners
@@ -218,12 +237,21 @@ class LetterOfCreditRequest
 
   def amount_does_not_exceed_borrowing_capacity
     fetch_member_profile
-    errors.add(:amount, :exceeds_borrowing_capacity) unless !amount || amount <= standard_borrowing_capacity
+    amount_to_validate = amended_amount.nil? ? amount : amended_amount
+    errors.add(:amount, :exceeds_borrowing_capacity) unless !amount_to_validate || amount_to_validate <= standard_borrowing_capacity
   end
 
   def amount_does_not_exceed_financing_availability
     fetch_member_profile
-    errors.add(:amount, :exceeds_financing_availability) unless !amount || amount <= remaining_financing_available
+    amount_to_validate = amended_amount.nil? ? amount : amended_amount
+    errors.add(:amount, :exceeds_financing_availability) unless !amount_to_validate || amount_to_validate <= remaining_financing_available
+  end
+
+  def amended_expiration_date_before_max_term
+   if amended_expiration_date && issue_date
+      fetch_member_profile
+      errors.add(:amended_expiration_date, :after_max_term) if amended_expiration_date.to_date > issue_date.to_date + max_term.months
+    end
   end
 
   def expiration_date_before_max_term
@@ -262,5 +290,4 @@ class LetterOfCreditRequest
   def past_issue_date_restriction_window?
     Time.zone.now > (Time.zone.parse(ISSUE_DATE_TIME_RESTRICTION) + ISSUE_DATE_TIME_RESTRICTION_WINDOW)
   end
-
 end

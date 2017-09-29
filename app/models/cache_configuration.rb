@@ -46,6 +46,10 @@ unless defined?(CacheConfiguration)
       quick_advance_rates: {
         key_prefix: "rates#{SEPARATOR}quick_advance",
         expiry: 30.seconds
+      },
+      mcu_member_info: {
+        key_prefix: 'mcu_member_info',
+        expiry: 1.hour
       }
     }.freeze
     

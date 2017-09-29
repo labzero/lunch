@@ -308,6 +308,8 @@ en:
               greater_than: Amount must be a positive number with no fractional cents.
               exceeds_borrowing_capacity: The amount you selected exceeds your institution's current whole loan borrowing capacity. You may make a request for a lower amount, or check with your Relationship Manager or Member Services Desk to adjust your collateral first.
               exceeds_financing_availability: The amount you entered exceeds your institution's current financing availability. Submit a request for a lesser amount or contact your Relationship Manager or the Member Services Desk.
+            amended_amount:
+              amended_amount_less_than_original_amount: The amended credit amount must be equal to or greater than the original credit amount.
             beneficiary_name:
               invalid: Please choose a valid beneficiary.
     attributes:
@@ -1589,6 +1591,8 @@ en:
       amend:
         title: Request Letter of Credit Amendment
         instructions: The member portal only supports requests for amendments to standard Letters of Credit collateralizing public unit deposits. If your amendment request is not received by 11:00am, your request will not be processed until the following business day. You may amend this Letter of Credit by requesting an increase in the Amount and/or an extension of the Expiration Date. For other types of amendments, please contact your Relationship Manager.
+        member_name: Member Name
+        fhfa_number: FHFA Number
         current:
           title: Current Letter of Credit
           lc_number: "LC Number:"
@@ -1598,7 +1602,7 @@ en:
           current_expiration: "Current Expiration Date:"
         requested:
           title: Amendment Request
-          explanation: You may request an increase in the Credit Amount and/or an extension of the Expiration Date.\nNo other amendments may be requested.
+          explanation: "You may request an increase in the Credit Amount and/or an extension of the Expiration Date.\nNo other amendments may be requested."
           amended_amount: Amended Credit Amount
           amended_expiration: Amended Expiration Date
           amendment_date: Amendment Date
@@ -1606,6 +1610,22 @@ en:
           explanation: 'Based on the amendment(s) requested above, the following fee will be applied:'
           fee: Amendment Fee
           further_explanation: The Amendment Fee will be charged to your Settlement/Transaction Account (STA) on the amendment date of the Letter of Credit.
+        preview:
+          current_amount: "Current Credit Amount:"
+          effective date: "Effective Date of Amendment:"
+          review_details: If you agree with the above, including the requested Letter of Credit Amendment terms, enter your SecurID token credentials below and press “Authorize Request.” If not, press “Edit Request” or “Cancel.”
+          review_details_elevated: If you agree with the above, including the requested Letter of Credit Amendment terms, press “Authorize Request.” If not, press “Edit Request” or “Cancel.”
+          legal: "This Letter of Credit amendment is subject to your institution’s continuing compliance with the Bank’s Advances and Security Agreement and other applicable agreements, as well as with the Bank’s Credit Program and specific eligibility or documentation requirements and policies applicable to specific Bank products. Also, statutory or regulatory conditions (including regulatory limits on Bank credit to capital-deficient savings institutions) may apply.\n\nThis Letter of Credit has been issued and is being amended pursuant to the Letter of Credit Reimbursement Agreement between the Bank and the Member, which will govern the rights and obligations of the Bank and the Member with respect to each other in regard to the Letter of Credit (including any amendments). The original amendment will be provided to the Beneficiary. Your institution covenants with and represents and warrants to the Bank that the above terms are valid and are those by which your institution agrees to be bound. For all purposes, your above request constitutes a “Confirmation of Amendment of Letter of Credit” and a “Confirmation,” as the latter term is used and defined in the Letter of Credit Reimbursement Agreement."
+        success:
+          title: Letter of Credit Amendment Request Received
+          confirmation: "We received your Letter of Credit Amendment Request at %{datetime}. \n\nWe will amend your Letter of Credit on the Amendment Date. Once amended, the original amendment will be sent to the Beneficiary on the Amendment Date."
+        errors:
+          not_authorized: This Letter of Credit Amendment Request was not completed because Bank employees are not authorized to request letters of credit amendments via the member portal.
+        pdf:
+          requested: Amend Letter of Credit Request Confirmation
+        email:
+          subject: 'FHLBank San Francisco: LC Amendment Request Received: %{lc_number}'
+          body: "We received your Letter of Credit Amendment Request. A copy of your request is attached (for all purposes, your request constitutes a “Confirmation of Amendment of Letter of Credit” and a “Confirmation,” as the latter term is used and defined in the Letter of Credit Reimbursement Agreement). \n\nOnce amended, the original amendment will be sent to the Beneficiary on the Amendment Date. Please contact Member Financial Services at %{phone_number} if you have any questions.\n\nThe Amendment Fee for amending the Letter of Credit will be charged to your Settlement/Transaction (STA) on the Amendment Date."
     preview:
       action: Preview Request
       review_details: If you agree with the above, including the requested Letter of Credit terms, enter your SecurID token credentials below and press “Authorize Request.” If not, press “Edit Request” or “Cancel.”
@@ -1631,11 +1651,11 @@ en:
       exceeds_financing_availability: The amount you entered exceeds your institution's current financing availability of %{financing_availability}. Submit a request for a lesser amount or contact your Relationship Manager or the Member Services Desk.
       amended_exp_date_prior_to_original: The expiration date must be the same or later than the current expiration date.
     pdf:
-      requested: Letter of Credit Request
+      requested: Letter of Credit Request Confirmation
       request_date: Request Date/Time
       requested_by: Request Authorized By
     email:
-      subject: 'FHLBank San Francisco: Letter of Credit Request Received'
+      subject: "FHLBank San Francisco: LC %{lc_number} Request Received for %{member_name}"
       body: "We received your Letter of Credit Request. A copy of your request is attached (for all purposes, your request constitutes a “Confirmation of Letter of Credit” and a “Confirmation” as such terms are used and defined in the Letter of Credit Reimbursement Agreement).\n\nOnce issued, the original Letter of Credit will be sent to the Beneficiary on the Issue Date. Please contact Member Financial Services at %{phone_number} if you have any questions."
     beneficiary:
       add: Add Beneficiary
@@ -1665,6 +1685,71 @@ en:
       member_name: Member Name
       fhfa_number: FHFA Number
       requested_by: Requested By
+  mortgages:
+    title: Mortgages
+    due_date: "MCU Due Date:"
+    extension: "Approved Extension Date:"
+    new:
+      title: New Mortgage Collateral Update (MCU)
+      authorize: Authorize
+      transaction:
+        title: Transaction Details
+        pledge: Pledge Type
+        select_pledge: Select Pledge Type
+        mcu: MCU Type
+        select_mcu: Select MCU Type
+        program: Program Type
+        select_program: Select Program Type
+        pledge_types:
+          specific: Specific Identification
+          blanket_lien: "Blanket Lien – Detailed Reporting"
+        mcu_types:
+          complete: Complete
+          update: Update
+          pledge: Pledge
+          depledge: Depledge
+          renumber: Renumber
+          add: Add
+          delete: Delete
+        program_types:
+          standard: Standard
+          loans_held: Loans Held for Sale
+        legal:
+          rights: All rights, remedies, and obligations of the Bank with respect to the Collateral specified in the submitted MCU shall be in accordance with the Advance and Security Agreement between your institution and the Bank.
+          process_mcu: MCUs will be processed by the Bank in accordance with the Advances and Security Agreement.
+          specific:
+            complete: The submitted MCU specifies Collateral that your institution is pledging to the Bank pursuant to the Advances and Security Agreement between your institution and the Bank, and if not specified on the submitted file, your institution is requesting the release of any Collateral not so specified.
+            update: The Streamlined MCU has fewer data fields than the Standard MCU and may be submitted in lieu of the Standard MCU only to update Collateral that your institution has already pledged to the Bank via a Standard MCU or Pledge MCU. The Streamlined MCU is for updates only, and new Collateral that has not been previously pledged to the Bank must be pledged using the Standard MCU or Pledge MCU. If Collateral that was previously pledged is not specified on the submitted Streamlined MCU, your institution is requesting the release of any Collateral not so specified.
+            pledge: The submitted MCU specifies Collateral that your institution is pledging to the Bank pursuant to the Advances and Security Agreement between your institution and the Bank.
+            depledge: The submitted MCU specifies Collateral that your institution is requesting the Bank to release.
+            renumber: The submitted MCU contains information to renumber the Collateral specified.
+            capitalized_terms: Capitalized terms used here have the meanings assigned to them in the Advances and Security Agreement between your institution and the Bank.
+          blanket_lien:
+            complete: The submitted MCU specifies eligible Collateral to be used in the calculation of your institution’s Borrowing Capacity.
+            update: The Streamlined MCU has fewer data fields than the Standard MCU and may be submitted in lieu of the Standard MCU only to update Collateral that your institution has already reported to the Bank for the calculation of your institution’s Borrowing Capacity via a Standard MCU or Pledge MCU. The Streamlined MCU is for updates only, and new Collateral that has not been previously reported to the Bank for the calculation of your institution’s Borrowing Capacity must be reported using the Standard MCU or Pledge MCU. If Collateral that was previously reported is not specified on the submitted Streamlined MCU, your institution is requesting that any Collateral not so specified be deleted from the calculation of your institution’s Borrowing Capacity.
+            add: The submitted MCU specifies eligible Collateral to be added to the calculation of your institution’s Borrowing Capacity.
+            delete: The submitted MCU specifies Collateral to be deleted from the calculation of your institution’s Borrowing Capacity.
+            renumber: The submitted MCU contains information to renumber the Collateral specified.
+            pledge_interest: Your institution has pledged and granted a security interest in all Loan Collateral, both eligible and ineligible, to the Bank pursuant to the Advances and Security Agreement between your institution and the Bank. Capitalized terms used here have the meanings assigned to them in the Advances and Security Agreement. You understand and agree that the Collateral specified on the submitted MCU is to be used solely for the purpose of determining your institution’s Borrowing Capacity and in no way affects the Bank’s lien on any Loan Collateral pledged to the Bank under the Advances and Security Agreement.
+      upload:
+        title: Mortgages
+        file_types: Upload an .xlsx, .xls, .csv, .txt or .zip file containing your loans.
+        instructions_html: Upload the file by either dragging and dropping it on to this page, or selecting it from your file system.<br>Contact <a href=%{email}>Collateral Operations</a> at %{phone} with questions.
+        uploaded_file: "The following file will be included in the MCU request:"
+    manage:
+      title: Manage Mortgage Collateral Updates (MCU)
+      recent_requests: Recent Requests
+      description: This list includes transactions which have had activity in the past 5 days.
+      transaction_number: Transaction Number
+      upload_type: Upload Type
+      authorized_by: Authorized By
+      authorized_on: Authorized On
+      status: Status
+      number_of_loans: Number of Loans
+      number_of_errors: Number of Errors
+      action: Action
+      contact_html: Contact <a href=%{email}>Collateral Operations</a> at %{phone_number} with questions.
+      new_mcu: New MCU
   reports:
     meta_title: FHLBSF - Reports
     title: Reports

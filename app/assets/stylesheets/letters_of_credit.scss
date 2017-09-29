@@ -90,7 +90,7 @@
   }
   dt {
     float: left;
-    padding: 8px 0px 0 0;
+    padding: 8px 0 0 0;
     margin-right: 150px;
   }
   dd {
@@ -107,6 +107,22 @@
     }
     dd {
       margin-left: 175px;
+      margin-bottom: 8px;
+      &:last-child {
+        margin-bottom: 30px;
+      }
+    }
+  }
+  .letter-of-credit-amendment-preview {
+    @extend %typography-subtitle;
+    dt {
+      width: 200px;
+      float: left;
+      color: $medium-gray;
+      margin-right: 20px;
+    }
+    dd {
+      width: 300px;
       margin-bottom: 8px;
       &:last-child {
         margin-bottom: 30px;
@@ -192,7 +208,7 @@
   }
 }
 
-.letters-of-credit-success-info {
+.letters-of-credit-success-info, .letters-of-credit-amend-success-info {
   position: relative;
   padding-left: $extra-large-icon-font-size * 2;
   margin-top: 35px;
@@ -215,6 +231,7 @@
     width: 219px;
   }
 }
+
 .letters-of-credit-success-actions {
   margin-top: 70px;
   .primary-button, .secondary-button {
@@ -239,7 +256,7 @@
     width: 500px;
     float: right;
     text-align: left;
-    margin: 0px;
+    margin: 0;
   }
 }
 
@@ -320,7 +337,7 @@
   }
 }
 
-.letters-of-credit-view-pdf {
+.letters-of-credit-view-pdf, .letters-of-credit-amend-view-pdf {
   display: none;
 }
 
@@ -330,7 +347,7 @@
     h1 {
       @include typography-print-header;
       float: none;
-      margin: 15px 0 0;
+      margin: 12px 0 7px 0;
     }
     h2 {
       @include typography-print-subheader;
@@ -345,11 +362,11 @@
       margin: 0;
     }
     .report-print-details {
-      margin-bottom: 15px;
+      margin-bottom: 0;
       h2, .report-print-sta {
         @include typography-print-details;
         display: inline-block;
-        margin: 0;
+        margin: 0 0 15px 0;
         white-space: nowrap;
       }
     }

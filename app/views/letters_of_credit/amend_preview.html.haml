@@ -1,0 +1,29 @@
+- relationship_manager = @contacts[:rm] || {}
+- walkthrough_mode = !policy(:letters_of_credit).execute?
+.letters-of-credit.letter-of-credit-amend-preview
+  .row
+    .column-9x3-left
+      %h1= @title
+      - if @error_message
+        .form-error-section
+          %p= @error_message
+  .row
+    = content_with_sidebar([{name: 'borrowing_capacity', locals: {profile: @profile}}, {name: 'contact', locals: {relationship_manager: relationship_manager, text: t('letters_of_credit.contact')}}]) do
+      = form_for(@letter_of_credit_request, url: letters_of_credit_amend_execute_path, html: {class: 'letter-of-credit-amend-request-preview', data: {securid_status: @securid_status, 'prevent-submit-on-enter' => true}}) do |f|
+        = f.hidden_field(:id)
+        = render 'amend_summary_data'
+        -if @error_message
+          .letters-of-credit-error-actions
+            = link_to(t('letters_of_credit.success.new_request'), letters_of_credit_request_path, class: 'primary-button')
+        -else
+          .letters-of-credit-legal-copy=simple_format(t'letters_of_credit.request.amend.preview.legal')
+          - if @session_elevated
+            %p= t('letters_of_credit.request.amend.preview.review_details_elevated')
+          - else
+            %p= t('letters_of_credit.request.amend.preview.review_details')
+          - unless @session_elevated || walkthrough_mode
+            = render 'shared/securid_module'
+          .request-form-actions
+            = link_to(t('global.cancel'), letters_of_credit_manage_path, class: 'secondary-button')
+            = link_to(t('letters_of_credit.preview.edit'), letters_of_credit_amend_path(id: @letter_of_credit_request.id, lc_number: @letter_of_credit_request.lc_number), class: 'secondary-button')
+            = f.submit({class: ["primary-button perform-advance-form #{'active' if @session_elevated}"], value: t('letters_of_credit.preview.authorize'), disabled: (!@session_elevated && !walkthrough_mode)}, is_amendment: true)

@@ -1434,6 +1434,44 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'the `mcu_transaction_id` method' do
+    it_behaves_like 'a MAPI backed service object method', :mcu_transaction_id
+    let(:transaction_id) { double('transaction_id') }
+    let(:call_method) { subject.mcu_transaction_id }
+    it 'returns nil if get_hash returns nil' do
+      allow(subject).to receive(:get_hash).and_return(nil)
+      expect(call_method).to eq(nil)
+    end
+    context 'with a response' do
+      before do
+        allow(subject).to receive(:get_hash).and_return(transaction_id)
+      end
+      it 'returns the result of `get_hash`' do
+        expect(call_method).to eq(transaction_id)
+      end
+    end
+  end
+
+  describe 'the `mcu_member_info` method' do
+    it_behaves_like 'a MAPI backed service object method', :mcu_member_info
+    let(:member_info) { double('mcu_member_info') }
+    let(:member_entry) { double('member_entry') }
+    let(:call_method) { subject.mcu_member_info }
+    it 'returns nil if get_hash returns nil' do
+      allow(subject).to receive(:get_hash).and_return(nil)
+      expect(call_method).to eq(nil)
+    end
+    context 'with a response' do
+      before do
+        allow(subject).to receive(:get_hash).and_return(member_info)
+        allow(member_info).to receive(:[]).with(member_id).and_return(member_entry)
+      end
+      it 'returns the result of `get_hash[@member_id]`' do
+        expect(call_method).to eq(member_entry)
+      end
+    end
+  end
+
   describe 'the `managed_securities` method' do
     let(:managed_securities) { subject.managed_securities }
     let(:securities) { double('an array of securities') }
@@ -1500,6 +1538,21 @@ describe MemberBalanceService do
       allow(subject).to receive(:get_json).and_return([non_exercised_activity, terminated_activity_without_status, terminated_lc])
       expect(subject).to receive(:fix_date).with(anything, [:funding_date, :maturity_date, :termination_date]).exactly(3)
       historic_credit_activity
+    end
+  end
+
+  describe 'the `mcu_member_status` method' do
+    it_behaves_like 'a MAPI backed service object method', :mcu_member_status
+    let(:mcu_member_status) { subject.mcu_member_status }
+    let(:mcu_member_status_result) { {transaction_number: double('transaction_number'), upload_type: double('upload_type'), authorized_by: double('authorized_by'), authorized_on: double('authorized_on'), status: double('status'), number_of_loans: double('number_of_loans'), number_of_errors: double('number_of_errors')} }
+
+    it 'should call `get_json` with the appropriate endpoint' do
+      expect(subject).to receive(:get_json).with(:mcu_member_status, "/member/#{member_id}/mcu_member_status")
+      mcu_member_status
+    end
+    it 'returns mcu member status array' do
+      allow(subject).to receive(:get_json).and_return([mcu_member_status_result])
+      expect(mcu_member_status).to eq([mcu_member_status_result.with_indifferent_access])
     end
   end
 

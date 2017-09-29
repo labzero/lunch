@@ -306,8 +306,12 @@ class ResourcesController < ApplicationController
   def download
     case params[:file]
     when 'creditguide'
+      cms_type = 'guide'
+      cms_uid = 'credit'
       filename = 'creditguide.pdf'
     when 'collateralguide'
+      cms_type = 'guide'
+      cms_uid = 'collateral'
       filename = 'collateralguide.pdf'
     when 'collateralreviewguide'
       filename = 'mortgage-loan-collateral-field-review-process.pdf'
@@ -377,7 +381,24 @@ class ResourcesController < ApplicationController
       raise ActionController::MissingFile
     end
 
-    send_file Rails.root.join('private', filename), filename: filename
+    if feature_enabled?('content-management-system') && cms_type && cms_uid
+      url = ContentManagementService.new(current_member_id, request).get_pdf_url(cms_type, cms_uid)
+      if url
+        begin
+          data = open(url)
+          send_data File.read(data),
+                    filename: filename,
+                    type: 'application/pdf',
+                    disposition: 'attachment'
+        ensure
+          data.close
+        end
+      else
+        raise ActionController::MissingFile
+      end
+    else
+      send_file Rails.root.join('private', filename), filename: filename
+    end
   end
 
   def business_continuity
