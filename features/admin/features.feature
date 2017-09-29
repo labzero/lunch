@@ -7,7 +7,6 @@ Feature: Toggling conditional features
   Scenario: Admins see a list of features and their availability
     Given I am logged into the admin panel
     When I click on the test features link in the header
-    And I click on the features link in the header
     Then I see a list of features and their state
 
   @jira-mem-2112

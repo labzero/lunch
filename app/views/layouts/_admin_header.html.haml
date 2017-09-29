@@ -11,12 +11,6 @@
 .secondary-nav
   %nav.row
     %ul<>
-      %li<>
-        = link_to(t('admin.nav.secondary.users'), '#', class: 'nav-menu')
-        .nav-dropdown
-      %li<>
-        = link_to(t('admin.nav.secondary.institutions'), '#', class: 'nav-menu')
-        .nav-dropdown
       %li{class: ('active-nav-item' if active_nav == :rules)}<>
         = link_to(t('admin.nav.secondary.trade_rules'), '#', class: 'nav-menu')
         .nav-dropdown
@@ -28,19 +22,6 @@
                 %li= link_to(t('admin.shutoff_times.title'), rules_advance_early_shutoff_path)
                 %li= link_to(t('admin.term_rules.title'), rules_term_limits_path)
       %li{class: ('active-nav-item' if active_nav == :data_visibility)}<>
-        = link_to(t('admin.nav.secondary.data_visibility'), '#', class: 'nav-menu')
-        .nav-dropdown
-          .nav-dropdown-row
-            .nav-dropdown-column
-              %h2= t('admin.nav.secondary.data_visibility')
-              %ul
-                %li= link_to(t('admin.data_visibility.title'), data_visibility_flags_path)
+        = link_to(t('admin.nav.secondary.data_visibility'), data_visibility_flags_path)
       %li{class: ('active-nav-item' if active_nav == :features)}<>
-        = link_to(t('admin.nav.secondary.features'), '#', class: 'nav-menu')
-        .nav-dropdown
-          .nav-dropdown-row
-            .nav-dropdown-column
-              %h2= t('admin.nav.secondary.features')
-              %ul
-                %li= link_to(t('admin.features.flipper.title'), flipper_features_admin_path)
-                %li= link_to(t('admin.features.title'), features_admin_path)
+        = link_to(t('admin.nav.secondary.features'), features_admin_path)
