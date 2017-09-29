@@ -391,7 +391,7 @@ Scenario: User clicks on the FRC rates and sees Add Custom Term then selects mat
   When I click on Add Custom Term link
   Then I should see Custom Term Calendar
   When I click the datepicker field
-  And I choose the first available custom date
+  And I choose the first available custom date two months from today
   And I click on the View Rates For this Term button
   Then I should see the add advance custom rate table
   When I select custom rate with a term of "custom" and a type of "whole" on the add advance page
@@ -413,7 +413,7 @@ Scenario: User clicks on the FRC rates and sees Add Custom Term, Cancels, select
   When I click on Add Custom Term link
   Then I should see Custom Term Calendar
   When I click the datepicker field
-  And I choose the first available custom date
+  And I choose the first available custom date two months from today
   And I click on the View Rates For this Term button
   Then I should see the add advance custom rate table
   Then I select custom rate with a term of "custom" and a type of "whole" on the add advance page
@@ -449,7 +449,7 @@ Scenario: User clicks on the FRC rates and sees Add Custom Term then selects mat
   When I click on Add Custom Term link
   Then I should see Custom Term Calendar
   When I click the datepicker field
-  And I choose the first available custom date
+  And I choose the first available custom date two months from today
   And I click on the View Rates For this Term button
   Then I should see the add advance custom rate table
   When I select custom rate with a term of "custom" and a type of "whole" on the add advance page

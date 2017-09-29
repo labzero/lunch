@@ -348,9 +348,10 @@ Then(/^I should not be able to see a calendar more than (\d+) months in the futu
   page.assert_no_selector('.fa-arrow-right', visible: true)
 end
 
-When(/^I choose the first available custom date$/) do
+When(/^I choose the first available custom date two months from today$/) do
   calendar = page.find('.daterangepicker .calendar')
   page.execute_script "window.scrollBy(0,10000)"
+  page.find('.fa-arrow-right', visible: true).click
   page.find('.fa-arrow-right', visible: true).click
   calendar.first("td.available:not(.off)").click
 end
