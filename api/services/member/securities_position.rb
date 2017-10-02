@@ -98,8 +98,8 @@ module MAPI
             fake_data = JSON.parse(File.read(File.join(MAPI.root, 'fakes', 'current_securities_position.json'))).with_indifferent_access
             rows = []
             r = Random.new((member_id.to_s + as_of_date.to_time.to_i.to_s + report_type.to_s.ord.to_s).to_i)
+            account_types = ['U', 'U', 'P', 'P'].shuffle(random: r)
             r.rand(5..15).times do |i|
-              account_types = ['U', 'U', 'P', 'P'].shuffle(random: r)
               account_type = account_types.pop || ['P', 'U'].sample(random: r)
               original_par = r.rand(200000..3000000)
               factor = r.rand()
