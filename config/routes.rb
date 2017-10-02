@@ -218,6 +218,7 @@ Rails.application.routes.draw do
     scope 'mortgage-collateral-update', as: :mcu do
       get 'manage' => 'mortgages#manage'
       get 'new' => 'mortgages#new'
+      get 'view' => 'mortgages#view', as: :view_transaction
     end
   end
 

@@ -1748,8 +1748,32 @@ en:
       number_of_loans: Number of Loans
       number_of_errors: Number of Errors
       action: Action
+      actions:
+        view_details: View Details
       contact_html: Contact <a href=%{email}>Collateral Operations</a> at %{phone_number} with questions.
       new_mcu: New MCU
+    view:
+      title: Mortgage Collateral Update (MCU) Status
+      transaction_details:
+        title: Transaction Details
+        number: Transaction Number
+        status:
+          label: Status
+          processing: FHLBSF Processing
+          review: FHLBSF Review
+          committed: Committed
+          canceled: Canceled
+        total_loans: Total Number of Loans
+        error_loans: Loans in Error
+        error_percent: '% of Loans in Error'
+      reports:
+        title: Available Reports
+        summary: Download Full Summary Report PDF
+        detail: Download Detail Report Excel
+        borrowing_capacity: Download Confirmation of Borrowing Capactiy Report PDF
+        unavailable: Reports are not available.
+      actions:
+        manage: Manage MCUS
   reports:
     meta_title: FHLBSF - Reports
     title: Reports

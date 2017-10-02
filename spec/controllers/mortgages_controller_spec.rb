@@ -58,17 +58,17 @@ RSpec.describe MortgagesController, :type => :controller do
       call_action
       expect(assigns[:extension_datetime]).to eq(Time.zone.parse("#{(today + 14.days).iso8601} 17:00:00"))
     end
-    it 'sets `@pledge_type_dropdown_options` to the `PLEDGE_TYPE_DROPDOWN` constant' do
+    it 'sets `@pledge_type_dropdown_options` to an array with each member array containing a `PLEDGE_TYPE_MAPPING` value-key pair' do
       call_action
-      expect(assigns[:pledge_type_dropdown_options]).to eq(described_class::PLEDGE_TYPE_DROPDOWN)
+      expect(assigns[:pledge_type_dropdown_options]).to eq(described_class::PLEDGE_TYPE_MAPPING.map{ |k,v| [v, k] })
     end
-    it 'sets `@mcu_type_dropdown_options` to the `MCU_TYPE_DROPDOWN` constant' do
+    it 'sets `@mcu_type_dropdown_options` to an array with each member array containing a `MCU_TYPE_MAPPING` value-key pair' do
       call_action
-      expect(assigns[:mcu_type_dropdown_options]).to eq(described_class::MCU_TYPE_DROPDOWN)
+      expect(assigns[:mcu_type_dropdown_options]).to eq(described_class::MCU_TYPE_MAPPING.map{ |k,v| [v, k] })
     end
-    it 'sets `@program_type_dropdown_options` to the `PROGRAM_TYPE_DROPDOWN` constant' do
+    it 'sets `@program_type_dropdown_options` to an array with each member array containing a `PROGRAM_TYPE_MAPPING` value-key pair' do
       call_action
-      expect(assigns[:program_type_dropdown_options]).to eq(described_class::PROGRAM_TYPE_DROPDOWN)
+      expect(assigns[:program_type_dropdown_options]).to eq(described_class::PROGRAM_TYPE_MAPPING.map{ |k,v| [v, k] })
     end
     it 'sets `@accepted_upload_mimetypes` to the joined `ACCEPTED_UPLOAD_MIMETYPES` constant' do
       call_action
@@ -132,16 +132,20 @@ RSpec.describe MortgagesController, :type => :controller do
           expect(assigns[:table_data][:rows].length).to eq(n)
         end
         describe 'populated rows' do
-          let(:mcu) { {transaction_number: double('transaction_number'), upload_type: double('upload_type'), authorized_by: double('authorized_by'), authorized_on: double('authorized_on'), status: double('status'), number_of_loans: double('number_of_loans'), number_of_errors: double('number_of_errors') } }
-          before {
-            allow(member_balance_service).to receive(:mcu_member_status).and_return([mcu])
-          }
+          let(:mcu) { {transaction_number: double('transaction_number'), translated_mcu_type: double('upload_type'), authorized_by: double('authorized_by'), authorized_on: double('authorized_on'), translated_status: double('status'), number_of_loans: double('number_of_loans'), number_of_errors: double('number_of_errors') } }
+          before { allow(member_balance_service).to receive(:mcu_member_status).and_return([mcu]) }
 
-          value_types = [[:transaction_number, nil], [:upload_type, nil], [:authorized_by, nil], [:authorized_on, nil], [:status, nil], [:number_of_loans, nil], [:number_of_errors, nil]]
+          it 'calls `translated_mcu_transaction` with each mcu transaction' do
+            expect(controller).to receive(:translated_mcu_transaction).and_return({})
+            call_action
+          end
+          value_types = [[:transaction_number, nil], [:translated_mcu_type, nil], [:authorized_by, nil], [:authorized_on, nil], [:translated_status, nil], [:number_of_loans, :number], [:number_of_errors, :number]]
           value_types.each_with_index do |attr, i|
             attr_name = attr.first
             attr_type = attr.last
-            describe "columns with cells based on the LC attribute `#{attr_name}`" do
+            describe "columns with cells based on the MCU attribute `#{attr_name}`" do
+              before { allow(controller).to receive(:translated_mcu_transaction).and_return(mcu) }
+
               it "builds a cell with a `value` of `#{attr_name}`" do
                 call_action
                 expect(assigns[:table_data][:rows].length).to be > 0
@@ -156,6 +160,148 @@ RSpec.describe MortgagesController, :type => :controller do
                   expect(row[:columns][i][:type]).to eq(attr_type)
                 end
               end
+            end
+          end
+          describe 'the `view_details` column' do
+            let(:view_details_column) { call_action; assigns[:table_data][:rows][0][:columns].last }
+            before { allow(controller).to receive(:translated_mcu_transaction).and_return(mcu) }
+
+            it 'builds a cell with a `type` of `:link_list`' do
+              expect(view_details_column[:type]).to eq(:link_list)
+            end
+            describe 'the `value` of the cell' do
+              it "is an array in an array whose first member is `#{I18n.t('mortgages.manage.actions.view_details')}`" do
+                expect(view_details_column[:value].first.first).to eq(I18n.t('mortgages.manage.actions.view_details'))
+              end
+              it 'is an array in an array whose second member is the `mcu_view_transaction_path` with the `transaction_number` of the mcu transaction' do
+                expect(view_details_column[:value].first.last).to eq(mcu_view_transaction_path(transaction_number: mcu[:transaction_number]))
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
+  describe 'get `view`' do
+    let(:transaction_number) { SecureRandom.hex }
+    let(:matching_transaction) { {transaction_number: transaction_number} }
+    let(:unmatching_transaction) { {transaction_number: SecureRandom.hex} }
+    let(:member_balance_service) { instance_double(MemberBalanceService, mcu_member_status: [unmatching_transaction, matching_transaction]) }
+    let(:call_action) { get :view, transaction_number: transaction_number }
+
+    before { allow(MemberBalanceService).to receive(:new).and_return(member_balance_service) }
+
+    it_behaves_like 'a MortgagesController action that sets page-specific instance variables with a before filter'
+    it 'sets the `@title` appropriately' do
+      call_action
+      expect(assigns[:title]).to eq(I18n.t('mortgages.view.title'))
+    end
+    it 'creates a new instance of `MemberBalanceService` with the member_id and request' do
+      expect(MemberBalanceService).to receive(:new).with(member_id, request).and_return(member_balance_service)
+      call_action
+    end
+    it 'calls `mcu_member_status` on the instance of `MemberBalanceService`' do
+      expect(member_balance_service).to receive(:mcu_member_status).and_return([unmatching_transaction, matching_transaction])
+      call_action
+    end
+    it 'raises an error if `mcu_member_status` returns nil' do
+      allow(member_balance_service).to receive(:mcu_member_status).and_return(nil)
+      expect{call_action}.to raise_error(StandardError, 'There has been an error and MortgagesController#view has encountered nil. Check error logs.')
+    end
+    describe 'when no transactions are returned from `mcu_member_status`' do
+      before { allow(member_balance_service).to receive(:mcu_member_status).and_return([]) }
+
+      it 'raises an error containing the transaction number' do
+        expect{call_action}.to raise_error(ArgumentError, "No matching MCU Status found for MCU with transaction_number: #{transaction_number}")
+      end
+    end
+    describe 'when no matching transactions are returned from `mcu_member_status`' do
+      before { allow(member_balance_service).to receive(:mcu_member_status).and_return([unmatching_transaction]) }
+
+      it 'raises an error containing the transaction number' do
+        expect{call_action}.to raise_error(ArgumentError, "No matching MCU Status found for MCU with transaction_number: #{transaction_number}")
+      end
+    end
+    describe 'when a matching transaction is included in the set returned by `mcu_member_status`' do
+      let(:translated_transaction_details) { instance_double(Hash) }
+      it 'calls `translated_mcu_transaction` with the mcu transaction that has the same `transaction_number` as the passed `transaction_number` param' do
+        expect(controller).to receive(:translated_mcu_transaction).with(matching_transaction)
+        call_action
+      end
+      it 'does not call `translated_mcu_transaction` with any mcu transactions that have different `transaction_numbers` than the passed `transaction_number` param' do
+        expect(controller).not_to receive(:translated_mcu_transaction).with(unmatching_transaction)
+        call_action
+      end
+      it 'sets `@transaction_details` to the result of calling `translated_mcu_transaction`' do
+        allow(controller).to receive(:translated_mcu_transaction).and_return(translated_transaction_details)
+        call_action
+        expect(assigns[:transaction_details]).to eq(translated_transaction_details)
+      end
+    end
+  end
+
+  describe 'private methods' do
+    describe '`translated_mcu_transaction`' do
+      let(:transaction) {{
+        mcu_type: described_class::MCU_TYPE_MAPPING.keys.sample,
+        pledge_type: described_class::PLEDGE_TYPE_MAPPING.keys.sample,
+        program_type: described_class::PROGRAM_TYPE_MAPPING.keys.sample,
+        status: described_class::STATUS_MAPPING.keys.sample
+      }}
+      let(:call_method) { subject.send(:translated_mcu_transaction, transaction) }
+      it 'returns nil if passed nil' do
+        expect(subject.send(:translated_mcu_transaction, nil)).to be nil
+      end
+      [
+        {
+          attr: :mcu_type,
+          const_name: 'MCU_TYPE_MAPPING',
+          const: described_class::MCU_TYPE_MAPPING
+        },
+        {
+          attr: :pledge_type,
+          const_name: 'PLEDGE_TYPE_MAPPING',
+          const: described_class::PLEDGE_TYPE_MAPPING
+        },
+        {
+          attr: :program_type,
+          const_name: 'PROGRAM_TYPE_MAPPING',
+          const: described_class::PROGRAM_TYPE_MAPPING
+        },
+        {
+          attr: :status,
+          const_name: 'STATUS',
+          const: described_class::STATUS_MAPPING
+        },
+      ].each do |translation|
+        it "sets `translated_#{translation[:attr]}` to the value of the `#{translation[:attr]}` key found in `#{translation[:const_name]}`" do
+          expect(call_method["translated_#{translation[:attr]}"]).to eq(translation[:const][transaction[translation[:attr]]])
+        end
+        it "does not set `translated_#{translation[:attr]}` if there is no `#{translation[:attr]}` value in the passed transaction" do
+          transaction.delete(translation[:attr])
+          expect(call_method["translated_#{translation[:attr]}"]).to be nil
+        end
+      end
+      describe 'the `error_percentage` attribute' do
+        let(:number_of_loans) { rand(100..999) }
+        let(:number_of_errors) { number_of_loans - rand(1..75) }
+        let(:error_percentage) { call_method[:error_percentage] }
+        it 'is not set if there is no `number_of_loans` value in the passed transaction' do
+          expect(error_percentage).to be nil
+        end
+        context 'when there is a `number_of_loans` value in the passed transaction' do
+          before { transaction[:number_of_loans] = number_of_loans }
+
+          it 'is zero if there is no `number_of_errors` value in the passed transaction' do
+            expect(error_percentage).to eq(0)
+          end
+
+          context 'when there is a `number_of_errors` value in the passed transaction' do
+            before { transaction[:number_of_errors] = number_of_errors }
+
+            it 'is the quotient of the `number_of_errors` divided by the `number_of_loans` times 100' do
+              expect(error_percentage).to eq((number_of_errors.to_f / number_of_loans.to_f) * 100)
             end
           end
         end

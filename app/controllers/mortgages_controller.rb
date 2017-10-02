@@ -8,25 +8,32 @@ class MortgagesController < ApplicationController
     authorize :mortgage, :request?
   end
 
-  PLEDGE_TYPE_DROPDOWN = [
-    [I18n.t('mortgages.new.transaction.pledge_types.specific'), 'specific'],
-    [I18n.t('mortgages.new.transaction.pledge_types.blanket_lien'), 'blanket_lien']
-  ].freeze
+  PLEDGE_TYPE_MAPPING = {
+    specific: I18n.t('mortgages.new.transaction.pledge_types.specific'),
+    blanket_lien: I18n.t('mortgages.new.transaction.pledge_types.blanket_lien')
+  }.with_indifferent_access
 
-  MCU_TYPE_DROPDOWN = [
-    [I18n.t('mortgages.new.transaction.mcu_types.complete'), 'complete'],
-    [I18n.t('mortgages.new.transaction.mcu_types.update'), 'update'],
-    [I18n.t('mortgages.new.transaction.mcu_types.pledge'), 'pledge'],
-    [I18n.t('mortgages.new.transaction.mcu_types.depledge'), 'depledge'],
-    [I18n.t('mortgages.new.transaction.mcu_types.add'), 'add'],
-    [I18n.t('mortgages.new.transaction.mcu_types.delete'), 'delete'],
-    [I18n.t('mortgages.new.transaction.mcu_types.renumber'), 'renumber']
-  ].freeze
+  MCU_TYPE_MAPPING = {
+    complete: I18n.t('mortgages.new.transaction.mcu_types.complete'),
+    update: I18n.t('mortgages.new.transaction.mcu_types.update'),
+    pledge: I18n.t('mortgages.new.transaction.mcu_types.pledge'),
+    depledge: I18n.t('mortgages.new.transaction.mcu_types.depledge'),
+    add: I18n.t('mortgages.new.transaction.mcu_types.add'),
+    delete: I18n.t('mortgages.new.transaction.mcu_types.delete'),
+    renumber: I18n.t('mortgages.new.transaction.mcu_types.renumber')
+  }.with_indifferent_access
 
-  PROGRAM_TYPE_DROPDOWN = [
-    [I18n.t('mortgages.new.transaction.program_types.standard'), 'standard'],
-    [I18n.t('mortgages.new.transaction.program_types.loans_held'), 'loans_held']
-  ].freeze
+  PROGRAM_TYPE_MAPPING = {
+    standard: I18n.t('mortgages.new.transaction.program_types.standard'),
+    loans_held: I18n.t('mortgages.new.transaction.program_types.loans_held')
+  }.with_indifferent_access
+
+  STATUS_MAPPING = {
+    processing: I18n.t('mortgages.view.transaction_details.status.processing'),
+    review: I18n.t('mortgages.view.transaction_details.status.review'),
+    committed: I18n.t('mortgages.view.transaction_details.status.committed'),
+    canceled: I18n.t('mortgages.view.transaction_details.status.canceled')
+  }.with_indifferent_access
 
   ACCEPTED_UPLOAD_MIMETYPES = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -50,16 +57,17 @@ class MortgagesController < ApplicationController
     mcu_status = member_balances.mcu_member_status
     rows = if mcu_status.present?
       mcu_status.collect do |status|
+        status = translated_mcu_transaction(status)
       {
         columns: [
           {value: status[:transaction_number], type: nil},
-          {value: status[:upload_type], type: nil},
+          {value: status[:translated_mcu_type], type: nil},
           {value: status[:authorized_by], type: nil},
           {value: status[:authorized_on], type: nil},
-          {value: status[:status], type: nil},
-          {value: status[:number_of_loans], type: nil},
-          {value: status[:number_of_errors], type: nil},
-          {value: "View Details", type: nil}
+          {value: status[:translated_status], type: nil},
+          {value: status[:number_of_loans], type: :number},
+          {value: status[:number_of_errors], type: :number},
+          {value: [[I18n.t('mortgages.manage.actions.view_details'), mcu_view_transaction_path(transaction_number: status[:transaction_number])]], type: :link_list}
         ]
       }
       end
@@ -87,10 +95,34 @@ class MortgagesController < ApplicationController
     today = Time.zone.today
     @due_datetime = Time.zone.parse("#{(today + 7.days).iso8601} 17:00:00") # Needs to come from MCU service
     @extension_datetime = @due_datetime + 7.days # Needs to come from MCU service
-    @pledge_type_dropdown_options = PLEDGE_TYPE_DROPDOWN
-    @mcu_type_dropdown_options = MCU_TYPE_DROPDOWN
-    @program_type_dropdown_options = PROGRAM_TYPE_DROPDOWN
+    @pledge_type_dropdown_options = PLEDGE_TYPE_MAPPING.map {|pledge_type, translation| [translation, pledge_type] }
+    @mcu_type_dropdown_options = MCU_TYPE_MAPPING.map {|mcu_type, translation| [translation, mcu_type] }
+    @program_type_dropdown_options = PROGRAM_TYPE_MAPPING.map {|program_type, translation| [translation, program_type] }
     @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')
     @session_elevated = session_elevated?
+  end
+
+  # GET
+  def view
+    @title = t('mortgages.view.title')
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    mcu_transactions = member_balances.mcu_member_status
+    raise StandardError, 'There has been an error and MortgagesController#view has encountered nil. Check error logs.' if mcu_transactions.nil?
+    transaction_details = mcu_transactions.select{ |transaction| transaction[:transaction_number].to_s == params[:transaction_number].to_s}.first
+    raise ArgumentError, "No matching MCU Status found for MCU with transaction_number: #{params[:transaction_number]}" unless transaction_details.present?
+    @transaction_details = translated_mcu_transaction(transaction_details)
+  end
+
+  private
+
+  def translated_mcu_transaction(transaction)
+    if transaction
+      transaction[:translated_mcu_type] = MCU_TYPE_MAPPING[transaction[:mcu_type]] if transaction[:mcu_type]
+      transaction[:translated_pledge_type] = PLEDGE_TYPE_MAPPING[transaction[:pledge_type]] if transaction[:pledge_type]
+      transaction[:translated_program_type] = PROGRAM_TYPE_MAPPING[transaction[:program_type]] if transaction[:program_type]
+      transaction[:translated_status] = STATUS_MAPPING[transaction[:status]] if transaction[:status]
+      transaction[:error_percentage] = ((transaction[:number_of_errors].to_f / transaction[:number_of_loans].to_f) * 100 if transaction[:number_of_loans])
+      transaction.with_indifferent_access
+    end
   end
 end

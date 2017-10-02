@@ -393,15 +393,7 @@ class MemberBalanceService < MAPIService
 
   def mcu_member_status
     #TODOCAB add caching
-    if data = get_json(:mcu_member_status, "/member/#{@member_id}/mcu_member_status")
-      processed_data = []
-      data.each do |status|
-        status = status.with_indifferent_access
-        processed_data.push(status)
-      end
-      processed_data
-    end
-    processed_data
+    get_hashes(:mcu_member_status, "/member/#{@member_id}/mcu_member_status")
   end
 
   def mcu_transaction_id
