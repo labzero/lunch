@@ -58,6 +58,11 @@ class Member
     @member_details[:name]
   end
 
+  def customer_lc_agreement_flag(request=nil)
+    fetch_details(request) unless @member_details.present?
+    @member_details[:customer_lc_agreement_flag]
+  end
+
   def found?(request=nil)
     fetch_details(request) unless @member_details.present?
     !!@member_details
