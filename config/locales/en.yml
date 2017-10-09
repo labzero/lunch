@@ -871,7 +871,7 @@ en:
           revisions:
             -
               date: '2016-04-07'
-              details:
+              revision_list:
                 -
                   description: "Incorporated certain changes to the Bank’s capital stock requirements that were announced in Bulletin No. 1480 on June 16, 2015 (page 7)."
                 -
@@ -888,7 +888,7 @@ en:
                   description: "Removed references to stand-alone Interest Rate Swaps, Caps, and Floors, which the Bank no longer offers."
             -
               date: '2015-04-22'
-              details:
+              revision_list:
                 -
                   description: "Incorporated certain changes to the Bank’s capital stock requirements that were announced in Bulletin 1470 on February 26, 2015 (page 8)."
                 -
@@ -909,7 +909,7 @@ en:
           revisions:
             -
               date: '2017-07-28'
-              details:
+              revision_list:
                 -
                   description: "Updated the list of eligible members to include privately insured, state-chartered credit unions (page 5)."
                 -
@@ -924,7 +924,7 @@ en:
                   description: "Updated the Guide to reflect the current process for conducting securities-related transactions on the member portal and the collateral-related reports available on the member portal (pages 33-38, 66-67, 72, 73)"
                 -
                   description: "Incorporated a variety of changes to loan collateral eligibility, pricing, and borrowing capacity that were announced on March 8, 2017, and became effective on April 20, 2017, including:"
-                  details:
+                  sub_list:
                     -
                       description: "Revised eligibility criteria for loan collateral related to delinquency, minimum FICO scores, maximum loan-to-value ratios, and minimum debt service coverage ratios (pages 39-46, 48, 95)"
                     -
@@ -933,7 +933,7 @@ en:
                       description: "Added the Streamlined MCU as a new option for reporting updates for loan collateral already pledged to the Bank via a Standard MCU or a Pledge Only MCU (pages 65-68)"
             -
               date: '2016-04-07'
-              details:
+              revision_list:
                 -
                   description: "Added information on eligible members and what types of collateral they can pledge (pages 6-7)."
                 -
@@ -944,7 +944,7 @@ en:
                   description: "Incorporated the decreases in the borrowing capacities of certain securities as announced in Bulletin No. 1482, dated June 23, 2015 (pages 22-26)."
                 -
                   description: "For non-depository Community Development Financial Institutions (CDFIs):"
-                  details:
+                  sub_list:
                     -
                       description: "Revised the Eligible Securities: Borrowing Capacity Table III to include non-depository CDFIs (pages 26-27)."
                     -
