@@ -67,6 +67,7 @@ RSpec.describe ResourcesController, type: :controller do
       end
     end
     context "when the `content-management-system` feature is not enabled" do
+      before { allow(controller).to receive(:feature_enabled?).with('content-management-system').and_return(false) }
       it 'sets `@credit_last_updated` to April 7, 2016' do
         call_action
         expect(assigns[:credit_last_updated]).to eq(Date.new(2016, 4, 7))
