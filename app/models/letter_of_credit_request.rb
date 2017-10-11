@@ -29,7 +29,7 @@ class LetterOfCreditRequest
   validates *REQUIRED_ATTRS, presence: true
   validates :amount, numericality: { greater_than: 0, only_integer: true}
   validate :issue_date_must_come_before_expiration_date
-  validate :issue_date_within_range
+  validate :issue_date_within_range, if: Proc.new{ |request| request.amendment_date.nil? }
   validate :issue_date_valid_for_today, if: Proc.new { |request| request.issue_date && request.issue_date.to_date == Time.zone.today }
   validate :expiration_date_within_range
   validate :amount_does_not_exceed_borrowing_capacity

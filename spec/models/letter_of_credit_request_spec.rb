@@ -46,6 +46,11 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         subject.valid?
       end
     end
+    it 'does not call `issue_date_within_range` as a validator if there is an `amendment_date` present' do
+      subject.amendment_date = Time.zone.today
+      expect(subject).not_to receive(:issue_date_within_range)
+      subject.valid?
+    end
     describe '`issue_date_must_come_before_expiration_date`' do
       let(:call_validator) { subject.send(:issue_date_must_come_before_expiration_date) }
       [:issue_date, :expiration_date].each do |attr|

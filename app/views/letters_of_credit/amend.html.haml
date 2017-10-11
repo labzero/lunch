@@ -12,6 +12,7 @@
       = form_for(@letter_of_credit_request, url: letters_of_credit_amend_preview_path, html: {class: 'letter-of-credit-amend-preview', data: {'prevent-submit-on-enter' => true}}) do |f|
         = f.hidden_field(:amount)
         = f.hidden_field(:expiration_date)
+        = f.hidden_field(:issue_date)
         = f.hidden_field(:lc_number)
         = f.hidden_field(:beneficiary_name)
         = f.hidden_field(:amended_expiration_date)
