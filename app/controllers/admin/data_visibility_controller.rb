@@ -94,6 +94,28 @@ class Admin::DataVisibilityController < Admin::BaseController
     }
   }.freeze
 
+  def account_report_names
+    [:account_summary, :authorizations, :settlement_transaction_account, :investments]
+  end
+  def capital_stock_report_names
+    [:cap_stock_activity, :cap_stock_trial_balance, :cap_stock_leverage, :dividend_statement]
+  end
+  def price_indications_report_names
+    [:current_price_indications, :historical_price_indications]
+  end
+  def collateral_report_names
+    [:borrowing_capacity, :mortgage_collateral_update]
+  end
+  def credit_report_names
+    [:todays_credit, :advances, :interest_rate, :letters_of_credit, :forward_commitments, :parallel_shift]
+  end
+  def securities_report_names
+    [:securities_transactions, :cash_projections, :current_securities_position, :monthly_securities_position, :securities_services]
+  end
+  def all_report_names
+    [securities_report_names, credit_report_names, collateral_report_names, price_indications_report_names, capital_stock_report_names, account_report_names].reduce([], :concat)
+  end
+
   before_action do
     set_active_nav(:data_visibility)
     @can_edit_data_visibility = policy(:web_admin).edit_data_visibility?
@@ -118,19 +140,19 @@ class Admin::DataVisibilityController < Admin::BaseController
     @member_dropdown = {
       default_value: member_id,
       options: [
-        [ t('admin.data_visibility.all_members'), 'all' ]
+        [ t('admin.data_visibility.manage_data_visibility.all_members'), 'all' ]
       ]
     }
     members.each do |member|
       @member_dropdown[:options] << [member[:name], member[:id]]
     end
 
-    @account_table = data_visibility_table(disabled_ids, [:account_summary, :authorizations, :settlement_transaction_account, :investments])
-    @capital_stock_table = data_visibility_table(disabled_ids, [:cap_stock_activity, :cap_stock_trial_balance, :cap_stock_leverage, :dividend_statement])
-    @price_indications_table = data_visibility_table(disabled_ids, [:current_price_indications, :historical_price_indications])
-    @collateral_table = data_visibility_table(disabled_ids, [:borrowing_capacity, :mortgage_collateral_update])
-    @credit_table = data_visibility_table(disabled_ids, [:todays_credit, :advances, :interest_rate, :letters_of_credit, :forward_commitments, :parallel_shift])
-    @securities_table = data_visibility_table(disabled_ids, [:securities_transactions, :cash_projections, :current_securities_position, :monthly_securities_position, :securities_services])
+    @account_table = data_visibility_table(disabled_ids, account_report_names)
+    @capital_stock_table = data_visibility_table(disabled_ids, capital_stock_report_names)
+    @price_indications_table = data_visibility_table(disabled_ids,  price_indications_report_names)
+    @collateral_table = data_visibility_table(disabled_ids, collateral_report_names)
+    @credit_table = data_visibility_table(disabled_ids, credit_report_names)
+    @securities_table = data_visibility_table(disabled_ids, securities_report_names)
   end
 
   # PUT
@@ -155,25 +177,44 @@ class Admin::DataVisibilityController < Admin::BaseController
     redirect_to action: :view_flags, member_id: member_id
   end
 
+  # GET
+  def view_status
+    members_service = MembersService.new(request)
+    disabled_ids = members_service.global_disabled_reports
+    raise 'There has been an error and Admin::DataVisibilityController#view_status has encountered nil. Check error logs.' if disabled_ids.nil?
+
+    @globally_disabled_reports = data_visibility_table(disabled_ids, all_report_names, true)
+  end
+
   private
 
-  def data_visibility_table(flags, report_names)
+  def data_visibility_table(flags, report_names, disabled_only = false)
     rows = []
     report_names.each do |report_name|
       data_source_enabled = (flags & DATA_VISIBILITY_MAPPING[report_name][:flags]).empty?
-      rows << {
-        columns: [
-          { name: "data_visibility_flags[#{report_name}]",
-            checked: data_source_enabled,
-            type: :checkbox,
-            label: true,
-            submit_unchecked_boxes: true,
-            disabled: !@can_edit_data_visibility
-          },
-          {value: DATA_VISIBILITY_MAPPING[report_name][:title]}
-        ]
-      }
-      rows.last[:row_class] = 'data-source-disabled' unless data_source_enabled
+      if disabled_only
+        unless data_source_enabled
+          rows << {
+            columns: [
+              { value: DATA_VISIBILITY_MAPPING[report_name][:title]}
+            ]
+          }
+        end
+      else
+        rows << {
+          columns: [
+            { name: "data_visibility_flags[#{report_name}]",
+              checked: data_source_enabled,
+              type: :checkbox,
+              label: true,
+              submit_unchecked_boxes: true,
+              disabled: !@can_edit_data_visibility
+            },
+            {value: DATA_VISIBILITY_MAPPING[report_name][:title]}
+          ]
+        }
+        rows.last[:row_class] = 'data-source-disabled' unless data_source_enabled
+      end
     end
     {rows: rows}
   end

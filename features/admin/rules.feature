@@ -39,7 +39,8 @@ Feature: Viewing/Modifying the Term/Credit Rules
   Scenario: Updating the Term Limits
     Given I am on the term rules limits page
     And I should see the term rules limits page in its editable mode
-    When I click the save changes button for the rules limits form
+    When I scroll to the bottom of the screen
+    And I click the save changes button for the rules limits form
     Then I should be on the term rules limits page
     And I should see the success message on the term rules limits page
 

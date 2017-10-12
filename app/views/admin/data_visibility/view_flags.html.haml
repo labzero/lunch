@@ -1,6 +1,6 @@
 .data-visibility.data-visibility-flags.row
   %a#top
-  %h1= t('admin.data_visibility.title')
+  %h1= t('admin.data_visibility.manage_data_visibility.title')
   - if flash[:error]
     .form-error-section
       %p= flash[:error]
@@ -8,14 +8,14 @@
     .form-success-section
       %p= flash[:notice]
   %section.data-visibility-select-member-section
-    %h2= t('admin.data_visibility.member_selector')
+    %h2= t('admin.data_visibility.manage_data_visibility.member_selector')
     = form_tag data_visibility_flags_path, method: :get, class: 'data-visibility-select-member' do
       = select_tag(:member_id, options_for_select(@member_dropdown[:options], @member_dropdown[:default_value]) )
   =form_tag(data_visibility_flags_update_path, {class: 'data-visibility-flags-form', method: :put}) do
     =hidden_field_tag(:member_id, @member_dropdown[:default_value])
     =submit_tag(t('admin.term_rules.save'), class: 'primary-button', disabled: true) if @can_edit_data_visibility
     %section
-      %h2= t('admin.data_visibility.report_visibility')
+      %h2= t('admin.data_visibility.manage_data_visibility.report_visibility')
       =render 'data_visibility_flags_table_section', title: t('reports.your_account.title'), table_data: @account_table
       =render 'data_visibility_flags_table_section', title: t('reports.capital_stock.title'), table_data: @capital_stock_table
       =render 'data_visibility_flags_table_section', title: t('reports.price_indications.title'), table_data: @price_indications_table

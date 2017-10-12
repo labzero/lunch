@@ -22,6 +22,13 @@
                 %li= link_to(t('admin.shutoff_times.title'), rules_advance_early_shutoff_path)
                 %li= link_to(t('admin.term_rules.title'), rules_term_limits_path)
       %li{class: ('active-nav-item' if active_nav == :data_visibility)}<>
-        = link_to(t('admin.nav.secondary.data_visibility'), data_visibility_flags_path)
+        = link_to(t('admin.nav.secondary.data_visibility'), '#', class: 'nav-menu')
+        .nav-dropdown
+          .nav-dropdown-row
+            .nav-dropdown-column
+              %h2= t('admin.nav.secondary.data_visibility')
+              %ul
+                %li= link_to(t('admin.data_visibility.status.title'), data_visibility_status_path)
+                %li= link_to(t('admin.data_visibility.manage_data_visibility.title'), data_visibility_flags_path)
       %li{class: ('active-nav-item' if active_nav == :features)}<>
         = link_to(t('admin.nav.secondary.features'), features_admin_path)

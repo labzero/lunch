@@ -3647,9 +3647,15 @@ en:
         duplicate_error: "An early shutoff is already scheduled for this date.\nPlease choose a new date and try again"
     data_visibility:
       title: Data Visibility
-      report_visibility: Report Visibility
-      all_members: All Members
-      member_selector: 'Data Visibility for:'
+      status:
+        title: Data and Institution Status
+        disabled_for_all: "The following items are disabled for every institution:"
+        none_disabled_for_all: "No items are disabled for every institution"
+      manage_data_visibility:
+        title: Manage Data Visibility
+        report_visibility: Report Visibility
+        all_members: All Members
+        member_selector: 'Data Visibility for:'
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

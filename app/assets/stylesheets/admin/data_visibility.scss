@@ -72,3 +72,40 @@
     margin-bottom: 20px;
   }
 }
+
+.data-visibility-status {
+  h2 {
+    display: inline-block;
+  }
+  a {
+    @extend %typography-table-button;
+    float: right;
+    text-transform: uppercase;
+  }
+
+  table {
+    margin-top: 30px;
+    th, td {
+      box-sizing: border-box;
+      text-align: left;
+      &:first-child {
+        width: 148px;
+      }
+    }
+  }
+
+  .status-off {
+    position: relative;
+    padding-left: 50px;
+    margin: 0;
+    font-weight: bold;
+    &:before {
+      @extend %absolute-pseudoelement;
+      @extend %vertical-center;
+      left: 0;
+      width: 20px;
+      height: 20px;
+      background-image: image-url('fhlb-status-off-small.svg');
+    }
+  }
+}

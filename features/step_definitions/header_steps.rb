@@ -17,6 +17,10 @@ When(/^I click on the data visibility web flags link in the header dropdown$/) d
   page.find('.page-header .secondary-nav .nav-dropdown-column a', text: dropdown_title_regex('data visibility web flags')).click
 end
 
+When(/^I click on the data and institution status link in the header dropdown$/) do
+  page.find('.page-header .secondary-nav .nav-dropdown-column a', text: dropdown_title_regex('data and institution status')).click
+end
+
 When(/^I click on the switch link in the nav$/) do
   page.find('.nav-member-switch a', text: I18n.t('nav.primary.switch')).click
 end
@@ -155,7 +159,9 @@ def dropdown_title_regex(dropdown)
   when 'data visibility'
     I18n.t('admin.nav.secondary.data_visibility')
   when 'data visibility web flags'
-    I18n.t('admin.data_visibility.title')
+    I18n.t('admin.data_visibility.manage_data_visibility.title')
+  when 'data and institution status'
+    I18n.t('admin.data_visibility.status.title')
   when 'mortgages'
     I18n.t('mortgages.title')
   when 'new mortgage collateral update'
