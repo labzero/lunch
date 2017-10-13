@@ -94,11 +94,8 @@ class SecuritiesController < ApplicationController
         {value: cusip || t('global.missing_value')},
         {value: security.description || t('global.missing_value')},
         {value: status},
-        {value: security.eligibility || t('global.missing_value')},
         {value: security.maturity_date, type: :date},
-        {value: security.authorized_by || t('global.missing_value')},
-        {value: security.current_par, type: :number},
-        {value: security.borrowing_capacity, type: :number}
+        {value: security.current_par, type: :number}
       ]
       columns.insert(4, {value: DELIVER_TO_MAPPING[security.reg_id] || t('global.missing_value')}) if feature_enabled?('securities-delivery-method')
       rows << {
@@ -111,11 +108,8 @@ class SecuritiesController < ApplicationController
       {title: t('common_table_headings.cusip'), sortable: true},
       {title: t('common_table_headings.description'), sortable: true},
       {title: t('common_table_headings.status'), sortable: true},
-      {title: t('securities.manage.eligibility'), sortable: true},
       {title: t('common_table_headings.maturity_date'), sortable: true},
-      {title: t('common_table_headings.authorized_by'), sortable: true},
-      {title: fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), sortable: true},
-      {title: fhlb_add_unit_to_table_header(t('global.borrowing_capacity'), '$'), sortable: true}]
+      {title: fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$'), sortable: true}]
     column_headings.insert(4, {title: t('securities.manage.delivery'), sortable: true} ) if feature_enabled?('securities-delivery-method')
     @securities_table_data = {
       filter: {

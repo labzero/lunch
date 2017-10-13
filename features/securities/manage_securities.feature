@@ -65,13 +65,7 @@ Scenario: Member sorts the Securities list
   Then I should see the "Description" column values in "ascending" order
   When I click the "Status" column heading on the "Manage Securities" table
   Then I should see the "Status" column values in "ascending" order
-  When I click the "Eligibility" column heading on the "Manage Securities" table
-  Then I should see the "Eligibility" column values in "ascending" order
   When I click the "Maturity Date" column heading on the "Manage Securities" table
   Then I should see the "Maturity Date" column values in "ascending" order
-  When I click the "Authorized By" column heading on the "Manage Securities" table
-  Then I should see the "Authorized By" column values in "ascending" order
   When I click the "Current Par ($)" column heading on the "Manage Securities" table
   Then I should see the "Current Par ($)" column values in "ascending" order
-  When I click the "Borrowing Capacity ($)" column heading on the "Manage Securities" table
-  Then I should see the "Borrowing Capacity ($)" column values in "ascending" order
