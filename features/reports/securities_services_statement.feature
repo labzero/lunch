@@ -7,7 +7,7 @@ Feature: Visiting the Securities Services Monthly Fee Statement Page
 Background:
   Given I am logged in to a bank with data for the "Securities Services Monthly Fee Statement" report
 
-@smoke @jira-mem-536
+@jira-mem-536
 Scenario: Member sees Securities Services Statement
   Given I visit the dashboard
   When I select "Securities Services Monthly Fee Statement" from the reports dropdown
@@ -15,7 +15,7 @@ Scenario: Member sees Securities Services Statement
   And I should see a report header
   And I should see 4 report tables with multiple data rows
 
-@smoke @jira-mem-1196
+@jira-mem-1196
 Scenario: The Securities Services Monthly Fee Statement report dropdown controls which report is shown
   Given I am on the "Securities Services Monthly Fee Statement" report page
   When I select the last entry from the month year dropdown
@@ -42,7 +42,7 @@ Scenario: The Securities Services Statement has been disabled
   Then I should see a "Dividend Summary" report table with all data missing
   Then I should see the "Dividend Details" report table with Data Unavailable messaging
 
-@resque-backed @smoke @jira-mem-822
+@resque-backed @jira-mem-822
 Scenario: Member downloads a PDF of the Securities Services Statement report
   Given I am on the "Securities Services Monthly Fee Statement" report page
   When I request a PDF

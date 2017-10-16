@@ -1,20 +1,57 @@
 [
   {
     "transaction_number": 25100033,
-    "upload_type": "Standard",
+    "mcu_type": "complete",
+    "program_type": "standard",
+    "pledge_type": "specific",
     "authorized_by": "John Smith",
     "authorized_on": "2017-02-05",
-    "status": "FHLBSF Processing",
-    "number_of_loans": "-",
-    "number_of_errors": "-"
+    "status": "processing",
+    "number_of_loans": null,
+    "number_of_errors": null,
+    "reports": {}
   },
   {
     "transaction_number": 25100055,
-    "upload_type": "Standard",
+    "mcu_type": "renumber",
+    "program_type": "standard",
+    "pledge_type": "specific",
     "authorized_by": "John Smith",
     "authorized_on": "2017-03-05",
-    "status": "FHLBSF Processed",
+    "status": "review",
     "number_of_loans": 4,
-    "number_of_errors": 2
+    "number_of_errors": 2,
+    "reports": {
+      "summary": "http://some-report-url",
+      "detail": "http://some-report-url"
+    }
+  },
+  {
+    "transaction_number": 25102355,
+    "mcu_type": "pledge",
+    "program_type": "loans_held",
+    "pledge_type": "specific",
+    "authorized_by": "John Smith",
+    "authorized_on": "2017-04-15",
+    "status": "committed",
+    "number_of_loans": 965,
+    "number_of_errors": 48,
+    "reports": {
+      "summary": "http://some-report-url",
+      "detail": "http://some-report-url",
+      "borrowing_capacity": "http://some-report-url"
+    }
+  },
+  {
+    "transaction_number": 24103457,
+    "mcu_type": "delete",
+    "program_type": "standard",
+    "pledge_type": "blanket_lien",
+    "authorized_by": "John Smith",
+    "authorized_on": "2016-12-05",
+    "status": "canceled",
+    "number_of_loans": 47,
+    "number_of_errors": 9,
+    "reports": {}
   }
 ]

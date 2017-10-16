@@ -4,6 +4,10 @@ module MAPI
   module Shared
     module EnterpriseMessaging
       HOSTNAME = 'SFDWMSGBROKER1.fhlbsf-i.com'
+      CONFIG_DIR = 'config/ssl'
+      CERT_FILE = "#{CONFIG_DIR}/client.crt"
+      KEY_FILE = "#{CONFIG_DIR}/client.key"
+      TS_FILES = "#{CONFIG_DIR}/msgbroker1.pem"
       PORT = 51515
       SLEEP_INTERVAL = 0.5
       NUM_RETRIES = 10
@@ -43,9 +47,7 @@ module MAPI
         end
 
         def stomp_client(app)
-          ssl_config = Stomp::SSLParams.new(cert_file: 'ssl/client.crt', 
-                                            key_file: 'ssl/client.key', 
-                                            ts_files: 'ssl/msgbroker1.pem')
+          ssl_config = Stomp::SSLParams.new(cert_file: CERT_FILE, key_file: KEY_FILE, ts_files: TS_FILES)
           #TODO configure failover onto SFDWMSGBROKER2
           @stomp_client ||= Stomp::Client.new( { hosts: [ { host: HOSTNAME, port: PORT, ssl: ssl_config } ], 
                                                  reliable: true, 

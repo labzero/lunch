@@ -187,7 +187,7 @@ describe MAPI::ServiceApp do
 
         it 'executes historical std breakdown sql' do
           sql = <<-SQL
-            SELECT COLLATERAL_TYPE, STD_UNPAID_BALANCE, STD_BORROWING_CAPACITY, STD_ORIGINAL_AMOUNT, STD_MARKET_VALUE, COLLATERAL_SORT_ID
+            SELECT COLLATERAL_TYPE, STD_COUNT, STD_UNPAID_BALANCE, STD_BORROWING_CAPACITY, STD_ORIGINAL_AMOUNT, STD_MARKET_VALUE, COLLATERAL_SORT_ID
             FROM FHLBOWN.COLLATERAL_SUMMARY_TYPE_HIST@COLAPROD_LINK.WORLD
             WHERE CUSTOMER_MASTER_ID = #{ActiveRecord::Base.connection.quote(member_id)}
             AND PERIODVALUE = #{ActiveRecord::Base.connection.quote(past_date.strftime('%Y%m'))}

@@ -63,6 +63,14 @@ $resource-page-padding: 140px !default;
 
 .resource-guide-updates {
   padding-right: $resource-page-padding;
+  time {
+    display: none;
+  }
+  ul {
+    p {
+      margin: 0;
+    }
+  }
 }
 
 .resource-guide-update {

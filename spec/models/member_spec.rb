@@ -34,7 +34,6 @@ RSpec.describe Member, type: :model do
         expect(subject.member_id).to eq(id)
       end
     end
-
     describe '`latest_report_set`' do
       let(:call_method) { subject.latest_report_set }
       before do
@@ -98,7 +97,7 @@ RSpec.describe Member, type: :model do
       let(:members_service_instance) { instance_double(MembersService, member: member_details) }
       let(:member_details) { {dual_signers_required: double('dual_signers_required')} }
       before { allow(MembersService).to receive(:new).and_return(members_service_instance) }
-      describe 'when @member_details are not present' do
+      describe 'when `@member_details` are not present' do
         it 'fetches details with the request object it was passed' do
           expect(subject).to receive(:fetch_details).with(request).and_call_original
           subject.requires_dual_signers?(request)
@@ -108,7 +107,7 @@ RSpec.describe Member, type: :model do
           call_method
         end
       end
-      it 'does not fetch details if @member_details are present' do
+      it 'does not fetch details if `@member_details` are present' do
         call_method
         expect(subject).not_to receive(:fetch_details)
         call_method
@@ -123,7 +122,7 @@ RSpec.describe Member, type: :model do
       let(:member_details) { {name: double('a name')} }
       let(:members_service_instance) { instance_double(MembersService, member: member_details) }
       before { allow(MembersService).to receive(:new).and_return(members_service_instance) }
-      describe 'when @member_details are not present' do
+      describe 'when `@member_details` are not present' do
         it 'fetches details with the request object it was passed' do
           expect(subject).to receive(:fetch_details).with(request).and_call_original
           subject.name(request)
@@ -133,7 +132,7 @@ RSpec.describe Member, type: :model do
           call_method
         end
       end
-      it 'does not fetch details if @member_details are present' do
+      it 'does not fetch details if `@member_details` are present' do
         call_method
         expect(subject).not_to receive(:fetch_details)
         call_method
@@ -142,14 +141,35 @@ RSpec.describe Member, type: :model do
         expect(call_method).to eq(member_details[:name])
       end
     end
-
+    describe '`customer_lc_agreement_flag`' do
+      let(:call_method) { subject.customer_lc_agreement_flag }
+      let(:request) { double('request object') }
+      let(:members_service_instance) { instance_double(MembersService, member: member_details) }
+      let(:member_details) { {customer_lc_agreement_flag: double('customer_lc_agreement_flag')} }
+      before { allow(MembersService).to receive(:new).and_return(members_service_instance) }
+      describe 'when `@member_details` are not present' do
+        it 'fetches details with the request object it was passed' do
+          expect(subject).to receive(:fetch_details).with(request).and_call_original
+          subject.customer_lc_agreement_flag(request)
+        end
+        it 'fetches details with no request object if none was passed' do
+          expect(subject).to receive(:fetch_details).with(nil).and_call_original
+          call_method
+        end
+      end
+      it 'does not fetch details if `@member_details` are present' do
+        call_method
+        expect(subject).not_to receive(:fetch_details)
+        call_method
+      end
+    end
     describe '`found?`' do
       let(:call_method) { subject.found? }
       let(:request) { double('request object') }
       let(:member_details) { {} }
       let(:members_service_instance) { instance_double(MembersService, member: member_details) }
       before { allow(MembersService).to receive(:new).and_return(members_service_instance) }
-      describe 'when @member_details are not present' do
+      describe 'when `@member_details` are not present' do
         it 'fetches details with the request object it was passed' do
           expect(subject).to receive(:fetch_details).with(request).and_call_original
           subject.name(request)
@@ -159,7 +179,7 @@ RSpec.describe Member, type: :model do
           call_method
         end
       end
-      it 'does not fetch details if @member_details are present' do
+      it 'does not fetch details if `@member_details` are present' do
         call_method
         expect(subject).not_to receive(:fetch_details)
         call_method
@@ -192,7 +212,7 @@ RSpec.describe Member, type: :model do
         expect(MembersService).to receive(:new).with(request).and_return(members_service_instance)
         call_method
       end
-      it 'sets @member_details to the result of calling `member` on the MembersService instance' do
+      it 'sets `@member_details` to the result of calling `member` on the MembersService instance' do
         allow(members_service_instance).to receive(:member).and_return(member_details)
         call_method
         expect(subject.instance_variable_get('@member_details')).to eq(member_details)

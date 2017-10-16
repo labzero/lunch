@@ -39,6 +39,13 @@ class ResourcesController < ApplicationController
 
   # GET
   def guides
+    if feature_enabled?('content-management-system')
+      cms = ContentManagementService.new(current_member_id, request)
+      @credit_guide = Cms::Guide.new(current_member_id, request, :credit_guide, cms)
+      @collateral_guide = Cms::Guide.new(current_member_id, request, :collateral_guide, cms)
+    end
+    @credit_last_updated = @credit_guide.try(:last_revised_date) || Date.new(2016, 4, 7)
+    @collateral_last_updated = @collateral_guide.try(:last_revised_date) || Date.new(2017, 7, 28)
   end
 
   # GET
@@ -306,12 +313,10 @@ class ResourcesController < ApplicationController
   def download
     case params[:file]
     when 'creditguide'
-      cms_type = 'guide'
-      cms_uid = 'credit'
+      cms_key = :credit_guide
       filename = 'creditguide.pdf'
     when 'collateralguide'
-      cms_type = 'guide'
-      cms_uid = 'collateral'
+      cms_key = :collateral_guide
       filename = 'collateralguide.pdf'
     when 'collateralreviewguide'
       filename = 'mortgage-loan-collateral-field-review-process.pdf'
@@ -381,8 +386,8 @@ class ResourcesController < ApplicationController
       raise ActionController::MissingFile
     end
 
-    if feature_enabled?('content-management-system') && cms_type && cms_uid
-      url = ContentManagementService.new(current_member_id, request).get_pdf_url(cms_type, cms_uid)
+    if feature_enabled?('content-management-system') && cms_key
+      url = ContentManagementService.new(current_member_id, request).get_pdf_url(cms_key)
       if url
         begin
           data = open(url)

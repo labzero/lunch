@@ -11,12 +11,16 @@ describe MAPI::Shared::EnterpriseMessaging::ClassMethods do
   let(:sleep_interval) { 0.1 }
   before do
     stub_const('MAPI::Shared::EnterpriseMessaging::HOSTNAME', 'SFDWMSGBROKER1.fhlbsf-i.com')
+    stub_const('MAPI::Shared::EnterpriseMessaging::CONFIG_DIR', 'config/ssl')
+    stub_const('MAPI::Shared::EnterpriseMessaging::CERT_FILE', "#{MAPI::Shared::EnterpriseMessaging::CONFIG_DIR}/client.crt")
+    stub_const('MAPI::Shared::EnterpriseMessaging::KEY_FILE', "#{MAPI::Shared::EnterpriseMessaging::CONFIG_DIR}/client.key")
+    stub_const('MAPI::Shared::EnterpriseMessaging::TS_FILES', "#{MAPI::Shared::EnterpriseMessaging::CONFIG_DIR}/msgbroker1.pem")
     stub_const('MAPI::Shared::EnterpriseMessaging::PORT', 51515)
     stub_const('MAPI::Shared::EnterpriseMessaging::CLIENT_ID', SecureRandom.hex)
     stub_const('MAPI::Shared::EnterpriseMessaging::SUBSCRIPTION_NAME', 'mp')
     stub_const('MAPI::Shared::EnterpriseMessaging::FQ_QUEUE', '/queue/mcufu.ix')
     stub_const('MAPI::Shared::EnterpriseMessaging::TOPIC', 'ix.portal')
-    stub_const('MAPI::Shared::EnterpriseMessaging::FQ_TOPIC', '/topic/ix.portal')
+    stub_const('MAPI::Shared::EnterpriseMessaging::FQ_TOPIC', "/topic/#{MAPI::Shared::EnterpriseMessaging::TOPIC}")
     stub_const('MAPI::Shared::EnterpriseMessaging::NUM_RETRIES', num_retries)
     stub_const('MAPI::Shared::EnterpriseMessaging::SLEEP_INTERVAL', sleep_interval)
   end
@@ -106,9 +110,9 @@ describe MAPI::Shared::EnterpriseMessaging::ClassMethods do
     end
     it 'creates an ssl config object' do
       allow(Stomp::Client).to receive(:new).and_return(stomp_client)
-      expect(Stomp::SSLParams).to receive(:new).with(cert_file: 'ssl/client.crt', 
-                                                     key_file: 'ssl/client.key', 
-                                                     ts_files: 'ssl/msgbroker1.pem')
+      expect(Stomp::SSLParams).to receive(:new).with(cert_file: MAPI::Shared::EnterpriseMessaging::CERT_FILE, 
+                                                     key_file: MAPI::Shared::EnterpriseMessaging::KEY_FILE, 
+                                                     ts_files: MAPI::Shared::EnterpriseMessaging::TS_FILES)
       call_method
     end
   end

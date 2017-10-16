@@ -140,6 +140,11 @@
     }
     td:nth-child(8) {
       width: 100px;
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
     }
     margin-top: 10px;
     margin-bottom: 0px;
@@ -159,5 +164,28 @@
   }
   span:last-child {
     @extend %typography-subtitle;
+  }
+}
+
+.mortgage-collateral-update-view {
+  section {
+    @extend %list-summary-data;
+  }
+  .request-form-actions {
+    text-align: left;
+  }
+}
+
+.mortgage-colleteral-update-view-reports {
+  h2 {
+    margin: 30px 0 10px 0;
+  }
+  a {
+    display: block;
+    text-transform: uppercase;
+  }
+  p {
+    @extend %empty_table_cell;
+    padding: 0;
   }
 }

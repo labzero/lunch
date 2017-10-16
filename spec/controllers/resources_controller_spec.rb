@@ -8,11 +8,74 @@ RSpec.describe ResourcesController, type: :controller do
   login_user
 
   describe 'GET guides' do
+    let(:member_id) { rand(1000..9999) }
+    let(:call_action) { get :guides }
+    before do
+      allow(controller).to receive(:current_member_id).and_return(member_id)
+    end
+
     it_behaves_like 'a controller action with an active nav setting', :guides, :resources
     it_behaves_like 'a user required action', :get, :guides
-    it 'should render the guides view' do
-      get :guides
+    it 'renders the guides view' do
+      call_action
       expect(response.body).to render_template('guides')
+    end
+    context "when the `content-management-system` feature is enabled" do
+      let(:cms) { instance_double(ContentManagementService) }
+      let(:last_revised_date) { instance_double(Date) }
+      let(:credit_guide) { instance_double(Cms::Guide, last_revised_date: nil) }
+      let(:collateral_guide) { instance_double(Cms::Guide, last_revised_date: nil) }
+      before do
+        allow(controller).to receive(:feature_enabled?).with('content-management-system').and_return(true)
+        allow(ContentManagementService).to receive(:new).and_return(cms)
+        allow(Cms::Guide).to receive(:new)
+      end
+
+      it 'creates a new instance of `ContentManagementService` with the member id and request' do
+        expect(ContentManagementService).to receive(:new).with(member_id, request).and_return(cms)
+        call_action
+      end
+      it 'creates a new instance of `Cms::Guide` with the the member id, request, credit guide cms key and the cms instance' do
+        expect(Cms::Guide).to receive(:new).with(member_id, request, :credit_guide, cms)
+        call_action
+      end
+      it 'sets `@credit_guide` to the instance of `Cms::Guide` created with the `credit_guide` key' do
+        allow(Cms::Guide).to receive(:new).with(anything, anything, :credit_guide, anything).and_return(credit_guide)
+        call_action
+        expect(assigns[:credit_guide]).to eq(credit_guide)
+      end
+      it 'sets `@credit_last_updated` to the result of calling `last_revised_date` on the credit `Cms::Guide` instance' do
+        allow(Cms::Guide).to receive(:new).with(anything, anything, :credit_guide, anything).and_return(credit_guide)
+        allow(credit_guide).to receive(:last_revised_date).and_return(last_revised_date)
+        call_action
+        expect(assigns[:credit_last_updated]).to eq(last_revised_date)
+      end
+      it 'creates a new instance of `Cms::Guide` with the the member id, request, collateral guide cms key and the cms instance' do
+        expect(Cms::Guide).to receive(:new).with(member_id, request, :collateral_guide, cms)
+        call_action
+      end
+      it 'sets `@collateral_guide` to the instance of `Cms::Guide` created with the `collateral_guide` key' do
+        allow(Cms::Guide).to receive(:new).with(anything, anything, :collateral_guide, anything).and_return(collateral_guide)
+        call_action
+        expect(assigns[:collateral_guide]).to eq(collateral_guide)
+      end
+      it 'sets `@collateral_last_updated` to the result of calling `last_revised_date` on the collateral `Cms::Guide` instance' do
+        allow(Cms::Guide).to receive(:new).with(anything, anything, :collateral_guide, anything).and_return(collateral_guide)
+        allow(collateral_guide).to receive(:last_revised_date).and_return(last_revised_date)
+        call_action
+        expect(assigns[:collateral_last_updated]).to eq(last_revised_date)
+      end
+    end
+    context "when the `content-management-system` feature is not enabled" do
+      before { allow(controller).to receive(:feature_enabled?).with('content-management-system').and_return(false) }
+      it 'sets `@credit_last_updated` to April 7, 2016' do
+        call_action
+        expect(assigns[:credit_last_updated]).to eq(Date.new(2016, 4, 7))
+      end
+      it 'sets `@collateral_last_updated` to July 28, 2017' do
+        call_action
+        expect(assigns[:collateral_last_updated]).to eq(Date.new(2017, 7, 28))
+      end
     end
   end
 
@@ -197,8 +260,8 @@ RSpec.describe ResourcesController, type: :controller do
       end
 
       {
-        'creditguide' => {filename: 'creditguide.pdf', type: 'guide', uid: 'credit'},
-        'collateralguide' => {filename: 'collateralguide.pdf', type: 'guide', uid: 'collateral'}
+        'creditguide' => {filename: 'creditguide.pdf', cms_key: :credit_guide},
+        'collateralguide' => {filename: 'collateralguide.pdf', cms_key: :collateral_guide}
       }.each do |param_name, options|
         context "when `#{param_name}` is requested" do
           let(:call_action) { get :download, file: param_name}
@@ -207,12 +270,8 @@ RSpec.describe ResourcesController, type: :controller do
             expect(ContentManagementService).to receive(:new).with(member_id, request).and_return(cms)
             call_action
           end
-          it "calls `get_pdf_url` on the instance of `ContentManagementService` with `#{options[:type]}` as the type" do
-            expect(cms).to receive(:get_pdf_url).with(options[:type], anything)
-            call_action
-          end
-          it "calls `get_pdf_url` on the instance of `ContentManagementService` with `#{options[:uid]}` as the uid" do
-            expect(cms).to receive(:get_pdf_url).with(anything, options[:uid])
+          it "calls `get_pdf_url` on the instance of `ContentManagementService` with `#{options[:cms_key]}`" do
+            expect(cms).to receive(:get_pdf_url).with(options[:cms_key])
             call_action
           end
           context 'when a url is returned' do

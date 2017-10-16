@@ -1743,7 +1743,6 @@ class ReportsController < ApplicationController
       else
         []
       end
-
       @as_of_date = forward_commitments[:as_of_date]
       @total_current_par = forward_commitments[:total_current_par]
       @table_data = {
