@@ -6,6 +6,10 @@ $(function() {
   var $pledgeTypeField = $newMcuForm.find('select[name="mortgage_collateral_update[pledge_type]"]');
   var $mcuTypeField = $newMcuForm.find('select[name="mortgage_collateral_update[mcu_type]"]');
   var $programTypeField = $newMcuForm.find('select[name="mortgage_collateral_update[program_type]"]');
+  var $mcuUploadInput = $('.mcu-upload-area input[type=file]');
+  var $mcuUploadFileNameField = $('.mcu-upload-file-name');
+  var $mcuUploadInstructions = $('.mcu-upload-instructions');
+  var $mcuUploadCompleteSection = $('.mcu-upload-complete');
 
   $pledgeTypeField.on('change', function(e) {
     $([$mcuTypeDropdown, $programTypeDropdown]).each(function() {resetDropdown(this)});
@@ -53,4 +57,17 @@ $(function() {
     $dropdown.find('.dropdown-selection').text(placeHolderText);
     $dropdown.find('li').removeClass('selected');
   };
+
+  $mcuUploadInput.on('change', function(e) {
+    $mcuUploadFileNameField.text(e.target.files[0].name);
+    $mcuUploadInstructions.hide();
+    $mcuUploadCompleteSection.show();
+  });
+
+  $('.mcu-upload-file-discard').on('click', function(e) {
+    $mcuUploadInput.val('');
+    $mcuUploadFileNameField.text('');
+    $mcuUploadCompleteSection.hide();
+    $mcuUploadInstructions.show();
+  });
 });

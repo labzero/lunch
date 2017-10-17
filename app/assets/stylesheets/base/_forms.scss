@@ -276,7 +276,7 @@ $horizontal-field-input-width: 180px;
   }
 }
 
-[data-dropzone] {
+%dropzone-style {
   position: relative;
   border: 1px dashed $actionable-blue;
   border-radius: $default-border-radius;
@@ -293,6 +293,10 @@ $horizontal-field-input-width: 180px;
       display: block;
     }
   }
+}
+
+[data-dropzone] {
+  @extend %dropzone-style;
 }
 
 .file-upload-progress {
