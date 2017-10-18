@@ -91,3 +91,9 @@ Feature: Amending an existing Letter of Credit
     And I enter 150000000 in the letter of credit amended_amount field
     When I click the Preview Request button
     Then I should see the "exceeds financing availability of 149,603,250" form error
+
+  @jira-mem-2635
+  Scenario: Member attempts to amend a letter of credit that is not amendable online
+    Given I visit the Manage Letters of Credit page
+    When I click on the amend link for a letter of credit that is not amendable online
+    Then I should see the "not amendable online" form error

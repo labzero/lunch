@@ -45,18 +45,19 @@ module MAPI
         def self.letter_of_credit(app, member_id, lc_number)
           unless should_fake?(app)
             loc_query = <<-SQL
-              SELECT FHLB_ID,
-              LC_LC_NUMBER,
-              LC_SORT_CODE,
-              LCX_CURRENT_PAR,
-              LCX_TRANS_SPREAD,
-              LC_TRADE_DATE,
-              LC_SETTLEMENT_DATE,
-              LC_MATURITY_DATE,
-              LC_ISSUE_NUMBER,
-              LCX_UPDATE_DATE,
-              LC_BENEFICIARY
-              FROM WEB_INET.WEB_LC_LATESTDATE_RPT
+              SELECT LR.FHLB_ID,
+              LR.LC_LC_NUMBER,
+              LR.LC_SORT_CODE,
+              LR.LCX_CURRENT_PAR,
+              LR.LCX_TRANS_SPREAD,
+              LR.LC_TRADE_DATE,
+              LR.LC_SETTLEMENT_DATE,
+              LR.LC_MATURITY_DATE,
+              LR.LC_ISSUE_NUMBER,
+              LR.LCX_UPDATE_DATE,
+              LR.LC_BENEFICIARY,
+              LC.LC_EVERGREEN_FLAG
+              FROM WEB_LC_LATESTDATE_RPT LR JOIN PORTFOLIOS.LCS LC ON LR.LC_LC_NUMBER = LC.LC_LC_NUMBER
               WHERE LC_LC_NUMBER = #{ quote(lc_number) }
               AND FHLB_ID = #{ quote(member_id) }
             SQL
@@ -90,7 +91,8 @@ module MAPI
                 settlement_date: (credit[:LC_SETTLEMENT_DATE].to_date if credit[:LC_SETTLEMENT_DATE]),
                 maturity_date: (credit[:LC_MATURITY_DATE].to_date if credit[:LC_MATURITY_DATE]),
                 description: (credit[:LC_ISSUE_NUMBER].to_s if credit[:LC_ISSUE_NUMBER]),
-                beneficiary: (credit[:LC_BENEFICIARY].to_s if credit[:LC_BENEFICIARY])
+                beneficiary: (credit[:LC_BENEFICIARY].to_s if credit[:LC_BENEFICIARY]),
+                evergreen_flag: (credit[:LC_EVERGREEN_FLAG].to_s if credit[:LC_EVERGREEN_FLAG])
               }
             end
           end

@@ -16,7 +16,7 @@ class LetterOfCreditRequest
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
   READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :amendment_fee, :request, :lc_number, :beneficiary, :current_par, :id, :owners,
-                     :standard_borrowing_capacity, :max_term, :member_id, :remaining_financing_available].freeze
+                     :standard_borrowing_capacity, :max_term, :member_id, :remaining_financing_available, :evergreen_flag, :intraday_lc, :sort_code].freeze
   ACCESSIBLE_ATTRS = [:beneficiary_name, :beneficiary_address, :amount, :amended_amount, :attention,
                       :issue_date, :expiration_date, :amended_expiration_date, :amendment_date, :created_at, :created_by].freeze
   DATE_ATTRS = [:issue_date, :expiration_date, :amended_expiration_date, :amendment_date, :created_at].freeze
@@ -53,23 +53,38 @@ class LetterOfCreditRequest
     @expiration_date = calendar_service.find_next_business_day(@issue_date + 1.year, 1.day)
   end
 
-  def self.find_by_lc_number(member_id, lc_number, request=nil)
+  def self.find_by_lc_number(member_id, lc_number, intraday_lc, request=nil)
     letter_of_credit_request = LetterOfCreditRequest.new(member_id, request)
     member_balances = MemberBalanceService.new(member_id, request)
-    lc_details = member_balances.letter_of_credit(lc_number)
+    lc_details = member_balances.letter_of_credit(lc_number) || {}
     letter_of_credit_request.instance_variable_set(:@lc_number, lc_details[:lc_number])
     letter_of_credit_request.beneficiary_name = lc_details[:beneficiary]
     letter_of_credit_request.amount = lc_details[:current_par]
     letter_of_credit_request.amended_amount = lc_details[:current_par]
-    letter_of_credit_request.issue_date = lc_details[:trade_date]
-    letter_of_credit_request.expiration_date = lc_details[:maturity_date]
-    letter_of_credit_request.amended_expiration_date = lc_details[:maturity_date]
+    letter_of_credit_request.issue_date = Time.zone.parse(lc_details[:trade_date]) if lc_details[:trade_date]
+    letter_of_credit_request.expiration_date = Time.zone.parse(lc_details[:maturity_date]) if lc_details[:maturity_date]
+    letter_of_credit_request.amended_expiration_date = Time.zone.parse(lc_details[:maturity_date]) if lc_details[:maturity_date]
     calendar_service = CalendarService.new(@request)
     today = Time.zone.today
     start_date = Time.zone.now > Time.zone.parse(AMENDMENT_DATE_TIME_RESTRICTION) ? today + 1.day : today
     letter_of_credit_request.amendment_date = calendar_service.find_next_business_day(start_date, 1.day)
     letter_of_credit_request.instance_variable_set(:@amendment_fee, DEFAULT_AMENDMENT_FEE)
+    letter_of_credit_request.instance_variable_set(:@evergreen_flag, lc_details[:evergreen_flag])
+    letter_of_credit_request.instance_variable_set(:@intraday_lc, intraday_lc.to_s == 'true')
+    letter_of_credit_request.instance_variable_set(:@sort_code, lc_details[:sort_code])
     letter_of_credit_request
+  end
+
+  def evergreen?
+    evergreen_flag.try(:upcase) == 'Y'
+  end
+
+  def public_deposit?
+    !!sort_code.to_s.match(/L03|L12/i)
+  end
+
+  def amendable_online?
+    !intraday_lc && !evergreen? && public_deposit? && beneficiary_name.present? && expiration_date.present? && issue_date.present? && date_within_range(expiration_date, issue_date + EXPIRATION_MAX_DATE_RESTRICTION) && expiration_date > Time.zone.today
   end
 
   def id
@@ -91,6 +106,8 @@ class LetterOfCreditRequest
         raise ArgumentError, "illegal attribute: #{key}"
       when :owners
         @owners = value.to_set
+      when :intraday_lc
+        instance_variable_set('@intraday_lc', (value.to_s == 'true'))
       when *READ_ONLY_ATTRS
         instance_variable_set("@#{key}", value)
       when *DATE_ATTRS

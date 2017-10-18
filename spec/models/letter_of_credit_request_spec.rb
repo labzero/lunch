@@ -595,7 +595,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
     describe '`find_by_lc_number`' do
       let(:request) { double('request') }
       let(:lc_number) { SecureRandom.hex }
-      let(:loc) { LetterOfCreditRequest.find_by_lc_number(member_id, lc_number, request) }
+      let(:loc) { LetterOfCreditRequest.find_by_lc_number(member_id, lc_number, nil, request) }
       let(:lc_details) { instance_double(Hash, :[] => nil) }
       let(:amendment_date) { Time.zone.today}
       let(:now) { instance_double(Time, :> => nil) }
@@ -650,26 +650,50 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         expect(letter_of_credit_request).to receive(:'amended_amount=').with(amended_amount)
         loc
       end
-      it 'assigns `issue_date`' do
-        issue_date = SecureRandom.hex
-        allow(lc_details).to receive(:[]).with(:trade_date).and_return(issue_date)
-        expect(letter_of_credit_request).to receive(:'issue_date=').with(issue_date)
-        loc
+      describe 'TimeWithZone attributes' do
+        [[:issue_date, :trade_date], [:expiration_date, :maturity_date], [:amended_expiration_date, :maturity_date]].each do |attr_details|
+          describe "assigning `#{attr_details.first}`" do
+            let(:date_sentinel) { instance_double(ActiveSupport::TimeWithZone) }
+
+            before do
+              allow(lc_details).to receive(:[]).with(attr_details.last).and_return(date_sentinel)
+              allow(Time.zone).to receive(:parse).with(date_sentinel).and_return(date_sentinel)
+            end
+
+            it "turns the `#{attr_details.last}` from the fetched letter of credit into a date" do
+              expect(Time.zone).to receive(:parse).with(date_sentinel).and_return(date_sentinel)
+              loc
+            end
+            it "sets `#{attr_details.first}` to the dateified value of the `#{attr_details.last}` from the fetched letter of credit" do
+              expect(letter_of_credit_request).to receive(:"#{attr_details.first}=").with(date_sentinel)
+              loc
+            end
+            it "does not set `#{attr_details.first}` if the value of `#{attr_details.last}` from the fetched hash is nil" do
+              allow(lc_details).to receive(:[]).with(attr_details.last).and_return(nil)
+              expect(letter_of_credit_request).not_to receive(:"#{attr_details.first}=")
+              loc
+            end
+          end
+        end
       end
-      it 'assigns `expiration_date`' do
-        expiration_date = SecureRandom.hex
-        allow(lc_details).to receive(:[]).with(:maturity_date).and_return(expiration_date)
-        expect(letter_of_credit_request).to receive(:'expiration_date=').with(expiration_date)
-        loc
-      end
-      it 'assigns `amended_expiration_date`' do
-        amended_expiration_date = SecureRandom.hex
-        allow(lc_details).to receive(:[]).with(:maturity_date).and_return(amended_expiration_date)
-        expect(letter_of_credit_request).to receive(:'amended_expiration_date=').with(amended_expiration_date)
-        loc
-      end
-      describe 'initial asigment of `amendment_date`' do
-        it 'parses the LetterOfCreditRequest::ISSUE_DATE_TIME_RESTRICTION to create an ActiveRecord::TimeWithZone object' do
+      describe 'assigning the `amendment_date`' do
+        let(:amendment_date) { instance_double(ActiveSupport::TimeWithZone) }
+
+        shared_examples 'it sets `amendment_date` based on `find_next_business_day`' do |day|
+          let(:start_date) { day == :today ? today : today + 1.day }
+
+          it "calls `find_next_business_day` with #{day} and a 1.day step" do
+            expect(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day)
+            loc
+          end
+          it 'sets `amendment_date` to the result of `find_next_business_day`' do
+            allow(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day).and_return(amendment_date)
+            expect(letter_of_credit_request).to receive(:amendment_date=).with(amendment_date)
+            loc
+          end
+        end
+
+        it 'parses the LetterOfCreditRequest::AMENDMENT_DATE_TIME_RESTRICTION to create an ActiveRecord::TimeWithZone object' do
           expect(Time.zone).to receive(:parse).with(LetterOfCreditRequest::AMENDMENT_DATE_TIME_RESTRICTION).and_return(parsed_time)
           loc
         end
@@ -677,15 +701,53 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
           expect(now).to receive(:>).with(parsed_time)
           loc
         end
-        shared_examples 'it sets `amendment_date` based on `find_next_business_day`' do |day|
-          let(:start_date) { day == :today ? today : today + 1.day }
-          it "calls `find_next_business_day` with #{day} and a 1.day step" do
-            expect(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day)
-            loc
+
+        context 'when it is before the AMENDMENT_DATE_TIME_RESTRICTION' do
+          before { allow(now).to receive(:>).and_return(false) }
+          it_behaves_like 'it sets `amendment_date` based on `find_next_business_day`', :today
+        end
+
+        context 'when it is after the AMENDMENT_DATE_TIME_RESTRICTION' do
+          before { allow(now).to receive(:>).and_return(true) }
+          it_behaves_like 'it sets `amendment_date` based on `find_next_business_day`', :tomorrow
+        end
+      end
+
+      describe 'direct assignment of read-only variables' do
+        let(:letter_of_credit_request) { LetterOfCreditRequest.new(member_id, nil) }
+        let(:call_method) { LetterOfCreditRequest.find_by_lc_number(member_id, lc_number, nil, request) }
+        let(:lc_hash) {{
+          evergreen_flag: double('evergreen flag'),
+          sort_code: double('sort code')
+        }}
+
+        before do
+          letter_of_credit_request
+          allow(LetterOfCreditRequest).to receive(:new).and_return(letter_of_credit_request)
+          allow(member_balance_service).to receive(:letter_of_credit).and_return(lc_hash)
+        end
+
+        [:evergreen_flag, :sort_code].each do |attr|
+          it "sets `#{attr}` to the corresponding `#{attr}` value from the fetched letter of credit hash" do
+            expect(call_method.send(attr)).to eq(lc_hash[attr])
           end
-          it 'sets `amendment_date` to the result of `find_next_business_day`' do
-            allow(calendar_service).to receive(:find_next_business_day).with(start_date, 1.day).and_return(issue_date)
-            expect(subject.issue_date).to eq(amendment_date)
+        end
+        it 'sets `amendment_fee` to the `DEFAULT_AMENDMENT_FEE`' do
+          expect(call_method.amendment_fee).to eq(LetterOfCreditRequest::DEFAULT_AMENDMENT_FEE)
+        end
+        describe 'setting `intraday_lc`' do
+          [
+            [true, true],
+            ['true', true],
+            ['false', false],
+            ['', false],
+            [false, false],
+            [nil, false]
+          ].each do |condition|
+            it "is set to `#{condition.last}` if passed `#{condition.first}` as the `intraday_lc` arg" do
+              lc = LetterOfCreditRequest.find_by_lc_number(member_id, lc_number, condition.first, request)
+              expect(lc.intraday_lc).to be condition.last
+            end
           end
         end
       end
@@ -693,6 +755,157 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
   end
 
   describe 'instance methods' do
+    describe '`evergreen?`' do
+      let(:call_method) { subject.evergreen? }
+
+      ['y', 'Y'].each do |flag|
+        it "returns `true` if the `evergreen_flag` attribute is `#{flag}`" do
+          subject.instance_variable_set(:@evergreen_flag, flag)
+          expect(call_method).to be true
+        end
+      end
+      ['n', 'N', nil, false, true].each do |flag|
+        it "returns `false` if the `evergreen_flag` attribute is `#{flag}`" do
+          subject.instance_variable_set(:@evergreen_flag, flag)
+          expect(call_method).to be false
+        end
+      end
+    end
+
+    describe '`public_deposit?`' do
+      let(:call_method) { subject.public_deposit? }
+
+      it 'returns `true` if the `sort_code` attribute contains the string `L03`' do
+        sort_code = SecureRandom.hex + 'L03' + SecureRandom.hex
+        subject.instance_variable_set(:@sort_code, sort_code)
+        expect(call_method).to be true
+      end
+      it 'returns `true` if the `sort_code` attribute contains the string `L12`' do
+        sort_code = SecureRandom.hex + 'L12' + SecureRandom.hex
+        subject.instance_variable_set(:@sort_code, sort_code)
+        expect(call_method).to be true
+      end
+      context 'when the `sort_code` attribute does not contain the `L03` or `L12` strings' do
+        ['L1', 'L02', 'L3', 'L17', nil, false, true, SecureRandom.hex].each do |attr_value|
+          it "returns `false` when the `sort_code` attribute contains `#{attr_value}`" do
+            sort_code = SecureRandom.hex + attr_value.to_s + SecureRandom.hex
+            subject.instance_variable_set(:@sort_code, sort_code)
+            expect(call_method).to be false
+          end
+        end
+      end
+    end
+
+    describe '`amendable_online?`' do
+      let(:call_method) { subject.amendable_online? }
+
+      context 'when the `intraday_lc` attribute is true' do
+        before { subject.instance_variable_set(:@intraday_lc, true) }
+
+        it 'returns `false`' do
+          expect(call_method).to be false
+        end
+      end
+      context 'when the `intraday_lc` attribute is false' do
+        before { subject.instance_variable_set(:@intraday_lc, false) }
+
+        context 'when the `evergreen?` method returns true' do
+          before { allow(subject).to receive(:evergreen?).and_return(true) }
+
+          it 'returns `false`' do
+            expect(call_method).to be false
+          end
+        end
+        context 'when the `evergreen?` method returns false' do
+          before { allow(subject).to receive(:evergreen?).and_return(false) }
+
+          context 'when the `public_deposit?` method returns false' do
+            before { allow(subject).to receive(:public_deposit?).and_return(false) }
+
+            it 'returns `false`' do
+              expect(call_method).to be false
+            end
+          end
+          context 'when the `public_deposit?` method returns true' do
+            before { allow(subject).to receive(:public_deposit?).and_return(true) }
+
+            context 'when there is not a `beneficiary_name` present' do
+              it 'returns `false`' do
+                expect(call_method).to be false
+              end
+            end
+            context 'when a `beneficiary_name` is present' do
+              before { subject.beneficiary_name = SecureRandom.hex }
+
+              context 'when the `expiration_date` is not present' do
+                it 'returns `false`' do
+                  expect(call_method).to be false
+                end
+              end
+              context 'when there is an `expiration_date`' do
+                let(:expiration_date) { instance_double(ActiveSupport::TimeWithZone) }
+                before { subject.expiration_date = expiration_date }
+
+                context 'when the `issue_date` is not present' do
+                  before { subject.issue_date = nil }
+
+                  it 'returns `false`' do
+                    expect(call_method).to be false
+                  end
+                end
+                context 'when there is an `issue_date`' do
+                  let(:issue_date) { Time.zone.today + rand(1..7).days }
+                  before { subject.issue_date = issue_date }
+
+                  it 'calls `date_within_range` with the `expiration_date`' do
+                    expect(subject).to receive(:date_within_range).with(expiration_date, anything)
+                    call_method
+                  end
+                  it 'calls `date_within_range` with the `issue_date` plus the `EXPIRATION_MAX_DATE_RESTRICTION`' do
+                    expect(subject).to receive(:date_within_range).with(anything, issue_date + described_class::EXPIRATION_MAX_DATE_RESTRICTION)
+                    call_method
+                  end
+
+                  context 'when `date_within_range` returns false' do
+                    before { allow(subject).to receive(:date_within_range).and_return(false) }
+
+                    it 'returns `false`' do
+                      expect(call_method).to be false
+                    end
+                  end
+                  context 'when `date_within_range` returns true' do
+                    before { allow(subject).to receive(:date_within_range).and_return(true) }
+
+                    context 'when the `expiration_date` is in the past' do
+                      before { subject.expiration_date = Time.zone.today - rand(1..30).days }
+
+                      it 'returns `false`' do
+                        expect(call_method).to be false
+                      end
+                    end
+                    context 'when the `expiration_date` is today' do
+                      before { subject.expiration_date = Time.zone.today }
+
+                      it 'returns `false`' do
+                        expect(call_method).to be false
+                      end
+                    end
+                    context 'when the `expiration_date` is in the future' do
+                      before { subject.expiration_date = Time.zone.today + rand(1..30).days }
+
+                      it 'returns `true`' do
+                        expect(call_method).to be true
+                      end
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
     describe 'the `id` getter' do
       let(:id) { SecureRandom.hex }
       context 'when the attribute already exists' do
@@ -791,6 +1004,27 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
         hash[:owners] = value
         call_method
         expect(subject.owners).to eq(expected_value)
+      end
+      describe 'assigning the `intraday_lc` attribute' do
+        it 'sets `intraday_lc` to `true` if the `intraday_lc` value in the hash is `true`' do
+          hash[:intraday_lc] = true
+          call_method
+          expect(subject.intraday_lc).to be true
+        end
+        it 'sets `intraday_lc` to `true` if the `intraday_lc` value in the hash is `"true"`' do
+          hash[:intraday_lc] = "true"
+          call_method
+          expect(subject.intraday_lc).to be true
+        end
+        context 'when the `intraday_lc` is anything other than `true` or `"true"`' do
+          [false, 'false', nil, ''].each do |intraday_lc_value|
+            it "sets `intraday_lc` to false if the `intraday_lc` hash value is `#{intraday_lc_value}`" do
+              hash[:intraday_lc] = intraday_lc_value
+              call_method
+              expect(subject.intraday_lc).to be false
+            end
+          end
+        end
       end
       it 'raises an exception if the hash contains keys that are not `LetterOfRequest` attributes' do
         hash[:foo] = 'bar'

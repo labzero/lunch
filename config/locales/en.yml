@@ -1650,6 +1650,7 @@ en:
       after_max_term: The expiration date cannot be more than %{max_term} months from the issue date. Adjust the expiration or issue date and try again.
       exceeds_financing_availability: The amount you entered exceeds your institution's current financing availability of %{financing_availability}. Submit a request for a lesser amount or contact your Relationship Manager or the Member Services Desk.
       amended_exp_date_prior_to_original: The expiration date must be the same or later than the current expiration date.
+      not_amendable_online: This Letter of Credit cannot be amended online. Please contact your Relationship Manager for assistance.
     pdf:
       requested: Letter of Credit Request Confirmation
       request_date: Request Date/Time

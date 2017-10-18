@@ -14,6 +14,9 @@
         = f.hidden_field(:expiration_date)
         = f.hidden_field(:issue_date)
         = f.hidden_field(:lc_number)
+        = f.hidden_field(:sort_code)
+        = f.hidden_field(:evergreen_flag)
+        = f.hidden_field(:intraday_lc)
         = f.hidden_field(:beneficiary_name)
         = f.hidden_field(:amended_expiration_date)
         = f.hidden_field(:amendment_date)
@@ -50,4 +53,4 @@
           %p=  t('letters_of_credit.request.amend.fees.further_explanation')
         .letters-of-credit-request-actions
           = link_to(t('global.cancel'), letters_of_credit_manage_path, class: 'secondary-button')
-          =  submit_tag(t('letters_of_credit.preview.action'), class: 'primary-button', disabled: true)
+          =  submit_tag(t('letters_of_credit.preview.action'), class: 'primary-button', disabled: true) if @letter_of_credit_request.amendable_online?

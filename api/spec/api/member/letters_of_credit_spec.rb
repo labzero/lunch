@@ -133,7 +133,7 @@ describe MAPI::ServiceApp do
 
       describe 'the SQL query' do
         describe 'the selected fields' do
-          ['FHLB_ID','LC_LC_NUMBER', 'LC_SORT_CODE','LCX_CURRENT_PAR', 'LCX_TRANS_SPREAD', 'LC_TRADE_DATE', 'LC_SETTLEMENT_DATE', 'LC_MATURITY_DATE', 'LC_ISSUE_NUMBER', 'LCX_UPDATE_DATE', 'LC_BENEFICIARY'].each do |field|
+          ['LR.FHLB_ID','LR.LC_LC_NUMBER', 'LR.LC_SORT_CODE','LR.LCX_CURRENT_PAR', 'LR.LCX_TRANS_SPREAD', 'LR.LC_TRADE_DATE', 'LR.LC_SETTLEMENT_DATE', 'LR.LC_MATURITY_DATE', 'LR.LC_ISSUE_NUMBER', 'LR.LCX_UPDATE_DATE', 'LR.LC_BENEFICIARY', 'LC.LC_EVERGREEN_FLAG'].each do |field|
             it "selects the `#{field}` field" do
               matcher = Regexp.new(/\A\s*SELECT.*\s+#{field}(?:,|\s+)/im)
               expect(letters_of_credit_module).to receive(:execute_sql).with(anything, matcher)
@@ -141,8 +141,8 @@ describe MAPI::ServiceApp do
             end
           end
         end
-        it 'selects from `WEB_INET.WEB_LC_LATESTDATE_RPT`' do
-          matcher = Regexp.new(/\A\s*SELECT.+FROM\s+WEB_INET.WEB_LC_LATESTDATE_RPT/im)
+        it 'selects from the JOIN of `WEB_INET.WEB_LC_LATESTDATE_RPT` and `PORTFOLIOS.LCS`' do
+          matcher = Regexp.new(/\A\s*SELECT.+FROM\s+WEB_LC_LATESTDATE_RPT\s+LR\s+JOIN\s+PORTFOLIOS\.LCS\s+LC\s+ON\s+LR\.LC_LC_NUMBER\s+=\s+LC\.LC_LC_NUMBER/im)
           expect(letters_of_credit_module).to receive(:execute_sql).with(anything, matcher)
           call_method
         end
@@ -168,7 +168,7 @@ describe MAPI::ServiceApp do
           end
         end
       end
-      [:lc_number, :description, :beneficiary].each do |property|
+      [:lc_number, :description, :beneficiary, :evergreen_flag].each do |property|
         it "returns an object with a `#{property}` formatted as a string" do
           formatted_credits.each do |credit|
             expect(credit[property]).to be_kind_of(String)
@@ -176,7 +176,7 @@ describe MAPI::ServiceApp do
         end
       end
       describe 'handling nil values' do
-        [:maturity_date, :trade_date, :trade_date, :current_par, :maintenance_charge, :lc_number, :description, :beneficiary].each do |property|
+        [:maturity_date, :trade_date, :trade_date, :current_par, :maintenance_charge, :lc_number, :description, :beneficiary, :evergreen_flag].each do |property|
           it "returns an object with a nil value for `#{property}` if that property doesn't have a value" do
             MAPI::Services::Member::LettersOfCredit::Private.format_credits([{}, {}]).each do |credit|
               expect(credit[property]).to be_nil

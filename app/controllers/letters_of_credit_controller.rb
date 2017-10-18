@@ -91,6 +91,7 @@ class LettersOfCreditController < ApplicationController
     raise StandardError, "There has been an error and LettersOfCreditController#manage has encountered nil. Check error logs." if historic_locs.nil? || intraday_locs.nil?
     historic_locs = historic_locs[:credits]
     intraday_locs = intraday_locs.select{ |activity| activity[:instrument_type] == LC_INSTRUMENT_TYPE }
+    intraday_locs = intraday_locs.collect { |activity| activity[:intraday_lc] = true; activity}
     locs = dedupe_locs(intraday_locs, historic_locs)
     rows = if locs.present?
       sort_report_data(locs, :lc_number).collect do |credit|
@@ -104,7 +105,7 @@ class LettersOfCreditController < ApplicationController
             {value: credit[:description], type: nil},
             {value: credit[:maintenance_charge], type: :basis_point},
             {value: t('global.view_pdf'), type: nil},
-            {value: credit[:sort_code], type: nil}
+            {value: credit[:intraday_lc], type: nil}
           ]
         }
       end
@@ -135,7 +136,7 @@ class LettersOfCreditController < ApplicationController
   def amend
     id = params[:id]
     @letter_of_credit_request = LetterOfCreditRequest.find(id, request) if id.present?
-    @letter_of_credit_request ||= LetterOfCreditRequest.find_by_lc_number(current_member_id,params[:lc_number], request)
+    @letter_of_credit_request ||= LetterOfCreditRequest.find_by_lc_number(current_member_id, params[:lc_number], params[:intraday_lc], request)
     populate_amend_request_view_variables
   end
 
@@ -147,7 +148,6 @@ class LettersOfCreditController < ApplicationController
     @amended_expiration_date = letter_of_credit_request.amended_expiration_date
     @session_elevated = session_elevated?
     unless @letter_of_credit_request.valid?
-      @error_message = prioritized_error_message(@letter_of_credit_request)
       populate_amend_request_view_variables
       render :amend
     end
@@ -307,6 +307,11 @@ class LettersOfCreditController < ApplicationController
   def populate_amend_request_view_variables
     set_titles(t('letters_of_credit.request.amend.title'))
     @date_restrictions = date_restrictions
+    @error_message = if letter_of_credit_request.amendable_online?
+      prioritized_error_message(letter_of_credit_request)
+    else
+      I18n.t('letters_of_credit.errors.not_amendable_online')
+    end
   end
 
   def letter_of_credit_request
