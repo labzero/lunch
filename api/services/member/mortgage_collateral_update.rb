@@ -29,18 +29,14 @@ module MAPI
         end
 
         def self.mcu_transaction_id(app, member_id)
-          unless should_fake?(app)
-            get_message(app, 'GET_TRANSACTION_ID')
-          else
-            SecureRandom.hex
-          end
+          { transaction_id: should_fake?(app) ? rand(999..9999) : get_message(app, 'GET_TRANSACTION_ID') }
         end
 
         def self.mcu_member_info(app, member_id)
           unless should_fake?(app)
-            get_message(app, 'GET_MEMBER_INFO')[member_id]
+            get_message(app, 'GET_MEMBER_INFO')[member_id.to_s]
           else
-            fake_hash('member_mcu_member_info')[member_id]
+            fake_hash('member_mcu_member_info')[member_id.to_s]
           end
         end
         

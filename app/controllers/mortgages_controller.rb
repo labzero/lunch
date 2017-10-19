@@ -13,6 +13,10 @@ class MortgagesController < ApplicationController
     blanket_lien: I18n.t('mortgages.new.transaction.pledge_types.blanket_lien')
   }.with_indifferent_access
 
+  PLEDGE_TYPE_DROPDOWN = [[I18n.t('mortgages.new.transaction.pledge_types.specific'), 'specific']]
+  
+  BLANKET_LIEN_DROPDOWN_OPTION = [I18n.t('mortgages.new.transaction.pledge_types.blanket_lien'), 'blanket_lien']
+
   MCU_TYPE_MAPPING = {
     complete: I18n.t('mortgages.new.transaction.mcu_types.complete'),
     update: I18n.t('mortgages.new.transaction.mcu_types.update'),
@@ -92,12 +96,15 @@ class MortgagesController < ApplicationController
   # GET
   def new
     @title = t('mortgages.new.title')
-    today = Time.zone.today
-    @due_datetime = Time.zone.parse("#{(today + 7.days).iso8601} 17:00:00") # Needs to come from MCU service
-    @extension_datetime = @due_datetime + 7.days # Needs to come from MCU service
-    @pledge_type_dropdown_options = PLEDGE_TYPE_MAPPING.map {|pledge_type, translation| [translation, pledge_type] }
-    @mcu_type_dropdown_options = MCU_TYPE_MAPPING.map {|mcu_type, translation| [translation, mcu_type] }
-    @program_type_dropdown_options = PROGRAM_TYPE_MAPPING.map {|program_type, translation| [translation, program_type] }
+    @member_info = MemberBalanceService.new(current_member_id, request).mcu_member_info
+    @due_datetime = Time.zone.parse(@member_info['mcuDueDate'])
+    @extension_datetime = Time.zone.parse(@member_info['mcuExtendedDate'])
+    @pledge_type_dropdown_options = PLEDGE_TYPE_DROPDOWN
+    @pledge_type_dropdown_options << BLANKET_LIEN_DROPDOWN_OPTION if @member_info['blanketLien']
+    @pledge_type_dropdown_options.uniq!
+    file_types = @member_info['mcuuFileTypes']
+    @mcu_type_dropdown_options = file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| type['value'] })
+    @program_type_dropdowns = Hash[file_types.map { |type| type['value'] }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })]
     @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')
     @session_elevated = session_elevated?
   end

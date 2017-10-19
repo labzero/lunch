@@ -1453,22 +1453,29 @@ describe MemberBalanceService do
   end
 
   describe 'the `mcu_member_info` method' do
-    it_behaves_like 'a MAPI backed service object method', :mcu_member_info
-    let(:member_info) { double('mcu_member_info') }
-    let(:member_entry) { double('member_entry') }
     let(:call_method) { subject.mcu_member_info }
-    it 'returns nil if get_hash returns nil' do
-      allow(subject).to receive(:get_hash).and_return(nil)
-      expect(call_method).to eq(nil)
+    let(:mcu_member_info) { double('mcu_member_info') }
+    it_behaves_like 'a MAPI backed service object method', :mcu_member_info
+    it 'gets the appropriate cache key' do
+      expect(CacheConfiguration).to receive(:key).with(:mcu_member_info)
+      call_method
     end
-    context 'with a response' do
-      before do
-        allow(subject).to receive(:get_hash).and_return(member_info)
-        allow(member_info).to receive(:[]).with(member_id).and_return(member_entry)
-      end
-      it 'returns the result of `get_hash[@member_id]`' do
-        expect(call_method).to eq(member_entry)
-      end
+    it 'gets the appropriate expiry' do
+      expect(CacheConfiguration).to receive(:expiry).with(:mcu_member_info)
+      call_method
+    end
+    it 'calls fetch on the cache' do
+      key = double('key')
+      expiry = double('expiry')
+      allow(CacheConfiguration).to receive(:key).with(:mcu_member_info).and_return(key)
+      allow(CacheConfiguration).to receive(:expiry).with(:mcu_member_info).and_return(expiry)
+      expect(Rails.cache).to receive(:fetch).with(key, expires_in: expiry)
+      call_method
+    end     
+    it 'gets a fresh result upon cache miss' do
+      allow(Rails.cache).to receive(:fetch).and_yield
+      expect(subject).to receive(:get_hash).with(:mcu_member_info, "/member/#{member_id}/mcu_member_info")
+      call_method
     end
   end
 

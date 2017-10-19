@@ -203,3 +203,10 @@
     padding: 0;
   }
 }
+
+.mcu-program-type-dropdown {
+  display: none;
+  &.selected {
+    display: inline-block;
+  }
+}

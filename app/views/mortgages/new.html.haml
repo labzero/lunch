@@ -17,13 +17,16 @@
           %h2= t('mortgages.new.transaction.title')
           .input-field-container-horizontal
             %label{for: 'mortgage_collateral_update_new'}= t('mortgages.new.transaction.pledge')
-            = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[pledge_type]', dropdown_options: @pledge_type_dropdown_options, default_text: t('mortgages.new.transaction.select_pledge'), include_blank: true, classes: ['mcu-pledge-type-dropdown']
+            = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[pledge_type]', dropdown_options: @pledge_type_dropdown_options, default_text: t('mortgages.new.transaction.select_pledge'), include_blank: true, classes: ['mcu-pledge-type-dropdown'], ignore_single_item: true
           .input-field-container-horizontal
             %label{for: 'mortgage_collateral_update_new'}= t('mortgages.new.transaction.mcu')
-            = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[mcu_type]', dropdown_options: @mcu_type_dropdown_options, default_text: t('mortgages.new.transaction.select_mcu'), include_blank: true, disabled: true, classes: ['mcu-mcu-type-dropdown']
+            = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[mcu_type]', dropdown_options: @mcu_type_dropdown_options, default_text: t('mortgages.new.transaction.select_mcu'), include_blank: true, disabled: true, classes: ['mcu-mcu-type-dropdown'], ignore_single_item: true
           .input-field-container-horizontal
             %label{for: 'mortgage_collateral_update_new'}= t('mortgages.new.transaction.program')
-            = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[program_type]', dropdown_options: @program_type_dropdown_options, default_text: t('mortgages.new.transaction.select_program'), include_blank: true, disabled: true, classes: ['mcu-program-type-dropdown']
+            - show_dropdown = true
+            - @program_type_dropdowns.each do |mcu_type, program_type_options|
+              = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[program_type]', dropdown_options: program_type_options, default_text: t('mortgages.new.transaction.select_program'), include_blank: true, disabled: true, classes: ['mcu-program-type-dropdown', mcu_type, show_dropdown ? 'selected' : ''], ignore_single_item: true
+              -show_dropdown = false
         %section
           %h2= t('mortgages.new.upload.title')
           .mcu-upload-area

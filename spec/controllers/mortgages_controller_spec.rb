@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe MortgagesController, :type => :controller do
   login_user
 
-  let(:member_id) { double('A Member ID') }
+  let(:member_id) { rand(9999..99999) }
 
   before { allow(controller).to receive(:current_member_id).and_return(member_id) }
 
@@ -42,7 +42,46 @@ RSpec.describe MortgagesController, :type => :controller do
 
     let(:today) { Time.zone.today }
     let(:call_action) { get :new }
-    before { allow(Time.zone).to receive(:today).and_return(today) }
+    let(:member_info) { double('member info') }
+    let(:member_balance_service) { double('member balance service') }
+    let(:due_string) { SecureRandom.hex }
+    let(:due_datetime) { double('due datetime') }
+    let(:extension_string) { SecureRandom.hex }
+    let(:extension_datetime) { double('extension datetime') }
+    let(:file_types) { JSON.parse('[ { "id" : 5,
+                           "value" : "COMPLETE",
+                           "nameSpecific" : "Complete",
+                           "nameBlanketLien" : "Standard",
+                           "pledgeTypes" : [ "FHLB" ]
+                         }, {
+                           "id" : 3,
+                           "value" : "DEPLEDGE",
+                           "nameSpecific" : "Depledge",
+                           "nameBlanketLien" : "Delete",
+                           "pledgeTypes" : [ "FHLB" ]
+                         }, {
+                           "id" : 1,
+                           "value" : "PLEDGE",
+                           "nameSpecific" : "Pledge",
+                           "nameBlanketLien" : "Add",
+                           "pledgeTypes" : [ "FHLB" ]
+                         }, {
+                           "id" : 4,
+                           "value" : "RENUMBER",
+                           "nameSpecific" : "Renumber",
+                           "nameBlanketLien" : "Renumber",
+                           "pledgeTypes" : [ "FHLB" ]
+                         } ]') }
+    before do
+      allow(MemberBalanceService).to receive(:new).with(member_id, request).and_return(member_balance_service)
+      allow(member_balance_service).to receive(:mcu_member_info).and_return(member_info)
+      allow(Time.zone).to receive(:parse)
+      allow(member_info).to receive(:[])
+      allow(member_info).to receive(:[]).with('mcuDueDate').and_return(due_string)
+      allow(member_info).to receive(:[]).with('mcuExtendedDate').and_return(extension_string)
+      allow(member_info).to receive(:[]).with('blanketLien').and_return(true)
+      allow(member_info).to receive(:[]).with('mcuuFileTypes').and_return(file_types)
+    end
 
     it_behaves_like 'a MortgagesController action that sets page-specific instance variables with a before filter'
     it_behaves_like 'it checks the `request?` `mortgage` policy'
@@ -50,29 +89,32 @@ RSpec.describe MortgagesController, :type => :controller do
       call_action
       expect(assigns[:title]).to eq(I18n.t('mortgages.new.title'))
     end
-    it 'sets `@due_datetime` to a day one week from today, at 5pm' do
+    it 'parses the due date' do
+      expect(Time.zone).to receive(:parse).with(due_string)
       call_action
-      expect(assigns[:due_datetime]).to eq(Time.zone.parse("#{(today + 7.days).iso8601} 17:00:00"))
     end
-    it 'sets `@extension_datetime` to a day two weeks from today, at 5pm' do
+    it 'sets the `@due_datetime`' do
+      allow(Time.zone).to receive(:parse).with(due_string).and_return(due_datetime)
       call_action
-      expect(assigns[:extension_datetime]).to eq(Time.zone.parse("#{(today + 14.days).iso8601} 17:00:00"))
+      expect(assigns[:due_datetime]).to eq(due_datetime)
     end
-    it 'sets `@pledge_type_dropdown_options` to an array with each member array containing a `PLEDGE_TYPE_MAPPING` value-key pair' do
+    it 'parses the extension date' do
+      expect(Time.zone).to receive(:parse).with(extension_string)
       call_action
-      expect(assigns[:pledge_type_dropdown_options]).to eq(described_class::PLEDGE_TYPE_MAPPING.map{ |k,v| [v, k] })
     end
-    it 'sets `@mcu_type_dropdown_options` to an array with each member array containing a `MCU_TYPE_MAPPING` value-key pair' do
+    it 'sets the `@extension_datetime`' do
+      allow(Time.zone).to receive(:parse).with(extension_string).and_return(extension_datetime)
       call_action
-      expect(assigns[:mcu_type_dropdown_options]).to eq(described_class::MCU_TYPE_MAPPING.map{ |k,v| [v, k] })
+      expect(assigns[:extension_datetime]).to eq(extension_datetime)
     end
-    it 'sets `@program_type_dropdown_options` to an array with each member array containing a `PROGRAM_TYPE_MAPPING` value-key pair' do
+    it 'does not add blanket lien option to `@pledge_type_dropdown_options` if `member_info["blanketLien"]` is false' do
+      allow(member_info).to receive(:[]).with('blanketLien').and_return(false)
       call_action
-      expect(assigns[:program_type_dropdown_options]).to eq(described_class::PROGRAM_TYPE_MAPPING.map{ |k,v| [v, k] })
+      expect(assigns[:pledge_type_dropdown_options]).to eq(described_class::PLEDGE_TYPE_DROPDOWN)
     end
-    it 'sets `@accepted_upload_mimetypes` to the joined `ACCEPTED_UPLOAD_MIMETYPES` constant' do
+    it 'assigns `@mcu_type_dropdown_options`' do
       call_action
-      expect(assigns[:accepted_upload_mimetypes]).to eq(described_class::ACCEPTED_UPLOAD_MIMETYPES.join(', '))
+      expect(assigns[:mcu_type_dropdown_options]).to eq(file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| type['value'] }))
     end
     it 'sets `@session_elevated` to the result of `session_elevated?`' do
       session_elevated = double('session info')
