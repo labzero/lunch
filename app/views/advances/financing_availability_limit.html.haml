@@ -19,8 +19,8 @@
               %dd= fhlb_formatted_currency(@net_stock_required, precision: 0)
             %dl.large_dl
               %dt= t('dashboard.quick_advance.financing_availability_limit.cumulative') +':'
-              %dd= fhlb_formatted_currency(@gross_cumulative_stock_required, precision: 0)
-            %p= t('dashboard.quick_advance.financing_availability_limit.debit_sta_html', amount: fhlb_formatted_currency(@gross_net_stock_required, precision: 0))
+              %dd= fhlb_formatted_currency(@stock, precision: 0)
+            %p= t('dashboard.quick_advance.financing_availability_limit.debit_sta_html', amount: fhlb_formatted_currency(@stock, precision: 0))
         .request-form-actions
           = link_to(t('global.cancel'), advances_manage_path, class: 'secondary-button cancel-advance')
           = link_to(t('global.edit'), advances_select_rate_path(advance_request: {id: @advance_request_id}), class: 'secondary-button edit-advance-button')
