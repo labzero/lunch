@@ -392,7 +392,6 @@ class MemberBalanceService < MAPIService
   end
 
   def mcu_member_status
-    #TODOCAB add caching
     get_hashes(:mcu_member_status, "/member/#{@member_id}/mcu_member_status")
   end
 

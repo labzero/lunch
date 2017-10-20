@@ -54,9 +54,9 @@ class MortgagesController < ApplicationController
   # GET
   def manage
     @title = t('mortgages.manage.title')
-    today = Time.zone.today
-    @due_datetime = Time.zone.parse("#{(today + 7.days).iso8601} 17:00:00") # Needs to come from MCU service
-    @extension_datetime = @due_datetime + 7.days # Needs to come from MCU service
+    member_info = MemberBalanceService.new(current_member_id, request).mcu_member_info
+    @due_datetime = member_info[:mcuDueDate].try(:to_date)
+    @extension_datetime = member_info[:mcuExtendedDate].try(:to_date)
     member_balances = MemberBalanceService.new(current_member_id, request)
     mcu_status = member_balances.mcu_member_status
     rows = if mcu_status.present?
@@ -64,14 +64,14 @@ class MortgagesController < ApplicationController
         status = translated_mcu_transaction(status)
       {
         columns: [
-          {value: status[:transaction_number], type: nil},
-          {value: status[:translated_mcu_type], type: nil},
-          {value: status[:authorized_by], type: nil},
-          {value: status[:authorized_on], type: nil},
-          {value: status[:translated_status], type: nil},
-          {value: status[:number_of_loans], type: :number},
-          {value: status[:number_of_errors], type: :number},
-          {value: [[I18n.t('mortgages.manage.actions.view_details'), mcu_view_transaction_path(transaction_number: status[:transaction_number])]], type: :link_list}
+          {value: status[:transactionId], type: nil},
+          {value: status[:mcuType], type: nil},
+          {value: status[:authorizedBy], type: nil},
+          {value: status[:authorizedOn], type: nil},
+          {value: status[:status], type: nil},
+          {value: status[:numberOfLoans], type: nil},
+          {value: status[:numberOfErrors], type: nil},
+          {value: [[I18n.t('mortgages.manage.actions.view_details'), mcu_view_transaction_path(transactionId: status[:transactionId])]], type: :link_list}
         ]
       }
       end
@@ -115,8 +115,8 @@ class MortgagesController < ApplicationController
     member_balances = MemberBalanceService.new(current_member_id, request)
     mcu_transactions = member_balances.mcu_member_status
     raise StandardError, 'There has been an error and MortgagesController#view has encountered nil. Check error logs.' if mcu_transactions.nil?
-    transaction_details = mcu_transactions.select{ |transaction| transaction[:transaction_number].to_s == params[:transaction_number].to_s}.first
-    raise ArgumentError, "No matching MCU Status found for MCU with transaction_number: #{params[:transaction_number]}" unless transaction_details.present?
+    transaction_details = mcu_transactions.select{ |transaction| transaction[:transactionId].to_s == params[:transactionId].to_s}.first
+    raise ArgumentError, "No matching MCU Status found for MCU with transactionId: #{params[:transactionId]}" unless transaction_details.present?
     @transaction_details = translated_mcu_transaction(transaction_details)
   end
 
@@ -124,11 +124,11 @@ class MortgagesController < ApplicationController
 
   def translated_mcu_transaction(transaction)
     if transaction
-      transaction[:translated_mcu_type] = MCU_TYPE_MAPPING[transaction[:mcu_type]] if transaction[:mcu_type]
+      transaction[:translated_mcuType] = MCU_TYPE_MAPPING[transaction[:mcuType].downcase] if transaction[:mcuType]
       transaction[:translated_pledge_type] = PLEDGE_TYPE_MAPPING[transaction[:pledge_type]] if transaction[:pledge_type]
       transaction[:translated_program_type] = PROGRAM_TYPE_MAPPING[transaction[:program_type]] if transaction[:program_type]
       transaction[:translated_status] = STATUS_MAPPING[transaction[:status]] if transaction[:status]
-      transaction[:error_percentage] = ((transaction[:number_of_errors].to_f / transaction[:number_of_loans].to_f) * 100 if transaction[:number_of_loans])
+      transaction[:error_percentage] = ((transaction[:numberOfErrors].to_f / transaction[:numberOfLoans].to_f) * 100 if transaction[:numberOfLoans])
       transaction.with_indifferent_access
     end
   end

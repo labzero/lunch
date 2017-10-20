@@ -1471,7 +1471,7 @@ describe MemberBalanceService do
       allow(CacheConfiguration).to receive(:expiry).with(:mcu_member_info).and_return(expiry)
       expect(Rails.cache).to receive(:fetch).with(key, expires_in: expiry)
       call_method
-    end     
+    end
     it 'gets a fresh result upon cache miss' do
       allow(Rails.cache).to receive(:fetch).and_yield
       expect(subject).to receive(:get_hash).with(:mcu_member_info, "/member/#{member_id}/mcu_member_info")

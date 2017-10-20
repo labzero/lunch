@@ -24,7 +24,7 @@ module MAPI
           correlation_id = SecureRandom.hex
           client = stomp_client(app)
           begin
-            client.subscribe(FQ_TOPIC, { 'correlation-id': correlation_id, 'client-id': CLIENT_ID }) do |msg|                
+            client.subscribe(FQ_TOPIC, { 'correlation-id': correlation_id, 'client-id': CLIENT_ID }) do |msg|
               @response = msg
             end
           rescue Stomp::Error::DuplicateSubscription
@@ -41,15 +41,15 @@ module MAPI
         def stomp_client(app)
           ssl_config = Stomp::SSLParams.new(cert_file: CERT_FILE, key_file: KEY_FILE, ts_files: TS_FILES)
           #TODO configure failover onto SFDWMSGBROKER2
-          @stomp_client ||= Stomp::Client.new( { hosts: [ { host: HOSTNAME, port: PORT, ssl: ssl_config } ], 
-                                                 reliable: true, 
-                                                 max_reconnect_attempts: 20, 
-                                                 randomize: true, 
-                                                 connect_timeout: 60, 
-                                                 logger: app.logger, 
+          @stomp_client ||= Stomp::Client.new( { hosts: [ { host: HOSTNAME, port: PORT, ssl: ssl_config } ],
+                                                 reliable: true,
+                                                 max_reconnect_attempts: 20,
+                                                 randomize: true,
+                                                 connect_timeout: 60,
+                                                 logger: app.logger,
                                                  ssl_post_conn_check: false,
-                                                 connect_headers: { host: HOSTNAME, 
-                                                                    'accept-version': '1.0', 
+                                                 connect_headers: { host: HOSTNAME,
+                                                                    'accept-version': '1.0',
                                                                     'client_id': CLIENT_ID }})
         end
       end

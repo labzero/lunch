@@ -65,11 +65,10 @@ end
 Then(/^I should see a list of transaction details for the transaction that was in the first row of the MCU Recent Request table$/) do
   transaction_number = page.all(:xpath, "//dt[text()='#{I18n.t('mortgages.manage.transaction_number')}']/following-sibling::dd").first.text
   mcu_type = page.all(:xpath, "//dt[text()='#{I18n.t('mortgages.new.transaction.mcu')}']/following-sibling::dd").first.text
-  status = page.all(:xpath, "//dt[text()='#{I18n.t('mortgages.manage.status')}']/following-sibling::dd").first.text
 
   expect(transaction_number).to eq(@transaction_number)
-  expect(mcu_type).to eq(@mcu_type)
-  expect(status).to eq(@status)
+  expect(mcu_type.downcase).to eq(@mcu_type.downcase)
+
 end
 
 When(/^I click on the Manage MCUS button$/) do

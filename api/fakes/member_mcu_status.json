@@ -1,57 +1,24 @@
 [
   {
-    "transaction_number": 25100033,
-    "mcu_type": "complete",
-    "program_type": "standard",
-    "pledge_type": "specific",
-    "authorized_by": "John Smith",
-    "authorized_on": "2017-02-05",
-    "status": "processing",
-    "number_of_loans": null,
-    "number_of_errors": null,
-    "reports": {}
+    "transactionId":210585,
+    "uploadType":"COMPLETE",
+    "authorizedBy":"IX_TEST",
+    "authorizedOn":"2017-09-20",
+    "status":"ERROR",
+    "numberOfLoans":0,
+    "numberOfErrors":0,
+    "canCancel":false,
+    "canView":false
   },
   {
-    "transaction_number": 25100055,
-    "mcu_type": "renumber",
-    "program_type": "standard",
-    "pledge_type": "specific",
-    "authorized_by": "John Smith",
-    "authorized_on": "2017-03-05",
-    "status": "review",
-    "number_of_loans": 4,
-    "number_of_errors": 2,
-    "reports": {
-      "summary": "http://some-report-url",
-      "detail": "http://some-report-url"
-    }
-  },
-  {
-    "transaction_number": 25102355,
-    "mcu_type": "pledge",
-    "program_type": "loans_held",
-    "pledge_type": "specific",
-    "authorized_by": "John Smith",
-    "authorized_on": "2017-04-15",
-    "status": "committed",
-    "number_of_loans": 965,
-    "number_of_errors": 48,
-    "reports": {
-      "summary": "http://some-report-url",
-      "detail": "http://some-report-url",
-      "borrowing_capacity": "http://some-report-url"
-    }
-  },
-  {
-    "transaction_number": 24103457,
-    "mcu_type": "delete",
-    "program_type": "standard",
-    "pledge_type": "blanket_lien",
-    "authorized_by": "John Smith",
-    "authorized_on": "2016-12-05",
-    "status": "canceled",
-    "number_of_loans": 47,
-    "number_of_errors": 9,
-    "reports": {}
+    "transactionId":207571,
+    "uploadType":"UPDATE",
+    "authorizedBy":"IX_TEST",
+    "authorizedOn":"2017-01-30",
+    "status":"ERROR",
+    "numberOfLoans":3,
+    "numberOfErrors":0,
+    "canCancel":false,
+    "canView":false
   }
 ]
