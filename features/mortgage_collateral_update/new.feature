@@ -18,7 +18,7 @@ Feature: Requesting a New Mortgage Collateral Update
       | intranet user            | should     |
       | quick-advance non-signer | should not |
 
-  @jira-mem-2574 @smoke
+  @smoke @jira-mem-2574
   Scenario: Visiting the New Mortgage Collateral Update (MCU) page
     Given I visit the dashboard
     When I click on the mortgages link in the header
