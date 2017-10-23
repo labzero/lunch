@@ -14,3 +14,9 @@
     - else
       %h2{class: "status-off"}= t('admin.data_visibility.status.none_disabled_for_all')
       =link_to(t('admin.data_visibility.manage_data_visibility.title'), data_visibility_flags_path)
+  %section.data-visibility-status
+    - if @institutions_with_disabled_items[:rows].count > 0
+      %h2{class: "status-conditional"}= t('admin.data_visibility.status.institutions_with_items_disabled')
+      =render 'data_visibility_disabled_reports_table_section', title: '', table_class: 'data-visibility-table', table_data: @institutions_with_disabled_items
+    - else
+      %h2{class: "status-conditional"}= t('admin.data_visibility.status.no_institutions_with_items_disabled')

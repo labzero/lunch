@@ -44,7 +44,7 @@ module MAPI
             SQL
             fetch_objects(app.logger, disabled_ids_for_member_query)
           else
-            fake('global_report_availability')
+            fake('report_availability_for_member')
           end
           disabled_ids.collect{ |flag| flag.to_i }
         end

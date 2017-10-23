@@ -809,6 +809,23 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'get `member/members_with_disabled_reports`' do
+    let(:results) { SecureRandom.hex }
+    let(:call_endpoint) { get 'member/members_with_disabled_reports' }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 'member/members_with_disabled_reports', :get, MAPI::Services::Member::MembersWithDisabledReports, :members_with_disabled_reports
+
+    it 'calls `MAPI::Services::Member::MembersWithDisabledReports.members_with_disabled_reports` with the app' do
+      expect(MAPI::Services::Member::MembersWithDisabledReports).to receive(:members_with_disabled_reports).with(an_instance_of(MAPI::ServiceApp))
+      call_endpoint
+    end
+    it 'returns the JSONd results of calling MAPI::Services::Member::MembersWithDisabledReports.members_with_disabled_reports' do
+      allow(MAPI::Services::Member::MembersWithDisabledReports).to receive(:members_with_disabled_reports).and_return(results)
+      call_endpoint
+      expect(last_response.body).to eq(results.to_json)
+    end
+  end
+
   describe 'get `member/{id}/beneficiaries`' do
     let(:results) { SecureRandom.hex }
     let(:member_id) { SecureRandom.hex }

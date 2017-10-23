@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'rspec/support/spec/string_matcher'
 
 RSpec.describe Admin::DataVisibilityController, :type => :controller do
   login_user(admin: true)
@@ -265,7 +266,7 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
   end
 
   describe 'GET view_status' do
-    let(:members_service) { instance_double(MembersService, global_disabled_reports: []) }
+    let(:members_service) { instance_double(MembersService, global_disabled_reports: [], members_with_disabled_reports: [] ) }
     let(:call_action) { get :view_status }
 
     before do
@@ -278,6 +279,11 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
       call_action
     end
     it 'raises an error if `global_disabled_reports` returns nil' do
+      allow(members_service).to receive(:global_disabled_reports).and_return(nil)
+      expect{call_action}.to raise_error('There has been an error and Admin::DataVisibilityController#view_status has encountered nil. Check error logs.')
+    end
+
+    it 'raises an error if `@institutions_with_disabled_items` returns nil' do
       allow(members_service).to receive(:global_disabled_reports).and_return(nil)
       expect{call_action}.to raise_error('There has been an error and Admin::DataVisibilityController#view_status has encountered nil. Check error logs.')
     end
@@ -310,12 +316,32 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
         expect(assigns[:globally_disabled_reports]).to eq(table_sentinel)
       end
     end
+
+    describe 'setting the `@institutions_with_disabled_items` view instance variable' do
+      let(:member_list) { double('list of members with disabled reports') }
+      let(:table_sentinel) { double('table instance variable') }
+
+      before do
+        allow(controller).to receive(:institutions_disabled_data_table)
+        allow(members_service).to receive(:members_with_disabled_reports).and_return(member_list)
+      end
+
+      it 'calls `institutions_disabled_data_table` with the list of members' do
+        expect(controller).to receive(:institutions_disabled_data_table).with(member_list)
+        call_action
+      end
+      it 'sets `@institutions_with_disabled_items` to the result of calling `institutions_disabled_data_table`' do
+        allow(controller).to receive(:institutions_disabled_data_table).with(anything).and_return(table_sentinel)
+        call_action
+        expect(assigns[:institutions_with_disabled_items]).to eq(table_sentinel)
+      end
+    end
   end
 
   describe 'private methods' do
     describe '`data_visibility_table`' do
       visibility_mapping = described_class::DATA_VISIBILITY_MAPPING
-      it 'returns a hash with a for for each report_name it is passed' do
+      it 'returns a hash with a row for for each `report_name` it is passed' do
         report_names = Array.new(rand(2..5)){visibility_mapping.keys.sample}
         result = subject.send(:data_visibility_table, [], report_names)
         expect(result[:rows].length).to eq(report_names.length)
@@ -398,6 +424,30 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
             result = subject.send(:data_visibility_table, disabled_ids, all_report_names, true)
             expect(result[:rows].length).to eq(0)
           end
+        end
+      end
+    end
+
+    describe '`institutions_disabled_data_table`' do
+      member_list = [ {"FHLB_ID"=> 1, "MEMBER_NAME"=> "Old McDonald's Leanding Window"},
+                      {"FHLB_ID"=> 3, "MEMBER_NAME"=> "Irish Bank"},
+                      {"FHLB_ID"=> 4, "MEMBER_NAME"=> "S'more Bank"} ]
+      let(:result) {subject.send(:institutions_disabled_data_table, member_list)}
+      let(:row) { subject.send(:institutions_disabled_data_table, member_list)[:rows].first}
+
+      it 'returns a hash with a row for for each item in the `member_list` array it is passed' do
+        expect(result[:rows].length).to eq(member_list.length)
+      end
+
+      describe 'the first column in the table' do
+         it 'has a value that contains the member name' do
+           expect(row[:columns].first[:value]).to eq(member_list[0]['MEMBER_NAME'].to_s)
+         end
+      end
+
+      describe 'the second column in the table' do
+        it 'is populated with a string value' do
+          expect(row[:columns].second[:value].to_s).to include('member_id=' + member_list[0]['FHLB_ID'].to_s)
         end
       end
     end

@@ -3651,7 +3651,11 @@ en:
       status:
         title: Data and Institution Status
         disabled_for_all: "The following items are disabled for every institution:"
-        none_disabled_for_all: "No items are disabled for every institution"
+        none_disabled_for_all: No items are disabled for every institution
+        institutions_with_items_disabled: "The following institutions have additional items disabled:"
+        no_institutions_with_items_disabled: No institutions have additional items disabled
+        actions:
+          view: View
       manage_data_visibility:
         title: Manage Data Visibility
         report_visibility: Report Visibility

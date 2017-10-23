@@ -180,10 +180,14 @@ class Admin::DataVisibilityController < Admin::BaseController
   # GET
   def view_status
     members_service = MembersService.new(request)
+
     disabled_ids = members_service.global_disabled_reports
     raise 'There has been an error and Admin::DataVisibilityController#view_status has encountered nil. Check error logs.' if disabled_ids.nil?
-
     @globally_disabled_reports = data_visibility_table(disabled_ids, all_report_names, true)
+
+    member_list = members_service.members_with_disabled_reports
+    @institutions_with_disabled_items = institutions_disabled_data_table(member_list)
+    raise 'There has been an error and Admin::DataVisibilityController#view_status has encountered nil. Check error logs.' if member_list.nil?
   end
 
   private
@@ -215,6 +219,19 @@ class Admin::DataVisibilityController < Admin::BaseController
         }
         rows.last[:row_class] = 'data-source-disabled' unless data_source_enabled
       end
+    end
+    {rows: rows}
+  end
+
+  def institutions_disabled_data_table(member_list)
+    rows = []
+    member_list.each do |member|
+    rows << {
+        columns: [
+          { value: member['MEMBER_NAME'].to_s },
+          { value: [[I18n.t('admin.data_visibility.status.actions.view'), data_visibility_flags_path(member_id: member['FHLB_ID'])]], type: :actions}
+        ]
+      }
     end
     {rows: rows}
   end

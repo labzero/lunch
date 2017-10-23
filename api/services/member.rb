@@ -7,6 +7,7 @@ require_relative 'member/capital_stock_trial_balance'
 require_relative 'member/cash_projections'
 require_relative 'member/collateral_fees'
 require_relative 'member/disabled_reports'
+require_relative 'member/members_with_disabled_reports'
 require_relative 'member/dividend_statement'
 require_relative 'member/flags'
 require_relative 'member/forward_commitments'
@@ -561,6 +562,18 @@ module MAPI
                 key :required, true
                 key :description, "The array of data visibility status hashes for flag_ids."
                 key :type, :GlobalDisabledReports
+              end
+            end
+          end
+          api do
+            key :path, '/members_with_disabled_reports'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Retrieve a list of all members that have at least one disabled report'
+              key :nickname, :getMembersWithDisabledReports
+              key :type, :array
+              items do
+                key :'$ref', :MembersWithDisabledReportsItem
               end
             end
           end
@@ -1262,7 +1275,6 @@ module MAPI
               end
             end
           end
-
           api do
             key :path, '/{id}/securities/authorize'
             operation do
@@ -1286,7 +1298,6 @@ module MAPI
               end
             end
           end
-
           api do
             key :path, '/{id}/securities/request/{header_id}'
             operation do
@@ -1640,6 +1651,13 @@ module MAPI
             member_id = params[:id]
             web_flags = JSON.parse(request.body.read)
             {} if MAPI::Services::Member::DisabledReports.update_ids_for_member(self, member_id, web_flags)
+          end
+        end
+
+        # Members with Disabled Reports
+        relative_get '/members_with_disabled_reports' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            MAPI::Services::Member::MembersWithDisabledReports.members_with_disabled_reports(self)
           end
         end
 
