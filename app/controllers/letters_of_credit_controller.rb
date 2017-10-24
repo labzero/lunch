@@ -273,6 +273,7 @@ class LettersOfCreditController < ApplicationController
     (intraday_locs + historic_locs).each do |loc|
       if deduped_locs[loc[:lc_number]]
         deduped_locs[loc[:lc_number]][:description] ||= loc[:description] # Intraday LOCs do not currently contain a cica program description
+        deduped_locs[loc[:lc_number]][:intraday_lc] = false
       else
         deduped_locs[loc[:lc_number]] = loc
       end

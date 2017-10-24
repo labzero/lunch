@@ -932,6 +932,14 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           duplicate_historic[:description] = historic_description
           expect(deduped_lc[:description]).to eq(historic_description)
         end
+        it 'sets `intraday_lc` to `false` if there is an overlapping historic and intraday lc' do
+          expect(deduped_lc[:intraday_lc]).to be false
+        end
+        it 'does not set `intraday_lc` if there is no overlap between historic and intraday lcs' do
+          results = controller.send(:dedupe_locs, [intraday], [])
+          deduped_lc = results.select{|loc| loc[:lc_number] == lc_number}.first
+          expect(deduped_lc[:intraday_lc]).to be nil
+        end
       end
     end
 

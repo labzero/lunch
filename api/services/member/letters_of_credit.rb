@@ -58,8 +58,8 @@ module MAPI
               LR.LC_BENEFICIARY,
               LC.LC_EVERGREEN_FLAG
               FROM WEB_LC_LATESTDATE_RPT LR JOIN PORTFOLIOS.LCS LC ON LR.LC_LC_NUMBER = LC.LC_LC_NUMBER
-              WHERE LC_LC_NUMBER = #{ quote(lc_number) }
-              AND FHLB_ID = #{ quote(member_id) }
+              WHERE LR.LC_LC_NUMBER = #{ quote(lc_number) }
+              AND LR.FHLB_ID = #{ quote(member_id) }
             SQL
             credits = []
             begin
