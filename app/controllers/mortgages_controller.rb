@@ -67,7 +67,7 @@ class MortgagesController < ApplicationController
           {value: status[:transactionId], type: nil},
           {value: status[:mcuType], type: nil},
           {value: status[:authorizedBy], type: nil},
-          {value: status[:authorizedOn], type: nil},
+          {value: status[:authorizedOn], type: :date},
           {value: status[:status], type: nil},
           {value: status[:numberOfLoans], type: nil},
           {value: status[:numberOfErrors], type: nil},
@@ -96,13 +96,13 @@ class MortgagesController < ApplicationController
   # GET
   def new
     @title = t('mortgages.new.title')
-    @member_info = MemberBalanceService.new(current_member_id, request).mcu_member_info
-    @due_datetime = Time.zone.parse(@member_info['mcuDueDate'])
-    @extension_datetime = Time.zone.parse(@member_info['mcuExtendedDate'])
+    member_info = MemberBalanceService.new(current_member_id, request).mcu_member_info
+    @due_datetime = Time.zone.parse(member_info['mcuDueDate'])
+    @extension_datetime = Time.zone.parse(member_info['mcuExtendedDate'])
     @pledge_type_dropdown_options = PLEDGE_TYPE_DROPDOWN
-    @pledge_type_dropdown_options << BLANKET_LIEN_DROPDOWN_OPTION if @member_info['blanketLien']
+    @pledge_type_dropdown_options << BLANKET_LIEN_DROPDOWN_OPTION if member_info['blanketLien']
     @pledge_type_dropdown_options.uniq!
-    file_types = @member_info['mcuuFileTypes']
+    file_types = member_info['mcuuFileTypes']
     @mcu_type_dropdown_options = file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| type['value'] })
     @program_type_dropdowns = Hash[file_types.map { |type| type['value'] }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })]
     @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')

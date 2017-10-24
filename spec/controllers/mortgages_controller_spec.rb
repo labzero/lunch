@@ -187,7 +187,7 @@ RSpec.describe MortgagesController, :type => :controller do
             expect(controller).to receive(:translated_mcu_transaction).and_return({})
             call_action
           end
-          value_types = [[:transactionId, nil], [:mcuType, nil], [:authorizedBy, nil], [:authorizedOn, nil], [:status, nil], [:numberOfLoans, nil], [:numberOfErrors, nil]]
+          value_types = [[:transactionId, nil], [:mcuType, nil], [:authorizedBy, nil], [:authorizedOn, :date], [:status, nil], [:numberOfLoans, nil], [:numberOfErrors, nil]]
           value_types.each_with_index do |attr, i|
             attr_name = attr.first
             attr_type = attr.last
