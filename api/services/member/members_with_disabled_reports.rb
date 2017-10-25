@@ -7,7 +7,7 @@ module MAPI
         def self.members_with_disabled_reports(app)
           member_list = unless should_fake?(app)
             fetch_hashes app, <<-SQL
-              SELECT FHLB_ID,  CU_SHORT_NAME AS MEMBER_NAME
+              SELECT DISTINCT FHLB_ID,  CU_SHORT_NAME AS MEMBER_NAME
               FROM WEB_ADM.WEB_DATA_FLAGS_BY_INSTITUTIONS INNER JOIN PORTFOLIOS.CUSTOMERS ON FHLB_ID = WEB_FHLB_ID
             SQL
           else
