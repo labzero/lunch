@@ -1742,7 +1742,7 @@ en:
       recent_requests: Recent Requests
       description: This list includes transactions which have had activity in the past 5 days.
       transaction_number: Transaction Number
-      upload_type: Upload Type
+      upload_type: MCU Type
       authorized_by: Authorized By
       authorized_on: Authorized On
       status: Status
