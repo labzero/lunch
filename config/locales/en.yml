@@ -761,7 +761,7 @@ en:
           other: Your institution has a maximum term for advances of %{count} months. See your Account Summary for more details.
         day_unit: day
         month_unit: month
-        custom_term_date: The shortest term available for an FRC custom term advance is two days.
+        custom_term_date: FRC advances must have at least one business day between funding and maturity.
     reports:
       title: Reports
       as_of_yesterday: As of yesterday
