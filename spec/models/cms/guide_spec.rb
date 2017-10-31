@@ -3,37 +3,9 @@ require 'rails_helper'
 RSpec.describe Cms::Guide, :type => :model do
   let(:request) { double('request') }
   let(:member_id) { rand(1000..9999) }
-  let(:guide_type) { instance_double(Symbol) }
+  let(:cms_key) { instance_double(Symbol) }
   let(:cms) { instance_double(ContentManagementService, get_slices_by_type: []) }
-  let(:subject) { Cms::Guide.new(member_id, request, guide_type, cms) }
-
-  describe 'initialization' do
-    let(:guide) { Cms::Guide.new(member_id, request, guide_type) }
-    before { allow(ContentManagementService).to receive(:new).and_return(cms) }
-
-    it 'sets the `guide_type` attribute to the given `guide_type`' do
-      expect(guide.guide_type).to eq(guide_type)
-    end
-    it 'sets the `cms` attribute to the given `cms` if one provided' do
-      preexisting_cms = double('cms')
-      guide = Cms::Guide.new(member_id, request, guide_type, preexisting_cms)
-      expect(guide.cms).to eq(preexisting_cms)
-    end
-    context 'when a `cms` is not passed in during initialization' do
-      it 'creates a new instance of `ContentManagementService` with the member id and the request' do
-        expect(ContentManagementService).to receive(:new).with(member_id, request)
-        guide
-      end
-      it 'sets the `cms` attribute to the instance of `ContentManagementService` that was created' do
-        allow(ContentManagementService).to receive(:new).and_return(cms)
-        expect(guide.cms).to eq(cms)
-      end
-      it 'raises an error if an instance of `ContentManagementService` is not created' do
-        allow(ContentManagementService).to receive(:new)
-        expect{guide}.to raise_error(ArgumentError, 'Failed to create a valid instance of `ContentManagementService`')
-      end
-    end
-  end
+  let(:subject) { Cms::Guide.new(member_id, request, cms_key, cms) }
 
   describe 'instance methods' do
     describe '`revisions`' do
@@ -54,8 +26,8 @@ RSpec.describe Cms::Guide, :type => :model do
       context 'when the `revisions` attribute has not yet been set' do
         before { subject.instance_variable_set(:@revisions, nil) }
 
-        it 'calls `get_slices_by_type` on the `cms` attribute with the `guide_type` attribute and the `revision` keyword' do
-          expect(subject.cms).to receive(:get_slices_by_type).with(subject.guide_type, 'revision')
+        it 'calls `get_slices_by_type` on the `cms` attribute with the `cms_key` attribute and the `revision` keyword' do
+          expect(subject.cms).to receive(:get_slices_by_type).with(subject.cms_key, 'revision')
           call_method
         end
         context 'when no slices are returned' do
