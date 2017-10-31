@@ -286,6 +286,7 @@ Rails.application.routes.draw do
         end
       end
       scope 'data-visibility' do
+        get '/status' => 'admin/data_visibility#view_status', as: :data_visibility_status
         get '/flags' => 'admin/data_visibility#view_flags', as: :data_visibility_flags
         put '/flags' => 'admin/data_visibility#update_flags', as: :data_visibility_flags_update
       end

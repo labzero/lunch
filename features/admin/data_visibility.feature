@@ -10,6 +10,7 @@ Feature: Viewing/Modifying the Data Visibility of the Member Portal
   Scenario: Navigating to the Data Visibility Flags page from the admin nav as a non-admin intranet user
     Given I am logged into the admin panel but do not have web admin privileges
     When I click on the data visibility link in the header
+    And I click on the data visibility web flags link in the header dropdown
     Then I should be on the data visibility web flags page
     And I should see the data visibility web flags page in its view-only mode
     And I should see 6 report tables with multiple data rows
@@ -20,6 +21,7 @@ Feature: Viewing/Modifying the Data Visibility of the Member Portal
   Scenario: Navigating to the Data Visibility Flags page from the admin nav as an etransact admin
     Given I am logged into the admin panel as an etransact admin
     When I click on the data visibility link in the header
+    And I click on the data visibility web flags link in the header dropdown
     Then I should be on the data visibility web flags page
     And I should see the data visibility web flags page in its view-only mode
     And I should see 6 report tables with multiple data rows
@@ -29,6 +31,7 @@ Feature: Viewing/Modifying the Data Visibility of the Member Portal
   @jira-mem-2452 @jira-mem-2453
   Scenario: Navigating to the Data Visibility Flags page from the admin nav
     When I click on the data visibility link in the header
+    And I click on the data visibility web flags link in the header dropdown
     Then I should be on the data visibility web flags page
     And I should see the data visibility web flags page in its editable mode
     And I should see 6 report tables with multiple data rows
@@ -54,3 +57,9 @@ Feature: Viewing/Modifying the Data Visibility of the Member Portal
     When I click to toggle the state of the first data source
     And I click to save the data visibility changes but there is an error
     Then I should see the error message on the data visibility flags page for that member
+
+  @jira-mem-2571 @local-only
+  Scenario: Navigating to the Data and Institution Status from the admin nav
+    When I click on the data visibility link in the header
+    And I click on the data and institution status link in the header dropdown
+    Then I should be on the data and institution status page

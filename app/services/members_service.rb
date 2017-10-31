@@ -54,6 +54,10 @@ class MembersService < MAPIService
     get_json(:global_disabled_reports, "member/disabled_reports")
   end
 
+  def members_with_disabled_reports
+    get_json(:members_with_disabled_reports, "member/members_with_disabled_reports")
+  end
+
   def update_global_data_visibility(flags)
     put_hash(:update_global_data_visibility, 'member/disabled_reports', flags)
   end

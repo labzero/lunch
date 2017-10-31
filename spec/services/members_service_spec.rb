@@ -84,6 +84,25 @@ describe MembersService do
     end
   end
 
+  describe ' the `members_with_disabled_reports` method' do
+    let(:results) { double('some results') }
+    let(:call_method) { subject.members_with_disabled_reports }
+
+    it_behaves_like 'a MAPI backed service object method', :members_with_disabled_reports, nil, :get, nil, true
+    it 'calls `get_json` with the endpoint name' do
+      expect(subject).to receive(:get_json).with(:members_with_disabled_reports, anything)
+      call_method
+    end
+    it 'calls `get_json` with the proper endpoint' do
+      expect(subject).to receive(:get_json).with(anything, 'member/members_with_disabled_reports')
+      call_method
+    end
+    it 'returns the result of `get_json`' do
+      allow(subject).to receive(:get_json).and_return(results)
+      expect(call_method).to eq(results)
+    end
+  end
+
   describe '`update_global_data_visibility` method' do
     let(:flags) { double('flags array') }
     let(:results) { double('some results') }

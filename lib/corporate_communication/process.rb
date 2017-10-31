@@ -99,7 +99,6 @@ class CorporateCommunication
           response
         when Net::HTTPRedirection then
           location = response['location']
-          warn "redirected to #{location}"
           fetch_image(location, limit - 1)
         else
           response.value

@@ -1,476 +1,516 @@
 {
   "1" : {
-    "id" : 1,
-    "name" : "Old McDonald's Leanding Window",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 6,
-      "value" : "STREAMLINE",
-      "nameSpecific" : "Streamline",
-      "nameBlanketLien" : "Streamline",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "2" : {
-    "id" : 2,
-    "name" : "Bobby's Payday Loans",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "3" : {
-    "id" : 3,
-    "name" : "Irish Bank",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "4" : {
-    "id" : 4,
-    "name" : "S'more Bank",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "5" : {
-    "id" : 5,
-    "name" : "Wells Faygo",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "6" : {
-    "id" : 6,
-    "name" : "Chaste Manhattan",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "7" : {
-    "id" : 7,
-    "name" : "Subprime Backalley Lenders",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "8" : {
-    "id" : 8,
-    "name" : "Loan Sharks Incorporated",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "9" : {
-    "id" : 9,
-    "name" : "Marina Bank",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "10" : {
-    "id" : 10,
-    "name" : "Overseas Bank",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "11" : {
-    "id" : 11,
-    "name" : "Cayman Islands Holding Company",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "12" : {
-    "id" : 12,
-    "name" : "The Bank With The Really Really Long Name That Requires Truncation or Expansion",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "13" : {
-    "id" : 13,
-    "name" : "The Bank With Disabled Signers",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 6,
-      "value" : "STREAMLINE",
-      "nameSpecific" : "Streamline",
-      "nameBlanketLien" : "Streamline",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  },
-  "14" : {
-    "id" : 14,
-    "name" : "The Bank Requiring Dual Signers for Advances",
-    "blanketLien" : false,
-    "mcuuFileTypes" : [ {
-      "id" : 5,
-      "value" : "COMPLETE",
-      "nameSpecific" : "Complete",
-      "nameBlanketLien" : "Standard",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 3,
-      "value" : "DEPLEDGE",
-      "nameSpecific" : "Depledge",
-      "nameBlanketLien" : "Delete",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 1,
-      "value" : "PLEDGE",
-      "nameSpecific" : "Pledge",
-      "nameBlanketLien" : "Add",
-      "pledgeTypes" : [ "FHLB" ]
-    }, {
-      "id" : 4,
-      "value" : "RENUMBER",
-      "nameSpecific" : "Renumber",
-      "nameBlanketLien" : "Renumber",
-      "pledgeTypes" : [ "FHLB" ]
-    } ],
-    "memberPortalFileTypes" : [ ],
-    "activeMcuu" : true,
-    "activeMemberPortal" : false
-  }
+   "id" : 1,
+   "name" : "Old McDonald's Leanding Window",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2019-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "2" : {
+   "id" : 2,
+   "name" : "Bobby's Payday Loans",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 6,
+     "value" : "STREAMLINE",
+     "nameSpecific" : "Streamline",
+     "nameBlanketLien" : "Streamline",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "3" : {
+   "id" : 3,
+   "name" : "Irish Bank",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 6,
+     "value" : "STREAMLINE",
+     "nameSpecific" : "Streamline",
+     "nameBlanketLien" : "Streamline",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "4" : {
+   "id" : 4,
+   "name" : "S'more Bank",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 6,
+     "value" : "STREAMLINE",
+     "nameSpecific" : "Streamline",
+     "nameBlanketLien" : "Streamline",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "5" : {
+   "id" : 5,
+   "name" : "Wells Faygo",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2018-12-31",
+   "blanketLien" : true,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "6" : {
+   "id" : 6,
+   "name" : "Chaste Manhattan",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "7" : {
+   "id" : 7,
+   "name" : "Subprime Backalley Lenders",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 6,
+     "value" : "STREAMLINE",
+     "nameSpecific" : "Streamline",
+     "nameBlanketLien" : "Streamline",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "8" : {
+   "id" : 8,
+   "name" : "Loan Sharks Incorporated",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "9" : {
+   "id" : 9,
+   "name" : "Marina Bank",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB", "MWL" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB", "MWL" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "10" : {
+   "id" : 10,
+   "name" : "Overseas Bank",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "11" : {
+   "id" : 11,
+   "name" : "Cayman Islands Holding Company",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "12" : {
+   "id" : 12,
+   "name" : "The Bank With The Really Really Long Name That Requires Truncation or Expansion",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "13" : {
+   "id" : 13,
+   "name" : "The Bank With Disabled Signers",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ },
+ "14" : {
+   "id" : 14,
+   "name" : "The Bank Requiring Dual Signers for Advances",
+   "mcuDueDate" : "2017-12-31",
+   "mcuExtendedDate" : "2017-12-31",
+   "blanketLien" : false,
+   "mcuuFileTypes" : [ {
+     "id" : 5,
+     "value" : "COMPLETE",
+     "nameSpecific" : "Complete",
+     "nameBlanketLien" : "Standard",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 3,
+     "value" : "DEPLEDGE",
+     "nameSpecific" : "Depledge",
+     "nameBlanketLien" : "Delete",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 1,
+     "value" : "PLEDGE",
+     "nameSpecific" : "Pledge",
+     "nameBlanketLien" : "Add",
+     "pledgeTypes" : [ "FHLB" ]
+   }, {
+     "id" : 4,
+     "value" : "RENUMBER",
+     "nameSpecific" : "Renumber",
+     "nameBlanketLien" : "Renumber",
+     "pledgeTypes" : [ "FHLB" ]
+   } ],
+   "memberPortalFileTypes" : [ ],
+   "activeMcuu" : true,
+   "activeMemberPortal" : false
+ }
 }

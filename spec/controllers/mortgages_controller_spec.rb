@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe MortgagesController, :type => :controller do
   login_user
 
-  let(:member_id) { double('A Member ID') }
+  let(:member_id) { rand(9999..99999) }
 
   before { allow(controller).to receive(:current_member_id).and_return(member_id) }
 
@@ -42,7 +42,46 @@ RSpec.describe MortgagesController, :type => :controller do
 
     let(:today) { Time.zone.today }
     let(:call_action) { get :new }
-    before { allow(Time.zone).to receive(:today).and_return(today) }
+    let(:member_info) { double('member info') }
+    let(:member_balance_service) { double('member balance service') }
+    let(:due_string) { SecureRandom.hex }
+    let(:due_datetime) { double('due datetime') }
+    let(:extension_string) { SecureRandom.hex }
+    let(:extension_datetime) { double('extension datetime') }
+    let(:file_types) { JSON.parse('[ { "id" : 5,
+                           "value" : "COMPLETE",
+                           "nameSpecific" : "Complete",
+                           "nameBlanketLien" : "Standard",
+                           "pledgeTypes" : [ "FHLB" ]
+                         }, {
+                           "id" : 3,
+                           "value" : "DEPLEDGE",
+                           "nameSpecific" : "Depledge",
+                           "nameBlanketLien" : "Delete",
+                           "pledgeTypes" : [ "FHLB" ]
+                         }, {
+                           "id" : 1,
+                           "value" : "PLEDGE",
+                           "nameSpecific" : "Pledge",
+                           "nameBlanketLien" : "Add",
+                           "pledgeTypes" : [ "FHLB" ]
+                         }, {
+                           "id" : 4,
+                           "value" : "RENUMBER",
+                           "nameSpecific" : "Renumber",
+                           "nameBlanketLien" : "Renumber",
+                           "pledgeTypes" : [ "FHLB" ]
+                         } ]') }
+    before do
+      allow(MemberBalanceService).to receive(:new).with(member_id, request).and_return(member_balance_service)
+      allow(member_balance_service).to receive(:mcu_member_info).and_return(member_info)
+      allow(Time.zone).to receive(:parse)
+      allow(member_info).to receive(:[])
+      allow(member_info).to receive(:[]).with('mcuDueDate').and_return(due_string)
+      allow(member_info).to receive(:[]).with('mcuExtendedDate').and_return(extension_string)
+      allow(member_info).to receive(:[]).with('blanketLien').and_return(true)
+      allow(member_info).to receive(:[]).with('mcuuFileTypes').and_return(file_types)
+    end
 
     it_behaves_like 'a MortgagesController action that sets page-specific instance variables with a before filter'
     it_behaves_like 'it checks the `request?` `mortgage` policy'
@@ -50,29 +89,32 @@ RSpec.describe MortgagesController, :type => :controller do
       call_action
       expect(assigns[:title]).to eq(I18n.t('mortgages.new.title'))
     end
-    it 'sets `@due_datetime` to a day one week from today, at 5pm' do
+    it 'parses the due date' do
+      expect(Time.zone).to receive(:parse).with(due_string)
       call_action
-      expect(assigns[:due_datetime]).to eq(Time.zone.parse("#{(today + 7.days).iso8601} 17:00:00"))
     end
-    it 'sets `@extension_datetime` to a day two weeks from today, at 5pm' do
+    it 'sets the `@due_datetime`' do
+      allow(Time.zone).to receive(:parse).with(due_string).and_return(due_datetime)
       call_action
-      expect(assigns[:extension_datetime]).to eq(Time.zone.parse("#{(today + 14.days).iso8601} 17:00:00"))
+      expect(assigns[:due_datetime]).to eq(due_datetime)
     end
-    it 'sets `@pledge_type_dropdown_options` to an array with each member array containing a `PLEDGE_TYPE_MAPPING` value-key pair' do
+    it 'parses the extension date' do
+      expect(Time.zone).to receive(:parse).with(extension_string)
       call_action
-      expect(assigns[:pledge_type_dropdown_options]).to eq(described_class::PLEDGE_TYPE_MAPPING.map{ |k,v| [v, k] })
     end
-    it 'sets `@mcu_type_dropdown_options` to an array with each member array containing a `MCU_TYPE_MAPPING` value-key pair' do
+    it 'sets the `@extension_datetime`' do
+      allow(Time.zone).to receive(:parse).with(extension_string).and_return(extension_datetime)
       call_action
-      expect(assigns[:mcu_type_dropdown_options]).to eq(described_class::MCU_TYPE_MAPPING.map{ |k,v| [v, k] })
+      expect(assigns[:extension_datetime]).to eq(extension_datetime)
     end
-    it 'sets `@program_type_dropdown_options` to an array with each member array containing a `PROGRAM_TYPE_MAPPING` value-key pair' do
+    it 'does not add blanket lien option to `@pledge_type_dropdown_options` if `member_info["blanketLien"]` is false' do
+      allow(member_info).to receive(:[]).with('blanketLien').and_return(false)
       call_action
-      expect(assigns[:program_type_dropdown_options]).to eq(described_class::PROGRAM_TYPE_MAPPING.map{ |k,v| [v, k] })
+      expect(assigns[:pledge_type_dropdown_options]).to eq(described_class::PLEDGE_TYPE_DROPDOWN)
     end
-    it 'sets `@accepted_upload_mimetypes` to the joined `ACCEPTED_UPLOAD_MIMETYPES` constant' do
+    it 'assigns `@mcu_type_dropdown_options`' do
       call_action
-      expect(assigns[:accepted_upload_mimetypes]).to eq(described_class::ACCEPTED_UPLOAD_MIMETYPES.join(', '))
+      expect(assigns[:mcu_type_dropdown_options]).to eq(file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| type['value'] }))
     end
     it 'sets `@session_elevated` to the result of `session_elevated?`' do
       session_elevated = double('session info')
@@ -85,10 +127,16 @@ RSpec.describe MortgagesController, :type => :controller do
   describe 'get `manage`' do
     let(:today) { Time.zone.today }
     let(:call_action) { get :manage }
-    let(:member_balance_service) { instance_double(MemberBalanceService, mcu_member_status: []) }
+    let(:member_info) { double('member info') }
+    let(:due_datetime) { Time.zone.today + rand(1..30).days }
+    let(:extension_datetime) { Time.zone.today + rand(1..30).days }
+    let(:member_balance_service) { instance_double(MemberBalanceService, mcu_member_status: [], mcu_member_info: []) }
     before {
       allow(Time.zone).to receive(:today).and_return(today)
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
+      allow(member_balance_service).to receive(:mcu_member_info).and_return(member_info)
+      allow(member_info).to receive(:[]).with(:mcuDueDate).and_return(due_datetime)
+      allow(member_info).to receive(:[]).with(:mcuExtendedDate).and_return(extension_datetime)
     }
 
     it_behaves_like 'a MortgagesController action that sets page-specific instance variables with a before filter'
@@ -98,11 +146,11 @@ RSpec.describe MortgagesController, :type => :controller do
     end
     it 'sets `@due_datetime` to a day one week from today, at 5pm' do
       call_action
-      expect(assigns[:due_datetime]).to eq(Time.zone.parse("#{(today + 7.days).iso8601} 17:00:00"))
+      expect(assigns[:due_datetime]).to eq(due_datetime)
     end
     it 'sets `@extension_datetime` to a day two weeks from today, at 5pm' do
       call_action
-      expect(assigns[:extension_datetime]).to eq(Time.zone.parse("#{(today + 14.days).iso8601} 17:00:00"))
+      expect(assigns[:extension_datetime]).to eq(extension_datetime)
     end
     describe '`@table_data`' do
       it 'has the proper `column_headings`' do
@@ -126,20 +174,20 @@ RSpec.describe MortgagesController, :type => :controller do
         it 'builds a row for each letter of credit returned by `dedupe_locs`' do
           n = rand(1..10)
           mcu = []
-          n.times { mcu << {transaction_number: SecureRandom.hex} }
+          n.times { mcu << {transactionId: SecureRandom.hex} }
           allow(member_balance_service).to receive(:mcu_member_status).and_return(mcu)
           call_action
           expect(assigns[:table_data][:rows].length).to eq(n)
         end
         describe 'populated rows' do
-          let(:mcu) { {transaction_number: double('transaction_number'), translated_mcu_type: double('upload_type'), authorized_by: double('authorized_by'), authorized_on: double('authorized_on'), translated_status: double('status'), number_of_loans: double('number_of_loans'), number_of_errors: double('number_of_errors') } }
+          let(:mcu) { {transactionId: double('transactionId'), mcu_type: double('mcu_type'), authorizedBy: double('authorizedBy'), authorizedOn: double('authorizedOn'), status: double('status'), numberOfLoans: double('numberOfLoans'), numberOfErrors: double('numberOfErrors') } }
           before { allow(member_balance_service).to receive(:mcu_member_status).and_return([mcu]) }
 
           it 'calls `translated_mcu_transaction` with each mcu transaction' do
             expect(controller).to receive(:translated_mcu_transaction).and_return({})
             call_action
           end
-          value_types = [[:transaction_number, nil], [:translated_mcu_type, nil], [:authorized_by, nil], [:authorized_on, nil], [:translated_status, nil], [:number_of_loans, :number], [:number_of_errors, :number]]
+          value_types = [[:transactionId, nil], [:mcuType, nil], [:authorizedBy, nil], [:authorizedOn, :date], [:status, nil], [:numberOfLoans, nil], [:numberOfErrors, nil]]
           value_types.each_with_index do |attr, i|
             attr_name = attr.first
             attr_type = attr.last
@@ -173,8 +221,8 @@ RSpec.describe MortgagesController, :type => :controller do
               it "is an array in an array whose first member is `#{I18n.t('mortgages.manage.actions.view_details')}`" do
                 expect(view_details_column[:value].first.first).to eq(I18n.t('mortgages.manage.actions.view_details'))
               end
-              it 'is an array in an array whose second member is the `mcu_view_transaction_path` with the `transaction_number` of the mcu transaction' do
-                expect(view_details_column[:value].first.last).to eq(mcu_view_transaction_path(transaction_number: mcu[:transaction_number]))
+              it 'is an array in an array whose second member is the `mcu_view_transaction_path` with the `transactionId` of the mcu transaction' do
+                expect(view_details_column[:value].first.last).to eq(mcu_view_transaction_path(transactionId: mcu[:transactionId]))
               end
             end
           end
@@ -184,11 +232,11 @@ RSpec.describe MortgagesController, :type => :controller do
   end
 
   describe 'get `view`' do
-    let(:transaction_number) { SecureRandom.hex }
-    let(:matching_transaction) { {transaction_number: transaction_number} }
-    let(:unmatching_transaction) { {transaction_number: SecureRandom.hex} }
+    let(:transactionId) { SecureRandom.hex }
+    let(:matching_transaction) { {transactionId: transactionId} }
+    let(:unmatching_transaction) { {transactionId: SecureRandom.hex} }
     let(:member_balance_service) { instance_double(MemberBalanceService, mcu_member_status: [unmatching_transaction, matching_transaction]) }
-    let(:call_action) { get :view, transaction_number: transaction_number }
+    let(:call_action) { get :view, transactionId: transactionId }
 
     before { allow(MemberBalanceService).to receive(:new).and_return(member_balance_service) }
 
@@ -213,23 +261,23 @@ RSpec.describe MortgagesController, :type => :controller do
       before { allow(member_balance_service).to receive(:mcu_member_status).and_return([]) }
 
       it 'raises an error containing the transaction number' do
-        expect{call_action}.to raise_error(ArgumentError, "No matching MCU Status found for MCU with transaction_number: #{transaction_number}")
+        expect{call_action}.to raise_error(ArgumentError, "No matching MCU Status found for MCU with transactionId: #{transactionId}")
       end
     end
     describe 'when no matching transactions are returned from `mcu_member_status`' do
       before { allow(member_balance_service).to receive(:mcu_member_status).and_return([unmatching_transaction]) }
 
       it 'raises an error containing the transaction number' do
-        expect{call_action}.to raise_error(ArgumentError, "No matching MCU Status found for MCU with transaction_number: #{transaction_number}")
+        expect{call_action}.to raise_error(ArgumentError, "No matching MCU Status found for MCU with transactionId: #{transactionId}")
       end
     end
     describe 'when a matching transaction is included in the set returned by `mcu_member_status`' do
       let(:translated_transaction_details) { instance_double(Hash) }
-      it 'calls `translated_mcu_transaction` with the mcu transaction that has the same `transaction_number` as the passed `transaction_number` param' do
+      it 'calls `translated_mcu_transaction` with the mcu transaction that has the same `transactionId` as the passed `transactionId` param' do
         expect(controller).to receive(:translated_mcu_transaction).with(matching_transaction)
         call_action
       end
-      it 'does not call `translated_mcu_transaction` with any mcu transactions that have different `transaction_numbers` than the passed `transaction_number` param' do
+      it 'does not call `translated_mcu_transaction` with any mcu transactions that have different `transactionId` than the passed `transactionId` param' do
         expect(controller).not_to receive(:translated_mcu_transaction).with(unmatching_transaction)
         call_action
       end
@@ -244,7 +292,7 @@ RSpec.describe MortgagesController, :type => :controller do
   describe 'private methods' do
     describe '`translated_mcu_transaction`' do
       let(:transaction) {{
-        mcu_type: described_class::MCU_TYPE_MAPPING.keys.sample,
+        mcuType: described_class::MCU_TYPE_MAPPING.keys.sample,
         pledge_type: described_class::PLEDGE_TYPE_MAPPING.keys.sample,
         program_type: described_class::PROGRAM_TYPE_MAPPING.keys.sample,
         status: described_class::STATUS_MAPPING.keys.sample
@@ -255,7 +303,7 @@ RSpec.describe MortgagesController, :type => :controller do
       end
       [
         {
-          attr: :mcu_type,
+          attr: :mcuType,
           const_name: 'MCU_TYPE_MAPPING',
           const: described_class::MCU_TYPE_MAPPING
         },
@@ -284,24 +332,24 @@ RSpec.describe MortgagesController, :type => :controller do
         end
       end
       describe 'the `error_percentage` attribute' do
-        let(:number_of_loans) { rand(100..999) }
-        let(:number_of_errors) { number_of_loans - rand(1..75) }
+        let(:numberOfLoans) { rand(100..999) }
+        let(:numberOfErrors) { numberOfLoans - rand(1..75) }
         let(:error_percentage) { call_method[:error_percentage] }
-        it 'is not set if there is no `number_of_loans` value in the passed transaction' do
+        it 'is not set if there is no `numberOfLoans` value in the passed transaction' do
           expect(error_percentage).to be nil
         end
-        context 'when there is a `number_of_loans` value in the passed transaction' do
-          before { transaction[:number_of_loans] = number_of_loans }
+        context 'when there is a `numberOfLoans` value in the passed transaction' do
+          before { transaction[:numberOfLoans] = numberOfLoans }
 
-          it 'is zero if there is no `number_of_errors` value in the passed transaction' do
+          it 'is zero if there is no `numberOfErrors` value in the passed transaction' do
             expect(error_percentage).to eq(0)
           end
 
-          context 'when there is a `number_of_errors` value in the passed transaction' do
-            before { transaction[:number_of_errors] = number_of_errors }
+          context 'when there is a `numberOfErrors` value in the passed transaction' do
+            before { transaction[:numberOfErrors] = numberOfErrors }
 
-            it 'is the quotient of the `number_of_errors` divided by the `number_of_loans` times 100' do
-              expect(error_percentage).to eq((number_of_errors.to_f / number_of_loans.to_f) * 100)
+            it 'is the quotient of the `numberOfErrors` divided by the `numberOfLoans` times 100' do
+              expect(error_percentage).to eq((numberOfErrors.to_f / numberOfLoans.to_f) * 100)
             end
           end
         end

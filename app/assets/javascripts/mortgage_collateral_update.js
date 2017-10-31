@@ -6,38 +6,31 @@ $(function() {
   var $pledgeTypeField = $newMcuForm.find('select[name="mortgage_collateral_update[pledge_type]"]');
   var $mcuTypeField = $newMcuForm.find('select[name="mortgage_collateral_update[mcu_type]"]');
   var $programTypeField = $newMcuForm.find('select[name="mortgage_collateral_update[program_type]"]');
+  var $mcuUploadInput = $('.mcu-upload-area input[type=file]');
+  var $mcuUploadFileNameField = $('.mcu-upload-file-name');
+  var $mcuUploadInstructions = $('.mcu-upload-instructions');
+  var $mcuUploadCompleteSection = $('.mcu-upload-complete');
 
   $pledgeTypeField.on('change', function(e) {
     $([$mcuTypeDropdown, $programTypeDropdown]).each(function() {resetDropdown(this)});
     enableDropdown($mcuTypeDropdown);
     disableDropdown($programTypeDropdown);
     if ($pledgeTypeField.val() === 'specific') {
-      $(['add', 'delete']).each(function() {hideDropdownSelection($mcuTypeDropdown, this)});
-      $(['pledge', 'depledge']).each(function() {showDropdownSelection($mcuTypeDropdown, this)});
       $('.mcu-upload-legal-section-specific').show();
       $('.mcu-upload-legal-section-blanket-lien').hide();
     } else if ($pledgeTypeField.val() === 'blanket_lien') {
-      $(['pledge', 'depledge']).each(function() {hideDropdownSelection($mcuTypeDropdown, this)});
-      $(['add', 'delete']).each(function() {showDropdownSelection($mcuTypeDropdown, this)});
       $('.mcu-upload-legal-section-blanket-lien').show();
       $('.mcu-upload-legal-section-specific').hide();
     };
   });
 
   $mcuTypeField.on('change', function(e) {
+    $programTypeDropdown.removeClass('selected');
+    $selectedProgramType = $('.mcu-program-type-dropdown.' + $mcuTypeField[0].options[$mcuTypeField[0].selectedIndex].value);
+    $selectedProgramType.addClass('selected');
     enableDropdown($programTypeDropdown);
     resetDropdown($programTypeDropdown);
   });
-
-  function hideDropdownSelection($dropdown, selection) {
-    $dropdown.find('option[value=' + selection + ']').hide();
-    $dropdown.find('li[data-dropdown-value=' + selection + ']').hide();
-  };
-
-  function showDropdownSelection($dropdown, selection) {
-    $dropdown.find('option[value=' + selection + ']').show();
-    $dropdown.find('li[data-dropdown-value=' + selection + ']').show();
-  };
 
   function enableDropdown($dropdown) {
     $dropdown.attr('disabled', false);
@@ -53,4 +46,17 @@ $(function() {
     $dropdown.find('.dropdown-selection').text(placeHolderText);
     $dropdown.find('li').removeClass('selected');
   };
+
+  $mcuUploadInput.on('change', function(e) {
+    $mcuUploadFileNameField.text(e.target.files[0].name);
+    $mcuUploadInstructions.hide();
+    $mcuUploadCompleteSection.show();
+  });
+
+  $('.mcu-upload-file-discard').on('click', function(e) {
+    $mcuUploadInput.val('');
+    $mcuUploadFileNameField.text('');
+    $mcuUploadCompleteSection.hide();
+    $mcuUploadInstructions.show();
+  });
 });

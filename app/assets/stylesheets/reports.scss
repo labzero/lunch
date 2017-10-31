@@ -1489,6 +1489,11 @@ td.dataTables_empty {
   .authorizations-report .report-table tbody td {
     @include typography-print-table-cell;
   }
+  .report-dividend-statement {
+    .report-table-title:nth-of-type(2) {
+      margin-bottom: 3px;
+    }
+  }
   .report-table  {
     border: none;
     width: 100%;

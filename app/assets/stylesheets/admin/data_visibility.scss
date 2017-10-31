@@ -1,3 +1,6 @@
+$disabled-icon: image-url('fhlb-status-off-small.svg');
+$partial-enabled-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjY0NjcuOTk5IC0xNjE1IDE1LjAwMSAxNSI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5jbHMtMSB7CiAgICAgICAgZmlsbDogI2RiZGJkYjsKICAgICAgfQoKICAgICAgLmNscy0yIHsKICAgICAgICBmaWxsOiAjMzhhNzZmOwogICAgICB9CgogICAgICAuY2xzLTMsIC5jbHMtNSB7CiAgICAgICAgZmlsbDogbm9uZTsKICAgICAgfQoKICAgICAgLmNscy0zIHsKICAgICAgICBzdHJva2U6ICM0ZjUzNWE7CiAgICAgICAgc3Ryb2tlLXdpZHRoOiAxcHg7CiAgICAgIH0KCiAgICAgIC5jbHMtNCB7CiAgICAgICAgc3Ryb2tlOiBub25lOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8ZyBpZD0iR3JvdXBfMjE4IiBkYXRhLW5hbWU9Ikdyb3VwIDIxOCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNjM3MSAtMTgyNikiPgogICAgPHBhdGggaWQ9IlN1YnRyYWN0aW9uXzYyIiBkYXRhLW5hbWU9IlN1YnRyYWN0aW9uIDYyIiBjbGFzcz0iY2xzLTEiIGQ9Ik0tODY5Ny41LDE5MjMuNWMtLjE2OSwwLS4zMzUtLjAwNi0uNS0uMDE4di0xMy45NjRjLjE2Ni0uMDEyLjMzMi0uMDE4LjUtLjAxOGE3LjAwOSw3LjAwOSwwLDAsMSw3LDdBNy4wMDgsNy4wMDgsMCwwLDEtODY5Ny41LDE5MjMuNVoiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDg4MDIgLTE2OTgpIi8+CiAgICA8cGF0aCBpZD0iU3VidHJhY3Rpb25fNjMiIGRhdGEtbmFtZT0iU3VidHJhY3Rpb24gNjMiIGNsYXNzPSJjbHMtMiIgZD0iTS04Njk4LjUsMTkyMy41Yy0uMTY3LDAtLjMzNC0uMDA2LS41LS4wMTh2LTEzLjk2NGMuMTY0LS4wMTIuMzMxLS4wMTguNS0uMDE4YTcuMDA4LDcuMDA4LDAsMCwxLDcsN0E3LjAwOCw3LjAwOCwwLDAsMS04Njk4LjUsMTkyMy41WiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTg1OTQuNTAyIDIxMzUpIHJvdGF0ZSgxODApIi8+CiAgICA8ZyBpZD0iRWxsaXBzZV8yNDIiIGRhdGEtbmFtZT0iRWxsaXBzZSAyNDIiIGNsYXNzPSJjbHMtMyIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoOTcgMjExKSI+CiAgICAgIDxjaXJjbGUgY2xhc3M9ImNscy00IiBjeD0iNy41IiBjeT0iNy41IiByPSI3LjUiLz4KICAgICAgPGNpcmNsZSBjbGFzcz0iY2xzLTUiIGN4PSI3LjUiIGN5PSI3LjUiIHI9IjciLz4KICAgIDwvZz4KICA8L2c+Cjwvc3ZnPgo=');
+
 .data-visibility {
   section {
     @extend %bordered-section;
@@ -70,5 +73,53 @@
   input[type=submit] {
     width: 100%;
     margin-bottom: 20px;
+  }
+}
+
+.data-visibility-status {
+  h2 {
+    display: inline-block;
+  }
+  a {
+    @extend %typography-table-button;
+    float: right;
+    text-transform: uppercase;
+  }
+
+  .data-visibility-table {
+    margin: 0px;
+    border-width: 0;
+    th, td {
+      box-sizing: border-box;
+      border-width: 0;
+      text-align: left;
+    }
+  }
+
+  .status-off, .status-conditional {
+    position: relative;
+    padding-left: 40px;
+    font-weight: bold;
+    &:before {
+      @extend %absolute-pseudoelement;
+      @extend %vertical-center;
+      top: 10px;
+      left: 0;
+      right: 0;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .status-off {
+    &:before {
+      background-image: $disabled-icon;
+    }
+  }
+
+  .status-conditional {
+    &:before {
+      background-image: $partial-enabled-icon;
+    }
   }
 }

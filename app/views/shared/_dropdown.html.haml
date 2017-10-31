@@ -6,7 +6,8 @@
 - dropdown_options ||= []
 - classes ||= []
 - classes = Array.wrap(classes)
-- if dropdown_options.length <= 1
+- ignore_single_item ||= false
+- if dropdown_options.length <= 1 && !ignore_single_item
   - classes << 'single-item-dropdown'
 - calculate_width ||= nil
 .input-field-container.icon-chevron-after.single-choice-dropdown.dropdown{class: classes, :'data-dropdown-calc-width' => calculate_width, 'disabled' => disabled, 'data-default-text' => default_text}

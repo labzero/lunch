@@ -50,14 +50,14 @@
                 %table
                   - table.each do |row|
                     %tr
-                      %td= row[:heading]
+                      %td= row[:heading].is_a?(Hash) ? row[:heading][:value] : row[:heading]
                       %td= row[:value]
             .right-column
               - row[:position_detail].last.each do |table|
                 %table
                   - table.each do |row|
                     %tr
-                      %td= row[:heading]
+                      %td= row[:heading].is_a?(Hash) ? row[:heading][:value] : row[:heading]
                       %td= row[:value]
     %tfoot
       %tr

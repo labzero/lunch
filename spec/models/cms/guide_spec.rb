@@ -39,48 +39,78 @@ RSpec.describe Cms::Guide, :type => :model do
     describe '`revisions`' do
       let(:call_method) { subject.revisions }
 
-      it 'calls `get_slices_by_type` on the `cms` attribute with the `guide_type` attribute and the `revision` keyword' do
-        expect(subject.cms).to receive(:get_slices_by_type).with(subject.guide_type, 'revision')
-        call_method
-      end
-      context 'when no slices are returned' do
-        it 'returns an empty array' do
-          expect(call_method).to eq([])
+      context 'when the `revisions` attribute has already been set' do
+        let(:revisions) { instance_double(Array) }
+        before { subject.instance_variable_set(:@revisions, revisions) }
+
+        it 'returns the `revisions` attribute' do
+          expect(call_method).to eq(revisions)
         end
-      end
-      context 'when slices are returned' do
-        let(:revision) { instance_double(Cms::Guide::Revision, last_updated: nil) }
-        it 'creates an instance of `Cms::Guide::Revision` for each slice' do
-          slices = []
-          n = rand(2..5)
-          n.times do |i|
-            slices << double('slice')
-          end
-          allow(subject.cms).to receive(:get_slices_by_type).and_return(slices)
-          expect(Cms::Guide::Revision).to receive(:new).exactly(n).and_return(revision)
+        it 'does not call `get_slices_by_type` on the `cms` attribute' do
+          expect(subject.cms).not_to receive(:get_slices_by_type)
           call_method
         end
-        it 'sorts the revisions by descending date' do
-          revision_1 = instance_double(Cms::Guide::Revision, last_updated: Date.new(2017, 3, 4))
-          revision_2 = instance_double(Cms::Guide::Revision, last_updated: Date.new(2018, 12, 14))
-          revision_3 = instance_double(Cms::Guide::Revision, last_updated: Date.new(2017, 1, 30))
-          allow(subject.cms).to receive(:get_slices_by_type).and_return([double('slice'), double('slice'), double('slice')])
-          allow(Cms::Guide::Revision).to receive(:new).and_return(revision_1, revision_2, revision_3)
-          expect(call_method).to eq([revision_2, revision_1, revision_3])
+      end
+      context 'when the `revisions` attribute has not yet been set' do
+        before { subject.instance_variable_set(:@revisions, nil) }
+
+        it 'calls `get_slices_by_type` on the `cms` attribute with the `guide_type` attribute and the `revision` keyword' do
+          expect(subject.cms).to receive(:get_slices_by_type).with(subject.guide_type, 'revision')
+          call_method
+        end
+        context 'when no slices are returned' do
+          it 'returns an empty array' do
+            expect(call_method).to eq([])
+          end
+        end
+        context 'when slices are returned' do
+          let(:revision) { instance_double(Cms::Guide::Revision, last_updated: nil) }
+          it 'creates an instance of `Cms::Guide::Revision` for each slice' do
+            slices = []
+            n = rand(2..5)
+            n.times do |i|
+              slices << double('slice')
+            end
+            allow(subject.cms).to receive(:get_slices_by_type).and_return(slices)
+            expect(Cms::Guide::Revision).to receive(:new).exactly(n).and_return(revision)
+            call_method
+          end
+          it 'sorts the revisions by descending date' do
+            revision_1 = instance_double(Cms::Guide::Revision, last_updated: Date.new(2017, 3, 4))
+            revision_2 = instance_double(Cms::Guide::Revision, last_updated: Date.new(2018, 12, 14))
+            revision_3 = instance_double(Cms::Guide::Revision, last_updated: Date.new(2017, 1, 30))
+            allow(subject.cms).to receive(:get_slices_by_type).and_return([double('slice'), double('slice'), double('slice')])
+            allow(Cms::Guide::Revision).to receive(:new).and_return(revision_1, revision_2, revision_3)
+            expect(call_method).to eq([revision_2, revision_1, revision_3])
+          end
         end
       end
     end
 
     describe '`last_revised_date`' do
+      let(:call_method) { subject.last_revised_date }
       let(:last_revised_date) { instance_double(Date) }
 
-      it 'calls `get_date` on the `cms` attribute with the `guide_type` attribute and the `last_revised_date` key word' do
-        expect(subject.cms).to receive(:get_date).with(subject.guide_type, 'last_revised_date')
-        subject.last_revised_date
+      context 'when `revisions` are present' do
+        let(:today) { Time.zone.today }
+        let(:most_recent_date) { today + rand(1..30).days }
+        let(:least_recent_date) { today - rand(1..30).days }
+        let(:revision1) { instance_double(Cms::Guide::Revision, last_updated: today) }
+        let(:revision2) { instance_double(Cms::Guide::Revision, last_updated: most_recent_date) }
+        let(:revision3) { instance_double(Cms::Guide::Revision, last_updated: least_recent_date) }
+        let(:revisions) { [revision1, revision2, revision3] }
+        before { subject.instance_variable_set(:@revisions, revisions) }
+
+        it 'returns the `last_updated` date from the most-recent revision' do
+          expect(call_method).to eq(most_recent_date)
+        end
       end
-      it 'returns the result of calling `get_date` on the `cms` attribute' do
-        allow(subject.cms).to receive(:get_date).and_return(last_revised_date)
-        expect(subject.last_revised_date).to eq(last_revised_date)
+      context 'when no revisions are present' do
+        before { subject.instance_variable_set(:@revisions, []) }
+
+        it 'returns nil' do
+          expect(call_method).to be nil
+        end
       end
     end
   end

@@ -82,6 +82,8 @@
   th, td {
     &:nth-child(1) {
       vertical-align: middle;
+      text-align: center;
+      padding-left: 15px;
     }
     &:nth-child(3) {
       width: 200px;

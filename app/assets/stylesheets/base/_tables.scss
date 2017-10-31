@@ -76,6 +76,16 @@
         background-color: $lightest-blue;
       }
     }
+    tbody {
+      tr:not(.odd):not(.even) {
+        &:nth-child(odd) {
+          background-color: transparent;
+        }
+        &:nth-child(even) {
+          background-color: transparent;
+        }
+      }
+    }
   }
 
   tfoot {

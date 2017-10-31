@@ -1,7 +1,17 @@
 require 'rails_helper'
+require 'rspec/support/spec/string_matcher'
 
 RSpec.describe Admin::DataVisibilityController, :type => :controller do
   login_user(admin: true)
+
+  account_reports = [:account_summary, :authorizations, :settlement_transaction_account, :investments]
+  capital_stock_reports = [:cap_stock_activity, :cap_stock_trial_balance, :cap_stock_leverage, :dividend_statement]
+  price_indications_reports = [:current_price_indications, :historical_price_indications]
+  collateral_reports = [:borrowing_capacity, :mortgage_collateral_update]
+  credit_reports = [:todays_credit, :advances, :interest_rate, :letters_of_credit, :forward_commitments, :parallel_shift]
+  securities_reports = [:securities_transactions, :cash_projections, :current_securities_position, :monthly_securities_position, :securities_services]
+
+  all_report_names = [securities_reports, credit_reports, collateral_reports, price_indications_reports, capital_stock_reports, account_reports].flatten
 
   it_behaves_like 'an admin controller'
 
@@ -101,12 +111,12 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
         allow(members_service).to receive(:global_disabled_reports).and_return(disabled_web_flags)
       end
       {
-        account_table: [:account_summary, :authorizations, :settlement_transaction_account, :investments],
-        capital_stock_table: [:cap_stock_activity, :cap_stock_trial_balance, :cap_stock_leverage, :dividend_statement],
-        price_indications_table: [:current_price_indications, :historical_price_indications],
-        collateral_table: [:borrowing_capacity, :mortgage_collateral_update],
-        credit_table: [:todays_credit, :advances, :interest_rate, :letters_of_credit, :forward_commitments, :parallel_shift],
-        securities_table: [:securities_transactions, :cash_projections, :current_securities_position, :monthly_securities_position, :securities_services]
+        account_table: account_reports,
+        capital_stock_table: capital_stock_reports,
+        price_indications_table: price_indications_reports,
+        collateral_table: collateral_reports,
+        credit_table: credit_reports,
+        securities_table: securities_reports
       }.each do |instance_var, web_flag_keys|
         describe "setting the `@#{instance_var}`" do
           it 'calls `data_visibility_table` with the disabled web flags' do
@@ -131,9 +141,9 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
           name: instance_double(String),
           id: instance_double(Integer)
         }}
-        it "has a first member whose text is #{I18n.t('admin.data_visibility.all_members')}" do
+        it "has a first member whose text is #{I18n.t('admin.data_visibility.manage_data_visibility.all_members')}" do
           call_action
-          expect(assigns[:member_dropdown][:options].first.first).to eq(I18n.t('admin.data_visibility.all_members'))
+          expect(assigns[:member_dropdown][:options].first.first).to eq(I18n.t('admin.data_visibility.manage_data_visibility.all_members'))
         end
         it "has a first member whose value is `all`" do
           call_action
@@ -255,10 +265,83 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
     end
   end
 
+  describe 'GET view_status' do
+    let(:members_service) { instance_double(MembersService, global_disabled_reports: [], members_with_disabled_reports: [] ) }
+    let(:call_action) { get :view_status }
+
+    before do
+      allow(MembersService).to receive(:new).and_return(members_service)
+    end
+
+    it_behaves_like 'a DataVisibilityController action with before_action methods'
+    it 'creates a new instance of the MembersService with the request' do
+      expect(MembersService).to receive(:new).and_return(members_service)
+      call_action
+    end
+    it 'raises an error if `global_disabled_reports` returns nil' do
+      allow(members_service).to receive(:global_disabled_reports).and_return(nil)
+      expect{call_action}.to raise_error('There has been an error and Admin::DataVisibilityController#view_status has encountered nil. Check error logs.')
+    end
+
+    it 'raises an error if `@institutions_with_disabled_items` returns nil' do
+      allow(members_service).to receive(:global_disabled_reports).and_return(nil)
+      expect{call_action}.to raise_error('There has been an error and Admin::DataVisibilityController#view_status has encountered nil. Check error logs.')
+    end
+
+    describe 'setting the `@globally_disabled_reports` view instance variable' do
+      let(:disabled_web_flags) { double('disabled web flags') }
+      let(:table_sentinel) { double('table instance variable') }
+
+      { globally_disabled_reports: [:letters_of_credit, :borrowing_capacity, :authorizations ] }
+      before do
+        allow(controller).to receive(:data_visibility_table)
+        allow(members_service).to receive(:global_disabled_reports).and_return(disabled_web_flags)
+      end
+
+      it 'calls `data_visibility_table` with the disabled web flags' do
+        expect(controller).to receive(:data_visibility_table).with(disabled_web_flags, anything, anything)
+        call_action
+      end
+      it 'calls `data_visibility_table` with an array of all report names' do
+        expect(controller).to receive(:data_visibility_table).with(anything, all_report_names, anything)
+        call_action
+      end
+      it 'calls `data_visibility_table` with the `disabled_only` parameter set to `true` ' do
+        expect(controller).to receive(:data_visibility_table).with(anything, anything, true)
+        call_action
+      end
+      it 'sets `@globally_disabled_reports` to result of calling `data_visibility_table`' do
+        allow(controller).to receive(:data_visibility_table).with(anything, anything, anything).and_return(table_sentinel)
+        call_action
+        expect(assigns[:globally_disabled_reports]).to eq(table_sentinel)
+      end
+    end
+
+    describe 'setting the `@institutions_with_disabled_items` view instance variable' do
+      let(:member_list) { double('list of members with disabled reports') }
+      let(:table_sentinel) { double('table instance variable') }
+
+      before do
+        allow(controller).to receive(:institutions_disabled_data_table)
+        allow(members_service).to receive(:members_with_disabled_reports).and_return(member_list)
+      end
+
+      it 'calls `institutions_disabled_data_table` with the list of members' do
+        expect(controller).to receive(:institutions_disabled_data_table).with(member_list)
+        call_action
+      end
+      it 'sets `@institutions_with_disabled_items` to the result of calling `institutions_disabled_data_table`' do
+        allow(controller).to receive(:institutions_disabled_data_table).with(anything).and_return(table_sentinel)
+        call_action
+        expect(assigns[:institutions_with_disabled_items]).to eq(table_sentinel)
+      end
+    end
+  end
+
   describe 'private methods' do
     describe '`data_visibility_table`' do
       visibility_mapping = described_class::DATA_VISIBILITY_MAPPING
-      it 'returns a hash with a for for each report_name it is passed' do
+      it 'returns a hash with a row for for each `report_name` it is passed' do
         report_names = Array.new(rand(2..5)){visibility_mapping.keys.sample}
         result = subject.send(:data_visibility_table, [], report_names)
         expect(result[:rows].length).to eq(report_names.length)
@@ -320,6 +403,51 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
           it 'has a value that is equal to the title associated with the report_name in the DATA_VISIBILITY_MAPPING' do
             expect(column[:value]).to eq(visibility_mapping[report_name][:title])
           end
+        end
+      end
+
+      context '`data_visibility_table` called with the `disabled_only` flag set to `true`' do
+        describe 'when there are globally disabled reports' do
+          disabled_ids = [ 17, 35, 39 ]
+          it 'returns a hash of disabled report names' do
+            result = subject.send(:data_visibility_table, disabled_ids, all_report_names, true)
+            expect(result[:rows].length).to eq(disabled_ids.length)
+          end
+          it 'return a hash with a single column' do
+            result = subject.send(:data_visibility_table, disabled_ids, all_report_names, true)
+            expect(result[:rows][0][:columns].length).to eq(1)
+          end
+        end
+        describe 'when there are no globally disabled reports' do
+          disabled_ids = []
+          it 'returns an empty hash' do
+            result = subject.send(:data_visibility_table, disabled_ids, all_report_names, true)
+            expect(result[:rows].length).to eq(0)
+          end
+        end
+      end
+    end
+
+    describe '`institutions_disabled_data_table`' do
+      member_list = [ {"FHLB_ID"=> 1, "MEMBER_NAME"=> "Old McDonald's Leanding Window"},
+                      {"FHLB_ID"=> 3, "MEMBER_NAME"=> "Irish Bank"},
+                      {"FHLB_ID"=> 4, "MEMBER_NAME"=> "S'more Bank"} ]
+      let(:result) {subject.send(:institutions_disabled_data_table, member_list)}
+      let(:row) { subject.send(:institutions_disabled_data_table, member_list)[:rows].first}
+
+      it 'returns a hash with a row for for each item in the `member_list` array it is passed' do
+        expect(result[:rows].length).to eq(member_list.length)
+      end
+
+      describe 'the first column in the table' do
+         it 'has a value that contains the member name' do
+           expect(row[:columns].first[:value]).to eq(member_list[0]['MEMBER_NAME'].to_s)
+         end
+      end
+
+      describe 'the second column in the table' do
+        it 'is populated with a string value' do
+          expect(row[:columns].second[:value].to_s).to include('member_id=' + member_list[0]['FHLB_ID'].to_s)
         end
       end
     end

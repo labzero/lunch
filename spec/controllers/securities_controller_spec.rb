@@ -31,7 +31,7 @@ RSpec.describe SecuritiesController, type: :controller do
     describe 'GET manage' do
       let(:security) do
         security = {}
-        [:cusip, :description, :custody_account_type, :eligibility, :maturity_date, :authorized_by, :current_par, :borrowing_capacity].each do |attr|
+        [:cusip, :description, :custody_account_type, :maturity_date, :current_par].each do |attr|
           security[attr] = double(attr.to_s, upcase: nil)
         end
         security[:reg_id] = reg_id
@@ -47,11 +47,8 @@ RSpec.describe SecuritiesController, type: :controller do
         { title: I18n.t('common_table_headings.cusip'), :sortable=>true},
         { title: I18n.t('common_table_headings.description'), :sortable=>true},
         { title: I18n.t('common_table_headings.status'), :sortable=>true},
-        { title: I18n.t('securities.manage.eligibility'), :sortable=>true},
         { title: I18n.t('common_table_headings.maturity_date'), :sortable=>true},
-        { title: I18n.t('common_table_headings.authorized_by'), :sortable=>true},
-        { title: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), :sortable=>true},
-        { title: fhlb_add_unit_to_table_header(I18n.t('global.borrowing_capacity'), '$'), :sortable=>true}
+        { title: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), :sortable=>true}
       ]}
       let(:column_headings_delivery_method_enabled) { [
         { value: 'check_all', type: :checkbox, name: 'check_all', :sortable=>false},
@@ -59,11 +56,8 @@ RSpec.describe SecuritiesController, type: :controller do
         { title: I18n.t('common_table_headings.description'), :sortable=>true},
         { title: I18n.t('common_table_headings.status'), :sortable=>true},
         { title: I18n.t('securities.manage.delivery'), :sortable=>true},
-        { title: I18n.t('securities.manage.eligibility'), :sortable=>true},
         { title: I18n.t('common_table_headings.maturity_date'), :sortable=>true},
-        { title: I18n.t('common_table_headings.authorized_by'), :sortable=>true},
-        { title: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), :sortable=>true},
-        { title: fhlb_add_unit_to_table_header(I18n.t('global.borrowing_capacity'), '$'), :sortable=>true}
+        { title: fhlb_add_unit_to_table_header(I18n.t('common_table_headings.current_par'), '$'), :sortable=>true}
       ]}
       before do
         allow(member_balance_service_instance).to receive(:managed_securities).and_return(securities)
@@ -152,7 +146,7 @@ RSpec.describe SecuritiesController, type: :controller do
             end
           end
         end
-        [[:cusip, 1], [:description, 2], [:eligibility, 4], [:authorized_by, 6]].each do |attr_with_index|
+        [[:cusip, 1], [:description, 2]].each do |attr_with_index|
           it "contains an object at the #{attr_with_index.last} index with the correct value for #{attr_with_index.first}" do
             call_action
             assigns[:securities_table_data][:rows].each do |row|
@@ -175,14 +169,14 @@ RSpec.describe SecuritiesController, type: :controller do
             expect(row[:columns][3][:value]).to eq(status)
           end
         end
-        it 'contains an object at the 5 index with the correct value for :maturity_date and a type of `:date`' do
+        it 'contains an object at the 4 index with the correct value for :maturity_date and a type of `:date`' do
           call_action
           assigns[:securities_table_data][:rows].each do |row|
-            expect(row[:columns][5][:value]).to eq(security[:maturity_date])
-            expect(row[:columns][5][:type]).to eq(:date)
+            expect(row[:columns][4][:value]).to eq(security[:maturity_date])
+            expect(row[:columns][4][:type]).to eq(:date)
           end
         end
-        [[:current_par, 7], [:borrowing_capacity, 8]].each do |attr_with_index|
+        [[:current_par, 5]].each do |attr_with_index|
           it "contains an object at the #{attr_with_index.last} index with the correct value for #{attr_with_index.first} and a type of `:number`" do
             call_action
             assigns[:securities_table_data][:rows].each do |row|

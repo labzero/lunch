@@ -50,6 +50,7 @@
 }
 
 .mcu-upload-area {
+  @extend %dropzone-style;
   padding: 20px;
 }
 
@@ -62,6 +63,19 @@
     @extend %typography-dashboard-account-summary;
     margin-bottom: 0;
   }
+}
+
+.mcu-upload-complete {
+  display: none;
+}
+
+.mcu-upload-file-discard {
+  @extend %link-style;
+  cursor: pointer;
+}
+
+.mcu-upload-file-name {
+  @extend %typography-dropdown-selector;
 }
 
 .mcu-upload-legal-section {
@@ -187,5 +201,12 @@
   p {
     @extend %empty_table_cell;
     padding: 0;
+  }
+}
+
+.mcu-program-type-dropdown {
+  display: none;
+  &.selected {
+    display: inline-block;
   }
 }

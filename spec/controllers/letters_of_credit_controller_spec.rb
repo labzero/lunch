@@ -11,7 +11,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
     fhfa_number: double('fhfa number'),
     customer_lc_agreement_flag: double('customer lc agreement flag')
   }}
-  let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest, save: nil, :attributes= => nil, beneficiary_name: nil, owners: instance_double(Set, add: nil), lc_number: nil, id: nil) }
+  let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest, save: nil, :attributes= => nil, beneficiary_name: nil, owners: instance_double(Set, add: nil), lc_number: nil, id: nil, :amendable_online? => true) }
   let(:beneficiary_request) { instance_double(BeneficiaryRequest, save: nil, :attributes= => nil, owners: instance_double(Set, add: nil), id: nil) }
   let(:members_service) { double("A Member Service") }
 
@@ -242,15 +242,24 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       expect(controller).to receive(:dedupe_locs).with(anything, historic_locs)
       call_action
     end
+    it 'sets the `intraday_lc` value to `true` for all activities from the `todays_credit_activity` endpoint' do
+      intraday_locs = [lc]
+      intraday_tagged_activity = (lc[:intraday_lc] = true; lc)
+      allow(member_balance_service).to receive(:todays_credit_activity).and_return(intraday_locs)
+      expect(controller).to receive(:dedupe_locs).with([intraday_tagged_activity], anything)
+      call_action
+    end
     it "calls `dedupe_locs` with activities from the `todays_credit_activity` that have an `instrument_type` of `#{described_class::LC_INSTRUMENT_TYPE}`" do
       advance = {instrument_type: 'ADVANCE'}
       investment = {instrument_type: 'INVESTMENT'}
+      lc[:intraday_lc] = true
       intraday_activities = [advance, investment, lc]
       allow(member_balance_service).to receive(:todays_credit_activity).and_return(intraday_activities)
       expect(controller).to receive(:dedupe_locs).with([lc], anything)
       call_action
     end
     it 'calls `dedupe_locs` with the intraday and historic locs' do
+      lc[:intraday_lc] = true
       intraday_locs = [lc]
       allow(member_balance_service).to receive(:todays_credit_activity).and_return(intraday_locs)
       allow(member_balance_service).to receive(:letters_of_credit).and_return({credits: historic_locs})
@@ -328,6 +337,25 @@ RSpec.describe LettersOfCreditController, :type => :controller do
             expect(assigns[:table_data][:rows].length).to be > 0
             assigns[:table_data][:rows].each do |row|
               expect(row[:columns].last[:type]).to be nil
+            end
+          end
+        end
+        describe 'the `intraday_lc` column' do
+          let(:intraday_lc) { double('intraday_lc value') }
+          before { allow(controller).to receive(:dedupe_locs).and_return([{intraday_lc: intraday_lc}]) }
+
+          it 'builds a cell with a `value` equal to the `intraday_lc` value of the given LC' do
+            call_action
+            expect(assigns[:table_data][:rows].length).to be > 0
+            assigns[:table_data][:rows].each do |row|
+              expect(row[:columns][8][:value]).to eq(intraday_lc)
+            end
+          end
+          it 'builds a cell with a nil `type`' do
+            call_action
+            expect(assigns[:table_data][:rows].length).to be > 0
+            assigns[:table_data][:rows].each do |row|
+              expect(row[:columns][8][:type]).to be nil
             end
           end
         end
@@ -658,10 +686,11 @@ RSpec.describe LettersOfCreditController, :type => :controller do
 
     describe 'GET amend' do
       let(:lc_number) { SecureRandom.hex }
-      let(:call_action) { get :amend, current_member_id: member_id, lc_number: lc_number}
+      let(:intraday_lc) { SecureRandom.hex }
+      let(:call_action) { get :amend, current_member_id: member_id, lc_number: lc_number, intraday_lc: intraday_lc}
       let(:letter_of_credit_request) { instance_double(LetterOfCreditRequest)}
       before do
-        allow(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
+        allow(LetterOfCreditRequest).to receive(:find_by_lc_number).and_return(letter_of_credit_request)
         allow(letter_of_credit_request).to receive(:save)
         allow(controller).to receive(:populate_amend_request_view_variables)
       end
@@ -671,7 +700,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       it_behaves_like 'a LettersOfCreditController action that sets sidebar view variables with a before filter'
 
       it 'calls the class method`find_by_lc_number`' do
-        expect(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, request).and_return(letter_of_credit_request)
+        expect(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, intraday_lc, request).and_return(letter_of_credit_request)
         call_action
       end
       it 'calls `populate_amend_request_view_variables`' do
@@ -724,22 +753,11 @@ RSpec.describe LettersOfCreditController, :type => :controller do
         end
       end
       describe 'when the created LetterOfCreditRequest instance is invalid' do
-        let(:error_message) { instance_double(String) }
         before do
           allow(letter_of_credit_request).to receive(:valid?).and_return(false)
           allow(controller).to receive(:populate_amend_request_view_variables)
-          allow(controller).to receive(:prioritized_error_message)
         end
 
-        it 'calls `prioritized_error_message` with the letter of credit request' do
-          expect(controller).to receive(:prioritized_error_message).with(letter_of_credit_request)
-          call_action
-        end
-        it 'sets `@error_message` to the result of `prioritized_error_message`' do
-          allow(controller).to receive(:prioritized_error_message).and_return(error_message)
-          call_action
-          expect(assigns[:error_message]).to eq(error_message)
-        end
         it 'calls `populate_amend_request_view_variables`' do
           expect(controller).to receive(:populate_amend_request_view_variables)
           call_action
@@ -913,6 +931,14 @@ RSpec.describe LettersOfCreditController, :type => :controller do
         it 'uses the `description` value from the historic loc if there is no intraday loc description value' do
           duplicate_historic[:description] = historic_description
           expect(deduped_lc[:description]).to eq(historic_description)
+        end
+        it 'sets `intraday_lc` to `false` if there is an overlapping historic and intraday lc' do
+          expect(deduped_lc[:intraday_lc]).to be false
+        end
+        it 'does not set `intraday_lc` if there is no overlap between historic and intraday lcs' do
+          results = controller.send(:dedupe_locs, [intraday], [])
+          deduped_lc = results.select{|loc| loc[:lc_number] == lc_number}.first
+          expect(deduped_lc[:intraday_lc]).to be nil
         end
       end
     end
@@ -1096,6 +1122,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       before do
         allow(controller).to receive(:date_restrictions)
         allow(controller).to receive(:letter_of_credit_request).and_return(letter_of_credit_request)
+        allow(controller).to receive(:prioritized_error_message)
       end
 
       it 'calls `set_titles` with its title' do
@@ -1113,6 +1140,30 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           allow(controller).to receive(:date_restrictions).and_return(date_restrictions)
           call_method
           expect(assigns[:date_restrictions]).to eq(date_restrictions)
+        end
+      end
+
+      describe '`@error_message`' do
+        let(:error_message) { instance_double(String) }
+
+        context 'when the letter of credit request is amendable online' do
+          it 'calls `prioritized_error_message` with the letter of credit request' do
+            expect(controller).to receive(:prioritized_error_message).with(letter_of_credit_request)
+            call_method
+          end
+          it 'sets `@error_message` to the result of `prioritized_error_message`' do
+            allow(controller).to receive(:prioritized_error_message).and_return(error_message)
+            call_method
+            expect(assigns[:error_message]).to eq(error_message)
+          end
+        end
+        context 'when the letter of credit request is not amendable online' do
+          before { allow(letter_of_credit_request).to receive(:amendable_online?).and_return(false) }
+
+          it 'sets `@error_message` to the error message letting the user know the lc cannot be amended online' do
+            call_method
+            expect(assigns[:error_message]).to eq(I18n.t('letters_of_credit.errors.not_amendable_online'))
+          end
         end
       end
     end
@@ -1341,6 +1392,8 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       let(:remaining_bc) { rand(1000..999999) }
       let(:remaining_financing) { rand(1000..999999) }
       let(:letter_of_credit) { instance_double(LetterOfCreditRequest, errors: nil, standard_borrowing_capacity: remaining_bc, max_term: max_term, remaining_financing_available: remaining_financing)}
+      let(:error_message) { instance_double(String) }
+      let(:errors) { instance_double(ActiveModel::Errors, :added? => nil, first: [SecureRandom.hex, error_message]) }
       let(:call_method) { subject.send(:prioritized_error_message, letter_of_credit) }
 
       context 'when there are no errors' do
@@ -1349,8 +1402,6 @@ RSpec.describe LettersOfCreditController, :type => :controller do
         end
       end
       context 'when there are errors' do
-        let(:error_message) { instance_double(String) }
-        let(:errors) { instance_double(ActiveModel::Errors, :added? => nil, first: [SecureRandom.hex, error_message]) }
         before do
           allow(letter_of_credit).to receive(:errors).and_return(errors)
           allow(errors).to receive(:added?)

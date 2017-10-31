@@ -25,25 +25,31 @@ module MAPI
 
 
         def self.mcu_member_status(app, member_id)
-          fake('member_mcu_status')
+          mcu_member_status = unless should_fake?(app)
+            get_message(app, 'GET_MEMBER_TRANSACTIONS', member_id, {partnerId: member_id})
+          else
+            fake('member_mcu_status')
+          end
+          if mcu_member_status
+            mcu_member_status.each do |mcu_status|
+              mcu_status["mcuType"] = mcu_status.delete("uploadType")
+            end
+          end
+          mcu_member_status
         end
 
         def self.mcu_transaction_id(app, member_id)
-          unless should_fake?(app)
-            get_message(app, 'GET_TRANSACTION_ID')
-          else
-            SecureRandom.hex
-          end
+          { transaction_id: should_fake?(app) ? rand(999..9999) : get_message(app, 'GET_TRANSACTION_ID') }
         end
 
         def self.mcu_member_info(app, member_id)
           unless should_fake?(app)
-            get_message(app, 'GET_MEMBER_INFO')[member_id]
+            get_message(app, 'GET_MEMBER_INFO')[member_id.to_s]
           else
-            fake_hash('member_mcu_member_info')[member_id]
+            fake_hash('member_mcu_member_info')[member_id.to_s]
           end
         end
-        
+
         module Private
           def self.mcu_sql(member_id)
             <<-SQL

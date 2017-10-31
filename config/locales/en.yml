@@ -1650,6 +1650,7 @@ en:
       after_max_term: The expiration date cannot be more than %{max_term} months from the issue date. Adjust the expiration or issue date and try again.
       exceeds_financing_availability: The amount you entered exceeds your institution's current financing availability of %{financing_availability}. Submit a request for a lesser amount or contact your Relationship Manager or the Member Services Desk.
       amended_exp_date_prior_to_original: The expiration date must be the same or later than the current expiration date.
+      not_amendable_online: This Letter of Credit cannot be amended online. Please contact your Relationship Manager for assistance.
     pdf:
       requested: Letter of Credit Request Confirmation
       request_date: Request Date/Time
@@ -1734,7 +1735,7 @@ en:
       upload:
         title: Mortgages
         file_types: Upload an .xlsx, .xls, .csv, .txt or .zip file containing your loans.
-        instructions_html: Upload the file by either dragging and dropping it on to this page, or selecting it from your file system.<br>Contact <a href=%{email}>Collateral Operations</a> at %{phone} with questions.
+        instructions_html: Upload the file by selecting it from your file system.<br>Contact <a href=%{email}>Collateral Operations</a> at %{phone} with questions.
         uploaded_file: "The following file will be included in the MCU request:"
     manage:
       title: Manage Mortgage Collateral Updates (MCU)
@@ -3647,9 +3648,19 @@ en:
         duplicate_error: "An early shutoff is already scheduled for this date.\nPlease choose a new date and try again"
     data_visibility:
       title: Data Visibility
-      report_visibility: Report Visibility
-      all_members: All Members
-      member_selector: 'Data Visibility for:'
+      status:
+        title: Data and Institution Status
+        disabled_for_all: "The following items are disabled for every institution:"
+        none_disabled_for_all: No items are disabled for every institution
+        institutions_with_items_disabled: "The following institutions have additional items disabled:"
+        no_institutions_with_items_disabled: No institutions have additional items disabled
+        actions:
+          view: View
+      manage_data_visibility:
+        title: Manage Data Visibility
+        report_visibility: Report Visibility
+        all_members: All Members
+        member_selector: 'Data Visibility for:'
   errors:
     format: '%{message}'
     assistance_html: "If you need assistance, contact <a href=%{email}>Web Support</a> at %{phone_number}."

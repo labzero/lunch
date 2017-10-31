@@ -18,7 +18,7 @@ Feature: Requesting a New Mortgage Collateral Update
       | intranet user            | should     |
       | quick-advance non-signer | should not |
 
-  @jira-mem-2574
+  @smoke @jira-mem-2574
   Scenario: Visiting the New Mortgage Collateral Update (MCU) page
     Given I visit the dashboard
     When I click on the mortgages link in the header
@@ -41,27 +41,10 @@ Feature: Requesting a New Mortgage Collateral Update
     And I should not see blanket lien mcu legal copy
     When I click on the mcu type dropdown
     Then I should see "Complete" as an option in the mcu type dropdown
-    And I should see "Update" as an option in the mcu type dropdown
     And I should see "Pledge" as an option in the mcu type dropdown
     And I should see "Depledge" as an option in the mcu type dropdown
     And I should see "Renumber" as an option in the mcu type dropdown
-    And I should not see "Add" as an option in the mcu type dropdown
-    And I should not see "Delete" as an option in the mcu type dropdown
     When I click on the pledge type dropdown
     When I select "Blanket Lien – Detailed Reporting" from the pledge type dropdown
     Then I should not see specific identification mcu legal copy
     And I should see blanket lien mcu legal copy
-    When I click on the mcu type dropdown
-    Then I should see "Complete" as an option in the mcu type dropdown
-    And I should see "Update" as an option in the mcu type dropdown
-    And I should see "Add" as an option in the mcu type dropdown
-    And I should see "Delete" as an option in the mcu type dropdown
-    And I should see "Renumber" as an option in the mcu type dropdown
-    And I should not see "Pledge" as an option in the mcu type dropdown
-    And I should not see "Depledge" as an option in the mcu type dropdown
-    When I select "Complete" from the mcu type dropdown
-    Then I should see the enabled state of the program type dropdown
-    When I click on the pledge type dropdown
-    And I select "Specific Identification" from the pledge type dropdown
-    Then I should see the enabled state of the mcu type dropdown
-    And I should see the disabled state of the program type dropdown

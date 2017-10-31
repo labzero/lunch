@@ -193,3 +193,8 @@ Then(/^I should be on the (Request Letter of Credit Amendment|Preview Letter of 
   end
   page.assert_selector(text)
 end
+
+When(/^I click on the amend link for a letter of credit that is not amendable online$/) do
+  allow_any_instance_of(LetterOfCreditRequest).to receive(:amendable_online?).and_return(false)
+  page.all('.amend_loc_link').first.click
+end

@@ -110,17 +110,17 @@ describe MAPI::ServiceApp do
     describe 'the `mcu_transaction_id` method' do
       let(:call_method) { mortgage_collateral_update_module.mcu_transaction_id(app, member_id) }
       describe 'when `should_fake?` returns `true`' do
-        let(:random) { SecureRandom.hex }
+        let(:random) { rand(999..9999) }
         before do
           allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
         end
         it 'calls for a random hexidecimal string' do
-          expect(SecureRandom).to receive(:hex)
+          expect(mortgage_collateral_update_module).to receive(:rand).with(999..9999)
           call_method
         end
         it 'returns the random value' do
-          allow(SecureRandom).to receive(:hex).and_return(random)
-          expect(call_method).to eq(random)
+          expect(mortgage_collateral_update_module).to receive(:rand).and_return(random)
+          expect(call_method).to eq({ transaction_id: random })
         end
       end
       describe 'when `should_fake?` returns `false`' do
@@ -134,7 +134,7 @@ describe MAPI::ServiceApp do
         end
         it 'returns the result of `get_message`' do
           allow(mortgage_collateral_update_module).to receive(:get_message).and_return(transaction_id)
-          expect(call_method).to eq(transaction_id)
+          expect(call_method).to eq({ transaction_id: transaction_id })
         end
       end
     end
@@ -160,7 +160,7 @@ describe MAPI::ServiceApp do
             allow(mortgage_collateral_update_module).to receive(:fake_hash).and_return(member_info)
           end      
           it 'gets the fake data for the given `member_id`' do
-            expect(member_info).to receive(:[]).with(member_id)
+            expect(member_info).to receive(:[]).with(member_id.to_s)
             call_method
           end
           it 'returns the fake data' do
@@ -177,26 +177,66 @@ describe MAPI::ServiceApp do
           expect(mortgage_collateral_update_module).to receive(:get_message).with(app, 'GET_MEMBER_INFO')
           call_method
         end
+        it 'gets the member info for the current member' do
+          expect(member_info).to receive(:[]).with(member_id.to_s)
+          call_method          
+        end
         describe 'in the real world' do
-          it 'gets the specified member\'s info' do
-            expect(member_info).to receive(:[]).with(member_id)
-            call_method     
-          end
-          it 'return the real data' do
+          it 'returns the real data' do
             expect(call_method).to eq(member_info_for_one_member)
           end
         end
       end
     end
     describe 'the `mcu_member_status` method' do
-      [:test, :development, :production].each do |environment|
-        describe "#{environment}" do
-          let(:call_method) { MAPI::Services::Member::MortgageCollateralUpdate.mcu_member_status(environment, member_id) }
-          it 'calls the shared utility function `fetch`' do
-            expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:fake).with(anything)
-            call_method
+      let(:call_method) { mortgage_collateral_update_module.mcu_member_status(app, member_id) }
+      let(:member_status) { [{ "transactionId" => 210585, "uploadType" => "COMPLETE", "authorizedBy" =>"IX_TEST",
+                               "authorizedOn" =>"2017-09-20", "status" =>"ERROR", "numberOfLoans" => 0, "numberOfErrors" => 0,
+                               "canCancel" => false, "canView"=>false}] }
+      let(:mcu_type) { SecureRandom.hex }
+      let(:member_status_upload) { ["uploadType" => mcu_type] }
+      let(:member_status_result) { ["mcuType" => mcu_type] }
+      describe 'when `should_fake?` returns `true`' do
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
+        end
+        it 'loads the fake' do
+          expect(mortgage_collateral_update_module).to receive(:fake).with('member_mcu_status')
+          call_method
+        end
+        describe 'in the fake world' do
+          before do
+            allow(mortgage_collateral_update_module).to receive(:fake).and_return(member_status)
+          end
+          it 'returns the fake data' do
+            expect(call_method).to eq(member_status)
           end
         end
+      end
+      describe 'when `should_fake?` returns `false`' do
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
+          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(member_status)
+        end
+        it 'calls `get_message` with the apppriate arguments' do
+          expect(mortgage_collateral_update_module).to receive(:get_message).with(app, 'GET_MEMBER_TRANSACTIONS', member_id, {partnerId: member_id})
+          call_method
+        end
+        describe 'in the real world' do
+          it 'return the real data' do
+            expect(call_method).to eq(member_status)
+          end
+        end
+      end
+      it 'converts `uploadType` to `mcu_type` and returns the result in the fake world' do
+        allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
+        allow(mortgage_collateral_update_module).to receive(:fake).and_return(member_status_upload)
+        expect(call_method).to eq(member_status_result)
+      end
+      it 'converts `uploadType` to `mcu_type` and returns the result in the real world' do
+        allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
+        allow(mortgage_collateral_update_module).to receive(:get_message).and_return(member_status_upload)
+        expect(call_method).to eq(member_status_result)
       end
     end
   end
