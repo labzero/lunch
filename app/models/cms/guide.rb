@@ -4,7 +4,7 @@ class Cms::Guide < Cms::BaseObject
   def revisions
     @revisions ||= (
       revisions = []
-      slices = cms.get_slices_by_type(cms_key, 'revision')
+      slices = cms.get_slices_by_type(cms_key, 'revision') || []
       slices.each { |slice| revisions <<  Revision.new(slice) }
       revisions.sort_by{ |revision| revision.last_updated }.reverse
     )

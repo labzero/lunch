@@ -4,7 +4,7 @@ RSpec.describe Cms::Guide, :type => :model do
   let(:request) { double('request') }
   let(:member_id) { rand(1000..9999) }
   let(:cms_key) { instance_double(Symbol) }
-  let(:cms) { instance_double(ContentManagementService, get_slices_by_type: []) }
+  let(:cms) { instance_double(ContentManagementService, get_slices_by_type: nil) }
   let(:subject) { Cms::Guide.new(member_id, request, cms_key, cms) }
 
   describe 'instance methods' do
