@@ -4,8 +4,10 @@
     %td
       = row[:title]
       - if row[:description]
-        %span= row[:form_number]
-        %p= row[:description]
+        - if @cms_enabled
+          = row[:description]
+        - else
+          %p= row[:description]
     - if row[:pdf_link]
       - links << link_to_download_resource(t('global.view_pdf'), row[:pdf_link])
     - if row[:word_link]

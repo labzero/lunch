@@ -173,6 +173,85 @@ class ContentManagementService
     subordination_agreement_credit_unions: {
       type: 'form', 
       uid: 'subordination-agreement-credit-unions'
+    },
+    forms_and_exhibits_checklist_commercial_banks: {
+      type: 'form',
+      uid: 'forms-and-exhibits-checklist-commercial-banks'
+    },
+    applicant_information_commercial_banks: {
+      type: "form",
+      uid: "applicant-information-commercial-banks"
+    },
+    certificate_of_applicant_commercial_banks: {
+      type: "form",
+      uid: "certificate-of-applicant-commercial-banks"
+    },
+    resolution_membership_counsel_certification: {
+      type: "form",
+      uid: "resolution-membership-counsel-certification"
+    },
+    calculation_of_percent_requirement_commercial_banks: {
+      type: "form",
+      uid: "calculation-of-percent-requirement-commercial-banks"
+    },
+    applicants_bank_stock_calculation_commercial_banks: {
+      type: "form",
+      uid: "applicants-bank-stock-calculation-commercial-banks"
+    },
+    authorization_to_release_records_arizona: {
+      type: "form",
+      uid: "authorization-to-release-records-arizona"
+    },
+    advances_and_security_agreement: {
+      type: "form",
+      uid: "advances-and-security-agreement"
+    },
+    isda_master_agreement_schedule: {
+      type: "form",
+      uid: "isda-master-agreement-schedule"
+    },
+    forms_and_exhibits_checklist_community_development: {
+      type: "form",
+      uid: "forms-and-exhibits-checklist-community-development"
+    },
+    applicant_information_community_development: {
+      type: "form",
+      uid: "applicant-information-community-development"
+    },
+    certificate_of_applicant_community_development: {
+      type: "form",
+      uid: "certificate-of-applicant-community-development"
+    },
+    applicants_bank_stock_calculation_community_development: {
+      type: "form",
+      uid: "applicants-bank-stock-calculation-community-development"
+    },
+    forms_and_exhibits_checklist_credit_union: {
+      type: "form",
+      uid: "forms-and-exhibits-checklist-credit-union"
+    },
+    applicant_information_credit_unions: {
+      type: "form", uid: "applicant-information-credit-unions"
+    },
+    calculation_of_percent_requirement_credit_unions: {
+      type: "form",
+      uid: "calculation-of-percent-requirement-credit-unions"
+    },
+    applicants_bank_stock_calculation_credit_unions: {
+      type: "form",
+      uid: "applicants-bank-stock-calculation-credit-unions"
+    },
+    forms_and_exhibits_checklist_insurance_companies: {
+      type: "form",
+      uid: "forms-and-exhibits-checklist-insurance-companies"
+    },
+    applicant_information_insurance_companies: {
+      type: "form",
+      uid: "applicant-information-insurance-companies"
+    },
+    applicants_bank_stock_calculation_insurance_companies: {
+      type: "form",
+      uid: "applicants-bank-stock-calculation-insurance-companies"
     }
   }.freeze
 

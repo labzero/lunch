@@ -563,6 +563,26 @@ RSpec.describe ApplicationController, :type => :controller do
     end
   end
 
+  describe '`resolve_relative_prismic_links`' do
+    let(:relative_url) { SecureRandom.hex }
+    let(:raw_absolute_html) { "https://#{relative_url}" }
+    let(:raw_relative_html) { "https:///#{relative_url}" }
+    let(:call_method) { controller.resolve_relative_prismic_links(raw_relative_html) }
+
+    it 'returns `nil` when passed `nil`' do
+      expect(controller.resolve_relative_prismic_links(nil)).to be nil
+    end
+    it 'substitutes in the `root_url` for the string `https:///`' do
+      expect(call_method).to eq("#{root_url}#{relative_url}")
+    end
+    it 'returns a string that is html safe' do
+      expect(call_method.html_safe?).to be true
+    end
+    it 'does not alter urls that do not contain the string `https:///`' do
+      expect(controller.resolve_relative_prismic_links(raw_absolute_html)).to eq(raw_absolute_html)
+    end
+  end
+
   describe '`skip_timeout_reset` private method' do
     let(:call_method) { controller.send(:skip_timeout_reset, &block) }
     let(:rack_env) { double('A Rack ENV', :[]= => nil) }

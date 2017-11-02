@@ -7,6 +7,47 @@ include ResourceHelper
 RSpec.describe ResourcesController, type: :controller do
   login_user
 
+  shared_examples 'a ResourceController action that checks to see if CMS functionality is enabled' do |action|
+    let(:call_action) { get action }
+    context 'when the `content-management-system` feature is enabled' do
+      let(:cms) { instance_double(ContentManagementService) }
+      before do
+        allow(controller).to receive(:feature_enabled?).with('content-management-system').and_return(true)
+        allow(ContentManagementService).to receive(:new).and_return(cms)
+      end
+
+      it 'sets `@cms_enabled` to true' do
+        call_action
+        expect(assigns[:cms_enabled]).to be true
+      end
+      it 'creates a new instance of `ContentManagementService` with the member id and request' do
+        expect(ContentManagementService).to receive(:new).with(member_id, request).and_return(cms)
+        call_action
+      end
+      it 'sets `@cms` to the instance of `ContentManagementService`' do
+        call_action
+        expect(assigns[:cms]).to eq(cms)
+      end
+    end
+
+    context 'when the `content-management-system` feature is disabled' do
+      before { allow(controller).to receive(:feature_enabled?).with('content-management-system').and_return(false) }
+
+      it 'sets `@cms_enabled` to false' do
+        call_action
+        expect(assigns[:cms_enabled]).to be false
+      end
+      it 'does not create a new instance of `ContentManagementService`' do
+        expect(ContentManagementService).not_to receive(:new)
+        call_action
+      end
+      it 'does not set `@cms`' do
+        call_action
+        expect(assigns.keys).not_to include('cms')
+      end
+    end
+  end
+
   describe 'GET guides' do
     let(:member_id) { rand(1000..9999) }
     let(:call_action) { get :guides }
@@ -109,27 +150,14 @@ RSpec.describe ResourcesController, type: :controller do
       allow(controller).to receive(:forms_page_title_from_cms)
       allow(ContentManagementService).to receive(:new).and_return(cms)
     end
+
     it_behaves_like 'a controller action with an active nav setting', :forms, :resources
     it_behaves_like 'a user required action', :get, :forms
+    it_behaves_like 'a ResourceController action that checks to see if CMS functionality is enabled', :forms
+
     it 'renders the `forms` view' do
       get :forms
       expect(response.body).to render_template('forms')
-    end
-    context 'when the `content-management-system` feature is enabled' do
-      before { allow(controller).to receive(:feature_enabled?).with('content-management-system').and_return(true) }
-
-      it 'creates a new instance of `ContentManagementService` with the member id and request object' do
-        expect(ContentManagementService).to receive(:new).with(member_id, request).and_return(cms)
-        call_action
-      end
-    end
-    context 'when the `content-management-system` feature is disabled' do
-      before { allow(controller).to receive(:feature_enabled?).with('content-management-system').and_return(false) }
-
-      it 'does not create a new instance of `ContentManagementService`' do
-        expect(ContentManagementService).not_to receive(:new)
-        call_action
-      end
     end
 
     shared_examples 'a `forms` page form row instance variable' do |form, instance_variable_path|
@@ -1068,7 +1096,7 @@ RSpec.describe ResourcesController, type: :controller do
 
     it_behaves_like 'a resource membership action', action
     it "calls `application_table_rows` with the form id hash for the `#{application_type}`" do
-      expect(controller).to receive(:application_table_rows).with(described_class::APPLICATION_FORM_IDS[application_type])
+      expect(controller).to receive(:application_table_rows).with(described_class::APPLICATION_FORM_IDS[application_type], any_args)
       call_action
     end
     it 'sets `@application_table_rows` to the result of calling `application_table_rows`' do
@@ -1087,19 +1115,31 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET :commercial_application' do
+    before { allow(controller).to receive(:application_table_rows) }
+
     it_behaves_like 'a resource membership action with application forms tables', :commercial_application, :commercial
+    it_behaves_like 'a ResourceController action that checks to see if CMS functionality is enabled', :commercial_application
   end
 
   describe 'GET :community_development_application' do
+    before { allow(controller).to receive(:application_table_rows) }
+
     it_behaves_like 'a resource membership action with application forms tables', :community_development_application, :community_development
+    it_behaves_like 'a ResourceController action that checks to see if CMS functionality is enabled', :community_development_application
   end
 
   describe 'GET :credit_union_application' do
+    before { allow(controller).to receive(:application_table_rows) }
+
     it_behaves_like 'a resource membership action with application forms tables', :credit_union_application, :credit_union
+    it_behaves_like 'a ResourceController action that checks to see if CMS functionality is enabled', :credit_union_application
   end
 
   describe 'GET :insurance_company_application' do
+    before { allow(controller).to receive(:application_table_rows) }
+
     it_behaves_like 'a resource membership action with application forms tables', :insurance_company_application, :insurance_company
+    it_behaves_like 'a ResourceController action that checks to see if CMS functionality is enabled', :insurance_company_application
   end
 
   describe 'the `fee_schedule_table_hash` private method' do
@@ -1338,6 +1378,54 @@ RSpec.describe ResourcesController, type: :controller do
           expect(controller).to receive(:form_description_from_id).and_return(description)
           processed_row = {title: title, description: description, form_number: form_id}
           expect(controller).to receive(:add_link_to_row).with(processed_row)
+          call_method
+        end
+      end
+
+      context 'when the cms is enabled' do
+        let(:cms) { instance_double(ContentManagementService) }
+        let(:form_id) { described_class::FORM_ID_CMS_KEY_MAPPING.keys.sample }
+        let(:page_title) { SecureRandom.hex }
+        let(:resolved_description) { SecureRandom.hex }
+        let(:description) { SecureRandom.hex }
+        let(:form) { instance_double(Cms::Form, application_page_title: '', description: '')}
+        let(:call_method) { controller.send(:application_table_rows, {application_type: [form_id]}) }
+
+        before do
+          controller.instance_variable_set('@cms', cms)
+          controller.instance_variable_set('@cms_enabled', true)
+          allow(Cms::Form).to receive(:new).and_return(form)
+        end
+
+        it 'creates a new instance of `Cms::Form` with the `current_member_id`' do
+          expect(Cms::Form).to receive(:new).with(member_id, any_args).and_return(form)
+          call_method
+        end
+        it 'creates a new instance of `Cms::Form` with the `request` object' do
+          expect(Cms::Form).to receive(:new).with(anything, request, any_args).and_return(form)
+          call_method
+        end
+        it 'creates a new instance of `Cms::Form` with the value mapped to the `form_id` key in the `FORM_ID_CMS_KEY_MAPPING`' do
+          expect(Cms::Form).to receive(:new).with(anything, anything, described_class::FORM_ID_CMS_KEY_MAPPING[form_id], any_args).and_return(form)
+          call_method
+        end
+        it 'creates a new instance of `Cms::Form` with the `@cms` object' do
+          expect(Cms::Form).to receive(:new).with(anything, anything, anything, cms).and_return(form)
+          call_method
+        end
+        it 'sets the title to the `application_page_title` from the form' do
+          allow(form).to receive(:application_page_title).and_return(page_title)
+          expect(controller).to receive(:add_link_to_row).with (hash_including(title: page_title))
+          call_method
+        end
+        it 'calls `resolve_relative_prismic_links` with the `description` from the instance of `Cms::Form`' do
+          allow(form).to receive(:description).and_return(description)
+          expect(controller).to receive(:resolve_relative_prismic_links).with(description)
+          call_method
+        end
+        it 'sets the `description` to the results of calling `resolve_relative_prismic_links`' do
+          allow(controller).to receive(:resolve_relative_prismic_links).and_return(resolved_description)
+          expect(controller).to receive(:add_link_to_row).with (hash_including(description: resolved_description))
           call_method
         end
       end

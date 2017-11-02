@@ -127,6 +127,10 @@ class ApplicationController < ActionController::Base
     )
   end
 
+  def resolve_relative_prismic_links(html)
+    html.gsub('https:///', root_url).html_safe if html # Relative urls entered into prismic as "/foo/bar" come back as "https::///foo/bar"
+  end
+
   alias_method_chain :authenticate_user!, :authentication_flag
 
   private
