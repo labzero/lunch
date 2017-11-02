@@ -153,6 +153,9 @@
     }
     .beneficiary-name {
       width: 100%;
+      p {
+        padding-bottom: 4px;
+      }
     }
     .dropdown-beneficiary {
       width: 500px;
