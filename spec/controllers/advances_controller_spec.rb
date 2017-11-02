@@ -1291,7 +1291,12 @@ RSpec.describe AdvancesController, :type => :controller do
     describe '`advance_request`' do
       let(:call_method) { subject.send(:advance_request) }
       let(:advance_request) { double(AdvanceRequest, owners: double(Set, add: nil)) }
-      before { allow(subject).to receive(:signer_full_name) }
+      let(:members_service) { double("A Member Service") }
+      before do
+        allow(subject).to receive(:signer_full_name)
+        allow(MembersService).to receive(:new).and_return(members_service)
+        allow(members_service).to receive(:report_disabled?).and_return(false)
+      end
       it 'returns a new AdvanceRequest if the controller is lacking one' do
         member_id = double('A Member ID')
         signer = double('A Signer')
@@ -1308,6 +1313,17 @@ RSpec.describe AdvancesController, :type => :controller do
         allow(AdvanceRequest).to receive(:new).and_return(advance_request)
         expect(advance_request.owners).to receive(:add).with(subject.current_user.id)
         call_method
+      end
+
+      describe 'when the `borrowing capacity` sidebar has been disabled' do
+        before do
+          allow(MembersService).to receive(:new).and_return(members_service)
+          allow(members_service).to receive(:report_disabled?).and_return(true)
+        end
+        it 'sets the `@borrowing_capacity_disabled` instance variable to true' do
+          call_method
+          expect(assigns[:borrowing_capacity_disabled]).to eq(true)
+        end
       end
     end
 

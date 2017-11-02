@@ -396,6 +396,8 @@ class AdvancesController < ApplicationController
   end
 
   def advance_request
+    members_service = MembersService.new(request)
+    @borrowing_capacity_disabled = members_service.report_disabled?(current_member_id, [MembersService::ACCT_SUMMARY_AND_BORROWING_CAP_SIDEBARS])
     @advance_request ||= AdvanceRequest.new(current_member_id, signer_full_name, request)
     @advance_request.owners.add(current_user.id)
     @advance_request
@@ -432,7 +434,6 @@ class AdvancesController < ApplicationController
     logger.info { 'Advance Request State at Exception: ' + advance_request.to_json }
     render :error
   end
-
 
   def days_to_maturity(maturity_date, funding_date=nil)
     days_to_maturity = (maturity_date.to_date - (funding_date || Time.zone.today).to_date).to_i

@@ -213,6 +213,7 @@ class DashboardController < ApplicationController
     @market_overview = [{ name: 'Test',
                           data: members_service.report_disabled?(current_member_id, [MembersService::IRDB_RATES_DATA]) ? nil : market_overview_data }]
 
+    @account_summary_disabled = members_service.report_disabled?(current_member_id, [MembersService::ACCT_SUMMARY_AND_BORROWING_CAP_SIDEBARS])
     @financing_availability_gauge = if profile[:total_financing_available]
       calculate_gauge_percentages(
         {
@@ -243,7 +244,7 @@ class DashboardController < ApplicationController
       current_report_set = QuickReportSet.for_member(current_member_id).latest_with_reports
       @quick_reports = {}.with_indifferent_access
       if current_report_set.present?
-        @quick_reports_period = (current_report_set.period + '-01').to_date # covert period to date
+        @quick_reports_period = (current_report_set.period + '-01').to_date # convert period to date
         current_report_set.member.quick_report_list.each do |report_name|
           @quick_reports[report_name] = {
             title: QUICK_REPORT_MAPPING[report_name]

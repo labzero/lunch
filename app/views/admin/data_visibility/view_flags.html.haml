@@ -15,6 +15,10 @@
     =hidden_field_tag(:member_id, @member_dropdown[:default_value])
     =submit_tag(t('admin.term_rules.save'), class: 'primary-button', disabled: true) if @can_edit_data_visibility
     %section
+      %h2= t('admin.data_visibility.manage_data_visibility.interface_visibility.title')
+      =render 'data_visibility_flags_table_section', title: t('admin.data_visibility.manage_data_visibility.interface_visibility.borrowing_capacity.title'), table_data: @borrowing_cap_elements_table
+      =render 'data_visibility_flags_table_section', title: t('admin.data_visibility.manage_data_visibility.interface_visibility.manage_pages.title'), table_data: @page_names_table
+    %section
       %h2= t('admin.data_visibility.manage_data_visibility.report_visibility')
       =render 'data_visibility_flags_table_section', title: t('reports.your_account.title'), table_data: @account_table
       =render 'data_visibility_flags_table_section', title: t('reports.capital_stock.title'), table_data: @capital_stock_table

@@ -40,7 +40,7 @@ $partial-enabled-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3
     float: right;
   }
   table {
-    margin-bottom: 20px;
+    margin-bottom: 0;
     border: none;
     border-top: 1px solid $light-blue;
     border-bottom: 1px solid $light-blue;
@@ -88,7 +88,8 @@ $partial-enabled-icon: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3
 
   .data-visibility-table {
     margin: 0px;
-    border-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
     th, td {
       box-sizing: border-box;
       border-width: 0;

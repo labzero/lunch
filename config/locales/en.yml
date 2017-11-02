@@ -3658,6 +3658,17 @@ en:
           view: View
       manage_data_visibility:
         title: Manage Data Visibility
+        interface_visibility:
+          title: Interface Visibility
+          borrowing_capacity:
+            title: Borrowing Capacity
+            acct_summary_and_borrowing_cap_sidebar: Account Summary and Borrowing Capacity Sidebars
+            table_in_acct_summary_report: Borrowing Capacity Table Within Account Summary Report
+          manage_pages:
+            title: Manage Pages
+            advances: Manage Advances
+            letters_of_credit: Manage Letters of Credit
+            securities: Manage Securities
         report_visibility: Report Visibility
         all_members: All Members
         member_selector: 'Data Visibility for:'

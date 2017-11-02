@@ -76,6 +76,11 @@ class LettersOfCreditController < ApplicationController
     @lc_agreement_flag = member[:customer_lc_agreement_flag]
   end
 
+  before_action only: [:new, :amend] do
+    members_service = MembersService.new(request)
+    @borrowing_capacity_disabled = members_service.report_disabled?(current_member_id, [MembersService::ACCT_SUMMARY_AND_BORROWING_CAP_SIDEBARS])
+  end
+
   before_action :fetch_beneficiary_request, only: [:beneficiary, :beneficiary_new]
   after_action :save_beneficiary_request, only: [:beneficiary]
 

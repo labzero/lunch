@@ -13,7 +13,7 @@ Feature: Viewing/Modifying the Data Visibility of the Member Portal
     And I click on the data visibility web flags link in the header dropdown
     Then I should be on the data visibility web flags page
     And I should see the data visibility web flags page in its view-only mode
-    And I should see 6 report tables with multiple data rows
+    And I should see 8 report tables with multiple data rows
     When I change the member selector to the 2 value on the data visibility web flags page
     Then I should see the data visibility web flags page for that member
 
@@ -24,7 +24,7 @@ Feature: Viewing/Modifying the Data Visibility of the Member Portal
     And I click on the data visibility web flags link in the header dropdown
     Then I should be on the data visibility web flags page
     And I should see the data visibility web flags page in its view-only mode
-    And I should see 6 report tables with multiple data rows
+    And I should see 8 report tables with multiple data rows
     When I change the member selector to the 2 value on the data visibility web flags page
     Then I should see the data visibility web flags page for that member
 
@@ -34,7 +34,7 @@ Feature: Viewing/Modifying the Data Visibility of the Member Portal
     And I click on the data visibility web flags link in the header dropdown
     Then I should be on the data visibility web flags page
     And I should see the data visibility web flags page in its editable mode
-    And I should see 6 report tables with multiple data rows
+    And I should see 8 report tables with multiple data rows
     When I change the member selector to the 2 value on the data visibility web flags page
     Then I should see the data visibility web flags page for that member
 

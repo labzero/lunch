@@ -255,6 +255,12 @@ RSpec.describe DashboardController, :type => :controller do
         get :index
         expect(assigns[:borrowing_capacity]).to eq(nil)
       end
+      it 'should set @account_summary_disabled to true if the report is disabled' do
+        allow_any_instance_of(MembersService).to receive(:report_disabled?).with(member_id, [MembersService::ACCT_SUMMARY_AND_BORROWING_CAP_SIDEBARS]).and_return(true)
+        get :index
+        expect(assigns[:account_summary_disabled]).to eq(true)
+      end
+
     end
 
     describe 'Quick Reports module' do

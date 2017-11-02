@@ -7,37 +7,40 @@
 - profile[:collateral_borrowing_capacity][:sbc][:aa] ||= {}
 - profile[:capital_stock] ||= {}
 .sidebar-section.sidebar-borrowing-capacity
-  %section.report-summary-data
-    %h3=t('advances.add_advance.borrowing_capacity.total_borrowing_capacity')
-    %p
-      %span.number-positive= fhlb_formatted_currency_whole(profile[:collateral_borrowing_capacity][:total])
-    %h3=t('advances.add_advance.borrowing_capacity.remaining_borrowing_capacity')
-    %p= fhlb_formatted_currency_whole(profile[:collateral_borrowing_capacity][:remaining])
-  %table
-    %tbody
-      %tr
-        %td.label=t('advances.add_advance.borrowing_capacity.standard')
-        %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:standard][:remaining])
-      %tr
-        %td.label=t('advances.add_advance.borrowing_capacity.sbc_agency')
-        %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:sbc][:agency][:remaining])
-      %tr
-        %td.label=t('advances.add_advance.borrowing_capacity.sbc_aaa')
-        %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:sbc][:aaa][:remaining])
-      %tr
-        %td.label=t('advances.add_advance.borrowing_capacity.sbc_aa')
-        %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:sbc][:aa][:remaining])
-  %h3.sidebar-borrowing-capacity-remaining=t('advances.add_advance.borrowing_capacity.remaining')
-  %table
-    %tbody
-      %tr
-        %td.label=t('advances.add_advance.borrowing_capacity.financing_avail')
-        %td.value= fhlb_formated_currency_unit(profile[:remaining_financing_available])
-      %tr
-        %td.label=t('advances.add_advance.borrowing_capacity.stock_leverage')
-        %td.value= fhlb_formated_currency_unit(profile[:capital_stock][:remaining_leverage])
-  %table
-    %tbody
-      %tr
-        %td.label=t('reports.pages.account_summary.financing_availability.maximum_term')
-        %td.value= t('reports.month_count.other', count: profile[:maximum_term])
+  - if @borrowing_capacity_disabled
+    .borrowing-capacity-disabled= t('errors.table_data_unavailable')
+  - else
+    %section.report-summary-data
+      %h3=t('advances.add_advance.borrowing_capacity.total_borrowing_capacity')
+      %p
+        %span.number-positive= fhlb_formatted_currency_whole(profile[:collateral_borrowing_capacity][:total])
+      %h3=t('advances.add_advance.borrowing_capacity.remaining_borrowing_capacity')
+      %p= fhlb_formatted_currency_whole(profile[:collateral_borrowing_capacity][:remaining])
+    %table
+      %tbody
+        %tr
+          %td.label=t('advances.add_advance.borrowing_capacity.standard')
+          %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:standard][:remaining])
+        %tr
+          %td.label=t('advances.add_advance.borrowing_capacity.sbc_agency')
+          %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:sbc][:agency][:remaining])
+        %tr
+          %td.label=t('advances.add_advance.borrowing_capacity.sbc_aaa')
+          %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:sbc][:aaa][:remaining])
+        %tr
+          %td.label=t('advances.add_advance.borrowing_capacity.sbc_aa')
+          %td.value= fhlb_formated_currency_unit(profile[:collateral_borrowing_capacity][:sbc][:aa][:remaining])
+    %h3.sidebar-borrowing-capacity-remaining=t('advances.add_advance.borrowing_capacity.remaining')
+    %table
+      %tbody
+        %tr
+          %td.label=t('advances.add_advance.borrowing_capacity.financing_avail')
+          %td.value= fhlb_formated_currency_unit(profile[:remaining_financing_available])
+        %tr
+          %td.label=t('advances.add_advance.borrowing_capacity.stock_leverage')
+          %td.value= fhlb_formated_currency_unit(profile[:capital_stock][:remaining_leverage])
+    %table
+      %tbody
+        %tr
+          %td.label=t('reports.pages.account_summary.financing_availability.maximum_term')
+          %td.value= t('reports.month_count.other', count: profile[:maximum_term])

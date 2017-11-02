@@ -322,8 +322,10 @@ $breakdown-table-currency-width: 10px;
   .dashboard-module-content {
     padding-top: 15px;
     background: $white;
-    min-height: 201px;
     box-sizing: border-box;
+  }
+  .dashboard-module-temporarily-unavailable, .dashboard-module-loading {
+    min-height: 201px;
   }
 }
 
@@ -651,6 +653,12 @@ $breakdown-table-currency-width: 10px;
     @include icon-loading;
     left: 0;
   }
+}
+
+.dashboard-module-disabled {
+  padding-left: 50px;
+  padding-right: 50px;
+  text-align: center;
 }
 
 .dashboard-module-recent-activity {
