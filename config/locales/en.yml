@@ -1691,7 +1691,7 @@ en:
     due_date: "MCU Due Date:"
     extension: "Approved Extension Date:"
     new:
-      title: New Mortgage Collateral Update (MCU)
+      title: New Mortgage Collateral Update (MCU) Request
       authorize: Authorize
       transaction:
         title: Transaction Details
@@ -1716,22 +1716,25 @@ en:
           standard: Standard
           loans_held: Loans Held for Sale
         legal:
-          rights: All rights, remedies, and obligations of the Bank with respect to the Collateral specified in the submitted MCU shall be in accordance with the Advance and Security Agreement between your institution and the Bank.
+          rights: All rights, remedies, and obligations of the Bank with respect to the Collateral specified in the submitted MCU shall be in accordance with the Advance and Security Agreement.
           process_mcu: MCUs will be processed by the Bank in accordance with the Advances and Security Agreement.
+          authorizing: "By authorizing the submission of the above uploaded MCU, your institution makes the following certifications:"
           specific:
-            complete: The submitted MCU specifies Collateral that your institution is pledging to the Bank pursuant to the Advances and Security Agreement between your institution and the Bank, and if not specified on the submitted file, your institution is requesting the release of any Collateral not so specified.
-            update: The Streamlined MCU has fewer data fields than the Standard MCU and may be submitted in lieu of the Standard MCU only to update Collateral that your institution has already pledged to the Bank via a Standard MCU or Pledge MCU. The Streamlined MCU is for updates only, and new Collateral that has not been previously pledged to the Bank must be pledged using the Standard MCU or Pledge MCU. If Collateral that was previously pledged is not specified on the submitted Streamlined MCU, your institution is requesting the release of any Collateral not so specified.
-            pledge: The submitted MCU specifies Collateral that your institution is pledging to the Bank pursuant to the Advances and Security Agreement between your institution and the Bank.
-            depledge: The submitted MCU specifies Collateral that your institution is requesting the Bank to release.
-            renumber: The submitted MCU contains information to renumber the Collateral specified.
+            title: MCU Type Descriptions
+            complete: The submitted Complete MCU specifies Collateral that your institution is pledging to the Bank pursuant to the Advances and Security Agreement between your institution and the Bank, and if not specified on the submitted MCU, your institution is requesting the Bank to release its security interest on any Collateral not so specified.
+            update: The Update MCU has fewer data fields than a Complete MCU or Pledge MCU and may be submitted in lieu of a Complete MCU or Pledge MCU only to update Collateral that your institution has already pledged to the Bank via a Complete MCU or Pledge MCU. The Update MCU is for updates only, and new Collateral that has not been previously pledged to the Bank must be pledged using the Complete MCU or Pledge MCU. If Collateral that was previously pledged is not specified on the submitted Update MCU, your institution is requesting the Bank to release its security interest on any Collateral not so specified.
+            pledge: The submitted Pledge MCU specifies Collateral that your institution is pledging to the Bank pursuant to the Advances and Security Agreement between your institution and the Bank.
+            depledge: The submitted Depledge MCU specifies Collateral that your institution is requesting the Bank to release its security interest on.
+            renumber: The submitted Renumber MCU contains information to renumber the Collateral specified.
             capitalized_terms: Capitalized terms used here have the meanings assigned to them in the Advances and Security Agreement between your institution and the Bank.
           blanket_lien:
-            complete: The submitted MCU specifies eligible Collateral to be used in the calculation of your institution’s Borrowing Capacity.
-            update: The Streamlined MCU has fewer data fields than the Standard MCU and may be submitted in lieu of the Standard MCU only to update Collateral that your institution has already reported to the Bank for the calculation of your institution’s Borrowing Capacity via a Standard MCU or Pledge MCU. The Streamlined MCU is for updates only, and new Collateral that has not been previously reported to the Bank for the calculation of your institution’s Borrowing Capacity must be reported using the Standard MCU or Pledge MCU. If Collateral that was previously reported is not specified on the submitted Streamlined MCU, your institution is requesting that any Collateral not so specified be deleted from the calculation of your institution’s Borrowing Capacity.
-            add: The submitted MCU specifies eligible Collateral to be added to the calculation of your institution’s Borrowing Capacity.
-            delete: The submitted MCU specifies Collateral to be deleted from the calculation of your institution’s Borrowing Capacity.
-            renumber: The submitted MCU contains information to renumber the Collateral specified.
-            pledge_interest: Your institution has pledged and granted a security interest in all Loan Collateral, both eligible and ineligible, to the Bank pursuant to the Advances and Security Agreement between your institution and the Bank. Capitalized terms used here have the meanings assigned to them in the Advances and Security Agreement. You understand and agree that the Collateral specified on the submitted MCU is to be used solely for the purpose of determining your institution’s Borrowing Capacity and in no way affects the Bank’s lien on any Loan Collateral pledged to the Bank under the Advances and Security Agreement.
+            title: Blanket Lien Type Descriptions
+            complete: The submitted Complete MCU specifies eligible Collateral to be used in the calculation of your institution’s Borrowing Capacity, and if not specified on the submitted MCU, your institution is requesting any Collateral not so specified to be deleted from the calculation of your institution’s Borrowing Capacity.
+            update: The Update MCU has fewer data fields than a Complete MCU or Add MCU and may be submitted in lieu of a Complete MCU or Add MCU only to update Collateral that your institution has already reported to the Bank for the calculation of your institution’s Borrowing Capacity via a Complete MCU or Add MCU. The Update MCU is for updates only, and new Collateral that has not been previously reported to the Bank for the calculation of your institution’s Borrowing Capacity must be reported using the Complete MCU or Add MCU. If Collateral that was previously reported is not specified on the submitted Update MCU, your institution is requesting that any Collateral not so specified be deleted from the calculation of your institution’s Borrowing Capacity.
+            add: The submitted Add MCU specifies eligible Collateral to be added to the calculation of your institution’s Borrowing Capacity.
+            delete: The submitted Delete MCU specifies Collateral that your institution is requesting to be deleted from the calculation of your institution’s Borrowing Capacity.
+            renumber: The submitted Renumber MCU contains information to renumber the Collateral specified.
+            pledge_interest: Your institution has pledged and granted a security interest in all Loan Collateral, both eligible and ineligible, to the Bank pursuant to the Advances and Security Agreement between your institution and the Bank. Capitalized terms used here have the meanings assigned to them in the Advances and Security Agreement. You understand and agree that the Collateral specified on the above uploaded MCU is to be used solely for the purpose of determining your institution’s Borrowing Capacity and in no way affects the Bank’s lien on any Loan Collateral pledged to the Bank under the Advances and Security Agreement.
       upload:
         title: Mortgages
         file_types: Upload an .xlsx, .xls, .csv, .txt or .zip file containing your loans.

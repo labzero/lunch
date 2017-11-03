@@ -81,13 +81,17 @@
 .mcu-upload-legal-section {
   display: none;
   dt {
-    @extend %typography-subtitle;
+    @extend %typography-field-value;
     float: left;
     margin-right: 5px;
   }
   dd {
+    @extend %typography-field-placeholder;
     @extend %pseudoelement-clearfix;
     margin: 0 0 15px 0;
+  }
+  dl {
+    border-bottom: 1px solid $secondary-gray;
   }
   .additional-legal h3 {
     @extend %typography-subtitle;

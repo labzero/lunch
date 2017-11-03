@@ -400,9 +400,7 @@ class MemberBalanceService < MAPIService
   end
 
   def mcu_member_info
-    Rails.cache.fetch(CacheConfiguration.key(:mcu_member_info), expires_in: CacheConfiguration.expiry(:mcu_member_info)) do
-      get_hash(:mcu_member_info, "/member/#{@member_id}/mcu_member_info")
-    end
+    get_hash(:mcu_member_info, "/member/#{@member_id}/mcu_member_info")
   end
 
   def managed_securities
