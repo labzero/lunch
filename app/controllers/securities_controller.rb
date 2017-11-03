@@ -80,28 +80,33 @@ class SecuritiesController < ApplicationController
 
   def manage
     @title = t('securities.manage.title')
+    members_service = MembersService.new(request)
+    @manage_securities_disabled = members_service.report_disabled?(current_member_id, [MembersService::MANAGE_SECURITIES])
+
     member_balances = MemberBalanceService.new(current_member_id, request)
     securities = member_balances.managed_securities.sort_by!{|e| [ e[:custody_account_type], e[:cusip] ]}
     raise StandardError, "There has been an error and SecuritiesController#manage has encountered nil. Check error logs." if securities.nil?
 
     securities.collect! { |security| Security.from_hash(security) }
     rows = []
-    securities.each do |security|
-      cusip = security.cusip
-      status = Security.human_custody_account_type_to_status(security.custody_account_type)
-      columns = [
-        {value: security.to_json, type: :checkbox, name: "securities[]", disabled: cusip.blank?, data: {status: status}},
-        {value: cusip || t('global.missing_value')},
-        {value: security.description || t('global.missing_value')},
-        {value: status},
-        {value: security.maturity_date, type: :date},
-        {value: security.current_par, type: :number}
-      ]
-      columns.insert(4, {value: DELIVER_TO_MAPPING[security.reg_id] || t('global.missing_value')}) if feature_enabled?('securities-delivery-method')
-      rows << {
-        filter_data: status,
-        columns: columns
-      }
+    unless @manage_securities_disabled
+      securities.each do |security|
+        cusip = security.cusip
+        status = Security.human_custody_account_type_to_status(security.custody_account_type)
+        columns = [
+          {value: security.to_json, type: :checkbox, name: "securities[]", disabled: cusip.blank?, data: {status: status}},
+          {value: cusip || t('global.missing_value')},
+          {value: security.description || t('global.missing_value')},
+          {value: status},
+          {value: security.maturity_date, type: :date},
+          {value: security.current_par, type: :number}
+        ]
+        columns.insert(4, {value: DELIVER_TO_MAPPING[security.reg_id] || t('global.missing_value')}) if feature_enabled?('securities-delivery-method')
+        rows << {
+          filter_data: status,
+          columns: columns
+        }
+      end
     end
     column_headings = [
       {value: 'check_all', type: :checkbox, name: 'check_all', sortable: false },

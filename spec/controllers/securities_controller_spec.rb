@@ -29,6 +29,12 @@ RSpec.describe SecuritiesController, type: :controller do
     end
 
     describe 'GET manage' do
+      let(:members_service_instance) { double("A Member Service") }
+      before do
+        allow(MembersService).to receive(:new).and_return(members_service_instance)
+        allow(members_service_instance).to receive(:report_disabled?).and_return(false)
+      end
+
       let(:security) do
         security = {}
         [:cusip, :description, :custody_account_type, :maturity_date, :current_par].each do |attr|
@@ -230,6 +236,17 @@ RSpec.describe SecuritiesController, type: :controller do
           assigns[:securities_table_data][:rows].each do |row|
             expect(row[:columns][4][:value]).to eq(I18n.t('global.missing_value'))
           end
+        end
+      end
+
+      describe 'when the `Manage Securities` user interface element has been disabled' do
+        before do
+          allow(MembersService).to receive(:new).and_return(members_service_instance)
+          allow(members_service_instance).to receive(:report_disabled?).and_return(true)
+        end
+        it 'sets the `@manage_securities_disabled` instance variable to true' do
+          call_action
+          expect(assigns[:manage_securities_disabled]).to eq(true)
         end
       end
     end
