@@ -1,3 +1,4 @@
+- missing_data_msg = @manage_locs_disabled ?  t('errors.table_data_unavailable') : t('errors.table_data_no_records')
 .letters-of-credit.letters-of-credit-manage.row
   %h1= @title
   -if !@lc_agreement_flag
@@ -5,7 +6,7 @@
   =link_to(t('letters_of_credit.manage.request'), letters_of_credit_request_path, {class: 'secondary-button'}) if policy(:letters_of_credit).request?
   - styles = ['letters-of-credit-manage-table']
   - styles << (@amend_on ? 'letters-of-credit-manage-amend-on-table' : 'letters-of-credit-manage-amend-off-table')
-  %table.report-table.table-allow-wrapping{ 'class':  "#{styles.join(' ')}", data: {loaded: true, sortable: false, :'disable-auto-width' => false, :'missing-data-message' => t('errors.table_data_no_records')}}
+  %table.report-table.table-allow-wrapping{ 'class':  "#{styles.join(' ')}", data: {loaded: true, sortable: false, :'disable-auto-width' => false, :'missing-data-message' => missing_data_msg}}
     %thead
       %tr
         - @table_data[:column_headings].each do |heading|

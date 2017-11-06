@@ -227,12 +227,15 @@ RSpec.describe LettersOfCreditController, :type => :controller do
   describe 'GET manage' do
     let(:historic_locs) { instance_double(Array) }
     let(:member_balance_service) { instance_double(MemberBalanceService, letters_of_credit: {credits: []}, todays_credit_activity: []) }
+    let(:members_service)  { double("A Member Service") }
     let(:lc) { {instrument_type: described_class::LC_INSTRUMENT_TYPE} }
     let(:call_action) { get :manage }
 
     before do
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
       allow(controller).to receive(:dedupe_locs)
+      allow(MembersService).to receive(:new).and_return(members_service)
+      allow(members_service).to receive(:report_disabled?).and_return(false)
     end
 
     it_behaves_like 'a user required action', :get, :manage
@@ -375,6 +378,21 @@ RSpec.describe LettersOfCreditController, :type => :controller do
             end
           end
         end
+      end
+    end
+
+    describe 'when the `Manage Letters of Credit` user interface element has been disabled' do
+      before do
+        allow(MembersService).to receive(:new).and_return(members_service)
+        allow(members_service).to receive(:report_disabled?).and_return(true)
+      end
+      it 'sets the `@manage_advances_disabled` instance variable to true' do
+        call_action
+        expect(assigns[:manage_locs_disabled]).to eq(true)
+      end
+      it 'returns an empty `@advances_data_table` table' do
+        call_action
+        expect(assigns[:table_data][:rows]).to eq([])
       end
     end
   end

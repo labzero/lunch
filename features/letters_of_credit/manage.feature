@@ -19,3 +19,10 @@ Feature: Managing Letters of Credit
     Given I am signed in as a Chaste Manhattan signer
     And I visit the Request Letter of Credit page
     Then I should see that my bank is not authorized to request a Letter of Credit
+
+
+  @data-unavailable @jira-mem-2511
+  Scenario: The Manage Letters of Credit page has been disabled
+    Given I visit the Manage Letters of Credit page
+    When the "Manage Letters of Credit" page has been disabled
+    Then I should see an empty data table with "Data Currently Disabled" messaging
