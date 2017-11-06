@@ -289,6 +289,73 @@ RSpec.describe MortgagesController, :type => :controller do
     end
   end
 
+  describe 'post `upload`' do
+    let(:transaction_id) { SecureRandom.hex }
+    let(:transaction_id_json) { JSON.parse("{ \"transaction_id\": \"#{transaction_id}\" }") }
+    let(:path) { SecureRandom.hex }
+    let(:original_filename) { 'upload-test-file.txt' }
+    let(:file) { fixture_file_upload(original_filename, 'text/text') }
+    let(:mcu_type) { SecureRandom.hex }
+    let(:pledge_type) { SecureRandom.hex }
+    let(:program_type) { SecureRandom.hex }
+    let(:username) { SecureRandom.hex }
+    let(:member_balance_service) { instance_double( MemberBalanceService, 
+                                                    mcu_transaction_id: transaction_id,
+                                                    mcu_upload_file: nil )}
+    let(:username) { SecureRandom.hex }
+    let(:user) { instance_double(User, username: username, accepted_terms?: true) }
+    let(:call_action) { get :upload, 
+                        mortgage_collateral_update: { file: file,
+                                                      mcu_type: mcu_type,
+                                                      pledge_type: pledge_type,
+                                                      "program_type_#{mcu_type.upcase}": program_type } }
+    before do 
+      allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
+      allow(member_balance_service).to receive(:mcu_transaction_id).and_return(transaction_id_json)
+      allow(transaction_id_json).to receive(:[]).and_return(transaction_id)
+      allow(member_balance_service).to receive(:mcu_upload_file)
+      allow(file).to receive(:path).and_return(path)
+      allow(file).to receive(:original_filename).and_return(original_filename)
+      allow(subject).to receive(:current_user).and_return(user)
+      allow(mcu_type).to receive(:titlecase).and_return(mcu_type)
+      allow(pledge_type).to receive(:titlecase).and_return(pledge_type)
+      allow(program_type).to receive(:titlecase).and_return(program_type)
+    end
+    it 'create a `MemberBalanceService` instance' do
+      expect(MemberBalanceService).to receive(:new).with(member_id, request)
+      call_action
+    end
+    it 'gets the `transaction_id` json response' do
+      expect(member_balance_service).to receive(:mcu_transaction_id).and_return(transaction_id_json)
+      call_action
+    end
+    it 'gets the `transaction_id` from the json response' do
+      expect(transaction_id_json).to receive(:[]).with('transaction_id').and_return(transaction_id)
+      call_action
+    end
+    it 'gets the `path` from the uploaded file' do
+      expect(file).to receive(:path)
+      call_action
+    end
+    it 'gets the `original_filename` from the uploaded file' do
+      expect(file).to receive(:original_filename)
+      call_action
+    end
+    it 'assings `@program_type`' do
+      call_action
+      expect(assigns[:program_type]).to eq(program_type)
+    end
+    it 'calls `mcu_upload_file` with the appropriate arguments' do
+      expect(member_balance_service).to receive(:mcu_upload_file).with(transaction_id,
+                                                                       mcu_type, 
+                                                                       pledge_type, 
+                                                                       path,
+                                                                       original_filename,
+                                                                       username)
+      call_action
+    end
+  end
+
   describe 'private methods' do
     describe '`translated_mcu_transaction`' do
       let(:transaction) {{

@@ -214,3 +214,40 @@
     display: inline-block;
   }
 }
+
+.mcu-success {
+  position: relative;
+  padding-left: $extra-large-icon-font-size * 2;
+  margin-top: 10px;
+  p {
+    span {
+      @extend %typography-graph-data;
+      display: block;
+    }
+  }
+  &:before {
+    position: absolute;
+    left: 0;
+    font-size: $extra-large-icon-font-size;
+    color: $approval-green;
+  }
+}
+
+.mcu-success-actions {
+  margin-top: 30px;
+  .primary-button, .secondary-button {
+    margin-right: 10px;
+    width: 219px;
+  }
+}
+
+.mcu-transaction-details {
+  @extend %list-summary-data;
+  h2 { 
+    margin-top: 0;
+  }
+  .extra-spacing { 
+    line-height: 3em;
+  }
+  padding-bottom: 0;
+}

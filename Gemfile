@@ -94,6 +94,7 @@ gem 'security_identifiers', '~> 0.1.1'
 gem 'prismic.io', require: 'prismic'
 
 # for communicating with the enterprise message bus
+gem 'net-sftp'
 gem 'stomp'
 
 group :production, :development do

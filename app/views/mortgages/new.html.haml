@@ -3,7 +3,7 @@
   .row
     .column-9x3-left
       %h1= @title
-  =form_for(:mortgage_collateral_update, html: {class: 'mortgage-collateral-update-new-form'}) do |f|
+  =form_for(:mortgage_collateral_update, url: mcu_upload_path, html: {class: 'mortgage-collateral-update-new-form'}) do |f|
     .row
       .column-9x3-left
         %section
@@ -25,7 +25,7 @@
             %label{for: 'mortgage_collateral_update_new'}= t('mortgages.new.transaction.program')
             - show_dropdown = true
             - @program_type_dropdowns.each do |mcu_type, program_type_options|
-              = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[program_type]', dropdown_options: program_type_options, default_text: t('mortgages.new.transaction.select_program'), include_blank: true, disabled: true, classes: ['mcu-program-type-dropdown', mcu_type, show_dropdown ? 'selected' : ''], ignore_single_item: true
+              = render 'shared/dropdown', dropdown_name: "mortgage_collateral_update[program_type_#{mcu_type}]", dropdown_options: program_type_options, default_text: t('mortgages.new.transaction.select_program'), include_blank: true, disabled: true, classes: ['mcu-program-type-dropdown', mcu_type, show_dropdown ? 'selected' : ''], ignore_single_item: true
               -show_dropdown = false
         %section
           %h2= t('mortgages.new.upload.title')

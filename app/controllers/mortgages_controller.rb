@@ -120,6 +120,23 @@ class MortgagesController < ApplicationController
     @transaction_details = translated_mcu_transaction(transaction_details)
   end
 
+  # POST
+  def upload
+    member_balances = MemberBalanceService.new(current_member_id, request)
+    @transaction_id = member_balances.mcu_transaction_id['transaction_id']
+    mcu_params = params['mortgage_collateral_update']
+    @mcu_type = mcu_params['mcu_type'].titlecase
+    @pledge_type = mcu_params['pledge_type'].titlecase
+    @program_type = mcu_params["program_type_#{@mcu_type.upcase}"].titlecase
+    uploaded_file = mcu_params['file']
+    @result = member_balances.mcu_upload_file(@transaction_id, 
+                                              @mcu_type, 
+                                              @pledge_type, 
+                                              uploaded_file.path, 
+                                              uploaded_file.original_filename, 
+                                              current_user.username)
+  end
+
   private
 
   def translated_mcu_transaction(transaction)

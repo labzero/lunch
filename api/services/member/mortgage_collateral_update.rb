@@ -1,3 +1,5 @@
+require 'net/sftp'
+
 module MAPI
   module Services
     module Member
@@ -23,10 +25,46 @@ module MAPI
           processed_data.with_indifferent_access
         end
 
+        def self.mcu_upload_file(app, member_id, transaction_id, file_type, pledge_type, local_path, original_filename, username)
+          unless should_fake?(app)
+            now = Time.zone.now
+            server_info = get_message(app, 'GetServerInfo', nil, {})[:headers]
+            remote_filename = "#{pledge_type}_#{transaction_id}_#{original_filename.gsub(' ', '_')}"
+            remote_path_fragment = "#{server_info['archiveDir']}/MCU/#{member_id}"
+            remote_path = ""
+            begin
+              Net::SFTP.start(server_info['hostname'], 
+                              server_info['svcAccountUsername'],
+                              password: server_info['svcAccountPassword']) do |sftp|
+                sftp.mkdir(remote_path_fragment)
+                remote_path_fragment = "#{remote_path_fragment}/#{now.year}"
+                sftp.mkdir(remote_path_fragment)
+                remote_path_fragment = "#{remote_path_fragment}/#{now.month}"
+                sftp.mkdir(remote_path_fragment)
+                remote_path = "#{remote_path_fragment}/#{remote_filename}"
+                sftp.upload!(local_path, remote_path)
+              end
+            rescue Exception => e
+              message = "Failed to SFTP #{local_path} to #{remote_path}. Reason: #{e.message}"
+              app.logger.error(message)
+              return { success: false, message: message }
+            end
+            post_message(app, 'INITIATE_FILE_SUBMISSION', { 'memberId': member_id,
+                                                            'fileTypeId': file_type,
+                                                            'transactionId': transaction_id,
+                                                            'fileName': remote_path,
+                                                            'extension': File.extname(remote_path),
+                                                            'pledgeType': pledge_type,
+                                                            'submittedBy': username })
+            post_message(app, 'UPDATE_FILE_STATUS', { 'transactionId': transaction_id, 
+                                                      'status': 'FHLBSF Processing' })
+          end
+          { success: true, message: '' }
+        end
 
         def self.mcu_member_status(app, member_id)
           mcu_member_status = unless should_fake?(app)
-            get_message(app, 'GET_MEMBER_TRANSACTIONS', member_id, {partnerId: member_id})
+            get_message(app, 'GET_MEMBER_TRANSACTIONS', member_id, {partnerId: member_id})[:body]
           else
             fake('member_mcu_status')
           end
@@ -39,12 +77,12 @@ module MAPI
         end
 
         def self.mcu_transaction_id(app, member_id)
-          { transaction_id: should_fake?(app) ? rand(999..9999) : get_message(app, 'GET_TRANSACTION_ID') }
+          { transaction_id: should_fake?(app) ? rand(9999..99999) : get_message(app, 'GET_TRANSACTION_ID')[:body] }
         end
 
         def self.mcu_member_info(app, member_id)
           unless should_fake?(app)
-            get_message(app, 'GET_MEMBER_INFO')[member_id.to_s]
+            get_message(app, 'GET_MEMBER_INFO')[:body][member_id.to_s]
           else
             fake_hash('member_mcu_member_info')[member_id.to_s]
           end
