@@ -15,10 +15,8 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
   all_report_names = [securities_reports, credit_reports, collateral_reports, price_indications_reports, capital_stock_reports, account_reports].flatten
 
   # User Interface Elements
-  borrowing_capacity_elements = [:acct_summary_and_borrowing_cap_sidebar]
+  borrowing_capacity_elements = [:acct_summary_and_borrowing_cap_sidebar, :table_in_acct_summary_report]
   site_page_names = [:manage_advances, :manage_letters_of_credit, :manage_securities]
-
-  all_entity_names = all_report_names + site_page_names + borrowing_capacity_elements
 
   it_behaves_like 'an admin controller'
 
@@ -312,7 +310,7 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
         call_action
       end
       it 'calls `data_visibility_table` with an array of all report names' do
-        expect(controller).to receive(:data_visibility_table).with(anything, all_entity_names, anything)
+        expect(controller).to receive(:data_visibility_table).with(anything, all_report_names, anything)
         call_action
       end
       it 'calls `data_visibility_table` with the `disabled_only` parameter set to `true` ' do
@@ -419,18 +417,18 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
         describe 'when there are globally disabled reports' do
           disabled_ids = [ 17, 35, 39 ]
           it 'returns a hash of disabled report names' do
-            result = subject.send(:data_visibility_table, disabled_ids, all_entity_names, true)
+            result = subject.send(:data_visibility_table, disabled_ids, all_report_names, true)
             expect(result[:rows].length).to eq(disabled_ids.length)
           end
           it 'return a hash with a single column' do
-            result = subject.send(:data_visibility_table, disabled_ids, all_entity_names, true)
+            result = subject.send(:data_visibility_table, disabled_ids, all_report_names, true)
             expect(result[:rows][0][:columns].length).to eq(1)
           end
         end
         describe 'when there are no globally disabled reports' do
           disabled_ids = []
           it 'returns an empty hash' do
-            result = subject.send(:data_visibility_table, disabled_ids, all_entity_names, true)
+            result = subject.send(:data_visibility_table, disabled_ids, all_report_names, true)
             expect(result[:rows].length).to eq(0)
           end
         end

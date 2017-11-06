@@ -96,6 +96,10 @@ class Admin::DataVisibilityController < Admin::BaseController
       flags: ReportsController::ACCT_SUMMARY_BORROWING_CAP_WEB_FLAGS,
       title: I18n.t('admin.data_visibility.manage_data_visibility.interface_visibility.borrowing_capacity.acct_summary_and_borrowing_cap_sidebar')
     },
+    table_in_acct_summary_report: {
+      flags: ReportsController::BORROWING_CAPACITY_IN_ACCT_SUMMARY_WEB_FLAGS,
+      title: I18n.t('admin.data_visibility.manage_data_visibility.interface_visibility.borrowing_capacity.table_in_acct_summary_report')
+    },
     manage_advances: {
       flags: ReportsController::MANAGE_ADVANCES_WEB_FLAGS,
       title: I18n.t('advances.manage_advances.title')
@@ -137,7 +141,7 @@ class Admin::DataVisibilityController < Admin::BaseController
   end
 
   def borrowing_capacity_elements
-    [:acct_summary_and_borrowing_cap_sidebar]
+    [:acct_summary_and_borrowing_cap_sidebar, :table_in_acct_summary_report]
   end
 
   before_action do
@@ -211,8 +215,7 @@ class Admin::DataVisibilityController < Admin::BaseController
 
     disabled_ids = members_service.global_disabled_reports
     raise 'There has been an error and Admin::DataVisibilityController#view_status has encountered nil. Check error logs.' if disabled_ids.nil?
-    entity_names = all_report_names + site_page_names + borrowing_capacity_elements
-    @globally_disabled_reports = data_visibility_table(disabled_ids, entity_names, true)
+    @globally_disabled_reports = data_visibility_table(disabled_ids, all_report_names, true)
 
     member_list = members_service.members_with_disabled_reports
     @institutions_with_disabled_items = institutions_disabled_data_table(member_list)

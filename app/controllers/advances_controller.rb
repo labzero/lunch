@@ -38,6 +38,9 @@ class AdvancesController < ApplicationController
   end
 
   def manage
+    members_service = MembersService.new(request)
+    @manage_advances_disabled = members_service.report_disabled?(current_member_id, [MembersService::MANAGE_ADVANCES])
+
     column_headings = [{title: t('common_table_headings.trade_date')}, {title: t('common_table_headings.funding_date')}, {title: t('common_table_headings.maturity_date')}, {title: t('common_table_headings.advance_number')}, {title: t('common_table_headings.advance_type')}, {title: t('global.footnoted_string', string: t('advances.rate'))}, {title: fhlb_add_unit_to_table_header(t('common_table_headings.original_par'), '$')}, {title: fhlb_add_unit_to_table_header(t('common_table_headings.current_par'), '$')}]
     column_headings.each {|col| col[:sortable] = true }
     column_headings << {title: t('advances.confirmation.title'), sortable: false} if feature_enabled?('advance-confirmation')
@@ -73,7 +76,9 @@ class AdvancesController < ApplicationController
       {orderData: [7, 3], orderSequence: [:desc, :asc], targets: [7]},
       {type: :date, targets: [0, 1]}
     ]
-    if params[:job_id]
+    if(@manage_advances_disabled)
+      @advances_data_table[:rows] = []
+    elsif params[:job_id]
       job_status = JobStatus.find_by(id: params[:job_id], user_id: current_user.id, status: JobStatus.statuses[:completed] )
       raise ActiveRecord::RecordNotFound unless job_status
       json = job_status.result_as_string

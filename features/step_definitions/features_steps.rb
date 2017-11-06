@@ -152,22 +152,22 @@ end
 
 When(/^the "(.*?)" page has been disabled$/) do |page|
   flags = case page
-            when 'Manage Advances'
-              { AdvancesController => ReportsController::MANAGE_ADVANCES_WEB_FLAGS }
-            when 'Manage Letters of Credit'
-              { LettersOfCreditController => ReportsController::MANAGE_LCS_WEB_FLAGS }
-            when 'Manage Securities'
-              { SecuritiesController => ReportsController::MANAGE_SECURITIES_WEB_FLAGS }
-          end
+    when 'Manage Advances'
+      { AdvancesController => ReportsController::MANAGE_ADVANCES_WEB_FLAGS }
+    when 'Manage Letters of Credit'
+      { LettersOfCreditController => ReportsController::MANAGE_LCS_WEB_FLAGS }
+    when 'Manage Securities'
+      { SecuritiesController => ReportsController::MANAGE_SECURITIES_WEB_FLAGS }
+  end
   allow_any_instance_of(flags.keys[0]).to receive(:report_disabled?).with(flags.values[0]).and_return(true)
 end
 
 Then(/^I should see an empty data table with "(.*?)" messaging$/) do |messaging|
   searchText = case messaging
-                 when 'Data Currently Disabled'
-                   I18n.t('errors.table_data_unavailable')
-                 when 'No Records Returned'
-                   I18n.t('errors.table_data_no_records')
-               end
+    when 'Data Currently Disabled'
+      I18n.t('errors.table_data_unavailable')
+    when 'No Records Returned'
+      I18n.t('errors.table_data_no_records')
+  end
   page.assert_selector('.report-table tbody tr:first-child .dataTables_empty', text: searchText)
 end
