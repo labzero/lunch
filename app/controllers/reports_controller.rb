@@ -1525,7 +1525,7 @@ class ReportsController < ApplicationController
       @total_credits = securities_transactions[:total_credits]
       @total_debits = securities_transactions[:total_debits]
       @final = securities_transactions[:final]
-      column_headings = [ { value: t('reports.pages.securities_transactions.custody_account_no'), type: :numeric_header},
+      column_headings = [ { value: t('reports.pages.securities_transactions.custody_account_no')},
                           t('common_table_headings.cusip'), 
                           t('reports.pages.securities_transactions.transaction_code'), 
                           t('common_table_headings.security_description'), 
