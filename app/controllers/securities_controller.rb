@@ -720,7 +720,7 @@ class SecuritiesController < ApplicationController
     populate_settlement_type_dropdown_variables(@securities_request)
     populate_delivery_instructions_dropdown_variables(@securities_request)
     populate_securities_table_data_view_variable(type, @securities_request.securities)
-    @date_restrictions = date_restrictions
+    @date_restrictions = date_restrictions(type)
   end
 
   def translated_dropdown_mapping(dropdown_hash)
@@ -754,7 +754,7 @@ class SecuritiesController < ApplicationController
     @delivery_instructions_defaults = delivery_instructions_dropdown_mapping[delivery_type]
   end
 
-  def date_restrictions
+  def date_restrictions(type)
     today = Time.zone.today
     max_date = today + SecuritiesRequest::MAX_DATE_RESTRICTION
     holidays =  CalendarService.new(request).holidays(today, max_date).map{|date| date.iso8601}
@@ -766,7 +766,7 @@ class SecuritiesController < ApplicationController
     end
     {
       settlement_date: {
-        min_date: today - (SecuritiesRequest::MIN_SETTLEMENT_DATE_RESTRICTION - 4.days),
+        min_date: type == :transfer ? today : today - (SecuritiesRequest::MIN_SETTLEMENT_DATE_RESTRICTION - 4.days),
         max_date: max_date,
         invalid_dates: holidays + weekends
       },
