@@ -1494,7 +1494,7 @@ class ReportsController < ApplicationController
         []
       end
       @loc_table_data = {
-        column_headings: [{value: t('reports.pages.letters_of_credit.headers.lc_number'), type: :numeric_header},
+        column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'),
                           {value: fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'), type: :numeric_header},
                           {value: t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), type: :numeric_header},
                           t('reports.pages.letters_of_credit.headers.issuance_date'), 

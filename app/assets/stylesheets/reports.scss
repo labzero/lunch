@@ -1543,6 +1543,12 @@ td.dataTables_empty {
     thead tr th {
       border-bottom: 1px solid $light-gray;
     }
+    &.letters-of-credit-table {
+      td:nth-child(4), td:nth-child(5) {
+        text-align: left;
+        padding-left: 10px;
+      }
+    }
   }
   .report-sub-table,
   .sbc-borrowing-capacity-tables .report-sub-table,

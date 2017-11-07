@@ -991,7 +991,7 @@ RSpec.describe ReportsController, :type => :controller do
         it 'sets @loc_table_data[:column_headings] to an array of column heading strings' do
           make_request
           expect(assigns[:loc_table_data][:column_headings]).to eq([
-            {value: I18n.t('reports.pages.letters_of_credit.headers.lc_number'), type: :numeric_header},
+            I18n.t('reports.pages.letters_of_credit.headers.lc_number'),
             {value: fhlb_add_unit_to_table_header(I18n.t('reports.pages.letters_of_credit.headers.current_amount'), '$'), type: :numeric_header},
             {value: I18n.t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), type: :numeric_header},
             I18n.t('reports.pages.letters_of_credit.headers.issuance_date'),
