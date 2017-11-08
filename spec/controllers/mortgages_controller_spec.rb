@@ -122,6 +122,20 @@ RSpec.describe MortgagesController, :type => :controller do
       call_action
       expect(assigns[:session_elevated]).to eq(session_elevated)
     end
+    describe 'when `member_info` is `nil`' do
+      let(:error_message) { 'No MCU member info returned from the MCM message bus' }
+      before do
+        allow(member_info).to receive(:present?).and_return(false)
+      end
+      it 'catches the error and assigns it to `@error`' do
+        call_action
+        expect(assigns[:error]).to eq(error_message)
+      end
+      it 'logs the error message' do
+        expect(subject.logger).to receive(:error).with(error_message)
+        call_action
+      end
+    end
   end
 
   describe 'get `manage`' do
@@ -304,6 +318,8 @@ RSpec.describe MortgagesController, :type => :controller do
                                                     mcu_upload_file: nil )}
     let(:username) { SecureRandom.hex }
     let(:user) { instance_double(User, username: username, accepted_terms?: true) }
+    let (:collateral_operations_email) { SecureRandom.hex }
+    let(:result) { { success: true, message: '' } }
     let(:call_action) { get :upload, 
                         mortgage_collateral_update: { file: file,
                                                       mcu_type: mcu_type,
@@ -320,6 +336,7 @@ RSpec.describe MortgagesController, :type => :controller do
       allow(mcu_type).to receive(:titlecase).and_return(mcu_type)
       allow(pledge_type).to receive(:titlecase).and_return(pledge_type)
       allow(program_type).to receive(:titlecase).and_return(program_type)
+      allow(member_balance_service).to receive(:mcu_upload_file).and_return(result)
     end
     it 'create a `MemberBalanceService` instance' do
       expect(MemberBalanceService).to receive(:new).with(member_id, request)
@@ -332,6 +349,20 @@ RSpec.describe MortgagesController, :type => :controller do
     it 'gets the `transaction_id` from the json response' do
       expect(transaction_id_json).to receive(:[]).with('transaction_id').and_return(transaction_id)
       call_action
+    end
+    describe 'when the `transaction_id` is `nil`' do
+      before do
+        allow(member_balance_service).to receive(:mcu_transaction_id).and_return(nil)
+      end
+      it 'logs the error message' do
+        expect(subject.logger).to receive(:error).with('No transaction id returned from the MCM message bus')
+        call_action
+      end
+      it 'sets the error result' do
+        allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)
+        call_action
+        expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+      end
     end
     it 'gets the `path` from the uploaded file' do
       expect(file).to receive(:path)
@@ -353,6 +384,25 @@ RSpec.describe MortgagesController, :type => :controller do
                                                                        original_filename,
                                                                        username)
       call_action
+    end
+    it 'assigns `@result` to the result of `mcu_upload_file`' do
+      call_action
+      expect(assigns[:result]).to eq(result)
+    end
+    describe 'when the `mcu_upload_file` fails' do
+      let(:error_result) { { success: false, message: 'error' } }
+      before do
+        allow(member_balance_service).to receive(:mcu_upload_file).and_return(error_result)
+      end
+      it 'logs the error message' do
+        expect(subject.logger).to receive(:error).with("MCU upload failed. Reason: error")
+        call_action
+      end
+      it 'sets the error result' do
+        allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)
+        call_action
+        expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+      end
     end
   end
 

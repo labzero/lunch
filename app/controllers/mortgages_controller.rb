@@ -1,4 +1,7 @@
 class MortgagesController < ApplicationController
+  include CustomFormattingHelper
+  include ContactInformationHelper
+
   before_action do
     set_active_nav(:mortgages)
     @html_class ||= 'white-background'
@@ -97,16 +100,21 @@ class MortgagesController < ApplicationController
   def new
     @title = t('mortgages.new.title')
     member_info = MemberBalanceService.new(current_member_id, request).mcu_member_info
-    @due_datetime = Time.zone.parse(member_info['mcuDueDate'])
-    @extension_datetime = Time.zone.parse(member_info['mcuExtendedDate'])
-    @pledge_type_dropdown_options = PLEDGE_TYPE_DROPDOWN
-    @pledge_type_dropdown_options << BLANKET_LIEN_DROPDOWN_OPTION if member_info['blanketLien']
-    @pledge_type_dropdown_options.uniq!
-    file_types = member_info['mcuuFileTypes']
-    @mcu_type_dropdown_options = file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| type['value'] })
-    @program_type_dropdowns = Hash[file_types.map { |type| type['value'] }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })]
-    @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')
-    @session_elevated = session_elevated?
+    unless member_info.present?
+      @error = 'No MCU member info returned from the MCM message bus'
+      logger.error(@error)
+    else
+      @due_datetime = Time.zone.parse(member_info['mcuDueDate'])
+      @extension_datetime = Time.zone.parse(member_info['mcuExtendedDate'])
+      @pledge_type_dropdown_options = PLEDGE_TYPE_DROPDOWN
+      @pledge_type_dropdown_options << BLANKET_LIEN_DROPDOWN_OPTION if member_info['blanketLien']
+      @pledge_type_dropdown_options.uniq!
+      file_types = member_info['mcuuFileTypes']
+      @mcu_type_dropdown_options = file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| type['value'] })
+      @program_type_dropdowns = Hash[file_types.map { |type| type['value'] }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })]
+      @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')
+      @session_elevated = session_elevated?
+    end
   end
 
   # GET
@@ -123,18 +131,30 @@ class MortgagesController < ApplicationController
   # POST
   def upload
     member_balances = MemberBalanceService.new(current_member_id, request)
-    @transaction_id = member_balances.mcu_transaction_id['transaction_id']
-    mcu_params = params['mortgage_collateral_update']
-    @mcu_type = mcu_params['mcu_type'].titlecase
-    @pledge_type = mcu_params['pledge_type'].titlecase
-    @program_type = mcu_params["program_type_#{@mcu_type.upcase}"].titlecase
-    uploaded_file = mcu_params['file']
-    @result = member_balances.mcu_upload_file(@transaction_id, 
-                                              @mcu_type, 
-                                              @pledge_type, 
-                                              uploaded_file.path, 
-                                              uploaded_file.original_filename, 
-                                              current_user.username)
+    transaction_id_response = member_balances.mcu_transaction_id
+    unless transaction_id_response.present?
+      logger.error('No transaction id returned from the MCM message bus')
+      @result = {}
+      @result[:success] = false
+      @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
+    else
+      @transaction_id = transaction_id_response['transaction_id']
+      mcu_params = params['mortgage_collateral_update']
+      @mcu_type = mcu_params['mcu_type'].titlecase
+      @pledge_type = mcu_params['pledge_type'].titlecase
+      @program_type = mcu_params["program_type_#{@mcu_type.upcase}"].titlecase
+      uploaded_file = mcu_params['file']
+      @result = member_balances.mcu_upload_file(@transaction_id, 
+                                                @mcu_type, 
+                                                @pledge_type, 
+                                                uploaded_file.path, 
+                                                uploaded_file.original_filename, 
+                                                current_user.username)
+      unless @result[:success]
+        logger.error("MCU upload failed. Reason: #{@result[:message]}")
+        @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
+      end
+    end
   end
 
   private

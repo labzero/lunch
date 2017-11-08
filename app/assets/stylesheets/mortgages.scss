@@ -251,3 +251,13 @@
   }
   padding-bottom: 0;
 }
+
+.mcu-error-wrapper {
+  padding-bottom: 55px;
+}
+
+.form-error-section {
+  p { 
+    color: $darkest-gray; 
+  }
+}
