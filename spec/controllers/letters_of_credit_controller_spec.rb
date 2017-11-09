@@ -1496,6 +1496,12 @@ RSpec.describe LettersOfCreditController, :type => :controller do
             expect(call_method).to eq(I18n.t('letters_of_credit.errors.after_max_term', max_term: max_term))
           end
         end
+        describe 'when the errors contain an `amended_expiration_date` `after_max_term` error' do
+          before { allow(errors).to receive(:added?).with(:amended_expiration_date, :after_max_term).and_return(true) }
+          it 'adds an error message containing the max term' do
+            expect(call_method).to eq(I18n.t('letters_of_credit.request.amend.errors.after_max_term', max_term: max_term))
+          end
+        end
         describe 'when the errors do not contain an `amount` `exceeds_borrowing_capacity` error' do
           it 'returns the first error message in the error array' do
             expect(call_method).to eq(error_message)

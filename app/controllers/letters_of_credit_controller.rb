@@ -367,6 +367,8 @@ class LettersOfCreditController < ApplicationController
         t('letters_of_credit.errors.exceeds_borrowing_capacity', borrowing_capacity: fhlb_formatted_currency_whole(letter_of_credit.standard_borrowing_capacity, html: false))
       elsif errors.added? :expiration_date, :after_max_term
         t('letters_of_credit.errors.after_max_term', max_term: letter_of_credit.max_term)
+      elsif errors.added? :amended_expiration_date, :after_max_term
+        t('letters_of_credit.request.amend.errors.after_max_term')
       else
         errors.first.last
       end
