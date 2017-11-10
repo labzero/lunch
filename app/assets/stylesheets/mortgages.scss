@@ -131,6 +131,9 @@
     width: $column-9-width;
     margin-bottom: 25px;
   }
+  .form-error-section p {
+    @extend %typography-paragraph;
+  }
 }
 
 .mortgages-manage {

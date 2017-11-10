@@ -1,4 +1,6 @@
 require 'rails_helper'
+include CustomFormattingHelper
+include ContactInformationHelper
 
 RSpec.describe MortgagesController, :type => :controller do
   login_user
@@ -158,6 +160,20 @@ RSpec.describe MortgagesController, :type => :controller do
       call_action
       expect(assigns[:title]).to eq(I18n.t('mortgages.manage.title'))
     end
+    describe 'when `mcu_member_info` is `nil`' do
+      let(:error_message) { 'No MCU member info returned from the MCM message bus' }
+      before do
+        allow(member_balance_service).to receive(:mcu_member_info).and_return(nil)
+      end
+      it 'assigns `@error`' do
+        call_action
+        expect(assigns[:error]).to eq(error_message)
+      end
+      it 'logs the error message' do
+        expect(subject.logger).to receive(:error).with(error_message)
+        call_action
+      end
+    end
     it 'sets `@due_datetime` to a day one week from today, at 5pm' do
       call_action
       expect(assigns[:due_datetime]).to eq(due_datetime)
@@ -188,13 +204,13 @@ RSpec.describe MortgagesController, :type => :controller do
         it 'builds a row for each letter of credit returned by `dedupe_locs`' do
           n = rand(1..10)
           mcu = []
-          n.times { mcu << {transactionId: SecureRandom.hex} }
+          n.times { mcu << {transaction_id: SecureRandom.hex} }
           allow(member_balance_service).to receive(:mcu_member_status).and_return(mcu)
           call_action
           expect(assigns[:table_data][:rows].length).to eq(n)
         end
         describe 'populated rows' do
-          let(:mcu) { {transactionId: double('transactionId'), mcu_type: double('mcu_type'), authorizedBy: double('authorizedBy'), authorizedOn: double('authorizedOn'), status: double('status'), numberOfLoans: double('numberOfLoans'), numberOfErrors: double('numberOfErrors') } }
+          let(:mcu) { {transaction_id: double('transactionId'), mcu_type: double('mcu_type'), authorizedBy: double('authorizedBy'), authorizedOn: double('authorizedOn'), status: double('status'), numberOfLoans: double('numberOfLoans'), numberOfErrors: double('numberOfErrors') } }
           before { allow(member_balance_service).to receive(:mcu_member_status).and_return([mcu]) }
 
           it 'calls `translated_mcu_transaction` with each mcu transaction' do
@@ -236,7 +252,7 @@ RSpec.describe MortgagesController, :type => :controller do
                 expect(view_details_column[:value].first.first).to eq(I18n.t('mortgages.manage.actions.view_details'))
               end
               it 'is an array in an array whose second member is the `mcu_view_transaction_path` with the `transactionId` of the mcu transaction' do
-                expect(view_details_column[:value].first.last).to eq(mcu_view_transaction_path(transactionId: mcu[:transactionId]))
+                expect(view_details_column[:value].first.last).to eq(mcu_view_transaction_path(transaction_id: mcu[:transactionId]))
               end
             end
           end
@@ -246,14 +262,16 @@ RSpec.describe MortgagesController, :type => :controller do
   end
 
   describe 'get `view`' do
-    let(:transactionId) { SecureRandom.hex }
-    let(:matching_transaction) { {transactionId: transactionId} }
+    let(:transaction_id) { SecureRandom.hex }
+    let(:matching_transaction) { {transactionId: transaction_id} }
     let(:unmatching_transaction) { {transactionId: SecureRandom.hex} }
     let(:member_balance_service) { instance_double(MemberBalanceService, mcu_member_status: [unmatching_transaction, matching_transaction]) }
-    let(:call_action) { get :view, transactionId: transactionId }
+    let(:call_action) { get :view, transactionId: transaction_id }
 
-    before { allow(MemberBalanceService).to receive(:new).and_return(member_balance_service) }
-
+    before do
+      allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
+      allow(subject.logger).to receive(:error).with(anything)
+    end
     it_behaves_like 'a MortgagesController action that sets page-specific instance variables with a before filter'
     it 'sets the `@title` appropriately' do
       call_action
@@ -267,31 +285,41 @@ RSpec.describe MortgagesController, :type => :controller do
       expect(member_balance_service).to receive(:mcu_member_status).and_return([unmatching_transaction, matching_transaction])
       call_action
     end
-    it 'raises an error if `mcu_member_status` returns nil' do
-      allow(member_balance_service).to receive(:mcu_member_status).and_return(nil)
-      expect{call_action}.to raise_error(StandardError, 'There has been an error and MortgagesController#view has encountered nil. Check error logs.')
-    end
-    describe 'when no transactions are returned from `mcu_member_status`' do
-      before { allow(member_balance_service).to receive(:mcu_member_status).and_return([]) }
-
-      it 'raises an error containing the transaction number' do
-        expect{call_action}.to raise_error(ArgumentError, "No matching MCU Status found for MCU with transactionId: #{transactionId}")
+    describe 'when `mcu_member_status` returns nil' do
+      let(:error_message) { 'There has been an error and MortgagesController#view has encountered nil. Check error logs.' }
+      before do
+        allow(member_balance_service).to receive(:mcu_member_status).and_return(nil)
+      end      
+      it 'assigns `@error` to an error message' do
+        call_action
+        expect(assigns[:error]).to eq(error_message)
+      end
+      it 'logs the error message' do
+        expect(subject.logger).to receive(:error).with(error_message)
+        call_action
       end
     end
     describe 'when no matching transactions are returned from `mcu_member_status`' do
-      before { allow(member_balance_service).to receive(:mcu_member_status).and_return([unmatching_transaction]) }
-
-      it 'raises an error containing the transaction number' do
-        expect{call_action}.to raise_error(ArgumentError, "No matching MCU Status found for MCU with transactionId: #{transactionId}")
+      let(:error_message) { "No matching MCU Status found for MCU with transactionId: #{transaction_id}" }
+      before do
+        allow(member_balance_service).to receive(:mcu_member_status).and_return([unmatching_transaction])
+      end
+      it 'assigns `@error` to an error message' do
+        call_action
+        expect(assigns[:error]).to eq(error_message)
+      end
+      it 'logs the error message' do
+        expect(subject.logger).to receive(:error).with(error_message)
+        call_action
       end
     end
     describe 'when a matching transaction is included in the set returned by `mcu_member_status`' do
       let(:translated_transaction_details) { instance_double(Hash) }
-      it 'calls `translated_mcu_transaction` with the mcu transaction that has the same `transactionId` as the passed `transactionId` param' do
+      it 'calls `translated_mcu_transaction` with the mcu transaction that has the same `transaction_id` as the passed `transactionId` param' do
         expect(controller).to receive(:translated_mcu_transaction).with(matching_transaction)
         call_action
       end
-      it 'does not call `translated_mcu_transaction` with any mcu transactions that have different `transactionId` than the passed `transactionId` param' do
+      it 'does not call `translated_mcu_transaction` with any mcu transactions that have different `transaction_id` than the passed `transactionId` param' do
         expect(controller).not_to receive(:translated_mcu_transaction).with(unmatching_transaction)
         call_action
       end
@@ -319,6 +347,7 @@ RSpec.describe MortgagesController, :type => :controller do
     let(:username) { SecureRandom.hex }
     let(:user) { instance_double(User, username: username, accepted_terms?: true) }
     let(:collateral_operations_email) { SecureRandom.hex }
+    let(:collateral_operations_phone) { SecureRandom.hex }
     let(:result) { { success: true, message: '' } }
     let(:year) { SecureRandom.hex }      
     let(:month) { SecureRandom.hex }
@@ -381,9 +410,11 @@ RSpec.describe MortgagesController, :type => :controller do
         expect(subject.logger).to receive(:error).with('No transaction id response returned from the MCM message bus')
         call_action
       end
-      it 'assigns a failure `@result`' do
+      it 'sets the error result' do
+        allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)
+        allow(controller).to receive(:collateral_operations_phone_number).and_return(collateral_operations_phone_number)
         call_action
-        expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+        expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
       end
     end
     describe 'when the `transaction_id_response` is present' do
@@ -409,10 +440,10 @@ RSpec.describe MortgagesController, :type => :controller do
         end
         it 'sets the error result' do
           call_action
-          expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+          expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
         end
       end
-      describe 'when the `transaction_id` is present' do
+      describe 'when the `@transaction_id` is present' do
         before do
           allow(transaction_id_response).to receive(:[]).with(:transaction_id).and_return(transaction_id)
         end
@@ -442,7 +473,7 @@ RSpec.describe MortgagesController, :type => :controller do
           end
           it 'sets the error result' do
             call_action
-            expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+            expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
           end
         end
         describe 'when the server info is not `nil`' do
@@ -490,7 +521,7 @@ RSpec.describe MortgagesController, :type => :controller do
             end
             it 'sets a failure message' do
               call_action
-              expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+              expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
             end
           end
           it 'does not raise an SFTP exception' do
@@ -524,8 +555,9 @@ RSpec.describe MortgagesController, :type => :controller do
           end
           it 'sets the error result' do
             allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)
+            allow(controller).to receive(:collateral_operations_phone_number).and_return(collateral_operations_phone_number)
             call_action
-            expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+            expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
           end
         end
       end

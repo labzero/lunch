@@ -3,42 +3,47 @@
   .row
     .column-9x3-left
       %h1= @title
+      -if @error.present?
+        .mcu-error-wrapper
+          .form-error-section
+            %p= t('mortgages.new.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number)
   .row
-    .column-9x3-left
-      %section
-        %h2= t('mortgages.view.transaction_details.title')
-        %dl
-          %dt= t('mortgages.view.transaction_details.number')
-          %dd= @transaction_details[:transactionId]
-        %dl
-          %dt= t('mortgages.new.transaction.pledge')
-          %dd= @transaction_details[:translated_pledge_type]
-          %dt= t('mortgages.new.transaction.mcu')
-          %dd= @transaction_details[:translated_mcuType]
-          %dt= t('mortgages.new.transaction.program')
-          %dd= @transaction_details[:translated_program_type]
-        %dl
-          %dt= t('mortgages.manage.status')
-          %dd= @transaction_details[:translated_status]
-        %dl
-          %dt= t('mortgages.manage.number_of_loans')
-          %dd= fhlb_formatted_number(@transaction_details[:numberOfLoans])
-          %dt= t('mortgages.manage.number_of_errors')
-          %dd= fhlb_formatted_number(@transaction_details[:numberOfErrors])
-          %dt= t('mortgages.view.transaction_details.error_percent')
-          %dd= fhlb_formatted_percentage(@transaction_details[:error_percentage])
-        .mortgage-colleteral-update-view-reports
-          %h2= t('mortgages.view.reports.title')
-          - reports = @transaction_details[:reports]
-          - if reports.present?
-            - if reports[:summary]
-              = link_to(t('mortgages.view.reports.summary'), reports[:summary])
-            - if reports[:detail]
-              = link_to(t('mortgages.view.reports.detail'), reports[:detail])
-            - if reports[:borrowing_capacity]
-              = link_to(t('mortgages.view.reports.borrowing_capacity'), reports[:borrowing_capacity])
-          - else
-            %p= t('mortgages.view.reports.unavailable')
-      %p= t('mortgages.manage.contact_html', email: collateral_operations_email,  phone_number: collateral_operations_phone_number)
-      .request-form-actions
-        =link_to(t('mortgages.view.actions.manage'), mcu_manage_url, class: 'secondary-button')
+    -unless @error.present?
+      .column-9x3-left
+        %section
+          %h2= t('mortgages.view.transaction_details.title')
+          %dl
+            %dt= t('mortgages.view.transaction_details.number')
+            %dd= @transaction_details[:transactionId]
+          %dl
+            %dt= t('mortgages.new.transaction.pledge')
+            %dd= @transaction_details[:translated_pledge_type]
+            %dt= t('mortgages.new.transaction.mcu')
+            %dd= @transaction_details[:translated_mcuType]
+            %dt= t('mortgages.new.transaction.program')
+            %dd= @transaction_details[:translated_program_type]
+          %dl
+            %dt= t('mortgages.manage.status')
+            %dd= @transaction_details[:translated_status]
+          %dl
+            %dt= t('mortgages.manage.number_of_loans')
+            %dd= fhlb_formatted_number(@transaction_details[:numberOfLoans])
+            %dt= t('mortgages.manage.number_of_errors')
+            %dd= fhlb_formatted_number(@transaction_details[:numberOfErrors])
+            %dt= t('mortgages.view.transaction_details.error_percent')
+            %dd= fhlb_formatted_percentage(@transaction_details[:error_percentage])
+          .mortgage-colleteral-update-view-reports
+            %h2= t('mortgages.view.reports.title')
+            - reports = @transaction_details[:reports]
+            - if reports.present?
+              - if reports[:summary]
+                = link_to(t('mortgages.view.reports.summary'), reports[:summary])
+              - if reports[:detail]
+                = link_to(t('mortgages.view.reports.detail'), reports[:detail])
+              - if reports[:borrowing_capacity]
+                = link_to(t('mortgages.view.reports.borrowing_capacity'), reports[:borrowing_capacity])
+            - else
+              %p= t('mortgages.view.reports.unavailable')
+        %p= t('mortgages.manage.contact_html', email: collateral_operations_email,  phone_number: collateral_operations_phone_number)
+        .request-form-actions
+          =link_to(t('mortgages.view.actions.manage'), mcu_manage_url, class: 'secondary-button')

@@ -59,42 +59,47 @@ class MortgagesController < ApplicationController
   def manage
     @title = t('mortgages.manage.title')
     member_info = MemberBalanceService.new(current_member_id, request).mcu_member_info
-    @due_datetime = member_info[:mcuDueDate].try(:to_date)
-    @extension_datetime = member_info[:mcuExtendedDate].try(:to_date)
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    mcu_status = member_balances.mcu_member_status
-    rows = if mcu_status.present?
-      mcu_status.collect do |status|
-        status = translated_mcu_transaction(status)
-      {
-        columns: [
-          {value: status[:transactionId], type: nil},
-          {value: status[:mcuType], type: nil},
-          {value: status[:authorizedBy], type: nil},
-          {value: status[:authorizedOn], type: :date},
-          {value: status[:status], type: nil},
-          {value: status[:numberOfLoans], type: nil},
-          {value: status[:numberOfErrors], type: nil},
-          {value: [[I18n.t('mortgages.manage.actions.view_details'), mcu_view_transaction_path(transactionId: status[:transactionId])]], type: :link_list}
-        ]
-      }
-      end
+    unless member_info.present?
+      @error = 'No MCU member info returned from the MCM message bus'
+      logger.error(@error)
     else
-      []
+      @due_datetime = member_info[:mcuDueDate].try(:to_date)
+      @extension_datetime = member_info[:mcuExtendedDate].try(:to_date)
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      mcu_status = member_balances.mcu_member_status
+      rows = if mcu_status.present?
+        mcu_status.collect do |status|
+          status = translated_mcu_transaction(status)
+        {
+          columns: [
+            {value: status[:transactionId], type: nil},
+            {value: status[:mcuType], type: nil},
+            {value: status[:authorizedBy], type: nil},
+            {value: status[:authorizedOn], type: :date},
+            {value: status[:status], type: nil},
+            {value: status[:numberOfLoans], type: nil},
+            {value: status[:numberOfErrors], type: nil},
+            {value: [[I18n.t('mortgages.manage.actions.view_details'), mcu_view_transaction_path(transactionId: status[:transactionId])]], type: :link_list}
+          ]
+        }
+        end
+      else
+        []
+      end
+      @table_data = {
+        column_headings: [
+          t('mortgages.manage.transaction_number'),
+          t('mortgages.manage.upload_type'),
+          t('mortgages.manage.authorized_by'),
+          t('mortgages.manage.authorized_on'),
+          t('mortgages.manage.status'),
+          t('mortgages.manage.number_of_loans'),
+          t('mortgages.manage.number_of_errors'),
+          t('mortgages.manage.action')
+        ],
+        rows: rows
+      }
     end
-    @table_data = {
-      column_headings: [
-        t('mortgages.manage.transaction_number'),
-        t('mortgages.manage.upload_type'),
-        t('mortgages.manage.authorized_by'),
-        t('mortgages.manage.authorized_on'),
-        t('mortgages.manage.status'),
-        t('mortgages.manage.number_of_loans'),
-        t('mortgages.manage.number_of_errors'),
-        t('mortgages.manage.action')
-      ],
-      rows: rows
-    }
   end
 
   # GET
@@ -123,10 +128,18 @@ class MortgagesController < ApplicationController
     @title = t('mortgages.view.title')
     member_balances = MemberBalanceService.new(current_member_id, request)
     mcu_transactions = member_balances.mcu_member_status
-    raise StandardError, 'There has been an error and MortgagesController#view has encountered nil. Check error logs.' if mcu_transactions.nil?
-    transaction_details = mcu_transactions.select{ |transaction| transaction[:transactionId].to_s == params[:transactionId].to_s}.first
-    raise ArgumentError, "No matching MCU Status found for MCU with transactionId: #{params[:transactionId]}" unless transaction_details.present?
-    @transaction_details = translated_mcu_transaction(transaction_details)
+    unless mcu_transactions.present?
+      @error = 'There has been an error and MortgagesController#view has encountered nil. Check error logs.'
+      logger.error(@error)
+    else
+      transaction_details = mcu_transactions.select{ |transaction| transaction[:transactionId].to_s == params[:transactionId].to_s}.first
+      unless transaction_details.present?
+        @error = "No matching MCU Status found for MCU with transactionId: #{params[:transactionId]}"
+        logger.error(@error)
+      else        
+        @transaction_details = translated_mcu_transaction(transaction_details)
+      end
+    end
   end
 
   # POST
@@ -137,13 +150,13 @@ class MortgagesController < ApplicationController
     unless transaction_id_response.present?
       logger.error('No transaction id response returned from the MCM message bus')
       @result[:success] = false
-      @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
+      @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe
     else
       @transaction_id = transaction_id_response[:transaction_id]
       unless @transaction_id.present?
         logger.error('No transaction id returned from the MCM message bus')
         @result[:success] = false
-        @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
+        @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe
       else
         mcu_params = params['mortgage_collateral_update']
         @mcu_type = mcu_params['mcu_type'].titlecase
@@ -154,7 +167,7 @@ class MortgagesController < ApplicationController
         unless server_info.present?
           logger.error('No server info returned from the MCM message bus')
           @result[:success] = false
-          @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
+          @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe
         else
           remote_filename = "#{@pledge_type}_#{@transaction_id}_#{uploaded_file.original_filename.gsub(' ', '_')}"
           remote_path_fragment = "#{server_info['archiveDir']}/MCU/#{current_member_id}"
@@ -175,7 +188,7 @@ class MortgagesController < ApplicationController
           rescue Exception => e
             logger.error("Failed to SFTP #{uploaded_file.path} to #{remote_path}. Reason: #{e.message}")
             @result[:success] = false
-            @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
+            @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe
             return
           end
           @result = member_balances.mcu_upload_file(@transaction_id, 
@@ -185,7 +198,7 @@ class MortgagesController < ApplicationController
                                                     remote_path)
           unless @result[:success]
             logger.error("MCU upload failed. Reason: #{@result[:message]}")
-            @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
+            @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe
           end
         end
       end
