@@ -1,5 +1,3 @@
-require 'net/sftp'
-
 module MAPI
   module Services
     module Member
@@ -25,30 +23,16 @@ module MAPI
           processed_data.with_indifferent_access
         end
 
-        def self.mcu_upload_file(app, member_id, transaction_id, file_type, pledge_type, local_path, original_filename, username)
+        def self.mcu_server_info(app)
           unless should_fake?(app)
-            now = Time.zone.now
-            server_info = get_message(app, 'GetServerInfo', nil, {})[:headers]
-            remote_filename = "#{pledge_type}_#{transaction_id}_#{original_filename.gsub(' ', '_')}"
-            remote_path_fragment = "#{server_info['archiveDir']}/MCU/#{member_id}"
-            remote_path = ""
-            begin
-              Net::SFTP.start(server_info['hostname'], 
-                              server_info['svcAccountUsername'],
-                              password: server_info['svcAccountPassword']) do |sftp|
-                sftp.mkdir(remote_path_fragment)
-                remote_path_fragment = "#{remote_path_fragment}/#{now.year}"
-                sftp.mkdir(remote_path_fragment)
-                remote_path_fragment = "#{remote_path_fragment}/#{now.month}"
-                sftp.mkdir(remote_path_fragment)
-                remote_path = "#{remote_path_fragment}/#{remote_filename}"
-                sftp.upload!(local_path, remote_path)
-              end
-            rescue Exception => e
-              message = "Failed to SFTP #{local_path} to #{remote_path}. Reason: #{e.message}"
-              app.logger.error(message)
-              return { success: false, message: message }
-            end
+            get_message(app, 'GetServerInfo', nil, {})[:headers]
+          else
+            self.fake_hash('member_mcu_server_info')
+          end
+        end
+
+        def self.mcu_upload_file(app, member_id, transaction_id, file_type, pledge_type, username, remote_path)
+          unless should_fake?(app)
             post_message(app, 'INITIATE_FILE_SUBMISSION', { 'memberId': member_id,
                                                             'fileTypeId': file_type,
                                                             'transactionId': transaction_id,

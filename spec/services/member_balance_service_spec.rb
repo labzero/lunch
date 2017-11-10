@@ -1461,20 +1461,27 @@ describe MemberBalanceService do
     end
   end
 
+  describe 'the `mcu_server_info` method' do
+    let(:mcu_server_info) { double('mcu_server_info') }
+    it_behaves_like 'a MAPI backed service object method', :mcu_server_info
+    it 'calls `get_hash`' do
+       expect(subject).to receive(:get_hash).with(:mcu_server_info, "/member/mcu_server_info")
+       subject.mcu_server_info
+    end
+  end
+
   describe 'the `mcu_upload_file` method' do
     let(:transaction_id) { SecureRandom.hex }
     let(:file_type) { SecureRandom.hex }
     let(:pledge_type) { SecureRandom.hex }
-    let(:local_path) { SecureRandom.hex }
-    let(:original_filename) { SecureRandom.hex }
     let(:username) { SecureRandom.hex }
+    let(:remote_path) { SecureRandom.hex }
     it_behaves_like 'a MAPI backed service object method', :mcu_upload_file, nil, :post, nil, false do
       let(:call_method) { subject.mcu_upload_file(transaction_id, 
                                                   file_type, 
                                                   pledge_type, 
-                                                  local_path, 
-                                                  original_filename,
-                                                  username) }
+                                                  username,
+                                                  remote_path) }
       it 'calls `mcu_upload_file` with the appropriate arguments' do
         expect(subject).to receive(:post_hash).with(:mcu_upload_file, 
                                                    "/member/#{member_id}/mcu_upload_file",
@@ -1482,8 +1489,7 @@ describe MemberBalanceService do
                                                      file_type: Rack::Utils.escape(file_type),
                                                      pledge_type: Rack::Utils.escape(pledge_type),
                                                      username: username,
-                                                     local_path: local_path,
-                                                     original_filename: original_filename })
+                                                     remote_path: remote_path })
         call_method
       end
     end

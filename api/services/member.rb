@@ -1049,6 +1049,15 @@ module MAPI
             end
           end
           api do
+            key :path, '/mcu_server_info'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Gets the MCU server information'
+              key :nickname, :getMCUServerInfoForMember
+              key :type, :MCUServerInfo
+            end
+          end
+          api do
             key :path, '/{id}/mcu_upload_file'
             operation do
               key :method, 'POST'
@@ -1857,6 +1866,12 @@ module MAPI
           end
         end
 
+        relative_get '/mcu_server_info' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            MAPI::Services::Member::MortgageCollateralUpdate.mcu_server_info(self)
+          end
+        end
+
         relative_get '/:id/mcu_member_status' do
           member_id = params[:id].to_i
           MAPI::Services::Member.rescued_json_response(self) do
@@ -1884,9 +1899,8 @@ module MAPI
                                                                              post_body_json['transaction_id'], 
                                                                              post_body_json['file_type'], 
                                                                              post_body_json['pledge_type'], 
-                                                                             post_body_json['local_path'], 
-                                                                             post_body_json['original_filename'],
-                                                                             post_body_json['username'])
+                                                                             post_body_json['username'],
+                                                                             post_body_json['remote_path'])
           end
         end
 

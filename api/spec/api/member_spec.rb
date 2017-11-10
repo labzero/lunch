@@ -1006,12 +1006,34 @@ describe MAPI::ServiceApp do
     end
   end
 
+  describe 'get `member/mcu_server_info`' do
+    let(:results) { SecureRandom.hex }
+    let(:call_endpoint) { get "member/mcu_server_info" }
+
+    it_behaves_like 'a MAPI endpoint with JSON error handling', 
+                    "member/mcu_server_info", 
+                    :get, 
+                    MAPI::Services::Member::MortgageCollateralUpdate, 
+                    :mcu_server_info
+
+    it 'calls `MAPI::Services::Member::MortgageCollateralUpdate.mcu_server_info` with the app' do
+      expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mcu_server_info).with(an_instance_of(MAPI::ServiceApp))
+      call_endpoint
+    end
+    it 'returns the JSONd results of calling `MAPI::Services::Member::MortgageCollateralUpdate.mcu_server_info`' do
+      allow(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mcu_server_info).and_return(results)
+      call_endpoint
+      expect(last_response.body).to eq(results.to_json)
+    end
+  end
+
   describe 'post `member/mcu_upload_file`' do
     let(:id) { rand(1000..9999) }
     let(:transaction_id) { SecureRandom.hex }
     let(:file_type) { SecureRandom.hex }
     let(:pledge_type) { SecureRandom.hex }
     let(:local_path) { SecureRandom.hex }
+    let(:remote_path) { SecureRandom.hex }
     let(:original_filename) { SecureRandom.hex }
     let(:username) { SecureRandom.hex }
     let(:call_endpoint) { post "member/#{id}/mcu_upload_file",
@@ -1019,8 +1041,7 @@ describe MAPI::ServiceApp do
                                  file_type: file_type,
                                  pledge_type: pledge_type,
                                  username: username, 
-                                 local_path: local_path, 
-                                 original_filename: original_filename }.to_json }
+                                 remote_path: remote_path }.to_json }
 
     it_behaves_like 'a MAPI endpoint with JSON error handling', 
                     "member/#{rand(1000..9999)}/mcu_upload_file", 
@@ -1030,9 +1051,8 @@ describe MAPI::ServiceApp do
                     { transaction_id: SecureRandom.hex,
                       file_type: SecureRandom.hex,
                       pledge_type: SecureRandom.hex,
-                      local_path: SecureRandom.hex, 
-                      original_filename: SecureRandom.hex,
-                      username: SecureRandom.hex }.to_json
+                      username: SecureRandom.hex,
+                      remote_path: SecureRandom.hex }.to_json
 
     it 'calls `MAPI::Services::Member::MortgageCollateralUpdate.mcu_upload_file` with the appropriate params' do
       expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mcu_upload_file).with(an_instance_of(MAPI::ServiceApp),
@@ -1040,9 +1060,8 @@ describe MAPI::ServiceApp do
                                                                                                  transaction_id,
                                                                                                  file_type,
                                                                                                  pledge_type,
-                                                                                                 local_path,
-                                                                                                 original_filename,
-                                                                                                 username)
+                                                                                                 username,
+                                                                                                 remote_path)
       call_endpoint
     end
     it 'returns the JSONd results of calling `MAPI::Services::Member::MortgageCollateralUpdate.mcu_upload_file`' do

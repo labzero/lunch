@@ -1,3 +1,4 @@
+require 'net/sftp'
 class MortgagesController < ApplicationController
   include CustomFormattingHelper
   include ContactInformationHelper
@@ -130,29 +131,63 @@ class MortgagesController < ApplicationController
 
   # POST
   def upload
+    @result = {}
     member_balances = MemberBalanceService.new(current_member_id, request)
     transaction_id_response = member_balances.mcu_transaction_id
     unless transaction_id_response.present?
-      logger.error('No transaction id returned from the MCM message bus')
-      @result = {}
+      logger.error('No transaction id response returned from the MCM message bus')
       @result[:success] = false
       @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
     else
-      @transaction_id = transaction_id_response['transaction_id']
-      mcu_params = params['mortgage_collateral_update']
-      @mcu_type = mcu_params['mcu_type'].titlecase
-      @pledge_type = mcu_params['pledge_type'].titlecase
-      @program_type = mcu_params["program_type_#{@mcu_type.upcase}"].titlecase
-      uploaded_file = mcu_params['file']
-      @result = member_balances.mcu_upload_file(@transaction_id, 
-                                                @mcu_type, 
-                                                @pledge_type, 
-                                                uploaded_file.path, 
-                                                uploaded_file.original_filename, 
-                                                current_user.username)
-      unless @result[:success]
-        logger.error("MCU upload failed. Reason: #{@result[:message]}")
+      @transaction_id = transaction_id_response[:transaction_id]
+      unless @transaction_id.present?
+        logger.error('No transaction id returned from the MCM message bus')
+        @result[:success] = false
         @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
+      else
+        mcu_params = params['mortgage_collateral_update']
+        @mcu_type = mcu_params['mcu_type'].titlecase
+        @pledge_type = mcu_params['pledge_type'].titlecase
+        @program_type = mcu_params["program_type_#{@mcu_type.upcase}"].titlecase
+        uploaded_file = mcu_params['file']
+        server_info = member_balances.mcu_server_info #TODOCAB cache this
+        unless server_info.present?
+          logger.error('No server info returned from the MCM message bus')
+          @result[:success] = false
+          @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
+        else
+          remote_filename = "#{@pledge_type}_#{@transaction_id}_#{uploaded_file.original_filename.gsub(' ', '_')}"
+          remote_path_fragment = "#{server_info['archiveDir']}/MCU/#{current_member_id}"
+          remote_path = ""
+          begin
+            now = Time.zone.now
+            Net::SFTP.start(server_info['hostname'], 
+                            server_info['svcAccountUsername'],
+                            password: server_info['svcAccountPassword']) do |sftp|
+              sftp.mkdir(remote_path_fragment)
+              remote_path_fragment = "#{remote_path_fragment}/#{now.year}"
+              sftp.mkdir(remote_path_fragment)
+              remote_path_fragment = "#{remote_path_fragment}/#{now.month}"
+              sftp.mkdir(remote_path_fragment)
+              remote_path = "#{remote_path_fragment}/#{remote_filename}"
+              sftp.upload!(uploaded_file.path, remote_path)
+            end
+          rescue Exception => e
+            logger.error("Failed to SFTP #{uploaded_file.path} to #{remote_path}. Reason: #{e.message}")
+            @result[:success] = false
+            @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
+            return
+          end
+          @result = member_balances.mcu_upload_file(@transaction_id, 
+                                                    @mcu_type, 
+                                                    @pledge_type, 
+                                                    current_user.username,
+                                                    remote_path)
+          unless @result[:success]
+            logger.error("MCU upload failed. Reason: #{@result[:message]}")
+            @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe
+          end
+        end
       end
     end
   end

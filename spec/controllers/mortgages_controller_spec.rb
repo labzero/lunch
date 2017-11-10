@@ -305,7 +305,7 @@ RSpec.describe MortgagesController, :type => :controller do
 
   describe 'post `upload`' do
     let(:transaction_id) { SecureRandom.hex }
-    let(:transaction_id_json) { JSON.parse("{ \"transaction_id\": \"#{transaction_id}\" }") }
+    let(:transaction_id_response) { { transaction_id: transaction_id } }
     let(:path) { SecureRandom.hex }
     let(:original_filename) { 'upload-test-file.txt' }
     let(:file) { fixture_file_upload(original_filename, 'text/text') }
@@ -318,8 +318,23 @@ RSpec.describe MortgagesController, :type => :controller do
                                                     mcu_upload_file: nil )}
     let(:username) { SecureRandom.hex }
     let(:user) { instance_double(User, username: username, accepted_terms?: true) }
-    let (:collateral_operations_email) { SecureRandom.hex }
+    let(:collateral_operations_email) { SecureRandom.hex }
     let(:result) { { success: true, message: '' } }
+    let(:year) { SecureRandom.hex }      
+    let(:month) { SecureRandom.hex }
+    let(:now) { instance_double(Time, year: year, month: month) }
+    let(:server_info) { instance_double(Hash, :[] => nil) }
+    let(:archive_dir) { SecureRandom.hex }
+    let(:hostname) { SecureRandom.hex }
+    let(:svc_account_username) { SecureRandom.hex }
+    let(:svc_account_password) { SecureRandom.hex }
+    let(:local_path) { SecureRandom.hex }
+    let(:remote_filename) { "#{pledge_type}_#{transaction_id}_#{original_filename.gsub(' ', '_')}" }
+    let(:remote_path_fragment) { "#{archive_dir}/MCU/#{member_id}" }
+    let(:remote_path_fragment_with_year) { "#{remote_path_fragment}/#{year}" }
+    let(:remote_path_fragment_with_year_and_month) { "#{remote_path_fragment_with_year}/#{month}" }
+    let(:remote_path) { "#{remote_path_fragment_with_year_and_month}/#{remote_filename}" }
+    let(:sftp) { double('sftp') }
     let(:call_action) { get :upload, 
                         mortgage_collateral_update: { file: file,
                                                       mcu_type: mcu_type,
@@ -327,8 +342,8 @@ RSpec.describe MortgagesController, :type => :controller do
                                                       "program_type_#{mcu_type.upcase}": program_type } }
     before do 
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
-      allow(member_balance_service).to receive(:mcu_transaction_id).and_return(transaction_id_json)
-      allow(transaction_id_json).to receive(:[]).and_return(transaction_id)
+      allow(member_balance_service).to receive(:mcu_transaction_id).and_return(transaction_id_response)
+      allow(transaction_id_response).to receive(:[]).and_return(transaction_id)
       allow(member_balance_service).to receive(:mcu_upload_file)
       allow(file).to receive(:path).and_return(path)
       allow(file).to receive(:original_filename).and_return(original_filename)
@@ -336,72 +351,183 @@ RSpec.describe MortgagesController, :type => :controller do
       allow(mcu_type).to receive(:titlecase).and_return(mcu_type)
       allow(pledge_type).to receive(:titlecase).and_return(pledge_type)
       allow(program_type).to receive(:titlecase).and_return(program_type)
+      allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)      
       allow(member_balance_service).to receive(:mcu_upload_file).and_return(result)
+      allow(member_balance_service).to receive(:mcu_server_info).and_return(server_info)
+      allow(Time.zone).to receive(:now).and_return(now)
+      allow(server_info).to receive(:[]).with('archiveDir').and_return(archive_dir)
+      allow(server_info).to receive(:[]).with('hostname').and_return(hostname)
+      allow(server_info).to receive(:[]).with('svcAccountUsername').and_return(svc_account_username)
+      allow(server_info).to receive(:[]).with('svcAccountPassword').and_return(svc_account_password)
+      allow(original_filename).to receive(:gsub).and_return(original_filename)
+      allow(Net::SFTP).to receive(:start).and_yield(sftp)
+      allow(sftp).to receive(:mkdir).with(anything)
+      allow(file).to receive(:path).and_return(local_path)
+      allow(sftp).to receive(:upload!)
     end
     it 'create a `MemberBalanceService` instance' do
       expect(MemberBalanceService).to receive(:new).with(member_id, request)
       call_action
     end
-    it 'gets the `transaction_id` json response' do
-      expect(member_balance_service).to receive(:mcu_transaction_id).and_return(transaction_id_json)
+    it 'gets the `transaction_id_response` from the member balance service instance' do
+      expect(member_balance_service).to receive(:mcu_transaction_id).and_return(transaction_id_response)
       call_action
     end
-    it 'gets the `transaction_id` from the json response' do
-      expect(transaction_id_json).to receive(:[]).with('transaction_id').and_return(transaction_id)
-      call_action
-    end
-    describe 'when the `transaction_id` is `nil`' do
-      before do
-        allow(member_balance_service).to receive(:mcu_transaction_id).and_return(nil)
+    describe 'when the `transaction_id_response` is missing' do
+      before do 
+        allow(transaction_id_response).to receive(:present?).and_return(false)
       end
-      it 'logs the error message' do
-        expect(subject.logger).to receive(:error).with('No transaction id returned from the MCM message bus')
+      it 'logs an error' do
+        expect(subject.logger).to receive(:error).with('No transaction id response returned from the MCM message bus')
         call_action
       end
-      it 'sets the error result' do
-        allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)
+      it 'assigns a failure `@result`' do
         call_action
         expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
       end
     end
-    it 'gets the `path` from the uploaded file' do
-      expect(file).to receive(:path)
-      call_action
-    end
-    it 'gets the `original_filename` from the uploaded file' do
-      expect(file).to receive(:original_filename)
-      call_action
-    end
-    it 'assings `@program_type`' do
-      call_action
-      expect(assigns[:program_type]).to eq(program_type)
-    end
-    it 'calls `mcu_upload_file` with the appropriate arguments' do
-      expect(member_balance_service).to receive(:mcu_upload_file).with(transaction_id,
-                                                                       mcu_type, 
-                                                                       pledge_type, 
-                                                                       path,
-                                                                       original_filename,
-                                                                       username)
-      call_action
-    end
-    it 'assigns `@result` to the result of `mcu_upload_file`' do
-      call_action
-      expect(assigns[:result]).to eq(result)
-    end
-    describe 'when the `mcu_upload_file` fails' do
-      let(:error_result) { { success: false, message: 'error' } }
-      before do
-        allow(member_balance_service).to receive(:mcu_upload_file).and_return(error_result)
+    describe 'when the `transaction_id_response` is present' do
+      before do 
+        allow(transaction_id_response).to receive(:present?).and_return(true)
       end
-      it 'logs the error message' do
-        expect(subject.logger).to receive(:error).with("MCU upload failed. Reason: error")
+      it 'gets the `transaction_id` from the json response' do
+        expect(transaction_id_response).to receive(:[]).with(:transaction_id).and_return(transaction_id)
         call_action
       end
-      it 'sets the error result' do
-        allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)
+      it 'assigns the `transaction_id` to `@transaction_id`' do
+        allow(transaction_id_response).to receive(:[]).with(:transaction_id).and_return(transaction_id)
         call_action
-        expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+        expect(assigns[:transaction_id]).to eq(transaction_id)
+      end        
+      describe 'when the `transaction_id` is `nil`' do
+        before do
+          allow(transaction_id_response).to receive(:[]).with(:transaction_id).and_return(nil)
+        end
+        it 'logs the error message' do
+          expect(subject.logger).to receive(:error).with('No transaction id returned from the MCM message bus')
+          call_action
+        end
+        it 'sets the error result' do
+          call_action
+          expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+        end
+      end
+      describe 'when the `transaction_id` is present' do
+        before do
+          allow(transaction_id_response).to receive(:[]).with(:transaction_id).and_return(transaction_id)
+        end
+        it 'assigns `@mcu_type`' do
+          call_action
+          expect(assigns[:mcu_type]).to eq(mcu_type)
+        end
+        it 'assigns `@pledge_type`' do
+          call_action
+          expect(assigns[:pledge_type]).to eq(pledge_type)
+        end
+        it 'assigns `@program_type`' do
+          call_action
+          expect(assigns[:program_type]).to eq(program_type)
+        end
+        it 'gets the server info' do
+          expect(member_balance_service).to receive(:mcu_server_info)
+          call_action
+        end
+        describe 'when the server info is `nil`' do
+          before do
+            allow(member_balance_service).to receive(:mcu_server_info).and_return(nil)
+          end
+          it 'logs the error message' do
+            expect(subject.logger).to receive(:error).with('No server info returned from the MCM message bus')
+            call_action
+          end
+          it 'sets the error result' do
+            call_action
+            expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+          end
+        end
+        describe 'when the server info is not `nil`' do
+          before do
+            allow(member_balance_service).to receive(:mcu_server_info).and_return(server_info)
+          end
+          it 'gets the current time' do
+            expect(Time.zone).to receive(:now)
+            call_action
+          end
+          it 'replaces spaces with underscores in the original filename' do
+            expect(original_filename).to receive(:gsub).with(' ', '_')
+            call_action
+          end
+          it 'starts the sftp session' do
+            expect(Net::SFTP).to receive(:start).with(hostname, svc_account_username, password: svc_account_password)
+            call_action
+          end
+          it 'creates the remote path fragment directory via sftp' do
+            expect(sftp).to receive(:mkdir).with(remote_path_fragment)
+            call_action
+          end
+          it 'creates the remote path fragment including the year' do
+            expect(sftp).to receive(:mkdir).with(remote_path_fragment_with_year)
+            call_action
+          end
+          it 'creates the remote path fragment including the year and month' do
+            expect(sftp).to receive(:mkdir).with(remote_path_fragment_with_year_and_month)
+            call_action
+          end
+          it 'gets the `path` from the uploaded file' do
+            expect(file).to receive(:path)
+            call_action
+          end
+          it 'uploads the file' do
+            expect(sftp).to receive(:upload!).with(local_path, remote_path)
+            call_action
+          end
+          describe 'handling an SFTP execption' do
+            let(:message) { "Failed to SFTP #{local_path} to #{remote_path}. Reason: sftp exception" } 
+            before { allow(sftp).to receive(:upload!).and_raise Exception.new('sftp exception') }
+            it 'logs the exception' do
+              expect(subject.logger).to receive(:error).with(message)
+              call_action
+            end
+            it 'sets a failure message' do
+              call_action
+              expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+            end
+          end
+          it 'does not raise an SFTP exception' do
+            expect{ call_action }.not_to raise_error
+          end
+        end
+        it 'gets the `original_filename` from the uploaded file' do
+          expect(file).to receive(:original_filename)
+          call_action
+        end
+        it 'calls `mcu_upload_file` with the appropriate arguments' do
+          expect(member_balance_service).to receive(:mcu_upload_file).with(transaction_id,
+                                                                           mcu_type, 
+                                                                           pledge_type, 
+                                                                           username,
+                                                                           remote_path)
+          call_action
+        end
+        it 'assigns `@result` to the result of `mcu_upload_file`' do
+          call_action
+          expect(assigns[:result]).to eq(result)
+        end
+        describe 'when the `mcu_upload_file` fails' do
+          let(:error_result) { { success: false, message: 'error' } }
+          before do
+            allow(member_balance_service).to receive(:mcu_upload_file).and_return(error_result)
+          end
+          it 'logs the error message' do
+            expect(subject.logger).to receive(:error).with("MCU upload failed. Reason: error")
+            call_action
+          end
+          it 'sets the error result' do
+            allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)
+            call_action
+            expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email).html_safe})
+          end
+        end
       end
     end
   end

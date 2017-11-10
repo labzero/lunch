@@ -193,6 +193,45 @@ describe MAPI::ServiceApp do
         end
       end
     end
+    describe 'the `mcu_server_info` method' do
+      let(:call_method) { mortgage_collateral_update_module.mcu_server_info(app) }
+      let(:server_info) { { headers: { "svcAccountUsername"=>"username", 
+                            "svcAccountPassword"=>"password", 
+                            "archiveDir"=>"path", 
+                            "hostname"=>"host" } } }
+      describe 'when `should_fake?` returns `true`' do
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
+        end
+        it 'loads the fake' do
+          expect(mortgage_collateral_update_module).to receive(:fake_hash).with('member_mcu_server_info')
+          call_method
+        end
+        describe 'in the fake world' do
+          before do
+            allow(mortgage_collateral_update_module).to receive(:fake).and_return(server_info[:headers])
+          end
+          it 'returns the fake data' do
+            expect(call_method).to eq(server_info[:headers])
+          end
+        end
+      end
+      describe 'when `should_fake?` returns `false`' do
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
+          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(server_info)
+        end
+        it 'calls `get_message` with the apppriate arguments' do
+          expect(mortgage_collateral_update_module).to receive(:get_message).with(app, 'GetServerInfo', nil, {})
+          call_method
+        end
+        describe 'in the real world' do
+          it 'return the real data' do
+            expect(call_method).to eq(server_info[:headers])
+          end
+        end
+      end
+    end
     describe 'the `mcu_member_status` method' do
       let(:call_method) { mortgage_collateral_update_module.mcu_member_status(app, member_id) }
       let(:member_status) { [{ "transactionId" => 210585, "uploadType" => "COMPLETE", "authorizedBy" =>"IX_TEST",
@@ -250,32 +289,15 @@ describe MAPI::ServiceApp do
       let(:transaction_id) { SecureRandom.hex }
       let(:file_type) { SecureRandom.hex }
       let(:pledge_type) { SecureRandom.hex }
-      let(:local_path) { SecureRandom.hex }
-      let(:original_filename) { "#{SecureRandom.hex}.#{SecureRandom.hex}" }
+      let(:remote_path) { SecureRandom.hex }
       let(:username) { SecureRandom.hex }
-      let(:year) { SecureRandom.hex }      
-      let(:month) { SecureRandom.hex }
-      let(:now) { instance_double(Time, year: year, month: month) }
-      let(:server_info) { instance_double(Hash, :[] => headers) }
-      let(:archive_dir) { SecureRandom.hex }
-      let(:hostname) { SecureRandom.hex }
-      let(:svc_account_username) { SecureRandom.hex }
-      let(:svc_account_password) { SecureRandom.hex }
-      let(:headers) { instance_double(Hash, :[] => nil) }
-      let(:remote_filename) { "#{pledge_type}_#{transaction_id}_#{original_filename.gsub(' ', '_')}" }
-      let(:remote_path_fragment) { "#{archive_dir}/MCU/#{member_id}" }
-      let(:remote_path_fragment_with_year) { "#{remote_path_fragment}/#{year}" }
-      let(:remote_path_fragment_with_year_and_month) { "#{remote_path_fragment_with_year}/#{month}" }
-      let(:remote_path) { "#{remote_path_fragment_with_year_and_month}/#{remote_filename}" }
-      let(:sftp) { double('sftp') }
       let(:call_method) { mortgage_collateral_update_module.mcu_upload_file(app, 
                                                                             member_id,
                                                                             transaction_id,
                                                                             file_type,
                                                                             pledge_type,
-                                                                            local_path,
-                                                                            original_filename,
-                                                                            username) }
+                                                                            username,
+                                                                            remote_path) }
       describe 'when `should_fake?` returns `true`' do
         before do
           allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
@@ -287,68 +309,8 @@ describe MAPI::ServiceApp do
       describe 'when `should_fake?` returns `false`' do
         before do
           allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
-          allow(Time.zone).to receive(:now).and_return(now)
-          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(server_info)
-          allow(headers).to receive(:[]).with('archiveDir').and_return(archive_dir)
-          allow(headers).to receive(:[]).with('hostname').and_return(hostname)
-          allow(headers).to receive(:[]).with('svcAccountUsername').and_return(svc_account_username)
-          allow(headers).to receive(:[]).with('svcAccountPassword').and_return(svc_account_password)
-          allow(original_filename).to receive(:gsub).and_return(original_filename)
-          allow(Net::SFTP).to receive(:start).and_yield(sftp)
-          allow(sftp).to receive(:mkdir).with(anything)
-          allow(sftp).to receive(:upload!)
           allow(mortgage_collateral_update_module).to receive(:post_message).and_return(nil)
           allow(app.logger).to receive(:error)
-        end
-        it 'gets the current time' do
-          expect(Time.zone).to receive(:now)
-          call_method
-        end
-        it 'gets the server info' do
-          expect(mortgage_collateral_update_module).to receive(:get_message).with(app, 'GetServerInfo', nil, {})
-          call_method
-        end
-        it 'gets the headers from server info' do
-          expect(server_info).to receive(:[]).with(:headers)
-          call_method
-        end
-        it 'replaces spaces with underscores in the original filename' do
-          expect(original_filename).to receive(:gsub).with(' ', '_')
-          call_method
-        end
-        it 'starts the sftp session' do
-          expect(Net::SFTP).to receive(:start).with(hostname, svc_account_username, password: svc_account_password)
-          call_method
-        end
-        it 'creates the remote path fragment directory via sftp' do
-          expect(sftp).to receive(:mkdir).with(remote_path_fragment)
-          call_method
-        end
-        it 'creates the remote path fragment including the year' do
-          expect(sftp).to receive(:mkdir).with(remote_path_fragment_with_year)
-          call_method
-        end
-        it 'creates the remote path fragment including the year and month' do
-          expect(sftp).to receive(:mkdir).with(remote_path_fragment_with_year_and_month)
-          call_method
-        end
-        it 'upload the file' do
-          expect(sftp).to receive(:upload!).with(local_path, remote_path)
-          call_method
-        end
-        describe 'handling an SFTP execption' do
-          let(:message) { "Failed to SFTP #{local_path} to #{remote_path}. Reason: sftp exception" } 
-          before { allow(sftp).to receive(:upload!).and_raise Exception.new('sftp exception') }
-          it 'logs the exception' do
-            expect(app.logger).to receive(:error).with(message)
-            call_method
-          end
-          it 'returns a failure message' do
-            expect(call_method).to eq({ success: false, message: message })
-          end
-        end
-        it 'does not raise an SFTP exception' do
-          expect{ call_method }.not_to raise_error
         end
         it 'calls `INITIATE_FILE_SUBMISSION` with the appropriate arguments' do
           expect(mortgage_collateral_update_module).to receive(:post_message).with( app, 
