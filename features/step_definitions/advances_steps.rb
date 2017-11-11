@@ -261,7 +261,7 @@ Then(/^I should see an? "(.*?)" advance error(?: with amount (\d+) and type "(.*
     else
       raise 'Unknown error_type'
   end
-  page.assert_selector('.add-advance-icon-section.icon-error-before p', visible: true, text: text)
+  page.assert_selector('.add-advance-error.icon-error-before p', visible: true, text: text)
 end
 
 Then(/^I should see SecurID errors on the (Add Advance|Letter of Credit|Letter of Credit Amendment) preview page$/) do |request_type|

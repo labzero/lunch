@@ -1,5 +1,5 @@
 = render layout: 'add_advance_error' do
-  .add-advance-icon-section.icon-error-before
+  .add-advance-error.icon-error-before
     - if @error_message == :pass
       %p= t('dashboard.quick_advance.error.capital_stock_exception')
     -elsif @error_message == :low
