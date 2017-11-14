@@ -5,6 +5,8 @@
   - if policy(:web_admin).edit_features?
     %button.text-only-button{disabled: @feature_status == :on, data: {confirmation_dialog_name: 'enable-all'}}= t('admin.features.confirmations.enable_all.accept')
     %button.text-only-button{disabled: @feature_status == :off, data: {confirmation_dialog_name: 'disable-all'}}= t('admin.features.confirmations.disable_all.accept')
+    .admin-feature-list-link
+      = link_to(t('admin.features.edit.back_to_list'), features_admin_path)
 %section.row.row-elements-equal-height.admin-feature-edit
   %section.column-2.column-bordered
     - if policy(:web_admin).edit_features?

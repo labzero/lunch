@@ -3535,6 +3535,7 @@ en:
         all_members: All Institutions
         no_users: No users are enabled for this feature.
         no_members: No institutions are enabled for this feature.
+        back_to_list: Back to List
       confirmations:
         enable_all:
           title: Enable this feature for all members and users?

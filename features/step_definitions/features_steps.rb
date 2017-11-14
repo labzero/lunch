@@ -14,6 +14,10 @@ When(/^I click on the view feature link$/) do
   page.all('.admin-features-table a', text: /\A#{Regexp.quote(I18n.t('admin.features.index.actions.edit'))}\z/i, exact: true, minimum: 1).first.click
 end
 
+When(/^I click on the Back to List link$/) do
+  page.all('.admin-feature-list-link a', text: /\A#{Regexp.quote(I18n.t('admin.features.edit.back_to_list'))}\z/i, exact: true, minimum: 1).first.click
+end
+
 Then(/^I see a list of enabled members$/) do
   page.assert_selector('.admin-feature-edit h2', text: I18n.t('admin.features.edit.members'), visible: true)
 end

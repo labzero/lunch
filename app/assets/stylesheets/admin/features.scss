@@ -108,3 +108,8 @@
     margin-bottom: 20px;
   }
 }
+
+.admin-feature-list-link {
+    @extend .text-only-button;
+    float: right;
+}
