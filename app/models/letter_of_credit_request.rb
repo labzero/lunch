@@ -14,6 +14,8 @@ class LetterOfCreditRequest
   ISSUE_DATE_TIME_RESTRICTION_WINDOW = 5.minutes
   AMENDMENT_DATE_TIME_RESTRICTION = '10:00:00'
   AMENDMENT_DATE_TIME_RESTRICTION_WINDOW = 5.minutes
+  AMENDMENT_MAX_DATE_RESTRICTION = 7.days
+
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
   READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :amendment_fee, :request, :lc_number, :beneficiary, :current_par, :id, :owners,
