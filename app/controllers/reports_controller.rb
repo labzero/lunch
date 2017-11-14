@@ -768,7 +768,7 @@ class ReportsController < ApplicationController
     current = Time.zone.today.iso8601
     @as_of = params['as_of_date'].blank? ? current : params['as_of_date']
     @month_display_map = {}
-    @month_options = [*1..6].collect do |i| #display current month + six previous months
+    @month_options = [*1..12].collect do |i|
       date = (Time.zone.today - i.months).end_of_month
       iso_date = date.iso8601
       @month_display_map[iso_date] = I18n.t('reports.pages.borrowing_capacity.monthend', month: date.strftime('%B'))

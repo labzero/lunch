@@ -2040,7 +2040,7 @@ RSpec.describe ReportsController, :type => :controller do
     end
     context do
       before do
-        allow(Time.zone).to receive(:today).and_return(current).exactly(7).times
+        allow(Time.zone).to receive(:today).and_return(current).exactly(13).times
       end
       describe 'when `current` is selected' do
         it 'should set `@as_of` to the value `as_of_date` param' do
@@ -2053,7 +2053,7 @@ RSpec.describe ReportsController, :type => :controller do
         end
       end
       describe 'setting up the months dropdown' do
-        [*1..6].each do |i|
+        [*1..12].each do |i|
           it 'sets the month display map value' do
             get :borrowing_capacity
             expect(assigns[:month_display_map][(current - i.months).end_of_month.iso8601.to_s]).to eq(I18n.t('reports.pages.borrowing_capacity.monthend', month: (current - i.months).strftime('%B')))
@@ -2145,7 +2145,7 @@ RSpec.describe ReportsController, :type => :controller do
         let(:response_hash) { instance_double(Hash) }
         let(:current_date) { instance_double(Date, iso8601: nil) }
         before do
-          allow(Time.zone).to receive(:today).and_return(current_date).exactly(7).times
+          allow(Time.zone).to receive(:today).and_return(current_date).exactly(13).times
           allow(current_date).to receive(:-).with(anything).and_return(current_date)
           allow(current_date).to receive(:strftime).with('%B')
           allow(current_date).to receive(:end_of_month).and_return(current_date)
