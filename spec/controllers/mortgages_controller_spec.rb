@@ -459,21 +459,40 @@ RSpec.describe MortgagesController, :type => :controller do
           call_action
           expect(assigns[:program_type]).to eq(program_type)
         end
-        it 'gets the server info' do
-          expect(member_balance_service).to receive(:mcu_server_info)
-          call_action
-        end
-        describe 'when the server info is `nil`' do
+        describe 'getting the server info' do
+          let(:cache_key) { double('cache key') }
+          let(:cache_expiry) { double('cache expiry') }
+          let(:server_info) { double('server info') }
           before do
-            allow(member_balance_service).to receive(:mcu_server_info).and_return(nil)
+            allow(CacheConfiguration).to receive(:key).with(:mcu_server_info).and_return(cache_key)
+            allow(CacheConfiguration).to receive(:expiry).with(:mcu_server_info).and_return(cache_expiry)
+            allow(Rails.cache).to receive(:fetch).and_return(server_info)
           end
-          it 'logs the error message' do
-            expect(subject.logger).to receive(:error).with('No server info returned from the MCM message bus')
+          it 'gets the server info from the cache' do
+            expect(Rails.cache).to receive(:fetch).with(cache_key, expires_in: cache_expiry).and_yield
             call_action
           end
-          it 'sets the error result' do
-            call_action
-            expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
+          describe 'a cache miss' do
+            before do
+              allow(Rails.cache).to receive(:fetch).with(cache_key, expires_in: cache_expiry).and_yield
+            end
+            it 'calls for the server info' do
+              expect(member_balance_service).to receive(:mcu_server_info)
+              call_action
+            end
+          end
+          describe 'when the server info is `nil`' do
+            before do
+              allow(Rails.cache).to receive(:fetch).with(cache_key, expires_in: cache_expiry).and_return(nil)
+            end
+            it 'logs the error message' do
+              expect(subject.logger).to receive(:error).with('No server info returned from the MCM message bus')
+              call_action
+            end
+            it 'sets the error result' do
+              call_action
+              expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
+            end
           end
         end
         describe 'when the server info is not `nil`' do

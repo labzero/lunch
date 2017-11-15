@@ -163,7 +163,10 @@ class MortgagesController < ApplicationController
         @pledge_type = mcu_params['pledge_type'].titlecase
         @program_type = mcu_params["program_type_#{@mcu_type.upcase}"].titlecase
         uploaded_file = mcu_params['file']
-        server_info = member_balances.mcu_server_info #TODOCAB cache this
+        server_info = Rails.cache.fetch(CacheConfiguration.key(:mcu_server_info), 
+                                        expires_in: CacheConfiguration.expiry(:mcu_server_info)) do
+          member_balances.mcu_server_info
+        end
         unless server_info.present?
           logger.error('No server info returned from the MCM message bus')
           @result[:success] = false
