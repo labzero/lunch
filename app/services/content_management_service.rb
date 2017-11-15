@@ -252,6 +252,82 @@ class ContentManagementService
     applicants_bank_stock_calculation_insurance_companies: {
       type: "form",
       uid: "applicants-bank-stock-calculation-insurance-companies"
+    },
+    frc_advance: {
+      type: "product",
+      uid: "frc-advance"
+    },
+    product_summary: {
+      type: "product",
+      uid: "product-summary"
+    },
+    standy_letters_of_credit: {
+      type: "product",
+      uid: "standy-letters-of-credit"
+    },
+    variable_balance_letter_of_credit: {
+      type: "product",
+      uid: "variable-balance-letter-of-credit"
+    },
+    arc_advance: {
+      type: "product",
+      uid: "arc-advance"
+    },
+    amortizing_advance: {
+      type: "product",
+      uid: "amortizing-advance"
+    },
+    arc_advance_embedded: {
+      type: "product",
+      uid: "arc-advance-embedded"
+    },
+    callable_advance: {
+      type: "product",
+      uid: "callable-advance"
+    },
+    choice_libor_arc_advance: {
+      type: "product",
+      uid: "choice-libor-arc-advance"
+    },
+    convertible_advance: {
+      type: "product",
+      uid: "convertible-advance"
+    },
+    frc_advance_embedded: {
+      type: "product",
+      uid: "frc-advance-embedded"
+    },
+    knockout_advance: {
+      type: "product",
+      uid: "knockout-advance"
+    },
+    mortgage_partnership_finance_program: {
+      type: "product",
+      uid: "mortgage-partnership-finance-program"
+    },
+    other_cash_needs_advance: {
+      type: "product",
+      uid: "other-cash-needs-advance"
+    },
+    putable_advance: {
+      type: "product",
+      uid: "putable-advance"
+    },
+    securities_backed_credit_program: {
+      type: "product",
+      uid: "securities-backed-credit-program"
+    },
+    vrc_advance: {
+      type: "product",
+      uid: "vrc-advance"
+    },
+    mortgage_partnership_finance_program_application: {
+      type: "product",
+      uid: "mortgage-partnership-finance-program-application"
+    },
+    interest_rate_swaps_caps_floors: {
+      type: "product",
+      uid: "interest-rate-swaps-caps-floors"
     }
   }.freeze
 

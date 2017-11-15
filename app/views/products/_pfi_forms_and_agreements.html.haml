@@ -1,0 +1,12 @@
+%h2= t('products.advances.pfi.forms_and_agreements')
+%h3= t('products.advances.pfi.all_applicants.title')
+= render 'pfi_table', rows: @all_applicants_rows
+%h3= t('products.advances.pfi.product_specific.title')
+%h4= t('products.advances.pfi.product_specific.mpf_original')
+= render 'pfi_table', rows: @mpf_original_rows
+%h4= t('products.advances.pfi.product_specific.mpf_extra')
+= render 'pfi_table', rows: @mpf_xtra_rows
+%h4= t('products.advances.pfi.product_specific.mpf_direct')
+= render 'pfi_table', rows: @mpf_direct_rows
+%h4= t('products.advances.pfi.product_specific.mpf_gov')
+= render 'pfi_table', rows: @mpf_gov_rows

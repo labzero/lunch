@@ -1,0 +1,9 @@
+- classes ||= nil
+.row.product-page{class: classes}
+  .column-2x10-right
+    - if @body_html
+      = @body_html
+      - if @additional_html
+        = @additional_html
+    - else
+      = yield

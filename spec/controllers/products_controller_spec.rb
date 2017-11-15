@@ -6,6 +6,7 @@ RSpec.describe ProductsController, :type => :controller do
   describe 'GET index' do
     it_behaves_like 'a user required action', :get, :index
     it_behaves_like 'a controller action with an active nav setting', :index, :products
+    it_behaves_like 'a ProductsController action that pulls content from the CMS', :index
     it 'should render the index view' do
       get :index
       expect(response.body).to render_template('index')
@@ -19,6 +20,7 @@ RSpec.describe ProductsController, :type => :controller do
   describe 'GET loc' do
     it_behaves_like 'a user required action', :get, :loc
     it_behaves_like 'a controller action with an active nav setting', :loc, :products
+    it_behaves_like 'a ProductsController action that pulls content from the CMS', :loc
     it 'should render the loc view' do
       get :loc
       expect(response.body).to render_template('loc')
@@ -57,6 +59,58 @@ RSpec.describe ProductsController, :type => :controller do
       it "should assign `@#{var}`" do
         get :pfi
         expect(assigns[var]).to be_present
+      end
+    end
+  end
+
+  {
+    arc: 'arc_interest_payments',
+    sbc: 'sbc_eligible_securities',
+    pfi: 'pfi_forms_and_agreements',
+    swaps: 'swap_term_exposure_table'
+  }.each do |action, partial|
+    describe "GET #{action}" do
+      let(:additional_html) { instance_double(String) }
+
+      it 'renders the `arc_interest_payments` partial to a string' do
+        expect(controller).to receive(:render_to_string).with(partial: partial)
+        get action
+      end
+      it 'sets `@additional_html` to the rendered partial string' do
+        allow(controller).to receive(:render_to_string).with(partial: partial).and_return(additional_html)
+        get action
+        expect(assigns[:additional_html]).to eq(additional_html)
+      end
+    end
+  end
+
+  describe 'private methods' do
+    describe '`set_body_html`' do
+      let(:resolved_html) { double('link-resolved html')}
+      let(:raw_html) { double('raw html')}
+      let(:cms_key) { double('some key') }
+      let(:product) { instance_double(Cms::Product, product_page_html: raw_html) }
+      let(:call_method) { subject.send(:set_body_html, cms_key) }
+      before do
+        allow(Cms::Product).to receive(:new).and_return(product)
+        allow(subject).to receive(:resolve_relative_prismic_links)
+      end
+      it 'creates a new instance of `Cms::Product` with the member id, request object and cms key' do
+        expect(Cms::Product).to receive(:new).with(member_id, request, cms_key).and_return(product)
+        call_method
+      end
+      it 'calls `product_page_html` on the instance of `Cms::Product`' do
+        expect(product).to receive(:product_page_html)
+        call_method
+      end
+      it 'calls `resolve_relative_prismic_links` with the `product_page_html`' do
+        expect(subject).to receive(:resolve_relative_prismic_links).with(raw_html)
+        call_method
+      end
+      it 'sets `@body_html` to the result of `resolve_relative_prismic_links`' do
+        allow(subject).to receive(:resolve_relative_prismic_links).and_return(resolved_html)
+        call_method
+        expect(assigns[:body_html]).to eq(resolved_html)
       end
     end
   end
