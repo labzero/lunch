@@ -4840,12 +4840,14 @@ describe MAPI::ServiceApp do
           MAPI::Services::Member::SecuritiesRequests.delivery_keys_for_delivery_type(delivery_type).map do |key|
             [key, SecureRandom.hex]
           end.to_h.merge('delivery_type' => delivery_type) }
+        let(:cusip) { SecureRandom.hex }
         let(:security) { { 'cusip' => SecureRandom.hex,
                            'description' => instance_double(String),
                            'original_par' => rand(0...50000000),
                            'payment_amount' => instance_double(Numeric),
                            'custodian_name' => instance_double(String) } }
         let(:securities) { [ security, security, security ]}
+        let(:cusip) { SecureRandom.hex }
         let(:method_params) { [ app,
                                 member_id,
                                 user_name,
@@ -4860,6 +4862,8 @@ describe MAPI::ServiceApp do
         before do
           allow(securities_request_module).to receive(:validate_broker_instructions)
           allow(securities_request_module).to receive(:validate_kind).with(:intake, kind).and_return(true)
+          allow(securities_request_module).to receive(:fetch_security_metadata_by_cusip).with(app, security, security['cusip']).and_return(security)
+
         end
 
         context 'validations' do
@@ -4945,6 +4949,7 @@ describe MAPI::ServiceApp do
           end
 
           context 'prepares SQL' do
+            let(:cusip) { SecureRandom.hex }
             before do
               allow(MAPI::Services::Member::SecuritiesRequests).to receive(:execute_sql).with(any_args).and_return(true)
             end
@@ -4968,6 +4973,13 @@ describe MAPI::ServiceApp do
             it 'calls `insert_security_query`' do
               expect(MAPI::Services::Member::SecuritiesRequests).to receive(:insert_security_query).with(next_id,
                 next_id, user_name, session_id, security, nil).exactly(3).times
+              call_method
+            end
+            it 'populates each security with metadata' do
+              expect(securities.length).to be > 0
+              securities.each do |security|
+                expect(MAPI::Services::Member::SecuritiesRequests).to receive(:fetch_security_metadata_by_cusip).with(app, security, security['cusip'])
+              end
               call_method
             end
           end
@@ -5314,6 +5326,7 @@ describe MAPI::ServiceApp do
     describe '`populate_security_metadata` class method' do
       let(:security) { { 'cusip' => double('A CUSIP') } }
       let(:ssk_id) { rand(1000..9999) }
+      let(:cusip) { SecureRandom.hex }
       let(:metadata) {
         {
           'DESCRIPTION' => double('A Description'),
@@ -5323,6 +5336,7 @@ describe MAPI::ServiceApp do
           'POOL_NUMBER' => double('A Pool Number')
         }
       }
+
       let(:call_method) { securities_request_module.populate_security_metadata(app, security, ssk_id) }
       let(:query) { double('Metadata Query') }
 
@@ -5333,6 +5347,67 @@ describe MAPI::ServiceApp do
 
       it 'builds SQL for querying the metadata of the CUSIP' do
         expect(securities_request_module).to receive(:cusip_metadata_query).with(ssk_id).and_return(query)
+        call_method
+      end
+
+      it 'executes the metadata query' do
+        expect(securities_request_module).to receive(:fetch_hash).with(app, query).and_return(metadata)
+        call_method
+      end
+
+      it 'returns the updated security' do
+        expect(call_method).to be(security)
+      end
+
+      {
+        'DESCRIPTION' => 'description',
+        'ISSUE_DATE' => 'issue_date',
+        'MATURITY_DATE' => 'maturity_date',
+        'COUPON_RATE' => 'coupon_rate',
+        'POOL_NUMBER' => 'pool_number'
+      }.each do |metadata_field, security_field|
+        it "sets the `#{security_field}` to the value of `#{metadata_field}` if its not already set" do
+          call_method
+          expect(security[security_field]).to be(metadata[metadata_field])
+        end
+
+        it "does not set the `#{security_field}` to the value of `#{metadata_field}` if its already set" do
+          value = double('A Value')
+          security[security_field] = value
+          call_method
+          expect(security[security_field]).to be(value)
+        end
+
+        it "does not raise an error if `#{metadata_field}` is nil" do
+          metadata[metadata_field] = nil
+          expect{call_method}.to_not raise_error
+        end
+      end
+    end
+
+    describe '`fetch_security_metadata_by_cusip` class method' do
+      let(:security) { { 'cusip' => double('A CUSIP') } }
+      let(:cusip) { SecureRandom.hex }
+      let(:metadata) {
+        {
+          'DESCRIPTION' => double('A Description'),
+          'ISSUE_DATE' => double(Date),
+          'MATURITY_DATE' => double(Date),
+          'COUPON_RATE' => double('A Coupon Rate'),
+          'POOL_NUMBER' => double('A Pool Number')
+        }
+      }
+
+      let(:call_method) { securities_request_module.fetch_security_metadata_by_cusip(app, security, cusip) }
+      let(:query) { double('Metadata Query') }
+
+      before do
+        allow(securities_request_module).to receive(:security_metadata_by_cusip_query).with(cusip).and_return(query)
+        allow(securities_request_module).to receive(:fetch_hash).with(app, query).and_return(metadata)
+      end
+
+      it 'builds SQL for querying the metadata of the security' do
+        expect(securities_request_module).to receive(:security_metadata_by_cusip_query).with(cusip).and_return(query)
         call_method
       end
 
@@ -5406,6 +5481,40 @@ describe MAPI::ServiceApp do
       end
     end
 
+    describe '`security_metadata_by_cusip_query`' do
+      let(:cusip) { SecureRandom.hex }
+      let(:limit_query) { securities_request_module.security_metadata_by_cusip_query(cusip) }
+      let(:inner_query) { limit_query.match(/\A\s*SELECT\s+\*\s+FROM\s+\((.+)\)\s+WHERE\s+ROWNUM\s+=\s+1\s*\z/mi)[1] }
+      it 'limits to a single row of results' do
+        expect(limit_query).to match(/\A\s*SELECT\s+\*\s+FROM\s+\(.+\)\s+WHERE\s+ROWNUM\s+=\s+1\s*\z/mi)
+      end
+      it 'fetches the issue date from the `SSK` table' do
+        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK\.SSK_ISSUE_DATE\s+AS\s+ISSUE_DATE((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.SSK\s+SSK\s+/mi)
+      end
+      it 'fetches the maturity date from the `SSK` table' do
+        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK\.SSK_MATURITY_DATE\s+AS\s+MATURITY_DATE((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.SSK\s+SSK\s+/mi)
+      end
+      it 'fetches the pool number from the `SSK` table' do
+        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK\.SSK_POOL_NUMBER\s+AS\s+POOL_NUMBER((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.SSK\s+SSK\s+/mi)
+      end
+      it 'fetches the description from the `SSK` table' do
+        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*SSK\.SSK_DESC1\s+AS\s+DESCRIPTION((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.SSK\s+SSK\s+/mi)
+      end
+      it 'fetches the coupon rate from the `SEC_PRICES` table' do
+        expect(inner_query).to match(/\A\s*SELECT\s+(\S+\s+(AS\s+\S+,\s+)?)*P.SP_COUPON_RATE\s+AS\s+COUPON_RATE((,\s+(\S+\s+(AS\s+\S+)?)*)|\s+)FROM\s+SAFEKEEPING\.SSK\s+SSK\s+/mi)
+      end
+      it 'joins the `SEC_PRICES` table on the `SSK` table' do
+        expect(inner_query).to match(/\s+FROM\s+SAFEKEEPING\.SSK\s+SSK\s+LEFT\s+JOIN\s+SAFEKEEPING\.SEC_PRICES\s+P\s+ON\s+SSK.SSK_CUSIP\s+=\s+P\.SP_CUSIP\s+WHERE\s+/mi)
+      end
+      it 'orders the results by `SSK_RECORD_DATE_UPDATED`, then `SSK_ID`, all descending' do
+        expect(inner_query).to match(/\s+ORDER\s+BY\s+SSK.SSK_RECORD_DATE_UPDATED\s+DESC,\s+SSK\.SSK_ID\s+DESC\s+\z/mi)
+      end
+      it 'finds the rows that match the provided CUSIP' do
+        quoted_cusip = SecureRandom.hex
+        allow(securities_request_module).to receive(:quote).with(cusip).and_return(quoted_cusip)
+        expect(inner_query).to match(/\s+WHERE\s+UPPER\(SSK.SSK_CUSIP\)\s+=\s+UPPER\(#{quoted_cusip}\)\s+/)
+      end
+    end
     describe '`account_number_query` class method' do
       let(:adx_id) { SecureRandom.hex }
       let(:call_method) { securities_request_module.account_number_query(adx_id) }

@@ -407,6 +407,20 @@ module MAPI
           SQL
         end
 
+        def self.security_metadata_by_cusip_query(cusip)
+           <<-SQL
+            SELECT * FROM (
+               SELECT SSK.SSK_CUSIP, SSK.SSK_ISSUE_DATE AS ISSUE_DATE, SSK.SSK_MATURITY_DATE AS MATURITY_DATE,
+                      SSK.SSK_POOL_NUMBER AS POOL_NUMBER, P.SP_COUPON_RATE AS COUPON_RATE, SSK.SSK_DESC1 AS DESCRIPTION
+                 FROM SAFEKEEPING.SSK SSK
+                        LEFT JOIN
+                      SAFEKEEPING.SEC_PRICES P ON SSK.SSK_CUSIP = P.SP_CUSIP
+                WHERE UPPER(SSK.SSK_CUSIP) = UPPER(#{quote(cusip)})
+                ORDER BY SSK.SSK_RECORD_DATE_UPDATED DESC, SSK.SSK_ID DESC
+              ) WHERE ROWNUM = 1
+          SQL
+        end
+
         def self.authorize_request_query(member_id, request_id, user_name, full_name, session_id, signer_id)
           now = Time.zone.now
           <<-SQL
@@ -554,6 +568,7 @@ module MAPI
             AND STATUS = #{quote(SSKRequestStatus::SUBMITTED)}
           SQL
         end
+
         def self.update_transfer_header_details_query(member_id, header_id, user_name, full_name, session_id, adx_id, un_adx_id, broker_instructions, kind)
           <<-SQL
             UPDATE SAFEKEEPING.SSK_WEB_FORM_HEADER SET
@@ -619,6 +634,7 @@ module MAPI
                                                               processed_delivery_instructions[:delivery_values], pledged_or_unpledged)
               raise "failed to insert security intake request header" unless execute_sql(app.logger, insert_header_sql)
               securities.each do |security|
+                fetch_security_metadata_by_cusip(app, security, security['cusip'])
                 insert_security_sql = insert_security_query(header_id, execute_sql_single_result(app, NEXT_ID_SQL, "Next ID Sequence").to_i, user_name, session_id, security, nil)
                 raise "failed to insert security intake request detail" unless execute_sql(app.logger, insert_security_sql)
               end
@@ -1214,15 +1230,26 @@ module MAPI
           kind == :pledge_intake ? :pledged : :unpledged
         end
 
-        def self.populate_security_metadata(app, security, ssk_id)
-          metadata = fetch_hash(app, cusip_metadata_query(ssk_id)) || {}
-          security['description'] ||= metadata['DESCRIPTION'] 
-          security['issue_date'] ||= metadata['ISSUE_DATE'] 
+        def self.fetch_security_metadata_by_cusip(app, security, cusip)
+          metadata = fetch_hash(app, security_metadata_by_cusip_query(cusip)) || {}
+          security['description'] ||= metadata['DESCRIPTION']
+          security['issue_date'] ||= metadata['ISSUE_DATE']
           security['maturity_date'] ||= metadata['MATURITY_DATE']
           security['coupon_rate'] ||= metadata['COUPON_RATE']
-          security['pool_number'] ||= metadata['POOL_NUMBER']  
+          security['pool_number'] ||= metadata['POOL_NUMBER']
           security
         end
+
+        def self.populate_security_metadata(app, security, id)
+          metadata = fetch_hash(app, cusip_metadata_query(id)) || {}
+          security['description'] ||= metadata['DESCRIPTION']
+          security['issue_date']  ||= metadata['ISSUE_DATE']
+          security['maturity_date'] ||= metadata['MATURITY_DATE']
+          security['coupon_rate'] ||= metadata['COUPON_RATE']
+          security['pool_number'] ||= metadata['POOL_NUMBER']
+          security
+        end
+
       end
     end
   end
