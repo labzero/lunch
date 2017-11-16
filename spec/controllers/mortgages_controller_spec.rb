@@ -116,7 +116,15 @@ RSpec.describe MortgagesController, :type => :controller do
     end
     it 'assigns `@mcu_type_dropdown_options`' do
       call_action
-      expect(assigns[:mcu_type_dropdown_options]).to eq(file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| type['value'] }))
+      expect(assigns[:mcu_type_dropdown_options]).to eq(file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| "#{type['id']}_#{type['nameSpecific']}" }))
+    end
+    it 'assigns `@program_type_dropdowns`' do
+      call_action
+      expect(assigns[:program_type_dropdowns]).to eq(Hash[file_types.map { |type| "#{type['id']}_#{type['nameSpecific']}" }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })])
+    end
+    it 'assigns `@accepted_upload_mimetypes' do
+      call_action
+      expect(assigns[:accepted_upload_mimetypes]).to eq(described_class::ACCEPTED_UPLOAD_MIMETYPES.join(', '))
     end
     it 'sets `@session_elevated` to the result of `session_elevated?`' do
       session_elevated = double('session info')
@@ -337,7 +345,8 @@ RSpec.describe MortgagesController, :type => :controller do
     let(:path) { SecureRandom.hex }
     let(:original_filename) { 'upload-test-file.txt' }
     let(:file) { fixture_file_upload(original_filename, 'text/text') }
-    let(:mcu_type) { SecureRandom.hex }
+    let(:mcu_type_id) { "#{rand(1..5)}" }
+    let(:mcu_type) { "#{mcu_type_id}_#{SecureRandom.hex}" }
     let(:pledge_type) { SecureRandom.hex }
     let(:program_type) { SecureRandom.hex }
     let(:username) { SecureRandom.hex }
@@ -368,7 +377,7 @@ RSpec.describe MortgagesController, :type => :controller do
                         mortgage_collateral_update: { file: file,
                                                       mcu_type: mcu_type,
                                                       pledge_type: pledge_type,
-                                                      "program_type_#{mcu_type.upcase}": program_type } }
+                                                      "program_type_#{mcu_type}": program_type } }
     before do 
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
       allow(member_balance_service).to receive(:mcu_transaction_id).and_return(transaction_id_response)
@@ -377,7 +386,6 @@ RSpec.describe MortgagesController, :type => :controller do
       allow(file).to receive(:path).and_return(path)
       allow(file).to receive(:original_filename).and_return(original_filename)
       allow(subject).to receive(:current_user).and_return(user)
-      allow(mcu_type).to receive(:titlecase).and_return(mcu_type)
       allow(pledge_type).to receive(:titlecase).and_return(pledge_type)
       allow(program_type).to receive(:titlecase).and_return(program_type)
       allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)      
@@ -447,9 +455,13 @@ RSpec.describe MortgagesController, :type => :controller do
         before do
           allow(transaction_id_response).to receive(:[]).with(:transaction_id).and_return(transaction_id)
         end
+        it 'assigns `@mcu_type_id`' do
+          call_action
+          expect(assigns[:mcu_type_id]).to eq(mcu_type.split('_')[0])
+        end
         it 'assigns `@mcu_type`' do
           call_action
-          expect(assigns[:mcu_type]).to eq(mcu_type)
+          expect(assigns[:mcu_type]).to eq(mcu_type.split('_')[1])
         end
         it 'assigns `@pledge_type`' do
           call_action
@@ -499,64 +511,65 @@ RSpec.describe MortgagesController, :type => :controller do
           before do
             allow(member_balance_service).to receive(:mcu_server_info).and_return(server_info)
           end
-          it 'gets the current time' do
-            expect(Time.zone).to receive(:now)
-            call_action
-          end
-          it 'replaces spaces with underscores in the original filename' do
-            expect(original_filename).to receive(:gsub).with(' ', '_')
-            call_action
-          end
-          it 'starts the sftp session' do
-            expect(Net::SFTP).to receive(:start).with(hostname, svc_account_username, password: svc_account_password)
-            call_action
-          end
-          it 'creates the remote path fragment directory via sftp' do
-            expect(sftp).to receive(:mkdir).with(remote_path_fragment)
-            call_action
-          end
-          it 'creates the remote path fragment including the year' do
-            expect(sftp).to receive(:mkdir).with(remote_path_fragment_with_year)
-            call_action
-          end
-          it 'creates the remote path fragment including the year and month' do
-            expect(sftp).to receive(:mkdir).with(remote_path_fragment_with_year_and_month)
-            call_action
-          end
-          it 'gets the `path` from the uploaded file' do
-            expect(file).to receive(:path)
-            call_action
-          end
-          it 'uploads the file' do
-            expect(sftp).to receive(:upload!).with(local_path, remote_path)
-            call_action
-          end
-          describe 'handling an SFTP execption' do
-            let(:message) { "Failed to SFTP #{local_path} to #{remote_path}. Reason: sftp exception" } 
-            before { allow(sftp).to receive(:upload!).and_raise Exception.new('sftp exception') }
-            it 'logs the exception' do
-              expect(subject.logger).to receive(:error).with(message)
+          describe 'when in production' do
+            before do
+              allow(Rails.env).to receive(:production?).and_return(true)
+            end
+            it 'gets the current time' do
+              expect(Time.zone).to receive(:now)
               call_action
             end
-            it 'sets a failure message' do
+            it 'replaces spaces with underscores in the original filename' do
+              expect(original_filename).to receive(:gsub).with(' ', '_')
               call_action
-              expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
+            end
+            it 'starts the sftp session' do
+              expect(Net::SFTP).to receive(:start).with(hostname, svc_account_username, password: svc_account_password)
+              call_action
+            end
+            it 'creates the remote path fragment directory via sftp' do
+              expect(sftp).to receive(:mkdir).with(remote_path_fragment)
+              call_action
+            end
+            it 'creates the remote path fragment including the year' do
+              expect(sftp).to receive(:mkdir).with(remote_path_fragment_with_year)
+              call_action
+            end
+            it 'creates the remote path fragment including the year and month' do
+              expect(sftp).to receive(:mkdir).with(remote_path_fragment_with_year_and_month)
+              call_action
+            end
+            it 'gets the `path` from the uploaded file' do
+              expect(file).to receive(:path)
+              call_action
+            end
+            it 'uploads the file' do
+              expect(sftp).to receive(:upload!).with(local_path, remote_path)
+              call_action
+            end
+            describe 'handling an SFTP execption' do
+              let(:message) { "Failed to SFTP #{local_path} to #{remote_path}. Reason: sftp exception" } 
+              before { allow(sftp).to receive(:upload!).and_raise Exception.new('sftp exception') }
+              it 'logs the exception' do
+                expect(subject.logger).to receive(:error).with(message)
+                call_action
+              end
+              it 'sets a failure message' do
+                call_action
+                expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
+              end
+            end
+            it 'does not raise an SFTP exception' do
+              expect{ call_action }.not_to raise_error
             end
           end
-          it 'does not raise an SFTP exception' do
-            expect{ call_action }.not_to raise_error
-          end
-        end
-        it 'gets the `original_filename` from the uploaded file' do
-          expect(file).to receive(:original_filename)
-          call_action
         end
         it 'calls `mcu_upload_file` with the appropriate arguments' do
           expect(member_balance_service).to receive(:mcu_upload_file).with(transaction_id,
-                                                                           mcu_type, 
+                                                                           mcu_type_id, 
                                                                            pledge_type, 
                                                                            username,
-                                                                           remote_path)
+                                                                           "")
           call_action
         end
         it 'assigns `@result` to the result of `mcu_upload_file`' do

@@ -41,7 +41,7 @@ module MAPI
                                                             'pledgeType': pledge_type,
                                                             'submittedBy': username })
             post_message(app, 'UPDATE_FILE_STATUS', { 'transactionId': transaction_id, 
-                                                      'status': 'FHLBSF Processing' })
+                                                      'status': 'Authorized' })
           end
           { success: true, message: '' }
         end

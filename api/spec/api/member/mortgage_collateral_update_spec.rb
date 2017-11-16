@@ -328,7 +328,7 @@ describe MAPI::ServiceApp do
           expect(mortgage_collateral_update_module).to receive(:post_message).with( app,
                                                           'UPDATE_FILE_STATUS',
                                                           { 'transactionId': transaction_id,
-                                                            'status': 'FHLBSF Processing' })
+                                                            'status': 'Authorized' })
           call_method
         end
         it 'returns a success message' do

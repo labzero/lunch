@@ -45,7 +45,7 @@ module MAPI
           raise 'No response received from message bus'
         end
 
-        def post_message(app, message, member_id = nil, publish_headers = {})
+        def post_message(app, message, publish_headers = {})
           stomp_client(app).publish(FQ_QUEUE, '', { 'CMD': message }.merge(publish_headers))
         end
 

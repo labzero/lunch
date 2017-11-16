@@ -116,8 +116,8 @@ class MortgagesController < ApplicationController
       @pledge_type_dropdown_options << BLANKET_LIEN_DROPDOWN_OPTION if member_info['blanketLien']
       @pledge_type_dropdown_options.uniq!
       file_types = member_info['mcuuFileTypes']
-      @mcu_type_dropdown_options = file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| type['value'] })
-      @program_type_dropdowns = Hash[file_types.map { |type| type['value'] }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })]
+      @mcu_type_dropdown_options = file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| "#{type['id']}_#{type['nameSpecific']}" })
+      @program_type_dropdowns = Hash[file_types.map { |type| "#{type['id']}_#{type['nameSpecific']}" }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })]
       @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')
       @session_elevated = session_elevated?
     end
@@ -159,9 +159,9 @@ class MortgagesController < ApplicationController
         @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe
       else
         mcu_params = params['mortgage_collateral_update']
-        @mcu_type = mcu_params['mcu_type'].titlecase
+        @mcu_type_id, @mcu_type = mcu_params['mcu_type'].split('_')
         @pledge_type = mcu_params['pledge_type'].titlecase
-        @program_type = mcu_params["program_type_#{@mcu_type.upcase}"].titlecase
+        @program_type = mcu_params["program_type_#{mcu_params['mcu_type']}"].titlecase
         uploaded_file = mcu_params['file']
         server_info = Rails.cache.fetch(CacheConfiguration.key(:mcu_server_info), 
                                         expires_in: CacheConfiguration.expiry(:mcu_server_info)) do
@@ -175,27 +175,29 @@ class MortgagesController < ApplicationController
           remote_filename = "#{@pledge_type}_#{@transaction_id}_#{uploaded_file.original_filename.gsub(' ', '_')}"
           remote_path_fragment = "#{server_info['archiveDir']}/MCU/#{current_member_id}"
           remote_path = ""
-          begin
-            now = Time.zone.now
-            Net::SFTP.start(server_info['hostname'], 
-                            server_info['svcAccountUsername'],
-                            password: server_info['svcAccountPassword']) do |sftp|
-              sftp.mkdir(remote_path_fragment)
-              remote_path_fragment = "#{remote_path_fragment}/#{now.year}"
-              sftp.mkdir(remote_path_fragment)
-              remote_path_fragment = "#{remote_path_fragment}/#{now.month}"
-              sftp.mkdir(remote_path_fragment)
-              remote_path = "#{remote_path_fragment}/#{remote_filename}"
-              sftp.upload!(uploaded_file.path, remote_path)
+          if Rails.env.production?
+            begin
+              now = Time.zone.now
+              Net::SFTP.start(server_info['hostname'], 
+                              server_info['svcAccountUsername'],
+                              password: server_info['svcAccountPassword']) do |sftp|
+                sftp.mkdir(remote_path_fragment)
+                remote_path_fragment = "#{remote_path_fragment}/#{now.year}"
+                sftp.mkdir(remote_path_fragment)
+                remote_path_fragment = "#{remote_path_fragment}/#{now.month}"
+                sftp.mkdir(remote_path_fragment)
+                remote_path = "#{remote_path_fragment}/#{remote_filename}"
+                sftp.upload!(uploaded_file.path, remote_path)
+              end
+            rescue Exception => e
+              logger.error("Failed to SFTP #{uploaded_file.path} to #{remote_path}. Reason: #{e.message}")
+              @result[:success] = false
+              @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe
+              return
             end
-          rescue Exception => e
-            logger.error("Failed to SFTP #{uploaded_file.path} to #{remote_path}. Reason: #{e.message}")
-            @result[:success] = false
-            @result[:message] = I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe
-            return
           end
           @result = member_balances.mcu_upload_file(@transaction_id, 
-                                                    @mcu_type, 
+                                                    @mcu_type_id, 
                                                     @pledge_type, 
                                                     current_user.username,
                                                     remote_path)

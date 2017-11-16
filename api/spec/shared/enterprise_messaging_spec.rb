@@ -79,7 +79,7 @@ describe MAPI::Shared::EnterpriseMessaging::ClassMethods do
   end
 
   describe '`post_message`' do
-    let(:call_method) { subject.post_message(app, message, member_id, publish_headers) }
+    let(:call_method) { subject.post_message(app, message, publish_headers) }
     let(:stomp_client) { double('stomp client') }
     let(:message) { double('message') }
     let(:publish_headers) { { name: 'value' } }
