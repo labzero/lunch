@@ -3,7 +3,7 @@ require 'stomp'
 module MAPI
   module Shared
     module EnterpriseMessaging
-      MESSAGE_BROKER_HOSTNAME = 'SFDWMSGBROKER1.fhlbsf-i.com'
+      MESSAGE_BROKER_HOSTNAME = 'msgbroker1.fhlbsf-i.com'
       CONFIG_DIR = 'config/ssl'
       CERT_FILE = "#{CONFIG_DIR}/client.crt"
       KEY_FILE = "#{CONFIG_DIR}/client.key"
@@ -15,6 +15,7 @@ module MAPI
       FQ_QUEUE = '/queue/mcufu.ix'
       TOPIC = 'ix.portal'
       FQ_TOPIC = "/topic/#{TOPIC}"
+      REPLY_TO = "topic://#{TOPIC}"
 
       extend ActiveSupport::Concern
 
@@ -30,7 +31,7 @@ module MAPI
           rescue Stomp::Error::DuplicateSubscription
             #ignore
           end
-          client.publish("#{FQ_QUEUE}?replyTo=#{TOPIC}", '', { 'correlation-id': correlation_id, 'CMD': message }.merge(publish_headers))
+          client.publish("#{FQ_QUEUE}", '', { 'JMSReplyTo': REPLY_TO, 'correlation-id': correlation_id, 'CMD': message }.merge(publish_headers))
           NUM_RETRIES.times do
             unless @response.nil?
               body = begin
@@ -46,7 +47,7 @@ module MAPI
         end
 
         def post_message(app, message, publish_headers = {})
-          stomp_client(app).publish(FQ_QUEUE, '', { 'CMD': message }.merge(publish_headers))
+          stomp_client(app).publish(FQ_QUEUE, '', { 'JMSReplyTo': REPLY_TO, 'CMD': message }.merge(publish_headers))
         end
 
         def stomp_client(app)

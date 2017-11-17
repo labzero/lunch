@@ -11,7 +11,7 @@ describe MAPI::Shared::EnterpriseMessaging::ClassMethods do
   let(:num_retries) { rand(5..20) }
   let(:sleep_interval) { 0.1 }
   before do
-    stub_const('MAPI::Shared::EnterpriseMessaging::HOSTNAME', 'SFDWMSGBROKER1.fhlbsf-i.com')
+    stub_const('MAPI::Shared::EnterpriseMessaging::HOSTNAME', 'msgbroker1.fhlbsf-i.com')
     stub_const('MAPI::Shared::EnterpriseMessaging::CONFIG_DIR', 'config/ssl')
     stub_const('MAPI::Shared::EnterpriseMessaging::CERT_FILE', "#{MAPI::Shared::EnterpriseMessaging::CONFIG_DIR}/client.crt")
     stub_const('MAPI::Shared::EnterpriseMessaging::KEY_FILE', "#{MAPI::Shared::EnterpriseMessaging::CONFIG_DIR}/client.key")
@@ -21,6 +21,7 @@ describe MAPI::Shared::EnterpriseMessaging::ClassMethods do
     stub_const('MAPI::Shared::EnterpriseMessaging::FQ_QUEUE', '/queue/mcufu.ix')
     stub_const('MAPI::Shared::EnterpriseMessaging::TOPIC', 'ix.portal')
     stub_const('MAPI::Shared::EnterpriseMessaging::FQ_TOPIC', "/topic/#{MAPI::Shared::EnterpriseMessaging::TOPIC}")
+    stub_const('MAPI::Shared::EnterpriseMessaging::REPLY_TO', "topic://#{MAPI::Shared::EnterpriseMessaging::TOPIC}")
     stub_const('MAPI::Shared::EnterpriseMessaging::NUM_RETRIES', num_retries)
     stub_const('MAPI::Shared::EnterpriseMessaging::SLEEP_INTERVAL', sleep_interval)
   end
@@ -57,9 +58,10 @@ describe MAPI::Shared::EnterpriseMessaging::ClassMethods do
     end
     it 'calls `publish` on the `stomp_client`' do
       expect(stomp_client).to receive(:publish).with(
-        "#{MAPI::Shared::EnterpriseMessaging::FQ_QUEUE}?replyTo=#{MAPI::Shared::EnterpriseMessaging::TOPIC}", 
+        "#{MAPI::Shared::EnterpriseMessaging::FQ_QUEUE}",
         '', 
-        { 'correlation-id': correlation_id, 
+        { 'JMSReplyTo': MAPI::Shared::EnterpriseMessaging::REPLY_TO,
+          'correlation-id': correlation_id,
           'CMD': message }.merge(publish_headers))
       call_method
     end
@@ -92,7 +94,7 @@ describe MAPI::Shared::EnterpriseMessaging::ClassMethods do
       call_method
     end
     it 'calls `publish` on the `stomp_client`' do
-      expect(stomp_client).to receive(:publish).with(MAPI::Shared::EnterpriseMessaging::FQ_QUEUE, '', { 'CMD': message }.merge(publish_headers))
+      expect(stomp_client).to receive(:publish).with(MAPI::Shared::EnterpriseMessaging::FQ_QUEUE, '', { 'JMSReplyTo': MAPI::Shared::EnterpriseMessaging::REPLY_TO, 'CMD': message }.merge(publish_headers))
       call_method
     end
   end
