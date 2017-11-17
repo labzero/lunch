@@ -22,7 +22,7 @@
           %dt= t('mortgages.new.authorized.transaction_details.pledge_type')
           %dd= @pledge_type
           %dt= t('mortgages.new.authorized.transaction_details.mcu_type')
-          %dd= @mcu_type
+          %dd= @mcu_type.titlecase
           %dt= t('mortgages.new.authorized.transaction_details.program_type')
           %dd= @program_type
           %dt.extra-spacing= t('mortgages.new.authorized.transaction_details.status')

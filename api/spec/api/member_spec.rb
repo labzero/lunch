@@ -1034,6 +1034,7 @@ describe MAPI::ServiceApp do
     let(:pledge_type) { SecureRandom.hex }
     let(:local_path) { SecureRandom.hex }
     let(:remote_path) { SecureRandom.hex }
+    let(:archive_dir) { remote_path[0..24] }
     let(:original_filename) { SecureRandom.hex }
     let(:username) { SecureRandom.hex }
     let(:call_endpoint) { post "member/#{id}/mcu_upload_file",
@@ -1041,7 +1042,8 @@ describe MAPI::ServiceApp do
                                  file_type: file_type,
                                  pledge_type: pledge_type,
                                  username: username, 
-                                 remote_path: remote_path }.to_json }
+                                 remote_path: remote_path,
+                                 archive_dir: archive_dir }.to_json }
 
     it_behaves_like 'a MAPI endpoint with JSON error handling', 
                     "member/#{rand(1000..9999)}/mcu_upload_file", 
@@ -1052,8 +1054,8 @@ describe MAPI::ServiceApp do
                       file_type: SecureRandom.hex,
                       pledge_type: SecureRandom.hex,
                       username: SecureRandom.hex,
-                      remote_path: SecureRandom.hex }.to_json
-
+                      remote_path: SecureRandom.hex,
+                      archive_dir: SecureRandom.hex }.to_json
     it 'calls `MAPI::Services::Member::MortgageCollateralUpdate.mcu_upload_file` with the appropriate params' do
       expect(MAPI::Services::Member::MortgageCollateralUpdate).to receive(:mcu_upload_file).with(an_instance_of(MAPI::ServiceApp),
                                                                                                  id, 
@@ -1061,7 +1063,8 @@ describe MAPI::ServiceApp do
                                                                                                  file_type,
                                                                                                  pledge_type,
                                                                                                  username,
-                                                                                                 remote_path)
+                                                                                                 remote_path,
+                                                                                                 archive_dir)
       call_endpoint
     end
     it 'returns the JSONd results of calling `MAPI::Services::Member::MortgageCollateralUpdate.mcu_upload_file`' do

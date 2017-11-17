@@ -407,14 +407,15 @@ class MemberBalanceService < MAPIService
     get_hash(:mcu_member_info, "/member/#{@member_id}/mcu_member_info")
   end
 
-  def mcu_upload_file(transaction_id, file_type, pledge_type, username, remote_path)
+  def mcu_upload_file(transaction_id, file_type, pledge_type, username, remote_path, archive_dir)
     post_hash(:mcu_upload_file, 
               "/member/#{@member_id}/mcu_upload_file",
               { transaction_id: transaction_id,
                 file_type: Rack::Utils.escape(file_type),
                 pledge_type: Rack::Utils.escape(pledge_type),
                 username: username,
-                remote_path: remote_path })
+                remote_path: remote_path,
+                archive_dir: archive_dir })
   end
 
   def managed_securities

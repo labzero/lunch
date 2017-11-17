@@ -116,11 +116,11 @@ RSpec.describe MortgagesController, :type => :controller do
     end
     it 'assigns `@mcu_type_dropdown_options`' do
       call_action
-      expect(assigns[:mcu_type_dropdown_options]).to eq(file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| "#{type['id']}_#{type['nameSpecific']}" }))
+      expect(assigns[:mcu_type_dropdown_options]).to eq(file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| "#{type['id']}_#{type['value']}" }))
     end
     it 'assigns `@program_type_dropdowns`' do
       call_action
-      expect(assigns[:program_type_dropdowns]).to eq(Hash[file_types.map { |type| "#{type['id']}_#{type['nameSpecific']}" }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })])
+      expect(assigns[:program_type_dropdowns]).to eq(Hash[file_types.map { |type| "#{type['id']}_#{type['value']}" }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })])
     end
     it 'assigns `@accepted_upload_mimetypes' do
       call_action
@@ -345,8 +345,7 @@ RSpec.describe MortgagesController, :type => :controller do
     let(:path) { SecureRandom.hex }
     let(:original_filename) { 'upload-test-file.txt' }
     let(:file) { fixture_file_upload(original_filename, 'text/text') }
-    let(:mcu_type_id) { "#{rand(1..5)}" }
-    let(:mcu_type) { "#{mcu_type_id}_#{SecureRandom.hex}" }
+    let(:mcu_type) { "#{rand(1..5)}_#{SecureRandom.hex}" }
     let(:pledge_type) { SecureRandom.hex }
     let(:program_type) { SecureRandom.hex }
     let(:username) { SecureRandom.hex }
@@ -455,13 +454,9 @@ RSpec.describe MortgagesController, :type => :controller do
         before do
           allow(transaction_id_response).to receive(:[]).with(:transaction_id).and_return(transaction_id)
         end
-        it 'assigns `@mcu_type_id`' do
-          call_action
-          expect(assigns[:mcu_type_id]).to eq(mcu_type.split('_')[0])
-        end
         it 'assigns `@mcu_type`' do
           call_action
-          expect(assigns[:mcu_type]).to eq(mcu_type.split('_')[1])
+          expect(assigns[:mcu_type]).to eq(mcu_type)
         end
         it 'assigns `@pledge_type`' do
           call_action
@@ -469,7 +464,7 @@ RSpec.describe MortgagesController, :type => :controller do
         end
         it 'assigns `@program_type`' do
           call_action
-          expect(assigns[:program_type]).to eq(program_type)
+          expect(assigns[:program_type]).to eq(program_type.upcase)
         end
         describe 'getting the server info' do
           let(:cache_key) { double('cache key') }
@@ -566,10 +561,11 @@ RSpec.describe MortgagesController, :type => :controller do
         end
         it 'calls `mcu_upload_file` with the appropriate arguments' do
           expect(member_balance_service).to receive(:mcu_upload_file).with(transaction_id,
-                                                                           mcu_type_id, 
-                                                                           pledge_type, 
+                                                                           mcu_type, 
+                                                                           program_type.upcase, 
                                                                            username,
-                                                                           "")
+                                                                           "",
+                                                                           archive_dir)
           call_action
         end
         it 'assigns `@result` to the result of `mcu_upload_file`' do

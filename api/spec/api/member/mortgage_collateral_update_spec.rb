@@ -289,7 +289,8 @@ describe MAPI::ServiceApp do
       let(:transaction_id) { SecureRandom.hex }
       let(:file_type) { SecureRandom.hex }
       let(:pledge_type) { SecureRandom.hex }
-      let(:remote_path) { SecureRandom.hex }
+      let(:remote_path) { "#{SecureRandom.hex}.#{SecureRandom.hex}" }
+      let(:archive_dir) { remote_path[0..12] }
       let(:username) { SecureRandom.hex }
       let(:call_method) { mortgage_collateral_update_module.mcu_upload_file(app, 
                                                                             member_id,
@@ -297,7 +298,8 @@ describe MAPI::ServiceApp do
                                                                             file_type,
                                                                             pledge_type,
                                                                             username,
-                                                                            remote_path) }
+                                                                            remote_path,
+                                                                            archive_dir) }
       describe 'when `should_fake?` returns `true`' do
         before do
           allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
@@ -314,21 +316,33 @@ describe MAPI::ServiceApp do
         end
         it 'calls `INITIATE_FILE_SUBMISSION` with the appropriate arguments' do
           expect(mortgage_collateral_update_module).to receive(:post_message).with( app, 
-                                                          'INITIATE_FILE_SUBMISSION', 
-                                                          { 'memberId': member_id,
-                                                            'fileTypeId': file_type,
-                                                            'transactionId': transaction_id,
-                                                            'fileName': remote_path,
-                                                            'extension': File.extname(remote_path),
-                                                            'pledgeType': pledge_type,
-                                                            'submittedBy': username } )
+                                                                                    'INITIATE_FILE_SUBMISSION', 
+                                                                                    { 'memberId': member_id,
+                                                                                      'fileTypeId': file_type.split('_')[0],
+                                                                                      'transactionId': transaction_id,
+                                                                                      'fileName': remote_path,
+                                                                                      'extension': File.extname(remote_path)[1..-1],
+                                                                                      'pledgeType': pledge_type,
+                                                                                      'submittedBy': username })
+          call_method
+        end
+        it 'posts a message without a command with the appropriate arguments' do
+          expect(mortgage_collateral_update_module).to receive(:post_message).with( app, 
+                                                                                    nil,
+                                                                                    { 'FHLBId': member_id,
+                                                                                      'TRANS_NUM': transaction_id,
+                                                                                      'MCUType': file_type.split('_')[1],
+                                                                                      'DataDate': Time.zone.now.strftime('%d-%^b-%Y'),
+                                                                                      'FileName': remote_path.gsub(archive_dir, ''),
+                                                                                      'Extension': File.extname(remote_path)[1..-1],
+                                                                                      'PledgeType': pledge_type })
           call_method
         end
         it 'calls `UPDATE_FILE_STATUS` with the apprpriate arguments' do
           expect(mortgage_collateral_update_module).to receive(:post_message).with( app,
-                                                          'UPDATE_FILE_STATUS',
-                                                          { 'transactionId': transaction_id,
-                                                            'status': 'Authorized' })
+                                                                                    'UPDATE_FILE_STATUS',
+                                                                                    { 'transactionId': transaction_id,
+                                                                                      'status': 'Authorized' })
           call_method
         end
         it 'returns a success message' do

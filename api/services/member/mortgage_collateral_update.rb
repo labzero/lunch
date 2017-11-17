@@ -31,15 +31,24 @@ module MAPI
           end
         end
 
-        def self.mcu_upload_file(app, member_id, transaction_id, file_type, pledge_type, username, remote_path)
+        def self.mcu_upload_file(app, member_id, transaction_id, file_type, pledge_type, username, remote_path, archive_dir)
           unless should_fake?(app)
+            mcu_type_id, mcu_type = file_type.split('_')
+            extension = File.extname(remote_path)[1..-1]
             post_message(app, 'INITIATE_FILE_SUBMISSION', { 'memberId': member_id,
-                                                            'fileTypeId': file_type,
+                                                            'fileTypeId': mcu_type_id,
                                                             'transactionId': transaction_id,
                                                             'fileName': remote_path,
-                                                            'extension': File.extname(remote_path),
+                                                            'extension': extension,
                                                             'pledgeType': pledge_type,
                                                             'submittedBy': username })
+            post_message(app, nil, { 'FHLBId': member_id,
+                                     'TRANS_NUM': transaction_id,
+                                     'MCUType': mcu_type,
+                                     'DataDate': Time.zone.now.strftime('%d-%^b-%Y'),
+                                     'FileName': remote_path.gsub(archive_dir, ''),
+                                     'Extension': extension,
+                                     'PledgeType': pledge_type })
             post_message(app, 'UPDATE_FILE_STATUS', { 'transactionId': transaction_id, 
                                                       'status': 'Authorized' })
           end

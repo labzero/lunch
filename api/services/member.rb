@@ -1900,7 +1900,8 @@ module MAPI
                                                                              post_body_json['file_type'], 
                                                                              post_body_json['pledge_type'], 
                                                                              post_body_json['username'],
-                                                                             post_body_json['remote_path'])
+                                                                             post_body_json['remote_path'],
+                                                                             post_body_json['archive_dir'])
           end
         end
 

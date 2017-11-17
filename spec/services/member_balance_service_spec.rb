@@ -1476,12 +1476,14 @@ describe MemberBalanceService do
     let(:pledge_type) { SecureRandom.hex }
     let(:username) { SecureRandom.hex }
     let(:remote_path) { SecureRandom.hex }
+    let(:archive_dir) { SecureRandom.hex }
     it_behaves_like 'a MAPI backed service object method', :mcu_upload_file, nil, :post, nil, false do
       let(:call_method) { subject.mcu_upload_file(transaction_id, 
                                                   file_type, 
                                                   pledge_type, 
                                                   username,
-                                                  remote_path) }
+                                                  remote_path,
+                                                  archive_dir) }
       it 'calls `mcu_upload_file` with the appropriate arguments' do
         expect(subject).to receive(:post_hash).with(:mcu_upload_file, 
                                                    "/member/#{member_id}/mcu_upload_file",
@@ -1489,7 +1491,8 @@ describe MemberBalanceService do
                                                      file_type: Rack::Utils.escape(file_type),
                                                      pledge_type: Rack::Utils.escape(pledge_type),
                                                      username: username,
-                                                     remote_path: remote_path })
+                                                     remote_path: remote_path,
+                                                     archive_dir: archive_dir })
         call_method
       end
     end

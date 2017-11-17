@@ -31,7 +31,9 @@ module MAPI
           rescue Stomp::Error::DuplicateSubscription
             #ignore
           end
-          client.publish("#{FQ_QUEUE}", '', { 'JMSReplyTo': REPLY_TO, 'correlation-id': correlation_id, 'CMD': message }.merge(publish_headers))
+          default_headers = { 'JMSReplyTo': REPLY_TO, 'correlation-id': correlation_id }
+          default_headers[:CMD] = message if message.present?
+          client.publish("#{FQ_QUEUE}", '', default_headers.merge(publish_headers))
           NUM_RETRIES.times do
             unless @response.nil?
               body = begin
