@@ -56,6 +56,7 @@
 .letters-of-credit-amend-current-lc {
   @extend %pseudoelement-clearfix;
   @extend %bordered-section;
+  padding-top: 0;
 
   .input-field-container-horizontal {
     @extend %horizontal-label-styling;
@@ -172,6 +173,9 @@
 }
 
 .letters-of-credit-fees-section {
+  @extend %bordered-section;
+  padding-top: 0;
+  padding-bottom: 0;
   .input-field-container-horizontal {
     @extend %horizontal-label-styling;
     text-align: right;

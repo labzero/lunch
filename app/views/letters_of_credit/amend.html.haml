@@ -45,6 +45,7 @@
           .input-field-container-horizontal.amendment_date
             %span= t('letters_of_credit.request.amend.requested.amendment_date')
             = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'letter_of_credit_request[amendment_date]', start_date: @letter_of_credit_request.amendment_date, min_date: Time.zone.today, max_date: Time.zone.today + LetterOfCreditRequest::AMENDMENT_MAX_DATE_RESTRICTION
+        %section.letters-of-credit-fees-section
           %h2= t('letters_of_credit.request.fees.title')
           %p= t('letters_of_credit.request.amend.fees.explanation')
           .input-field-container-horizontal
