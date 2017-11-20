@@ -415,9 +415,9 @@ end
 Then(/^I see (only outstanding|all) advances$/) do |type|
   case type
   when 'only outstanding'
-    page.assert_selector('.manage-advances-table tr td:nth-child(6) span')
+    page.assert_selector('.manage-advances-table tr td:nth-child(8) span')
   when 'all'
-    page.assert_selector('.manage-advances-table tr td:nth-child(6)', text: I18n.t('global.missing_value'), exact: true)
+    page.assert_selector('.manage-advances-table tr td:nth-child(8)', text: I18n.t('global.missing_value'), exact: true)
   else
     raise ArgumentError.new("unknown advance type: #{type}")
   end

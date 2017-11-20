@@ -373,9 +373,28 @@ module MAPI
           SQL
         end
 
+        def self.historic_advance_initial_interest_rate(app, member_id, advance_number)
+          interest_rate_query = <<-SQL
+            SELECT ADVDET_INTEREST_RATE, ADVDET_DATEUPDATE
+            FROM WEB_INET.WEB_ADVANCES_HISTORICAL_RPT
+            WHERE FHLB_ID = #{quote(member_id)}
+            AND ADVDET_ADVANCE_NUMBER = #{quote(advance_number)}
+            ORDER BY ADVDET_DATEUPDATE ASC
+          SQL
+          advances = fetch_hashes(app.logger, interest_rate_query) || []
+          advances.first['ADVDET_INTEREST_RATE'] if advances.present?
+        end
+
         def self.historic_advances_fetch(app, member_id, after_date)
           unless should_fake?(app)
-            fetch_hashes(app.logger, historic_advances_query(member_id, after_date))
+            historic_advances = fetch_hashes(app.logger, historic_advances_query(member_id, after_date))
+            historic_advances = unless historic_advances.nil?
+              historic_advances.collect do |advance|
+                advance['INTEREST_RATE'] = historic_advance_initial_interest_rate(app, member_id, advance['ADVANCE_NUMBER'])
+                advance
+              end
+            end
+            historic_advances
           else
             rng = Random.new((member_id.to_i * 10**10) + after_date.to_time.to_i)
             days = Time.zone.today - after_date
@@ -389,7 +408,8 @@ module MAPI
                 'TRADE_DATE' => trade_date,
                 'FUNDING_DATE' => [trade_date + rng.rand(1..3).days, maturity_date].min,
                 'ORIGINAL_PAR' =>  rng.rand(10**6..10**9),
-                'ADVANCE_TYPE' => ['FX CONSTANT', 'VR S-I FLTR', 'O/N VRC'].sample(random: rng)
+                'ADVANCE_TYPE' => ['FX CONSTANT', 'VR S-I FLTR', 'O/N VRC'].sample(random: rng),
+                'INTEREST_RATE' => rng.rand
               }
             end
             entries
@@ -408,6 +428,7 @@ module MAPI
               original_par: advance['ORIGINAL_PAR'].try(:to_i),
               advance_number: advance['ADVANCE_NUMBER'].try(:to_s),
               advance_type: advance['ADVANCE_TYPE'].try(:to_s),
+              interest_rate: (advance['INTEREST_RATE'].to_f.round(5) if advance['INTEREST_RATE']),
               advance_confirmation: []
             }.with_indifferent_access
           end
