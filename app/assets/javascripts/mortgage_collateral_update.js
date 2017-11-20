@@ -10,6 +10,9 @@ $(function() {
   var $mcuUploadFileNameField = $('.mcu-upload-file-name');
   var $mcuUploadInstructions = $('.mcu-upload-instructions');
   var $mcuUploadCompleteSection = $('.mcu-upload-complete');
+  var $submitField = $newMcuForm.find('input[type=submit]');
+  var $secureIDTokenField = $('#securid_token');
+  var $secureIDPinField = $('#securid_pin');
 
   $pledgeTypeField.on('change', function(e) {
     $([$mcuTypeDropdown, $programTypeDropdown]).each(function() {resetDropdown(this)});
@@ -59,4 +62,37 @@ $(function() {
     $mcuUploadCompleteSection.hide();
     $mcuUploadInstructions.show();
   });
+
+  function secureIDValid() {
+    if ($secureIDPinField.length && $secureIDTokenField.length) {
+      return $secureIDTokenField.val().length == 6 && $secureIDPinField.val().length == 4;
+    } else {
+      return true;
+    };
+  };
+
+  function typesSelected() {
+    programType = $('.mortgage-collateral-update-new-form').find('.mcu-program-type-dropdown:visible').find('select')[0];
+    if (programType != undefined) {
+      return $pledgeTypeField[0].value && 
+             $mcuTypeField[0].value &&
+             programType.value
+    } else { 
+      return false; 
+    };            
+  }
+
+  function validateMCUFields() {
+    if (secureIDValid() && typesSelected()) {
+      $submitField.addClass('active');
+      $submitField.attr('disabled', false);
+    } else {
+      $submitField.removeClass('active');
+      $submitField.attr('disabled', true);
+    };
+  };
+
+  $newMcuForm.find('input').on('keyup', validateMCUFields);
+  $newMcuForm.on('change', validateMCUFields);
+  validateMCUFields();
 });

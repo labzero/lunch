@@ -120,6 +120,9 @@ class MortgagesController < ApplicationController
       @program_type_dropdowns = Hash[file_types.map { |type| "#{type['id']}_#{type['value']}" }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })]
       @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')
       @session_elevated = session_elevated?
+      unless @session_elevated
+        @securid_status = securid_perform_check(params[:securid_pin] || '', params[:securid_token] || '')
+      end
     end
   end
 
@@ -145,6 +148,13 @@ class MortgagesController < ApplicationController
   # POST
   def upload
     @result = {}
+    unless session_elevated?
+      @securid_status = securid_perform_check
+      if !@securid_status.nil? && @securid_status != RSA::SecurID::Session::AUTHENTICATED
+        redirect_to mcu_new_url
+        return
+      end
+    end
     member_balances = MemberBalanceService.new(current_member_id, request)
     transaction_id_response = member_balances.mcu_transaction_id
     unless transaction_id_response.present?

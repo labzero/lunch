@@ -7,7 +7,7 @@
         .mcu-error-wrapper
           .form-error-section
             %p= t('mortgages.new.error_html', email: collateral_operations_email)
-  =form_for(:mortgage_collateral_update, url: mcu_upload_path, html: {class: 'mortgage-collateral-update-new-form'}) do |f|
+  =form_for(:mortgage_collateral_update, url: mcu_upload_path, html: {class: 'mortgage-collateral-update-new-form', data: {securid_status: @securid_status, 'prevent-submit-on-enter' => true}}) do |f|
     .row
       -unless @error.present?
         .column-9x3-left
@@ -85,7 +85,7 @@
             =render 'shared/anti_predatory_legal_notice'
             %p= t('mortgages.new.transaction.legal.rights')
           - unless @session_elevated
-            = render 'shared/securid_module'
+            = render 'shared/securid_module', error: @securid_status
           .new-mortgage-collateral-update-actions
             %span.secondary-button= t('global.cancel')
             = submit_tag(t('mortgages.new.authorize'), class: 'primary-button')

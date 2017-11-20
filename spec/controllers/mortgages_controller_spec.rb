@@ -83,6 +83,7 @@ RSpec.describe MortgagesController, :type => :controller do
       allow(member_info).to receive(:[]).with('mcuExtendedDate').and_return(extension_string)
       allow(member_info).to receive(:[]).with('blanketLien').and_return(true)
       allow(member_info).to receive(:[]).with('mcuuFileTypes').and_return(file_types)
+      allow(subject).to receive(:securid_perform_check).and_return(nil)
     end
 
     it_behaves_like 'a MortgagesController action that sets page-specific instance variables with a before filter'
@@ -372,11 +373,15 @@ RSpec.describe MortgagesController, :type => :controller do
     let(:remote_path_fragment_with_year_and_month) { "#{remote_path_fragment_with_year}/#{month}" }
     let(:remote_path) { "#{remote_path_fragment_with_year_and_month}/#{remote_filename}" }
     let(:sftp) { double('sftp') }
+    let(:securid_pin) { '1111' }
+    let(:securid_token) { '222222' }
     let(:call_action) { get :upload, 
-                        mortgage_collateral_update: { file: file,
-                                                      mcu_type: mcu_type,
-                                                      pledge_type: pledge_type,
-                                                      "program_type_#{mcu_type}": program_type } }
+                            mortgage_collateral_update: { securid_pin: securid_pin,
+                                                          securid_token: securid_token,
+                                                          file: file,
+                                                          mcu_type: mcu_type,
+                                                          pledge_type: pledge_type,
+                                                          "program_type_#{mcu_type}": program_type } }
     before do 
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
       allow(member_balance_service).to receive(:mcu_transaction_id).and_return(transaction_id_response)
@@ -400,6 +405,31 @@ RSpec.describe MortgagesController, :type => :controller do
       allow(sftp).to receive(:mkdir).with(anything)
       allow(file).to receive(:path).and_return(local_path)
       allow(sftp).to receive(:upload!)
+      allow(subject).to receive(:securid_perform_check).and_return(nil)
+      allow(Rails.env).to receive(:production?).and_return(true)
+      allow(subject).to receive(:session_elevated?).and_return(true)
+    end
+    describe 'when the session is not elevated' do
+      let(:securid_status) { SecureRandom.hex }
+      let(:mcu_new_url) { SecureRandom.hex }
+      before do
+        allow(subject).to receive(:session_elevated?).and_return(false)
+        allow(subject).to receive(:securid_perform_check).and_return(securid_status)
+        allow(subject).to receive(:mcu_new_url).and_return(mcu_new_url)
+      end
+      it 'assigns the results of `securid_perform_check` to `@securid_status`' do
+        call_action
+        expect(assigns[:securid_status]).to eq(securid_status)
+      end
+      it 'redirects' do
+        expect(subject).to receive(:redirect_to).with(mcu_new_url)  
+        call_action
+      end
+      it 'does not redirect' do
+        allow(subject).to receive(:securid_perform_check).and_return(RSA::SecurID::Session::AUTHENTICATED)
+        expect(subject).not_to receive(:redirect_to).with(mcu_new_url)  
+        call_action
+      end
     end
     it 'create a `MemberBalanceService` instance' do
       expect(MemberBalanceService).to receive(:new).with(member_id, request)
@@ -502,7 +532,11 @@ RSpec.describe MortgagesController, :type => :controller do
             end
           end
         end
-        describe 'when the server info is not `nil`' do
+        it 'checks for the production environment' do
+          expect(Rails.env).to receive(:production?)
+          call_action
+        end
+        describe 'when in production and the server info is not `nil`' do
           before do
             allow(member_balance_service).to receive(:mcu_server_info).and_return(server_info)
           end
@@ -564,7 +598,7 @@ RSpec.describe MortgagesController, :type => :controller do
                                                                            mcu_type, 
                                                                            program_type.upcase, 
                                                                            username,
-                                                                           "",
+                                                                           remote_path,
                                                                            archive_dir)
           call_action
         end
