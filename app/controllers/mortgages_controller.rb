@@ -120,9 +120,6 @@ class MortgagesController < ApplicationController
       @program_type_dropdowns = Hash[file_types.map { |type| "#{type['id']}_#{type['value']}" }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })]
       @accepted_upload_mimetypes = ACCEPTED_UPLOAD_MIMETYPES.join(', ')
       @session_elevated = session_elevated?
-      unless @session_elevated
-        @securid_status = securid_perform_check(params[:securid_pin] || '', params[:securid_token] || '')
-      end
     end
   end
 

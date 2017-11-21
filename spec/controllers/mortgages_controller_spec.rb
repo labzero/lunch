@@ -83,7 +83,6 @@ RSpec.describe MortgagesController, :type => :controller do
       allow(member_info).to receive(:[]).with('mcuExtendedDate').and_return(extension_string)
       allow(member_info).to receive(:[]).with('blanketLien').and_return(true)
       allow(member_info).to receive(:[]).with('mcuuFileTypes').and_return(file_types)
-      allow(subject).to receive(:securid_perform_check).and_return(nil)
     end
 
     it_behaves_like 'a MortgagesController action that sets page-specific instance variables with a before filter'

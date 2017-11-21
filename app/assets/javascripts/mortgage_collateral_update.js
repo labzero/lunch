@@ -63,14 +63,6 @@ $(function() {
     $mcuUploadInstructions.show();
   });
 
-  function secureIDValid() {
-    if ($secureIDPinField.length && $secureIDTokenField.length) {
-      return $secureIDTokenField.val().length == 6 && $secureIDPinField.val().length == 4;
-    } else {
-      return true;
-    };
-  };
-
   function typesSelected() {
     programType = $('.mortgage-collateral-update-new-form').find('.mcu-program-type-dropdown:visible').find('select')[0];
     if (programType != undefined) {
@@ -83,7 +75,7 @@ $(function() {
   }
 
   function validateMCUFields() {
-    if (secureIDValid() && typesSelected()) {
+    if (typesSelected() && $secureIDTokenField.val().length == 6 && $secureIDPinField.val().length == 4) {
       $submitField.addClass('active');
       $submitField.attr('disabled', false);
     } else {
@@ -92,7 +84,20 @@ $(function() {
     };
   };
 
+  Fhlb.Utils.bindFormSubmitStateToSecureIDFields($newMcuForm, $secureIDPinField, $secureIDTokenField);
   $newMcuForm.find('input').on('keyup', validateMCUFields);
   $newMcuForm.on('change', validateMCUFields);
   validateMCUFields();
+
+  if ($newMcuForm.length > 0) {
+    Fhlb.Utils.findAndDisplaySecurIDErrors($newMcuForm);
+  };
+
+  $newMcuForm.on('submit', function(e) {
+    if ($secureIDTokenField.length > 0 && $secureIDPinField.length > 0 && !Fhlb.Utils.validateSecurID($(this))) {
+      return false;
+    } else {
+      return true;
+    };
+  });
 });
