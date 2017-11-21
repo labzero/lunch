@@ -50,6 +50,13 @@ class ReportsController < ApplicationController
   CURRENT_SECURITIES_POSITION_WEB_FLAG = [MembersService::CURRENT_SECURITIES_POSITION]
   MONTHLY_SECURITIES_WEB_FLAGS = [MembersService::MONTHLY_SECURITIES_POSITION]
   SECURITIES_SERVICES_STATMENT_WEB_FLAGS = [MembersService::SECURITIESBILLSTATEMENT]
+
+  #Interface Elements
+  ACCT_SUMMARY_BORROWING_CAP_WEB_FLAGS = [MembersService::ACCT_SUMMARY_AND_BORROWING_CAP_SIDEBARS]
+  BORROWING_CAPACITY_IN_ACCT_SUMMARY_WEB_FLAGS = [MembersService::BORROWING_CAPACITY_WITHIN_ACCOUNT_SUMMARY]
+  MANAGE_ADVANCES_WEB_FLAGS = [MembersService::MANAGE_ADVANCES]
+  MANAGE_LCS_WEB_FLAGS = [MembersService::MANAGE_LETTERS_OF_CREDIT]
+  MANAGE_SECURITIES_WEB_FLAGS = [MembersService::MANAGE_SECURITIES]
   # ***************** END Web Flag Mapping *****************
 
 
@@ -759,9 +766,9 @@ class ReportsController < ApplicationController
   def borrowing_capacity
     @report_name = ReportConfiguration.report_title(:borrowing_capacity)
     current = Time.zone.today.iso8601
-    @as_of = params['as_of_date'].blank? ? current : params['as_of_date']
+    @dropdown_as_of = params['as_of_date'].blank? ? current : params['as_of_date']
     @month_display_map = {}
-    @month_options = [*1..6].collect do |i| #display current month + six previous months
+    @month_options = [*1..12].collect do |i|
       date = (Time.zone.today - i.months).end_of_month
       iso_date = date.iso8601
       @month_display_map[iso_date] = I18n.t('reports.pages.borrowing_capacity.monthend', month: date.strftime('%B'))
@@ -769,12 +776,13 @@ class ReportsController < ApplicationController
     end
     @month_options.unshift([I18n.t('global.current'), current])
     @month_display_map[current] = I18n.t('global.current')
-    downloadable_report(:pdf, {as_of_date:  @as_of}, "borrowing_capacity_#{@as_of}") do
+    @as_of = fhlb_date_standard_numeric(@dropdown_as_of)
+    downloadable_report(:pdf, {as_of_date:  @dropdown_as_of}, "borrowing_capacity_#{@dropdown_as_of}") do
       if params[:job_id] || self.skip_deferred_load
         if report_disabled?(BORROWING_CAPACITY_WEB_FLAGS)
           @borrowing_capacity_summary = {}
         elsif self.skip_deferred_load
-          @borrowing_capacity_summary = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @as_of.to_s)
+          @borrowing_capacity_summary = MemberBalanceServiceJob.perform_now(current_member_id, 'borrowing_capacity_summary', request.uuid, @dropdown_as_of.to_s)
           if params['disable_until_data_available'] && @borrowing_capacity_summary['UPDATE_DATE']
             if Time.zone.parse(@borrowing_capacity_summary['UPDATE_DATE']) < (Date.parse(current) - 1.month).end_of_month
                raise StandardError, "Previous month's data is not available yet"
@@ -789,10 +797,10 @@ class ReportsController < ApplicationController
         raise StandardError, "There has been an error and ReportsController#borrowing_capacity has encountered nil. Check error logs." if @borrowing_capacity_summary.nil?
         render layout: false if request.try(:xhr?)
       else
-        job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'borrowing_capacity_summary', request.uuid, @as_of.to_s).job_status
+        job_status = MemberBalanceServiceJob.perform_later(current_member_id, 'borrowing_capacity_summary', request.uuid, @dropdown_as_of.to_s).job_status
         job_status.update_attributes!(user_id: current_user.id)
         @job_status_url = job_status_url(job_status)
-        @load_url = reports_borrowing_capacity_url(job_id: job_status.id, as_of_date: @as_of)
+        @load_url = reports_borrowing_capacity_url(job_id: job_status.id, as_of_date: @dropdown_as_of)
         @borrowing_capacity_summary = {deferred: true}
       end
     end
@@ -1487,7 +1495,7 @@ class ReportsController < ApplicationController
         []
       end
       @loc_table_data = {
-        column_headings: [{value: t('reports.pages.letters_of_credit.headers.lc_number'), type: :numeric_header},
+        column_headings: [t('reports.pages.letters_of_credit.headers.lc_number'),
                           {value: fhlb_add_unit_to_table_header(t('reports.pages.letters_of_credit.headers.current_amount'), '$'), type: :numeric_header},
                           {value: t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), type: :numeric_header},
                           t('reports.pages.letters_of_credit.headers.issuance_date'), 
@@ -1518,7 +1526,7 @@ class ReportsController < ApplicationController
       @total_credits = securities_transactions[:total_credits]
       @total_debits = securities_transactions[:total_debits]
       @final = securities_transactions[:final]
-      column_headings = [ { value: t('reports.pages.securities_transactions.custody_account_no'), type: :numeric_header},
+      column_headings = [ { value: t('reports.pages.securities_transactions.custody_account_no')},
                           t('common_table_headings.cusip'), 
                           t('reports.pages.securities_transactions.transaction_code'), 
                           t('common_table_headings.security_description'), 

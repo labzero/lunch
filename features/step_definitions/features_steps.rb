@@ -14,6 +14,10 @@ When(/^I click on the view feature link$/) do
   page.all('.admin-features-table a', text: /\A#{Regexp.quote(I18n.t('admin.features.index.actions.edit'))}\z/i, exact: true, minimum: 1).first.click
 end
 
+When(/^I click on the Back to List link$/) do
+  page.all('.admin-feature-list-link a', text: /\A#{Regexp.quote(I18n.t('admin.features.edit.back_to_list'))}\z/i, exact: true, minimum: 1).first.click
+end
+
 Then(/^I see a list of enabled members$/) do
   page.assert_selector('.admin-feature-edit h2', text: I18n.t('admin.features.edit.members'), visible: true)
 end
@@ -148,4 +152,26 @@ end
 When(/^I remove the user "([^"]*)"$/) do |user|
   row = page.find('.admin-feature-edit table:last-of-type td', text: user)
   row.find('.admin-feature-link-remove').click
+end
+
+When(/^the "(.*?)" page has been disabled$/) do |page|
+  flags = case page
+    when 'Manage Advances'
+      { AdvancesController => ReportsController::MANAGE_ADVANCES_WEB_FLAGS }
+    when 'Manage Letters of Credit'
+      { LettersOfCreditController => ReportsController::MANAGE_LCS_WEB_FLAGS }
+    when 'Manage Securities'
+      { SecuritiesController => ReportsController::MANAGE_SECURITIES_WEB_FLAGS }
+  end
+  allow_any_instance_of(flags.keys[0]).to receive(:report_disabled?).with(flags.values[0]).and_return(true)
+end
+
+Then(/^I should see an empty data table with "(.*?)" messaging$/) do |messaging|
+  searchText = case messaging
+    when 'Data Currently Disabled'
+      I18n.t('errors.table_data_unavailable')
+    when 'No Records Returned'
+      I18n.t('errors.table_data_no_records')
+  end
+  page.assert_selector('.report-table tbody tr:first-child .dataTables_empty', text: searchText)
 end

@@ -1,9 +1,15 @@
 .product-page {
   @extend %info-page-style;
+  h1 strong {
+    @extend %typography-page-title;
+  }
   .term, .definition {
     display: inline;
   }
   .term {
+    @extend %typography-subtitle;
+  }
+  strong {
     @extend %typography-subtitle;
   }
   table {
@@ -35,16 +41,6 @@
   margin-top: 40px;
 }
 
-.product-mpf-exhibits
-{
-  ul {
-    margin-bottom: 30px;
-    li {
-      margin-bottom: 10px;
-    }
-  }
-}
-
 .product-page-mpf
 {
   h1 {
@@ -58,6 +54,12 @@
     color: $medium-gray;
     margin-top: 0;
     margin-bottom: 12px;
+  }
+  ul {
+    margin-bottom: 30px;
+    li {
+      margin-bottom: 10px;
+    }
   }
 }
 

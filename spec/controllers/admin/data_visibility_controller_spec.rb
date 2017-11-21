@@ -4,6 +4,7 @@ require 'rspec/support/spec/string_matcher'
 RSpec.describe Admin::DataVisibilityController, :type => :controller do
   login_user(admin: true)
 
+  # Reports
   account_reports = [:account_summary, :authorizations, :settlement_transaction_account, :investments]
   capital_stock_reports = [:cap_stock_activity, :cap_stock_trial_balance, :cap_stock_leverage, :dividend_statement]
   price_indications_reports = [:current_price_indications, :historical_price_indications]
@@ -12,6 +13,12 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
   securities_reports = [:securities_transactions, :cash_projections, :current_securities_position, :monthly_securities_position, :securities_services]
 
   all_report_names = [securities_reports, credit_reports, collateral_reports, price_indications_reports, capital_stock_reports, account_reports].flatten
+
+  # User Interface Elements
+  borrowing_capacity_elements = [:acct_summary_and_borrowing_cap_sidebar]
+  site_page_names = [:manage_advances, :manage_letters_of_credit, :manage_securities]
+
+  all_entity_names = all_report_names + site_page_names + borrowing_capacity_elements
 
   it_behaves_like 'an admin controller'
 
@@ -116,7 +123,9 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
         price_indications_table: price_indications_reports,
         collateral_table: collateral_reports,
         credit_table: credit_reports,
-        securities_table: securities_reports
+        securities_table: securities_reports,
+        borrowing_cap_elements_table: borrowing_capacity_elements,
+        page_names_table: site_page_names
       }.each do |instance_var, web_flag_keys|
         describe "setting the `@#{instance_var}`" do
           it 'calls `data_visibility_table` with the disabled web flags' do
@@ -303,7 +312,7 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
         call_action
       end
       it 'calls `data_visibility_table` with an array of all report names' do
-        expect(controller).to receive(:data_visibility_table).with(anything, all_report_names, anything)
+        expect(controller).to receive(:data_visibility_table).with(anything, all_entity_names, anything)
         call_action
       end
       it 'calls `data_visibility_table` with the `disabled_only` parameter set to `true` ' do
@@ -410,18 +419,18 @@ RSpec.describe Admin::DataVisibilityController, :type => :controller do
         describe 'when there are globally disabled reports' do
           disabled_ids = [ 17, 35, 39 ]
           it 'returns a hash of disabled report names' do
-            result = subject.send(:data_visibility_table, disabled_ids, all_report_names, true)
+            result = subject.send(:data_visibility_table, disabled_ids, all_entity_names, true)
             expect(result[:rows].length).to eq(disabled_ids.length)
           end
           it 'return a hash with a single column' do
-            result = subject.send(:data_visibility_table, disabled_ids, all_report_names, true)
+            result = subject.send(:data_visibility_table, disabled_ids, all_entity_names, true)
             expect(result[:rows][0][:columns].length).to eq(1)
           end
         end
         describe 'when there are no globally disabled reports' do
           disabled_ids = []
           it 'returns an empty hash' do
-            result = subject.send(:data_visibility_table, disabled_ids, all_report_names, true)
+            result = subject.send(:data_visibility_table, disabled_ids, all_entity_names, true)
             expect(result[:rows].length).to eq(0)
           end
         end

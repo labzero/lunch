@@ -79,3 +79,9 @@ Scenario: Member sees an "Add Advance" button if they can take out an advance
   When I am logged in as a "quick-advance signer"
   And I am on the "Manage Advances" advances page
   Then I should see an "Add Advance" button
+
+@data-unavailable @jira-mem-2511
+Scenario: The Manage Advances page has been disabled
+  Given I am on the "Manage Advances" advances page
+  When the "Manage Advances" page has been disabled
+  Then I should see an empty data table with "Data Currently Disabled" messaging

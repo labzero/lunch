@@ -1,0 +1,32 @@
+.mcu-success
+  .row
+    .column-9x3-left
+      - if @result[:success]
+        %h1= t('mortgages.new.authorized.title')
+      - else
+        %h1= t('mortgages.new.title')
+        .mcu-error-wrapper
+          .form-error-section
+            %p= @result[:message]
+  .row
+    -if @result[:success]
+      .mcu-success.icon-success-before
+        %p= t('mortgages.new.authorized.success', timestamp: fhlb_datetime_long_alpha_with_on(Time.zone.now))
+        %p= t('mortgages.new.authorized.issues')
+        %p= t('mortgages.manage.contact_html', email: collateral_operations_email,  phone_number: collateral_operations_phone_number)
+      .mcu-transaction-details
+        %h2= t('mortgages.new.authorized.transaction_details.title')
+        %dl
+          %dt.extra-spacing= t('mortgages.new.authorized.transaction_details.transaction_number')
+          %dd.extra-spacing= @transaction_id
+          %dt= t('mortgages.new.authorized.transaction_details.pledge_type')
+          %dd= @pledge_type
+          %dt= t('mortgages.new.authorized.transaction_details.mcu_type')
+          %dd= @mcu_type.split('_')[1].titlecase
+          %dt= t('mortgages.new.authorized.transaction_details.program_type')
+          %dd= @program_type
+          %dt.extra-spacing= t('mortgages.new.authorized.transaction_details.status')
+          %dd.extra-spacing= MortgagesController::STATUS_MAPPING[:processing]
+      .mcu-success-actions
+        = link_to(t('mortgages.view.actions.manage'), mcu_manage_path, class: 'secondary-button')
+        = link_to(t('mortgages.manage.new_mcu'), mcu_new_path, class: 'secondary-button')

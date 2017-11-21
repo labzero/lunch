@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'net/sftp'
 
 describe MAPI::ServiceApp do
   mortgage_collateral_update_module = MAPI::Services::Member::MortgageCollateralUpdate
@@ -110,12 +111,12 @@ describe MAPI::ServiceApp do
     describe 'the `mcu_transaction_id` method' do
       let(:call_method) { mortgage_collateral_update_module.mcu_transaction_id(app, member_id) }
       describe 'when `should_fake?` returns `true`' do
-        let(:random) { rand(999..9999) }
+        let(:random) { rand(9999..99999) }
         before do
           allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
         end
-        it 'calls for a random hexidecimal string' do
-          expect(mortgage_collateral_update_module).to receive(:rand).with(999..9999)
+        it 'calls for a random id' do
+          expect(mortgage_collateral_update_module).to receive(:rand).with(9999..99999)
           call_method
         end
         it 'returns the random value' do
@@ -124,16 +125,18 @@ describe MAPI::ServiceApp do
         end
       end
       describe 'when `should_fake?` returns `false`' do
+        let(:response) { instance_double(Hash, :[] => nil )}
         let(:transaction_id) { double('transaction_id') }
         before do
           allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
+          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(response)
         end
         it 'calls `get_message` with the appropriate arguments' do
           expect(mortgage_collateral_update_module).to receive(:get_message).with(app, 'GET_TRANSACTION_ID')
           call_method
         end
         it 'returns the result of `get_message`' do
-          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(transaction_id)
+          allow(response).to receive(:[]).with(:body).and_return(transaction_id)
           expect(call_method).to eq({ transaction_id: transaction_id })
         end
       end
@@ -169,9 +172,11 @@ describe MAPI::ServiceApp do
         end
       end
       describe 'when `should_fake?` returns `false`' do
+        let(:response) { instance_double(Hash, :[] => nil) }
         before do
           allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
-          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(member_info)
+          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(response)
+          allow(response).to receive(:[]).with(:body).and_return(member_info)
         end   
         it 'calls `get_message` with the apppriate arguments' do
           expect(mortgage_collateral_update_module).to receive(:get_message).with(app, 'GET_MEMBER_INFO')
@@ -188,6 +193,45 @@ describe MAPI::ServiceApp do
         end
       end
     end
+    describe 'the `mcu_server_info` method' do
+      let(:call_method) { mortgage_collateral_update_module.mcu_server_info(app) }
+      let(:server_info) { { headers: { "svcAccountUsername"=>"username", 
+                            "svcAccountPassword"=>"password", 
+                            "archiveDir"=>"path", 
+                            "hostname"=>"host" } } }
+      describe 'when `should_fake?` returns `true`' do
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
+        end
+        it 'loads the fake' do
+          expect(mortgage_collateral_update_module).to receive(:fake_hash).with('member_mcu_server_info')
+          call_method
+        end
+        describe 'in the fake world' do
+          before do
+            allow(mortgage_collateral_update_module).to receive(:fake).and_return(server_info[:headers])
+          end
+          it 'returns the fake data' do
+            expect(call_method).to eq(server_info[:headers])
+          end
+        end
+      end
+      describe 'when `should_fake?` returns `false`' do
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
+          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(server_info)
+        end
+        it 'calls `get_message` with the apppriate arguments' do
+          expect(mortgage_collateral_update_module).to receive(:get_message).with(app, 'GetServerInfo', nil, {})
+          call_method
+        end
+        describe 'in the real world' do
+          it 'return the real data' do
+            expect(call_method).to eq(server_info[:headers])
+          end
+        end
+      end
+    end
     describe 'the `mcu_member_status` method' do
       let(:call_method) { mortgage_collateral_update_module.mcu_member_status(app, member_id) }
       let(:member_status) { [{ "transactionId" => 210585, "uploadType" => "COMPLETE", "authorizedBy" =>"IX_TEST",
@@ -196,6 +240,7 @@ describe MAPI::ServiceApp do
       let(:mcu_type) { SecureRandom.hex }
       let(:member_status_upload) { ["uploadType" => mcu_type] }
       let(:member_status_result) { ["mcuType" => mcu_type] }
+      let(:response) { instance_double(Hash, :[] => member_status) }
       describe 'when `should_fake?` returns `true`' do
         before do
           allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
@@ -216,7 +261,7 @@ describe MAPI::ServiceApp do
       describe 'when `should_fake?` returns `false`' do
         before do
           allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
-          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(member_status)
+          allow(mortgage_collateral_update_module).to receive(:get_message).and_return(response)
         end
         it 'calls `get_message` with the apppriate arguments' do
           expect(mortgage_collateral_update_module).to receive(:get_message).with(app, 'GET_MEMBER_TRANSACTIONS', member_id, {partnerId: member_id})
@@ -235,8 +280,74 @@ describe MAPI::ServiceApp do
       end
       it 'converts `uploadType` to `mcu_type` and returns the result in the real world' do
         allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
-        allow(mortgage_collateral_update_module).to receive(:get_message).and_return(member_status_upload)
+        allow(mortgage_collateral_update_module).to receive(:get_message).and_return(response)
+        allow(response).to receive(:[]).and_return(member_status_upload) 
         expect(call_method).to eq(member_status_result)
+      end
+    end
+    describe 'the `mcu_upload_file` method' do
+      let(:transaction_id) { SecureRandom.hex }
+      let(:file_type) { SecureRandom.hex }
+      let(:pledge_type) { SecureRandom.hex }
+      let(:remote_path) { "#{SecureRandom.hex}.#{SecureRandom.hex}" }
+      let(:archive_dir) { remote_path[0..12] }
+      let(:username) { SecureRandom.hex }
+      let(:call_method) { mortgage_collateral_update_module.mcu_upload_file(app, 
+                                                                            member_id,
+                                                                            transaction_id,
+                                                                            file_type,
+                                                                            pledge_type,
+                                                                            username,
+                                                                            remote_path,
+                                                                            archive_dir) }
+      describe 'when `should_fake?` returns `true`' do
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(true)
+        end
+        it 'returns a success message' do
+          expect(call_method).to eq({ success: true, message: '' })
+        end
+      end
+      describe 'when `should_fake?` returns `false`' do
+        before do
+          allow(mortgage_collateral_update_module).to receive(:should_fake?).and_return(false)
+          allow(mortgage_collateral_update_module).to receive(:post_message).and_return(nil)
+          allow(app.logger).to receive(:error)
+        end
+        it 'calls `INITIATE_FILE_SUBMISSION` with the appropriate arguments' do
+          expect(mortgage_collateral_update_module).to receive(:post_message).with( app, 
+                                                                                    'INITIATE_FILE_SUBMISSION', 
+                                                                                    { 'memberId': member_id,
+                                                                                      'fileTypeId': file_type.split('_')[0],
+                                                                                      'transactionId': transaction_id,
+                                                                                      'fileName': remote_path,
+                                                                                      'extension': File.extname(remote_path)[1..-1],
+                                                                                      'pledgeType': pledge_type,
+                                                                                      'submittedBy': username })
+          call_method
+        end
+        it 'posts a message without a command with the appropriate arguments' do
+          expect(mortgage_collateral_update_module).to receive(:post_message).with( app, 
+                                                                                    nil,
+                                                                                    { 'FHLBId': member_id,
+                                                                                      'TRANS_NUM': transaction_id,
+                                                                                      'MCUType': file_type.split('_')[1],
+                                                                                      'DataDate': Time.zone.now.strftime('%d-%^b-%Y'),
+                                                                                      'FileName': remote_path.gsub(archive_dir, ''),
+                                                                                      'Extension': File.extname(remote_path)[1..-1],
+                                                                                      'PledgeType': pledge_type })
+          call_method
+        end
+        it 'calls `UPDATE_FILE_STATUS` with the apprpriate arguments' do
+          expect(mortgage_collateral_update_module).to receive(:post_message).with( app,
+                                                                                    'UPDATE_FILE_STATUS',
+                                                                                    { 'transactionId': transaction_id,
+                                                                                      'status': 'Authorized' })
+          call_method
+        end
+        it 'returns a success message' do
+          expect(call_method).to eq({ success: true, message: '' })
+        end
       end
     end
   end

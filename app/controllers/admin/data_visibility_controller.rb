@@ -91,6 +91,22 @@ class Admin::DataVisibilityController < Admin::BaseController
     securities_services: {
       flags: ReportsController::SECURITIES_SERVICES_STATMENT_WEB_FLAGS,
       title: I18n.t('reports.securities.services_monthly.title')
+    },
+    acct_summary_and_borrowing_cap_sidebar: {
+      flags: ReportsController::ACCT_SUMMARY_BORROWING_CAP_WEB_FLAGS,
+      title: I18n.t('admin.data_visibility.manage_data_visibility.interface_visibility.borrowing_capacity.acct_summary_and_borrowing_cap_sidebar')
+     },
+    manage_advances: {
+      flags: ReportsController::MANAGE_ADVANCES_WEB_FLAGS,
+      title: I18n.t('advances.manage_advances.title')
+    },
+    manage_letters_of_credit: {
+      flags: ReportsController::MANAGE_LCS_WEB_FLAGS,
+      title: I18n.t('letters_of_credit.manage.title')
+    },
+    manage_securities: {
+      flags: ReportsController::MANAGE_SECURITIES_WEB_FLAGS,
+      title: I18n.t('securities.manage.title')
     }
   }.freeze
 
@@ -114,6 +130,14 @@ class Admin::DataVisibilityController < Admin::BaseController
   end
   def all_report_names
     [securities_report_names, credit_report_names, collateral_report_names, price_indications_report_names, capital_stock_report_names, account_report_names].reduce([], :concat)
+  end
+
+  def site_page_names
+   [:manage_advances, :manage_letters_of_credit, :manage_securities]
+  end
+
+  def borrowing_capacity_elements
+    [:acct_summary_and_borrowing_cap_sidebar]
   end
 
   before_action do
@@ -147,6 +171,10 @@ class Admin::DataVisibilityController < Admin::BaseController
       @member_dropdown[:options] << [member[:name], member[:id]]
     end
 
+    # Interface elements
+    @borrowing_cap_elements_table = data_visibility_table(disabled_ids, borrowing_capacity_elements)
+    @page_names_table = data_visibility_table(disabled_ids, site_page_names )
+    # Reports
     @account_table = data_visibility_table(disabled_ids, account_report_names)
     @capital_stock_table = data_visibility_table(disabled_ids, capital_stock_report_names)
     @price_indications_table = data_visibility_table(disabled_ids,  price_indications_report_names)
@@ -183,7 +211,9 @@ class Admin::DataVisibilityController < Admin::BaseController
 
     disabled_ids = members_service.global_disabled_reports
     raise 'There has been an error and Admin::DataVisibilityController#view_status has encountered nil. Check error logs.' if disabled_ids.nil?
-    @globally_disabled_reports = data_visibility_table(disabled_ids, all_report_names, true)
+
+    entity_names = all_report_names + site_page_names + borrowing_capacity_elements
+    @globally_disabled_reports = data_visibility_table(disabled_ids, entity_names, true)
 
     member_list = members_service.members_with_disabled_reports
     @institutions_with_disabled_items = institutions_disabled_data_table(member_list)

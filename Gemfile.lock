@@ -273,6 +273,8 @@ GEM
     net-ping (2.0.1)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
+    net-sftp (2.1.2)
+      net-ssh (>= 2.6.5)
     net-ssh (4.1.0)
     netrc (0.11.0)
     newrelic_rpm (4.2.0.334)
@@ -552,6 +554,7 @@ DEPENDENCIES
   mini_magick
   momentjs-rails
   net-ping
+  net-sftp
   newrelic_rpm
   nokogiri
   paperclip

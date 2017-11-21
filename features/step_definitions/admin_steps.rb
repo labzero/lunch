@@ -285,7 +285,7 @@ When(/^I change the member selector to the (\d) value on the data visibility web
 end
 
 Then(/^I should see the data visibility web flags page for that member$/) do
-  step 'I should see 6 report tables with multiple data rows'
+  step 'I should see 8 report tables with multiple data rows'
   expect(page.find('.data-visibility-select-member select').value).to eq(@data_visibility_member_id)
 end
 

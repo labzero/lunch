@@ -1,8 +1,31 @@
 class ProductsController < ApplicationController
 
+  PRODUCTS_CMS_KEY_MAPPING = {
+    index: :product_summary,
+    loc: :standy_letters_of_credit,
+    arc_embedded: :arc_advance_embedded,
+    amortizing: :amortizing_advance,
+    choice_libor: :choice_libor_arc_advance,
+    callable: :callable_advance,
+    frc: :frc_advance,
+    frc_embedded: :frc_advance_embedded,
+    arc: :arc_advance,
+    convertible: :convertible_advance,
+    vbloc: :variable_balance_letter_of_credit,
+    knockout: :knockout_advance,
+    mpf: :mortgage_partnership_finance_program,
+    ocn: :other_cash_needs_advance,
+    putable: :putable_advance,
+    sbc: :securities_backed_credit_program,
+    vrc: :vrc_advance,
+    pfi: :mortgage_partnership_finance_program_application,
+    swaps: :interest_rate_swaps_caps_floors
+  }
+
   before_action do
     @html_class ||= 'white-background'
     set_active_nav(:products)
+    set_body_html(PRODUCTS_CMS_KEY_MAPPING[action_name.to_sym]) if feature_enabled?('content-management-system')
   end
 
   # GET
@@ -47,6 +70,7 @@ class ProductsController < ApplicationController
   # GET
   def arc
     @last_modified = Date.new(2011, 2, 1)
+    @additional_html = render_to_string(partial: 'arc_interest_payments')
   end
 
   # GET
@@ -72,6 +96,7 @@ class ProductsController < ApplicationController
   # GET
   def sbc
     @last_modified = Date.new(2016, 4, 1)
+    @additional_html = render_to_string(partial: 'sbc_eligible_securities')
   end
 
   # GET
@@ -234,11 +259,19 @@ class ProductsController < ApplicationController
     ]
 
     @last_modified = Date.new(2015, 8, 1)
+    @additional_html = render_to_string(partial: 'pfi_forms_and_agreements')
   end
 
   # GET
   def swaps
     @last_modified = Date.new(2011, 4, 1)
+    @additional_html = render_to_string(partial: 'swap_term_exposure_table')
+  end
+
+  private
+
+  def set_body_html(cms_key)
+    @body_html = resolve_relative_prismic_links(Cms::Product.new(current_member_id, request, cms_key).product_page_html)
   end
 
 end

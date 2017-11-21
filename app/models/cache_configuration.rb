@@ -50,6 +50,10 @@ unless defined?(CacheConfiguration)
       mcu_member_info: {
         key_prefix: 'mcu_member_info',
         expiry: 1.hour
+      },
+      mcu_server_info: {
+        key_prefix: 'mcu_server_info',
+        expiry: 1.day
       }
     }.freeze
     

@@ -1,4 +1,6 @@
 require 'rails_helper'
+include CustomFormattingHelper
+include ContactInformationHelper
 
 RSpec.describe MortgagesController, :type => :controller do
   login_user
@@ -114,13 +116,35 @@ RSpec.describe MortgagesController, :type => :controller do
     end
     it 'assigns `@mcu_type_dropdown_options`' do
       call_action
-      expect(assigns[:mcu_type_dropdown_options]).to eq(file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| type['value'] }))
+      expect(assigns[:mcu_type_dropdown_options]).to eq(file_types.map { |type| type['nameSpecific'] }.zip(file_types.map { |type| "#{type['id']}_#{type['value']}" }))
+    end
+    it 'assigns `@program_type_dropdowns`' do
+      call_action
+      expect(assigns[:program_type_dropdowns]).to eq(Hash[file_types.map { |type| "#{type['id']}_#{type['value']}" }.zip(file_types.map { |type| [[type['pledgeTypes'][0], type['pledgeTypes'][0]]] })])
+    end
+    it 'assigns `@accepted_upload_mimetypes' do
+      call_action
+      expect(assigns[:accepted_upload_mimetypes]).to eq(described_class::ACCEPTED_UPLOAD_MIMETYPES.join(', '))
     end
     it 'sets `@session_elevated` to the result of `session_elevated?`' do
       session_elevated = double('session info')
       allow(controller).to receive(:session_elevated?).and_return(session_elevated)
       call_action
       expect(assigns[:session_elevated]).to eq(session_elevated)
+    end
+    describe 'when `member_info` is `nil`' do
+      let(:error_message) { 'No MCU member info returned from the MCM message bus' }
+      before do
+        allow(member_info).to receive(:present?).and_return(false)
+      end
+      it 'catches the error and assigns it to `@error`' do
+        call_action
+        expect(assigns[:error]).to eq(error_message)
+      end
+      it 'logs the error message' do
+        expect(subject.logger).to receive(:error).with(error_message)
+        call_action
+      end
     end
   end
 
@@ -143,6 +167,20 @@ RSpec.describe MortgagesController, :type => :controller do
     it 'sets the `@title`' do
       call_action
       expect(assigns[:title]).to eq(I18n.t('mortgages.manage.title'))
+    end
+    describe 'when `mcu_member_info` is `nil`' do
+      let(:error_message) { 'No MCU member info returned from the MCM message bus' }
+      before do
+        allow(member_balance_service).to receive(:mcu_member_info).and_return(nil)
+      end
+      it 'assigns `@error`' do
+        call_action
+        expect(assigns[:error]).to eq(error_message)
+      end
+      it 'logs the error message' do
+        expect(subject.logger).to receive(:error).with(error_message)
+        call_action
+      end
     end
     it 'sets `@due_datetime` to a day one week from today, at 5pm' do
       call_action
@@ -174,13 +212,13 @@ RSpec.describe MortgagesController, :type => :controller do
         it 'builds a row for each letter of credit returned by `dedupe_locs`' do
           n = rand(1..10)
           mcu = []
-          n.times { mcu << {transactionId: SecureRandom.hex} }
+          n.times { mcu << {transaction_id: SecureRandom.hex} }
           allow(member_balance_service).to receive(:mcu_member_status).and_return(mcu)
           call_action
           expect(assigns[:table_data][:rows].length).to eq(n)
         end
         describe 'populated rows' do
-          let(:mcu) { {transactionId: double('transactionId'), mcu_type: double('mcu_type'), authorizedBy: double('authorizedBy'), authorizedOn: double('authorizedOn'), status: double('status'), numberOfLoans: double('numberOfLoans'), numberOfErrors: double('numberOfErrors') } }
+          let(:mcu) { {transaction_id: double('transactionId'), mcu_type: double('mcu_type'), authorizedBy: double('authorizedBy'), authorizedOn: double('authorizedOn'), status: double('status'), numberOfLoans: double('numberOfLoans'), numberOfErrors: double('numberOfErrors') } }
           before { allow(member_balance_service).to receive(:mcu_member_status).and_return([mcu]) }
 
           it 'calls `translated_mcu_transaction` with each mcu transaction' do
@@ -222,7 +260,7 @@ RSpec.describe MortgagesController, :type => :controller do
                 expect(view_details_column[:value].first.first).to eq(I18n.t('mortgages.manage.actions.view_details'))
               end
               it 'is an array in an array whose second member is the `mcu_view_transaction_path` with the `transactionId` of the mcu transaction' do
-                expect(view_details_column[:value].first.last).to eq(mcu_view_transaction_path(transactionId: mcu[:transactionId]))
+                expect(view_details_column[:value].first.last).to eq(mcu_view_transaction_path(transaction_id: mcu[:transactionId]))
               end
             end
           end
@@ -232,14 +270,16 @@ RSpec.describe MortgagesController, :type => :controller do
   end
 
   describe 'get `view`' do
-    let(:transactionId) { SecureRandom.hex }
-    let(:matching_transaction) { {transactionId: transactionId} }
+    let(:transaction_id) { SecureRandom.hex }
+    let(:matching_transaction) { {transactionId: transaction_id} }
     let(:unmatching_transaction) { {transactionId: SecureRandom.hex} }
     let(:member_balance_service) { instance_double(MemberBalanceService, mcu_member_status: [unmatching_transaction, matching_transaction]) }
-    let(:call_action) { get :view, transactionId: transactionId }
+    let(:call_action) { get :view, transactionId: transaction_id }
 
-    before { allow(MemberBalanceService).to receive(:new).and_return(member_balance_service) }
-
+    before do
+      allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
+      allow(subject.logger).to receive(:error).with(anything)
+    end
     it_behaves_like 'a MortgagesController action that sets page-specific instance variables with a before filter'
     it 'sets the `@title` appropriately' do
       call_action
@@ -253,31 +293,41 @@ RSpec.describe MortgagesController, :type => :controller do
       expect(member_balance_service).to receive(:mcu_member_status).and_return([unmatching_transaction, matching_transaction])
       call_action
     end
-    it 'raises an error if `mcu_member_status` returns nil' do
-      allow(member_balance_service).to receive(:mcu_member_status).and_return(nil)
-      expect{call_action}.to raise_error(StandardError, 'There has been an error and MortgagesController#view has encountered nil. Check error logs.')
-    end
-    describe 'when no transactions are returned from `mcu_member_status`' do
-      before { allow(member_balance_service).to receive(:mcu_member_status).and_return([]) }
-
-      it 'raises an error containing the transaction number' do
-        expect{call_action}.to raise_error(ArgumentError, "No matching MCU Status found for MCU with transactionId: #{transactionId}")
+    describe 'when `mcu_member_status` returns nil' do
+      let(:error_message) { 'There has been an error and MortgagesController#view has encountered nil. Check error logs.' }
+      before do
+        allow(member_balance_service).to receive(:mcu_member_status).and_return(nil)
+      end      
+      it 'assigns `@error` to an error message' do
+        call_action
+        expect(assigns[:error]).to eq(error_message)
+      end
+      it 'logs the error message' do
+        expect(subject.logger).to receive(:error).with(error_message)
+        call_action
       end
     end
     describe 'when no matching transactions are returned from `mcu_member_status`' do
-      before { allow(member_balance_service).to receive(:mcu_member_status).and_return([unmatching_transaction]) }
-
-      it 'raises an error containing the transaction number' do
-        expect{call_action}.to raise_error(ArgumentError, "No matching MCU Status found for MCU with transactionId: #{transactionId}")
+      let(:error_message) { "No matching MCU Status found for MCU with transactionId: #{transaction_id}" }
+      before do
+        allow(member_balance_service).to receive(:mcu_member_status).and_return([unmatching_transaction])
+      end
+      it 'assigns `@error` to an error message' do
+        call_action
+        expect(assigns[:error]).to eq(error_message)
+      end
+      it 'logs the error message' do
+        expect(subject.logger).to receive(:error).with(error_message)
+        call_action
       end
     end
     describe 'when a matching transaction is included in the set returned by `mcu_member_status`' do
       let(:translated_transaction_details) { instance_double(Hash) }
-      it 'calls `translated_mcu_transaction` with the mcu transaction that has the same `transactionId` as the passed `transactionId` param' do
+      it 'calls `translated_mcu_transaction` with the mcu transaction that has the same `transaction_id` as the passed `transactionId` param' do
         expect(controller).to receive(:translated_mcu_transaction).with(matching_transaction)
         call_action
       end
-      it 'does not call `translated_mcu_transaction` with any mcu transactions that have different `transactionId` than the passed `transactionId` param' do
+      it 'does not call `translated_mcu_transaction` with any mcu transactions that have different `transaction_id` than the passed `transactionId` param' do
         expect(controller).not_to receive(:translated_mcu_transaction).with(unmatching_transaction)
         call_action
       end
@@ -285,6 +335,292 @@ RSpec.describe MortgagesController, :type => :controller do
         allow(controller).to receive(:translated_mcu_transaction).and_return(translated_transaction_details)
         call_action
         expect(assigns[:transaction_details]).to eq(translated_transaction_details)
+      end
+    end
+  end
+
+  describe 'post `upload`' do
+    let(:transaction_id) { SecureRandom.hex }
+    let(:transaction_id_response) { { transaction_id: transaction_id } }
+    let(:path) { SecureRandom.hex }
+    let(:original_filename) { 'upload-test-file.txt' }
+    let(:file) { fixture_file_upload(original_filename, 'text/text') }
+    let(:mcu_type) { "#{rand(1..5)}_#{SecureRandom.hex}" }
+    let(:pledge_type) { SecureRandom.hex }
+    let(:program_type) { SecureRandom.hex }
+    let(:username) { SecureRandom.hex }
+    let(:member_balance_service) { instance_double( MemberBalanceService, 
+                                                    mcu_transaction_id: transaction_id,
+                                                    mcu_upload_file: nil )}
+    let(:username) { SecureRandom.hex }
+    let(:user) { instance_double(User, username: username, accepted_terms?: true) }
+    let(:collateral_operations_email) { SecureRandom.hex }
+    let(:collateral_operations_phone) { SecureRandom.hex }
+    let(:result) { { success: true, message: '' } }
+    let(:year) { SecureRandom.hex }      
+    let(:month) { SecureRandom.hex }
+    let(:now) { instance_double(Time, year: year, month: month) }
+    let(:server_info) { instance_double(Hash, :[] => nil) }
+    let(:archive_dir) { SecureRandom.hex }
+    let(:hostname) { SecureRandom.hex }
+    let(:svc_account_username) { SecureRandom.hex }
+    let(:svc_account_password) { SecureRandom.hex }
+    let(:local_path) { SecureRandom.hex }
+    let(:remote_filename) { "#{pledge_type}_#{transaction_id}_#{original_filename.gsub(' ', '_')}" }
+    let(:remote_path_fragment) { "#{archive_dir}/MCU/#{member_id}" }
+    let(:remote_path_fragment_with_year) { "#{remote_path_fragment}/#{year}" }
+    let(:remote_path_fragment_with_year_and_month) { "#{remote_path_fragment_with_year}/#{month}" }
+    let(:remote_path) { "#{remote_path_fragment_with_year_and_month}/#{remote_filename}" }
+    let(:sftp) { double('sftp') }
+    let(:securid_pin) { '1111' }
+    let(:securid_token) { '222222' }
+    let(:call_action) { get :upload, 
+                            mortgage_collateral_update: { securid_pin: securid_pin,
+                                                          securid_token: securid_token,
+                                                          file: file,
+                                                          mcu_type: mcu_type,
+                                                          pledge_type: pledge_type,
+                                                          "program_type_#{mcu_type}": program_type } }
+    before do 
+      allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
+      allow(member_balance_service).to receive(:mcu_transaction_id).and_return(transaction_id_response)
+      allow(transaction_id_response).to receive(:[]).and_return(transaction_id)
+      allow(member_balance_service).to receive(:mcu_upload_file)
+      allow(file).to receive(:path).and_return(path)
+      allow(file).to receive(:original_filename).and_return(original_filename)
+      allow(subject).to receive(:current_user).and_return(user)
+      allow(pledge_type).to receive(:titlecase).and_return(pledge_type)
+      allow(program_type).to receive(:titlecase).and_return(program_type)
+      allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)      
+      allow(member_balance_service).to receive(:mcu_upload_file).and_return(result)
+      allow(member_balance_service).to receive(:mcu_server_info).and_return(server_info)
+      allow(Time.zone).to receive(:now).and_return(now)
+      allow(server_info).to receive(:[]).with('archiveDir').and_return(archive_dir)
+      allow(server_info).to receive(:[]).with('hostname').and_return(hostname)
+      allow(server_info).to receive(:[]).with('svcAccountUsername').and_return(svc_account_username)
+      allow(server_info).to receive(:[]).with('svcAccountPassword').and_return(svc_account_password)
+      allow(original_filename).to receive(:gsub).and_return(original_filename)
+      allow(Net::SFTP).to receive(:start).and_yield(sftp)
+      allow(sftp).to receive(:mkdir).with(anything)
+      allow(file).to receive(:path).and_return(local_path)
+      allow(sftp).to receive(:upload!)
+      allow(subject).to receive(:securid_perform_check).and_return(nil)
+      allow(Rails.env).to receive(:production?).and_return(true)
+      allow(subject).to receive(:session_elevated?).and_return(true)
+    end
+    describe 'when the session is not elevated' do
+      let(:securid_status) { SecureRandom.hex }
+      let(:mcu_new_url) { SecureRandom.hex }
+      before do
+        allow(subject).to receive(:session_elevated?).and_return(false)
+        allow(subject).to receive(:securid_perform_check).and_return(securid_status)
+        allow(subject).to receive(:mcu_new_url).and_return(mcu_new_url)
+      end
+      it 'assigns the results of `securid_perform_check` to `@securid_status`' do
+        call_action
+        expect(assigns[:securid_status]).to eq(securid_status)
+      end
+      it 'redirects' do
+        expect(subject).to receive(:redirect_to).with(mcu_new_url)  
+        call_action
+      end
+      it 'does not redirect' do
+        allow(subject).to receive(:securid_perform_check).and_return(RSA::SecurID::Session::AUTHENTICATED)
+        expect(subject).not_to receive(:redirect_to).with(mcu_new_url)  
+        call_action
+      end
+    end
+    it 'create a `MemberBalanceService` instance' do
+      expect(MemberBalanceService).to receive(:new).with(member_id, request)
+      call_action
+    end
+    it 'gets the `transaction_id_response` from the member balance service instance' do
+      expect(member_balance_service).to receive(:mcu_transaction_id).and_return(transaction_id_response)
+      call_action
+    end
+    describe 'when the `transaction_id_response` is missing' do
+      before do 
+        allow(transaction_id_response).to receive(:present?).and_return(false)
+      end
+      it 'logs an error' do
+        expect(subject.logger).to receive(:error).with('No transaction id response returned from the MCM message bus')
+        call_action
+      end
+      it 'sets the error result' do
+        allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)
+        allow(controller).to receive(:collateral_operations_phone_number).and_return(collateral_operations_phone_number)
+        call_action
+        expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
+      end
+    end
+    describe 'when the `transaction_id_response` is present' do
+      before do 
+        allow(transaction_id_response).to receive(:present?).and_return(true)
+      end
+      it 'gets the `transaction_id` from the json response' do
+        expect(transaction_id_response).to receive(:[]).with(:transaction_id).and_return(transaction_id)
+        call_action
+      end
+      it 'assigns the `transaction_id` to `@transaction_id`' do
+        allow(transaction_id_response).to receive(:[]).with(:transaction_id).and_return(transaction_id)
+        call_action
+        expect(assigns[:transaction_id]).to eq(transaction_id)
+      end        
+      describe 'when the `transaction_id` is `nil`' do
+        before do
+          allow(transaction_id_response).to receive(:[]).with(:transaction_id).and_return(nil)
+        end
+        it 'logs the error message' do
+          expect(subject.logger).to receive(:error).with('No transaction id returned from the MCM message bus')
+          call_action
+        end
+        it 'sets the error result' do
+          call_action
+          expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
+        end
+      end
+      describe 'when the `@transaction_id` is present' do
+        before do
+          allow(transaction_id_response).to receive(:[]).with(:transaction_id).and_return(transaction_id)
+        end
+        it 'assigns `@mcu_type`' do
+          call_action
+          expect(assigns[:mcu_type]).to eq(mcu_type)
+        end
+        it 'assigns `@pledge_type`' do
+          call_action
+          expect(assigns[:pledge_type]).to eq(pledge_type)
+        end
+        it 'assigns `@program_type`' do
+          call_action
+          expect(assigns[:program_type]).to eq(program_type.upcase)
+        end
+        describe 'getting the server info' do
+          let(:cache_key) { double('cache key') }
+          let(:cache_expiry) { double('cache expiry') }
+          let(:server_info) { double('server info') }
+          before do
+            allow(CacheConfiguration).to receive(:key).with(:mcu_server_info).and_return(cache_key)
+            allow(CacheConfiguration).to receive(:expiry).with(:mcu_server_info).and_return(cache_expiry)
+            allow(Rails.cache).to receive(:fetch).and_return(server_info)
+          end
+          it 'gets the server info from the cache' do
+            expect(Rails.cache).to receive(:fetch).with(cache_key, expires_in: cache_expiry).and_yield
+            call_action
+          end
+          describe 'a cache miss' do
+            before do
+              allow(Rails.cache).to receive(:fetch).with(cache_key, expires_in: cache_expiry).and_yield
+            end
+            it 'calls for the server info' do
+              expect(member_balance_service).to receive(:mcu_server_info)
+              call_action
+            end
+          end
+          describe 'when the server info is `nil`' do
+            before do
+              allow(Rails.cache).to receive(:fetch).with(cache_key, expires_in: cache_expiry).and_return(nil)
+            end
+            it 'logs the error message' do
+              expect(subject.logger).to receive(:error).with('No server info returned from the MCM message bus')
+              call_action
+            end
+            it 'sets the error result' do
+              call_action
+              expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
+            end
+          end
+        end
+        it 'checks for the production environment' do
+          expect(Rails.env).to receive(:production?)
+          call_action
+        end
+        describe 'when in production and the server info is not `nil`' do
+          before do
+            allow(member_balance_service).to receive(:mcu_server_info).and_return(server_info)
+          end
+          describe 'when in production' do
+            before do
+              allow(Rails.env).to receive(:production?).and_return(true)
+            end
+            it 'gets the current time' do
+              expect(Time.zone).to receive(:now)
+              call_action
+            end
+            it 'replaces spaces with underscores in the original filename' do
+              expect(original_filename).to receive(:gsub).with(' ', '_')
+              call_action
+            end
+            it 'starts the sftp session' do
+              expect(Net::SFTP).to receive(:start).with(hostname, svc_account_username, password: svc_account_password)
+              call_action
+            end
+            it 'creates the remote path fragment directory via sftp' do
+              expect(sftp).to receive(:mkdir).with(remote_path_fragment)
+              call_action
+            end
+            it 'creates the remote path fragment including the year' do
+              expect(sftp).to receive(:mkdir).with(remote_path_fragment_with_year)
+              call_action
+            end
+            it 'creates the remote path fragment including the year and month' do
+              expect(sftp).to receive(:mkdir).with(remote_path_fragment_with_year_and_month)
+              call_action
+            end
+            it 'gets the `path` from the uploaded file' do
+              expect(file).to receive(:path)
+              call_action
+            end
+            it 'uploads the file' do
+              expect(sftp).to receive(:upload!).with(local_path, remote_path)
+              call_action
+            end
+            describe 'handling an SFTP execption' do
+              let(:message) { "Failed to SFTP #{local_path} to #{remote_path}. Reason: sftp exception" } 
+              before { allow(sftp).to receive(:upload!).and_raise Exception.new('sftp exception') }
+              it 'logs the exception' do
+                expect(subject.logger).to receive(:error).with(message)
+                call_action
+              end
+              it 'sets a failure message' do
+                call_action
+                expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
+              end
+            end
+            it 'does not raise an SFTP exception' do
+              expect{ call_action }.not_to raise_error
+            end
+          end
+        end
+        it 'calls `mcu_upload_file` with the appropriate arguments' do
+          expect(member_balance_service).to receive(:mcu_upload_file).with(transaction_id,
+                                                                           mcu_type, 
+                                                                           program_type.upcase, 
+                                                                           username,
+                                                                           remote_path,
+                                                                           archive_dir)
+          call_action
+        end
+        it 'assigns `@result` to the result of `mcu_upload_file`' do
+          call_action
+          expect(assigns[:result]).to eq(result)
+        end
+        describe 'when the `mcu_upload_file` fails' do
+          let(:error_result) { { success: false, message: 'error' } }
+          before do
+            allow(member_balance_service).to receive(:mcu_upload_file).and_return(error_result)
+          end
+          it 'logs the error message' do
+            expect(subject.logger).to receive(:error).with("MCU upload failed. Reason: error")
+            call_action
+          end
+          it 'sets the error result' do
+            allow(controller).to receive(:collateral_operations_email).and_return(collateral_operations_email)
+            allow(controller).to receive(:collateral_operations_phone_number).and_return(collateral_operations_phone_number)
+            call_action
+            expect(assigns[:result]).to eq({ success: false, message: I18n.t('mortgages.new.upload.error_html', email: collateral_operations_email, phone: collateral_operations_phone_number).html_safe})
+          end
+        end
       end
     end
   end

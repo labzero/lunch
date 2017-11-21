@@ -1,0 +1,6 @@
+{
+	"svcAccountUsername" : "username", 
+	"svcAccountPassword" : "password", 
+	"archiveDir" : "path", 
+	"hostname": "host"
+}

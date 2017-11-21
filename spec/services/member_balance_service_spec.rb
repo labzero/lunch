@@ -1453,29 +1453,48 @@ describe MemberBalanceService do
   end
 
   describe 'the `mcu_member_info` method' do
-    let(:call_method) { subject.mcu_member_info }
     let(:mcu_member_info) { double('mcu_member_info') }
     it_behaves_like 'a MAPI backed service object method', :mcu_member_info
-    it 'gets the appropriate cache key' do
-      expect(CacheConfiguration).to receive(:key).with(:mcu_member_info)
-      call_method
+    it 'calls `get_hash`' do
+       expect(subject).to receive(:get_hash).with(:mcu_member_info, "/member/#{member_id}/mcu_member_info")
+       subject.mcu_member_info
     end
-    it 'gets the appropriate expiry' do
-      expect(CacheConfiguration).to receive(:expiry).with(:mcu_member_info)
-      call_method
+  end
+
+  describe 'the `mcu_server_info` method' do
+    let(:mcu_server_info) { double('mcu_server_info') }
+    it_behaves_like 'a MAPI backed service object method', :mcu_server_info
+    it 'calls `get_hash`' do
+       expect(subject).to receive(:get_hash).with(:mcu_server_info, "/member/mcu_server_info")
+       subject.mcu_server_info
     end
-    it 'calls fetch on the cache' do
-      key = double('key')
-      expiry = double('expiry')
-      allow(CacheConfiguration).to receive(:key).with(:mcu_member_info).and_return(key)
-      allow(CacheConfiguration).to receive(:expiry).with(:mcu_member_info).and_return(expiry)
-      expect(Rails.cache).to receive(:fetch).with(key, expires_in: expiry)
-      call_method
-    end
-    it 'gets a fresh result upon cache miss' do
-      allow(Rails.cache).to receive(:fetch).and_yield
-      expect(subject).to receive(:get_hash).with(:mcu_member_info, "/member/#{member_id}/mcu_member_info")
-      call_method
+  end
+
+  describe 'the `mcu_upload_file` method' do
+    let(:transaction_id) { SecureRandom.hex }
+    let(:file_type) { SecureRandom.hex }
+    let(:pledge_type) { SecureRandom.hex }
+    let(:username) { SecureRandom.hex }
+    let(:remote_path) { SecureRandom.hex }
+    let(:archive_dir) { SecureRandom.hex }
+    it_behaves_like 'a MAPI backed service object method', :mcu_upload_file, nil, :post, nil, false do
+      let(:call_method) { subject.mcu_upload_file(transaction_id, 
+                                                  file_type, 
+                                                  pledge_type, 
+                                                  username,
+                                                  remote_path,
+                                                  archive_dir) }
+      it 'calls `mcu_upload_file` with the appropriate arguments' do
+        expect(subject).to receive(:post_hash).with(:mcu_upload_file, 
+                                                   "/member/#{member_id}/mcu_upload_file",
+                                                   { transaction_id: transaction_id,
+                                                     file_type: Rack::Utils.escape(file_type),
+                                                     pledge_type: Rack::Utils.escape(pledge_type),
+                                                     username: username,
+                                                     remote_path: remote_path,
+                                                     archive_dir: archive_dir })
+        call_method
+      end
     end
   end
 

@@ -923,30 +923,104 @@ describe MAPI::ServiceApp do
       end
     end
 
+    describe '`historic_advance_initial_interest_rate` class method' do
+      let(:advance_number) { instance_double(String) }
+      let(:member_id) { double('Member ID') }
+      let(:quoted_value) { SecureRandom.hex }
+      let(:app) { double('app', logger: instance_double(Logger))}
+      let(:first_advance) { {'ADVDET_INTEREST_RATE' => SecureRandom.hex} }
+      let(:second_advance) { {'ADVDET_INTEREST_RATE' => SecureRandom.hex} }
+      let(:call_method) { MAPI::Services::Member::TradeActivity.historic_advance_initial_interest_rate(app, member_id, advance_number) }
+
+      before do
+        allow(trade_activity_module).to receive(:fetch_hashes).and_return([])
+        allow(trade_activity_module).to receive(:quote).and_call_original
+      end
+
+      describe 'fetching the hash of interest rates for the advance' do
+        it 'calls `fetch_hashes` with the logger' do
+          expect(trade_activity_module).to receive(:fetch_hashes).with(app.logger, anything).and_return([])
+          call_method
+        end
+        describe 'the SQL passed to `fetch_hashes`' do
+          it 'SELECTs fields FROM the WEB_ADVANCES_HISTORICAL_RPT view' do
+            expect(trade_activity_module).to receive(:fetch_hashes).with(anything, match(/\A\s*SELECT\s+ADVDET_INTEREST_RATE,\s*ADVDET_DATEUPDATE\s+FROM\s+WEB_INET\.WEB_ADVANCES_HISTORICAL_RPT\s+WHERE\s+.*\s+AND\s+.*\s+ORDER\s+BY\s+ADVDET_DATEUPDATE ASC\s*\z/mi))
+            call_method
+          end
+          it 'includes the quoted `member_id` in the statement' do
+            allow(trade_activity_module).to receive(:quote).with(member_id).and_return(quoted_value)
+            expect(trade_activity_module).to receive(:fetch_hashes).with(anything, match(/\s*WHERE\s+FHLB_ID\s*=\s*#{quoted_value}\s+/mi))
+            call_method
+          end
+          it 'includes the quoted `advance_number` in the statement' do
+            allow(trade_activity_module).to receive(:quote).with(advance_number).and_return(quoted_value)
+            expect(trade_activity_module).to receive(:fetch_hashes).with(anything, match(/\s*AND\s+ADVDET_ADVANCE_NUMBER\s*=\s*#{quoted_value}\s+/mi))
+            call_method
+          end
+        end
+      end
+      it 'returns `nil` if `fetch_hashes` returns `nil`' do
+        allow(trade_activity_module).to receive(:fetch_hashes).and_return(nil)
+        expect(call_method).to be nil
+      end
+      it 'returns `nil` if `fetch_hashes` returns an empty array' do
+        allow(trade_activity_module).to receive(:fetch_hashes).and_return([])
+        expect(call_method).to be nil
+      end
+      it 'returns the `ADVDET_INTEREST_RATE` from the first advance returned by `fetch_hashes`' do
+        allow(trade_activity_module).to receive(:fetch_hashes).and_return([first_advance, second_advance])
+        expect(call_method).to eq(first_advance['ADVDET_INTEREST_RATE'])
+      end
+    end
+
     describe '`historic_advances_fetch` class method' do
       let(:member_id) { double('Member ID') }
       let(:app_instance) { instance_double(app, logger: instance_double(Logger))}
-      let(:entries) { instance_double(Array) }
-      let(:call_method) { MAPI::Services::Member::TradeActivity.historic_advances_fetch(app_instance, member_id, after_date) }
+      let(:advance) { {'ADVANCE_NUMBER' => SecureRandom.hex} }
+      let(:call_method) { trade_activity_module.historic_advances_fetch(app_instance, member_id, after_date) }
 
       describe 'when not faking' do
         let(:after_date) { instance_double(Date) }
         let(:sql) { double('An SQL Query') }
         before do
-          allow(MAPI::Services::Member::TradeActivity).to receive(:should_fake?).with(app_instance).and_return(false)
-          allow(MAPI::Services::Member::TradeActivity).to receive(:historic_advances_query).with(member_id, after_date).and_return(sql)
-          allow(MAPI::Services::Member::TradeActivity).to receive(:fetch_hashes).and_return(entries)
+          allow(trade_activity_module).to receive(:should_fake?).with(app_instance).and_return(false)
+          allow(trade_activity_module).to receive(:historic_advances_query).with(member_id, after_date).and_return(sql)
+          allow(trade_activity_module).to receive(:fetch_hashes)
+          allow(trade_activity_module).to receive(:historic_advance_initial_interest_rate)
         end
         it 'calls `historic_advances_query` with the `after_date` and `member_id`' do
-          expect(MAPI::Services::Member::TradeActivity).to receive(:historic_advances_query).with(member_id, after_date)
+          expect(trade_activity_module).to receive(:historic_advances_query).with(member_id, after_date)
           call_method
         end
         it 'calls `fetch_hashes` with the built SQL' do
-          expect(MAPI::Services::Member::TradeActivity).to receive(:fetch_hashes).with(app_instance.logger, sql)
+          expect(trade_activity_module).to receive(:fetch_hashes).with(app_instance.logger, sql)
           call_method
         end
-        it 'returns the result of the fetch' do
-          expect(call_method).to be(entries)
+        it 'returns `nil` if `fetch_hashes` returns `nil`' do
+          expect(trade_activity_module).to receive(:fetch_hashes).and_return(nil)
+          expect(call_method).to be nil
+        end
+        it 'returns an empty array if `fetch_hashes` returns an empty array' do
+          expect(trade_activity_module).to receive(:fetch_hashes).and_return([])
+          expect(call_method).to eq([])
+        end
+        context 'when advances are returned from the `fetch_hashes` call' do
+          let(:interest_rate) { SecureRandom.hex }
+          before { allow(trade_activity_module).to receive(:fetch_hashes).and_return([advance]) }
+          it 'calls `historic_advance_initial_interest_rate` with the app, member id and `ADVANCE_NUMBER` for each advance' do
+            expect(trade_activity_module).to receive(:historic_advance_initial_interest_rate).with(app_instance, member_id, advance['ADVANCE_NUMBER'])
+            call_method
+          end
+          it 'sets the `INTEREST_RATE` of the given advance to the result of `historic_advance_initial_interest_rate`' do
+            allow(trade_activity_module).to receive(:historic_advance_initial_interest_rate).and_return(interest_rate)
+            expect(call_method.first['INTEREST_RATE']).to eq(interest_rate)
+          end
+          it 'returns the results of `fetch_hashes` with the added `INTEREST_RATE` for each advance' do
+            allow(trade_activity_module).to receive(:historic_advance_initial_interest_rate).and_return(interest_rate)
+            modified_advance = advance.clone
+            modified_advance['INTEREST_RATE'] = interest_rate
+            expect(call_method).to eq([modified_advance])
+          end
         end
       end
 
@@ -976,7 +1050,7 @@ describe MAPI::ServiceApp do
           call_method
         end
         it 'builds some entries' do
-          expect(call_method).to include(hash_including('TRADE_DATE', 'FUNDING_DATE', 'MATURITY_DATE', 'ADVANCE_NUMBER', 'ORIGINAL_PAR', 'ADVANCE_TYPE'))
+          expect(call_method).to include(hash_including('TRADE_DATE', 'FUNDING_DATE', 'MATURITY_DATE', 'ADVANCE_NUMBER', 'ORIGINAL_PAR', 'ADVANCE_TYPE', 'INTEREST_RATE'))
         end
         it 'builds the same entries each time' do
           expect(call_method).to match(call_method)
@@ -1023,6 +1097,8 @@ describe MAPI::ServiceApp do
         let(:original_par) { instance_double(String) }
         let(:advance_type) { instance_double(String) }
         let(:advance_number) { instance_double(String) }
+        let(:raw_interest_rate) { rand }
+        let(:interest_rate) { instance_double(String, :to_f => raw_interest_rate) }
         let(:matching_confirmation) {
           {
             advance_number: advance_number
@@ -1046,7 +1122,8 @@ describe MAPI::ServiceApp do
             'TRADE_DATE' => trade_date,
             'ORIGINAL_PAR' => original_par,
             'ADVANCE_TYPE' => advance_type,
-            'ADVANCE_NUMBER' => advance_number
+            'ADVANCE_NUMBER' => advance_number,
+            'INTEREST_RATE' => interest_rate
           }
         ] }
         before do
@@ -1079,6 +1156,13 @@ describe MAPI::ServiceApp do
           expect(advance_type).to receive(:to_s)
           call_method
         end
+        it 'converts each entries `INTEREST_RATE` to a float' do
+          expect(interest_rate).to receive(:to_f)
+          call_method
+        end
+        it 'rounds the `INTEREST_RATE` to the fifth decimal place' do
+          expect(call_method.first[:interest_rate]).to eq(raw_interest_rate.round(5))
+        end
         it 'returns an array of indifferent access hashes' do
           expect(call_method.first).to be_kind_of(ActiveSupport::HashWithIndifferentAccess)
         end
@@ -1098,7 +1182,7 @@ describe MAPI::ServiceApp do
           expect(call_method.first[:advance_confirmation]).to match([matching_confirmation])
         end
         it 'downcases the keys of the entries' do
-          expect(call_method).to match([hash_including(:maturity_date, :trade_date, :funding_date, :original_par, :advance_number, :advance_type, :advance_confirmation)])
+          expect(call_method).to match([hash_including(:maturity_date, :trade_date, :funding_date, :original_par, :advance_number, :advance_type, :advance_confirmation, :interest_rate)])
         end
       end
     end

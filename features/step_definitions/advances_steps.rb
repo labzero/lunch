@@ -261,7 +261,7 @@ Then(/^I should see an? "(.*?)" advance error(?: with amount (\d+) and type "(.*
     else
       raise 'Unknown error_type'
   end
-  page.assert_selector('.add-advance-icon-section.icon-error-before p', visible: true, text: text)
+  page.assert_selector('.add-advance-error.icon-error-before p', visible: true, text: text)
 end
 
 Then(/^I should see SecurID errors on the (Add Advance|Letter of Credit|Letter of Credit Amendment) preview page$/) do |request_type|
@@ -415,9 +415,9 @@ end
 Then(/^I see (only outstanding|all) advances$/) do |type|
   case type
   when 'only outstanding'
-    page.assert_selector('.manage-advances-table tr td:nth-child(6) span')
+    page.assert_selector('.manage-advances-table tr td:nth-child(8) span')
   when 'all'
-    page.assert_selector('.manage-advances-table tr td:nth-child(6)', text: I18n.t('global.missing_value'), exact: true)
+    page.assert_selector('.manage-advances-table tr td:nth-child(8)', text: I18n.t('global.missing_value'), exact: true)
   else
     raise ArgumentError.new("unknown advance type: #{type}")
   end

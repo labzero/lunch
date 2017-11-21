@@ -7,7 +7,10 @@ describe ContentManagementService do
   let(:url) { double('the prismic url') }
   let(:access_token) { double('the prismic access token') }
   let(:ref) { double('some ref') }
-  let(:guide_type) { described_class::DOCUMENT_MAPPING.keys.sample }
+  let(:cms_key) { described_class::DOCUMENT_MAPPING.keys.sample }
+  let(:fragment) { instance_double(Prismic::Fragments::Fragment) }
+  let(:document) { instance_double(Prismic::Document, fragments: nil) }
+  let(:api_id) { SecureRandom.hex }
 
   before do
     allow(Prismic).to receive(:api).and_return(api)
@@ -40,22 +43,23 @@ describe ContentManagementService do
   describe 'instance methods' do
     describe '`get_document`' do
       let(:results) { double('some results') }
-      let(:call_method) { subject.get_document(guide_type) }
+      let(:call_method) { subject.get_document(cms_key) }
       before { allow(subject).to receive(:ref).and_return(ref) }
 
       it 'raises an error if passed an invalid `cms_key`' do
-        expect{subject.get_document(:foo)}.to raise_error(ArgumentError, 'Invalid `cms_key`')
+        invalid_key = SecureRandom.hex
+        expect{subject.get_document(invalid_key)}.to raise_error(ArgumentError, "Invalid `cms_key`: `#{invalid_key}`")
       end
       it 'retrieves its `ref`' do
         expect(subject).to receive(:ref)
         call_method
       end
       it 'calls `get_by_uid` on its api with the `type` for the `cms_key`' do
-        expect(subject.api).to receive(:get_by_uid).with(described_class::DOCUMENT_MAPPING[guide_type][:type], any_args)
+        expect(subject.api).to receive(:get_by_uid).with(described_class::DOCUMENT_MAPPING[cms_key][:type], any_args)
         call_method
       end
       it 'calls `get_by_uid` on its api with the `uid` for the `cms_key`' do
-        expect(subject.api).to receive(:get_by_uid).with(anything, described_class::DOCUMENT_MAPPING[guide_type][:uid], anything)
+        expect(subject.api).to receive(:get_by_uid).with(anything, described_class::DOCUMENT_MAPPING[cms_key][:uid], anything)
         call_method
       end
       it 'calls `get_by_uid` on its api with the `ref`' do
@@ -82,14 +86,12 @@ describe ContentManagementService do
       end
     end
 
-    describe '`get_pdf_url`' do
-      let(:pdf_fragment) { instance_double(Prismic::Fragments::FileLink)  }
-      let(:fragments) {{'pdf' => pdf_fragment}}
+    shared_examples 'a method that manipulates `Prismic::Fragments`' do
+      let(:fragments) {{'file-download' => fragment}}
       let(:document) { instance_double(Prismic::Document, fragments: nil) }
-      let(:call_method) { subject.get_pdf_url(guide_type) }
 
       it 'calls `get_document` with the `cms_key`' do
-        expect(subject).to receive(:get_document).with(guide_type)
+        expect(subject).to receive(:get_document).with(cms_key)
         call_method
       end
       context 'when no content is returned from `get_document`' do
@@ -112,16 +114,94 @@ describe ContentManagementService do
             expect(call_method).to be nil
           end
         end
-        context 'when fragments are returned with a `pdf` key' do
+      end
+    end
+
+    describe '`get_attribute_as_text`' do
+      let(:fragments) { {api_id => fragment} }
+      let(:text_result) { instance_double(String) }
+      let(:call_method) { subject.get_attribute_as_text(cms_key, api_id) }
+
+      it_behaves_like 'a method that manipulates `Prismic::Fragments`'
+
+      context 'when content is returned from `get_document`' do
+        before { allow(subject).to receive(:get_document).and_return(document) }
+
+        context 'when fragments are returned with have a key matching the passed `api_id` arg' do
+          before { allow(document).to receive(:fragments).and_return(fragments) }
+
+          it 'calls `as_text` on the fragment' do
+            expect(fragment).to receive(:as_text)
+            call_method
+          end
+          it 'returns the result of calling `as_text` on the fragment' do
+            allow(fragment).to receive(:as_text).and_return(text_result)
+            expect(call_method).to eq(text_result)
+          end
+        end
+        context 'when fragments are returned that do not have a key matching the passed `api_id` arg' do
+          before { allow(document).to receive(:fragments).and_return({'foo' => fragment}) }
+
+          it 'returns nil' do
+            expect(call_method).to be nil
+          end
+        end
+      end
+    end
+
+    describe '`get_attribute_as_html`' do
+      let(:fragments) { {api_id => fragment} }
+      let(:html_result) { instance_double(String) }
+      let(:cms_key) { described_class::DOCUMENT_MAPPING.keys.sample }
+      let(:call_method) { subject.get_attribute_as_html(cms_key, api_id) }
+
+      it_behaves_like 'a method that manipulates `Prismic::Fragments`'
+
+      context 'when content is returned from `get_document`' do
+        before { allow(subject).to receive(:get_document).and_return(document) }
+
+        context 'when fragments are returned with have a key matching the passed `api_id` arg' do
+          before { allow(document).to receive(:fragments).and_return(fragments) }
+
+          it 'calls `as_html` on the fragment with a string containing the mapped `cms_key` type and the `api_id`' do
+            expect(fragment).to receive(:as_html).with("#{described_class::DOCUMENT_MAPPING[cms_key][:type]}.#{api_id}")
+            call_method
+          end
+          it 'returns the result of calling `as_html` on the fragment' do
+            allow(fragment).to receive(:as_html).and_return(html_result)
+            expect(call_method).to eq(html_result)
+          end
+        end
+        context 'when fragments are returned that do not have a key matching the passed `api_id` arg' do
+          before { allow(document).to receive(:fragments).and_return({'foo' => fragment}) }
+
+          it 'returns nil' do
+            expect(call_method).to be nil
+          end
+        end
+      end
+    end
+
+    describe '`get_file_download_url`' do
+      let(:fragment) { instance_double(Prismic::Fragments::FileLink)  }
+      let(:fragments) {{'file-download' => fragment}}
+      let(:call_method) { subject.get_file_download_url(cms_key) }
+
+      it_behaves_like 'a method that manipulates `Prismic::Fragments`'
+
+      context 'when content is returned from `get_document`' do
+        before { allow(subject).to receive(:get_document).and_return(document) }
+
+        context 'when fragments are returned with a `file-download` key' do
           before { allow(document).to receive(:fragments).and_return(fragments) }
 
           it 'returns the `url` of the pdf fragment' do
-            allow(pdf_fragment).to receive(:url).and_return(url)
+            allow(fragment).to receive(:url).and_return(url)
             expect(call_method).to eq(url)
           end
         end
-        context 'when fragments are returned that do not have a `pdf` key' do
-          before { allow(document).to receive(:fragments).and_return({'foo' => pdf_fragment}) }
+        context 'when fragments are returned that do not have a `file-download` key' do
+          before { allow(document).to receive(:fragments).and_return({'foo' => fragment}) }
 
           it 'returns nil' do
             expect(call_method).to be nil
@@ -137,10 +217,10 @@ describe ContentManagementService do
       let(:matching_slice_2) { instance_double(Prismic::Fragments::CompositeSlice, slice_type: slice_type) }
       let(:slice_zone) { instance_double(Prismic::Fragments::SliceZone, slices: []) }
       let(:document) { instance_double(Prismic::Document, get_slice_zone: slice_zone) }
-      let(:call_method) { subject.get_slices_by_type(guide_type, slice_type) }
+      let(:call_method) { subject.get_slices_by_type(cms_key, slice_type) }
 
       it 'calls `get_document` with the `cms_key`' do
-        expect(subject).to receive(:get_document).with(guide_type)
+        expect(subject).to receive(:get_document).with(cms_key)
         call_method
       end
       context 'when no content is returned from `get_document`' do
@@ -154,7 +234,7 @@ describe ContentManagementService do
         before { allow(subject).to receive(:get_document).and_return(document) }
 
         it 'calls `get_slice_zone` on the returned document with a string containing the `type` of the `cms_key`' do
-          expect(document).to receive(:get_slice_zone).with("#{described_class::DOCUMENT_MAPPING[guide_type][:type]}.body").and_return(slice_zone)
+          expect(document).to receive(:get_slice_zone).with("#{described_class::DOCUMENT_MAPPING[cms_key][:type]}.body").and_return(slice_zone)
           call_method
         end
         it 'returns an array of slices with a `slice_type` matching the passed `slice_type` arg' do
@@ -169,10 +249,10 @@ describe ContentManagementService do
       let(:document) { instance_double(Prismic::Document, get_date: nil) }
       let(:date) { Time.zone.today - rand(1..360).days }
       let(:date_node) { double('node', value: date) }
-      let(:call_method) { subject.get_date(guide_type, date_field) }
+      let(:call_method) { subject.get_date(cms_key, date_field) }
 
       it 'calls `get_document` with the `cms_key`' do
-        expect(subject).to receive(:get_document).with(guide_type)
+        expect(subject).to receive(:get_document).with(cms_key)
         call_method
       end
       context 'when no content is returned from `get_document`' do
@@ -186,7 +266,7 @@ describe ContentManagementService do
         before { allow(subject).to receive(:get_document).and_return(document) }
 
         it 'calls `get_date` on the returned document with a string containing the `type` of the `cms_key` and the `date_field` arg' do
-          expect(document).to receive(:get_date).with("#{described_class::DOCUMENT_MAPPING[guide_type][:type]}.#{date_field}")
+          expect(document).to receive(:get_date).with("#{described_class::DOCUMENT_MAPPING[cms_key][:type]}.#{date_field}")
           call_method
         end
         it 'returns the `value` of the node returned by `get_date`' do

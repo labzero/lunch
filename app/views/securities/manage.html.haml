@@ -1,4 +1,6 @@
 - @page_title = t('global.page_meta_title', title: @title)
+- missing_data_msg = @manage_securities_disabled ?  t('errors.table_data_unavailable') : t('errors.table_data_no_records')
+
 .securities.row
   .securities-header
     %h1= @title
@@ -11,4 +13,4 @@
         = link_to(t('securities.manage.safekeep_new'), securities_safekeep_edit_path, class: ['safekeep', 'primary-button'])
         = link_to(t('securities.manage.transfer'), '#', disabled: true, class: 'primary-button', data: {'manage-securities-form-submit' => securities_transfer_edit_path})
         = link_to(t('securities.manage.release'), '#', disabled: true, class: 'primary-button', data: {'manage-securities-form-submit' => securities_release_edit_path})
-      = render 'reports/reports_table', table_class: 'manage-securities-table', table_data: @securities_table_data
+      = render 'reports/reports_table', table_class: 'manage-securities-table', table_data: @securities_table_data, :'missing_data_message' =>  missing_data_msg

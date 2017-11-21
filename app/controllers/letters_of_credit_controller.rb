@@ -76,6 +76,11 @@ class LettersOfCreditController < ApplicationController
     @lc_agreement_flag = member[:customer_lc_agreement_flag]
   end
 
+  before_action only: [:new, :amend] do
+    members_service = MembersService.new(request)
+    @borrowing_capacity_disabled = members_service.report_disabled?(current_member_id, [MembersService::ACCT_SUMMARY_AND_BORROWING_CAP_SIDEBARS])
+  end
+
   before_action :fetch_beneficiary_request, only: [:beneficiary, :beneficiary_new]
   after_action :save_beneficiary_request, only: [:beneficiary]
 
@@ -85,32 +90,34 @@ class LettersOfCreditController < ApplicationController
   # GET
   def manage
     set_titles(t('letters_of_credit.manage.title'))
-    member_balances = MemberBalanceService.new(current_member_id, request)
-    historic_locs = member_balances.letters_of_credit
-    intraday_locs = member_balances.todays_credit_activity
-    raise StandardError, "There has been an error and LettersOfCreditController#manage has encountered nil. Check error logs." if historic_locs.nil? || intraday_locs.nil?
-    historic_locs = historic_locs[:credits]
-    intraday_locs = intraday_locs.select{ |activity| activity[:instrument_type] == LC_INSTRUMENT_TYPE }
-    intraday_locs = intraday_locs.collect { |activity| activity[:intraday_lc] = true; activity}
-    locs = dedupe_locs(intraday_locs, historic_locs)
-    rows = if locs.present?
-      sort_report_data(locs, :lc_number).collect do |credit|
-        {
-          columns: [
-            {value: credit[:lc_number], type: nil},
-            {value: credit[:beneficiary].try(:truncate, 52, separator: ' ', omission: '..').try(:gsub, /\,..$/, '..'), type: nil},
-            {value: credit[:current_par], type: :currency_whole},
-            {value: credit[:trade_date], type: :date},
-            {value: credit[:maturity_date], type: :date},
-            {value: credit[:description], type: nil},
-            {value: credit[:maintenance_charge], type: :basis_point},
-            {value: t('global.view_pdf'), type: nil},
-            {value: credit[:intraday_lc], type: nil}
-          ]
-        }
+    @manage_locs_disabled = MembersService.new(request).report_disabled?(current_member_id, [MembersService::MANAGE_LETTERS_OF_CREDIT])
+    rows = []
+    unless @manage_locs_disabled
+      member_balances = MemberBalanceService.new(current_member_id, request)
+      historic_locs = member_balances.letters_of_credit
+      intraday_locs = member_balances.todays_credit_activity
+      raise StandardError, "There has been an error and LettersOfCreditController#manage has encountered nil. Check error logs." if historic_locs.nil? || intraday_locs.nil?
+      historic_locs = historic_locs[:credits]
+      intraday_locs = intraday_locs.select{ |activity| activity[:instrument_type] == LC_INSTRUMENT_TYPE }
+      intraday_locs = intraday_locs.collect { |activity| activity[:intraday_lc] = true; activity}
+      locs = dedupe_locs(intraday_locs, historic_locs)
+      if locs.present?
+        rows = sort_report_data(locs, :lc_number).collect do |credit|
+          {
+            columns: [
+              {value: credit[:lc_number], type: nil},
+              {value: credit[:beneficiary].try(:truncate, 52, separator: ' ', omission: '..').try(:gsub, /\,..$/, '..'), type: nil},
+              {value: credit[:current_par], type: :currency_whole},
+              {value: credit[:trade_date], type: :date},
+              {value: credit[:maturity_date], type: :date},
+              {value: credit[:description], type: nil},
+              {value: credit[:maintenance_charge], type: :basis_point},
+              {value: t('global.view_pdf'), type: nil},
+              {value: credit[:intraday_lc], type: nil}
+            ]
+          }
+        end
       end
-    else
-      []
     end
     @table_data = {
       column_headings: [
@@ -360,6 +367,8 @@ class LettersOfCreditController < ApplicationController
         t('letters_of_credit.errors.exceeds_borrowing_capacity', borrowing_capacity: fhlb_formatted_currency_whole(letter_of_credit.standard_borrowing_capacity, html: false))
       elsif errors.added? :expiration_date, :after_max_term
         t('letters_of_credit.errors.after_max_term', max_term: letter_of_credit.max_term)
+      elsif errors.added? :amended_expiration_date, :after_max_term
+        t('letters_of_credit.request.amend.errors.after_max_term')
       else
         errors.first.last
       end

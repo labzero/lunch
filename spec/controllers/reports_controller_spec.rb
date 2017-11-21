@@ -991,7 +991,7 @@ RSpec.describe ReportsController, :type => :controller do
         it 'sets @loc_table_data[:column_headings] to an array of column heading strings' do
           make_request
           expect(assigns[:loc_table_data][:column_headings]).to eq([
-            {value: I18n.t('reports.pages.letters_of_credit.headers.lc_number'), type: :numeric_header},
+            I18n.t('reports.pages.letters_of_credit.headers.lc_number'),
             {value: fhlb_add_unit_to_table_header(I18n.t('reports.pages.letters_of_credit.headers.current_amount'), '$'), type: :numeric_header},
             {value: I18n.t('reports.pages.letters_of_credit.headers.annual_maintenance_charge'), type: :numeric_header},
             I18n.t('reports.pages.letters_of_credit.headers.issuance_date'),
@@ -2040,20 +2040,24 @@ RSpec.describe ReportsController, :type => :controller do
     end
     context do
       before do
-        allow(Time.zone).to receive(:today).and_return(current).exactly(7).times
+        allow(Time.zone).to receive(:today).and_return(current).exactly(13).times
       end
       describe 'when `current` is selected' do
-        it 'should set `@as_of` to the value `as_of_date` param' do
+        it 'should set `@dropdown_as_of` to the value `as_of_date` param' do
           get :borrowing_capacity, as_of_date: alternate.strftime('%Y-%m-%d')
-          expect(assigns[:as_of]).to eq(alternate.iso8601)
+          expect(assigns[:dropdown_as_of]).to eq(alternate.iso8601)
         end
-        it 'sets `@as_of` to the current date if `as_of_date` not supplied' do
+        it 'sets `@dropdown_as_of` to the current date if `as_of_date` not supplied' do
           call_action
-          expect(assigns[:as_of]).to eq(current.iso8601)
+          expect(assigns[:dropdown_as_of]).to eq(current.iso8601)
+        end
+        it 'assigns (for the pdf footer partial) @as_of to the properly formatted value of the `as_of_date` param' do
+          get :borrowing_capacity, as_of_date: alternate.strftime('%Y-%m-%d')
+          expect(assigns[:as_of]).to eq(fhlb_date_standard_numeric(alternate.iso8601))
         end
       end
       describe 'setting up the months dropdown' do
-        [*1..6].each do |i|
+        [*1..12].each do |i|
           it 'sets the month display map value' do
             get :borrowing_capacity
             expect(assigns[:month_display_map][(current - i.months).end_of_month.iso8601.to_s]).to eq(I18n.t('reports.pages.borrowing_capacity.monthend', month: (current - i.months).strftime('%B')))
@@ -2145,7 +2149,7 @@ RSpec.describe ReportsController, :type => :controller do
         let(:response_hash) { instance_double(Hash) }
         let(:current_date) { instance_double(Date, iso8601: nil) }
         before do
-          allow(Time.zone).to receive(:today).and_return(current_date).exactly(7).times
+          allow(Time.zone).to receive(:today).and_return(current_date).exactly(13).times
           allow(current_date).to receive(:-).with(anything).and_return(current_date)
           allow(current_date).to receive(:strftime).with('%B')
           allow(current_date).to receive(:end_of_month).and_return(current_date)
@@ -2154,6 +2158,7 @@ RSpec.describe ReportsController, :type => :controller do
           allow(response_hash).to receive(:[]).with('UPDATE_DATE').and_return(update_date_iso8601)
           allow(Time.zone).to receive(:parse).with(update_date_iso8601).and_return(update_date)
           allow(Date).to receive(:parse).with(current_iso8601).and_return(current_date)
+          allow(subject).to receive(:fhlb_date_standard_numeric)
         end
         describe 'the end of last month' do 
           before { allow(current_date).to receive(:-).with(1.month).and_return(current_date) }

@@ -41,7 +41,7 @@ Then(/^I should see the "(.*?)" product page$/) do |product|
 end
 
 Then(/^I should see the pfi page$/) do
-  page.assert_selector('.product-page-mpf h1 span', text: I18n.t('products.advances.pfi.title'))
+  expect(page.find('.product-page-mpf h1').text).to include(I18n.t('products.advances.pfi.title'))
 end
 
 When(/^I click on the (arc embedded|frc|frc embedded|arc|amortizing|choice libor|knockout|putable|other cash needs|mortgage partnership finance|standby letters of credit) link in the products advances dropdown$/) do |link|

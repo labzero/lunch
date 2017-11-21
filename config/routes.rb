@@ -219,6 +219,7 @@ Rails.application.routes.draw do
       get 'manage' => 'mortgages#manage'
       get 'new' => 'mortgages#new'
       get 'view' => 'mortgages#view', as: :view_transaction
+      post 'upload' => 'mortgages#upload'
     end
   end
 

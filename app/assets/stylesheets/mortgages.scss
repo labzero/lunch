@@ -81,13 +81,17 @@
 .mcu-upload-legal-section {
   display: none;
   dt {
-    @extend %typography-subtitle;
+    @extend %typography-field-value;
     float: left;
     margin-right: 5px;
   }
   dd {
+    @extend %typography-field-placeholder;
     @extend %pseudoelement-clearfix;
     margin: 0 0 15px 0;
+  }
+  dl {
+    border-bottom: 1px solid $secondary-gray;
   }
   .additional-legal h3 {
     @extend %typography-subtitle;
@@ -126,6 +130,9 @@
     @extend %typography-dashboard-account-summary;
     width: $column-9-width;
     margin-bottom: 25px;
+  }
+  .form-error-section p {
+    @extend %typography-paragraph;
   }
 }
 
@@ -208,5 +215,52 @@
   display: none;
   &.selected {
     display: inline-block;
+  }
+}
+
+.mcu-success {
+  position: relative;
+  padding-left: $extra-large-icon-font-size * 2;
+  margin-top: 10px;
+  p {
+    span {
+      @extend %typography-graph-data;
+      display: block;
+    }
+  }
+  &:before {
+    position: absolute;
+    left: 0;
+    font-size: $extra-large-icon-font-size;
+    color: $approval-green;
+  }
+}
+
+.mcu-success-actions {
+  margin-top: 30px;
+  .primary-button, .secondary-button {
+    margin-right: 10px;
+    width: 219px;
+  }
+}
+
+.mcu-transaction-details {
+  @extend %list-summary-data;
+  h2 { 
+    margin-top: 0;
+  }
+  .extra-spacing { 
+    line-height: 3em;
+  }
+  padding-bottom: 0;
+}
+
+.mcu-error-wrapper {
+  padding-bottom: 55px;
+}
+
+.form-error-section {
+  p { 
+    color: $darkest-gray; 
   }
 }

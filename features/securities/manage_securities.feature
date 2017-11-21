@@ -69,3 +69,9 @@ Scenario: Member sorts the Securities list
   Then I should see the "Maturity Date" column values in "ascending" order
   When I click the "Current Par ($)" column heading on the "Manage Securities" table
   Then I should see the "Current Par ($)" column values in "ascending" order
+
+ @data-unavailable @jira-mem-2512
+Scenario: The Manage Securities page has been disabled
+  Given I am on the manage securities page
+  When the "Manage Securities" page has been disabled
+  Then I should see an empty data table with "Data Currently Disabled" messaging

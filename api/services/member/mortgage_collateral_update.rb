@@ -23,10 +23,41 @@ module MAPI
           processed_data.with_indifferent_access
         end
 
+        def self.mcu_server_info(app)
+          unless should_fake?(app)
+            get_message(app, 'GetServerInfo', nil, {})[:headers]
+          else
+            self.fake_hash('member_mcu_server_info')
+          end
+        end
+
+        def self.mcu_upload_file(app, member_id, transaction_id, file_type, pledge_type, username, remote_path, archive_dir)
+          unless should_fake?(app)
+            mcu_type_id, mcu_type = file_type.split('_')
+            extension = File.extname(remote_path)[1..-1]
+            post_message(app, 'INITIATE_FILE_SUBMISSION', { 'memberId': member_id,
+                                                            'fileTypeId': mcu_type_id,
+                                                            'transactionId': transaction_id,
+                                                            'fileName': remote_path,
+                                                            'extension': extension,
+                                                            'pledgeType': pledge_type,
+                                                            'submittedBy': username })
+            post_message(app, nil, { 'FHLBId': member_id,
+                                     'TRANS_NUM': transaction_id,
+                                     'MCUType': mcu_type,
+                                     'DataDate': Time.zone.now.strftime('%d-%^b-%Y'),
+                                     'FileName': remote_path.gsub(archive_dir, ''),
+                                     'Extension': extension,
+                                     'PledgeType': pledge_type })
+            post_message(app, 'UPDATE_FILE_STATUS', { 'transactionId': transaction_id, 
+                                                      'status': 'Authorized' })
+          end
+          { success: true, message: '' }
+        end
 
         def self.mcu_member_status(app, member_id)
           mcu_member_status = unless should_fake?(app)
-            get_message(app, 'GET_MEMBER_TRANSACTIONS', member_id, {partnerId: member_id})
+            get_message(app, 'GET_MEMBER_TRANSACTIONS', member_id, {partnerId: member_id})[:body]
           else
             fake('member_mcu_status')
           end
@@ -39,12 +70,12 @@ module MAPI
         end
 
         def self.mcu_transaction_id(app, member_id)
-          { transaction_id: should_fake?(app) ? rand(999..9999) : get_message(app, 'GET_TRANSACTION_ID') }
+          { transaction_id: should_fake?(app) ? rand(9999..99999) : get_message(app, 'GET_TRANSACTION_ID')[:body] }
         end
 
         def self.mcu_member_info(app, member_id)
           unless should_fake?(app)
-            get_message(app, 'GET_MEMBER_INFO')[member_id.to_s]
+            get_message(app, 'GET_MEMBER_INFO')[:body][member_id.to_s]
           else
             fake_hash('member_mcu_member_info')[member_id.to_s]
           end

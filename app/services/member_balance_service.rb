@@ -391,6 +391,10 @@ class MemberBalanceService < MAPIService
     fix_date(get_hash(:mortgage_collateral_update, "/member/#{@member_id}/mortgage_collateral_update"), :date_processed)
   end
 
+  def mcu_server_info
+    get_hash(:mcu_server_info, "/member/mcu_server_info")
+  end
+
   def mcu_member_status
     get_hashes(:mcu_member_status, "/member/#{@member_id}/mcu_member_status")
   end
@@ -400,9 +404,18 @@ class MemberBalanceService < MAPIService
   end
 
   def mcu_member_info
-    Rails.cache.fetch(CacheConfiguration.key(:mcu_member_info), expires_in: CacheConfiguration.expiry(:mcu_member_info)) do
-      get_hash(:mcu_member_info, "/member/#{@member_id}/mcu_member_info")
-    end
+    get_hash(:mcu_member_info, "/member/#{@member_id}/mcu_member_info")
+  end
+
+  def mcu_upload_file(transaction_id, file_type, pledge_type, username, remote_path, archive_dir)
+    post_hash(:mcu_upload_file, 
+              "/member/#{@member_id}/mcu_upload_file",
+              { transaction_id: transaction_id,
+                file_type: Rack::Utils.escape(file_type),
+                pledge_type: Rack::Utils.escape(pledge_type),
+                username: username,
+                remote_path: remote_path,
+                archive_dir: archive_dir })
   end
 
   def managed_securities

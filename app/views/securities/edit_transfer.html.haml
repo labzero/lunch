@@ -15,7 +15,7 @@
         - if @error_message
           .form-error-section
             %p= @error_message
-        %section.securities-broker-instructions.form-fields-section-column-2
+        %section.securities-broker-instructions.form-fields-section-column-2.form-fields-section-column-2-multirow
           %h2= t('securities.release.broker_instructions')
           - if kind == :pledge_transfer
             .input-field-container-horizontal
@@ -26,6 +26,12 @@
           - else
             .input-field-container-horizontal
               = render 'shared/input_field', form_builder: f, field_name: :safekept_account, label: t('securities.release.account_number.label'), field_class: ['disabled'], html_attributes: { disabled: true }
+            .input-field-container-horizontal.input-field-container-horizontal-placeholder
+          .input-field-container-horizontal
+            = render 'shared/input_field', form_builder: f, field_name: :trade_date, field_type: :date_field, label: t('common_table_headings.trade_date'), field_class: ['disabled'], html_attributes: { disabled: true }
+          .input-field-container-horizontal
+            %span= t('common_table_headings.settlement_date')
+            = render 'shared/date_picker', single_date_picker: true, input_field_text: '{replace_date}', from_label: '', linked_input_field: 'securities_request[settlement_date]', start_date: @securities_request.settlement_date, max_date: @date_restrictions[:settlement_date][:max_date], min_date: @date_restrictions[:settlement_date][:min_date], invalid_dates: @date_restrictions[:settlement_date][:invalid_dates], disable_weekends: true
         %section.securities-delivery-instructions
           %h2= t('securities.release.delivery_instructions.label')
           - if kind == :pledge_transfer

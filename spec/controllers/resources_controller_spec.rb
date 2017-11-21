@@ -7,6 +7,47 @@ include ResourceHelper
 RSpec.describe ResourcesController, type: :controller do
   login_user
 
+  shared_examples 'a ResourceController action that checks to see if CMS functionality is enabled' do |action|
+    let(:call_action) { get action }
+    context 'when the `content-management-system` feature is enabled' do
+      let(:cms) { instance_double(ContentManagementService) }
+      before do
+        allow(controller).to receive(:feature_enabled?).with('content-management-system').and_return(true)
+        allow(ContentManagementService).to receive(:new).and_return(cms)
+      end
+
+      it 'sets `@cms_enabled` to true' do
+        call_action
+        expect(assigns[:cms_enabled]).to be true
+      end
+      it 'creates a new instance of `ContentManagementService` with the member id and request' do
+        expect(ContentManagementService).to receive(:new).with(member_id, request).and_return(cms)
+        call_action
+      end
+      it 'sets `@cms` to the instance of `ContentManagementService`' do
+        call_action
+        expect(assigns[:cms]).to eq(cms)
+      end
+    end
+
+    context 'when the `content-management-system` feature is disabled' do
+      before { allow(controller).to receive(:feature_enabled?).with('content-management-system').and_return(false) }
+
+      it 'sets `@cms_enabled` to false' do
+        call_action
+        expect(assigns[:cms_enabled]).to be false
+      end
+      it 'does not create a new instance of `ContentManagementService`' do
+        expect(ContentManagementService).not_to receive(:new)
+        call_action
+      end
+      it 'does not set `@cms`' do
+        call_action
+        expect(assigns.keys).not_to include('cms')
+      end
+    end
+  end
+
   describe 'GET guides' do
     let(:member_id) { rand(1000..9999) }
     let(:call_action) { get :guides }
@@ -99,63 +140,471 @@ RSpec.describe ResourcesController, type: :controller do
 
   describe 'GET forms' do
     let(:link) { double(String) }
+    let(:title) { double(String) }
+    let(:cms) { instance_double(ContentManagementService) }
     let(:call_action) { get :forms }
     before do
       allow(subject).to receive(:feature_enabled?).and_call_original
       allow(subject).to receive(:docusign_link)
       allow(subject).to receive(:resources_download_path)
+      allow(controller).to receive(:forms_page_title_from_cms)
+      allow(ContentManagementService).to receive(:new).and_return(cms)
     end
+
     it_behaves_like 'a controller action with an active nav setting', :forms, :resources
     it_behaves_like 'a user required action', :get, :forms
-    it 'should render the guides view' do
+    it_behaves_like 'a ResourceController action that checks to see if CMS functionality is enabled', :forms
+
+    it 'renders the `forms` view' do
       get :forms
       expect(response.body).to render_template('forms')
     end
-    [:agreement_rows, :signature_card_rows, :wire_transfer_rows, :capital_stock_rows,
-    :website_access_rows, :credit_rows, :lien_real_estate_rows, :lien_other_rows,
-    :specific_identification_rows, :deposits_rows, :loan_document_rows,
-    :creditor_relationship_rows
-    ].each do |var|
-      it "should assign `@#{var}`" do
-        call_action
-        expect(assigns[var]).to be_present
+
+    shared_examples 'a `forms` page form row instance variable' do |form, instance_variable_path|
+      describe "the `#{form[:title]}` form" do
+        let(:base_variable_path) { instance_variable_path.inject(assigns) { |obj, item| obj[item] || break } }
+
+        context 'when the `content-management-system` feature is disabled' do
+          before { allow(subject).to receive(:feature_enabled?).with('content-management-system').and_return(false) }
+
+          it 'uses the correct interpolated title' do
+            call_action
+            expect(base_variable_path[:title]).to eq(form[:title])
+          end
+        end
+        context 'when the `content-management-system` feature is enabled' do
+          before { allow(subject).to receive(:feature_enabled?).with('content-management-system').and_return(true) }
+
+          it 'calls `forms_page_title_from_cms` with the cms' do
+            expect(controller).to receive(:forms_page_title_from_cms).with(cms, anything)
+            call_action
+          end
+          it "calls `forms_page_title_from_cms` with `#{form[:cms_key]}` as the cms key" do
+            expect(controller).to receive(:forms_page_title_from_cms).with(anything, form[:cms_key])
+            call_action
+          end
+          it 'sets the `title` to the value returned from `forms_page_title_from_cms`' do
+            allow(controller).to receive(:forms_page_title_from_cms).and_return(title)
+            call_action
+            expect(base_variable_path[:title]).to eq(title)
+          end
+        end
       end
     end
-    it 'assigns @securities_rows when the `securities-hide-forms` feature is disabled' do
-      allow(subject).to receive(:feature_enabled?).with('securities-hide-forms').and_return(false)
-      call_action
-      expect(assigns[:securities_rows]).to be_present
+
+    shared_examples 'a `forms` page form row instance variable with a `pdf_link`' do |form, instance_variable_path|
+      describe "the `#{form[:title]}` form" do
+        let(:pdf_link_key) { "form_#{form[:form_number]}".to_sym }
+        let(:base_variable_path) { instance_variable_path.inject(assigns) { |obj, item| obj[item] || break } }
+
+        it "has a `form_number` of `#{form[:form_number]}`" do
+          call_action
+          expect(base_variable_path[:form_number]).to eq(form[:form_number])
+        end
+        it 'has the correct `pdf_link`' do
+          allow(subject).to receive(:resources_download_path).with(file: pdf_link_key).and_return(link)
+          call_action
+          expect(base_variable_path[:pdf_link]).to eq(link)
+        end
+      end
     end
-    it 'does not assign @securities_rows when the `securities-hide-forms` feature is enabled' do
-      allow(subject).to receive(:feature_enabled?).with('securities-hide-forms').and_return(true)
-      call_action
-      expect(assigns[:securities_rows]).to_not be_present
+
+    describe '`@agreement_rows`' do
+      describe 'first-level form objects' do
+        [
+          {
+            title: I18n.t('resources.forms.agreements.letters_of_credit'),
+            form_number: 1465,
+            cms_key: :letter_of_credit_reimbursement_agreement
+          },
+          {
+            title: I18n.t('resources.forms.agreements.safekeeping'),
+            form_number: 1694,
+            cms_key: :safekeeping_agreement
+          },
+          {
+            title: I18n.t('resources.forms.agreements.settlement_transaction_account'),
+            form_number: 2136,
+            cms_key: :settlement_transaction_account_agreement
+          }
+        ].each_with_index do |form, i|
+          it_behaves_like 'a `forms` page form row instance variable', form, [:agreement_rows, i + 1]
+          it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:agreement_rows, i + 1]
+        end
+      end
+      describe 'second-level form objects' do
+        [
+          {
+            title: I18n.t('resources.forms.agreements.commercial_banks'),
+            form_number: 2117,
+            cms_key: :advances_security_agreement_commercial_banks
+          },
+          {
+            title: I18n.t('resources.forms.agreements.community'),
+            form_number: 2349,
+            cms_key: :advances_security_agreement_community_development
+          },
+          {
+            title: I18n.t('resources.forms.agreements.credit_unions'),
+            form_number: 2127,
+            cms_key: :advances_security_agreement_credit_unions
+          },
+          {
+            title: I18n.t('resources.forms.agreements.insurance'),
+            form_number: 2177,
+            cms_key: :advances_security_agreement_insurance_companies
+          }
+        ].each_with_index do |form, i|
+          it_behaves_like 'a `forms` page form row instance variable', form, [:agreement_rows, 0, :rows, i]
+          it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:agreement_rows, 0, :rows, i]
+        end
+      end
     end
-    describe '@website_access_rows' do
+
+    describe '`@signature_card_rows`' do
+      [
+        {
+          title: I18n.t('resources.forms.authorizations.signature_cards.member_transactions'),
+          form_number: 2065,
+          cms_key: :resolution_authorization_member_transactions
+        },
+        {
+          title: I18n.t('resources.forms.authorizations.signature_cards.entire_authority'),
+          form_number: 2066,
+          cms_key: :authorization_entire_authority
+        },
+        {
+          title: I18n.t('resources.forms.authorizations.signature_cards.wire_transfer'),
+          form_number: 2108,
+          cms_key: :authorization_wire_transfer_services
+        },
+        {
+          title: I18n.t('resources.forms.authorizations.signature_cards.advances'),
+          form_number: 2067,
+          cms_key: :authorization_advances
+        },
+        {
+          title: I18n.t('resources.forms.authorizations.signature_cards.affordable_housing'),
+          form_number: 2153,
+          cms_key: :authorization_affordable_housing_program
+        },
+        {
+          title: I18n.t('resources.forms.authorizations.signature_cards.collateral'),
+          form_number: 2068,
+          cms_key: :authorization_collateral
+        },
+        {
+          title: I18n.t('resources.forms.authorizations.signature_cards.money_market'),
+          form_number: 2071,
+          cms_key: :authorization_money_market_transaction
+        },
+        {
+          title: I18n.t('resources.forms.authorizations.signature_cards.securities_services'),
+          form_number: 2109,
+          cms_key: :authorization_securities_services
+        }
+      ].each_with_index do |form, i|
+        it_behaves_like 'a `forms` page form row instance variable', form, [:signature_card_rows, i]
+        it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:signature_card_rows, i]
+      end
+    end
+
+    describe '`@wire_transfer_rows`' do
+      [
+        {
+          title: I18n.t('resources.forms.authorizations.wire_transfer.repetitive'),
+          form_number: 1685,
+          cms_key: :authorization_repetitive_wire_instructions
+        }
+      ].each_with_index do |form, i|
+        it_behaves_like 'a `forms` page form row instance variable', form, [:wire_transfer_rows, i]
+        it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:wire_transfer_rows, i]
+      end
+    end
+
+    describe '`@capital_stock_rows`' do
+      [
+        {
+          title: I18n.t('resources.forms.authorizations.capital_stock.redemption'),
+          form_number: 2238,
+          cms_key: :authorization_capital_stock_redemption_notice
+        }
+      ].each_with_index do |form, i|
+        it_behaves_like 'a `forms` page form row instance variable', form, [:capital_stock_rows, i]
+        it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:capital_stock_rows, i]
+      end
+    end
+
+    describe '`@credit_rows`' do
+      describe 'first-level form objects' do
+        [
+          {
+            title: I18n.t('resources.forms.credit.application'),
+            form_number: 2051,
+            cms_key: :credit_application_cip_and_ace
+          },
+          {
+            title: I18n.t('resources.forms.credit.ace_application'),
+            form_number: 2192,
+            cms_key: :ace_application_sba_lenders
+          },
+          {
+            title: I18n.t('resources.forms.credit.reimbursement'),
+            form_number: 1465,
+            cms_key: :letter_of_credit_reimbursement_agreement
+          }
+        ].each_with_index do |form, i|
+          it_behaves_like 'a `forms` page form row instance variable', form, [:credit_rows, i]
+          it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:credit_rows, i]
+        end
+      end
+      describe 'second-level form objects' do
+        [
+          {
+            title: I18n.t('resources.forms.credit.prepayment_symmetry'),
+            form_number: 2215,
+            cms_key: :statement_of_authority_advances_partial_prepayment
+          },
+          {
+            title: I18n.t('resources.forms.credit.putable_advances'),
+            form_number: 2161,
+            cms_key: :statement_of_authority_putable_advances
+          }
+        ].each_with_index do |form, i|
+          it_behaves_like 'a `forms` page form row instance variable', form, [:credit_rows, 3, :rows, i]
+          it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:credit_rows, 3, :rows, i]
+        end
+      end
+    end
+
+    describe '`@lien_real_estate_rows`' do
+      [
+        {
+          title: I18n.t('resources.forms.collateral.lien_real_estate.pledging'),
+          form_number: 2237,
+          cms_key: :blanket_lien_real_estate_pledging_reporting_designation
+        },
+        {
+          title: I18n.t('resources.forms.collateral.lien_real_estate.lending_policy'),
+          form_number: 2281,
+          cms_key: :anti_predatory_lending_policy_certification_blanket_lien
+        },
+        {
+          title: I18n.t('resources.forms.collateral.lien_real_estate.questionnaire_html').html_safe,
+          form_number: 2242,
+          cms_key: :blanket_lien_collateral_eligibility_commercial_banks
+        },
+        {
+          title: I18n.t('resources.forms.collateral.lien_real_estate.certification'),
+          form_number: 2241,
+          cms_key: :blanket_lien_collateral_certification_credit_unions
+        },
+        {
+          title: I18n.t('resources.forms.collateral.lien_real_estate.notification'),
+          form_number: 2243,
+          cms_key: :blanket_lien_mcu_notification_detailed_reporting
+        }
+      ].each_with_index do |form, i|
+        it_behaves_like 'a `forms` page form row instance variable', form, [:lien_real_estate_rows, i]
+        it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:lien_real_estate_rows, i]
+      end
+    end
+
+    describe '`@lien_other_rows`' do
+      [
+        {
+          title: I18n.t('resources.forms.collateral.lien_other.certification'),
+          form_number: 2202,
+          cms_key: :cfi_blanket_lien_collateral_certification
+        },
+        {
+          title: I18n.t('resources.forms.collateral.lien_other.release'),
+          form_number: 2200,
+          cms_key: :cfi_blanket_lien_collateral_release_request_certification
+        }
+      ].each_with_index do |form, i|
+        it_behaves_like 'a `forms` page form row instance variable', form, [:lien_other_rows, i]
+        it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:lien_other_rows, i]
+      end
+    end
+
+    describe '`@specific_identification_rows`' do
+      [
+        {
+          title: I18n.t('resources.forms.collateral.specific_identification.transmission'),
+          form_number: 2249,
+          cms_key: :specific_identification_mcu_data_transmission_set_up
+        },
+        {
+          title: I18n.t('resources.forms.collateral.specific_identification.transmittal'),
+          form_number: 1547,
+          cms_key: :specific_identification_mcu_transmittal_letter
+        },
+        {
+          title: I18n.t('resources.forms.collateral.specific_identification.questionnaire'),
+          form_number: 2204,
+          cms_key: :specific_identification_mcu_data_field_questionnaire
+        }
+      ].each_with_index do |form, i|
+        it_behaves_like 'a `forms` page form row instance variable', form, [:specific_identification_rows, i]
+        it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:specific_identification_rows, i]
+      end
+    end
+
+    describe '`@deposits_rows`' do
+      [
+        {
+          title: I18n.t('resources.forms.collateral.deposits.pledge'),
+          form_number: 1722,
+          cms_key: :pledge_of_time_deposit_account
+        }
+      ].each_with_index do |form, i|
+        it_behaves_like 'a `forms` page form row instance variable', form, [:deposits_rows, i]
+        it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:deposits_rows, i]
+      end
+    end
+
+    describe '`@securities_rows`' do
+      context 'when `securities-hide-forms` is disabled' do
+        before { allow(controller).to receive(:feature_enabled?).with('securities-hide-forms').and_return(false) }
+
+        [
+          {
+            title: I18n.t('resources.forms.collateral.securities.pledge'),
+            form_number: 449,
+            cms_key: :pledge_of_securities
+          },
+          {
+            title: I18n.t('resources.forms.collateral.securities.release'),
+            form_number: 1227,
+            cms_key: :securities_release_request
+          },
+          {
+            title: I18n.t('resources.forms.collateral.securities.deposit'),
+            form_number: 2143,
+            cms_key: :safekeeping_deposit_request
+          },
+          {
+            title: I18n.t('resources.forms.collateral.securities.safekeeping_release'),
+            form_number: 2194,
+            cms_key: :safekeeping_release_request
+          }
+        ].each_with_index do |form, i|
+          it_behaves_like 'a `forms` page form row instance variable', form, [:securities_rows, i]
+          it_behaves_like 'a `forms` page form row instance variable with a `pdf_link`', form, [:securities_rows, i]
+        end
+      end
+
+      context 'when `securities-hide-forms` is enabled' do
+        before { allow(controller).to receive(:feature_enabled?).with('securities-hide-forms').and_return(true) }
+
+        it 'does not assign `@securities_rows`' do
+          call_action
+          expect(assigns.keys).not_to include('securities_rows')
+        end
+      end
+    end
+
+    describe '`@loan_document_rows`' do
+      [
+        {
+          title: I18n.t('resources.forms.collateral.loan_document.assignment'),
+          cms_key: :corporation_assignment_template
+        }
+      ].each_with_index do |form, i|
+        it_behaves_like 'a `forms` page form row instance variable', form, [:loan_document_rows, i]
+
+        it 'has the correct `word_link`' do
+          allow(subject).to receive(:resources_download_path).with(file: :corporation_assignment).and_return(link)
+          call_action
+          expect(assigns[:loan_document_rows][0][:word_link]).to eq(link)
+        end
+      end
+    end
+
+    describe '`@creditor_relationship_rows`' do
+      [
+        {
+          title: I18n.t('resources.forms.collateral.creditor_relationship.amendment'),
+          cms_key: :amendment_to_corporate_credit_union_security_agreement
+        },
+        {
+          title: I18n.t('resources.forms.collateral.creditor_relationship.agreement'),
+          form_number: 2373,
+          cms_key: :subordination_agreement_credit_unions
+        }
+      ].each_with_index do |form, i|
+        it_behaves_like 'a `forms` page form row instance variable', form, [:creditor_relationship_rows, i]
+      end
+
+      describe 'the first form object' do
+        it 'has the correct `word_link`' do
+          allow(subject).to receive(:resources_download_path).with(file: :credit_union_amendment).and_return(link)
+          call_action
+          expect(assigns[:creditor_relationship_rows][0][:word_link]).to eq(link)
+        end
+      end
+      describe 'the second form object' do
+        it "has a `form_number` of `2373`" do
+          call_action
+          expect(assigns[:creditor_relationship_rows][1][:form_number]).to eq(2373)
+        end
+        it 'has the correct `pdf_link`' do
+          allow(subject).to receive(:resources_download_path).with(file: :credit_union_agreement).and_return(link)
+          call_action
+          expect(assigns[:creditor_relationship_rows][1][:pdf_link]).to eq(link)
+        end
+      end
+    end
+
+    describe '`@website_access_rows`' do
       [
         {
           title: I18n.t('resources.forms.authorizations.website.access_manager'),
           form_number: 2160,
           feature: 'resources-access-manager',
           docusign_link_key: :member_access_manager,
-          pdf_link_key: :form_2160
+          pdf_link_key: :form_2160,
+          cms_key: :authorization_portal_access_manager
         },
         {
           title: I18n.t('resources.forms.authorizations.website.securid'),
           form_number: 2228,
           feature: 'resources-token',
           docusign_link_key: :member_token_request,
-          pdf_link_key: :form_2228
+          pdf_link_key: :form_2228,
+          cms_key: :authorization_securid_token_request
         }
       ].each_with_index do |form, i|
         describe "the `#{form[:title]}` form" do
-          it 'has the correct title' do
-            call_action
-            expect(assigns[:website_access_rows][i][:title]).to eq(form[:title])
-          end
           it "has a form_number of `#{form[:form_number]}`" do
             call_action
             expect(assigns[:website_access_rows][i][:form_number]).to eq(form[:form_number])
+          end
+          context 'when the `content-management-system` feature is disabled' do
+            before { allow(subject).to receive(:feature_enabled?).with('content-management-system').and_return(false) }
+
+            it 'uses the correct interpolated title' do
+              call_action
+              expect(assigns[:website_access_rows][i][:title]).to eq(form[:title])
+            end
+          end
+          context 'when the `content-management-system` feature is enabled' do
+            before { allow(subject).to receive(:feature_enabled?).with('content-management-system').and_return(true) }
+
+            it 'calls `forms_page_title_from_cms` with the cms' do
+              expect(controller).to receive(:forms_page_title_from_cms).with(cms, anything)
+              call_action
+            end
+            it "calls `forms_page_title_from_cms` with `#{form[:cms_key]}` as the cms key" do
+              expect(controller).to receive(:forms_page_title_from_cms).with(anything, form[:cms_key])
+              call_action
+            end
+            it 'sets the `title` to the value returned from `forms_page_title_from_cms`' do
+              allow(controller).to receive(:forms_page_title_from_cms).and_return(title)
+              call_action
+              expect(assigns[:website_access_rows][i][:title]).to eq(title)
+            end
           end
           describe "when the `#{form[:feature]}` feature is enabled" do
             before { allow(subject).to receive(:feature_enabled?).with(form[:feature]).and_return(true) }
@@ -247,31 +696,29 @@ RSpec.describe ResourcesController, type: :controller do
       end
     end
     context 'when the `content-management-system` feature is enabled' do
-      let(:member_id) { double('member id') }
-      let(:pdf_url) { instance_double(String) }
-      let(:cms) { instance_double(ContentManagementService, get_pdf_url: pdf_url) }
-      let(:file) { instance_double(File, close:nil )}
-      before do
-        allow(controller).to receive(:current_member_id).and_return(member_id)
-        allow(subject).to receive(:feature_enabled?).with('content-management-system').and_return(true)
-        allow(ContentManagementService).to receive(:new).and_return(cms)
-        allow(controller).to receive(:open).and_return(file)
-        allow(File).to receive(:read)
-      end
+      before { allow(subject).to receive(:feature_enabled?).with('content-management-system').and_return(true) }
 
-      {
-        'creditguide' => {filename: 'creditguide.pdf', cms_key: :credit_guide},
-        'collateralguide' => {filename: 'collateralguide.pdf', cms_key: :collateral_guide}
-      }.each do |param_name, options|
+      shared_examples 'a file that can be downloaded from the cms' do |param_name, options|
         context "when `#{param_name}` is requested" do
+          let(:member_id) { double('member id') }
+          let(:file_url) { instance_double(String) }
+          let(:cms) { instance_double(ContentManagementService, get_file_download_url: file_url) }
+          let(:file) { instance_double(File, close:nil )}
           let(:call_action) { get :download, file: param_name}
+
+          before do
+            allow(controller).to receive(:current_member_id).and_return(member_id)
+            allow(ContentManagementService).to receive(:new).and_return(cms)
+            allow(controller).to receive(:open).and_return(file)
+            allow(File).to receive(:read)
+          end
 
           it 'creates a new instance of the `ContentManagementService` with the member_id and request object' do
             expect(ContentManagementService).to receive(:new).with(member_id, request).and_return(cms)
             call_action
           end
-          it "calls `get_pdf_url` on the instance of `ContentManagementService` with `#{options[:cms_key]}`" do
-            expect(cms).to receive(:get_pdf_url).with(options[:cms_key])
+          it "calls `get_file_download_url` on the instance of `ContentManagementService` with `#{options[:cms_key]}`" do
+            expect(cms).to receive(:get_file_download_url).with(options[:cms_key])
             call_action
           end
           context 'when a url is returned' do
@@ -280,7 +727,7 @@ RSpec.describe ResourcesController, type: :controller do
               allow(File).to receive(:read).with(file).and_return(read_file)
             end
             it 'opens the returned url' do
-              expect(controller).to receive(:open).with(pdf_url)
+              expect(controller).to receive(:open).with(file_url)
               call_action
             end
             it 'reads the data stream' do
@@ -295,8 +742,8 @@ RSpec.describe ResourcesController, type: :controller do
               expect(controller).to receive(:send_data).with(anything, hash_including(filename: options[:filename])).and_call_original
               call_action
             end
-            it 'calls `send_data` with `application/pdf` as the `type`' do
-              expect(controller).to receive(:send_data).with(anything, hash_including(type: 'application/pdf')).and_call_original
+            it "calls `send_data` with `#{options[:mime_type]}` as the `type`" do
+              expect(controller).to receive(:send_data).with(anything, hash_including(type: options[:mime_type])).and_call_original
               call_action
             end
             it 'calls `send_data` with `attachment` as the `disposition`' do
@@ -309,12 +756,25 @@ RSpec.describe ResourcesController, type: :controller do
             end
           end
           context 'when a url is not returned' do
-            before { allow(cms).to receive(:get_pdf_url).and_return(nil) }
+            before { allow(cms).to receive(:get_file_download_url).and_return(nil) }
             it 'raises an error' do
               expect{call_action}.to raise_error(ActionController::MissingFile)
             end
           end
         end
+      end
+
+      {
+        'creditguide' => {filename: 'creditguide.pdf', cms_key: :credit_guide, mime_type: 'application/pdf'},
+        'collateralguide' => {filename: 'collateralguide.pdf', cms_key: :collateral_guide, mime_type: 'application/pdf'},
+        'corporation_assignment' => {filename: 'Corporate_Assignment.doc', cms_key: :corporation_assignment_template, mime_type: 'application/msword'},
+        'credit_union_amendment' => {filename: 'corporate-credit-union-amendment.docx', cms_key: :amendment_to_corporate_credit_union_security_agreement, mime_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'},
+        'credit_union_agreement' => {filename: 'subordination-agreement-credit-unions.pdf', cms_key: :subordination_agreement_credit_unions, mime_type: 'application/pdf'}
+      }.each do |param_name, options|
+        it_behaves_like 'a file that can be downloaded from the cms', param_name, options
+      end
+      described_class::FORM_ID_CMS_KEY_MAPPING.each do |id, cms_key|
+        it_behaves_like 'a file that can be downloaded from the cms', "form_#{id}", {filename: "fc#{id}.pdf", cms_key: cms_key, mime_type: 'application/pdf' }
       end
     end
   end
@@ -636,7 +1096,7 @@ RSpec.describe ResourcesController, type: :controller do
 
     it_behaves_like 'a resource membership action', action
     it "calls `application_table_rows` with the form id hash for the `#{application_type}`" do
-      expect(controller).to receive(:application_table_rows).with(described_class::APPLICATION_FORM_IDS[application_type])
+      expect(controller).to receive(:application_table_rows).with(described_class::APPLICATION_FORM_IDS[application_type], any_args)
       call_action
     end
     it 'sets `@application_table_rows` to the result of calling `application_table_rows`' do
@@ -655,19 +1115,31 @@ RSpec.describe ResourcesController, type: :controller do
   end
 
   describe 'GET :commercial_application' do
+    before { allow(controller).to receive(:application_table_rows) }
+
     it_behaves_like 'a resource membership action with application forms tables', :commercial_application, :commercial
+    it_behaves_like 'a ResourceController action that checks to see if CMS functionality is enabled', :commercial_application
   end
 
   describe 'GET :community_development_application' do
+    before { allow(controller).to receive(:application_table_rows) }
+
     it_behaves_like 'a resource membership action with application forms tables', :community_development_application, :community_development
+    it_behaves_like 'a ResourceController action that checks to see if CMS functionality is enabled', :community_development_application
   end
 
   describe 'GET :credit_union_application' do
+    before { allow(controller).to receive(:application_table_rows) }
+
     it_behaves_like 'a resource membership action with application forms tables', :credit_union_application, :credit_union
+    it_behaves_like 'a ResourceController action that checks to see if CMS functionality is enabled', :credit_union_application
   end
 
   describe 'GET :insurance_company_application' do
+    before { allow(controller).to receive(:application_table_rows) }
+
     it_behaves_like 'a resource membership action with application forms tables', :insurance_company_application, :insurance_company
+    it_behaves_like 'a ResourceController action that checks to see if CMS functionality is enabled', :insurance_company_application
   end
 
   describe 'the `fee_schedule_table_hash` private method' do
@@ -908,6 +1380,77 @@ RSpec.describe ResourcesController, type: :controller do
           expect(controller).to receive(:add_link_to_row).with(processed_row)
           call_method
         end
+      end
+
+      context 'when the cms is enabled' do
+        let(:cms) { instance_double(ContentManagementService) }
+        let(:form_id) { described_class::FORM_ID_CMS_KEY_MAPPING.keys.sample }
+        let(:page_title) { SecureRandom.hex }
+        let(:resolved_description) { SecureRandom.hex }
+        let(:description) { SecureRandom.hex }
+        let(:form) { instance_double(Cms::Form, application_page_title: '', description: '')}
+        let(:call_method) { controller.send(:application_table_rows, {application_type: [form_id]}) }
+
+        before do
+          controller.instance_variable_set('@cms', cms)
+          controller.instance_variable_set('@cms_enabled', true)
+          allow(Cms::Form).to receive(:new).and_return(form)
+        end
+
+        it 'creates a new instance of `Cms::Form` with the `current_member_id`' do
+          expect(Cms::Form).to receive(:new).with(member_id, any_args).and_return(form)
+          call_method
+        end
+        it 'creates a new instance of `Cms::Form` with the `request` object' do
+          expect(Cms::Form).to receive(:new).with(anything, request, any_args).and_return(form)
+          call_method
+        end
+        it 'creates a new instance of `Cms::Form` with the value mapped to the `form_id` key in the `FORM_ID_CMS_KEY_MAPPING`' do
+          expect(Cms::Form).to receive(:new).with(anything, anything, described_class::FORM_ID_CMS_KEY_MAPPING[form_id], any_args).and_return(form)
+          call_method
+        end
+        it 'creates a new instance of `Cms::Form` with the `@cms` object' do
+          expect(Cms::Form).to receive(:new).with(anything, anything, anything, cms).and_return(form)
+          call_method
+        end
+        it 'sets the title to the `application_page_title` from the form' do
+          allow(form).to receive(:application_page_title).and_return(page_title)
+          expect(controller).to receive(:add_link_to_row).with (hash_including(title: page_title))
+          call_method
+        end
+        it 'calls `resolve_relative_prismic_links` with the `description` from the instance of `Cms::Form`' do
+          allow(form).to receive(:description).and_return(description)
+          expect(controller).to receive(:resolve_relative_prismic_links).with(description)
+          call_method
+        end
+        it 'sets the `description` to the results of calling `resolve_relative_prismic_links`' do
+          allow(controller).to receive(:resolve_relative_prismic_links).and_return(resolved_description)
+          expect(controller).to receive(:add_link_to_row).with (hash_including(description: resolved_description))
+          call_method
+        end
+      end
+    end
+
+    describe '`forms_page_title_from_cms`' do
+      let(:cms) { instance_double(ContentManagementService) }
+      let(:cms_key) { double('some key') }
+      let(:title) { double('some title') }
+      let(:form) { instance_double(Cms::Form, form_page_title: nil) }
+      let(:call_method) { controller.send(:forms_page_title_from_cms, cms, cms_key) }
+
+      before { allow(Cms::Form).to receive(:new).and_return(form) }
+
+      it 'creates a new instance of `Cms::Form` with the member id, request object, cms instance and cms key' do
+        expect(Cms::Form).to receive(:new).with(member_id, request, cms_key, cms).and_return(form)
+        call_method
+      end
+      it 'calls `form_page_title` on the instance of `Cms::Form`' do
+        expect(form).to receive(:form_page_title)
+        call_method
+      end
+      it 'returns the results of calling `form_page_title` on the instance of `Cms::Form`' do
+        allow(form).to receive(:form_page_title).and_return(title)
+        expect(call_method).to eq(title)
       end
     end
   end

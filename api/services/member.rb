@@ -1049,6 +1049,38 @@ module MAPI
             end
           end
           api do
+            key :path, '/mcu_server_info'
+            operation do
+              key :method, 'GET'
+              key :summary, 'Gets the MCU server information'
+              key :nickname, :getMCUServerInfoForMember
+              key :type, :MCUServerInfo
+            end
+          end
+          api do
+            key :path, '/{id}/mcu_upload_file'
+            operation do
+              key :method, 'POST'
+              key :summary, 'Uploads a file for processing by MCU'
+              key :nickname, :postMCUUploadFileForMember
+              key :type, :MCUUploadFile
+              parameter do
+                key :paramType, :path
+                key :name, :id
+                key :required, true
+                key :type, :string
+                key :description, 'The FHLB ID of the member institution'
+              end
+              parameter do
+                key :paramType, :body
+                key :name, :body
+                key :required, true
+                key :type, :MCUUploadFileRequest
+                key :description, "Metadata for an MCU file upload"
+              end
+            end
+          end
+          api do
             key :path, '/{id}/capital_stock_trial_balance/{date}'
             operation do
               key :method, 'GET'
@@ -1834,6 +1866,12 @@ module MAPI
           end
         end
 
+        relative_get '/mcu_server_info' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            MAPI::Services::Member::MortgageCollateralUpdate.mcu_server_info(self)
+          end
+        end
+
         relative_get '/:id/mcu_member_status' do
           member_id = params[:id].to_i
           MAPI::Services::Member.rescued_json_response(self) do
@@ -1850,6 +1888,20 @@ module MAPI
         relative_get '/:id/mcu_member_info' do
           MAPI::Services::Member.rescued_json_response(self) do
             MAPI::Services::Member::MortgageCollateralUpdate.mcu_member_info(self, params[:id].to_i)
+          end
+        end
+
+        relative_post '/:id/mcu_upload_file' do
+          MAPI::Services::Member.rescued_json_response(self) do
+            post_body_json = JSON.parse(request.body.read)
+            MAPI::Services::Member::MortgageCollateralUpdate.mcu_upload_file(self, 
+                                                                             params[:id].to_i, 
+                                                                             post_body_json['transaction_id'], 
+                                                                             post_body_json['file_type'], 
+                                                                             post_body_json['pledge_type'], 
+                                                                             post_body_json['username'],
+                                                                             post_body_json['remote_path'],
+                                                                             post_body_json['archive_dir'])
           end
         end
 

@@ -127,6 +127,10 @@ class ApplicationController < ActionController::Base
     )
   end
 
+  def resolve_relative_prismic_links(html)
+    html.gsub(/https?:\/\/(localhost:\d+|.*fhlbsf.com|\/)/i, root_url).html_safe if html
+  end
+
   alias_method_chain :authenticate_user!, :authentication_flag
 
   private

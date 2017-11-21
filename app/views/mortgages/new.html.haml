@@ -3,78 +3,89 @@
   .row
     .column-9x3-left
       %h1= @title
-  =form_for(:mortgage_collateral_update, html: {class: 'mortgage-collateral-update-new-form'}) do |f|
+      -if @error.present?
+        .mcu-error-wrapper
+          .form-error-section
+            %p= t('mortgages.new.error_html', email: collateral_operations_email)
+  =form_for(:mortgage_collateral_update, url: mcu_upload_path, html: {class: 'mortgage-collateral-update-new-form', data: {securid_status: @securid_status, 'prevent-submit-on-enter' => true}}) do |f|
     .row
-      .column-9x3-left
-        %section
-          .mortgage-collateral-update-date-wrapper
-            %span= t('mortgages.due_date')
-            %span= fhlb_datetime_standard_numeric_with_at(@due_datetime)
-          .mortgage-collateral-update-date-wrapper
-            %span= t('mortgages.extension')
-            %span= fhlb_datetime_standard_numeric_with_at(@extension_datetime)
-        %section
-          %h2= t('mortgages.new.transaction.title')
-          .input-field-container-horizontal
-            %label{for: 'mortgage_collateral_update_new'}= t('mortgages.new.transaction.pledge')
-            = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[pledge_type]', dropdown_options: @pledge_type_dropdown_options, default_text: t('mortgages.new.transaction.select_pledge'), include_blank: true, classes: ['mcu-pledge-type-dropdown'], ignore_single_item: true
-          .input-field-container-horizontal
-            %label{for: 'mortgage_collateral_update_new'}= t('mortgages.new.transaction.mcu')
-            = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[mcu_type]', dropdown_options: @mcu_type_dropdown_options, default_text: t('mortgages.new.transaction.select_mcu'), include_blank: true, disabled: true, classes: ['mcu-mcu-type-dropdown'], ignore_single_item: true
-          .input-field-container-horizontal
-            %label{for: 'mortgage_collateral_update_new'}= t('mortgages.new.transaction.program')
-            - show_dropdown = true
-            - @program_type_dropdowns.each do |mcu_type, program_type_options|
-              = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[program_type]', dropdown_options: program_type_options, default_text: t('mortgages.new.transaction.select_program'), include_blank: true, disabled: true, classes: ['mcu-program-type-dropdown', mcu_type, show_dropdown ? 'selected' : ''], ignore_single_item: true
-              -show_dropdown = false
-        %section
-          %h2= t('mortgages.new.upload.title')
-          .mcu-upload-area
-            .mcu-upload-instructions
-              %p= t('mortgages.new.upload.file_types')
-              %p= t('mortgages.new.upload.instructions_html', email: collateral_operations_email, phone: collateral_operations_phone_number)
-              .mcu-upload-actions
-                .input-file-button-wrapper
-                  %button.secondary-button{type: 'button'}= t('securities.release.edit.select_file')
-                  =f.file_field(:file, accept: @accepted_upload_mimetypes)
-            .mcu-upload-complete
-              %p= t('mortgages.new.upload.uploaded_file')
-              %p.mcu-upload-file-name
-              %p.mcu-upload-file-discard=t('securities.safekeep_pledge.discard_and_upload_again')
-        %section.mcu-upload-legal-section.mcu-upload-legal-section-specific
-          %dl
-            %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.complete'))
-            %dd= t('mortgages.new.transaction.legal.specific.complete')
-            %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.update'))
-            %dd= t('mortgages.new.transaction.legal.specific.update')
-            %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.pledge'))
-            %dd= t('mortgages.new.transaction.legal.specific.pledge')
-            %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.depledge'))
-            %dd= t('mortgages.new.transaction.legal.specific.depledge')
-            %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.renumber'))
-            %dd= t('mortgages.new.transaction.legal.specific.renumber')
-          %p= t('mortgages.new.transaction.legal.specific.capitalized_terms')
-          %p= t('mortgages.new.transaction.legal.process_mcu')
-          =render 'shared/anti_predatory_legal_notice'
-          %p= t('mortgages.new.transaction.legal.rights')
-        %section.mcu-upload-legal-section.mcu-upload-legal-section-blanket-lien
-          %dl
-            %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.complete'))
-            %dd= t('mortgages.new.transaction.legal.blanket_lien.complete')
-            %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.update'))
-            %dd= t('mortgages.new.transaction.legal.blanket_lien.update')
-            %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.add'))
-            %dd= t('mortgages.new.transaction.legal.blanket_lien.add')
-            %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.delete'))
-            %dd= t('mortgages.new.transaction.legal.blanket_lien.delete')
-            %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.renumber'))
-            %dd= t('mortgages.new.transaction.legal.blanket_lien.renumber')
-          %p= t('mortgages.new.transaction.legal.specific.capitalized_terms')
-          %p= t('mortgages.new.transaction.legal.process_mcu')
-          =render 'shared/anti_predatory_legal_notice'
-          %p= t('mortgages.new.transaction.legal.rights')
-        - unless @session_elevated
-          = render 'shared/securid_module'
-        .new-mortgage-collateral-update-actions
-          %span.secondary-button= t('global.cancel')
-          = submit_tag(t('mortgages.new.authorize'), class: 'primary-button')
+      -unless @error.present?
+        .column-9x3-left
+          %section
+            .mortgage-collateral-update-date-wrapper
+              %span= t('mortgages.due_date')
+              %span= fhlb_datetime_standard_numeric_with_at(@due_datetime)
+            .mortgage-collateral-update-date-wrapper
+              %span= t('mortgages.extension')
+              %span= fhlb_datetime_standard_numeric_with_at(@extension_datetime)
+          %section
+            %h2= t('mortgages.new.transaction.title')
+            .input-field-container-horizontal
+              %label{for: 'mortgage_collateral_update_new'}= t('mortgages.new.transaction.pledge')
+              = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[pledge_type]', dropdown_options: @pledge_type_dropdown_options, default_text: t('mortgages.new.transaction.select_pledge'), include_blank: true, classes: ['mcu-pledge-type-dropdown'], ignore_single_item: true
+            .input-field-container-horizontal
+              %label{for: 'mortgage_collateral_update_new'}= t('mortgages.new.transaction.mcu')
+              = render 'shared/dropdown', dropdown_name: 'mortgage_collateral_update[mcu_type]', dropdown_options: @mcu_type_dropdown_options, default_text: t('mortgages.new.transaction.select_mcu'), include_blank: true, disabled: true, classes: ['mcu-mcu-type-dropdown'], ignore_single_item: true
+            .input-field-container-horizontal
+              %label{for: 'mortgage_collateral_update_new'}= t('mortgages.new.transaction.program')
+              - show_dropdown = true
+              - @program_type_dropdowns.each do |mcu_type, program_type_options|
+                = render 'shared/dropdown', dropdown_name: "mortgage_collateral_update[program_type_#{mcu_type}]", dropdown_options: program_type_options, default_text: t('mortgages.new.transaction.select_program'), include_blank: true, disabled: true, classes: ['mcu-program-type-dropdown', mcu_type, show_dropdown ? 'selected' : ''], ignore_single_item: true
+                -show_dropdown = false
+          %section
+            %h2= t('mortgages.new.upload.title')
+            .mcu-upload-area
+              .mcu-upload-instructions
+                %p= t('mortgages.new.upload.file_types')
+                %p= t('mortgages.new.upload.instructions_html', email: collateral_operations_email, phone: collateral_operations_phone_number)
+                .mcu-upload-actions
+                  .input-file-button-wrapper
+                    %button.secondary-button{type: 'button'}= t('securities.release.edit.select_file')
+                    =f.file_field(:file, accept: @accepted_upload_mimetypes)
+              .mcu-upload-complete
+                %p= t('mortgages.new.upload.uploaded_file')
+                %p.mcu-upload-file-name
+                %p.mcu-upload-file-discard=t('securities.safekeep_pledge.discard_and_upload_again')
+          %section.mcu-upload-legal-section.mcu-upload-legal-section-specific
+            %dl
+              %dt= t('mortgages.new.transaction.legal.specific.title')
+              %dd
+              %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.complete'))
+              %dd= t('mortgages.new.transaction.legal.specific.complete')
+              %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.update'))
+              %dd= t('mortgages.new.transaction.legal.specific.update')
+              %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.pledge'))
+              %dd= t('mortgages.new.transaction.legal.specific.pledge')
+              %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.depledge'))
+              %dd= t('mortgages.new.transaction.legal.specific.depledge')
+              %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.renumber'))
+              %dd= t('mortgages.new.transaction.legal.specific.renumber')
+            %p= t('mortgages.new.transaction.legal.specific.capitalized_terms')
+            %p= t('mortgages.new.transaction.legal.process_mcu')
+            %p= t('mortgages.new.transaction.legal.authorizing')
+            =render 'shared/anti_predatory_legal_notice'
+            %p= t('mortgages.new.transaction.legal.rights')
+          %section.mcu-upload-legal-section.mcu-upload-legal-section-blanket-lien
+            %dl
+              %dt= t('mortgages.new.transaction.legal.blanket_lien.title')
+              %dd
+              %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.complete'))
+              %dd= t('mortgages.new.transaction.legal.blanket_lien.complete')
+              %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.update'))
+              %dd= t('mortgages.new.transaction.legal.blanket_lien.update')
+              %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.add'))
+              %dd= t('mortgages.new.transaction.legal.blanket_lien.add')
+              %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.delete'))
+              %dd= t('mortgages.new.transaction.legal.blanket_lien.delete')
+              %dt= t('global.defined_term', term: t('mortgages.new.transaction.mcu_types.renumber'))
+              %dd= t('mortgages.new.transaction.legal.blanket_lien.renumber')
+            %p= t('mortgages.new.transaction.legal.blanket_lien.pledge_interest')
+            %p= t('mortgages.new.transaction.legal.process_mcu')
+            %p= t('mortgages.new.transaction.legal.authorizing')
+            =render 'shared/anti_predatory_legal_notice'
+            %p= t('mortgages.new.transaction.legal.rights')
+          - unless @session_elevated
+            = render 'shared/securid_module', error: @securid_status
+          .new-mortgage-collateral-update-actions
+            %span.secondary-button= t('global.cancel')
+            = submit_tag(t('mortgages.new.authorize'), class: 'primary-button')

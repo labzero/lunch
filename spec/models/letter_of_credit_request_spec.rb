@@ -599,7 +599,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
       let(:lc_details) { instance_double(Hash, :[] => nil) }
       let(:amendment_date) { Time.zone.today}
       let(:now) { instance_double(Time, :> => nil) }
-      let(:parsed_time) { instance_double(Time) }
+      let(:parsed_time) { instance_double(Time, :+ => described_class::AMENDMENT_DATE_TIME_RESTRICTION_WINDOW) }
       let(:letter_of_credit_request) { instance_double( LetterOfCreditRequest,
                                                         'beneficiary_name=': nil,
                                                         'amount=': nil,
@@ -698,7 +698,7 @@ RSpec.describe LetterOfCreditRequest, :type => :model do
           loc
         end
         it 'checks to see if the current time is greater than the time restriction' do
-          expect(now).to receive(:>).with(parsed_time)
+          expect(now).to receive(:>).with(parsed_time + described_class::AMENDMENT_DATE_TIME_RESTRICTION_WINDOW)
           loc
         end
 

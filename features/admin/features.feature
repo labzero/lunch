@@ -17,6 +17,14 @@ Feature: Toggling conditional features
     Then I see a list of enabled members
     And I see a list of enabled users
 
+  @jira-mem-2320
+  Scenario: Admin can navigate back to Features List from individual feature
+    Given I am logged into the admin panel
+    When I am on the features list
+    And I click on the view feature link
+    And I click on the Back to List link
+    Then I am on the features list
+
   @jira-mem-2114 @local-only
   Scenario: Admins can enable a feature for everyone
     Given I am logged into the admin panel

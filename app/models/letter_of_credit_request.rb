@@ -12,7 +12,10 @@ class LetterOfCreditRequest
   ISSUE_MAX_DATE_RESTRICTION = 1.week
   ISSUE_DATE_TIME_RESTRICTION = '10:00:00'
   ISSUE_DATE_TIME_RESTRICTION_WINDOW = 5.minutes
-  AMENDMENT_DATE_TIME_RESTRICTION = '11:00:00'
+  AMENDMENT_DATE_TIME_RESTRICTION = '10:00:00'
+  AMENDMENT_DATE_TIME_RESTRICTION_WINDOW = 5.minutes
+  AMENDMENT_MAX_DATE_RESTRICTION = 7.days
+
   REDIS_EXPIRATION_KEY_PATH =  'letter_of_credit_request.key_expiration'
 
   READ_ONLY_ATTRS = [:issuance_fee, :maintenance_fee, :amendment_fee, :request, :lc_number, :beneficiary, :current_par, :id, :owners,
@@ -66,7 +69,7 @@ class LetterOfCreditRequest
     letter_of_credit_request.amended_expiration_date = Time.zone.parse(lc_details[:maturity_date]) if lc_details[:maturity_date]
     calendar_service = CalendarService.new(@request)
     today = Time.zone.today
-    start_date = Time.zone.now > Time.zone.parse(AMENDMENT_DATE_TIME_RESTRICTION) ? today + 1.day : today
+    start_date = Time.zone.now > (Time.zone.parse(AMENDMENT_DATE_TIME_RESTRICTION) + AMENDMENT_DATE_TIME_RESTRICTION_WINDOW) ? today + 1.day : today
     letter_of_credit_request.amendment_date = calendar_service.find_next_business_day(start_date, 1.day)
     letter_of_credit_request.instance_variable_set(:@amendment_fee, DEFAULT_AMENDMENT_FEE)
     letter_of_credit_request.instance_variable_set(:@evergreen_flag, lc_details[:evergreen_flag])

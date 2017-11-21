@@ -18,6 +18,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
   before do
     allow(controller).to receive(:current_member_id).and_return(member_id)
     allow(MembersService).to receive(:new).and_return(members_service)
+    allow(members_service).to receive(:report_disabled?).and_return(false)
     allow(members_service).to receive(:member).with(member_id).and_return(member)
     allow(controller).to receive(:sanitized_profile)
     allow(controller).to receive(:member_contacts)
@@ -208,15 +209,33 @@ RSpec.describe LettersOfCreditController, :type => :controller do
     end
   end
 
+  shared_examples 'A LettersOfCreditController action that sets the `@borrowing capacity_disabled` instance variable with a before filter' do
+    let (:borrowing_capacity_disabled_val) { double('borrowing capacity disabled flag')}
+    before do
+      allow(members_service).to receive(:report_disabled?).with(member_id, [MembersService::ACCT_SUMMARY_AND_BORROWING_CAP_SIDEBARS]).and_return(:borrowing_capacity_disabled_val)
+    end
+    it 'creates a new instance of MembersService with the request' do
+      expect(MembersService).to receive(:new).with(request).and_return(members_service)
+      call_action
+    end
+    it 'sets the `@borrowing_capacity_disabled` instance variable to the value returned by MembersService' do
+      call_action
+      expect(assigns[:borrowing_capacity_disabled]).to eq(:borrowing_capacity_disabled_val)
+    end
+  end
+
   describe 'GET manage' do
     let(:historic_locs) { instance_double(Array) }
     let(:member_balance_service) { instance_double(MemberBalanceService, letters_of_credit: {credits: []}, todays_credit_activity: []) }
+    let(:members_service)  { double("A Member Service") }
     let(:lc) { {instrument_type: described_class::LC_INSTRUMENT_TYPE} }
     let(:call_action) { get :manage }
 
     before do
       allow(MemberBalanceService).to receive(:new).and_return(member_balance_service)
       allow(controller).to receive(:dedupe_locs)
+      allow(MembersService).to receive(:new).and_return(members_service)
+      allow(members_service).to receive(:report_disabled?).and_return(false)
     end
 
     it_behaves_like 'a user required action', :get, :manage
@@ -361,6 +380,21 @@ RSpec.describe LettersOfCreditController, :type => :controller do
         end
       end
     end
+
+    describe 'when the `Manage Letters of Credit` user interface element has been disabled' do
+      before do
+        allow(MembersService).to receive(:new).and_return(members_service)
+        allow(members_service).to receive(:report_disabled?).and_return(true)
+      end
+      it 'sets the `@manage_advances_disabled` instance variable to true' do
+        call_action
+        expect(assigns[:manage_locs_disabled]).to eq(true)
+      end
+      it 'returns an empty `@advances_data_table` table' do
+        call_action
+        expect(assigns[:table_data][:rows]).to eq([])
+      end
+    end
   end
 
   describe 'GET view' do
@@ -477,6 +511,8 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       it_behaves_like 'a LettersOfCreditController action that sets sidebar view variables with a before filter'
       it_behaves_like 'a LettersOfCreditController action that fetches a letter of credit request'
       it_behaves_like 'a LettersOfCreditController action that saves a letter of credit request'
+      it_behaves_like 'A LettersOfCreditController action that sets the `@borrowing capacity_disabled` instance variable with a before filter'
+
       it 'calls `populate_new_request_view_variables`' do
         expect(controller).to receive(:populate_new_request_view_variables)
         call_action
@@ -698,6 +734,7 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       it_behaves_like 'a user required action', :get, :amend
       it_behaves_like 'a LettersOfCreditController action that sets page-specific instance variables with a before filter'
       it_behaves_like 'a LettersOfCreditController action that sets sidebar view variables with a before filter'
+      it_behaves_like 'A LettersOfCreditController action that sets the `@borrowing capacity_disabled` instance variable with a before filter'
 
       it 'calls the class method`find_by_lc_number`' do
         expect(LetterOfCreditRequest).to receive(:find_by_lc_number).with(member_id, lc_number, intraday_lc, request).and_return(letter_of_credit_request)
@@ -1386,7 +1423,6 @@ RSpec.describe LettersOfCreditController, :type => :controller do
       end
     end
 
-
     describe '`prioritized_error_message`' do
       let(:max_term) { rand(12..120) }
       let(:remaining_bc) { rand(1000..999999) }
@@ -1458,6 +1494,12 @@ RSpec.describe LettersOfCreditController, :type => :controller do
           end
           it 'adds an error message containing the max term' do
             expect(call_method).to eq(I18n.t('letters_of_credit.errors.after_max_term', max_term: max_term))
+          end
+        end
+        describe 'when the errors contain an `amended_expiration_date` `after_max_term` error' do
+          before { allow(errors).to receive(:added?).with(:amended_expiration_date, :after_max_term).and_return(true) }
+          it 'adds an error message containing the max term' do
+            expect(call_method).to eq(I18n.t('letters_of_credit.request.amend.errors.after_max_term', max_term: max_term))
           end
         end
         describe 'when the errors do not contain an `amount` `exceeds_borrowing_capacity` error' do

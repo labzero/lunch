@@ -1,16 +1,10 @@
-class Cms::Guide
-  attr_reader :cms, :guide_type, :revisions
-
-  def initialize(member_id, request, guide_type, cms=nil)
-    @guide_type = guide_type
-    @cms = cms || ContentManagementService.new(member_id, request)
-    raise ArgumentError, 'Failed to create a valid instance of `ContentManagementService`' unless @cms.present?
-  end
+class Cms::Guide < Cms::BaseObject
+  attr_reader :revisions
 
   def revisions
     @revisions ||= (
       revisions = []
-      slices = cms.get_slices_by_type(guide_type, 'revision')
+      slices = cms.get_slices_by_type(cms_key, 'revision') || []
       slices.each { |slice| revisions <<  Revision.new(slice) }
       revisions.sort_by{ |revision| revision.last_updated }.reverse
     )

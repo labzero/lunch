@@ -29,6 +29,12 @@ RSpec.describe SecuritiesController, type: :controller do
     end
 
     describe 'GET manage' do
+      let(:members_service_instance) { double("A Member Service") }
+      before do
+        allow(MembersService).to receive(:new).and_return(members_service_instance)
+        allow(members_service_instance).to receive(:report_disabled?).and_return(false)
+      end
+
       let(:security) do
         security = {}
         [:cusip, :description, :custody_account_type, :maturity_date, :current_par].each do |attr|
@@ -230,6 +236,17 @@ RSpec.describe SecuritiesController, type: :controller do
           assigns[:securities_table_data][:rows].each do |row|
             expect(row[:columns][4][:value]).to eq(I18n.t('global.missing_value'))
           end
+        end
+      end
+
+      describe 'when the `Manage Securities` user interface element has been disabled' do
+        before do
+          allow(MembersService).to receive(:new).and_return(members_service_instance)
+          allow(members_service_instance).to receive(:report_disabled?).and_return(true)
+        end
+        it 'sets the `@manage_securities_disabled` instance variable to true' do
+          call_action
+          expect(assigns[:manage_securities_disabled]).to eq(true)
         end
       end
     end
@@ -1986,7 +2003,8 @@ RSpec.describe SecuritiesController, type: :controller do
         pledge: {
           upload_path: :securities_pledge_upload_path,
           download_path: :securities_pledge_download_path
-        }, safekeep: {
+        },
+        safekeep: {
           upload_path: :securities_safekeep_upload_path,
           download_path: :securities_safekeep_download_path
         },
@@ -2006,6 +2024,10 @@ RSpec.describe SecuritiesController, type: :controller do
         it "sets `@upload_path` to `#{details[:upload_path]}`" do
           controller.send(:populate_view_variables, type)
           expect(assigns[:upload_path]).to eq(controller.send(details[:upload_path]))
+        end
+        it "calls `date_restrictions` with `#{type}`" do
+          expect(controller).to receive(:date_restrictions).with(type)
+          controller.send(:populate_view_variables, type)
         end
       end
       it 'calls `populate_transaction_code_dropdown_variables` with the @securities_request' do
@@ -2375,7 +2397,7 @@ RSpec.describe SecuritiesController, type: :controller do
         end
       end
       let(:calendar_service) { instance_double(CalendarService, holidays: holidays) }
-      let(:call_method) { subject.send(:date_restrictions) }
+      let(:call_method) { subject.send(:date_restrictions, SecureRandom.hex) }
 
       before { allow(CalendarService).to receive(:new).and_return(calendar_service) }
 
@@ -2407,6 +2429,26 @@ RSpec.describe SecuritiesController, type: :controller do
             it 'includes all weekends between the today and the max date' do
               expect(call_method[date_type][:invalid_dates]).to include(*weekends)
             end
+          end
+        end
+      end
+      [:release, :pledge, :safekeep].each do |type|
+        context "when the `type` is `#{type}`" do
+          let(:call_method) { controller.send(:date_restrictions, type) }
+
+          describe 'the `settlement_date` hash' do
+            it "has a `min_date` of today minus #{SecuritiesRequest::MIN_SETTLEMENT_DATE_RESTRICTION - 4.days})" do
+              expect(call_method[:settlement_date][:min_date]).to eq(min_dates[:settlement_date])
+            end
+          end
+        end
+      end
+      context 'when the `type` is `:transfer`' do
+        let(:call_method) { controller.send(:date_restrictions, :transfer) }
+
+        describe 'the `settlement_date` hash' do
+          it 'has a `min_date` of today' do
+            expect(call_method[:settlement_date][:min_date]).to eq(Time.zone.today)
           end
         end
       end
