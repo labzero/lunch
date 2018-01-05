@@ -47,7 +47,7 @@ export const getFilteredRestaurants = createSelector(
         restaurantEntities[id].tags.includes(tagFilter))) &&
       (tagExclusions.length === 0 || tagExclusions.every(tagExclusion =>
         !restaurantEntities[id].tags.includes(tagExclusion))) &&
-      restaurantEntities[id].name.toLowerCase().indexOf(nameFilter) > -1
+      restaurantEntities[id].name.toLowerCase().indexOf(nameFilter.toLowerCase()) > -1
     );
   }
 );
