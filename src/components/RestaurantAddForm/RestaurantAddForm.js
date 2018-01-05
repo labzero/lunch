@@ -2,8 +2,12 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import { intlShape } from 'react-intl';
 import loadComponent from '../../helpers/loadComponent';
 import s from './RestaurantAddForm.scss';
+import generateMessageDescriptor from '../../helpers/generateMessageDescriptor';
+
+const m = generateMessageDescriptor('RestaurantAddForm');
 
 let google = { maps: { Geocoder: function Geocoder() { return {}; }, GeocoderStatus: {} } };
 if (canUseDOM) {
@@ -19,7 +23,8 @@ class RestaurantAddForm extends Component {
     createTempMarker: PropTypes.func.isRequired,
     clearTempMarker: PropTypes.func.isRequired,
     handleSuggestSelect: PropTypes.func.isRequired,
-    latLng: PropTypes.object.isRequired
+    latLng: PropTypes.object.isRequired,
+    intl: intlShape.isRequired
   };
 
   constructor(props) {
@@ -49,6 +54,8 @@ class RestaurantAddForm extends Component {
   }
 
   render() {
+    const { intl: { formatMessage: f } } = this.props;
+
     return (
       <form>
         <Geosuggest
@@ -60,6 +67,7 @@ class RestaurantAddForm extends Component {
           suggestItemActiveClassName={s.suggestItemActive}
           suggestsClassName={s.suggests}
           location={{ lat: () => this.props.latLng.lat, lng: () => this.props.latLng.lng }}
+          placeholder={f(m('addPlaces'))}
           radius="0"
           onBlur={this.props.clearTempMarker}
           onActivateSuggest={this.getCoordsForMarker}

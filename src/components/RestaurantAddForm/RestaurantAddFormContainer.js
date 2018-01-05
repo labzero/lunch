@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import { scroller } from 'react-scroll';
+import { injectIntl } from 'react-intl';
 import { getRestaurants } from '../../selectors/restaurants';
 import { getTeamLatLng } from '../../selectors/team';
 import { addRestaurant } from '../../actions/restaurants';
@@ -71,4 +72,4 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps,
   mergeProps
-)(RestaurantAddForm);
+)(injectIntl(RestaurantAddForm));
