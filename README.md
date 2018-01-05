@@ -28,7 +28,7 @@ Make two copies of `.env.sample`, named `.env` and `.env.prod`.
 For `GOOGLE_CLIENT_*` env variables:
 
 - Create a Google Developer app in the [console](https://console.developers.google.com/).
-- Enable the Google+ API, Contacts API, and Google Maps JavaScript API.
+- Enable the Google+ API, Contacts API, Google Maps JavaScript API, Google Places API Web Service, and Google Maps Geocoding API.
 - Go to the Credentials section and create an OAuth client ID.
 - For local development:
   - Enter `http://local.lunch.pink:3000` as an authorized JavaScript origin
