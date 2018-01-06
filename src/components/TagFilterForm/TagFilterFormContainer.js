@@ -5,6 +5,7 @@ import { getTagExclusions } from '../../selectors/tagExclusions';
 import { getTags } from '../../selectors/tags';
 import { addTagFilter, clearTagFilters, removeTagFilter } from '../../actions/tagFilters';
 import { addTagExclusion, clearTagExclusions, removeTagExclusion } from '../../actions/tagExclusions';
+import { setFlipMove } from '../../actions/listUi';
 import TagFilterForm from './TagFilterForm';
 
 const mapStateToProps = (state, ownProps) => {
@@ -23,6 +24,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
+  setFlipMove: val => dispatch(setFlipMove(val)),
   clearTags() {
     if (ownProps.exclude) {
       dispatch(clearTagExclusions());

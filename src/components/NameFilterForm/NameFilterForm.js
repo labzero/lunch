@@ -26,8 +26,13 @@ class NameFilterForm extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.shown !== prevState.shown && this.state.shown) {
-      this.input.focus();
+    if (this.state.shown !== prevState.shown) {
+      if (this.state.shown) {
+        this.input.focus();
+      }
+      else {
+        this.setFlipMoveTrue();
+      }
     }
   }
 
@@ -80,7 +85,6 @@ class NameFilterForm extends Component {
               value={nameFilter}
               onChange={this.setNameFilterValue}
               onFocus={this.setFlipMoveFalse}
-              onBlur={this.setFlipMoveTrue}
               ref={i => { this.input = i; }}
             />
           </div>

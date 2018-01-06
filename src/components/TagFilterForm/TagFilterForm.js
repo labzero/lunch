@@ -15,6 +15,10 @@ autosuggestTheme.input = 'form-control';
 const returnTrue = () => true;
 
 class TagFilterForm extends Component {
+  static propTypes = {
+    setFlipMove: PropTypes.func.isRequired,
+  };
+
   constructor(props) {
     super(props);
 
@@ -26,8 +30,13 @@ class TagFilterForm extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.shown !== prevState.shown && this.state.shown) {
-      this.autosuggest.input.focus();
+    if (this.state.shown !== prevState.shown) {
+      if (this.state.shown) {
+        this.autosuggest.input.focus();
+      }
+      else {
+        this.props.setFlipMove(true);
+      }
     }
   }
 
@@ -59,6 +68,7 @@ class TagFilterForm extends Component {
   }
 
   showForm = () => {
+    this.props.setFlipMove(false);
     this.setState(() => ({
       shown: true,
     }));
