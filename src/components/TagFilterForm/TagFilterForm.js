@@ -33,8 +33,7 @@ class TagFilterForm extends Component {
     if (this.state.shown !== prevState.shown) {
       if (this.state.shown) {
         this.autosuggest.input.focus();
-      }
-      else {
+      } else {
         this.props.setFlipMove(true);
       }
     }

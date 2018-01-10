@@ -7,6 +7,7 @@ const Team = sequelize.define('team', {
     type: DataTypes.STRING(63)
   },
   default_zoom: DataTypes.INTEGER,
+  sort_duration: DataTypes.INTEGER,
   lat: {
     allowNull: false,
     type: DataTypes.DOUBLE
