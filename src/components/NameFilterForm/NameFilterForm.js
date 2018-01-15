@@ -29,8 +29,7 @@ class NameFilterForm extends Component {
     if (this.state.shown !== prevState.shown) {
       if (this.state.shown) {
         this.input.focus();
-      }
-      else {
+      } else {
         this.setFlipMoveTrue();
       }
     }

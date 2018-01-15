@@ -108,6 +108,9 @@ export default () => {
           }, {
             name: 'slug',
             type: 'string'
+          }, {
+            name: 'sort_duration',
+            type: 'number'
           });
         }
 

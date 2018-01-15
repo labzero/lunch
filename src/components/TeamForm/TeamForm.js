@@ -5,9 +5,14 @@ import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
+import InputGroup from 'react-bootstrap/lib/InputGroup';
+import OverlayTrigger from 'react-bootstrap/lib/OverlayTrigger';
+import Popover from 'react-bootstrap/lib/Popover';
 import Row from 'react-bootstrap/lib/Row';
 import TeamGeosuggestContainer from '../TeamGeosuggest/TeamGeosuggestContainer';
 import TeamMapContainer from '../TeamMap/TeamMapContainer';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import s from './TeamForm.scss';
 
 class TeamForm extends Component {
   static propTypes = {
@@ -28,7 +33,8 @@ class TeamForm extends Component {
     };
     this.state = {
       address: props.team.address,
-      name: props.team.name
+      name: props.team.name,
+      sortDuration: props.team.sort_duration
     };
   }
 
@@ -36,12 +42,37 @@ class TeamForm extends Component {
 
   handleSubmit = (event) => {
     event.preventDefault();
-    this.props.updateTeam(Object.assign({}, this.state, this.props.center));
+    const typedsortDuration = typeof this.state.sortDuration === 'number' ?
+      this.state.sortDuration :
+      parseInt(this.state.sortDuration.slice(), 10);
+    if (typedsortDuration > 0) {
+      this.props.updateTeam(
+        Object.assign({}, this.state, this.props.center, { sort_duration: typedsortDuration })
+        );
+    } else {
+      event.stopPropagation();
+    }
   };
 
   render() {
     const { team } = this.props;
-    const { name } = this.state;
+    const { name, sortDuration } = this.state;
+    const sortDurationAddonLabel = parseInt(sortDuration, 10) === 1 ? 'day' : 'days';
+    const popoverRight = (
+      <Popover title="Sort Duration">
+        <p>
+          Sort duration refers to the amount of time votes and decisions factor in to how
+          restaurants are sorted.  For example, if you choose Burger Shack for today’s lunch
+          and your sort duration is set to 7 days, Burger Shack will appear towards the bottom
+          of your restaurant list for the next week.
+        </p>
+        <p>
+          Conversely, if you were to upvote Burger Shack but not choose it for today’s lunch,
+          Burger Shack would be prioritized and appear higher in your restaurant list for the
+          next week.
+        </p>
+      </Popover>
+    );
 
     return (
       <form onSubmit={this.handleSubmit}>
@@ -68,10 +99,33 @@ class TeamForm extends Component {
             onChange={this.handleChange('address')}
           />
         </FormGroup>
+        <FormGroup controlId="teamForm-vote-duration">
+          <ControlLabel>Sort duration</ControlLabel>
+          <OverlayTrigger trigger="focus" placement="right" overlay={popoverRight}>
+            <Button
+              bsSize="xsmall"
+              className={["glyphicon glyphicon-question-sign", s.overlayTrigger].join(' ')}
+            />
+          </OverlayTrigger>
+          <Row>
+            <Col sm={2}>
+              <InputGroup>
+                <FormControl
+                  type="number"
+                  onChange={this.handleChange('sortDuration')}
+                  required
+                  value={sortDuration}
+                  min="1"
+                />
+                <InputGroup.Addon>{sortDurationAddonLabel}</InputGroup.Addon>
+              </InputGroup>
+            </Col>
+          </Row>
+        </FormGroup>
         <Button type="submit">Save Changes</Button>
       </form>
     );
   }
 }
 
-export default TeamForm;
+export default withStyles(s)(TeamForm);
