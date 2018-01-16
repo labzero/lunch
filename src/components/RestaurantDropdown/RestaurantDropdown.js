@@ -8,6 +8,7 @@ import s from './RestaurantDropdown.scss';
 
 const RestaurantDropdown = ({
   restaurant,
+  sortDuration,
   listUiItem,
   decision,
   showMapAndInfoWindow,
@@ -74,7 +75,7 @@ const RestaurantDropdown = ({
       <DropdownMenu bsRole="menu" className={s.menu}>
         {menuItems}
         <MenuItem divider />
-        <MenuItem header>Last 4 weeks:</MenuItem>
+        <MenuItem header>Last {sortDuration} day{sortDuration === 1 ? '' : 's'}:</MenuItem>
         <li className={s.stat}>
           {restaurant.all_vote_count} vote{parseInt(restaurant.all_vote_count, 10) === 1 ? '' : 's'}
         </li>
@@ -89,6 +90,7 @@ decision${parseInt(restaurant.all_decision_count, 10) === 1 ? '' : 's'}`}
 
 RestaurantDropdown.propTypes = {
   restaurant: PropTypes.object.isRequired,
+  sortDuration: PropTypes.number.isRequired,
   listUiItem: PropTypes.object.isRequired,
   decision: PropTypes.object,
   showMapAndInfoWindow: PropTypes.func.isRequired,
