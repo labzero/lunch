@@ -7,10 +7,12 @@ import { removeDecision, decide } from '../../actions/decisions';
 import { showMapAndInfoWindow } from '../../actions/mapUi';
 import { showEditNameForm, setEditNameFormValue } from '../../actions/listUi';
 import { removeRestaurant } from '../../actions/restaurants';
+import { getTeamSortDuration } from '../../selectors/team';
 import RestaurantDropdown from './RestaurantDropdown';
 
 const mapStateToProps = (state, ownProps) => ({
   restaurant: getRestaurantById(state, ownProps.id),
+  sortDuration: getTeamSortDuration(state),
   listUiItem: getListUiItemForId(state, ownProps.id),
   decision: getDecision(state),
   ...ownProps
