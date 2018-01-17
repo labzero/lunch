@@ -153,7 +153,6 @@
     "postcss-pseudoelements": "^5.0.0",
     "postcss-selector-matches": "^3.0.1",
     "postcss-selector-not": "^3.0.1",
-    "pre-commit": "^1.2.2",
     "precss": "^1.4.0",
     "proxyquire": "^1.7.11",
     "raw-loader": "^0.5.1",
