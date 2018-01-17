@@ -177,7 +177,7 @@ describe('api/team/decisions', () => {
 
       it('broadcasts decisionPosted', () => {
         expect(broadcastSpy.called).to.be.true;
-        expect(decisionPostedSpy.calledWith(match.any, 231)).to.be.true;
+        expect(decisionPostedSpy.calledWith(match.any, match.array, 231)).to.be.true;
       });
 
       it('returns 201', () => {

@@ -265,10 +265,15 @@ export default new Map([
       items: {
         entities: {
           restaurants: {
-            [action.decision.restaurant_id]: {
-              all_decision_count: {
-                $apply: count => parseInt(count, 10) + 1
-              }
+            $apply: r => {
+              const changedRestaurants = Object.assign({}, r);
+              const decision = changedRestaurants[action.decision.restaurant_id];
+              decision.all_decision_count = parseInt(decision.all_decision_count, 10) + 1;
+              action.deselected.forEach(i => {
+                changedRestaurants[i.restaurant_id].all_decision_count =
+                  parseInt(changedRestaurants[i.restaurant_id].all_decision_count, 10) - 1;
+              });
+              return changedRestaurants;
             }
           }
         }
