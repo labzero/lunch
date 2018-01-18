@@ -266,14 +266,20 @@ export default new Map([
         entities: {
           restaurants: {
             $apply: r => {
-              const changedRestaurants = Object.assign({}, r);
-              const decision = changedRestaurants[action.decision.restaurant_id];
-              decision.all_decision_count = parseInt(decision.all_decision_count, 10) + 1;
+              const decision = r[action.decision.restaurant_id];
+              // eslint-disable-next-line no-param-reassign
+              r[action.decision.restaurant_id] = {
+                ...r[action.decision.restaurant_id],
+                all_decision_count: parseInt(decision.all_decision_count, 10) + 1,
+              };
               action.deselected.forEach(i => {
-                changedRestaurants[i.restaurant_id].all_decision_count =
-                  parseInt(changedRestaurants[i.restaurant_id].all_decision_count, 10) - 1;
+                // eslint-disable-next-line no-param-reassign
+                r[i.restaurant_id] = {
+                  ...r[i.restaurant_id],
+                  all_decision_count: parseInt(r[i.restaurant_id].all_decision_count, 10) - 1,
+                };
               });
-              return changedRestaurants;
+              return r;
             }
           }
         }
