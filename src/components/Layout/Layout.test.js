@@ -1,39 +1,32 @@
 /**
  * React Starter Kit (https://www.reactstarterkit.com/)
  *
- * Copyright © 2014-2016 Kriasoft, LLC. All rights reserved.
+ * Copyright © 2014-present Kriasoft, LLC. All rights reserved.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-/* eslint-env mocha */
-/* eslint-disable no-unused-expressions */
+/* eslint-env jest */
+/* eslint-disable padded-blocks, no-unused-expressions */
 
 import React from 'react';
-import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import renderer from 'react-test-renderer';
+import App from '../App';
 import Layout from './Layout';
 
-const context = { insertCss: () => {} };
+describe('Layout', () => {
+  test('renders children correctly', () => {
+    const wrapper = renderer
+      .create(
+        <App context={{ insertCss: () => {}, fetch: () => {} }}>
+          <Layout>
+            <div className="child" />
+          </Layout>
+        </App>,
+      )
+      .toJSON();
 
-describe('App', () => {
-  let props;
-
-  beforeEach(() => {
-    props = {
-      shouldScrollToTop: false,
-      scrolledToTop: () => {}
-    };
-  });
-
-  it('renders children correctly', () => {
-    const wrapper = shallow(
-      <Layout {...props}>
-        <div className="child" />
-      </Layout>,
-    { context });
-
-    expect(wrapper.contains(<div className="child" />)).to.be.true;
+    expect(wrapper).toMatchSnapshot();
   });
 });

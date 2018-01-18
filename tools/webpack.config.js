@@ -17,12 +17,20 @@ import pkg from '../package.json';
 
 const isDebug = !process.argv.includes('--release');
 const isVerbose = process.argv.includes('--verbose');
-const isAnalyze = process.argv.includes('--analyze') || process.argv.includes('--analyse');
+const isAnalyze =
+  process.argv.includes('--analyze') || process.argv.includes('--analyse');
 
-const reScript = /\.jsx?$/;
-const reStyle = /\.(css|less|scss|sss)$/;
-const reImage = /\.(bmp|gif|jpe?g|png|svg)$/;
-const staticAssetName = isDebug ? '[path][name].[ext]?[hash:8]' : '[hash:8].[ext]';
+const reScript = /\.(js|jsx|mjs)$/;
+const reStyle = /\.(css|less|styl|scss|sass|sss)$/;
+const reImage = /\.(bmp|gif|jpg|jpeg|png|svg)$/;
+const staticAssetName = isDebug
+  ? '[path][name].[ext]?[hash:8]'
+  : '[hash:8].[ext]';
+
+// CSS Nano options http://cssnano.co/
+const minimizeCssOptions = {
+  discardComments: { removeAll: true },
+};
 
 //
 // Common configuration chunk to be used for both
@@ -37,8 +45,12 @@ const config = {
     publicPath: '/assets/',
     pathinfo: isVerbose,
     filename: isDebug ? '[name].js' : '[name].[chunkhash:8].js',
-    chunkFilename: isDebug ? '[name].chunk.js' : '[name].[chunkhash:8].chunk.js',
-    devtoolModuleFilenameTemplate: info => path.resolve(info.absoluteResourcePath),
+    chunkFilename: isDebug
+      ? '[name].chunk.js'
+      : '[name].[chunkhash:8].chunk.js',
+    // Point sourcemap entries to original disk location (format as URL on Windows)
+    devtoolModuleFilenameTemplate: info =>
+      path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
   },
 
   resolve: {
@@ -55,7 +67,10 @@ const config = {
       // Rules for JS / JSX
       {
         test: reScript,
-        include: path.resolve(__dirname, '../src'),
+        include: [
+          path.resolve(__dirname, '../src'),
+          path.resolve(__dirname, '../tools'),
+        ],
         loader: 'babel-loader',
         options: {
           // https://github.com/babel/babel-loader#options
@@ -66,32 +81,38 @@ const config = {
           presets: [
             // A Babel preset that can automatically determine the Babel plugins and polyfills
             // https://github.com/babel/babel-preset-env
-            ['env', {
-              targets: {
-                browsers: pkg.browserslist,
-                uglify: true,
+            [
+              '@babel/preset-env',
+              {
+                targets: {
+                  browsers: pkg.browserslist,
+                  forceAllTransforms: !isDebug, // for UglifyJS
+                },
+                modules: false,
+                useBuiltIns: false,
+                debug: false,
               },
-              modules: false,
-              useBuiltIns: false,
-              debug: false,
-            }],
+            ],
             // Experimental ECMAScript proposals
             // https://babeljs.io/docs/plugins/#presets-stage-x-experimental-presets-
-            'stage-2',
-            // JSX, Flow
+            '@babel/preset-stage-2',
+            // Flow
+            // https://github.com/babel/babel/tree/master/packages/babel-preset-flow
+            '@babel/preset-flow',
+            // JSX
             // https://github.com/babel/babel/tree/master/packages/babel-preset-react
-            'react',
-            // Optimize React code for the production build
-            // https://github.com/thejameskyle/babel-react-optimize
-            ...isDebug ? [] : ['react-optimize'],
+            ['@babel/preset-react', { development: isDebug }],
           ],
           plugins: [
-            // Adds component stack to warning messages
-            // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-jsx-source
-            ...isDebug ? ['transform-react-jsx-source'] : [],
-            // Adds __self attribute to JSX which React will use for some warnings
-            // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-jsx-self
-            ...isDebug ? ['transform-react-jsx-self'] : [],
+            // Treat React JSX elements as value types and hoist them to the highest scope
+            // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-constant-elements
+            ...(isDebug ? [] : ['@babel/transform-react-constant-elements']),
+            // Replaces the React.createElement function with one that is more optimized for production
+            // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-inline-elements
+            ...(isDebug ? [] : ['@babel/transform-react-inline-elements']),
+            // Remove unnecessary React propTypes from the production build
+            // https://github.com/oliviertassinari/babel-plugin-transform-react-remove-prop-types
+            ...(isDebug ? [] : ['transform-react-remove-prop-types']),
           ],
         },
       },
@@ -112,8 +133,7 @@ const config = {
             loader: 'css-loader',
             options: {
               sourceMap: isDebug,
-              minimize: !isDebug,
-              discardComments: { removeAll: true },
+              minimize: isDebug ? false : minimizeCssOptions,
             },
           },
 
@@ -128,10 +148,11 @@ const config = {
               sourceMap: isDebug,
               // CSS Modules https://github.com/css-modules/css-modules
               modules: true,
-              localIdentName: isDebug ? '[name]-[local]-[hash:base64:5]' : '[hash:base64:5]',
-              // CSS Nano http://cssnano.co/options/
-              minimize: !isDebug,
-              discardComments: { removeAll: true },
+              localIdentName: isDebug
+                ? '[name]-[local]-[hash:base64:5]'
+                : '[hash:base64:5]',
+              // CSS Nano http://cssnano.co/
+              minimize: isDebug ? false : minimizeCssOptions,
             },
           },
 
@@ -249,14 +270,7 @@ const config = {
       // Return public URL for all assets unless explicitly excluded
       // DO NOT FORGET to update `exclude` list when you adding a new loader
       {
-        exclude: [
-          reScript,
-          reStyle,
-          reImage,
-          /\.json$/,
-          /\.txt$/,
-          /\.md$/,
-        ],
+        exclude: [reScript, reStyle, reImage, /\.json$/, /\.txt$/, /\.md$/],
         loader: 'file-loader',
         options: {
           name: staticAssetName,
@@ -264,12 +278,17 @@ const config = {
       },
 
       // Exclude dev modules from production build
-      ...isDebug ? [] : [
-        {
-          test: path.resolve(__dirname, '../node_modules/react-deep-force-update/lib/index.js'),
-          loader: 'null-loader',
-        },
-      ],
+      ...(isDebug
+        ? []
+        : [
+            {
+              test: path.resolve(
+                __dirname,
+                '../node_modules/react-deep-force-update/lib/index.js',
+              ),
+              loader: 'null-loader',
+            },
+          ]),
     ],
   },
 
@@ -309,7 +328,7 @@ const clientConfig = {
   target: 'web',
 
   entry: {
-    client: ['babel-polyfill', './src/client.js'],
+    client: ['@babel/polyfill', './src/client.js'],
   },
 
   plugins: [
@@ -336,30 +355,32 @@ const clientConfig = {
       minChunks: module => /node_modules/.test(module.resource),
     }),
 
-    ...isDebug ? [] : [
-      // Decrease script evaluation time
-      // https://github.com/webpack/webpack/blob/master/examples/scope-hoisting/README.md
-      new webpack.optimize.ModuleConcatenationPlugin(),
+    ...(isDebug
+      ? []
+      : [
+          // Decrease script evaluation time
+          // https://github.com/webpack/webpack/blob/master/examples/scope-hoisting/README.md
+          new webpack.optimize.ModuleConcatenationPlugin(),
 
-      // Minimize all JavaScript output of chunks
-      // https://github.com/mishoo/UglifyJS2#compressor-options
-      new webpack.optimize.UglifyJsPlugin({
-        sourceMap: true,
-        compress: {
-          screw_ie8: true, // React doesn't support IE8
-          warnings: isVerbose,
-          unused: true,
-          dead_code: true,
-        },
-        mangle: {
-          screw_ie8: true,
-        },
-        output: {
-          comments: false,
-          screw_ie8: true,
-        },
-      }),
-    ],
+          // Minimize all JavaScript output of chunks
+          // https://github.com/mishoo/UglifyJS2#compressor-options
+          new webpack.optimize.UglifyJsPlugin({
+            compress: {
+              warnings: isVerbose,
+              unused: true,
+              dead_code: true,
+              screw_ie8: true,
+            },
+            mangle: {
+              screw_ie8: true,
+            },
+            output: {
+              comments: false,
+              screw_ie8: true,
+            },
+            sourceMap: true,
+          }),
+        ]),
 
     // Webpack Bundle Analyzer
     // https://github.com/th0r/webpack-bundle-analyzer
@@ -388,7 +409,7 @@ const serverConfig = {
   target: 'node',
 
   entry: {
-    server: ['babel-polyfill', './src/server.js'],
+    server: ['@babel/polyfill', './src/server.js'],
   },
 
   output: {
@@ -408,33 +429,44 @@ const serverConfig = {
   module: {
     ...config.module,
 
-    rules: overrideRules(config.module.rules, (rule) => {
+    rules: overrideRules(config.module.rules, rule => {
       // Override babel-preset-env configuration for Node.js
       if (rule.loader === 'babel-loader') {
         return {
           ...rule,
           options: {
             ...rule.options,
-            presets: rule.options.presets.map(preset => (preset[0] !== 'env' ? preset : ['env', {
-              targets: {
-                node: pkg.engines.node.match(/(\d+\.?)+/)[0],
-              },
-              modules: false,
-              useBuiltIns: false,
-              debug: false,
-            }])),
+            presets: rule.options.presets.map(
+              preset =>
+                preset[0] !== '@babel/preset-env'
+                  ? preset
+                  : [
+                      '@babel/preset-env',
+                      {
+                        targets: {
+                          node: pkg.engines.node.match(/(\d+\.?)+/)[0],
+                        },
+                        modules: false,
+                        useBuiltIns: false,
+                        debug: false,
+                      },
+                    ],
+            ),
           },
         };
       }
 
       // Override paths to static assets
-      if (rule.loader === 'file-loader' || rule.loader === 'url-loader' || rule.loader === 'svg-url-loader') {
+      if (
+        rule.loader === 'file-loader' ||
+        rule.loader === 'url-loader' ||
+        rule.loader === 'svg-url-loader'
+      ) {
         return {
           ...rule,
           options: {
             ...rule.options,
-            name: `public/assets/${rule.options.name}`,
-            publicPath: url => url.replace(/^public/, ''),
+            emitFile: false,
           },
         };
       }
@@ -446,10 +478,7 @@ const serverConfig = {
   externals: [
     './assets.json',
     nodeExternals({
-      whitelist: [
-        reStyle,
-        reImage,
-      ],
+      whitelist: [reStyle, reImage],
     }),
   ],
 
