@@ -29,6 +29,7 @@ export default () => {
       async (req, res, next) => {
         const restaurantId = parseInt(req.body.restaurant_id, 10);
         try {
+          const deselected = await Decision.scope('fromToday').findAll({ where: { team_id: req.team.id } });
           await Decision.scope('fromToday').destroy({ where: { team_id: req.team.id } });
 
           try {
@@ -38,7 +39,7 @@ export default () => {
             });
 
             const json = obj.toJSON();
-            req.wss.broadcast(req.team.id, decisionPosted(json, req.user.id));
+            req.wss.broadcast(req.team.id, decisionPosted(json, deselected, req.user.id));
             res.status(201).send({ error: false, data: obj });
           } catch (err) {
             const error = { message: 'Could not save decision.' };

@@ -65,9 +65,10 @@ export const postDecision = (restaurantId) => ({
   restaurantId
 });
 
-export const decisionPosted = (decision, userId) => ({
+export const decisionPosted = (decision, deselected, userId) => ({
   type: ActionTypes.DECISION_POSTED,
   decision,
+  deselected,
   userId
 });
 

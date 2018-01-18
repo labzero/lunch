@@ -265,10 +265,21 @@ export default new Map([
       items: {
         entities: {
           restaurants: {
-            [action.decision.restaurant_id]: {
-              all_decision_count: {
-                $apply: count => parseInt(count, 10) + 1
-              }
+            $apply: r => {
+              const decision = r[action.decision.restaurant_id];
+              // eslint-disable-next-line no-param-reassign
+              r[action.decision.restaurant_id] = {
+                ...r[action.decision.restaurant_id],
+                all_decision_count: parseInt(decision.all_decision_count, 10) + 1,
+              };
+              action.deselected.forEach(i => {
+                // eslint-disable-next-line no-param-reassign
+                r[i.restaurant_id] = {
+                  ...r[i.restaurant_id],
+                  all_decision_count: parseInt(r[i.restaurant_id].all_decision_count, 10) - 1,
+                };
+              });
+              return r;
             }
           }
         }
