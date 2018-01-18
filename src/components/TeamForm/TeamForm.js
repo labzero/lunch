@@ -9,9 +9,9 @@ import InputGroup from 'react-bootstrap/lib/InputGroup';
 import OverlayTrigger from 'react-bootstrap/lib/OverlayTrigger';
 import Popover from 'react-bootstrap/lib/Popover';
 import Row from 'react-bootstrap/lib/Row';
+import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import TeamGeosuggestContainer from '../TeamGeosuggest/TeamGeosuggestContainer';
 import TeamMapContainer from '../TeamMap/TeamMapContainer';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import s from './TeamForm.scss';
 
 class TeamForm extends Component {
@@ -104,7 +104,7 @@ class TeamForm extends Component {
           <OverlayTrigger trigger="focus" placement="right" overlay={popoverRight}>
             <Button
               bsSize="xsmall"
-              className={["glyphicon glyphicon-question-sign", s.overlayTrigger].join(' ')}
+              className={['glyphicon glyphicon-question-sign', s.overlayTrigger].join(' ')}
             />
           </OverlayTrigger>
           <Row>
