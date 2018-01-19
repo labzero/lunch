@@ -23,7 +23,7 @@ export default (context) => {
       title,
       chunks: ['account'],
       component: (
-        <LayoutContainer path={context.url}>
+        <LayoutContainer path={context.pathname}>
           <AccountContainer />
         </LayoutContainer>
       )

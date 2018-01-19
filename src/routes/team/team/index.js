@@ -27,7 +27,7 @@ export default (context) => {
         title,
         chunks: ['team'],
         component: (
-          <LayoutContainer path={context.url}>
+          <LayoutContainer path={context.pathname}>
             <TeamContainer />
           </LayoutContainer>
         ),

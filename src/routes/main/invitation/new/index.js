@@ -16,7 +16,7 @@ export default (context) => {
 
   return {
     component: (
-      <LayoutContainer path={context.url}>
+      <LayoutContainer path={context.pathname}>
         <New email={email} />
       </LayoutContainer>
     ),

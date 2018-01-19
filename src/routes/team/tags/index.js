@@ -27,7 +27,7 @@ export default (context) => {
         title,
         chunks: ['tags'],
         component: (
-          <LayoutContainer path={context.url}>
+          <LayoutContainer path={context.pathname}>
             <TagsContainer title={title} />
           </LayoutContainer>
         ),

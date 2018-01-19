@@ -26,7 +26,7 @@ export default (context) => {
 
     return {
       component: (
-        <LayoutContainer path={context.url}>
+        <LayoutContainer path={context.pathname}>
           <Create success={success} />
         </LayoutContainer>
       ),

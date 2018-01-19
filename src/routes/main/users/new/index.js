@@ -21,7 +21,7 @@ export default (context) => {
   if (user.superuser) {
     return {
       component: (
-        <LayoutContainer path={context.url}>
+        <LayoutContainer path={context.pathname}>
           <New email={email} />
         </LayoutContainer>
       )
