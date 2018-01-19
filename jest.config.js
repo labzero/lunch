@@ -63,6 +63,7 @@ module.exports = {
   // like images or styles with a single module.
   moduleNameMapper: {
     '\\.(css|less|styl|scss|sass|sss)$': 'identity-obj-proxy',
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': 'GlobalImageStub',
   },
 
   // modulePathIgnorePatterns: // [array<string>]
@@ -90,9 +91,8 @@ module.exports = {
   // timers: // [string]
 
   transform: {
-    '\\.(js|jsx)$': '<rootDir>/node_modules/babel-jest',
-    '^(?!.*\\.(js|jsx|json|css|less|styl|scss|sass|sss)$)':
-      '<rootDir>/tools/lib/fileTransformer.js',
+    '\\.(js|jsx)$': 'babel-jest',
+    '\\.(jpe?g|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/jest/fileTransformer.js',
   },
 
   // transformIgnorePatterns: // [array<string>]
