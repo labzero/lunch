@@ -11,7 +11,7 @@
 
 export default [
   {
-    path: '/',
+    path: '',
     action: require('./create').default,
   },
   {
@@ -23,9 +23,9 @@ export default [
     action: require('./new').default,
   },
 
-  // Wildcard routes, e.g. { path: '*', ... } (must go last)
+  // Wildcard routes, e.g. { path: '(.*)', ... } (must go last)
   {
-    path: '*',
+    path: '(.*)',
     load: () => import(/* webpackChunkName: 'not-found' */ '../../not-found'),
   }
 ];
