@@ -398,7 +398,7 @@ const serverConfig = {
   target: 'node',
 
   entry: {
-    server: ['@babel/polyfill', './src/server.js'],
+    server: ['./src/server.js'],
   },
 
   output: {
