@@ -20,7 +20,7 @@ import createFetch from './createFetch';
 import configureStore from './store/configureStore';
 import history from './history';
 import { updateMeta } from './DOMUtils';
-import universalRouter from './router';
+import routerCreator from './router';
 
 /* eslint-disable global-require */
 
@@ -128,14 +128,14 @@ let onRenderComplete = function initialRenderComplete() {
   };
 };
 
-// let routes;
-// if (subdomain) {
-//   routes = require('./routes/team').default; // eslint-disable-line global-require
-// } else {
-//   routes = require('./routes/main').default; // eslint-disable-line global-require
-// }
+let routes;
+if (subdomain) {
+  routes = require('./routes/team').default; // eslint-disable-line global-require
+} else {
+  routes = require('./routes/main').default; // eslint-disable-line global-require
+}
 
-const router = universalRouter;
+const router = routerCreator(routes);
 
 // Re-render the app when window.location changes
 async function onLocationChange(location, action) {

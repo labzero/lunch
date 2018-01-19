@@ -8,9 +8,8 @@
  */
 
 import UniversalRouter from 'universal-router';
-import routes from './routes';
 
-export default new UniversalRouter(routes, {
+export default routes => new UniversalRouter(routes, {
   resolveRoute(context, params) {
     if (typeof context.route.load === 'function') {
       return context.route

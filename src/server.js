@@ -40,7 +40,7 @@ import teamRoutes from './routes/team';
 import mainRoutes from './routes/main';
 import createFetch from './createFetch';
 import passport from './passport';
-import universalRouter from './router';
+import routerCreator from './router';
 import assets from './assets.json'; // eslint-disable-line import/no-unresolved
 import configureStore from './store/configureStore';
 import config from './config';
@@ -302,12 +302,12 @@ const render = async (req, res, next) => {
       store
     };
 
-    const router = universalRouter;
-    // if (req.subdomain) {
-    //   router = routerCreator(teamRoutes);
-    // } else {
-    //   router = routerCreator(mainRoutes);
-    // }
+    let router;
+    if (req.subdomain) {
+      router = routerCreator(teamRoutes);
+    } else {
+      router = routerCreator(mainRoutes);
+    }
 
     const route = await router.resolve({
       ...context,
