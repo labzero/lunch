@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign */
+/* eslint-disable no-param-reassign, no-return-assign */
 
 export default (obj, path, def) => (() => typeof path === 'string' ? path.replace(/\[(\d+)]/g, '.$1') : path.join('.'))()
   .split('.')

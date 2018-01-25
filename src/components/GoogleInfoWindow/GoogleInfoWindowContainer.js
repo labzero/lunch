@@ -4,6 +4,7 @@ import GoogleInfoWindow from './GoogleInfoWindow';
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   addRestaurant: (result) => {
+    // eslint-disable-next-line camelcase
     const { name, formatted_address } = result;
     const location = result.geometry.location;
 

@@ -56,7 +56,7 @@
     "react-bootstrap": "^0.31.0",
     "react-dom": "^16.2.0",
     "react-flip-move": "^2.9.14",
-    "react-geosuggest": "^2.3.5",
+    "react-geosuggest": "^2.7.0",
     "react-intl": "^2.3.0",
     "react-redux": "^5.0.6",
     "react-scroll": "^1.5.4",

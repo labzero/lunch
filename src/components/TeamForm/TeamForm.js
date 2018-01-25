@@ -55,8 +55,7 @@ class TeamForm extends Component {
   };
 
   render() {
-    const { team } = this.props;
-    const { name, sortDuration } = this.state;
+    const { name, address, sortDuration } = this.state;
     const sortDurationAddonLabel = parseInt(sortDuration, 10) === 1 ? 'day' : 'days';
     const popoverRight = (
       <Popover title="Sort Duration">
@@ -95,7 +94,7 @@ class TeamForm extends Component {
           <TeamMapContainer defaultCenter={this.defaultCenter} />
           <TeamGeosuggestContainer
             id="teamForm-address"
-            initialValue={team.address}
+            initialValue={address}
             onChange={this.handleChange('address')}
           />
         </FormGroup>

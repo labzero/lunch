@@ -40,14 +40,6 @@
   z-index: 3; /* above form-control within input-group */
 }
 
-.loggedIn {
-  .bannerTitle {
-    img {
-      height: 5em;
-    }
-  }
-}
-
 .backgroundOverflow {
   overflow: hidden;
   position: absolute;
@@ -120,6 +112,14 @@
   &:active {
     span {
       transform: scale(1.25, .75);
+    }
+  }
+}
+
+.loggedIn {
+  .bannerTitle {
+    img {
+      height: 5em;
     }
   }
 }
