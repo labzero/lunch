@@ -428,6 +428,7 @@ const serverConfig = {
               preset[0] !== '@babel/preset-env' ? preset : [
                 '@babel/preset-env',
                 {
+                  include: ['transform-regenerator'],
                   targets: {
                     node: pkg.engines.node.match(/(\d+\.?)+/)[0],
                   },
