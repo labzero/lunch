@@ -62,7 +62,7 @@ class Account extends Component {
               </Col>
             </Row>
           </FormGroup>
-          <FormGroup controlId="account-name">
+          <FormGroup controlId="account-email">
             <ControlLabel>Email</ControlLabel>
             <Row>
               <Col sm={6}>
@@ -76,7 +76,7 @@ class Account extends Component {
               </Col>
             </Row>
           </FormGroup>
-          <FormGroup controlId="account-name">
+          <FormGroup controlId="account-password">
             <ControlLabel>Change password?</ControlLabel>
             <Row>
               <Col sm={6}>
