@@ -58,7 +58,7 @@ class TeamForm extends Component {
     const { name, address, sortDuration } = this.state;
     const sortDurationAddonLabel = parseInt(sortDuration, 10) === 1 ? 'day' : 'days';
     const popoverRight = (
-      <Popover title="Sort Duration">
+      <Popover title="Sort Duration" id="sortDuration">
         <p>
           Sort duration refers to the amount of time votes and decisions factor in to how
           restaurants are sorted.  For example, if you choose Burger Shack for today’s lunch
