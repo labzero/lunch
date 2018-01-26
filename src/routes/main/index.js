@@ -13,12 +13,12 @@ import rootAction from '../helpers/rootAction';
 // The top-level (parent) route
 export default {
 
-  path: '/',
+  path: '',
 
   // Keep in mind, routes are evaluated in order
   children: [
     {
-      path: '/',
+      path: '',
       load: () => import(/* webpackChunkName: 'landing' */ './landing'),
     },
     {
@@ -58,9 +58,9 @@ export default {
       load: () => import(/* webpackChunkName: 'login' */ '../login'),
     },
 
-    // Wildcard routes, e.g. { path: '*', ... } (must go last)
+    // Wildcard routes, e.g. { path: '(.*)', ... } (must go last)
     {
-      path: '*',
+      path: '(.*)',
       load: () => import(/* webpackChunkName: 'not-found' */ '../not-found'),
     }
   ],

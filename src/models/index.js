@@ -27,6 +27,7 @@ Tag.addScope('orderedByRestaurant', {
   order: [sequelize.literal('restaurant_count DESC')]
 });
 
+// eslint-disable-next-line camelcase
 Restaurant.findAllWithTagIds = ({ team_id }) =>
   Team.findById(team_id).then(team =>
     Restaurant.findAll({

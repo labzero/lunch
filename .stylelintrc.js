@@ -22,6 +22,12 @@ module.exports = {
   ],
 
   rules: {
+    'at-rule-no-unknown': [
+      true,
+      {
+        ignoreAtRules: ['include', 'mixin'],
+      },
+    ],
     'declaration-empty-line-before': null,
     'number-leading-zero': 'never',
     'property-no-unknown': [true, {

@@ -19,7 +19,7 @@ export default (context) => {
 
   return renderIfLoggedOut(state, () => ({
     component: (
-      <LayoutContainer path={context.url}>
+      <LayoutContainer path={context.pathname}>
         <New email={email} />
       </LayoutContainer>
     ),

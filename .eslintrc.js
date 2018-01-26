@@ -16,6 +16,9 @@ module.exports = {
     'airbnb',
     'plugin:flowtype/recommended',
     'plugin:css-modules/recommended',
+    'prettier',
+    'prettier/flowtype',
+    'prettier/react',
   ],
 
   plugins: [
@@ -48,6 +51,13 @@ module.exports = {
     // https://github.com/benmosher/eslint-plugin-import/issues/458
     'import/no-extraneous-dependencies': 'off',
 
+    'jsx-a11y/anchor-is-valid': [ 
+      'error', 
+      {
+        specialLink: ['to'],
+      },
+    ],
+
     // Recommend not to leave any console.log in your code
     // Use console.error, console.warn and console.info instead
     'no-console': [
@@ -56,6 +66,8 @@ module.exports = {
         allow: ['warn', 'error', 'info'],
       },
     ],
+
+    'prefer-destructuring': 0,
 
     // Allow js files to use jsx syntax, too
     'react/jsx-filename-extension': ['error', { extensions: ['.js', '.jsx'] }],

@@ -21,7 +21,7 @@ function action(context) {
   return renderIfLoggedOut(state, () => ({
     chunks: ['login'],
     component: (
-      <LayoutContainer path={context.url}>
+      <LayoutContainer path={context.pathname}>
         <LoginContainer team={subdomain} next={next} />
       </LayoutContainer>
     ),

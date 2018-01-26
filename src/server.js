@@ -148,13 +148,16 @@ app.use(flash());
 //
 // Authentication
 // -----------------------------------------------------------------------------
-app.use(expressJwt({
-  secret: config.auth.jwt.secret,
-  credentialsRequired: false,
-  getToken: req => req.cookies.id_token,
-}));
+app.use(
+  expressJwt({
+    secret: config.auth.jwt.secret,
+    credentialsRequired: false,
+    getToken: req => req.cookies.id_token,
+  }),
+);
 // Error handler for express-jwt
 app.use((err, req, res, next) => {
+  // eslint-disable-line no-unused-vars
   if (err instanceof Jwt401Error) {
     req.logout();
     res.clearCookie('id_token', { domain: config.domain });
@@ -308,7 +311,7 @@ const render = async (req, res, next) => {
 
     const route = await router.resolve({
       ...context,
-      path: req.path,
+      pathname: req.path,
       query: req.query,
       subdomain: req.subdomain,
     });
@@ -371,7 +374,8 @@ const pe = new PrettyError();
 pe.skipNodeFiles();
 pe.skipPackage('express');
 
-app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
   console.error(pe.render(err));
   res.status(err.status || 500);
   if (req.accepts('html') === 'html') {

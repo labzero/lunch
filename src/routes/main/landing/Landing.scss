@@ -59,11 +59,6 @@
     z-index: 0;
   }
 
-  &:nth-child(even)::after,
-  &:nth-child(odd)::before {
-    background: $white-color;
-  }
-
   &::before {
     border-right: $default-border;
     right: calc(50% - 1.5px);
@@ -71,6 +66,11 @@
 
   &::after {
     left: calc(50% + 1.5px);
+  }
+
+  &:nth-child(even)::after,
+  &:nth-child(odd)::before {
+    background: $white-color;
   }
 
   &:last-child {

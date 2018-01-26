@@ -47,7 +47,7 @@ describe('mailers/transporter', () => {
       it('contains the to email in the tos value', () => {
         const body = emptyRequestSpy.lastCall.args[0].body;
         expect(body.subject).to.eq('Hello');
-        expect(body.personalizations[0].tos[0]).to.deep.eq({
+        expect(body.personalizations[0].to[0]).to.deep.eq({
           name: 'Jeffrey',
           email: 'j@l.com'
         });
@@ -79,7 +79,7 @@ describe('mailers/transporter', () => {
           name: 'Lunch',
           email: 'noreply@lunch.pink'
         });
-        expect(body.personalizations[0].tos[0]).to.deep.eq({
+        expect(body.personalizations[0].to[0]).to.deep.eq({
           name: 'Lunch',
           email: 'noreply@lunch.pink'
         });
@@ -87,7 +87,7 @@ describe('mailers/transporter', () => {
 
       it('contains the emails in the bccs value', () => {
         const body = emptyRequestSpy.lastCall.args[0].body;
-        expect(body.personalizations[0].bccs).to.deep.contain.members([
+        expect(body.personalizations[0].bcc).to.deep.contain.members([
           {
             name: 'Jeffrey',
             email: 'j@l.com'

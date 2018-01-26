@@ -17,7 +17,7 @@ export default (context) => ({
   title,
   chunks: ['about'],
   component: (
-    <LayoutContainer path={context.url}>
+    <LayoutContainer path={context.pathname}>
       <About />
     </LayoutContainer>
   ),

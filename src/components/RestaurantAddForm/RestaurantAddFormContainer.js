@@ -43,26 +43,28 @@ const mapDispatchToProps = dispatch => ({
 const mergeProps = (stateProps, dispatchProps) =>
   Object.assign({}, stateProps, dispatchProps, {
     handleSuggestSelect: (suggestion, geosuggest) => {
-      let name = suggestion.label;
-      let address;
-      const { placeId, location: { lat, lng } } = suggestion;
-      const isEstablishment = suggestion.gmaps && suggestion.gmaps.types.indexOf('establishment') > -1;
-      if (suggestCache[placeId] !== undefined && isEstablishment) {
-        name = suggestCache[placeId];
-      } else if (!isEstablishment) {
-        name = name.split(',')[0];
-      }
-      if (suggestion.gmaps !== undefined) {
-        address = suggestion.gmaps.formatted_address;
-      }
-      suggestCache = [];
-      geosuggest.update('');
-      geosuggest.showSuggests();
-      const existingRestaurant = stateProps.restaurants.find(r => r.place_id === placeId);
-      if (existingRestaurant === undefined) {
-        dispatchProps.dispatch(addRestaurant(name, placeId, address, lat, lng));
-      } else {
-        scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, true, undefined, -20);
+      if (suggestion) {
+        let name = suggestion.label;
+        let address;
+        const { placeId, location: { lat, lng } } = suggestion;
+        const isEstablishment = suggestion.gmaps && suggestion.gmaps.types.indexOf('establishment') > -1;
+        if (suggestCache[placeId] !== undefined && isEstablishment) {
+          name = suggestCache[placeId];
+        } else if (!isEstablishment) {
+          name = name.split(',')[0];
+        }
+        if (suggestion.gmaps !== undefined) {
+          address = suggestion.gmaps.formatted_address;
+        }
+        suggestCache = [];
+        geosuggest.update('');
+        geosuggest.showSuggests();
+        const existingRestaurant = stateProps.restaurants.find(r => r.place_id === placeId);
+        if (existingRestaurant === undefined) {
+          dispatchProps.dispatch(addRestaurant(name, placeId, address, lat, lng));
+        } else {
+          scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, true, undefined, -20);
+        }
       }
       dispatchProps.dispatch(clearTempMarker());
     }

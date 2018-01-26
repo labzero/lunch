@@ -18,7 +18,7 @@ export default (context) => {
   return renderIfLoggedOut(state, () => ({
     chunks: ['landing'],
     component: (
-      <LayoutContainer path={context.url}>
+      <LayoutContainer path={context.pathname}>
         <Landing />
       </LayoutContainer>
     ),

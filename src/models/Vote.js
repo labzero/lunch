@@ -27,7 +27,7 @@ const Vote = sequelize.define('vote',
       fromToday: () => ({
         where: {
           created_at: {
-            $gt: moment().subtract(12, 'hours').toDate()
+            [DataTypes.Op.gt]: moment().subtract(12, 'hours').toDate()
           }
         }
       })

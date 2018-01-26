@@ -13,7 +13,7 @@ import browserSync from 'browser-sync';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
-import createLaunchEditorMiddleware from 'react-error-overlay/middleware';
+import createLaunchEditorMiddleware from 'react-dev-utils/errorOverlayMiddleware';
 import webpackConfig from './webpack.config';
 import run, { format } from './run';
 import clean from './clean';
@@ -117,6 +117,7 @@ async function start() {
   serverCompiler.plugin('compile', () => {
     if (!appPromiseIsResolved) return;
     appPromiseIsResolved = false;
+    // eslint-disable-next-line no-return-assign
     appPromise = new Promise(resolve => (appPromiseResolve = resolve));
   });
 

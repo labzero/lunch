@@ -69,6 +69,7 @@ export default () => {
       loggedIn,
       checkTeamRole(),
       async (req, res, next) => {
+        // eslint-disable-next-line camelcase
         const { name, place_id, lat, lng } = req.body;
 
         let { address } = req.body;
@@ -87,6 +88,8 @@ export default () => {
           }, { include: [Vote, Tag] });
 
           const json = obj.toJSON();
+          json.all_decision_count = 0;
+          json.all_vote_count = 0;
           req.wss.broadcast(req.team.id, restaurantPosted(json, req.user.id));
           res.status(201).send({ error: false, data: json });
         } catch (err) {

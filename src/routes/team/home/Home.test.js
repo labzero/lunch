@@ -2,11 +2,14 @@
 /* eslint-disable padded-blocks, no-unused-expressions */
 
 import React from 'react';
+import Adapter from 'enzyme-adapter-react-16';
 import sinon from 'sinon';
 import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import { shallow, configure } from 'enzyme';
 import { _Home as Home } from './Home';
 import RestaurantAddFormContainer from '../../../components/RestaurantAddForm/RestaurantAddFormContainer';
+
+configure({ adapter: new Adapter() });
 
 describe('Home', () => {
   let props;

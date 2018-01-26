@@ -18,7 +18,7 @@ export default (context) => renderIfHasName(context, () => ({
   title,
   chunks: ['new-team'],
   component: (
-    <LayoutContainer path={context.url}>
+    <LayoutContainer path={context.pathname}>
       <NewTeamContainer />
     </LayoutContainer>
   ),

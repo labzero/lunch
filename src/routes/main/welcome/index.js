@@ -23,7 +23,7 @@ export default (context) => {
       title,
       chunks: ['welcome'],
       component: (
-        <LayoutContainer path={context.url}>
+        <LayoutContainer path={context.pathname}>
           <WelcomeContainer next={context.query.next} team={context.query.team} />
         </LayoutContainer>
       )
