@@ -14,7 +14,8 @@ if (canUseDOM) {
   google = window.google || google;
 }
 
-let Geosuggest = () => null;
+const renderNull = () => null;
+let Geosuggest = renderNull;
 
 class RestaurantAddForm extends Component {
 
@@ -73,7 +74,8 @@ class RestaurantAddForm extends Component {
           onActivateSuggest={this.getCoordsForMarker}
           onSuggestSelect={this.handleSuggestSelect}
           getSuggestLabel={this.props.getSuggestLabel}
-          ref={g => { this.geosuggest = g; }}
+          // to silence ref warning in React 16
+          ref={Geosuggest === renderNull ? undefined : (g => { this.geosuggest = g; })}
         />
       </form>
     );
