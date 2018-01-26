@@ -73,7 +73,7 @@ class Team extends React.Component {
   };
 
   handleDeleteUserClicked = id => () => {
-    // eslint-disable-next-line
+    // eslint-disable-next-line no-restricted-globals, no-alert
     if (confirm('Are you sure you want to remove this user from this team?')) {
       this.props.removeUserFromTeam(id);
     }
