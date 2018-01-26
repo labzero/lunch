@@ -397,7 +397,7 @@ const serverConfig = {
   target: 'node',
 
   entry: {
-    server: ['./src/server.js'],
+    server: ['@babel/polyfill', './src/server.js'],
   },
 
   output: {
@@ -428,7 +428,6 @@ const serverConfig = {
               preset[0] !== '@babel/preset-env' ? preset : [
                 '@babel/preset-env',
                 {
-                  include: ['transform-regenerator'],
                   targets: {
                     node: pkg.engines.node.match(/(\d+\.?)+/)[0],
                   },
