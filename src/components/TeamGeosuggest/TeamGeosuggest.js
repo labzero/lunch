@@ -47,7 +47,9 @@ class TeamGeosuggest extends Component {
   }
 
   handleSuggestSelect = (suggestion) => {
-    this.props.setCenter(suggestion.location);
+    if (suggestion) {
+      this.props.setCenter(suggestion.location);
+    }
   }
 
   handleChange = value => this.props.onChange({ target: { value } });
