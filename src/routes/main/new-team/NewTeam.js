@@ -100,7 +100,7 @@ class NewTeam extends Component {
                 </InputGroup>
               </Col>
             </Row>
-            <HelpBlock>Letters, numbers, and dashes only.</HelpBlock>
+            <HelpBlock>Letters, numbers, and dashes only. URL must start with a letter.</HelpBlock>
           </FormGroup>
           <FormGroup controlId="newTeam-address">
             <ControlLabel>Address</ControlLabel>
