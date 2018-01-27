@@ -9,6 +9,8 @@
 
 /* Configure Mocha test runner, see package.json/scripts/test */
 
+require('@babel/polyfill');
+
 process.env.NODE_ENV = 'test';
 
 function noop() {

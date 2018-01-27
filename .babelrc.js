@@ -10,6 +10,9 @@
 // Babel configuration
 // https://babeljs.io/docs/usage/api/
 module.exports = {
+  plugins: [
+    '@babel/plugin-transform-modules-commonjs',
+  ],
   presets: [
     [
       '@babel/preset-env',
@@ -24,4 +27,11 @@ module.exports = {
     '@babel/preset-react',
   ],
   ignore: ['node_modules', 'build'],
+  env: {
+    test: {
+      plugins: [
+        'rewire',
+      ],
+    },
+  },
 };
