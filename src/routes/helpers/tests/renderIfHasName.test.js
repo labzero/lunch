@@ -4,9 +4,10 @@
 import { expect } from 'chai';
 import configureStore from 'redux-mock-store';
 import { spy } from 'sinon';
-import { __RewireAPI__ as rewireApi } from '../renderIfHasName';
-import renderIfHasName from '../renderIfHasName';
+import proxyquire from 'proxyquire';
+import mockEsmodule from '../../../../test/mockEsmodule';
 
+const proxyquireStrict = proxyquire.noCallThru();
 const mockStore = configureStore();
 
 describe('routes/helpers/renderIfHasName', () => {
@@ -19,15 +20,20 @@ describe('routes/helpers/renderIfHasName', () => {
 
   describe('when there is no user', () => {
     let redirectToLoginSpy;
+    let renderIfHasNameProxy;
     beforeEach(() => {
       redirectToLoginSpy = spy();
-      rewireApi.__Rewire__('redirectToLogin', redirectToLoginSpy);
+      renderIfHasNameProxy = proxyquireStrict('../renderIfHasName', {
+        './redirectToLogin': mockEsmodule({
+          default: redirectToLoginSpy
+        })
+      }).default;
       context = {
         store: mockStore({
           user: {}
         })
       };
-      renderIfHasName(context, makeRouteSpy);
+      renderIfHasNameProxy(context, makeRouteSpy);
     });
 
     it('redirects to login', () => {

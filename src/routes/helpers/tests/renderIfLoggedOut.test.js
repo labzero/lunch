@@ -3,12 +3,13 @@
 
 import { expect } from 'chai';
 import { spy } from 'sinon';
-import { __RewireAPI__ as rewireApi } from '../renderIfLoggedOut';
+import proxyquire from 'proxyquire';
 import renderIfLoggedOut from '../renderIfLoggedOut';
 
 describe('routes/helpers/renderIfLoggedOut', () => {
   let makeRouteSpy;
   let state;
+  let renderIfLoggedOutProxy;
 
   beforeEach(() => {
     makeRouteSpy = spy();
@@ -16,9 +17,13 @@ describe('routes/helpers/renderIfLoggedOut', () => {
 
   describe('when user has one role', () => {
     beforeEach(() => {
-      rewireApi.__Rewire__('getTeams', () => [{
-        slug: 'labzero'
-      }]);
+      renderIfLoggedOutProxy = proxyquire('../renderIfLoggedOut', {
+        '../../selectors/teams': {
+          getTeams: () => [{
+            slug: 'labzero'
+          }]
+        }
+      }).default;
       state = {
         host: 'lunch.pink',
         user: {
@@ -29,7 +34,7 @@ describe('routes/helpers/renderIfLoggedOut', () => {
     });
 
     it('redirects user to team home', () => {
-      expect(renderIfLoggedOut(state, makeRouteSpy)).to.deep.eq({
+      expect(renderIfLoggedOutProxy(state, makeRouteSpy)).to.deep.eq({
         redirect: '//labzero.lunch.pink'
       });
     });

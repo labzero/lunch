@@ -3,18 +3,19 @@
 
 import { expect } from 'chai';
 import configureStore from 'redux-mock-store';
-import { __RewireAPI__ as landingRewireApi } from './index';
-import landing from './index';
+import proxyquire from 'proxyquire';
+import mockEsmodule from '../../../../test/mockEsmodule';
 
+const proxyquireStrict = proxyquire.noCallThru();
 const mockStore = configureStore();
 
 describe('routes/team/tags', () => {
   let context;
   let render404;
   let team;
+  let landingProxy;
 
   beforeEach(() => {
-    landingRewireApi.__Rewire__('renderIfHasName', (_, cb) => cb());
     team = {
       id: 77
     };
@@ -33,9 +34,18 @@ describe('routes/team/tags', () => {
     let result;
     beforeEach(() => {
       render404 = 'render404';
-      landingRewireApi.__Rewire__('render404', render404);
-      landingRewireApi.__Rewire__('hasRole', () => false);
-      result = landing(context);
+      landingProxy = proxyquireStrict('./index', {
+        '../../../helpers/hasRole': mockEsmodule({
+          default: () => false,
+        }),
+        '../../helpers/renderIfHasName': mockEsmodule({
+          default: (_, cb) => cb(),
+        }),
+        '../../helpers/render404': mockEsmodule({
+          default: 'render404',
+        })
+      }).default;
+      result = landingProxy(context);
     });
 
     it('renders 404', () => {
@@ -46,8 +56,15 @@ describe('routes/team/tags', () => {
   describe('when user is on team', () => {
     let result;
     beforeEach(() => {
-      landingRewireApi.__Rewire__('hasRole', () => true);
-      result = landing(context);
+      landingProxy = proxyquireStrict('./index', {
+        '../../../helpers/hasRole': mockEsmodule({
+          default: () => true,
+        }),
+        '../../helpers/renderIfHasName': mockEsmodule({
+          default: (_, cb) => cb(),
+        })
+      }).default;
+      result = landingProxy(context);
     });
 
     it('renders team', () => {

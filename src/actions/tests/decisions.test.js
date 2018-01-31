@@ -1,25 +1,21 @@
 /* eslint-env mocha */
-/* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates */
+/* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates, arrow-body-style */
 
 import { expect } from 'chai';
 import configureStore from 'redux-mock-store';
 import fetchMock from 'fetch-mock';
+import proxyquire from 'proxyquire';
 import thunk from 'redux-thunk';
 import * as decisions from '../decisions';
-import { __RewireAPI__ as decisionsRewireAPI } from '../decisions';
-import actionCreatorStub from '../../../test/actionCreatorStub';
 
 const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
 
 describe('actions/decisions', () => {
   let store;
-  let flashErrorStub;
 
   beforeEach(() => {
     store = mockStore({});
-    flashErrorStub = actionCreatorStub();
-    decisionsRewireAPI.__Rewire__('flashError', flashErrorStub);
   });
 
   describe('fetchDecision', () => {
@@ -29,43 +25,42 @@ describe('actions/decisions', () => {
       });
 
       it('dispatches requestDecision', () => {
-        const requestDecisionStub = actionCreatorStub();
-        decisionsRewireAPI.__Rewire__('requestDecision', requestDecisionStub);
-
-        store.dispatch(decisions.fetchDecision());
-
-        expect(requestDecisionStub.callCount).to.eq(1);
+        return store.dispatch(decisions.fetchDecision()).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[0].type).to.eq('REQUEST_DECISION');
+        });
       });
 
       it('fetches decision', () => {
         store.dispatch(decisions.fetchDecision());
-
         expect(fetchMock.lastCall()[0]).to.eq('/api/decisions/fromToday');
       });
     });
 
     describe('success', () => {
-      let receiveDecisionStub;
       beforeEach(() => {
         fetchMock.mock('*', { data: { foo: 'bar' } });
-        receiveDecisionStub = actionCreatorStub();
-        decisionsRewireAPI.__Rewire__('receiveDecision', receiveDecisionStub);
-        return store.dispatch(decisions.fetchDecision());
       });
 
       it('dispatches receiveDecision', () => {
-        expect(receiveDecisionStub.calledWith({ foo: 'bar' })).to.be.true;
+        return store.dispatch(decisions.fetchDecision()).then(() => {
+          const actions = store.getActions();
+          expect(actions[1].type).to.eq('RECEIVE_DECISION');
+          expect(actions[1].inst).to.eql({ foo: 'bar' });
+        });
       });
     });
 
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(decisions.fetchDecision());
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(decisions.fetchDecision()).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
@@ -83,12 +78,11 @@ describe('actions/decisions', () => {
       });
 
       it('dispatches postDecision', () => {
-        const postDecisionStub = actionCreatorStub();
-        decisionsRewireAPI.__Rewire__('postDecision', postDecisionStub);
-
-        store.dispatch(decisions.decide(restaurantId));
-
-        expect(postDecisionStub.calledWith(restaurantId)).to.be.true;
+        return store.dispatch(decisions.decide(restaurantId)).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[0].type).to.eq('POST_DECISION');
+          expect(actions[0].restaurantId).to.eq(1);
+        });
       });
 
       it('fetches decision', () => {
@@ -102,22 +96,29 @@ describe('actions/decisions', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(decisions.decide(restaurantId));
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(decisions.decide(restaurantId)).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
 
   describe('removeDecision', () => {
     let restaurantId;
+    let proxyDecision;
     beforeEach(() => {
       restaurantId = 1;
-      decisionsRewireAPI.__Rewire__('getDecision', () => ({
-        restaurant_id: restaurantId
-      }));
+      proxyDecision = proxyquire('../decisions', {
+        '../selectors/decisions': {
+          getDecision: () => {
+            return ({restaurant_id: restaurantId});
+          }
+        }
+      });
     });
 
     describe('before fetch', () => {
@@ -126,16 +127,15 @@ describe('actions/decisions', () => {
       });
 
       it('dispatches deleteDecision', () => {
-        const deleteDecisionStub = actionCreatorStub();
-        decisionsRewireAPI.__Rewire__('deleteDecision', deleteDecisionStub);
-
-        store.dispatch(decisions.removeDecision());
-
-        expect(deleteDecisionStub.calledWith(restaurantId)).to.be.true;
+        return store.dispatch(proxyDecision.removeDecision()).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[0].type).to.eq('DELETE_DECISION');
+          expect(actions[0].restaurantId).to.eq(1);
+        });
       });
 
       it('fetches decision', () => {
-        store.dispatch(decisions.removeDecision());
+        store.dispatch(proxyDecision.removeDecision());
 
         expect(fetchMock.lastCall()[0]).to.eq('/api/decisions/fromToday');
         expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ restaurant_id: 1 }));
@@ -145,11 +145,13 @@ describe('actions/decisions', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(decisions.removeDecision());
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(proxyDecision.removeDecision()).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
