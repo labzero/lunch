@@ -1,25 +1,20 @@
 /* eslint-env mocha */
-/* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates */
+/* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates, arrow-body-style */
 
 import { expect } from 'chai';
 import configureStore from 'redux-mock-store';
 import fetchMock from 'fetch-mock';
 import thunk from 'redux-thunk';
 import * as teams from '../teams';
-import { __RewireAPI__ as teamsRewireAPI } from '../teams';
-import actionCreatorStub from '../../../test/actionCreatorStub';
 
 const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
 
 describe('actions/teams', () => {
   let store;
-  let flashErrorStub;
 
   beforeEach(() => {
     store = mockStore({});
-    flashErrorStub = actionCreatorStub();
-    teamsRewireAPI.__Rewire__('flashError', flashErrorStub);
   });
 
   describe('createTeam', () => {
@@ -34,12 +29,11 @@ describe('actions/teams', () => {
       });
 
       it('dispatches postTeam', () => {
-        const postTeamStub = actionCreatorStub();
-        teamsRewireAPI.__Rewire__('postTeam', postTeamStub);
-
-        store.dispatch(teams.createTeam(payload));
-
-        expect(postTeamStub.calledWith(payload)).to.be.true;
+        return store.dispatch(teams.createTeam(payload)).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[0].type).to.eq('POST_TEAM');
+          expect(actions[0].team).to.eql({ foo: 'bar' });
+        });
       });
 
       it('fetches restaurant', () => {
@@ -52,7 +46,6 @@ describe('actions/teams', () => {
 
     describe('success', () => {
       let team;
-      let teamPostedStub;
       beforeEach(() => {
         team = {
           foo: 'bar',
@@ -65,24 +58,27 @@ describe('actions/teams', () => {
         fetchMock.mock('*', {
           data: team
         });
-        teamPostedStub = actionCreatorStub();
-        teamsRewireAPI.__Rewire__('teamPosted', teamPostedStub);
-        return store.dispatch(teams.createTeam(payload));
       });
 
       it('dispatches teamPosted', () => {
-        expect(teamPostedStub.calledWith(team)).to.be.true;
+        return store.dispatch(teams.createTeam(payload)).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('TEAM_POSTED');
+          expect(actions[1].team).to.eql(team);
+        });
       });
     });
 
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(teams.createTeam(payload)).catch(() => Promise.resolve());
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(teams.createTeam(payload)).catch(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });

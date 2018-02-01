@@ -1,25 +1,20 @@
 /* eslint-env mocha */
-/* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates */
+/* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates, arrow-body-style */
 
 import { expect } from 'chai';
 import configureStore from 'redux-mock-store';
 import fetchMock from 'fetch-mock';
 import thunk from 'redux-thunk';
 import * as restaurants from '../restaurants';
-import { __RewireAPI__ as restaurantsRewireAPI } from '../restaurants';
-import actionCreatorStub from '../../../test/actionCreatorStub';
 
 const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
 
 describe('actions/restaurants', () => {
   let store;
-  let flashErrorStub;
 
   beforeEach(() => {
     store = mockStore({});
-    flashErrorStub = actionCreatorStub();
-    restaurantsRewireAPI.__Rewire__('flashError', flashErrorStub);
   });
 
   describe('fetchRestaurants', () => {
@@ -29,43 +24,42 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches requestRestaurants', () => {
-        const requestRestaurantsStub = actionCreatorStub();
-        restaurantsRewireAPI.__Rewire__('requestRestaurants', requestRestaurantsStub);
-
-        store.dispatch(restaurants.fetchRestaurants());
-
-        expect(requestRestaurantsStub.callCount).to.eq(1);
+        return store.dispatch(restaurants.fetchRestaurants()).then(() => {
+          const actions = store.getActions();
+          expect(actions[0].type).to.eq('REQUEST_RESTAURANTS');
+        });
       });
 
       it('fetches restaurants', () => {
         store.dispatch(restaurants.fetchRestaurants());
-
         expect(fetchMock.lastCall()[0]).to.eq('/api/restaurants');
       });
     });
 
     describe('success', () => {
-      let receiveRestaurantsStub;
       beforeEach(() => {
         fetchMock.mock('*', { data: [{ foo: 'bar' }] });
-        receiveRestaurantsStub = actionCreatorStub();
-        restaurantsRewireAPI.__Rewire__('receiveRestaurants', receiveRestaurantsStub);
-        return store.dispatch(restaurants.fetchRestaurants());
       });
 
       it('dispatches receiveRestaurants', () => {
-        expect(receiveRestaurantsStub.calledWith([{ foo: 'bar' }])).to.be.true;
+        return store.dispatch(restaurants.fetchRestaurants()).then(() => {
+          const actions = store.getActions();
+          expect(actions[1].type).to.eq('RECEIVE_RESTAURANTS');
+          expect(actions[1].items).to.eql([{ foo: 'bar' }]);
+        });
       });
     });
 
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(restaurants.fetchRestaurants());
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(restaurants.fetchRestaurants()).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
@@ -91,18 +85,17 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches postRestaurant', () => {
-        const postRestaurantStub = actionCreatorStub();
-        restaurantsRewireAPI.__Rewire__('postRestaurant', postRestaurantStub);
-
-        store.dispatch(restaurants.addRestaurant(name, placeId, address, lat, lng));
-
-        expect(postRestaurantStub.calledWith({
-          name,
-          place_id: placeId,
-          address,
-          lat,
-          lng
-        })).to.be.true;
+        return store.dispatch(restaurants.addRestaurant(name, placeId, address, lat, lng)).then(() => {
+          const actions = store.getActions();
+          expect(actions[0].type).to.eq('POST_RESTAURANT');
+          expect(actions[0].restaurant).to.eql({
+            name: 'Lab Zero',
+            place_id: '12345',
+            address: '123 Main',
+            lat: 50,
+            lng: 100,
+          });
+        });
       });
 
       it('fetches restaurant', () => {
@@ -122,13 +115,15 @@ describe('actions/restaurants', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(
-          restaurants.addRestaurant(name, placeId, address, lat, lng)
-        );
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(
+          restaurants.addRestaurant(name, placeId, address, lat, lng)
+        ).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
@@ -145,17 +140,15 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches deleteRestaurant', () => {
-        const deleteRestaurantStub = actionCreatorStub();
-        restaurantsRewireAPI.__Rewire__('deleteRestaurant', deleteRestaurantStub);
-
-        store.dispatch(restaurants.removeRestaurant(id));
-
-        expect(deleteRestaurantStub.calledWith(id)).to.be.true;
+        return store.dispatch(restaurants.removeRestaurant(id)).then(() => {
+          const actions = store.getActions();
+          expect(actions[0].type).to.eq('DELETE_RESTAURANT');
+          expect(actions[0].id).to.eq(1);
+        });
       });
 
       it('fetches restaurant', () => {
         store.dispatch(restaurants.removeRestaurant(id));
-
         expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${id}`);
       });
     });
@@ -163,11 +156,13 @@ describe('actions/restaurants', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(restaurants.removeRestaurant(id));
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(restaurants.removeRestaurant(id)).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
@@ -187,12 +182,12 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches renameRestaurant', () => {
-        const renameRestaurantStub = actionCreatorStub();
-        restaurantsRewireAPI.__Rewire__('renameRestaurant', renameRestaurantStub);
-
-        store.dispatch(restaurants.changeRestaurantName(id, name));
-
-        expect(renameRestaurantStub.calledWith(id, { name })).to.be.true;
+        return store.dispatch(restaurants.changeRestaurantName(id, name)).then(() => {
+          const actions = store.getActions();
+          expect(actions[0].type).to.eq('RENAME_RESTAURANT');
+          expect(actions[0].id).to.eq(1);
+          expect(actions[0].restaurant.name).to.eq('Lab Zero');
+        });
       });
 
       it('fetches restaurant', () => {
@@ -206,13 +201,15 @@ describe('actions/restaurants', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(
-          restaurants.changeRestaurantName(id, name)
-        );
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(
+          restaurants.changeRestaurantName(id, name)
+        ).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
@@ -229,12 +226,11 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches postVote', () => {
-        const postVoteStub = actionCreatorStub();
-        restaurantsRewireAPI.__Rewire__('postVote', postVoteStub);
-
-        store.dispatch(restaurants.addVote(id));
-
-        expect(postVoteStub.calledWith(id)).to.be.true;
+        return store.dispatch(restaurants.addVote(id)).then(() => {
+          const actions = store.getActions();
+          expect(actions[0].type).to.eq('POST_VOTE');
+          expect(actions[0].id).to.eq(1);
+        });
       });
 
       it('fetches vote', () => {
@@ -247,13 +243,14 @@ describe('actions/restaurants', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(
-          restaurants.addVote(id)
-        );
+        
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(restaurants.addVote(id)).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
@@ -272,12 +269,12 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches deleteVote', () => {
-        const deleteVoteStub = actionCreatorStub();
-        restaurantsRewireAPI.__Rewire__('deleteVote', deleteVoteStub);
-
-        store.dispatch(restaurants.removeVote(restaurantId, id));
-
-        expect(deleteVoteStub.calledWith(restaurantId, id)).to.be.true;
+        return store.dispatch(restaurants.removeVote(restaurantId, id)).then(() => {
+          const actions = store.getActions();
+          expect(actions[0].type).to.eq('DELETE_VOTE');
+          expect(actions[0].restaurantId).to.eq(1);
+          expect(actions[0].id).to.eq(2);
+        });
       });
 
       it('fetches vote', () => {
@@ -290,13 +287,16 @@ describe('actions/restaurants', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(
-          restaurants.removeVote(restaurantId, id)
-        );
+        
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(
+          restaurants.removeVote(restaurantId, id)
+        ).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
@@ -315,12 +315,12 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches postNewTagToRestaurant', () => {
-        const postNewTagToRestaurantStub = actionCreatorStub();
-        restaurantsRewireAPI.__Rewire__('postNewTagToRestaurant', postNewTagToRestaurantStub);
-
-        store.dispatch(restaurants.addNewTagToRestaurant(id, name));
-
-        expect(postNewTagToRestaurantStub.calledWith(id, name)).to.be.true;
+        return store.dispatch(restaurants.addNewTagToRestaurant(id, name)).then(() => {
+          const actions = store.getActions();
+          expect(actions[0].type).to.eq('POST_NEW_TAG_TO_RESTAURANT');
+          expect(actions[0].restaurantId).to.eq(1);
+          expect(actions[0].value).to.eq('zap');
+        });
       });
 
       it('fetches tag', () => {
@@ -334,13 +334,15 @@ describe('actions/restaurants', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(
-          restaurants.addNewTagToRestaurant(id, name)
-        );
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(
+          restaurants.addNewTagToRestaurant(id, name)
+        ).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
@@ -359,12 +361,12 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches postTagToRestaurant', () => {
-        const postTagToRestaurantStub = actionCreatorStub();
-        restaurantsRewireAPI.__Rewire__('postTagToRestaurant', postTagToRestaurantStub);
-
-        store.dispatch(restaurants.addTagToRestaurant(restaurantId, id));
-
-        expect(postTagToRestaurantStub.calledWith(restaurantId, id)).to.be.true;
+        return store.dispatch(restaurants.addTagToRestaurant(restaurantId, id)).then(() => {
+          const actions = store.getActions();
+          expect(actions[0].type).to.eq('POST_TAG_TO_RESTAURANT');
+          expect(actions[0].restaurantId).to.eq(1);
+          expect(actions[0].id).to.eq(2);
+        });
       });
 
       it('fetches tag', () => {
@@ -377,14 +379,16 @@ describe('actions/restaurants', () => {
 
     describe('failure', () => {
       beforeEach(() => {
-        fetchMock.mock('*', 400);
-        return store.dispatch(
-          restaurants.addTagToRestaurant(restaurantId, id)
-        );
+        fetchMock.mock('*', 400);        
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(
+          restaurants.addTagToRestaurant(restaurantId, id)
+        ).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
@@ -403,12 +407,12 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches deleteTagFromRestaurant', () => {
-        const deleteTagFromRestaurantStub = actionCreatorStub();
-        restaurantsRewireAPI.__Rewire__('deleteTagFromRestaurant', deleteTagFromRestaurantStub);
-
-        store.dispatch(restaurants.removeTagFromRestaurant(restaurantId, id));
-
-        expect(deleteTagFromRestaurantStub.calledWith(restaurantId, id)).to.be.true;
+        return store.dispatch(restaurants.removeTagFromRestaurant(restaurantId, id)).then(() => {
+          const actions = store.getActions();
+          expect(actions[0].type).to.eq('DELETE_TAG_FROM_RESTAURANT');
+          expect(actions[0].restaurantId).to.eq(1);
+          expect(actions[0].id).to.eq(2);
+        });
       });
 
       it('fetches tag', () => {
@@ -421,13 +425,15 @@ describe('actions/restaurants', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        return store.dispatch(
-          restaurants.removeTagFromRestaurant(restaurantId, id)
-        );
       });
 
       it('dispatches flashError', () => {
-        expect(flashErrorStub.called).to.be.true;
+        return store.dispatch(
+          restaurants.removeTagFromRestaurant(restaurantId, id)
+        ).then(() => {
+          const actions = store.getActions(); 
+          expect(actions[1].type).to.eq('FLASH_ERROR');
+        });
       });
     });
   });
