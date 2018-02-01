@@ -42,9 +42,12 @@ For `GOOGLE_CLIENT_*` env variables:
 
 Set up a PostgreSQL database and enter the credentials into `.env`. If you want to use another database dialect, change it in `database.js`.
 
-To seed your database with a Superuser, fill out the `SUPERUSER_*` env variables accordingly, then run ```bash
+To seed your database with a Superuser, fill out the `SUPERUSER_*` env variables accordingly, then run
+
+```bash
 node_modules/.bin/sequelize db:seed:all
 ```
+
 After setting up and starting the app, you will be able to log in with this user and create a team. If you did not supply a SUPERUSER_PASSWORD, you will need to log in via OAuth, using the email address you supplied for SUPERUSER_EMAIL.  
 
 ### Commands
