@@ -27,16 +27,16 @@ Make two copies of `.env.sample`, named `.env` and `.env.prod`.
 
 For `GOOGLE_CLIENT_*` env variables:
 
-- Create a Google Developer app in the [console](https://console.developers.google.com/).
-- Enable the Google+ API, Contacts API, Google Maps JavaScript API, Google Places API Web Service, and Google Maps Geocoding API.
-- Go to the Credentials section and create an OAuth client ID.
-- For local development:
-  - Enter `http://local.lunch.pink:3000` as an authorized JavaScript origin
-  - Enter `http://local.lunch.pink:3000/login/google/callback` as an authorized redirect URI
-- Add your deployment target(s) as additional origins/redirect URIs.
-- Go back to the Credentials section and create an API key.
-  - Choose "Browser key".
-  - Optionally limit requests to certain referrers.
+* Create a Google Developer app in the [console](https://console.developers.google.com/).
+* Enable the Google+ API, Contacts API, Google Maps JavaScript API, Google Places API Web Service, and Google Maps Geocoding API.
+* Go to the Credentials section and create an OAuth client ID.
+* For local development:
+  * Enter `http://local.lunch.pink:3000` as an authorized JavaScript origin
+  * Enter `http://local.lunch.pink:3000/login/google/callback` as an authorized redirect URI
+* Add your deployment target(s) as additional origins/redirect URIs.
+* Go back to the Credentials section and create an API key.
+  * Choose "Browser key".
+  * Optionally limit requests to certain referrers.
 
 #### Database
 
@@ -48,7 +48,7 @@ To seed your database with a Superuser, fill out the `SUPERUSER_*` env variables
 node_modules/.bin/sequelize db:seed:all
 ```
 
-After setting up and starting the app, you will be able to log in with this user and create a team. If you did not supply a SUPERUSER_PASSWORD, you will need to log in via OAuth, using the email address you supplied for SUPERUSER_EMAIL.  
+After setting up and starting the app, you will be able to log in with this user and create a team. If you did not supply a SUPERUSER_PASSWORD, you will need to log in via OAuth, using the email address you supplied for SUPERUSER_EMAIL.
 
 ### Commands
 
@@ -65,6 +65,7 @@ sequelize db:migrate
 ## Development server
 
 ### Running
+
 ```bash
 npm start
 ```
@@ -72,16 +73,19 @@ npm start
 ## Production server
 
 ### Building
+
 ```bash
 npm run build
 ```
 
 ### Running
+
 ```bash
 node build/server.js
 ```
 
 ### Deploying
+
 You can modify `tools/deploy.js` as needed to work with your deployment strategy.
 
 ## More info
