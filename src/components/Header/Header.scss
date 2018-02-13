@@ -37,7 +37,6 @@
 .root {
   border-bottom: $default-border;
   position: relative;
-  z-index: 3; /* above form-control within input-group */
 }
 
 .backgroundOverflow {
@@ -82,7 +81,7 @@
 .flashes {
   position: fixed;
   width: 100%;
-  z-index: 2; /* above logo */
+  z-index: 1051; /* above bootstrap modals */
 }
 
 .hamburger {
@@ -132,6 +131,7 @@
   position: fixed;
   top: 0;
   width: 100%;
+  z-index: 2; /* above map controls */
 }
 
 @media only screen and (max-height: 500px) {

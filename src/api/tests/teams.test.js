@@ -145,6 +145,31 @@ describe('api/main/teams', () => {
       });
     });
 
+    describe('existing slug check', () => {
+      let response;
+      beforeEach((done) => {
+        stub(TeamMock, 'create').callsFake(() => {
+          const e = new Error();
+          e.name = 'SequelizeUniqueConstraintError';
+          return Promise.reject(e);
+        });
+
+        request(app).post('/').send({ name: 'Existing Team', slug: 'existing' }).then(r => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns 409', () => {
+        expect(response.statusCode).to.eq(409);
+      });
+
+      it('returns json with error message', () => {
+        expect(response.body.error).to.be.true;
+        expect(response.body.data.message).to.be.a('string');
+      });
+    });
+
     describe('invalid slug', () => {
       let createSpy;
       let response;
@@ -422,6 +447,82 @@ describe('api/main/teams', () => {
 
       it('updates team', () => {
         expect(updateSpy.callCount).to.eq(1);
+      });
+    });
+
+    describe('reserved slug check', () => {
+      let updateSpy;
+      let response;
+      beforeEach((done) => {
+        app = makeApp({
+          '../../helpers/hasRole': mockEsmodule({
+            default: () => true
+          }),
+          '../helpers/checkTeamRole': mockEsmodule({
+            default: () => checkTeamRoleSpy
+          })
+        });
+
+        updateSpy = spy();
+        stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
+          get: () => {},
+          update: updateSpy
+        }));
+
+        request(app).patch('/1').send({ name: 'World Wide What', slug: 'www' }).then(r => {
+          response = r;
+          done();
+        });
+      });
+
+      it('does not update team', () => {
+        expect(updateSpy.callCount).to.eq(0);
+      });
+
+      it('returns 409', () => {
+        expect(response.statusCode).to.eq(409);
+      });
+
+      it('returns json with error message', () => {
+        expect(response.body.error).to.be.true;
+        expect(response.body.data.message).to.be.a('string');
+      });
+    });
+
+    describe('existing slug check', () => {
+      let response;
+      beforeEach((done) => {
+        app = makeApp({
+          '../../helpers/hasRole': mockEsmodule({
+            default: () => true
+          }),
+          '../helpers/checkTeamRole': mockEsmodule({
+            default: () => checkTeamRoleSpy
+          })
+        });
+
+        stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
+          get: () => {},
+          update: () => {
+            const e = new Error();
+            e.name = 'SequelizeUniqueConstraintError';
+            return Promise.reject(e);
+          }
+        }));
+
+        request(app).patch('/1').send({ name: 'Existing Team', slug: 'existing' }).then(r => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns 409', () => {
+        expect(response.statusCode).to.eq(409);
+      });
+
+      it('returns json with error message', () => {
+        expect(response.body.error).to.be.true;
+        expect(response.body.data.message).to.be.a('string');
       });
     });
 
