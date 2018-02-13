@@ -20,6 +20,7 @@
   top: 0;
   transform: translateX(100%);
   transition: transform .25s;
+  z-index: 2; /* above map controls */
 }
 
 .open {

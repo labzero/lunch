@@ -18,8 +18,8 @@ const getTeam = async (req, res, next) => {
   next();
 };
 
-const error409 = (res) =>
-  res.status(409).json({ error: true, data: { message: 'Could not create new team. It might already exist.' } });
+const error409 = (res, message) =>
+  res.status(409).json({ error: true, data: { message } });
 
 export default () => {
   const router = new Router();
@@ -30,13 +30,14 @@ export default () => {
       loggedIn,
       async (req, res, next) => {
         const { address, lat, lng, name, slug } = req.body;
+        const message409 = 'Could not create new team. It might already exist.';
 
         if (!req.user.superuser && req.user.roles.length >= TEAM_LIMIT) {
           return res.status(403).json({ error: true, data: { message: `You currently can't join more than ${TEAM_LIMIT} teams.` } });
         }
 
         if (reservedTeamSlugs.indexOf(slug) > -1) {
-          return error409(res);
+          return error409(res, message409);
         }
 
         if (!slug.match(TEAM_SLUG_REGEX)) {
@@ -60,7 +61,7 @@ export default () => {
           return res.status(201).send({ error: false, data: json });
         } catch (err) {
           if (err.name === 'SequelizeUniqueConstraintError') {
-            return error409(res);
+            return error409(res, message409);
           }
           return next(err);
         }
@@ -89,6 +90,7 @@ export default () => {
       getTeam,
       checkTeamRole(),
       async (req, res, next) => {
+        const message409 = 'Could not update team. Its new URL might already exist.';
         let fieldCount = 0;
 
         const allowedFields = [{ name: 'default_zoom', type: 'number' }];
@@ -128,11 +130,15 @@ export default () => {
           try {
             const oldSlug = req.team.get('slug');
 
+            if (oldSlug !== filteredPayload.slug && reservedTeamSlugs.indexOf(filteredPayload.slug) > -1) {
+              return error409(res, message409);
+            };
+
             await req.team.update(filteredPayload);
 
             if (filteredPayload.slug && oldSlug !== filteredPayload.slug) {
               req.flash('success', 'Team URL has been updated.');
-              req.session.save(async () => {
+              return req.session.save(async () => {
                 const teamRoles = await Role.findAll({ where: { team_id: req.team.get('id') } });
                 const userIds = teamRoles.map(r => r.get('user_id'));
                 const recipients = await User.findAll({ where: { id: userIds } });
@@ -143,23 +149,25 @@ export default () => {
                   subject: `${req.team.get('name')}'s team URL has changed`,
                   text: `Hi there!
 
-  ${req.user.get('name')} has changed the URL of the ${req.team.get('name')} team on Lunch.
+${req.user.get('name')} has changed the URL of the ${req.team.get('name')} team on Lunch.
 
-  From now on, the team can be accessed at ${generateUrl(req, `${filteredPayload.slug}.${bsHost}`)}. Please update any bookmarks you might have created.
+From now on, the team can be accessed at ${generateUrl(req, `${filteredPayload.slug}.${bsHost}`)}. Please update any bookmarks you might have created.
 
-  Happy Lunching!`
+Happy Lunching!`
                 }).then(() => {}).catch(() => {});
 
-                res.status(200).json({ error: false, data: req.team });
+                return res.status(200).json({ error: false, data: req.team });
               });
-            } else {
-              res.status(200).json({ error: false, data: req.team });
             }
+            return res.status(200).json({ error: false, data: req.team });
           } catch (err) {
-            next(err);
+            if (err.name === 'SequelizeUniqueConstraintError') {
+              return error409(res, message409);
+            }
+            return next(err);
           }
         } else {
-          res.status(422).json({ error: true, data: { message: 'Can\'t update any of the provided fields.' } });
+          return res.status(422).json({ error: true, data: { message: 'Can\'t update any of the provided fields.' } });
         }
       }
     );
