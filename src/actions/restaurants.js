@@ -3,7 +3,6 @@ import { getDecision } from '../selectors/decisions';
 import { getNewlyAdded } from '../selectors/listUi';
 import { getCurrentUser } from '../selectors/user';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
-import { flashError } from './flash';
 
 export function sortRestaurants() {
   return (dispatch, getState) => {
@@ -174,13 +173,11 @@ export function fetchRestaurants() {
   return dispatch => {
     dispatch(requestRestaurants());
     return fetch('/api/restaurants', {
-      credentials
+      credentials,
+      headers: jsonHeaders
     })
-      .then(response => processResponse(response))
-      .then(json => dispatch(receiveRestaurants(json)))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch))
+      .then(json => dispatch(receiveRestaurants(json)));
   };
 }
 
@@ -223,10 +220,7 @@ export function addRestaurant(name, placeId, address, lat, lng) {
       headers: jsonHeaders,
       body: JSON.stringify(payload)
     })
-      .then(response => processResponse(response))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch));
   };
 }
 
@@ -237,10 +231,7 @@ export function removeRestaurant(id) {
       credentials,
       method: 'delete'
     })
-      .then(response => processResponse(response))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch));
   };
 }
 
@@ -254,10 +245,7 @@ export function changeRestaurantName(id, name) {
       method: 'PATCH',
       body: JSON.stringify(payload)
     })
-      .then(response => processResponse(response))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch));
   };
 }
 
@@ -268,10 +256,7 @@ export function addVote(id) {
       method: 'post',
       credentials
     })
-      .then(response => processResponse(response))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch));
   };
 }
 
@@ -282,10 +267,7 @@ export function removeVote(restaurantId, id) {
       credentials,
       method: 'delete'
     })
-      .then(response => processResponse(response))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch));
   };
 }
 
@@ -298,10 +280,7 @@ export function addNewTagToRestaurant(restaurantId, name) {
       headers: jsonHeaders,
       body: JSON.stringify({ name })
     })
-      .then(response => processResponse(response))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch));
   };
 }
 
@@ -314,10 +293,7 @@ export function addTagToRestaurant(restaurantId, id) {
       headers: jsonHeaders,
       body: JSON.stringify({ id })
     })
-      .then(response => processResponse(response))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch));
   };
 }
 
@@ -328,9 +304,6 @@ export function removeTagFromRestaurant(restaurantId, id) {
       credentials,
       method: 'delete'
     })
-      .then(response => processResponse(response))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch));
   };
 }

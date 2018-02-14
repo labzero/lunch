@@ -1,6 +1,5 @@
 import ActionTypes from '../constants/ActionTypes';
 import { credentials, jsonHeaders, processResponse } from '../core/ApiClient';
-import { flashError } from './flash';
 
 export function patchCurrentUser(payload) {
   return {
@@ -25,11 +24,7 @@ export function updateCurrentUser(payload) {
       headers: jsonHeaders,
       body: JSON.stringify(payload)
     })
-      .then(response => processResponse(response))
-      .then(json => dispatch(currentUserPatched(json)))
-      .catch(err => {
-        dispatch(flashError(err.message));
-        throw err;
-      });
+      .then(response => processResponse(response, dispatch))
+      .then(json => dispatch(currentUserPatched(json)));
   };
 }

@@ -1,6 +1,5 @@
 import ActionTypes from '../constants/ActionTypes';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
-import { flashError } from './flash';
 
 export function postTeam(obj) {
   return {
@@ -25,11 +24,7 @@ export function createTeam(payload) {
       headers: jsonHeaders,
       body: JSON.stringify(payload)
     })
-      .then(response => processResponse(response))
-      .then(obj => dispatch(teamPosted(obj)))
-      .catch(err => {
-        dispatch(flashError(err.message));
-        throw err;
-      });
+      .then(response => processResponse(response, dispatch))
+      .then(obj => dispatch(teamPosted(obj)));
   };
 }

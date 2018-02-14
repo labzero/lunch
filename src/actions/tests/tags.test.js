@@ -14,7 +14,11 @@ describe('actions/tags', () => {
   let store;
 
   beforeEach(() => {
-    store = mockStore({});
+    store = mockStore({
+      user: {
+        id: 1
+      }
+    });
   });
 
   describe('fetchTags', () => {
@@ -56,7 +60,7 @@ describe('actions/tags', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(tags.fetchTags()).then(() => {
+        return store.dispatch(tags.fetchTags()).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -77,7 +81,7 @@ describe('actions/tags', () => {
 
       it('dispatches deleteTag', () => {
         return store.dispatch(tags.removeTag(id)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('DELETE_TAG');
           expect(actions[0].id).to.eq(1);
         });
@@ -114,7 +118,7 @@ describe('actions/tags', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(tags.removeTag(id)).then(() => {
+        return store.dispatch(tags.removeTag(id)).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });

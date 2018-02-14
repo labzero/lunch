@@ -1,6 +1,5 @@
 import ActionTypes from '../constants/ActionTypes';
-import { credentials, processResponse } from '../core/ApiClient';
-import { flashError } from './flash';
+import { credentials, jsonHeaders, processResponse } from '../core/ApiClient';
 
 export function invalidateTags() {
   return { type: ActionTypes.INVALIDATE_TAGS };
@@ -23,13 +22,11 @@ export function fetchTags() {
   return dispatch => {
     dispatch(requestTags());
     return fetch('/api/tags', {
-      credentials
+      credentials,
+      headers: jsonHeaders
     })
-      .then(response => processResponse(response))
-      .then(json => dispatch(receiveTags(json)))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch))
+      .then(json => dispatch(receiveTags(json)));
   };
 }
 
@@ -84,10 +81,7 @@ export function removeTag(id) {
       credentials,
       method: 'delete'
     })
-      .then(response => processResponse(response))
-      .then(() => dispatch(tagDeleted(id, getState().user.id)))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch))
+      .then(() => dispatch(tagDeleted(id, getState().user.id)));
   };
 }
