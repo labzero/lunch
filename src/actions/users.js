@@ -1,7 +1,6 @@
 import ActionTypes from '../constants/ActionTypes';
 import { credentials, jsonHeaders, processResponse } from '../core/ApiClient';
 import { getCurrentUser } from '../selectors/user';
-import { flashError } from './flash';
 
 export function invalidateUsers() {
   return { type: ActionTypes.INVALIDATE_USERS };
@@ -24,13 +23,11 @@ export function fetchUsers() {
   return dispatch => {
     dispatch(requestUsers());
     return fetch('/api/users', {
-      credentials
+      credentials,
+      headers: jsonHeaders
     })
-      .then(response => processResponse(response))
-      .then(json => dispatch(receiveUsers(json)))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch))
+      .then(json => dispatch(receiveUsers(json)));
   };
 }
 
@@ -98,11 +95,8 @@ export function removeUser(id, team) {
       credentials: team ? 'include' : credentials,
       method: 'delete'
     })
-      .then(response => processResponse(response))
-      .then(() => dispatch(userDeleted(id, team, isSelf)))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch))
+      .then(() => dispatch(userDeleted(id, team, isSelf)));
   };
 }
 
@@ -129,11 +123,8 @@ export function addUser(payload) {
       headers: jsonHeaders,
       body: JSON.stringify(payload)
     })
-      .then(response => processResponse(response))
-      .then(json => dispatch(userPosted(json)))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch))
+      .then(json => dispatch(userPosted(json)));
   };
 }
 
@@ -173,10 +164,7 @@ export function changeUserRole(id, type) {
       headers: jsonHeaders,
       body: JSON.stringify(payload)
     })
-      .then(response => processResponse(response))
-      .then(json => dispatch(userPatched(id, json, team, isSelf)))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch))
+      .then(json => dispatch(userPatched(id, json, team, isSelf)));
   };
 }

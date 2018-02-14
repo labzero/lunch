@@ -1,7 +1,6 @@
 import ActionTypes from '../constants/ActionTypes';
 import { getDecision } from '../selectors/decisions';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
-import { flashError } from './flash';
 
 export function invalidateDecision() {
   return { type: ActionTypes.INVALIDATE_DECISION };
@@ -24,13 +23,11 @@ export function fetchDecision() {
   return dispatch => {
     dispatch(requestDecision());
     return fetch('/api/decisions/fromToday', {
-      credentials
+      credentials,
+      headers: jsonHeaders
     })
-      .then(response => processResponse(response))
-      .then(json => dispatch(receiveDecision(json)))
-      .catch(
-        err => dispatch(flashError(err.message))
-      );
+      .then(response => processResponse(response, dispatch))
+      .then(json => dispatch(receiveDecision(json)));
   };
 }
 
@@ -92,10 +89,7 @@ export const decide = (restaurantId) => dispatch => {
     method: 'post',
     body: JSON.stringify(payload)
   })
-    .then(response => processResponse(response))
-    .catch(
-      err => dispatch(flashError(err.message))
-    );
+    .then(response => processResponse(response, dispatch))
 };
 
 export const removeDecision = () => (dispatch, getState) => {
@@ -108,8 +102,5 @@ export const removeDecision = () => (dispatch, getState) => {
     method: 'delete',
     body: JSON.stringify(payload)
   })
-    .then(response => processResponse(response))
-    .catch(
-      err => dispatch(flashError(err.message))
-    );
+    .then(response => processResponse(response, dispatch));
 };

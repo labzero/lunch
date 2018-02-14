@@ -1,6 +1,5 @@
 import ActionTypes from '../constants/ActionTypes';
 import { processResponse, jsonHeaders } from '../core/ApiClient';
-import { flashError } from './flash';
 
 export function deleteTeam() {
   return {
@@ -25,12 +24,8 @@ export function removeTeam() {
       credentials: 'include',
       headers: jsonHeaders
     })
-      .then(response => processResponse(response))
-      .then(() => dispatch(teamDeleted()))
-      .catch(err => {
-        dispatch(flashError(err.message));
-        throw err;
-      });
+      .then(response => processResponse(response, dispatch))
+      .then(() => dispatch(teamDeleted()));
   };
 }
 
@@ -60,11 +55,7 @@ export function updateTeam(payload) {
       headers: jsonHeaders,
       body: JSON.stringify(payload)
     })
-      .then(response => processResponse(response))
-      .then(json => dispatch(teamPatched(json)))
-      .catch(err => {
-        dispatch(flashError(err.message));
-        throw err;
-      });
+      .then(response => processResponse(response, dispatch))
+      .then(json => dispatch(teamPatched(json)));
   };
 }

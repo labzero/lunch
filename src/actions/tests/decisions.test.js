@@ -57,7 +57,7 @@ describe('actions/decisions', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(decisions.fetchDecision()).then(() => {
+        return store.dispatch(decisions.fetchDecision()).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -99,7 +99,7 @@ describe('actions/decisions', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(decisions.decide(restaurantId)).then(() => {
+        return store.dispatch(decisions.decide(restaurantId)).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -148,7 +148,7 @@ describe('actions/decisions', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(proxyDecision.removeDecision()).then(() => {
+        return store.dispatch(proxyDecision.removeDecision()).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });

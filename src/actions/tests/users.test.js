@@ -58,7 +58,7 @@ describe('actions/users', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(users.fetchUsers()).then(() => {
+        return store.dispatch(users.fetchUsers()).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -116,7 +116,7 @@ describe('actions/users', () => {
       it('dispatches flashError', () => {
         return store.dispatch(
           users.addUser(payload)
-        ).then(() => {
+        ).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -222,7 +222,7 @@ describe('actions/users', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(proxyUsers.removeUser(id)).then(() => {
+        return store.dispatch(proxyUsers.removeUser(id)).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -289,7 +289,7 @@ describe('actions/users', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(proxyUsers.changeUserRole(id, roleType)).then(() => {
+        return store.dispatch(proxyUsers.changeUserRole(id, roleType)).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });

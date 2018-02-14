@@ -56,7 +56,7 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(restaurants.fetchRestaurants()).then(() => {
+        return store.dispatch(restaurants.fetchRestaurants()).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -120,7 +120,7 @@ describe('actions/restaurants', () => {
       it('dispatches flashError', () => {
         return store.dispatch(
           restaurants.addRestaurant(name, placeId, address, lat, lng)
-        ).then(() => {
+        ).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -159,7 +159,7 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(restaurants.removeRestaurant(id)).then(() => {
+        return store.dispatch(restaurants.removeRestaurant(id)).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -206,7 +206,7 @@ describe('actions/restaurants', () => {
       it('dispatches flashError', () => {
         return store.dispatch(
           restaurants.changeRestaurantName(id, name)
-        ).then(() => {
+        ).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -247,7 +247,7 @@ describe('actions/restaurants', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(restaurants.addVote(id)).then(() => {
+        return store.dispatch(restaurants.addVote(id)).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -293,7 +293,7 @@ describe('actions/restaurants', () => {
       it('dispatches flashError', () => {
         return store.dispatch(
           restaurants.removeVote(restaurantId, id)
-        ).then(() => {
+        ).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -339,7 +339,7 @@ describe('actions/restaurants', () => {
       it('dispatches flashError', () => {
         return store.dispatch(
           restaurants.addNewTagToRestaurant(id, name)
-        ).then(() => {
+        ).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -385,7 +385,7 @@ describe('actions/restaurants', () => {
       it('dispatches flashError', () => {
         return store.dispatch(
           restaurants.addTagToRestaurant(restaurantId, id)
-        ).then(() => {
+        ).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -430,7 +430,7 @@ describe('actions/restaurants', () => {
       it('dispatches flashError', () => {
         return store.dispatch(
           restaurants.removeTagFromRestaurant(restaurantId, id)
-        ).then(() => {
+        ).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });

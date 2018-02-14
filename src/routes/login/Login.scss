@@ -12,6 +12,7 @@
 $button-height: ($padding-large-vertical * 2) + ($font-size-large * $line-height-large);
 
 .googleButton {
+  height: $button-height + 2;
   position: relative;
   padding-left: $button-height + $padding-large-horizontal;
 }
