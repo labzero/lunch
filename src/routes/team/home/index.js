@@ -17,7 +17,7 @@ export default (context) => {
       return {
         chunks: ['home'],
         component: (
-          <LayoutContainer path={context.pathname}>
+          <LayoutContainer path={context.pathname} isHome>
             <HomeContainer />
           </LayoutContainer>
         ),

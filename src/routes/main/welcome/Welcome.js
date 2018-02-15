@@ -37,27 +37,29 @@ class Welcome extends Component {
     const { name } = this.state;
 
     return (
-      <Grid className={s.root}>
-        <h2>Welcome!</h2>
-        <p>Welcome to Lunch! To continue, please enter your name.</p>
-        <form onSubmit={this.handleSubmit}>
-          <Row>
-            <Col sm={6}>
-              <FormGroup controlId="account-name">
-                <ControlLabel>Name</ControlLabel>
-                <FormControl
-                  name="name"
-                  onChange={this.handleChange}
-                  required
-                  type="text"
-                  value={name}
-                />
-              </FormGroup>
-            </Col>
-          </Row>
-          <Button type="submit">Submit</Button>
-        </form>
-      </Grid>
+      <div className={s.root}>
+        <Grid>
+          <h2>Welcome!</h2>
+          <p>Welcome to Lunch! To continue, please enter your name.</p>
+          <form onSubmit={this.handleSubmit}>
+            <Row>
+              <Col sm={6}>
+                <FormGroup controlId="account-name">
+                  <ControlLabel>Name</ControlLabel>
+                  <FormControl
+                    name="name"
+                    onChange={this.handleChange}
+                    required
+                    type="text"
+                    value={name}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            <Button type="submit">Submit</Button>
+          </form>
+        </Grid>
+      </div>
     );
   }
 }

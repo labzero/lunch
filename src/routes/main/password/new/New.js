@@ -27,30 +27,32 @@ class New extends Component {
     const { email } = this.props;
 
     return (
-      <Grid className={s.root}>
-        <h2>Request password reset</h2>
-        <p>
-          Enter your email address and we will send you a link
-          to reset your password.
-        </p>
-        <form action="/password?success=sent" method="post">
-          <Row>
-            <Col sm={6}>
-              <FormGroup controlId="passwordNew-email">
-                <ControlLabel>Email</ControlLabel>
-                <FormControl
-                  defaultValue={email}
-                  inputRef={(i) => { this.emailField = i; }}
-                  name="email"
-                  required
-                  type="email"
-                />
-              </FormGroup>
-            </Col>
-          </Row>
-          <Button type="submit">Submit</Button>
-        </form>
-      </Grid>
+      <div className={s.root}>
+        <Grid>
+          <h2>Request password reset</h2>
+          <p>
+            Enter your email address and we will send you a link
+            to reset your password.
+          </p>
+          <form action="/password?success=sent" method="post">
+            <Row>
+              <Col sm={6}>
+                <FormGroup controlId="passwordNew-email">
+                  <ControlLabel>Email</ControlLabel>
+                  <FormControl
+                    defaultValue={email}
+                    inputRef={(i) => { this.emailField = i; }}
+                    name="email"
+                    required
+                    type="email"
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            <Button type="submit">Submit</Button>
+          </form>
+        </Grid>
+      </div>
     );
   }
 }

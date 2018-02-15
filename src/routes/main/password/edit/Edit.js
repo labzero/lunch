@@ -24,28 +24,30 @@ class Edit extends Component {
     const { token } = this.props;
 
     return (
-      <Grid className={s.root}>
-        <h2>Reset password</h2>
-        <form action="/password?success=reset" method="post">
-          <Row>
-            <Col sm={6}>
-              <FormGroup controlId="resetPassword-password">
-                <ControlLabel>New password</ControlLabel>
-                <FormControl
-                  inputRef={(i) => { this.passwordField = i; }}
-                  minLength={PASSWORD_MIN_LENGTH}
-                  name="password"
-                  required
-                  type="password"
-                />
-              </FormGroup>
-            </Col>
-          </Row>
-          <input type="hidden" name="token" value={token} />
-          <input type="hidden" name="_method" value="PUT" />
-          <Button type="submit">Submit</Button>
-        </form>
-      </Grid>
+      <div className={s.root}>
+        <Grid>
+          <h2>Reset password</h2>
+          <form action="/password?success=reset" method="post">
+            <Row>
+              <Col sm={6}>
+                <FormGroup controlId="resetPassword-password">
+                  <ControlLabel>New password</ControlLabel>
+                  <FormControl
+                    inputRef={(i) => { this.passwordField = i; }}
+                    minLength={PASSWORD_MIN_LENGTH}
+                    name="password"
+                    required
+                    type="password"
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            <input type="hidden" name="token" value={token} />
+            <input type="hidden" name="_method" value="PUT" />
+            <Button type="submit">Submit</Button>
+          </form>
+        </Grid>
+      </div>
     );
   }
 }

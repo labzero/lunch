@@ -20,10 +20,12 @@ class NotFound extends React.Component {
 
   render() {
     return (
-      <Grid className={s.root}>
-        <h2>{this.props.title}</h2>
-        <p>Sorry, the page you were trying to view does not exist.</p>
-      </Grid>
+      <div className={s.root}>
+        <Grid>
+          <h2>{this.props.title}</h2>
+          <p>Sorry, the page you were trying to view does not exist.</p>
+        </Grid>
+      </div>
     );
   }
 }

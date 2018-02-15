@@ -59,67 +59,69 @@ class NewTeam extends Component {
     const { name, slug } = this.state;
 
     return (
-      <Grid className={s.root}>
-        <h2>Create a new team</h2>
-        <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="newTeam-name">
-            <ControlLabel>
-              Name
-            </ControlLabel>
-            <Row>
-              <Col sm={6}>
-                <FormControl
-                  type="text"
-                  onChange={this.handleChange('name')}
-                  value={name}
-                  required
-                />
-              </Col>
-            </Row>
-          </FormGroup>
-          <FormGroup controlId="newTeam-slug">
-            <ControlLabel>
-              URL
-            </ControlLabel>
-            <Row>
-              <Col sm={6}>
-                <InputGroup>
+      <div className={s.root}>
+        <Grid>
+          <h2>Create a new team</h2>
+          <form onSubmit={this.handleSubmit}>
+            <FormGroup controlId="newTeam-name">
+              <ControlLabel>
+                Name
+              </ControlLabel>
+              <Row>
+                <Col sm={6}>
                   <FormControl
-                    autoCorrect="off"
-                    autoCapitalize="off"
-                    className={s.teamUrl}
                     type="text"
-                    value={slug}
-                    maxLength={63}
-                    minLength={2}
-                    pattern={TEAM_SLUG_REGEX}
-                    onChange={this.handleSlugChange}
+                    onChange={this.handleChange('name')}
+                    value={name}
                     required
                   />
-                  <InputGroup.Addon>.lunch.pink</InputGroup.Addon>
-                </InputGroup>
-              </Col>
-            </Row>
-            <HelpBlock>Letters, numbers, and dashes only. URL must start with a letter.</HelpBlock>
-          </FormGroup>
-          <FormGroup controlId="newTeam-address">
-            <ControlLabel>Address</ControlLabel>
-            <p>
-              Pick a centerpoint for your team.
-              It will ensure that nearby recommendations are shown when you search
-              for restaurants.
-              You can drag the map or enter your full address.
-            </p>
-            <TeamMapContainer defaultCenter={defaultCoords} />
-            <TeamGeosuggestContainer
-              id="newTeam-address"
-              initialValue=""
-              onChange={this.handleChange('address')}
-            />
-          </FormGroup>
-          <Button type="submit">Submit</Button>
-        </form>
-      </Grid>
+                </Col>
+              </Row>
+            </FormGroup>
+            <FormGroup controlId="newTeam-slug">
+              <ControlLabel>
+                URL
+              </ControlLabel>
+              <Row>
+                <Col sm={6}>
+                  <InputGroup>
+                    <FormControl
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      className={s.teamUrl}
+                      type="text"
+                      value={slug}
+                      maxLength={63}
+                      minLength={2}
+                      pattern={TEAM_SLUG_REGEX}
+                      onChange={this.handleSlugChange}
+                      required
+                    />
+                    <InputGroup.Addon>.lunch.pink</InputGroup.Addon>
+                  </InputGroup>
+                </Col>
+              </Row>
+              <HelpBlock>Letters, numbers, and dashes only. URL must start with a letter.</HelpBlock>
+            </FormGroup>
+            <FormGroup controlId="newTeam-address">
+              <ControlLabel>Address</ControlLabel>
+              <p>
+                Pick a centerpoint for your team.
+                It will ensure that nearby recommendations are shown when you search
+                for restaurants.
+                You can drag the map or enter your full address.
+              </p>
+              <TeamMapContainer defaultCenter={defaultCoords} />
+              <TeamGeosuggestContainer
+                id="newTeam-address"
+                initialValue=""
+                onChange={this.handleChange('address')}
+              />
+            </FormGroup>
+            <Button type="submit">Submit</Button>
+          </form>
+        </Grid>
+      </div>
     );
   }
 }

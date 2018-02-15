@@ -24,12 +24,20 @@ $icon-font-path: '../../node_modules/bootstrap-sass/assets/fonts/bootstrap/';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/tooltip';
 @import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/popovers';
 
+html,
+body,
+#app {
+  height: 100%;
+}
+
 html {
+  background: $background-color;
   font-size: 16px;
   overflow-anchor: none; // prevent browsers from scrolling to top after vote
 }
 
 body {
+  background: transparent;
   font-family: Nunito, sans-serif;
 }
 

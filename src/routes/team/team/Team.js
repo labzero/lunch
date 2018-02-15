@@ -168,30 +168,32 @@ class Team extends React.Component {
     }
 
     return (
-      <Grid className={s.root}>
-        <h2>{team.name}</h2>
-        {hasOwnerRole ? (
-          <Tabs id="team-tabs" mountOnEnter>
-            <Tab eventKey={1} title="Users">
-              <h3>User List</h3>
-              {this.renderUsers()}
-            </Tab>
-            <Tab eventKey={2} title="Team">
-              <h3>Team Management</h3>
-              <TeamFormContainer />
-            </Tab>
-            <Tab eventKey={3} title="Messy Business">
-              <h3>Messy Business</h3>
-              <ButtonToolbar className={s.buttonToolbar}>
-                <Button bsStyle="info" onClick={confirmChangeTeamURL}>Change team URL</Button>
-              </ButtonToolbar>
-              <ButtonToolbar className={s.buttonToolbar}>
-                <Button bsStyle="danger" onClick={confirmDeleteTeam}>Delete team</Button>
-              </ButtonToolbar>
-            </Tab>
-          </Tabs>
-        ) : this.renderUsers()}
-      </Grid>
+      <div className={s.root}>
+        <Grid>
+          <h2>{team.name}</h2>
+          {hasOwnerRole ? (
+            <Tabs id="team-tabs" mountOnEnter>
+              <Tab eventKey={1} title="Users">
+                <h3>User List</h3>
+                {this.renderUsers()}
+              </Tab>
+              <Tab eventKey={2} title="Team">
+                <h3>Team Management</h3>
+                <TeamFormContainer />
+              </Tab>
+              <Tab eventKey={3} title="Messy Business">
+                <h3>Messy Business</h3>
+                <ButtonToolbar className={s.buttonToolbar}>
+                  <Button bsStyle="info" onClick={confirmChangeTeamURL}>Change team URL</Button>
+                </ButtonToolbar>
+                <ButtonToolbar className={s.buttonToolbar}>
+                  <Button bsStyle="danger" onClick={confirmDeleteTeam}>Delete team</Button>
+                </ButtonToolbar>
+              </Tab>
+            </Tabs>
+          ) : this.renderUsers()}
+        </Grid>
+      </div>
     );
   }
 }

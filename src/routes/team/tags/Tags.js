@@ -17,10 +17,12 @@ class Tags extends Component {
     }
 
     return (
-      <Grid className={s.root}>
-        <h2>Tags</h2>
-        <TagManagerContainer />
-      </Grid>
+      <div className={s.root}>
+        <Grid>
+          <h2>Tags</h2>
+          <TagManagerContainer />
+        </Grid>
+      </div>
     );
   }
 }

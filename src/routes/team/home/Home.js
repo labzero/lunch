@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import FooterContainer from '../../../components/Footer/FooterContainer';
 import NameFilterFormContainer from '../../../components/NameFilterForm/NameFilterFormContainer';
 import RestaurantMapContainer from '../../../components/RestaurantMap/RestaurantMapContainer';
 import RestaurantListContainer from '../../../components/RestaurantList/RestaurantListContainer';
@@ -69,15 +70,20 @@ export class _Home extends Component {
 
     return (
       <div className={s.root}>
-        <RestaurantMapContainer />
-        <section className={s.forms}>
-          {user.id && <RestaurantAddFormContainer />}
-          <NameFilterFormContainer />
-          <TagFilterFormContainer />
-          <TagFilterFormContainer exclude />
-        </section>
-        <div className={s.restaurantList}>
-          <RestaurantListContainer />
+        <div className={s.mapContainer}>
+          <RestaurantMapContainer />
+        </div>
+        <div className={s.listContainer}>
+          <section className={s.forms}>
+            {user.id && <RestaurantAddFormContainer />}
+            <NameFilterFormContainer />
+            <TagFilterFormContainer />
+            <TagFilterFormContainer exclude />
+          </section>
+          <div className={s.restaurantList}>
+            <RestaurantListContainer />
+          </div>
+          <FooterContainer />
         </div>
       </div>
     );
