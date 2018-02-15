@@ -46,10 +46,6 @@ class RestaurantMap extends Component {
   }
 
   componentDidMount() {
-    this.root.addEventListener('touchmove', event => {
-      // prevent window from scrolling
-      event.preventDefault();
-    });
     this.props.clearCenter();
     loadComponent(() => require.ensure([], require => require('google-map-react').default, 'map')).then((map) => {
       GoogleMap = map;
@@ -118,7 +114,7 @@ class RestaurantMap extends Component {
     }
 
     return (
-      <section className={s.root} ref={r => { this.root = r; }}>
+      <section className={s.root}>
         <GoogleMap
           defaultZoom={defaultZoom || GOOGLE_MAP_ZOOM}
           defaultCenter={latLng}
