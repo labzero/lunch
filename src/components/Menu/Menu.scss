@@ -9,7 +9,8 @@
 }
 
 .root {
-  background: url('./hamburgers.jpg');
+  background: url('./hamburgers.jpg') repeat-y;
+  background-size: 100%;
   border-left: $default-border;
   height: 100%;
   max-width: 100%;
