@@ -35,8 +35,7 @@ export default () => {
               next(err);
             }
           } else {
-            const error = { message: 'Could not vote. Did you already vote today?' };
-            next(error);
+            res.status(409).json({ error: true, data: { message: 'Could not vote. Did you already vote today?' } });
           }
         } catch (err) {
           next(err);
