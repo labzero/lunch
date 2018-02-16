@@ -42,51 +42,53 @@ class Login extends Component {
     const nextQuery = queryString.stringify({ next });
 
     return (
-      <Grid className={s.root}>
-        <h2>Log in</h2>
-        <div className={s.googleButtonContainer}>
-          <Button
-            bsSize="large"
-            bsStyle="primary"
-            className={s.googleButton}
-            href={`//${host}/login/google${googleQuery ? `?${googleQuery}` : ''}`}
-          >
-            <img className={s.googleLogo} src={google} alt="" />
-            Sign in with Google
-          </Button>
-        </div>
-        <h3>Email/password</h3>
-        <form action={`/login${nextQuery ? `?${nextQuery}` : ''}`} method="post">
-          <Row>
-            <Col sm={6}>
-              <FormGroup controlId="login-email">
-                <ControlLabel>Email</ControlLabel>
-                <FormControl
-                  onChange={this.handleChange('email')}
-                  name="email"
-                  type="email"
-                  required
-                  value={email}
-                />
-              </FormGroup>
-              <FormGroup controlId="login-password">
-                <ControlLabel>Password</ControlLabel>
-                <FormControl
-                  onChange={this.handleChange('password')}
-                  name="password"
-                  type="password"
-                  required
-                  value={password}
-                />
-              </FormGroup>
-            </Col>
-          </Row>
-          <Button type="submit">Log in</Button>
-          <Button bsStyle="link" href={`//${host}/password/new${email ? `?email=${email}` : ''}`}>
-            Forgot password?
-          </Button>
-        </form>
-      </Grid>
+      <div className={s.root}>
+        <Grid>
+          <h2>Log in</h2>
+          <div className={s.googleButtonContainer}>
+            <Button
+              bsSize="large"
+              bsStyle="primary"
+              className={s.googleButton}
+              href={`//${host}/login/google${googleQuery ? `?${googleQuery}` : ''}`}
+            >
+              <img className={s.googleLogo} src={google} alt="" />
+              Sign in with Google
+            </Button>
+          </div>
+          <h3>Email/password</h3>
+          <form action={`/login${nextQuery ? `?${nextQuery}` : ''}`} method="post">
+            <Row>
+              <Col sm={6}>
+                <FormGroup controlId="login-email">
+                  <ControlLabel>Email</ControlLabel>
+                  <FormControl
+                    onChange={this.handleChange('email')}
+                    name="email"
+                    type="email"
+                    required
+                    value={email}
+                  />
+                </FormGroup>
+                <FormGroup controlId="login-password">
+                  <ControlLabel>Password</ControlLabel>
+                  <FormControl
+                    onChange={this.handleChange('password')}
+                    name="password"
+                    type="password"
+                    required
+                    value={password}
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            <Button type="submit">Log in</Button>
+            <Button bsStyle="link" href={`//${host}/password/new${email ? `?email=${email}` : ''}`}>
+              Forgot password?
+            </Button>
+          </form>
+        </Grid>
+      </div>
     );
   }
 }

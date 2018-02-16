@@ -45,55 +45,57 @@ class Account extends Component {
     const { name, email, password } = this.state;
 
     return (
-      <Grid className={s.root}>
-        <h2>Account</h2>
-        <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="account-name">
-            <ControlLabel>Name</ControlLabel>
-            <Row>
-              <Col sm={6}>
-                <FormControl
-                  name="name"
-                  onChange={this.handleChange('name')}
-                  required
-                  type="text"
-                  value={name}
-                />
-              </Col>
-            </Row>
-          </FormGroup>
-          <FormGroup controlId="account-email">
-            <ControlLabel>Email</ControlLabel>
-            <Row>
-              <Col sm={6}>
-                <FormControl
-                  name="email"
-                  onChange={this.handleChange('email')}
-                  required
-                  type="email"
-                  value={email}
-                />
-              </Col>
-            </Row>
-          </FormGroup>
-          <FormGroup controlId="account-password">
-            <ControlLabel>Change password?</ControlLabel>
-            <Row>
-              <Col sm={6}>
-                <FormControl
-                  minLength={PASSWORD_MIN_LENGTH}
-                  name="password"
-                  onChange={this.handleChange('password')}
-                  type="password"
-                  value={password}
-                />
-              </Col>
-            </Row>
-            <HelpBlock>Leave this blank if you don&rsquo;t want to set a new password.</HelpBlock>
-          </FormGroup>
-          <Button type="submit">Submit</Button>
-        </form>
-      </Grid>
+      <div className={s.root}>
+        <Grid>
+          <h2>Account</h2>
+          <form onSubmit={this.handleSubmit}>
+            <FormGroup controlId="account-name">
+              <ControlLabel>Name</ControlLabel>
+              <Row>
+                <Col sm={6}>
+                  <FormControl
+                    name="name"
+                    onChange={this.handleChange('name')}
+                    required
+                    type="text"
+                    value={name}
+                  />
+                </Col>
+              </Row>
+            </FormGroup>
+            <FormGroup controlId="account-email">
+              <ControlLabel>Email</ControlLabel>
+              <Row>
+                <Col sm={6}>
+                  <FormControl
+                    name="email"
+                    onChange={this.handleChange('email')}
+                    required
+                    type="email"
+                    value={email}
+                  />
+                </Col>
+              </Row>
+            </FormGroup>
+            <FormGroup controlId="account-password">
+              <ControlLabel>Change password?</ControlLabel>
+              <Row>
+                <Col sm={6}>
+                  <FormControl
+                    minLength={PASSWORD_MIN_LENGTH}
+                    name="password"
+                    onChange={this.handleChange('password')}
+                    type="password"
+                    value={password}
+                  />
+                </Col>
+              </Row>
+              <HelpBlock>Leave this blank if you don&rsquo;t want to set a new password.</HelpBlock>
+            </FormGroup>
+            <Button type="submit">Submit</Button>
+          </form>
+        </Grid>
+      </div>
     );
   }
 }

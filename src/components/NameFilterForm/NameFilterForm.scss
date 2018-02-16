@@ -2,28 +2,11 @@
 @import '../../styles/_variables.scss';
 
 .root {
-  display: inline-block;
-  margin-right: 1em;
-
-  &:last-child {
-    margin-right: 0;
-  }
-
-  button {
-    border: $default-border;
-    border-radius: $button-border-radius;
-  }
+  @include filter-form-root;
 }
 
 .form {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: -10px;
-
-  > * {
-    margin-bottom: 10px;
-  }
+  @include filter-form-form;
 }
 
 .container {

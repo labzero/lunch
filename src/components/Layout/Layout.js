@@ -23,12 +23,14 @@ class Layout extends Component {
 
   static propTypes = {
     children: PropTypes.element.isRequired,
+    isHome: PropTypes.bool,
     path: PropTypes.string,
     shouldScrollToTop: PropTypes.bool.isRequired,
     scrolledToTop: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
+    isHome: false,
     path: undefined
   };
 
@@ -68,13 +70,13 @@ class Layout extends Component {
   }
 
   render() {
-    const { path } = this.props;
+    const { isHome, path } = this.props;
 
     return (
-      <div>
+      <div className={isHome ? s.flex : ''}>
         <HeaderContainer path={path} />
         {this.props.children}
-        <FooterContainer />
+        {!isHome && <FooterContainer />}
         <NotificationListContainer />
         <ModalSectionContainer />
       </div>

@@ -15,6 +15,7 @@
 }
 
 @mixin page-root {
+  background: $white-color;
   padding-bottom: 2em;
   padding-top: 1em;
 }
@@ -48,6 +49,27 @@
 
 @mixin autosuggest-suggestion-focused {
   background: pink;
+}
+
+@mixin filter-form-root {
+  display: inline-block;
+  margin-bottom: 10px;
+  margin-right: 1em;
+
+  &:last-child {
+    margin-right: 0;
+  }
+
+  button {
+    border: $default-border;
+    border-radius: $button-border-radius;
+  }
+}
+
+@mixin filter-form-form {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 @mixin info-window {
