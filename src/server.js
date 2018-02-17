@@ -14,6 +14,7 @@ import fs from 'fs';
 import rfs from 'rotating-file-stream';
 import morgan from 'morgan';
 import express from 'express';
+import cors from 'cors';
 import { Server as HttpServer } from 'http';
 import enforce from 'express-sslify';
 import compression from 'compression';
@@ -241,6 +242,13 @@ app.use(async (req, res, next) => {
 //
 // Register API middleware
 // -----------------------------------------------------------------------------
+if (__DEV__) {
+  app.use(cors({
+    credentials: true,
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    origin: true,
+  }));
+}
 app.use('/api', api());
 
 //
