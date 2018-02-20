@@ -25,6 +25,19 @@ export default () => {
   const router = new Router();
 
   return router
+    .get(
+      '/',
+      loggedIn,
+      async (req, res, next) => {
+        try {
+          const teams = await Team.findAllForUser(req.user);
+
+          res.status(200).json({ error: false, data: teams });
+        } catch (err) {
+          next(err);
+        }
+      }
+    )
     .post(
       '/',
       loggedIn,

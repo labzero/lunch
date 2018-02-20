@@ -25,6 +25,7 @@ describe('api/main/teams', () => {
 
   beforeEach(() => {
     TeamMock = dbMock.define('team', {});
+    TeamMock.findAllForUser = () => Promise.resolve([]);
     RoleMock = dbMock.define('role', {});
     UserMock = dbMock.define('user', {});
 
@@ -71,6 +72,37 @@ describe('api/main/teams', () => {
     };
 
     app = makeApp();
+  });
+
+  describe('GET /', () => {
+    describe('before query', () => {
+      beforeEach(() =>
+        request(app).get('/').send(),
+      );
+
+      it('checks for login', () => {
+        expect(loggedInSpy.called).to.be.true;
+      });
+    });
+
+    describe('success', () => {
+      let response;
+      beforeEach((done) => {
+        request(app).get('/').send().then(r => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns 200', () => {
+        expect(response.statusCode).to.eq(200);
+      });
+
+      it('returns json with teams', () => {
+        expect(response.body.error).to.eq(false);
+        expect(response.body.data).not.to.be.null;
+      });
+    });
   });
 
   describe('POST /', () => {

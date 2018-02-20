@@ -27,6 +27,12 @@ Tag.addScope('orderedByRestaurant', {
   order: [sequelize.literal('restaurant_count DESC')]
 });
 
+Team.findAllForUser = user =>
+  Team.findAll({
+    order: [['created_at', 'ASC']],
+    where: { id: user.roles.map(r => r.team_id) }
+  });
+
 // eslint-disable-next-line camelcase
 Restaurant.findAllWithTagIds = ({ team_id }) =>
   Team.findById(team_id).then(team =>
