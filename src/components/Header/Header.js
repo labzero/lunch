@@ -69,7 +69,7 @@ class Header extends Component {
     const { loggedIn } = this.props;
     const { menuOpen } = this.state;
     return (
-      <div className={`${s.root} ${loggedIn ? s.loggedIn : ''}`}>
+      <div className={`${s.root} ${loggedIn ? s.loggedIn : ''}`} id="header">
         <div className={s.backgroundOverflow}>
           <div className={s.background} />
         </div>

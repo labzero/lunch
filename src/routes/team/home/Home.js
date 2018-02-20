@@ -73,8 +73,8 @@ export class _Home extends Component {
         <div className={s.mapContainer}>
           <RestaurantMapContainer />
         </div>
-        <div className={s.listContainer}>
-          <section className={s.forms}>
+        <div className={s.listContainer} id="listContainer">
+          <section className={s.forms} id="listForms">
             {user.id && <RestaurantAddFormContainer />}
             <NameFilterFormContainer />
             <TagFilterFormContainer />

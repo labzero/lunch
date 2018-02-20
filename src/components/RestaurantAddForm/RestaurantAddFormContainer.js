@@ -63,7 +63,11 @@ const mergeProps = (stateProps, dispatchProps) =>
         if (existingRestaurant === undefined) {
           dispatchProps.dispatch(addRestaurant(name, placeId, address, lat, lng));
         } else {
-          scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, true, undefined, -20);
+          scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, {
+            containerId: 'listContainer',
+            offset: document.getElementById('listForms').offsetHeight + document.getElementById('header').offsetHeight,
+          });
+          scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`);
         }
       }
       dispatchProps.dispatch(clearTempMarker());

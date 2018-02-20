@@ -39,6 +39,7 @@
   .listContainer {
     flex-grow: 0;
     overflow: auto;
+    overflow-anchor: none; // prevent browsers from scrolling to top after vote
     width: 500px;
   }
 }
