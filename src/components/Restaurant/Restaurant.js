@@ -108,21 +108,23 @@ class Restaurant extends Component {
 
     return (
       <div className={s.root}>
-        <div>
-          {nameArea}
+        <div className={s.topRow}>
+          <div className={s.data}>
+            {nameArea}
+            <div className={s.addressContainer}>
+              <a
+                href={`/api/restaurants/${restaurant.id}/place_url`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {restaurant.address}
+              </a>
+            </div>
+          </div>
           <div className={s.voteContainer}>
             <RestaurantVoteCountContainer id={restaurant.id} />
             {voteButton}
           </div>
-        </div>
-        <div className={s.addressContainer}>
-          <a
-            href={`/api/restaurants/${restaurant.id}/place_url`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {restaurant.address}
-          </a>
         </div>
         <div className={s.footer}>
           <div className={s.tagsArea}>

@@ -1,11 +1,6 @@
 @import '../../styles/_variables.scss';
 @import '../../styles/_mixins.scss';
 
-.root,
-.footer {
-  @include clearfix;
-}
-
 .root {
   background: $white-color;
   border: $default-border;
@@ -16,9 +11,16 @@
   padding: 10px;
 }
 
+.topRow {
+  display: flex;
+}
+
+.data {
+  flex-grow: 1;
+}
+
 .heading {
   cursor: pointer;
-  float: left;
   font-size: 28px;
   font-weight: bold;
   margin: 0;
@@ -39,7 +41,6 @@
 }
 
 .voteContainer {
-  float: right;
   margin-left: 1em;
 }
 
@@ -48,16 +49,19 @@
 }
 
 .addressContainer {
-  clear: left;
   margin-bottom: .25em;
 }
 
+.footer {
+  align-items: flex-end;
+  display: flex;
+}
+
 .tagsArea {
-  float: left;
+  flex-grow: 1;
 }
 
 .dropdownContainer {
-  float: right;
   height: 30px;
   line-height: 30px;
   margin-left: 1em;
