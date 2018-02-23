@@ -39,7 +39,6 @@ Restaurant.findAllWithTagIds = ({ team_id }) =>
     Restaurant.findAll({
       attributes: {
         include: [
-          [sequelize.literal('COUNT(*) OVER(PARTITION BY "restaurant"."id")'), 'vote_count'],
           [sequelize.literal(`ARRAY(SELECT "tag_id" from "restaurants_tags"
             where "restaurants_tags"."restaurant_id" = "restaurant"."id")`),
             'tags'],
@@ -68,7 +67,7 @@ Restaurant.findAllWithTagIds = ({ team_id }) =>
       ],
       order: [
         [Restaurant.associations.decisions, 'id', 'NULLS LAST'],
-        sequelize.literal('vote_count DESC'),
+        sequelize.literal('(COUNT(*) OVER(PARTITION BY "restaurant"."id")) DESC'),
         [Restaurant.associations.votes, 'created_at', 'DESC', 'NULLS LAST'],
         sequelize.literal('all_decision_count ASC'),
         sequelize.literal('all_vote_count DESC'),
