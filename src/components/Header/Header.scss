@@ -73,6 +73,14 @@
   font-size: inherit;
   margin: 0;
 
+  a {
+    outline: none;
+
+    &:focus {
+      @include shadow-focus;
+    }
+  }
+
   img {
     height: 6em;
   }
@@ -88,6 +96,7 @@
   @include plain-button;
   cursor: pointer;
   margin-top: -15px;
+  outline: none;
   position: absolute;
   right: 10px;
   top: 50%;
@@ -112,6 +121,10 @@
     span {
       transform: scale(1.25, .75);
     }
+  }
+
+  &:focus {
+    @include shadow-focus;
   }
 }
 

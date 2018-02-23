@@ -22,6 +22,8 @@ class Menu extends Component {
   render() {
     const { closeMenu, hasGuestRole, hasMemberRole, host, open, team, user } = this.props;
 
+    const tabIndex = open ? 0 : -1;
+
     return (
       <nav className={`${s.root} ${open ? s.open : ''}`}>
         <div className={s.name}>
@@ -37,25 +39,25 @@ class Menu extends Component {
             <ul className={s.list}>
               {hasMemberRole && (
                 <li className={s.item}>
-                  <Link className={s.button} onClick={closeMenu} to="/team">Team</Link>
+                  <Link className={s.button} onClick={closeMenu} tabIndex={tabIndex} to="/team">Team</Link>
                 </li>
               )}
               {hasGuestRole && (
                 <li className={s.item}>
-                  <Link className={s.button} onClick={closeMenu} to="/tags">Tags</Link>
+                  <Link className={s.button} onClick={closeMenu} tabIndex={tabIndex} to="/tags">Tags</Link>
                 </li>
               )}
             </ul>
           )}
           <ul className={s.list}>
             <li className={s.item}>
-              <a className={s.button} onClick={closeMenu} href={`//${host}/teams`}>My Teams</a>
+              <a className={s.button} onClick={closeMenu} tabIndex={tabIndex} href={`//${host}/teams`}>My Teams</a>
             </li>
             <li className={s.item}>
-              <a className={s.button} onClick={closeMenu} href={`//${host}/account`}>Account</a>
+              <a className={s.button} onClick={closeMenu} tabIndex={tabIndex} href={`//${host}/account`}>Account</a>
             </li>
             <li className={`${s.item} ${s.logout}`}>
-              <a className={s.button} onClick={closeMenu} href={`//${host}/logout`}>Log Out</a>
+              <a className={s.button} onClick={closeMenu} tabIndex={tabIndex} href={`//${host}/logout`}>Log Out</a>
             </li>
           </ul>
         </div>
