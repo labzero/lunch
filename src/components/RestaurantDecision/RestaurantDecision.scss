@@ -1,16 +1,22 @@
 @import '../../styles/_mixins.scss';
 
 .root {
-  @include plain-button;
   @include image-replace;
 
   background: url('./checkmark.svg') center no-repeat;
+  display: inline-block;
   height: 30px;
   opacity: .15;
+  outline: none;
+  vertical-align: middle;
   width: 30px;
 
   &:hover {
     opacity: .5;
+  }
+
+  &:focus {
+    @include shadow-focus;
   }
 }
 

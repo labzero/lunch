@@ -42,7 +42,11 @@ export class _RestaurantVoteCount extends Component {
           )}</Tooltip>
         );
         voteCountContainer = (
-          <OverlayTrigger placement="top" overlay={tooltip}>
+          <OverlayTrigger
+            placement="top"
+            overlay={tooltip}
+            trigger={['click', 'hover']}
+          >
             {voteCount}
           </OverlayTrigger>
         );

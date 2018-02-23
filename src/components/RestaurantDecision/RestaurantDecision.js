@@ -14,12 +14,15 @@ const RestaurantDecision = ({ id, votes, decided, loggedIn, handleClick }) => {
   return ((loggedIn && votes.length > 0) || decided) &&
     (
     <OverlayTrigger placement="top" overlay={tooltip}>
-      <button
-        onClick={handleClick}
+      <span
         className={`${s.root} ${loggedIn ? '' : s.loggedOut} ${decided ? s.decided : ''}`}
+        onClick={handleClick}
+        onKeyPress={handleClick}
+        role="button"
+        tabIndex={0}
       >
         ✔
-      </button>
+      </span>
     </OverlayTrigger>
     );
 };

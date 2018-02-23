@@ -1,3 +1,4 @@
+@import '../../styles/_mixins.scss';
 @import '../../styles/_variables.scss';
 
 .root {
@@ -15,5 +16,9 @@
   &:focus,
   &:active:focus {
     outline: none;
+  }
+
+  &:focus { /* stylelint-disable-line no-descending-specificity */
+    @include shadow-focus;
   }
 }

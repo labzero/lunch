@@ -3,7 +3,6 @@
 @mixin plain-button {
   background: none;
   border: 0;
-  outline: none;
   padding: 0;
   text-align: left;
 }
@@ -106,6 +105,10 @@
 @mixin text-on-texture {
   color: $white-color;
   text-shadow: 0 0 5px $black-color, 0 0 10px $black-color, 0 0 20px $black-color;
+}
+
+@mixin shadow-focus {
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, .5));
 }
 
 @mixin image-replace {

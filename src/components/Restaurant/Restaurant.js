@@ -98,9 +98,15 @@ class Restaurant extends Component {
     } else {
       nameArea = (
         <h2 className={s.heading}>
-          <button onClick={showMapAndInfoWindow} className={s.headingButton}>
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={showMapAndInfoWindow}
+            onKeyPress={showMapAndInfoWindow}
+            className={s.headingButton}
+          >
             {restaurant.name}
-          </button>
+          </span>
           <RestaurantDecisionContainer id={restaurant.id} />
         </h2>
       );

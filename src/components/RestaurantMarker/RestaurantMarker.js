@@ -60,6 +60,7 @@ const InnerRestaurantMarker = ({
       {showInfoWindow ? renderInfoWindow() : null}
       <button
         key={index}
+        tabIndex={-1}
         title={restaurant.name}
         onClick={handleMarkerClick}
         className={s.marker}
