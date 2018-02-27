@@ -1,8 +1,8 @@
 import { connect } from 'react-redux';
-import { fetchDecisionIfNeeded, invalidateDecision } from '../../../actions/decisions';
-import { fetchRestaurantsIfNeeded, invalidateRestaurants } from '../../../actions/restaurants';
-import { fetchTagsIfNeeded, invalidateTags } from '../../../actions/tags';
-import { fetchUsersIfNeeded, invalidateUsers } from '../../../actions/users';
+import { fetchDecision, invalidateDecision } from '../../../actions/decisions';
+import { fetchRestaurants, invalidateRestaurants } from '../../../actions/restaurants';
+import { fetchTags, invalidateTags } from '../../../actions/tags';
+import { fetchUsers, invalidateUsers } from '../../../actions/users';
 import { messageReceived } from '../../../actions/websockets';
 import Home from './Home';
 
@@ -12,17 +12,17 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetchDecisionIfNeeded() {
-    dispatch(fetchDecisionIfNeeded());
+  fetchDecision() {
+    dispatch(fetchDecision());
   },
-  fetchRestaurantsIfNeeded() {
-    dispatch(fetchRestaurantsIfNeeded());
+  fetchRestaurants() {
+    dispatch(fetchRestaurants());
   },
-  fetchTagsIfNeeded() {
-    dispatch(fetchTagsIfNeeded());
+  fetchTags() {
+    dispatch(fetchTags());
   },
-  fetchUsersIfNeeded() {
-    dispatch(fetchUsersIfNeeded());
+  fetchUsers() {
+    dispatch(fetchUsers());
   },
   invalidateDecision() {
     dispatch(invalidateDecision());

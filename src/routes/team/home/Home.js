@@ -14,10 +14,10 @@ export class _Home extends Component {
 
   static propTypes = {
     user: PropTypes.object.isRequired,
-    fetchDecisionIfNeeded: PropTypes.func.isRequired,
-    fetchRestaurantsIfNeeded: PropTypes.func.isRequired,
-    fetchTagsIfNeeded: PropTypes.func.isRequired,
-    fetchUsersIfNeeded: PropTypes.func.isRequired,
+    fetchDecision: PropTypes.func.isRequired,
+    fetchRestaurants: PropTypes.func.isRequired,
+    fetchTags: PropTypes.func.isRequired,
+    fetchUsers: PropTypes.func.isRequired,
     invalidateDecision: PropTypes.func.isRequired,
     invalidateRestaurants: PropTypes.func.isRequired,
     invalidateTags: PropTypes.func.isRequired,
@@ -29,6 +29,10 @@ export class _Home extends Component {
   componentDidMount() {
     const { messageReceived, wsPort } = this.props;
 
+    this.props.invalidateDecision();
+    this.props.invalidateRestaurants();
+    this.props.invalidateTags();
+    this.props.invalidateUsers();
     this.fetchAllData();
 
     if (canUseDOM) {
@@ -47,22 +51,17 @@ export class _Home extends Component {
         },
       });
       this.socket.onmessage = messageReceived;
+      this.socket.onopen = this.fetchAllData;
     }
 
-    setInterval(() => {
-      this.props.invalidateDecision();
-      this.props.invalidateRestaurants();
-      this.props.invalidateTags();
-      this.props.invalidateUsers();
-      this.fetchAllData();
-    }, 1000 * 60 * 60 * 6);
+    setInterval(this.fetchAllData, 1000 * 60 * 60);
   }
 
-  fetchAllData() {
-    this.props.fetchDecisionIfNeeded();
-    this.props.fetchRestaurantsIfNeeded();
-    this.props.fetchTagsIfNeeded();
-    this.props.fetchUsersIfNeeded();
+  fetchAllData = () => {
+    this.props.fetchDecision();
+    this.props.fetchRestaurants();
+    this.props.fetchTags();
+    this.props.fetchUsers();
   }
 
   render() {
