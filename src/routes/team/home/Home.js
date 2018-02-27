@@ -33,7 +33,6 @@ export class _Home extends Component {
     this.props.invalidateRestaurants();
     this.props.invalidateTags();
     this.props.invalidateUsers();
-    this.fetchAllData();
 
     if (canUseDOM) {
       let host = window.location.host;
@@ -57,6 +56,9 @@ export class _Home extends Component {
       setInterval(() => {
         this.socket.send('');
       }, 1000 * 30);
+    } else {
+      // websocket open will handle initial fetch
+      this.fetchAllData();
     }
 
     setInterval(this.fetchAllData, 1000 * 60 * 60);
