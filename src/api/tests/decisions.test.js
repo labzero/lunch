@@ -44,6 +44,13 @@ describe('api/team/decisions', () => {
 
     makeApp = deps => {
       const decisionsApi = proxyquireStrict('../team/decisions', {
+        '../../models/db': mockEsmodule({
+          DataTypes: {
+            Op: {
+              gt: 'gt',
+            },
+          },
+        }),
         '../../models': mockEsmodule({
           Decision: DecisionMock,
         }),
@@ -69,6 +76,75 @@ describe('api/team/decisions', () => {
     };
 
     app = makeApp();
+  });
+
+  describe('GET /', () => {
+    describe('before query', () => {
+      beforeEach(() =>
+        request(app).get('/'));
+
+      it('checks for login', () => {
+        expect(loggedInSpy.called).to.be.true;
+      });
+
+      it('checks for team role', () => {
+        expect(checkTeamRoleSpy.called).to.be.true;
+      });
+    });
+
+    describe('5 days of decisions', () => {
+      let findAllSpy;
+      beforeEach(() => {
+        findAllSpy = spy(DecisionMock, 'findAll');
+        return request(app).get('/?days=5');
+      });
+
+      it('looks for decisions within past 5 days', () => {
+        expect(findAllSpy.calledWith({
+          where: {
+            created_at: {
+              gt: match.date,
+            },
+            team_id: 77
+          }
+        })).to.be.true;
+      });
+    });
+
+    describe('success', () => {
+      let response;
+      beforeEach((done) => {
+        request(app).get('/').then(r => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns 200', () => {
+        expect(response.statusCode).to.eq(200);
+      });
+
+      it('returns json with decisions', () => {
+        expect(response.body.error).to.eq(false);
+        expect(response.body.data).not.to.be.null;
+      });
+    });
+
+    describe('failure', () => {
+      let response;
+      beforeEach((done) => {
+        stub(DecisionMock, 'findAll').throws('Oh No');
+
+        request(app).get('/').then((r) => {
+          response = r;
+          done();
+        });
+      });
+
+      it('returns error', () => {
+        expect(response.error.text).to.contain('Oh No');
+      });
+    });
   });
 
   describe('GET /fromToday', () => {

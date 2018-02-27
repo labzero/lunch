@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import moment from 'moment';
+import { DataTypes } from '../../models/db';
 import { Decision } from '../../models';
 import checkTeamRole from '../helpers/checkTeamRole';
 import loggedIn from '../helpers/loggedIn';
@@ -8,6 +10,28 @@ export default () => {
   const router = new Router({ mergeParams: true });
 
   return router
+    .get(
+      '/',
+      loggedIn,
+      checkTeamRole(),
+      async (req, res, next) => {
+        try {
+          const opts = { where: { team_id: req.team.id } };
+          const days = parseInt(req.query.days, 10);
+          if (!Number.isNaN(days)) {
+            opts.where.created_at = {
+              [DataTypes.Op.gt]: moment().subtract(days, 'days').toDate()
+            }
+          }
+      
+          const decisions = await Decision.findAll(opts);
+
+          res.status(200).json({ error: false, data: decisions });
+        } catch (err) {
+          next(err);
+        }
+      }
+    )
     .get(
       '/fromToday',
       loggedIn,
