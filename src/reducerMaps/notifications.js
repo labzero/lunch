@@ -93,11 +93,11 @@ export default new Map([
         };
         break;
       }
-      case ActionTypes.DECISION_DELETED: {
-        const { restaurantId, userId } = realAction;
+      case ActionTypes.DECISIONS_DELETED: {
+        const { decisions, userId } = realAction;
         notification.vals = {
           userId,
-          restaurantId
+          restaurantId: decisions[0].restaurant_id,
         };
         break;
       }

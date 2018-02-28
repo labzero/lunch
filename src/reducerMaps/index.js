@@ -1,4 +1,4 @@
-export { default as decision } from './decision';
+export { default as decisions } from './decisions';
 export { default as flashes } from './flashes';
 export { default as listUi } from './listUi';
 export { default as mapUi } from './mapUi';

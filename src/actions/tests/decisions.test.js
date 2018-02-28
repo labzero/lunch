@@ -4,7 +4,6 @@
 import { expect } from 'chai';
 import configureStore from 'redux-mock-store';
 import fetchMock from 'fetch-mock';
-import proxyquire from 'proxyquire';
 import thunk from 'redux-thunk';
 import * as decisions from '../decisions';
 
@@ -18,35 +17,35 @@ describe('actions/decisions', () => {
     store = mockStore({});
   });
 
-  describe('fetchDecision', () => {
+  describe('fetchDecisions', () => {
     describe('before fetch', () => {
       beforeEach(() => {
         fetchMock.mock('*', {});
       });
 
-      it('dispatches requestDecision', () => {
-        return store.dispatch(decisions.fetchDecision()).then(() => {
+      it('dispatches requestDecisions', () => {
+        return store.dispatch(decisions.fetchDecisions()).then(() => {
           const actions = store.getActions(); 
-          expect(actions[0].type).to.eq('REQUEST_DECISION');
+          expect(actions[0].type).to.eq('REQUEST_DECISIONS');
         });
       });
 
-      it('fetches decision', () => {
-        store.dispatch(decisions.fetchDecision());
-        expect(fetchMock.lastCall()[0]).to.eq('/api/decisions/fromToday');
+      it('fetches 5 days of decisions', () => {
+        store.dispatch(decisions.fetchDecisions());
+        expect(fetchMock.lastCall()[0]).to.eq('/api/decisions/?days=5');
       });
     });
 
     describe('success', () => {
       beforeEach(() => {
-        fetchMock.mock('*', { data: { foo: 'bar' } });
+        fetchMock.mock('*', { data: [{ foo: 'bar' }] });
       });
 
       it('dispatches receiveDecision', () => {
-        return store.dispatch(decisions.fetchDecision()).then(() => {
+        return store.dispatch(decisions.fetchDecisions()).then(() => {
           const actions = store.getActions();
-          expect(actions[1].type).to.eq('RECEIVE_DECISION');
-          expect(actions[1].inst).to.eql({ foo: 'bar' });
+          expect(actions[1].type).to.eq('RECEIVE_DECISIONS');
+          expect(actions[1].items).to.eql([{ foo: 'bar' }]);
         });
       });
     });
@@ -57,7 +56,7 @@ describe('actions/decisions', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(decisions.fetchDecision()).catch(() => {
+        return store.dispatch(decisions.fetchDecisions()).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
@@ -108,37 +107,22 @@ describe('actions/decisions', () => {
   });
 
   describe('removeDecision', () => {
-    let restaurantId;
-    let proxyDecision;
-    beforeEach(() => {
-      restaurantId = 1;
-      proxyDecision = proxyquire('../decisions', {
-        '../selectors/decisions': {
-          getDecision: () => {
-            return ({restaurant_id: restaurantId});
-          }
-        }
-      });
-    });
-
     describe('before fetch', () => {
       beforeEach(() => {
         fetchMock.mock('*', {});
       });
 
       it('dispatches deleteDecision', () => {
-        return store.dispatch(proxyDecision.removeDecision()).then(() => {
+        return store.dispatch(decisions.removeDecision()).then(() => {
           const actions = store.getActions(); 
           expect(actions[0].type).to.eq('DELETE_DECISION');
-          expect(actions[0].restaurantId).to.eq(1);
         });
       });
 
       it('fetches decision', () => {
-        store.dispatch(proxyDecision.removeDecision());
+        store.dispatch(decisions.removeDecision());
 
         expect(fetchMock.lastCall()[0]).to.eq('/api/decisions/fromToday');
-        expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ restaurant_id: 1 }));
       });
     });
 
@@ -148,7 +132,7 @@ describe('actions/decisions', () => {
       });
 
       it('dispatches flashError', () => {
-        return store.dispatch(proxyDecision.removeDecision()).catch(() => {
+        return store.dispatch(decisions.removeDecision()).catch(() => {
           const actions = store.getActions(); 
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });

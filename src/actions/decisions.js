@@ -1,45 +1,44 @@
 import ActionTypes from '../constants/ActionTypes';
-import { getDecision } from '../selectors/decisions';
 import { processResponse, credentials, jsonHeaders } from '../core/ApiClient';
 
-export function invalidateDecision() {
-  return { type: ActionTypes.INVALIDATE_DECISION };
+export function invalidateDecisions() {
+  return { type: ActionTypes.INVALIDATE_DECISIONS };
 }
 
-export function requestDecision() {
+export function requestDecisions() {
   return {
-    type: ActionTypes.REQUEST_DECISION
+    type: ActionTypes.REQUEST_DECISIONS
   };
 }
 
-export function receiveDecision(json) {
+export function receiveDecisions(json) {
   return {
-    type: ActionTypes.RECEIVE_DECISION,
-    inst: json
+    type: ActionTypes.RECEIVE_DECISIONS,
+    items: json
   };
 }
 
-export function fetchDecision() {
+export function fetchDecisions() {
   return dispatch => {
-    dispatch(requestDecision());
-    return fetch('/api/decisions/fromToday', {
+    dispatch(requestDecisions());
+    return fetch('/api/decisions/?days=5', {
       credentials,
       headers: jsonHeaders
     })
       .then(response => processResponse(response, dispatch))
-      .then(json => dispatch(receiveDecision(json)));
+      .then(json => dispatch(receiveDecisions(json)));
   };
 }
 
-function shouldFetchDecision(state) {
-  const restaurants = state.restaurants;
-  if (restaurants.isFetching) {
+function shouldFetchDecisions(state) {
+  const { decisions } = state;
+  if (decisions.isFetching) {
     return false;
   }
-  return restaurants.didInvalidate;
+  return decisions.didInvalidate;
 }
 
-export function fetchDecisionIfNeeded() {
+export function fetchDecisionsIfNeeded() {
   // Note that the function also receives getState()
   // which lets you choose what to dispatch next.
 
@@ -47,9 +46,9 @@ export function fetchDecisionIfNeeded() {
   // a cached value is already available.
 
   return (dispatch, getState) => {
-    if (shouldFetchDecision(getState())) {
+    if (shouldFetchDecisions(getState())) {
       // Dispatch a thunk from thunk!
-      return dispatch(fetchDecision());
+      return dispatch(fetchDecisions());
     }
 
     // Let the calling code know there's nothing to wait for.
@@ -69,14 +68,13 @@ export const decisionPosted = (decision, deselected, userId) => ({
   userId
 });
 
-export const deleteDecision = (restaurantId) => ({
+export const deleteDecision = () => ({
   type: ActionTypes.DELETE_DECISION,
-  restaurantId
 });
 
-export const decisionDeleted = (restaurantId, userId) => ({
-  type: ActionTypes.DECISION_DELETED,
-  restaurantId,
+export const decisionsDeleted = (decisions, userId) => ({
+  type: ActionTypes.DECISIONS_DELETED,
+  decisions,
   userId
 });
 
@@ -92,15 +90,12 @@ export const decide = (restaurantId) => dispatch => {
     .then(response => processResponse(response, dispatch))
 };
 
-export const removeDecision = () => (dispatch, getState) => {
-  const restaurantId = getDecision(getState()).restaurant_id;
-  const payload = { restaurant_id: restaurantId };
-  dispatch(deleteDecision(restaurantId));
+export const removeDecision = () => (dispatch) => {
+  dispatch(deleteDecision());
   return fetch('/api/decisions/fromToday', {
     credentials,
     headers: jsonHeaders,
     method: 'delete',
-    body: JSON.stringify(payload)
   })
     .then(response => processResponse(response, dispatch));
 };

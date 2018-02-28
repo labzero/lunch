@@ -27,7 +27,7 @@ const RestaurantDropdown = ({
   }
 
   let decideButton;
-  if (decision !== null && decision.restaurant_id === restaurant.id) {
+  if (decision !== undefined && decision.restaurant_id === restaurant.id) {
     decideButton = (
       <MenuItem
         onSelect={removeDecision}

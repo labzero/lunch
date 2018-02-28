@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { fetchDecision, invalidateDecision } from '../../../actions/decisions';
+import { fetchDecisions, invalidateDecisions } from '../../../actions/decisions';
 import { fetchRestaurants, invalidateRestaurants } from '../../../actions/restaurants';
 import { fetchTags, invalidateTags } from '../../../actions/tags';
 import { fetchUsers, invalidateUsers } from '../../../actions/users';
@@ -12,8 +12,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  fetchDecision() {
-    dispatch(fetchDecision());
+  fetchDecisions() {
+    dispatch(fetchDecisions());
   },
   fetchRestaurants() {
     dispatch(fetchRestaurants());
@@ -24,8 +24,8 @@ const mapDispatchToProps = dispatch => ({
   fetchUsers() {
     dispatch(fetchUsers());
   },
-  invalidateDecision() {
-    dispatch(invalidateDecision());
+  invalidateDecisions() {
+    dispatch(invalidateDecisions());
   },
   invalidateRestaurants() {
     dispatch(invalidateRestaurants());

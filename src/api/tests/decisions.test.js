@@ -147,56 +147,6 @@ describe('api/team/decisions', () => {
     });
   });
 
-  describe('GET /fromToday', () => {
-    describe('before query', () => {
-      beforeEach(() =>
-        request(app).get('/fromToday'));
-
-      it('checks for login', () => {
-        expect(loggedInSpy.called).to.be.true;
-      });
-
-      it('checks for team role', () => {
-        expect(checkTeamRoleSpy.called).to.be.true;
-      });
-    });
-
-    describe('success', () => {
-      let response;
-      beforeEach((done) => {
-        request(app).get('/fromToday').then(r => {
-          response = r;
-          done();
-        });
-      });
-
-      it('returns 200', () => {
-        expect(response.statusCode).to.eq(200);
-      });
-
-      it('returns json with decision', () => {
-        expect(response.body.error).to.eq(false);
-        expect(response.body.data).not.to.be.null;
-      });
-    });
-
-    describe('failure', () => {
-      let response;
-      beforeEach((done) => {
-        stub(DecisionMock, 'scope').throws('Oh No');
-
-        request(app).get('/fromToday').then((r) => {
-          response = r;
-          done();
-        });
-      });
-
-      it('returns error', () => {
-        expect(response.error.text).to.contain('Oh No');
-      });
-    });
-  });
-
   describe('POST /', () => {
     describe('before query', () => {
       beforeEach(() =>
@@ -324,39 +274,40 @@ describe('api/team/decisions', () => {
     });
 
     describe('query', () => {
-      let destroySpy;
+      let findAllSpy;
       beforeEach(() => {
-        destroySpy = spy(DecisionMock, 'destroy');
-        return request(app).delete('/fromToday').send({ restaurant_id: 1 });
+        findAllSpy = spy(DecisionMock, 'findAll');
+        return request(app).delete('/fromToday').send();
       });
 
-      it('deletes decision', () => {
-        expect(destroySpy.calledWith({
+      it('finds decisions', () => {
+        expect(findAllSpy.calledWith({
           where: { team_id: 77 }
         })).to.be.true;
       });
     });
 
     describe('success', () => {
-      let decisionDeletedSpy;
+      let decisionsDeletedSpy;
       let response;
       beforeEach((done) => {
-        decisionDeletedSpy = spy();
+        decisionsDeletedSpy = spy();
         app = makeApp({
           '../../actions/decisions': mockEsmodule({
-            decisionDeleted: decisionDeletedSpy
+            decisionsDeleted: decisionsDeletedSpy
           })
         });
 
-        request(app).delete('/fromToday').send({ restaurant_id: 1 }).then(r => {
+        request(app).delete('/fromToday').send().then(r => {
           response = r;
           done();
         });
       });
 
-      it('broadcasts decisionDeleted', () => {
+      it('broadcasts decisionsDeleted', () => {
         expect(broadcastSpy.called).to.be.true;
-        expect(decisionDeletedSpy.calledWith(1, 231)).to.be.true;
+        expect(decisionsDeletedSpy.args[0][0].length).to.eq(1);
+        expect(decisionsDeletedSpy.args[0][1]).to.eq(231);
       });
 
       it('returns 204', () => {

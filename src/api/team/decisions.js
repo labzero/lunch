@@ -4,7 +4,7 @@ import { DataTypes } from '../../models/db';
 import { Decision } from '../../models';
 import checkTeamRole from '../helpers/checkTeamRole';
 import loggedIn from '../helpers/loggedIn';
-import { decisionPosted, decisionDeleted } from '../../actions/decisions';
+import { decisionPosted, decisionsDeleted } from '../../actions/decisions';
 
 export default () => {
   const router = new Router({ mergeParams: true });
@@ -27,20 +27,6 @@ export default () => {
           const decisions = await Decision.findAll(opts);
 
           res.status(200).json({ error: false, data: decisions });
-        } catch (err) {
-          next(err);
-        }
-      }
-    )
-    .get(
-      '/fromToday',
-      loggedIn,
-      checkTeamRole(),
-      async (req, res, next) => {
-        try {
-          const decision = await Decision.scope('fromToday').findOne({ where: { team_id: req.team.id } });
-
-          res.status(200).json({ error: false, data: decision });
         } catch (err) {
           next(err);
         }
@@ -79,11 +65,11 @@ export default () => {
       loggedIn,
       checkTeamRole(),
       async (req, res, next) => {
-        const restaurantId = parseInt(req.body.restaurant_id, 10);
         try {
-          await Decision.scope('fromToday').destroy({ where: { team_id: req.team.id } });
+          const decisions = await Decision.scope('fromToday').findAll({ where: { team_id: req.team.id } });
+          Decision.scope('fromToday').destroy({ where: { team_id: req.team.id } });
 
-          req.wss.broadcast(req.team.id, decisionDeleted(restaurantId, req.user.id));
+          req.wss.broadcast(req.team.id, decisionsDeleted(decisions, req.user.id));
           res.status(204).send();
         } catch (err) {
           next(err);

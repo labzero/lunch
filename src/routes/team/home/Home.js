@@ -14,11 +14,11 @@ export class _Home extends Component {
 
   static propTypes = {
     user: PropTypes.object.isRequired,
-    fetchDecision: PropTypes.func.isRequired,
+    fetchDecisions: PropTypes.func.isRequired,
     fetchRestaurants: PropTypes.func.isRequired,
     fetchTags: PropTypes.func.isRequired,
     fetchUsers: PropTypes.func.isRequired,
-    invalidateDecision: PropTypes.func.isRequired,
+    invalidateDecisions: PropTypes.func.isRequired,
     invalidateRestaurants: PropTypes.func.isRequired,
     invalidateTags: PropTypes.func.isRequired,
     invalidateUsers: PropTypes.func.isRequired,
@@ -29,7 +29,7 @@ export class _Home extends Component {
   componentDidMount() {
     const { messageReceived, wsPort } = this.props;
 
-    this.props.invalidateDecision();
+    this.props.invalidateDecisions();
     this.props.invalidateRestaurants();
     this.props.invalidateTags();
     this.props.invalidateUsers();
@@ -65,7 +65,7 @@ export class _Home extends Component {
   }
 
   fetchAllData = () => {
-    this.props.fetchDecision();
+    this.props.fetchDecisions();
     this.props.fetchRestaurants();
     this.props.fetchTags();
     this.props.fetchUsers();

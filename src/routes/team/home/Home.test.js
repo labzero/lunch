@@ -10,30 +10,30 @@ import RestaurantAddFormContainer from '../../../components/RestaurantAddForm/Re
 
 describe('Home', () => {
   let props;
-  let fetchDecision;
+  let fetchDecisions;
   let fetchRestaurants;
   let fetchTags;
   let fetchUsers;
-  let invalidateDecision;
+  let invalidateDecisions;
   let invalidateRestaurants;
   let invalidateTags;
   let invalidateUsers;
 
   beforeEach(() => {
-    fetchDecision = spy();
+    fetchDecisions = spy();
     fetchRestaurants = spy();
     fetchTags = spy();
     fetchUsers = spy();
-    invalidateDecision = spy();
+    invalidateDecisions = spy();
     invalidateRestaurants = spy();
     invalidateTags = spy();
     invalidateUsers = spy();
     props = {
-      fetchDecision,
+      fetchDecisions,
       fetchRestaurants,
       fetchTags,
       fetchUsers,
-      invalidateDecision,
+      invalidateDecisions,
       invalidateRestaurants,
       invalidateTags,
       invalidateUsers,
@@ -54,12 +54,12 @@ describe('Home', () => {
   it('invalidates and fetches all data upon mount', () => {
     shallow(<Home {...props} />);
 
-    expect(invalidateDecision.callCount).to.eq(1);
+    expect(invalidateDecisions.callCount).to.eq(1);
     expect(invalidateRestaurants.callCount).to.eq(1);
     expect(invalidateTags.callCount).to.eq(1);
     expect(invalidateUsers.callCount).to.eq(1);
 
-    expect(fetchDecision.callCount).to.eq(1);
+    expect(fetchDecisions.callCount).to.eq(1);
     expect(fetchRestaurants.callCount).to.eq(1);
     expect(fetchTags.callCount).to.eq(1);
     expect(fetchUsers.callCount).to.eq(1);
@@ -72,7 +72,7 @@ describe('Home', () => {
 
     clock.tick(1000 * 60 * 60);
 
-    expect(fetchDecision.callCount).to.eq(2);
+    expect(fetchDecisions.callCount).to.eq(2);
     expect(fetchRestaurants.callCount).to.eq(2);
     expect(fetchTags.callCount).to.eq(2);
     expect(fetchUsers.callCount).to.eq(2);

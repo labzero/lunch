@@ -44,7 +44,7 @@ const actionMap = {
   [ActionTypes.DELETED_TAG_FROM_RESTAURANT]: dispatchNotify,
   [ActionTypes.TAG_DELETED]: notifyDispatch,
   [ActionTypes.DECISION_POSTED]: dispatchSortNotify,
-  [ActionTypes.DECISION_DELETED]: dispatchSortNotify
+  [ActionTypes.DECISIONS_DELETED]: dispatchSortNotify
 };
 
 export function messageReceived(payload) {

@@ -26,7 +26,7 @@ const contentMap = {
   [ActionTypes.DELETED_TAG_FROM_RESTAURANT]: DeletedTagFromRestaurant,
   [ActionTypes.TAG_DELETED]: TagDeleted,
   [ActionTypes.DECISION_POSTED]: DecisionPosted,
-  [ActionTypes.DECISION_DELETED]: DecisionDeleted
+  [ActionTypes.DECISIONS_DELETED]: DecisionDeleted
 };
 
 class Notification extends Component {

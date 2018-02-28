@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 import hasRole from '../helpers/hasRole';
-import { isDecisionLoading } from './decisions';
+import { areDecisionsLoading } from './decisions';
 import {
   areRestaurantsLoading,
   getNameFilter,
@@ -59,9 +59,9 @@ export const currentUserHasRole = createSelector(
 );
 
 export const isRestaurantListReady = createSelector(
-  areRestaurantsLoading, areTagsLoading, areUsersLoading, isDecisionLoading,
-  (restaurantsLoading, tagsLoading, usersLoading, decisionLoading) =>
-    !restaurantsLoading && !tagsLoading && !usersLoading && !decisionLoading
+  areRestaurantsLoading, areTagsLoading, areUsersLoading, areDecisionsLoading,
+  (restaurantsLoading, tagsLoading, usersLoading, decisionsLoading) =>
+    !restaurantsLoading && !tagsLoading && !usersLoading && !decisionsLoading
 );
 
 export const isUserListReady = createSelector(
