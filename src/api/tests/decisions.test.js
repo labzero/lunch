@@ -47,6 +47,7 @@ describe('api/team/decisions', () => {
         '../../models/db': mockEsmodule({
           DataTypes: {
             Op: {
+              lt: 'lt',
               gt: 'gt',
             },
           },
@@ -178,6 +179,36 @@ describe('api/team/decisions', () => {
 
       it('creates new decision', () => {
         expect(createSpy.calledWith({
+          restaurant_id: 1,
+          team_id: 77
+        })).to.be.true;
+      });
+    });
+
+    describe('1 day ago', () => {
+      let destroySpy;
+      let createSpy;
+      beforeEach(() => {
+        destroySpy = spy(DecisionMock, 'destroy');
+        createSpy = spy(DecisionMock, 'create');
+        return request(app).post('/').send({ daysAgo: 1, restaurant_id: 1 });
+      });
+
+      it('deletes any prior decisions', () => {
+        expect(destroySpy.calledWith({
+          where: {
+            created_at: {
+              lt: match.date,
+              gt: match.date,
+            },
+            team_id: 77,
+          },
+        })).to.be.true;
+      });
+
+      it('creates new decision', () => {
+        expect(createSpy.calledWith({
+          created_at: match.date,
           restaurant_id: 1,
           team_id: 77
         })).to.be.true;
