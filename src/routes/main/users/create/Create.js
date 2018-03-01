@@ -4,10 +4,12 @@ import Grid from 'react-bootstrap/lib/Grid';
 import s from './Create.scss';
 
 const Create = () => (
-  <Grid className={s.root}>
-    <h2>Success</h2>
-    <p>User created.</p>
-  </Grid>
+  <div className={s.root}>
+    <Grid>
+      <h2>Success</h2>
+      <p>User created.</p>
+    </Grid>
+  </div>
 );
 
 export default withStyles(s)(Create);

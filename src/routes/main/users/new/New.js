@@ -27,33 +27,35 @@ class New extends Component {
     const { email } = this.props;
 
     return (
-      <Grid className={s.root}>
-        <h2>New user</h2>
-        <form action="/users" method="post">
-          <Row>
-            <Col sm={6}>
-              <FormGroup controlId="usersNew-name">
-                <ControlLabel>Name</ControlLabel>
-                <FormControl
-                  name="name"
-                  type="text"
-                />
-              </FormGroup>
-              <FormGroup controlId="usersNew-email">
-                <ControlLabel>Email</ControlLabel>
-                <FormControl
-                  defaultValue={email}
-                  inputRef={(i) => { this.emailField = i; }}
-                  name="email"
-                  required
-                  type="email"
-                />
-              </FormGroup>
-            </Col>
-          </Row>
-          <Button type="submit">Submit</Button>
-        </form>
-      </Grid>
+      <div className={s.root}>
+        <Grid>
+          <h2>New user</h2>
+          <form action="/users" method="post">
+            <Row>
+              <Col sm={6}>
+                <FormGroup controlId="usersNew-name">
+                  <ControlLabel>Name</ControlLabel>
+                  <FormControl
+                    name="name"
+                    type="text"
+                  />
+                </FormGroup>
+                <FormGroup controlId="usersNew-email">
+                  <ControlLabel>Email</ControlLabel>
+                  <FormControl
+                    defaultValue={email}
+                    inputRef={(i) => { this.emailField = i; }}
+                    name="email"
+                    required
+                    type="email"
+                  />
+                </FormGroup>
+              </Col>
+            </Row>
+            <Button type="submit">Submit</Button>
+          </form>
+        </Grid>
+      </div>
     );
   }
 }
