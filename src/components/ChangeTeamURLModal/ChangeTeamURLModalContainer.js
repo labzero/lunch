@@ -16,15 +16,10 @@ const mapDispatchToProps = dispatch => ({
   hideModal: () => {
     dispatch(hideModal(modalName));
   },
-  dispatch
-});
-
-const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
-  updateTeam: payload => dispatchProps.dispatch(updateTeam(payload))
+  updateTeam: payload => dispatch(updateTeam(payload)),
 });
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-  mergeProps
 )(ChangeTeamURLModal);

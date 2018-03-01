@@ -4,6 +4,29 @@ import moment from 'moment';
 export const getDecisionIds = state => state.decisions.items.result;
 export const getDecisionEntities = state => state.decisions.items.entities.decisions;
 
+export const getDecisionsByDay = createSelector(
+  [getDecisionIds, getDecisionEntities],
+  (decisionIds, decisionEntities) => decisionIds.reduce((acc, curr) => {
+    const decision = decisionEntities[curr];
+    const createdAt = moment(decision.created_at);
+    const comparisonDate = moment().subtract(12, 'hours');
+    for (let i = 0; i < 5; i += 1) {
+      if (createdAt.isAfter(comparisonDate)) {
+        acc[i].push(decision);
+        break;
+      }
+      comparisonDate.subtract(24, 'hours');
+    }
+    return acc;
+  }, {
+    0: [],
+    1: [],
+    2: [],
+    3: [],
+    4: [],
+  }),
+);
+
 export const areDecisionsLoading = state =>
   state.decisions.didInvalidate;
 

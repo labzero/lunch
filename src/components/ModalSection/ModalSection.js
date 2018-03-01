@@ -3,6 +3,7 @@ import React from 'react';
 import ChangeTeamURLModalContainer from '../ChangeTeamURLModal/ChangeTeamURLModalContainer';
 import ConfirmModalContainer from '../ConfirmModal/ConfirmModalContainer';
 import DeleteTeamModalContainer from '../DeleteTeamModal/DeleteTeamModalContainer';
+import PastDecisionsModalContainer from '../PastDecisionsModal/PastDecisionsModalContainer';
 
 const ModalSection = ({ modals }) => {
   const modalContainers = [];
@@ -14,6 +15,9 @@ const ModalSection = ({ modals }) => {
   }
   if (modals.changeTeamURL !== undefined) {
     modalContainers.push(<ChangeTeamURLModalContainer key="modalContainer_changeTeamURL" />);
+  }
+  if (modals.pastDecisions !== undefined) {
+    modalContainers.push(<PastDecisionsModalContainer key="modalContainer_pastDecisions" />);
   }
 
   return (
