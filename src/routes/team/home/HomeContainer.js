@@ -7,6 +7,7 @@ import { messageReceived } from '../../../actions/websockets';
 import Home from './Home';
 
 const mapStateToProps = state => ({
+  pastDecisionsShown: !!state.modals.pastDecisions,
   user: state.user,
   wsPort: state.wsPort
 });

@@ -4,6 +4,7 @@ import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import FooterContainer from '../../../components/Footer/FooterContainer';
 import NameFilterFormContainer from '../../../components/NameFilterForm/NameFilterFormContainer';
+import PastDecisionsModalContainer from '../../../components/PastDecisionsModal/PastDecisionsModalContainer';
 import RestaurantMapContainer from '../../../components/RestaurantMap/RestaurantMapContainer';
 import RestaurantListContainer from '../../../components/RestaurantList/RestaurantListContainer';
 import RestaurantAddFormContainer from '../../../components/RestaurantAddForm/RestaurantAddFormContainer';
@@ -23,6 +24,7 @@ export class _Home extends Component {
     invalidateTags: PropTypes.func.isRequired,
     invalidateUsers: PropTypes.func.isRequired,
     messageReceived: PropTypes.func.isRequired,
+    pastDecisionsShown: PropTypes.bool.isRequired,
     wsPort: PropTypes.number.isRequired
   };
 
@@ -72,7 +74,7 @@ export class _Home extends Component {
   }
 
   render() {
-    const { user } = this.props;
+    const { pastDecisionsShown, user } = this.props;
 
     return (
       <div className={s.root}>
@@ -91,6 +93,7 @@ export class _Home extends Component {
           </div>
           <FooterContainer />
         </div>
+        {pastDecisionsShown && <PastDecisionsModalContainer />}
       </div>
     );
   }

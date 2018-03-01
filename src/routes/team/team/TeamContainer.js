@@ -9,7 +9,9 @@ import { getUsers } from '../../../selectors/users';
 import Team from './Team';
 
 const mapStateToProps = state => ({
+  changeTeamURLShown: !!state.modals.changeTeamURL,
   currentUser: getCurrentUser(state),
+  deleteTeamShown: !!state.modals.deleteTeam,
   hasGuestRole: currentUserHasRole(state, 'guest'),
   hasMemberRole: currentUserHasRole(state, 'member'),
   hasOwnerRole: currentUserHasRole(state, 'owner'),

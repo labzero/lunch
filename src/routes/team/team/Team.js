@@ -19,6 +19,8 @@ import Tab from 'react-bootstrap/lib/Tab';
 import Tabs from 'react-bootstrap/lib/Tabs';
 import Table from 'react-bootstrap/lib/Table';
 import AddUserFormContainer from '../../../components/AddUserForm/AddUserFormContainer';
+import ChangeTeamURLModalContainer from '../../../components/ChangeTeamURLModal/ChangeTeamURLModalContainer';
+import DeleteTeamModalContainer from '../../../components/DeleteTeamModal/DeleteTeamModalContainer';
 import TeamFormContainer from '../../../components/TeamForm/TeamFormContainer';
 import Loading from '../../../components/Loading';
 import { globalMessageDescriptor as gm } from '../../../helpers/generateMessageDescriptor';
@@ -28,11 +30,13 @@ import s from './Team.scss';
 
 class Team extends React.Component {
   static propTypes = {
+    changeTeamURLShown: PropTypes.bool.isRequired,
     changeUserRole: PropTypes.func.isRequired,
     confirm: PropTypes.func.isRequired,
     confirmChangeTeamURL: PropTypes.func.isRequired,
     confirmDeleteTeam: PropTypes.func.isRequired,
     currentUser: PropTypes.object.isRequired,
+    deleteTeamShown: PropTypes.bool.isRequired,
     fetchUsersIfNeeded: PropTypes.func.isRequired,
     hasGuestRole: PropTypes.bool.isRequired,
     hasMemberRole: PropTypes.bool.isRequired,
@@ -156,8 +160,10 @@ class Team extends React.Component {
 
   render() {
     const {
+      changeTeamURLShown,
       confirmChangeTeamURL,
       confirmDeleteTeam,
+      deleteTeamShown,
       hasOwnerRole,
       team,
       userListReady
@@ -193,6 +199,8 @@ class Team extends React.Component {
             </Tabs>
           ) : this.renderUsers()}
         </Grid>
+        {changeTeamURLShown && <ChangeTeamURLModalContainer />}
+        {deleteTeamShown && <DeleteTeamModalContainer />}
       </div>
     );
   }
