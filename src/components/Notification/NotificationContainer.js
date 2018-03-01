@@ -28,6 +28,7 @@ const mapStateToProps = () => {
         tagName = getTagById(state, vals).name;
       }
       contentProps = {
+        decision: vals.decision,
         loggedIn: state.user.id !== undefined,
         restaurantName,
         tagName,

@@ -88,6 +88,7 @@ export default new Map([
       case ActionTypes.DECISION_POSTED: {
         const { userId, decision } = realAction;
         notification.vals = {
+          decision,
           userId,
           restaurantId: decision.restaurant_id
         };
