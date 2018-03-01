@@ -83,7 +83,7 @@ export default () => {
       async (req, res, next) => {
         try {
           const decisions = await Decision.scope('fromToday').findAll({ where: { team_id: req.team.id } });
-          Decision.scope('fromToday').destroy({ where: { team_id: req.team.id } });
+          await Decision.scope('fromToday').destroy({ where: { team_id: req.team.id } });
 
           req.wss.broadcast(req.team.id, decisionsDeleted(decisions, req.user.id));
           res.status(204).send();
