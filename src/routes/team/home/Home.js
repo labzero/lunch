@@ -4,6 +4,7 @@ import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
 import FooterContainer from '../../../components/Footer/FooterContainer';
 import NameFilterFormContainer from '../../../components/NameFilterForm/NameFilterFormContainer';
+import PastDecisionsModalContainer from '../../../components/PastDecisionsModal/PastDecisionsModalContainer';
 import RestaurantMapContainer from '../../../components/RestaurantMap/RestaurantMapContainer';
 import RestaurantListContainer from '../../../components/RestaurantList/RestaurantListContainer';
 import RestaurantAddFormContainer from '../../../components/RestaurantAddForm/RestaurantAddFormContainer';
@@ -14,22 +15,23 @@ export class _Home extends Component {
 
   static propTypes = {
     user: PropTypes.object.isRequired,
-    fetchDecision: PropTypes.func.isRequired,
+    fetchDecisions: PropTypes.func.isRequired,
     fetchRestaurants: PropTypes.func.isRequired,
     fetchTags: PropTypes.func.isRequired,
     fetchUsers: PropTypes.func.isRequired,
-    invalidateDecision: PropTypes.func.isRequired,
+    invalidateDecisions: PropTypes.func.isRequired,
     invalidateRestaurants: PropTypes.func.isRequired,
     invalidateTags: PropTypes.func.isRequired,
     invalidateUsers: PropTypes.func.isRequired,
     messageReceived: PropTypes.func.isRequired,
+    pastDecisionsShown: PropTypes.bool.isRequired,
     wsPort: PropTypes.number.isRequired
   };
 
   componentDidMount() {
     const { messageReceived, wsPort } = this.props;
 
-    this.props.invalidateDecision();
+    this.props.invalidateDecisions();
     this.props.invalidateRestaurants();
     this.props.invalidateTags();
     this.props.invalidateUsers();
@@ -65,14 +67,14 @@ export class _Home extends Component {
   }
 
   fetchAllData = () => {
-    this.props.fetchDecision();
+    this.props.fetchDecisions();
     this.props.fetchRestaurants();
     this.props.fetchTags();
     this.props.fetchUsers();
   }
 
   render() {
-    const { user } = this.props;
+    const { pastDecisionsShown, user } = this.props;
 
     return (
       <div className={s.root}>
@@ -91,6 +93,7 @@ export class _Home extends Component {
           </div>
           <FooterContainer />
         </div>
+        {pastDecisionsShown && <PastDecisionsModalContainer />}
       </div>
     );
   }

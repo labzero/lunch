@@ -14,7 +14,7 @@ import emptyFunction from 'fbjs/lib/emptyFunction';
 import HeaderContainer from '../Header/HeaderContainer';
 import FooterContainer from '../Footer/FooterContainer';
 import NotificationListContainer from '../NotificationList/NotificationListContainer';
-import ModalSectionContainer from '../ModalSection/ModalSectionContainer';
+import ConfirmModalContainer from '../ConfirmModal/ConfirmModalContainer';
 import s from './Layout.scss';
 // eslint-disable-next-line css-modules/no-unused-class
 import globalCss from '../../styles/globalCss.scss';
@@ -26,6 +26,7 @@ class Layout extends Component {
     isHome: PropTypes.bool,
     path: PropTypes.string,
     shouldScrollToTop: PropTypes.bool.isRequired,
+    confirmShown: PropTypes.bool.isRequired,
     scrolledToTop: PropTypes.func.isRequired,
   };
 
@@ -70,7 +71,7 @@ class Layout extends Component {
   }
 
   render() {
-    const { isHome, path } = this.props;
+    const { confirmShown, isHome, path } = this.props;
 
     return (
       <div className={isHome ? s.flex : ''}>
@@ -78,7 +79,7 @@ class Layout extends Component {
         {this.props.children}
         {!isHome && <FooterContainer />}
         <NotificationListContainer />
-        <ModalSectionContainer />
+        {confirmShown && <ConfirmModalContainer />}
       </div>
     );
   }

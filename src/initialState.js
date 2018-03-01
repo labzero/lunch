@@ -7,10 +7,10 @@ const getInitialState = () => ({
     isFetching: false,
     items: []
   },
-  decision: {
+  decisions: {
     isFetching: false,
     didInvalidate: true,
-    inst: null
+    items: [],
   },
   flashes: [],
   host,

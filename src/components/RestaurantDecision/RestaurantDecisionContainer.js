@@ -9,7 +9,7 @@ const mapStateToProps = (state, ownProps) => {
   return {
     id: ownProps.id,
     loggedIn: state.user.id !== undefined,
-    decided: decision !== null && decision.restaurant_id === ownProps.id,
+    decided: decision !== undefined && decision.restaurant_id === ownProps.id,
     votes: getRestaurantById(state, ownProps.id).votes
   };
 };

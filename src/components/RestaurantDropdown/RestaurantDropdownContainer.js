@@ -3,7 +3,7 @@ import { getRestaurantById } from '../../selectors/restaurants';
 import { getListUiItemForId } from '../../selectors/listUi';
 import { getDecision } from '../../selectors/decisions';
 import { showModal } from '../../actions/modals';
-import { removeDecision, decide } from '../../actions/decisions';
+import { removeDecision } from '../../actions/decisions';
 import { showMapAndInfoWindow } from '../../actions/mapUi';
 import { showEditNameForm, setEditNameFormValue } from '../../actions/listUi';
 import { removeRestaurant } from '../../actions/restaurants';
@@ -22,8 +22,10 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   removeDecision: () => {
     dispatch(removeDecision());
   },
-  decide: () => {
-    dispatch(decide(ownProps.id));
+  showPastDecisionsModal: () => {
+    dispatch(showModal('pastDecisions', {
+      restaurantId: ownProps.id
+    }));
   },
   showMapAndInfoWindow: () => {
     dispatch(showMapAndInfoWindow(ownProps.id));

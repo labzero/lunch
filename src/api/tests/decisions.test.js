@@ -44,6 +44,14 @@ describe('api/team/decisions', () => {
 
     makeApp = deps => {
       const decisionsApi = proxyquireStrict('../team/decisions', {
+        '../../models/db': mockEsmodule({
+          DataTypes: {
+            Op: {
+              lt: 'lt',
+              gt: 'gt',
+            },
+          },
+        }),
         '../../models': mockEsmodule({
           Decision: DecisionMock,
         }),
@@ -71,10 +79,10 @@ describe('api/team/decisions', () => {
     app = makeApp();
   });
 
-  describe('GET /fromToday', () => {
+  describe('GET /', () => {
     describe('before query', () => {
       beforeEach(() =>
-        request(app).get('/fromToday'));
+        request(app).get('/'));
 
       it('checks for login', () => {
         expect(loggedInSpy.called).to.be.true;
@@ -85,10 +93,29 @@ describe('api/team/decisions', () => {
       });
     });
 
+    describe('5 days of decisions', () => {
+      let findAllSpy;
+      beforeEach(() => {
+        findAllSpy = spy(DecisionMock, 'findAll');
+        return request(app).get('/?days=5');
+      });
+
+      it('looks for decisions within past 5 days', () => {
+        expect(findAllSpy.calledWith({
+          where: {
+            created_at: {
+              gt: match.date,
+            },
+            team_id: 77
+          }
+        })).to.be.true;
+      });
+    });
+
     describe('success', () => {
       let response;
       beforeEach((done) => {
-        request(app).get('/fromToday').then(r => {
+        request(app).get('/').then(r => {
           response = r;
           done();
         });
@@ -98,7 +125,7 @@ describe('api/team/decisions', () => {
         expect(response.statusCode).to.eq(200);
       });
 
-      it('returns json with decision', () => {
+      it('returns json with decisions', () => {
         expect(response.body.error).to.eq(false);
         expect(response.body.data).not.to.be.null;
       });
@@ -107,9 +134,9 @@ describe('api/team/decisions', () => {
     describe('failure', () => {
       let response;
       beforeEach((done) => {
-        stub(DecisionMock, 'scope').throws('Oh No');
+        stub(DecisionMock, 'findAll').throws('Oh No');
 
-        request(app).get('/fromToday').then((r) => {
+        request(app).get('/').then((r) => {
           response = r;
           done();
         });
@@ -152,6 +179,36 @@ describe('api/team/decisions', () => {
 
       it('creates new decision', () => {
         expect(createSpy.calledWith({
+          restaurant_id: 1,
+          team_id: 77
+        })).to.be.true;
+      });
+    });
+
+    describe('1 day ago', () => {
+      let destroySpy;
+      let createSpy;
+      beforeEach(() => {
+        destroySpy = spy(DecisionMock, 'destroy');
+        createSpy = spy(DecisionMock, 'create');
+        return request(app).post('/').send({ daysAgo: 1, restaurant_id: 1 });
+      });
+
+      it('deletes any prior decisions', () => {
+        expect(destroySpy.calledWith({
+          where: {
+            created_at: {
+              lt: match.date,
+              gt: match.date,
+            },
+            team_id: 77,
+          },
+        })).to.be.true;
+      });
+
+      it('creates new decision', () => {
+        expect(createSpy.calledWith({
+          created_at: match.date,
           restaurant_id: 1,
           team_id: 77
         })).to.be.true;
@@ -248,39 +305,40 @@ describe('api/team/decisions', () => {
     });
 
     describe('query', () => {
-      let destroySpy;
+      let findAllSpy;
       beforeEach(() => {
-        destroySpy = spy(DecisionMock, 'destroy');
-        return request(app).delete('/fromToday').send({ restaurant_id: 1 });
+        findAllSpy = spy(DecisionMock, 'findAll');
+        return request(app).delete('/fromToday').send();
       });
 
-      it('deletes decision', () => {
-        expect(destroySpy.calledWith({
+      it('finds decisions', () => {
+        expect(findAllSpy.calledWith({
           where: { team_id: 77 }
         })).to.be.true;
       });
     });
 
     describe('success', () => {
-      let decisionDeletedSpy;
+      let decisionsDeletedSpy;
       let response;
       beforeEach((done) => {
-        decisionDeletedSpy = spy();
+        decisionsDeletedSpy = spy();
         app = makeApp({
           '../../actions/decisions': mockEsmodule({
-            decisionDeleted: decisionDeletedSpy
+            decisionsDeleted: decisionsDeletedSpy
           })
         });
 
-        request(app).delete('/fromToday').send({ restaurant_id: 1 }).then(r => {
+        request(app).delete('/fromToday').send().then(r => {
           response = r;
           done();
         });
       });
 
-      it('broadcasts decisionDeleted', () => {
+      it('broadcasts decisionsDeleted', () => {
         expect(broadcastSpy.called).to.be.true;
-        expect(decisionDeletedSpy.calledWith(1, 231)).to.be.true;
+        expect(decisionsDeletedSpy.args[0][0].length).to.eq(1);
+        expect(decisionsDeletedSpy.args[0][1]).to.eq(231);
       });
 
       it('returns 204', () => {

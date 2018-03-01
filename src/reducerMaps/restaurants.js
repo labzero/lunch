@@ -20,7 +20,7 @@ export default new Map([
                 if (a === action.newlyAdded.id) { return -1; }
                 if (b === action.newlyAdded.id) { return 1; }
               }
-              if (action.decision !== null) {
+              if (action.decision !== undefined) {
                 if (action.decision.restaurant_id === a) { return -1; }
                 if (action.decision.restaurant_id === b) { return 1; }
               }
@@ -286,21 +286,23 @@ export default new Map([
       }
     })
   ],
-  [ActionTypes.DECISION_DELETED, (state, action) =>
-    update(state, {
+  [ActionTypes.DECISIONS_DELETED, (state, action) => {
+    const newState = {
       items: {
         entities: {
-          restaurants: {
-            [action.restaurantId]: {
-              all_decision_count: {
-                $apply: count => parseInt(count, 10) - 1
-              }
-            }
-          }
+          restaurants: {},
+        },
+      },
+    };
+    action.decisions.forEach(d => {
+      newState.items.entities.restaurants[d.restaurant_id] = {
+        all_decision_count: {
+          $apply: count => parseInt(count, 10) - 1
         }
-      }
-    })
-  ],
+      };
+    });
+    return update(state, newState);
+  }],
   [ActionTypes.SET_NAME_FILTER, (state, action) =>
     update(state, {
       nameFilter: {

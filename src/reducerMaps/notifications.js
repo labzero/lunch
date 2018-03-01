@@ -88,16 +88,17 @@ export default new Map([
       case ActionTypes.DECISION_POSTED: {
         const { userId, decision } = realAction;
         notification.vals = {
+          decision,
           userId,
           restaurantId: decision.restaurant_id
         };
         break;
       }
-      case ActionTypes.DECISION_DELETED: {
-        const { restaurantId, userId } = realAction;
+      case ActionTypes.DECISIONS_DELETED: {
+        const { decisions, userId } = realAction;
         notification.vals = {
           userId,
-          restaurantId
+          restaurantId: decisions[0].restaurant_id,
         };
         break;
       }

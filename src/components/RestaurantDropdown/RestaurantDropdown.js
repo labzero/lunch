@@ -15,7 +15,7 @@ const RestaurantDropdown = ({
   showEditNameForm,
   deleteRestaurant,
   removeDecision,
-  decide
+  showPastDecisionsModal,
 }) => {
   let editButton;
   if (!listUiItem.isEditingName) {
@@ -27,7 +27,7 @@ const RestaurantDropdown = ({
   }
 
   let decideButton;
-  if (decision !== null && decision.restaurant_id === restaurant.id) {
+  if (decision !== undefined && decision.restaurant_id === restaurant.id) {
     decideButton = (
       <MenuItem
         onSelect={removeDecision}
@@ -38,8 +38,8 @@ const RestaurantDropdown = ({
     );
   } else {
     decideButton = (
-      <MenuItem onSelect={decide} key={`restaurantDropdown_${restaurant.id}_decide`}>
-        Mark as decision
+      <MenuItem onSelect={showPastDecisionsModal} key={`restaurantDropdown_${restaurant.id}_showPastDecisionsModal`}>
+        We went here...
       </MenuItem>
     );
   }
@@ -97,7 +97,7 @@ RestaurantDropdown.propTypes = {
   showEditNameForm: PropTypes.func.isRequired,
   deleteRestaurant: PropTypes.func.isRequired,
   removeDecision: PropTypes.func,
-  decide: PropTypes.func.isRequired
+  showPastDecisionsModal: PropTypes.func.isRequired
 };
 
 RestaurantDropdown.defaultProps = {
