@@ -2,7 +2,7 @@
 /* eslint-disable padded-blocks, no-unused-expressions */
 
 import { expect } from 'chai';
-import { generateTagList } from './TagAutosuggestHelper';
+import { generateTagList } from '../TagAutosuggestHelper';
 
 describe('TagAutosuggestHelper', () => {
   describe('generateTagList', () => {
