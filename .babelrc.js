@@ -27,4 +27,9 @@ module.exports = {
     '@babel/preset-react',
   ],
   ignore: ['node_modules', 'build'],
+  env: {
+    test: {
+      plugins: ['istanbul'],
+    }
+  }
 };
