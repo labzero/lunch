@@ -204,6 +204,8 @@
       "mocha \"test/helper.js\" \"src/**/*.test.js\" --require @babel/register --require test/setup.js --exit",
     "test-watch": "yarn run test --watch --notify",
     "test-cover": "nyc yarn run test",
+    "integration": "npm-run-all -r -p start integration-test",
+    "integration-test": "mocha --opts ./test/integration.opts",
     "coverage": "yarn run test-cover && open coverage/lcov-report/index.html",
     "clean": "babel-node tools/run clean",
     "copy": "babel-node tools/run copy",
