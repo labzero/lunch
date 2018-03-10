@@ -1,26 +1,40 @@
-// // eslint-disable
+/* eslint-env mocha */
 
-// const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer');
+const { expect } = require('chai');
 
-// let browser;
+let browser;
+let page;
 
-// before(async () => {
-//  browser = await puppeteer.launch({
-//    headless: false,
-//    slowMo: 250 // slow down by 250ms
-//  });
-//   const page = await browser.newPage();
-//   await page.goto('https://local.lunch.pink:3000');
-//   await page.screenshot({path: 'example.png'});
+before((done) => {
+  puppeteer.launch({
+    headless: false,
+  }).then((b) => {
+    browser = b;
+    browser.newPage().then((p) => {
+      page = p;
+      let gotoInterval = setInterval(() => {
+        page.goto('http://local.lunch.pink:3000').then(() => {
+          if (gotoInterval) {
+            clearInterval(gotoInterval);
+            gotoInterval = undefined;
+            done();
+          }
+        }).catch(() => {});
+      }, 1000);
+    });
+  });
+});
 
-// });
+after(async () => {
+  await browser.close();
+});
 
-// after(browser.close);
-
-// it('returns true', () => true);
-
-// /*
-
-// use mocha to test pages
-
-// */
+describe('landing page', () => {
+  it('contains hero text', (done) => {
+    page.content().then((content) => {
+      expect(content).to.contain('Figure it out');
+      done();
+    });
+  });
+});
