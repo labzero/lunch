@@ -45,7 +45,7 @@ Set up a PostgreSQL database and enter the credentials into `.env`. If you want 
 To seed your database with a Superuser, fill out the `SUPERUSER_*` env variables accordingly, then run
 
 ```bash
-node_modules/.bin/sequelize db:seed:all
+npx sequelize db:seed:all
 ```
 
 After setting up and starting the app, you will be able to log in with this user and create a team. If you did not supply a SUPERUSER_PASSWORD, you will need to log in via OAuth, using the email address you supplied for SUPERUSER_EMAIL.
@@ -58,8 +58,7 @@ First, [install Yarn.](https://yarnpkg.com/en/docs/install) Then:
 
 ```bash
 yarn
-npm install -g sequelize-cli
-sequelize db:migrate
+npx sequelize db:migrate
 ```
 
 ## Development server
@@ -87,6 +86,32 @@ node build/server.js
 ### Deploying
 
 You can modify `tools/deploy.js` as needed to work with your deployment strategy.
+
+## Testing
+
+### Unit tests
+
+```bash
+npm test
+```
+
+#### Testing with coverage
+
+```bash
+npm run coverage
+```
+
+### Integration tests
+
+```bash
+npm run integration
+```
+
+### Linting
+
+```bash
+npm run lint
+```
 
 ## More info
 
