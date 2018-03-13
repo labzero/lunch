@@ -1,0 +1,63 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:8.1-browsers
+        environment:
+          - DB_NAME=lunch_test
+          - DB_USER=lunch_test
+          - DB_PASS=
+          - DB_HOST=localhost
+          - SUPERUSER_NAME=test
+          - SUPERUSER_PASSWORD=test
+          - SUPERUSER_EMAIL=test@lunch.pink
+
+      - image: postgres:9.6
+        environment:
+        - POSTGRES_USER=lunch_test
+        - POSTGRES_DB=lunch_test
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: dotenv
+          command: touch .env
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      # install deps
+      - run:
+          name: yarn-install
+          command: yarn install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+      # set up the database
+      - run:
+          name: migrate
+          command: npm run db:migrate
+
+      - run:
+          name: seed
+          command: npm run db:seed:all
+
+      # run tests
+      - run: npm test
+
+
