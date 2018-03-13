@@ -16,6 +16,8 @@ jobs:
           - SUPERUSER_NAME=test
           - SUPERUSER_PASSWORD=test
           - SUPERUSER_EMAIL=test@lunch.pink
+          - GOOGLE_CLIENT_ID=749354550307-pa28c9b7m8movr6ljmk3n074cobuvq4d.apps.googleusercontent.com
+          - GOOGLE_CLIENT_SECRET=Abp5N3RlHoxA2RjM0vpYNltV
 
       - image: postgres:9.6
         environment:
@@ -26,6 +28,10 @@ jobs:
 
     steps:
       - checkout
+
+      - run:
+          name: write hosts file
+          command: echo 127.0.0.1 local.lunch.pink | sudo tee -a /etc/hosts
 
       - run:
           name: dotenv
@@ -59,5 +65,9 @@ jobs:
 
       # run tests
       - run: npm test
+
+      - run:
+          name: integration-tests
+          command: npm run integration
 
 

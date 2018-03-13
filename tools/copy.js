@@ -38,13 +38,16 @@ async function copy() {
     copyFile('LICENSE.txt', 'build/LICENSE.txt'),
     copyFile('yarn.lock', 'build/yarn.lock'),
     copyDir('public', 'build/public'),
-    copyFile('.env.prod', 'build/.env'),
     copyFile('database.js', 'build/database.js'),
     copyFile('.sequelizerc', 'build/.sequelizerc'),
     copyDir('db', 'build/db'),
     copyDir('cert', 'build/cert'),
     makeDir('build/src').then(() => makeDir('build/src/models')).then(() => copyFile('src/models/db.js', 'build/src/models/db.js'))
   ]);
+
+  if (process.argv.includes('--release')) {
+    await copyFile('.env.prod', 'build/.env')
+  }
 
   if (process.argv.includes('--watch')) {
     const watcher = chokidar.watch(['public/**/*'], { ignoreInitial: true });
