@@ -8,7 +8,6 @@
   },
   "browserslist": [">1%", "last 4 versions", "Firefox ESR", "not ie < 9"],
   "dependencies": {
-    "@babel/highlight": "^7.0.0-beta.41",
     "@babel/polyfill": "7.0.0-beta.36",
     "bcrypt": "^1.0.3",
     "bluebird": "^3.5.1",
@@ -95,7 +94,7 @@
     "assets-webpack-plugin": "^3.5.1",
     "autoprefixer": "^7.2.3",
     "babel-core": "^7.0.0-0",
-    "babel-eslint": "^8.1.2",
+    "babel-eslint": "8.2.1",
     "babel-loader": "8.0.0-beta.0",
     "babel-plugin-istanbul": "^4.1.5",
     "babel-plugin-react-transform": "^2.0.2",
