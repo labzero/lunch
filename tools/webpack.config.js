@@ -471,7 +471,8 @@ const serverConfig = {
     // Define free variables
     // https://webpack.js.org/plugins/define-plugin/
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': isDebug ? '"development"' : '"production"',
+      // eslint-disable-next-line no-nested-ternary
+      'process.env.NODE_ENV': process.env.NODE_ENV === 'test' ? '"test"' : (isDebug ? '"development"' : '"production"'),
       'process.env.BROWSER': false,
       __DEV__: isDebug,
     }),

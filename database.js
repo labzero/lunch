@@ -1,3 +1,11 @@
+const path = require('path');
+
+if(process.env.NODE_ENV === 'test') {
+  	// eslint-disable-next-line global-require
+	require('dotenv').config({
+		path: path.resolve(process.cwd(), '.env.test'),
+	});
+}
 require('dotenv').config();
 
 const settings = {
@@ -10,10 +18,12 @@ const settings = {
 
 const config = {
   development: {},
+  test: {},
   production: {}
 };
 
 Object.assign(config.development, settings);
+Object.assign(config.test, settings);
 Object.assign(config.production, settings);
 
 module.exports = config;

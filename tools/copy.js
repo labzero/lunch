@@ -48,6 +48,12 @@ async function copy() {
   if (process.argv.includes('--release')) {
     await copyFile('.env.prod', 'build/.env')
   }
+  else {
+    await copyFile('.env', 'build/.env')
+    if (process.env.NODE_ENV === 'test') {
+      await copyFile('.env.test', 'build/.env.test')
+    }
+  }
 
   if (process.argv.includes('--watch')) {
     const watcher = chokidar.watch(['public/**/*'], { ignoreInitial: true });

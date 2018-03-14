@@ -31,4 +31,5 @@ yarn-error.log*
 
 .env
 .env.prod
+.env.test
 deploy.sh

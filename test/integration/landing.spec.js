@@ -37,4 +37,10 @@ describe('landing page', () => {
       done();
     });
   });
+  it('has login link', (done) => {
+  	page.content().then((content) => {
+      expect(content).to.contain('/login');
+      done();
+    });
+  })
 });

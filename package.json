@@ -207,9 +207,11 @@
     "db:create": "./node_modules/.bin/sequelize db:create",
     "db:seed:all": "./node_modules/.bin/sequelize db:seed:all",
     "db:migrate": "./node_modules/.bin/sequelize db:migrate",
+    "db:migrate:undo:all": "./node_modules/.bin/sequelize db:migrate:undo:all",
     "db:drop": "./node_modules/.bin/sequelize db:drop",
-    "test-cover": "nyc yarn run test",
-    "integration": "yarn build && npm-run-all -r -p serve integration-test",
+    "test-cover": "nyc npm run test",
+    "integration":
+      "cross-env-shell NODE_ENV=test \"npm-run-all db:migrate:undo:all db:migrate db:seed:all build && npm-run-all -r -p serve integration-test\"",
     "integration-test": "mocha --opts ./test/integration.opts",
     "coverage": "yarn run test-cover && open coverage/lcov-report/index.html",
     "clean": "babel-node tools/run clean",
@@ -219,7 +221,7 @@
     "build-stats": "yarn run build --release --analyse",
     "deploy": "babel-node tools/run deploy",
     "render": "babel-node tools/run render",
-    "serve": "babel-node tools/run runServer",
+    "serve": "babel-node tools/run runServer || true",
     "start": "babel-node tools/run start"
   }
 }

@@ -53,18 +53,9 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       # run tests
+      - run: npm run lint      
+
       - run: npm test
-
-      - run: npm run lint
-
-      # set up the database
-      - run:
-          name: migrate
-          command: npm run db:migrate
-
-      - run:
-          name: seed
-          command: npm run db:seed:all
 
       - run:
           name: integration tests

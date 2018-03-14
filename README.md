@@ -103,6 +103,14 @@ npm run coverage
 
 ### Integration tests
 
+Make sure your `.env` file is filled out. Set up a separate test database using the same user as your development environment. Enter the following into `.env.test`:
+
+```bash
+DB_NAME=your_test_db_name
+```
+
+Then run:
+
 ```bash
 npm run integration
 ```
