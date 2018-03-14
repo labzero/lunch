@@ -35,7 +35,7 @@ jobs:
 
       - run:
           name: dotenv
-          command: touch .env
+          command: touch .env && touch .env.test
 
       # Download and cache dependencies
       - restore_cache:
@@ -53,7 +53,7 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       # run tests
-      - run: npm run lint      
+      - run: npm run lint
 
       - run: npm test
 
