@@ -52,10 +52,10 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      - run: npm run lint
-
       # run tests
       - run: npm test
+
+      - run: npm run lint
 
       # set up the database
       - run:
