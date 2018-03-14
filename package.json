@@ -8,6 +8,7 @@
   },
   "browserslist": [">1%", "last 4 versions", "Firefox ESR", "not ie < 9"],
   "dependencies": {
+    "@babel/highlight": "^7.0.0-beta.41",
     "@babel/polyfill": "7.0.0-beta.36",
     "bcrypt": "^1.0.3",
     "bluebird": "^3.5.1",
@@ -194,10 +195,8 @@
   },
   "scripts": {
     "precommit": "npm run test && lint-staged",
-    "lint-js":
-      "./node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern \"!**/.*\" .",
-    "lint-css":
-      "./node_modules/.bin/stylelint \"src/**/*.{css,less,styl,scss,sass,sss}\"",
+    "lint-js": "eslint --ignore-path .gitignore --ignore-pattern \"!**/.*\" .",
+    "lint-css": "stylelint \"src/**/*.{css,less,styl,scss,sass,sss}\"",
     "lint": "npm run lint-js && npm run lint-css",
     "fix-js": "npm run lint-js --fix",
     "fix-css": "npm run lint-css --fix",
