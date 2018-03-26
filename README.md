@@ -19,6 +19,12 @@ If you will be testing subdomains, you should add an additional line for each su
 127.0.0.1 someotherteam.local.lunch.pink
 ```
 
+If you want to run integration tests, you will also need to add:
+
+```
+127.0.0.1 integration-test.local.lunch.pink
+```
+
 ### Environment variables
 
 Make two copies of `.env.sample`, named `.env` and `.env.prod`.
@@ -95,6 +101,12 @@ You can modify `tools/deploy.js` as needed to work with your deployment strategy
 npm test
 ```
 
+To run an individual file:
+
+```bash
+npm run test-file /path/to/file
+```
+
 #### Testing with coverage
 
 ```bash
@@ -107,12 +119,21 @@ Make sure your `.env` file is filled out. Set up a separate test database using 
 
 ```bash
 DB_NAME=your_test_db_name
+SUPERUSER_NAME=test
+SUPERUSER_PASSWORD=test
+SUPERUSER_EMAIL=test@lunch.pink
 ```
 
 Then run:
 
 ```bash
 npm run integration
+```
+
+Individual files can be run using:
+
+```bash
+npm run integration-file /path/to/file
 ```
 
 ### Linting

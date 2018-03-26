@@ -17,7 +17,7 @@ const hostname = host.match(/^([^:]*):?[0-9]{0,}/)[1];
 
 module.exports = {
   port,
-  wsPort: port + 10,
+  wsPort: module.hot ? port + 10 : port,
   // API Gateway
   api: {
     // API URL to be used in the client-side code
