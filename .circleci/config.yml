@@ -28,7 +28,8 @@ jobs:
 
       - run:
           name: dotenv
-          command: touch .env && touch .env.prod
+          command: touch .env && touch .env.prod && touch .env.test
+
 
       # Download and cache dependencies
       - restore_cache:
@@ -56,7 +57,26 @@ jobs:
           command: npm run db:seed:all
 
       # run tests
-      - run: npm test
+      - run:
+          name: unit-tests
+          command: npm test
+
+      - run:
+          name: setup /etc/hosts
+          command: echo 127.0.0.1 local.lunch.pink | sudo tee -a /etc/hosts
+
+      - run:
+          name: build-release
+          command: npm run build -- --release --verbose
+
+      - run:
+          name: start-server
+          command: NODE_ENV=test npm run serve
+          background: true
+
+      - run:
+          name: integration-tests
+          command: NODE_ENV=test npm run integration-test
 
 
   build:
