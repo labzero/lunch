@@ -45,7 +45,7 @@ const getInitialState = () => ({
     didInvalidate: true,
     items: []
   },
-  wsPort: process.env.BS_RUNNING ? wsPort : 0
+  wsPort: module.hot ? wsPort : 0
 });
 
 export default (stateData) => {

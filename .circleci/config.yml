@@ -1,12 +1,9 @@
-# Javascript Node CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-javascript/ for more details
-#
+# JOB DEFINITIONS
 version: 2
 jobs:
-  build:
+  test:
     docker:
-      # specify the version you desire here
+      # image for running tests
       - image: circleci/node:8.1-browsers
         environment:
           - DB_NAME=lunch_test
@@ -16,9 +13,8 @@ jobs:
           - SUPERUSER_NAME=test
           - SUPERUSER_PASSWORD=test
           - SUPERUSER_EMAIL=test@lunch.pink
-          - GOOGLE_CLIENT_ID=749354550307-pa28c9b7m8movr6ljmk3n074cobuvq4d.apps.googleusercontent.com
-          - GOOGLE_CLIENT_SECRET=Abp5N3RlHoxA2RjM0vpYNltV
 
+      # service image for database for functional tests
       - image: postgres:9.6
         environment:
         - POSTGRES_USER=lunch_test
@@ -27,15 +23,12 @@ jobs:
     working_directory: ~/repo
 
     steps:
+
       - checkout
 
       - run:
-          name: write hosts file
-          command: echo 127.0.0.1 local.lunch.pink | sudo tee -a /etc/hosts
-
-      - run:
           name: dotenv
-          command: touch .env && touch .env.test
+          command: touch .env && touch .env.prod
 
       # Download and cache dependencies
       - restore_cache:
@@ -45,20 +38,154 @@ jobs:
           - v1-dependencies-
 
       # install deps
-      - run: yarn install
+      - run:
+          name: yarn-install
+          command: yarn install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      # set up the database
+      - run:
+          name: migrate
+          command: npm run db:migrate
+
+      - run:
+          name: seed
+          command: npm run db:seed:all
+
+      # run tests
+      - run: npm test
+
+
+  build:
+    docker:
+      - image: ${BUILD_IMAGE}
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - run:
+          name: dotenv
+          command: touch .env && touch .env.prod
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      # install deps
+      - run:
+          name: yarn-install
+          command: yarn install
 
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      # run tests
-      - run: npm run lint
-
-      - run: npm test
-
+      # build the release
       - run:
-          name: integration tests
-          command: npm run integration
+          name: build-release
+          command: npm run build -- --release --verbose
+
+      - setup_remote_docker
+
+      # build and push a docker image (script is defined in the custom build image)
+      - run:
+          name: build-docker-image
+          command: ../buildImage.sh
+
+
+  deploy-staging:
+
+    docker:
+      - image: ${BUILD_IMAGE}
+
+    working_directory: ~/repo
+
+    steps:
+
+      # update ECS task and service with image build above (script is defined in custom build image)
+      - run:
+          name: update-service
+          command: ../deployStaging.sh
+
+  deploy-production:
+
+    docker:
+      - image: ${BUILD_IMAGE}
+
+    working_directory: ~/repo
+
+    steps:
+      - run:
+          name: update_service
+          command: ../deployProduction.sh
+
+# WORKFLOW DEFINITIONS
+workflows:
+  version: 2
+
+  commit:
+    jobs:
+      - test:
+          filters:
+            branches:
+              ignore: develop
+
+  develop-test-deploy:
+    jobs:
+      - test:
+          filters:
+            branches:
+              only: develop
+
+      - build:
+          requires:
+            - test
+          filters:
+            branches:
+              only: develop
+
+      - deploy-staging:
+          requires:
+            - build
+          filters:
+            branches:
+              only: develop
+
+  deploy:
+    jobs:
+      - deploy-staging:
+          filters:
+            tags:
+              only: /^lunch-v.*/
+            branches:
+              ignore: /.*/
+      - hold:
+          type: approval
+          requires:
+            - deploy-staging
+          filters:
+            tags:
+              only: /^lunch-v.*/
+            branches:
+              ignore: /.*/
+
+      - deploy-production:
+          requires:
+            - hold
+          filters:
+            tags:
+              only: /^lunch-v.*/
+            branches:
+              ignore: /.*/
+
 
 
