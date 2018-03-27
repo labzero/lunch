@@ -200,15 +200,16 @@
     "fix-js": "npm run lint-js --fix",
     "fix-css": "npm run lint-css --fix",
     "fix": "npm run fix-js && npm run fix-css",
-    "test":
-      "mocha \"test/helper.js\" \"src/**/*.test.js\" --require @babel/register --require test/setup.js --exit",
+    "test-file": "mocha",
+    "test": "npm run test-file \"./src/**/*.test.js\"",
     "test-watch": "npm run test --watch --notify",
+    "test-cover": "nyc npm run test",
+    "coverage": "npm run test-cover && open coverage/lcov-report/index.html",
     "db:create": "./node_modules/.bin/sequelize db:create",
     "db:seed:all": "./node_modules/.bin/sequelize db:seed:all",
     "db:migrate": "./node_modules/.bin/sequelize db:migrate",
     "db:migrate:undo:all": "./node_modules/.bin/sequelize db:migrate:undo:all",
     "db:drop": "./node_modules/.bin/sequelize db:drop",
-    "test-cover": "nyc npm run test",
     "integration-setup":
       "npm-run-all db:migrate:undo:all db:migrate db:seed:all build",
     "integration":
@@ -219,7 +220,6 @@
     "integration-file":
       "cross-env NODE_ENV=test npm-run-all integration-setup -r -p serve \"integration-test-file {1}\" --",
     "integration-test-file": "mocha --opts \"./test/integration.opts\"",
-    "coverage": "npm run test-cover && open coverage/lcov-report/index.html",
     "clean": "babel-node tools/run clean",
     "copy": "babel-node tools/run copy",
     "bundle": "babel-node tools/run bundle",
