@@ -50,11 +50,11 @@ jobs:
       # set up the database
       - run:
           name: migrate
-          command: npm run db:migrate
+          command: NODE_ENV=test npm run db:migrate
 
       - run:
           name: seed
-          command: npm run db:seed:all
+          command: NODE_ENV=test npm run db:seed:all
 
       # run tests
       - run:
