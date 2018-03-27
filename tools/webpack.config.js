@@ -137,7 +137,8 @@ const config = {
               sourceMap: isDebug,
               // CSS Modules https://github.com/css-modules/css-modules
               modules: true,
-              localIdentName: isDebug ? '[name]-[local]-[hash:base64:5]' : '[hash:base64:5]',
+              // eslint-disable-next-line no-nested-ternary
+              localIdentName: process.env.NODE_ENV === 'test' ? '[name]-[local]' : (isDebug ? '[name]-[local]-[hash:base64:5]' : '[hash:base64:5]'),
               // CSS Nano http://cssnano.co/options/
               minimize: !isDebug,
               discardComments: { removeAll: true },
@@ -471,7 +472,8 @@ const serverConfig = {
     // Define free variables
     // https://webpack.js.org/plugins/define-plugin/
     new webpack.DefinePlugin({
-      'process.env.NODE_ENV': isDebug ? '"development"' : '"production"',
+      // eslint-disable-next-line no-nested-ternary
+      'process.env.NODE_ENV': process.env.NODE_ENV === 'test' ? '"test"' : (isDebug ? '"development"' : '"production"'),
       'process.env.BROWSER': false,
       __DEV__: isDebug,
     }),

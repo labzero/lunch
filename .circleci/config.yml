@@ -28,7 +28,8 @@ jobs:
 
       - run:
           name: dotenv
-          command: touch .env && touch .env.prod
+          command: touch .env && touch .env.prod && touch .env.test
+
 
       # Download and cache dependencies
       - restore_cache:
@@ -49,15 +50,35 @@ jobs:
       # set up the database
       - run:
           name: migrate
-          command: npm run db:migrate
+          command: NODE_ENV=test npm run db:migrate
 
       - run:
           name: seed
-          command: npm run db:seed:all
+          command: NODE_ENV=test npm run db:seed:all
 
       # run tests
-      - run: npm test
+      - run:
+          name: unit-tests
+          command: npm test
 
+      - run:
+          name: setup /etc/hosts
+          command: |
+            echo 127.0.0.1 local.lunch.pink | sudo tee -a /etc/hosts
+            echo 127.0.0.1 integration-test.local.lunch.pink | sudo tee -a /etc/hosts
+
+      - run:
+          name: build-release
+          command: NODE_ENV=test npm run build
+
+      - run:
+          name: start-server
+          command: NODE_ENV=test npm run serve
+          background: true
+
+      - run:
+          name: integration-tests
+          command: NODE_ENV=test npm run integration-test
 
   build:
     docker:

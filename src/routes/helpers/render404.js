@@ -4,9 +4,9 @@ import NotFound from '../not-found/NotFound';
 
 const title = 'Page Not Found';
 
-export default {
+export default (context) => ({
   chunks: ['not-found'],
   title,
-  component: <LayoutContainer><NotFound title={title} /></LayoutContainer>,
+  component: <LayoutContainer path={context.pathname}><NotFound title={title} /></LayoutContainer>,
   status: 404,
-};
+});

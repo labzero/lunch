@@ -26,5 +26,5 @@ export default (context) => {
     };
   }
 
-  return render404;
+  return render404(context);
 };
