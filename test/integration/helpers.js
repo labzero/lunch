@@ -42,7 +42,7 @@ export const deleteTeam = async () => {
 export const addRestaurant = async () => {
 	const page = singletons.page;
 	await page.goto('http://integration-test.local.lunch.pink:3000/');
-    await page.waitForSelector('#app');
+    await page.waitForSelector('.geosuggest__input');
 	await page.type('.geosuggest__input', 'ferry building');
     await page.waitForSelector('.geosuggest__item__matched-text');
     await page.click('li.RestaurantAddForm-suggestItemActive');
@@ -52,7 +52,7 @@ export const addRestaurant = async () => {
 export const deleteRestaurant = async () => {
 	const page = singletons.page;
 	await page.goto('http://integration-test.local.lunch.pink:3000/');
-    await page.waitForSelector('#app');
+    await page.waitForSelector('.dropdown-toggle');
     await page.click('.dropdown-toggle');
     await page.waitForSelector('.dropdown.open');
     await page.click('ul.dropdown-menu li:nth-child(4)');
