@@ -78,14 +78,14 @@ jobs:
           command: NODE_ENV=test npm run serve
           background: true
 
-      - run: mkdir /repo/screenshots
+      - run: mkdir ~/repo/screenshots
 
       - run:
           name: integration-tests
           command: NODE_ENV=test npm run integration-test
 
       - store_artifacts:
-          path: /repo/screenshots
+          path: ~/repo/screenshots
 
 
   build:
