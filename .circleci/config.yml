@@ -71,7 +71,7 @@ jobs:
 
       - run:
           name: build-release
-          command: npm run build
+          command: NODE_ENV=test npm run build
 
       - run:
           name: start-server
