@@ -4,9 +4,8 @@
 import puppeteer from 'puppeteer';
 import { expect } from 'chai';
 
-import * as account from './helpers/account';
+import * as helpers from './helpers';
 import singletons from './singletons';
-
 
 describe('login page', () => {
   let browser;
@@ -15,10 +14,6 @@ describe('login page', () => {
   before(() => {
     browser = singletons.browser;
     page = singletons.page;
-  }); 
-
-  after(async () => {
-    await account.logout();
   });
 
   beforeEach(async () => {
@@ -42,8 +37,9 @@ describe('login page', () => {
   });
 
   it('logs in successfully', async () => {
-    await account.login();
+    await helpers.login();
     const content = await page.content();
     expect(content).to.contain('You’re not currently a part of any teams!');
+    await helpers.logout();
   });
 });

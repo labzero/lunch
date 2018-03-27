@@ -4,7 +4,7 @@
 import puppeteer from 'puppeteer';
 import { expect } from 'chai';
 
-import * as account from './helpers/account';
+import * as helpers from './helpers';
 import singletons from './singletons';
 
 describe('team page (within team)', () => {
@@ -14,13 +14,13 @@ describe('team page (within team)', () => {
   before(async () => {
     browser = singletons.browser;
     page = singletons.page;
-    await account.login();
-    await account.createTeam();
+    await helpers.login();
+    await helpers.createTeam();
   }); 
 
   after(async () => {
-    await account.deleteTeam();
-    await account.logout();
+    await helpers.deleteTeam();
+    await helpers.logout();
   });
 
   beforeEach(async () => {

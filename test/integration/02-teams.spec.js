@@ -4,7 +4,7 @@
 import puppeteer from 'puppeteer';
 import { expect } from 'chai';
 
-import * as account from './helpers/account';
+import * as helpers from './helpers';
 import singletons from './singletons';
 
 describe('teams page (no teams)', () => {
@@ -14,11 +14,11 @@ describe('teams page (no teams)', () => {
   before(async () => {
     browser = singletons.browser;
     page = singletons.page;
-    await account.login();
+    await helpers.login();
   }); 
 
   after(async () => {
-    await account.logout();
+    await helpers.logout();
   });
 
   it('shows that there are no teams', async () => {
@@ -48,14 +48,16 @@ describe('teams page (no teams)', () => {
     });
 
     it('creates a new team successfully', async () => {
-      await account.createTeam();
+      await helpers.createTeam();
       const content = await page.content();
       expect(content).to.contain('Visit one of your teams');
       expect(content).to.contain('list-group-item');
+      await helpers.deleteTeam();
     });
 
     it('deletes a team successfully', async () => {
-      await account.deleteTeam();
+      await helpers.createTeam();
+      await helpers.deleteTeam();
       const content = await page.content();
       expect(content).to.contain('You’re not currently a part of any teams!');
       expect(content).to.contain('Create a new team');

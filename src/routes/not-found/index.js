@@ -9,4 +9,4 @@
 
 import render404 from '../helpers/render404';
 
-export default () => render404;
+export default (context) => render404(context);

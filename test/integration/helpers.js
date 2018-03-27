@@ -1,9 +1,6 @@
-/* eslint-disable no-unused-vars */
-
-import singletons from '../singletons';
+import singletons from './singletons';
 
 export const login = async () => {
-	const browser = singletons.browser;
 	const page = singletons.page;
 	await page.goto('http://local.lunch.pink:3000/login');
     await page.waitForSelector('#app');
@@ -14,14 +11,12 @@ export const login = async () => {
 };
 
 export const logout = async () => {
-	const browser = singletons.browser;
 	const page = singletons.page;
 	await page.goto('http://local.lunch.pink:3000/logout');
     await page.waitForSelector('#app');
 };
 
 export const createTeam = async () => {
-	const browser = singletons.browser;
 	const page = singletons.page;
 	await page.goto('http://local.lunch.pink:3000/new-team');
 	await page.waitForSelector('#app');
@@ -33,7 +28,6 @@ export const createTeam = async () => {
 };
 
 export const deleteTeam = async () => {
-	const browser = singletons.browser;
 	const page = singletons.page;
 	await page.goto('http://integration-test.local.lunch.pink:3000/team');
     await page.waitForSelector('.form-group');
@@ -46,7 +40,6 @@ export const deleteTeam = async () => {
 };
 
 export const addRestaurant = async () => {
-	const browser = singletons.browser;
 	const page = singletons.page;
 	await page.goto('http://integration-test.local.lunch.pink:3000/');
     await page.waitForSelector('#app');
@@ -57,7 +50,6 @@ export const addRestaurant = async () => {
 };
 
 export const deleteRestaurant = async () => {
-	const browser = singletons.browser;
 	const page = singletons.page;
 	await page.goto('http://integration-test.local.lunch.pink:3000/');
     await page.waitForSelector('#app');
@@ -70,7 +62,6 @@ export const deleteRestaurant = async () => {
 };
 
 export const addTag = async () => {
-	const browser = singletons.browser;
 	const page = singletons.page;
 	await page.goto('http://integration-test.local.lunch.pink:3000/');
     await page.waitForSelector('.Restaurant-tagsArea button');
@@ -84,7 +75,6 @@ export const addTag = async () => {
 };
 
 export const deleteTag = async () => {
-	const browser = singletons.browser;
 	const page = singletons.page;
 	await page.goto('http://integration-test.local.lunch.pink:3000/');
     await page.waitForSelector('button.Tag-button');

@@ -4,7 +4,7 @@
 import puppeteer from 'puppeteer';
 import { expect } from 'chai';
 
-import * as account from './helpers/account';
+import * as helpers from './helpers';
 import singletons from './singletons';
 
 describe('other pages', () => {
@@ -14,15 +14,13 @@ describe('other pages', () => {
   before(async () => {
     browser = singletons.browser;
     page = singletons.page;
-    await account.login();
-    await account.createTeam();
-    await account.addRestaurant();
+    await helpers.login();
+    await helpers.createTeam();
   }); 
 
   after(async () => {
-    await account.deleteRestaurant();
-    await account.deleteTeam();
-    await account.logout();
+    await helpers.deleteTeam();
+    await helpers.logout();
   });
 
   describe('hamburger menu', () => {
@@ -60,12 +58,14 @@ describe('other pages', () => {
     });
 
     it('should display a list of tags when there are tags', async () => {
-      await account.addTag();
+      await helpers.addRestaurant();
+      await helpers.addTag();
       await page.goto('http://integration-test.local.lunch.pink:3000/tags');
       await page.waitForSelector('.Tag-button');
       const content = await page.content();
       expect(content).to.contain('waterfront');
-      await account.deleteTag();
+      await helpers.deleteTag();
+      await helpers.deleteRestaurant();
     });
   });
 

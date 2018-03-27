@@ -4,7 +4,7 @@
 import puppeteer from 'puppeteer';
 import { expect } from 'chai';
 
-import * as account from './helpers/account';
+import * as helpers from './helpers';
 import singletons from './singletons';
 
 describe('Adding a restaurant and tag', () => {
@@ -14,8 +14,8 @@ describe('Adding a restaurant and tag', () => {
   before(async () => {
     browser = singletons.browser;
     page = singletons.page;
-    await account.login();
-    await account.createTeam();
+    await helpers.login();
+    await helpers.createTeam();
   }); 
 
   beforeEach(async () => {    
@@ -24,8 +24,8 @@ describe('Adding a restaurant and tag', () => {
   });
 
   after(async () => {
-    await account.deleteTeam();
-    await account.logout();
+    await helpers.deleteTeam();
+    await helpers.logout();
   });
 
   describe('landing page (logged in)', () => {
@@ -48,54 +48,56 @@ describe('Adding a restaurant and tag', () => {
     });
 
     describe('Adding a restaurant', () => {
+      beforeEach(async () => {
+        await helpers.addRestaurant();
+      });
 
       it('makes suggestions and then displays the new restaurant in the restaurant list', async () => {
-        await account.addRestaurant();
         const content = await page.content();
         expect(content).to.contain('filter by name');
         expect(content).to.contain('Restaurant-root');
-        await account.deleteRestaurant();
+        await helpers.deleteRestaurant();
       });
 
       it('show the restaurant list item with contents', async () => {
-        await account.addRestaurant();
         const content = await page.content();
         expect(content).to.contain('Restaurant-data');
         expect(content).to.contain('Restaurant-heading');
         expect(content).to.contain('Restaurant-addressContainer');
         expect(content).to.contain('Restaurant-voteContainer');
         expect(content).to.contain('Restaurant-footer');
-        await account.deleteRestaurant();
+        await helpers.deleteRestaurant();
       });
 
       it('deletes a restaurant successfully', async () => {
-        await account.addRestaurant();
-        await account.deleteRestaurant();
+        await helpers.deleteRestaurant();
         const content = await page.content();
         expect(content).to.contain('Welcome to Lunch!');
       });
     });
 
     describe('Adding a tag', () => {
+      beforeEach(async () => {
+        await helpers.addRestaurant();
+        await helpers.addTag();
+      });
+
+      afterEach(async () => {
+        await helpers.deleteRestaurant()
+      });
 
       it('shows the three filter buttons after adding a tag', async () => {
-        await account.addRestaurant();
-        await account.addTag();
         const content = await page.content();
         expect(content).to.contain('filter by tag');
         expect(content).to.contain('exclude tags');
         expect(content).to.contain('waterfront');
-        await account.deleteTag();
-        await account.deleteRestaurant();
+        await helpers.deleteTag();
       });
 
       it('deletes a tag successfully', async () => {
-        await account.addRestaurant();
-        await account.addTag();
-        await account.deleteTag();
+        await helpers.deleteTag();
         const content = await page.content();
         expect(content).to.not.contain('waterfront');
-        await account.deleteRestaurant();
       });
     });
   });

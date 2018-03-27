@@ -24,6 +24,6 @@ export default (context) => {
         map: true
       };
     }
-    return render404;
+    return render404(context);
   });
 };
