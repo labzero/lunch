@@ -38,14 +38,14 @@ describe('login page', () => {
 
   it('logs in successfully', async () => {
     page.tracing.start({path: 'debug/trace.json'});
-    page.screenshot({path: "PreLogin.png"})
+    page.screenshot({path: "screenshots/PreLogin.png"})
     await helpers.login();
-    page.screenshot({path: "PostLogin.png"})
+    page.screenshot({path: "screenshots/PostLogin.png"})
     page.tracing.stop();
     const content = await page.content();
     expect(content).to.contain('You’re not currently a part of any teams!');
-    page.screenshot({path: "PreLogout.png"})
+    page.screenshot({path: "screenshots/PreLogout.png"})
     await helpers.logout();
-    page.screenshot({path: "PostLogout.png"})
+    page.screenshot({path: "screenshots/PostLogout.png"})
   });
 });

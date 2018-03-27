@@ -83,7 +83,7 @@ jobs:
           command: NODE_ENV=test npm run integration-test
 
       - store_artifacts:
-          path: /repo/debug
+          path: /repo/screenshots
 
 
   build:
