@@ -23,16 +23,16 @@ describe('teams page (no teams)', () => {
 
   it('shows that there are no teams', async () => {
     await page.goto('http://local.lunch.pink:3000/teams');
-    await page.waitForSelector('.Teams-centerer .btn-default');
+    await page.waitForSelector('.Teams-centerer .btn-default', helpers.waitOptions);
     const content = await page.content();
     expect(content).to.contain('You’re not currently a part of any teams!');
   });
 
   it('takes user to create team page', async () => {
     await page.goto('http://local.lunch.pink:3000/teams');
-    await page.waitForSelector('.Teams-centerer .btn-default');
+    await page.waitForSelector('.Teams-centerer .btn-default', helpers.waitOptions);
     await page.click('.btn-default');
-    await page.waitForSelector('input');
+    await page.waitForSelector('input', helpers.waitOptions);
     const content = await page.content();
     expect(content).to.contain('Create a new team');
     expect(content).to.contain('form-group');
@@ -41,7 +41,7 @@ describe('teams page (no teams)', () => {
   describe('new team page', () => {
     it('has a new team form', async () => {
       await page.goto('http://local.lunch.pink:3000/new-team');
-      await page.waitForSelector('#app');
+      await page.waitForSelector('#app', helpers.waitOptions);
       const content = await page.content();
       expect(content).to.contain('Create a new team');
       expect(content).to.contain('form-group');

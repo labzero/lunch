@@ -40,7 +40,7 @@ describe('other pages', () => {
   describe('Account page', () => {
     it('should have "Name," "Email," and "Change Password?" inputs and Submit button', async () => {
       await page.goto('http://local.lunch.pink:3000/account');
-      await page.waitForSelector('.form-group');
+      await page.waitForSelector('.form-group', helpers.waitOptions);
       const content = await page.content();
       expect(content).to.contain('Name');
       expect(content).to.contain('Email');
@@ -52,7 +52,7 @@ describe('other pages', () => {
   describe('Tags page', () => {
     it('should display blurb when no tags', async () => {
       await page.goto('http://integration-test.local.lunch.pink:3000/tags');
-      await page.waitForSelector('#app');
+      await page.waitForSelector('#app', helpers.waitOptions);
       const content = await page.content();
       expect(content).to.contain('Once you add tags');
     });
@@ -61,7 +61,7 @@ describe('other pages', () => {
       await helpers.addRestaurant();
       await helpers.addTag();
       await page.goto('http://integration-test.local.lunch.pink:3000/tags');
-      await page.waitForSelector('.Tag-button');
+      await page.waitForSelector('.Tag-button', helpers.waitOptions);
       const content = await page.content();
       expect(content).to.contain('waterfront');
       await helpers.deleteTag();
@@ -72,7 +72,7 @@ describe('other pages', () => {
   describe('About page', () => {
     it('should have some content', async () => {
       await page.goto('http://local.lunch.pink:3000/about');
-      await page.waitForSelector('#app');
+      await page.waitForSelector('#app', helpers.waitOptions);
       const content = await page.content();
       expect(content).to.contain('About Lunch');
     });
@@ -81,7 +81,7 @@ describe('other pages', () => {
   describe('404 page', () => {
     it('should have some content', async () => {
       await page.goto('http://local.lunch.pink:3000/404');
-      await page.waitForSelector('#app');
+      await page.waitForSelector('#app', helpers.waitOptions);
       const content = await page.content();
       expect(content).to.contain('Page Not Found');
     });

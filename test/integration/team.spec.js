@@ -25,7 +25,7 @@ describe('team page (within team)', () => {
 
   beforeEach(async () => {
     await page.goto('http://integration-test.local.lunch.pink:3000/team');
-    await page.waitForSelector('.form-group');
+    await page.waitForSelector('.form-group', helpers.waitOptions);
   });
 
   describe('team page', () => {
@@ -50,7 +50,7 @@ describe('team page (within team)', () => {
     describe('under Team tab', () => {
       it('should have Name input, Address section, Sort duration, and Save Changes button', async () => {
         await page.click('#team-tabs-tab-2');
-        await page.waitForSelector('.gm-style');
+        await page.waitForSelector('.gm-style', helpers.waitOptions);
         const content = await page.content();
         expect(content).to.contain('Name');
         expect(content).to.contain('Address');
@@ -62,7 +62,7 @@ describe('team page (within team)', () => {
     describe('under Messy Business tab', () => {
       it('should have Change team URL button and Delete team button', async () => {
         await page.click('#team-tabs-tab-3');
-        await page.waitForSelector('.btn-danger');
+        await page.waitForSelector('.btn-danger', helpers.waitOptions);
         const content = await page.content();
         expect(content).to.contain('Change team URL');
         expect(content).to.contain('Delete team');
