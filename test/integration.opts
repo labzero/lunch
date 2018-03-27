@@ -1,2 +1,4 @@
+--compilers js:@babel/register
+--require ./test/setup.js
 --timeout 10000
-test/integration/**/*.spec.js
+./test/integration-setup.js
