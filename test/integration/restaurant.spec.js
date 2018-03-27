@@ -20,7 +20,7 @@ describe('Adding a restaurant and tag', () => {
 
   beforeEach(async () => {    
     await page.goto('http://integration-test.local.lunch.pink:3000/');
-    await page.waitForSelector('#app');
+    await page.waitForSelector('#app', helpers.waitOptions);
   });
 
   after(async () => {
@@ -40,7 +40,7 @@ describe('Adding a restaurant and tag', () => {
     describe('with no restaurants', () => {
 
       it('shows the Welcome box', async () => {
-        await page.waitForSelector('.RestaurantList-welcome');
+        await page.waitForSelector('.RestaurantList-welcome', helpers.waitOptions);
         const content = await page.content();
         expect(content).to.contain('Welcome to Lunch!');
       });

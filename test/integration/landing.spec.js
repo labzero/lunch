@@ -3,6 +3,8 @@
 
 import puppeteer from 'puppeteer';
 import { expect } from 'chai';
+
+import * as helpers from './helpers';
 import singletons from './singletons';
 
 describe('landing page', () => {
@@ -13,7 +15,7 @@ describe('landing page', () => {
     browser = singletons.browser;
     page = singletons.page;
     await page.goto('http://local.lunch.pink:3000/');
-    await page.waitForSelector('#app');
+    await page.waitForSelector('#app', helpers.waitOptions);
   });
 
   it('contains hero text', async () => {

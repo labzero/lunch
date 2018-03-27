@@ -18,7 +18,7 @@ describe('login page', () => {
 
   beforeEach(async () => {
     await page.goto('http://local.lunch.pink:3000/login');
-    await page.waitForSelector('#app');
+    await page.waitForSelector('#app', helpers.waitOptions);
   });
 
   it('contains email and password fields', async () => {
