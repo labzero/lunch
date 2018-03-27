@@ -63,8 +63,8 @@ jobs:
 
       - run:
           name: setup /etc/hosts
-          command: echo 127.0.0.1 local.lunch.pink | sudo tee -a /etc/hosts
-
+          command: echo "127.0.0.1 local.lunch.pink\n127.0.0.1 integration-test.lunch.pink" | sudo tee -a /etc/hosts
+          
       - run:
           name: build-release
           command: npm run build
