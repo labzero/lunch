@@ -18,7 +18,9 @@ const settings = {
 
 const config = {
   development: {},
-  test: {},
+  test: {
+    logging: false,
+  },
   production: {}
 };
 
