@@ -33,4 +33,5 @@ package-lock.json
 .DS_Store
 .env
 .env.prod
+.env.test
 deploy.sh

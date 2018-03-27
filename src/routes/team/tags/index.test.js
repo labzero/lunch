@@ -42,7 +42,7 @@ describe('routes/team/tags', () => {
           default: (_, cb) => cb(),
         }),
         '../../helpers/render404': mockEsmodule({
-          default: 'render404',
+          default: () => render404,
         })
       }).default;
       result = landingProxy(context);
