@@ -67,8 +67,6 @@ jobs:
             echo 127.0.0.1 local.lunch.pink | sudo tee -a /etc/hosts
             echo 127.0.0.1 integration-test.local.lunch.pink | sudo tee -a /etc/hosts
 
-      - run: cat /etc/hosts
-
       - run:
           name: build-release
           command: NODE_ENV=test npm run build
@@ -78,15 +76,9 @@ jobs:
           command: NODE_ENV=test npm run serve
           background: true
 
-      - run: mkdir ~/repo/screenshots
-
       - run:
           name: integration-tests
           command: NODE_ENV=test npm run integration-test
-
-      - store_artifacts:
-          path: ~/repo/screenshots
-
 
   build:
     docker:
