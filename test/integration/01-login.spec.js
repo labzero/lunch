@@ -37,8 +37,10 @@ describe('login page', () => {
   });
 
   it('logs in successfully', async () => {
+    page.tracing.start({path: 'debug/trace.json'});
     await helpers.login();
     const content = await page.content();
+    page.tracing.stop();
     expect(content).to.contain('You’re not currently a part of any teams!');
     await helpers.logout();
   });
