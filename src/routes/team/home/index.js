@@ -15,13 +15,12 @@ export default (context) => {
   return renderIfHasName(context, () => {
     if (team.id && hasRole(user, team)) {
       return {
-        chunks: ['home'],
+        chunks: ['home', 'map'],
         component: (
           <LayoutContainer path={context.pathname} isHome>
             <HomeContainer />
           </LayoutContainer>
         ),
-        map: true
       };
     }
     return render404(context);

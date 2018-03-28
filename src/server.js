@@ -367,9 +367,6 @@ const render = async (req, res, next) => {
     addChunk('client');
     if (route.chunk) addChunk(route.chunk);
     if (route.chunks) route.chunks.forEach(addChunk);
-    if (route.map) {
-      chunks.map.forEach(asset => scripts.add(asset));
-    }
 
     data.scripts = Array.from(scripts);
     data.app = {
