@@ -92,7 +92,9 @@ const RestaurantMarker = ({
   const context = {
     fetch: props.fetch,
     insertCss: props.insertCss,
-    store: props.store
+    store: props.store,
+    pathname: props.pathname,
+    query: props.query,
   };
 
   return (
@@ -111,7 +113,13 @@ RestaurantMarker.propTypes = {
   fetch: PropTypes.func.isRequired,
   store: PropTypes.object.isRequired,
   insertCss: PropTypes.func.isRequired,
+  pathname: PropTypes.string.isRequired,
+  query: PropTypes.object,
   restaurant: PropTypes.object.isRequired
+};
+
+RestaurantMarker.defaultProps = {
+  query: undefined,
 };
 
 export default RestaurantMarker;

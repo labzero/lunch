@@ -17,7 +17,9 @@ class RestaurantMap extends Component {
   static contextTypes = {
     fetch: PropTypes.func.isRequired,
     insertCss: PropTypes.func.isRequired,
-    store: PropTypes.object.isRequired
+    store: PropTypes.object.isRequired,
+    pathname: PropTypes.string.isRequired,
+    query: PropTypes.object,
   };
 
   static propTypes = {
@@ -139,6 +141,8 @@ class RestaurantMap extends Component {
               store={this.context.store}
               fetch={this.context.fetch}
               insertCss={this.context.insertCss}
+              pathname={this.context.pathname}
+              query={this.context.query}
             />
           ))}
         </GoogleMap>

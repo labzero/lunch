@@ -205,6 +205,7 @@ async function start() {
   // Launch the development server with Browsersync and HMR
   await new Promise((resolve, reject) => browserSync.create().init({
     // https://www.browsersync.io/docs/options
+    ghostMode: false,
     host: server.hostname,
     server: 'src/server.js',
     middleware: [server],
