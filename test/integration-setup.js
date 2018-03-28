@@ -6,25 +6,31 @@ import singletons from './integration/singletons';
 
 let browser;
 
-before((done) => {
-  puppeteer.launch({
+const loadPage = () => new Promise((resolve, reject) => {
+  const innerLoadPage = async () => {
+    try {
+      await singletons.page.goto('http://local.lunch.pink:3000/');
+      resolve();
+    } catch (err) {
+      if (err.message.indexOf('ERR_CONNECTION_REFUSED' > -1)) {
+        // eslint-disable-next-line no-console
+        console.log('No response from server. Trying again in 1 second...');
+        setTimeout(innerLoadPage, 1000);
+      } else {
+        reject();
+      }
+    };
+  };
+  innerLoadPage();
+});
+
+before(async () => {
+  browser = singletons.browser = await puppeteer.launch({
     headless: false,
     slowMo: 10,
-  }).then((b) => {
-    browser = singletons.browser = b;
-    browser.newPage().then((p) => {
-      const page = singletons.page = p;
-      let gotoInterval = setInterval(() => {
-        page.goto('http://local.lunch.pink:3000/').then(() => {
-          if (gotoInterval) {
-            clearInterval(gotoInterval);
-            gotoInterval = undefined;
-            done();
-          }
-        }).catch(() => {});
-      }, 1000);
-    });
   });
+  singletons.page = await browser.newPage();
+  await loadPage();
 });
 
 after(async () => {
