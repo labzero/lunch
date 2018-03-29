@@ -35,3 +35,4 @@ package-lock.json
 .env.prod
 .env.test
 deploy.sh
+test-results.xml
