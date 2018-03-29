@@ -31,7 +31,7 @@ Make two copies of `.env.sample`, named `.env` and `.env.prod`.
 
 #### Google project
 
-For `GOOGLE_CLIENT_*` env variables:
+For `GOOGLE_*` env variables:
 
 * Create a Google Developer app in the [console](https://console.developers.google.com/).
 * Enable the Google+ API, Contacts API, Google Maps JavaScript API, Google Places API Web Service, and Google Maps Geocoding API.
@@ -40,9 +40,8 @@ For `GOOGLE_CLIENT_*` env variables:
   * Enter `http://local.lunch.pink:3000` as an authorized JavaScript origin
   * Enter `http://local.lunch.pink:3000/login/google/callback` as an authorized redirect URI
 * Add your deployment target(s) as additional origins/redirect URIs.
-* Go back to the Credentials section and create an API key.
-  * Choose "Browser key".
-  * Optionally limit requests to certain referrers.
+* Go back to the Credentials section and create two API keys - one for the client, and one for the server.
+  * For the client, optionally limit requests to certain referrers.
 
 #### Database
 
