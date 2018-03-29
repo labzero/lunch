@@ -13,10 +13,13 @@ export function processResponse(response, dispatch) {
       if (response.status === 401) {
         history.replace(`/login?next=${history.location.pathname}`);
       } else {
-        dispatch(flashError(err.message))
-        throw err;
+        dispatch(flashError(err.message));
+        // returning a rejection instead of throwing an error prevents
+        // react-error-overlay from triggering.
+        return Promise.reject(err.message);
       }
     }
+    return undefined;
   });
 }
 

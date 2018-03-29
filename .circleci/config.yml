@@ -169,7 +169,9 @@ workflows:
       - test:
           filters:
             branches:
-              ignore: develop
+              ignore:
+                - develop
+                - master
 
   develop-test-deploy:
     jobs:
@@ -194,6 +196,14 @@ workflows:
 
   deploy:
     jobs:
+
+      - build:
+          filters:
+            tags:
+              only: /^lunch-v.*/
+            branches:
+              ignore: /.*/
+
       - deploy-staging:
           filters:
             tags:

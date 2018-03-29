@@ -57,7 +57,7 @@ describe('processResponse', () => {
 
     return processResponse(response, dispatch).catch((err) => {
       expect(dispatch.args[0][0].type).to.eq('FLASH_ERROR');
-      expect(err.message).to.eq('Oh No');
+      expect(err).to.eq('Oh No');
     });
   });
 
