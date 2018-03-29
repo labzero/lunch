@@ -47,19 +47,21 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-      # set up the database
-      - run:
-          name: migrate
-          command: NODE_ENV=test npm run db:migrate
 
-      - run:
-          name: seed
-          command: NODE_ENV=test npm run db:seed:all
+      # run unit tests
+      - run: mkdir ~/repo/junit
 
-      # run tests
       - run:
           name: unit-tests
-          command: npm test
+          command: npm run test-ci
+          environment:
+            MOCHA_FILE: junit/unit-test-results.xml
+
+      # set up for integration tests
+      # set up the database
+      - run:
+          name: database-setup
+          command: NODE_ENV=test npm run integration-setup
 
       - run:
           name: setup /etc/hosts
@@ -67,6 +69,7 @@ jobs:
             echo 127.0.0.1 local.lunch.pink | sudo tee -a /etc/hosts
             echo 127.0.0.1 integration-test.local.lunch.pink | sudo tee -a /etc/hosts
 
+      # build the app
       - run:
           name: build-release
           command: NODE_ENV=test npm run build
@@ -78,7 +81,15 @@ jobs:
 
       - run:
           name: integration-tests
-          command: NODE_ENV=test npm run integration-test
+          command: NODE_ENV=test npm run integration-test-ci
+          environment:
+            MOCHA_FILE: junit/browser-test-results.xml
+
+      - store_test_results:
+          path: ~/repo/junit
+
+      - store_artifacts:
+          path: ~/repo/junit
 
   build:
     docker:

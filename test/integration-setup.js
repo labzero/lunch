@@ -27,6 +27,7 @@ const loadPage = () => new Promise((resolve, reject) => {
 const opts = process.env.CI ?
   {
     headless: true,
+    slowMo: 10,
   } :
   { headless: false,
     slowMo: 10,

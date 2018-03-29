@@ -38,6 +38,7 @@
     "isomorphic-style-loader": "^4.0.0",
     "jsonwebtoken": "^8.2.0",
     "method-override": "^2.3.8",
+    "mocha-junit-reporter": "^1.17.0",
     "moment": "^2.11.2",
     "morgan": "^1.8.1",
     "node-fetch": "^2.1.1",
@@ -203,7 +204,9 @@
     "fix-css": "npm run lint-css --fix",
     "fix": "npm run fix-js && npm run fix-css",
     "test-file": "mocha",
+    "test-file-ci": "mocha --reporter mocha-junit-reporter",
     "test": "npm run test-file \"./src/**/*.test.js\"",
+    "test-ci": "npm run test-file-ci \"./src/**/*.test.js\"",
     "test-watch": "npm run test --watch --notify",
     "test-cover": "nyc npm run test",
     "coverage": "npm run test-cover && opn coverage/lcov-report/index.html",
@@ -216,12 +219,15 @@
       "npm-run-all db:migrate:undo:all db:migrate db:seed:all build",
     "integration":
       "cross-env NODE_ENV=test npm-run-all integration-setup -r -p serve integration-test",
-    "integration-ci": "NODE_ENV=test npm-run-all -r -p serve integration-test",
     "integration-test":
       "npm run integration-test-file \"./test/integration/**/*.spec.js\"",
+    "integration-test-ci":
+      "npm run integration-test-file-ci \"./test/integration/**/*.spec.js\"",
     "integration-file":
       "cross-env NODE_ENV=test npm-run-all integration-setup -r -p serve \"integration-test-file {1}\" --",
     "integration-test-file": "mocha --opts \"./test/integration.opts\"",
+    "integration-test-file-ci":
+      "mocha --reporter mocha-junit-reporter --opts \"./test/integration.opts\"",
     "clean": "babel-node tools/run clean",
     "copy": "babel-node tools/run copy",
     "bundle": "babel-node tools/run bundle",
