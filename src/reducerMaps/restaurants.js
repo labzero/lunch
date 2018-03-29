@@ -27,10 +27,13 @@ export default new Map([
               const restaurantA = getRestaurantById({ restaurants: state }, a);
               const restaurantB = getRestaurantById({ restaurants: state }, b);
 
-              // stable sort
               if (restaurantA.votes.length !== restaurantB.votes.length) {
                 return restaurantB.votes.length - restaurantA.votes.length;
               }
+              if (restaurantA.all_vote_count !== restaurantB.all_vote_count) {
+                return restaurantB.all_vote_count - restaurantA.all_vote_count;
+              }
+              // stable sort
               return sortIndexes[a] - sortIndexes[b];
             });
             // If array contents match, return original (for shallow comparison)

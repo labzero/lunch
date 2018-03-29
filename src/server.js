@@ -42,7 +42,7 @@ import mainRoutes from './routes/main';
 import createFetch from './createFetch';
 import passport from './passport';
 import routerCreator from './router';
-import assets from './assets.json'; // eslint-disable-line import/no-unresolved
+import chunks from './chunk-manifest.json'; // eslint-disable-line import/no-unresolved
 import configureStore from './store/configureStore';
 import config from './config';
 import makeInitialState from './initialState';
@@ -56,7 +56,11 @@ import { Team, User } from './models';
 
 fetch.promise = Promise;
 
-const app = express();
+process.on('unhandledRejection', (reason, p) => {
+  console.error('Unhandled Rejection at:', p, 'reason:', reason);
+  // send entire app down. Process manager will restart it
+  process.exit(1);
+});
 
 const logDirectory = path.join(__dirname, 'log');
 
@@ -70,6 +74,8 @@ const accessLogStream = rfs('access.log', {
   path: logDirectory
 });
 
+const app = express();
+
 export const wsServer = new HttpServer(app);
 
 //
@@ -78,6 +84,12 @@ export const wsServer = new HttpServer(app);
 // -----------------------------------------------------------------------------
 global.navigator = global.navigator || {};
 global.navigator.userAgent = global.navigator.userAgent || 'all';
+
+//
+// If you are using proxy from external machine, you can set TRUST_PROXY env
+// Default is to trust proxy headers only from loopback interface.
+// -----------------------------------------------------------------------------
+app.set('trust proxy', config.trustProxy);
 
 //
 // Register Node.js middleware
@@ -280,6 +292,13 @@ const render = async (req, res, next) => {
     }
     const css = new Set();
 
+    // Enables critical path CSS rendering
+    // https://github.com/kriasoft/isomorphic-style-loader
+    const insertCss = (...styles) => {
+      // eslint-disable-next-line no-underscore-dangle
+      styles.forEach(style => css.add(style._getCss()));
+    };
+
     // Universal HTTP client
     const fetch = createFetch(nodeFetch, {
       baseUrl: config.api.serverUrl,
@@ -296,15 +315,13 @@ const render = async (req, res, next) => {
     // Global (context) variables that can be easily accessed from any React component
     // https://facebook.github.io/react/docs/context.html
     const context = {
-      // Enables critical path CSS rendering
-      // https://github.com/kriasoft/isomorphic-style-loader
-      insertCss: (...styles) => {
-        // eslint-disable-next-line no-underscore-dangle
-        styles.forEach(style => css.add(style._getCss()));
-      },
+      insertCss,
       fetch,
+      // The twins below are wild, be careful!
+      pathname: req.path,
+      query: req.query,
       // You can access redux through react-redux connect
-      store
+      store,
     };
 
     let router;
@@ -316,8 +333,6 @@ const render = async (req, res, next) => {
 
     const route = await router.resolve({
       ...context,
-      pathname: req.path,
-      query: req.query,
       subdomain: req.subdomain,
     });
 
@@ -334,28 +349,30 @@ const render = async (req, res, next) => {
       root: generateUrl(req, req.get('host')),
     };
 
-    data.app = {
-      apiUrl: config.api.clientUrl,
-      state: initialState,
-    };
-
     data.children = ReactDOM.renderToString(
       <App context={context} store={store}>
         {route.component}
       </App>,
     );
+    data.styles = [{ id: 'css', cssText: [...css].join('') }];
 
-    data.styles = [
-      { id: 'css', cssText: [...css].join('') },
-    ];
-    data.scripts = [assets.vendor.js];
-    if (route.chunks) {
-      data.scripts.push(...route.chunks.map(chunk => assets[chunk].js));
-    }
-    if (route.map) {
-      data.scripts.push(assets.map.js);
-    }
-    data.scripts.push(assets.client.js);
+    const scripts = new Set();
+    const addChunk = chunk => {
+      if (chunks[chunk]) {
+        chunks[chunk].forEach(asset => scripts.add(asset));
+      } else if (__DEV__) {
+        throw new Error(`Chunk with name '${chunk}' cannot be found`);
+      }
+    };
+    addChunk('client');
+    if (route.chunk) addChunk(route.chunk);
+    if (route.chunks) route.chunks.forEach(addChunk);
+
+    data.scripts = Array.from(scripts);
+    data.app = {
+      apiUrl: config.api.clientUrl,
+      state: initialState,
+    };
 
     const html = ReactDOM.renderToStaticMarkup(<Html {...data} />);
     res.status(route.status || 200);

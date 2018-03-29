@@ -34,6 +34,6 @@ export default (context) => {
         map: hasRole(user, team, 'owner')
       };
     }
-    return render404;
+    return render404(context);
   });
 };

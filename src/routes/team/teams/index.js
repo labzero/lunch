@@ -24,6 +24,6 @@ export default (context) => {
         status: 301
       };
     }
-    return render404;
+    return render404(context);
   });
 };

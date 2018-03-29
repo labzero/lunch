@@ -78,12 +78,7 @@ const container = document.getElementById('app');
 let currentLocation = history.location;
 let appInstance;
 
-// Switch off the native scroll restoration behavior and handle it manually
-// https://developers.google.com/web/updates/2015/09/history-api-scroll-restoration
 const scrollPositionsHistory = {};
-if (window.history && 'scrollRestoration' in window.history) {
-  window.history.scrollRestoration = 'manual';
-}
 
 let routes;
 if (subdomain) {
@@ -109,14 +104,15 @@ async function onLocationChange(location, action) {
 
   const isInitialRender = !action;
   try {
+    context.pathname = location.pathname;
+    context.query = queryString.parse(location.search);
+
     // Traverses the list of routes in the order they are defined until
     // it finds the first route that matches provided URL path string
     // and whose action method returns anything other than `undefined`.
     const route = await router.resolve({
       ...context,
-      pathname: location.pathname,
-      query: queryString.parse(location.search),
-      subdomain
+      subdomain,
     });
 
     // Prevent multiple page renders during the routing process
@@ -135,6 +131,12 @@ async function onLocationChange(location, action) {
       container,
       () => {
         if (isInitialRender) {
+          // Switch off the native scroll restoration behavior and handle it manually
+          // https://developers.google.com/web/updates/2015/09/history-api-scroll-restoration
+          if (window.history && 'scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
+          }
+
           const elem = document.getElementById('css');
           if (elem) elem.parentNode.removeChild(elem);
           return;
@@ -187,6 +189,7 @@ async function onLocationChange(location, action) {
 
     // Do a full page reload if error occurs during client-side navigation
     if (!isInitialRender && currentLocation.key === location.key) {
+      console.error('RSK will reload your page after error');
       window.location.reload();
     }
   }
