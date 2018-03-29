@@ -37,7 +37,10 @@ class TeamMap extends Component {
 
   setMap = ({ map }) => {
     this.map = map;
-    map.addListener('bounds_changed', () => {
+    // "idle" is triggered after dragging or panning in general has completed.
+    // no need to set center while the map is being dragged - otherwise,
+    // the map will re-render, causing dragging to cease prematurely.
+    map.addListener('idle', () => {
       const center = map.getCenter();
       this.props.setCenter({
         lat: center.lat(),
