@@ -92,7 +92,7 @@ class Html extends Component {
           {config.analytics.googleTrackingId &&
             <script src="https://www.google-analytics.com/analytics.js" async defer />
           }
-          {apikey && <script src={`https://maps.googleapis.com/maps/api/js?key=${apikey}&libraries=places`} />}
+          {apikey && <script src={`https://maps.googleapis.com/maps/api/js?key=${apikey}&libraries=places&v=3.`} />}
           {scripts.map(script => <script key={script} src={script} />)}
         </body>
       </html>
