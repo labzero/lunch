@@ -24,12 +24,9 @@ const loadPage = () => new Promise((resolve, reject) => {
   innerLoadPage();
 });
 
-const opts = process.env.CI ?
+const opts =
   {
-    headless: true,
-    slowMo: 10,
-  } :
-  { headless: false,
+    headless: !process.env.CI,
     slowMo: 10,
   };
 
