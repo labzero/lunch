@@ -16,11 +16,10 @@ const title = 'New Team';
 
 export default (context) => renderIfHasName(context, () => ({
   title,
-  chunks: ['new-team'],
+  chunks: ['map', 'new-team'],
   component: (
     <LayoutContainer path={context.pathname}>
       <NewTeamContainer />
     </LayoutContainer>
   ),
-  map: true
 }));

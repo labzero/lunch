@@ -66,8 +66,11 @@ class Html extends Component {
           <meta property="twitter:image" content={`${root}/tile.png`} />
           <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
           <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:400,900" />
-          {scripts.map(script => <link key={script} rel="preload" href={script} as="script" />)}
-          <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+          {scripts.map(script => (
+            <link key={script} rel="preload" href={script} as="script" />
+          ))}
+          <link rel="manifest" href="/site.webmanifest" />
+          <link rel="apple-touch-icon" href="/icon.png" />
           {styles.map(style => (
             <style
               key={style.id}

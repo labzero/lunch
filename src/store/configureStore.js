@@ -1,6 +1,8 @@
-import { combineReducers, createStore, applyMiddleware, compose } from 'redux';
+import { combineReducers, createStore, applyMiddleware } from 'redux';
 import { normalize } from 'normalizr';
 import thunk from 'redux-thunk';
+import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
+import { name, version } from '../../package.json';
 import * as schemas from '../schemas';
 import * as reducerMaps from '../reducerMaps';
 import createHelpers from './createHelpers';
@@ -18,8 +20,8 @@ const generateReducer = (map, initial) => (state = initial, action) => {
 const generateReducers = (newReducerMaps, normalizedInitialState) => {
   const reducers = {};
 
-  Object.keys(newReducerMaps).forEach(name => {
-    reducers[name] = generateReducer(reducerMaps[name], normalizedInitialState[name] || {});
+  Object.keys(newReducerMaps).forEach(mapName => {
+    reducers[mapName] = generateReducer(reducerMaps[mapName], normalizedInitialState[mapName] || {});
   });
 
   return reducers;
@@ -50,13 +52,14 @@ export default function configureStore(initialState, helpersConfig) {
   if (__DEV__) {
     middleware.push(createLogger());
 
-    // https://github.com/zalmoxisus/redux-devtools-extension#redux-devtools-extension
-    let devToolsExtension = f => f;
-    if (process.env.BROWSER && window.devToolsExtension) {
-      devToolsExtension = window.devToolsExtension();
-    }
+    // https://github.com/zalmoxisus/redux-devtools-extension#14-using-in-production
+    const composeEnhancers = composeWithDevTools({
+      // Options: https://github.com/zalmoxisus/redux-devtools-extension/blob/master/docs/API/Arguments.md#options
+      name: `${name}@${version}`,
+    });
 
-    enhancer = compose(applyMiddleware(...middleware), devToolsExtension);
+    // https://redux.js.org/docs/api/applyMiddleware.html
+    enhancer = composeEnhancers(applyMiddleware(...middleware));
   } else {
     enhancer = applyMiddleware(...middleware);
   }

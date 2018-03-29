@@ -16,8 +16,13 @@ const host = process.env.WEBSITE_HOSTNAME ||
 const hostname = host.match(/^([^:]*):?[0-9]{0,}/)[1];
 
 module.exports = {
+  // Node.js app
   port,
   wsPort: module.hot ? port + 10 : port,
+
+  // https://expressjs.com/en/guide/behind-proxies.html
+  trustProxy: process.env.TRUST_PROXY || 'loopback',
+
   // API Gateway
   api: {
     // API URL to be used in the client-side code

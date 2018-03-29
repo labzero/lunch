@@ -39,13 +39,17 @@ module.exports = {
       ],
     }],
 
-    'selector-pseudo-class-no-unknown': [true, {
-      ignorePseudoClasses: [
-        // CSS Modules :global scope
-        // https://github.com/css-modules/css-modules#exceptions
-        'global',
-      ],
-    }],
+    'selector-pseudo-class-no-unknown': [
+      true,
+      {
+        ignorePseudoClasses: [
+          // CSS Modules :global scope
+          // https://github.com/css-modules/css-modules#exceptions
+          'global',
+          'local',
+        ],
+      },
+    ],
 
     // Opinionated rule, you can disable it if you want
     'string-quotes': 'single',

@@ -40,6 +40,7 @@
     flex-grow: 0;
     overflow: auto;
     overflow-anchor: none; // prevent browsers from scrolling to top after vote
+    -webkit-overflow-scrolling: touch;
     width: 500px;
   }
 }
