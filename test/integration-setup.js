@@ -24,12 +24,18 @@ const loadPage = () => new Promise((resolve, reject) => {
   innerLoadPage();
 });
 
-before(async () => {
-  browser = singletons.browser = await puppeteer.launch({
-    headless: false,
+const opts = process.env.CI ?
+  {
+    headless: true,
+  } :
+  { headless: false,
     slowMo: 10,
-  });
+  };
+
+before(async () => {
+  browser = singletons.browser = await puppeteer.launch(opts);
   singletons.page = await browser.newPage();
+  singletons.page.setViewport({width: 1024, height: 768});
   await loadPage();
 });
 
