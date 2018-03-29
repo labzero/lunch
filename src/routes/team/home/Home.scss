@@ -30,6 +30,7 @@
 @media (min-width: 1000px) {
   .root {
     flex-direction: row-reverse;
+    overflow: hidden;
   }
 
   .mapContainer {
