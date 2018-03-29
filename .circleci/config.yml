@@ -205,6 +205,8 @@ workflows:
               ignore: /.*/
 
       - deploy-staging:
+          requires:
+            - build
           filters:
             tags:
               only: /^lunch-v.*/
