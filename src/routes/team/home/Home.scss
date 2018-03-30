@@ -1,3 +1,5 @@
+@import '../../../styles/_mixins.scss';
+
 .root,
 .forms,
 .restaurantList {
@@ -6,6 +8,7 @@
 }
 
 .root {
+  @include page-root-layer;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
