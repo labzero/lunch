@@ -1,23 +1,30 @@
 /* eslint-env mocha */
 /* eslint-disable no-multi-assign */
 
+import Bluebird from 'bluebird';
 import puppeteer from 'puppeteer';
 import singletons from './integration/singletons';
+
+// use bluebird instead of native promises for improved async stack traces
+Bluebird.config({ longStackTraces: true });
+global.Promise = Bluebird;
 
 let browser;
 
 const loadPage = () => new Promise((resolve, reject) => {
+  let tryCount = 0;
   const innerLoadPage = async () => {
     try {
       await singletons.page.goto('http://local.lunch.pink:3000/');
       resolve();
     } catch (err) {
-      if (err.message.indexOf('ERR_CONNECTION_REFUSED' > -1)) {
+      if (err.message.indexOf('ERR_CONNECTION_REFUSED') > -1 && tryCount < 30) {
         // eslint-disable-next-line no-console
         console.log('No response from server. Trying again in 1 second...');
         setTimeout(innerLoadPage, 1000);
+        tryCount += 1;
       } else {
-        reject();
+        reject(err);
       }
     };
   };
@@ -26,7 +33,7 @@ const loadPage = () => new Promise((resolve, reject) => {
 
 const opts =
   {
-    headless: !process.env.CI,
+    headless: !!process.env.CI,
     slowMo: 10,
   };
 

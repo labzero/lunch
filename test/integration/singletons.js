@@ -1,1 +1,1 @@
-export default { browser: null, page:null }
+export default { browser: null, page: null };
