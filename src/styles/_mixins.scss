@@ -14,9 +14,13 @@
 }
 
 @mixin page-root {
+  @include page-root-layer;
   background: $white-color;
   padding-bottom: 2em;
   padding-top: 1em;
+}
+
+@mixin page-root-layer {
   z-index: 1; /* set page z-index below hamburger menu overlay */
   position: relative;
 }
