@@ -85,23 +85,22 @@ export default new Map([
   ],
   [ActionTypes.DELETE_TAG, isFetching],
   [ActionTypes.TAG_DELETED, (state, action) =>
-  {
-    const tagIndex = getTagIds({ tags: state }).indexOf(action.id);
-    let items = {};
-    if (tagIndex !== -1) {
-      items = {
-        result: {
-          $splice: [[tagIndex, 1]]
+    {
+      const tagIndex = getTagIds({ tags: state }).indexOf(action.id);
+      const newState = {
+        isFetching: {
+          $set: false
         }
       };
+      newState.items = {};
+      if (tagIndex !== -1) {
+        newState.items = {
+          result: {
+            $splice: [[tagIndex, 1]]
+          }
+        };
+      }
+      return update(state, newState)
     }
-    const newState = {
-      isFetching: {
-        $set: false
-      },
-      items
-    };
-    return update(state, newState)
-  }
   ]
 ]);
