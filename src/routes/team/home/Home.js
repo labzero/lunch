@@ -55,7 +55,7 @@ export class _Home extends Component {
       this.socket.onopen = this.fetchAllData;
 
       // avoid nginx proxy_read_timeout by sending a ping every 30 seconds
-      setInterval(() => {
+      this.pingInterval = setInterval(() => {
         if (this.socket.readyState === this.socket.OPEN) {
           this.socket.send('');
         }
@@ -65,11 +65,13 @@ export class _Home extends Component {
       this.fetchAllData();
     }
 
-    setInterval(this.fetchAllData, 1000 * 60 * 60);
+    this.fetchAllInterval = setInterval(this.fetchAllData, 1000 * 60 * 60);
   }
 
   componentWillUnmount() {
     this.socket.close();
+    clearInterval(this.pingInterval);
+    clearInterval(this.fetchAllInterval);
   }
 
   fetchAllData = () => {
