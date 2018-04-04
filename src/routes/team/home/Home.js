@@ -56,7 +56,9 @@ export class _Home extends Component {
 
       // avoid nginx proxy_read_timeout by sending a ping every 30 seconds
       setInterval(() => {
-        this.socket.send('');
+        if (this.socket.readyState === this.socket.OPEN) {
+          this.socket.send('');
+        }
       }, 1000 * 30);
     } else {
       // websocket open will handle initial fetch
