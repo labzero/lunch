@@ -74,6 +74,10 @@ export class _Home extends Component {
     clearInterval(this.fetchAllInterval);
   }
 
+  componentWillUnmount() {
+    this.socket.close();
+  }
+
   fetchAllData = () => {
     this.props.fetchDecisions();
     this.props.fetchRestaurants();
