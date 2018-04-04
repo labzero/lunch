@@ -92,7 +92,6 @@ export default new Map([
           $set: false
         }
       };
-      newState.items = {};
       if (tagIndex !== -1) {
         newState.items = {
           result: {
