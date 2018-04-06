@@ -30,6 +30,9 @@ export default new Map([
               if (restaurantA.votes.length !== restaurantB.votes.length) {
                 return restaurantB.votes.length - restaurantA.votes.length;
               }
+              if (restaurantA.all_decision_count !== restaurantB.all_decision_count) {
+                return restaurantA.all_decision_count - restaurantB.all_decision_count;
+              };
               if (restaurantA.all_vote_count !== restaurantB.all_vote_count) {
                 return restaurantB.all_vote_count - restaurantA.all_vote_count;
               }
