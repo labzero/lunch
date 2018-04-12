@@ -71,13 +71,17 @@ class TagFilterForm extends Component {
     }));
   }
 
+  removeTagFilter = (tag) => {
+    this.props.removeTag(tag); 
+    this.props.setFlipMove(false);
+  }
+
   render() {
     const {
       addByName,
       addedTags,
       allTags,
       exclude,
-      removeTag,
       restaurantIds,
     } = this.props;
 
@@ -120,7 +124,7 @@ class TagFilterForm extends Component {
               <TagContainer
                 id={tag}
                 showDelete
-                onDeleteClicked={() => {removeTag(tag); this.props.setFlipMove(false);}}
+                onDeleteClicked={() => this.removeTagFilter(tag)}
                 exclude={exclude}
               />
             </div>
