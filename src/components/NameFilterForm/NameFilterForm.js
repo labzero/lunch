@@ -48,6 +48,7 @@ class NameFilterForm extends Component {
   }
 
   hideForm = () => {
+    this.props.setFlipMove(false);
     this.props.setNameFilter('');
     this.setState(() => ({
       shown: false,
@@ -84,6 +85,7 @@ class NameFilterForm extends Component {
               value={nameFilter}
               onChange={this.setNameFilterValue}
               onFocus={this.setFlipMoveFalse}
+              onBlur={this.setFlipMoveTrue}
               ref={i => { this.input = i; }}
             />
           </div>
