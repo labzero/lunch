@@ -68,7 +68,6 @@ Restaurant.findAllWithTagIds = ({ team_id }) =>
       order: [
         [Restaurant.associations.decisions, 'id', 'NULLS LAST'],
         sequelize.literal('(COUNT(*) OVER(PARTITION BY "restaurant"."id")) DESC'),
-        [Restaurant.associations.votes, 'created_at', 'DESC', 'NULLS LAST'],
         sequelize.literal('all_decision_count ASC'),
         sequelize.literal('all_vote_count DESC'),
         ['name', 'ASC'],
