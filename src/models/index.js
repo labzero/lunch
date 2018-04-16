@@ -66,11 +66,12 @@ Restaurant.findAllWithTagIds = ({ team_id }) =>
         }
       ],
       order: [
-        [Restaurant.associations.decisions, 'id', 'NULLS LAST'],
-        sequelize.literal('(COUNT(*) OVER(PARTITION BY "restaurant"."id")) DESC'),
-        sequelize.literal('all_decision_count ASC'),
-        sequelize.literal('all_vote_count DESC'),
-        ['name', 'ASC'],
+        [Restaurant.associations.decisions, 'id', 'NULLS LAST'], // decision of the day
+        sequelize.literal('(COUNT(*) OVER(PARTITION BY "restaurant"."id")) DESC'), // number of votes
+        [Restaurant.associations.votes, 'id', 'NULLS LAST'], // votes vs. no votes
+        sequelize.literal('all_decision_count ASC'), // past decisions on bottom
+        sequelize.literal('all_vote_count DESC'), // past votes on top
+        ['name', 'ASC'], // alphabetical
       ],
       where: {
         team_id
