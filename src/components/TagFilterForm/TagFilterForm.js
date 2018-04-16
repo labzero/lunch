@@ -30,13 +30,10 @@ class TagFilterForm extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.shown !== prevState.shown) {
-      if (this.state.shown) {
-        this.autosuggest.input.focus();
-      } else {
-        this.props.setFlipMove(true);
-      }
+    if (this.state.shown !== prevState.shown && this.state.shown) {
+      this.autosuggest.input.focus();
     }
+    this.props.setFlipMove(true);
   }
 
   setAutosuggestValue = (event, { newValue, method }) => {
@@ -52,6 +49,7 @@ class TagFilterForm extends Component {
     if (method === 'enter') {
       event.preventDefault();
     }
+    this.props.setFlipMove(false);
     this.props.addTag(suggestion.id);
     this.setState(() => ({
       autosuggestValue: '',
@@ -60,6 +58,7 @@ class TagFilterForm extends Component {
 
   hideForm = () => {
     this.props.clearTags();
+    this.props.setFlipMove(false);
     this.setState(() => ({
       autosuggestValue: '',
       shown: false,
@@ -67,10 +66,14 @@ class TagFilterForm extends Component {
   }
 
   showForm = () => {
-    this.props.setFlipMove(false);
     this.setState(() => ({
       shown: true,
     }));
+  }
+
+  removeTagFilter = (tag) => {
+    this.props.removeTag(tag); 
+    this.props.setFlipMove(false);
   }
 
   render() {
@@ -79,7 +82,6 @@ class TagFilterForm extends Component {
       addedTags,
       allTags,
       exclude,
-      removeTag,
       restaurantIds,
     } = this.props;
 
@@ -122,7 +124,7 @@ class TagFilterForm extends Component {
               <TagContainer
                 id={tag}
                 showDelete
-                onDeleteClicked={() => removeTag(tag)}
+                onDeleteClicked={() => this.removeTagFilter(tag)}
                 exclude={exclude}
               />
             </div>
