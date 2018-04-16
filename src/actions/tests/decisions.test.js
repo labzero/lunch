@@ -30,9 +30,9 @@ describe('actions/decisions', () => {
         });
       });
 
-      it('fetches 5 days of decisions', () => {
+      it('fetches all the decisions', () => {
         store.dispatch(decisions.fetchDecisions());
-        expect(fetchMock.lastCall()[0]).to.eq('/api/decisions/?days=5');
+        expect(fetchMock.lastCall()[0]).to.eq('/api/decisions/');
       });
     });
 

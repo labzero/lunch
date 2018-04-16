@@ -27,6 +27,19 @@ export const getDecisionsByDay = createSelector(
   }),
 );
 
+export const getDecisionsByRestaurantId = createSelector(
+  getDecisionIds, getDecisionEntities,
+  (decisionIds, decisionEntities) => {
+    const decisions = {};
+    let decision;
+    decisionIds.forEach((id) => {
+      decision = decisionEntities[id];
+      decisions[decision.restaurant_id] = new Date(decision.created_at).toLocaleDateString();
+    });
+    return decisions; 
+  }
+);
+
 export const areDecisionsLoading = state =>
   state.decisions.didInvalidate;
 

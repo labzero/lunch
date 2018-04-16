@@ -11,6 +11,7 @@ const RestaurantDropdown = ({
   sortDuration,
   listUiItem,
   decision,
+  pastDecisions,
   showMapAndInfoWindow,
   showEditNameForm,
   deleteRestaurant,
@@ -61,6 +62,15 @@ const RestaurantDropdown = ({
   const DropdownToggle = Dropdown.Toggle;
   const DropdownMenu = Dropdown.Menu;
 
+  let lastVisited = [];
+  if (restaurant.all_decision_count > 0) {
+    lastVisited = [
+      <MenuItem divider key={`restaurantDropdown_${restaurant.id}_lastVisitDivider`}/>,
+      <MenuItem header key={`restaurantDropdown_${restaurant.id}_lastVisit`}>Last visited:</MenuItem>,
+      <li className={s.stat}  key={`restaurantDropdown_${restaurant.id}_visitDate`}>{pastDecisions[restaurant.id]}</li>
+    ];
+  }
+
   return (
     <Dropdown
       id={`restaurantDropdown_${restaurant.id}`}
@@ -74,6 +84,7 @@ const RestaurantDropdown = ({
       </DropdownToggle>
       <DropdownMenu bsRole="menu" className={s.menu}>
         {menuItems}
+        {lastVisited}
         <MenuItem divider />
         <MenuItem header>Last {sortDuration} day{sortDuration === 1 ? '' : 's'}:</MenuItem>
         <li className={s.stat}>
@@ -93,6 +104,7 @@ RestaurantDropdown.propTypes = {
   sortDuration: PropTypes.number.isRequired,
   listUiItem: PropTypes.object.isRequired,
   decision: PropTypes.object,
+  pastDecisions: PropTypes.object,
   showMapAndInfoWindow: PropTypes.func.isRequired,
   showEditNameForm: PropTypes.func.isRequired,
   deleteRestaurant: PropTypes.func.isRequired,
@@ -102,6 +114,7 @@ RestaurantDropdown.propTypes = {
 
 RestaurantDropdown.defaultProps = {
   decision: {},
+  pastDecisions: {},
   removeDecision: () => {}
 };
 
