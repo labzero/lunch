@@ -62,13 +62,15 @@ const RestaurantDropdown = ({
   const DropdownToggle = Dropdown.Toggle;
   const DropdownMenu = Dropdown.Menu;
 
-  let lastVisited = [];
-  if (restaurant.all_decision_count > 0) {
-    lastVisited = [
-      <MenuItem divider key={`restaurantDropdown_${restaurant.id}_lastVisitDivider`}/>,
-      <MenuItem header key={`restaurantDropdown_${restaurant.id}_lastVisit`}>Last visited:</MenuItem>,
-      <li className={s.stat}  key={`restaurantDropdown_${restaurant.id}_visitDate`}>{pastDecisions[restaurant.id]}</li>
-    ];
+  let lastVisited;
+  if (pastDecisions && pastDecisions[restaurant.id]) {
+    lastVisited = (
+      <>
+        <MenuItem divider />
+        <MenuItem header>Last visited:</MenuItem>
+        <li className={s.stat}>{pastDecisions[restaurant.id]}</li>
+      </>
+    );
   }
 
   return (
