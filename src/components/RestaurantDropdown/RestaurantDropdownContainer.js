@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { getRestaurantById } from '../../selectors/restaurants';
 import { getListUiItemForId } from '../../selectors/listUi';
-import { getDecision } from '../../selectors/decisions';
+import { getDecision, getDecisionsByRestaurantId } from '../../selectors/decisions';
 import { showModal } from '../../actions/modals';
 import { removeDecision } from '../../actions/decisions';
 import { showMapAndInfoWindow } from '../../actions/mapUi';
@@ -15,6 +15,7 @@ const mapStateToProps = (state, ownProps) => ({
   sortDuration: getTeamSortDuration(state),
   listUiItem: getListUiItemForId(state, ownProps.id),
   decision: getDecision(state),
+  pastDecisions: getDecisionsByRestaurantId(state),
   ...ownProps
 });
 
