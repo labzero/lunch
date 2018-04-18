@@ -21,7 +21,7 @@ export function receiveDecisions(json) {
 export function fetchDecisions() {
   return dispatch => {
     dispatch(requestDecisions());
-    return fetch('/api/decisions/?days=5', {
+    return fetch('/api/decisions/', {
       credentials,
       headers: jsonHeaders
     })
