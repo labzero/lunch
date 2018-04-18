@@ -34,7 +34,7 @@ const loadPage = () => new Promise((resolve, reject) => {
 const opts =
   {
     headless: !!process.env.CI,
-    slowMo: 10,
+    slowMo: 30,
   };
 
 before(async () => {
