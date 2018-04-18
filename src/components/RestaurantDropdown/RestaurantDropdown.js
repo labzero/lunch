@@ -39,7 +39,7 @@ const RestaurantDropdown = ({
   } else {
     decideButton = (
       <MenuItem onSelect={showPastDecisionsModal} key={`restaurantDropdown_${restaurant.id}_showPastDecisionsModal`}>
-        We went here...
+        We ate here...
       </MenuItem>
     );
   }
