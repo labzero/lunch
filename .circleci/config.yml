@@ -91,6 +91,9 @@ jobs:
       - store_artifacts:
           path: ~/repo/junit
 
+      - store_artifacts:
+          path: ~/repo/screenshots
+
   build:
     docker:
       - image: ${BUILD_IMAGE}
