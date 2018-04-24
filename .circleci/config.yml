@@ -69,6 +69,8 @@ jobs:
             echo 127.0.0.1 local.lunch.pink | sudo tee -a /etc/hosts
             echo 127.0.0.1 integration-test.local.lunch.pink | sudo tee -a /etc/hosts
 
+      - run: mkdir ~/repo/screenshots
+      
       # build the app
       - run:
           name: build-release
@@ -90,6 +92,9 @@ jobs:
 
       - store_artifacts:
           path: ~/repo/junit
+
+      - store_artifacts:
+          path: ~/repo/screenshots
 
   build:
     docker:

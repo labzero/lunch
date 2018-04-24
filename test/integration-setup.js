@@ -34,7 +34,7 @@ const loadPage = () => new Promise((resolve, reject) => {
 const opts =
   {
     headless: !!process.env.CI,
-    slowMo: 10,
+    slowMo: 20,
   };
 
 before(async () => {
@@ -46,4 +46,11 @@ before(async () => {
 
 after(async () => {
   await browser.close();
+});
+
+afterEach(async function() {
+  if (this.currentTest.state === 'failed') {
+    const title = this.currentTest.title.replace(/ /g,"_");
+    await singletons.page.screenshot({path: `screenshots/${title}.png`});
+  }
 });
