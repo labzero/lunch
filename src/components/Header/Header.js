@@ -21,6 +21,7 @@ class Header extends Component {
   static propTypes = {
     flashes: PropTypes.array.isRequired,
     loggedIn: PropTypes.bool.isRequired,
+    // eslint-disable-next-line react/no-unused-prop-types
     path: PropTypes.string
   };
 
@@ -28,17 +29,21 @@ class Header extends Component {
     path: PropTypes.string
   };
 
-  state = {
-    menuOpen: false
+  static getDerivedStateFromProps(nextProps, state) {
+    if (nextProps.path !== state.prevPath) {
+      return {
+        menuOpen: false,
+        prevPath: nextProps.path
+      }
+    }
+    return null;
   };
 
-  componentWillReceiveProps(nextProps) {
-    if (!nextProps.path || nextProps.path !== this.props.path) {
-      this.setState({
-        menuOpen: false
-      });
-    }
-  }
+  state = {
+    menuOpen: false,
+    // eslint-disable-next-line react/no-unused-state
+    prevPath: null
+  };
 
   flashContainers = () => {
     const { flashes } = this.props;
