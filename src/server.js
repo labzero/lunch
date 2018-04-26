@@ -78,10 +78,7 @@ const accessLogStream = rfs('access.log', {
 const app = express();
 
 let internalWsServer;
-if (process.env.NODE_ENV === 'production') {
-  // prod proxy will take care of https
-  internalWsServer = new HttpServer(app);
-} else {
+if (module.hot) {
   // use self-signed cert locally
   const options = {
     key: fs.readFileSync(path.join(__dirname, '../cert/server.key')),
@@ -89,6 +86,9 @@ if (process.env.NODE_ENV === 'production') {
   };
 
   internalWsServer = new HttpsServer(options, app);
+} else {
+  // prod proxy will take care of https
+  internalWsServer = new HttpServer(app);
 }
 export const wsServer = internalWsServer;
 
@@ -445,7 +445,7 @@ app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
 if (module.hot) {
   wsServer.listen(config.wsPort, () => {
     /* eslint-disable no-console */
-    console.log(`The websockets server is running at http://local.lunch.pink:${config.wsPort}/`);
+    console.log(`The websockets server is running at https://local.lunch.pink:${config.wsPort}/`);
   });
 } else {
   wsServer.listen(config.port, () => {

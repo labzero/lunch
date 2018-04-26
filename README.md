@@ -37,8 +37,8 @@ For `GOOGLE_*` env variables:
 * Enable the Google+ API, Contacts API, Google Maps JavaScript API, Google Places API Web Service, and Google Maps Geocoding API.
 * Go to the Credentials section and create an OAuth client ID.
 * For local development:
-  * Enter `https://local.lunch.pink:3000` as an authorized JavaScript origin
-  * Enter `https://local.lunch.pink:3000/login/google/callback` as an authorized redirect URI
+  * Enter `http://local.lunch.pink:3000` and `https://local.lunch.pink:3000` as authorized JavaScript origins
+  * Enter `http://local.lunch.pink:3000/login/google/callback` and `https://local.lunch.pink:3000/login/google/callback` as authorized redirect URIs
 * Add your deployment target(s) as additional origins/redirect URIs.
 * Go back to the Credentials section and create two API keys - one for the client, and one for the server.
   * For the client, optionally limit requests to certain referrers.
