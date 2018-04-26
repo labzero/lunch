@@ -16,6 +16,7 @@ import morgan from 'morgan';
 import express from 'express';
 import cors from 'cors';
 import { Server as HttpServer } from 'http';
+import { Server as HttpsServer } from 'https';
 import enforce from 'express-sslify';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
@@ -76,7 +77,20 @@ const accessLogStream = rfs('access.log', {
 
 const app = express();
 
-export const wsServer = new HttpServer(app);
+let internalWsServer;
+if (process.env.NODE_ENV === 'production') {
+  // prod proxy will take care of https
+  internalWsServer = new HttpServer(app);
+} else {
+  // use self-signed cert locally
+  const options = {
+    key: fs.readFileSync(path.join(__dirname, '../cert/server.key')),
+    cert: fs.readFileSync(path.join(__dirname, '../cert/server.crt')),
+  };
+
+  internalWsServer = new HttpsServer(options, app);
+}
+export const wsServer = internalWsServer;
 
 //
 // Tell any CSS tooling (such as Material UI) to use all vendor prefixes if the

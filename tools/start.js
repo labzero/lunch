@@ -207,6 +207,10 @@ async function start() {
     // https://www.browsersync.io/docs/options
     ghostMode: false,
     host: server.hostname,
+    https: {
+      key: path.join(__dirname, '../cert/server.key'),
+      cert: path.join(__dirname, '../cert/server.crt'),
+    },
     server: 'src/server.js',
     middleware: [server],
     open: !process.argv.includes('--silent'),

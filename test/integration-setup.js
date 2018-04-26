@@ -48,7 +48,7 @@ after(async () => {
   await browser.close();
 });
 
-afterEach(async function() {
+afterEach(async () => {
   if (this.currentTest.state === 'failed') {
     const title = this.currentTest.title.replace(/ /g,"_");
     await singletons.page.screenshot({path: `screenshots/${title}.png`});
