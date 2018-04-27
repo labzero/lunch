@@ -1,6 +1,8 @@
 /* eslint-env mocha */
 /* eslint-disable no-multi-assign */
 
+import fs from 'fs';
+import rimraf from 'rimraf';
 import Bluebird from 'bluebird';
 import puppeteer from 'puppeteer';
 import singletons from './integration/singletons';
@@ -8,6 +10,11 @@ import singletons from './integration/singletons';
 // use bluebird instead of native promises for improved async stack traces
 Bluebird.config({ longStackTraces: true });
 global.Promise = Bluebird;
+
+if (fs.existsSync('screenshots')) {
+  rimraf.sync('screenshots');
+}
+fs.mkdirSync('screenshots');
 
 let browser;
 
@@ -48,7 +55,7 @@ after(async () => {
   await browser.close();
 });
 
-afterEach(async function() {
+afterEach(async function takeScreenshots() {
   if (this.currentTest.state === 'failed') {
     const title = this.currentTest.title.replace(/ /g,"_");
     await singletons.page.screenshot({path: `screenshots/${title}.png`});
