@@ -70,12 +70,15 @@ export default new Map([
     })
   ],
   [ActionTypes.POST_RESTAURANT, isFetching],
-  [ActionTypes.RESTAURANT_POSTED, (state, action) =>
-    update(state, {
+  [ActionTypes.RESTAURANT_POSTED, (state, action) => {
+    const updates = {
       isFetching: {
         $set: false
-      },
-      items: {
+      }
+    };
+
+    if (!(action.restaurant.id in state.items.entities.restaurants)) {
+      updates.items = {
         result: {
           $unshift: [action.restaurant.id]
         },
@@ -91,8 +94,11 @@ export default new Map([
           }
         }
       }
-    })
-  ],
+    }
+
+    return update(state, updates);
+
+  }],
   [ActionTypes.DELETE_RESTAURANT, isFetching],
   [ActionTypes.RESTAURANT_DELETED, (state, action) =>
     update(state, {
@@ -124,12 +130,15 @@ export default new Map([
     })
   ],
   [ActionTypes.POST_VOTE, isFetching],
-  [ActionTypes.VOTE_POSTED, (state, action) =>
-    update(state, {
+  [ActionTypes.VOTE_POSTED, (state, action) => {
+    const updates = {
       isFetching: {
         $set: false
-      },
-      items: {
+      }
+    };
+
+    if (!(action.vote.id in state.items.entities.votes)) {
+      updates.items = {
         entities: {
           restaurants: {
             [action.vote.restaurant_id]: {
@@ -151,9 +160,11 @@ export default new Map([
             }
           }
         }
-      }
-    })
-  ],
+      }      
+    }
+
+    return update(state, updates);
+  }],
   [ActionTypes.DELETE_VOTE, isFetching],
   [ActionTypes.VOTE_DELETED, (state, action) =>
     update(state, {
@@ -202,12 +213,15 @@ export default new Map([
     })
   ],
   [ActionTypes.POST_TAG_TO_RESTAURANT, isFetching],
-  [ActionTypes.POSTED_TAG_TO_RESTAURANT, (state, action) =>
-    update(state, {
+  [ActionTypes.POSTED_TAG_TO_RESTAURANT, (state, action) => {
+    const updates = {
       isFetching: {
         $set: false
-      },
-      items: {
+      }
+    };
+
+    if (state.items.entities.restaurants[action.restaurantId].tags.indexOf(action.id) === -1) {
+      updates.items = {
         entities: {
           restaurants: {
             [action.restaurantId]: {
@@ -217,9 +231,11 @@ export default new Map([
             }
           }
         }
-      }
-    })
-  ],
+      }      
+    }
+
+    return update(state, updates);
+  }],
   [ActionTypes.DELETE_TAG_FROM_RESTAURANT, isFetching],
   [ActionTypes.DELETED_TAG_FROM_RESTAURANT, (state, action) =>
     update(state, {
