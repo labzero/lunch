@@ -150,8 +150,7 @@ export default new Map([
       }
     };
 
-    if (!state.items.entities.votes || 
-      state.items.entities.restaurants[action.vote.restaurant_id].votes.indexOf(action.vote.id) === -1) {
+    if (state.items.entities.restaurants[action.vote.restaurant_id].votes.indexOf(action.vote.id) === -1) {
       updates.items.entities.restaurants = {
         [action.vote.restaurant_id]: {
           votes: {
