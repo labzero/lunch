@@ -58,7 +58,7 @@ class PastDecisionsModal extends Component {
     return (
       <Modal show={shown} onHide={hideModal}>
         <ModalHeader>
-          We went here...
+          We ate here...
         </ModalHeader>
         <ModalBody>
           <FormControl

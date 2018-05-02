@@ -43,15 +43,16 @@ class Layout extends Component {
     insertCss: PropTypes.func.isRequired,
   };
 
+  constructor(props, context) {
+    super(props);
+    this.removeCss = context.insertCss(s, globalCss);
+  }
+
   getChildContext() {
     const context = this.context;
     return {
       insertCss: context.insertCss || emptyFunction,
     };
-  }
-
-  componentWillMount() {
-    this.removeCss = this.context.insertCss(s, globalCss);
   }
 
   componentDidUpdate() {
@@ -64,10 +65,6 @@ class Layout extends Component {
       }
       this.props.scrolledToTop();
     }
-  }
-
-  componentWillUnmount() {
-    this.removeCss();
   }
 
   render() {

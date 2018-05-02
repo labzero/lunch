@@ -8,7 +8,7 @@ import s from './RestaurantDecision.scss';
 // TODO return null when upgrading to React 15
 const RestaurantDecision = ({ id, votes, decided, loggedIn, handleClick }) => {
   const tooltip = (
-    <Tooltip id={`restaurantDecisionTooltip_${id}`}>We went here{decided ? '!' : '?'}</Tooltip>
+    <Tooltip id={`restaurantDecisionTooltip_${id}`}>We ate here{decided ? '!' : '?'}</Tooltip>
   );
 
   return ((loggedIn && votes.length > 0) || decided) &&

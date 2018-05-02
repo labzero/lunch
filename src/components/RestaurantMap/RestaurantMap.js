@@ -55,20 +55,17 @@ class RestaurantMap extends Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.center !== undefined) {
+  componentDidUpdate() {
+    if (this.props.center !== undefined) {
       this.props.clearCenter();
 
-      if (nextProps.tempMarker === undefined) {
+      if (this.props.tempMarker === undefined) {
         // offset by infowindow height after recenter
         setTimeout(() => {
           this.map.panBy(0, -100);
         });
       }
     }
-  }
-
-  componentDidUpdate() {
     if (this.props.newlyAddedRestaurant !== undefined) {
       this.props.showNewlyAddedInfoWindow();
     }
