@@ -26,6 +26,13 @@ const RestaurantTag = sequelize.define('restaurants_tags', {
     }
   },
   underscored: true
+},
+{
+  indexes: [
+    {
+      fields: ['restaurant_id', 'tag_id']
+    }
+  ]
 });
 RestaurantTag.removeAttribute('id');
 

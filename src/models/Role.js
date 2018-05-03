@@ -30,6 +30,13 @@ const Role = sequelize.define('role', {
     }
   },
   underscored: true
+},
+{
+  indexes: [
+    {
+      fields: ['user_id', 'team_id']
+    }
+  ]
 });
 
 export default Role;
