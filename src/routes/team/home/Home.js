@@ -48,7 +48,7 @@ export class _Home extends Component {
       this.socket = new window.RobustWebSocket(`${protocol}//${host}/api`, null, {
         shouldReconnect: (event, ws) => {
           if (event.code === 1008 || event.code === 1011) return undefined;
-          return 1000 * ws.attempts;
+          return Math.min(1000 * ws.attempts, 5000);
         },
       });
       this.socket.onmessage = messageReceived;
