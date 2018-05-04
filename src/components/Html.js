@@ -51,6 +51,16 @@ class Html extends Component {
     return (
       <html className="no-js" lang="en">
         <head>
+          {config.analytics.googleTrackingId &&
+            <React.Fragment>
+              <script
+                dangerouslySetInnerHTML={{ __html:
+                'window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;' +
+                `ga('create','${config.analytics.googleTrackingId}','auto');ga('send','pageview')` }}
+              />
+              <script src="https://www.google-analytics.com/analytics.js" async defer />
+            </React.Fragment>
+          }
           <meta charSet="utf-8" />
           <meta httpEquiv="x-ua-compatible" content="ie=edge" />
           <title>{title}</title>
@@ -82,16 +92,6 @@ class Html extends Component {
         <body>
           <div id="app" dangerouslySetInnerHTML={{ __html: children }} />
           <script dangerouslySetInnerHTML={{ __html: `window.App=${serialize(app)}` }} />
-          {config.analytics.googleTrackingId &&
-            <script
-              dangerouslySetInnerHTML={{ __html:
-              'window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;' +
-              `ga('create','${config.analytics.googleTrackingId}','auto');ga('send','pageview')` }}
-            />
-          }
-          {config.analytics.googleTrackingId &&
-            <script src="https://www.google-analytics.com/analytics.js" async defer />
-          }
           {apikey && <script src={`https://maps.googleapis.com/maps/api/js?key=${apikey}&libraries=places&v=3`} />}
           {scripts.map(script => <script key={script} src={script} />)}
         </body>
