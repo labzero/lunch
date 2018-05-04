@@ -10,12 +10,17 @@ import singletons from './singletons';
 describe('Adding a restaurant and tag', () => {
   let browser;
   let page;
+  let resp;
 
   before(async () => {
     browser = singletons.browser;
     page = singletons.page;
-    await helpers.login();
-    await helpers.createTeam();
+    resp = await helpers.login();
+    // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+    resp === null ? console.log('Login null') : console.log('Login success');
+    resp = await helpers.createTeam();
+    // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+    resp === null ? console.log('Create team null') : console.log('Create team success');
   }); 
 
   beforeEach(async () => {    
@@ -72,7 +77,11 @@ describe('Adding a restaurant and tag', () => {
       });
 
       it('deletes a restaurant successfully', async () => {
-        await helpers.deleteRestaurant();
+        resp = await helpers.deleteRestaurant();
+        // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+        console.log("*****************\nDeletes a restaurant successfully");
+        // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+        console.log(resp);
         const content = await page.content();
         expect(content).to.contain('Welcome to Lunch!');
       });
