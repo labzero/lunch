@@ -4,8 +4,8 @@ import waitOptions from './waitOptions';
 export default async () => {
   const page = singletons.page;
   const res = await page.goto('http://integration-test.local.lunch.pink:3000/');
-    // eslint-disable-next-line no-console, no-unused-expressions
-    res === null ? console.log('Null response encountered') : console.log('Successful `goto` command');
+    // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+    console.log("*******************\n" + res + "\n");
   await page.waitForSelector('.dropdown-toggle', waitOptions);
   await page.click('.dropdown-toggle');
   await page.waitForSelector('.dropdown.open', waitOptions);

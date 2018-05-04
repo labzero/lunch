@@ -23,8 +23,8 @@ describe('teams page (no teams)', () => {
 
   it('shows that there are no teams', async () => {
     const res = await page.goto('http://local.lunch.pink:3000/teams');
-      // eslint-disable-next-line no-console, no-unused-expressions
-  res === null ? console.log('Null response encountered') : console.log('Successful `goto` command');
+      // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+  console.log("*******************\n" + res + "\n");
     await page.waitForSelector('.Teams-centerer .btn-default', helpers.waitOptions);
     const content = await page.content();
     expect(content).to.contain('You’re not currently a part of any teams!');
@@ -32,8 +32,8 @@ describe('teams page (no teams)', () => {
 
   it('takes user to create team page', async () => {
     const res = await page.goto('http://local.lunch.pink:3000/teams');
-      // eslint-disable-next-line no-console, no-unused-expressions
-  res === null ? console.log('Null response encountered') : console.log('Successful `goto` command');
+      // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+  console.log("*******************\n" + res + "\n");
     await page.waitForSelector('.Teams-centerer .btn-default', helpers.waitOptions);
     await page.click('.btn-default');
     await page.waitForSelector('input', helpers.waitOptions);
@@ -45,8 +45,8 @@ describe('teams page (no teams)', () => {
   describe('new team page', () => {
     it('has a new team form', async () => {
       const res = await page.goto('http://local.lunch.pink:3000/new-team');
-        // eslint-disable-next-line no-console, no-unused-expressions
-  res === null ? console.log('Null response encountered') : console.log('Successful `goto` command');
+        // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+  console.log("*******************\n" + res + "\n");
       await page.waitForSelector('#app', helpers.waitOptions);
       const content = await page.content();
       expect(content).to.contain('Create a new team');
