@@ -33,6 +33,13 @@ const Vote = sequelize.define('vote',
       })
     },
     underscored: true
+  },
+  {
+    indexes: [
+      {
+        fields: ['created_at', 'restaurant_id', 'user_id']
+      }
+    ]
   }
 );
 
