@@ -23,6 +23,13 @@ const Decision = sequelize.define('decision', {
     })
   },
   underscored: true
+},
+{
+  indexes: [
+    {
+      fields: ['created_at', 'restaurant_id']
+    }
+  ]
 });
 
 export default Decision;

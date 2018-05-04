@@ -19,6 +19,13 @@ const Team = sequelize.define('team', {
   address: DataTypes.STRING
 }, {
   underscored: true
+},
+{
+  indexes: [
+    {
+      fields: ['created_at']
+    }
+  ]
 });
 
 export default Team;
