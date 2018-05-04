@@ -102,11 +102,11 @@ describe('Adding a restaurant and tag', () => {
         expect(content).to.contain('filter by tag');
         expect(content).to.contain('exclude tags');
         expect(content).to.contain('waterfront');
-        await helpers.deleteTag();
+        await helpers.deleteTag(page); // Why is this line necessary?  Don't we delete the restaurant at the end of this test?
       });
 
       it('deletes a tag successfully', async () => {
-        await helpers.deleteTag();
+        await helpers.deleteTag(page);
         const content = await page.content();
         expect(content).to.not.contain('waterfront');
       });
