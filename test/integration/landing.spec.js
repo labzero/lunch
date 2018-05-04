@@ -14,7 +14,9 @@ describe('landing page', () => {
   before(async () => {
     browser = singletons.browser;
     page = singletons.page;
-    await page.goto('http://local.lunch.pink:3000/');
+    const res = await page.goto('http://local.lunch.pink:3000/');
+      // eslint-disable-next-line no-console, no-unused-expressions
+  res === null ? console.log('Null response encountered') : console.log('Successful `goto` command');
     await page.waitForSelector('#app', helpers.waitOptions);
   });
 
