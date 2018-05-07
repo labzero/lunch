@@ -7,6 +7,7 @@ import Bluebird from 'bluebird';
 import puppeteer from 'puppeteer';
 import singletons from './integration/singletons';
 
+
 // use bluebird instead of native promises for improved async stack traces
 Bluebird.config({ longStackTraces: true });
 global.Promise = Bluebird;

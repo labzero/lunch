@@ -3,7 +3,11 @@ import waitOptions from './waitOptions';
 
 export default async () => {
   const page = singletons.page;
-  await page.goto('http://integration-test.local.lunch.pink:3000/');
+  const res = await page.goto('http://integration-test.local.lunch.pink:3000/');
+    // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+    console.log("*******************\nDeleted a restaurant");
+    // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+    console.log(res);    
   await page.waitForSelector('.dropdown-toggle', waitOptions);
   await page.click('.dropdown-toggle');
   await page.waitForSelector('.dropdown.open', waitOptions);

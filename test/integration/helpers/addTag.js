@@ -3,7 +3,9 @@ import waitOptions from './waitOptions';
 
 export default async () => {
   const page = singletons.page;
-  await page.goto('http://integration-test.local.lunch.pink:3000/');
+  const res = await page.goto('http://integration-test.local.lunch.pink:3000/');
+    // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+    console.log("*******************\n" + res + "\n");
   await page.waitForSelector('.Restaurant-tagsArea button', waitOptions);
   await page.click('.Restaurant-tagsArea button');
   await page.waitForSelector('.RestaurantAddTagFormAutosuggest-container input', waitOptions);

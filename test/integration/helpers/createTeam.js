@@ -3,7 +3,9 @@ import waitOptions from './waitOptions';
 
 export default async () => {
   const page = singletons.page;
-  await page.goto('http://local.lunch.pink:3000/new-team');
+  const res = await page.goto('http://local.lunch.pink:3000/new-team');
+    // eslint-disable-next-line no-console, no-unused-expressions, prefer-template
+    console.log("*******************\n" + res + "\n");
   await page.waitForSelector('#app', waitOptions);
   await page.type('#newTeam-name', 'test');
   await page.type('#newTeam-slug', 'integration-test');
