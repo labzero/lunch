@@ -25,6 +25,7 @@ function action(context) {
         <LoginContainer team={subdomain} next={next} />
       </LayoutContainer>
     ),
+    title: 'Log in',
   }));
 }
 

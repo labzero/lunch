@@ -83,7 +83,7 @@ describe('other pages', () => {
       await page.goto('http://local.lunch.pink:3000/404');
       await page.waitForSelector('#app', helpers.waitOptions);
       const content = await page.content();
-      expect(content).to.contain('Page Not Found');
+      expect(content).to.contain('Page not found');
     });
   });
 });

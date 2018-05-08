@@ -8,4 +8,5 @@ import TeamsContainer from './TeamsContainer';
 export default (context) => renderIfHasName(context, () => ({
   chunks: ['teams'],
   component: <LayoutContainer path={context.pathname}><TeamsContainer /></LayoutContainer>,
+  title: 'My teams',
 }));

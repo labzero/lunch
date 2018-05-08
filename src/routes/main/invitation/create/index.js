@@ -27,5 +27,6 @@ export default (context) => {
         <Create success={success} token={token} />
       </LayoutContainer>
     ),
+    title: 'Invitation',
   };
 };

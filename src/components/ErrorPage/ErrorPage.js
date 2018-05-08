@@ -18,7 +18,7 @@ export function ErrorPage({ error }) {
   let errorMessage = null;
 
   if (error.status === 404) {
-    title = 'Page Not Found';
+    title = 'Page not found';
     content = 'Sorry, the page you were trying to view does not exist.';
   } else if (process.env.NODE_ENV !== 'production') {
     errorMessage = <pre>{error.stack}</pre>;
