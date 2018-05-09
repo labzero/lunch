@@ -24,7 +24,8 @@ export default (context) => {
         <LayoutContainer path={context.pathname}>
           <New email={email} />
         </LayoutContainer>
-      )
+      ),
+      title: 'New user',
     };
   }
 

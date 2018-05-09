@@ -30,6 +30,7 @@ export default (context) => {
           <Create success={success} />
         </LayoutContainer>
       ),
+      title: 'Reset password',
     };
   });
 };

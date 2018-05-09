@@ -22,5 +22,6 @@ export default (context) => {
         <Landing />
       </LayoutContainer>
     ),
+    fullTitle: 'Lunch – Team voting for nearby restaurants',
   }));
 };

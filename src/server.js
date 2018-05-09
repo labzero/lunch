@@ -358,7 +358,7 @@ const render = async (req, res, next) => {
     const data = { ...route,
       apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
       title: route.title || 'Lunch',
-      description: 'An app for groups to decide on nearby lunch options.',
+      description: 'A simple lunch voting app for you and your team. Search nearby restaurants, add them to your list, vote for as many as you like, and decide on today’s pick!',
       body: '',
       root: generateUrl(req, req.get('host')),
     };
