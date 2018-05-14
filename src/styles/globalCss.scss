@@ -92,3 +92,9 @@ a {
     border-color: $border-color;
   }
 }
+
+// causes google maps touch warning to appear above markers
+.gm-style-pbc {
+  z-index: 5 !important;
+  pointer-events: none;
+}
