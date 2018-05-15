@@ -74,6 +74,7 @@ class Html extends Component {
           <meta property="twitter:card" content="summary" />
           <meta property="twitter:site" content="labzero" />
           <meta property="twitter:image" content={`${root}/tile.png`} />
+          <meta name="theme-color" content="#FFC0CB" />
           <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
           <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:400,900" />
           {scripts.map(script => (
@@ -92,6 +93,7 @@ class Html extends Component {
         <body>
           <div id="app" dangerouslySetInnerHTML={{ __html: children }} />
           <script dangerouslySetInnerHTML={{ __html: `window.App=${serialize(app)}` }} />
+          <script dangerouslySetInnerHTML={{ __html: `if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/service-worker.js'); }); }` }} />
           {apikey && <script src={`https://maps.googleapis.com/maps/api/js?key=${apikey}&libraries=places&v=3`} />}
           {scripts.map(script => <script key={script} src={script} />)}
         </body>

@@ -1,4 +1,7 @@
 {
+  "short_name": "Lunch",
+  "name": "Lunch",
+  "description": "An app for groups to decide on nearby lunch options.",
   "icons": [
     {
       "src": "icon.png",
@@ -6,5 +9,8 @@
       "type": "image/png"
     }
   ],
-  "start_url": "/"
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#FFC0CB",
+  "background_color": "#FFF"
 }
