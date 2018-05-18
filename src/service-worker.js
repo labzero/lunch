@@ -1,4 +1,8 @@
-/* eslint-disable no-undef, no-restricted-globals */
+/* global workbox */
+/* eslint-disable no-restricted-globals */
+
+// eslint-disable-next-line no-underscore-dangle
+workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
 
 // Cache the index page
 workbox.routing.registerRoute(
@@ -12,9 +16,6 @@ workbox.routing.registerRoute(
         ],
     }),
 );
-
-// eslint-disable-next-line no-underscore-dangle
-workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
 
 // eslint-disable-next-line no-unused-vars
 self.addEventListener('install', event => {

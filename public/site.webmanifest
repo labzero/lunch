@@ -1,7 +1,7 @@
 {
   "short_name": "Lunch",
   "name": "Lunch",
-  "description": "An app for groups to decide on nearby lunch options.",
+  "description": "A simple lunch voting app for you and your team. Search nearby restaurants, add them to your list, vote for as many as you like, and decide on today’s pick!",
   "icons": [
     {
       "src": "icon.png",
