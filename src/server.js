@@ -78,7 +78,7 @@ const accessLogStream = rfs('access.log', {
 const app = express();
 
 let internalWsServer;
-if (module.hot) {
+if (process.env.USE_HTTPS === 'true') {
   // use self-signed cert locally
   const options = {
     key: fs.readFileSync(path.join(__dirname, '../cert/server.key')),
@@ -442,7 +442,7 @@ app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
 //
 // Launch the server
 // -----------------------------------------------------------------------------
-if (module.hot) {
+if (process.env.USE_HTTPS === 'true') {
   wsServer.listen(config.wsPort, () => {
     /* eslint-disable no-console */
     console.log(`The websockets server is running at https://local.lunch.pink:${config.wsPort}/`);

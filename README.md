@@ -92,6 +92,10 @@ node build/server.js
 
 You can modify `tools/deploy.js` as needed to work with your deployment strategy.
 
+## Service Worker
+
+To run the service worker locally, follow the above steps to run the production server. After testing the service worker, be sure to unregister the service worker in the browser (or close all local Lunch tabs) to avoid issues when testing on the development server.
+
 ## Testing
 
 ### Unit tests
