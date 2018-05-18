@@ -13,6 +13,7 @@ import webpack from 'webpack';
 import WebpackAssetsManifest from 'webpack-assets-manifest';
 import nodeExternals from 'webpack-node-externals';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import {InjectManifest} from 'workbox-webpack-plugin';
 import overrideRules from './lib/overrideRules';
 import pkg from '../package.json';
 
@@ -88,7 +89,7 @@ const config = {
             ],
             // Experimental ECMAScript proposals
             // https://babeljs.io/docs/plugins/#presets-stage-x-experimental-presets-
-            '@babel/preset-stage-2',
+            ["@babel/preset-stage-2", { "decoratorsLegacy": true }],
             // Flow
             // https://github.com/babel/babel/tree/master/packages/babel-preset-flow
             '@babel/preset-flow',
@@ -368,7 +369,7 @@ const clientConfig = {
               ),
             ];
             return acc;
-          }, Object.create(null));
+          }, Object.create(null)); 
           fs.writeFileSync(chunkFileName, JSON.stringify(chunkFiles, null, 2));
         } catch (err) {
           console.error(`ERROR: Cannot write ${chunkFileName}: `, err);
@@ -384,6 +385,11 @@ const clientConfig = {
           // https://github.com/th0r/webpack-bundle-analyzer
           ...(isAnalyze ? [new BundleAnalyzerPlugin()] : []),
         ]),
+
+    new InjectManifest({
+      swSrc: './src/service-worker.js',
+      swDest: resolvePath(BUILD_DIR, 'public/service-worker.js'),
+    }),
   ],
 
   // Move modules that occur in multiple entry chunks to a new entry chunk (the commons chunk).

@@ -23,5 +23,6 @@ export default (context) => {
         <New email={email} />
       </LayoutContainer>
     ),
+    title: 'Reset password',
   }));
 };

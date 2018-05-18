@@ -30,6 +30,7 @@ export default (context) => {
           <Edit token={token} />
         </LayoutContainer>
       ),
+      title: 'Reset password',
     };
   });
 };

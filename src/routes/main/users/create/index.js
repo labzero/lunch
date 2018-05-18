@@ -23,6 +23,7 @@ export default (context) => {
           <Create />
         </LayoutContainer>
       ),
+      title: 'New user',
     };
   }
 

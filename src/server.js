@@ -78,7 +78,7 @@ const accessLogStream = rfs('access.log', {
 const app = express();
 
 let internalWsServer;
-if (module.hot) {
+if (process.env.USE_HTTPS === 'true') {
   // use self-signed cert locally
   const options = {
     key: fs.readFileSync(path.join(__dirname, '../cert/server.key')),
@@ -358,7 +358,7 @@ const render = async (req, res, next) => {
     const data = { ...route,
       apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
       title: route.title || 'Lunch',
-      description: 'An app for groups to decide on nearby lunch options.',
+      description: 'A simple lunch voting app for you and your team. Search nearby restaurants, add them to your list, vote for as many as you like, and decide on today’s pick!',
       body: '',
       root: generateUrl(req, req.get('host')),
     };
@@ -442,7 +442,7 @@ app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
 //
 // Launch the server
 // -----------------------------------------------------------------------------
-if (module.hot) {
+if (process.env.USE_HTTPS === 'true') {
   wsServer.listen(config.wsPort, () => {
     /* eslint-disable no-console */
     console.log(`The websockets server is running at https://local.lunch.pink:${config.wsPort}/`);
