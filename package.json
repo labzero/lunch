@@ -30,7 +30,7 @@
     "fastclick": "^1.0.6",
     "fbjs": "^0.8.4",
     "fetch-mock": "^5.9.4",
-    "google-map-react": "^0.34.0",
+    "google-map-react": "^1.0.3",
     "history": "^4.7.2",
     "honeybadger": "^1.1.3",
     "immutability-helper": "^2.1.2",
