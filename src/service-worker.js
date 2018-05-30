@@ -4,17 +4,17 @@
 // eslint-disable-next-line no-underscore-dangle
 workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
 
-// Cache the index page
+// Cache fonts
 workbox.routing.registerRoute(
-    context => context.url.pathname.indexOf('/api') !== 0 && context.url.pathname.indexOf('/assets') !== 0,
-    workbox.strategies.cacheFirst({
-        cacheName: 'pages',
-        plugins: [
-            new workbox.expiration.Plugin({
-                maxAgeSeconds: 30 * 24 * 60 * 60, // 24 hours
-            }),
-        ],
-    }),
+  new RegExp('https://fonts.(?:googleapis|gstatic).com/(.*)'),
+  workbox.strategies.cacheFirst({
+    cacheName: 'googleapis',
+    plugins: [
+        new workbox.expiration.Plugin({
+            maxAgeSeconds: 30 * 24 * 60 * 60, // 24 hours
+        }),
+    ],
+  }),
 );
 
 // eslint-disable-next-line no-unused-vars
