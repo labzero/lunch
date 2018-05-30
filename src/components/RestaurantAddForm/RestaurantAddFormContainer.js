@@ -65,7 +65,7 @@ const mergeProps = (stateProps, dispatchProps) =>
         } else {
           scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, {
             containerId: 'listContainer',
-            offset: document.getElementById('listForms').offsetHeight + document.getElementById('header').offsetHeight,
+            offset: document.getElementById('listForms').offsetHeight,
           });
           scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`);
         }
