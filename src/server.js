@@ -355,9 +355,12 @@ const render = async (req, res, next) => {
       return;
     }
 
+    const pageTitle = route.title || 'Lunch';
+
     const data = { ...route,
       apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
-      title: route.title || 'Lunch',
+      title: pageTitle,
+      ogTitle: route.ogTitle || pageTitle,
       description: 'A simple lunch voting app for you and your team. Search nearby restaurants, add them to your list, vote for as many as you like, and decide on today’s pick!',
       body: '',
       root: generateUrl(req, req.get('host')),
