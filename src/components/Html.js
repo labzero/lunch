@@ -19,6 +19,7 @@ class Html extends Component {
     apikey: PropTypes.string,
     app: PropTypes.object, // eslint-disable-line
     title: PropTypes.string.isRequired,
+    ogTitle: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     root: PropTypes.string,
     styles: PropTypes.arrayOf(PropTypes.shape({
@@ -41,6 +42,7 @@ class Html extends Component {
       apikey,
       app,
       title,
+      ogTitle,
       description,
       root,
       styles,
@@ -65,7 +67,7 @@ class Html extends Component {
           <meta httpEquiv="x-ua-compatible" content="ie=edge" />
           <title>{title}</title>
           <meta name="description" content={description} />
-          <meta property="og:title" content={title} />
+          <meta property="og:title" content={ogTitle} />
           <meta property="og:description" content={description} />
           <meta property="og:image" content={`${root}/tile.png`} />
           <meta property="og:site_name" content="Lab Zero" />

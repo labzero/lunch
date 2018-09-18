@@ -26,6 +26,7 @@ function action(context) {
       </LayoutContainer>
     ),
     title: 'Log in',
+    ogTitle: 'Lunch'
   }));
 }
 
