@@ -8,6 +8,7 @@
   margin: 1em;
   max-width: 300px;
   transition: height .5s;
+  z-index: 1; // at same level as page-root-layer
 }
 
 .notificationContainer {
