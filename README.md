@@ -36,22 +36,20 @@ For `GOOGLE_*` env variables:
 * Create a Google Developer app in the [console](https://console.developers.google.com/).
 * Enable the Google+ API, Contacts API, Google Maps JavaScript API, Google Places API Web Service, and Google Maps Geocoding API.
 * Go to the Credentials section and create an OAuth client ID.
+* Click the OAuth Consent tab and add `lunch.pink` as an authorized domain.
+* Click the Credentials tab, choose "OAuth" from the Create Credentials dropdown.
+* Choose "Web Application" as the type.
 * For local development:
   * Enter `http://local.lunch.pink:3000` and `https://local.lunch.pink:3000` as authorized JavaScript origins
   * Enter `http://local.lunch.pink:3000/login/google/callback` and `https://local.lunch.pink:3000/login/google/callback` as authorized redirect URIs
 * Add your deployment target(s) as additional origins/redirect URIs.
 * Go back to the Credentials section and create two API keys - one for the client, and one for the server.
   * For the client, optionally limit requests to certain referrers.
+* On each API key, add `http://*.lunch.pink` and `https://*.lunch.pink` as HTTP referrers.
 
 #### Database
 
-Set up a PostgreSQL database and enter the credentials into `.env`. If you want to use another database dialect, change it in `database.js`.
-
-To seed your database with a Superuser, fill out the `SUPERUSER_*` env variables accordingly, then run
-
-```bash
-npx sequelize db:seed:all
-```
+Set up a PostgreSQL database and enter the admin credentials into `.env`. If you want to use another database dialect, change it in `database.js`.
 
 After setting up and starting the app, you will be able to log in with this user and create a team. If you did not supply a SUPERUSER_PASSWORD, you will need to log in via OAuth, using the email address you supplied for SUPERUSER_EMAIL.
 
@@ -66,6 +64,12 @@ yarn
 npx sequelize db:migrate
 ```
 
+To seed your database with a Superuser, fill out the `SUPERUSER_*` env variables accordingly, then run
+
+```bash
+npx sequelize db:seed:all
+```
+
 ## Development server
 
 ### Running
@@ -73,6 +77,8 @@ npx sequelize db:migrate
 ```bash
 npm start
 ```
+
+`npm start` will default to `localhost`, but the browser should point to `http://local.lunch.pink:3000`
 
 ## Production server
 
