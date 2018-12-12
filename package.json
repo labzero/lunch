@@ -227,8 +227,7 @@
       "cross-env NODE_ENV=test npm-run-all integration-setup -r -p serve \"cypress:run-file {1}\" --",
     "integration-interactive":
       "cross-env NODE_ENV=test npm-run-all integration-setup -r -p serve cypress:open",
-    "integration-test-ci":
-      "npm run integration --reporter mocha-junit-reporter",
+    "integration-test-ci": "npm run integration",
     "clean": "babel-node tools/run clean",
     "copy": "babel-node tools/run copy",
     "bundle": "babel-node tools/run bundle",
