@@ -78,7 +78,7 @@ npx sequelize db:seed:all
 npm start
 ```
 
-`npm start` will default to `localhost`, but the browser should point to `http://local.lunch.pink:3000`
+`npm start` will default to `localhost`, but the browser should point to `https://local.lunch.pink:3000`
 
 ## Production server
 
