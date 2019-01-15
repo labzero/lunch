@@ -74,11 +74,6 @@ jobs:
           command: NODE_ENV=test npm run build
 
       - run:
-          name: start-server
-          command: NODE_ENV=test npm run serve
-          background: true
-
-      - run:
           name: integration-tests
           command: NODE_ENV=test npm run integration-test-ci
           environment:
