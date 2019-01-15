@@ -1,4 +1,4 @@
 {
-  "baseUrl": "https://local.lunch.pink:3000/",
+  "baseUrl": "http://local.lunch.pink:3000/",
   "port": 4000
 }
