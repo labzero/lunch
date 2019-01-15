@@ -4,7 +4,7 @@ jobs:
   test:
     docker:
       # image for running tests
-      - image: circleci/node:9.11-browsers
+      - image: cypress/browsers:chrome69
         environment:
           - DB_NAME=lunch_test
           - DB_USER=lunch_test
