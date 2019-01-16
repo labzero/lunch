@@ -2,6 +2,8 @@
 /* eslint-disable no-undef */
 import * as helpers from '../../support/helpers';
 
+const subdomain = Cypress.env('subdomain');
+
 describe('Adding a restaurant and tag', () => {
 
   before(() => {
@@ -31,7 +33,7 @@ describe('Adding a restaurant and tag', () => {
 
     describe('Adding a restaurant', () => {
       it('makes suggestions and then displays the new restaurant in the restaurant list', () => {
-        cy.visit('https://integration-test.local.lunch.pink:3000/');
+        cy.visit(subdomain);
         cy.get('.geosuggest__input').type('ferry building');
         cy.get('li.RestaurantAddForm-suggestItemActive').click();
         cy.contains('filter by name');

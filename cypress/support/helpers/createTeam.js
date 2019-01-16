@@ -6,7 +6,7 @@ export default () => {
     const name = "test";
     const slug = "integration-test";
 
-    cy.request('POST', 'https://local.lunch.pink:3000/api/teams', {
+    cy.request('POST', `${Cypress.config().baseUrl  }/api/teams`, {
         lat,
         lng,
         name,

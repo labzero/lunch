@@ -219,6 +219,8 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "cypress:run-file": "cypress run --spec",
+    "cypress:run-integration":
+      "cypress run --config baseUrl=http://local.lunch.pink:3000/ --env subdomain=http://integration-test.local.lunch.pink:3000/",
     "integration-setup":
       "npm-run-all db:migrate:undo:all db:migrate db:seed:all build",
     "integration":
@@ -227,7 +229,8 @@
       "cross-env NODE_ENV=test npm-run-all integration-setup -r -p serve \"cypress:run-file {1}\" --",
     "integration-interactive":
       "cross-env NODE_ENV=test npm-run-all integration-setup -r -p serve cypress:open",
-    "integration-test-ci": "npm run integration",
+    "integration-test-ci":
+      "cross-env NODE_ENV=test npm-run-all integration-setup -r -p serve cypress:run-integration",
     "clean": "babel-node tools/run clean",
     "copy": "babel-node tools/run copy",
     "bundle": "babel-node tools/run bundle",

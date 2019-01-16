@@ -2,6 +2,8 @@
 /* eslint-disable no-undef */
 import * as helpers from '../../support/helpers';
 
+const subdomain = Cypress.env('subdomain');
+
 describe('other pages', () => {
 
   before(() => {
@@ -44,14 +46,14 @@ describe('other pages', () => {
     it('should display a list of tags when there are tags', () => {
       helpers.addRestaurant();
       helpers.addTag();
-      cy.visit('https://integration-test.local.lunch.pink:3000/tags');
+      cy.visit(`${subdomain  }tags`);
       cy.contains('waterfront');
       helpers.deleteTag();
       helpers.deleteRestaurant();
     });
 
     it('should display blurb when no tags', () => {
-      cy.visit('https://integration-test.local.lunch.pink:3000/tags');
+      cy.visit(`${subdomain  }tags`);
       cy.get('button.Tag-button').click();
       cy.get('.modal-footer .btn-primary').click();
       cy.contains('Once you add tags');

@@ -2,6 +2,8 @@
 /* eslint-disable no-undef */
 import * as helpers from '../../support/helpers';
 
+const subdomain = Cypress.env('subdomain');
+
 describe('team page (within team)', () => {
 
   before(() => {
@@ -12,7 +14,7 @@ describe('team page (within team)', () => {
 
   beforeEach(() => {
     helpers.login();
-    cy.visit('https://integration-test.local.lunch.pink:3000/team');
+    cy.visit(`${subdomain  }team`);
   });
 
   describe('team page', () => {

@@ -7,7 +7,7 @@ export default () => {
         // nothing to do, team doesn't exist
     }
     else {
-        cy.visit('https://integration-test.local.lunch.pink:3000/team');
+        cy.visit(`${Cypress.env('subdomain')  }team`);
         cy.get('div.Team-root');
         cy.get('#team-tabs-tab-3').click();
         cy.get('.btn-danger').contains('Delete team').should('be.visible').click();
