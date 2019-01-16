@@ -34,7 +34,7 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v2-dependencies-{{ checksum "package.json" }}
+          - v1-test-dependencies-{{ checksum "package.json" }}
 
       # install deps
       - run:
@@ -45,7 +45,7 @@ jobs:
           paths:
             - node_modules
             - ~/.cache
-          key: v2-dependencies-{{ checksum "package.json" }}
+          key: v1-test-dependencies-{{ checksum "package.json" }}
 
       # run unit tests
       - run: mkdir ~/repo/junit
@@ -104,9 +104,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v2-dependencies-{{ checksum "package.json" }}
+          - v1-build-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
-          - v2-dependencies-
+          - v1-build-dependencies-
 
       # install deps
       - run:
@@ -116,7 +116,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v2-dependencies-{{ checksum "package.json" }}
+          key: v1-build-dependencies-{{ checksum "package.json" }}
 
       # build the release
       - run:
