@@ -142,7 +142,13 @@ npm run integration
 Individual files can be run using:
 
 ```bash
-npm run integration-file /path/to/file
+npm run integration-file path/to/file
+```
+
+Or selected using the Cypress Test Runner in interactive mode:
+
+```bash
+npm run integration-interactive
 ```
 
 ### Linting

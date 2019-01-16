@@ -1,5 +1,0 @@
---compilers js:@babel/register
---require ./test/setup.js
---timeout 30000
---full-trace
-./test/integration-setup.js

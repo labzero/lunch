@@ -1,0 +1,7 @@
+{
+  "baseUrl": "https://local.lunch.pink:3000/",
+  "port": 4000,
+  "env": {
+    "subdomain": "https://integration-test.local.lunch.pink:3000/"
+  }
+}

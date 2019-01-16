@@ -29,6 +29,12 @@ yarn-error.log*
 # Don't use npm install
 package-lock.json
 
+# Cypress sample files and data from runs
+cypress/fixtures/
+cypress/plugins/
+cypress/screenshots/
+cypress/videos/
+
 # Misc
 .DS_Store
 .env

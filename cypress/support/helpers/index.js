@@ -6,7 +6,6 @@ import deleteTag from './deleteTag';
 import deleteTeam from './deleteTeam';
 import login from './login';
 import logout from './logout';
-import waitOptions from './waitOptions';
 
 export {
   addRestaurant,
@@ -16,6 +15,5 @@ export {
   deleteTag,
   deleteTeam,
   login,
-  logout,
-  waitOptions
+  logout
 };
