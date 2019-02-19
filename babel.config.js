@@ -11,6 +11,8 @@
 // https://babeljs.io/docs/usage/api/
 module.exports = {
   plugins: [
+    '@babel/plugin-proposal-class-properties',
+    '@babel/plugin-syntax-dynamic-import',
     '@babel/plugin-transform-modules-commonjs',
   ],
   presets: [
@@ -22,7 +24,6 @@ module.exports = {
         },
       },
     ],
-    ["@babel/preset-stage-2", { "decoratorsLegacy": true }],
     '@babel/preset-flow',
     '@babel/preset-react',
   ],

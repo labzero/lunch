@@ -13,17 +13,16 @@ const mapDispatchToProps = dispatch => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) =>
-  Object.assign({}, stateProps, dispatchProps, {
-    handleDeleteClicked() {
-      dispatchProps.dispatch(showModal('confirm', {
-        actionLabel: 'delete',
-        body: `Are you sure you want to delete the “${stateProps.tag.name}” tag?
+const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
+  handleDeleteClicked() {
+    dispatchProps.dispatch(showModal('confirm', {
+      actionLabel: 'delete',
+      body: `Are you sure you want to delete the “${stateProps.tag.name}” tag?
         All restaurants will be untagged.`,
-        handleSubmit: () => dispatchProps.dispatch(removeTag(ownProps.id))
-      }));
-    }
-  });
+      handleSubmit: () => dispatchProps.dispatch(removeTag(ownProps.id))
+    }));
+  }
+});
 
 export default connect(
   mapStateToProps,

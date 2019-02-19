@@ -10,18 +10,28 @@ const VoteDeleted = ({
   showMapAndInfoWindow
 }) => {
   const restaurantEl = (
-    <button className={s.clickable} onClick={showMapAndInfoWindow}>
+    <button className={s.clickable} onClick={showMapAndInfoWindow} type="button">
       {restaurantName}
     </button>
   );
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b> downvoted {restaurantEl}.
+        <b>{user}</b>
+        {' '}
+downvoted
+        {restaurantEl}
+.
       </span>
     );
   }
-  return <span>{restaurantEl} was downvoted.</span>;
+  return (
+    <span>
+      {restaurantEl}
+      {' '}
+was downvoted.
+    </span>
+  );
 };
 
 VoteDeleted.propTypes = {

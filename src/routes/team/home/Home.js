@@ -12,7 +12,6 @@ import TagFilterFormContainer from '../../../components/TagFilterForm/TagFilterF
 import s from './Home.scss';
 
 export class _Home extends Component {
-
   static propTypes = {
     user: PropTypes.object.isRequired,
     fetchDecisions: PropTypes.func.isRequired,
@@ -105,7 +104,6 @@ export class _Home extends Component {
       </div>
     );
   }
-
 }
 
 export default withStyles(s)(_Home);

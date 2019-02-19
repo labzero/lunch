@@ -26,8 +26,7 @@ const InnerRestaurantMarker = ({
   // place markers higher based on vote length
   // place markers lower based on how far down they are in the list
   // add item length so index doesn't dip below MAX_ZINDEX
-  const zIndex =
-      google.maps.Marker.MAX_ZINDEX
+  const zIndex = google.maps.Marker.MAX_ZINDEX
       + restaurant.votes.length
       + (-index)
       + baseZIndex;
@@ -65,6 +64,7 @@ const InnerRestaurantMarker = ({
         onClick={handleMarkerClick}
         className={s.marker}
         style={{ zIndex }}
+        type="button"
       >
         <span className={s.label}>
           {label}

@@ -42,7 +42,7 @@ You will need to be invited back by another member.`,
                     >
                       {team.name}
                     </a>
-                    <button className={s.leave} onClick={this.confirmLeave(team)} aria-label="Leave">
+                    <button className={s.leave} onClick={this.confirmLeave(team)} aria-label="Leave" type="button">
                       <Glyphicon glyph="remove" />
                     </button>
                   </li>

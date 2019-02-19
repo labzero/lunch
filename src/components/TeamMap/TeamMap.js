@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import HereMarker from '../../components/HereMarker';
+import HereMarker from '../HereMarker';
 import { GOOGLE_MAP_ZOOM } from '../../constants';
 import googleMapOptions from '../../helpers/googleMapOptions';
 import loadComponent from '../../helpers/loadComponent';

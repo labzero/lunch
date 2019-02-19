@@ -20,7 +20,6 @@ import s from './Layout.scss';
 import globalCss from '../../styles/globalCss.scss';
 
 class Layout extends Component {
-
   static propTypes = {
     children: PropTypes.element.isRequired,
     isHome: PropTypes.bool,
@@ -80,7 +79,6 @@ class Layout extends Component {
       </div>
     );
   }
-
 }
 
 export default Layout;

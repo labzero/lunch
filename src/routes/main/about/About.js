@@ -9,10 +9,14 @@ const About = () => (
       <h2>About Lunch</h2>
       <p>
         Hi! I’m
-        {' '}<a href="https://jeffreyatw.com" rel="noopener noreferrer" target="_blank">Jeffrey</a>,
+        {' '}
+        <a href="https://jeffreyatw.com" rel="noopener noreferrer" target="_blank">Jeffrey</a>
+,
         the guy behind Lunch. I created Lunch when my coworkers at
-        {' '}<a href="https://labzero.com" rel="noopener noreferrer" target="_blank">Lab Zero</a>
-        {' '}realized we had fallen into sort of a rut, food-wise. We kept going to the same few
+        {' '}
+        <a href="https://labzero.com" rel="noopener noreferrer" target="_blank">Lab Zero</a>
+        {' '}
+realized we had fallen into sort of a rut, food-wise. We kept going to the same few
         places, and our routine was getting stale. So I made Lunch, an easy way to keep a list of
         our favorite restaurants, and decide where to go!
       </p>
@@ -37,9 +41,11 @@ const About = () => (
       <h4>Open-source</h4>
       <p>
         First of all, Lunch is
-        {' '}<a href="https://github.com/labzero/lunch" rel="noopener noreferrer" target="_blank">
+        {' '}
+        <a href="https://github.com/labzero/lunch" rel="noopener noreferrer" target="_blank">
           open-source and available on GitHub
-        </a>. If you’re ever doubtful about what we’re doing with stuff like your email address or
+        </a>
+. If you’re ever doubtful about what we’re doing with stuff like your email address or
         your team’s daily decisions, you can have a look yourself.
       </p>
       <h4>Storing your data</h4>
@@ -70,12 +76,17 @@ const About = () => (
       <h4>Google Analytics</h4>
       <p>
         This site also uses
-        {' '}<a href="https://analytics.google.com/" rel="noopener noreferrer" target="_blank">
+        {' '}
+        <a href="https://analytics.google.com/" rel="noopener noreferrer" target="_blank">
           Google Analytics
-        </a> to give me an idea of what sorts of people are using Lunch, and from where.
-        {' '}<a href="https://support.google.com/analytics/answer/6004245?hl=en" rel="noopener noreferrer" target="_blank">
+        </a>
+        {' '}
+to give me an idea of what sorts of people are using Lunch, and from where.
+        {' '}
+        <a href="https://support.google.com/analytics/answer/6004245?hl=en" rel="noopener noreferrer" target="_blank">
           You can read more about their own policies
-        </a>, which are pretty standard (they store a few cookies as well), but it’s worth pointing
+        </a>
+, which are pretty standard (they store a few cookies as well), but it’s worth pointing
         out that the tracking is anonymous &mdash; there’s no way they or I can tell exactly who you
         are.
       </p>
@@ -103,7 +114,9 @@ const About = () => (
       </p>
       <p>
         Any other questions or things I forgot to mention? Drop me a line at
-        {' '}<a href="mailto:jeffrey@labzero.com">jeffrey@labzero.com</a>. I’d be happy to hear from
+        {' '}
+        <a href="mailto:jeffrey@labzero.com">jeffrey@labzero.com</a>
+. I’d be happy to hear from
         you.
       </p>
       <p>

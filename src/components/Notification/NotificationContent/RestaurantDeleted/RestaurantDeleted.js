@@ -9,11 +9,21 @@ const RestaurantDeleted = ({ loggedIn, user, restaurantName }) => {
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b> deleted <b>{restaurantName}</b>.
+        <b>{user}</b>
+        {' '}
+deleted
+        <b>{restaurantName}</b>
+.
       </span>
     );
   }
-  return <span><b>{restaurantName}</b> was deleted.</span>;
+  return (
+    <span>
+      <b>{restaurantName}</b>
+      {' '}
+was deleted.
+    </span>
+  );
 };
 
 RestaurantDeleted.propTypes = {

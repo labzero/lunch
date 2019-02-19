@@ -1,6 +1,6 @@
 import { hostname } from '../../config';
 
-const isDev = typeof __DEV__ !== 'undefined' && __DEV__; 
+const isDev = typeof __DEV__ !== 'undefined' && __DEV__;
 
 export default (req, callback) => {
   callback(null, {

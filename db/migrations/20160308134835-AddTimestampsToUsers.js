@@ -15,4 +15,3 @@ exports.down = queryInterface => Promise.all(
   queryInterface.removeColumn('users', 'created_at'),
   queryInterface.removeColumn('users', 'updated_at')
 );
-

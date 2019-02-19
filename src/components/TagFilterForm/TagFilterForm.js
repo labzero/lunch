@@ -16,7 +16,19 @@ const returnTrue = () => true;
 
 class TagFilterForm extends Component {
   static propTypes = {
+    exclude: PropTypes.bool,
+    addByName: PropTypes.func.isRequired,
+    addTag: PropTypes.func.isRequired,
+    allTags: PropTypes.array.isRequired,
+    clearTags: PropTypes.func.isRequired,
+    removeTag: PropTypes.func.isRequired,
+    restaurantIds: PropTypes.array.isRequired,
+    addedTags: PropTypes.array.isRequired,
     setFlipMove: PropTypes.func.isRequired,
+  };
+
+  static defaultProps = {
+    exclude: false
   };
 
   constructor(props) {
@@ -72,7 +84,7 @@ class TagFilterForm extends Component {
   }
 
   removeTagFilter = (tag) => {
-    this.props.removeTag(tag); 
+    this.props.removeTag(tag);
     this.props.setFlipMove(false);
   }
 
@@ -140,31 +152,19 @@ class TagFilterForm extends Component {
       );
     } else {
       showButton = (
-        <button className="btn btn-default" onClick={this.showForm}>
+        <button className="btn btn-default" onClick={this.showForm} type="button">
           {exclude ? 'exclude tags' : 'filter by tag'}
         </button>
       );
     }
     return (
-      <div className={s.root}>{showButton}{form}</div>
+      <div className={s.root}>
+        {showButton}
+        {form}
+      </div>
     );
   }
 }
-
-TagFilterForm.propTypes = {
-  exclude: PropTypes.bool,
-  addByName: PropTypes.func.isRequired,
-  addTag: PropTypes.func.isRequired,
-  allTags: PropTypes.array.isRequired,
-  clearTags: PropTypes.func.isRequired,
-  removeTag: PropTypes.func.isRequired,
-  restaurantIds: PropTypes.array.isRequired,
-  addedTags: PropTypes.array.isRequired,
-};
-
-TagFilterForm.defaultProps = {
-  exclude: false
-};
 
 export const undecorated = TagFilterForm;
 export default withStyles(s)(withStyles(autosuggestTheme)(TagFilterForm));

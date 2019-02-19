@@ -18,7 +18,6 @@ describe('actions/websockets', () => {
   });
 
   describe('messageReceived', () => {
-
     it('dispatches data if action is undefined', () => {
       const payload = '{ "type": "bar" }';
       store.dispatch(websockets.messageReceived(payload));
@@ -31,7 +30,7 @@ describe('actions/websockets', () => {
       const proxysockets = proxyquire('../websockets', {
         './restaurants': {
           sortRestaurants: () => ({
-           type: 'SORT_RESTAURANTS'
+            type: 'SORT_RESTAURANTS'
           })
         }
       });

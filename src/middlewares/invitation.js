@@ -111,5 +111,6 @@ Add them here: ${generateUrl(req, bsHost, `/users/new?email=${querystring.escape
         } catch (err) {
           return next(err);
         }
-      });
+      }
+    );
 };

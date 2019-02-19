@@ -12,13 +12,11 @@ function singleLine(str) {
 
 const actionFormatters = {
   // This is used at feature/apollo branch, but it can help you when implementing Apollo
-  APOLLO_QUERY_INIT: a =>
-    `queryId:${a.queryId} variables:${inspectObject(
-      a.variables,
-    )}\n   ${singleLine(a.queryString)}`,
+  APOLLO_QUERY_INIT: a => `queryId:${a.queryId} variables:${inspectObject(
+    a.variables,
+  )}\n   ${singleLine(a.queryString)}`,
 
-  APOLLO_QUERY_RESULT: a =>
-    `queryId:${a.queryId}\n   ${singleLine(inspectObject(a.result))}`,
+  APOLLO_QUERY_RESULT: a => `queryId:${a.queryId}\n   ${singleLine(inspectObject(a.result))}`,
 
   APOLLO_QUERY_STOP: a => `queryId:${a.queryId}`,
 };

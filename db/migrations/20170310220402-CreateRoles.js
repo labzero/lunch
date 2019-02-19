@@ -59,9 +59,8 @@ exports.up = (queryInterface, Sequelize) => {
       }
     }
   })
-  .then(() => User.findAll())
-  .then((users) =>
-    Team.findOne({ where: { name: 'Lab Zero' } }).then(team => {
+    .then(() => User.findAll())
+    .then((users) => Team.findOne({ where: { name: 'Lab Zero' } }).then(team => {
       const Role = db.sequelize.define('role', {
         type: {
           allowNull: false,
@@ -99,10 +98,7 @@ exports.up = (queryInterface, Sequelize) => {
         user_id: user.id,
         type: user.email.match(/@labzero\.com$/) ? 'member' : 'guest'
       })));
-    })
-  );
+    }));
 };
 
-exports.down = queryInterface =>
-  queryInterface.dropTable('roles').then(() =>
-    db.sequelize.query('DROP TYPE enum_roles_type'));
+exports.down = queryInterface => queryInterface.dropTable('roles').then(() => db.sequelize.query('DROP TYPE enum_roles_type'));

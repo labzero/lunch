@@ -30,7 +30,7 @@ describe('actions/teams', () => {
 
       it('dispatches postTeam', () => {
         return store.dispatch(teams.createTeam(payload)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('POST_TEAM');
           expect(actions[0].team).to.eql({ foo: 'bar' });
         });
@@ -62,7 +62,7 @@ describe('actions/teams', () => {
 
       it('dispatches teamPosted', () => {
         return store.dispatch(teams.createTeam(payload)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('TEAM_POSTED');
           expect(actions[1].team).to.eql(team);
         });
@@ -76,7 +76,7 @@ describe('actions/teams', () => {
 
       it('dispatches flashError', () => {
         return store.dispatch(teams.createTeam(payload)).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });

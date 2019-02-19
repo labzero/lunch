@@ -88,9 +88,19 @@ const RestaurantDropdown = ({
         {menuItems}
         {lastVisited}
         <MenuItem divider />
-        <MenuItem header>Last {sortDuration} day{sortDuration === 1 ? '' : 's'}:</MenuItem>
+        <MenuItem header>
+Last
+          {sortDuration}
+          {' '}
+day
+          {sortDuration === 1 ? '' : 's'}
+:
+        </MenuItem>
         <li className={s.stat}>
-          {restaurant.all_vote_count} vote{parseInt(restaurant.all_vote_count, 10) === 1 ? '' : 's'}
+          {restaurant.all_vote_count}
+          {' '}
+vote
+          {parseInt(restaurant.all_vote_count, 10) === 1 ? '' : 's'}
         </li>
         <li className={s.stat}>
           {`${restaurant.all_decision_count} \

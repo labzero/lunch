@@ -44,7 +44,7 @@ class Link extends React.Component {
     }
 
     event.preventDefault();
-    
+
     if (window.swUpdate) {
       window.location = this.props.to;
     } else {

@@ -1,7 +1,6 @@
 /* eslint-disable no-undef */
 
 describe('landing page', () => {
-
   before(() => {
     cy.visit('/');
   });

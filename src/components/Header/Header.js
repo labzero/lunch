@@ -34,10 +34,10 @@ class Header extends Component {
       return {
         menuOpen: false,
         prevPath: nextProps.path
-      }
+      };
     }
     return null;
-  };
+  }
 
   state = {
     menuOpen: false,
@@ -65,9 +65,9 @@ class Header extends Component {
   }
 
   toggleMenu = () => {
-    this.setState({
-      menuOpen: !this.state.menuOpen
-    });
+    this.setState(prevState => ({
+      menuOpen: !prevState.menuOpen
+    }));
   }
 
   render() {
@@ -90,16 +90,17 @@ class Header extends Component {
             </h1>
           </div>
         </div>
-        {loggedIn ?
-          <div>
-            <button className={s.hamburger} onClick={this.toggleMenu}>
-              <span>Menu</span>
-            </button>
-            {menuOpen && <button className={s.menuBackground} onClick={this.closeMenu} />}
-            <MenuContainer open={menuOpen} closeMenu={this.closeMenu} />
-          </div>
-          :
-          <HeaderLoginContainer />
+        {loggedIn
+          ? (
+            <div>
+              <button className={s.hamburger} onClick={this.toggleMenu} type="button">
+                <span>Menu</span>
+              </button>
+              {menuOpen && <button className={s.menuBackground} onClick={this.closeMenu} type="button" />}
+              <MenuContainer open={menuOpen} closeMenu={this.closeMenu} />
+            </div>
+          )
+          : <HeaderLoginContainer />
         }
       </div>
     );

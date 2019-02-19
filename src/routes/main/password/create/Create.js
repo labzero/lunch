@@ -25,7 +25,11 @@ class Create extends Component {
           {success === 'reset' && (
             <div>
               <h2>Password reset</h2>
-              <p>Your password has been reset. Go ahead and <Link to="/login">log in</Link>.</p>
+              <p>
+Your password has been reset. Go ahead and
+                <Link to="/login">log in</Link>
+.
+              </p>
             </div>
           )}
         </Grid>

@@ -209,7 +209,7 @@ if (module.hot) {
     }
 
     onLocationChange(currentLocation);
-  }
+  };
 
   module.hot.accept('./routes/team', () => {
     routes = require('./routes/team').default; // eslint-disable-line global-require

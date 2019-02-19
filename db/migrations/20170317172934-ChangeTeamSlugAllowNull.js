@@ -8,15 +8,13 @@ exports.up = (queryInterface, Sequelize) => {
     underscored: true
   });
 
-  return Team.update({ slug: 'labzero' }, { where: { name: 'Lab Zero' } }).then(() =>
-    queryInterface.changeColumn('teams', 'slug', {
-      allowNull: false,
-      type: Sequelize.STRING(63)
-    }));
+  return Team.update({ slug: 'labzero' }, { where: { name: 'Lab Zero' } }).then(() => queryInterface.changeColumn('teams', 'slug', {
+    allowNull: false,
+    type: Sequelize.STRING(63)
+  }));
 };
 
-exports.down = (queryInterface, Sequelize) =>
-  queryInterface.changeColumn('teams', 'slug', {
-    allowNull: true,
-    type: Sequelize.STRING(63)
-  });
+exports.down = (queryInterface, Sequelize) => queryInterface.changeColumn('teams', 'slug', {
+  allowNull: true,
+  type: Sequelize.STRING(63)
+});

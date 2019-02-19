@@ -5,16 +5,15 @@ import * as helpers from '../../support/helpers';
 const subdomain = Cypress.env('subdomain');
 
 describe('team page (within team)', () => {
-
   before(() => {
     helpers.login();
     helpers.deleteTeam();
     helpers.createTeam();
-  }); 
+  });
 
   beforeEach(() => {
     helpers.login();
-    cy.visit(`${subdomain  }team`);
+    cy.visit(`${subdomain}team`);
   });
 
   describe('team page', () => {

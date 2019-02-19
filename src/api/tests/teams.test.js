@@ -76,9 +76,7 @@ describe('api/main/teams', () => {
 
   describe('GET /', () => {
     describe('before query', () => {
-      beforeEach(() =>
-        request(app).get('/').send(),
-      );
+      beforeEach(() => request(app).get('/').send());
 
       it('checks for login', () => {
         expect(loggedInSpy.called).to.be.true;
@@ -107,8 +105,7 @@ describe('api/main/teams', () => {
 
   describe('POST /', () => {
     describe('before query', () => {
-      beforeEach(() =>
-        request(app).post('/').send({ name: 'Something', slug: 'something' }));
+      beforeEach(() => request(app).post('/').send({ name: 'Something', slug: 'something' }));
 
       it('checks for login', () => {
         expect(loggedInSpy.called).to.be.true;
@@ -280,7 +277,9 @@ describe('api/main/teams', () => {
       let createSpy;
       beforeEach(() => {
         createSpy = spy(TeamMock, 'create');
-        return request(app).post('/').send({ address: '77 Battery', lat: 123, lng: 321, name: 'Lab Zero', slug: 'labzero' });
+        return request(app).post('/').send({
+          address: '77 Battery', lat: 123, lng: 321, name: 'Lab Zero', slug: 'labzero'
+        });
       });
 
       it('creates new team', () => {

@@ -43,7 +43,11 @@ const Landing = () => (
   <div className={s.root}>
     <Jumbotron className={s.jumbotron}>
       <Grid>
-        <h2 className={s.jumbotronHeading}>Figure it out,<br />together.</h2>
+        <h2 className={s.jumbotronHeading}>
+Figure it out,
+          <br />
+together.
+        </h2>
         <Row>
           <Col xs={12} sm={6} smOffset={3}>
             <p>

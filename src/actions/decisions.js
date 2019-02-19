@@ -87,7 +87,7 @@ export const decide = (restaurantId, daysAgo) => dispatch => {
     method: 'post',
     body: JSON.stringify(payload)
   })
-    .then(response => processResponse(response, dispatch))
+    .then(response => processResponse(response, dispatch));
 };
 
 export const removeDecision = () => (dispatch) => {

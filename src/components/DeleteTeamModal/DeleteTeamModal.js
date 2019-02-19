@@ -49,8 +49,14 @@ class DeleteTeamModal extends Component {
       <Modal show={shown} onHide={hideModal}>
         <ModalBody>
           <p>
-            Are you sure you want to delete the {team.name} team?
-            {' '}<strong>This is irreversible.</strong>{' '}
+            Are you sure you want to delete the
+            {' '}
+            {team.name}
+            {' '}
+team?
+            {' '}
+            <strong>This is irreversible.</strong>
+            {' '}
             All restaurants and tags will be deleted,
             and all users will be unassigned from the team.
           </p>

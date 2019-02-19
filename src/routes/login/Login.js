@@ -29,10 +29,9 @@ class Login extends Component {
     password: ''
   };
 
-  handleChange = field => event =>
-    this.setState({
-      [field]: event.target.value
-    });
+  handleChange = field => event => this.setState({
+    [field]: event.target.value
+  });
 
   render() {
     const { host, next, team } = this.props;

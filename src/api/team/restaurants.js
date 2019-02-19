@@ -45,8 +45,10 @@ export default () => {
                 if (!error && response.statusCode === 200) {
                   const json = JSON.parse(body);
                   if (json.status !== 'OK') {
-                    const newError = { message: `Could not get info for restaurant. Google might have
-    removed its entry. Try removing it and adding it to Lunch again.` };
+                    const newError = {
+                      message: `Could not get info for restaurant. Google might have
+    removed its entry. Try removing it and adding it to Lunch again.`
+                    };
                     res.status(404).json({ error: true, newError });
                   } else if (json.result && json.result.url) {
                     res.redirect(json.result.url);
@@ -56,8 +58,7 @@ export default () => {
                 } else {
                   next(error);
                 }
-              }
-            );
+              });
           }
         } catch (err) {
           next(err);
@@ -69,8 +70,10 @@ export default () => {
       loggedIn,
       checkTeamRole(),
       async (req, res, next) => {
-        // eslint-disable-next-line camelcase
-        const { name, place_id, lat, lng } = req.body;
+        const {
+          // eslint-disable-next-line camelcase
+          name, place_id, lat, lng
+        } = req.body;
 
         let { address } = req.body;
         address = address.replace(`${name}, `, '');

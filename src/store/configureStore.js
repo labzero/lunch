@@ -31,16 +31,11 @@ const generateReducers = (newReducerMaps, normalizedInitialState) => {
 export default function configureStore(initialState, helpersConfig) {
   const normalizedInitialState = JSON.parse(JSON.stringify(initialState));
 
-  normalizedInitialState.restaurants.items =
-    normalize(initialState.restaurants.items, [schemas.restaurant]);
-  normalizedInitialState.tags.items =
-    normalize(initialState.tags.items, [schemas.tag]);
-  normalizedInitialState.teams.items =
-    normalize(initialState.teams.items, [schemas.team]);
-  normalizedInitialState.users.items =
-    normalize(initialState.users.items, [schemas.user]);
-  normalizedInitialState.restaurants.items.entities.votes =
-    normalizedInitialState.restaurants.items.entities.votes || {};
+  normalizedInitialState.restaurants.items = normalize(initialState.restaurants.items, [schemas.restaurant]);
+  normalizedInitialState.tags.items = normalize(initialState.tags.items, [schemas.tag]);
+  normalizedInitialState.teams.items = normalize(initialState.teams.items, [schemas.team]);
+  normalizedInitialState.users.items = normalize(initialState.users.items, [schemas.user]);
+  normalizedInitialState.restaurants.items.entities.votes = normalizedInitialState.restaurants.items.entities.votes || {};
 
   const reducers = generateReducers(reducerMaps, normalizedInitialState);
 

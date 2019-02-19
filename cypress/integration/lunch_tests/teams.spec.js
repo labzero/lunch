@@ -6,11 +6,11 @@ describe('teams page (no teams)', () => {
   before(() => {
     helpers.login();
     helpers.deleteTeam();
-  }); 
+  });
 
   beforeEach(() => {
     helpers.login();
-  }); 
+  });
 
   it('shows that there are no teams', () => {
     cy.visit('/teams');
