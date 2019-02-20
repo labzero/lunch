@@ -103,6 +103,9 @@ class AddUserForm extends Component {
             </HelpBlock>
           </FormGroup>
           <Button type="submit">Add</Button>
+          <HelpBlock>
+            Please tell the user you are inviting to check their spam folder if they don&rsquo;t receive anything shortly.
+          </HelpBlock>
         </form>
       </div>
     );

@@ -83,7 +83,7 @@ Add them here: ${generateUrl(req, bsHost, `/users/new?email=${querystring.escape
             }
             const confirmationSentAt = existingInvitation.get('confirmation_sent_at');
             if (confirmationSentAt && Date.now() - confirmationSentAt < 60 * 60 * 1000 * 24) {
-              req.flash('error', 'You\'ve already submitted an invitation request. Check your email for a confirmation URL. If you don\'t see one, submit again in 24 hours.');
+              req.flash('error', 'You\'ve already submitted an invitation request. Check your email for a confirmation URL. If you don\'t see one, check your spam folder or submit again in 24 hours.');
               return req.session.save(() => {
                 res.redirect('/invitation/new');
               });
@@ -92,7 +92,7 @@ Add them here: ${generateUrl(req, bsHost, `/users/new?email=${querystring.escape
             await existingInvitation.update({
               confirmation_sent_at: new Date()
             });
-            req.flash('success', 'We\'ve resent an email to confirm your invitation request.');
+            req.flash('success', 'We\'ve resent an email to confirm your invitation request. Check your spam folder if you don\'t see it.');
             return req.session.save(() => {
               next();
             });
