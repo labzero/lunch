@@ -28,6 +28,7 @@ class Create extends Component {
                 Thanks for requesting an invitation!
                 We&rsquo;ve sent you an email &mdash;
                 please follow the provided URL in the email to confirm your request.
+                If it doesn&rsquo;t show up, please check your spam folder.
               </p>
             </div>
           )}
