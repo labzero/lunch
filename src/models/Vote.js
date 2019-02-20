@@ -1,7 +1,8 @@
 import moment from 'moment';
 import { sequelize, DataTypes } from './db';
 
-const Vote = sequelize.define('vote',
+const Vote = sequelize.define(
+  'vote',
   {
     user_id: {
       type: DataTypes.INTEGER,
@@ -40,7 +41,16 @@ const Vote = sequelize.define('vote',
         fields: ['created_at', 'restaurant_id', 'user_id']
       }
     ]
-  });
+  }
+);
+
+Vote.recentForRestaurantAndUser = (restaurantId, userId, transaction) =>
+  Vote.scope('fromToday').count({
+    where: {
+      user_id: userId,
+      restaurant_id: restaurantId
+    }
+  }, { transaction });
 
 Vote.recentForRestaurantAndUser = (restaurantId, userId) => Vote.scope('fromToday').count({
   where: {

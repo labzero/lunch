@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { Vote } from '../../models';
+import { sequelize } from '../../models/db';
 import checkTeamRole from '../helpers/checkTeamRole';
 import loggedIn from '../helpers/loggedIn';
 import { votePosted, voteDeleted } from '../../actions/restaurants';
@@ -19,23 +20,27 @@ export default () => {
       async (req, res, next) => {
         const restaurantId = parseInt(req.params.restaurant_id, 10);
         try {
-          const count = await Vote.recentForRestaurantAndUser(restaurantId, req.user.id);
+          const result = await sequelize.transaction(async (t) => {
+            const count = await Vote.recentForRestaurantAndUser(restaurantId, req.user.id, t);
 
-          if (count === 0) {
-            try {
-              const obj = await Vote.create({
+            if (count === 0) {
+              return Vote.create({
                 restaurant_id: restaurantId,
                 user_id: req.user.id
-              });
-
-              const json = obj.toJSON();
+              }, { transaction: t });
+            }
+            return '409';
+          });
+          if (result === '409') {
+            res.status(409).json({ error: true, data: { message: 'Could not vote. Did you already vote today?' } });
+          } else {
+            try {
+              const json = result.toJSON();
               req.wss.broadcast(req.team.id, votePosted(json));
-              res.status(201).send({ error: false, data: obj });
+              res.status(201).send({ error: false, data: result });
             } catch (err) {
               next(err);
             }
-          } else {
-            res.status(409).json({ error: true, data: { message: 'Could not vote. Did you already vote today?' } });
           }
         } catch (err) {
           next(err);
