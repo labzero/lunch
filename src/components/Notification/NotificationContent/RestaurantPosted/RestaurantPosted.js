@@ -10,14 +10,29 @@ const RestaurantPosted = ({
   showMapAndInfoWindow
 }) => {
   const restaurantEl = (
-    <button className={s.clickable} onClick={showMapAndInfoWindow}>
+    <button className={s.clickable} onClick={showMapAndInfoWindow} type="button">
       {restaurantName}
     </button>
   );
   if (loggedIn) {
-    return <span><b>{user}</b> added {restaurantEl}.</span>;
+    return (
+      <span>
+        <b>{user}</b>
+        {' '}
+added
+        {' '}
+        {restaurantEl}
+.
+      </span>
+    );
   }
-  return <span>{restaurantEl} was added.</span>;
+  return (
+    <span>
+      {restaurantEl}
+      {' '}
+was added.
+    </span>
+  );
 };
 
 RestaurantPosted.propTypes = {

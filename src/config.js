@@ -10,9 +10,9 @@
 /* eslint-disable max-len */
 
 const port = process.env.PORT || 3000;
-const host = process.env.WEBSITE_HOSTNAME ||
-          (process.env.DOCKERCLOUD_SERVICE_FQDN ? `${process.env.DOCKERCLOUD_SERVICE_FQDN}:${port}` : undefined) ||
-          `local.lunch.pink:${port}`;
+const host = process.env.WEBSITE_HOSTNAME
+          || (process.env.DOCKERCLOUD_SERVICE_FQDN ? `${process.env.DOCKERCLOUD_SERVICE_FQDN}:${port}` : undefined)
+          || `local.lunch.pink:${port}`;
 const hostname = host.match(/^([^:]*):?[0-9]{0,}/)[1];
 
 module.exports = {

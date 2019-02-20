@@ -2,7 +2,6 @@
 import * as helpers from '../../support/helpers';
 
 describe('login page', () => {
-
   beforeEach(() => {
     cy.visit('/login');
   });
@@ -19,7 +18,7 @@ describe('login page', () => {
     cy.get('button[type="submit"]').click();
     helpers.deleteTeam();
     cy.contains('You’re not currently a part of any teams!');
-    
+
     cy.get('#header button').click();
     cy.get('nav.Menu-root.Menu-open a').contains('Log Out').click();
     cy.contains('Figure it out');

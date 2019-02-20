@@ -30,7 +30,6 @@ const contentMap = {
 };
 
 class Notification extends Component {
-
   static propTypes = {
     expireNotification: PropTypes.func.isRequired,
     noRender: PropTypes.bool,
@@ -58,12 +57,11 @@ class Notification extends Component {
     const Content = contentMap[this.props.actionType];
     return (
       <div className={s.root}>
-        <button className={s.close} onClick={this.props.expireNotification}>&times;</button>
+        <button className={s.close} onClick={this.props.expireNotification} type="button">&times;</button>
         <Content {...this.props.contentProps} />
       </div>
     );
   }
-
 }
 
 export default withStyles(s)(Notification);

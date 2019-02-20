@@ -72,7 +72,7 @@ class Restaurant extends Component {
           );
         } else {
           addTagArea = (
-            <button className="btn btn-sm btn-default" onClick={this.showAddTagForm}>add tag</button>
+            <button className="btn btn-sm btn-default" onClick={this.showAddTagForm} type="button">add tag</button>
           );
         }
       }

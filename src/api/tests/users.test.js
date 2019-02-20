@@ -97,8 +97,7 @@ describe('api/team/users', () => {
     });
 
     describe('before query', () => {
-      beforeEach(() =>
-        request(app).get('/'));
+      beforeEach(() => request(app).get('/'));
 
       it('checks for login', () => {
         expect(loggedInSpy.called).to.be.true;
@@ -116,8 +115,7 @@ describe('api/team/users', () => {
       });
 
       describe('as guest', () => {
-        beforeEach(() =>
-          request(app).get('/'));
+        beforeEach(() => request(app).get('/'));
 
         it('does not pass extra attributes', () => {
           expect(scopeSpy.calledWith({
@@ -494,8 +492,7 @@ describe('api/team/users', () => {
     });
 
     describe('before query', () => {
-      beforeEach(() =>
-        request(app).patch('/1'));
+      beforeEach(() => request(app).patch('/1'));
 
       it('checks for login', () => {
         expect(loggedInSpy.called).to.be.true;
@@ -745,8 +742,7 @@ describe('api/team/users', () => {
         });
 
         describe('to member', () => {
-          beforeEach(() =>
-            request(app).patch(path).send({ type: 'member' }));
+          beforeEach(() => request(app).patch(path).send({ type: 'member' }));
 
           it('updates role', () => {
             expect(role.update.calledWith({ type: 'member' })).to.be.true;
@@ -858,8 +854,7 @@ describe('api/team/users', () => {
 
   describe('DELETE /:id', () => {
     describe('before query', () => {
-      beforeEach(() =>
-        request(app).delete('/1'));
+      beforeEach(() => request(app).delete('/1'));
 
       it('checks for login', () => {
         expect(loggedInSpy.called).to.be.true;

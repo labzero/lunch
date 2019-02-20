@@ -20,7 +20,9 @@ class Menu extends Component {
   };
 
   render() {
-    const { closeMenu, hasGuestRole, hasMemberRole, host, open, team, user } = this.props;
+    const {
+      closeMenu, hasGuestRole, hasMemberRole, host, open, team, user
+    } = this.props;
 
     const tabIndex = open ? 0 : -1;
 

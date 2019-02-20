@@ -40,15 +40,13 @@ const Vote = sequelize.define('vote',
         fields: ['created_at', 'restaurant_id', 'user_id']
       }
     ]
-  }
-);
-
-Vote.recentForRestaurantAndUser = (restaurantId, userId) =>
-  Vote.scope('fromToday').count({
-    where: {
-      user_id: userId,
-      restaurant_id: restaurantId
-    }
   });
+
+Vote.recentForRestaurantAndUser = (restaurantId, userId) => Vote.scope('fromToday').count({
+  where: {
+    user_id: userId,
+    restaurant_id: restaurantId
+  }
+});
 
 export default Vote;

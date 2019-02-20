@@ -357,7 +357,8 @@ const render = async (req, res, next) => {
 
     const pageTitle = route.title || 'Lunch';
 
-    const data = { ...route,
+    const data = {
+      ...route,
       apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
       title: pageTitle,
       ogTitle: route.ogTitle || pageTitle,
@@ -440,7 +441,7 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-app.use(Honeybadger.errorHandler);  // Use *after* all other app middleware.
+app.use(Honeybadger.errorHandler); // Use *after* all other app middleware.
 
 //
 // Launch the server

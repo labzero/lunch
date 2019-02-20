@@ -15,7 +15,7 @@ function run(fn, options) {
   // eslint-disable-next-line global-require
   const path = require('path');
 
-  if(process.env.NODE_ENV === 'test') {
+  if (process.env.NODE_ENV === 'test') {
     // eslint-disable-next-line global-require
     require('dotenv').config({
       path: path.resolve(process.cwd(), '.env.test'),

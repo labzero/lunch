@@ -25,7 +25,7 @@ describe('actions/decisions', () => {
 
       it('dispatches requestDecisions', () => {
         return store.dispatch(decisions.fetchDecisions()).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('REQUEST_DECISIONS');
         });
       });
@@ -57,7 +57,7 @@ describe('actions/decisions', () => {
 
       it('dispatches flashError', () => {
         return store.dispatch(decisions.fetchDecisions()).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -78,7 +78,7 @@ describe('actions/decisions', () => {
 
       it('dispatches postDecision', () => {
         return store.dispatch(decisions.decide(restaurantId)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('POST_DECISION');
           expect(actions[0].restaurantId).to.eq(1);
         });
@@ -99,7 +99,7 @@ describe('actions/decisions', () => {
 
       it('dispatches flashError', () => {
         return store.dispatch(decisions.decide(restaurantId)).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -114,7 +114,7 @@ describe('actions/decisions', () => {
 
       it('dispatches deleteDecision', () => {
         return store.dispatch(decisions.removeDecision()).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('DELETE_DECISION');
         });
       });
@@ -133,7 +133,7 @@ describe('actions/decisions', () => {
 
       it('dispatches flashError', () => {
         return store.dispatch(decisions.removeDecision()).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });

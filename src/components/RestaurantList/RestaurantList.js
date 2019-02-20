@@ -8,7 +8,9 @@ import RestaurantContainer from '../Restaurant/RestaurantContainer';
 import Loading from '../Loading';
 import s from './RestaurantList.scss';
 
-const RestaurantList = ({ allRestaurantIds, flipMove, ids, restaurantListReady }) => {
+const RestaurantList = ({
+  allRestaurantIds, flipMove, ids, restaurantListReady
+}) => {
   if (!restaurantListReady) {
     return <Loading />;
   }

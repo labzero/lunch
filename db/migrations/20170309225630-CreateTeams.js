@@ -31,5 +31,4 @@ exports.up = (queryInterface, Sequelize) => {
   }));
 };
 
-exports.down = queryInterface =>
-  queryInterface.dropTable('teams');
+exports.down = queryInterface => queryInterface.dropTable('teams');

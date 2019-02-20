@@ -43,9 +43,9 @@ export class _RestaurantVoteCount extends Component {
         voteCountContainer = voteCount;
       } else {
         tooltip = (
-          <Tooltip id={`voteCountTooltip_${this.props.id}`}>{this.props.votes.map(voteId =>
-            <TooltipUserContainer key={`voteCountTooltipUser_${voteId}`} voteId={voteId} />
-          )}</Tooltip>
+          <Tooltip id={`voteCountTooltip_${this.props.id}`}>
+            {this.props.votes.map(voteId => <TooltipUserContainer key={`voteCountTooltipUser_${voteId}`} voteId={voteId} />)}
+          </Tooltip>
         );
         voteCountContainer = (
           <OverlayTrigger

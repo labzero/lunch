@@ -5,15 +5,14 @@ import * as helpers from '../../support/helpers';
 const subdomain = Cypress.env('subdomain');
 
 describe('Adding a restaurant and tag', () => {
-
   before(() => {
     helpers.login();
     helpers.deleteTeam();
     helpers.createTeam();
     cy.visit('/');
-  }); 
+  });
 
-  beforeEach(() => {    
+  beforeEach(() => {
     helpers.login();
   });
 
@@ -28,7 +27,6 @@ describe('Adding a restaurant and tag', () => {
       it('shows the Welcome box', () => {
         cy.contains('Welcome to Lunch!');
       });
-
     });
 
     describe('Adding a restaurant', () => {

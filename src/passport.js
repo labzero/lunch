@@ -31,8 +31,8 @@ passport.use(new GoogleStrategy(
   },
   async (accessToken, refreshToken, profile, done) => {
     if (
-      typeof profile.emails === 'object' &&
-      profile.emails.length !== undefined
+      typeof profile.emails === 'object'
+      && profile.emails.length !== undefined
     ) {
       const accountEmail = profile.emails.find(email => email.type === 'account');
       try {
@@ -59,9 +59,9 @@ passport.use(new GoogleStrategy(
         }
 
         if (
-          typeof profile.displayName === 'string' &&
-          profile.displayName !== user.get('name') &&
-          !user.get('name_changed')
+          typeof profile.displayName === 'string'
+          && profile.displayName !== user.get('name')
+          && !user.get('name_changed')
         ) {
           userUpdates.name = profile.displayName;
           doUpdates = true;

@@ -21,9 +21,9 @@ export default () => {
           if (!Number.isNaN(days)) {
             opts.where.created_at = {
               [DataTypes.Op.gt]: moment().subtract(days, 'days').toDate()
-            }
+            };
           }
-      
+
           const decisions = await Decision.findAll(opts);
 
           res.status(200).json({ error: false, data: decisions });
@@ -46,7 +46,7 @@ export default () => {
             destroyOpts.where.created_at = {
               [DataTypes.Op.gt]: moment().subtract(daysAgo, 'days').subtract(12, 'hours').toDate(),
               [DataTypes.Op.lt]: moment().subtract(daysAgo, 'days').add(12, 'hours').toDate(),
-            }
+            };
           } else {
             MaybeScopedDecision = MaybeScopedDecision.scope('fromToday');
           }

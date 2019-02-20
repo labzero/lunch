@@ -13,7 +13,7 @@ import webpack from 'webpack';
 import WebpackAssetsManifest from 'webpack-assets-manifest';
 import nodeExternals from 'webpack-node-externals';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
-import {InjectManifest} from 'workbox-webpack-plugin';
+import { InjectManifest } from 'workbox-webpack-plugin';
 import overrideRules from './lib/overrideRules';
 import pkg from '../package.json';
 
@@ -72,6 +72,7 @@ const config = {
 
           // https://babeljs.io/docs/usage/options/
           babelrc: false,
+          configFile: false,
           presets: [
             // A Babel preset that can automatically determine the Babel plugins and polyfills
             // https://github.com/babel/babel-preset-env
@@ -80,16 +81,13 @@ const config = {
               {
                 targets: {
                   browsers: pkg.browserslist,
-                  forceAllTransforms: !isDebug, // for UglifyJS
                 },
+                forceAllTransforms: !isDebug, // for UglifyJS
                 modules: false,
                 useBuiltIns: false,
                 debug: false,
               },
             ],
-            // Experimental ECMAScript proposals
-            // https://babeljs.io/docs/plugins/#presets-stage-x-experimental-presets-
-            ["@babel/preset-stage-2", { "decoratorsLegacy": true }],
             // Flow
             // https://github.com/babel/babel/tree/master/packages/babel-preset-flow
             '@babel/preset-flow',
@@ -98,6 +96,9 @@ const config = {
             ['@babel/preset-react', { development: isDebug }],
           ],
           plugins: [
+            // Experimental ECMAScript proposals
+            '@babel/plugin-proposal-class-properties',
+            '@babel/plugin-syntax-dynamic-import',
             // Treat React JSX elements as value types and hoist them to the highest scope
             // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-constant-elements
             ...(isDebug ? [] : ['@babel/transform-react-constant-elements']),
@@ -283,13 +284,13 @@ const config = {
       ...(isDebug
         ? []
         : [
-            {
-              test: resolvePath(
-                'node_modules/react-deep-force-update/lib/index.js',
-              ),
-              loader: 'null-loader',
-            },
-          ]),
+          {
+            test: resolvePath(
+              'node_modules/react-deep-force-update/lib/index.js',
+            ),
+            loader: 'null-loader',
+          },
+        ]),
     ],
   },
 
@@ -369,7 +370,7 @@ const clientConfig = {
               ),
             ];
             return acc;
-          }, Object.create(null)); 
+          }, Object.create(null));
           fs.writeFileSync(chunkFileName, JSON.stringify(chunkFiles, null, 2));
         } catch (err) {
           console.error(`ERROR: Cannot write ${chunkFileName}: `, err);
@@ -381,10 +382,10 @@ const clientConfig = {
     ...(isDebug
       ? []
       : [
-          // Webpack Bundle Analyzer
-          // https://github.com/th0r/webpack-bundle-analyzer
-          ...(isAnalyze ? [new BundleAnalyzerPlugin()] : []),
-        ]),
+        // Webpack Bundle Analyzer
+        // https://github.com/th0r/webpack-bundle-analyzer
+        ...(isAnalyze ? [new BundleAnalyzerPlugin()] : []),
+      ]),
 
     new InjectManifest({
       swSrc: './src/service-worker.js',
@@ -454,19 +455,17 @@ const serverConfig = {
           ...rule,
           options: {
             ...rule.options,
-            presets: rule.options.presets.map(preset =>
-              preset[0] !== '@babel/preset-env' ? preset : [
-                '@babel/preset-env',
-                {
-                  targets: {
-                    node: pkg.engines.node.match(/(\d+\.?)+/)[0],
-                  },
-                  modules: false,
-                  useBuiltIns: false,
-                  debug: false,
+            presets: rule.options.presets.map(preset => preset[0] !== '@babel/preset-env' ? preset : [
+              '@babel/preset-env',
+              {
+                targets: {
+                  node: pkg.engines.node.match(/(\d+\.?)+/)[0],
                 },
-              ],
-            ),
+                modules: false,
+                useBuiltIns: false,
+                debug: false,
+              },
+            ]),
           },
         };
       }

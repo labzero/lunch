@@ -72,8 +72,7 @@ export default () => {
         });
       })(req, res, next);
     },
-    setCookie
-  ).post('/',
+    setCookie).post('/',
     (req, res, next) => {
       passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) { return next(err); }
@@ -87,8 +86,7 @@ export default () => {
         });
       })(req, res, next);
     },
-    setCookie
-  );
+    setCookie);
 
   return router;
 };

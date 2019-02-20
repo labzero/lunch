@@ -5,12 +5,11 @@ import * as helpers from '../../support/helpers';
 const subdomain = Cypress.env('subdomain');
 
 describe('other pages', () => {
-
   before(() => {
     helpers.login();
     helpers.deleteTeam();
     helpers.createTeam();
-  }); 
+  });
 
   beforeEach(() => {
     helpers.login();
@@ -46,14 +45,14 @@ describe('other pages', () => {
     it('should display a list of tags when there are tags', () => {
       helpers.addRestaurant();
       helpers.addTag();
-      cy.visit(`${subdomain  }tags`);
+      cy.visit(`${subdomain}tags`);
       cy.contains('waterfront');
       helpers.deleteTag();
       helpers.deleteRestaurant();
     });
 
     it('should display blurb when no tags', () => {
-      cy.visit(`${subdomain  }tags`);
+      cy.visit(`${subdomain}tags`);
       cy.get('button.Tag-button').click();
       cy.get('.modal-footer .btn-primary').click();
       cy.contains('Once you add tags');
@@ -69,7 +68,7 @@ describe('other pages', () => {
 
   describe('404 page', () => {
     it('should have some content', () => {
-      cy.visit('/404', {failOnStatusCode: false});
+      cy.visit('/404', { failOnStatusCode: false });
       cy.contains('Page not found');
     });
   });

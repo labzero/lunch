@@ -18,7 +18,6 @@ const renderNull = () => null;
 let Geosuggest = renderNull;
 
 class RestaurantAddForm extends Component {
-
   static propTypes = {
     getSuggestLabel: PropTypes.func.isRequired,
     createTempMarker: PropTypes.func.isRequired,
@@ -80,7 +79,6 @@ class RestaurantAddForm extends Component {
       </form>
     );
   }
-
 }
 
 export default withStyles(s)(RestaurantAddForm);

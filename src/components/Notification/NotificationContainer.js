@@ -52,15 +52,14 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) =>
-  Object.assign({}, stateProps, dispatchProps, {
-    contentProps: {
-      ...stateProps.contentProps,
-      showMapAndInfoWindow: () => {
-        dispatchProps.dispatch(showMapAndInfoWindow(ownProps.vals.restaurantId));
-      }
+const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
+  contentProps: {
+    ...stateProps.contentProps,
+    showMapAndInfoWindow: () => {
+      dispatchProps.dispatch(showMapAndInfoWindow(ownProps.vals.restaurantId));
     }
-  });
+  }
+});
 
 export default connect(
   mapStateToProps,

@@ -26,7 +26,7 @@ describe('actions/users', () => {
 
       it('dispatches requestUsers', () => {
         return store.dispatch(users.fetchUsers()).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('REQUEST_USERS');
         });
       });
@@ -45,7 +45,7 @@ describe('actions/users', () => {
 
       it('dispatches receiveUsers', () => {
         return store.dispatch(users.fetchUsers()).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('RECEIVE_USERS');
           expect(actions[1].items).to.eql([{ foo: 'bar' }]);
         });
@@ -59,7 +59,7 @@ describe('actions/users', () => {
 
       it('dispatches flashError', () => {
         return store.dispatch(users.fetchUsers()).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -80,7 +80,7 @@ describe('actions/users', () => {
 
       it('dispatches postUser', () => {
         return store.dispatch(users.addUser(payload)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('POST_USER');
           expect(actions[0].user).to.eql({ foo: 'bar' });
         });
@@ -101,7 +101,7 @@ describe('actions/users', () => {
 
       it('dispatches userPosted', () => {
         return store.dispatch(users.addUser(payload)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('USER_POSTED');
           expect(actions[1].user).to.eql({ foo: 'bar' });
         });
@@ -117,7 +117,7 @@ describe('actions/users', () => {
         return store.dispatch(
           users.addUser(payload)
         ).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -132,9 +132,9 @@ describe('actions/users', () => {
       proxyUsers = proxyquire('../users', {
         '../selectors/user': {
           getCurrentUser: () => {
-            return {id: 231};
+            return { id: 231 };
           }
-        } 
+        }
       });
     });
 
@@ -145,7 +145,7 @@ describe('actions/users', () => {
 
       it('dispatches deleteUser', () => {
         return store.dispatch(proxyUsers.removeUser(id)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('DELETE_USER');
           expect(actions[0].id).to.eq(1);
         });
@@ -166,7 +166,7 @@ describe('actions/users', () => {
 
       it('dispatches deleteUser with isSelf = true', () => {
         return store.dispatch(proxyUsers.removeUser(id)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('DELETE_USER');
           expect(actions[0].isSelf).to.eq(true);
           expect(actions[0].id).to.eq(231);
@@ -189,7 +189,7 @@ describe('actions/users', () => {
 
       it('dispatches deleteUser with team', () => {
         return store.dispatch(proxyUsers.removeUser(id, team)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('DELETE_USER');
           expect(actions[0].team).to.eql({ slug: 'labzero' });
           expect(actions[0].id).to.eq(1);
@@ -209,7 +209,7 @@ describe('actions/users', () => {
 
       it('dispatches userDeleted', () => {
         return store.dispatch(proxyUsers.removeUser(id)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('USER_DELETED');
           expect(actions[1].id).to.eq(1);
         });
@@ -223,7 +223,7 @@ describe('actions/users', () => {
 
       it('dispatches flashError', () => {
         return store.dispatch(proxyUsers.removeUser(id)).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -240,9 +240,9 @@ describe('actions/users', () => {
       proxyUsers = proxyquire('../users', {
         '../selectors/user': {
           getCurrentUser: () => {
-            return {id: 231};
+            return { id: 231 };
           }
-        } 
+        }
       });
     });
 
@@ -253,7 +253,7 @@ describe('actions/users', () => {
 
       it('dispatches patchUser', () => {
         return store.dispatch(proxyUsers.changeUserRole(id, roleType)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('PATCH_USER');
           expect(actions[0].id).to.eq(1);
           expect(actions[0].roleType).to.eq('member');
@@ -275,7 +275,7 @@ describe('actions/users', () => {
 
       it('dispatches userPatched', () => {
         return store.dispatch(proxyUsers.changeUserRole(id, roleType)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('USER_PATCHED');
           expect(actions[1].id).to.eq(1);
           expect(actions[1].user).to.eql({ foo: 'bar' });
@@ -290,7 +290,7 @@ describe('actions/users', () => {
 
       it('dispatches flashError', () => {
         return store.dispatch(proxyUsers.changeUserRole(id, roleType)).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });

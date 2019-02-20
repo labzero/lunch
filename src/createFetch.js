@@ -37,17 +37,16 @@ function createFetch(
     },
   };
 
-  return async (url: string, options: any) =>
-    url.startsWith('/api')
-      ? fetch(`${baseUrl}${url}`, {
-          ...defaults,
-          ...options,
-          headers: {
-            ...defaults.headers,
-            ...(options && options.headers),
-          },
-        })
-      : fetch(url, options);
+  return async (url: string, options: any) => url.startsWith('/api')
+    ? fetch(`${baseUrl}${url}`, {
+      ...defaults,
+      ...options,
+      headers: {
+        ...defaults.headers,
+        ...(options && options.headers),
+      },
+    })
+    : fetch(url, options);
 }
 
 export default createFetch;

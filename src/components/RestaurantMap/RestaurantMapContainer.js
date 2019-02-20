@@ -21,10 +21,9 @@ const mapStateToProps = (state) => {
     center: mapUi.center,
     defaultZoom: getTeamDefaultZoom(state),
     tempMarker: mapUi.tempMarker,
-    newlyAddedRestaurant: mapUi.newlyAdded ?
-      getRestaurantById(state, mapUi.newlyAdded.id)
-      :
-      undefined,
+    newlyAddedRestaurant: mapUi.newlyAdded
+      ? getRestaurantById(state, mapUi.newlyAdded.id)
+      : undefined,
     newlyAddedUserId: mapUi.newlyAdded ? mapUi.newlyAdded.userId : undefined,
     latLng: getTeamLatLng(state),
     showPOIs: mapUi.showPOIs,

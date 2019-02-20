@@ -42,13 +42,13 @@ class TeamForm extends Component {
 
   handleSubmit = (event) => {
     event.preventDefault();
-    const typedsortDuration = typeof this.state.sortDuration === 'number' ?
-      this.state.sortDuration :
-      parseInt(this.state.sortDuration.slice(), 10);
+    const typedsortDuration = typeof this.state.sortDuration === 'number'
+      ? this.state.sortDuration
+      : parseInt(this.state.sortDuration.slice(), 10);
     if (typedsortDuration > 0) {
       this.props.updateTeam(
         Object.assign({}, this.state, this.props.center, { sort_duration: typedsortDuration })
-        );
+      );
     } else {
       event.stopPropagation();
     }

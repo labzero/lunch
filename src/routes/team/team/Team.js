@@ -140,9 +140,9 @@ class Team extends React.Component {
                 </td>
                 <td className={s.deleteCell}>
                   {
-                    currentUser.id !== user.id &&
-                    canChangeUser(currentUser, user, team, users) &&
-                    (
+                    currentUser.id !== user.id
+                    && canChangeUser(currentUser, user, team, users)
+                    && (
                       <button className={s.remove} type="button" onClick={this.handleDeleteUserClicked(user.id)} aria-label="Remove">
                         <Glyphicon glyph="remove" />
                       </button>

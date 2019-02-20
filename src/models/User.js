@@ -20,7 +20,7 @@ const User = sequelize.define('user', {
         'id',
         [sequelize.literal(`(SELECT "roles"."type" FROM "roles"
           WHERE "roles"."team_id" = ${teamId} AND "roles"."user_id" = "user"."id")`),
-          'type']
+        'type']
       ].concat(extraAttributes || [])
     })
   },

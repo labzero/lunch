@@ -48,7 +48,7 @@ class PastDecisionsModal extends Component {
       children = `${children} (${decisionNamesForDay})`;
     }
 
-    return <option disabled={disabled} value={index}>{children}</option>
+    return <option disabled={disabled} value={index}>{children}</option>;
   }
 
   render() {

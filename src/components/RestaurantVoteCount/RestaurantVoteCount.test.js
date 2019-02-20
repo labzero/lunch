@@ -19,7 +19,7 @@ describe('RestaurantAddTagForm', () => {
   });
 
   it('counts votes when a vote is added', () => {
-    const wrapper = shallow(<RestaurantVoteCount {...props} />, {disableLifecycleMethods: true});
+    const wrapper = shallow(<RestaurantVoteCount {...props} />, { disableLifecycleMethods: true });
     wrapper.setProps({ votes: [{ restaurant_id: 1 }] });
     expect(wrapper.render().text()).to.eq('1 vote');
   });
