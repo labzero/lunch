@@ -149,6 +149,17 @@ app.use((req, res, next) => {
 });
 
 //
+// Redirect www to root
+// -----------------------------------------------------------------------------
+app.use((req, res, next) => {
+  if (req.headers.host.slice(0, 4) === 'www.') {
+    var newHost = req.headers.host.slice(4);
+    return res.redirect(301, req.protocol + '://' + newHost + req.originalUrl);
+  }
+  next();
+});
+
+//
 // Session / Flash
 // -----------------------------------------------------------------------------
 if (__DEV__) {
