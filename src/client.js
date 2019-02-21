@@ -121,7 +121,11 @@ async function onLocationChange(location, action) {
     }
 
     if (route.redirect) {
-      history.replace(route.redirect);
+      if (route.redirect.slice(0, 2) === '//') {
+        window.location.href = route.redirect;
+      } else {
+        history.replace(route.redirect);
+      }
       return;
     }
 
