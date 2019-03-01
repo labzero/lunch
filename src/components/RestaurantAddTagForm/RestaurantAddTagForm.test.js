@@ -12,9 +12,10 @@ describe('RestaurantAddTagForm', () => {
 
   beforeEach(() => {
     props = {
+      addedTags: [],
       addNewTagToRestaurant: sinon.mock(),
-      handleSuggestionSelected: sinon.mock(),
-      autosuggestValue: '',
+      addTagToRestaurant: () => {},
+      hideAddTagForm: () => {},
       tags: []
     };
   });

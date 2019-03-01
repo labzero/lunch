@@ -38,6 +38,7 @@ describe('Home', () => {
       invalidateTags,
       invalidateUsers,
       messageReceived: () => {},
+      pastDecisionsShown: false,
       user: {},
       wsPort: 3000
     };

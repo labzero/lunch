@@ -32,6 +32,8 @@ describe('Layout', () => {
 
   beforeEach(() => {
     props = {
+      children: <div className="child" />,
+      confirmShown: false,
       shouldScrollToTop: false,
       scrolledToTop: () => {}
     };
@@ -39,9 +41,7 @@ describe('Layout', () => {
 
   it('renders children correctly', () => {
     const wrapper = shallow(
-      <Layout {...props}>
-        <div className="child" />
-      </Layout>,
+      <Layout {...props} />,
       { context }
     );
 
