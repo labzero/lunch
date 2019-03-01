@@ -81,8 +81,7 @@ describe('api/team/decisions', () => {
 
   describe('GET /', () => {
     describe('before query', () => {
-      beforeEach(() =>
-        request(app).get('/'));
+      beforeEach(() => request(app).get('/'));
 
       it('checks for login', () => {
         expect(loggedInSpy.called).to.be.true;
@@ -150,8 +149,7 @@ describe('api/team/decisions', () => {
 
   describe('POST /', () => {
     describe('before query', () => {
-      beforeEach(() =>
-        request(app).post('/'));
+      beforeEach(() => request(app).post('/'));
 
       it('checks for login', () => {
         expect(loggedInSpy.called).to.be.true;
@@ -292,8 +290,7 @@ describe('api/team/decisions', () => {
 
   describe('DELETE /fromToday', () => {
     describe('before query', () => {
-      beforeEach(() =>
-        request(app).delete('/fromToday'));
+      beforeEach(() => request(app).delete('/fromToday'));
 
       it('checks for login', () => {
         expect(loggedInSpy.called).to.be.true;

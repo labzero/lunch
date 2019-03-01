@@ -12,15 +12,16 @@ describe('RestaurantAddTagForm', () => {
 
   beforeEach(() => {
     props = {
+      addedTags: [],
       addNewTagToRestaurant: sinon.mock(),
-      handleSuggestionSelected: sinon.mock(),
-      autosuggestValue: '',
+      addTagToRestaurant: () => {},
+      hideAddTagForm: () => {},
       tags: []
     };
   });
 
   it('disables add button when autosuggest value is blank', () => {
-    const wrapper = shallow(<RestaurantAddTagForm {...props} />, {disableLifecycleMethods: true});
+    const wrapper = shallow(<RestaurantAddTagForm {...props} />, { disableLifecycleMethods: true });
     expect(wrapper.render().find('button').first()
       .attr('disabled')).to.eq('disabled');
   });

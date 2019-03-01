@@ -32,6 +32,8 @@ describe('Layout', () => {
 
   beforeEach(() => {
     props = {
+      children: <div className="child" />,
+      confirmShown: false,
       shouldScrollToTop: false,
       scrolledToTop: () => {}
     };
@@ -39,10 +41,9 @@ describe('Layout', () => {
 
   it('renders children correctly', () => {
     const wrapper = shallow(
-      <Layout {...props}>
-        <div className="child" />
-      </Layout>,
-    { context });
+      <Layout {...props} />,
+      { context }
+    );
 
     expect(wrapper.contains(<div className="child" />)).to.be.true;
   });
@@ -51,7 +52,8 @@ describe('Layout', () => {
     props.isHome = true;
     const wrapper = shallow(
       <Layout {...props} />,
-    { context });
+      { context }
+    );
 
     expect(wrapper.find('FooterContainer')).to.have.length(0);
   });
@@ -61,7 +63,8 @@ describe('Layout', () => {
 
     const wrapper = shallow(
       <Layout {...props} />,
-    { context });
+      { context }
+    );
 
     expect(wrapper.find('FooterContainer')).to.have.length(1);
   });
@@ -69,7 +72,8 @@ describe('Layout', () => {
   it('renders the FooterContainer component if the isHome prop is left undefined', () => {
     const wrapper = shallow(
       <Layout {...props} />,
-    { context });
+      { context }
+    );
 
     expect(wrapper.find('FooterContainer')).to.have.length(1);
   });
@@ -78,7 +82,8 @@ describe('Layout', () => {
     props.confirmShown = true;
     const wrapper = shallow(
       <Layout {...props} />,
-    { context });
+      { context }
+    );
 
     expect(wrapper.find('ConfirmModalContainer')).to.have.length(1);
   });
@@ -87,7 +92,8 @@ describe('Layout', () => {
     props.confirmShown = false;
     const wrapper = shallow(
       <Layout {...props} />,
-    { context });
+      { context }
+    );
 
     expect(wrapper.find('ConfirmModalContainer')).to.have.length(0);
   });

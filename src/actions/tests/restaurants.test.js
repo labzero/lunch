@@ -57,7 +57,7 @@ describe('actions/restaurants', () => {
 
       it('dispatches flashError', () => {
         return store.dispatch(restaurants.fetchRestaurants()).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -121,7 +121,7 @@ describe('actions/restaurants', () => {
         return store.dispatch(
           restaurants.addRestaurant(name, placeId, address, lat, lng)
         ).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -160,7 +160,7 @@ describe('actions/restaurants', () => {
 
       it('dispatches flashError', () => {
         return store.dispatch(restaurants.removeRestaurant(id)).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -207,7 +207,7 @@ describe('actions/restaurants', () => {
         return store.dispatch(
           restaurants.changeRestaurantName(id, name)
         ).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -243,12 +243,11 @@ describe('actions/restaurants', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        
       });
 
       it('dispatches flashError', () => {
         return store.dispatch(restaurants.addVote(id)).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -287,14 +286,13 @@ describe('actions/restaurants', () => {
     describe('failure', () => {
       beforeEach(() => {
         fetchMock.mock('*', 400);
-        
       });
 
       it('dispatches flashError', () => {
         return store.dispatch(
           restaurants.removeVote(restaurantId, id)
         ).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -340,7 +338,7 @@ describe('actions/restaurants', () => {
         return store.dispatch(
           restaurants.addNewTagToRestaurant(id, name)
         ).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -379,14 +377,14 @@ describe('actions/restaurants', () => {
 
     describe('failure', () => {
       beforeEach(() => {
-        fetchMock.mock('*', 400);        
+        fetchMock.mock('*', 400);
       });
 
       it('dispatches flashError', () => {
         return store.dispatch(
           restaurants.addTagToRestaurant(restaurantId, id)
         ).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -431,7 +429,7 @@ describe('actions/restaurants', () => {
         return store.dispatch(
           restaurants.removeTagFromRestaurant(restaurantId, id)
         ).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });

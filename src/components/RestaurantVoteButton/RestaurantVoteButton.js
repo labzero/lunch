@@ -20,6 +20,7 @@ export class _RestaurantVoteButton extends Component {
         ref={r => { this.el = r; }}
         onClick={this.props.handleClick}
         className={`${s.root} btn btn-sm ${btnClass}`}
+        type="button"
       >
         {this.props.userVotes.length > 0 ? '-1' : '+1'}
       </button>

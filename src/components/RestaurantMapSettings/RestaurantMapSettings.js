@@ -17,7 +17,7 @@ class RestaurantMapSettings extends Component {
     collapsed: false
   }
 
-  toggleCollapsed = () => this.setState({ collapsed: !this.state.collapsed });
+  toggleCollapsed = () => this.setState(prevState => ({ collapsed: !prevState.collapsed }));
 
   render() {
     const {

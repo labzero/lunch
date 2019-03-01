@@ -86,8 +86,7 @@ async function start() {
   // Configure server-side hot module replacement
   const serverConfig = webpackConfig.find(config => config.name === 'server');
   serverConfig.output.hotUpdateMainFilename = 'updates/[hash].hot-update.json';
-  serverConfig.output.hotUpdateChunkFilename =
-    'updates/[id].[hash].hot-update.js';
+  serverConfig.output.hotUpdateChunkFilename = 'updates/[id].[hash].hot-update.js';
   serverConfig.module.rules = serverConfig.module.rules.filter(
     x => x.loader !== 'null-loader',
   );

@@ -29,7 +29,7 @@ describe('actions/tags', () => {
 
       it('dispatches requestTags', () => {
         return store.dispatch(tags.fetchTags()).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[0].type).to.eq('REQUEST_TAGS');
         });
       });
@@ -47,7 +47,7 @@ describe('actions/tags', () => {
 
       it('dispatches receiveTags', () => {
         return store.dispatch(tags.fetchTags()).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('RECEIVE_TAGS');
           expect(actions[1].items).to.eql([{ foo: 'bar' }]);
         });
@@ -61,7 +61,7 @@ describe('actions/tags', () => {
 
       it('dispatches flashError', () => {
         return store.dispatch(tags.fetchTags()).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });
@@ -105,7 +105,7 @@ describe('actions/tags', () => {
 
       it('dispatches tagDeleted', () => {
         return store.dispatch(tags.removeTag(id)).then(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('TAG_DELETED');
           expect(actions[1].id).to.eq(1);
         });
@@ -119,7 +119,7 @@ describe('actions/tags', () => {
 
       it('dispatches flashError', () => {
         return store.dispatch(tags.removeTag(id)).catch(() => {
-          const actions = store.getActions(); 
+          const actions = store.getActions();
           expect(actions[1].type).to.eq('FLASH_ERROR');
         });
       });

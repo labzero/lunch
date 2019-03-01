@@ -100,7 +100,7 @@ class NameFilterForm extends Component {
       );
     } else {
       child = (
-        <button className="btn btn-default" onClick={this.showForm}>
+        <button className="btn btn-default" onClick={this.showForm} type="button">
           filter by name
         </button>
       );

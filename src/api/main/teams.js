@@ -18,8 +18,7 @@ const getTeam = async (req, res, next) => {
   next();
 };
 
-const error409 = (res, message) =>
-  res.status(409).json({ error: true, data: { message } });
+const error409 = (res, message) => res.status(409).json({ error: true, data: { message } });
 
 export default () => {
   const router = new Router();
@@ -42,7 +41,9 @@ export default () => {
       '/',
       loggedIn,
       async (req, res, next) => {
-        const { address, lat, lng, name, slug } = req.body;
+        const {
+          address, lat, lng, name, slug
+        } = req.body;
         const message409 = 'Could not create new team. It might already exist.';
 
         if (!req.user.superuser && req.user.roles.length >= TEAM_LIMIT) {
@@ -145,7 +146,7 @@ export default () => {
 
             if (oldSlug !== filteredPayload.slug && reservedTeamSlugs.indexOf(filteredPayload.slug) > -1) {
               return error409(res, message409);
-            };
+            }
 
             await req.team.update(filteredPayload);
 

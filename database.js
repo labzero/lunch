@@ -1,10 +1,10 @@
 const path = require('path');
 
-if(process.env.NODE_ENV === 'test') {
-  	// eslint-disable-next-line global-require
-	require('dotenv').config({
-		path: path.resolve(process.cwd(), '.env.test'),
-	});
+if (process.env.NODE_ENV === 'test') {
+  // eslint-disable-next-line global-require
+  require('dotenv').config({
+    path: path.resolve(process.cwd(), '.env.test'),
+  });
 }
 require('dotenv').config();
 

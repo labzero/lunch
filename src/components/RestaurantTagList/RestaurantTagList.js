@@ -7,7 +7,7 @@ import TagContainer from '../Tag/TagContainer';
 const RestaurantTagList = ({ ids, removeTag, loggedIn }) => (
   <ul className={`${s.root} ${ids.length === 0 ? s.empty : ''}`}>
     {ids.map(tagId => {
-      const boundRemoveTag = () => {removeTag(tagId)};
+      const boundRemoveTag = () => { removeTag(tagId); };
       return (
         <li className={s.tagItem} key={`restaurantTag_${tagId}`}>
           <TagContainer id={tagId} showDelete={loggedIn} onDeleteClicked={boundRemoveTag} />

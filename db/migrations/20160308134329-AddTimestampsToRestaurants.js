@@ -15,4 +15,3 @@ exports.down = queryInterface => Promise.all(
   queryInterface.removeColumn('restaurants', 'created_at'),
   queryInterface.removeColumn('restaurants', 'updated_at')
 );
-

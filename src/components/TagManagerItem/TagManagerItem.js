@@ -13,7 +13,9 @@ const TagManagerItem = ({ tag, showDelete, handleDeleteClicked }) => (
         onDeleteClicked={handleDeleteClicked}
       />
     </span>
-    ({tag.restaurant_count})
+    (
+    {tag.restaurant_count}
+)
   </li>
 );
 

@@ -16,9 +16,6 @@ module.exports = {
     'airbnb',
     'plugin:flowtype/recommended',
     'plugin:css-modules/recommended',
-    'prettier',
-    'prettier/flowtype',
-    'prettier/react',
   ],
 
   plugins: [
@@ -51,8 +48,8 @@ module.exports = {
     // https://github.com/benmosher/eslint-plugin-import/issues/458
     'import/no-extraneous-dependencies': 'off',
 
-    'jsx-a11y/anchor-is-valid': [ 
-      'error', 
+    'jsx-a11y/anchor-is-valid': [
+      'error',
       {
         specialLink: ['to'],
       },
@@ -80,6 +77,7 @@ module.exports = {
     'key-spacing': 0,
     'no-confusing-arrow': 0,
     'react/jsx-quotes': 0,
+    'max-len': 0,
     'jsx-quotes': [
       2,
       'prefer-double'
@@ -87,7 +85,9 @@ module.exports = {
     'arrow-parens': 'off',
     'generator-star-spacing': 'off',
     'import/prefer-default-export': 0,
+
     'react/forbid-prop-types': 'off',
+    'react/destructuring-assignment': 'off',
   },
 
   settings: {

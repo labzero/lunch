@@ -22,10 +22,9 @@ const mapDispatchToProps = dispatch => ({
 const mergeProps = (stateProps, dispatchProps) => ({
   ...stateProps,
   ...dispatchProps,
-  decide: daysAgo =>
-    dispatchProps
-      .dispatch(decide(stateProps.restaurantId, daysAgo))
-      .then(dispatchProps.hideModal),
+  decide: daysAgo => dispatchProps
+    .dispatch(decide(stateProps.restaurantId, daysAgo))
+    .then(dispatchProps.hideModal),
 });
 
 export default connect(

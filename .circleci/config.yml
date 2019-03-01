@@ -4,7 +4,7 @@ jobs:
   test:
     docker:
       # image for running tests
-      - image: circleci/node:9.11-browsers
+      - image: cypress/browsers:chrome69
         environment:
           - DB_NAME=lunch_test
           - DB_USER=lunch_test
@@ -34,7 +34,7 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-test-dependencies-{{ checksum "package.json" }}
 
       # install deps
       - run:
@@ -44,7 +44,8 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+            - ~/.cache
+          key: v1-test-dependencies-{{ checksum "package.json" }}
 
       # run unit tests
       - run: mkdir ~/repo/junit
@@ -64,18 +65,13 @@ jobs:
       - run:
           name: setup /etc/hosts
           command: |
-            echo 127.0.0.1 local.lunch.pink | sudo tee -a /etc/hosts
-            echo 127.0.0.1 integration-test.local.lunch.pink | sudo tee -a /etc/hosts
+            echo 127.0.0.1 local.lunch.pink | tee -a /etc/hosts
+            echo 127.0.0.1 integration-test.local.lunch.pink | tee -a /etc/hosts
       
       # build the app
       - run:
           name: build-release
           command: NODE_ENV=test npm run build
-
-      - run:
-          name: start-server
-          command: NODE_ENV=test npm run serve
-          background: true
 
       - run:
           name: integration-tests
@@ -108,9 +104,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-build-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
+          - v1-build-dependencies-
 
       # install deps
       - run:
@@ -120,7 +116,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: v1-build-dependencies-{{ checksum "package.json" }}
 
       # build the release
       - run:

@@ -5,7 +5,9 @@ import ModalBody from 'react-bootstrap/lib/ModalBody';
 import ModalFooter from 'react-bootstrap/lib/ModalFooter';
 import Button from 'react-bootstrap/lib/Button';
 
-const ConfirmModal = ({ actionLabel, shown, hideModal, body, handleSubmit }) => (
+const ConfirmModal = ({
+  actionLabel, shown, hideModal, body, handleSubmit
+}) => (
   <Modal show={shown} onHide={hideModal}>
     <ModalBody>
       {body}

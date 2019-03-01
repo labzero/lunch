@@ -53,15 +53,19 @@ class Html extends Component {
     return (
       <html className="no-js" lang="en">
         <head>
-          {config.analytics.googleTrackingId &&
+          {config.analytics.googleTrackingId
+            && (
             <React.Fragment>
               <script
-                dangerouslySetInnerHTML={{ __html:
-                'window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;' +
-                `ga('create','${config.analytics.googleTrackingId}','auto');ga('send','pageview')` }}
+                dangerouslySetInnerHTML={{
+                  __html:
+                'window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;'
+                + `ga('create','${config.analytics.googleTrackingId}','auto');ga('send','pageview')`
+                }}
               />
               <script src="https://www.google-analytics.com/analytics.js" async defer />
             </React.Fragment>
+            )
           }
           <meta charSet="utf-8" />
           <meta httpEquiv="x-ua-compatible" content="ie=edge" />
@@ -95,7 +99,7 @@ class Html extends Component {
         <body>
           <div id="app" dangerouslySetInnerHTML={{ __html: children }} />
           <script dangerouslySetInnerHTML={{ __html: `window.App=${serialize(app)}` }} />
-          {!module.hot && <script dangerouslySetInnerHTML={{ __html: `if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/service-worker.js').then(function(registration) {registration.addEventListener('updatefound', () => {window.swUpdate = true; }); }); }); }` }} />}
+          {!module.hot && <script dangerouslySetInnerHTML={{ __html: 'if (\'serviceWorker\' in navigator) { window.addEventListener(\'load\', () => { navigator.serviceWorker.register(\'/service-worker.js\').then(function(registration) {registration.addEventListener(\'updatefound\', () => {window.swUpdate = true; }); }); }); }' }} />}
           {apikey && <script src={`https://maps.googleapis.com/maps/api/js?key=${apikey}&libraries=places&v=3`} />}
           {scripts.map(script => <script key={script} src={script} />)}
         </body>

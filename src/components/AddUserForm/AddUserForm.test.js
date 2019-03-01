@@ -3,16 +3,31 @@
 import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
-import AddUserForm from './AddUserForm';
+import proxyquire from 'proxyquire';
+import PropTypes from 'prop-types';
+
+const proxyquireStrict = proxyquire.noCallThru();
+
+const AddUserForm = proxyquireStrict('./AddUserForm', {
+  'react-intl': {
+    intlShape: {
+      isRequired: PropTypes.shape().isRequired,
+    },
+  }
+}).default;
 
 describe('AddUserForm', () => {
   let props;
 
   beforeEach(() => {
     props = {
+      addUserToTeam: () => {},
+      hasGuestRole: false,
+      hasMemberRole: false,
+      hasOwnerRole: false,
       intl: {
-        formatMessage: () => {}
-      }
+        formatMessage: () => {},
+      },
     };
   });
 

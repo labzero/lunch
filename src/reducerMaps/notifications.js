@@ -111,7 +111,6 @@ export default new Map([
       notification
     ];
   }],
-  [ActionTypes.EXPIRE_NOTIFICATION, (state, action) =>
-    state.filter(n => n.id !== action.id)
+  [ActionTypes.EXPIRE_NOTIFICATION, (state, action) => state.filter(n => n.id !== action.id)
   ]
 ]);

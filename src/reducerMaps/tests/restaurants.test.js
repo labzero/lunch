@@ -5,7 +5,6 @@ import ActionTypes from '../../constants/ActionTypes';
 import restaurants from '../restaurants';
 
 describe('reducerMaps/restaurants', () => {
-
   describe('SORT_RESTAURANTS', () => {
     let beforeState;
     let afterState;
@@ -54,14 +53,14 @@ describe('reducerMaps/restaurants', () => {
               }
             }
           },
-          result: [1,2,3,4,5,6]
+          result: [1, 2, 3, 4, 5, 6]
         }
       };
 
       afterState = restaurants.get(ActionTypes.SORT_RESTAURANTS)(beforeState, {
-        decision: {restaurant_id: 5},
-        newlyAdded: {id: 6, userId: 1},
-        user: {id: 1}
+        decision: { restaurant_id: 5 },
+        newlyAdded: { id: 6, userId: 1 },
+        user: { id: 1 }
       });
     });
 
@@ -82,7 +81,6 @@ describe('reducerMaps/restaurants', () => {
       expect(afterState.items.result[4]).to.eq(4);
       expect(afterState.items.result[5]).to.eq(3);
     });
-
   });
 
   describe('DECISION_POSTED', () => {
@@ -98,12 +96,12 @@ describe('reducerMaps/restaurants', () => {
               1: {
                 id: 1,
                 name: 'Tokyo Express',
-                all_decision_count: "1",
+                all_decision_count: '1',
               },
               2: {
                 id: 2,
                 name: 'Ferry Building',
-                all_decision_count: "1",
+                all_decision_count: '1',
               }
             }
           }
@@ -127,7 +125,5 @@ describe('reducerMaps/restaurants', () => {
     it('decrements the decision count for any unselected restaurants', () => {
       expect(afterState.items.entities.restaurants[2].all_decision_count).to.eq(0);
     });
-
   });
-
 });

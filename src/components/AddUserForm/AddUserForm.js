@@ -97,12 +97,15 @@ class AddUserForm extends Component {
             </Row>
             <HelpBlock>
               Members can add new users and remove guests.
-              {hasOwnerRole &&
-                ' Owners can manage all user roles and manage overall team information.'
+              {hasOwnerRole
+                && ' Owners can manage all user roles and manage overall team information.'
               }
             </HelpBlock>
           </FormGroup>
           <Button type="submit">Add</Button>
+          <HelpBlock>
+            Please tell the user you are inviting to check their spam folder if they don&rsquo;t receive anything shortly.
+          </HelpBlock>
         </form>
       </div>
     );

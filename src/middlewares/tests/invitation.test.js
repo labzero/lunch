@@ -97,10 +97,10 @@ describe('middlewares/invitation', () => {
       beforeEach((done) => {
         stub(InvitationMock, 'findOne').callsFake(() => Promise.resolve({
           get: stub()
-                 .onFirstCall()
-                 .returns(false)
-                 .onSecondCall()
-                 .returns(new Date())
+            .onFirstCall()
+            .returns(false)
+            .onSecondCall()
+            .returns(new Date())
         }));
 
         request(app).post('/').send({ email: 'jeffrey@labzero.com' }).then((r) => {
@@ -126,10 +126,10 @@ describe('middlewares/invitation', () => {
       beforeEach(() => {
         stub(InvitationMock, 'findOne').callsFake(() => Promise.resolve({
           get: stub()
-                 .onFirstCall()
-                 .returns(false)
-                 .onSecondCall()
-                 .returns(new Date() - (60 * 60 * 1000 * 24)),
+            .onFirstCall()
+            .returns(false)
+            .onSecondCall()
+            .returns(new Date() - (60 * 60 * 1000 * 24)),
           update: updateSpy
         }));
 

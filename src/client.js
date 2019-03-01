@@ -121,7 +121,11 @@ async function onLocationChange(location, action) {
     }
 
     if (route.redirect) {
-      history.replace(route.redirect);
+      if (route.redirect.slice(0, 2) === '//') {
+        window.location.href = route.redirect;
+      } else {
+        history.replace(route.redirect);
+      }
       return;
     }
 
@@ -209,7 +213,7 @@ if (module.hot) {
     }
 
     onLocationChange(currentLocation);
-  }
+  };
 
   module.hot.accept('./routes/team', () => {
     routes = require('./routes/team').default; // eslint-disable-line global-require
