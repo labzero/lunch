@@ -31,10 +31,13 @@ passport.use(new GoogleStrategy(
   },
   async (accessToken, refreshToken, profile, done) => {
     if (
-      typeof profile.emails === 'object'
-      && profile.emails.length !== undefined
+      /* eslint-disable no-underscore-dangle */
+      profile._json
+      && profile._json.email
     ) {
-      const accountEmail = profile.emails.find(email => email.type === 'account');
+      const accountEmail = profile._json.email;
+      /* eslint-enable no-underscore-dangle */
+
       try {
         // WARNING: this retrieves all attributes (incl. password).
         // But we only provide the ID to passport.
@@ -48,14 +51,14 @@ passport.use(new GoogleStrategy(
         // might not have been linked with Google yet
         if (!user) {
           user = await User.findOne({
-            where: { email: accountEmail.value }
+            where: { email: accountEmail }
           });
           userUpdates.google_id = profile.id;
           doUpdates = true;
         }
 
         if (!user) {
-          return done(null, false, accountEmail.value);
+          return done(null, false, accountEmail);
         }
 
         if (
