@@ -8,7 +8,7 @@ jobs:
         environment:
           - DB_NAME=lunch_test
           - DB_USER=lunch_test
-          - DB_PASS=
+          - DB_PASS=lunch_test
           - DB_HOST=localhost
           - SUPERUSER_NAME=test
           - SUPERUSER_PASSWORD=test
@@ -19,6 +19,7 @@ jobs:
         environment:
         - POSTGRES_USER=lunch_test
         - POSTGRES_DB=lunch_test
+        - POSTGRES_PASSWORD=lunch_test
 
     working_directory: ~/repo
 
