@@ -80,6 +80,10 @@ npm start
 
 `npm start` will default to `localhost`, but the browser should point to `https://local.lunch.pink:3000`
 
+#### Logging in
+
+If you are logged into the production version of Lunch, you will need to log out in order to log in locally. This is due to the `*.lunch.pink` cookie conflicting with the `*.local.lunch.pink` cookie.
+
 ## Production server
 
 ### Building
