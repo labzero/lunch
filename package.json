@@ -14,7 +14,7 @@
   ],
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
-    "bcrypt": "^3.0.8",
+    "bcrypt": "^5.0.0",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.3",
     "classnames": "^2.2.6",
