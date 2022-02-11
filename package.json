@@ -46,7 +46,7 @@
     "mocha-junit-reporter": "^1.17.0",
     "moment": "^2.11.2",
     "morgan": "^1.8.1",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "normalizr": "^3.2.2",
     "passport": "^0.4.0",
     "passport-google-oauth20": "^1.0.0",
