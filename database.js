@@ -9,7 +9,7 @@ if (process.env.NODE_ENV === 'test') {
 require('dotenv').config();
 
 const settings = {
-  dialect: 'postgresql',
+  dialect: 'postgres',
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
