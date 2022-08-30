@@ -4,7 +4,7 @@ jobs:
   test:
     docker:
       # image for running tests
-      - image: cypress/browsers:chrome69
+      - image: cypress/browsers:node16.14.0-chrome99-ff97
         environment:
           - DB_NAME=lunch_test
           - DB_USER=lunch_test
@@ -15,27 +15,25 @@ jobs:
           - SUPERUSER_EMAIL=test@lunch.pink
 
       # service image for database for functional tests
-      - image: postgres:9.6
+      - image: postgres:14.5
         environment:
-        - POSTGRES_USER=lunch_test
-        - POSTGRES_DB=lunch_test
-        - POSTGRES_PASSWORD=lunch_test
+          - POSTGRES_USER=lunch_test
+          - POSTGRES_DB=lunch_test
+          - POSTGRES_PASSWORD=lunch_test
 
     working_directory: ~/repo
 
     steps:
-
       - checkout
 
       - run:
           name: dotenv
           command: touch .env && touch .env.prod && touch .env.test
 
-
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-test-dependencies-{{ checksum "package.json" }}
+            - v1-test-dependencies-{{ checksum "package.json" }}
 
       # install deps
       - run:
@@ -68,7 +66,7 @@ jobs:
           command: |
             echo 127.0.0.1 local.lunch.pink | tee -a /etc/hosts
             echo 127.0.0.1 integration-test.local.lunch.pink | tee -a /etc/hosts
-      
+
       # build the app
       - run:
           name: build-release
@@ -105,9 +103,9 @@ jobs:
       # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-build-dependencies-{{ checksum "package.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-build-dependencies-
+            - v1-build-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-build-dependencies-
 
       # install deps
       - run:
@@ -131,23 +129,19 @@ jobs:
           name: build-docker-image
           command: ../buildImage.sh
 
-
   deploy-staging:
-
     docker:
       - image: ${BUILD_IMAGE}
 
     working_directory: ~/repo
 
     steps:
-
       # update ECS task and service with image build above (script is defined in custom build image)
       - run:
           name: update-service
           command: ../deployStaging.sh
 
   deploy-production:
-
     docker:
       - image: ${BUILD_IMAGE}
 
@@ -194,7 +188,6 @@ workflows:
 
   deploy:
     jobs:
-
       - build:
           filters:
             tags:
@@ -228,6 +221,3 @@ workflows:
               only: /^lunch-v.*/
             branches:
               ignore: /.*/
-
-
-

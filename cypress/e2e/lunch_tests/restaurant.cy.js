@@ -20,7 +20,11 @@ describe('Adding a restaurant and tag', () => {
     it('loads the map and geosuggest input field', () => {
       cy.get('.RestaurantMap-root');
       cy.get('.RestaurantMap-mapSettingsContainer');
-      cy.get('.geosuggest__input').should('have.prop', 'placeholder', 'Add places');
+      cy.get('.geosuggest__input').should(
+        'have.prop',
+        'placeholder',
+        'Add places'
+      );
     });
 
     describe('with no restaurants', () => {
@@ -41,6 +45,7 @@ describe('Adding a restaurant and tag', () => {
 
       it('show the restaurant list item with contents', () => {
         helpers.addRestaurant();
+        cy.reload();
         cy.get('ul.RestaurantList-root').as('restaurant');
         cy.get('@restaurant').find('div.Restaurant-data');
         cy.get('@restaurant').find('div.Restaurant-voteContainer');
@@ -50,6 +55,7 @@ describe('Adding a restaurant and tag', () => {
 
       it('deletes a restaurant successfully', () => {
         helpers.addRestaurant();
+        cy.reload();
         helpers.deleteRestaurant();
         cy.contains('Welcome to Lunch!');
       });
