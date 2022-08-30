@@ -52,7 +52,7 @@
     "passport-google-oauth20": "^1.0.0",
     "passport-local": "^1.0.0",
     "pg": "^8.7.1",
-    "pg-native": "^3.0.0",
+    "pg-native": "^3.0.1",
     "pretty-error": "^2.1.1",
     "prop-types": "^15.6.2",
     "query-string": "^6.1.0",
