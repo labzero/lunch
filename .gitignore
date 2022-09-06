@@ -43,3 +43,4 @@ cypress/videos/
 deploy.sh
 test-results.xml
 screenshots
+Dockerfile.bak

@@ -1,4 +1,4 @@
-version: '2'
+version: "2"
 services:
   web:
     build:
@@ -10,10 +10,10 @@ services:
     container_name: lunch-node
     ports:
       - "3000:3000"
-    env_file: '.env.prod'
+    env_file: ".env.prod"
   db:
-    image: postgres:9.5.1
+    image: postgres:14.5
     ports:
       - "5432:5432"
     container_name: lunch-postgres
-    env_file: '.env.prod'
+    env_file: ".env.prod"
