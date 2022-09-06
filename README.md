@@ -33,19 +33,18 @@ Make two copies of `.env.sample`, named `.env` and `.env.prod`.
 
 For `GOOGLE_*` env variables:
 
-* Create a Google Developer app in the [console](https://console.developers.google.com/).
-* Enable the Google+ API, Contacts API, Google Maps JavaScript API, Google Places API Web Service, and Google Maps Geocoding API.
-* Go to the Credentials section and create an OAuth client ID.
-* Click the OAuth Consent tab and add `lunch.pink` as an authorized domain.
-* Click the Credentials tab, choose "OAuth" from the Create Credentials dropdown.
-* Choose "Web Application" as the type.
-* For local development:
-  * Enter `http://local.lunch.pink:3000` and `https://local.lunch.pink:3000` as authorized JavaScript origins
-  * Enter `http://local.lunch.pink:3000/login/google/callback` and `https://local.lunch.pink:3000/login/google/callback` as authorized redirect URIs
-* Add your deployment target(s) as additional origins/redirect URIs.
-* Go back to the Credentials section and create two API keys - one for the client, and one for the server.
-  * For the client, optionally limit requests to certain referrers.
-* On each API key, add `http://*.lunch.pink` and `https://*.lunch.pink` as HTTP referrers.
+- Create a Google Developer app in the [console](https://console.developers.google.com/).
+- Enable the Google+ API, Contacts API, Maps JavaScript API, Places API, and Geocoding API.
+- Click the OAuth Consent tab and add click "Edit app".
+- Add `lunch.pink` as an authorized domain.
+- Click the Credentials tab and choose "OAuth client ID" from the Create Credentials dropdown.
+- Choose "Web application" as the type.
+- For local development:
+  - Enter `http://local.lunch.pink:3000` and `https://local.lunch.pink:3000` as authorized JavaScript origins
+  - Enter `http://local.lunch.pink:3000/login/google/callback` and `https://local.lunch.pink:3000/login/google/callback` as authorized redirect URIs
+- Add your deployment target(s) as additional origins/redirect URIs.
+- Go back to the Credentials tab and create two API keys - one for the client, and one for the server.
+- On each API key, add `http://lunch.pink`, `https://lunch.pink`, `http://*.lunch.pink`, and `https://*.lunch.pink` as HTTP referrers.
 
 #### Database
 
