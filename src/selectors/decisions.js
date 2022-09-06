@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 import moment from 'moment';
 
-export const getDecisionIds = state => state.decisions.items.result;
+export const getDecisionIds = state => state.decisions.items.result || [];
 export const getDecisionEntities = (state) => {
   if (state.decisions.items.entities) {
     return state.decisions.items.entities.decisions;
