@@ -86,9 +86,9 @@ jobs:
             echo 127.0.0.1 integration-test.local.lunch.pink | tee -a /etc/hosts
 
       # build the app
-      - run:
-          name: build-release
-          command: NODE_ENV=test npm run build
+      # - run:
+      #     name: build-release
+      #     command: NODE_ENV=test npm run build
 
       - run:
           name: integration-tests
@@ -118,9 +118,9 @@ jobs:
           version: 20.10.11
           docker_layer_caching: true
 
-      # - run:
-      #     name: dotenv
-      #     command: touch .env && touch .env.prod
+      - run:
+          name: dotenv
+          command: touch .env && touch .env.prod
 
       # # Download and cache dependencies
       # - restore_cache:
