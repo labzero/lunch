@@ -6,12 +6,12 @@ export default () => {
   const name = 'test';
   const slug = 'integration-test';
 
-  cy.request('POST', `${Cypress.config().baseUrl}/api/teams`, {
+  cy.request('POST', `${Cypress.config().baseUrl}api/teams`, {
     lat,
     lng,
     name,
     slug,
-    address
+    address,
   });
   cy.visit('/');
 };
