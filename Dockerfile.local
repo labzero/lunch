@@ -1,0 +1,12 @@
+FROM node:16.17.0
+
+# Set a working directory
+WORKDIR /app
+
+# Install dependencies based on the preferred package manager
+COPY package.json yarn.lock ./
+RUN yarn --frozen-lockfile
+
+COPY . .
+
+CMD [ "npm", "start" ]
