@@ -44,3 +44,6 @@ deploy.sh
 test-results.xml
 screenshots
 Dockerfile.bak
+
+#Docker postgres-data
+postgres-data
