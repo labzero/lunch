@@ -8,14 +8,14 @@ commands:
       - run:
           name: Deploy
           command: |
-            aws configure set default.region us-west-2 \
-            CLEAN_BRANCH=`echo $CIRCLE_BRANCH | sed 's/\//-/g'` \
-            DOCKER_TAG=${BUILD_CONTAINER_REPOSITORY}:${CIRCLE_SHA1} \
-            CURRENT_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix ${TASK_FAMILY} --sort DESC | jq -r '.taskDefinitionArns[0]'` \
-            TASK_JSON=`aws ecs describe-task-definition --task-definition ${CURRENT_TASK} | jq --arg DOCKER_TAG "$DOCKER_TAG" '.taskDefinition.containerDefinitions[0].image = $DOCKER_TAG | {containerDefinitions: .taskDefinition.containerDefinitions, family: .taskDefinition.family}'` \
-            aws ecs register-task-definition --cli-input-json "${TASK_JSON}" \
-            aws ecs run-task --cluster ${ECS_CLUSTER} --task-definition ${MIGRATION_TASK} \
-            NEW_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix ${TASK_FAMILY} --sort DESC | jq -r '.taskDefinitionArns[0]'` \
+            aws configure set default.region us-west-2
+            CLEAN_BRANCH=`echo $CIRCLE_BRANCH | sed 's/\//-/g'`
+            DOCKER_TAG=${BUILD_CONTAINER_REPOSITORY}:${CIRCLE_SHA1}
+            CURRENT_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix ${TASK_FAMILY} --sort DESC | jq -r '.taskDefinitionArns[0]'`
+            TASK_JSON=`aws ecs describe-task-definition --task-definition ${CURRENT_TASK} | jq --arg DOCKER_TAG "$DOCKER_TAG" '.taskDefinition.containerDefinitions[0].image = $DOCKER_TAG | {containerDefinitions: .taskDefinition.containerDefinitions, family: .taskDefinition.family}'`
+            aws ecs register-task-definition --cli-input-json "${TASK_JSON}"
+            aws ecs run-task --cluster ${ECS_CLUSTER} --task-definition ${MIGRATION_TASK}
+            NEW_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix ${TASK_FAMILY} --sort DESC | jq -r '.taskDefinitionArns[0]'`
             aws ecs update-service --service ${SERVICE_NAME} --cluster ${ECS_CLUSTER} --task-definition ${NEW_TASK}
 
 jobs:
@@ -153,10 +153,10 @@ jobs:
       - run:
           name: build-docker-image
           command: |
-            CLEAN_BRANCH=`echo $CIRCLE_BRANCH | sed 's/\//-/g'` \
-            DOCKER_TAG=${BUILD_CONTAINER_REPOSITORY}:${CIRCLE_SHA1} \
-            docker build --tag ${DOCKER_TAG} . \
-            aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${CONTAINER_REGISTRY} \
+            CLEAN_BRANCH=`echo $CIRCLE_BRANCH | sed 's/\//-/g'`
+            DOCKER_TAG=${BUILD_CONTAINER_REPOSITORY}:${CIRCLE_SHA1}
+            docker build --tag ${DOCKER_TAG} .
+            aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${CONTAINER_REGISTRY}
             docker push ${DOCKER_TAG}
 
   deploy-staging:
@@ -170,9 +170,9 @@ jobs:
       - run:
           name: update-service
           command: |
-            export TASK_FAMILY=lunch-staging \
-            export ECS_CLUSTER=Lunch-Staging \
-            export SERVICE_NAME=lunch-staging \
+            export TASK_FAMILY=lunch-staging
+            export ECS_CLUSTER=Lunch-Staging
+            export SERVICE_NAME=lunch-staging
             export MIGRATION_TASK=staging_lunch_migrate
 
       - aws-deploy
@@ -187,9 +187,9 @@ jobs:
       - run:
           name: update_service
           command: |
-            export TASK_FAMILY=lunch \
-            export ECS_CLUSTER=Lunch \
-            export SERVICE_NAME=lunch \
+            export TASK_FAMILY=lunch
+            export ECS_CLUSTER=Lunch
+            export SERVICE_NAME=lunch
             export MIGRATION_TASK=lunch_migrate
 
       - aws-deploy
