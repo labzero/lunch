@@ -8,12 +8,6 @@ commands:
       build_container_repository:
         type: env_var_name
         default: BUILD_CONTAINER_REPOSITORY
-      circle_branch:
-        type: env_var_name
-        default: CIRCLE_BRANCH
-      circle_sha1:
-        type: env_var_name
-        default: CIRCLE_SHA1
       ecs_cluster:
         type: env_var_name
         default: ECS_CLUSTER
@@ -31,8 +25,8 @@ commands:
           name: Deploy
           command: |
             aws configure set default.region us-west-2
-            CLEAN_BRANCH=`echo ${<< parameters.circle_branch >>} | sed 's/\//-/g'`
-            DOCKER_TAG=${<< parameters.build_container_repository >>}:${<< parameters.circle_sha1 >>}
+            CLEAN_BRANCH=`echo ${CIRCLE_BRANCH} | sed 's/\//-/g'`
+            DOCKER_TAG=${<< parameters.build_container_repository >>}:${CIRCLE_SHA1}
             CURRENT_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix ${<< parameters.task_family >>} --sort DESC | jq -r '.taskDefinitionArns[0]'`
             TASK_JSON=`aws ecs describe-task-definition --task-definition ${CURRENT_TASK} | jq --arg DOCKER_TAG "$DOCKER_TAG" '.taskDefinition.containerDefinitions[0].image = $DOCKER_TAG | {containerDefinitions: .taskDefinition.containerDefinitions, family: .taskDefinition.family}'`
             aws ecs register-task-definition --cli-input-json "${TASK_JSON}"
@@ -192,10 +186,10 @@ jobs:
       - run:
           name: update-service
           command: |
-            export TASK_FAMILY=lunch-staging
-            export ECS_CLUSTER=Lunch-Staging
-            export SERVICE_NAME=lunch-staging
-            export MIGRATION_TASK=staging_lunch_migrate
+            echo 'export TASK_FAMILY="lunch-staging"' >> "$BASH_ENV"
+            echo 'export ECS_CLUSTER="Lunch-Staging"' >> "$BASH_ENV"
+            echo 'export SERVICE_NAME="lunch-staging"' >> "$BASH_ENV"
+            echo 'export MIGRATION_TASK="staging_lunch_migrate"' >> "$BASH_ENV"
 
       - aws-deploy
 
@@ -209,10 +203,10 @@ jobs:
       - run:
           name: update_service
           command: |
-            export TASK_FAMILY=lunch
-            export ECS_CLUSTER=Lunch
-            export SERVICE_NAME=lunch
-            export MIGRATION_TASK=lunch_migrate
+            echo 'export TASK_FAMILY="lunch"' >> "$BASH_ENV"
+            echo 'export ECS_CLUSTER="Lunch"' >> "$BASH_ENV"
+            echo 'export SERVICE_NAME="lunch"' >> "$BASH_ENV"
+            echo 'export MIGRATION_TASK="lunch_migrate"' >> "$BASH_ENV"
 
       - aws-deploy
 
