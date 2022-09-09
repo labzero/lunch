@@ -6,26 +6,26 @@ commands:
   aws-deploy:
     parameters:
       build_container_repository:
-        type: string
-        default: $BUILD_CONTAINER_REPOSITORY
+        type: env_var_name
+        default: BUILD_CONTAINER_REPOSITORY
       circle_branch:
-        type: string
-        default: $CIRCLE_BRANCH
+        type: env_var_name
+        default: CIRCLE_BRANCH
       circle_sha1:
-        type: string
-        default: $CIRCLE_SHA1
+        type: env_var_name
+        default: CIRCLE_SHA1
       ecs_cluster:
-        type: string
-        default: $ECS_CLUSTER
+        type: env_var_name
+        default: ECS_CLUSTER
       migration_task:
-        type: string
-        default: $MIGRATION_TASK
+        type: env_var_name
+        default: MIGRATION_TASK
       service_name:
-        type: string
-        default: $SERVICE_NAME
+        type: env_var_name
+        default: SERVICE_NAME
       task_family:
-        type: string
-        default: $TASK_FAMILY
+        type: env_var_name
+        default: TASK_FAMILY
     steps:
       - run:
           name: Deploy
