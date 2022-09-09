@@ -31,14 +31,14 @@ commands:
           name: Deploy
           command: |
             aws configure set default.region us-west-2
-            CLEAN_BRANCH=`echo << parameters.circle_branch >> | sed 's/\//-/g'`
-            DOCKER_TAG=<< parameters.build_container_repository >>:<< parameters.circle_sha1 >>
-            CURRENT_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix << parameters.task_family >> --sort DESC | jq -r '.taskDefinitionArns[0]'`
+            CLEAN_BRANCH=`echo ${<< parameters.circle_branch >>} | sed 's/\//-/g'`
+            DOCKER_TAG=${<< parameters.build_container_repository >>}:${<< parameters.circle_sha1 >>}
+            CURRENT_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix ${<< parameters.task_family >>} --sort DESC | jq -r '.taskDefinitionArns[0]'`
             TASK_JSON=`aws ecs describe-task-definition --task-definition ${CURRENT_TASK} | jq --arg DOCKER_TAG "$DOCKER_TAG" '.taskDefinition.containerDefinitions[0].image = $DOCKER_TAG | {containerDefinitions: .taskDefinition.containerDefinitions, family: .taskDefinition.family}'`
             aws ecs register-task-definition --cli-input-json "${TASK_JSON}"
-            aws ecs run-task --cluster << parameters.ecs_cluster >> --task-definition << parameters.migration_task >>
-            NEW_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix << parameters.task_family >> --sort DESC | jq -r '.taskDefinitionArns[0]'`
-            aws ecs update-service --service << parameters.service_name >> --cluster << parameters.ecs_cluster >> --task-definition ${NEW_TASK}
+            aws ecs run-task --cluster ${<< parameters.ecs_cluster >>} --task-definition ${<< parameters.migration_task >>}
+            NEW_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix ${<< parameters.task_family >>} --sort DESC | jq -r '.taskDefinitionArns[0]'`
+            aws ecs update-service --service ${<< parameters.service_name >>} --cluster ${<< parameters.ecs_cluster >>} --task-definition ${NEW_TASK}
 
 jobs:
   test:
