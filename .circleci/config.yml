@@ -6,8 +6,8 @@ commands:
   aws-deploy:
     parameters:
       build_container_repository:
-        type: string
-        default: ""
+        type: env_var_name
+        default: BUILD_CONTAINER_REPOSITORY
       ecs_cluster:
         type: string
         default: ""
@@ -27,12 +27,12 @@ commands:
             aws configure set default.region us-west-2
             CLEAN_BRANCH=`echo ${CIRCLE_BRANCH} | sed 's/\//-/g'`
             DOCKER_TAG=${<< parameters.build_container_repository >>}:${CIRCLE_SHA1}
-            CURRENT_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix ${<< parameters.task_family >>} --sort DESC | jq -r '.taskDefinitionArns[0]'`
+            CURRENT_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix << parameters.task_family >> --sort DESC | jq -r '.taskDefinitionArns[0]'`
             TASK_JSON=`aws ecs describe-task-definition --task-definition ${CURRENT_TASK} | jq --arg DOCKER_TAG "$DOCKER_TAG" '.taskDefinition.containerDefinitions[0].image = $DOCKER_TAG | {containerDefinitions: .taskDefinition.containerDefinitions, family: .taskDefinition.family}'`
             aws ecs register-task-definition --cli-input-json "${TASK_JSON}" > /dev/null
-            aws ecs run-task --cluster ${<< parameters.ecs_cluster >>} --task-definition ${<< parameters.migration_task >>}
-            NEW_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix ${<< parameters.task_family >>} --sort DESC | jq -r '.taskDefinitionArns[0]'`
-            aws ecs update-service --service ${<< parameters.service_name >>} --cluster ${<< parameters.ecs_cluster >>} --task-definition ${NEW_TASK}
+            aws ecs run-task --cluster << parameters.ecs_cluster >> --task-definition << parameters.migration_task >>
+            NEW_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix << parameters.task_family >> --sort DESC | jq -r '.taskDefinitionArns[0]'`
+            aws ecs update-service --service << parameters.service_name >> --cluster << parameters.ecs_cluster >> --task-definition ${NEW_TASK}
 
 jobs:
   test:
