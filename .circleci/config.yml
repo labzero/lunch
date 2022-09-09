@@ -6,20 +6,20 @@ commands:
   aws-deploy:
     parameters:
       build_container_repository:
-        type: env_var_name
-        default: BUILD_CONTAINER_REPOSITORY
+        type: string
+        default: ""
       ecs_cluster:
-        type: env_var_name
-        default: ECS_CLUSTER
+        type: string
+        default: ""
       migration_task:
-        type: env_var_name
-        default: MIGRATION_TASK
+        type: string
+        default: ""
       service_name:
-        type: env_var_name
-        default: SERVICE_NAME
+        type: string
+        default: ""
       task_family:
-        type: env_var_name
-        default: TASK_FAMILY
+        type: string
+        default: ""
     steps:
       - run:
           name: Deploy
@@ -29,7 +29,7 @@ commands:
             DOCKER_TAG=${<< parameters.build_container_repository >>}:${CIRCLE_SHA1}
             CURRENT_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix ${<< parameters.task_family >>} --sort DESC | jq -r '.taskDefinitionArns[0]'`
             TASK_JSON=`aws ecs describe-task-definition --task-definition ${CURRENT_TASK} | jq --arg DOCKER_TAG "$DOCKER_TAG" '.taskDefinition.containerDefinitions[0].image = $DOCKER_TAG | {containerDefinitions: .taskDefinition.containerDefinitions, family: .taskDefinition.family}'`
-            aws ecs register-task-definition --cli-input-json "${TASK_JSON}"
+            aws ecs register-task-definition --cli-input-json "${TASK_JSON}" > /dev/null
             aws ecs run-task --cluster ${<< parameters.ecs_cluster >>} --task-definition ${<< parameters.migration_task >>}
             NEW_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix ${<< parameters.task_family >>} --sort DESC | jq -r '.taskDefinitionArns[0]'`
             aws ecs update-service --service ${<< parameters.service_name >>} --cluster ${<< parameters.ecs_cluster >>} --task-definition ${NEW_TASK}
@@ -182,16 +182,11 @@ jobs:
     # working_directory: ~/repo
 
     steps:
-      # update ECS task and service with image build above
-      - run:
-          name: update-service
-          command: |
-            echo 'export TASK_FAMILY="lunch-staging"' >> "$BASH_ENV"
-            echo 'export ECS_CLUSTER="Lunch-Staging"' >> "$BASH_ENV"
-            echo 'export SERVICE_NAME="lunch-staging"' >> "$BASH_ENV"
-            echo 'export MIGRATION_TASK="staging_lunch_migrate"' >> "$BASH_ENV"
-
-      - aws-deploy
+      - aws-deploy:
+          task_family: lunch-staging
+          ecs_cluster: Lunch-Staging
+          service_name: lunch-staging
+          migration_task: staging_lunch_migrate
 
   deploy-production:
     docker:
@@ -200,15 +195,11 @@ jobs:
     # working_directory: ~/repo
 
     steps:
-      - run:
-          name: update_service
-          command: |
-            echo 'export TASK_FAMILY="lunch"' >> "$BASH_ENV"
-            echo 'export ECS_CLUSTER="Lunch"' >> "$BASH_ENV"
-            echo 'export SERVICE_NAME="lunch"' >> "$BASH_ENV"
-            echo 'export MIGRATION_TASK="lunch_migrate"' >> "$BASH_ENV"
-
-      - aws-deploy
+      - aws-deploy:
+          task_family: lunch
+          ecs_cluster: Lunch
+          service_name: lunch
+          migration_task: lunch_migrate
 
 # WORKFLOW DEFINITIONS
 workflows:
