@@ -141,7 +141,7 @@
     "husky": "^1.0.0-rc.15",
     "identity-obj-proxy": "^3.0.0",
     "json-loader": "^0.5.4",
-    "lint-staged": "^8.1.4",
+    "lint-staged": "^13.1.0",
     "mkdirp": "^0.5.1",
     "mocha": "^5.0.0",
     "node-sass": "7.0.0",
@@ -194,22 +194,17 @@
     "workbox-webpack-plugin": "^3.2.0"
   },
   "lint-staged": {
-    "ignore": [
-      "package.json"
+    "*.{js,jsx}": [
+      "eslint --no-ignore --fix",
+      "git add --force"
     ],
-    "linters": {
-      "*.{js,jsx}": [
-        "eslint --no-ignore --fix",
-        "git add --force"
-      ],
-      "*.{json,md,graphql}": [
-        "git add --force"
-      ],
-      "*.{css,less,styl,scss,sass,sss}": [
-        "stylelint --fix",
-        "git add --force"
-      ]
-    }
+    "*.{json,md,graphql}": [
+      "git add --force"
+    ],
+    "*.{css,less,styl,scss,sass,sss}": [
+      "stylelint --fix",
+      "git add --force"
+    ]
   },
   "scripts": {
     "precommit": "npm run test && lint-staged",
