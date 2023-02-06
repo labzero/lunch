@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import RestaurantVoteCountContainer from '../RestaurantVoteCount/RestaurantVoteCountContainer';
 import RestaurantVoteButtonContainer from '../RestaurantVoteButton/RestaurantVoteButtonContainer';
 import RestaurantDecisionContainer from '../RestaurantDecision/RestaurantDecisionContainer';
@@ -17,29 +17,29 @@ class Restaurant extends Component {
     shouldShowAddTagArea: PropTypes.bool,
     shouldShowDropdown: PropTypes.bool,
     listUiItem: PropTypes.object.isRequired,
-    showMapAndInfoWindow: PropTypes.func.isRequired
+    showMapAndInfoWindow: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
     shouldShowAddTagArea: false,
-    shouldShowDropdown: false
+    shouldShowDropdown: false,
   };
 
   state = {
-    isAddingTags: false
+    isAddingTags: false,
   };
 
   hideAddTagForm = () => {
     this.setState(() => ({
-      isAddingTags: false
+      isAddingTags: false,
     }));
-  }
+  };
 
   showAddTagForm = () => {
     this.setState(() => ({
-      isAddingTags: true
+      isAddingTags: true,
     }));
-  }
+  };
 
   render() {
     const {
@@ -72,7 +72,13 @@ class Restaurant extends Component {
           );
         } else {
           addTagArea = (
-            <button className="btn btn-sm btn-default" onClick={this.showAddTagForm} type="button">add tag</button>
+            <button
+              className="btn btn-sm btn-default"
+              onClick={this.showAddTagForm}
+              type="button"
+            >
+              add tag
+            </button>
           );
         }
       }

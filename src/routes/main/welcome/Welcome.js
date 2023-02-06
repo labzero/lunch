@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Button from 'react-bootstrap/lib/Button';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
@@ -13,7 +13,7 @@ import s from './Welcome.scss';
 class Welcome extends Component {
   static propTypes = {
     updateCurrentUser: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired
+    user: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -26,12 +26,12 @@ class Welcome extends Component {
     };
   }
 
-  handleChange = event => this.setState({ name: event.target.value });
+  handleChange = (event) => this.setState({ name: event.target.value });
 
   handleSubmit = (event) => {
     event.preventDefault();
     this.props.updateCurrentUser(this.state);
-  }
+  };
 
   render() {
     const { name } = this.state;

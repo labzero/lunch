@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 
 import React from 'react';
 import Grid from 'react-bootstrap/lib/Grid';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './NotFound.scss';
 
 class NotFound extends React.Component {

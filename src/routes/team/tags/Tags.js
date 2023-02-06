@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Grid from 'react-bootstrap/lib/Grid';
 import Loading from '../../../components/Loading';
 import TagManagerContainer from '../../../components/TagManager/TagManagerContainer';
@@ -29,7 +29,7 @@ class Tags extends Component {
 
 Tags.propTypes = {
   fetchTagsIfNeeded: PropTypes.func.isRequired,
-  tagListReady: PropTypes.bool.isRequired
+  tagListReady: PropTypes.bool.isRequired,
 };
 
 export default withStyles(s)(Tags);

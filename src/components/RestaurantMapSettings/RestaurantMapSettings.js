@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Button from 'react-bootstrap/lib/Button';
 import s from './RestaurantMapSettings.scss';
 
@@ -10,14 +10,14 @@ class RestaurantMapSettings extends Component {
     showPOIs: PropTypes.bool.isRequired,
     setShowPOIs: PropTypes.func.isRequired,
     showUnvoted: PropTypes.bool.isRequired,
-    setShowUnvoted: PropTypes.func.isRequired
+    setShowUnvoted: PropTypes.func.isRequired,
   };
 
   state = {
-    collapsed: false
-  }
+    collapsed: false,
+  };
 
-  toggleCollapsed = () => this.setState(prevState => ({ collapsed: !prevState.collapsed }));
+  toggleCollapsed = () => this.setState((prevState) => ({ collapsed: !prevState.collapsed }));
 
   render() {
     const {
@@ -25,7 +25,7 @@ class RestaurantMapSettings extends Component {
       showUnvoted,
       showPOIs,
       setShowPOIs,
-      setShowUnvoted
+      setShowUnvoted,
     } = this.props;
 
     const { collapsed } = this.state;
@@ -33,22 +33,38 @@ class RestaurantMapSettings extends Component {
     return (
       <div className={s.root}>
         {collapsed ? (
-          <Button bsSize="xsmall" onClick={this.toggleCollapsed}>Show</Button>
+          <Button bsSize="xsmall" onClick={this.toggleCollapsed}>
+            Show
+          </Button>
         ) : (
           <div>
             <div className={s.buttons}>
-              <Button bsSize="xsmall" onClick={setDefaultZoom}>Save zoom level</Button>
-              <Button bsSize="xsmall" onClick={this.toggleCollapsed}>Hide</Button>
+              <Button bsSize="xsmall" onClick={setDefaultZoom}>
+                Save zoom level
+              </Button>
+              <Button bsSize="xsmall" onClick={this.toggleCollapsed}>
+                Hide
+              </Button>
             </div>
             <div className={`checkbox ${s.checkbox}`}>
               <label htmlFor="show-unvoted">
-                <input id="show-unvoted" type="checkbox" checked={showUnvoted} onChange={setShowUnvoted} />
+                <input
+                  id="show-unvoted"
+                  type="checkbox"
+                  checked={showUnvoted}
+                  onChange={setShowUnvoted}
+                />
                 Show Unvoted
               </label>
             </div>
             <div className={`checkbox ${s.checkbox}`}>
               <label htmlFor="show-pois">
-                <input id="show-pois" type="checkbox" checked={showPOIs} onChange={setShowPOIs} />
+                <input
+                  id="show-pois"
+                  type="checkbox"
+                  checked={showPOIs}
+                  onChange={setShowPOIs}
+                />
                 Show Points of Interest
               </label>
             </div>

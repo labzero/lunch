@@ -7,6 +7,7 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+import StyleContext from 'isomorphic-style-loader/StyleContext';
 import PropTypes from 'prop-types';
 import React, { Children } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -20,6 +21,7 @@ const ContextType = {
   fetch: PropTypes.func.isRequired,
   pathname: PropTypes.string.isRequired,
   query: PropTypes.object,
+  store: PropTypes.object.isRequired,
   // Integrate Redux
   // http://redux.js.org/docs/basics/UsageWithReact.html
   ...ReduxProvider.childContextTypes,
@@ -63,9 +65,15 @@ class App extends React.PureComponent {
     // NOTE: If you need to add or modify header, footer etc. of the app,
     // please do that inside the Layout component.
     return (
-      <IntlProviderContainer>
-        {Children.only(this.props.children)}
-      </IntlProviderContainer>
+      <StyleContext.Provider
+        value={{ insertCss: this.props.context.insertCss }}
+      >
+        <ReduxProvider store={this.props.context.store}>
+          <IntlProviderContainer>
+            {Children.only(this.props.children)}
+          </IntlProviderContainer>
+        </ReduxProvider>
+      </StyleContext.Provider>
     );
   }
 }

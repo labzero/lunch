@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
@@ -20,18 +20,18 @@ class DeleteTeamModal extends Component {
     team: PropTypes.object.isRequired,
     shown: PropTypes.bool.isRequired,
     hideModal: PropTypes.func.isRequired,
-    deleteTeam: PropTypes.func.isRequired
+    deleteTeam: PropTypes.func.isRequired,
   };
 
   state = {
-    confirmSlug: ''
+    confirmSlug: '',
   };
 
   handleChange = (event) => {
     this.setState({
-      confirmSlug: event.target.value
+      confirmSlug: event.target.value,
     });
-  }
+  };
 
   handleSubmit = () => {
     const { deleteTeam, host } = this.props;
@@ -39,7 +39,7 @@ class DeleteTeamModal extends Component {
     deleteTeam().then(() => {
       window.location.href = `//${host}/teams`;
     });
-  }
+  };
 
   render() {
     const { team, shown, hideModal } = this.props;
@@ -57,10 +57,12 @@ team?
             {' '}
             <strong>This is irreversible.</strong>
             {' '}
-            All restaurants and tags will be deleted,
-            and all users will be unassigned from the team.
+All restaurants and tags will
+            be deleted, and all users will be unassigned from the team.
           </p>
-          <p>To confirm, please write the URL of the team in the field below.</p>
+          <p>
+            To confirm, please write the URL of the team in the field below.
+          </p>
           <Row>
             <Col sm={9}>
               <FormGroup controlId="deleteTeamModal-confirmSlug">
@@ -81,7 +83,9 @@ team?
           </Row>
         </ModalBody>
         <ModalFooter>
-          <Button type="button" bsSize="small" onClick={hideModal}>Cancel</Button>
+          <Button type="button" bsSize="small" onClick={hideModal}>
+            Cancel
+          </Button>
           <Button
             autoFocus
             bsSize="small"

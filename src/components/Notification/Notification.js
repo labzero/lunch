@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import ActionTypes from '../../constants/ActionTypes';
 import RestaurantPosted from './NotificationContent/RestaurantPosted';
 import RestaurantDeleted from './NotificationContent/RestaurantDeleted';
@@ -26,7 +26,7 @@ const contentMap = {
   [ActionTypes.DELETED_TAG_FROM_RESTAURANT]: DeletedTagFromRestaurant,
   [ActionTypes.TAG_DELETED]: TagDeleted,
   [ActionTypes.DECISION_POSTED]: DecisionPosted,
-  [ActionTypes.DECISIONS_DELETED]: DecisionDeleted
+  [ActionTypes.DECISIONS_DELETED]: DecisionDeleted,
 };
 
 class Notification extends Component {
@@ -34,13 +34,13 @@ class Notification extends Component {
     expireNotification: PropTypes.func.isRequired,
     noRender: PropTypes.bool,
     actionType: PropTypes.string,
-    contentProps: PropTypes.object.isRequired
+    contentProps: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
     actionType: '',
-    noRender: false
-  }
+    noRender: false,
+  };
 
   componentDidMount() {
     this.timeout = setTimeout(this.props.expireNotification, 5000);
@@ -57,7 +57,13 @@ class Notification extends Component {
     const Content = contentMap[this.props.actionType];
     return (
       <div className={s.root}>
-        <button className={s.close} onClick={this.props.expireNotification} type="button">&times;</button>
+        <button
+          className={s.close}
+          onClick={this.props.expireNotification}
+          type="button"
+        >
+          &times;
+        </button>
         <Content {...this.props.contentProps} />
       </div>
     );

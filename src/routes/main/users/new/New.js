@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Button from 'react-bootstrap/lib/Button';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
@@ -12,11 +12,11 @@ import s from './New.scss';
 
 class New extends Component {
   static propTypes = {
-    email: PropTypes.string
+    email: PropTypes.string,
   };
 
   static defaultProps = {
-    email: ''
+    email: '',
   };
 
   componentDidMount() {
@@ -35,16 +35,15 @@ class New extends Component {
               <Col sm={6}>
                 <FormGroup controlId="usersNew-name">
                   <ControlLabel>Name</ControlLabel>
-                  <FormControl
-                    name="name"
-                    type="text"
-                  />
+                  <FormControl name="name" type="text" />
                 </FormGroup>
                 <FormGroup controlId="usersNew-email">
                   <ControlLabel>Email</ControlLabel>
                   <FormControl
                     defaultValue={email}
-                    inputRef={(i) => { this.emailField = i; }}
+                    inputRef={(i) => {
+                      this.emailField = i;
+                    }}
                     name="email"
                     required
                     type="email"

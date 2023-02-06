@@ -40,7 +40,7 @@ describe('Home', () => {
       messageReceived: () => {},
       pastDecisionsShown: false,
       user: {},
-      wsPort: 3000
+      wsPort: 3000,
     };
   });
 

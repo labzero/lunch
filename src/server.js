@@ -72,7 +72,7 @@ fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
 // create a rotating write stream
 const accessLogStream = rfs('access.log', {
   interval: '1d', // rotate daily
-  path: logDirectory
+  path: logDirectory,
 });
 
 const app = express();
@@ -116,10 +116,12 @@ app.get('/health', (req, res) => {
 });
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(enforce.HTTPS({
-    trustProtoHeader: true,
-    trustXForwardedHostHeader: true
-  }));
+  app.use(
+    enforce.HTTPS({
+      trustProtoHeader: true,
+      trustXForwardedHostHeader: true,
+    })
+  );
   app.set('trust proxy', true);
 }
 
@@ -128,14 +130,16 @@ app.use(express.static(path.resolve(__dirname, 'public')));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(methodOverride((req) => {
-  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
-    const method = req.body._method; // eslint-disable-line no-underscore-dangle
-    delete req.body._method; // eslint-disable-line no-underscore-dangle, no-param-reassign
-    return method;
-  }
-  return undefined;
-}));
+app.use(
+  methodOverride((req) => {
+    if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+      const method = req.body._method; // eslint-disable-line no-underscore-dangle
+      delete req.body._method; // eslint-disable-line no-underscore-dangle, no-param-reassign
+      return method;
+    }
+    return undefined;
+  })
+);
 
 //
 // Redirect old labzero.com host
@@ -168,19 +172,21 @@ if (__DEV__) {
 }
 
 const SequelizeStore = connectSessionSequelize(session.Store);
-app.use(session({
-  cookie: {
-    domain: config.domain,
-    secure: process.env.NODE_ENV === 'production'
-  },
-  saveUninitialized: false,
-  secret: config.auth.session.secret,
-  store: new SequelizeStore({
-    db: sequelize
-  }),
-  resave: false,
-  proxy: true
-}));
+app.use(
+  session({
+    cookie: {
+      domain: config.domain,
+      secure: process.env.NODE_ENV === 'production',
+    },
+    saveUninitialized: false,
+    secret: config.auth.session.secret,
+    store: new SequelizeStore({
+      db: sequelize,
+    }),
+    resave: false,
+    proxy: true,
+  })
+);
 
 app.use(flash());
 
@@ -191,8 +197,8 @@ app.use(
   expressJwt({
     secret: config.auth.jwt.secret,
     credentialsRequired: false,
-    getToken: req => req.cookies.id_token,
-  }),
+    getToken: (req) => req.cookies.id_token,
+  })
 );
 // Error handler for express-jwt
 app.use((err, req, res, next) => {
@@ -212,23 +218,27 @@ app.use((err, req, res, next) => {
 app.use(passport.initialize());
 
 app.use((req, res, next) => {
-  const subdomainMatch = req.hostname.match(`^(.*)${config.domain.replace(/\./g, '\\.')}`);
+  const subdomainMatch = req.hostname.match(
+    `^(.*)${config.domain.replace(/\./g, '\\.')}`
+  );
   if (subdomainMatch && subdomainMatch[1]) {
     // eslint-disable-next-line no-param-reassign
     req.subdomain = subdomainMatch[1];
   }
 
   if (typeof req.user === 'number' || typeof req.user === 'string') {
-    User.getSessionUser(req.user).then(user => {
-      if (user) {
-        // eslint-disable-next-line no-param-reassign
-        req.user = user;
-      } else {
-        // eslint-disable-next-line no-param-reassign
-        delete req.user;
-      }
-      next();
-    }).catch(err => next(err));
+    User.getSessionUser(req.user)
+      .then((user) => {
+        if (user) {
+          // eslint-disable-next-line no-param-reassign
+          req.user = user;
+        } else {
+          // eslint-disable-next-line no-param-reassign
+          delete req.user;
+        }
+        next();
+      })
+      .catch((err) => next(err));
   } else {
     next();
   }
@@ -252,7 +262,7 @@ const wsInstance = expressWs(app, wsServer);
 export const wss = wsInstance.getWss();
 
 wss.broadcast = (teamId, data) => {
-  wss.clients.forEach(client => {
+  wss.clients.forEach((client) => {
     if (client.teamId === teamId) {
       client.send(JSON.stringify(data));
     }
@@ -281,11 +291,13 @@ app.use(async (req, res, next) => {
 // Register API middleware
 // -----------------------------------------------------------------------------
 if (__DEV__) {
-  app.use(cors({
-    credentials: true,
-    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-    origin: true,
-  }));
+  app.use(
+    cors({
+      credentials: true,
+      optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+      origin: true,
+    })
+  );
 }
 app.use('/api', api());
 
@@ -295,7 +307,7 @@ app.use('/api', api());
 const render = async (req, res, next) => {
   try {
     const stateData = {
-      host: config.bsHost
+      host: config.bsHost,
     };
     if (req.user) {
       stateData.user = req.user;
@@ -307,11 +319,11 @@ const render = async (req, res, next) => {
     const flashKeys = Object.keys(flashes);
     if (flashKeys.length) {
       stateData.flashes = [];
-      flashKeys.forEach(k => {
-        flashes[k].forEach(f => {
+      flashKeys.forEach((k) => {
+        flashes[k].forEach((f) => {
           stateData.flashes.push({
             message: f,
-            type: k
+            type: k,
           });
         });
       });
@@ -322,7 +334,7 @@ const render = async (req, res, next) => {
     // https://github.com/kriasoft/isomorphic-style-loader
     const insertCss = (...styles) => {
       // eslint-disable-next-line no-underscore-dangle
-      styles.forEach(style => css.add(style._getCss()));
+      styles.forEach((style) => css.add(style._getCss()));
     };
 
     // Universal HTTP client
@@ -374,22 +386,21 @@ const render = async (req, res, next) => {
       apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
       title: pageTitle,
       ogTitle: route.ogTitle || pageTitle,
-      description: 'A simple lunch voting app for you and your team. Search nearby restaurants, add them to your list, vote for as many as you like, and decide on today’s pick!',
+      description:
+        'A simple lunch voting app for you and your team. Search nearby restaurants, add them to your list, vote for as many as you like, and decide on today’s pick!',
       body: '',
       root: generateUrl(req, req.get('host')),
     };
 
     data.children = ReactDOM.renderToString(
-      <App context={context} store={store}>
-        {route.component}
-      </App>,
+      <App context={context}>{route.component}</App>
     );
     data.styles = [{ id: 'css', cssText: [...css].join('') }];
 
     const scripts = new Set();
-    const addChunk = chunk => {
+    const addChunk = (chunk) => {
       if (chunks[chunk]) {
-        chunks[chunk].forEach(asset => scripts.add(asset));
+        chunks[chunk].forEach((asset) => scripts.add(asset));
       } else if (__DEV__) {
         throw new Error(`Chunk with name '${chunk}' cannot be found`);
       }
@@ -438,7 +449,7 @@ app.use((err, req, res, next) => {
         styles={[{ id: 'css', cssText: errorPageStyle._getCss() }]} // eslint-disable-line no-underscore-dangle
       >
         {ReactDOM.renderToString(<ErrorPageWithoutStyle error={err} />)}
-      </Html>,
+      </Html>
     );
     res.send(`<!doctype html>${html}`);
   } else {
@@ -446,8 +457,8 @@ app.use((err, req, res, next) => {
       error: true,
       data: {
         message: err.message,
-        stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
-      }
+        stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined,
+      },
     });
   }
   next(err);
@@ -461,12 +472,16 @@ app.use(Honeybadger.errorHandler); // Use *after* all other app middleware.
 if (process.env.USE_HTTPS === 'true') {
   wsServer.listen(config.wsPort, () => {
     /* eslint-disable no-console */
-    console.log(`The websockets server is running at https://local.lunch.pink:${config.wsPort}/`);
+    console.log(
+      `The websockets server is running at https://local.lunch.pink:${config.wsPort}/`
+    );
   });
 } else {
   wsServer.listen(config.port, () => {
     /* eslint-disable no-console */
-    console.log(`The server is running at http://local.lunch.pink:${config.port}/`);
+    console.log(
+      `The server is running at http://local.lunch.pink:${config.port}/`
+    );
   });
 }
 

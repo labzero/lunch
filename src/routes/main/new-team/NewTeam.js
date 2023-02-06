@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Button from 'react-bootstrap/lib/Button';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
@@ -21,26 +21,26 @@ class NewTeam extends Component {
   static propTypes = {
     center: PropTypes.shape({
       lat: PropTypes.number.isRequired,
-      lng: PropTypes.number.isRequired
+      lng: PropTypes.number.isRequired,
     }),
     createTeam: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
-    center: defaultCoords
-  }
+    center: defaultCoords,
+  };
 
   state = {
     name: '',
     slug: '',
-    address: ''
+    address: '',
   };
 
-  handleChange = field => event => this.setState({ [field]: event.target.value });
+  handleChange = (field) => (event) => this.setState({ [field]: event.target.value });
 
-  handleSlugChange = event => {
+  handleSlugChange = (event) => {
     this.setState({
-      slug: event.target.value.toLowerCase()
+      slug: event.target.value.toLowerCase(),
     });
   };
 
@@ -51,9 +51,9 @@ class NewTeam extends Component {
 
     createTeam({
       ...center,
-      ...this.state
+      ...this.state,
     }).then(() => history.push('/teams'));
-  }
+  };
 
   render() {
     const { name, slug } = this.state;
@@ -64,9 +64,7 @@ class NewTeam extends Component {
           <h2>Create a new team</h2>
           <form onSubmit={this.handleSubmit}>
             <FormGroup controlId="newTeam-name">
-              <ControlLabel>
-                Name
-              </ControlLabel>
+              <ControlLabel>Name</ControlLabel>
               <Row>
                 <Col sm={6}>
                   <FormControl
@@ -79,9 +77,7 @@ class NewTeam extends Component {
               </Row>
             </FormGroup>
             <FormGroup controlId="newTeam-slug">
-              <ControlLabel>
-                URL
-              </ControlLabel>
+              <ControlLabel>URL</ControlLabel>
               <Row>
                 <Col sm={6}>
                   <InputGroup>
@@ -101,15 +97,16 @@ class NewTeam extends Component {
                   </InputGroup>
                 </Col>
               </Row>
-              <HelpBlock>Letters, numbers, and dashes only. URL must start with a letter.</HelpBlock>
+              <HelpBlock>
+                Letters, numbers, and dashes only. URL must start with a letter.
+              </HelpBlock>
             </FormGroup>
             <FormGroup controlId="newTeam-address">
               <ControlLabel>Address</ControlLabel>
               <p>
-                Pick a centerpoint for your team.
-                It will ensure that nearby recommendations are shown when you search
-                for restaurants.
-                You can drag the map or enter your full address.
+                Pick a centerpoint for your team. It will ensure that nearby
+                recommendations are shown when you search for restaurants. You
+                can drag the map or enter your full address.
               </p>
               <TeamMapContainer defaultCenter={defaultCoords} />
               <TeamGeosuggestContainer

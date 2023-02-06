@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Button from 'react-bootstrap/lib/Button';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
@@ -12,11 +12,11 @@ import s from './New.scss';
 
 class New extends Component {
   static propTypes = {
-    email: PropTypes.string
+    email: PropTypes.string,
   };
 
   static defaultProps = {
-    email: ''
+    email: '',
   };
 
   componentDidMount() {
@@ -31,8 +31,8 @@ class New extends Component {
         <Grid>
           <h2>Request an invitation</h2>
           <p>
-            Enter your email address and we will send you a link
-            to confirm your request.
+            Enter your email address and we will send you a link to confirm your
+            request.
           </p>
           <form action="/invitation?success=sent" method="post">
             <Row>
@@ -41,7 +41,9 @@ class New extends Component {
                   <ControlLabel>Email</ControlLabel>
                   <FormControl
                     defaultValue={email}
-                    inputRef={(i) => { this.emailField = i; }}
+                    inputRef={(i) => {
+                      this.emailField = i;
+                    }}
                     name="email"
                     required
                     type="email"

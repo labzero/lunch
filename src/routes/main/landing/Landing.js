@@ -1,5 +1,5 @@
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Button from 'react-bootstrap/lib/Button';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
@@ -16,7 +16,12 @@ import decide from './decide.png';
 import s from './Landing.scss';
 
 const renderForm = () => (
-  <Form className={s.form} inline action="/invitation?success=sent" method="post">
+  <Form
+    className={s.form}
+    inline
+    action="/invitation?success=sent"
+    method="post"
+  >
     <FormGroup className={s.formGroup} controlId="landing-email">
       <ControlLabel className="sr-only">Email</ControlLabel>
       <FormControl
@@ -29,11 +34,7 @@ const renderForm = () => (
       />
     </FormGroup>
     {' '}
-    <Button
-      bsSize="large"
-      bsStyle="primary"
-      type="submit"
-    >
+    <Button bsSize="large" bsStyle="primary" type="submit">
       Get invited
     </Button>
   </Form>
@@ -44,16 +45,15 @@ const Landing = () => (
     <Jumbotron className={s.jumbotron}>
       <Grid>
         <h2 className={s.jumbotronHeading}>
-Figure it out,
+          Figure it out,
           <br />
-together.
+          together.
         </h2>
         <Row>
           <Col xs={12} sm={6} smOffset={3}>
             <p>
-              Unsure what to eat?
-              Want to leave the office for a bit and grab some grub with your team?
-              Try&nbsp;Lunch!
+              Unsure what to eat? Want to leave the office for a bit and grab
+              some grub with your team? Try&nbsp;Lunch!
             </p>
             {renderForm()}
           </Col>
@@ -67,7 +67,10 @@ together.
         </Col>
         <Col xs={12} sm={6}>
           <h3>Search!</h3>
-          <p>Put together a list of nearby restaurants. You can add as many as you like.</p>
+          <p>
+            Put together a list of nearby restaurants. You can add as many as
+            you like.
+          </p>
         </Col>
       </Row>
       <Row className={s.feature}>
@@ -77,7 +80,8 @@ together.
         <Col xs={12} sm={6}>
           <h3>Tag!</h3>
           <p>
-            Tag the restaurants, then filter or exclude certain kinds. Emoji tags? Go for it!
+            Tag the restaurants, then filter or exclude certain kinds. Emoji
+            tags? Go for it!
           </p>
         </Col>
       </Row>
@@ -88,8 +92,9 @@ together.
         <Col xs={12} sm={6}>
           <h3>Vote!</h3>
           <p>
-            You only get one vote per restaurant each day, but you can vote for as many as you
-            like. Voting also affects what shows up at the top of the list tomorrow!
+            You only get one vote per restaurant each day, but you can vote for
+            as many as you like. Voting also affects what shows up at the top of
+            the list tomorrow!
           </p>
         </Col>
       </Row>
@@ -100,8 +105,9 @@ together.
         <Col xs={12} sm={6}>
           <h3>Decide!</h3>
           <p>
-            When you mark a restaurant as the decision for the day, it’ll be sorted to
-            the bottom of the list for the next few weeks to keep things fresh.
+            When you mark a restaurant as the decision for the day, it’ll be
+            sorted to the bottom of the list for the next few weeks to keep
+            things fresh.
           </p>
         </Col>
       </Row>

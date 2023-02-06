@@ -2,14 +2,17 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import FlipMove from 'react-flip-move';
 import { Element as ScrollElement } from 'react-scroll';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Grid from 'react-bootstrap/lib/Grid';
 import RestaurantContainer from '../Restaurant/RestaurantContainer';
 import Loading from '../Loading';
 import s from './RestaurantList.scss';
 
 const RestaurantList = ({
-  allRestaurantIds, flipMove, ids, restaurantListReady
+  allRestaurantIds,
+  flipMove,
+  ids,
+  restaurantListReady,
 }) => {
   if (!restaurantListReady) {
     return <Loading />;
@@ -34,9 +37,7 @@ const RestaurantList = ({
     return (
       <div className={s.root}>
         <Grid className={s.nothing}>
-          <p>
-            Nothing to see here!
-          </p>
+          <p>Nothing to see here!</p>
         </Grid>
       </div>
     );
@@ -52,7 +53,7 @@ const RestaurantList = ({
       staggerDelayBy={40}
       staggerDurationBy={40}
     >
-      {ids.map(id => (
+      {ids.map((id) => (
         <li key={`restaurantListItem_${id}`}>
           <ScrollElement name={`restaurantListItem_${id}`}>
             <RestaurantContainer
@@ -71,7 +72,7 @@ RestaurantList.propTypes = {
   allRestaurantIds: PropTypes.array.isRequired,
   flipMove: PropTypes.bool.isRequired,
   ids: PropTypes.array.isRequired,
-  restaurantListReady: PropTypes.bool.isRequired
+  restaurantListReady: PropTypes.bool.isRequired,
 };
 
 export default withStyles(s)(RestaurantList);

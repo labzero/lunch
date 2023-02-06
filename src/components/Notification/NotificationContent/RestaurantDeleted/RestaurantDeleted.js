@@ -2,7 +2,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from '../NotificationContent.scss';
 
 const RestaurantDeleted = ({ loggedIn, user, restaurantName }) => {
@@ -29,11 +29,11 @@ was deleted.
 RestaurantDeleted.propTypes = {
   loggedIn: PropTypes.bool.isRequired,
   user: PropTypes.string,
-  restaurantName: PropTypes.string.isRequired
+  restaurantName: PropTypes.string.isRequired,
 };
 
 RestaurantDeleted.defaultProps = {
-  user: ''
+  user: '',
 };
 
 export default withStyles(s)(RestaurantDeleted);

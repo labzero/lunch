@@ -1,16 +1,32 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from '../NotificationContent.scss';
 
 const RestaurantRenamed = ({
-  loggedIn, user, restaurantName, newName, showMapAndInfoWindow
+  loggedIn,
+  user,
+  restaurantName,
+  newName,
+  showMapAndInfoWindow,
 }) => {
   const oldNameEl = (
-    <button className={s.clickable} onClick={showMapAndInfoWindow} type="button">{restaurantName}</button>
+    <button
+      className={s.clickable}
+      onClick={showMapAndInfoWindow}
+      type="button"
+    >
+      {restaurantName}
+    </button>
   );
   const newNameEl = (
-    <button className={s.clickable} onClick={showMapAndInfoWindow} type="button">{newName}</button>
+    <button
+      className={s.clickable}
+      onClick={showMapAndInfoWindow}
+      type="button"
+    >
+      {newName}
+    </button>
   );
   if (loggedIn) {
     return (
@@ -31,7 +47,6 @@ to
       {oldNameEl}
       {' '}
 was renamed to
-      {' '}
       {newNameEl}
 .
     </span>
@@ -43,11 +58,11 @@ RestaurantRenamed.propTypes = {
   user: PropTypes.string,
   restaurantName: PropTypes.string.isRequired,
   newName: PropTypes.string.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired
+  showMapAndInfoWindow: PropTypes.func.isRequired,
 };
 
 RestaurantRenamed.defaultProps = {
-  user: ''
+  user: '',
 };
 
 export default withStyles(s)(RestaurantRenamed);

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './RestaurantNameForm.scss';
 
 class RestaurantNameForm extends Component {
@@ -21,7 +21,9 @@ class RestaurantNameForm extends Component {
             className="form-control input-sm"
             value={this.props.editNameFormValue}
             onChange={this.props.setEditNameFormValue}
-            ref={i => { this.input = i; }}
+            ref={(i) => {
+              this.input = i;
+            }}
           />
         </span>
         <button

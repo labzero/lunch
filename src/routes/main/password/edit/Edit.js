@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Button from 'react-bootstrap/lib/Button';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
@@ -13,7 +13,7 @@ import s from './Edit.scss';
 
 class Edit extends Component {
   static propTypes = {
-    token: PropTypes.string.isRequired
+    token: PropTypes.string.isRequired,
   };
 
   componentDidMount() {
@@ -33,7 +33,9 @@ class Edit extends Component {
                 <FormGroup controlId="resetPassword-password">
                   <ControlLabel>New password</ControlLabel>
                   <FormControl
-                    inputRef={(i) => { this.passwordField = i; }}
+                    inputRef={(i) => {
+                      this.passwordField = i;
+                    }}
                     minLength={PASSWORD_MIN_LENGTH}
                     name="password"
                     required

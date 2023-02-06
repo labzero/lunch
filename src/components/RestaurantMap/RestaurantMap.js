@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import { GOOGLE_MAP_ZOOM } from '../../constants';
 import googleMapOptions from '../../helpers/googleMapOptions';
 import loadComponent from '../../helpers/loadComponent';
@@ -28,7 +28,7 @@ class RestaurantMap extends Component {
     latLng: PropTypes.object.isRequired,
     center: PropTypes.shape({
       lat: PropTypes.number.isRequired,
-      lng: PropTypes.number.isRequired
+      lng: PropTypes.number.isRequired,
     }),
     defaultZoom: PropTypes.number,
     tempMarker: PropTypes.object,
@@ -37,19 +37,23 @@ class RestaurantMap extends Component {
     mapClicked: PropTypes.func.isRequired,
     showGoogleInfoWindow: PropTypes.func.isRequired,
     showNewlyAddedInfoWindow: PropTypes.func.isRequired,
-    showPOIs: PropTypes.bool.isRequired
+    showPOIs: PropTypes.bool.isRequired,
   };
 
   static defaultProps = {
     center: undefined,
     defaultZoom: GOOGLE_MAP_ZOOM,
     tempMarker: undefined,
-    newlyAddedRestaurant: undefined
-  }
+    newlyAddedRestaurant: undefined,
+  };
 
   componentDidMount() {
     this.props.clearCenter();
-    loadComponent(() => require.ensure([], require => require('google-map-react').default, 'map')).then((map) => {
+    loadComponent(() => require.ensure(
+      [],
+      (require) => require('google-map-react').default,
+      'map'
+    )).then((map) => {
       GoogleMap = map;
       this.forceUpdate();
     });
@@ -93,7 +97,7 @@ class RestaurantMap extends Component {
       latLng,
       mapClicked,
       showPOIs,
-      tempMarker
+      tempMarker,
     } = this.props;
 
     let tempMarkerComponent;

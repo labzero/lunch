@@ -3,7 +3,7 @@ import React from 'react';
 import Dropdown from 'react-bootstrap/lib/Dropdown';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
 import MenuItem from 'react-bootstrap/lib/MenuItem';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './RestaurantDropdown.scss';
 
 const RestaurantDropdown = ({
@@ -21,7 +21,10 @@ const RestaurantDropdown = ({
   let editButton;
   if (!listUiItem.isEditingName) {
     editButton = (
-      <MenuItem onSelect={showEditNameForm} key={`restaurantDropdown_${restaurant.id}_editName`}>
+      <MenuItem
+        onSelect={showEditNameForm}
+        key={`restaurantDropdown_${restaurant.id}_editName`}
+      >
         Edit name
       </MenuItem>
     );
@@ -39,14 +42,20 @@ const RestaurantDropdown = ({
     );
   } else {
     decideButton = (
-      <MenuItem onSelect={showPastDecisionsModal} key={`restaurantDropdown_${restaurant.id}_showPastDecisionsModal`}>
+      <MenuItem
+        onSelect={showPastDecisionsModal}
+        key={`restaurantDropdown_${restaurant.id}_showPastDecisionsModal`}
+      >
         We ate here...
       </MenuItem>
     );
   }
 
   const menuItems = [
-    <MenuItem onSelect={showMapAndInfoWindow} key={`restaurantDropdown_${restaurant.id}_showMap`}>
+    <MenuItem
+      onSelect={showMapAndInfoWindow}
+      key={`restaurantDropdown_${restaurant.id}_showMap`}
+    >
       Reveal on map
     </MenuItem>,
     editButton,
@@ -56,7 +65,7 @@ const RestaurantDropdown = ({
       key={`restaurantDropdown_${restaurant.id}_delete`}
     >
       Delete
-    </MenuItem>
+    </MenuItem>,
   ];
 
   const DropdownToggle = Dropdown.Toggle;
@@ -89,7 +98,7 @@ const RestaurantDropdown = ({
         {lastVisited}
         <MenuItem divider />
         <MenuItem header>
-Last
+          Last
           {sortDuration}
           {' '}
 day
@@ -121,13 +130,13 @@ RestaurantDropdown.propTypes = {
   showEditNameForm: PropTypes.func.isRequired,
   deleteRestaurant: PropTypes.func.isRequired,
   removeDecision: PropTypes.func,
-  showPastDecisionsModal: PropTypes.func.isRequired
+  showPastDecisionsModal: PropTypes.func.isRequired,
 };
 
 RestaurantDropdown.defaultProps = {
   decision: {},
   pastDecisions: {},
-  removeDecision: () => {}
+  removeDecision: () => {},
 };
 
 export default withStyles(s)(RestaurantDropdown);

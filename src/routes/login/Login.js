@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import queryString from 'query-string';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Button from 'react-bootstrap/lib/Button';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
@@ -16,21 +16,21 @@ class Login extends Component {
   static propTypes = {
     host: PropTypes.string.isRequired,
     next: PropTypes.string,
-    team: PropTypes.string
+    team: PropTypes.string,
   };
 
   static defaultProps = {
     next: undefined,
-    team: undefined
+    team: undefined,
   };
 
   state = {
     email: '',
-    password: ''
+    password: '',
   };
 
-  handleChange = field => event => this.setState({
-    [field]: event.target.value
+  handleChange = (field) => (event) => this.setState({
+    [field]: event.target.value,
   });
 
   render() {
@@ -49,14 +49,19 @@ class Login extends Component {
               bsSize="large"
               bsStyle="primary"
               className={s.googleButton}
-              href={`//${host}/login/google${googleQuery ? `?${googleQuery}` : ''}`}
+              href={`//${host}/login/google${
+                googleQuery ? `?${googleQuery}` : ''
+              }`}
             >
               <img className={s.googleLogo} src={google} alt="" />
               Sign in with Google
             </Button>
           </div>
           <h3>Email/password</h3>
-          <form action={`/login${nextQuery ? `?${nextQuery}` : ''}`} method="post">
+          <form
+            action={`/login${nextQuery ? `?${nextQuery}` : ''}`}
+            method="post"
+          >
             <Row>
               <Col sm={6}>
                 <FormGroup controlId="login-email">
@@ -82,7 +87,10 @@ class Login extends Component {
               </Col>
             </Row>
             <Button type="submit">Log in</Button>
-            <Button bsStyle="link" href={`//${host}/password/new${email ? `?email=${email}` : ''}`}>
+            <Button
+              bsStyle="link"
+              href={`//${host}/password/new${email ? `?email=${email}` : ''}`}
+            >
               Forgot password?
             </Button>
           </form>

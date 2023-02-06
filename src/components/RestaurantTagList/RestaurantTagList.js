@@ -1,16 +1,22 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './RestaurantTagList.scss';
 import TagContainer from '../Tag/TagContainer';
 
 const RestaurantTagList = ({ ids, removeTag, loggedIn }) => (
   <ul className={`${s.root} ${ids.length === 0 ? s.empty : ''}`}>
-    {ids.map(tagId => {
-      const boundRemoveTag = () => { removeTag(tagId); };
+    {ids.map((tagId) => {
+      const boundRemoveTag = () => {
+        removeTag(tagId);
+      };
       return (
         <li className={s.tagItem} key={`restaurantTag_${tagId}`}>
-          <TagContainer id={tagId} showDelete={loggedIn} onDeleteClicked={boundRemoveTag} />
+          <TagContainer
+            id={tagId}
+            showDelete={loggedIn}
+            onDeleteClicked={boundRemoveTag}
+          />
         </li>
       );
     })}
@@ -20,7 +26,7 @@ const RestaurantTagList = ({ ids, removeTag, loggedIn }) => (
 RestaurantTagList.propTypes = {
   ids: PropTypes.array.isRequired,
   removeTag: PropTypes.func.isRequired,
-  loggedIn: PropTypes.bool.isRequired
+  loggedIn: PropTypes.bool.isRequired,
 };
 
 export default withStyles(s)(RestaurantTagList);

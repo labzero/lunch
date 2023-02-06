@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './NameFilterForm.scss';
 
 class NameFilterForm extends Component {
@@ -37,15 +37,15 @@ class NameFilterForm extends Component {
 
   setFlipMoveFalse = () => {
     this.props.setFlipMove(false);
-  }
+  };
 
   setFlipMoveTrue = () => {
     this.props.setFlipMove(true);
-  }
+  };
 
   setNameFilterValue = (event) => {
     this.props.setNameFilter(event.target.value);
-  }
+  };
 
   hideForm = () => {
     this.props.setFlipMove(false);
@@ -53,19 +53,16 @@ class NameFilterForm extends Component {
     this.setState(() => ({
       shown: false,
     }));
-  }
+  };
 
   showForm = () => {
     this.setState(() => ({
       shown: true,
     }));
-  }
+  };
 
   render() {
-    const {
-      nameFilter,
-      restaurantIds,
-    } = this.props;
+    const { nameFilter, restaurantIds } = this.props;
 
     const { shown } = this.state;
 
@@ -86,7 +83,9 @@ class NameFilterForm extends Component {
               onChange={this.setNameFilterValue}
               onFocus={this.setFlipMoveFalse}
               onBlur={this.setFlipMoveTrue}
-              ref={i => { this.input = i; }}
+              ref={(i) => {
+                this.input = i;
+              }}
             />
           </div>
           <button
@@ -100,14 +99,16 @@ class NameFilterForm extends Component {
       );
     } else {
       child = (
-        <button className="btn btn-default" onClick={this.showForm} type="button">
+        <button
+          className="btn btn-default"
+          onClick={this.showForm}
+          type="button"
+        >
           filter by name
         </button>
       );
     }
-    return (
-      <div className={s.root}>{child}</div>
-    );
+    return <div className={s.root}>{child}</div>;
   }
 }
 

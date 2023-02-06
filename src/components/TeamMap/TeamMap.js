@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import HereMarker from '../HereMarker';
 import { GOOGLE_MAP_ZOOM } from '../../constants';
 import googleMapOptions from '../../helpers/googleMapOptions';
@@ -13,23 +13,27 @@ class TeamMap extends Component {
   static propTypes = {
     center: PropTypes.shape({
       lat: PropTypes.number.isRequired,
-      lng: PropTypes.number.isRequired
+      lng: PropTypes.number.isRequired,
     }),
     clearCenter: PropTypes.func.isRequired,
     defaultCenter: PropTypes.shape({
       lat: PropTypes.number.isRequired,
-      lng: PropTypes.number.isRequired
+      lng: PropTypes.number.isRequired,
     }).isRequired,
-    setCenter: PropTypes.func.isRequired
-  }
+    setCenter: PropTypes.func.isRequired,
+  };
 
   static defaultProps = {
-    center: undefined
-  }
+    center: undefined,
+  };
 
   componentDidMount() {
     this.props.clearCenter();
-    loadComponent(() => require.ensure([], require => require('google-map-react').default, 'map')).then((map) => {
+    loadComponent(() => require.ensure(
+      [],
+      (require) => require('google-map-react').default,
+      'map'
+    )).then((map) => {
       GoogleMap = map;
       this.forceUpdate();
     });
@@ -41,7 +45,7 @@ class TeamMap extends Component {
       const center = map.getCenter();
       this.props.setCenter({
         lat: center.lat(),
-        lng: center.lng()
+        lng: center.lng(),
       });
     });
   };

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from '../NotificationContent.scss';
 
 const PostedNewTagToRestaurant = ({
@@ -8,10 +8,14 @@ const PostedNewTagToRestaurant = ({
   user,
   restaurantName,
   tagName,
-  showMapAndInfoWindow
+  showMapAndInfoWindow,
 }) => {
   const restaurantEl = (
-    <button className={s.clickable} onClick={showMapAndInfoWindow} type="button">
+    <button
+      className={s.clickable}
+      onClick={showMapAndInfoWindow}
+      type="button"
+    >
       {restaurantName}
     </button>
   );
@@ -22,12 +26,12 @@ const PostedNewTagToRestaurant = ({
         {' '}
 added new tag
         <b>
-&ldquo;
+          &ldquo;
           {tagName}
-&rdquo;
+          &rdquo;
         </b>
         {' '}
-to
+        to
         {restaurantEl}
 .
       </span>
@@ -38,12 +42,12 @@ to
       New tag
       {' '}
       <b>
-&ldquo;
+        &ldquo;
         {tagName}
-&rdquo;
+        &rdquo;
       </b>
       {' '}
-was added to
+      was added to
       {' '}
       {restaurantEl}
 .
@@ -56,11 +60,11 @@ PostedNewTagToRestaurant.propTypes = {
   user: PropTypes.string,
   restaurantName: PropTypes.string.isRequired,
   tagName: PropTypes.string.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired
+  showMapAndInfoWindow: PropTypes.func.isRequired,
 };
 
 PostedNewTagToRestaurant.defaultProps = {
-  user: ''
+  user: '',
 };
 
 export default withStyles(s)(PostedNewTagToRestaurant);

@@ -1,15 +1,21 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import { intlShape } from 'react-intl';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import loadComponent from '../../helpers/loadComponent';
 import s from './RestaurantAddForm.scss';
 import generateMessageDescriptor from '../../helpers/generateMessageDescriptor';
 
 const m = generateMessageDescriptor('RestaurantAddForm');
 
-let google = { maps: { Geocoder: function Geocoder() { return {}; }, GeocoderStatus: {} } };
+let google = {
+  maps: {
+    Geocoder: function Geocoder() {
+      return {};
+    },
+    GeocoderStatus: {},
+  },
+};
 if (canUseDOM) {
   google = window.google || google;
 }
@@ -24,7 +30,7 @@ class RestaurantAddForm extends Component {
     clearTempMarker: PropTypes.func.isRequired,
     handleSuggestSelect: PropTypes.func.isRequired,
     latLng: PropTypes.object.isRequired,
-    intl: intlShape.isRequired
+    intl: PropTypes.shape().isRequired,
   };
 
   constructor(props) {
@@ -33,7 +39,11 @@ class RestaurantAddForm extends Component {
   }
 
   componentDidMount() {
-    loadComponent(() => require.ensure([], require => require('react-geosuggest').default, 'map')).then((g) => {
+    loadComponent(() => require.ensure(
+      [],
+      (require) => require('react-geosuggest').default,
+      'map'
+    )).then((g) => {
       Geosuggest = g;
       this.forceUpdate();
     });
@@ -47,14 +57,16 @@ class RestaurantAddForm extends Component {
         }
       });
     }
-  }
+  };
 
   handleSuggestSelect = (suggestion) => {
     this.props.handleSuggestSelect(suggestion, this.geosuggest);
-  }
+  };
 
   render() {
-    const { intl: { formatMessage: f } } = this.props;
+    const {
+      intl: { formatMessage: f },
+    } = this.props;
 
     return (
       <form>
@@ -66,7 +78,10 @@ class RestaurantAddForm extends Component {
           suggestItemClassName={s.suggestItem}
           suggestItemActiveClassName={s.suggestItemActive}
           suggestsClassName={s.suggests}
-          location={{ lat: () => this.props.latLng.lat, lng: () => this.props.latLng.lng }}
+          location={{
+            lat: () => this.props.latLng.lat,
+            lng: () => this.props.latLng.lng,
+          }}
           placeholder={f(m('addPlaces'))}
           radius="0"
           onBlur={this.props.clearTempMarker}
@@ -74,7 +89,13 @@ class RestaurantAddForm extends Component {
           onSuggestSelect={this.handleSuggestSelect}
           getSuggestLabel={this.props.getSuggestLabel}
           // to silence ref warning in React 16
-          ref={Geosuggest === renderNull ? undefined : (g => { this.geosuggest = g; })}
+          ref={
+            Geosuggest === renderNull
+              ? undefined
+              : (g) => {
+                this.geosuggest = g;
+              }
+          }
         />
       </form>
     );

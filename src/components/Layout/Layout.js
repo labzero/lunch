@@ -31,7 +31,7 @@ class Layout extends Component {
 
   static defaultProps = {
     isHome: false,
-    path: undefined
+    path: undefined,
   };
 
   static contextTypes = {

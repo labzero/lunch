@@ -1,13 +1,20 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from '../NotificationContent.scss';
 
 const DecisionDeleted = ({
-  loggedIn, user, restaurantName, showMapAndInfoWindow
+  loggedIn,
+  user,
+  restaurantName,
+  showMapAndInfoWindow,
 }) => {
   const restaurantEl = (
-    <button className={s.clickable} onClick={showMapAndInfoWindow} type="button">
+    <button
+      className={s.clickable}
+      onClick={showMapAndInfoWindow}
+      type="button"
+    >
       {restaurantName}
     </button>
   );
@@ -24,7 +31,7 @@ cancelled the decision for
   }
   return (
     <span>
-The decision for
+      The decision for
       {restaurantEl}
       {' '}
 was cancelled.
@@ -36,11 +43,11 @@ DecisionDeleted.propTypes = {
   loggedIn: PropTypes.bool.isRequired,
   user: PropTypes.string,
   restaurantName: PropTypes.string.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired
+  showMapAndInfoWindow: PropTypes.func.isRequired,
 };
 
 DecisionDeleted.defaultProps = {
-  user: ''
+  user: '',
 };
 
 export default withStyles(s)(DecisionDeleted);

@@ -9,8 +9,7 @@ import PropTypes from 'prop-types';
  */
 
 import React from 'react';
-import { intlShape } from 'react-intl';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Button from 'react-bootstrap/lib/Button';
 import ButtonToolbar from 'react-bootstrap/lib/ButtonToolbar';
 import Glyphicon from 'react-bootstrap/lib/Glyphicon';
@@ -41,42 +40,45 @@ class Team extends React.Component {
     hasGuestRole: PropTypes.bool.isRequired,
     hasMemberRole: PropTypes.bool.isRequired,
     hasOwnerRole: PropTypes.bool.isRequired,
-    intl: intlShape.isRequired,
+    intl: PropTypes.shape().isRequired,
     removeUserFromTeam: PropTypes.func.isRequired,
     userListReady: PropTypes.bool.isRequired,
     users: PropTypes.array.isRequired,
-    team: PropTypes.object.isRequired
+    team: PropTypes.object.isRequired,
   };
 
   componentDidMount() {
     this.props.fetchUsersIfNeeded();
   }
 
-  handleRoleChange = user => event => {
+  handleRoleChange = (user) => (event) => {
     const { currentUser, team } = this.props;
 
     const newRole = event.target.value;
 
     const changeRole = () => this.props.changeUserRole(user.id, newRole);
 
-    if (event.target.value === 'member' && getRole(currentUser, team).type === 'member') {
+    if (
+      event.target.value === 'member'
+      && getRole(currentUser, team).type === 'member'
+    ) {
       this.props.confirm({
         actionLabel: 'Promote',
         body: 'Are you sure you want to promote this user to Member status? You will not be able to demote them later.',
-        handleSubmit: changeRole
+        handleSubmit: changeRole,
       });
     } else if (currentUser.id === user.id && !currentUser.superuser) {
       this.props.confirm({
         actionLabel: 'Demote',
         body: 'Are you sure you want to demote yourself? You will not be able to undo this by yourself.',
-        handleSubmit: changeRole
+        handleSubmit: changeRole,
       });
     } else {
       changeRole();
     }
   };
 
-  handleDeleteUserClicked = id => () => {
+  handleDeleteUserClicked = (id) => () => {
     // eslint-disable-next-line no-restricted-globals, no-alert
     if (confirm('Are you sure you want to remove this user from this team?')) {
       this.props.removeUserFromTeam(id);
@@ -91,23 +93,22 @@ class Team extends React.Component {
       hasOwnerRole,
       intl: { formatMessage: f },
       team,
-      users
+      users,
     } = this.props;
 
     if (canChangeUser(currentUser, user, team, users)) {
       return (
-        <select
-          onChange={this.handleRoleChange(user)}
-          value={user.type}
-        >
+        <select onChange={this.handleRoleChange(user)} value={user.type}>
           {hasGuestRole && <option value="guest">{f(gm('guestRole'))}</option>}
-          {hasMemberRole && <option value="member">{f(gm('memberRole'))}</option>}
+          {hasMemberRole && (
+            <option value="member">{f(gm('memberRole'))}</option>
+          )}
           {hasOwnerRole && <option value="owner">{f(gm('ownerRole'))}</option>}
         </select>
       );
     }
     return f(gm(`${user.type}Role`));
-  }
+  };
 
   renderUsers = () => {
     const {
@@ -116,7 +117,7 @@ class Team extends React.Component {
       hasOwnerRole,
       intl: { formatMessage: f },
       team,
-      users
+      users,
     } = this.props;
 
     return (
@@ -131,23 +132,23 @@ class Team extends React.Component {
             </tr>
           </thead>
           <tbody>
-            {users.map(user => (
+            {users.map((user) => (
               <tr key={user.id}>
                 <td>{user.name ? user.name : f(gm('noUserName'))}</td>
                 {hasOwnerRole && <td>{user.email}</td>}
-                <td>
-                  {this.roleOptions(user)}
-                </td>
+                <td>{this.roleOptions(user)}</td>
                 <td className={s.deleteCell}>
-                  {
-                    currentUser.id !== user.id
-                    && canChangeUser(currentUser, user, team, users)
-                    && (
-                      <button className={s.remove} type="button" onClick={this.handleDeleteUserClicked(user.id)} aria-label="Remove">
+                  {currentUser.id !== user.id
+                    && canChangeUser(currentUser, user, team, users) && (
+                      <button
+                        className={s.remove}
+                        type="button"
+                        onClick={this.handleDeleteUserClicked(user.id)}
+                        aria-label="Remove"
+                      >
                         <Glyphicon glyph="remove" />
                       </button>
-                    )
-                  }
+                  )}
                 </td>
               </tr>
             ))}
@@ -156,7 +157,7 @@ class Team extends React.Component {
         {hasMemberRole && <AddUserFormContainer />}
       </div>
     );
-  }
+  };
 
   render() {
     const {
@@ -166,7 +167,7 @@ class Team extends React.Component {
       deleteTeamShown,
       hasOwnerRole,
       team,
-      userListReady
+      userListReady,
     } = this.props;
 
     if (!userListReady) {
@@ -190,14 +191,20 @@ class Team extends React.Component {
               <Tab eventKey={3} title="Messy Business">
                 <h3>Messy Business</h3>
                 <ButtonToolbar className={s.buttonToolbar}>
-                  <Button bsStyle="info" onClick={confirmChangeTeamURL}>Change team URL</Button>
+                  <Button bsStyle="info" onClick={confirmChangeTeamURL}>
+                    Change team URL
+                  </Button>
                 </ButtonToolbar>
                 <ButtonToolbar className={s.buttonToolbar}>
-                  <Button bsStyle="danger" onClick={confirmDeleteTeam}>Delete team</Button>
+                  <Button bsStyle="danger" onClick={confirmDeleteTeam}>
+                    Delete team
+                  </Button>
                 </ButtonToolbar>
               </Tab>
             </Tabs>
-          ) : this.renderUsers()}
+          ) : (
+            this.renderUsers()
+          )}
         </Grid>
         {changeTeamURLShown && <ChangeTeamURLModalContainer />}
         {deleteTeamShown && <DeleteTeamModalContainer />}

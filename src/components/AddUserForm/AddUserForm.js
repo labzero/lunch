@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { intlShape } from 'react-intl';
 import Button from 'react-bootstrap/lib/Button';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
@@ -16,7 +15,7 @@ class AddUserForm extends Component {
     hasGuestRole: PropTypes.bool.isRequired,
     hasMemberRole: PropTypes.bool.isRequired,
     hasOwnerRole: PropTypes.bool.isRequired,
-    intl: intlShape.isRequired,
+    intl: PropTypes.shape().isRequired,
   };
 
   static defaultState = {

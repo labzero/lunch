@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Button from 'react-bootstrap/lib/Button';
 import Col from 'react-bootstrap/lib/Col';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
@@ -15,7 +15,7 @@ import s from './Account.scss';
 class Account extends Component {
   static propTypes = {
     updateCurrentUser: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired
+    user: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -26,20 +26,23 @@ class Account extends Component {
     this.state = {
       name: user.name,
       email: user.email,
-      password: ''
+      password: '',
     };
   }
 
-  handleChange = field => event => this.setState({ [field]: event.target.value });
+  handleChange = (field) => (event) => this.setState({ [field]: event.target.value });
 
   handleSubmit = (event) => {
     event.preventDefault();
-    this.props.updateCurrentUser(this.state).then(() => {
-      this.setState({
-        password: ''
-      });
-    }).catch(() => {});
-  }
+    this.props
+      .updateCurrentUser(this.state)
+      .then(() => {
+        this.setState({
+          password: '',
+        });
+      })
+      .catch(() => {});
+  };
 
   render() {
     const { name, email, password } = this.state;
@@ -90,7 +93,9 @@ class Account extends Component {
                   />
                 </Col>
               </Row>
-              <HelpBlock>Leave this blank if you don&rsquo;t want to set a new password.</HelpBlock>
+              <HelpBlock>
+                Leave this blank if you don&rsquo;t want to set a new password.
+              </HelpBlock>
             </FormGroup>
             <Button type="submit">Submit</Button>
           </form>

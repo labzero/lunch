@@ -9,7 +9,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Button from 'react-bootstrap/lib/Button';
 import s from './HeaderLogin.scss';
 
@@ -29,7 +29,7 @@ const HeaderLogin = ({ user }) => {
 };
 
 HeaderLogin.propTypes = {
-  user: PropTypes.object.isRequired
+  user: PropTypes.object.isRequired,
 };
 
 export default withStyles(s)(HeaderLogin);
