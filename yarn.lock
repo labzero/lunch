@@ -3007,7 +3007,7 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@^2.2.3, classnames@^2.2.5:
+classnames@^2.2.5:
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.5.tgz#fb3801d453467649ef3603c7d61a02bd129bde6d"
 
@@ -9952,7 +9952,7 @@ rc@^1.1.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-addons-shallow-compare@^15.4.2, react-addons-shallow-compare@^15.6.2:
+react-addons-shallow-compare@^15.4.2:
   version "15.6.2"
   resolved "https://registry.yarnpkg.com/react-addons-shallow-compare/-/react-addons-shallow-compare-15.6.2.tgz#198a00b91fc37623db64a28fd17b596ba362702f"
   dependencies:
@@ -10034,13 +10034,13 @@ react-flip-move@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/react-flip-move/-/react-flip-move-3.0.1.tgz#7bb5351c6e1d9778baf748cc5292aa98250c3401"
 
-react-geosuggest@^2.7.0:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/react-geosuggest/-/react-geosuggest-2.7.0.tgz#6c02ea685062cf191aca40879c17916337d16250"
+react-geosuggest@^2.14.1:
+  version "2.14.1"
+  resolved "https://registry.yarnpkg.com/react-geosuggest/-/react-geosuggest-2.14.1.tgz#1e127b24d3c8b4ffb353bb0b74370ddc6806e8b8"
+  integrity sha512-gaAEZfDEHHWEMn9y8UNH+nJzu5Kc3LvK8CAFD6dFZmn69TJ/4GgoXLCLzUunbPK/Nqs08mpDsryK5ceFFmVhVg==
   dependencies:
-    classnames "^2.2.3"
+    classnames "^2.2.6"
     lodash.debounce "^4.0.6"
-    react-addons-shallow-compare "^15.6.2"
 
 react-intl@^2.3.0:
   version "2.4.0"
