@@ -30,7 +30,7 @@ import nodeFetch from 'node-fetch';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import expressWs from 'express-ws';
-import Honeybadger from 'honeybadger';
+import Honeybadger from '@honeybadger-io/js';
 import PrettyError from 'pretty-error';
 import App from './components/App';
 import Html from './components/Html';
@@ -61,6 +61,11 @@ process.on('unhandledRejection', (reason, p) => {
   console.error('Unhandled Rejection at:', p, 'reason:', reason);
   // send entire app down. Process manager will restart it
   process.exit(1);
+});
+
+Honeybadger.configure({
+  apiKey: process.env.HONEYBADGER_API_KEY,
+  environment: __DEV__ ? 'development' : 'production',
 });
 
 const logDirectory = path.join(__dirname, 'log');
