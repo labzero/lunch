@@ -209,9 +209,8 @@ app.use(
 app.use((err, req, res, next) => {
   // eslint-disable-line no-unused-vars
   if (err instanceof Jwt401Error) {
-    req.logout();
+    req.logout(next);
     res.clearCookie('id_token', { domain: config.domain });
-    next();
   } else {
     console.error('[express-jwt-error]', req.cookies.id_token);
     // `clearCookie`, otherwise user can't use web-app until cookie expires
@@ -254,10 +253,14 @@ app.use('/login', loginMiddleware());
 app.use('/password', passwordMiddleware());
 app.use('/users', usersMiddleware());
 
-app.get('/logout', (req, res) => {
-  req.logout();
+app.get('/logout', (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    return res.redirect('/');
+  });
   res.clearCookie('id_token', { domain: config.domain });
-  res.redirect('/');
 });
 
 //
