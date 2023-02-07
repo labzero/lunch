@@ -18,8 +18,6 @@ import webpackConfig from './webpack.config';
 import run, { format } from './run';
 import clean from './clean';
 
-const isDebug = !process.argv.includes('--release');
-
 // https://webpack.js.org/configuration/watch/#watchoptions
 const watchOptions = {
   // Watching may not work with NFS and machines in VirtualBox
@@ -213,7 +211,8 @@ async function start() {
     server: 'src/server.js',
     middleware: [server],
     open: !process.argv.includes('--silent'),
-    ...isDebug ? {} : { notify: false, ui: false },
+    notify: false,
+    ui: false,
   }, (error, bs) => (error ? reject(error) : resolve(bs))));
 
   const timeEnd = new Date();
