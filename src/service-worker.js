@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-globals */
 
 // eslint-disable-next-line no-underscore-dangle
-workbox.precaching.precacheAndRoute(self.__precacheManifest || []);
+workbox.precaching.precacheAndRoute(self.__WB_MANIFEST || []);
 
 // Cache fonts
 workbox.routing.registerRoute(
