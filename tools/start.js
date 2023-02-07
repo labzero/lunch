@@ -70,11 +70,11 @@ async function start() {
     .sort((a, b) => b.includes('polyfill') - a.includes('polyfill'));
   clientConfig.output.filename = clientConfig.output.filename.replace(
     'chunkhash',
-    'hash',
+    'fullhash',
   );
   clientConfig.output.chunkFilename = clientConfig.output.chunkFilename.replace(
     'chunkhash',
-    'hash',
+    'fullhash',
   );
   clientConfig.module.rules = clientConfig.module.rules.filter(
     x => x.loader !== 'null-loader',
@@ -83,8 +83,8 @@ async function start() {
 
   // Configure server-side hot module replacement
   const serverConfig = webpackConfig.find(config => config.name === 'server');
-  serverConfig.output.hotUpdateMainFilename = 'updates/[hash].hot-update.json';
-  serverConfig.output.hotUpdateChunkFilename = 'updates/[id].[hash].hot-update.js';
+  serverConfig.output.hotUpdateMainFilename = 'updates/[fullhash].hot-update.json';
+  serverConfig.output.hotUpdateChunkFilename = 'updates/[id].[fullhash].hot-update.js';
   serverConfig.module.rules = serverConfig.module.rules.filter(
     x => x.loader !== 'null-loader',
   );
@@ -101,8 +101,6 @@ async function start() {
   // https://github.com/webpack/webpack-dev-middleware
   server.use(webpackDevMiddleware(clientCompiler, {
     publicPath: clientConfig.output.publicPath,
-    quiet: true,
-    watchOptions,
   }));
 
   // https://github.com/glenjamin/webpack-hot-middleware
