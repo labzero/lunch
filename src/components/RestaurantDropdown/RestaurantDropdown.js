@@ -99,6 +99,7 @@ const RestaurantDropdown = ({
         <MenuItem divider />
         <MenuItem header>
           Last
+          {' '}
           {sortDuration}
           {' '}
 day

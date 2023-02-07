@@ -259,8 +259,12 @@ export default new Map([
             const changedRestaurants = Object.assign({}, r);
             Object.keys(changedRestaurants).forEach(i => {
               if (changedRestaurants[i].tags.indexOf(action.id) > -1) {
-                changedRestaurants[i].tags = update(changedRestaurants[i].tags, {
-                  $splice: [[changedRestaurants[i].tags.indexOf(action.id), 1]]
+                changedRestaurants[i] = update(changedRestaurants[i], {
+                  $merge: {
+                    tags: update(changedRestaurants[i].tags, {
+                      $splice: [[changedRestaurants[i].tags.indexOf(action.id), 1]]
+                    })
+                  }
                 });
               }
             });
