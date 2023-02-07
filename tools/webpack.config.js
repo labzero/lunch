@@ -127,9 +127,8 @@ const config = {
             exclude: SRC_DIR,
             loader: 'css-loader',
             options: {
+              esModule: false,
               sourceMap: isDebug,
-              minimize: !isDebug,
-              discardComments: { removeAll: true },
             },
           },
 
@@ -139,16 +138,15 @@ const config = {
             include: SRC_DIR,
             loader: 'css-loader',
             options: {
+              esModule: false,
               // CSS Loader https://github.com/webpack/css-loader
               importLoaders: 1,
               sourceMap: isDebug,
               // CSS Modules https://github.com/css-modules/css-modules
-              modules: true,
-              // eslint-disable-next-line no-nested-ternary
-              localIdentName: process.env.NODE_ENV === 'test' ? '[name]-[local]' : (isDebug ? '[name]-[local]-[hash:base64:5]' : '[hash:base64:5]'),
-              // CSS Nano http://cssnano.co/options/
-              minimize: !isDebug,
-              discardComments: { removeAll: true },
+              modules: {
+                // eslint-disable-next-line no-nested-ternary
+                localIdentName: process.env.NODE_ENV === 'test' ? '[name]-[local]' : (isDebug ? '[name]-[local]-[hash:base64:5]' : '[hash:base64:5]'),
+              }
             },
           },
 
@@ -158,15 +156,14 @@ const config = {
             include: SRC_DIR,
             loader: 'css-loader',
             options: {
+              esModule: false,
               // CSS Loader https://github.com/webpack/css-loader
               importLoaders: 1,
               sourceMap: isDebug,
               // CSS Modules https://github.com/css-modules/css-modules
-              modules: true,
-              localIdentName: '[local]',
-              // CSS Nano http://cssnano.co/options/
-              minimize: !isDebug,
-              discardComments: { removeAll: true },
+              modules: {
+                localIdentName: '[local]',
+              },
             },
           },
 
@@ -225,6 +222,7 @@ const config = {
                 test: /\.svg$/,
                 loader: 'svg-url-loader',
                 options: {
+                  esModule: false,
                   name: staticAssetName,
                   limit: 4096, // 4kb
                 },
@@ -234,6 +232,7 @@ const config = {
               {
                 loader: 'url-loader',
                 options: {
+                  esModule: false,
                   name: staticAssetName,
                   limit: 4096, // 4kb
                 },
@@ -245,6 +244,7 @@ const config = {
           {
             loader: 'file-loader',
             options: {
+              esModule: false,
               name: staticAssetName,
             },
           },
