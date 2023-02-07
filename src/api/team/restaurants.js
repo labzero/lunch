@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import request from 'request';
+import fetch from 'node-fetch';
 import { Restaurant, Vote, Tag } from '../../models';
 import checkTeamRole from '../helpers/checkTeamRole';
 import loggedIn from '../helpers/loggedIn';
@@ -40,25 +40,23 @@ export default () => {
           if (r === null || r.team_id !== req.team.id) {
             notFound(res);
           } else {
-            request(`https://maps.googleapis.com/maps/api/place/details/json?key=${apikey}&placeid=${r.place_id}`,
-              (error, response, body) => {
-                if (!error && response.statusCode === 200) {
-                  const json = JSON.parse(body);
-                  if (json.status !== 'OK') {
-                    const newError = {
-                      message: `Could not get info for restaurant. Google might have
-    removed its entry. Try removing it and adding it to Lunch again.`
-                    };
-                    res.status(404).json({ error: true, newError });
-                  } else if (json.result && json.result.url) {
-                    res.redirect(json.result.url);
-                  } else {
-                    res.redirect(`https://www.google.com/maps/place/${r.name}, ${r.address}`);
-                  }
-                } else {
-                  next(error);
-                }
-              });
+            const response = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?key=${apikey}&placeid=${r.place_id}`);
+            const json = await response.json();
+            if (response.ok) {
+              if (json.status !== 'OK') {
+                const newError = {
+                  message: `Could not get info for restaurant. Google might have
+removed its entry. Try removing it and adding it to Lunch again.`
+                };
+                res.status(404).json({ error: true, newError });
+              } else if (json.result && json.result.url) {
+                res.redirect(json.result.url);
+              } else {
+                res.redirect(`https://www.google.com/maps/place/${r.name}, ${r.address}`);
+              }
+            } else {
+              next(json);
+            }
           }
         } catch (err) {
           next(err);

@@ -68,7 +68,6 @@
     "react-scroll": "^1.7.6",
     "react-transition-group": "^4.4.5",
     "redux": "^4.2.1",
-    "request": "^2.71.0",
     "reselect": "^2.3.0",
     "reserved-usernames": "^1.0.3",
     "resolve-url-loader": "^2.0.2",
