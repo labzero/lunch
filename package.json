@@ -16,7 +16,7 @@
     "@babel/polyfill": "^7.0.0",
     "@honeybadger-io/js": "^5.0.0",
     "@reduxjs/toolkit": "^1.9.2",
-    "bcrypt": "^5.0.1",
+    "bcrypt": "^5.1.0",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.3",
     "classnames": "^2.2.6",
