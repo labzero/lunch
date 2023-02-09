@@ -11,7 +11,9 @@ import StyleContext from 'isomorphic-style-loader/StyleContext';
 import PropTypes from 'prop-types';
 import React, { Children } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
+import { Loader } from '@googlemaps/js-api-loader';
 import IntlProviderContainer from './IntlProvider/IntlProviderContainer';
+import GoogleMapsLoaderContext from './GoogleMapsLoaderContext/GoogleMapsLoaderContext';
 
 const ContextType = {
   // Enables critical path CSS rendering
@@ -19,6 +21,7 @@ const ContextType = {
   insertCss: PropTypes.func.isRequired,
   // Universal HTTP client
   fetch: PropTypes.func.isRequired,
+  googleApiKey: PropTypes.string.isRequired,
   pathname: PropTypes.string.isRequired,
   query: PropTypes.object,
   store: PropTypes.object.isRequired,
@@ -57,6 +60,18 @@ class App extends React.PureComponent {
 
   static childContextTypes = ContextType;
 
+  constructor(props) {
+    super(props);
+
+    this.loaderContextValue = {
+      loader: new Loader({
+        apiKey: this.props.context.googleApiKey,
+        version: 'weekly',
+        libraries: ['places', 'geocoder']
+      })
+    };
+  }
+
   getChildContext() {
     return this.props.context;
   }
@@ -70,7 +85,9 @@ class App extends React.PureComponent {
       >
         <ReduxProvider store={this.props.context.store}>
           <IntlProviderContainer>
-            {Children.only(this.props.children)}
+            <GoogleMapsLoaderContext.Provider value={this.loaderContextValue}>
+              {Children.only(this.props.children)}
+            </GoogleMapsLoaderContext.Provider>
           </IntlProviderContainer>
         </ReduxProvider>
       </StyleContext.Provider>

@@ -42,5 +42,6 @@ module.exports = {
     jwt: { secret: process.env.JWT_SECRET || 'React Starter Kit' },
     session: { secret: process.env.SESSION_SECRET || 'Lunch session' },
     sendgrid: { secret: process.env.SENDGRID_API_KEY }
-  }
+  },
+  googleApiKey: process.env.GOOGLE_CLIENT_APIKEY
 };

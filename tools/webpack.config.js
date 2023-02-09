@@ -29,7 +29,7 @@ const isAnalyze = process.argv.includes('--analyze') || process.argv.includes('-
 const reScript = /\.(js|jsx|mjs)$/;
 const reStyle = /\.(css|less|styl|scss|sass|sss)$/;
 const reImage = /\.(bmp|gif|jpg|jpeg|png|svg)$/;
-const staticAssetName = isDebug ? '[path][name].[ext]?[fullhash:8]' : '[fullhash:8].[ext]';
+const staticAssetName = isDebug ? '[path][name].[ext]?[hash:8]' : '[hash:8].[ext]';
 
 //
 // Common configuration chunk to be used for both
@@ -153,7 +153,7 @@ const config = {
               // CSS Modules https://github.com/css-modules/css-modules
               modules: {
                 // eslint-disable-next-line no-nested-ternary
-                localIdentName: process.env.NODE_ENV === 'test' ? '[name]-[local]' : (isDebug ? '[name]-[local]-[fullhash:base64:5]' : '[fullhash:base64:5]'),
+                localIdentName: process.env.NODE_ENV === 'test' ? '[name]-[local]' : (isDebug ? '[name]-[local]-[hash:base64:5]' : '[hash:base64:5]'),
               }
             },
           },

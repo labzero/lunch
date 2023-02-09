@@ -363,6 +363,7 @@ const render = async (req, res, next) => {
     const context = {
       insertCss,
       fetch,
+      googleApiKey: config.googleApiKey,
       // The twins below are wild, be careful!
       pathname: req.path,
       query: req.query,
@@ -391,7 +392,6 @@ const render = async (req, res, next) => {
 
     const data = {
       ...route,
-      apikey: process.env.GOOGLE_CLIENT_APIKEY || '',
       title: pageTitle,
       ogTitle: route.ogTitle || pageTitle,
       description:
@@ -420,6 +420,7 @@ const render = async (req, res, next) => {
     data.scripts = Array.from(scripts);
     data.app = {
       apiUrl: config.api.clientUrl,
+      googleApiKey: config.googleApiKey,
       state: initialState,
     };
 

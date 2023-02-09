@@ -39,6 +39,7 @@ export class _Home extends Component {
       let host = window.location.host;
       if (
         window.location.port
+        && typeof wsPort === 'number'
         && wsPort !== 0
         && wsPort !== window.location.port
       ) {

@@ -71,6 +71,7 @@ const context = {
   fetch: createFetch(fetch, {
     baseUrl: window.App.apiUrl,
   }),
+  googleApiKey: window.App.googleApiKey,
   // Initialize a new Redux store
   // http://redux.js.org/docs/basics/UsageWithReact.html
   store,

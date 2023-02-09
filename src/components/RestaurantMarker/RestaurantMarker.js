@@ -85,6 +85,7 @@ const StyledRestaurantMarker = withStyles(s)(InnerRestaurantMarker);
 
 const RestaurantMarker = ({ restaurant, ...props }) => {
   const context = {
+    googleApiKey: props.googleApiKey,
     fetch: props.fetch,
     insertCss: props.insertCss,
     store: props.store,

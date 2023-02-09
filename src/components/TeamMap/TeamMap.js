@@ -6,6 +6,7 @@ import { GOOGLE_MAP_ZOOM } from '../../constants';
 import googleMapOptions from '../../helpers/googleMapOptions';
 import loadComponent from '../../helpers/loadComponent';
 import s from './TeamMap.scss';
+import GoogleMapsLoaderContext from '../GoogleMapsLoaderContext/GoogleMapsLoaderContext';
 
 let GoogleMap = () => null;
 
@@ -55,14 +56,19 @@ class TeamMap extends Component {
 
     return (
       <div className={s.root}>
-        <GoogleMap
-          center={center}
-          defaultZoom={GOOGLE_MAP_ZOOM}
-          defaultCenter={defaultCenter}
-          onGoogleApiLoaded={this.setMap}
-          options={googleMapOptions()}
-          yesIWantToUseGoogleMapApiInternals
-        />
+        <GoogleMapsLoaderContext.Consumer>
+          {({ loader }) => (
+            <GoogleMap
+              center={center}
+              defaultZoom={GOOGLE_MAP_ZOOM}
+              defaultCenter={defaultCenter}
+              googleMapLoader={() => loader.load().then(google => google.maps)}
+              onGoogleApiLoaded={this.setMap}
+              options={googleMapOptions()}
+              yesIWantToUseGoogleMapApiInternals
+            />
+          )}
+        </GoogleMapsLoaderContext.Consumer>
         <div className={s.hereCenterer}>
           <HereMarker />
         </div>
