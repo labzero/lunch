@@ -7,6 +7,10 @@ import TooltipUserContainer from '../TooltipUser/TooltipUserContainer';
 import s from './RestaurantVoteCount.scss';
 
 export class _RestaurantVoteCount extends Component {
+  static contextTypes = {
+    store: PropTypes.object.isRequired,
+  };
+
   static propTypes = {
     id: PropTypes.number.isRequired,
     votes: PropTypes.array.isRequired,
@@ -47,6 +51,7 @@ export class _RestaurantVoteCount extends Component {
             {this.props.votes.map((voteId) => (
               <TooltipUserContainer
                 key={`voteCountTooltipUser_${voteId}`}
+                store={this.context.store}
                 voteId={voteId}
               />
             ))}

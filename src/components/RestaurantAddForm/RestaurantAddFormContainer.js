@@ -65,6 +65,7 @@ const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, 
         scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, {
           containerId: 'listContainer',
           offset: document.getElementById('listForms').offsetHeight,
+          smooth: true,
         });
         scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`);
       }

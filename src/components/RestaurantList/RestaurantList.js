@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import React from 'react';
-import FlipMove from 'react-flip-move';
+import React, { useCallback } from 'react';
+import { Flipper, Flipped } from 'react-flip-toolkit';
 import { Element as ScrollElement } from 'react-scroll';
 import withStyles from 'isomorphic-style-loader/withStyles';
 import Grid from 'react-bootstrap/lib/Grid';
@@ -43,28 +43,65 @@ const RestaurantList = ({
     );
   }
 
+  const shouldFlip = useCallback(() => flipMove, []);
+
+  const onAppear = useCallback((el, i) => {
+    setTimeout(() => {
+      el.classList.add(s.fadeIn);
+      setTimeout(() => {
+        // eslint-disable-next-line no-param-reassign
+        el.style.opacity = 1;
+        el.classList.remove(s.fadeIn);
+      }, 500);
+    }, i * 50);
+  }, []);
+
+  const onExit = useCallback((el, i, removeElement) => {
+    setTimeout(() => {
+      el.classList.add(s.fadeOut);
+      setTimeout(removeElement, 500);
+    }, i * 50);
+  }, []);
+
+  const handleEnterUpdateDelete = useCallback(({
+    hideEnteringElements,
+    animateEnteringElements,
+    animateExitingElements,
+    animateFlippedElements
+  }) => {
+    hideEnteringElements();
+    animateEnteringElements();
+    animateExitingElements()
+      .then(animateFlippedElements);
+  }, []);
+
   return (
-    <FlipMove
-      typeName="ul"
+    <Flipper
+      element="ul"
       className={s.root}
-      disableAllAnimations={!flipMove}
-      enterAnimation="fade"
-      leaveAnimation="fade"
-      staggerDelayBy={40}
-      staggerDurationBy={40}
+      flipKey={ids}
+      handleEnterUpdateDelete={handleEnterUpdateDelete}
+      staggerConfig={{
+        default: {
+          reverse: true,
+          speed: 0.75,
+        }
+      }}
     >
       {ids.map((id) => (
-        <li key={`restaurantListItem_${id}`}>
-          <ScrollElement name={`restaurantListItem_${id}`}>
-            <RestaurantContainer
-              id={id}
-              shouldShowAddTagArea
-              shouldShowDropdown
-            />
-          </ScrollElement>
-        </li>
+        <Flipped key={id} flipId={id} onAppear={onAppear} onExit={onExit} shouldFlip={shouldFlip} stagger>
+          <li key={`restaurantListItem_${id}`}>
+            <ScrollElement name={`restaurantListItem_${id}`}>
+              <RestaurantContainer
+                id={id}
+                shouldShowAddTagArea
+                shouldShowDropdown
+              />
+            </ScrollElement>
+          </li>
+        </Flipped>
       ))}
-    </FlipMove>
+    </Flipper>
   );
 };
 
