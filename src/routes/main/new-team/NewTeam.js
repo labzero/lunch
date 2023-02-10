@@ -1,15 +1,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/lib/Button';
-import Col from 'react-bootstrap/lib/Col';
-import ControlLabel from 'react-bootstrap/lib/ControlLabel';
-import FormControl from 'react-bootstrap/lib/FormControl';
-import FormGroup from 'react-bootstrap/lib/FormGroup';
-import Grid from 'react-bootstrap/lib/Grid';
-import HelpBlock from 'react-bootstrap/lib/HelpBlock';
-import InputGroup from 'react-bootstrap/lib/InputGroup';
-import Row from 'react-bootstrap/lib/Row';
+import Button from 'react-bootstrap/Button';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import Container from 'react-bootstrap/Container';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Row from 'react-bootstrap/Row';
 import { TEAM_SLUG_REGEX } from '../../../constants';
 import defaultCoords from '../../../constants/defaultCoords';
 import TeamGeosuggestContainer from '../../../components/TeamGeosuggest/TeamGeosuggestContainer';
@@ -60,14 +57,14 @@ class NewTeam extends Component {
 
     return (
       <div className={s.root}>
-        <Grid>
+        <Container>
           <h2>Create a new team</h2>
           <form onSubmit={this.handleSubmit}>
-            <FormGroup controlId="newTeam-name">
-              <ControlLabel>Name</ControlLabel>
+            <Form.Group className="mb-3" controlId="newTeam-name">
+              <Form.Label>Name</Form.Label>
               <Row>
                 <Col sm={6}>
-                  <FormControl
+                  <Form.Control
                     type="text"
                     onChange={this.handleChange('name')}
                     value={name}
@@ -75,13 +72,13 @@ class NewTeam extends Component {
                   />
                 </Col>
               </Row>
-            </FormGroup>
-            <FormGroup controlId="newTeam-slug">
-              <ControlLabel>URL</ControlLabel>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="newTeam-slug">
+              <Form.Label>URL</Form.Label>
               <Row>
                 <Col sm={6}>
                   <InputGroup>
-                    <FormControl
+                    <Form.Control
                       autoCorrect="off"
                       autoCapitalize="off"
                       className={s.teamUrl}
@@ -93,16 +90,16 @@ class NewTeam extends Component {
                       onChange={this.handleSlugChange}
                       required
                     />
-                    <InputGroup.Addon>.lunch.pink</InputGroup.Addon>
+                    <InputGroup.Text>.lunch.pink</InputGroup.Text>
                   </InputGroup>
                 </Col>
               </Row>
-              <HelpBlock>
+              <Form.Text>
                 Letters, numbers, and dashes only. URL must start with a letter.
-              </HelpBlock>
-            </FormGroup>
-            <FormGroup controlId="newTeam-address">
-              <ControlLabel>Address</ControlLabel>
+              </Form.Text>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="newTeam-address">
+              <Form.Label>Address</Form.Label>
               <p>
                 Pick a centerpoint for your team. It will ensure that nearby
                 recommendations are shown when you search for restaurants. You
@@ -114,10 +111,10 @@ class NewTeam extends Component {
                 initialValue=""
                 onChange={this.handleChange('address')}
               />
-            </FormGroup>
+            </Form.Group>
             <Button type="submit">Submit</Button>
           </form>
-        </Grid>
+        </Container>
       </div>
     );
   }

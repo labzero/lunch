@@ -18,7 +18,7 @@ $button-height: ($padding-large-vertical * 2) + ($font-size-large * $line-height
 }
 
 .googleLogo {
-  border-radius: $btn-border-radius-large - 1;
+  border-radius: $border-radius-large - 1;
   left: 0;
   height: $button-height;
   position: absolute;

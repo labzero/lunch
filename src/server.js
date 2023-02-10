@@ -198,6 +198,8 @@ app.use(flash());
 //
 // Authentication
 // -----------------------------------------------------------------------------
+app.use(passport.initialize());
+
 app.use(
   expressJwt({
     secret: config.auth.jwt.secret,
@@ -218,8 +220,6 @@ app.use((err, req, res, next) => {
     next(err);
   }
 });
-
-app.use(passport.initialize());
 
 app.use((req, res, next) => {
   const subdomainMatch = req.hostname.match(

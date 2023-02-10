@@ -3,7 +3,7 @@ import React, { useCallback } from 'react';
 import { Flipper, Flipped } from 'react-flip-toolkit';
 import { Element as ScrollElement } from 'react-scroll';
 import withStyles from 'isomorphic-style-loader/withStyles';
-import Grid from 'react-bootstrap/lib/Grid';
+import Container from 'react-bootstrap/Container';
 import RestaurantContainer from '../Restaurant/RestaurantContainer';
 import Loading from '../Loading';
 import s from './RestaurantList.scss';
@@ -21,14 +21,14 @@ const RestaurantList = ({
   if (!allRestaurantIds.length) {
     return (
       <div className={s.root}>
-        <Grid className={s.welcome}>
+        <Container className={s.welcome}>
           <h2>Welcome to Lunch!</h2>
           <p>
             Get started by adding restaurants! Use the above map or search box
             and add as many restaurants as you like. Then you and your team can
             start voting!
           </p>
-        </Grid>
+        </Container>
       </div>
     );
   }
@@ -36,9 +36,9 @@ const RestaurantList = ({
   if (!ids.length) {
     return (
       <div className={s.root}>
-        <Grid className={s.nothing}>
+        <Container className={s.nothing}>
           <p>Nothing to see here!</p>
-        </Grid>
+        </Container>
       </div>
     );
   }

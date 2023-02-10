@@ -1,16 +1,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
-import Col from 'react-bootstrap/lib/Col';
-import ControlLabel from 'react-bootstrap/lib/ControlLabel';
-import FormControl from 'react-bootstrap/lib/FormControl';
-import FormGroup from 'react-bootstrap/lib/FormGroup';
-import InputGroup from 'react-bootstrap/lib/InputGroup';
-import Modal from 'react-bootstrap/lib/Modal';
-import ModalBody from 'react-bootstrap/lib/ModalBody';
-import ModalFooter from 'react-bootstrap/lib/ModalFooter';
-import Row from 'react-bootstrap/lib/Row';
-import Button from 'react-bootstrap/lib/Button';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Modal from 'react-bootstrap/Modal';
+import ModalBody from 'react-bootstrap/ModalBody';
+import ModalFooter from 'react-bootstrap/ModalFooter';
+import Row from 'react-bootstrap/Row';
+import Button from 'react-bootstrap/Button';
 import { TEAM_SLUG_REGEX } from '../../constants';
 import s from './DeleteTeamModal.scss';
 
@@ -65,10 +63,10 @@ All restaurants and tags will
           </p>
           <Row>
             <Col sm={9}>
-              <FormGroup controlId="deleteTeamModal-confirmSlug">
-                <ControlLabel>Team URL</ControlLabel>
+              <Form.Group className="mb-3" controlId="deleteTeamModal-confirmSlug">
+                <Form.Label>Team URL</Form.Label>
                 <InputGroup>
-                  <FormControl
+                  <Form.Control
                     className={s.teamUrl}
                     type="text"
                     onChange={this.handleChange}
@@ -76,20 +74,20 @@ All restaurants and tags will
                     value={confirmSlug}
                     required
                   />
-                  <InputGroup.Addon>.lunch.pink</InputGroup.Addon>
+                  <InputGroup.Text>.lunch.pink</InputGroup.Text>
                 </InputGroup>
-              </FormGroup>
+              </Form.Group>
             </Col>
           </Row>
         </ModalBody>
         <ModalFooter>
-          <Button type="button" bsSize="small" onClick={hideModal}>
+          <Button type="button" size="sm" onClick={hideModal}>
             Cancel
           </Button>
           <Button
             autoFocus
-            bsSize="small"
-            bsStyle="primary"
+            size="sm"
+            variant="primary"
             disabled={team.slug !== confirmSlug}
             onClick={this.handleSubmit}
             type="submit"

@@ -1,14 +1,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/lib/Button';
-import Col from 'react-bootstrap/lib/Col';
-import ControlLabel from 'react-bootstrap/lib/ControlLabel';
-import FormControl from 'react-bootstrap/lib/FormControl';
-import FormGroup from 'react-bootstrap/lib/FormGroup';
-import Grid from 'react-bootstrap/lib/Grid';
-import HelpBlock from 'react-bootstrap/lib/HelpBlock';
-import Row from 'react-bootstrap/lib/Row';
+import Button from 'react-bootstrap/Button';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
 import { PASSWORD_MIN_LENGTH } from '../../../constants';
 import s from './Account.scss';
 
@@ -49,14 +46,14 @@ class Account extends Component {
 
     return (
       <div className={s.root}>
-        <Grid>
+        <Container>
           <h2>Account</h2>
           <form onSubmit={this.handleSubmit}>
-            <FormGroup controlId="account-name">
-              <ControlLabel>Name</ControlLabel>
+            <Form.Group className="mb-3" controlId="account-name">
+              <Form.Label>Name</Form.Label>
               <Row>
                 <Col sm={6}>
-                  <FormControl
+                  <Form.Control
                     name="name"
                     onChange={this.handleChange('name')}
                     required
@@ -65,12 +62,12 @@ class Account extends Component {
                   />
                 </Col>
               </Row>
-            </FormGroup>
-            <FormGroup controlId="account-email">
-              <ControlLabel>Email</ControlLabel>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="account-email">
+              <Form.Label>Email</Form.Label>
               <Row>
                 <Col sm={6}>
-                  <FormControl
+                  <Form.Control
                     name="email"
                     onChange={this.handleChange('email')}
                     required
@@ -79,12 +76,12 @@ class Account extends Component {
                   />
                 </Col>
               </Row>
-            </FormGroup>
-            <FormGroup controlId="account-password">
-              <ControlLabel>Change password?</ControlLabel>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="account-password">
+              <Form.Label>Change password?</Form.Label>
               <Row>
                 <Col sm={6}>
-                  <FormControl
+                  <Form.Control
                     minLength={PASSWORD_MIN_LENGTH}
                     name="password"
                     onChange={this.handleChange('password')}
@@ -93,13 +90,13 @@ class Account extends Component {
                   />
                 </Col>
               </Row>
-              <HelpBlock>
+              <Form.Text>
                 Leave this blank if you don&rsquo;t want to set a new password.
-              </HelpBlock>
-            </FormGroup>
+              </Form.Text>
+            </Form.Group>
             <Button type="submit">Submit</Button>
           </form>
-        </Grid>
+        </Container>
       </div>
     );
   }

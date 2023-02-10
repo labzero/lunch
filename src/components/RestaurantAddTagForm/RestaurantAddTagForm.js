@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Autosuggest from 'react-autosuggest';
+import Button from 'react-bootstrap/Button';
 import withStyles from 'isomorphic-style-loader/withStyles';
 import {
   generateTagList,
@@ -88,20 +89,23 @@ export class _RestaurantAddTagForm extends Component {
             this.autosuggest = a;
           }}
         />
-        <button
-          className={`btn btn-sm btn-primary ${s.button}`}
+        <Button
+          className={s.button}
           type="submit"
           disabled={autosuggestValue === ''}
+          size="sm"
+          variant="primary"
         >
           add
-        </button>
-        <button
-          className={`btn btn-sm btn-default ${s.button}`}
-          type="button"
+        </Button>
+        <Button
+          className={s.button}
           onClick={hideAddTagForm}
+          size="sm"
+          variant="light"
         >
           done
-        </button>
+        </Button>
       </form>
     );
   }

@@ -1,11 +1,11 @@
 import React from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
-import Grid from 'react-bootstrap/lib/Grid';
+import Container from 'react-bootstrap/Container';
 import s from './About.scss';
 
 const About = () => (
   <div className={s.root}>
-    <Grid className={s.grid}>
+    <Container className={s.grid}>
       <h2>About Lunch</h2>
       <p>
         Hi! I’m
@@ -153,7 +153,7 @@ const About = () => (
         happy to hear from you.
       </p>
       <p>I last updated this page on May 1, 2017.</p>
-    </Grid>
+    </Container>
   </div>
 );
 

@@ -1,14 +1,10 @@
 import React from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/lib/Button';
-import Col from 'react-bootstrap/lib/Col';
-import ControlLabel from 'react-bootstrap/lib/ControlLabel';
-import Form from 'react-bootstrap/lib/Form';
-import FormControl from 'react-bootstrap/lib/FormControl';
-import FormGroup from 'react-bootstrap/lib/FormGroup';
-import Grid from 'react-bootstrap/lib/Grid';
-import Jumbotron from 'react-bootstrap/lib/Jumbotron';
-import Row from 'react-bootstrap/lib/Row';
+import Button from 'react-bootstrap/Button';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
 import search from './search.png';
 import tag from './tag.png';
 import vote from './vote.png';
@@ -22,19 +18,19 @@ const renderForm = () => (
     action="/invitation?success=sent"
     method="post"
   >
-    <FormGroup className={s.formGroup} controlId="landing-email">
-      <ControlLabel className="sr-only">Email</ControlLabel>
-      <FormControl
-        bsSize="large"
+    <Form.Group className={s.formGroup} controlId="landing-email">
+      <Form.Label visuallyHidden>Email</Form.Label>
+      <Form.Control
+        size="lg"
         className={s.field}
         name="email"
         placeholder="Enter your email"
         required
         type="email"
       />
-    </FormGroup>
+    </Form.Group>
     {' '}
-    <Button bsSize="large" bsStyle="primary" type="submit">
+    <Button size="lg" variant="primary" type="submit">
       Get invited
     </Button>
   </Form>
@@ -42,15 +38,15 @@ const renderForm = () => (
 
 const Landing = () => (
   <div className={s.root}>
-    <Jumbotron className={s.jumbotron}>
-      <Grid>
+    <section className={s.jumbotron}>
+      <Container>
         <h2 className={s.jumbotronHeading}>
           Figure it out,
           <br />
           together.
         </h2>
         <Row>
-          <Col xs={12} sm={6} smOffset={3}>
+          <Col xs={12} sm={{ span: 6, offset: 3 }}>
             <p>
               Unsure what to eat? Want to leave the office for a bit and grab
               some grub with your team? Try&nbsp;Lunch!
@@ -58,9 +54,9 @@ const Landing = () => (
             {renderForm()}
           </Col>
         </Row>
-      </Grid>
-    </Jumbotron>
-    <Grid>
+      </Container>
+    </section>
+    <Container>
       <Row className={s.feature}>
         <Col xs={12} sm={6}>
           <img src={search} alt="" />
@@ -111,23 +107,23 @@ const Landing = () => (
           </p>
         </Col>
       </Row>
-    </Grid>
-    <Grid>
+    </Container>
+    <Container>
       <div className={s.finalCta}>
         <h3>Sign up today!</h3>
         <Row>
-          <Col xs={12} sm={6} smOffset={3}>
+          <Col xs={12} sm={{ span: 6, offset: 3 }}>
             {renderForm()}
           </Col>
         </Row>
       </div>
       <div className={s.finalCta}>
         <h3>Already a member? Come on in!</h3>
-        <Button bsSize="large" bsStyle="primary" href="/login">
+        <Button size="lg" variant="primary" href="/login">
           Log into your teams
         </Button>
       </div>
-    </Grid>
+    </Container>
   </div>
 );
 

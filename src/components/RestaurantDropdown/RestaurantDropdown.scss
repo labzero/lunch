@@ -1,15 +1,26 @@
 @import '../../styles/_mixins.scss';
 @import '../../styles/_variables.scss';
 
+.root,
+.toggle {
+  line-height: 1;
+}
+
 .root {
+  display: inline-block;
   vertical-align: bottom;
 }
 
 .toggle {
   @include plain-button;
 
-  line-height: 1;
   padding: 0 .5em;
+
+  &,
+  &:hover,
+  &:active {
+    color: inherit;
+  }
 
   &:hover {
     background: none;

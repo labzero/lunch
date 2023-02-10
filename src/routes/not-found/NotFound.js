@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
  */
 
 import React from 'react';
-import Grid from 'react-bootstrap/lib/Grid';
+import Container from 'react-bootstrap/Container';
 import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './NotFound.scss';
 
@@ -21,10 +21,10 @@ class NotFound extends React.Component {
   render() {
     return (
       <div className={s.root}>
-        <Grid>
+        <Container>
           <h2>{this.props.title}</h2>
           <p>Sorry, the page you were trying to view does not exist.</p>
-        </Grid>
+        </Container>
       </div>
     );
   }

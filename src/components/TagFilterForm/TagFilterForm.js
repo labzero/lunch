@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Autosuggest from 'react-autosuggest';
 import withStyles from 'isomorphic-style-loader/withStyles';
+import Button from 'react-bootstrap/Button';
 import TagContainer from '../Tag/TagContainer';
 import {
   generateTagList,
@@ -143,24 +144,22 @@ class TagFilterForm extends Component {
               />
             </div>
           ))}
-          <button
-            className="btn btn-default"
-            type="button"
+          <Button
             onClick={this.hideForm}
+            variant="light"
           >
             cancel
-          </button>
+          </Button>
         </form>
       );
     } else {
       showButton = (
-        <button
-          className="btn btn-default"
+        <Button
           onClick={this.showForm}
-          type="button"
+          variant="light"
         >
           {exclude ? 'exclude tags' : 'filter by tag'}
-        </button>
+        </Button>
       );
     }
     return (

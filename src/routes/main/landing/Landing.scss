@@ -16,9 +16,14 @@
   background-size: cover;
   border-bottom: $default-border;
   margin: 0;
-  padding-bottom: 6em;
+  padding: 48px 0 6em;
   text-align: center;
   text-shadow: 0 0 .25em white, 0 0 .5em white, 0 0 1em white, 0 0 2em white;
+
+  p {
+    margin-bottom: 15px;
+    font-size: 21px;
+  }
 }
 
 .jumbotronHeading {
@@ -34,7 +39,6 @@
 
 .formGroup {
   flex-grow: 1;
-  margin-bottom: 0;
   margin-right: .5em;
 
   .field {

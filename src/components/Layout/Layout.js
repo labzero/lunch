@@ -70,7 +70,7 @@ class Layout extends Component {
     const { confirmShown, isHome, path } = this.props;
 
     return (
-      <div className={isHome ? s.flex : ''}>
+      <div className={s.root}>
         <HeaderContainer path={path} />
         {this.props.children}
         {!isHome && <FooterContainer />}

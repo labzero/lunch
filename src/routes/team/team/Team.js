@@ -10,13 +10,13 @@ import PropTypes from 'prop-types';
 
 import React from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/lib/Button';
-import ButtonToolbar from 'react-bootstrap/lib/ButtonToolbar';
-import Glyphicon from 'react-bootstrap/lib/Glyphicon';
-import Grid from 'react-bootstrap/lib/Grid';
-import Tab from 'react-bootstrap/lib/Tab';
-import Tabs from 'react-bootstrap/lib/Tabs';
-import Table from 'react-bootstrap/lib/Table';
+import Button from 'react-bootstrap/Button';
+import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
+import { FaTimes } from 'react-icons/fa';
+import Container from 'react-bootstrap/Container';
+import Tab from 'react-bootstrap/Tab';
+import Tabs from 'react-bootstrap/Tabs';
+import Table from 'react-bootstrap/Table';
 import AddUserFormContainer from '../../../components/AddUserForm/AddUserFormContainer';
 import ChangeTeamURLModalContainer from '../../../components/ChangeTeamURLModal/ChangeTeamURLModalContainer';
 import DeleteTeamModalContainer from '../../../components/DeleteTeamModal/DeleteTeamModalContainer';
@@ -146,7 +146,7 @@ class Team extends React.Component {
                         onClick={this.handleDeleteUserClicked(user.id)}
                         aria-label="Remove"
                       >
-                        <Glyphicon glyph="remove" />
+                        <FaTimes />
                       </button>
                   )}
                 </td>
@@ -176,7 +176,7 @@ class Team extends React.Component {
 
     return (
       <div className={s.root}>
-        <Grid>
+        <Container>
           <h2>{team.name}</h2>
           {hasOwnerRole ? (
             <Tabs id="team-tabs" mountOnEnter>
@@ -191,12 +191,12 @@ class Team extends React.Component {
               <Tab eventKey={3} title="Messy Business">
                 <h3>Messy Business</h3>
                 <ButtonToolbar className={s.buttonToolbar}>
-                  <Button bsStyle="info" onClick={confirmChangeTeamURL}>
+                  <Button variant="info" onClick={confirmChangeTeamURL}>
                     Change team URL
                   </Button>
                 </ButtonToolbar>
                 <ButtonToolbar className={s.buttonToolbar}>
-                  <Button bsStyle="danger" onClick={confirmDeleteTeam}>
+                  <Button variant="danger" onClick={confirmDeleteTeam}>
                     Delete team
                   </Button>
                 </ButtonToolbar>
@@ -205,7 +205,7 @@ class Team extends React.Component {
           ) : (
             this.renderUsers()
           )}
-        </Grid>
+        </Container>
         {changeTeamURLShown && <ChangeTeamURLModalContainer />}
         {deleteTeamShown && <DeleteTeamModalContainer />}
       </div>

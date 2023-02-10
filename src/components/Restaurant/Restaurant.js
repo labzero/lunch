@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
+import Button from 'react-bootstrap/Button';
 import RestaurantVoteCountContainer from '../RestaurantVoteCount/RestaurantVoteCountContainer';
 import RestaurantVoteButtonContainer from '../RestaurantVoteButton/RestaurantVoteButtonContainer';
 import RestaurantDecisionContainer from '../RestaurantDecision/RestaurantDecisionContainer';
@@ -72,13 +73,13 @@ class Restaurant extends Component {
           );
         } else {
           addTagArea = (
-            <button
-              className="btn btn-sm btn-default"
+            <Button
               onClick={this.showAddTagForm}
-              type="button"
+              size="sm"
+              variant="light"
             >
               add tag
-            </button>
+            </Button>
           );
         }
       }

@@ -1,8 +1,10 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
-import Glyphicon from 'react-bootstrap/lib/Glyphicon';
-import Grid from 'react-bootstrap/lib/Grid';
+import Button from 'react-bootstrap/Button';
+import ListGroup from 'react-bootstrap/ListGroup';
+import { FaTimes } from 'react-icons/fa';
+import Container from 'react-bootstrap/Container';
 import Link from '../../../components/Link';
 import s from './Teams.scss';
 
@@ -14,7 +16,8 @@ class Teams extends Component {
     teams: PropTypes.array.isRequired,
   };
 
-  confirmLeave = (team) => () => {
+  confirmLeave = (team) => (event) => {
+    event.preventDefault();
     this.props.confirm({
       actionLabel: 'Leave',
       body: `Are you sure you want to leave this team?
@@ -28,31 +31,25 @@ You will need to be invited back by another member.`,
 
     return (
       <div className={s.root}>
-        <Grid>
+        <Container>
           {teams.length ? (
             <div>
               <h2>Visit one of your teams:</h2>
-              <ul className={`list-group ${s.list}`}>
+              <ListGroup activeKey={null} className={s.list}>
                 {teams.map((team) => (
-                  <li className={`list-group-item ${s.item}`} key={team.slug}>
-                    <a
-                      className={`list-group-item ${s.itemLink}`}
-                      key={team.id}
-                      href={`//${team.slug}.${host}`}
-                    >
-                      {team.name}
-                    </a>
+                  <ListGroup.Item action className={s.item} href={`//${team.slug}.${host}`} key={team.slug}>
+                    <div className={s.itemName}>{team.name}</div>
                     <button
                       className={s.leave}
                       onClick={this.confirmLeave(team)}
                       aria-label="Leave"
                       type="button"
                     >
-                      <Glyphicon glyph="remove" />
+                      <FaTimes />
                     </button>
-                  </li>
+                  </ListGroup.Item>
                 ))}
-              </ul>
+              </ListGroup>
             </div>
           ) : (
             <div className={s.centerer}>
@@ -61,10 +58,12 @@ You will need to be invited back by another member.`,
           )}
           <div className={s.centerer}>
             <Link className="btn btn-default" to="/new-team">
-              Create a new team
+              <Button variant="light">
+                Create a new team
+              </Button>
             </Link>
           </div>
-        </Grid>
+        </Container>
       </div>
     );
   }

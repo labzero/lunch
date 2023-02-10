@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
+import Button from 'react-bootstrap/button';
 import s from './NameFilterForm.scss';
 
 class NameFilterForm extends Component {
@@ -88,24 +89,22 @@ class NameFilterForm extends Component {
               }}
             />
           </div>
-          <button
-            className="btn btn-default"
-            type="button"
+          <Button
             onClick={this.hideForm}
+            variant="light"
           >
             cancel
-          </button>
+          </Button>
         </form>
       );
     } else {
       child = (
-        <button
-          className="btn btn-default"
+        <Button
           onClick={this.showForm}
-          type="button"
+          variant="light"
         >
           filter by name
-        </button>
+        </Button>
       );
     }
     return <div className={s.root}>{child}</div>;

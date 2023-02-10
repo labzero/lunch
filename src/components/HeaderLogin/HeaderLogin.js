@@ -10,7 +10,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/lib/Button';
+import Button from 'react-bootstrap/Button';
 import s from './HeaderLogin.scss';
 
 const HeaderLogin = ({ user }) => {
@@ -18,7 +18,7 @@ const HeaderLogin = ({ user }) => {
   if (user.id === undefined) {
     content = (
       <div className={s.root}>
-        <Button bsSize="small" bsStyle="primary" href="/login">
+        <Button size="sm" variant="primary" href="/login">
           Log in
         </Button>
       </div>

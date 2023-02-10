@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
-import Grid from 'react-bootstrap/lib/Grid';
+import Container from 'react-bootstrap/Container';
 import s from './Create.scss';
 
 class Create extends Component {
@@ -20,7 +20,7 @@ class Create extends Component {
 
     return (
       <div className={s.root}>
-        <Grid>
+        <Container>
           {success === 'sent' && (
             <div>
               <h2>Confirmation sent</h2>
@@ -41,7 +41,7 @@ class Create extends Component {
               </p>
             </div>
           )}
-        </Grid>
+        </Container>
       </div>
     );
   }

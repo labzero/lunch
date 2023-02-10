@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import OverlayTrigger from 'react-bootstrap/lib/OverlayTrigger';
-import Tooltip from 'react-bootstrap/lib/Tooltip';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 import withStyles from 'isomorphic-style-loader/withStyles';
 import TooltipUserContainer from '../TooltipUser/TooltipUserContainer';
 import s from './RestaurantVoteCount.scss';

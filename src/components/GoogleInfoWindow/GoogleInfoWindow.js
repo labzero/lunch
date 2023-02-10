@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import Button from 'react-bootstrap/lib/Button';
+import Button from 'react-bootstrap/Button';
 import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './GoogleInfoWindow.scss';
 
@@ -45,7 +45,7 @@ class GoogleInfoWindow extends Component {
         style={{ zIndex: google.maps.Marker.MAX_ZINDEX * 2 }}
       >
         <div className={s.buttonContainer}>
-          <Button bsSize="large" bsStyle="primary" onClick={this.handleClick}>
+          <Button size="lg" variant="primary" onClick={this.handleClick}>
             Add to Lunch
           </Button>
         </div>

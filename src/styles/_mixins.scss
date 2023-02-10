@@ -16,8 +16,7 @@
 @mixin page-root {
   @include page-root-layer;
   background: $white-color;
-  padding-bottom: 2em;
-  padding-top: 1em;
+  padding: 2em 0;
 }
 
 @mixin page-root-layer {
@@ -67,7 +66,7 @@
 
   button {
     border: $default-border;
-    border-radius: $button-border-radius;
+    border-radius: $border-radius;
   }
 }
 
