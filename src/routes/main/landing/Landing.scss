@@ -1,5 +1,4 @@
-@import '../../../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/variables';
-@import '../../../styles/_variables.scss';
+@import '../../../styles/variables';
 
 .root {
   background: pink url('../../../styles/ham.jpg');
@@ -27,7 +26,7 @@
 }
 
 .jumbotronHeading {
-  font-size: $jumbotron-heading-font-size;
+  font-size: 63px;
   font-weight: bold;
   white-space: nowrap;
 }
@@ -91,7 +90,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: ($grid-gutter-width + $default-border-width) $grid-gutter-width;
+    padding: calc($grid-gutter-width + $default-border-width) $grid-gutter-width;
     position: relative;
     z-index: 1; /* above pseudoelements */
 
@@ -102,11 +101,11 @@
   }
 
   &:nth-child(odd) > :first-child {
-    padding-right: $grid-gutter-width / 2;
+    padding-right: calc($grid-gutter-width / 2);
   }
 
   &:nth-child(even) > :first-child {
-    padding-left: $grid-gutter-width / 2;
+    padding-left: calc($grid-gutter-width / 2);
   }
 
   &:nth-child(odd) {
@@ -124,13 +123,13 @@
   }
 }
 
-@media (max-width: $screen-md-max) {
+@media (max-width: calc($screen-md-min - 1px)) {
   .feature {
     font-size: 1.5em;
   }
 }
 
-@media (max-width: $screen-xs-max) {
+@media (max-width: calc($screen-xs-min - 1px)) {
   .root {
     img {
       height: auto;
@@ -158,8 +157,8 @@
     }
 
     & > :first-child {
-      padding-left: $grid-gutter-width / 2;
-      padding-right: $grid-gutter-width / 2;
+      padding-left: calc($grid-gutter-width / 2);
+      padding-right: calc($grid-gutter-width / 2);
       text-align: center;
     }
 

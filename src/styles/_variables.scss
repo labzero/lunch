@@ -22,7 +22,7 @@ $primary: $link-color;
 /*
  * Typography
  * ========================================================================== */
-$font-family-base: Nunito, sans-serif;
+$font-family-base: nunito, sans-serif;
 $font-size-base: .875rem;
 $normal-weight: 400;
 $bold-weight: 900;
@@ -51,3 +51,6 @@ $enable-caret: false;
 $modal-header-border-color: $list-group-border;
 $popover-font-size: $font-size-base;
 $table-border-color: $list-group-border;
+
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';

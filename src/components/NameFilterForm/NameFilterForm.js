@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/button';
+import Button from 'react-bootstrap/Button';
 import s from './NameFilterForm.scss';
 
 class NameFilterForm extends Component {

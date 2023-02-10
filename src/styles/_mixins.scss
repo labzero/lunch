@@ -1,4 +1,4 @@
-@import './_variables.scss';
+@import './variables';
 
 @mixin plain-button {
   background: none;
@@ -113,7 +113,7 @@
 }
 
 @mixin shadow-focus {
-  filter: drop-shadow(0 0 3px rgba(0, 0, 0, .5));
+  filter: drop-shadow(0 0 3px rgb(0 0 0 / 50%));
 }
 
 @mixin image-replace {

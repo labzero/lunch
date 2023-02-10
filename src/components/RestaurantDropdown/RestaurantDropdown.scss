@@ -1,5 +1,5 @@
-@import '../../styles/_mixins.scss';
-@import '../../styles/_variables.scss';
+@import '../../styles/mixins';
+@import '../../styles/variables';
 
 .root,
 .toggle {
@@ -32,6 +32,6 @@
 }
 
 .stat {
-  line-height: 1.42857143;
+  line-height: 1.4286;
   padding: 3px 20px;
 }
