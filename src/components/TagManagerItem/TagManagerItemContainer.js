@@ -16,7 +16,7 @@ const mapDispatchToProps = dispatch => ({
 const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
   handleDeleteClicked() {
     dispatchProps.dispatch(showModal('confirm', {
-      actionLabel: 'delete',
+      actionLabel: 'Delete',
       body: `Are you sure you want to delete the “${stateProps.tag.name}” tag?
         All restaurants will be untagged.`,
       handleSubmit: () => dispatchProps.dispatch(removeTag(ownProps.id))
