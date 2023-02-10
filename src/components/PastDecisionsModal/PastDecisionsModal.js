@@ -16,9 +16,13 @@ class PastDecisionsModal extends Component {
     shown: PropTypes.bool.isRequired,
   };
 
-  state = {
-    daysAgo: 0,
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      daysAgo: 0,
+    };
+  }
 
   handleChange = event => this.setState({
     daysAgo: event.target.value
@@ -29,7 +33,7 @@ class PastDecisionsModal extends Component {
     const { daysAgo } = this.state;
 
     decide(daysAgo).then(() => this.setState({ daysAgo: 0 }));
-  }
+  };
 
   renderOption(index, text) {
     const { decisionsByDay, restaurantEntities } = this.props;

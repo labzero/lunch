@@ -24,7 +24,7 @@ const PostedNewTagToRestaurant = ({
       <span>
         <b>{user}</b>
         {' '}
-added new tag
+        added new tag
         <b>
           &ldquo;
           {tagName}
@@ -33,7 +33,7 @@ added new tag
         {' '}
         to
         {restaurantEl}
-.
+        .
       </span>
     );
   }
@@ -50,7 +50,7 @@ added new tag
       was added to
       {' '}
       {restaurantEl}
-.
+      .
     </span>
   );
 };

@@ -23,9 +23,9 @@ const DecisionDeleted = ({
       <span>
         <b>{user}</b>
         {' '}
-cancelled the decision for
+        cancelled the decision for
         {restaurantEl}
-.
+        .
       </span>
     );
   }
@@ -34,7 +34,7 @@ cancelled the decision for
       The decision for
       {restaurantEl}
       {' '}
-was cancelled.
+      was cancelled.
     </span>
   );
 };

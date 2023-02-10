@@ -39,11 +39,15 @@ class Header extends Component {
     return null;
   }
 
-  state = {
-    menuOpen: false,
-    // eslint-disable-next-line react/no-unused-state
-    prevPath: null,
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      menuOpen: false,
+      // eslint-disable-next-line react/no-unused-state
+      prevPath: null,
+    };
+  }
 
   flashContainers = () => {
     const { flashes } = this.props;
@@ -99,6 +103,7 @@ class Header extends Component {
             </button>
             {menuOpen && (
               <button
+                aria-label="Close"
                 className={s.menuBackground}
                 onClick={this.closeMenu}
                 type="button"

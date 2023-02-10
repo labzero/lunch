@@ -52,7 +52,7 @@ class Html extends Component {
         <head>
           {config.analytics.googleTrackingId
             && (
-            <React.Fragment>
+            <>
               <script
                 dangerouslySetInnerHTML={{
                   __html:
@@ -61,9 +61,8 @@ class Html extends Component {
                 }}
               />
               <script src="https://www.google-analytics.com/analytics.js" async defer />
-            </React.Fragment>
-            )
-          }
+            </>
+            )}
           <meta charSet="utf-8" />
           <meta httpEquiv="x-ua-compatible" content="ie=edge" />
           <title>{title}</title>

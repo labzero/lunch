@@ -22,10 +22,14 @@ class Login extends Component {
     team: undefined,
   };
 
-  state = {
-    email: '',
-    password: '',
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      email: '',
+      password: '',
+    };
+  }
 
   handleChange = (field) => (event) => this.setState({
     [field]: event.target.value,

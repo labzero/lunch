@@ -15,7 +15,9 @@ const mapStateToProps = () => {
 
 const mapDispatchToProps = null;
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+  ...stateProps,
+  ...dispatchProps,
   handleClick: () => {
     if (stateProps.userVotes.length > 0) {
       stateProps.userVotes.forEach(vote => {

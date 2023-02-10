@@ -21,14 +21,18 @@ class AddUserForm extends Component {
     type: 'member'
   };
 
-  state = Object.assign({}, AddUserForm.defaultState);
+  constructor(props) {
+    super(props);
+
+    this.state = ({ ...AddUserForm.defaultState });
+  }
 
   handleChange = field => event => this.setState({ [field]: event.target.value });
 
   handleSubmit = (event) => {
     event.preventDefault();
     this.props.addUserToTeam(this.state);
-    this.setState(Object.assign({}, AddUserForm.defaultState));
+    this.setState({ ...AddUserForm.defaultState });
   };
 
   render() {
@@ -93,8 +97,7 @@ class AddUserForm extends Component {
             <Form.Text>
               Members can add new users and remove guests.
               {hasOwnerRole
-                && ' Owners can manage all user roles and manage overall team information.'
-              }
+                && ' Owners can manage all user roles and manage overall team information.'}
             </Form.Text>
           </Form.Group>
           <Button type="submit">Add</Button>

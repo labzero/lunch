@@ -27,9 +27,13 @@ export class _RestaurantAddTagForm extends Component {
     tags: PropTypes.array.isRequired,
   };
 
-  state = {
-    autosuggestValue: '',
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      autosuggestValue: '',
+    };
+  }
 
   componentDidMount() {
     this.autosuggest.input.focus();

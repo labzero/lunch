@@ -21,9 +21,13 @@ class DeleteTeamModal extends Component {
     deleteTeam: PropTypes.func.isRequired,
   };
 
-  state = {
-    confirmSlug: '',
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      confirmSlug: '',
+    };
+  }
 
   handleChange = (event) => {
     this.setState({
@@ -51,11 +55,11 @@ class DeleteTeamModal extends Component {
             {' '}
             {team.name}
             {' '}
-team?
+            team?
             {' '}
             <strong>This is irreversible.</strong>
             {' '}
-All restaurants and tags will
+            All restaurants and tags will
             be deleted, and all users will be unassigned from the team.
           </p>
           <p>

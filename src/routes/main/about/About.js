@@ -149,7 +149,7 @@ const About = () => (
         Any other questions or things I forgot to mention? Drop me a line at
         {' '}
         <a href="mailto:jeffrey@labzero.com">jeffrey@labzero.com</a>
-. I’d be
+        . I’d be
         happy to hear from you.
       </p>
       <p>I last updated this page on May 1, 2017.</p>

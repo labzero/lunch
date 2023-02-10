@@ -99,7 +99,8 @@ class RestaurantAddForm extends Component {
                   this.geosuggest = g;
                 }
             }
-          />) : null}
+          />
+        ) : null}
       </form>
     );
   }

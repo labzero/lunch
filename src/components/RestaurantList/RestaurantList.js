@@ -4,8 +4,8 @@ import { Flipper, Flipped } from 'react-flip-toolkit';
 import { Element as ScrollElement } from 'react-scroll';
 import withStyles from 'isomorphic-style-loader/withStyles';
 import Container from 'react-bootstrap/Container';
+import Loading from '../Loading/Loading';
 import RestaurantContainer from '../Restaurant/RestaurantContainer';
-import Loading from '../Loading';
 import s from './RestaurantList.scss';
 
 const RestaurantList = ({

@@ -107,6 +107,7 @@ const RestaurantMarker = ({ restaurant, ...props }) => {
 
 RestaurantMarker.propTypes = {
   fetch: PropTypes.func.isRequired,
+  googleApiKey: PropTypes.string.isRequired,
   store: PropTypes.object.isRequired,
   insertCss: PropTypes.func.isRequired,
   pathname: PropTypes.string.isRequired,

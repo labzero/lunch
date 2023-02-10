@@ -87,6 +87,7 @@ Restaurant.findAllWithTagIds = ({ team_id }) => Team.findById(team_id).then((tea
     ['name', 'ASC'], // alphabetical
   ],
   where: {
+    // eslint-disable-next-line camelcase
     team_id,
   },
 }));

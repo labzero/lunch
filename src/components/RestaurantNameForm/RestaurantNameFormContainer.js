@@ -21,7 +21,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+  ...stateProps,
+  ...dispatchProps,
   changeRestaurantName: event => {
     event.preventDefault();
     dispatchProps.dispatch(

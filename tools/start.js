@@ -7,6 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+/* eslint-disable no-promise-executor-return */
+
 import path from 'path';
 import express from 'express';
 import browserSync from 'browser-sync';
@@ -150,7 +152,7 @@ async function start() {
         console.warn(`${hmrPrefix}Cannot apply update.`);
         delete require.cache[require.resolve('../build/server')];
         const cb = () => {
-          // eslint-disable-next-line global-require, import/no-unresolved
+          // eslint-disable-next-line global-require, import/no-unresolved, import/extensions
           const build = require('../build/server');
           app = build.default;
           wss = build.wss;
@@ -189,7 +191,7 @@ async function start() {
   console.info(`[${format(timeStart)}] Launching server...`);
 
   // Load compiled src/server.js as a middleware
-  // eslint-disable-next-line global-require, import/no-unresolved
+  // eslint-disable-next-line global-require, import/no-unresolved, import/extensions
   const build = require('../build/server');
   app = build.default;
   wss = build.wss;

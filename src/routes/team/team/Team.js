@@ -17,11 +17,11 @@ import Container from 'react-bootstrap/Container';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Table from 'react-bootstrap/Table';
+import Loading from '../../../components/Loading/Loading';
 import AddUserFormContainer from '../../../components/AddUserForm/AddUserFormContainer';
 import ChangeTeamURLModalContainer from '../../../components/ChangeTeamURLModal/ChangeTeamURLModalContainer';
 import DeleteTeamModalContainer from '../../../components/DeleteTeamModal/DeleteTeamModalContainer';
 import TeamFormContainer from '../../../components/TeamForm/TeamFormContainer';
-import Loading from '../../../components/Loading';
 import { globalMessageDescriptor as gm } from '../../../helpers/generateMessageDescriptor';
 import getRole from '../../../helpers/getRole';
 import canChangeUser from '../../../helpers/canChangeUser';
@@ -128,6 +128,7 @@ class Team extends React.Component {
               <th>Name</th>
               {hasOwnerRole && <th>Email</th>}
               <th>Role</th>
+              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
               <th />
             </tr>
           </thead>

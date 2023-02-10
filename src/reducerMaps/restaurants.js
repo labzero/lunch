@@ -256,7 +256,7 @@ export default new Map([
       entities: {
         restaurants: {
           $apply: r => {
-            const changedRestaurants = Object.assign({}, r);
+            const changedRestaurants = { ...r };
             Object.keys(changedRestaurants).forEach(i => {
               if (changedRestaurants[i].tags.indexOf(action.id) > -1) {
                 changedRestaurants[i] = update(changedRestaurants[i], {

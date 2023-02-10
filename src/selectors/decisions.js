@@ -34,7 +34,8 @@ export const getDecisionsByDay = createSelector(
 );
 
 export const getDecisionsByRestaurantId = createSelector(
-  getDecisionIds, getDecisionEntities,
+  getDecisionIds,
+  getDecisionEntities,
   (decisionIds, decisionEntities) => decisionIds.reduce((acc, curr) => {
     const decision = decisionEntities[curr];
     acc[decision.restaurant_id] = new Date(decision.created_at).toLocaleDateString();
@@ -45,7 +46,8 @@ export const getDecisionsByRestaurantId = createSelector(
 export const areDecisionsLoading = state => state.decisions.didInvalidate;
 
 export const getDecision = createSelector(
-  getDecisionIds, getDecisionEntities,
+  getDecisionIds,
+  getDecisionEntities,
   (decisionIds, decisionEntities) => {
     if (decisionIds.length === 0) {
       return undefined;

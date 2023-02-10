@@ -59,7 +59,9 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+  ...stateProps,
+  ...dispatchProps,
   addByName(event) {
     event.preventDefault();
     const tag = stateProps.tags.find(t => t.name === stateProps.autosuggestValue);

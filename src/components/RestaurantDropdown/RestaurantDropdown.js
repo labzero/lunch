@@ -100,14 +100,14 @@ const RestaurantDropdown = ({
           {' '}
           {sortDuration}
           {' '}
-day
+          day
           {sortDuration === 1 ? '' : 's'}
-:
+          :
         </Dropdown.Header>
         <Dropdown.ItemText className={s.stat}>
           {restaurant.all_vote_count}
           {' '}
-vote
+          vote
           {parseInt(restaurant.all_vote_count, 10) === 1 ? '' : 's'}
         </Dropdown.ItemText>
         <Dropdown.ItemText className={s.stat}>

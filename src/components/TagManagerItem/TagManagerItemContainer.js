@@ -13,7 +13,9 @@ const mapDispatchToProps = dispatch => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+  ...stateProps,
+  ...dispatchProps,
   handleDeleteClicked() {
     dispatchProps.dispatch(showModal('confirm', {
       actionLabel: 'Delete',

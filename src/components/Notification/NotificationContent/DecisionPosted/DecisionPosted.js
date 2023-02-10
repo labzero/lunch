@@ -26,10 +26,10 @@ const DecisionPosted = ({
         <span>
           <b>{user}</b>
           {' '}
-marked
+          marked
           {restaurantEl}
           {' '}
-as a past decision.
+          as a past decision.
         </span>
       );
     }
@@ -37,10 +37,10 @@ as a past decision.
       <span>
         <b>{user}</b>
         {' '}
-marked
+        marked
         {restaurantEl}
         {' '}
-as today&rsquo;s decision.
+        as today&rsquo;s decision.
       </span>
     );
   }
@@ -48,7 +48,7 @@ as today&rsquo;s decision.
     <span>
       {restaurantEl}
       {' '}
-was decided upon.
+      was decided upon.
     </span>
   );
 };

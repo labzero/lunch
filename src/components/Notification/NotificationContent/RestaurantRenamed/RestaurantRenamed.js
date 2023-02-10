@@ -33,12 +33,12 @@ const RestaurantRenamed = ({
       <span>
         <b>{user}</b>
         {' '}
-renamed
+        renamed
         {oldNameEl}
         {' '}
-to
+        to
         {newNameEl}
-.
+        .
       </span>
     );
   }
@@ -46,9 +46,9 @@ to
     <span>
       {oldNameEl}
       {' '}
-was renamed to
+      was renamed to
       {newNameEl}
-.
+      .
     </span>
   );
 };

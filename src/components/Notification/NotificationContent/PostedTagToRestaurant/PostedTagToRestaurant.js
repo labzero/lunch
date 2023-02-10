@@ -24,7 +24,7 @@ const PostedTagToRestaurant = ({
       <span>
         <b>{user}</b>
         {' '}
-added tag
+        added tag
         {' '}
         <b>
           &ldquo;
@@ -35,7 +35,7 @@ added tag
         to
         {' '}
         {restaurantEl}
-.
+        .
       </span>
     );
   }
@@ -50,7 +50,7 @@ added tag
       {' '}
       was added to
       {restaurantEl}
-.
+      .
     </span>
   );
 };

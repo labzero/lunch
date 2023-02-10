@@ -11,9 +11,9 @@ const RestaurantDeleted = ({ loggedIn, user, restaurantName }) => {
       <span>
         <b>{user}</b>
         {' '}
-deleted
+        deleted
         <b>{restaurantName}</b>
-.
+        .
       </span>
     );
   }
@@ -21,7 +21,7 @@ deleted
     <span>
       <b>{restaurantName}</b>
       {' '}
-was deleted.
+      was deleted.
     </span>
   );
 };

@@ -14,9 +14,13 @@ class RestaurantMapSettings extends Component {
     setShowUnvoted: PropTypes.func.isRequired,
   };
 
-  state = {
-    collapsed: false,
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      collapsed: false,
+    };
+  }
 
   toggleCollapsed = () => this.setState((prevState) => ({ collapsed: !prevState.collapsed }));
 

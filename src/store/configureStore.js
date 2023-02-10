@@ -5,6 +5,7 @@ import * as schemas from '../schemas';
 import * as reducerMaps from '../reducerMaps';
 import createHelpers from './createHelpers';
 
+// eslint-disable-next-line default-param-last
 const generateReducer = (map, initial) => (state = initial, action) => {
   const reducer = map.get(action.type);
   if (reducer === undefined) {

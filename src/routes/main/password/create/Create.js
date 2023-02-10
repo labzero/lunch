@@ -31,7 +31,7 @@ class Create extends Component {
               <p>
                 Your password has been reset. Go ahead and
                 <Link to="/login">log in</Link>
-.
+                .
               </p>
             </div>
           )}

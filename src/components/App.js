@@ -70,6 +70,8 @@ class App extends React.PureComponent {
         libraries: ['places', 'geocoder']
       })
     };
+
+    this.styleContextValue = { insertCss: props.context.insertCss };
   }
 
   getChildContext() {
@@ -81,7 +83,7 @@ class App extends React.PureComponent {
     // please do that inside the Layout component.
     return (
       <StyleContext.Provider
-        value={{ insertCss: this.props.context.insertCss }}
+        value={this.styleContextValue}
       >
         <ReduxProvider store={this.props.context.store}>
           <IntlProviderContainer>

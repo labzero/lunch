@@ -46,9 +46,7 @@ class TeamForm extends Component {
       : parseInt(this.state.sortDuration.slice(), 10);
     if (typedsortDuration > 0) {
       this.props.updateTeam(
-        Object.assign({}, this.state, this.props.center, {
-          sort_duration: typedsortDuration,
-        })
+        { ...this.state, ...this.props.center, sort_duration: typedsortDuration, }
       );
     } else {
       event.stopPropagation();

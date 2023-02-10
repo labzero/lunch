@@ -42,7 +42,7 @@ class TeamMap extends Component {
 
   setMap = ({ map }) => {
     this.map = map;
-    map.addListener('bounds_changed', () => {
+    this.map.addListener('bounds_changed', () => {
       const center = map.getCenter();
       this.props.setCenter({
         lat: center.lat(),

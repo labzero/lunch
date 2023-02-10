@@ -26,9 +26,13 @@ class Restaurant extends Component {
     shouldShowDropdown: false,
   };
 
-  state = {
-    isAddingTags: false,
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isAddingTags: false,
+    };
+  }
 
   hideAddTagForm = () => {
     this.setState(() => ({

@@ -21,10 +21,14 @@ class ChangeTeamURLModal extends Component {
     updateTeam: PropTypes.func.isRequired,
   };
 
-  state = {
-    newSlug: '',
-    oldSlug: '',
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      newSlug: '',
+      oldSlug: '',
+    };
+  }
 
   handleChange = (field) => (event) => this.setState({
     [field]: event.target.value,
@@ -49,7 +53,7 @@ class ChangeTeamURLModal extends Component {
           <p>
             <strong>Be forewarned:</strong>
             {' '}
-Changing the team URL frees up the
+            Changing the team URL frees up the
             old URL to be used by other teams. This means that any bookmarks
             your team members have created for this team will no longer work.
             We&rsquo;ll send out an email notification to all users on the team

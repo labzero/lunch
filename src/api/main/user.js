@@ -4,7 +4,6 @@ import getUserPasswordUpdates from '../../helpers/getUserPasswordUpdates';
 import { User } from '../../models';
 import loggedIn from '../helpers/loggedIn';
 
-
 export default () => {
   const router = new Router();
 

@@ -1,6 +1,6 @@
 // use require syntax to work with migrations
 const Sequelize = require('sequelize');
-const configs = require('../../database.js');
+const configs = require('../../database');
 
 const env = process.env.NODE_ENV || 'development';
 const config = configs[env];

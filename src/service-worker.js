@@ -10,7 +10,7 @@ precacheAndRoute(self.__WB_MANIFEST || []);
 
 // Cache fonts
 registerRoute(
-  new RegExp('https://fonts.(?:googleapis|gstatic).com/(.*)'),
+  /https:\/\/fonts\.(?:googleapis|gstatic)\.com\/(.*)/,
   new CacheFirst({
     cacheName: 'googleapis',
     plugins: [

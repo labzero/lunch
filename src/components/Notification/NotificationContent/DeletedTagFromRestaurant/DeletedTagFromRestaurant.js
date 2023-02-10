@@ -24,7 +24,7 @@ const DeletedTagFromRestaurant = ({
       <span>
         <b>{user}</b>
         {' '}
-removed tag
+        removed tag
         <b>
           &ldquo;
           {tagName}
@@ -33,7 +33,7 @@ removed tag
         {' '}
         from
         {restaurantEl}
-.
+        .
       </span>
     );
   }
@@ -50,7 +50,7 @@ removed tag
       was removed from
       {' '}
       {restaurantEl}
-.
+      .
     </span>
   );
 };

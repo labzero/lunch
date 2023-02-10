@@ -11,7 +11,7 @@ const TagDeleted = ({ loggedIn, user, tagName }) => {
       <span>
         <b>{user}</b>
         {' '}
-deleted tag
+        deleted tag
         {' '}
         <b>
           &ldquo;

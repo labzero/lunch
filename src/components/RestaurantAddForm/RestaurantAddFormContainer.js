@@ -40,7 +40,9 @@ const mapDispatchToProps = dispatch => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps) => ({
+  ...stateProps,
+  ...dispatchProps,
   handleSuggestSelect: (suggestion, geosuggest) => {
     if (suggestion) {
       let name = suggestion.label;

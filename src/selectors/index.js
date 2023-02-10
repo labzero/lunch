@@ -20,17 +20,25 @@ import { getMapUi } from './mapUi';
 export const getUserByVoteId = (state, voteId) => getUserById(state, getVoteById(state, voteId).user_id);
 
 export const makeGetRestaurantVotesForUser = () => createSelector(
-  getRestaurantById, getVoteEntities, getUserId,
+  getRestaurantById,
+  getVoteEntities,
+  getUserId,
   (restaurant, voteEntities, userId) => restaurant.votes.filter(voteId => voteEntities[voteId].user_id === userId)
 );
 
 export const getMapItems = createSelector(
-  getRestaurantIds, getRestaurantEntities, getMapUi,
+  getRestaurantIds,
+  getRestaurantEntities,
+  getMapUi,
   (restaurantIds, restaurantEntities, mapUi) => restaurantIds.filter(id => mapUi.showUnvoted || (!mapUi.showUnvoted && restaurantEntities[id].votes.length > 0)).map(id => ({ id, lat: restaurantEntities[id].lat, lng: restaurantEntities[id].lng }))
 );
 
 export const getFilteredRestaurants = createSelector(
-  getRestaurantIds, getNameFilter, getTagFilters, getTagExclusions, getRestaurantEntities,
+  getRestaurantIds,
+  getNameFilter,
+  getTagFilters,
+  getTagExclusions,
+  getRestaurantEntities,
   (restaurantIds, nameFilter, tagFilters, tagExclusions, restaurantEntities) => {
     if (
       tagFilters.length === 0
@@ -45,12 +53,17 @@ export const getFilteredRestaurants = createSelector(
 
 const getRoleProp = (state, props) => props.role || props;
 export const currentUserHasRole = createSelector(
-  getCurrentUser, getTeam, getRoleProp,
+  getCurrentUser,
+  getTeam,
+  getRoleProp,
   hasRole
 );
 
 export const isRestaurantListReady = createSelector(
-  areRestaurantsLoading, areTagsLoading, areUsersLoading, areDecisionsLoading,
+  areRestaurantsLoading,
+  areTagsLoading,
+  areUsersLoading,
+  areDecisionsLoading,
   (restaurantsLoading, tagsLoading, usersLoading, decisionsLoading) => !restaurantsLoading && !tagsLoading && !usersLoading && !decisionsLoading
 );
 

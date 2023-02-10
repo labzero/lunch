@@ -192,15 +192,13 @@ Happy Lunching!`
           const roleToChange = await getRoleToChange(req.user, id, req.team);
 
           if (roleToChange) {
-            const allowed = await canChangeUser(
-              req.user, roleToChange, req.body.type, req.team, () => res.status(403).json({
-                error: true,
-                data: {
-                  message: `You cannot demote yourself if you are the only owner.
+            const allowed = await canChangeUser(req.user, roleToChange, req.body.type, req.team, () => res.status(403).json({
+              error: true,
+              data: {
+                message: `You cannot demote yourself if you are the only owner.
   Grant ownership to another user first.`
-                }
-              })
-            );
+              }
+            }));
 
             // in case of error response within canChangeUser
             if (typeof allowed !== 'boolean') {
@@ -233,15 +231,13 @@ Happy Lunching!`
           const roleToDelete = await getRoleToChange(req.user, id, req.team);
 
           if (roleToDelete) {
-            const allowed = await canChangeUser(
-              req.user, roleToDelete, undefined, req.team, () => res.status(403).json({
-                error: true,
-                data: {
-                  message: `You cannot remove yourself if you are the only owner.
+            const allowed = await canChangeUser(req.user, roleToDelete, undefined, req.team, () => res.status(403).json({
+              error: true,
+              data: {
+                message: `You cannot remove yourself if you are the only owner.
   Transfer ownership to another user first.`
-                }
-              })
-            );
+              }
+            }));
 
             // in case of error response within canChangeUser
             if (typeof allowed !== 'boolean') {

@@ -15,7 +15,9 @@ const mapDispatchToProps = dispatch => ({
   hideModal: () => dispatch(hideModal('confirm')),
 });
 
-const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps) => ({
+  ...stateProps,
+  ...dispatchProps,
   handleSubmit: () => {
     stateProps.internalHandleSubmit();
     dispatchProps.hideModal();

@@ -23,9 +23,9 @@ const VotePosted = ({
       <span>
         <b>{user}</b>
         {' '}
-voted for
+        voted for
         {restaurantEl}
-.
+        .
       </span>
     );
   }
@@ -33,7 +33,7 @@ voted for
     <span>
       {restaurantEl}
       {' '}
-was upvoted.
+      was upvoted.
     </span>
   );
 };

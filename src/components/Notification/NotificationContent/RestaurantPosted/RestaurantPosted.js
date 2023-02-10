@@ -23,9 +23,9 @@ const RestaurantPosted = ({
       <span>
         <b>{user}</b>
         {' '}
-added
+        added
         {restaurantEl}
-.
+        .
       </span>
     );
   }
@@ -33,7 +33,7 @@ added
     <span>
       {restaurantEl}
       {' '}
-was added.
+      was added.
     </span>
   );
 };

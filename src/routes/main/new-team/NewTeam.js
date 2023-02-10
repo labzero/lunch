@@ -27,11 +27,15 @@ class NewTeam extends Component {
     center: defaultCoords,
   };
 
-  state = {
-    name: '',
-    slug: '',
-    address: '',
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      name: '',
+      slug: '',
+      address: '',
+    };
+  }
 
   handleChange = (field) => (event) => this.setState({ [field]: event.target.value });
 

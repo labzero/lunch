@@ -21,7 +21,9 @@ const mapDispatchToProps = (dispatch) => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps) => ({
+  ...stateProps,
+  ...dispatchProps,
   handleMarkerClick(event) {
     event.preventDefault();
     if (stateProps.showInfoWindow) {

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import withStyles from 'isomorphic-style-loader/withStyles';
 import Container from 'react-bootstrap/Container';
-import Loading from '../../../components/Loading';
+import Loading from '../../../components/Loading/Loading';
 import TagManagerContainer from '../../../components/TagManager/TagManagerContainer';
 import s from './Tags.scss';
 
