@@ -42,6 +42,11 @@ class Layout extends Component {
     insertCss: PropTypes.func.isRequired,
   };
 
+  constructor(props, context) {
+    super(props);
+    context.insertCss(s, globalCss);
+  }
+
   getChildContext() {
     const context = this.context;
     return {
