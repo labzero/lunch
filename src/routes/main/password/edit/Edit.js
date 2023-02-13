@@ -31,7 +31,7 @@ class Edit extends Component {
                 <Form.Group className="mb-3" controlId="resetPassword-password">
                   <Form.Label>New password</Form.Label>
                   <Form.Control
-                    inputRef={(i) => {
+                    ref={(i) => {
                       this.passwordField = i;
                     }}
                     minLength={PASSWORD_MIN_LENGTH}

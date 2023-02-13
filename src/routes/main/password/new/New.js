@@ -39,7 +39,7 @@ class New extends Component {
                   <Form.Label>Email</Form.Label>
                   <Form.Control
                     defaultValue={email}
-                    inputRef={(i) => {
+                    ref={(i) => {
                       this.emailField = i;
                     }}
                     name="email"
