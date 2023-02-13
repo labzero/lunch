@@ -16,16 +16,16 @@ describe('selectors/decisions', () => {
             entities: {
               decisions: {
                 1: {
-                  created_at: dayjs(now),
+                  createdAt: dayjs(now),
                 },
                 2: {
-                  created_at: dayjs(now).subtract(23, 'hours'),
+                  createdAt: dayjs(now).subtract(23, 'hours'),
                 },
                 3: {
-                  created_at: dayjs(now).subtract(25, 'hours'),
+                  createdAt: dayjs(now).subtract(25, 'hours'),
                 },
                 4: {
-                  created_at: dayjs(now).subtract(48, 'hours'),
+                  createdAt: dayjs(now).subtract(48, 'hours'),
                 },
               },
             },

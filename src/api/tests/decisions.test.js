@@ -102,7 +102,7 @@ describe('api/team/decisions', () => {
       it('looks for decisions within past 5 days', () => {
         expect(findAllSpy.calledWith({
           where: {
-            created_at: {
+            createdAt: {
               gt: match.date,
             },
             team_id: 77
@@ -195,7 +195,7 @@ describe('api/team/decisions', () => {
       it('deletes any prior decisions', () => {
         expect(destroySpy.calledWith({
           where: {
-            created_at: {
+            createdAt: {
               lt: match.date,
               gt: match.date,
             },
@@ -206,7 +206,7 @@ describe('api/team/decisions', () => {
 
       it('creates new decision', () => {
         expect(createSpy.calledWith({
-          created_at: match.date,
+          createdAt: match.date,
           restaurant_id: 1,
           team_id: 77
         })).to.be.true;

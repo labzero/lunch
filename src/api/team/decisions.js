@@ -19,7 +19,7 @@ export default () => {
           const opts = { where: { team_id: req.team.id } };
           const days = parseInt(req.query.days, 10);
           if (!Number.isNaN(days)) {
-            opts.where.created_at = {
+            opts.where.createdAt = {
               [DataTypes.Op.gt]: dayjs().subtract(days, 'days').toDate()
             };
           }
@@ -43,7 +43,7 @@ export default () => {
           const daysAgo = parseInt(req.body.daysAgo, 10);
           let MaybeScopedDecision = Decision;
           if (daysAgo > 0) {
-            destroyOpts.where.created_at = {
+            destroyOpts.where.createdAt = {
               [DataTypes.Op.gt]: dayjs().subtract(daysAgo, 'days').subtract(12, 'hours').toDate(),
               [DataTypes.Op.lt]: dayjs().subtract(daysAgo, 'days').add(12, 'hours').toDate(),
             };
@@ -60,7 +60,7 @@ export default () => {
               team_id: req.team.id
             };
             if (daysAgo > 0) {
-              createOpts.created_at = dayjs().subtract(daysAgo, 'days').toDate();
+              createOpts.createdAt = dayjs().subtract(daysAgo, 'days').toDate();
             }
             const obj = await Decision.create(createOpts);
 

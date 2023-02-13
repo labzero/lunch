@@ -35,7 +35,7 @@ export default () => {
       checkTeamRole(),
       async (req, res, next) => {
         try {
-          const r = await Restaurant.findById(parseInt(req.params.id, 10));
+          const r = await Restaurant.findByPk(parseInt(req.params.id, 10));
 
           if (r === null || r.team_id !== req.team.id) {
             notFound(res);
