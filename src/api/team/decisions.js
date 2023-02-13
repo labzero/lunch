@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { DataTypes } from '../../models/db';
 import { Decision } from '../../models';
 import checkTeamRole from '../helpers/checkTeamRole';
@@ -20,7 +20,7 @@ export default () => {
           const days = parseInt(req.query.days, 10);
           if (!Number.isNaN(days)) {
             opts.where.created_at = {
-              [DataTypes.Op.gt]: moment().subtract(days, 'days').toDate()
+              [DataTypes.Op.gt]: dayjs().subtract(days, 'days').toDate()
             };
           }
 
@@ -44,8 +44,8 @@ export default () => {
           let MaybeScopedDecision = Decision;
           if (daysAgo > 0) {
             destroyOpts.where.created_at = {
-              [DataTypes.Op.gt]: moment().subtract(daysAgo, 'days').subtract(12, 'hours').toDate(),
-              [DataTypes.Op.lt]: moment().subtract(daysAgo, 'days').add(12, 'hours').toDate(),
+              [DataTypes.Op.gt]: dayjs().subtract(daysAgo, 'days').subtract(12, 'hours').toDate(),
+              [DataTypes.Op.lt]: dayjs().subtract(daysAgo, 'days').add(12, 'hours').toDate(),
             };
           } else {
             MaybeScopedDecision = MaybeScopedDecision.scope('fromToday');
@@ -60,7 +60,7 @@ export default () => {
               team_id: req.team.id
             };
             if (daysAgo > 0) {
-              createOpts.created_at = moment().subtract(daysAgo, 'days').toDate();
+              createOpts.created_at = dayjs().subtract(daysAgo, 'days').toDate();
             }
             const obj = await Decision.create(createOpts);
 

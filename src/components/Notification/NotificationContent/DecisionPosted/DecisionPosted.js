@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import withStyles from 'isomorphic-style-loader/withStyles';
 import s from '../NotificationContent.scss';
 
@@ -21,7 +21,7 @@ const DecisionPosted = ({
     </button>
   );
   if (loggedIn) {
-    if (moment().subtract(12, 'hours').isAfter(decision.created_at)) {
+    if (dayjs().subtract(12, 'hours').isAfter(decision.created_at)) {
       return (
         <span>
           <b>{user}</b>

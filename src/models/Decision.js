@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { sequelize, DataTypes } from './db';
 
 const Decision = sequelize.define(
@@ -20,7 +20,7 @@ const Decision = sequelize.define(
       fromToday: () => ({
         where: {
           created_at: {
-            [DataTypes.Op.gt]: moment().subtract(12, 'hours').toDate()
+            [DataTypes.Op.gt]: dayjs().subtract(12, 'hours').toDate()
           }
         }
       })
