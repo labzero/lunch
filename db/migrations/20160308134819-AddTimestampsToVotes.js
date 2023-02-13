@@ -1,6 +1,6 @@
 const Promise = require('bluebird');
 
-exports.up = (queryInterface, Sequelize) => Promise.all(
+exports.up = (queryInterface, Sequelize) => Promise.all([
   queryInterface.addColumn('votes', 'created_at', {
     type: Sequelize.DATE,
     allowNull: false
@@ -9,9 +9,9 @@ exports.up = (queryInterface, Sequelize) => Promise.all(
     type: Sequelize.DATE,
     allowNull: false
   })
-);
+]);
 
-exports.down = queryInterface => Promise.all(
+exports.down = queryInterface => Promise.all([
   queryInterface.removeColumn('votes', 'created_at'),
   queryInterface.removeColumn('votes', 'updated_at')
-);
+]);

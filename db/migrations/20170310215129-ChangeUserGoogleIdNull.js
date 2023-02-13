@@ -11,7 +11,7 @@ exports.down = (queryInterface, Sequelize) => {
     underscored: true
   });
 
-  User.destroy({ where: { google_id: null } }).then(() => queryInterface.changeColumn('users', 'google_id', {
+  return User.destroy({ where: { google_id: null } }).then(() => queryInterface.changeColumn('users', 'google_id', {
     type: Sequelize.STRING,
     allowNull: false
   }));

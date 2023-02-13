@@ -30,7 +30,7 @@ exports.up = (queryInterface, Sequelize) => {
   ));
 };
 
-exports.down = (queryInterface, Sequelize) => Promise.all(
+exports.down = (queryInterface, Sequelize) => Promise.all([
   queryInterface.changeColumn('teams', 'lat', {
     allowNull: true,
     type: Sequelize.DOUBLE
@@ -39,4 +39,4 @@ exports.down = (queryInterface, Sequelize) => Promise.all(
     allowNull: true,
     type: Sequelize.DOUBLE
   })
-);
+]);
