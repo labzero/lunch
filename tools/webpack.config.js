@@ -180,9 +180,9 @@ const config = {
             test: /\.css/,
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: './tools/postcss.config.js',
-              },
+              postcssOptions: {
+                config: './tools/postcss.config.js',
+              }
             },
           },
 
@@ -201,8 +201,8 @@ const config = {
             test: /\.scss$/,
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: './tools/postcss.sass.config.js',
+              postcssOptions: {
+                config: './tools/postcss.sass.config.js',
               },
             },
           },
