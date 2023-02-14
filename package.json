@@ -158,7 +158,7 @@
     "postcss-import": "^12.0.0",
     "postcss-loader": "^7.0.2",
     "postcss-media-minmax": "^4.0.0",
-    "postcss-nested": "^4.1.0",
+    "postcss-nested": "^6.0.0",
     "postcss-nesting": "^7.0.0",
     "postcss-pseudoelements": "^5.0.0",
     "postcss-selector-matches": "^4.0.0",
