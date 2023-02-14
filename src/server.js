@@ -24,7 +24,7 @@ import methodOverride from 'method-override';
 import session from 'express-session';
 import connectSessionSequelize from 'connect-session-sequelize';
 import flash from 'connect-flash';
-import expressJwt, { UnauthorizedError as Jwt401Error } from 'express-jwt';
+import { expressjwt, UnauthorizedError as Jwt401Error } from 'express-jwt';
 import nodeFetch from 'node-fetch';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
@@ -200,10 +200,12 @@ app.use(flash());
 app.use(passport.initialize());
 
 app.use(
-  expressJwt({
+  expressjwt({
+    algorithms: ['HS256'],
     secret: config.auth.jwt.secret,
     credentialsRequired: false,
     getToken: (req) => req.cookies.id_token,
+    requestProperty: 'user'
   })
 );
 // Error handler for express-jwt
