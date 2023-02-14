@@ -175,17 +175,6 @@ const config = {
             },
           },
 
-          // Apply PostCSS plugins including autoprefixer
-          {
-            test: /\.css/,
-            loader: 'postcss-loader',
-            options: {
-              postcssOptions: {
-                config: './tools/postcss.config.js',
-              }
-            },
-          },
-
           // Compile Less to CSS
           // https://github.com/webpack-contrib/less-loader
           // Install dependencies before uncommenting: yarn add --dev less-loader less
