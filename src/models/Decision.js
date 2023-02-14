@@ -19,7 +19,7 @@ const Decision = sequelize.define(
     scopes: {
       fromToday: () => ({
         where: {
-          createdAt: {
+          created_at: {
             [DataTypes.Op.gt]: dayjs().subtract(12, 'hours').toDate()
           }
         }

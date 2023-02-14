@@ -39,7 +39,7 @@ Team.findAllForUser = (user) => Team.findAll({
 });
 
 // eslint-disable-next-line camelcase
-Restaurant.findAllWithTagIds = ({ team_id }) => Team.findByPk(team_id).then((team) => Restaurant.findAll({
+Restaurant.findAllWithTagIds = ({ team_id }) => Team.findById(team_id).then((team) => Restaurant.findAll({
   attributes: {
     include: [
       [

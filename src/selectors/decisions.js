@@ -14,7 +14,7 @@ export const getDecisionsByDay = createSelector(
   [getDecisionIds, getDecisionEntities],
   (decisionIds, decisionEntities) => decisionIds.reduce((acc, curr) => {
     const decision = decisionEntities[curr];
-    const createdAt = dayjs(decision.createdAt);
+    const createdAt = dayjs(decision.created_at);
     let comparisonDate = dayjs().subtract(12, 'hours');
     for (let i = 0; i < 5; i += 1) {
       if (createdAt.isAfter(comparisonDate)) {
@@ -38,7 +38,7 @@ export const getDecisionsByRestaurantId = createSelector(
   getDecisionEntities,
   (decisionIds, decisionEntities) => decisionIds.reduce((acc, curr) => {
     const decision = decisionEntities[curr];
-    acc[decision.restaurant_id] = new Date(decision.createdAt).toLocaleDateString();
+    acc[decision.restaurant_id] = new Date(decision.created_at).toLocaleDateString();
     return acc;
   }, {}),
 );
@@ -54,7 +54,7 @@ export const getDecision = createSelector(
     }
     const twelveHoursAgo = dayjs().subtract(12, 'hours');
     for (let i = 0; i < decisionIds.length; i += 1) {
-      if (dayjs(decisionEntities[decisionIds[i]].createdAt).isAfter(twelveHoursAgo)) {
+      if (dayjs(decisionEntities[decisionIds[i]].created_at).isAfter(twelveHoursAgo)) {
         return decisionEntities[decisionIds[i]];
       }
     }
