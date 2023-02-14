@@ -48,7 +48,7 @@
     "method-override": "^2.3.8",
     "mocha-junit-reporter": "^2.2.0",
     "morgan": "^1.8.1",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^2.6.9",
     "normalizr": "^3.2.2",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^1.0.0",
