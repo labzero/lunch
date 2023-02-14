@@ -79,7 +79,7 @@ export const decisionsDeleted = (decisions, userId) => ({
 });
 
 export const decide = (restaurantId, daysAgo) => dispatch => {
-  const payload = { daysAgo, restaurant_id: restaurantId };
+  const payload = { daysAgo, restaurantId };
   dispatch(postDecision(restaurantId));
   return fetch('/api/decisions', {
     credentials,

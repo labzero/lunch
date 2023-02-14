@@ -33,7 +33,7 @@ class TeamForm extends Component {
     this.state = {
       address: props.team.address,
       name: props.team.name,
-      sortDuration: props.team.sort_duration,
+      sortDuration: props.team.sortDuration,
     };
   }
 
@@ -46,7 +46,7 @@ class TeamForm extends Component {
       : parseInt(this.state.sortDuration.slice(), 10);
     if (typedsortDuration > 0) {
       this.props.updateTeam(
-        { ...this.state, ...this.props.center, sort_duration: typedsortDuration, }
+        { ...this.state, ...this.props.center, sortDuration: typedsortDuration, }
       );
     } else {
       event.stopPropagation();

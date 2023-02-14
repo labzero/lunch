@@ -290,7 +290,7 @@ describe('api/main/teams', () => {
           name: 'Lab Zero',
           slug: 'labzero',
           roles: [{
-            user_id: 231,
+            userId: 231,
             type: 'owner'
           }]
         })).to.be.true;
@@ -473,7 +473,7 @@ describe('api/main/teams', () => {
           update: updateSpy
         }));
 
-        return request(app).patch('/1').send({ default_zoom: 15, id: 123 });
+        return request(app).patch('/1').send({ defaultZoom: 15, id: 123 });
       });
 
       it('updates team', () => {
@@ -560,7 +560,7 @@ describe('api/main/teams', () => {
     describe('success', () => {
       let response;
       beforeEach((done) => {
-        request(app).patch('/1').send({ default_zoom: 15 }).then(r => {
+        request(app).patch('/1').send({ defaultZoom: 15 }).then(r => {
           response = r;
           done();
         });
@@ -615,7 +615,7 @@ describe('api/main/teams', () => {
           get: () => {},
           update: stub().throws('Oh No')
         }));
-        request(app).patch('/1').send({ default_zoom: 15 }).then((r) => {
+        request(app).patch('/1').send({ defaultZoom: 15 }).then((r) => {
           response = r;
           done();
         });

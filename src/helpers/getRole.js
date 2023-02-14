@@ -5,5 +5,5 @@ export default (user, team) => {
   if (user.type) {
     return { type: user.type };
   }
-  return user.roles.find(userRole => userRole.team_id === team.id);
+  return user.roles.find(userRole => userRole.teamId === team.id);
 };

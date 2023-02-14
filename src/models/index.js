@@ -15,7 +15,7 @@ Tag.addScope('orderedByRestaurant', {
     'id',
     'name',
     [
-      sequelize.fn('count', sequelize.col('restaurants_tags.restaurant_id')),
+      sequelize.fn('count', sequelize.col('restaurantsTags.restaurantId')),
       'restaurant_count',
     ],
   ],
@@ -31,42 +31,42 @@ Tag.addScope('orderedByRestaurant', {
 });
 
 Team.findAllForUser = (user) => Team.findAll({
-  order: [['created_at', 'ASC']],
-  where: { id: user.roles.map((r) => r.team_id) },
+  order: [['createdAt', 'ASC']],
+  where: { id: user.roles.map((r) => r.teamId) },
   attributes: {
-    exclude: ['created_at', 'updated_at'],
+    exclude: ['createdAt', 'updatedAt'],
   },
 });
 
 // eslint-disable-next-line camelcase
-Restaurant.findAllWithTagIds = ({ team_id }) => Team.findById(team_id).then((team) => Restaurant.findAll({
+Restaurant.findAllWithTagIds = ({ teamId }) => Team.findByPk(teamId).then((team) => Restaurant.findAll({
   attributes: {
     include: [
       [
-        sequelize.literal(`ARRAY(SELECT "tag_id" from "restaurants_tags"
-            where "restaurants_tags"."restaurant_id" = "restaurant"."id")`),
+        sequelize.literal(`ARRAY(SELECT "tagId" from "restaurantsTags"
+            where "restaurantsTags"."restaurantId" = "restaurant"."id")`),
         'tags',
       ],
       [
-        sequelize.literal(`(SELECT COUNT(*) from "votes" as "all_votes"
-            where "all_votes"."restaurant_id" = "restaurant"."id"
-            and "all_votes"."created_at" >= CURRENT_DATE - INTERVAL '${team.sort_duration} days')`),
+        sequelize.literal(`(SELECT COUNT(*) from "votes" as "allVotes"
+            where "allVotes"."restaurantId" = "restaurant"."id"
+            and "allVotes"."createdAt" >= CURRENT_DATE - INTERVAL '${team.sortDuration} days')`),
         'all_vote_count',
       ],
       [
-        sequelize.literal(`(SELECT COUNT(*) from "decisions" as "all_decisions"
-            where "all_decisions"."restaurant_id" = "restaurant"."id"
-            and "all_decisions"."created_at" >= CURRENT_DATE - INTERVAL '${team.sort_duration} days')`),
+        sequelize.literal(`(SELECT COUNT(*) from "decisions" as "allDecisions"
+            where "allDecisions"."restaurantId" = "restaurant"."id"
+            and "allDecisions"."createdAt" >= CURRENT_DATE - INTERVAL '${team.sortDuration} days')`),
         'all_decision_count',
       ],
     ],
-    exclude: ['updated_at'],
+    exclude: ['updatedAt'],
   },
   include: [
     {
       model: Vote.scope('fromToday'),
       required: false,
-      attributes: ['id', 'user_id', 'restaurant_id', 'created_at'],
+      attributes: ['id', 'userId', 'restaurantId', 'createdAt'],
     },
     {
       model: Decision.scope('fromToday'),
@@ -88,7 +88,7 @@ Restaurant.findAllWithTagIds = ({ team_id }) => Team.findById(team_id).then((tea
   ],
   where: {
     // eslint-disable-next-line camelcase
-    team_id,
+    teamId,
   },
 }));
 
@@ -98,7 +98,7 @@ const teamUserAttributes = (teamId, extraAttributes) => ({
     'id',
     [
       sequelize.literal(`(SELECT "roles"."type" FROM "roles"
-      WHERE "roles"."team_id" = ${teamId} AND "roles"."user_id" = "user"."id")`),
+      WHERE "roles"."teamId" = ${teamId} AND "roles"."userId" = "user"."id")`),
       'type',
     ],
   ]),
@@ -120,7 +120,7 @@ User.getSessionUser = (id) => User.findOne({
     {
       model: Role,
       required: false,
-      attributes: ['type', 'team_id', 'user_id'],
+      attributes: ['type', 'teamId', 'userId'],
     },
   ],
 });

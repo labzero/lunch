@@ -14,7 +14,7 @@ export default () => {
       checkTeamRole(),
       async (req, res, next) => {
         try {
-          const all = await Tag.scope('orderedByRestaurant').findAll({ where: { team_id: req.team.id } });
+          const all = await Tag.scope('orderedByRestaurant').findAll({ where: { teamId: req.team.id } });
           res.status(200).send({ error: false, data: all });
         } catch (err) {
           next(err);
@@ -28,7 +28,7 @@ export default () => {
       async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
         try {
-          const count = await Tag.destroy({ where: { id, team_id: req.team.id } });
+          const count = await Tag.destroy({ where: { id, teamId: req.team.id } });
           if (count === 0) {
             res.status(404).json({ error: true, data: { message: 'Tag not found.' } });
           } else {

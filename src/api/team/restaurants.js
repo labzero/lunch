@@ -22,7 +22,7 @@ export default () => {
       checkTeamRole(),
       async (req, res, next) => {
         try {
-          const all = await Restaurant.findAllWithTagIds({ team_id: req.team.id });
+          const all = await Restaurant.findAllWithTagIds({ teamId: req.team.id });
 
           res.status(200).json({ error: false, data: all });
         } catch (err) {
@@ -35,12 +35,12 @@ export default () => {
       checkTeamRole(),
       async (req, res, next) => {
         try {
-          const r = await Restaurant.findById(parseInt(req.params.id, 10));
+          const r = await Restaurant.findByPk(parseInt(req.params.id, 10));
 
-          if (r === null || r.team_id !== req.team.id) {
+          if (r === null || r.teamId !== req.team.id) {
             notFound(res);
           } else {
-            const response = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?key=${apikey}&placeid=${r.place_id}`);
+            const response = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?key=${apikey}&placeid=${r.placeId}`);
             const json = await response.json();
             if (response.ok) {
               if (json.status !== 'OK') {
@@ -69,8 +69,7 @@ removed its entry. Try removing it and adding it to Lunch again.`
       checkTeamRole(),
       async (req, res, next) => {
         const {
-          // eslint-disable-next-line camelcase
-          name, place_id, lat, lng
+          name, placeId, lat, lng
         } = req.body;
 
         let { address } = req.body;
@@ -79,12 +78,11 @@ removed its entry. Try removing it and adding it to Lunch again.`
         try {
           const obj = await Restaurant.create({
             name,
-            // eslint-disable-next-line camelcase
-            place_id,
+            placeId,
             address,
             lat,
             lng,
-            team_id: req.team.id,
+            teamId: req.team.id,
             votes: [],
             tags: []
           }, { include: [Vote, Tag] });
@@ -110,8 +108,8 @@ removed its entry. Try removing it and adding it to Lunch again.`
 
         Restaurant.update(
           { name },
-          { fields: ['name'], where: { id, team_id: req.team.id }, returning: true }
-        ).spread((count, rows) => {
+          { fields: ['name'], where: { id, teamId: req.team.id }, returning: true }
+        ).then((count, rows) => {
           if (count === 0) {
             notFound(res);
           } else {
@@ -132,7 +130,7 @@ removed its entry. Try removing it and adding it to Lunch again.`
       async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
         try {
-          const count = await Restaurant.destroy({ where: { id, team_id: req.team.id } });
+          const count = await Restaurant.destroy({ where: { id, teamId: req.team.id } });
           if (count === 0) {
             notFound(res);
           } else {
@@ -144,6 +142,6 @@ removed its entry. Try removing it and adding it to Lunch again.`
         }
       }
     )
-    .use('/:restaurant_id/votes', voteApi())
-    .use('/:restaurant_id/tags', restaurantTagApi());
+    .use('/:restaurantId/votes', voteApi())
+    .use('/:restaurantId/tags', restaurantTagApi());
 };

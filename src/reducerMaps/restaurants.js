@@ -20,8 +20,8 @@ export default new Map([
               if (b === action.newlyAdded.id) { return 1; }
             }
             if (action.decision !== undefined) {
-              if (action.decision.restaurant_id === a) { return -1; }
-              if (action.decision.restaurant_id === b) { return 1; }
+              if (action.decision.restaurantId === a) { return -1; }
+              if (action.decision.restaurantId === b) { return 1; }
             }
             const restaurantA = getRestaurantById({ restaurants: state }, a);
             const restaurantB = getRestaurantById({ restaurants: state }, b);
@@ -143,9 +143,9 @@ export default new Map([
       }
     };
 
-    if (state.items.entities.restaurants[action.vote.restaurant_id].votes.indexOf(action.vote.id) === -1) {
+    if (state.items.entities.restaurants[action.vote.restaurantId].votes.indexOf(action.vote.id) === -1) {
       updates.items.entities.restaurants = {
-        [action.vote.restaurant_id]: {
+        [action.vote.restaurantId]: {
           votes: {
             $push: [action.vote.id]
           },
@@ -280,17 +280,17 @@ export default new Map([
       entities: {
         restaurants: {
           $apply: r => {
-            const decision = r[action.decision.restaurant_id];
+            const decision = r[action.decision.restaurantId];
             // eslint-disable-next-line no-param-reassign
-            r[action.decision.restaurant_id] = {
-              ...r[action.decision.restaurant_id],
+            r[action.decision.restaurantId] = {
+              ...r[action.decision.restaurantId],
               all_decision_count: parseInt(decision.all_decision_count, 10) + 1,
             };
             action.deselected.forEach(i => {
               // eslint-disable-next-line no-param-reassign
-              r[i.restaurant_id] = {
-                ...r[i.restaurant_id],
-                all_decision_count: parseInt(r[i.restaurant_id].all_decision_count, 10) - 1,
+              r[i.restaurantId] = {
+                ...r[i.restaurantId],
+                all_decision_count: parseInt(r[i.restaurantId].all_decision_count, 10) - 1,
               };
             });
             return r;
@@ -309,7 +309,7 @@ export default new Map([
       },
     };
     action.decisions.forEach(d => {
-      newState.items.entities.restaurants[d.restaurant_id] = {
+      newState.items.entities.restaurants[d.restaurantId] = {
         all_decision_count: {
           $apply: count => parseInt(count, 10) - 1
         }

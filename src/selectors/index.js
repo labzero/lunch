@@ -17,13 +17,13 @@ import { areUsersLoading, getUserId, getUserById } from './users';
 import { getCurrentUser } from './user';
 import { getMapUi } from './mapUi';
 
-export const getUserByVoteId = (state, voteId) => getUserById(state, getVoteById(state, voteId).user_id);
+export const getUserByVoteId = (state, voteId) => getUserById(state, getVoteById(state, voteId).userId);
 
 export const makeGetRestaurantVotesForUser = () => createSelector(
   getRestaurantById,
   getVoteEntities,
   getUserId,
-  (restaurant, voteEntities, userId) => restaurant.votes.filter(voteId => voteEntities[voteId].user_id === userId)
+  (restaurant, voteEntities, userId) => restaurant.votes.filter(voteId => voteEntities[voteId].userId === userId)
 );
 
 export const getMapItems = createSelector(

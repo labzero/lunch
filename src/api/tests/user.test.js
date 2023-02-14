@@ -134,7 +134,7 @@ describe('api/main/user', () => {
           }),
           '../../helpers/getUserPasswordUpdates': mockEsmodule({
             default: () => Promise.resolve({
-              encrypted_password: 'drowssapdoog'
+              encryptedPassword: 'drowssapdoog'
             })
           })
         });
@@ -143,15 +143,15 @@ describe('api/main/user', () => {
       });
 
       it('updates with password updates, not password', () => {
-        expect(updateSpy.calledWith({ encrypted_password: 'drowssapdoog' })).to.be.true;
+        expect(updateSpy.calledWith({ encryptedPassword: 'drowssapdoog' })).to.be.true;
       });
     });
 
     describe('with new name', () => {
       beforeEach(() => request(app).patch('/').send({ name: 'New Name' }));
 
-      it('sets name_changed', () => {
-        expect(updateSpy.calledWith({ name: 'New Name', name_changed: true })).to.be.true;
+      it('sets namedChanged', () => {
+        expect(updateSpy.calledWith({ name: 'New Name', namedChanged: true })).to.be.true;
       });
     });
 

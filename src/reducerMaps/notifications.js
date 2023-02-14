@@ -37,8 +37,8 @@ export default new Map([
       }
       case ActionTypes.VOTE_POSTED: {
         notification.vals = {
-          userId: realAction.vote.user_id,
-          restaurantId: realAction.vote.restaurant_id
+          userId: realAction.vote.userId,
+          restaurantId: realAction.vote.restaurantId
         };
         break;
       }
@@ -90,7 +90,7 @@ export default new Map([
         notification.vals = {
           decision,
           userId,
-          restaurantId: decision.restaurant_id
+          restaurantId: decision.restaurantId
         };
         break;
       }
@@ -98,7 +98,7 @@ export default new Map([
         const { decisions, userId } = realAction;
         notification.vals = {
           userId,
-          restaurantId: decisions[0].restaurant_id,
+          restaurantId: decisions[0].restaurantId,
         };
         break;
       }

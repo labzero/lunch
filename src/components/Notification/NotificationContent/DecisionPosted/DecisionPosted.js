@@ -21,7 +21,7 @@ const DecisionPosted = ({
     </button>
   );
   if (loggedIn) {
-    if (dayjs().subtract(12, 'hours').isAfter(decision.created_at)) {
+    if (dayjs().subtract(12, 'hours').isAfter(decision.createdAt)) {
       return (
         <span>
           <b>{user}</b>

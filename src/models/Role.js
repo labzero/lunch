@@ -7,7 +7,7 @@ const Role = sequelize.define(
       allowNull: false,
       type: DataTypes.ENUM('guest', 'member', 'owner'),
     },
-    user_id: {
+    userId: {
       type: DataTypes.INTEGER,
       references: {
         model: 'user',
@@ -16,7 +16,7 @@ const Role = sequelize.define(
       allowNull: false,
       onDelete: 'cascade'
     },
-    team_id: {
+    teamId: {
       type: DataTypes.INTEGER,
       references: {
         model: 'team',
@@ -29,15 +29,14 @@ const Role = sequelize.define(
   {
     uniqueKeys: {
       unique: {
-        fields: ['user_id', 'team_id']
+        fields: ['userId', 'teamId']
       }
     },
-    underscored: true
   },
   {
     indexes: [
       {
-        fields: ['user_id', 'team_id']
+        fields: ['userId', 'teamId']
       }
     ]
   }

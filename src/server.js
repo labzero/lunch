@@ -8,7 +8,6 @@
  */
 
 import 'isomorphic-fetch';
-import Promise from 'bluebird';
 import path from 'path';
 import fs from 'fs';
 import rfs from 'rotating-file-stream';

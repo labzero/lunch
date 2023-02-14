@@ -1,5 +1,3 @@
-const Promise = require('bluebird');
-
 exports.up = (queryInterface, Sequelize) => Promise.all([
   queryInterface.addColumn('teams', 'lat', {
     type: Sequelize.DOUBLE

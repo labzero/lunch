@@ -15,7 +15,7 @@ describe('helpers/canChangeUser', () => {
       name: 'dev',
       id: 1,
       superuser: false,
-      roles: [{ type: 'owner', team_id: 1, user_id: 1 }],
+      roles: [{ type: 'owner', teamId: 1, userId: 1 }],
       email: 'dev@labzero.com'
     };
     userToChange = {

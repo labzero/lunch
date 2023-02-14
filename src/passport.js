@@ -42,7 +42,7 @@ passport.use(new GoogleStrategy(
         // WARNING: this retrieves all attributes (incl. password).
         // But we only provide the ID to passport.
         let user = await User.findOne({
-          where: { google_id: profile.id }
+          where: { googleId: profile.id }
         });
 
         const userUpdates = {};
@@ -53,7 +53,7 @@ passport.use(new GoogleStrategy(
           user = await User.findOne({
             where: { email: accountEmail }
           });
-          userUpdates.google_id = profile.id;
+          userUpdates.googleId = profile.id;
           doUpdates = true;
         }
 
@@ -64,7 +64,7 @@ passport.use(new GoogleStrategy(
         if (
           typeof profile.displayName === 'string'
           && profile.displayName !== user.get('name')
-          && !user.get('name_changed')
+          && !user.get('namedChanged')
         ) {
           userUpdates.name = profile.displayName;
           doUpdates = true;
@@ -96,10 +96,10 @@ passport.use(new LocalStrategy({
     // WARNING: this retrieves all attributes (incl. password).
     // But we only provide the ID to passport.
     const user = await User.findOne({ where: { email } });
-    if (!user || !user.get('encrypted_password')) {
+    if (!user || !user.get('encryptedPassword')) {
       return done(null, false, failureData);
     }
-    const passwordValid = await bcrypt.compare(password, user.get('encrypted_password'));
+    const passwordValid = await bcrypt.compare(password, user.get('encryptedPassword'));
     if (passwordValid) {
       return done(null, user.get('id'));
     }

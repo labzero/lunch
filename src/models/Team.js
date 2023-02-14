@@ -8,8 +8,8 @@ const Team = sequelize.define(
       allowNull: false,
       type: DataTypes.STRING(63)
     },
-    default_zoom: DataTypes.INTEGER,
-    sort_duration: DataTypes.INTEGER,
+    defaultZoom: DataTypes.INTEGER,
+    sortDuration: DataTypes.INTEGER,
     lat: {
       allowNull: false,
       type: DataTypes.DOUBLE
@@ -20,13 +20,11 @@ const Team = sequelize.define(
     },
     address: DataTypes.STRING
   },
-  {
-    underscored: true
-  },
+  undefined,
   {
     indexes: [
       {
-        fields: ['created_at']
+        fields: ['createdAt']
       }
     ]
   }

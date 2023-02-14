@@ -18,15 +18,15 @@ export default () => {
       loggedIn,
       checkTeamRole(),
       async (req, res, next) => {
-        const restaurantId = parseInt(req.params.restaurant_id, 10);
+        const restaurantId = parseInt(req.params.restaurantId, 10);
         try {
           const result = await sequelize.transaction(async (t) => {
             const count = await Vote.recentForRestaurantAndUser(restaurantId, req.user.id, t);
 
             if (count === 0) {
               return Vote.create({
-                restaurant_id: restaurantId,
-                user_id: req.user.id
+                restaurantId,
+                userId: req.user.id
               }, { transaction: t });
             }
             return '409';
@@ -55,14 +55,14 @@ export default () => {
         const id = parseInt(req.params.id, 10);
 
         try {
-          const count = await Vote.destroy({ where: { id, user_id: req.user.id } });
+          const count = await Vote.destroy({ where: { id, userId: req.user.id } });
 
           if (count === 0) {
             notFound(res);
           } else {
             req.wss.broadcast(
               req.team.id,
-              voteDeleted(parseInt(req.params.restaurant_id, 10), req.user.id, id)
+              voteDeleted(parseInt(req.params.restaurantId, 10), req.user.id, id)
             );
             res.status(204).send();
           }

@@ -42,7 +42,7 @@ class PastDecisionsModal extends Component {
     let disabled = false;
     if (index > 0 && decisionsByDay[index].length > 0) {
       const decisionNamesForDay = decisionsByDay[index].reduce((acc, curr) => {
-        const restaurant = restaurantEntities[curr.restaurant_id];
+        const restaurant = restaurantEntities[curr.restaurantId];
         if (restaurant) {
           disabled = true;
           acc.push(restaurant.name);

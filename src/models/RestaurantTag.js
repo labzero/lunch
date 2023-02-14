@@ -1,9 +1,9 @@
 import { sequelize, DataTypes } from './db';
 
 const RestaurantTag = sequelize.define(
-  'restaurants_tags',
+  'restaurantsTags',
   {
-    restaurant_id: {
+    restaurantId: {
       type: DataTypes.INTEGER,
       references: {
         model: 'restaurant',
@@ -12,7 +12,7 @@ const RestaurantTag = sequelize.define(
       allowNull: false,
       onDelete: 'cascade'
     },
-    tag_id: {
+    tagId: {
       type: DataTypes.INTEGER,
       references: {
         model: 'tag',
@@ -25,15 +25,14 @@ const RestaurantTag = sequelize.define(
   {
     uniqueKeys: {
       unique: {
-        fields: ['restaurant_id', 'tag_id']
+        fields: ['restaurantId', 'tagId']
       }
     },
-    underscored: true
   },
   {
     indexes: [
       {
-        fields: ['restaurant_id', 'tag_id']
+        fields: ['restaurantId', 'tagId']
       }
     ]
   }

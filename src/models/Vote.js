@@ -4,7 +4,7 @@ import { sequelize, DataTypes } from './db';
 const Vote = sequelize.define(
   'vote',
   {
-    user_id: {
+    userId: {
       type: DataTypes.INTEGER,
       references: {
         model: 'user',
@@ -13,7 +13,7 @@ const Vote = sequelize.define(
       allowNull: false
     },
 
-    restaurant_id: {
+    restaurantId: {
       type: DataTypes.INTEGER,
       references: {
         model: 'restaurant',
@@ -27,18 +27,17 @@ const Vote = sequelize.define(
     scopes: {
       fromToday: () => ({
         where: {
-          created_at: {
+          createdAt: {
             [DataTypes.Op.gt]: dayjs().subtract(12, 'hours').toDate()
           }
         }
       })
     },
-    underscored: true
   },
   {
     indexes: [
       {
-        fields: ['created_at', 'restaurant_id', 'user_id']
+        fields: ['createdAt', 'restaurantId', 'userId']
       }
     ]
   }
@@ -46,8 +45,8 @@ const Vote = sequelize.define(
 
 Vote.recentForRestaurantAndUser = (restaurantId, userId, transaction) => Vote.scope('fromToday').count({
   where: {
-    user_id: userId,
-    restaurant_id: restaurantId
+    userId,
+    restaurantId
   }
 }, { transaction });
 

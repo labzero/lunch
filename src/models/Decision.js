@@ -4,7 +4,7 @@ import { sequelize, DataTypes } from './db';
 const Decision = sequelize.define(
   'decision',
   {
-    restaurant_id: {
+    restaurantId: {
       type: DataTypes.INTEGER,
       references: {
         model: 'restaurant',
@@ -13,24 +13,23 @@ const Decision = sequelize.define(
       allowNull: false,
       onDelete: 'cascade'
     },
-    team_id: DataTypes.INTEGER
+    teamId: DataTypes.INTEGER
   },
   {
     scopes: {
       fromToday: () => ({
         where: {
-          created_at: {
+          createdAt: {
             [DataTypes.Op.gt]: dayjs().subtract(12, 'hours').toDate()
           }
         }
       })
     },
-    underscored: true
   },
   {
     indexes: [
       {
-        fields: ['created_at', 'restaurant_id']
+        fields: ['createdAt', 'restaurantId']
       }
     ]
   }

@@ -1,5 +1,3 @@
-const Promise = require('bluebird');
-
 exports.up = (queryInterface, Sequelize) => Promise.all([
   queryInterface.addColumn('users', 'encrypted_password', {
     type: Sequelize.STRING

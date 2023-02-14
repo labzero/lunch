@@ -140,8 +140,8 @@ describe('middlewares/invitation', () => {
         expect(sendMailSpy.calledWith(match({ email: 'jeffrey@labzero.com' }))).to.be.true;
       });
 
-      it('updates confirmation_sent_at', () => {
-        expect(updateSpy.calledWith({ confirmation_sent_at: match.date })).to.be.true;
+      it('updates confirmationSentAt', () => {
+        expect(updateSpy.calledWith({ confirmationSentAt: match.date })).to.be.true;
       });
 
       it('sets flash success', () => {

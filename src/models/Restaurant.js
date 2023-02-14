@@ -5,10 +5,8 @@ const Restaurant = sequelize.define('restaurant', {
   address: DataTypes.STRING,
   lat: DataTypes.FLOAT,
   lng: DataTypes.FLOAT,
-  place_id: DataTypes.STRING,
-  team_id: DataTypes.INTEGER
-}, {
-  underscored: true
+  placeId: DataTypes.STRING,
+  teamId: DataTypes.INTEGER
 });
 
 export default Restaurant;

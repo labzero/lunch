@@ -90,7 +90,7 @@ describe('actions/restaurants', () => {
           expect(actions[0].type).to.eq('POST_RESTAURANT');
           expect(actions[0].restaurant).to.eql({
             name: 'Lab Zero',
-            place_id: '12345',
+            placeId: '12345',
             address: '123 Main',
             lat: 50,
             lng: 100,
@@ -104,7 +104,7 @@ describe('actions/restaurants', () => {
         expect(fetchMock.lastCall()[0]).to.eq('/api/restaurants');
         expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({
           name,
-          place_id: placeId,
+          placeId,
           address,
           lat,
           lng

@@ -16,10 +16,10 @@ export default () => {
       checkTeamRole(),
       async (req, res, next) => {
         try {
-          const opts = { where: { team_id: req.team.id } };
+          const opts = { where: { teamId: req.team.id } };
           const days = parseInt(req.query.days, 10);
           if (!Number.isNaN(days)) {
-            opts.where.created_at = {
+            opts.where.createdAt = {
               [DataTypes.Op.gt]: dayjs().subtract(days, 'days').toDate()
             };
           }
@@ -37,13 +37,13 @@ export default () => {
       loggedIn,
       checkTeamRole(),
       async (req, res, next) => {
-        const restaurantId = parseInt(req.body.restaurant_id, 10);
+        const restaurantId = parseInt(req.body.restaurantId, 10);
         try {
-          const destroyOpts = { where: { team_id: req.team.id } };
+          const destroyOpts = { where: { teamId: req.team.id } };
           const daysAgo = parseInt(req.body.daysAgo, 10);
           let MaybeScopedDecision = Decision;
           if (daysAgo > 0) {
-            destroyOpts.where.created_at = {
+            destroyOpts.where.createdAt = {
               [DataTypes.Op.gt]: dayjs().subtract(daysAgo, 'days').subtract(12, 'hours').toDate(),
               [DataTypes.Op.lt]: dayjs().subtract(daysAgo, 'days').add(12, 'hours').toDate(),
             };
@@ -56,11 +56,11 @@ export default () => {
 
           try {
             const createOpts = {
-              restaurant_id: restaurantId,
-              team_id: req.team.id
+              restaurantId,
+              teamId: req.team.id
             };
             if (daysAgo > 0) {
-              createOpts.created_at = dayjs().subtract(daysAgo, 'days').toDate();
+              createOpts.createdAt = dayjs().subtract(daysAgo, 'days').toDate();
             }
             const obj = await Decision.create(createOpts);
 
@@ -82,8 +82,8 @@ export default () => {
       checkTeamRole(),
       async (req, res, next) => {
         try {
-          const decisions = await Decision.scope('fromToday').findAll({ where: { team_id: req.team.id } });
-          await Decision.scope('fromToday').destroy({ where: { team_id: req.team.id } });
+          const decisions = await Decision.scope('fromToday').findAll({ where: { teamId: req.team.id } });
+          await Decision.scope('fromToday').destroy({ where: { teamId: req.team.id } });
 
           req.wss.broadcast(req.team.id, decisionsDeleted(decisions, req.user.id));
           res.status(204).send();

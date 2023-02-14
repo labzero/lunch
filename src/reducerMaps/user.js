@@ -6,7 +6,7 @@ export default new Map([
     let newState;
     if (action.team.roles) {
       action.team.roles.forEach(role => {
-        if (role.user_id === state.id) {
+        if (role.userId === state.id) {
           newState = update(newState || state, {
             roles: {
               $push: [role]
@@ -22,7 +22,7 @@ export default new Map([
     if (action.isSelf) {
       return update(state, {
         roles: {
-          $splice: [[state.roles.map(role => role.team_id).indexOf(action.team.id), 1]]
+          $splice: [[state.roles.map(role => role.teamId).indexOf(action.team.id), 1]]
         }
       });
     }
@@ -34,7 +34,7 @@ export default new Map([
         ...state,
         ...action.user,
         roles: state.roles.map((role) => {
-          if (role.team_id === action.team.id) {
+          if (role.teamId === action.team.id) {
             return {
               ...role,
               type: action.user.type
