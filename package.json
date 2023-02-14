@@ -38,7 +38,7 @@
     "express-ws": "^3.0.0",
     "fastclick": "^1.0.6",
     "fbjs": "^3.0.4",
-    "fetch-mock": "^5.9.4",
+    "fetch-mock": "^9.11.0",
     "google-map-react": "^2.2.0",
     "history": "^4.7.2",
     "immutability-helper": "^2.1.2",
