@@ -130,7 +130,6 @@
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.32.2",
-    "extend": "^3.0.0",
     "file-loader": "^6.2.0",
     "git-repository": "^0.1.4",
     "glob": "^7.1.3",
