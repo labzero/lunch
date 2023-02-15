@@ -30,6 +30,9 @@ commands:
             CURRENT_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix << parameters.task_family >> --sort DESC | jq -r '.taskDefinitionArns[0]'`
             TASK_JSON=`aws ecs describe-task-definition --task-definition ${CURRENT_TASK} | jq --arg DOCKER_TAG "$DOCKER_TAG" '.taskDefinition.containerDefinitions[0].image = $DOCKER_TAG | {containerDefinitions: .taskDefinition.containerDefinitions, family: .taskDefinition.family}'`
             aws ecs register-task-definition --cli-input-json "${TASK_JSON}" > /dev/null
+            CURRENT_MIGRATION_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix << parameters.migration_task >> --sort DESC | jq -r '.taskDefinitionArns[0]'`
+            MIGRATION_TASK_JSON=`aws ecs describe-task-definition --task-definition ${CURRENT_MIGRATION_TASK} | jq --arg DOCKER_TAG "$DOCKER_TAG" '.taskDefinition.containerDefinitions[0].image = $DOCKER_TAG | {containerDefinitions: .taskDefinition.containerDefinitions, family: .taskDefinition.family}'`
+            aws ecs register-task-definition --cli-input-json "${MIGRATION_TASK_JSON}" > /dev/null
             aws ecs run-task --cluster << parameters.ecs_cluster >> --task-definition << parameters.migration_task >>
             NEW_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix << parameters.task_family >> --sort DESC | jq -r '.taskDefinitionArns[0]'`
             aws ecs update-service --service << parameters.service_name >> --cluster << parameters.ecs_cluster >> --task-definition ${NEW_TASK}
