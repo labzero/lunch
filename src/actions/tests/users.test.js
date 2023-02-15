@@ -198,7 +198,7 @@ describe('actions/users', () => {
 
       it('fetches user with full url', () => {
         store.dispatch(proxyUsers.removeUser(id, team));
-        expect(fetchMock.lastCall()[0]).to.eq(`//${team.slug}.lunch.pink/api/users/${id}`);
+        expect(fetchMock.lastCall()[0]).to.eq(`http://${team.slug}.lunch.pink/api/users/${id}`);
       });
     });
 

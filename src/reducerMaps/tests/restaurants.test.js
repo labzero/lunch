@@ -58,7 +58,7 @@ describe('reducerMaps/restaurants', () => {
       };
 
       afterState = restaurants.get(ActionTypes.SORT_RESTAURANTS)(beforeState, {
-        decision: { restaurant_id: 5 },
+        decision: { restaurantId: 5 },
         newlyAdded: { id: 6, userId: 1 },
         user: { id: 1 }
       });
@@ -110,10 +110,10 @@ describe('reducerMaps/restaurants', () => {
 
       afterState = restaurants.get(ActionTypes.DECISION_POSTED)(beforeState, {
         decision: {
-          restaurant_id: 1
+          restaurantId: 1
         },
         deselected: [{
-          restaurant_id: 2
+          restaurantId: 2
         }]
       });
     });

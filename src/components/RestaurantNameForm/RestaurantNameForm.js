@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
+import Button from 'react-bootstrap/Button';
 import s from './RestaurantNameForm.scss';
 
 class RestaurantNameForm extends Component {
@@ -21,23 +22,28 @@ class RestaurantNameForm extends Component {
             className="form-control input-sm"
             value={this.props.editNameFormValue}
             onChange={this.props.setEditNameFormValue}
-            ref={i => { this.input = i; }}
+            ref={(i) => {
+              this.input = i;
+            }}
           />
         </span>
-        <button
+        <Button
           type="submit"
-          className={`btn btn-primary btn-sm ${s.button}`}
+          className={s.button}
           disabled={this.props.editNameFormValue === ''}
+          size="sm"
+          variant="primary"
         >
           ok
-        </button>
-        <button
-          type="button"
-          className={`btn btn-default btn-sm ${s.button}`}
+        </Button>
+        <Button
+          className={s.button}
           onClick={this.props.hideEditNameForm}
+          size="sm"
+          variant="light"
         >
           cancel
-        </button>
+        </Button>
       </form>
     );
   }

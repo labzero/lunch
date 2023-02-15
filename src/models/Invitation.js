@@ -6,18 +6,17 @@ const Invitation = sequelize.define('invitation', {
     allowNull: false,
     unique: true
   },
-  confirmed_at: {
+  confirmedAt: {
     type: DataTypes.DATE
   },
-  confirmation_token: {
+  confirmationToken: {
     type: DataTypes.STRING,
     unique: true
   },
-  confirmation_sent_at: {
+  confirmationSentAt: {
     type: DataTypes.DATE
   }
 }, {
-  underscored: true
 });
 
 export default Invitation;

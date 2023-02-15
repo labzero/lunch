@@ -4,7 +4,6 @@ import getUserPasswordUpdates from '../../helpers/getUserPasswordUpdates';
 import { User } from '../../models';
 import loggedIn from '../helpers/loggedIn';
 
-
 export default () => {
   const router = new Router();
 
@@ -57,7 +56,7 @@ export default () => {
             }
             if (filteredPayload.name) {
               if (req.user.get('name') !== filteredPayload.name) {
-                filteredPayload.name_changed = true;
+                filteredPayload.namedChanged = true;
               }
             }
             await req.user.update(filteredPayload);

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './RestaurantVoteButton.scss';
 
 export class _RestaurantVoteButton extends Component {
@@ -17,7 +17,9 @@ export class _RestaurantVoteButton extends Component {
 
     return (
       <button
-        ref={r => { this.el = r; }}
+        ref={(r) => {
+          this.el = r;
+        }}
         onClick={this.props.handleClick}
         className={`${s.root} btn btn-sm ${btnClass}`}
         type="button"
@@ -30,7 +32,7 @@ export class _RestaurantVoteButton extends Component {
 
 _RestaurantVoteButton.propTypes = {
   handleClick: PropTypes.func.isRequired,
-  userVotes: PropTypes.array.isRequired
+  userVotes: PropTypes.array.isRequired,
 };
 
 export default withStyles(s)(_RestaurantVoteButton);

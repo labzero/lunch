@@ -1,4 +1,0 @@
---require @babel/register
---require ./test/setup
---exit
-./test/mocha-setup

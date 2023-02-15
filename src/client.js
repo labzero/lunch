@@ -44,7 +44,9 @@ window.App.state.host = host;
 
 if (!subdomain) {
   // escape domain periods to not appear as regex wildcards
-  const subdomainMatch = window.location.host.match(`^(.*)\\.${host.replace(/\./g, '\\.')}`);
+  const subdomainMatch = window.location.host.match(
+    `^(.*)\\.${host.replace(/\./g, '\\.')}`
+  );
   if (subdomainMatch) {
     subdomain = subdomainMatch[1];
   }
@@ -60,18 +62,19 @@ const context = {
   // https://github.com/kriasoft/isomorphic-style-loader
   insertCss: (...styles) => {
     // eslint-disable-next-line no-underscore-dangle
-    const removeCss = styles.map(x => x._insertCss());
+    const removeCss = styles.map((x) => x._insertCss());
     return () => {
-      removeCss.forEach(f => f());
+      removeCss.forEach((f) => f());
     };
   },
   // Universal HTTP client
   fetch: createFetch(fetch, {
     baseUrl: window.App.apiUrl,
   }),
+  googleApiKey: window.App.googleApiKey,
   // Initialize a new Redux store
   // http://redux.js.org/docs/basics/UsageWithReact.html
-  store
+  store,
 };
 
 const container = document.getElementById('app');
@@ -182,7 +185,7 @@ async function onLocationChange(location, action) {
         if (window.ga) {
           window.ga('send', 'pageview', createPath(location));
         }
-      },
+      }
     );
   } catch (error) {
     if (__DEV__) {

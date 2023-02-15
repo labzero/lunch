@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import Link from '../Link';
 import s from './Menu.scss';
 
@@ -12,11 +12,11 @@ class Menu extends Component {
     host: PropTypes.string.isRequired,
     open: PropTypes.bool.isRequired,
     team: PropTypes.object,
-    user: PropTypes.object.isRequired
-  }
+    user: PropTypes.object.isRequired,
+  };
 
   static defaultProps = {
-    team: undefined
+    team: undefined,
   };
 
   render() {
@@ -29,37 +29,68 @@ class Menu extends Component {
     return (
       <nav className={`${s.root} ${open ? s.open : ''}`}>
         <div className={s.name}>
-          <div>
-            {user.name}
-          </div>
-          <div>
-            {user.email}
-          </div>
+          <div>{user.name}</div>
+          <div>{user.email}</div>
         </div>
         <div className={s.lists}>
           {team.id && (
             <ul className={s.list}>
               {hasMemberRole && (
                 <li className={s.item}>
-                  <Link className={s.button} onClick={closeMenu} tabIndex={tabIndex} to="/team">Team</Link>
+                  <Link
+                    className={s.button}
+                    onClick={closeMenu}
+                    tabIndex={tabIndex}
+                    to="/team"
+                  >
+                    Team
+                  </Link>
                 </li>
               )}
               {hasGuestRole && (
                 <li className={s.item}>
-                  <Link className={s.button} onClick={closeMenu} tabIndex={tabIndex} to="/tags">Tags</Link>
+                  <Link
+                    className={s.button}
+                    onClick={closeMenu}
+                    tabIndex={tabIndex}
+                    to="/tags"
+                  >
+                    Tags
+                  </Link>
                 </li>
               )}
             </ul>
           )}
           <ul className={s.list}>
             <li className={s.item}>
-              <a className={s.button} onClick={closeMenu} tabIndex={tabIndex} href={`//${host}/teams`}>My Teams</a>
+              <a
+                className={s.button}
+                onClick={closeMenu}
+                tabIndex={tabIndex}
+                href={`//${host}/teams`}
+              >
+                My Teams
+              </a>
             </li>
             <li className={s.item}>
-              <a className={s.button} onClick={closeMenu} tabIndex={tabIndex} href={`//${host}/account`}>Account</a>
+              <a
+                className={s.button}
+                onClick={closeMenu}
+                tabIndex={tabIndex}
+                href={`//${host}/account`}
+              >
+                Account
+              </a>
             </li>
             <li className={`${s.item} ${s.logout}`}>
-              <a className={s.button} onClick={closeMenu} tabIndex={tabIndex} href={`//${host}/logout`}>Log Out</a>
+              <a
+                className={s.button}
+                onClick={closeMenu}
+                tabIndex={tabIndex}
+                href={`//${host}/logout`}
+              >
+                Log Out
+              </a>
             </li>
           </ul>
         </div>

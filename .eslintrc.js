@@ -10,7 +10,7 @@
 // ESLint configuration
 // http://eslint.org/docs/user-guide/configuring
 module.exports = {
-  parser: 'babel-eslint',
+  parser: '@babel/eslint-parser',
 
   extends: [
     'airbnb',
@@ -77,6 +77,7 @@ module.exports = {
     'key-spacing': 0,
     'no-confusing-arrow': 0,
     'react/jsx-quotes': 0,
+    'react/jsx-props-no-spreading': 0,
     'max-len': 0,
     'jsx-quotes': [
       2,
@@ -88,6 +89,13 @@ module.exports = {
 
     'react/forbid-prop-types': 'off',
     'react/destructuring-assignment': 'off',
+    'react/function-component-definition': ['error', {
+      namedComponents: 'arrow-function',
+      unnamedComponents: 'arrow-function'
+    }],
+    'react/static-property-placement': 'off',
+    'import/no-relative-packages': 'off',
+    'import/no-import-module-exports': 'off'
   },
 
   settings: {

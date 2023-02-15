@@ -1,7 +1,5 @@
-const db = require('../../src/models/db');
-
 exports.up = (queryInterface, Sequelize) => {
-  const User = db.sequelize.define('user', {
+  const User = queryInterface.sequelize.define('user', {
     google_id: Sequelize.STRING,
     name: Sequelize.STRING,
     email: Sequelize.STRING
@@ -9,7 +7,7 @@ exports.up = (queryInterface, Sequelize) => {
     underscored: true
   });
 
-  const Team = db.sequelize.define('team', {
+  const Team = queryInterface.sequelize.define('team', {
     name: Sequelize.STRING,
   }, {
     underscored: true
@@ -61,7 +59,7 @@ exports.up = (queryInterface, Sequelize) => {
   })
     .then(() => User.findAll())
     .then((users) => Team.findOne({ where: { name: 'Lab Zero' } }).then(team => {
-      const Role = db.sequelize.define('role', {
+      const Role = queryInterface.sequelize.define('role', {
         type: {
           allowNull: false,
           type: Sequelize.ENUM('guest', 'member', 'owner'),
@@ -101,4 +99,4 @@ exports.up = (queryInterface, Sequelize) => {
     }));
 };
 
-exports.down = queryInterface => queryInterface.dropTable('roles').then(() => db.sequelize.query('DROP TYPE enum_roles_type'));
+exports.down = queryInterface => queryInterface.dropTable('roles').then(() => queryInterface.sequelize.query('DROP TYPE enum_roles_type'));

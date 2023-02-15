@@ -212,7 +212,7 @@ export function fetchRestaurantsIfNeeded() {
 
 export function addRestaurant(name, placeId, address, lat, lng) {
   const payload = {
-    name, place_id: placeId, address, lat, lng
+    name, placeId, address, lat, lng
   };
   return (dispatch) => {
     dispatch(postRestaurant(payload));

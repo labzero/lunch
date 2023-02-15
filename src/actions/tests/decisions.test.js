@@ -88,7 +88,7 @@ describe('actions/decisions', () => {
         store.dispatch(decisions.decide(restaurantId));
 
         expect(fetchMock.lastCall()[0]).to.eq('/api/decisions');
-        expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ restaurant_id: 1 }));
+        expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ restaurantId: 1 }));
       });
     });
 

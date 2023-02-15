@@ -1,7 +1,8 @@
-@import '../../styles/_mixins.scss';
+@use 'sass:color';
+@import '../../styles/mixins';
 
 .root {
-  background: transparentize(pink, .5);
+  background: color.adjust(pink, $alpha: -.5);
   color: #666;
   font-size: .75em;
   line-height: 1;

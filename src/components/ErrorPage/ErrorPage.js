@@ -9,10 +9,10 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './ErrorPage.scss';
 
-export function ErrorPage({ error }) {
+export const ErrorPage = ({ error }) => {
   let title = 'Error';
   let content = 'Sorry, a critical error occurred on this page.';
   let errorMessage = null;
@@ -31,7 +31,7 @@ export function ErrorPage({ error }) {
       {errorMessage}
     </div>
   );
-}
+};
 
 ErrorPage.propTypes = { error: PropTypes.object.isRequired };
 

@@ -11,11 +11,11 @@ module.exports = {
     function createUser(encryptedPassword) {
       return queryInterface.bulkInsert('users', [{
         name,
-        encrypted_password: encryptedPassword,
+        encryptedPassword,
         superuser: true,
         email: process.env.SUPERUSER_EMAIL,
-        created_at: now,
-        updated_at: now
+        createdAt: now,
+        updatedAt: now
       }], {});
     }
 

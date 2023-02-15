@@ -1,27 +1,35 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import moment from 'moment';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import dayjs from 'dayjs';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from '../NotificationContent.scss';
 
 const DecisionPosted = ({
-  decision, loggedIn, user, restaurantName, showMapAndInfoWindow
+  decision,
+  loggedIn,
+  user,
+  restaurantName,
+  showMapAndInfoWindow,
 }) => {
   const restaurantEl = (
-    <button className={s.clickable} onClick={showMapAndInfoWindow} type="button">
+    <button
+      className={s.clickable}
+      onClick={showMapAndInfoWindow}
+      type="button"
+    >
       {restaurantName}
     </button>
   );
   if (loggedIn) {
-    if (moment().subtract(12, 'hours').isAfter(decision.created_at)) {
+    if (dayjs().subtract(12, 'hours').isAfter(decision.createdAt)) {
       return (
         <span>
           <b>{user}</b>
           {' '}
-marked
+          marked
           {restaurantEl}
           {' '}
-as a past decision.
+          as a past decision.
         </span>
       );
     }
@@ -29,10 +37,10 @@ as a past decision.
       <span>
         <b>{user}</b>
         {' '}
-marked
+        marked
         {restaurantEl}
         {' '}
-as today&rsquo;s decision.
+        as today&rsquo;s decision.
       </span>
     );
   }
@@ -40,7 +48,7 @@ as today&rsquo;s decision.
     <span>
       {restaurantEl}
       {' '}
-was decided upon.
+      was decided upon.
     </span>
   );
 };
@@ -50,11 +58,11 @@ DecisionPosted.propTypes = {
   loggedIn: PropTypes.bool.isRequired,
   user: PropTypes.string,
   restaurantName: PropTypes.string.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired
+  showMapAndInfoWindow: PropTypes.func.isRequired,
 };
 
 DecisionPosted.defaultProps = {
-  user: ''
+  user: '',
 };
 
 export default withStyles(s)(DecisionPosted);

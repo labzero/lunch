@@ -1,28 +1,30 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import CSSTransitionGroup from 'react-transition-group/CSSTransitionGroup';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import NotificationContainer from '../Notification/NotificationContainer';
 import s from './NotificationList.scss';
 
 const NotificationList = ({ notifications }) => (
   <ul className={s.notifications}>
-    <CSSTransitionGroup
-      transitionName="notification"
-      transitionEnterTimeout={250}
-      transitionLeaveTimeout={1000}
-    >
-      {notifications.map(notification => (
-        <li className={s.notificationContainer} key={`notification_${notification.id}`}>
-          <NotificationContainer {...notification} />
-        </li>
+    <TransitionGroup>
+      {notifications.map((notification) => (
+        <CSSTransition
+          classNames="notification"
+          key={`notification_${notification.id}`}
+          timeout={{ enter: 250, exit: 1000 }}
+        >
+          <li className={s.notificationContainer}>
+            <NotificationContainer {...notification} />
+          </li>
+        </CSSTransition>
       ))}
-    </CSSTransitionGroup>
+    </TransitionGroup>
   </ul>
 );
 
 NotificationList.propTypes = {
-  notifications: PropTypes.array.isRequired
+  notifications: PropTypes.array.isRequired,
 };
 
 export default withStyles(s)(NotificationList);

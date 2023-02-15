@@ -10,7 +10,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  setDefaultZoom: () => dispatch(updateTeam({ default_zoom: ownProps.map.getZoom() }))
+  setDefaultZoom: () => dispatch(updateTeam({ defaultZoom: ownProps.map.getZoom() }))
     .then(() => dispatch(flashSuccess('Default zoom level set for team.'))),
   setShowUnvoted: event => dispatch(setShowUnvoted(event.target.checked)),
   setShowPOIs: event => dispatch(setShowPOIs(event.target.checked))

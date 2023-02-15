@@ -9,16 +9,13 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './Footer.scss';
 
 const Footer = ({ host }) => (
   <div className={s.root}>
     <div className={s.container}>
-      <a
-        className={s.link}
-        href={`//${host}/about`}
-      >
+      <a className={s.link} href={`//${host}/about`}>
         About / Privacy
       </a>
       <span className={s.spacer} />
@@ -38,7 +35,7 @@ const Footer = ({ host }) => (
 );
 
 Footer.propTypes = {
-  host: PropTypes.string.isRequired
+  host: PropTypes.string.isRequired,
 };
 
 export default withStyles(s)(Footer);

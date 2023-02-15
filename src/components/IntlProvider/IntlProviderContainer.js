@@ -1,9 +1,6 @@
 import { connect } from 'react-redux';
-import { addLocaleData, IntlProvider } from 'react-intl';
-import enLocaleData from 'react-intl/locale-data/en';
+import { IntlProvider } from 'react-intl';
 import { getLocale, getMessages } from '../../selectors/locale';
-
-addLocaleData(enLocaleData);
 
 const mapStateToProps = (state, ownProps) => ({
   locale: getLocale(state),
@@ -11,6 +8,4 @@ const mapStateToProps = (state, ownProps) => ({
   ...ownProps,
 });
 
-export default connect(
-  mapStateToProps
-)(IntlProvider);
+export default connect(mapStateToProps)(IntlProvider);

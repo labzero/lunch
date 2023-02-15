@@ -7,6 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+/* eslint-disable no-promise-executor-return */
+
 import path from 'path';
 import cp from 'child_process';
 import webpackConfig from './webpack.config';
@@ -47,7 +49,7 @@ function runServer() {
     }
 
     server = cp.spawn('node', [serverPath], {
-      env: Object.assign({ NODE_ENV: 'development' }, process.env),
+      env: { NODE_ENV: 'development', ...process.env },
       silent: false,
     });
 

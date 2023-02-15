@@ -2,7 +2,6 @@
 import { expect } from 'chai';
 import proxyquire from 'proxyquire';
 
-
 describe('selectors/index', () => {
   describe('getFilteredRestaurants', () => {
     let restaurantIds;

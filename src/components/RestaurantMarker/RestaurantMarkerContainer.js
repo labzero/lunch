@@ -8,7 +8,7 @@ import RestaurantMarker from './RestaurantMarker';
 const mapStateToProps = (state, ownProps) => {
   const restaurant = getRestaurantById(state, ownProps.id);
   const decision = getDecision(state);
-  const decided = decision !== undefined && decision.restaurant_id === restaurant.id;
+  const decided = decision !== undefined && decision.restaurantId === restaurant.id;
   return {
     restaurant,
     decided,
@@ -21,7 +21,9 @@ const mapDispatchToProps = (dispatch) => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps) => ({
+  ...stateProps,
+  ...dispatchProps,
   handleMarkerClick(event) {
     event.preventDefault();
     if (stateProps.showInfoWindow) {

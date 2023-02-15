@@ -31,6 +31,7 @@ describe('AddUserForm', () => {
     };
   });
 
+  /* eslint-disable jsx-a11y/control-has-associated-label */
   describe('the options for the User Type form', () => {
     it('includes an option for guest if the hasGuestRole prop is true', () => {
       props.hasGuestRole = true;

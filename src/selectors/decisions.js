@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect';
-import moment from 'moment';
+import dayjs from 'dayjs';
 
 export const getDecisionIds = state => state.decisions.items.result || [];
 export const getDecisionEntities = (state) => {
@@ -14,14 +14,14 @@ export const getDecisionsByDay = createSelector(
   [getDecisionIds, getDecisionEntities],
   (decisionIds, decisionEntities) => decisionIds.reduce((acc, curr) => {
     const decision = decisionEntities[curr];
-    const createdAt = moment(decision.created_at);
-    const comparisonDate = moment().subtract(12, 'hours');
+    const createdAt = dayjs(decision.createdAt);
+    let comparisonDate = dayjs().subtract(12, 'hours');
     for (let i = 0; i < 5; i += 1) {
       if (createdAt.isAfter(comparisonDate)) {
         acc[i].push(decision);
         break;
       }
-      comparisonDate.subtract(24, 'hours');
+      comparisonDate = comparisonDate.subtract(24, 'hours');
     }
     return acc;
   }, {
@@ -34,10 +34,11 @@ export const getDecisionsByDay = createSelector(
 );
 
 export const getDecisionsByRestaurantId = createSelector(
-  getDecisionIds, getDecisionEntities,
+  getDecisionIds,
+  getDecisionEntities,
   (decisionIds, decisionEntities) => decisionIds.reduce((acc, curr) => {
     const decision = decisionEntities[curr];
-    acc[decision.restaurant_id] = new Date(decision.created_at).toLocaleDateString();
+    acc[decision.restaurantId] = new Date(decision.createdAt).toLocaleDateString();
     return acc;
   }, {}),
 );
@@ -45,14 +46,15 @@ export const getDecisionsByRestaurantId = createSelector(
 export const areDecisionsLoading = state => state.decisions.didInvalidate;
 
 export const getDecision = createSelector(
-  getDecisionIds, getDecisionEntities,
+  getDecisionIds,
+  getDecisionEntities,
   (decisionIds, decisionEntities) => {
     if (decisionIds.length === 0) {
       return undefined;
     }
-    const twelveHoursAgo = moment().subtract(12, 'hours');
+    const twelveHoursAgo = dayjs().subtract(12, 'hours');
     for (let i = 0; i < decisionIds.length; i += 1) {
-      if (moment(decisionEntities[decisionIds[i]].created_at).isAfter(twelveHoursAgo)) {
+      if (dayjs(decisionEntities[decisionIds[i]].createdAt).isAfter(twelveHoursAgo)) {
         return decisionEntities[decisionIds[i]];
       }
     }

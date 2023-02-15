@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import FormControl from 'react-bootstrap/lib/FormControl';
-import Modal from 'react-bootstrap/lib/Modal';
-import ModalBody from 'react-bootstrap/lib/ModalBody';
-import ModalHeader from 'react-bootstrap/lib/ModalHeader';
-import ModalFooter from 'react-bootstrap/lib/ModalFooter';
-import Button from 'react-bootstrap/lib/Button';
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
+import ModalBody from 'react-bootstrap/ModalBody';
+import ModalHeader from 'react-bootstrap/ModalHeader';
+import ModalFooter from 'react-bootstrap/ModalFooter';
+import Button from 'react-bootstrap/Button';
 
 class PastDecisionsModal extends Component {
   static propTypes = {
@@ -16,9 +16,13 @@ class PastDecisionsModal extends Component {
     shown: PropTypes.bool.isRequired,
   };
 
-  state = {
-    daysAgo: 0,
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      daysAgo: 0,
+    };
+  }
 
   handleChange = event => this.setState({
     daysAgo: event.target.value
@@ -29,7 +33,7 @@ class PastDecisionsModal extends Component {
     const { daysAgo } = this.state;
 
     decide(daysAgo).then(() => this.setState({ daysAgo: 0 }));
-  }
+  };
 
   renderOption(index, text) {
     const { decisionsByDay, restaurantEntities } = this.props;
@@ -38,7 +42,7 @@ class PastDecisionsModal extends Component {
     let disabled = false;
     if (index > 0 && decisionsByDay[index].length > 0) {
       const decisionNamesForDay = decisionsByDay[index].reduce((acc, curr) => {
-        const restaurant = restaurantEntities[curr.restaurant_id];
+        const restaurant = restaurantEntities[curr.restaurantId];
         if (restaurant) {
           disabled = true;
           acc.push(restaurant.name);
@@ -61,8 +65,7 @@ class PastDecisionsModal extends Component {
           We ate here...
         </ModalHeader>
         <ModalBody>
-          <FormControl
-            componentClass="select"
+          <Form.Select
             onChange={this.handleChange}
             value={daysAgo}
             required
@@ -72,14 +75,14 @@ class PastDecisionsModal extends Component {
             {this.renderOption(2)}
             {this.renderOption(3)}
             {this.renderOption(4)}
-          </FormControl>
+          </Form.Select>
         </ModalBody>
         <ModalFooter>
-          <Button type="button" bsSize="small" onClick={hideModal}>Cancel</Button>
+          <Button size="sm" onClick={hideModal} variant="light">Cancel</Button>
           <Button
             autoFocus
-            bsSize="small"
-            bsStyle="primary"
+            size="sm"
+            variant="primary"
             onClick={this.handleSubmit}
             type="submit"
           >

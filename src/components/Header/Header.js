@@ -9,7 +9,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import HeaderLoginContainer from '../HeaderLogin/HeaderLoginContainer';
 import FlashContainer from '../Flash/FlashContainer';
 import MenuContainer from '../Menu/MenuContainer';
@@ -22,33 +22,37 @@ class Header extends Component {
     flashes: PropTypes.array.isRequired,
     loggedIn: PropTypes.bool.isRequired,
     // eslint-disable-next-line react/no-unused-prop-types
-    path: PropTypes.string
+    path: PropTypes.string,
   };
 
   static defaultProps = {
-    path: PropTypes.string
+    path: PropTypes.string,
   };
 
   static getDerivedStateFromProps(nextProps, state) {
     if (nextProps.path !== state.prevPath) {
       return {
         menuOpen: false,
-        prevPath: nextProps.path
+        prevPath: nextProps.path,
       };
     }
     return null;
   }
 
-  state = {
-    menuOpen: false,
-    // eslint-disable-next-line react/no-unused-state
-    prevPath: null
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      menuOpen: false,
+      // eslint-disable-next-line react/no-unused-state
+      prevPath: null,
+    };
+  }
 
   flashContainers = () => {
     const { flashes } = this.props;
 
-    return flashes.map(flash => (
+    return flashes.map((flash) => (
       <FlashContainer
         message={flash.message}
         type={flash.type}
@@ -56,19 +60,19 @@ class Header extends Component {
         key={flash.id}
       />
     ));
-  }
+  };
 
   closeMenu = () => {
     this.setState({
-      menuOpen: false
+      menuOpen: false,
     });
-  }
+  };
 
   toggleMenu = () => {
-    this.setState(prevState => ({
-      menuOpen: !prevState.menuOpen
+    this.setState((prevState) => ({
+      menuOpen: !prevState.menuOpen,
     }));
-  }
+  };
 
   render() {
     const { loggedIn } = this.props;
@@ -78,9 +82,7 @@ class Header extends Component {
         <div className={s.backgroundOverflow}>
           <div className={s.background} />
         </div>
-        <div className={s.flashes}>
-          {this.flashContainers()}
-        </div>
+        <div className={s.flashes}>{this.flashContainers()}</div>
         <div className={s.container}>
           <div className={s.banner}>
             <h1 className={s.bannerTitle}>
@@ -90,18 +92,28 @@ class Header extends Component {
             </h1>
           </div>
         </div>
-        {loggedIn
-          ? (
-            <div>
-              <button className={s.hamburger} onClick={this.toggleMenu} type="button">
-                <span>Menu</span>
-              </button>
-              {menuOpen && <button className={s.menuBackground} onClick={this.closeMenu} type="button" />}
-              <MenuContainer open={menuOpen} closeMenu={this.closeMenu} />
-            </div>
-          )
-          : <HeaderLoginContainer />
-        }
+        {loggedIn ? (
+          <div>
+            <button
+              className={s.hamburger}
+              onClick={this.toggleMenu}
+              type="button"
+            >
+              <span>Menu</span>
+            </button>
+            {menuOpen && (
+              <button
+                aria-label="Close"
+                className={s.menuBackground}
+                onClick={this.closeMenu}
+                type="button"
+              />
+            )}
+            <MenuContainer open={menuOpen} closeMenu={this.closeMenu} />
+          </div>
+        ) : (
+          <HeaderLoginContainer />
+        )}
       </div>
     );
   }

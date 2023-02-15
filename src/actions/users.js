@@ -1,3 +1,4 @@
+import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
 import ActionTypes from '../constants/ActionTypes';
 import { credentials, jsonHeaders, processResponse } from '../core/ApiClient';
 import { getCurrentUser } from '../selectors/user';
@@ -88,8 +89,12 @@ export function removeUser(id, team) {
     dispatch(deleteUser(id, team, isSelf));
     let url = `/api/users/${id}`;
     const host = state.host;
+    let protocol = 'http:';
+    if (canUseDOM) {
+      protocol = window.location.protocol;
+    }
     if (team) {
-      url = `//${team.slug}.${host}${url}`;
+      url = `${protocol}//${team.slug}.${host}${url}`;
     }
     return fetch(url, {
       credentials: team ? 'include' : credentials,

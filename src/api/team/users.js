@@ -20,12 +20,12 @@ export default () => {
     if (currentUser.id === targetId) {
       return getRole(currentUser, team);
     }
-    return Role.findOne({ where: { team_id: team.id, user_id: targetId } });
+    return Role.findOne({ where: { teamId: team.id, userId: targetId } });
   };
 
   const hasOtherOwners = async (team, id) => {
-    const allTeamRoles = await Role.findAll({ where: { team_id: team.id } });
-    return allTeamRoles.some(role => role.type === 'owner' && role.user_id !== id);
+    const allTeamRoles = await Role.findAll({ where: { teamId: team.id } });
+    return allTeamRoles.some(role => role.type === 'owner' && role.userId !== id);
   };
 
   const getExtraAttributes = (req) => {
@@ -37,7 +37,7 @@ export default () => {
 
   const canChangeUser = async (user, roleToChange, target, team, noOtherOwners) => {
     let currentUserRole;
-    if (user.id === roleToChange.user_id) {
+    if (user.id === roleToChange.userId) {
       currentUserRole = roleToChange;
     } else {
       currentUserRole = getRole(user, team);
@@ -46,8 +46,8 @@ export default () => {
     if (user.superuser) {
       allowed = true;
     } else if (currentUserRole.type === 'owner') {
-      if (user.id === roleToChange.user_id) {
-        const otherOwners = await hasOtherOwners(team, roleToChange.user_id);
+      if (user.id === roleToChange.userId) {
+        const otherOwners = await hasOtherOwners(team, roleToChange.userId);
         if (otherOwners) {
           allowed = true;
         } else {
@@ -75,7 +75,7 @@ export default () => {
             include: {
               attributes: [],
               model: Role,
-              where: { team_id: req.team.id }
+              where: { teamId: req.team.id }
             }
           });
 
@@ -112,7 +112,7 @@ export default () => {
             if (hasRole(userToAdd, req.team, undefined, true)) {
               return res.status(409).json({ error: true, data: { message: 'User already exists on this team.' } });
             }
-            await Role.create({ team_id: req.team.id, user_id: userToAdd.id, type });
+            await Role.create({ teamId: req.team.id, userId: userToAdd.id, type });
 
             // returns a promise but we're not going to wait to see if it succeeds.
             transporter.sendMail({
@@ -141,10 +141,10 @@ Happy Lunching!`
           let newUser = await User.create({
             email,
             name,
-            reset_password_token: resetPasswordToken,
-            reset_password_sent_at: new Date(),
+            resetPasswordToken,
+            resetPasswordSentAt: new Date(),
             roles: [{
-              team_id: req.team.id,
+              teamId: req.team.id,
               type
             }]
           }, { include: [Role] });
@@ -192,15 +192,13 @@ Happy Lunching!`
           const roleToChange = await getRoleToChange(req.user, id, req.team);
 
           if (roleToChange) {
-            const allowed = await canChangeUser(
-              req.user, roleToChange, req.body.type, req.team, () => res.status(403).json({
-                error: true,
-                data: {
-                  message: `You cannot demote yourself if you are the only owner.
+            const allowed = await canChangeUser(req.user, roleToChange, req.body.type, req.team, () => res.status(403).json({
+              error: true,
+              data: {
+                message: `You cannot demote yourself if you are the only owner.
   Grant ownership to another user first.`
-                }
-              })
-            );
+              }
+            }));
 
             // in case of error response within canChangeUser
             if (typeof allowed !== 'boolean') {
@@ -233,15 +231,13 @@ Happy Lunching!`
           const roleToDelete = await getRoleToChange(req.user, id, req.team);
 
           if (roleToDelete) {
-            const allowed = await canChangeUser(
-              req.user, roleToDelete, undefined, req.team, () => res.status(403).json({
-                error: true,
-                data: {
-                  message: `You cannot remove yourself if you are the only owner.
+            const allowed = await canChangeUser(req.user, roleToDelete, undefined, req.team, () => res.status(403).json({
+              error: true,
+              data: {
+                message: `You cannot remove yourself if you are the only owner.
   Transfer ownership to another user first.`
-                }
-              })
-            );
+              }
+            }));
 
             // in case of error response within canChangeUser
             if (typeof allowed !== 'boolean') {

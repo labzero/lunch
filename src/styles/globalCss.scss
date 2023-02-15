@@ -1,28 +1,8 @@
-@import '../../node_modules/react-geosuggest/module/geosuggest.css';
-@import './_variables.scss';
-$icon-font-path: '../../node_modules/bootstrap-sass/assets/fonts/bootstrap/';
+/* stylelint-disable selector-class-pattern */
 
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/variables';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/mixins';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/normalize';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/glyphicons';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/scaffolding';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/type';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/buttons';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/component-animations';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/dropdowns';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/button-groups';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/forms';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/input-groups';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/grid';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/jumbotron';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/list-group';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/tables';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/navs';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/close';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/modals';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/tooltip';
-@import '../../node_modules/bootstrap-sass/assets/stylesheets/bootstrap/popovers';
+@import '../../node_modules/react-geosuggest/module/geosuggest.css';
+@import './variables';
+@import '~bootstrap/scss/bootstrap';
 
 html,
 body,
@@ -43,6 +23,15 @@ body {
 
 a {
   color: $link-color;
+  text-decoration: none;
+}
+
+label {
+  font-weight: bold;
+}
+
+.geosuggest__input {
+  box-shadow: none;
 }
 
 .notification {
@@ -65,36 +54,87 @@ a {
   }
 }
 
+/* stylelint-disable no-descending-specificity */
 .btn-primary {
   background: $link-color;
+  border-color: #4f4feb;
 
-  &:hover,
-  &:focus {
-    border-color: $border-color;
-  }
-
-  &:active,
-  &:hover:active,
-  &:focus:active {
-    border-color: $border-color;
+  &,
+  &:first-child {
+    &:active,
+    &:hover:active,
+    &:focus:active {
+      background-color: #3838e9;
+    }
   }
 }
 
 .btn-danger {
-  &:hover,
-  &:focus {
-    border-color: $border-color;
+  &,
+  &:first-child {
+    &:active,
+    &:hover:active,
+    &:focus:active {
+      background-color: #ff42d9;
+    }
   }
+}
 
-  &:active,
-  &:hover:active,
-  &:focus:active {
-    border-color: $border-color;
+.btn-primary,
+.btn-danger {
+  &,
+  &:first-child {
+    &,
+    &:disabled,
+    &:hover,
+    &:active {
+      color: $white-color;
+    }
+
+    &:hover,
+    &:focus {
+      border-color: $border-color;
+    }
+
+    &:active,
+    &:hover:active,
+    &:focus:active {
+      border-color: $border-color;
+    }
   }
+}
+/* stylelint-enable no-descending-specificity */
+
+.form-text {
+  display: block;
 }
 
 // causes google maps touch warning to appear above markers
 .gm-style-pbc {
   z-index: 5 !important;
   pointer-events: none;
+}
+
+.btn-light {
+  border-color: $black-color;
+}
+
+.btn-xs,
+.btn-group-xs > .btn {
+  padding: 1px 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 3px;
+}
+
+.btn-link {
+  text-decoration: none;
+}
+
+.tab-content {
+  padding-top: 1.5em;
+}
+
+.popover-body p:last-child {
+  margin: 0;
 }

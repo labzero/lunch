@@ -1,8 +1,5 @@
-const Promise = require('bluebird');
-const db = require('../../src/models/db');
-
 exports.up = (queryInterface, Sequelize) => {
-  const Team = db.sequelize.define('team', {
+  const Team = queryInterface.sequelize.define('team', {
     name: Sequelize.STRING,
     slug: Sequelize.STRING(63),
     lat: Sequelize.DOUBLE,
@@ -18,7 +15,7 @@ exports.up = (queryInterface, Sequelize) => {
     lng: -122.399991
   }, {
     where: { slug: 'labzero' }
-  }).then(() => Promise.all(
+  }).then(() => Promise.all([
     queryInterface.changeColumn('teams', 'lat', {
       type: Sequelize.DOUBLE,
       allowNull: false,
@@ -27,10 +24,10 @@ exports.up = (queryInterface, Sequelize) => {
       type: Sequelize.DOUBLE,
       allowNull: false,
     })
-  ));
+  ]));
 };
 
-exports.down = (queryInterface, Sequelize) => Promise.all(
+exports.down = (queryInterface, Sequelize) => Promise.all([
   queryInterface.changeColumn('teams', 'lat', {
     allowNull: true,
     type: Sequelize.DOUBLE
@@ -39,4 +36,4 @@ exports.down = (queryInterface, Sequelize) => Promise.all(
     allowNull: true,
     type: Sequelize.DOUBLE
   })
-);
+]);

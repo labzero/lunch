@@ -1,35 +1,38 @@
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { sequelize, DataTypes } from './db';
 
-const Decision = sequelize.define('decision', {
-  restaurant_id: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: 'restaurant',
-      key: 'id'
+const Decision = sequelize.define(
+  'decision',
+  {
+    restaurantId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'restaurant',
+        key: 'id'
+      },
+      allowNull: false,
+      onDelete: 'cascade'
     },
-    allowNull: false,
-    onDelete: 'cascade'
+    teamId: DataTypes.INTEGER
   },
-  team_id: DataTypes.INTEGER
-}, {
-  scopes: {
-    fromToday: () => ({
-      where: {
-        created_at: {
-          [DataTypes.Op.gt]: moment().subtract(12, 'hours').toDate()
+  {
+    scopes: {
+      fromToday: () => ({
+        where: {
+          createdAt: {
+            [DataTypes.Op.gt]: dayjs().subtract(12, 'hours').toDate()
+          }
         }
-      }
-    })
+      })
+    },
   },
-  underscored: true
-},
-{
-  indexes: [
-    {
-      fields: ['created_at', 'restaurant_id']
-    }
-  ]
-});
+  {
+    indexes: [
+      {
+        fields: ['createdAt', 'restaurantId']
+      }
+    ]
+  }
+);
 
 export default Decision;

@@ -54,6 +54,14 @@ const config = {
     // Allow absolute paths in imports, e.g. import Button from 'components/Button'
     // Keep in sync with .flowconfig and .eslintrc
     modules: ['node_modules', 'src'],
+
+    // Do not replace node globals with polyfills
+    // https://webpack.js.org/configuration/node/
+    fallback: {
+      buffer: false,
+      console: false,
+      process: false,
+    }
   },
 
   module: {
@@ -127,9 +135,8 @@ const config = {
             exclude: SRC_DIR,
             loader: 'css-loader',
             options: {
+              esModule: false,
               sourceMap: isDebug,
-              minimize: !isDebug,
-              discardComments: { removeAll: true },
             },
           },
 
@@ -139,16 +146,15 @@ const config = {
             include: SRC_DIR,
             loader: 'css-loader',
             options: {
+              esModule: false,
               // CSS Loader https://github.com/webpack/css-loader
               importLoaders: 1,
               sourceMap: isDebug,
               // CSS Modules https://github.com/css-modules/css-modules
-              modules: true,
-              // eslint-disable-next-line no-nested-ternary
-              localIdentName: process.env.NODE_ENV === 'test' ? '[name]-[local]' : (isDebug ? '[name]-[local]-[hash:base64:5]' : '[hash:base64:5]'),
-              // CSS Nano http://cssnano.co/options/
-              minimize: !isDebug,
-              discardComments: { removeAll: true },
+              modules: {
+                // eslint-disable-next-line no-nested-ternary
+                localIdentName: process.env.NODE_ENV === 'test' ? '[name]-[local]' : (isDebug ? '[name]-[local]-[hash:base64:5]' : '[hash:base64:5]'),
+              }
             },
           },
 
@@ -158,25 +164,13 @@ const config = {
             include: SRC_DIR,
             loader: 'css-loader',
             options: {
+              esModule: false,
               // CSS Loader https://github.com/webpack/css-loader
               importLoaders: 1,
               sourceMap: isDebug,
               // CSS Modules https://github.com/css-modules/css-modules
-              modules: true,
-              localIdentName: '[local]',
-              // CSS Nano http://cssnano.co/options/
-              minimize: !isDebug,
-              discardComments: { removeAll: true },
-            },
-          },
-
-          // Apply PostCSS plugins including autoprefixer
-          {
-            test: /\.css/,
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: './tools/postcss.config.js',
+              modules: {
+                localIdentName: '[local]',
               },
             },
           },
@@ -196,8 +190,8 @@ const config = {
             test: /\.scss$/,
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: './tools/postcss.sass.config.js',
+              postcssOptions: {
+                config: './tools/postcss.sass.config.js',
               },
             },
           },
@@ -225,6 +219,7 @@ const config = {
                 test: /\.svg$/,
                 loader: 'svg-url-loader',
                 options: {
+                  esModule: false,
                   name: staticAssetName,
                   limit: 4096, // 4kb
                 },
@@ -234,6 +229,7 @@ const config = {
               {
                 loader: 'url-loader',
                 options: {
+                  esModule: false,
                   name: staticAssetName,
                   limit: 4096, // 4kb
                 },
@@ -245,6 +241,7 @@ const config = {
           {
             loader: 'file-loader',
             options: {
+              esModule: false,
               name: staticAssetName,
             },
           },
@@ -301,22 +298,11 @@ const config = {
 
   // Specify what bundle information gets displayed
   // https://webpack.js.org/configuration/stats/
-  stats: {
-    cached: isVerbose,
-    cachedAssets: isVerbose,
-    chunks: isVerbose,
-    chunkModules: isVerbose,
-    colors: true,
-    hash: isVerbose,
-    modules: isVerbose,
-    reasons: isDebug,
-    timings: true,
-    version: isVerbose,
-  },
+  stats: 'errors-warnings',
 
   // Choose a developer tool to enhance debugging
   // https://webpack.js.org/configuration/devtool/#devtool
-  devtool: isDebug ? 'cheap-module-inline-source-map' : 'source-map',
+  devtool: isDebug ? 'inline-cheap-module-source-map' : 'source-map',
 };
 
 //
@@ -364,7 +350,7 @@ const clientConfig = {
               ...c.chunks.reduce(
                 (files, cc) => [
                   ...files,
-                  ...cc.files.filter(fileFilter).map(addPath),
+                  ...Array.from(cc.files).filter(fileFilter).map(addPath),
                 ],
                 [],
               ),
@@ -410,10 +396,14 @@ const clientConfig = {
   // Tell Webpack to provide empty mocks for them so importing them works.
   // https://webpack.js.org/configuration/node/
   // https://github.com/webpack/node-libs-browser/tree/master/mock
-  node: {
-    fs: 'empty',
-    net: 'empty',
-    tls: 'empty',
+  resolve: {
+    ...config.resolve,
+    fallback: {
+      ...config.resolve.fallback,
+      fs: 'empty',
+      net: 'empty',
+      tls: 'empty',
+    }
   },
 };
 
@@ -490,7 +480,7 @@ const serverConfig = {
     './chunk-manifest.json',
     './asset-manifest.json',
     nodeExternals({
-      whitelist: [
+      allowlist: [
         reStyle,
         reImage,
       ],
@@ -519,10 +509,7 @@ const serverConfig = {
   // Do not replace node globals with polyfills
   // https://webpack.js.org/configuration/node/
   node: {
-    console: false,
     global: false,
-    process: false,
-    Buffer: false,
     __filename: false,
     __dirname: false,
   },

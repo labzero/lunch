@@ -1,10 +1,13 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import Dropdown from 'react-bootstrap/lib/Dropdown';
-import Glyphicon from 'react-bootstrap/lib/Glyphicon';
-import MenuItem from 'react-bootstrap/lib/MenuItem';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import Dropdown from 'react-bootstrap/Dropdown';
+import { FaEllipsisH } from 'react-icons/fa';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './RestaurantDropdown.scss';
+
+const DropdownToggle = Dropdown.Toggle;
+const DropdownMenu = Dropdown.Menu;
+const MenuItem = Dropdown.Item;
 
 const RestaurantDropdown = ({
   restaurant,
@@ -21,17 +24,20 @@ const RestaurantDropdown = ({
   let editButton;
   if (!listUiItem.isEditingName) {
     editButton = (
-      <MenuItem onSelect={showEditNameForm} key={`restaurantDropdown_${restaurant.id}_editName`}>
+      <MenuItem
+        onClick={showEditNameForm}
+        key={`restaurantDropdown_${restaurant.id}_editName`}
+      >
         Edit name
       </MenuItem>
     );
   }
 
   let decideButton;
-  if (decision !== undefined && decision.restaurant_id === restaurant.id) {
+  if (decision !== undefined && decision.restaurantId === restaurant.id) {
     decideButton = (
       <MenuItem
-        onSelect={removeDecision}
+        onClick={removeDecision}
         key={`restaurantDropdown_${restaurant.id}_removeDecision`}
       >
         Remove decision
@@ -39,35 +45,38 @@ const RestaurantDropdown = ({
     );
   } else {
     decideButton = (
-      <MenuItem onSelect={showPastDecisionsModal} key={`restaurantDropdown_${restaurant.id}_showPastDecisionsModal`}>
+      <MenuItem
+        onClick={showPastDecisionsModal}
+        key={`restaurantDropdown_${restaurant.id}_showPastDecisionsModal`}
+      >
         We ate here...
       </MenuItem>
     );
   }
 
   const menuItems = [
-    <MenuItem onSelect={showMapAndInfoWindow} key={`restaurantDropdown_${restaurant.id}_showMap`}>
+    <MenuItem
+      onClick={showMapAndInfoWindow}
+      key={`restaurantDropdown_${restaurant.id}_showMap`}
+    >
       Reveal on map
     </MenuItem>,
     editButton,
     decideButton,
     <MenuItem
-      onSelect={deleteRestaurant}
+      onClick={deleteRestaurant}
       key={`restaurantDropdown_${restaurant.id}_delete`}
     >
       Delete
-    </MenuItem>
+    </MenuItem>,
   ];
-
-  const DropdownToggle = Dropdown.Toggle;
-  const DropdownMenu = Dropdown.Menu;
 
   let lastVisited;
   if (pastDecisions && pastDecisions[restaurant.id]) {
     lastVisited = (
       <>
-        <MenuItem divider />
-        <MenuItem header>Last visited:</MenuItem>
+        <Dropdown.Divider />
+        <Dropdown.Header>Last visited:</Dropdown.Header>
         <li className={s.stat}>{pastDecisions[restaurant.id]}</li>
       </>
     );
@@ -77,35 +86,34 @@ const RestaurantDropdown = ({
     <Dropdown
       id={`restaurantDropdown_${restaurant.id}`}
       title=""
-      bsRole="toggle"
-      pullRight
       className={s.root}
     >
-      <DropdownToggle bsRole="toggle" noCaret className={s.toggle}>
-        <Glyphicon glyph="option-horizontal" />
+      <DropdownToggle className={s.toggle} variant="light">
+        <FaEllipsisH />
       </DropdownToggle>
-      <DropdownMenu bsRole="menu" className={s.menu}>
+      <DropdownMenu className={s.menu}>
         {menuItems}
         {lastVisited}
-        <MenuItem divider />
-        <MenuItem header>
-Last
+        <Dropdown.Divider />
+        <Dropdown.Header>
+          Last
+          {' '}
           {sortDuration}
           {' '}
-day
+          day
           {sortDuration === 1 ? '' : 's'}
-:
-        </MenuItem>
-        <li className={s.stat}>
+          :
+        </Dropdown.Header>
+        <Dropdown.ItemText className={s.stat}>
           {restaurant.all_vote_count}
           {' '}
-vote
+          vote
           {parseInt(restaurant.all_vote_count, 10) === 1 ? '' : 's'}
-        </li>
-        <li className={s.stat}>
+        </Dropdown.ItemText>
+        <Dropdown.ItemText className={s.stat}>
           {`${restaurant.all_decision_count} \
 decision${parseInt(restaurant.all_decision_count, 10) === 1 ? '' : 's'}`}
-        </li>
+        </Dropdown.ItemText>
       </DropdownMenu>
     </Dropdown>
   );
@@ -121,13 +129,13 @@ RestaurantDropdown.propTypes = {
   showEditNameForm: PropTypes.func.isRequired,
   deleteRestaurant: PropTypes.func.isRequired,
   removeDecision: PropTypes.func,
-  showPastDecisionsModal: PropTypes.func.isRequired
+  showPastDecisionsModal: PropTypes.func.isRequired,
 };
 
 RestaurantDropdown.defaultProps = {
   decision: {},
   pastDecisions: {},
-  removeDecision: () => {}
+  removeDecision: () => {},
 };
 
 export default withStyles(s)(RestaurantDropdown);

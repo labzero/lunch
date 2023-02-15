@@ -42,7 +42,9 @@ const mapDispatchToProps = dispatch => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps) => ({
+  ...stateProps,
+  ...dispatchProps,
   showNewlyAddedInfoWindow: () => {
     if (stateProps.newlyAddedUserId === stateProps.user.id) {
       dispatchProps.dispatch(showRestaurantInfoWindow(stateProps.newlyAddedRestaurant));

@@ -1,8 +1,13 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Autosuggest from 'react-autosuggest';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import { generateTagList, getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
+import Button from 'react-bootstrap/Button';
+import withStyles from 'isomorphic-style-loader/withStyles';
+import {
+  generateTagList,
+  getSuggestionValue,
+  renderSuggestion,
+} from '../../helpers/TagAutosuggestHelper';
 import s from './RestaurantAddTagForm.scss';
 
 // eslint-disable-next-line css-modules/no-unused-class
@@ -19,12 +24,16 @@ export class _RestaurantAddTagForm extends Component {
     addNewTagToRestaurant: PropTypes.func.isRequired,
     addTagToRestaurant: PropTypes.func.isRequired,
     hideAddTagForm: PropTypes.func.isRequired,
-    tags: PropTypes.array.isRequired
+    tags: PropTypes.array.isRequired,
   };
 
-  state = {
-    autosuggestValue: ''
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      autosuggestValue: '',
+    };
+  }
 
   componentDidMount() {
     this.autosuggest.input.focus();
@@ -45,7 +54,7 @@ export class _RestaurantAddTagForm extends Component {
     this.setState(() => ({
       autosuggestValue: '',
     }));
-  }
+  };
 
   handleSuggestionSelected = (event, { suggestion, method }) => {
     if (method === 'enter') {
@@ -58,11 +67,7 @@ export class _RestaurantAddTagForm extends Component {
   };
 
   render() {
-    const {
-      addedTags,
-      hideAddTagForm,
-      tags,
-    } = this.props;
+    const { addedTags, hideAddTagForm, tags } = this.props;
 
     const { autosuggestValue } = this.state;
 
@@ -84,25 +89,30 @@ export class _RestaurantAddTagForm extends Component {
           onSuggestionsFetchRequested={() => {}}
           onSuggestionsClearRequested={() => {}}
           shouldRenderSuggestions={returnTrue}
-          ref={a => { this.autosuggest = a; }}
+          ref={(a) => {
+            this.autosuggest = a;
+          }}
         />
-        <button
-          className={`btn btn-sm btn-primary ${s.button}`}
+        <Button
+          className={s.button}
           type="submit"
           disabled={autosuggestValue === ''}
+          size="sm"
+          variant="primary"
         >
           add
-        </button>
-        <button
-          className={`btn btn-sm btn-default ${s.button}`}
-          type="button"
+        </Button>
+        <Button
+          className={s.button}
           onClick={hideAddTagForm}
+          size="sm"
+          variant="light"
         >
           done
-        </button>
+        </Button>
       </form>
     );
   }
 }
 
-export default withStyles(s)(withStyles(autosuggestTheme)(_RestaurantAddTagForm));
+export default withStyles(s, autosuggestTheme)(_RestaurantAddTagForm);

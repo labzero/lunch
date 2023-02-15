@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import Modal from 'react-bootstrap/lib/Modal';
-import ModalBody from 'react-bootstrap/lib/ModalBody';
-import ModalFooter from 'react-bootstrap/lib/ModalFooter';
-import Button from 'react-bootstrap/lib/Button';
+import Modal from 'react-bootstrap/Modal';
+import ModalBody from 'react-bootstrap/ModalBody';
+import ModalFooter from 'react-bootstrap/ModalFooter';
+import Button from 'react-bootstrap/Button';
 
 const ConfirmModal = ({
   actionLabel, shown, hideModal, body, handleSubmit
@@ -13,8 +13,8 @@ const ConfirmModal = ({
       {body}
     </ModalBody>
     <ModalFooter>
-      <Button type="button" bsSize="small" onClick={hideModal}>Cancel</Button>
-      <Button type="button" onClick={handleSubmit} autoFocus bsSize="small" bsStyle="primary">
+      <Button type="button" size="sm" onClick={hideModal} variant="light">Cancel</Button>
+      <Button type="button" onClick={handleSubmit} autoFocus size="sm" variant="primary">
         {actionLabel}
       </Button>
     </ModalFooter>

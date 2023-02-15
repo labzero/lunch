@@ -51,8 +51,8 @@ describe('actions/teams', () => {
           foo: 'bar',
           roles: [{
             id: 1,
-            team_id: 2,
-            user_id: 3
+            teamId: 2,
+            userId: 3
           }]
         };
         fetchMock.mock('*', {

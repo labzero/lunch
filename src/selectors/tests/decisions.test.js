@@ -1,5 +1,5 @@
 /* eslint-env mocha */
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { expect } from 'chai';
 import { getDecisionsByDay } from '../decisions';
 
@@ -7,7 +7,7 @@ describe('selectors/decisions', () => {
   describe('getDecisionsByDay', () => {
     let state;
     beforeEach(() => {
-      const now = moment();
+      const now = dayjs();
 
       state = {
         decisions: {
@@ -16,16 +16,16 @@ describe('selectors/decisions', () => {
             entities: {
               decisions: {
                 1: {
-                  created_at: moment(now),
+                  createdAt: dayjs(now),
                 },
                 2: {
-                  created_at: moment(now).subtract(23, 'hours'),
+                  createdAt: dayjs(now).subtract(23, 'hours'),
                 },
                 3: {
-                  created_at: moment(now).subtract(25, 'hours'),
+                  createdAt: dayjs(now).subtract(25, 'hours'),
                 },
                 4: {
-                  created_at: moment(now).subtract(48, 'hours'),
+                  createdAt: dayjs(now).subtract(48, 'hours'),
                 },
               },
             },

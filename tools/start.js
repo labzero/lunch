@@ -7,6 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+/* eslint-disable no-promise-executor-return */
+
 import path from 'path';
 import express from 'express';
 import browserSync from 'browser-sync';
@@ -17,8 +19,6 @@ import createLaunchEditorMiddleware from 'react-dev-utils/errorOverlayMiddleware
 import webpackConfig from './webpack.config';
 import run, { format } from './run';
 import clean from './clean';
-
-const isDebug = !process.argv.includes('--release');
 
 // https://webpack.js.org/configuration/watch/#watchoptions
 const watchOptions = {
@@ -103,8 +103,6 @@ async function start() {
   // https://github.com/webpack/webpack-dev-middleware
   server.use(webpackDevMiddleware(clientCompiler, {
     publicPath: clientConfig.output.publicPath,
-    quiet: true,
-    watchOptions,
   }));
 
   // https://github.com/glenjamin/webpack-hot-middleware
@@ -154,7 +152,7 @@ async function start() {
         console.warn(`${hmrPrefix}Cannot apply update.`);
         delete require.cache[require.resolve('../build/server')];
         const cb = () => {
-          // eslint-disable-next-line global-require, import/no-unresolved
+          // eslint-disable-next-line global-require, import/no-unresolved, import/extensions
           const build = require('../build/server');
           app = build.default;
           wss = build.wss;
@@ -193,7 +191,7 @@ async function start() {
   console.info(`[${format(timeStart)}] Launching server...`);
 
   // Load compiled src/server.js as a middleware
-  // eslint-disable-next-line global-require, import/no-unresolved
+  // eslint-disable-next-line global-require, import/no-unresolved, import/extensions
   const build = require('../build/server');
   app = build.default;
   wss = build.wss;
@@ -213,7 +211,8 @@ async function start() {
     server: 'src/server.js',
     middleware: [server],
     open: !process.argv.includes('--silent'),
-    ...isDebug ? {} : { notify: false, ui: false },
+    notify: false,
+    ui: false,
   }, (error, bs) => (error ? reject(error) : resolve(bs))));
 
   const timeEnd = new Date();

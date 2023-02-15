@@ -2,7 +2,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from '../NotificationContent.scss';
 
 const TagDeleted = ({ loggedIn, user, tagName }) => {
@@ -11,27 +11,27 @@ const TagDeleted = ({ loggedIn, user, tagName }) => {
       <span>
         <b>{user}</b>
         {' '}
-deleted tag
+        deleted tag
         {' '}
         <b>
-&ldquo;
+          &ldquo;
           {tagName}
-&rdquo;
+          &rdquo;
         </b>
-.
+        .
       </span>
     );
   }
   return (
     <span>
-Tag
+      Tag
       <b>
-&ldquo;
+        &ldquo;
         {tagName}
-&rdquo;
+        &rdquo;
       </b>
       {' '}
-was deleted.
+      was deleted.
     </span>
   );
 };
@@ -39,11 +39,11 @@ was deleted.
 TagDeleted.propTypes = {
   loggedIn: PropTypes.bool.isRequired,
   user: PropTypes.string,
-  tagName: PropTypes.string.isRequired
+  tagName: PropTypes.string.isRequired,
 };
 
 TagDeleted.defaultProps = {
-  user: ''
+  user: '',
 };
 
 export default withStyles(s)(TagDeleted);

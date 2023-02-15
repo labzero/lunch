@@ -21,7 +21,7 @@ describe('reducerMaps/user', () => {
         afterState = users.get(ActionTypes.TEAM_POSTED)(beforeState, {
           team: {
             roles: [{
-              user_id: 2,
+              userId: 2,
               type: 'owner'
             }]
           }
@@ -38,7 +38,7 @@ describe('reducerMaps/user', () => {
         afterState = users.get(ActionTypes.TEAM_POSTED)(beforeState, {
           team: {
             roles: [{
-              user_id: 1,
+              userId: 1,
               type: 'owner'
             }]
           }
@@ -58,9 +58,9 @@ describe('reducerMaps/user', () => {
       beforeState = {
         id: 1,
         roles: [{
-          team_id: 77
+          teamId: 77
         }, {
-          team_id: 12345
+          teamId: 12345
         }]
       };
     });
@@ -105,10 +105,10 @@ describe('reducerMaps/user', () => {
       beforeState = {
         id: 1,
         roles: [{
-          team_id: 77,
+          teamId: 77,
           type: 'owner'
         }, {
-          team_id: 12345,
+          teamId: 12345,
           type: 'owner'
         }]
       };
