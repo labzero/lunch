@@ -123,7 +123,7 @@ jobs:
 
   build:
     docker:
-      - image: cimg/aws:2022.06
+      - image: cimg/aws:2023.01
 
     # working_directory: ~/repo
 
@@ -177,7 +177,7 @@ jobs:
 
   deploy-staging:
     docker:
-      - image: cimg/aws:2022.06
+      - image: cimg/aws:2023.01
 
     # working_directory: ~/repo
 
@@ -190,7 +190,7 @@ jobs:
 
   deploy-production:
     docker:
-      - image: cimg/aws:2022.06
+      - image: cimg/aws:2023.01
 
     # working_directory: ~/repo
 
