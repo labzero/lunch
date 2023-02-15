@@ -78,7 +78,7 @@
     "sendgrid": "^5.2.3",
     "sequelize": "^6.28.0",
     "sequelize-cli": "^6.6.0",
-    "serialize-javascript": "^1.5.0",
+    "serialize-javascript": "^6.0.1",
     "source-map-support": "^0.5.9",
     "sqlite3": "^5.0.11",
     "universal-router": "^8.1.0",
