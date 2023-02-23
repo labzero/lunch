@@ -4132,13 +4132,7 @@ debug@4.3.2:
   dependencies:
     ms "2.1.2"
 
-debug@^3.1.0:
-  version "3.2.5"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-3.2.5.tgz#c2418fbfd7a29f4d4f70ff4cea604d4b64c46407"
-  dependencies:
-    ms "^2.1.1"
-
-debug@^3.2.7:
+debug@^3.1.0, debug@^3.2.7:
   version "3.2.7"
   resolved "https://registry.yarnpkg.com/debug/-/debug-3.2.7.tgz#72580b7e9145fb39b6676f9c5e5fb100b934179a"
   integrity sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==
@@ -6269,11 +6263,7 @@ infer-owner@^1.0.4:
   resolved "https://registry.yarnpkg.com/infer-owner/-/infer-owner-1.0.4.tgz#c4cefcaa8e51051c2a40ba2ce8a3d27295af9467"
   integrity sha512-IClj+Xz94+d7irH5qRyfJonOdfTzuDaifE6ZPWfx0N0+/ATZCbuTPq2prFl526urkQd90WyUKIh1DfBQ2hMz9A==
 
-inflection@^1.10.0:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/inflection/-/inflection-1.12.0.tgz#a200935656d6f5f6bc4dc7502e1aecb703228416"
-
-inflection@^1.13.2:
+inflection@^1.10.0, inflection@^1.13.2:
   version "1.13.4"
   resolved "https://registry.yarnpkg.com/inflection/-/inflection-1.13.4.tgz#65aa696c4e2da6225b148d7a154c449366633a32"
   integrity sha512-6I/HUDeYFfuNCVS3td055BaXBwKYuzw7K3ExVMStBowKo9oOAMJIXIHvdyR3iboTCp1b+1i5DSkIZTcwIktuDw==
@@ -7723,7 +7713,7 @@ module-not-found-error@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/module-not-found-error/-/module-not-found-error-1.0.1.tgz#cf8b4ff4f29640674d6cdd02b0e3bc523c2bbdc0"
 
-moment-timezone@^0.5.34:
+moment-timezone@^0.5.35:
   version "0.5.40"
   resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.40.tgz#c148f5149fd91dd3e29bf481abc8830ecba16b89"
   integrity sha512-tWfmNkRYmBkPJz5mr9GVDn9vRlVZOTe6yqY92rFxiOdWXbjaR0+9LwQnZGGuNR63X456NqmEkbskte8tWL5ePg==
@@ -9671,11 +9661,7 @@ section-iterator@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/section-iterator/-/section-iterator-2.0.0.tgz#bf444d7afeeb94ad43c39ad2fb26151627ccba2a"
 
-"semver@2 || 3 || 4 || 5", semver@^5.3.0, semver@^5.5.0:
-  version "5.5.1"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-5.5.1.tgz#7dfdd8814bdb7cabc7be0fb1d734cfb66c940477"
-
-semver@^5.6.0, semver@^5.7.0, semver@^5.7.1:
+"semver@2 || 3 || 4 || 5", semver@^5.3.0, semver@^5.5.0, semver@^5.6.0, semver@^5.7.0, semver@^5.7.1:
   version "5.7.1"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.7.1.tgz#a954f931aeba508d307bbf069eff0c01c96116f7"
   integrity sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==
@@ -9771,10 +9757,10 @@ sequelize-pool@^7.1.0:
   resolved "https://registry.yarnpkg.com/sequelize-pool/-/sequelize-pool-7.1.0.tgz#210b391af4002762f823188fd6ecfc7413020768"
   integrity sha512-G9c0qlIWQSK29pR/5U2JF5dDQeqqHRragoyahj/Nx4KOOQ3CPPfzxnfqFPCSB7x5UgjOgnZ61nSxz+fjDpRlJg==
 
-sequelize@^6.28.0:
-  version "6.28.0"
-  resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-6.28.0.tgz#d6bc4e36647e8501635467c0777c45a33f5d5ba8"
-  integrity sha512-+WHqvUQgTp19GLkt+gyQ+F6qg+FIEO2O5F9C0TOYV/PjZ2a/XwWvVkL1NCkS4VSIjVVvAUutiW6Wv9ofveGaVw==
+sequelize@^6.28.2:
+  version "6.28.2"
+  resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-6.28.2.tgz#adf42c4f4532a1c41bccdd98e8344798f678d273"
+  integrity sha512-MpK2h7xXHhBcwyTDf1sM1mrDdKFTGYbmrAC+4bJAf6f9Tp2IuiNwbNPj6Q5rMGVsKnO0CiJm8PEKtyNLOY8rNg==
   dependencies:
     "@types/debug" "^4.1.7"
     "@types/validator" "^13.7.1"
@@ -9783,7 +9769,7 @@ sequelize@^6.28.0:
     inflection "^1.13.2"
     lodash "^4.17.21"
     moment "^2.29.1"
-    moment-timezone "^0.5.34"
+    moment-timezone "^0.5.35"
     pg-connection-string "^2.5.0"
     retry-as-promised "^7.0.3"
     semver "^7.3.5"
