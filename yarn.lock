@@ -1312,22 +1312,7 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
-"@mapbox/node-pre-gyp@^1.0.0":
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.9.tgz#09a8781a3a036151cdebbe8719d6f8b25d4058bc"
-  integrity sha512-aDF3S3rK9Q2gey/WAttUlISduDItz5BU3306M9Eyv6/oS40aMprnopshtlKTykxRNIBEZuRMaZAnbrQ4QtKGyw==
-  dependencies:
-    detect-libc "^2.0.0"
-    https-proxy-agent "^5.0.0"
-    make-dir "^3.1.0"
-    node-fetch "^2.6.7"
-    nopt "^5.0.0"
-    npmlog "^5.0.1"
-    rimraf "^3.0.2"
-    semver "^7.3.5"
-    tar "^6.1.11"
-
-"@mapbox/node-pre-gyp@^1.0.10":
+"@mapbox/node-pre-gyp@^1.0.0", "@mapbox/node-pre-gyp@^1.0.10":
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.10.tgz#8e6735ccebbb1581e5a7e652244cadc8a844d03c"
   integrity sha512-4ySo4CjzStuprMwk35H5pPbkymjv1SF3jGLj6rAHp/xT/RF7TL7bd9CTm1xDY49K2qF7jmR/g7k+SkLETP6opA==
@@ -10115,10 +10100,10 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
 
-sqlite3@^5.0.11:
-  version "5.0.11"
-  resolved "https://registry.yarnpkg.com/sqlite3/-/sqlite3-5.0.11.tgz#102c835d70be66da9d95a383fd6ea084a082ef7f"
-  integrity sha512-4akFOr7u9lJEeAWLJxmwiV43DJcGV7w3ab7SjQFAFaTVyknY3rZjvXTKIVtWqUoY4xwhjwoHKYs2HDW2SoHVsA==
+sqlite3@^5.1.5:
+  version "5.1.5"
+  resolved "https://registry.yarnpkg.com/sqlite3/-/sqlite3-5.1.5.tgz#cf5a753c98914f3aa44b7bd057702fdca6abceb6"
+  integrity sha512-7sP16i4wI+yKnGOO2q2ijze7EjQ9US+Vw7DYYwxfFtqNZDGgBcEw0oeDaDvUTq66uJOzVd/z6MkIg+c9erSJKg==
   dependencies:
     "@mapbox/node-pre-gyp" "^1.0.0"
     node-addon-api "^4.2.0"
