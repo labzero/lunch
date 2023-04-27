@@ -24,6 +24,7 @@ const VotePosted = ({
         <b>{user}</b>
         {' '}
         voted for
+        {' '}
         {restaurantEl}
         .
       </span>

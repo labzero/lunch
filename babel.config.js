@@ -11,11 +11,11 @@
 // https://babeljs.io/docs/usage/api/
 module.exports = {
   plugins: [
-    '@babel/plugin-proposal-class-properties',
     '@babel/plugin-syntax-dynamic-import',
     '@babel/plugin-transform-modules-commonjs',
   ],
   presets: [
+    ['@babel/preset-typescript', { allowDeclareFields: true }],
     [
       '@babel/preset-env',
       {
@@ -24,7 +24,6 @@ module.exports = {
         },
       },
     ],
-    '@babel/preset-flow',
     '@babel/preset-react',
   ],
   ignore: ['node_modules', 'build'],

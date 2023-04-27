@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import ActionTypes from '../../constants/ActionTypes';
 import users from '../user';
 
 describe('reducerMaps/user', () => {
@@ -18,13 +17,14 @@ describe('reducerMaps/user', () => {
 
     describe('when role is on different user', () => {
       beforeEach(() => {
-        afterState = users.get(ActionTypes.TEAM_POSTED)(beforeState, {
+        afterState = users(beforeState, {
           team: {
             roles: [{
               userId: 2,
               type: 'owner'
             }]
-          }
+          },
+          type: 'TEAM_POSTED'
         });
       });
 
@@ -35,13 +35,14 @@ describe('reducerMaps/user', () => {
 
     describe('when role is on logged-in user', () => {
       beforeEach(() => {
-        afterState = users.get(ActionTypes.TEAM_POSTED)(beforeState, {
+        afterState = users(beforeState, {
           team: {
             roles: [{
               userId: 1,
               type: 'owner'
             }]
-          }
+          },
+          type: 'TEAM_POSTED'
         });
       });
 
@@ -67,12 +68,13 @@ describe('reducerMaps/user', () => {
 
     describe('when current user has not been deleted', () => {
       beforeEach(() => {
-        afterState = users.get(ActionTypes.USER_DELETED)(beforeState, {
+        afterState = users(beforeState, {
           id: 2,
           isSelf: false,
           team: {
             id: 12345
-          }
+          },
+          type: 'USER_DELETED'
         });
       });
 
@@ -83,12 +85,13 @@ describe('reducerMaps/user', () => {
 
     describe('when current user has been deleted', () => {
       beforeEach(() => {
-        afterState = users.get(ActionTypes.USER_DELETED)(beforeState, {
+        afterState = users(beforeState, {
           id: 1,
           isSelf: true,
           team: {
             id: 77
-          }
+          },
+          type: 'USER_DELETED'
         });
       });
 
@@ -116,13 +119,14 @@ describe('reducerMaps/user', () => {
 
     describe('when current user has not been updated', () => {
       beforeEach(() => {
-        afterState = users.get(ActionTypes.USER_PATCHED)(beforeState, {
+        afterState = users(beforeState, {
           id: 2,
           isSelf: false,
           user: { foo: 'bar' },
           team: {
             id: 12345
-          }
+          },
+          type: 'USER_PATCHED'
         });
       });
 
@@ -133,12 +137,13 @@ describe('reducerMaps/user', () => {
 
     describe('when current user has been updated', () => {
       beforeEach(() => {
-        afterState = users.get(ActionTypes.USER_PATCHED)(beforeState, {
+        afterState = users(beforeState, {
           id: 1,
           isSelf: true,
           team: {
             id: 77
           },
+          type: 'USER_PATCHED',
           user: {
             type: 'member'
           }

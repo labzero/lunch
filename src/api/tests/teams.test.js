@@ -28,11 +28,13 @@ describe('api/main/teams', () => {
     TeamMock.findAllForUser = () => Promise.resolve([]);
     RoleMock = dbMock.define('role', {});
     UserMock = dbMock.define('user', {});
+    UserMock.hasMany(RoleMock);
 
     loggedInSpy = spy((req, res, next) => {
       req.user = { // eslint-disable-line no-param-reassign
-        get: () => {},
+        get: () => undefined,
         id: 231,
+        getRoles: () => [],
         roles: []
       };
       next();
@@ -120,6 +122,7 @@ describe('api/main/teams', () => {
         loggedInSpy = spy((req, res, next) => {
           req.user = { // eslint-disable-line no-param-reassign
             id: 231,
+            getRoles: () => [{}, {}, {}, {}, {}],
             roles: [{}, {}, {}, {}, {}]
           };
           next();
@@ -469,7 +472,7 @@ describe('api/main/teams', () => {
       beforeEach(() => {
         updateSpy = spy();
         stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
-          get: () => {},
+          get: () => undefined,
           update: updateSpy
         }));
 
@@ -496,7 +499,7 @@ describe('api/main/teams', () => {
 
         updateSpy = spy();
         stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
-          get: () => {},
+          get: () => undefined,
           update: updateSpy
         }));
 
@@ -533,7 +536,7 @@ describe('api/main/teams', () => {
         });
 
         stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
-          get: () => {},
+          get: () => undefined,
           update: () => {
             const e = new Error();
             e.name = 'SequelizeUniqueConstraintError';
@@ -612,7 +615,7 @@ describe('api/main/teams', () => {
       let response;
       beforeEach((done) => {
         stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
-          get: () => {},
+          get: () => undefined,
           update: stub().throws('Oh No')
         }));
         request(app).patch('/1').send({ defaultZoom: 15 }).then((r) => {

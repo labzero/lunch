@@ -24,6 +24,7 @@ const VoteDeleted = ({
         <b>{user}</b>
         {' '}
         downvoted
+        {' '}
         {restaurantEl}
         .
       </span>

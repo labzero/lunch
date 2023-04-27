@@ -64,7 +64,7 @@ class RestaurantMap extends Component {
     if (this.props.center !== undefined) {
       this.props.clearCenter();
 
-      if (this.props.tempMarker === undefined) {
+      if (this.map && this.props.tempMarker === undefined) {
         // offset by infowindow height after recenter
         setTimeout(() => {
           this.map.panBy(0, -100);
@@ -79,7 +79,7 @@ class RestaurantMap extends Component {
   setMap = ({ map }) => {
     this.map = map;
     map.addListener('click', (event) => {
-      if (event.placeId) {
+      if (event.placeId && event.latLng) {
         event.stop();
         const defaultPrevented = event.ya && event.ya.defaultPrevented;
         if (!defaultPrevented) {

@@ -45,11 +45,9 @@ describe('api/team/decisions', () => {
     makeApp = deps => {
       const decisionsApi = proxyquireStrict('../team/decisions', {
         '../../models/db': mockEsmodule({
-          DataTypes: {
-            Op: {
-              lt: 'lt',
-              gt: 'gt',
-            },
+          Op: {
+            lt: 'lt',
+            gt: 'gt',
           },
         }),
         '../../models': mockEsmodule({
@@ -67,9 +65,7 @@ describe('api/team/decisions', () => {
       const server = express();
       server.use(bodyParser.json());
       server.use((req, res, next) => {
-        req.wss = { // eslint-disable-line no-param-reassign
-          broadcast: broadcastSpy
-        };
+        req.broadcast = broadcastSpy;
         next();
       });
       server.use('/', decisionsApi());

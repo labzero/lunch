@@ -47,7 +47,7 @@ hotClient.setOptionsAndConnect({
 });
 
 startReportingRuntimeErrors({
-  filename: '/assets/client.js',
+  filename: '/assets/client.tsx',
 });
 
 if (module.hot) {

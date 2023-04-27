@@ -36,7 +36,7 @@ export default () => {
               });
               const json = tag.toJSON();
               json.restaurant_count = 1;
-              req.wss.broadcast(
+              req.broadcast(
                 req.team.id,
                 postedNewTagToRestaurant(restaurantId, json, req.user.id)
               );
@@ -56,7 +56,7 @@ export default () => {
             });
 
             const json = obj.toJSON();
-            req.wss.broadcast(req.team.id, postedTagToRestaurant(restaurantId, id, req.user.id));
+            req.broadcast(req.team.id, postedTagToRestaurant(restaurantId, id, req.user.id));
             res.status(201).send({ error: false, data: json });
           } catch (err) {
             alreadyAddedError(err);
@@ -75,7 +75,7 @@ export default () => {
         const restaurantId = parseInt(req.params.restaurantId, 10);
         try {
           await RestaurantTag.destroy({ where: { restaurantId, tagId: id } });
-          req.wss.broadcast(req.team.id, deletedTagFromRestaurant(restaurantId, id, req.user.id));
+          req.broadcast(req.team.id, deletedTagFromRestaurant(restaurantId, id, req.user.id));
           res.status(204).send();
         } catch (err) {
           next(err);
