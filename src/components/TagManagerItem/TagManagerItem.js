@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './TagManagerItem.scss';
 import TagContainer from '../Tag/TagContainer';
 
@@ -15,14 +15,14 @@ const TagManagerItem = ({ tag, showDelete, handleDeleteClicked }) => (
     </span>
     (
     {tag.restaurant_count}
-)
+    )
   </li>
 );
 
 TagManagerItem.propTypes = {
   tag: PropTypes.object.isRequired,
   showDelete: PropTypes.bool.isRequired,
-  handleDeleteClicked: PropTypes.func.isRequired
+  handleDeleteClicked: PropTypes.func.isRequired,
 };
 
 export default withStyles(s)(TagManagerItem);

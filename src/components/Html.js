@@ -16,7 +16,6 @@ import config from '../config';
 
 class Html extends Component {
   static propTypes = {
-    apikey: PropTypes.string,
     app: PropTypes.object, // eslint-disable-line
     title: PropTypes.string.isRequired,
     ogTitle: PropTypes.string.isRequired,
@@ -31,7 +30,6 @@ class Html extends Component {
   };
 
   static defaultProps = {
-    apikey: '',
     styles: [],
     scripts: [],
     root: ''
@@ -39,7 +37,6 @@ class Html extends Component {
 
   render() {
     const {
-      apikey,
       app,
       title,
       ogTitle,
@@ -55,7 +52,7 @@ class Html extends Component {
         <head>
           {config.analytics.googleTrackingId
             && (
-            <React.Fragment>
+            <>
               <script
                 dangerouslySetInnerHTML={{
                   __html:
@@ -64,9 +61,8 @@ class Html extends Component {
                 }}
               />
               <script src="https://www.google-analytics.com/analytics.js" async defer />
-            </React.Fragment>
-            )
-          }
+            </>
+            )}
           <meta charSet="utf-8" />
           <meta httpEquiv="x-ua-compatible" content="ie=edge" />
           <title>{title}</title>
@@ -100,7 +96,6 @@ class Html extends Component {
           <div id="app" dangerouslySetInnerHTML={{ __html: children }} />
           <script dangerouslySetInnerHTML={{ __html: `window.App=${serialize(app)}` }} />
           {!module.hot && <script dangerouslySetInnerHTML={{ __html: 'if (\'serviceWorker\' in navigator) { window.addEventListener(\'load\', () => { navigator.serviceWorker.register(\'/service-worker.js\').then(function(registration) {registration.addEventListener(\'updatefound\', () => {window.swUpdate = true; }); }); }); }' }} />}
-          {apikey && <script src={`https://maps.googleapis.com/maps/api/js?key=${apikey}&libraries=places&v=3`} />}
           {scripts.map(script => <script key={script} src={script} />)}
         </body>
       </html>

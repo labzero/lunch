@@ -45,11 +45,9 @@ describe('api/team/decisions', () => {
     makeApp = deps => {
       const decisionsApi = proxyquireStrict('../team/decisions', {
         '../../models/db': mockEsmodule({
-          DataTypes: {
-            Op: {
-              lt: 'lt',
-              gt: 'gt',
-            },
+          Op: {
+            lt: 'lt',
+            gt: 'gt',
           },
         }),
         '../../models': mockEsmodule({
@@ -67,9 +65,7 @@ describe('api/team/decisions', () => {
       const server = express();
       server.use(bodyParser.json());
       server.use((req, res, next) => {
-        req.wss = { // eslint-disable-line no-param-reassign
-          broadcast: broadcastSpy
-        };
+        req.broadcast = broadcastSpy;
         next();
       });
       server.use('/', decisionsApi());
@@ -102,10 +98,10 @@ describe('api/team/decisions', () => {
       it('looks for decisions within past 5 days', () => {
         expect(findAllSpy.calledWith({
           where: {
-            created_at: {
+            createdAt: {
               gt: match.date,
             },
-            team_id: 77
+            teamId: 77
           }
         })).to.be.true;
       });
@@ -166,19 +162,19 @@ describe('api/team/decisions', () => {
       beforeEach(() => {
         destroySpy = spy(DecisionMock, 'destroy');
         createSpy = spy(DecisionMock, 'create');
-        return request(app).post('/').send({ restaurant_id: 1 });
+        return request(app).post('/').send({ restaurantId: 1 });
       });
 
       it('deletes any prior decisions', () => {
         expect(destroySpy.calledWith({
-          where: { team_id: 77 }
+          where: { teamId: 77 }
         })).to.be.true;
       });
 
       it('creates new decision', () => {
         expect(createSpy.calledWith({
-          restaurant_id: 1,
-          team_id: 77
+          restaurantId: 1,
+          teamId: 77
         })).to.be.true;
       });
     });
@@ -189,26 +185,26 @@ describe('api/team/decisions', () => {
       beforeEach(() => {
         destroySpy = spy(DecisionMock, 'destroy');
         createSpy = spy(DecisionMock, 'create');
-        return request(app).post('/').send({ daysAgo: 1, restaurant_id: 1 });
+        return request(app).post('/').send({ daysAgo: 1, restaurantId: 1 });
       });
 
       it('deletes any prior decisions', () => {
         expect(destroySpy.calledWith({
           where: {
-            created_at: {
+            createdAt: {
               lt: match.date,
               gt: match.date,
             },
-            team_id: 77,
+            teamId: 77,
           },
         })).to.be.true;
       });
 
       it('creates new decision', () => {
         expect(createSpy.calledWith({
-          created_at: match.date,
-          restaurant_id: 1,
-          team_id: 77
+          createdAt: match.date,
+          restaurantId: 1,
+          teamId: 77
         })).to.be.true;
       });
     });
@@ -224,7 +220,7 @@ describe('api/team/decisions', () => {
           })
         });
 
-        request(app).post('/').send({ restaurant_id: 1 }).then(r => {
+        request(app).post('/').send({ restaurantId: 1 }).then(r => {
           response = r;
           done();
         });
@@ -310,7 +306,7 @@ describe('api/team/decisions', () => {
 
       it('finds decisions', () => {
         expect(findAllSpy.calledWith({
-          where: { team_id: 77 }
+          where: { teamId: 77 }
         })).to.be.true;
       });
     });

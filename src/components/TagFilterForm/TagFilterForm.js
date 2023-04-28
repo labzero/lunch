@@ -1,9 +1,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Autosuggest from 'react-autosuggest';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
+import Button from 'react-bootstrap/Button';
 import TagContainer from '../Tag/TagContainer';
-import { generateTagList, getSuggestionValue, renderSuggestion } from '../../helpers/TagAutosuggestHelper';
+import {
+  generateTagList,
+  getSuggestionValue,
+  renderSuggestion,
+} from '../../helpers/TagAutosuggestHelper';
 import s from './TagFilterForm.scss';
 
 // eslint-disable-next-line css-modules/no-unused-class
@@ -28,7 +33,7 @@ class TagFilterForm extends Component {
   };
 
   static defaultProps = {
-    exclude: false
+    exclude: false,
   };
 
   constructor(props) {
@@ -53,7 +58,7 @@ class TagFilterForm extends Component {
       return;
     }
     this.setState(() => ({
-      autosuggestValue: newValue
+      autosuggestValue: newValue,
     }));
   };
 
@@ -66,7 +71,7 @@ class TagFilterForm extends Component {
     this.setState(() => ({
       autosuggestValue: '',
     }));
-  }
+  };
 
   hideForm = () => {
     this.props.clearTags();
@@ -75,26 +80,22 @@ class TagFilterForm extends Component {
       autosuggestValue: '',
       shown: false,
     }));
-  }
+  };
 
   showForm = () => {
     this.setState(() => ({
       shown: true,
     }));
-  }
+  };
 
   removeTagFilter = (tag) => {
     this.props.removeTag(tag);
     this.props.setFlipMove(false);
-  }
+  };
 
   render() {
     const {
-      addByName,
-      addedTags,
-      allTags,
-      exclude,
-      restaurantIds,
+      addByName, addedTags, allTags, exclude, restaurantIds
     } = this.props;
 
     const { autosuggestValue, shown } = this.state;
@@ -126,9 +127,11 @@ class TagFilterForm extends Component {
             onSuggestionsFetchRequested={() => {}}
             onSuggestionsClearRequested={() => {}}
             shouldRenderSuggestions={returnTrue}
-            ref={a => { this.autosuggest = a; }}
+            ref={(a) => {
+              this.autosuggest = a;
+            }}
           />
-          {addedTags.map(tag => (
+          {addedTags.map((tag) => (
             <div
               className={s.tagContainer}
               key={exclude ? `tagExclusion_${tag}` : `tagFilter_${tag}`}
@@ -141,20 +144,22 @@ class TagFilterForm extends Component {
               />
             </div>
           ))}
-          <button
-            className="btn btn-default"
-            type="button"
+          <Button
             onClick={this.hideForm}
+            variant="light"
           >
             cancel
-          </button>
+          </Button>
         </form>
       );
     } else {
       showButton = (
-        <button className="btn btn-default" onClick={this.showForm} type="button">
+        <Button
+          onClick={this.showForm}
+          variant="light"
+        >
           {exclude ? 'exclude tags' : 'filter by tag'}
-        </button>
+        </Button>
       );
     }
     return (

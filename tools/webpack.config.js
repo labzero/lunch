@@ -14,6 +14,8 @@ import WebpackAssetsManifest from 'webpack-assets-manifest';
 import nodeExternals from 'webpack-node-externals';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { InjectManifest } from 'workbox-webpack-plugin';
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import overrideRules from './lib/overrideRules';
 import pkg from '../package.json';
 
@@ -26,14 +28,14 @@ const isDebug = !process.argv.includes('--release');
 const isVerbose = process.argv.includes('--verbose');
 const isAnalyze = process.argv.includes('--analyze') || process.argv.includes('--analyse');
 
-const reScript = /\.(js|jsx|mjs)$/;
+const reScript = /\.(js|jsx|mjs|ts|tsx)$/;
 const reStyle = /\.(css|less|styl|scss|sass|sss)$/;
 const reImage = /\.(bmp|gif|jpg|jpeg|png|svg)$/;
 const staticAssetName = isDebug ? '[path][name].[ext]?[hash:8]' : '[hash:8].[ext]';
 
 //
 // Common configuration chunk to be used for both
-// client-side (client.js) and server-side (server.js) bundles
+// client-side (client.tsx) and server-side (server.js) bundles
 // -----------------------------------------------------------------------------
 
 const config = {
@@ -51,9 +53,25 @@ const config = {
   },
 
   resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
+
+    // Add support for TypeScripts fully qualified ESM imports.
+    extensionAlias: {
+      '.js': ['.js', '.ts'],
+      '.cjs': ['.cjs', '.cts'],
+      '.mjs': ['.mjs', '.mts']
+    },
     // Allow absolute paths in imports, e.g. import Button from 'components/Button'
     // Keep in sync with .flowconfig and .eslintrc
     modules: ['node_modules', 'src'],
+
+    // Do not replace node globals with polyfills
+    // https://webpack.js.org/configuration/node/
+    fallback: {
+      buffer: false,
+      console: false,
+      process: false,
+    }
   },
 
   module: {
@@ -63,8 +81,8 @@ const config = {
     rules: [
       // Rules for JS / JSX
       {
-        test: reScript,
-        include: [SRC_DIR, resolvePath('tools')],
+        test: /\.(js|jsx|mjs|ts|tsx)$/,
+        include: [ROOT_DIR, resolvePath('tools')],
         loader: 'babel-loader',
         options: {
           // https://github.com/babel/babel-loader#options
@@ -74,6 +92,7 @@ const config = {
           babelrc: false,
           configFile: false,
           presets: [
+            ['@babel/preset-typescript', { allowDeclareFields: true }],
             // A Babel preset that can automatically determine the Babel plugins and polyfills
             // https://github.com/babel/babel-preset-env
             [
@@ -88,16 +107,13 @@ const config = {
                 debug: false,
               },
             ],
-            // Flow
-            // https://github.com/babel/babel/tree/master/packages/babel-preset-flow
-            '@babel/preset-flow',
             // JSX
             // https://github.com/babel/babel/tree/master/packages/babel-preset-react
             ['@babel/preset-react', { development: isDebug }],
           ],
           plugins: [
             // Experimental ECMAScript proposals
-            '@babel/plugin-proposal-class-properties',
+            // '@babel/plugin-proposal-class-properties',
             '@babel/plugin-syntax-dynamic-import',
             // Treat React JSX elements as value types and hoist them to the highest scope
             // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-constant-elements
@@ -108,6 +124,7 @@ const config = {
             // Remove unnecessary React propTypes from the production build
             // https://github.com/oliviertassinari/babel-plugin-transform-react-remove-prop-types
             ...(isDebug ? [] : ['transform-react-remove-prop-types']),
+            ...(isDebug && process.env.NODE_ENV !== 'test' ? ['react-refresh/babel'] : []),
           ],
         },
       },
@@ -127,9 +144,8 @@ const config = {
             exclude: SRC_DIR,
             loader: 'css-loader',
             options: {
+              esModule: false,
               sourceMap: isDebug,
-              minimize: !isDebug,
-              discardComments: { removeAll: true },
             },
           },
 
@@ -139,16 +155,15 @@ const config = {
             include: SRC_DIR,
             loader: 'css-loader',
             options: {
+              esModule: false,
               // CSS Loader https://github.com/webpack/css-loader
               importLoaders: 1,
               sourceMap: isDebug,
               // CSS Modules https://github.com/css-modules/css-modules
-              modules: true,
-              // eslint-disable-next-line no-nested-ternary
-              localIdentName: process.env.NODE_ENV === 'test' ? '[name]-[local]' : (isDebug ? '[name]-[local]-[hash:base64:5]' : '[hash:base64:5]'),
-              // CSS Nano http://cssnano.co/options/
-              minimize: !isDebug,
-              discardComments: { removeAll: true },
+              modules: {
+                // eslint-disable-next-line no-nested-ternary
+                localIdentName: process.env.NODE_ENV === 'test' ? '[name]-[local]' : (isDebug ? '[name]-[local]-[hash:base64:5]' : '[hash:base64:5]'),
+              }
             },
           },
 
@@ -158,25 +173,13 @@ const config = {
             include: SRC_DIR,
             loader: 'css-loader',
             options: {
+              esModule: false,
               // CSS Loader https://github.com/webpack/css-loader
               importLoaders: 1,
               sourceMap: isDebug,
               // CSS Modules https://github.com/css-modules/css-modules
-              modules: true,
-              localIdentName: '[local]',
-              // CSS Nano http://cssnano.co/options/
-              minimize: !isDebug,
-              discardComments: { removeAll: true },
-            },
-          },
-
-          // Apply PostCSS plugins including autoprefixer
-          {
-            test: /\.css/,
-            loader: 'postcss-loader',
-            options: {
-              config: {
-                path: './tools/postcss.config.js',
+              modules: {
+                localIdentName: '[local]',
               },
             },
           },
@@ -196,8 +199,8 @@ const config = {
             test: /\.scss$/,
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: './tools/postcss.sass.config.js',
+              postcssOptions: {
+                config: './tools/postcss.sass.config.js',
               },
             },
           },
@@ -225,6 +228,7 @@ const config = {
                 test: /\.svg$/,
                 loader: 'svg-url-loader',
                 options: {
+                  esModule: false,
                   name: staticAssetName,
                   limit: 4096, // 4kb
                 },
@@ -234,6 +238,7 @@ const config = {
               {
                 loader: 'url-loader',
                 options: {
+                  esModule: false,
                   name: staticAssetName,
                   limit: 4096, // 4kb
                 },
@@ -245,6 +250,7 @@ const config = {
           {
             loader: 'file-loader',
             options: {
+              esModule: false,
               name: staticAssetName,
             },
           },
@@ -294,6 +300,16 @@ const config = {
     ],
   },
 
+  plugins: [
+    new ForkTsCheckerWebpackPlugin(),
+    isDebug && process.env.NODE_ENV !== 'test' && new webpack.HotModuleReplacementPlugin(),
+    isDebug && process.env.NODE_ENV !== 'test' && new ReactRefreshWebpackPlugin({
+      overlay: {
+        sockIntegration: 'whm',
+      }
+    })
+  ].filter(Boolean),
+
   // Don't attempt to continue if there are any errors.
   bail: !isDebug,
 
@@ -301,26 +317,15 @@ const config = {
 
   // Specify what bundle information gets displayed
   // https://webpack.js.org/configuration/stats/
-  stats: {
-    cached: isVerbose,
-    cachedAssets: isVerbose,
-    chunks: isVerbose,
-    chunkModules: isVerbose,
-    colors: true,
-    hash: isVerbose,
-    modules: isVerbose,
-    reasons: isDebug,
-    timings: true,
-    version: isVerbose,
-  },
+  stats: 'errors-warnings',
 
   // Choose a developer tool to enhance debugging
   // https://webpack.js.org/configuration/devtool/#devtool
-  devtool: isDebug ? 'cheap-module-inline-source-map' : 'source-map',
+  devtool: isDebug ? 'inline-source-map' : 'source-map',
 };
 
 //
-// Configuration for the client-side bundle (client.js)
+// Configuration for the client-side bundle (client.tsx)
 // -----------------------------------------------------------------------------
 
 const clientConfig = {
@@ -330,10 +335,11 @@ const clientConfig = {
   target: 'web',
 
   entry: {
-    client: ['@babel/polyfill', './src/client.js'],
+    client: './src/client.tsx',
   },
 
   plugins: [
+    ...config.plugins,
     // Define free variables
     // https://webpack.js.org/plugins/define-plugin/
     new webpack.DefinePlugin({
@@ -364,7 +370,7 @@ const clientConfig = {
               ...c.chunks.reduce(
                 (files, cc) => [
                   ...files,
-                  ...cc.files.filter(fileFilter).map(addPath),
+                  ...Array.from(cc.files).filter(fileFilter).map(addPath),
                 ],
                 [],
               ),
@@ -410,10 +416,14 @@ const clientConfig = {
   // Tell Webpack to provide empty mocks for them so importing them works.
   // https://webpack.js.org/configuration/node/
   // https://github.com/webpack/node-libs-browser/tree/master/mock
-  node: {
-    fs: 'empty',
-    net: 'empty',
-    tls: 'empty',
+  resolve: {
+    ...config.resolve,
+    fallback: {
+      ...config.resolve.fallback,
+      fs: 'empty',
+      net: 'empty',
+      tls: 'empty',
+    }
   },
 };
 
@@ -428,7 +438,7 @@ const serverConfig = {
   target: 'node',
 
   entry: {
-    server: ['@babel/polyfill', './src/server.js'],
+    server: './src/server.tsx',
   },
 
   output: {
@@ -490,7 +500,7 @@ const serverConfig = {
     './chunk-manifest.json',
     './asset-manifest.json',
     nodeExternals({
-      whitelist: [
+      allowlist: [
         reStyle,
         reImage,
       ],
@@ -498,6 +508,7 @@ const serverConfig = {
   ],
 
   plugins: [
+    ...config.plugins,
     // Define free variables
     // https://webpack.js.org/plugins/define-plugin/
     new webpack.DefinePlugin({
@@ -519,10 +530,7 @@ const serverConfig = {
   // Do not replace node globals with polyfills
   // https://webpack.js.org/configuration/node/
   node: {
-    console: false,
     global: false,
-    process: false,
-    Buffer: false,
     __filename: false,
     __dirname: false,
   },

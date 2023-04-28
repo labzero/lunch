@@ -10,17 +10,18 @@
 // ESLint configuration
 // http://eslint.org/docs/user-guide/configuring
 module.exports = {
-  parser: 'babel-eslint',
+  parser: '@typescript-eslint/parser',
 
   extends: [
     'airbnb',
-    'plugin:flowtype/recommended',
     'plugin:css-modules/recommended',
+    'plugin:@typescript-eslint/recommended'
   ],
 
   plugins: [
-    'flowtype',
     'css-modules',
+    '@typescript-eslint',
+    'import'
   ],
 
   globals: {
@@ -31,16 +32,18 @@ module.exports = {
     browser: true,
   },
 
+  root: true,
+
   rules: {
     // `js` and `jsx` are common extensions
     // `mjs` is for `universal-router` only, for now
     'import/extensions': [
       'error',
-      'always',
       {
         js: 'never',
         jsx: 'never',
         mjs: 'never',
+        ts: 'never',
       },
     ],
 
@@ -77,6 +80,7 @@ module.exports = {
     'key-spacing': 0,
     'no-confusing-arrow': 0,
     'react/jsx-quotes': 0,
+    'react/jsx-props-no-spreading': 0,
     'max-len': 0,
     'jsx-quotes': [
       2,
@@ -88,6 +92,13 @@ module.exports = {
 
     'react/forbid-prop-types': 'off',
     'react/destructuring-assignment': 'off',
+    'react/function-component-definition': ['error', {
+      namedComponents: 'arrow-function',
+      unnamedComponents: 'arrow-function'
+    }],
+    'react/static-property-placement': 'off',
+    'import/no-relative-packages': 'off',
+    'import/no-import-module-exports': 'off'
   },
 
   settings: {
@@ -95,8 +106,16 @@ module.exports = {
     // https://github.com/benmosher/eslint-plugin-import/tree/master/resolvers
     'import/resolver': {
       node: {
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
         moduleDirectory: ['node_modules', 'src'],
       },
+      typescript: {
+        alwaysTryTypes: true, // always try to resolve types under `<root>@types` directory even it doesn't contain any source code, like `@types/unist`
+        extensions: ['.ts', '.tsx'],
+      }
+    },
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
   },
 };

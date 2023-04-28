@@ -17,7 +17,7 @@ export default () => {
       loggedIn,
       checkTeamRole(),
       async (req, res, next) => {
-        const restaurantId = parseInt(req.params.restaurant_id, 10);
+        const restaurantId = parseInt(req.params.restaurantId, 10);
         const alreadyAddedError = () => {
           const error = { message: 'Could not add tag to restaurant. Is it already added?' };
           res.status(409).json({ error: true, data: error });
@@ -26,17 +26,17 @@ export default () => {
           Tag.findOrCreate({
             where: {
               name: req.body.name.toLowerCase().trim(),
-              team_id: req.team.id
+              teamId: req.team.id
             }
-          }).spread(async tag => {
+          }).then(async ([tag]) => {
             try {
               await RestaurantTag.create({
-                restaurant_id: restaurantId,
-                tag_id: tag.id
+                restaurantId,
+                tagId: tag.id
               });
               const json = tag.toJSON();
               json.restaurant_count = 1;
-              req.wss.broadcast(
+              req.broadcast(
                 req.team.id,
                 postedNewTagToRestaurant(restaurantId, json, req.user.id)
               );
@@ -51,12 +51,12 @@ export default () => {
           const id = parseInt(req.body.id, 10);
           try {
             const obj = await RestaurantTag.create({
-              restaurant_id: restaurantId,
-              tag_id: id
+              restaurantId,
+              tagId: id
             });
 
             const json = obj.toJSON();
-            req.wss.broadcast(req.team.id, postedTagToRestaurant(restaurantId, id, req.user.id));
+            req.broadcast(req.team.id, postedTagToRestaurant(restaurantId, id, req.user.id));
             res.status(201).send({ error: false, data: json });
           } catch (err) {
             alreadyAddedError(err);
@@ -72,10 +72,10 @@ export default () => {
       checkTeamRole(),
       async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
-        const restaurantId = parseInt(req.params.restaurant_id, 10);
+        const restaurantId = parseInt(req.params.restaurantId, 10);
         try {
-          await RestaurantTag.destroy({ where: { restaurant_id: restaurantId, tag_id: id } });
-          req.wss.broadcast(req.team.id, deletedTagFromRestaurant(restaurantId, id, req.user.id));
+          await RestaurantTag.destroy({ where: { restaurantId, tagId: id } });
+          req.broadcast(req.team.id, deletedTagFromRestaurant(restaurantId, id, req.user.id));
           res.status(204).send();
         } catch (err) {
           next(err);

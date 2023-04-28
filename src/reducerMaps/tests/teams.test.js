@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import ActionTypes from '../../constants/ActionTypes';
 import teams from '../teams';
 
 describe('reducerMaps/teams', () => {
@@ -23,12 +22,13 @@ describe('reducerMaps/teams', () => {
 
     describe('when current user has not been deleted', () => {
       beforeEach(() => {
-        afterState = teams.get(ActionTypes.USER_DELETED)(beforeState, {
+        afterState = teams(beforeState, {
           id: 2,
           isSelf: false,
           team: {
             id: 12345
-          }
+          },
+          type: 'USER_DELETED'
         });
       });
 
@@ -39,12 +39,13 @@ describe('reducerMaps/teams', () => {
 
     describe('when current user has been deleted', () => {
       beforeEach(() => {
-        afterState = teams.get(ActionTypes.USER_DELETED)(beforeState, {
+        afterState = teams(beforeState, {
           id: 1,
           isSelf: true,
           team: {
             id: 77
-          }
+          },
+          type: 'USER_DELETED'
         });
       });
 

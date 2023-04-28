@@ -1,8 +1,9 @@
-version: '2'
+version: "2"
 services:
   web:
     build:
       context: .
+      dockerfile: Dockerfile.local
     depends_on:
       - db
     links:
@@ -10,10 +11,16 @@ services:
     container_name: lunch-node
     ports:
       - "3000:3000"
-    env_file: '.env.prod'
+      - "3010:3010"
   db:
-    image: postgres:9.5.1
+    image: postgres:14.5
     ports:
       - "5432:5432"
     container_name: lunch-postgres
-    env_file: '.env.prod'
+    env_file: ".env"
+    environment:
+      POSTGRES_USER: lunch
+      POSTGRES_PASSWORD: lunch
+      POSTGRES_DB: lunch
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data

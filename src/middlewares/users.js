@@ -21,8 +21,8 @@ export default () => {
             await User.create({
               email,
               name,
-              reset_password_token: resetPasswordToken,
-              reset_password_sent_at: new Date()
+              resetPasswordToken,
+              resetPasswordSentAt: new Date()
             });
 
             // returns a promise but we're not going to wait to see if it succeeds.

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "incremental": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "outDir": "./build/public/assets/",
+    "skipLibCheck": true,
+    "strict": true,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "module": "esnext",
+    "target": "es5",
+    "jsx": "react",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "strictPropertyInitialization": false
+  },
+  "include": ["./**/*.ts", "./**/*.tsx", "./*.d.ts"],
+  "exclude": ["node_modules"]
+}

@@ -88,8 +88,8 @@ describe('middlewares/users', () => {
         expect(createSpy.calledWith({
           email: 'jeffrey@labzero.com',
           name: 'Jeffrey',
-          reset_password_token: '12345',
-          reset_password_sent_at: match.date
+          resetPasswordToken: '12345',
+          resetPasswordSentAt: match.date
         })).to.be.true;
       });
 

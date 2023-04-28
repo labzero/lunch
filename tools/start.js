@@ -7,6 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+/* eslint-disable no-promise-executor-return */
+
 import path from 'path';
 import express from 'express';
 import browserSync from 'browser-sync';
@@ -17,8 +19,6 @@ import createLaunchEditorMiddleware from 'react-dev-utils/errorOverlayMiddleware
 import webpackConfig from './webpack.config';
 import run, { format } from './run';
 import clean from './clean';
-
-const isDebug = !process.argv.includes('--release');
 
 // https://webpack.js.org/configuration/watch/#watchoptions
 const watchOptions = {
@@ -103,8 +103,6 @@ async function start() {
   // https://github.com/webpack/webpack-dev-middleware
   server.use(webpackDevMiddleware(clientCompiler, {
     publicPath: clientConfig.output.publicPath,
-    quiet: true,
-    watchOptions,
   }));
 
   // https://github.com/glenjamin/webpack-hot-middleware
@@ -121,67 +119,14 @@ async function start() {
   });
 
   let app;
-  let wss;
-  let wsServer;
   server.use((req, res) => {
     appPromise.then(() => app.handle(req, res)).catch(error => console.error(error));
   });
 
-  function checkForUpdate(fromUpdate) {
-    const hmrPrefix = '[\x1b[35mHMR\x1b[0m] ';
-    if (!app.hot) {
-      throw new Error(`${hmrPrefix}Hot Module Replacement is disabled.`);
-    }
-    if (app.hot.status() !== 'idle') {
-      return Promise.resolve();
-    }
-    return app.hot.check(true).then((updatedModules) => {
-      if (!updatedModules) {
-        if (fromUpdate) {
-          console.info(`${hmrPrefix}Update applied.`);
-        }
-        return;
-      }
-      if (updatedModules.length === 0) {
-        console.info(`${hmrPrefix}Nothing hot updated.`);
-      } else {
-        console.info(`${hmrPrefix}Updated modules:`);
-        updatedModules.forEach(moduleId => console.info(`${hmrPrefix} - ${moduleId}`));
-        checkForUpdate(true);
-      }
-    }).catch((error) => {
-      if (['abort', 'fail'].includes(app.hot.status())) {
-        console.warn(`${hmrPrefix}Cannot apply update.`);
-        delete require.cache[require.resolve('../build/server')];
-        const cb = () => {
-          // eslint-disable-next-line global-require, import/no-unresolved
-          const build = require('../build/server');
-          app = build.default;
-          wss = build.wss;
-          wsServer = build.wsServer;
-          console.warn(`${hmrPrefix}App has been reloaded.`);
-        };
-        if (wss) {
-          wss.close(() => {
-            if (wsServer) {
-              wsServer.close(cb);
-            } else {
-              cb();
-            }
-          });
-        }
-      } else {
-        console.warn(`${hmrPrefix}Update failed: ${error.stack || error.message}`);
-      }
-    });
-  }
-
   serverCompiler.watch(watchOptions, (error, stats) => {
     if (app && !error && !stats.hasErrors()) {
-      checkForUpdate().then(() => {
-        appPromiseIsResolved = true;
-        appPromiseResolve();
-      });
+      appPromiseIsResolved = true;
+      appPromiseResolve();
     }
   });
 
@@ -193,11 +138,9 @@ async function start() {
   console.info(`[${format(timeStart)}] Launching server...`);
 
   // Load compiled src/server.js as a middleware
-  // eslint-disable-next-line global-require, import/no-unresolved
+  // eslint-disable-next-line global-require, import/no-unresolved, import/extensions, @typescript-eslint/no-var-requires
   const build = require('../build/server');
   app = build.default;
-  wss = build.wss;
-  wsServer = build.wsServer;
   appPromiseIsResolved = true;
   appPromiseResolve();
 
@@ -210,15 +153,17 @@ async function start() {
       key: path.join(__dirname, '../cert/server.key'),
       cert: path.join(__dirname, '../cert/server.crt'),
     },
-    server: 'src/server.js',
+    server: 'src/server.tsx',
     middleware: [server],
     open: !process.argv.includes('--silent'),
-    ...isDebug ? {} : { notify: false, ui: false },
+    notify: false,
+    ui: false,
   }, (error, bs) => (error ? reject(error) : resolve(bs))));
 
   const timeEnd = new Date();
   const time = timeEnd.getTime() - timeStart.getTime();
   console.info(`[${format(timeEnd)}] Server launched after ${time} ms`);
+
   return server;
 }
 

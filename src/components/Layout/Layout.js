@@ -16,7 +16,7 @@ import FooterContainer from '../Footer/FooterContainer';
 import NotificationListContainer from '../NotificationList/NotificationListContainer';
 import ConfirmModalContainer from '../ConfirmModal/ConfirmModalContainer';
 import s from './Layout.scss';
-// eslint-disable-next-line css-modules/no-unused-class
+// eslint-disable-next-line css-modules/no-unused-class, no-unused-vars
 import globalCss from '../../styles/globalCss.scss';
 
 class Layout extends Component {
@@ -31,7 +31,7 @@ class Layout extends Component {
 
   static defaultProps = {
     isHome: false,
-    path: undefined
+    path: undefined,
   };
 
   static contextTypes = {
@@ -44,7 +44,7 @@ class Layout extends Component {
 
   constructor(props, context) {
     super(props);
-    this.removeCss = context.insertCss(s, globalCss);
+    context.insertCss(s, globalCss);
   }
 
   getChildContext() {
@@ -70,7 +70,7 @@ class Layout extends Component {
     const { confirmShown, isHome, path } = this.props;
 
     return (
-      <div className={isHome ? s.flex : ''}>
+      <div className={s.root}>
         <HeaderContainer path={path} />
         {this.props.children}
         {!isHome && <FooterContainer />}

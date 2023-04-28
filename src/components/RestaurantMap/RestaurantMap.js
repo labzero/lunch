@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import { GOOGLE_MAP_ZOOM } from '../../constants';
 import googleMapOptions from '../../helpers/googleMapOptions';
 import loadComponent from '../../helpers/loadComponent';
@@ -10,6 +10,7 @@ import GoogleInfoWindowContainer from '../GoogleInfoWindow/GoogleInfoWindowConta
 import HereMarker from '../HereMarker';
 import TempMarker from '../TempMarker';
 import s from './RestaurantMap.scss';
+import GoogleMapsLoaderContext from '../GoogleMapsLoaderContext/GoogleMapsLoaderContext';
 
 let GoogleMap = () => null;
 
@@ -28,7 +29,7 @@ class RestaurantMap extends Component {
     latLng: PropTypes.object.isRequired,
     center: PropTypes.shape({
       lat: PropTypes.number.isRequired,
-      lng: PropTypes.number.isRequired
+      lng: PropTypes.number.isRequired,
     }),
     defaultZoom: PropTypes.number,
     tempMarker: PropTypes.object,
@@ -37,19 +38,23 @@ class RestaurantMap extends Component {
     mapClicked: PropTypes.func.isRequired,
     showGoogleInfoWindow: PropTypes.func.isRequired,
     showNewlyAddedInfoWindow: PropTypes.func.isRequired,
-    showPOIs: PropTypes.bool.isRequired
+    showPOIs: PropTypes.bool.isRequired,
   };
 
   static defaultProps = {
     center: undefined,
     defaultZoom: GOOGLE_MAP_ZOOM,
     tempMarker: undefined,
-    newlyAddedRestaurant: undefined
-  }
+    newlyAddedRestaurant: undefined,
+  };
 
   componentDidMount() {
     this.props.clearCenter();
-    loadComponent(() => require.ensure([], require => require('google-map-react').default, 'map')).then((map) => {
+    loadComponent(() => require.ensure(
+      [],
+      (require) => require('google-map-react').default,
+      'map'
+    )).then((map) => {
       GoogleMap = map;
       this.forceUpdate();
     });
@@ -59,7 +64,7 @@ class RestaurantMap extends Component {
     if (this.props.center !== undefined) {
       this.props.clearCenter();
 
-      if (this.props.tempMarker === undefined) {
+      if (this.map && this.props.tempMarker === undefined) {
         // offset by infowindow height after recenter
         setTimeout(() => {
           this.map.panBy(0, -100);
@@ -74,7 +79,7 @@ class RestaurantMap extends Component {
   setMap = ({ map }) => {
     this.map = map;
     map.addListener('click', (event) => {
-      if (event.placeId) {
+      if (event.placeId && event.latLng) {
         event.stop();
         const defaultPrevented = event.ya && event.ya.defaultPrevented;
         if (!defaultPrevented) {
@@ -93,7 +98,7 @@ class RestaurantMap extends Component {
       latLng,
       mapClicked,
       showPOIs,
-      tempMarker
+      tempMarker,
     } = this.props;
 
     let tempMarkerComponent;
@@ -114,35 +119,41 @@ class RestaurantMap extends Component {
 
     return (
       <section className={s.root}>
-        <GoogleMap
-          defaultZoom={defaultZoom || GOOGLE_MAP_ZOOM}
-          defaultCenter={latLng}
-          center={center}
-          margin={[100, 0, 0, 0]}
-          options={googleMapOptions(showPOIs)}
-          onGoogleApiLoaded={this.setMap}
-          onClick={mapClicked}
-          yesIWantToUseGoogleMapApiInternals
-        >
-          <HereMarker lat={latLng.lat} lng={latLng.lng} />
-          {googleInfoWindow}
-          {tempMarkerComponent}
-          {items.map((item, index) => (
-            <RestaurantMarkerContainer
-              lat={item.lat}
-              lng={item.lng}
-              key={`restaurantMarkerContainer_${item.id}`}
-              id={item.id}
-              index={index}
-              baseZIndex={items.length}
-              store={this.context.store}
-              fetch={this.context.fetch}
-              insertCss={this.context.insertCss}
-              pathname={this.context.pathname}
-              query={this.context.query}
-            />
-          ))}
-        </GoogleMap>
+        <GoogleMapsLoaderContext.Consumer>
+          {({ loader }) => loader ? (
+            <GoogleMap
+              defaultZoom={defaultZoom || GOOGLE_MAP_ZOOM}
+              defaultCenter={latLng}
+              center={center}
+              googleMapLoader={() => loader.load().then(google => google.maps)}
+              margin={[100, 0, 0, 0]}
+              options={googleMapOptions(showPOIs)}
+              onGoogleApiLoaded={this.setMap}
+              onClick={mapClicked}
+              yesIWantToUseGoogleMapApiInternals
+            >
+              <HereMarker lat={latLng.lat} lng={latLng.lng} />
+              {googleInfoWindow}
+              {tempMarkerComponent}
+              {items.map((item, index) => (
+                <RestaurantMarkerContainer
+                  lat={item.lat}
+                  lng={item.lng}
+                  key={`restaurantMarkerContainer_${item.id}`}
+                  id={item.id}
+                  index={index}
+                  baseZIndex={items.length}
+                  googleApiKey={loader.apiKey}
+                  store={this.context.store}
+                  fetch={this.context.fetch}
+                  insertCss={this.context.insertCss}
+                  pathname={this.context.pathname}
+                  query={this.context.query}
+                />
+              ))}
+            </GoogleMap>
+          ) : null}
+        </GoogleMapsLoaderContext.Consumer>
         <div className={s.mapSettingsContainer}>
           <RestaurantMapSettingsContainer map={this.map} />
         </div>

@@ -1,18 +1,17 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './Tag.scss';
 
 const Tag = ({
-  name,
-  showDelete,
-  onDeleteClicked,
-  exclude
+  name, showDelete, onDeleteClicked, exclude
 }) => {
   let deleteButton = null;
   if (showDelete) {
     deleteButton = (
-      <button type="button" className={s.button} onClick={onDeleteClicked}>&times;</button>
+      <button type="button" className={s.button} onClick={onDeleteClicked}>
+        &times;
+      </button>
     );
   }
 
@@ -28,11 +27,11 @@ Tag.propTypes = {
   name: PropTypes.string.isRequired,
   showDelete: PropTypes.bool.isRequired,
   onDeleteClicked: PropTypes.func.isRequired,
-  exclude: PropTypes.bool
+  exclude: PropTypes.bool,
 };
 
 Tag.defaultProps = {
-  exclude: false
+  exclude: false,
 };
 
 export const undecorated = Tag;

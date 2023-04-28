@@ -16,8 +16,8 @@ export default () => {
       if (user) {
         const resetPasswordToken = await generateToken();
         await user.update({
-          reset_password_token: resetPasswordToken,
-          reset_password_sent_at: new Date()
+          resetPasswordToken,
+          resetPasswordSentAt: new Date()
         });
         await transporter.sendMail({
           name: user.name,
@@ -38,7 +38,7 @@ Happy Lunching!`
     }
   }).put('/', async (req, res, next) => {
     try {
-      const user = await User.findOne({ where: { reset_password_token: req.body.token } });
+      const user = await User.findOne({ where: { resetPasswordToken: req.body.token } });
       if (!user || !user.resetPasswordValid()) {
         res.redirect('/password/new');
       } else {
@@ -59,7 +59,7 @@ Happy Lunching!`
     }
   }).get('/edit', async (req, res, next) => {
     try {
-      const user = await User.findOne({ where: { reset_password_token: req.query.token } });
+      const user = await User.findOne({ where: { resetPasswordToken: req.query.token } });
       if (!user || !user.resetPasswordValid()) {
         res.redirect('/password/new');
       } else {

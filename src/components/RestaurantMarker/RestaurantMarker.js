@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import App from '../App';
 import RestaurantContainer from '../Restaurant/RestaurantContainer';
 import s from './RestaurantMarker.scss';
@@ -17,7 +17,7 @@ const InnerRestaurantMarker = ({
   index,
   baseZIndex,
   handleMarkerClick,
-  showInfoWindow
+  showInfoWindow,
 }) => {
   const length = restaurant.votes.length;
   let label = '';
@@ -27,9 +27,9 @@ const InnerRestaurantMarker = ({
   // place markers lower based on how far down they are in the list
   // add item length so index doesn't dip below MAX_ZINDEX
   const zIndex = google.maps.Marker.MAX_ZINDEX
-      + restaurant.votes.length
-      + (-index)
-      + baseZIndex;
+    + restaurant.votes.length
+    + -index
+    + baseZIndex;
 
   if (restaurant.votes.length > 99 || decided) {
     label = '✔';
@@ -45,15 +45,15 @@ const InnerRestaurantMarker = ({
       style={{ zIndex: zIndex * 2 }}
       key={`infoWindow_${ref}`}
     >
-      <RestaurantContainer
-        id={restaurant.id}
-      />
+      <RestaurantContainer id={restaurant.id} />
     </div>
   );
 
   return (
     <div
-      className={`${s.root} ${restaurant.votes.length > 0 || decided ? s.voted : ''}`}
+      className={`${s.root} ${
+        restaurant.votes.length > 0 || decided ? s.voted : ''
+      }`}
       data-marker
     >
       {showInfoWindow ? renderInfoWindow() : null}
@@ -66,9 +66,7 @@ const InnerRestaurantMarker = ({
         style={{ zIndex }}
         type="button"
       >
-        <span className={s.label}>
-          {label}
-        </span>
+        <span className={s.label}>{label}</span>
       </button>
     </div>
   );
@@ -80,16 +78,14 @@ InnerRestaurantMarker.propTypes = {
   index: PropTypes.number.isRequired,
   baseZIndex: PropTypes.number.isRequired,
   showInfoWindow: PropTypes.bool.isRequired,
-  handleMarkerClick: PropTypes.func.isRequired
+  handleMarkerClick: PropTypes.func.isRequired,
 };
 
 const StyledRestaurantMarker = withStyles(s)(InnerRestaurantMarker);
 
-const RestaurantMarker = ({
-  restaurant,
-  ...props
-}) => {
+const RestaurantMarker = ({ restaurant, ...props }) => {
   const context = {
+    googleApiKey: props.googleApiKey,
     fetch: props.fetch,
     insertCss: props.insertCss,
     store: props.store,
@@ -111,11 +107,12 @@ const RestaurantMarker = ({
 
 RestaurantMarker.propTypes = {
   fetch: PropTypes.func.isRequired,
+  googleApiKey: PropTypes.string.isRequired,
   store: PropTypes.object.isRequired,
   insertCss: PropTypes.func.isRequired,
   pathname: PropTypes.string.isRequired,
   query: PropTypes.object,
-  restaurant: PropTypes.object.isRequired
+  restaurant: PropTypes.object.isRequired,
 };
 
 RestaurantMarker.defaultProps = {

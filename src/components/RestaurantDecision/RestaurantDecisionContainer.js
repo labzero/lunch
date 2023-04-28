@@ -9,7 +9,7 @@ const mapStateToProps = (state, ownProps) => {
   return {
     id: ownProps.id,
     loggedIn: state.user.id !== undefined,
-    decided: decision !== undefined && decision.restaurant_id === ownProps.id,
+    decided: decision !== undefined && decision.restaurantId === ownProps.id,
     votes: getRestaurantById(state, ownProps.id).votes
   };
 };
@@ -18,7 +18,9 @@ const mapDispatchToProps = dispatch => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+  ...stateProps,
+  ...dispatchProps,
   handleClick() {
     if (stateProps.loggedIn) {
       if (stateProps.decided) {

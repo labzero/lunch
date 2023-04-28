@@ -1,5 +1,5 @@
-@import '../../styles/_mixins.scss';
-@import '../../styles/_variables.scss';
+@import '../../styles/mixins';
+@import '../../styles/variables';
 
 .container {
   @include autosuggest-container;
@@ -8,7 +8,7 @@
 
   input {
     border: $default-border;
-    box-shadow: inset 5px 5px 0 rgba(128, 0, 0, .1);
+    box-shadow: inset 5px 5px 0 rgb(128 0 0 / 10%);
   }
 }
 

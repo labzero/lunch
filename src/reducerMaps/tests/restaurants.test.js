@@ -1,7 +1,6 @@
 /* eslint-env mocha */
 
 import { expect } from 'chai';
-import ActionTypes from '../../constants/ActionTypes';
 import restaurants from '../restaurants';
 
 describe('reducerMaps/restaurants', () => {
@@ -57,9 +56,10 @@ describe('reducerMaps/restaurants', () => {
         }
       };
 
-      afterState = restaurants.get(ActionTypes.SORT_RESTAURANTS)(beforeState, {
-        decision: { restaurant_id: 5 },
+      afterState = restaurants(beforeState, {
+        decision: { restaurantId: 5 },
         newlyAdded: { id: 6, userId: 1 },
+        type: 'SORT_RESTAURANTS',
         user: { id: 1 }
       });
     });
@@ -108,13 +108,14 @@ describe('reducerMaps/restaurants', () => {
         }
       };
 
-      afterState = restaurants.get(ActionTypes.DECISION_POSTED)(beforeState, {
+      afterState = restaurants(beforeState, {
         decision: {
-          restaurant_id: 1
+          restaurantId: 1
         },
         deselected: [{
-          restaurant_id: 2
-        }]
+          restaurantId: 2
+        }],
+        type: 'DECISION_POSTED'
       });
     });
 

@@ -9,7 +9,8 @@ const mapStateToProps = state => ({
   user: getCurrentUser(state)
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => Object.assign({}, stateProps, {
+const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+  ...stateProps,
   updateCurrentUser: payload => dispatchProps.dispatch(updateCurrentUser(payload)).then(() => {
     const team = ownProps.team;
     if (team) {

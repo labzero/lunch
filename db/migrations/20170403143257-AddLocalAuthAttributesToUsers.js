@@ -1,6 +1,4 @@
-const Promise = require('bluebird');
-
-exports.up = (queryInterface, Sequelize) => Promise.all(
+exports.up = (queryInterface, Sequelize) => Promise.all([
   queryInterface.addColumn('users', 'encrypted_password', {
     type: Sequelize.STRING
   }),
@@ -21,13 +19,13 @@ exports.up = (queryInterface, Sequelize) => Promise.all(
   queryInterface.addColumn('users', 'confirmation_sent_at', {
     type: Sequelize.DATE
   })
-);
+]);
 
-exports.down = queryInterface => Promise.all(
+exports.down = queryInterface => Promise.all([
   queryInterface.removeColumn('users', 'encrypted_password'),
   queryInterface.removeColumn('users', 'reset_password_token'),
   queryInterface.removeColumn('users', 'reset_password_sent_at'),
   queryInterface.removeColumn('users', 'confirmation_token'),
   queryInterface.removeColumn('users', 'confirmed_at'),
   queryInterface.removeColumn('users', 'confirmation_sent_at')
-);
+]);

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 // eslint-disable-next-line css-modules/no-unused-class
 import s from './Flash.scss';
 
@@ -8,7 +8,7 @@ class Flash extends Component {
   static propTypes = {
     expireFlash: PropTypes.func.isRequired,
     message: PropTypes.string.isRequired,
-    type: PropTypes.string.isRequired
+    type: PropTypes.string.isRequired,
   };
 
   componentDidMount() {
@@ -17,7 +17,9 @@ class Flash extends Component {
 
   render() {
     return (
-      <div className={`${s.root} ${s[this.props.type]}`}>{this.props.message}</div>
+      <div className={`${s.root} ${s[this.props.type]}`}>
+        {this.props.message}
+      </div>
     );
   }
 }

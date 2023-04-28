@@ -1,15 +1,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import Button from 'react-bootstrap/lib/Button';
-import Col from 'react-bootstrap/lib/Col';
-import ControlLabel from 'react-bootstrap/lib/ControlLabel';
-import FormControl from 'react-bootstrap/lib/FormControl';
-import FormGroup from 'react-bootstrap/lib/FormGroup';
-import Grid from 'react-bootstrap/lib/Grid';
-import HelpBlock from 'react-bootstrap/lib/HelpBlock';
-import InputGroup from 'react-bootstrap/lib/InputGroup';
-import Row from 'react-bootstrap/lib/Row';
+import withStyles from 'isomorphic-style-loader/withStyles';
+import Button from 'react-bootstrap/Button';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import Container from 'react-bootstrap/Container';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Row from 'react-bootstrap/Row';
 import { TEAM_SLUG_REGEX } from '../../../constants';
 import defaultCoords from '../../../constants/defaultCoords';
 import TeamGeosuggestContainer from '../../../components/TeamGeosuggest/TeamGeosuggestContainer';
@@ -21,26 +18,30 @@ class NewTeam extends Component {
   static propTypes = {
     center: PropTypes.shape({
       lat: PropTypes.number.isRequired,
-      lng: PropTypes.number.isRequired
+      lng: PropTypes.number.isRequired,
     }),
     createTeam: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
-    center: defaultCoords
-  }
-
-  state = {
-    name: '',
-    slug: '',
-    address: ''
+    center: defaultCoords,
   };
 
-  handleChange = field => event => this.setState({ [field]: event.target.value });
+  constructor(props) {
+    super(props);
 
-  handleSlugChange = event => {
+    this.state = {
+      name: '',
+      slug: '',
+      address: '',
+    };
+  }
+
+  handleChange = (field) => (event) => this.setState({ [field]: event.target.value });
+
+  handleSlugChange = (event) => {
     this.setState({
-      slug: event.target.value.toLowerCase()
+      slug: event.target.value.toLowerCase(),
     });
   };
 
@@ -51,25 +52,23 @@ class NewTeam extends Component {
 
     createTeam({
       ...center,
-      ...this.state
+      ...this.state,
     }).then(() => history.push('/teams'));
-  }
+  };
 
   render() {
     const { name, slug } = this.state;
 
     return (
       <div className={s.root}>
-        <Grid>
+        <Container>
           <h2>Create a new team</h2>
           <form onSubmit={this.handleSubmit}>
-            <FormGroup controlId="newTeam-name">
-              <ControlLabel>
-                Name
-              </ControlLabel>
+            <Form.Group className="mb-3" controlId="newTeam-name">
+              <Form.Label>Name</Form.Label>
               <Row>
                 <Col sm={6}>
-                  <FormControl
+                  <Form.Control
                     type="text"
                     onChange={this.handleChange('name')}
                     value={name}
@@ -77,15 +76,13 @@ class NewTeam extends Component {
                   />
                 </Col>
               </Row>
-            </FormGroup>
-            <FormGroup controlId="newTeam-slug">
-              <ControlLabel>
-                URL
-              </ControlLabel>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="newTeam-slug">
+              <Form.Label>URL</Form.Label>
               <Row>
                 <Col sm={6}>
                   <InputGroup>
-                    <FormControl
+                    <Form.Control
                       autoCorrect="off"
                       autoCapitalize="off"
                       className={s.teamUrl}
@@ -97,19 +94,20 @@ class NewTeam extends Component {
                       onChange={this.handleSlugChange}
                       required
                     />
-                    <InputGroup.Addon>.lunch.pink</InputGroup.Addon>
+                    <InputGroup.Text>.lunch.pink</InputGroup.Text>
                   </InputGroup>
                 </Col>
               </Row>
-              <HelpBlock>Letters, numbers, and dashes only. URL must start with a letter.</HelpBlock>
-            </FormGroup>
-            <FormGroup controlId="newTeam-address">
-              <ControlLabel>Address</ControlLabel>
+              <Form.Text>
+                Letters, numbers, and dashes only. URL must start with a letter.
+              </Form.Text>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="newTeam-address">
+              <Form.Label>Address</Form.Label>
               <p>
-                Pick a centerpoint for your team.
-                It will ensure that nearby recommendations are shown when you search
-                for restaurants.
-                You can drag the map or enter your full address.
+                Pick a centerpoint for your team. It will ensure that nearby
+                recommendations are shown when you search for restaurants. You
+                can drag the map or enter your full address.
               </p>
               <TeamMapContainer defaultCenter={defaultCoords} />
               <TeamGeosuggestContainer
@@ -117,10 +115,10 @@ class NewTeam extends Component {
                 initialValue=""
                 onChange={this.handleChange('address')}
               />
-            </FormGroup>
+            </Form.Group>
             <Button type="submit">Submit</Button>
           </form>
-        </Grid>
+        </Container>
       </div>
     );
   }

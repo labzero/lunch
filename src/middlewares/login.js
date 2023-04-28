@@ -55,7 +55,8 @@ export default () => {
         passport.authenticate('google', options)(req, res, next);
       }
     },
-  ).get('/google/callback',
+  ).get(
+    '/google/callback',
     (req, res, next) => {
       passport.authenticate('google', { session: false }, (err, user, email) => {
         if (err) { return next(err); }
@@ -72,12 +73,14 @@ export default () => {
         });
       })(req, res, next);
     },
-    setCookie).post('/',
+    setCookie
+  ).post(
+    '/',
     (req, res, next) => {
       passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) { return next(err); }
         if (!user) {
-          req.flash('error', info); // eslint-disable-line no-param-reassign
+          req.flash('error', info.message); // eslint-disable-line no-param-reassign
           return next();
         }
         return req.logIn(user, (logInErr) => {
@@ -86,7 +89,8 @@ export default () => {
         });
       })(req, res, next);
     },
-    setCookie);
+    setCookie
+  );
 
   return router;
 };

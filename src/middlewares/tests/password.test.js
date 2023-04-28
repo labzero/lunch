@@ -71,8 +71,8 @@ describe('middlewares/password', () => {
 
       it('updates user with new token', () => {
         expect(updateSpy.calledWith({
-          reset_password_token: match.string,
-          reset_password_sent_at: match.date
+          resetPasswordToken: match.string,
+          resetPasswordSentAt: match.date
         })).to.be.true;
       });
 
@@ -106,7 +106,7 @@ describe('middlewares/password', () => {
 
         request(app).put('/').send({
           password: 'a great password',
-          reset_password_token: '12345'
+          resetPasswordToken: '12345'
         }).then((r) => {
           response = r;
           done();
@@ -131,7 +131,7 @@ describe('middlewares/password', () => {
 
         request(app).put('/').send({
           password: 'a great password',
-          reset_password_token: '12345'
+          resetPasswordToken: '12345'
         }).then((r) => {
           response = r;
           done();
@@ -160,7 +160,7 @@ describe('middlewares/password', () => {
 
         request(app).put('/').send({
           password: 'short',
-          reset_password_token: '12345'
+          resetPasswordToken: '12345'
         }).then((r) => {
           response = r;
           done();
@@ -193,7 +193,7 @@ describe('middlewares/password', () => {
 
         request(app).put('/').send({
           password: 'password',
-          reset_password_token: '12345'
+          resetPasswordToken: '12345'
         }).then((r) => {
           response = r;
           done();
@@ -226,26 +226,26 @@ describe('middlewares/password', () => {
         app = makeApp({
           '../helpers/getUserPasswordUpdates': mockEsmodule({
             default: () => Promise.resolve({
-              encrypted_password: 'drowssap taerg a',
-              reset_password_token: null,
-              reset_password_sent_at: null,
-              confirmed_at: 'some date'
+              encryptedPassword: 'drowssap taerg a',
+              resetPasswordToken: null,
+              resetPasswordSentAt: null,
+              confirmedAt: 'some date'
             })
           })
         });
 
         return request(app).put('/').send({
           password: 'a great password',
-          reset_password_token: '12345'
+          resetPasswordToken: '12345'
         });
       });
 
       it('updates user', () => {
         expect(updateSpy.calledWith({
-          encrypted_password: 'drowssap taerg a',
-          reset_password_token: null,
-          reset_password_sent_at: null,
-          confirmed_at: 'some date'
+          encryptedPassword: 'drowssap taerg a',
+          resetPasswordToken: null,
+          resetPasswordSentAt: null,
+          confirmedAt: 'some date'
         })).to.be.true;
       });
     });

@@ -19,14 +19,14 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   getSuggestLabel: (suggest) => {
     if (suggest.terms !== undefined && suggest.terms.length > 0) {
-      suggestCache[suggest.place_id] = suggest.terms[0].value;
+      suggestCache[suggest.placeId] = suggest.terms[0].value;
     }
     return suggest.description;
   },
   createTempMarker: (result) => {
     const location = result.geometry.location;
     const marker = {
-      label: suggestCache[location.place_id],
+      label: suggestCache[location.placeId],
       latLng: {
         lat: location.lat(),
         lng: location.lng()
@@ -40,7 +40,9 @@ const mapDispatchToProps = dispatch => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
+const mergeProps = (stateProps, dispatchProps) => ({
+  ...stateProps,
+  ...dispatchProps,
   handleSuggestSelect: (suggestion, geosuggest) => {
     if (suggestion) {
       let name = suggestion.label;
@@ -58,13 +60,14 @@ const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, 
       suggestCache = [];
       geosuggest.update('');
       geosuggest.showSuggests();
-      const existingRestaurant = stateProps.restaurants.find(r => r.place_id === placeId);
+      const existingRestaurant = stateProps.restaurants.find(r => r.placeId === placeId);
       if (existingRestaurant === undefined) {
         dispatchProps.dispatch(addRestaurant(name, placeId, address, lat, lng));
       } else {
         scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, {
           containerId: 'listContainer',
           offset: document.getElementById('listForms').offsetHeight,
+          smooth: true,
         });
         scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`);
       }

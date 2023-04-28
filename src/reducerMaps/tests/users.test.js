@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from 'chai';
-import ActionTypes from '../../constants/ActionTypes';
 import users from '../users';
 
 describe('reducerMaps/users', () => {
@@ -23,8 +22,9 @@ describe('reducerMaps/users', () => {
           }
         }
       };
-      afterState = users.get(ActionTypes.USER_PATCHED)(beforeState, {
+      afterState = users(beforeState, {
         id: 1,
+        type: 'USER_PATCHED',
         user: {
           foo: 'baz'
         }

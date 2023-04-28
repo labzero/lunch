@@ -134,7 +134,7 @@ describe('middlewares/login', () => {
       let flashSpy;
       beforeEach(() => {
         authenticateStub = stub().callsFake((strategy, options, callback) => () => {
-          callback(null, false, 'Oh No');
+          callback(null, false, { message: 'Oh No' });
         });
         flashSpy = spy();
         app = makeApp({

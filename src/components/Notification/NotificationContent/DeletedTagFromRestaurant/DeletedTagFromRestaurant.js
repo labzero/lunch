@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from '../NotificationContent.scss';
 
 const DeletedTagFromRestaurant = ({
@@ -8,10 +8,14 @@ const DeletedTagFromRestaurant = ({
   user,
   restaurantName,
   tagName,
-  showMapAndInfoWindow
+  showMapAndInfoWindow,
 }) => {
   const restaurantEl = (
-    <button className={s.clickable} onClick={showMapAndInfoWindow} type="button">
+    <button
+      className={s.clickable}
+      onClick={showMapAndInfoWindow}
+      type="button"
+    >
       {restaurantName}
     </button>
   );
@@ -20,16 +24,16 @@ const DeletedTagFromRestaurant = ({
       <span>
         <b>{user}</b>
         {' '}
-removed tag
+        removed tag
         <b>
-&ldquo;
+          &ldquo;
           {tagName}
-&rdquo;
+          &rdquo;
         </b>
         {' '}
-from
+        from
         {restaurantEl}
-.
+        .
       </span>
     );
   }
@@ -38,15 +42,15 @@ from
       Tag
       {' '}
       <b>
-&ldquo;
+        &ldquo;
         {tagName}
-&rdquo;
+        &rdquo;
       </b>
       {' '}
-was removed from
+      was removed from
       {' '}
       {restaurantEl}
-.
+      .
     </span>
   );
 };
@@ -56,11 +60,11 @@ DeletedTagFromRestaurant.propTypes = {
   user: PropTypes.string,
   restaurantName: PropTypes.string.isRequired,
   tagName: PropTypes.string.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired
+  showMapAndInfoWindow: PropTypes.func.isRequired,
 };
 
 DeletedTagFromRestaurant.defaultProps = {
-  user: ''
+  user: '',
 };
 
 export default withStyles(s)(DeletedTagFromRestaurant);

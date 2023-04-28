@@ -7,9 +7,11 @@ export default (state, makeRoute) => {
   if (user.id) {
     if (user.roles.length === 1) {
       const team = getTeams(state)[0];
-      return {
-        redirect: `//${team.slug}.${host}`
-      };
+      if (team) {
+        return {
+          redirect: `//${team.slug}.${host}`
+        };
+      }
     }
     return {
       redirect: '/teams'

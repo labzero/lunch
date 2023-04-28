@@ -1,13 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { intlShape } from 'react-intl';
-import Button from 'react-bootstrap/lib/Button';
-import Col from 'react-bootstrap/lib/Col';
-import ControlLabel from 'react-bootstrap/lib/ControlLabel';
-import FormControl from 'react-bootstrap/lib/FormControl';
-import FormGroup from 'react-bootstrap/lib/FormGroup';
-import HelpBlock from 'react-bootstrap/lib/HelpBlock';
-import Row from 'react-bootstrap/lib/Row';
+import Button from 'react-bootstrap/Button';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import Row from 'react-bootstrap/Row';
 import { globalMessageDescriptor as gm } from '../../helpers/generateMessageDescriptor';
 
 class AddUserForm extends Component {
@@ -16,7 +12,7 @@ class AddUserForm extends Component {
     hasGuestRole: PropTypes.bool.isRequired,
     hasMemberRole: PropTypes.bool.isRequired,
     hasOwnerRole: PropTypes.bool.isRequired,
-    intl: intlShape.isRequired,
+    intl: PropTypes.shape().isRequired,
   };
 
   static defaultState = {
@@ -25,14 +21,18 @@ class AddUserForm extends Component {
     type: 'member'
   };
 
-  state = Object.assign({}, AddUserForm.defaultState);
+  constructor(props) {
+    super(props);
+
+    this.state = ({ ...AddUserForm.defaultState });
+  }
 
   handleChange = field => event => this.setState({ [field]: event.target.value });
 
   handleSubmit = (event) => {
     event.preventDefault();
     this.props.addUserToTeam(this.state);
-    this.setState(Object.assign({}, AddUserForm.defaultState));
+    this.setState({ ...AddUserForm.defaultState });
   };
 
   render() {
@@ -48,27 +48,27 @@ class AddUserForm extends Component {
       <div>
         <h3>Add User</h3>
         <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="addUserForm-name">
-            <ControlLabel>
+          <Form.Group className="mb-3" controlId="addUserForm-name">
+            <Form.Label>
               Name
-            </ControlLabel>
+            </Form.Label>
             <Row>
               <Col sm={6}>
-                <FormControl
+                <Form.Control
                   type="text"
                   onChange={this.handleChange('name')}
                   value={name}
                 />
               </Col>
             </Row>
-          </FormGroup>
-          <FormGroup controlId="addUserForm-email">
-            <ControlLabel>
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="addUserForm-email">
+            <Form.Label>
               Email
-            </ControlLabel>
+            </Form.Label>
             <Row>
               <Col sm={6}>
-                <FormControl
+                <Form.Control
                   type="email"
                   onChange={this.handleChange('email')}
                   value={email}
@@ -76,15 +76,14 @@ class AddUserForm extends Component {
                 />
               </Col>
             </Row>
-          </FormGroup>
-          <FormGroup controlId="addUserForm-type">
-            <ControlLabel>
+          </Form.Group>
+          <Form.Group className="mb-3" controlId="addUserForm-type">
+            <Form.Label>
               Type
-            </ControlLabel>
+            </Form.Label>
             <Row>
               <Col sm={6}>
-                <FormControl
-                  componentClass="select"
+                <Form.Select
                   onChange={this.handleChange('type')}
                   value={type}
                   required
@@ -92,20 +91,19 @@ class AddUserForm extends Component {
                   {hasGuestRole && <option value="guest">{f(gm('guestRole'))}</option>}
                   {hasMemberRole && <option value="member">{f(gm('memberRole'))}</option>}
                   {hasOwnerRole && <option value="owner">{f(gm('ownerRole'))}</option>}
-                </FormControl>
+                </Form.Select>
               </Col>
             </Row>
-            <HelpBlock>
+            <Form.Text>
               Members can add new users and remove guests.
               {hasOwnerRole
-                && ' Owners can manage all user roles and manage overall team information.'
-              }
-            </HelpBlock>
-          </FormGroup>
+                && ' Owners can manage all user roles and manage overall team information.'}
+            </Form.Text>
+          </Form.Group>
           <Button type="submit">Add</Button>
-          <HelpBlock>
+          <Form.Text>
             Please tell the user you are inviting to check their spam folder if they don&rsquo;t receive anything shortly.
-          </HelpBlock>
+          </Form.Text>
         </form>
       </div>
     );

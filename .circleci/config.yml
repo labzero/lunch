@@ -1,10 +1,47 @@
 # JOB DEFINITIONS
-version: 2
+version: 2.1
+orbs:
+  node: circleci/node@5.1.0
+commands:
+  aws-deploy:
+    parameters:
+      build_container_repository:
+        type: env_var_name
+        default: BUILD_CONTAINER_REPOSITORY
+      ecs_cluster:
+        type: string
+        default: ""
+      migration_task:
+        type: string
+        default: ""
+      service_name:
+        type: string
+        default: ""
+      task_family:
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: Deploy
+          command: |
+            aws configure set default.region us-west-2
+            CLEAN_BRANCH=`echo ${CIRCLE_BRANCH} | sed 's/\//-/g'`
+            DOCKER_TAG=${<< parameters.build_container_repository >>}:${CIRCLE_SHA1}
+            CURRENT_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix << parameters.task_family >> --sort DESC | jq -r '.taskDefinitionArns[0]'`
+            TASK_JSON=`aws ecs describe-task-definition --task-definition ${CURRENT_TASK} | jq --arg DOCKER_TAG "$DOCKER_TAG" '.taskDefinition.containerDefinitions[0].image = $DOCKER_TAG | {containerDefinitions: .taskDefinition.containerDefinitions, family: .taskDefinition.family}'`
+            aws ecs register-task-definition --cli-input-json "${TASK_JSON}" > /dev/null
+            CURRENT_MIGRATION_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix << parameters.migration_task >> --sort DESC | jq -r '.taskDefinitionArns[0]'`
+            MIGRATION_TASK_JSON=`aws ecs describe-task-definition --task-definition ${CURRENT_MIGRATION_TASK} | jq --arg DOCKER_TAG "$DOCKER_TAG" '.taskDefinition.containerDefinitions[0].image = $DOCKER_TAG | {containerDefinitions: .taskDefinition.containerDefinitions, family: .taskDefinition.family}'`
+            aws ecs register-task-definition --cli-input-json "${MIGRATION_TASK_JSON}" > /dev/null
+            aws ecs run-task --cluster << parameters.ecs_cluster >> --task-definition << parameters.migration_task >>
+            NEW_TASK=`aws ecs list-task-definitions --status ACTIVE --family-prefix << parameters.task_family >> --sort DESC | jq -r '.taskDefinitionArns[0]'`
+            aws ecs update-service --service << parameters.service_name >> --cluster << parameters.ecs_cluster >> --task-definition ${NEW_TASK}
+
 jobs:
   test:
     docker:
       # image for running tests
-      - image: cypress/browsers:node16.14.0-chrome99-ff97
+      - image: cypress/browsers:node18.12.0-chrome103-ff107
         environment:
           - DB_NAME=lunch_test
           - DB_USER=lunch_test
@@ -68,9 +105,9 @@ jobs:
             echo 127.0.0.1 integration-test.local.lunch.pink | tee -a /etc/hosts
 
       # build the app
-      - run:
-          name: build-release
-          command: NODE_ENV=test npm run build
+      # - run:
+      #     name: build-release
+      #     command: NODE_ENV=test npm run build
 
       - run:
           name: integration-tests
@@ -89,68 +126,83 @@ jobs:
 
   build:
     docker:
-      - image: ${BUILD_IMAGE}
+      - image: cimg/aws:2023.01
 
-    working_directory: ~/repo
+    # working_directory: ~/repo
 
     steps:
       - checkout
+
+      - setup_remote_docker:
+          version: 20.10.11
+          docker_layer_caching: true
 
       - run:
           name: dotenv
           command: touch .env && touch .env.prod
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-build-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-build-dependencies-
+      # # Download and cache dependencies
+      # - restore_cache:
+      #     keys:
+      #       - v1-build-dependencies-{{ checksum "package.json" }}
+      #       # fallback to using the latest cache if no exact match is found
+      #       - v1-build-dependencies-
 
-      # install deps
-      - run:
-          name: yarn-install
-          command: yarn install
+      # # install deps
+      # - run:
+      #     name: yarn-install
+      #     command: yarn install
 
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-build-dependencies-{{ checksum "package.json" }}
+      # - save_cache:
+      #     paths:
+      #       - node_modules
+      #     key: v1-build-dependencies-{{ checksum "package.json" }}
+
+      - node/install-packages:
+          pkg-manager: yarn
 
       # build the release
       - run:
           name: build-release
           command: npm run build -- --release --verbose
 
-      - setup_remote_docker
+      # - setup_remote_docker
 
-      # build and push a docker image (script is defined in the custom build image)
+      # build and push a docker image
       - run:
           name: build-docker-image
-          command: ../buildImage.sh
+          command: |
+            CLEAN_BRANCH=`echo $CIRCLE_BRANCH | sed 's/\//-/g'`
+            DOCKER_TAG=${BUILD_CONTAINER_REPOSITORY}:${CIRCLE_SHA1}
+            docker build --tag ${DOCKER_TAG} .
+            aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin ${CONTAINER_REGISTRY}
+            docker push ${DOCKER_TAG}
 
   deploy-staging:
     docker:
-      - image: ${BUILD_IMAGE}
+      - image: cimg/aws:2023.01
 
-    working_directory: ~/repo
+    # working_directory: ~/repo
 
     steps:
-      # update ECS task and service with image build above (script is defined in custom build image)
-      - run:
-          name: update-service
-          command: ../deployStaging.sh
+      - aws-deploy:
+          task_family: lunch-staging
+          ecs_cluster: Lunch-Staging
+          service_name: lunch-staging
+          migration_task: staging_lunch_migrate
 
   deploy-production:
     docker:
-      - image: ${BUILD_IMAGE}
+      - image: cimg/aws:2023.01
 
-    working_directory: ~/repo
+    # working_directory: ~/repo
 
     steps:
-      - run:
-          name: update_service
-          command: ../deployProduction.sh
+      - aws-deploy:
+          task_family: lunch
+          ecs_cluster: Lunch
+          service_name: lunch
+          migration_task: lunch_migrate
 
 # WORKFLOW DEFINITIONS
 workflows:

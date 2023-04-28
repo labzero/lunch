@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import ActionTypes from '../../constants/ActionTypes';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import RestaurantPosted from './NotificationContent/RestaurantPosted';
 import RestaurantDeleted from './NotificationContent/RestaurantDeleted';
 import RestaurantRenamed from './NotificationContent/RestaurantRenamed';
@@ -16,17 +15,17 @@ import DecisionDeleted from './NotificationContent/DecisionDeleted';
 import s from './Notification.scss';
 
 const contentMap = {
-  [ActionTypes.RESTAURANT_POSTED]: RestaurantPosted,
-  [ActionTypes.RESTAURANT_DELETED]: RestaurantDeleted,
-  [ActionTypes.RESTAURANT_RENAMED]: RestaurantRenamed,
-  [ActionTypes.VOTE_POSTED]: VotePosted,
-  [ActionTypes.VOTE_DELETED]: VoteDeleted,
-  [ActionTypes.POSTED_NEW_TAG_TO_RESTAURANT]: PostedNewTagToRestaurant,
-  [ActionTypes.POSTED_TAG_TO_RESTAURANT]: PostedTagToRestaurant,
-  [ActionTypes.DELETED_TAG_FROM_RESTAURANT]: DeletedTagFromRestaurant,
-  [ActionTypes.TAG_DELETED]: TagDeleted,
-  [ActionTypes.DECISION_POSTED]: DecisionPosted,
-  [ActionTypes.DECISIONS_DELETED]: DecisionDeleted
+  RESTAURANT_POSTED: RestaurantPosted,
+  RESTAURANT_DELETED: RestaurantDeleted,
+  RESTAURANT_RENAMED: RestaurantRenamed,
+  VOTE_POSTED: VotePosted,
+  VOTE_DELETED: VoteDeleted,
+  POSTED_NEW_TAG_TO_RESTAURANT: PostedNewTagToRestaurant,
+  POSTED_TAG_TO_RESTAURANT: PostedTagToRestaurant,
+  DELETED_TAG_FROM_RESTAURANT: DeletedTagFromRestaurant,
+  TAG_DELETED: TagDeleted,
+  DECISION_POSTED: DecisionPosted,
+  DECISIONS_DELETED: DecisionDeleted,
 };
 
 class Notification extends Component {
@@ -34,13 +33,13 @@ class Notification extends Component {
     expireNotification: PropTypes.func.isRequired,
     noRender: PropTypes.bool,
     actionType: PropTypes.string,
-    contentProps: PropTypes.object.isRequired
+    contentProps: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
     actionType: '',
-    noRender: false
-  }
+    noRender: false,
+  };
 
   componentDidMount() {
     this.timeout = setTimeout(this.props.expireNotification, 5000);
@@ -57,7 +56,13 @@ class Notification extends Component {
     const Content = contentMap[this.props.actionType];
     return (
       <div className={s.root}>
-        <button className={s.close} onClick={this.props.expireNotification} type="button">&times;</button>
+        <button
+          className={s.close}
+          onClick={this.props.expireNotification}
+          type="button"
+        >
+          &times;
+        </button>
         <Content {...this.props.contentProps} />
       </div>
     );

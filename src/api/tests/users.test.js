@@ -75,9 +75,7 @@ describe('api/team/users', () => {
       const server = express();
       server.use(bodyParser.json());
       server.use((req, res, next) => {
-        req.wss = { // eslint-disable-line no-param-reassign
-          broadcast: broadcastSpy
-        };
+        req.broadcast = broadcastSpy;
         next();
       });
       server.use('/', usersApi());
@@ -344,8 +342,8 @@ describe('api/team/users', () => {
 
         it('creates team role for user', () => {
           expect(createSpy.calledWith({
-            team_id: 77,
-            user_id: 2,
+            teamId: 77,
+            userId: 2,
             type: 'member'
           })).to.be.true;
         });
@@ -386,10 +384,10 @@ describe('api/team/users', () => {
         expect(createStub.calledWith({
           email: 'foo@bar.com',
           name: 'Jeffrey',
-          reset_password_token: match.string,
-          reset_password_sent_at: match.date,
+          resetPasswordToken: match.string,
+          resetPasswordSentAt: match.date,
           roles: [{
-            team_id: 77,
+            teamId: 77,
             type: 'member'
           }]
         })).to.be.true;
@@ -529,8 +527,8 @@ describe('api/team/users', () => {
       beforeEach(() => {
         role = {
           update: spy(),
-          user_id: user.id,
-          team_id: team.id,
+          userId: user.id,
+          teamId: team.id,
           type: 'owner'
         };
         path = `/${user.id}`;
@@ -554,7 +552,7 @@ describe('api/team/users', () => {
           beforeEach((done) => {
             findAllStub = stub(RoleMock, 'findAll').callsFake(() => Promise.resolve([role, {
               type: 'member',
-              user_id: 2
+              userId: 2
             }]));
             request(app).patch(path).send(payload).then((r) => {
               response = r;
@@ -563,7 +561,7 @@ describe('api/team/users', () => {
           });
 
           it('finds all roles', () => {
-            expect(findAllStub.calledWith({ where: { team_id: team.id } })).to.be.true;
+            expect(findAllStub.calledWith({ where: { teamId: team.id } })).to.be.true;
           });
 
           it('returns 403', () => {
@@ -580,7 +578,7 @@ describe('api/team/users', () => {
           beforeEach(() => {
             stub(RoleMock, 'findAll').callsFake(() => Promise.resolve([role, {
               type: 'owner',
-              user_id: 2
+              userId: 2
             }]));
             return request(app).patch(path).send(payload);
           });
@@ -602,8 +600,8 @@ describe('api/team/users', () => {
       it('queries role on team', () => {
         expect(findOneSpy.calledWith({
           where: {
-            team_id: team.id,
-            user_id: 2
+            teamId: team.id,
+            userId: 2
           }
         })).to.be.true;
       });
@@ -616,14 +614,14 @@ describe('api/team/users', () => {
       let role;
       beforeEach(() => {
         currentUserRole = {
-          user_id: user.id,
-          team_id: team.id,
+          userId: user.id,
+          teamId: team.id,
           type: 'owner'
         };
         role = {
           update: spy(),
-          user_id: otherUserId,
-          team_id: team.id
+          userId: otherUserId,
+          teamId: team.id
         };
         otherUserId = 2;
         path = `/${otherUserId}`;
@@ -679,14 +677,14 @@ describe('api/team/users', () => {
       let role;
       beforeEach(() => {
         currentUserRole = {
-          user_id: user.id,
-          team_id: team.id,
+          userId: user.id,
+          teamId: team.id,
           type: 'member'
         };
         role = {
           update: spy(),
-          user_id: otherUserId,
-          team_id: team.id
+          userId: otherUserId,
+          teamId: team.id
         };
         otherUserId = 2;
         path = `/${otherUserId}`;
@@ -791,8 +789,8 @@ describe('api/team/users', () => {
       let userToChange;
       beforeEach((done) => {
         currentUserRole = {
-          user_id: user.id,
-          team_id: team.id,
+          userId: user.id,
+          teamId: team.id,
           type: 'member'
         };
         userToChange = {
@@ -800,8 +798,8 @@ describe('api/team/users', () => {
         };
         stub(RoleMock, 'findOne').callsFake(() => Promise.resolve({
           update: () => Promise.resolve(),
-          user_id: userToChange.id,
-          team_id: team.id,
+          userId: userToChange.id,
+          teamId: team.id,
           type: 'guest'
         }));
         stub(UserMock, 'findOne').callsFake(() => Promise.resolve(userToChange));
@@ -872,8 +870,8 @@ describe('api/team/users', () => {
       let userToDelete;
       beforeEach((done) => {
         currentUserRole = {
-          user_id: user.id,
-          team_id: team.id,
+          userId: user.id,
+          teamId: team.id,
           type: 'member'
         };
         userToDelete = {
@@ -881,8 +879,8 @@ describe('api/team/users', () => {
         };
         roleToDestroy = {
           destroy: spy(() => Promise.resolve()),
-          user_id: userToDelete.id,
-          team_id: team.id,
+          userId: userToDelete.id,
+          teamId: team.id,
           type: 'guest'
         };
         stub(RoleMock, 'findOne').callsFake(() => Promise.resolve(roleToDestroy));

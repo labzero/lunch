@@ -28,11 +28,13 @@ describe('api/main/teams', () => {
     TeamMock.findAllForUser = () => Promise.resolve([]);
     RoleMock = dbMock.define('role', {});
     UserMock = dbMock.define('user', {});
+    UserMock.hasMany(RoleMock);
 
     loggedInSpy = spy((req, res, next) => {
       req.user = { // eslint-disable-line no-param-reassign
-        get: () => {},
+        get: () => undefined,
         id: 231,
+        getRoles: () => [],
         roles: []
       };
       next();
@@ -120,6 +122,7 @@ describe('api/main/teams', () => {
         loggedInSpy = spy((req, res, next) => {
           req.user = { // eslint-disable-line no-param-reassign
             id: 231,
+            getRoles: () => [{}, {}, {}, {}, {}],
             roles: [{}, {}, {}, {}, {}]
           };
           next();
@@ -290,7 +293,7 @@ describe('api/main/teams', () => {
           name: 'Lab Zero',
           slug: 'labzero',
           roles: [{
-            user_id: 231,
+            userId: 231,
             type: 'owner'
           }]
         })).to.be.true;
@@ -469,11 +472,11 @@ describe('api/main/teams', () => {
       beforeEach(() => {
         updateSpy = spy();
         stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
-          get: () => {},
+          get: () => undefined,
           update: updateSpy
         }));
 
-        return request(app).patch('/1').send({ default_zoom: 15, id: 123 });
+        return request(app).patch('/1').send({ defaultZoom: 15, id: 123 });
       });
 
       it('updates team', () => {
@@ -496,7 +499,7 @@ describe('api/main/teams', () => {
 
         updateSpy = spy();
         stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
-          get: () => {},
+          get: () => undefined,
           update: updateSpy
         }));
 
@@ -533,7 +536,7 @@ describe('api/main/teams', () => {
         });
 
         stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
-          get: () => {},
+          get: () => undefined,
           update: () => {
             const e = new Error();
             e.name = 'SequelizeUniqueConstraintError';
@@ -560,7 +563,7 @@ describe('api/main/teams', () => {
     describe('success', () => {
       let response;
       beforeEach((done) => {
-        request(app).patch('/1').send({ default_zoom: 15 }).then(r => {
+        request(app).patch('/1').send({ defaultZoom: 15 }).then(r => {
           response = r;
           done();
         });
@@ -612,10 +615,10 @@ describe('api/main/teams', () => {
       let response;
       beforeEach((done) => {
         stub(TeamMock, 'findOne').callsFake(() => Promise.resolve({
-          get: () => {},
+          get: () => undefined,
           update: stub().throws('Oh No')
         }));
-        request(app).patch('/1').send({ default_zoom: 15 }).then((r) => {
+        request(app).patch('/1').send({ defaultZoom: 15 }).then((r) => {
           response = r;
           done();
         });

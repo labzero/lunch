@@ -19,9 +19,7 @@ const mapDispatchToProps = dispatch => ({
   dispatch
 });
 
-const mergeProps = (stateProps, dispatchProps) => Object.assign({}, stateProps, dispatchProps, {
-  deleteTeam: () => dispatchProps.dispatch(removeTeam())
-});
+const mergeProps = (stateProps, dispatchProps) => ({ ...stateProps, ...dispatchProps, deleteTeam: () => dispatchProps.dispatch(removeTeam()) });
 
 export default connect(
   mapStateToProps,

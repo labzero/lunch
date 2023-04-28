@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import queryString from 'query-string';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import Button from 'react-bootstrap/lib/Button';
-import Col from 'react-bootstrap/lib/Col';
-import ControlLabel from 'react-bootstrap/lib/ControlLabel';
-import FormControl from 'react-bootstrap/lib/FormControl';
-import FormGroup from 'react-bootstrap/lib/FormGroup';
-import Grid from 'react-bootstrap/lib/Grid';
-import Row from 'react-bootstrap/lib/Row';
+import withStyles from 'isomorphic-style-loader/withStyles';
+import Button from 'react-bootstrap/Button';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
 import google from './google.svg';
 import s from './Login.scss';
 
@@ -16,21 +14,25 @@ class Login extends Component {
   static propTypes = {
     host: PropTypes.string.isRequired,
     next: PropTypes.string,
-    team: PropTypes.string
+    team: PropTypes.string,
   };
 
   static defaultProps = {
     next: undefined,
-    team: undefined
+    team: undefined,
   };
 
-  state = {
-    email: '',
-    password: ''
-  };
+  constructor(props) {
+    super(props);
 
-  handleChange = field => event => this.setState({
-    [field]: event.target.value
+    this.state = {
+      email: '',
+      password: '',
+    };
+  }
+
+  handleChange = (field) => (event) => this.setState({
+    [field]: event.target.value,
   });
 
   render() {
@@ -42,51 +44,59 @@ class Login extends Component {
 
     return (
       <div className={s.root}>
-        <Grid>
+        <Container>
           <h2>Log in</h2>
           <div className={s.googleButtonContainer}>
             <Button
-              bsSize="large"
-              bsStyle="primary"
+              size="lg"
+              variant="primary"
               className={s.googleButton}
-              href={`//${host}/login/google${googleQuery ? `?${googleQuery}` : ''}`}
+              href={`//${host}/login/google${
+                googleQuery ? `?${googleQuery}` : ''
+              }`}
             >
               <img className={s.googleLogo} src={google} alt="" />
               Sign in with Google
             </Button>
           </div>
           <h3>Email/password</h3>
-          <form action={`/login${nextQuery ? `?${nextQuery}` : ''}`} method="post">
+          <form
+            action={`/login${nextQuery ? `?${nextQuery}` : ''}`}
+            method="post"
+          >
             <Row>
               <Col sm={6}>
-                <FormGroup controlId="login-email">
-                  <ControlLabel>Email</ControlLabel>
-                  <FormControl
+                <Form.Group className="mb-3" controlId="login-email">
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
                     onChange={this.handleChange('email')}
                     name="email"
                     type="email"
                     required
                     value={email}
                   />
-                </FormGroup>
-                <FormGroup controlId="login-password">
-                  <ControlLabel>Password</ControlLabel>
-                  <FormControl
+                </Form.Group>
+                <Form.Group className="mb-3" controlId="login-password">
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
                     onChange={this.handleChange('password')}
                     name="password"
                     type="password"
                     required
                     value={password}
                   />
-                </FormGroup>
+                </Form.Group>
               </Col>
             </Row>
             <Button type="submit">Log in</Button>
-            <Button bsStyle="link" href={`//${host}/password/new${email ? `?email=${email}` : ''}`}>
+            <Button
+              href={`//${host}/password/new${email ? `?email=${email}` : ''}`}
+              variant="link"
+            >
               Forgot password?
             </Button>
           </form>
-        </Grid>
+        </Container>
       </div>
     );
   }

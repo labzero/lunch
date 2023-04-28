@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import request from 'request';
+import fetch from 'node-fetch';
 import { Restaurant, Vote, Tag } from '../../models';
 import checkTeamRole from '../helpers/checkTeamRole';
 import loggedIn from '../helpers/loggedIn';
@@ -22,7 +22,7 @@ export default () => {
       checkTeamRole(),
       async (req, res, next) => {
         try {
-          const all = await Restaurant.findAllWithTagIds({ team_id: req.team.id });
+          const all = await Restaurant.findAllWithTagIds({ teamId: req.team.id });
 
           res.status(200).json({ error: false, data: all });
         } catch (err) {
@@ -35,30 +35,28 @@ export default () => {
       checkTeamRole(),
       async (req, res, next) => {
         try {
-          const r = await Restaurant.findById(parseInt(req.params.id, 10));
+          const r = await Restaurant.findByPk(parseInt(req.params.id, 10));
 
-          if (r === null || r.team_id !== req.team.id) {
+          if (r === null || r.teamId !== req.team.id) {
             notFound(res);
           } else {
-            request(`https://maps.googleapis.com/maps/api/place/details/json?key=${apikey}&placeid=${r.place_id}`,
-              (error, response, body) => {
-                if (!error && response.statusCode === 200) {
-                  const json = JSON.parse(body);
-                  if (json.status !== 'OK') {
-                    const newError = {
-                      message: `Could not get info for restaurant. Google might have
-    removed its entry. Try removing it and adding it to Lunch again.`
-                    };
-                    res.status(404).json({ error: true, newError });
-                  } else if (json.result && json.result.url) {
-                    res.redirect(json.result.url);
-                  } else {
-                    res.redirect(`https://www.google.com/maps/place/${r.name}, ${r.address}`);
-                  }
-                } else {
-                  next(error);
-                }
-              });
+            const response = await fetch(`https://maps.googleapis.com/maps/api/place/details/json?key=${apikey}&placeid=${r.placeId}`);
+            const json = await response.json();
+            if (response.ok) {
+              if (json.status !== 'OK') {
+                const newError = {
+                  message: `Could not get info for restaurant. Google might have
+removed its entry. Try removing it and adding it to Lunch again.`
+                };
+                res.status(404).json({ error: true, newError });
+              } else if (json.result && json.result.url) {
+                res.redirect(json.result.url);
+              } else {
+                res.redirect(`https://www.google.com/maps/place/${r.name}, ${r.address}`);
+              }
+            } else {
+              next(json);
+            }
           }
         } catch (err) {
           next(err);
@@ -71,8 +69,7 @@ export default () => {
       checkTeamRole(),
       async (req, res, next) => {
         const {
-          // eslint-disable-next-line camelcase
-          name, place_id, lat, lng
+          name, placeId, lat, lng
         } = req.body;
 
         let { address } = req.body;
@@ -81,11 +78,11 @@ export default () => {
         try {
           const obj = await Restaurant.create({
             name,
-            place_id,
+            placeId,
             address,
             lat,
             lng,
-            team_id: req.team.id,
+            teamId: req.team.id,
             votes: [],
             tags: []
           }, { include: [Vote, Tag] });
@@ -93,7 +90,7 @@ export default () => {
           const json = obj.toJSON();
           json.all_decision_count = 0;
           json.all_vote_count = 0;
-          req.wss.broadcast(req.team.id, restaurantPosted(json, req.user.id));
+          req.broadcast(req.team.id, restaurantPosted(json, req.user.id));
           res.status(201).send({ error: false, data: json });
         } catch (err) {
           const error = { message: 'Could not save new restaurant. Has it already been added?' };
@@ -111,13 +108,13 @@ export default () => {
 
         Restaurant.update(
           { name },
-          { fields: ['name'], where: { id, team_id: req.team.id }, returning: true }
-        ).spread((count, rows) => {
+          { fields: ['name'], where: { id, teamId: req.team.id }, returning: true }
+        ).then(([count, rows]) => {
           if (count === 0) {
             notFound(res);
           } else {
             const json = { name: rows[0].toJSON().name };
-            req.wss.broadcast(req.team.id, restaurantRenamed(id, json, req.user.id));
+            req.broadcast(req.team.id, restaurantRenamed(id, json, req.user.id));
             res.status(200).send({ error: false, data: json });
           }
         }).catch(() => {
@@ -133,11 +130,11 @@ export default () => {
       async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
         try {
-          const count = await Restaurant.destroy({ where: { id, team_id: req.team.id } });
+          const count = await Restaurant.destroy({ where: { id, teamId: req.team.id } });
           if (count === 0) {
             notFound(res);
           } else {
-            req.wss.broadcast(req.team.id, restaurantDeleted(id, req.user.id));
+            req.broadcast(req.team.id, restaurantDeleted(id, req.user.id));
             res.status(204).send();
           }
         } catch (err) {
@@ -145,6 +142,6 @@ export default () => {
         }
       }
     )
-    .use('/:restaurant_id/votes', voteApi())
-    .use('/:restaurant_id/tags', restaurantTagApi());
+    .use('/:restaurantId/votes', voteApi())
+    .use('/:restaurantId/tags', restaurantTagApi());
 };

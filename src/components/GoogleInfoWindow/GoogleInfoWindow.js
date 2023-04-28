@@ -1,15 +1,15 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import Button from 'react-bootstrap/lib/Button';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
+import Button from 'react-bootstrap/Button';
+import withStyles from 'isomorphic-style-loader/withStyles';
 import s from './GoogleInfoWindow.scss';
 
 let google = {
   maps: {
     Marker: { MAX_ZINDEX: 1000000 },
-    places: { PlacesService: () => {}, PlacesServiceStatus: {} }
-  }
+    places: { PlacesService: () => {}, PlacesServiceStatus: {} },
+  },
 };
 if (canUseDOM) {
   google = window.google || google;
@@ -19,7 +19,7 @@ class GoogleInfoWindow extends Component {
   static propTypes = {
     addRestaurant: PropTypes.func.isRequired,
     map: PropTypes.any.isRequired,
-    placeId: PropTypes.string.isRequired
+    placeId: PropTypes.string.isRequired,
   };
 
   constructor(props) {
@@ -45,12 +45,8 @@ class GoogleInfoWindow extends Component {
         style={{ zIndex: google.maps.Marker.MAX_ZINDEX * 2 }}
       >
         <div className={s.buttonContainer}>
-          <Button
-            bsSize="large"
-            bsStyle="primary"
-            onClick={this.handleClick}
-          >
-Add to Lunch
+          <Button size="lg" variant="primary" onClick={this.handleClick}>
+            Add to Lunch
           </Button>
         </div>
       </div>

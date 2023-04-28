@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/lib/withStyles';
-import Button from 'react-bootstrap/lib/Button';
+import withStyles from 'isomorphic-style-loader/withStyles';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 import s from './RestaurantMapSettings.scss';
 
 class RestaurantMapSettings extends Component {
@@ -10,14 +11,18 @@ class RestaurantMapSettings extends Component {
     showPOIs: PropTypes.bool.isRequired,
     setShowPOIs: PropTypes.func.isRequired,
     showUnvoted: PropTypes.bool.isRequired,
-    setShowUnvoted: PropTypes.func.isRequired
+    setShowUnvoted: PropTypes.func.isRequired,
   };
 
-  state = {
-    collapsed: false
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      collapsed: false,
+    };
   }
 
-  toggleCollapsed = () => this.setState(prevState => ({ collapsed: !prevState.collapsed }));
+  toggleCollapsed = () => this.setState((prevState) => ({ collapsed: !prevState.collapsed }));
 
   render() {
     const {
@@ -25,7 +30,7 @@ class RestaurantMapSettings extends Component {
       showUnvoted,
       showPOIs,
       setShowPOIs,
-      setShowUnvoted
+      setShowUnvoted,
     } = this.props;
 
     const { collapsed } = this.state;
@@ -33,25 +38,33 @@ class RestaurantMapSettings extends Component {
     return (
       <div className={s.root}>
         {collapsed ? (
-          <Button bsSize="xsmall" onClick={this.toggleCollapsed}>Show</Button>
+          <Button size="xs" onClick={this.toggleCollapsed} variant="light">
+            Show
+          </Button>
         ) : (
           <div>
             <div className={s.buttons}>
-              <Button bsSize="xsmall" onClick={setDefaultZoom}>Save zoom level</Button>
-              <Button bsSize="xsmall" onClick={this.toggleCollapsed}>Hide</Button>
+              <Button size="xs" onClick={setDefaultZoom} variant="light">
+                Save zoom level
+              </Button>
+              <Button size="xs" onClick={this.toggleCollapsed} variant="light">
+                Hide
+              </Button>
             </div>
-            <div className={`checkbox ${s.checkbox}`}>
-              <label htmlFor="show-unvoted">
-                <input id="show-unvoted" type="checkbox" checked={showUnvoted} onChange={setShowUnvoted} />
-                Show Unvoted
-              </label>
-            </div>
-            <div className={`checkbox ${s.checkbox}`}>
-              <label htmlFor="show-pois">
-                <input id="show-pois" type="checkbox" checked={showPOIs} onChange={setShowPOIs} />
-                Show Points of Interest
-              </label>
-            </div>
+            <Form.Check
+              checked={showUnvoted}
+              className={s.checkbox}
+              id="show-unvoted"
+              label="Show Unvoted"
+              onChange={setShowUnvoted}
+            />
+            <Form.Check
+              checked={showPOIs}
+              className={s.checkbox}
+              id="show-pois"
+              label="Show Points of Interest"
+              onChange={setShowPOIs}
+            />
           </div>
         )}
       </div>

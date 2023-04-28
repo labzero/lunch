@@ -1,11 +1,9 @@
-const db = require('../../src/models/db');
-
 exports.up = (queryInterface, Sequelize) => queryInterface.addColumn('users', 'superuser', {
   allowNull: false,
   type: Sequelize.BOOLEAN,
   defaultValue: false
 }).then(() => {
-  const User = db.sequelize.define('user', {
+  const User = queryInterface.sequelize.define('user', {
     google_id: Sequelize.STRING,
     name: Sequelize.STRING,
     email: Sequelize.STRING,

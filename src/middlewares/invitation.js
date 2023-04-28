@@ -30,14 +30,14 @@ export default () => {
 
         if (token) {
           try {
-            const invitation = await Invitation.findOne({ where: { confirmation_token: token } });
+            const invitation = await Invitation.findOne({ where: { confirmationToken: token } });
 
             if (invitation) {
-              if (invitation.get('confirmed_at')) {
+              if (invitation.get('confirmedAt')) {
                 next();
               } else {
                 await invitation.update({
-                  confirmed_at: new Date()
+                  confirmedAt: new Date()
                 });
                 const recipients = await User.findAll({
                   where: { superuser: true },
@@ -75,13 +75,13 @@ Add them here: ${generateUrl(req, bsHost, `/users/new?email=${querystring.escape
           const existingInvitation = await Invitation.findOne({ where: { email } });
 
           if (existingInvitation) {
-            if (existingInvitation.get('confirmed_at')) {
+            if (existingInvitation.get('confirmedAt')) {
               req.flash('error', 'You\'ve already confirmed your invitation request. Please be patient!');
               return req.session.save(() => {
                 res.redirect('/invitation/new');
               });
             }
-            const confirmationSentAt = existingInvitation.get('confirmation_sent_at');
+            const confirmationSentAt = existingInvitation.get('confirmationSentAt');
             if (confirmationSentAt && Date.now() - confirmationSentAt < 60 * 60 * 1000 * 24) {
               req.flash('error', 'You\'ve already submitted an invitation request. Check your email for a confirmation URL. If you don\'t see one, check your spam folder or submit again in 24 hours.');
               return req.session.save(() => {
@@ -90,7 +90,7 @@ Add them here: ${generateUrl(req, bsHost, `/users/new?email=${querystring.escape
             }
             await sendConfirmation(req, email, existingInvitation.get('token'));
             await existingInvitation.update({
-              confirmation_sent_at: new Date()
+              confirmationSentAt: new Date()
             });
             req.flash('success', 'We\'ve resent an email to confirm your invitation request. Check your spam folder if you don\'t see it.');
             return req.session.save(() => {
@@ -102,8 +102,8 @@ Add them here: ${generateUrl(req, bsHost, `/users/new?email=${querystring.escape
 
           Invitation.create({
             email,
-            confirmation_token: confirmationToken,
-            confirmation_sent_at: new Date()
+            confirmationToken,
+            confirmationSentAt: new Date()
           });
 
           await sendConfirmation(req, email, confirmationToken);

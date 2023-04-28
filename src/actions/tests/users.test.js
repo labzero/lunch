@@ -2,14 +2,14 @@
 /* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates, arrow-body-style */
 
 import { expect } from 'chai';
-import configureStore from 'redux-mock-store';
+import { configureMockStore } from '@jedmao/redux-mock-store';
 import fetchMock from 'fetch-mock';
 import proxyquire from 'proxyquire';
 import thunk from 'redux-thunk';
 import * as users from '../users';
 
 const middlewares = [thunk];
-const mockStore = configureStore(middlewares);
+const mockStore = configureMockStore(middlewares);
 
 describe('actions/users', () => {
   let store;
@@ -198,7 +198,7 @@ describe('actions/users', () => {
 
       it('fetches user with full url', () => {
         store.dispatch(proxyUsers.removeUser(id, team));
-        expect(fetchMock.lastCall()[0]).to.eq(`//${team.slug}.lunch.pink/api/users/${id}`);
+        expect(fetchMock.lastCall()[0]).to.eq(`http://${team.slug}.lunch.pink/api/users/${id}`);
       });
     });
 

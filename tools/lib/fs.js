@@ -7,6 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+/* eslint-disable no-promise-executor-return */
+
 import fs from 'fs';
 import path from 'path';
 import glob from 'glob';
@@ -61,9 +63,7 @@ export const readDir = (pattern, options) => new Promise((resolve, reject) => gl
   (err, result) => (err ? reject(err) : resolve(result)),
 ));
 
-export const makeDir = name => new Promise((resolve, reject) => {
-  mkdirp(name, err => (err ? reject(err) : resolve()));
-});
+export const makeDir = mkdirp;
 
 export const moveDir = async (source, target) => {
   const dirs = await readDir('**/*.*', {
@@ -75,7 +75,7 @@ export const moveDir = async (source, target) => {
     dirs.map(async dir => {
       const from = path.resolve(source, dir);
       const to = path.resolve(target, dir);
-      await makeDir(path.dirname(to));
+      await mkdirp(path.dirname(to));
       await renameFile(from, to);
     }),
   );
@@ -91,7 +91,7 @@ export const copyDir = async (source, target) => {
     dirs.map(async dir => {
       const from = path.resolve(source, dir);
       const to = path.resolve(target, dir);
-      await makeDir(path.dirname(to));
+      await mkdirp(path.dirname(to));
       await copyFile(from, to);
     }),
   );
