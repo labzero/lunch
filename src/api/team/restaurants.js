@@ -109,7 +109,7 @@ removed its entry. Try removing it and adding it to Lunch again.`
         Restaurant.update(
           { name },
           { fields: ['name'], where: { id, teamId: req.team.id }, returning: true }
-        ).then((count, rows) => {
+        ).then(([count, rows]) => {
           if (count === 0) {
             notFound(res);
           } else {
