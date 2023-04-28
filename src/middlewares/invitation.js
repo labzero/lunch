@@ -72,6 +72,13 @@ Add them here: ${generateUrl(req, bsHost, `/users/new?email=${querystring.escape
         const { email } = req.body;
 
         try {
+          if (!email) {
+            req.flash('error', 'Email is required.');
+            return req.session.save(() => {
+              res.redirect('/invitation/new');
+            });
+          }
+
           const existingInvitation = await Invitation.findOne({ where: { email } });
 
           if (existingInvitation) {
