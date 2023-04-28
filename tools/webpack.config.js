@@ -14,6 +14,8 @@ import WebpackAssetsManifest from 'webpack-assets-manifest';
 import nodeExternals from 'webpack-node-externals';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import { InjectManifest } from 'workbox-webpack-plugin';
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import overrideRules from './lib/overrideRules';
 import pkg from '../package.json';
 
@@ -26,14 +28,14 @@ const isDebug = !process.argv.includes('--release');
 const isVerbose = process.argv.includes('--verbose');
 const isAnalyze = process.argv.includes('--analyze') || process.argv.includes('--analyse');
 
-const reScript = /\.(js|jsx|mjs)$/;
+const reScript = /\.(js|jsx|mjs|ts|tsx)$/;
 const reStyle = /\.(css|less|styl|scss|sass|sss)$/;
 const reImage = /\.(bmp|gif|jpg|jpeg|png|svg)$/;
 const staticAssetName = isDebug ? '[path][name].[ext]?[hash:8]' : '[hash:8].[ext]';
 
 //
 // Common configuration chunk to be used for both
-// client-side (client.js) and server-side (server.js) bundles
+// client-side (client.tsx) and server-side (server.js) bundles
 // -----------------------------------------------------------------------------
 
 const config = {
@@ -51,6 +53,14 @@ const config = {
   },
 
   resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
+
+    // Add support for TypeScripts fully qualified ESM imports.
+    extensionAlias: {
+      '.js': ['.js', '.ts'],
+      '.cjs': ['.cjs', '.cts'],
+      '.mjs': ['.mjs', '.mts']
+    },
     // Allow absolute paths in imports, e.g. import Button from 'components/Button'
     // Keep in sync with .flowconfig and .eslintrc
     modules: ['node_modules', 'src'],
@@ -71,8 +81,8 @@ const config = {
     rules: [
       // Rules for JS / JSX
       {
-        test: reScript,
-        include: [SRC_DIR, resolvePath('tools')],
+        test: /\.(js|jsx|mjs|ts|tsx)$/,
+        include: [ROOT_DIR, resolvePath('tools')],
         loader: 'babel-loader',
         options: {
           // https://github.com/babel/babel-loader#options
@@ -82,6 +92,7 @@ const config = {
           babelrc: false,
           configFile: false,
           presets: [
+            ['@babel/preset-typescript', { allowDeclareFields: true }],
             // A Babel preset that can automatically determine the Babel plugins and polyfills
             // https://github.com/babel/babel-preset-env
             [
@@ -96,16 +107,13 @@ const config = {
                 debug: false,
               },
             ],
-            // Flow
-            // https://github.com/babel/babel/tree/master/packages/babel-preset-flow
-            '@babel/preset-flow',
             // JSX
             // https://github.com/babel/babel/tree/master/packages/babel-preset-react
             ['@babel/preset-react', { development: isDebug }],
           ],
           plugins: [
             // Experimental ECMAScript proposals
-            '@babel/plugin-proposal-class-properties',
+            // '@babel/plugin-proposal-class-properties',
             '@babel/plugin-syntax-dynamic-import',
             // Treat React JSX elements as value types and hoist them to the highest scope
             // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-constant-elements
@@ -116,6 +124,7 @@ const config = {
             // Remove unnecessary React propTypes from the production build
             // https://github.com/oliviertassinari/babel-plugin-transform-react-remove-prop-types
             ...(isDebug ? [] : ['transform-react-remove-prop-types']),
+            ...(isDebug && process.env.NODE_ENV !== 'test' ? ['react-refresh/babel'] : []),
           ],
         },
       },
@@ -291,6 +300,16 @@ const config = {
     ],
   },
 
+  plugins: [
+    new ForkTsCheckerWebpackPlugin(),
+    isDebug && process.env.NODE_ENV !== 'test' && new webpack.HotModuleReplacementPlugin(),
+    isDebug && process.env.NODE_ENV !== 'test' && new ReactRefreshWebpackPlugin({
+      overlay: {
+        sockIntegration: 'whm',
+      }
+    })
+  ].filter(Boolean),
+
   // Don't attempt to continue if there are any errors.
   bail: !isDebug,
 
@@ -302,11 +321,11 @@ const config = {
 
   // Choose a developer tool to enhance debugging
   // https://webpack.js.org/configuration/devtool/#devtool
-  devtool: isDebug ? 'inline-cheap-module-source-map' : 'source-map',
+  devtool: isDebug ? 'inline-source-map' : 'source-map',
 };
 
 //
-// Configuration for the client-side bundle (client.js)
+// Configuration for the client-side bundle (client.tsx)
 // -----------------------------------------------------------------------------
 
 const clientConfig = {
@@ -316,10 +335,11 @@ const clientConfig = {
   target: 'web',
 
   entry: {
-    client: ['@babel/polyfill', './src/client.js'],
+    client: './src/client.tsx',
   },
 
   plugins: [
+    ...config.plugins,
     // Define free variables
     // https://webpack.js.org/plugins/define-plugin/
     new webpack.DefinePlugin({
@@ -418,7 +438,7 @@ const serverConfig = {
   target: 'node',
 
   entry: {
-    server: ['@babel/polyfill', './src/server.js'],
+    server: './src/server.tsx',
   },
 
   output: {
@@ -488,6 +508,7 @@ const serverConfig = {
   ],
 
   plugins: [
+    ...config.plugins,
     // Define free variables
     // https://webpack.js.org/plugins/define-plugin/
     new webpack.DefinePlugin({

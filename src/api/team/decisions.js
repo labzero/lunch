@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import dayjs from 'dayjs';
-import { DataTypes } from '../../models/db';
+import { Op } from '../../models/db';
 import { Decision } from '../../models';
 import checkTeamRole from '../helpers/checkTeamRole';
 import loggedIn from '../helpers/loggedIn';
@@ -20,7 +20,7 @@ export default () => {
           const days = parseInt(req.query.days, 10);
           if (!Number.isNaN(days)) {
             opts.where.createdAt = {
-              [DataTypes.Op.gt]: dayjs().subtract(days, 'days').toDate()
+              [Op.gt]: dayjs().subtract(days, 'days').toDate()
             };
           }
 
@@ -44,8 +44,8 @@ export default () => {
           let MaybeScopedDecision = Decision;
           if (daysAgo > 0) {
             destroyOpts.where.createdAt = {
-              [DataTypes.Op.gt]: dayjs().subtract(daysAgo, 'days').subtract(12, 'hours').toDate(),
-              [DataTypes.Op.lt]: dayjs().subtract(daysAgo, 'days').add(12, 'hours').toDate(),
+              [Op.gt]: dayjs().subtract(daysAgo, 'days').subtract(12, 'hours').toDate(),
+              [Op.lt]: dayjs().subtract(daysAgo, 'days').add(12, 'hours').toDate(),
             };
           } else {
             MaybeScopedDecision = MaybeScopedDecision.scope('fromToday');
@@ -65,7 +65,7 @@ export default () => {
             const obj = await Decision.create(createOpts);
 
             const json = obj.toJSON();
-            req.wss.broadcast(req.team.id, decisionPosted(json, deselected, req.user.id));
+            req.broadcast(req.team.id, decisionPosted(json, deselected, req.user.id));
             res.status(201).send({ error: false, data: obj });
           } catch (err) {
             const error = { message: 'Could not save decision.' };
@@ -85,7 +85,7 @@ export default () => {
           const decisions = await Decision.scope('fromToday').findAll({ where: { teamId: req.team.id } });
           await Decision.scope('fromToday').destroy({ where: { teamId: req.team.id } });
 
-          req.wss.broadcast(req.team.id, decisionsDeleted(decisions, req.user.id));
+          req.broadcast(req.team.id, decisionsDeleted(decisions, req.user.id));
           res.status(204).send();
         } catch (err) {
           next(err);

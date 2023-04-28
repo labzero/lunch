@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
+import RobustWebSocket from 'robust-websocket';
 import withStyles from 'isomorphic-style-loader/withStyles';
 import FooterContainer from '../../../components/Footer/FooterContainer';
 import NameFilterFormContainer from '../../../components/NameFilterForm/NameFilterFormContainer';
@@ -49,7 +50,7 @@ export class _Home extends Component {
       if (window.location.protocol === 'https:') {
         protocol = 'wss:';
       }
-      this.socket = new window.RobustWebSocket(
+      this.socket = new RobustWebSocket(
         `${protocol}//${host}/api`,
         null,
         {

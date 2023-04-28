@@ -56,6 +56,8 @@ export default () => {
       } else {
         allowed = true;
       }
+    } else if (target === undefined && user.id === roleToChange.userId) {
+      allowed = true;
     } else {
       allowed = canChangeRole(currentUserRole.type, roleToChange.type, target);
     }
@@ -126,7 +128,7 @@ ${req.user.get('name')} invited you to the ${req.team.get('name')} team on Lunch
 To get started, simply visit ${generateUrl(req, `${req.team.get('slug')}.${bsHost}`)} and vote away.
 
 Happy Lunching!`
-            }).then(() => {}).catch(() => {});
+            }).then(() => undefined).catch(() => undefined);
 
             userToAdd = await UserWithTeamRole.findOne({
               where: { email },
@@ -150,7 +152,7 @@ Happy Lunching!`
           }, { include: [Role] });
 
           // returns a promise but we're not going to wait to see if it succeeds.
-          Invitation.destroy({ where: { email } }).then(() => {}).catch(() => {});
+          Invitation.destroy({ where: { email } }).then(() => undefined).catch(() => undefined);
 
           // returns a promise but we're not going to wait to see if it succeeds.
           transporter.sendMail({
@@ -167,7 +169,7 @@ If you'd like to log in using a password instead, just follow this URL to genera
 ${generateUrl(req, bsHost, `/password/edit?token=${resetPasswordToken}`)}
 
 Happy Lunching!`
-          }).then(() => {}).catch(() => {});
+          }).then(() => undefined).catch(() => undefined);
 
           // Sequelize can't apply scopes on create, so just get user again.
           // Also will exclude hidden fields like password, token, etc.

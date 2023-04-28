@@ -10,6 +10,10 @@
 /* eslint-disable global-require */
 import rootAction from '../helpers/rootAction';
 
+import invitation from './invitation';
+import password from './password';
+import users from './users';
+
 // The top-level (parent) route
 export default {
 
@@ -19,49 +23,49 @@ export default {
   children: [
     {
       path: '',
-      load: () => import(/* webpackChunkName: 'landing' */ './landing'),
+      action: async (context) => (await import(/* webpackChunkName: 'landing' */ './landing')).default(context)
     },
     {
       path: '/teams',
-      load: () => import(/* webpackChunkName: 'teams' */ './teams'),
+      action: async (context) => (await import(/* webpackChunkName: 'teams' */ './teams')).default(context)
     },
     {
       path: '/new-team',
-      load: () => import(/* webpackChunkName: 'new-team' */ './new-team'),
+      action: async (context) => (await import(/* webpackChunkName: 'new-team' */ './new-team')).default(context)
     },
     {
       path: '/account',
-      load: () => import(/* webpackChunkName: 'account' */ './account'),
+      action: async (context) => (await import(/* webpackChunkName: 'account' */ './account')).default(context)
     },
     {
       path: '/welcome',
-      load: () => import(/* webpackChunkName: 'welcome' */ './welcome'),
+      action: async (context) => (await import(/* webpackChunkName: 'welcome' */ './welcome')).default(context)
     },
     {
       path: '/invitation',
-      children: require('./invitation').default,
+      children: invitation,
     },
     {
       path: '/password',
-      children: require('./password').default,
+      children: password,
     },
     {
       path: '/users',
-      children: require('./users').default,
+      children: users,
     },
     {
       path: '/about',
-      load: () => import(/* webpackChunkName: 'about' */ './about'),
+      action: async (context) => (await import(/* webpackChunkName: 'about' */ './about')).default(context)
     },
     {
       path: '/login',
-      load: () => import(/* webpackChunkName: 'login' */ '../login'),
+      action: async (context) => (await import(/* webpackChunkName: 'login' */ '../login')).default(context)
     },
 
     // Wildcard routes, e.g. { path: '(.*)', ... } (must go last)
     {
       path: '(.*)',
-      load: () => import(/* webpackChunkName: 'not-found' */ '../not-found'),
+      action: async (context) => (await import(/* webpackChunkName: 'not-found' */ '../not-found')).default(context)
     }
   ],
 

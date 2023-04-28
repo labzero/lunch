@@ -14,7 +14,6 @@ import s from './Landing.scss';
 const renderForm = () => (
   <Form
     className={s.form}
-    inline
     action="/invitation?success=sent"
     method="post"
   >

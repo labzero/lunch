@@ -2,13 +2,13 @@
 
 import { expect } from 'chai';
 import { useFakeTimers } from 'sinon';
-import configureStore from 'redux-mock-store';
+import { configureMockStore } from '@jedmao/redux-mock-store';
 import thunk from 'redux-thunk';
 import proxyquire from 'proxyquire';
 import * as websockets from '../websockets';
 
 const middlewares = [thunk];
-const mockStore = configureStore(middlewares);
+const mockStore = configureMockStore(middlewares);
 
 describe('actions/websockets', () => {
   let store;

@@ -3,11 +3,11 @@
 
 import { expect } from 'chai';
 import proxyquire from 'proxyquire';
-import configureStore from 'redux-mock-store';
+import { configureMockStore } from '@jedmao/redux-mock-store';
 import mockEsmodule from '../../../../test/mockEsmodule';
 
 const proxyquireStrict = proxyquire.noCallThru();
-const mockStore = configureStore();
+const mockStore = configureMockStore();
 
 describe('routes/team/team', () => {
   let context;

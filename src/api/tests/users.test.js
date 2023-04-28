@@ -75,9 +75,7 @@ describe('api/team/users', () => {
       const server = express();
       server.use(bodyParser.json());
       server.use((req, res, next) => {
-        req.wss = { // eslint-disable-line no-param-reassign
-          broadcast: broadcastSpy
-        };
+        req.broadcast = broadcastSpy;
         next();
       });
       server.use('/', usersApi());

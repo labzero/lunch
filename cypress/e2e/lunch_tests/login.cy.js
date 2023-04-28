@@ -1,6 +1,9 @@
 /* eslint-disable no-undef */
 import * as helpers from '../../support/helpers';
 
+const superuserEmail = Cypress.env('superuserEmail');
+const superuserPassword = Cypress.env('superuserPassword');
+
 describe('login page', () => {
   beforeEach(() => {
     cy.visit('/login');
@@ -13,8 +16,8 @@ describe('login page', () => {
   });
 
   it('logs in and out successfully', () => {
-    cy.get('#login-email').type('test@lunch.pink');
-    cy.get('#login-password').type('test');
+    cy.get('#login-email').type(superuserEmail);
+    cy.get('#login-password').type(superuserPassword);
     cy.get('button[type="submit"]').click();
     helpers.deleteTeam();
     cy.contains('You’re not currently a part of any teams!');

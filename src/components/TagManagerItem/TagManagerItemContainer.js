@@ -21,7 +21,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
       actionLabel: 'Delete',
       body: `Are you sure you want to delete the “${stateProps.tag.name}” tag?
         All restaurants will be untagged.`,
-      handleSubmit: () => dispatchProps.dispatch(removeTag(ownProps.id))
+      action: removeTag(ownProps.id)
     }));
   }
 });

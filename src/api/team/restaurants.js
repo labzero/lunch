@@ -90,7 +90,7 @@ removed its entry. Try removing it and adding it to Lunch again.`
           const json = obj.toJSON();
           json.all_decision_count = 0;
           json.all_vote_count = 0;
-          req.wss.broadcast(req.team.id, restaurantPosted(json, req.user.id));
+          req.broadcast(req.team.id, restaurantPosted(json, req.user.id));
           res.status(201).send({ error: false, data: json });
         } catch (err) {
           const error = { message: 'Could not save new restaurant. Has it already been added?' };
@@ -114,7 +114,7 @@ removed its entry. Try removing it and adding it to Lunch again.`
             notFound(res);
           } else {
             const json = { name: rows[0].toJSON().name };
-            req.wss.broadcast(req.team.id, restaurantRenamed(id, json, req.user.id));
+            req.broadcast(req.team.id, restaurantRenamed(id, json, req.user.id));
             res.status(200).send({ error: false, data: json });
           }
         }).catch(() => {
@@ -134,7 +134,7 @@ removed its entry. Try removing it and adding it to Lunch again.`
           if (count === 0) {
             notFound(res);
           } else {
-            req.wss.broadcast(req.team.id, restaurantDeleted(id, req.user.id));
+            req.broadcast(req.team.id, restaurantDeleted(id, req.user.id));
             res.status(204).send();
           }
         } catch (err) {

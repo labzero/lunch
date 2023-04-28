@@ -11,7 +11,7 @@ describe('processResponse', () => {
 
   beforeEach(() => {
     replaceSpy = spy();
-    processResponse = proxyquireStrict('../ApiClient.js', {
+    processResponse = proxyquireStrict('../ApiClient.ts', {
       '../actions/flash': {
         flashError: (message) => ({
           type: 'FLASH_ERROR',

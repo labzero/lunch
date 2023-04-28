@@ -40,7 +40,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
   deleteRestaurant: () => dispatchProps.dispatch(showModal('confirm', {
     actionLabel: 'Delete',
     body: `Are you sure you want to delete ${stateProps.restaurant.name}?`,
-    handleSubmit: () => dispatchProps.dispatch(removeRestaurant(ownProps.id))
+    action: removeRestaurant(ownProps.id)
   })),
   showEditNameForm: () => {
     dispatchProps.dispatch(setEditNameFormValue(ownProps.id, stateProps.restaurant.name));

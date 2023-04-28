@@ -67,7 +67,7 @@ class App extends React.PureComponent {
       loader: new Loader({
         apiKey: this.props.context.googleApiKey,
         version: 'weekly',
-        libraries: ['places', 'geocoder']
+        libraries: ['places', 'geocoding']
       })
     };
 

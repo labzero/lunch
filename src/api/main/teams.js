@@ -46,8 +46,11 @@ export default () => {
         } = req.body;
         const message409 = 'Could not create new team. It might already exist.';
 
-        if (!req.user.superuser && req.user.roles.length >= TEAM_LIMIT) {
-          return res.status(403).json({ error: true, data: { message: `You currently can't join more than ${TEAM_LIMIT} teams.` } });
+        if (!req.user.superuser) {
+          const roles = await req.user.getRoles();
+          if (roles.length >= TEAM_LIMIT) {
+            return res.status(403).json({ error: true, data: { message: `You currently can't join more than ${TEAM_LIMIT} teams.` } });
+          }
         }
 
         if (reservedTeamSlugs.indexOf(slug) > -1) {
@@ -108,6 +111,7 @@ export default () => {
         let fieldCount = 0;
 
         const allowedFields = [{ name: 'defaultZoom', type: 'number' }];
+
         if (hasRole(req.user, req.team, 'owner')) {
           allowedFields.push({
             name: 'address',
@@ -168,7 +172,7 @@ ${req.user.get('name')} has changed the URL of the ${req.team.get('name')} team 
 From now on, the team can be accessed at ${generateUrl(req, `${filteredPayload.slug}.${bsHost}`)}. Please update any bookmarks you might have created.
 
 Happy Lunching!`
-                }).then(() => {}).catch(() => {});
+                }).then(() => undefined).catch(() => undefined);
 
                 return res.status(200).json({ error: false, data: req.team });
               });

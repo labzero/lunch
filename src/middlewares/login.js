@@ -80,7 +80,7 @@ export default () => {
       passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) { return next(err); }
         if (!user) {
-          req.flash('error', info); // eslint-disable-line no-param-reassign
+          req.flash('error', info.message); // eslint-disable-line no-param-reassign
           return next();
         }
         return req.logIn(user, (logInErr) => {

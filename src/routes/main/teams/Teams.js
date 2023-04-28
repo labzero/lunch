@@ -22,7 +22,7 @@ class Teams extends Component {
       actionLabel: 'Leave',
       body: `Are you sure you want to leave this team?
 You will need to be invited back by another member.`,
-      handleSubmit: () => this.props.leaveTeam(team),
+      action: this.props.leaveTeam(team),
     });
   };
 

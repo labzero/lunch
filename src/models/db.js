@@ -1,14 +1,11 @@
-// use require syntax to work with migrations
-const Sequelize = require('sequelize');
-const configs = require('../../database');
+import { Op, Sequelize } from 'sequelize';
+import configs from '../../database';
 
-const env = process.env.NODE_ENV || 'development';
+const env = (process.env.NODE_ENV || 'development');
+
 const config = configs[env];
-config.operatorsAliases = { $gt: Sequelize.Op.gt, $lt: Sequelize.Op.lt };
 
-const sequelizeInst = new Sequelize(config.database, config.username, config.password, config);
+config.operatorsAliases = { $gt: Op.gt, $lt: Op.lt };
 
-module.exports = {
-  sequelize: sequelizeInst,
-  DataTypes: Sequelize
-};
+export const sequelize = new Sequelize(config.database, config.username, config.password, config);
+export { DataTypes, Op } from 'sequelize';

@@ -36,7 +36,7 @@ export default () => {
           } else {
             try {
               const json = result.toJSON();
-              req.wss.broadcast(req.team.id, votePosted(json));
+              req.broadcast(req.team.id, votePosted(json));
               res.status(201).send({ error: false, data: result });
             } catch (err) {
               next(err);
@@ -60,7 +60,7 @@ export default () => {
           if (count === 0) {
             notFound(res);
           } else {
-            req.wss.broadcast(
+            req.broadcast(
               req.team.id,
               voteDeleted(parseInt(req.params.restaurantId, 10), req.user.id, id)
             );

@@ -36,6 +36,7 @@ class Team extends React.Component {
     confirmDeleteTeam: PropTypes.func.isRequired,
     currentUser: PropTypes.object.isRequired,
     deleteTeamShown: PropTypes.bool.isRequired,
+    dispatch: PropTypes.func.isRequired,
     fetchUsersIfNeeded: PropTypes.func.isRequired,
     hasGuestRole: PropTypes.bool.isRequired,
     hasMemberRole: PropTypes.bool.isRequired,
@@ -56,7 +57,7 @@ class Team extends React.Component {
 
     const newRole = event.target.value;
 
-    const changeRole = () => this.props.changeUserRole(user.id, newRole);
+    const changeRole = this.props.changeUserRole(user.id, newRole);
 
     if (
       event.target.value === 'member'
@@ -65,16 +66,16 @@ class Team extends React.Component {
       this.props.confirm({
         actionLabel: 'Promote',
         body: 'Are you sure you want to promote this user to Member status? You will not be able to demote them later.',
-        handleSubmit: changeRole,
+        action: changeRole,
       });
     } else if (currentUser.id === user.id && !currentUser.superuser) {
       this.props.confirm({
         actionLabel: 'Demote',
         body: 'Are you sure you want to demote yourself? You will not be able to undo this by yourself.',
-        handleSubmit: changeRole,
+        action: changeRole,
       });
     } else {
-      changeRole();
+      this.props.dispatch(changeRole);
     }
   };
 
