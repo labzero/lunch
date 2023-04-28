@@ -201,7 +201,7 @@ jobs:
       - aws-deploy:
           task_family: lunch
           ecs_cluster: Lunch
-          service_name: lunch
+          service_name: lunch-production
           migration_task: lunch_migrate
 
 # WORKFLOW DEFINITIONS
