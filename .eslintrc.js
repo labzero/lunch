@@ -70,7 +70,7 @@ module.exports = {
     'prefer-destructuring': 0,
 
     // Allow js files to use jsx syntax, too
-    'react/jsx-filename-extension': ['error', { extensions: ['.js', '.jsx'] }],
+    'react/jsx-filename-extension': ['error', { extensions: ['.js', '.jsx', '.tsx'] }],
 
     // Automatically convert pure class to function by
     // babel-plugin-transform-react-pure-class-to-function

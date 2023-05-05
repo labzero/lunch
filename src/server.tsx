@@ -455,6 +455,8 @@ const pe = new PrettyError();
 pe.skipNodeFiles();
 pe.skipPackage('express');
 
+app.use(Honeybadger.errorHandler); // Use *after* all other app middleware.
+
 // eslint-disable-next-line no-unused-vars
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error(pe.render(err));
@@ -479,11 +481,9 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
       },
     });
   }
-  next(err);
-}
-app.use(errorHandler);
+};
 
-app.use(Honeybadger.errorHandler); // Use *after* all other app middleware.
+app.use(errorHandler);
 
 //
 // Launch the server

@@ -30,6 +30,11 @@ label {
   font-weight: bold;
 }
 
+button,
+input {
+  color: inherit;
+}
+
 .geosuggest__input {
   box-shadow: none;
 }
