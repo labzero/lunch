@@ -12,7 +12,7 @@ import path from 'path';
 import fs from 'fs';
 import { createStream } from 'rotating-file-stream';
 import morgan from 'morgan';
-import express, { ErrorRequestHandler, NextFunction, Request, RequestHandler, Response } from 'express';
+import express, { ErrorRequestHandler, RequestHandler } from 'express';
 import cors from 'cors';
 import http from 'http';
 import https from 'https';
@@ -20,7 +20,7 @@ import enforce from 'express-sslify';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
-import bodyParserErrorHandler from 'express-body-parser-error-handler'
+import bodyParserErrorHandler from 'express-body-parser-error-handler';
 import methodOverride from 'method-override';
 import session from 'express-session';
 import connectSessionSequelize from 'connect-session-sequelize';
@@ -33,6 +33,7 @@ import expressWs from 'express-ws';
 import Honeybadger from '@honeybadger-io/js';
 import PrettyError from 'pretty-error';
 import { v1 } from 'uuid';
+import { ResolveContext } from 'universal-router';
 import App from './components/App';
 import Html from './components/Html';
 import { ErrorPageWithoutStyle } from './components/ErrorPage/ErrorPage';
@@ -58,7 +59,6 @@ import { sequelize } from './models/db';
 import { Team, User } from './models';
 import { Flash, StateData } from './interfaces';
 import { ExtWebSocket, Style } from '../global';
-import { ResolveContext } from 'universal-router';
 
 process.on('unhandledRejection', (reason, p) => {
   console.error('Unhandled Rejection at:', p, 'reason:', reason);
