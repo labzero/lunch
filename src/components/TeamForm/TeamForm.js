@@ -102,7 +102,6 @@ class TeamForm extends Component {
         <Form.Group className="mb-3" controlId="teamForm-vote-duration">
           <Form.Label>Sort duration</Form.Label>
           <OverlayTrigger
-            trigger="focus"
             placement="right"
             overlay={popoverRight}
           >
