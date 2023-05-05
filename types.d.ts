@@ -19,3 +19,5 @@ declare module "*.scss" {
 }
 
 declare module 'react-deep-force-update';
+
+declare module 'express-body-parser-error-handler';
