@@ -20,6 +20,7 @@ import enforce from 'express-sslify';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
+import bodyParserErrorHandler from 'express-body-parser-error-handler'
 import methodOverride from 'method-override';
 import session from 'express-session';
 import connectSessionSequelize from 'connect-session-sequelize';
@@ -138,6 +139,9 @@ app.use(express.static(path.resolve(__dirname, 'public')));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use(bodyParserErrorHandler());
+
 app.use(
   methodOverride((req) => {
     if (req.body && typeof req.body === 'object' && '_method' in req.body) {
