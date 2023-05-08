@@ -2,7 +2,7 @@ import { sequelize, DataTypes } from './db';
 
 const Invitation = sequelize.define('invitation', {
   email: {
-    type: DataTypes.STRING,
+    type: DataTypes.CITEXT,
     allowNull: false,
     unique: true
   },

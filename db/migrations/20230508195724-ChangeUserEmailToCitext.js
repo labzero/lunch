@@ -7,9 +7,9 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.sequelize.query('DROP EXTENSION citext;');
     await queryInterface.changeColumn('users', 'email', {
       type: Sequelize.STRING
     });
+    await queryInterface.sequelize.query('DROP EXTENSION citext;');
   }
 };
