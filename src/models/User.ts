@@ -66,7 +66,7 @@ User.init({
   },
   googleId: DataTypes.STRING,
   name: DataTypes.STRING,
-  email: DataTypes.STRING,
+  email: DataTypes.CITEXT,
   encryptedPassword: DataTypes.STRING,
   resetPasswordToken: DataTypes.STRING,
   resetPasswordSentAt: DataTypes.DATE,
