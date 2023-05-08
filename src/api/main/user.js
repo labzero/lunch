@@ -66,6 +66,9 @@ export default () => {
 
             return res.status(200).json({ error: false, data: user });
           } catch (err) {
+            if (err.name === 'SequelizeUniqueConstraintError') {
+              return res.status(422).json({ error: true, data: { message: 'Email is already taken.' } });
+            }
             return next(err);
           }
         }
