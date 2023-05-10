@@ -98,13 +98,7 @@ const config = {
             [
               '@babel/preset-env',
               {
-                targets: {
-                  browsers: pkg.browserslist,
-                },
                 forceAllTransforms: !isDebug, // for UglifyJS
-                modules: false,
-                useBuiltIns: false,
-                debug: false,
               },
             ],
             // JSX
