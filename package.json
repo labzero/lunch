@@ -10,7 +10,6 @@
     "defaults"
   ],
   "dependencies": {
-    "@babel/polyfill": "^7.0.0",
     "@googlemaps/js-api-loader": "^1.15.1",
     "@honeybadger-io/js": "^5.0.0",
     "@popperjs/core": "^2.11.7",
@@ -24,7 +23,7 @@
     "connect-flash": "^0.1.1",
     "connect-session-sequelize": "^7.1.5",
     "cookie-parser": "^1.4.6",
-    "core-js": "^2.5.4",
+    "core-js": "^3.30.2",
     "cors": "^2.8.3",
     "dayjs": "^1.11.7",
     "dotenv": "^2.0.0",
@@ -254,5 +253,6 @@
     "serve": "babel-node tools/run runServer || true",
     "start": "babel-node tools/run start",
     "prepare": "husky install"
-  }
+  },
+  "packageManager": "yarn@3.5.1"
 }

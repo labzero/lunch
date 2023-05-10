@@ -11,7 +11,7 @@
 
 require('global-jsdom/register');
 
-require('@babel/polyfill');
+require('core-js/stable');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { use } = require('chai');
