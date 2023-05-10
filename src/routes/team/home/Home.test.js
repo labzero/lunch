@@ -4,9 +4,30 @@
 import React from 'react';
 import { spy, useFakeTimers } from 'sinon';
 import { expect } from 'chai';
-import { shallow } from 'enzyme';
-import { _Home as Home } from './Home';
-import RestaurantAddFormContainer from '../../../components/RestaurantAddForm/RestaurantAddFormContainer';
+import proxyquire from 'proxyquire';
+import { render, screen } from '../../../../test/test-utils';
+
+const proxy = proxyquire.noCallThru();
+
+const FooterContainer = () => <div>Stubbed footercontainer.</div>;
+const NameFilterFormContainer = () => <div>Stubbed name filter form container.</div>;
+const PastDecisionsModalContainer = () => <div>Stubbed past decisions modal container.</div>;
+const RestaurantMapContainer = () => <div>Stubbed restaurant map container.</div>;
+const RestaurantListContainer = () => <div>Stubbed restaurant list container.</div>;
+const RestaurantAddFormContainer = () => <div>Stubbed restaurant add form container.</div>;
+const TagFilterFormContainer = () => <div>Stubbed tag filter form container.</div>;
+
+// eslint-disable-next-line no-underscore-dangle
+const Home = proxy('./Home', {
+  'fbjs/lib/ExecutionEnvironment': { canUseDOM: false },
+  '../../../components/RestaurantAddForm/RestaurantAddFormContainer': RestaurantAddFormContainer,
+  '../../../components/Footer/FooterContainer': FooterContainer,
+  '../../../components/NameFilterForm/NameFilterFormContainer': NameFilterFormContainer,
+  '../../../components/PastDecisionsModal/PastDecisionsModalContainer': PastDecisionsModalContainer,
+  '../../../components/RestaurantMap/RestaurantMapContainer': RestaurantMapContainer,
+  '../../../components/RestaurantList/RestaurantListContainer': RestaurantListContainer,
+  '../../../components/TagFilterForm/TagFilterFormContainer': TagFilterFormContainer,
+})._Home;
 
 describe('Home', () => {
   let props;
@@ -37,23 +58,29 @@ describe('Home', () => {
       invalidateRestaurants,
       invalidateTags,
       invalidateUsers,
-      messageReceived: () => {},
+      messageReceived: () => undefined,
       pastDecisionsShown: false,
       user: {},
       wsPort: 3000,
     };
   });
 
-  it('renders form if user is logged in', () => {
+  const renderComponent = async () => {
+    render(<Home {...props} />);
+
+    expect(await screen.findByText('Stubbed restaurant map container.')).to.be.in.document;
+  };
+
+  it('renders form if user is logged in', async () => {
     props.user.id = 1;
 
-    const wrapper = shallow(<Home {...props} />);
+    await renderComponent();
 
-    expect(wrapper.find(RestaurantAddFormContainer).length).to.eq(1);
+    expect(await screen.findByText('Stubbed restaurant add form container.')).to.be.in.document;
   });
 
-  it('invalidates and fetches all data upon mount', () => {
-    shallow(<Home {...props} />);
+  it('invalidates and fetches all data upon mount', async () => {
+    await renderComponent();
 
     expect(invalidateDecisions.callCount).to.eq(1);
     expect(invalidateRestaurants.callCount).to.eq(1);
@@ -66,10 +93,10 @@ describe('Home', () => {
     expect(fetchUsers.callCount).to.eq(1);
   });
 
-  it('fetches all data after an hour', () => {
-    const clock = useFakeTimers();
+  it('fetches all data after an hour', async () => {
+    const clock = useFakeTimers({ shouldAdvanceTime: true });
 
-    shallow(<Home {...props} />);
+    await renderComponent();
 
     clock.tick(1000 * 60 * 60);
 

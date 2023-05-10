@@ -11,20 +11,23 @@
 /* eslint-disable no-unused-expressions */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { expect } from 'chai';
-import { shallow } from 'enzyme';
 import proxyquire from 'proxyquire';
-
-const context = { insertCss: () => {} };
+import { render, screen } from '../../../test/test-utils';
 
 const proxy = proxyquire.noCallThru();
 
+const HeaderContainer = () => <div>Stubbed header container.</div>;
 const FooterContainer = () => <div>Stubbed footer container.</div>;
 const ConfirmModalContainer = () => <div>Stubbed confirm modal container.</div>;
+const NotificationListContainer = () => <div>Stubbed notification list container.</div>;
 
 const Layout = proxy('./Layout', {
+  '../Header/HeaderContainer': HeaderContainer,
   '../Footer/FooterContainer': FooterContainer,
-  '../ConfirmModal/ConfirmModalContainer': ConfirmModalContainer
+  '../ConfirmModal/ConfirmModalContainer': ConfirmModalContainer,
+  '../NotificationList/NotificationListContainer': NotificationListContainer,
 }).default;
 
 describe('Layout', () => {
@@ -32,69 +35,72 @@ describe('Layout', () => {
 
   beforeEach(() => {
     props = {
-      children: <div className="child" />,
+      children: <div>Child</div>,
       confirmShown: false,
       shouldScrollToTop: false,
-      scrolledToTop: () => {}
+      scrolledToTop: () => undefined
     };
   });
 
-  it('renders children correctly', () => {
-    const wrapper = shallow(
-      <Layout {...props} />,
-      { context }
-    );
+  const renderComponent = () => {
+    class LayoutWithContext extends React.Component {
+      static childContextTypes = {
+        insertCss: PropTypes.func.isRequired
+      };
 
-    expect(wrapper.contains(<div className="child" />)).to.be.true;
+      getChildContext() {
+        return { insertCss: () => undefined };
+      }
+
+      render() {
+        return <Layout {...this.props} />;
+      }
+    }
+
+    return render(<LayoutWithContext {...props} />);
+  };
+
+  it('renders children correctly', async () => {
+    renderComponent();
+
+    expect(await screen.findByText('Child')).to.be.in.document;
   });
 
-  it('does not render the FooterContainer component if the isHome prop is true', () => {
+  it('does not render the FooterContainer component if the isHome prop is true', async () => {
     props.isHome = true;
-    const wrapper = shallow(
-      <Layout {...props} />,
-      { context }
-    );
 
-    expect(wrapper.find('FooterContainer')).to.have.length(0);
+    renderComponent();
+
+    expect(await screen.queryByText('Stubbed footer container.')).not.to.be.in.document;
   });
 
-  it('renders the FooterContainer component if the isHome prop is false', () => {
+  it('renders the FooterContainer component if the isHome prop is false', async () => {
     props.isHome = false;
 
-    const wrapper = shallow(
-      <Layout {...props} />,
-      { context }
-    );
+    renderComponent();
 
-    expect(wrapper.find('FooterContainer')).to.have.length(1);
+    expect(await screen.findByText('Stubbed footer container.')).to.be.in.document;
   });
 
-  it('renders the FooterContainer component if the isHome prop is left undefined', () => {
-    const wrapper = shallow(
-      <Layout {...props} />,
-      { context }
-    );
+  it('renders the FooterContainer component if the isHome prop is left undefined', async () => {
+    renderComponent();
 
-    expect(wrapper.find('FooterContainer')).to.have.length(1);
+    expect(await screen.findByText('Stubbed footer container.')).to.be.in.document;
   });
 
-  it('renders the ConfirmModalContainer component if the confirmShown prop is set to true', () => {
+  it('renders the ConfirmModalContainer component if the confirmShown prop is set to true', async () => {
     props.confirmShown = true;
-    const wrapper = shallow(
-      <Layout {...props} />,
-      { context }
-    );
 
-    expect(wrapper.find('ConfirmModalContainer')).to.have.length(1);
+    renderComponent();
+
+    expect(await screen.findByText('Stubbed confirm modal container.')).to.be.in.document;
   });
 
-  it('does not render the ConfirmModalContainer component if the confirmShown prop is set to false', () => {
+  it('does not render the ConfirmModalContainer component if the confirmShown prop is set to false', async () => {
     props.confirmShown = false;
-    const wrapper = shallow(
-      <Layout {...props} />,
-      { context }
-    );
 
-    expect(wrapper.find('ConfirmModalContainer')).to.have.length(0);
+    renderComponent();
+
+    expect(await screen.queryByText('Stubbed confirm modal container.')).not.to.be.in.document;
   });
 });

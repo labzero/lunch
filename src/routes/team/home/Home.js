@@ -78,7 +78,9 @@ export class _Home extends Component {
   }
 
   componentWillUnmount() {
-    this.socket.close();
+    if (this.socket) {
+      this.socket.close();
+    }
     clearInterval(this.pingInterval);
     clearInterval(this.fetchAllInterval);
   }

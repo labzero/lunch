@@ -4,7 +4,7 @@
 import React from 'react';
 import sinon from 'sinon';
 import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import { render, screen } from '../../../test/test-utils';
 import { _RestaurantAddTagForm as RestaurantAddTagForm } from './RestaurantAddTagForm';
 
 describe('RestaurantAddTagForm', () => {
@@ -14,15 +14,14 @@ describe('RestaurantAddTagForm', () => {
     props = {
       addedTags: [],
       addNewTagToRestaurant: sinon.mock(),
-      addTagToRestaurant: () => {},
-      hideAddTagForm: () => {},
+      addTagToRestaurant: () => undefined,
+      hideAddTagForm: () => undefined,
       tags: []
     };
   });
 
-  it('disables add button when autosuggest value is blank', () => {
-    const wrapper = shallow(<RestaurantAddTagForm {...props} />, { disableLifecycleMethods: true });
-    expect(wrapper.render().find('button').first()
-      .attr('disabled')).to.eq('disabled');
+  it('disables add button when autosuggest value is blank', async () => {
+    render(<RestaurantAddTagForm {...props} />);
+    expect((await screen.findAllByRole('button'))[0]).to.be.disabled;
   });
 });

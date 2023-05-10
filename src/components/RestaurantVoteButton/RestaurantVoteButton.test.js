@@ -4,7 +4,7 @@
 import React from 'react';
 import sinon from 'sinon';
 import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import { render, screen } from '../../../test/test-utils';
 import { _RestaurantVoteButton as RestaurantVoteButton } from './RestaurantVoteButton';
 
 describe('RestaurantVoteButton', () => {
@@ -17,10 +17,10 @@ describe('RestaurantVoteButton', () => {
     };
   });
 
-  it('renders -1 when user has already voted', () => {
+  it('renders -1 when user has already voted', async () => {
     props.userVotes.push({ id: 1 });
 
-    const wrapper = shallow(<RestaurantVoteButton {...props} />);
-    expect(wrapper.text()).to.eq('-1');
+    render(<RestaurantVoteButton {...props} />);
+    expect(await screen.findByText('-1')).to.be.in.document;
   });
 });
