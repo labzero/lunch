@@ -7,10 +7,7 @@
     "npm": ">=5.0"
   },
   "browserslist": [
-    ">1%",
-    "last 4 versions",
-    "Firefox ESR",
-    "not ie < 9"
+    "defaults"
   ],
   "dependencies": {
     "@babel/polyfill": "^7.0.0",
@@ -131,17 +128,9 @@
     "@typescript-eslint/parser": "^5.59.1",
     "assets-webpack-plugin": "^7.1.1",
     "autoprefixer": "^9.1.5",
-    "babel-core": "^7.0.0-bridge.0",
     "babel-loader": "^9.1.0",
     "babel-plugin-istanbul": "^6.1.1",
-    "babel-plugin-react-transform": "^2.0.2",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.18",
-    "babel-preset-env": "^1.5.2",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-react-optimize": "^1.0.1",
-    "babel-preset-stage-2": "^6.24.1",
-    "babel-template": "^6.25.0",
-    "babel-types": "^6.25.0",
     "browser-sync": "2.29.1",
     "chai": "4.3.7",
     "chai-jsdom": "^0.2.3",
