@@ -45,5 +45,14 @@ test-results.xml
 screenshots
 Dockerfile.bak
 
-#Docker postgres-data
+# Docker postgres-data
 postgres-data
+
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
