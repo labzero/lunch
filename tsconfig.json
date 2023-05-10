@@ -18,6 +18,7 @@
     "resolveJsonModule": true,
     "strictPropertyInitialization": false
   },
+  "files": ["node_modules/chai-jsdom/typings/chai/index.d.ts"],
   "include": ["./**/*.ts", "./**/*.tsx", "./*.d.ts"],
   "exclude": ["node_modules"]
 }

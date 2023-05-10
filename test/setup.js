@@ -9,7 +9,16 @@
 
 /* Configure Mocha test runner, see package.json/scripts/test */
 
+require('global-jsdom/register');
+
 require('@babel/polyfill');
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { use } = require('chai');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const chaiJSDOM = require('chai-jsdom');
+
+use(chaiJSDOM);
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const register = require('@babel/register').default;
@@ -17,8 +26,6 @@ const register = require('@babel/register').default;
 register({ extensions: ['.ts', '.tsx', '.js', '.jsx'] });
 
 process.env.NODE_ENV = 'test';
-
-global.navigator = undefined;
 
 function noop() {
   return null;

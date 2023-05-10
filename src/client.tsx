@@ -9,17 +9,17 @@
 
 import 'whatwg-fetch';
 import es6Promise from 'es6-promise';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React, { useEffect } from 'react';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import queryString from 'query-string';
 import { Action, createPath, Location } from 'history';
+import { ResolveContext } from 'universal-router';
 import App from './components/App';
 import createFetch from './createFetch';
 import configureStore from './store/configureStore';
 import history from './history';
 import { updateMeta } from './DOMUtils';
 import routerCreator from './router';
-import { ResolveContext } from 'universal-router';
 import { Style } from '../global';
 
 es6Promise.polyfill();
@@ -82,12 +82,14 @@ const scrollPositionsHistory: {[index: string]: { scrollX: number, scrollY: numb
 
 let routes;
 if (subdomain) {
-  routes = require('./routes/team').default; // eslint-disable-line global-require
+  routes = require('./routes/team').default; // eslint-disable-line global-require, @typescript-eslint/no-var-requires
 } else {
-  routes = require('./routes/main').default; // eslint-disable-line global-require
+  routes = require('./routes/main').default; // eslint-disable-line global-require, @typescript-eslint/no-var-requires
 }
 
 const router = routerCreator(routes);
+
+const root = createRoot(container!);
 
 // Re-render the app when window.location changes
 const onLocationChange = async ({ action, location }: { action?: Action, location: Location }) => {
@@ -129,11 +131,8 @@ const onLocationChange = async ({ action, location }: { action?: Action, locatio
       return;
     }
 
-    const renderReactApp = isInitialRender ? ReactDOM.hydrate : ReactDOM.render;
-    renderReactApp(
-      <App context={context}>{route.component}</App>,
-      container,
-      () => {
+    const AppWithCallbackAfterRender = () => {
+      useEffect(() => {
         if (isInitialRender) {
           // Switch off the native scroll restoration behavior and handle it manually
           // https://developers.google.com/web/updates/2015/09/history-api-scroll-restoration
@@ -182,8 +181,16 @@ const onLocationChange = async ({ action, location }: { action?: Action, locatio
         if (window.ga) {
           window.ga('send', 'pageview', createPath(location));
         }
-      }
-    );
+      });
+
+      return <App context={context}>{route.component}</App>;
+    };
+
+    if (isInitialRender) {
+      hydrateRoot(container!, <AppWithCallbackAfterRender />);
+    } else {
+      root.render(<AppWithCallbackAfterRender />);
+    }
   } catch (error) {
     if (__DEV__) {
       throw error;
@@ -197,7 +204,7 @@ const onLocationChange = async ({ action, location }: { action?: Action, locatio
       window.location.reload();
     }
   }
-}
+};
 
 // Handle client-side navigation by using HTML5 History API
 // For more information visit https://github.com/mjackson/history#readme

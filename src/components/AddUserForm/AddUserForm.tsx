@@ -1,35 +1,41 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { ChangeEvent, Component, FormEvent } from 'react';
 import Button from 'react-bootstrap/Button';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
+import { IntlShape } from 'react-intl';
 import { globalMessageDescriptor as gm } from '../../helpers/generateMessageDescriptor';
 
-class AddUserForm extends Component {
-  static propTypes = {
-    addUserToTeam: PropTypes.func.isRequired,
-    hasGuestRole: PropTypes.bool.isRequired,
-    hasMemberRole: PropTypes.bool.isRequired,
-    hasOwnerRole: PropTypes.bool.isRequired,
-    intl: PropTypes.shape().isRequired,
-  };
+interface AddUserFormState {
+  email?: string;
+  name?: string;
+  type?: string;
+}
 
+export interface AddUserFormProps {
+  addUserToTeam: (state: AddUserFormState) => void;
+  hasGuestRole: boolean;
+  hasMemberRole: boolean;
+  hasOwnerRole: boolean;
+  intl: IntlShape
+}
+
+class AddUserForm extends Component<AddUserFormProps, AddUserFormState> {
   static defaultState = {
     email: '',
     name: '',
     type: 'member'
   };
 
-  constructor(props) {
+  constructor(props: AddUserFormProps) {
     super(props);
 
-    this.state = ({ ...AddUserForm.defaultState });
+    this.state = { ...AddUserForm.defaultState };
   }
 
-  handleChange = field => event => this.setState({ [field]: event.target.value });
+  handleChange = (field: keyof AddUserFormState) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => this.setState({ [field]: event.target.value });
 
-  handleSubmit = (event) => {
+  handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     this.props.addUserToTeam(this.state);
     this.setState({ ...AddUserForm.defaultState });

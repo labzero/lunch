@@ -2,8 +2,9 @@
 /* eslint-disable padded-blocks, no-unused-expressions */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { expect } from 'chai';
-import { shallow } from 'enzyme';
+import { render, screen } from '../../../test/test-utils';
 import { _RestaurantVoteCount as RestaurantVoteCount } from './RestaurantVoteCount';
 
 describe('RestaurantAddTagForm', () => {
@@ -12,15 +13,32 @@ describe('RestaurantAddTagForm', () => {
   beforeEach(() => {
     props = {
       id: 1,
-      votes: [],
+      votes: [{ restaurantId: 1 }],
       user: {},
       users: []
     };
   });
 
-  it('counts votes when a vote is added', () => {
-    const wrapper = shallow(<RestaurantVoteCount {...props} />, { disableLifecycleMethods: true });
-    wrapper.setProps({ votes: [{ restaurantId: 1 }] });
-    expect(wrapper.render().text()).to.eq('1 vote');
+  const renderComponent = () => {
+    class RestaurantVoteCountWithContext extends React.Component {
+      static childContextTypes = {
+        store: PropTypes.shape({}).isRequired
+      };
+
+      getChildContext() {
+        return { store: {} };
+      }
+
+      render() {
+        return <RestaurantVoteCount {...this.props} />;
+      }
+    }
+
+    return render(<RestaurantVoteCountWithContext {...props} />);
+  };
+
+  it('counts votes when a vote is added', async () => {
+    renderComponent();
+    expect(await screen.findByText('1')).to.be.in.document;
   });
 });
