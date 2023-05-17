@@ -1,7 +1,5 @@
-import React from 'react';
+import React from "react";
 
-const LoginPage = () => (
-  <button type="button">Login</button>
-);
+const LoginPage = () => <button type="button">Login</button>;
 
 export default LoginPage;

@@ -1,16 +1,16 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Modal from 'react-bootstrap/Modal';
-import ModalBody from 'react-bootstrap/ModalBody';
-import ModalFooter from 'react-bootstrap/ModalFooter';
-import Row from 'react-bootstrap/Row';
-import Button from 'react-bootstrap/Button';
-import { TEAM_SLUG_REGEX } from '../../constants';
-import s from './ChangeTeamURLModal.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import InputGroup from "react-bootstrap/InputGroup";
+import Modal from "react-bootstrap/Modal";
+import ModalBody from "react-bootstrap/ModalBody";
+import ModalFooter from "react-bootstrap/ModalFooter";
+import Row from "react-bootstrap/Row";
+import Button from "react-bootstrap/Button";
+import { TEAM_SLUG_REGEX } from "../../constants";
+import s from "./ChangeTeamURLModal.scss";
 
 class ChangeTeamURLModal extends Component {
   static propTypes = {
@@ -25,14 +25,15 @@ class ChangeTeamURLModal extends Component {
     super(props);
 
     this.state = {
-      newSlug: '',
-      oldSlug: '',
+      newSlug: "",
+      oldSlug: "",
     };
   }
 
-  handleChange = (field) => (event) => this.setState({
-    [field]: event.target.value,
-  });
+  handleChange = (field) => (event) =>
+    this.setState({
+      [field]: event.target.value,
+    });
 
   handleSubmit = () => {
     const { updateTeam, host } = this.props;
@@ -51,9 +52,7 @@ class ChangeTeamURLModal extends Component {
       <Modal show={shown} onHide={hideModal}>
         <ModalBody>
           <p>
-            <strong>Be forewarned:</strong>
-            {' '}
-            Changing the team URL frees up the
+            <strong>Be forewarned:</strong> Changing the team URL frees up the
             old URL to be used by other teams. This means that any bookmarks
             your team members have created for this team will no longer work.
             We&rsquo;ll send out an email notification to all users on the team
@@ -65,13 +64,16 @@ class ChangeTeamURLModal extends Component {
           </p>
           <Row>
             <Col sm={9}>
-              <Form.Group className="mb-3" controlId="changeTeamURLModal-oldSlug">
+              <Form.Group
+                className="mb-3"
+                controlId="changeTeamURLModal-oldSlug"
+              >
                 <Form.Label>Current team URL</Form.Label>
                 <InputGroup>
                   <Form.Control
                     className={s.teamUrl}
                     type="text"
-                    onChange={this.handleChange('oldSlug')}
+                    onChange={this.handleChange("oldSlug")}
                     pattern={TEAM_SLUG_REGEX}
                     value={oldSlug}
                     required
@@ -79,13 +81,16 @@ class ChangeTeamURLModal extends Component {
                   <InputGroup.Text>.lunch.pink</InputGroup.Text>
                 </InputGroup>
               </Form.Group>
-              <Form.Group className="mb-3" controlId="changeTeamURLModal-newSlug">
+              <Form.Group
+                className="mb-3"
+                controlId="changeTeamURLModal-newSlug"
+              >
                 <Form.Label>New team URL</Form.Label>
                 <InputGroup>
                   <Form.Control
                     className={s.teamUrl}
                     type="text"
-                    onChange={this.handleChange('newSlug')}
+                    onChange={this.handleChange("newSlug")}
                     pattern={TEAM_SLUG_REGEX}
                     value={newSlug}
                     required

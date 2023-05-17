@@ -1,7 +1,7 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from '../NotificationContent.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "../NotificationContent.scss";
 
 const RestaurantRenamed = ({
   loggedIn,
@@ -31,24 +31,16 @@ const RestaurantRenamed = ({
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b>
-        {' '}
-        renamed
-        {oldNameEl}
-        {' '}
-        to
-        {newNameEl}
-        .
+        <b>{user}</b> renamed
+        {oldNameEl} to
+        {newNameEl}.
       </span>
     );
   }
   return (
     <span>
-      {oldNameEl}
-      {' '}
-      was renamed to
-      {newNameEl}
-      .
+      {oldNameEl} was renamed to
+      {newNameEl}.
     </span>
   );
 };
@@ -62,7 +54,7 @@ RestaurantRenamed.propTypes = {
 };
 
 RestaurantRenamed.defaultProps = {
-  user: '',
+  user: "",
 };
 
 export default withStyles(s)(RestaurantRenamed);

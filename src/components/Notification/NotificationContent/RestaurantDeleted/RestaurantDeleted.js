@@ -1,27 +1,22 @@
 /* eslint-disable css-modules/no-unused-class */
 
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from '../NotificationContent.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "../NotificationContent.scss";
 
 const RestaurantDeleted = ({ loggedIn, user, restaurantName }) => {
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b>
-        {' '}
-        deleted
-        <b>{restaurantName}</b>
-        .
+        <b>{user}</b> deleted
+        <b>{restaurantName}</b>.
       </span>
     );
   }
   return (
     <span>
-      <b>{restaurantName}</b>
-      {' '}
-      was deleted.
+      <b>{restaurantName}</b> was deleted.
     </span>
   );
 };
@@ -33,7 +28,7 @@ RestaurantDeleted.propTypes = {
 };
 
 RestaurantDeleted.defaultProps = {
-  user: '',
+  user: "",
 };
 
 export default withStyles(s)(RestaurantDeleted);

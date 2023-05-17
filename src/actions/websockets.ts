@@ -1,7 +1,7 @@
-import { sortRestaurants } from './restaurants';
-import { notify } from './notifications';
-import { Action, State } from '../interfaces';
-import { ThunkAction, ThunkDispatch } from '@reduxjs/toolkit';
+import { sortRestaurants } from "./restaurants";
+import { notify } from "./notifications";
+import { Action, State } from "../interfaces";
+import { ThunkAction, ThunkDispatch } from "@reduxjs/toolkit";
 
 let sortTimeout: NodeJS.Timer;
 
@@ -12,29 +12,41 @@ const sort = (dispatch: ThunkDispatch<State, unknown, Action>) => {
   }, 1000);
 };
 
-const dispatchNotify: (data: Action) => ThunkAction<void, State, unknown, Action> = data => dispatch => {
+const dispatchNotify: (
+  data: Action
+) => ThunkAction<void, State, unknown, Action> = (data) => (dispatch) => {
   dispatch(notify(data));
   dispatch(data);
 };
 
-const notifyDispatch: (data: Action) => ThunkAction<void, State, unknown, Action> = data => dispatch => {
+const notifyDispatch: (
+  data: Action
+) => ThunkAction<void, State, unknown, Action> = (data) => (dispatch) => {
   dispatch(notify(data));
   dispatch(data);
 };
 
-const dispatchSortNotify: (data: Action) => ThunkAction<void, State, unknown, Action> = data => dispatch => {
+const dispatchSortNotify: (
+  data: Action
+) => ThunkAction<void, State, unknown, Action> = (data) => (dispatch) => {
   dispatch(data);
   sort(dispatch);
   dispatch(notify(data));
 };
 
-const notifyDispatchSort: (data: Action) => ThunkAction<void, State, unknown, Action> = data => dispatch => {
+const notifyDispatchSort: (
+  data: Action
+) => ThunkAction<void, State, unknown, Action> = (data) => (dispatch) => {
   dispatch(notify(data));
   dispatch(data);
   sort(dispatch);
 };
 
-const actionMap: Partial<{[key in Action["type"]]: (data: Action) => ThunkAction<void, State, unknown, Action>}> = {
+const actionMap: Partial<{
+  [key in Action["type"]]: (
+    data: Action
+  ) => ThunkAction<void, State, unknown, Action>;
+}> = {
   ["RESTAURANT_POSTED"]: dispatchSortNotify,
   ["RESTAURANT_DELETED"]: notifyDispatch,
   ["RESTAURANT_RENAMED"]: notifyDispatchSort,
@@ -45,11 +57,13 @@ const actionMap: Partial<{[key in Action["type"]]: (data: Action) => ThunkAction
   ["DELETED_TAG_FROM_RESTAURANT"]: dispatchNotify,
   ["TAG_DELETED"]: notifyDispatch,
   ["DECISION_POSTED"]: dispatchSortNotify,
-  ["DECISIONS_DELETED"]: dispatchSortNotify
+  ["DECISIONS_DELETED"]: dispatchSortNotify,
 };
 
-export function messageReceived(payload: string): ThunkAction<void, State, unknown, Action> {
-  return dispatch => {
+export function messageReceived(
+  payload: string
+): ThunkAction<void, State, unknown, Action> {
+  return (dispatch) => {
     try {
       const data = JSON.parse(payload) as Action;
       const action = actionMap[data.type];

@@ -1,9 +1,9 @@
-@import '../../styles/mixins';
+@import "../../styles/mixins";
 
 .root {
   @include image-replace;
 
-  background: url('./checkmark.svg') center no-repeat;
+  background: url("./checkmark.svg") center no-repeat;
   display: inline-block;
   height: 30px;
   opacity: .15;
@@ -25,7 +25,7 @@
 }
 
 .decided {
-  background: url('./checkmark-decided.svg') center no-repeat;
+  background: url("./checkmark-decided.svg") center no-repeat;
 
   &,
   &:hover {

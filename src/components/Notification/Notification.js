@@ -1,18 +1,18 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import RestaurantPosted from './NotificationContent/RestaurantPosted';
-import RestaurantDeleted from './NotificationContent/RestaurantDeleted';
-import RestaurantRenamed from './NotificationContent/RestaurantRenamed';
-import VotePosted from './NotificationContent/VotePosted';
-import VoteDeleted from './NotificationContent/VoteDeleted';
-import PostedNewTagToRestaurant from './NotificationContent/PostedNewTagToRestaurant';
-import PostedTagToRestaurant from './NotificationContent/PostedTagToRestaurant';
-import DeletedTagFromRestaurant from './NotificationContent/DeletedTagFromRestaurant';
-import TagDeleted from './NotificationContent/TagDeleted';
-import DecisionPosted from './NotificationContent/DecisionPosted';
-import DecisionDeleted from './NotificationContent/DecisionDeleted';
-import s from './Notification.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import RestaurantPosted from "./NotificationContent/RestaurantPosted";
+import RestaurantDeleted from "./NotificationContent/RestaurantDeleted";
+import RestaurantRenamed from "./NotificationContent/RestaurantRenamed";
+import VotePosted from "./NotificationContent/VotePosted";
+import VoteDeleted from "./NotificationContent/VoteDeleted";
+import PostedNewTagToRestaurant from "./NotificationContent/PostedNewTagToRestaurant";
+import PostedTagToRestaurant from "./NotificationContent/PostedTagToRestaurant";
+import DeletedTagFromRestaurant from "./NotificationContent/DeletedTagFromRestaurant";
+import TagDeleted from "./NotificationContent/TagDeleted";
+import DecisionPosted from "./NotificationContent/DecisionPosted";
+import DecisionDeleted from "./NotificationContent/DecisionDeleted";
+import s from "./Notification.scss";
 
 const contentMap = {
   RESTAURANT_POSTED: RestaurantPosted,
@@ -37,7 +37,7 @@ class Notification extends Component {
   };
 
   static defaultProps = {
-    actionType: '',
+    actionType: "",
     noRender: false,
   };
 

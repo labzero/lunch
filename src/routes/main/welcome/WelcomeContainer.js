@@ -1,30 +1,27 @@
-import { connect } from 'react-redux';
-import { updateCurrentUser } from '../../../actions/user';
-import history from '../../../history';
-import { getCurrentUser } from '../../../selectors/user';
-import Welcome from './Welcome';
+import { connect } from "react-redux";
+import { updateCurrentUser } from "../../../actions/user";
+import history from "../../../history";
+import { getCurrentUser } from "../../../selectors/user";
+import Welcome from "./Welcome";
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   host: state.host,
-  user: getCurrentUser(state)
+  user: getCurrentUser(state),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => ({
   ...stateProps,
-  updateCurrentUser: payload => dispatchProps.dispatch(updateCurrentUser(payload)).then(() => {
-    const team = ownProps.team;
-    if (team) {
-      window.location.href = `//${team}.${stateProps.host}${ownProps.next}`;
-    } else if (ownProps.next) {
-      history.push(ownProps.next);
-    } else {
-      history.push('/');
-    }
-  })
+  updateCurrentUser: (payload) =>
+    dispatchProps.dispatch(updateCurrentUser(payload)).then(() => {
+      const team = ownProps.team;
+      if (team) {
+        window.location.href = `//${team}.${stateProps.host}${ownProps.next}`;
+      } else if (ownProps.next) {
+        history.push(ownProps.next);
+      } else {
+        history.push("/");
+      }
+    }),
 });
 
-export default connect(
-  mapStateToProps,
-  null,
-  mergeProps
-)(Welcome);
+export default connect(mapStateToProps, null, mergeProps)(Welcome);

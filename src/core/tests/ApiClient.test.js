@@ -1,46 +1,46 @@
 /* eslint-env mocha */
-import { spy } from 'sinon';
-import { expect } from 'chai';
-import proxyquire from 'proxyquire';
+import { spy } from "sinon";
+import { expect } from "chai";
+import proxyquire from "proxyquire";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
-describe('processResponse', () => {
+describe("processResponse", () => {
   let processResponse;
   let replaceSpy;
 
   beforeEach(() => {
     replaceSpy = spy();
-    processResponse = proxyquireStrict('../ApiClient.ts', {
-      '../actions/flash': {
+    processResponse = proxyquireStrict("../ApiClient.ts", {
+      "../actions/flash": {
         flashError: (message) => ({
-          type: 'FLASH_ERROR',
+          type: "FLASH_ERROR",
           message,
-        })
+        }),
       },
-      '../history': {
+      "../history": {
         location: {
-          pathname: '/team',
+          pathname: "/team",
         },
-        replace: replaceSpy
-      }
+        replace: replaceSpy,
+      },
     }).processResponse;
   });
 
-  it('returns data when successful', () => {
+  it("returns data when successful", () => {
     const response = {
-      json: () => Promise.resolve({ data: { foo: 'bar' } }),
+      json: () => Promise.resolve({ data: { foo: "bar" } }),
     };
 
     return processResponse(response).then((data) => {
-      expect(data).to.eql({ foo: 'bar' });
+      expect(data).to.eql({ foo: "bar" });
     });
   });
 
-  it('returns nothing when 204', () => {
+  it("returns nothing when 204", () => {
     const response = {
       json: () => Promise.reject(),
-      status: 204
+      status: 204,
     };
 
     return processResponse(response).then((data) => {
@@ -48,28 +48,28 @@ describe('processResponse', () => {
     });
   });
 
-  it('flashes error message from 400 response', () => {
+  it("flashes error message from 400 response", () => {
     const dispatch = spy();
     const response = {
-      json: () => Promise.resolve({ data: { message: 'Oh No' } }),
-      status: 400
+      json: () => Promise.resolve({ data: { message: "Oh No" } }),
+      status: 400,
     };
 
     return processResponse(response, dispatch).catch((err) => {
-      expect(dispatch.args[0][0].type).to.eq('FLASH_ERROR');
-      expect(err).to.eq('Oh No');
+      expect(dispatch.args[0][0].type).to.eq("FLASH_ERROR");
+      expect(err).to.eq("Oh No");
     });
   });
 
-  it('redirects to login from 401 response', () => {
+  it("redirects to login from 401 response", () => {
     const dispatch = spy();
     const response = {
       json: () => Promise.resolve({}),
-      status: 401
+      status: 401,
     };
 
     return processResponse(response, dispatch).catch(() => {
-      expect(replaceSpy.args[0][0]).to.eq('/login?next=/team');
+      expect(replaceSpy.args[0][0]).to.eq("/login?next=/team");
     });
   });
 });

@@ -7,9 +7,9 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from 'react';
-import LayoutContainer from '../../../../components/Layout/LayoutContainer';
-import Create from './Create';
+import React from "react";
+import LayoutContainer from "../../../../components/Layout/LayoutContainer";
+import Create from "./Create";
 
 export default (context) => {
   const success = context.query.success;
@@ -17,7 +17,7 @@ export default (context) => {
 
   if (!success && !token) {
     return {
-      redirect: '/invitation/new'
+      redirect: "/invitation/new",
     };
   }
 
@@ -27,6 +27,6 @@ export default (context) => {
         <Create success={success} token={token} />
       </LayoutContainer>
     ),
-    title: 'Invitation',
+    title: "Invitation",
   };
 };

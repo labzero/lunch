@@ -1,8 +1,13 @@
-import { RoleType, Team, User } from 'src/interfaces';
-import canOperateAtRole from './canOperateAtRole';
-import getRole from './getRole';
+import { RoleType, Team, User } from "src/interfaces";
+import canOperateAtRole from "./canOperateAtRole";
+import getRole from "./getRole";
 
-export default (user: User | undefined, team: Team | undefined, role?: RoleType, ignoreSuperuser?: boolean) => {
+export default (
+  user: User | undefined,
+  team: Team | undefined,
+  role?: RoleType,
+  ignoreSuperuser?: boolean
+) => {
   if (!user || !user.id) {
     return false;
   }

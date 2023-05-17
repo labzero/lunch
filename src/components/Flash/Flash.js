@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
 // eslint-disable-next-line css-modules/no-unused-class
-import s from './Flash.scss';
+import s from "./Flash.scss";
 
 class Flash extends Component {
   static propTypes = {

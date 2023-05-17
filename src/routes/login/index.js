@@ -7,10 +7,10 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from 'react';
-import LayoutContainer from '../../components/Layout/LayoutContainer';
-import renderIfLoggedOut from '../helpers/renderIfLoggedOut';
-import LoginContainer from './LoginContainer';
+import React from "react";
+import LayoutContainer from "../../components/Layout/LayoutContainer";
+import renderIfLoggedOut from "../helpers/renderIfLoggedOut";
+import LoginContainer from "./LoginContainer";
 
 function action(context) {
   const state = context.store.getState();
@@ -19,14 +19,14 @@ function action(context) {
   const next = context.query.next;
 
   return renderIfLoggedOut(state, () => ({
-    chunks: ['login'],
+    chunks: ["login"],
     component: (
       <LayoutContainer path={context.pathname}>
         <LoginContainer team={subdomain} next={next} />
       </LayoutContainer>
     ),
-    title: 'Log in',
-    ogTitle: 'Lunch'
+    title: "Log in",
+    ogTitle: "Lunch",
   }));
 }
 

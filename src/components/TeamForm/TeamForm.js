@@ -1,17 +1,17 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { FaRegQuestionCircle } from 'react-icons/fa';
-import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Popover from 'react-bootstrap/Popover';
-import Row from 'react-bootstrap/Row';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import TeamGeosuggestContainer from '../TeamGeosuggest/TeamGeosuggestContainer';
-import TeamMapContainer from '../TeamMap/TeamMapContainer';
-import s from './TeamForm.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { FaRegQuestionCircle } from "react-icons/fa";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import InputGroup from "react-bootstrap/InputGroup";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Popover from "react-bootstrap/Popover";
+import Row from "react-bootstrap/Row";
+import withStyles from "isomorphic-style-loader/withStyles";
+import TeamGeosuggestContainer from "../TeamGeosuggest/TeamGeosuggestContainer";
+import TeamMapContainer from "../TeamMap/TeamMapContainer";
+import s from "./TeamForm.scss";
 
 class TeamForm extends Component {
   static propTypes = {
@@ -37,17 +37,21 @@ class TeamForm extends Component {
     };
   }
 
-  handleChange = (field) => (event) => this.setState({ [field]: event.target.value });
+  handleChange = (field) => (event) =>
+    this.setState({ [field]: event.target.value });
 
   handleSubmit = (event) => {
     event.preventDefault();
-    const typedsortDuration = typeof this.state.sortDuration === 'number'
-      ? this.state.sortDuration
-      : parseInt(this.state.sortDuration.slice(), 10);
+    const typedsortDuration =
+      typeof this.state.sortDuration === "number"
+        ? this.state.sortDuration
+        : parseInt(this.state.sortDuration.slice(), 10);
     if (typedsortDuration > 0) {
-      this.props.updateTeam(
-        { ...this.state, ...this.props.center, sortDuration: typedsortDuration, }
-      );
+      this.props.updateTeam({
+        ...this.state,
+        ...this.props.center,
+        sortDuration: typedsortDuration,
+      });
     } else {
       event.stopPropagation();
     }
@@ -55,22 +59,23 @@ class TeamForm extends Component {
 
   render() {
     const { name, address, sortDuration } = this.state;
-    const sortDurationAddonLabel = parseInt(sortDuration, 10) === 1 ? 'day' : 'days';
+    const sortDurationAddonLabel =
+      parseInt(sortDuration, 10) === 1 ? "day" : "days";
     const popoverRight = (
       <Popover id="sortDuration">
         <Popover.Header>Sort Duration</Popover.Header>
         <Popover.Body>
           <p>
-            Sort duration refers to the amount of time votes and decisions factor
-            in to how restaurants are sorted. For example, if you choose Burger
-            Shack for today’s lunch and your sort duration is set to 7 days,
-            Burger Shack will appear towards the bottom of your restaurant list
-            for the next week.
+            Sort duration refers to the amount of time votes and decisions
+            factor in to how restaurants are sorted. For example, if you choose
+            Burger Shack for today’s lunch and your sort duration is set to 7
+            days, Burger Shack will appear towards the bottom of your restaurant
+            list for the next week.
           </p>
           <p>
             Conversely, if you were to upvote Burger Shack but not choose it for
-            today’s lunch, Burger Shack would be prioritized and appear higher in
-            your restaurant list for the next week.
+            today’s lunch, Burger Shack would be prioritized and appear higher
+            in your restaurant list for the next week.
           </p>
         </Popover.Body>
       </Popover>
@@ -83,7 +88,7 @@ class TeamForm extends Component {
           <Row>
             <Col sm={6}>
               <Form.Control
-                onChange={this.handleChange('name')}
+                onChange={this.handleChange("name")}
                 required
                 value={name}
               />
@@ -96,20 +101,13 @@ class TeamForm extends Component {
           <TeamGeosuggestContainer
             id="teamForm-address"
             initialValue={address}
-            onChange={this.handleChange('address')}
+            onChange={this.handleChange("address")}
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="teamForm-vote-duration">
           <Form.Label>Sort duration</Form.Label>
-          <OverlayTrigger
-            placement="right"
-            overlay={popoverRight}
-          >
-            <Button
-              size="xs"
-              className={s.overlayTrigger}
-              variant="light"
-            >
+          <OverlayTrigger placement="right" overlay={popoverRight}>
+            <Button size="xs" className={s.overlayTrigger} variant="light">
               <FaRegQuestionCircle />
             </Button>
           </OverlayTrigger>
@@ -118,7 +116,7 @@ class TeamForm extends Component {
               <InputGroup>
                 <Form.Control
                   type="number"
-                  onChange={this.handleChange('sortDuration')}
+                  onChange={this.handleChange("sortDuration")}
                   required
                   value={sortDuration}
                   min="1"

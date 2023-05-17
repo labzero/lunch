@@ -1,7 +1,7 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from './RestaurantVoteButton.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "./RestaurantVoteButton.scss";
 
 export class _RestaurantVoteButton extends Component {
   componentDidUpdate() {
@@ -10,9 +10,9 @@ export class _RestaurantVoteButton extends Component {
   }
 
   render() {
-    let btnClass = 'btn-primary';
+    let btnClass = "btn-primary";
     if (this.props.userVotes.length > 0) {
-      btnClass = 'btn-danger';
+      btnClass = "btn-danger";
     }
 
     return (
@@ -24,7 +24,7 @@ export class _RestaurantVoteButton extends Component {
         className={`${s.root} btn btn-sm ${btnClass}`}
         type="button"
       >
-        {this.props.userVotes.length > 0 ? '-1' : '+1'}
+        {this.props.userVotes.length > 0 ? "-1" : "+1"}
       </button>
     );
   }

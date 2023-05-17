@@ -1,16 +1,16 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Modal from 'react-bootstrap/Modal';
-import ModalBody from 'react-bootstrap/ModalBody';
-import ModalFooter from 'react-bootstrap/ModalFooter';
-import Row from 'react-bootstrap/Row';
-import Button from 'react-bootstrap/Button';
-import { TEAM_SLUG_REGEX } from '../../constants';
-import s from './DeleteTeamModal.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import InputGroup from "react-bootstrap/InputGroup";
+import Modal from "react-bootstrap/Modal";
+import ModalBody from "react-bootstrap/ModalBody";
+import ModalFooter from "react-bootstrap/ModalFooter";
+import Row from "react-bootstrap/Row";
+import Button from "react-bootstrap/Button";
+import { TEAM_SLUG_REGEX } from "../../constants";
+import s from "./DeleteTeamModal.scss";
 
 class DeleteTeamModal extends Component {
   static propTypes = {
@@ -25,7 +25,7 @@ class DeleteTeamModal extends Component {
     super(props);
 
     this.state = {
-      confirmSlug: '',
+      confirmSlug: "",
     };
   }
 
@@ -51,15 +51,8 @@ class DeleteTeamModal extends Component {
       <Modal show={shown} onHide={hideModal}>
         <ModalBody>
           <p>
-            Are you sure you want to delete the
-            {' '}
-            {team.name}
-            {' '}
-            team?
-            {' '}
-            <strong>This is irreversible.</strong>
-            {' '}
-            All restaurants and tags will
+            Are you sure you want to delete the {team.name} team?{" "}
+            <strong>This is irreversible.</strong> All restaurants and tags will
             be deleted, and all users will be unassigned from the team.
           </p>
           <p>
@@ -67,7 +60,10 @@ class DeleteTeamModal extends Component {
           </p>
           <Row>
             <Col sm={9}>
-              <Form.Group className="mb-3" controlId="deleteTeamModal-confirmSlug">
+              <Form.Group
+                className="mb-3"
+                controlId="deleteTeamModal-confirmSlug"
+              >
                 <Form.Label>Team URL</Form.Label>
                 <InputGroup>
                   <Form.Control

@@ -1,60 +1,60 @@
 export default (showPOIs) => ({
-  backgroundColor: '#fcb3f2',
+  backgroundColor: "#fcb3f2",
   scrollwheel: false,
   styles: [
     {
-      featureType: 'landscape',
-      elementType: 'geometry',
+      featureType: "landscape",
+      elementType: "geometry",
       stylers: [
         {
-          color: '#fbf5fa'
-        }
-      ]
+          color: "#fbf5fa",
+        },
+      ],
     },
     {
-      featureType: 'road',
-      elementType: 'geometry',
+      featureType: "road",
+      elementType: "geometry",
       stylers: [
         {
-          color: '#fdc0cb'
-        }
-      ]
+          color: "#fdc0cb",
+        },
+      ],
     },
     {
-      featureType: 'poi',
-      elementType: 'geometry.fill',
+      featureType: "poi",
+      elementType: "geometry.fill",
       stylers: [
         {
-          color: '#fbd1f6'
-        }
-      ]
+          color: "#fbd1f6",
+        },
+      ],
     },
     {
-      featureType: 'poi',
-      elementType: 'labels',
+      featureType: "poi",
+      elementType: "labels",
       stylers: [
         {
-          visibility: 'off'
-        }
-      ]
+          visibility: "off",
+        },
+      ],
     },
     {
-      featureType: 'poi.business',
-      elementType: 'labels',
+      featureType: "poi.business",
+      elementType: "labels",
       stylers: [
         {
-          visibility: showPOIs ? 'on' : 'off'
-        }
-      ]
+          visibility: showPOIs ? "on" : "off",
+        },
+      ],
     },
     {
-      featureType: 'water',
-      elementType: 'geometry',
+      featureType: "water",
+      elementType: "geometry",
       stylers: [
         {
-          color: '#fcb3f2'
-        }
-      ]
-    }
-  ]
+          color: "#fcb3f2",
+        },
+      ],
+    },
+  ],
 });

@@ -1,11 +1,9 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from './Tag.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "./Tag.scss";
 
-const Tag = ({
-  name, showDelete, onDeleteClicked, exclude
-}) => {
+const Tag = ({ name, showDelete, onDeleteClicked, exclude }) => {
   let deleteButton = null;
   if (showDelete) {
     deleteButton = (
@@ -16,7 +14,7 @@ const Tag = ({
   }
 
   return (
-    <div className={`${s.root} ${exclude ? s.exclude : ''}`}>
+    <div className={`${s.root} ${exclude ? s.exclude : ""}`}>
       {name}
       {deleteButton}
     </div>

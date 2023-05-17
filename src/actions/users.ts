@@ -1,8 +1,8 @@
-import { ThunkAction } from '@reduxjs/toolkit';
-import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import { credentials, jsonHeaders, processResponse } from '../core/ApiClient';
-import { Action, RoleType, State, Team, User } from '../interfaces';
-import { getCurrentUser } from '../selectors/user';
+import { ThunkAction } from "@reduxjs/toolkit";
+import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
+import { credentials, jsonHeaders, processResponse } from "../core/ApiClient";
+import { Action, RoleType, State, Team, User } from "../interfaces";
+import { getCurrentUser } from "../selectors/user";
 
 export function invalidateUsers(): Action {
   return { type: "INVALIDATE_USERS" };
@@ -10,26 +10,26 @@ export function invalidateUsers(): Action {
 
 export function requestUsers(): Action {
   return {
-    type: "REQUEST_USERS"
+    type: "REQUEST_USERS",
   };
 }
 
 export function receiveUsers(json: User[]): Action {
   return {
     type: "RECEIVE_USERS",
-    items: json
+    items: json,
   };
 }
 
 export function fetchUsers(): ThunkAction<void, State, unknown, Action> {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(requestUsers());
-    return fetch('/api/users', {
+    return fetch("/api/users", {
       credentials,
-      headers: jsonHeaders
+      headers: jsonHeaders,
     })
-      .then(response => processResponse(response, dispatch))
-      .then(json => dispatch(receiveUsers(json)));
+      .then((response) => processResponse(response, dispatch))
+      .then((json) => dispatch(receiveUsers(json)));
   };
 }
 
@@ -44,7 +44,12 @@ function shouldFetchUsers(state: State) {
   return users.didInvalidate;
 }
 
-export function fetchUsersIfNeeded(): ThunkAction<void, State, unknown, Action> {
+export function fetchUsersIfNeeded(): ThunkAction<
+  void,
+  State,
+  unknown,
+  Action
+> {
   // Note that the function also receives getState()
   // which lets you choose what to dispatch next.
 
@@ -67,7 +72,7 @@ export function deleteUser(id: number, team: Team, isSelf: boolean): Action {
     type: "DELETE_USER",
     id,
     isSelf,
-    team
+    team,
   };
 }
 
@@ -76,11 +81,14 @@ export function userDeleted(id: number, team: Team, isSelf: boolean): Action {
     type: "USER_DELETED",
     id,
     isSelf,
-    team
+    team,
   };
 }
 
-export function removeUser(id: number, team: Team): ThunkAction<void, State, unknown, Action> {
+export function removeUser(
+  id: number,
+  team: Team
+): ThunkAction<void, State, unknown, Action> {
   return (dispatch, getState) => {
     const state = getState();
     let isSelf = false;
@@ -90,7 +98,7 @@ export function removeUser(id: number, team: Team): ThunkAction<void, State, unk
     dispatch(deleteUser(id, team, isSelf));
     let url = `/api/users/${id}`;
     const host = state.host;
-    let protocol = 'http:';
+    let protocol = "http:";
     if (canUseDOM) {
       protocol = window.location.protocol;
     }
@@ -98,10 +106,10 @@ export function removeUser(id: number, team: Team): ThunkAction<void, State, unk
       url = `${protocol}//${team.slug}.${host}${url}`;
     }
     return fetch(url, {
-      credentials: team ? 'include' : credentials,
-      method: 'delete'
+      credentials: team ? "include" : credentials,
+      method: "delete",
     })
-      .then(response => processResponse(response, dispatch))
+      .then((response) => processResponse(response, dispatch))
       .then(() => dispatch(userDeleted(id, team, isSelf)));
   };
 }
@@ -109,52 +117,67 @@ export function removeUser(id: number, team: Team): ThunkAction<void, State, unk
 export function postUser(obj: User): Action {
   return {
     type: "POST_USER",
-    user: obj
+    user: obj,
   };
 }
 
 export function userPosted(json: User): Action {
   return {
     type: "USER_POSTED",
-    user: json
+    user: json,
   };
 }
 
-export function addUser(payload: User): ThunkAction<void, State, unknown, Action> {
+export function addUser(
+  payload: User
+): ThunkAction<void, State, unknown, Action> {
   return (dispatch) => {
     dispatch(postUser(payload));
-    return fetch('/api/users', {
-      method: 'post',
+    return fetch("/api/users", {
+      method: "post",
       credentials,
       headers: jsonHeaders,
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     })
-      .then(response => processResponse(response, dispatch))
-      .then(json => dispatch(userPosted(json)));
+      .then((response) => processResponse(response, dispatch))
+      .then((json) => dispatch(userPosted(json)));
   };
 }
 
-export function patchUser(id: number, roleType: RoleType, team: Team, isSelf: boolean): Action {
+export function patchUser(
+  id: number,
+  roleType: RoleType,
+  team: Team,
+  isSelf: boolean
+): Action {
   return {
     type: "PATCH_USER",
     id,
     isSelf,
     roleType,
-    team
+    team,
   };
 }
 
-export function userPatched(id: number, user: User, team: Team, isSelf: boolean): Action {
+export function userPatched(
+  id: number,
+  user: User,
+  team: Team,
+  isSelf: boolean
+): Action {
   return {
     type: "USER_PATCHED",
     id,
     isSelf,
     team,
-    user
+    user,
   };
 }
 
-export function changeUserRole(id: number, type: RoleType): ThunkAction<void, State, unknown, Action> {
+export function changeUserRole(
+  id: number,
+  type: RoleType
+): ThunkAction<void, State, unknown, Action> {
   const payload = { id, type };
   return (dispatch, getState) => {
     const state = getState();
@@ -165,12 +188,12 @@ export function changeUserRole(id: number, type: RoleType): ThunkAction<void, St
     }
     dispatch(patchUser(id, type, team, isSelf));
     return fetch(`/api/users/${id}`, {
-      method: 'PATCH',
+      method: "PATCH",
       credentials,
       headers: jsonHeaders,
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     })
-      .then(response => processResponse(response, dispatch))
-      .then(json => dispatch(userPatched(id, json, team, isSelf)));
+      .then((response) => processResponse(response, dispatch))
+      .then((json) => dispatch(userPatched(id, json, team, isSelf)));
   };
 }

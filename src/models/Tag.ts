@@ -1,8 +1,8 @@
-import { sequelize, DataTypes } from './db';
+import { sequelize, DataTypes } from "./db";
 
-const Tag = sequelize.define('tag', {
+const Tag = sequelize.define("tag", {
   name: DataTypes.STRING,
-  teamId: DataTypes.INTEGER
+  teamId: DataTypes.INTEGER,
 });
 
 export default Tag;

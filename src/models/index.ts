@@ -1,21 +1,21 @@
-import { sequelize } from './db';
-import Decision from './Decision';
-import Invitation from './Invitation';
-import Restaurant from './Restaurant';
-import RestaurantTag from './RestaurantTag';
-import Role from './Role';
-import Tag from './Tag';
-import Team from './Team';
-import User from './User';
-import Vote from './Vote';
+import { sequelize } from "./db";
+import Decision from "./Decision";
+import Invitation from "./Invitation";
+import Restaurant from "./Restaurant";
+import RestaurantTag from "./RestaurantTag";
+import Role from "./Role";
+import Tag from "./Tag";
+import Team from "./Team";
+import User from "./User";
+import Vote from "./Vote";
 
-Tag.addScope('orderedByRestaurant', {
+Tag.addScope("orderedByRestaurant", {
   attributes: [
-    'id',
-    'name',
+    "id",
+    "name",
     [
-      sequelize.fn('count', sequelize.col('restaurantsTags.restaurantId')),
-      'restaurant_count',
+      sequelize.fn("count", sequelize.col("restaurantsTags.restaurantId")),
+      "restaurant_count",
     ],
   ],
   include: [
@@ -25,8 +25,8 @@ Tag.addScope('orderedByRestaurant', {
       required: false,
     },
   ],
-  group: ['tag.id'],
-  order: [sequelize.literal('restaurant_count DESC')],
+  group: ["tag.id"],
+  order: [sequelize.literal("restaurant_count DESC")],
 });
 
 Restaurant.hasMany(Vote);
@@ -41,7 +41,7 @@ Role.belongsTo(Team);
 User.hasMany(Vote);
 User.hasMany(Role);
 User.belongsToMany(Team, {
-  through: 'role',
+  through: "role",
 });
 
 Tag.belongsToMany(Restaurant, {
@@ -51,7 +51,7 @@ Tag.hasMany(RestaurantTag);
 
 Team.hasMany(Role);
 Team.belongsToMany(User, {
-  through: 'role',
+  through: "role",
 });
 
 RestaurantTag.belongsTo(Restaurant);

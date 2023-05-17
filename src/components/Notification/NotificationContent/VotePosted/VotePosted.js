@@ -1,7 +1,7 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from '../NotificationContent.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "../NotificationContent.scss";
 
 const VotePosted = ({
   loggedIn,
@@ -21,22 +21,11 @@ const VotePosted = ({
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b>
-        {' '}
-        voted for
-        {' '}
-        {restaurantEl}
-        .
+        <b>{user}</b> voted for {restaurantEl}.
       </span>
     );
   }
-  return (
-    <span>
-      {restaurantEl}
-      {' '}
-      was upvoted.
-    </span>
-  );
+  return <span>{restaurantEl} was upvoted.</span>;
 };
 
 VotePosted.propTypes = {
@@ -47,7 +36,7 @@ VotePosted.propTypes = {
 };
 
 VotePosted.defaultProps = {
-  user: '',
+  user: "",
 };
 
 export default withStyles(s)(VotePosted);

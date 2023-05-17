@@ -1,13 +1,13 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import loadComponent from '../../helpers/loadComponent';
-import s from './RestaurantAddForm.scss';
-import generateMessageDescriptor from '../../helpers/generateMessageDescriptor';
-import GoogleMapsLoaderContext from '../GoogleMapsLoaderContext/GoogleMapsLoaderContext';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
+import withStyles from "isomorphic-style-loader/withStyles";
+import loadComponent from "../../helpers/loadComponent";
+import s from "./RestaurantAddForm.scss";
+import generateMessageDescriptor from "../../helpers/generateMessageDescriptor";
+import GoogleMapsLoaderContext from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 
-const m = generateMessageDescriptor('RestaurantAddForm');
+const m = generateMessageDescriptor("RestaurantAddForm");
 
 const renderNull = () => null;
 let Geosuggest = renderNull;
@@ -37,11 +37,13 @@ class RestaurantAddForm extends Component {
   }
 
   componentDidMount() {
-    loadComponent(() => require.ensure(
-      [],
-      (require) => require('react-geosuggest').default,
-      'map'
-    )).then((g) => {
+    loadComponent(() =>
+      require.ensure(
+        [],
+        (require) => require("react-geosuggest").default,
+        "map"
+      )
+    ).then((g) => {
       Geosuggest = g;
       this.forceUpdate();
     });
@@ -85,7 +87,7 @@ class RestaurantAddForm extends Component {
               lat: () => this.props.latLng.lat,
               lng: () => this.props.latLng.lng,
             }}
-            placeholder={f(m('addPlaces'))}
+            placeholder={f(m("addPlaces"))}
             radius="0"
             onBlur={this.props.clearTempMarker}
             onActivateSuggest={this.getCoordsForMarker}
@@ -96,8 +98,8 @@ class RestaurantAddForm extends Component {
               Geosuggest === renderNull
                 ? undefined
                 : (g) => {
-                  this.geosuggest = g;
-                }
+                    this.geosuggest = g;
+                  }
             }
           />
         ) : null}

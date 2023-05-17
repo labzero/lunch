@@ -7,10 +7,10 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from 'react';
-import LayoutContainer from '../../../../components/Layout/LayoutContainer';
-import renderIfLoggedOut from '../../../helpers/renderIfLoggedOut';
-import New from './New';
+import React from "react";
+import LayoutContainer from "../../../../components/Layout/LayoutContainer";
+import renderIfLoggedOut from "../../../helpers/renderIfLoggedOut";
+import New from "./New";
 
 export default (context) => {
   const state = context.store.getState();
@@ -23,6 +23,6 @@ export default (context) => {
         <New email={email} />
       </LayoutContainer>
     ),
-    title: 'Reset password',
+    title: "Reset password",
   }));
 };

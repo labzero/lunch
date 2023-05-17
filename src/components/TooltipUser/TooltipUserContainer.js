@@ -1,13 +1,11 @@
-import { connect } from 'react-redux';
-import { getVoteById } from '../../selectors/votes';
-import { getUserByVoteId } from '../../selectors';
-import TooltipUser from './TooltipUser';
+import { connect } from "react-redux";
+import { getVoteById } from "../../selectors/votes";
+import { getUserByVoteId } from "../../selectors";
+import TooltipUser from "./TooltipUser";
 
 const mapStateToProps = (state, ownProps) => ({
   vote: getVoteById(state, ownProps.voteId),
-  user: getUserByVoteId(state, ownProps.voteId)
+  user: getUserByVoteId(state, ownProps.voteId),
 });
 
-export default connect(
-  mapStateToProps
-)(TooltipUser);
+export default connect(mapStateToProps)(TooltipUser);

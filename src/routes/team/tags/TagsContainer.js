@@ -1,13 +1,13 @@
-import { connect } from 'react-redux';
-import { fetchTagsIfNeeded } from '../../../actions/tags';
-import { isTagListReady } from '../../../selectors';
-import Tags from './Tags';
+import { connect } from "react-redux";
+import { fetchTagsIfNeeded } from "../../../actions/tags";
+import { isTagListReady } from "../../../selectors";
+import Tags from "./Tags";
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   tagListReady: isTagListReady(state),
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   fetchTagsIfNeeded() {
     dispatch(fetchTagsIfNeeded());
   },

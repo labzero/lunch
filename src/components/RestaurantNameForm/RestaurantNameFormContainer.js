@@ -1,13 +1,13 @@
-import { connect } from 'react-redux';
-import { getListUiItemForId } from '../../selectors/listUi';
-import { changeRestaurantName } from '../../actions/restaurants';
-import { hideEditNameForm, setEditNameFormValue } from '../../actions/listUi';
-import RestaurantNameForm from './RestaurantNameForm';
+import { connect } from "react-redux";
+import { getListUiItemForId } from "../../selectors/listUi";
+import { changeRestaurantName } from "../../actions/restaurants";
+import { hideEditNameForm, setEditNameFormValue } from "../../actions/listUi";
+import RestaurantNameForm from "./RestaurantNameForm";
 
 const mapStateToProps = (state, ownProps) => {
   const listUiItem = getListUiItemForId(state, ownProps.id);
   return {
-    editNameFormValue: listUiItem.editNameFormValue || ''
+    editNameFormValue: listUiItem.editNameFormValue || "",
   };
 };
 
@@ -15,21 +15,21 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   hideEditNameForm: () => {
     dispatch(hideEditNameForm(ownProps.id));
   },
-  setEditNameFormValue: event => {
+  setEditNameFormValue: (event) => {
     dispatch(setEditNameFormValue(ownProps.id, event.target.value));
   },
-  dispatch
+  dispatch,
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => ({
   ...stateProps,
   ...dispatchProps,
-  changeRestaurantName: event => {
+  changeRestaurantName: (event) => {
     event.preventDefault();
     dispatchProps.dispatch(
       changeRestaurantName(ownProps.id, stateProps.editNameFormValue)
     );
-  }
+  },
 });
 
 export default connect(

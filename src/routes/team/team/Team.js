@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 /**
  * React Starter Kit (https://www.reactstarterkit.com/)
  *
@@ -8,24 +8,24 @@ import PropTypes from 'prop-types';
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import ButtonToolbar from 'react-bootstrap/ButtonToolbar';
-import { FaTimes } from 'react-icons/fa';
-import Container from 'react-bootstrap/Container';
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
-import Table from 'react-bootstrap/Table';
-import Loading from '../../../components/Loading/Loading';
-import AddUserFormContainer from '../../../components/AddUserForm/AddUserFormContainer';
-import ChangeTeamURLModalContainer from '../../../components/ChangeTeamURLModal/ChangeTeamURLModalContainer';
-import DeleteTeamModalContainer from '../../../components/DeleteTeamModal/DeleteTeamModalContainer';
-import TeamFormContainer from '../../../components/TeamForm/TeamFormContainer';
-import { globalMessageDescriptor as gm } from '../../../helpers/generateMessageDescriptor';
-import getRole from '../../../helpers/getRole';
-import canChangeUser from '../../../helpers/canChangeUser';
-import s from './Team.scss';
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import ButtonToolbar from "react-bootstrap/ButtonToolbar";
+import { FaTimes } from "react-icons/fa";
+import Container from "react-bootstrap/Container";
+import Tab from "react-bootstrap/Tab";
+import Tabs from "react-bootstrap/Tabs";
+import Table from "react-bootstrap/Table";
+import Loading from "../../../components/Loading/Loading";
+import AddUserFormContainer from "../../../components/AddUserForm/AddUserFormContainer";
+import ChangeTeamURLModalContainer from "../../../components/ChangeTeamURLModal/ChangeTeamURLModalContainer";
+import DeleteTeamModalContainer from "../../../components/DeleteTeamModal/DeleteTeamModalContainer";
+import TeamFormContainer from "../../../components/TeamForm/TeamFormContainer";
+import { globalMessageDescriptor as gm } from "../../../helpers/generateMessageDescriptor";
+import getRole from "../../../helpers/getRole";
+import canChangeUser from "../../../helpers/canChangeUser";
+import s from "./Team.scss";
 
 class Team extends React.Component {
   static propTypes = {
@@ -60,18 +60,18 @@ class Team extends React.Component {
     const changeRole = this.props.changeUserRole(user.id, newRole);
 
     if (
-      event.target.value === 'member'
-      && getRole(currentUser, team).type === 'member'
+      event.target.value === "member" &&
+      getRole(currentUser, team).type === "member"
     ) {
       this.props.confirm({
-        actionLabel: 'Promote',
-        body: 'Are you sure you want to promote this user to Member status? You will not be able to demote them later.',
+        actionLabel: "Promote",
+        body: "Are you sure you want to promote this user to Member status? You will not be able to demote them later.",
         action: changeRole,
       });
     } else if (currentUser.id === user.id && !currentUser.superuser) {
       this.props.confirm({
-        actionLabel: 'Demote',
-        body: 'Are you sure you want to demote yourself? You will not be able to undo this by yourself.',
+        actionLabel: "Demote",
+        body: "Are you sure you want to demote yourself? You will not be able to undo this by yourself.",
         action: changeRole,
       });
     } else {
@@ -81,7 +81,7 @@ class Team extends React.Component {
 
   handleDeleteUserClicked = (id) => () => {
     // eslint-disable-next-line no-restricted-globals, no-alert
-    if (confirm('Are you sure you want to remove this user from this team?')) {
+    if (confirm("Are you sure you want to remove this user from this team?")) {
       this.props.removeUserFromTeam(id);
     }
   };
@@ -100,11 +100,11 @@ class Team extends React.Component {
     if (canChangeUser(currentUser, user, team, users)) {
       return (
         <select onChange={this.handleRoleChange(user)} value={user.type}>
-          {hasGuestRole && <option value="guest">{f(gm('guestRole'))}</option>}
+          {hasGuestRole && <option value="guest">{f(gm("guestRole"))}</option>}
           {hasMemberRole && (
-            <option value="member">{f(gm('memberRole'))}</option>
+            <option value="member">{f(gm("memberRole"))}</option>
           )}
-          {hasOwnerRole && <option value="owner">{f(gm('ownerRole'))}</option>}
+          {hasOwnerRole && <option value="owner">{f(gm("ownerRole"))}</option>}
         </select>
       );
     }
@@ -136,12 +136,12 @@ class Team extends React.Component {
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td>{user.name ? user.name : f(gm('noUserName'))}</td>
+                <td>{user.name ? user.name : f(gm("noUserName"))}</td>
                 {hasOwnerRole && <td>{user.email}</td>}
                 <td>{this.roleOptions(user)}</td>
                 <td className={s.deleteCell}>
-                  {currentUser.id !== user.id
-                    && canChangeUser(currentUser, user, team, users) && (
+                  {currentUser.id !== user.id &&
+                    canChangeUser(currentUser, user, team, users) && (
                       <button
                         className={s.remove}
                         type="button"
@@ -150,7 +150,7 @@ class Team extends React.Component {
                       >
                         <FaTimes />
                       </button>
-                  )}
+                    )}
                 </td>
               </tr>
             ))}

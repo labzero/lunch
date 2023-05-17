@@ -11,25 +11,25 @@
 // https://babeljs.io/docs/usage/api/
 module.exports = {
   plugins: [
-    '@babel/plugin-syntax-dynamic-import',
-    '@babel/plugin-transform-modules-commonjs',
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/plugin-transform-modules-commonjs",
   ],
   presets: [
-    ['@babel/preset-typescript', { allowDeclareFields: true }],
+    ["@babel/preset-typescript", { allowDeclareFields: true }],
     [
-      '@babel/preset-env',
+      "@babel/preset-env",
       {
         targets: {
-          node: 'current',
+          node: "current",
         },
       },
     ],
-    '@babel/preset-react',
+    "@babel/preset-react",
   ],
-  ignore: ['node_modules', 'build'],
+  ignore: ["node_modules", "build"],
   env: {
     test: {
-      plugins: ['istanbul'],
-    }
-  }
+      plugins: ["istanbul"],
+    },
+  },
 };

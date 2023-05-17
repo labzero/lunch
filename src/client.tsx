@@ -7,20 +7,20 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import 'whatwg-fetch';
-import es6Promise from 'es6-promise';
-import React, { useEffect } from 'react';
-import { createRoot, hydrateRoot } from 'react-dom/client';
-import queryString from 'query-string';
-import { Action, createPath, Location } from 'history';
-import { ResolveContext } from 'universal-router';
-import App from './components/App';
-import createFetch from './createFetch';
-import configureStore from './store/configureStore';
-import history from './history';
-import { updateMeta } from './DOMUtils';
-import routerCreator from './router';
-import { Style } from '../global';
+import "whatwg-fetch";
+import es6Promise from "es6-promise";
+import React, { useEffect } from "react";
+import { createRoot, hydrateRoot } from "react-dom/client";
+import queryString from "query-string";
+import { Action, createPath, Location } from "history";
+import { ResolveContext } from "universal-router";
+import App from "./components/App";
+import createFetch from "./createFetch";
+import configureStore from "./store/configureStore";
+import history from "./history";
+import { updateMeta } from "./DOMUtils";
+import routerCreator from "./router";
+import { Style } from "../global";
 
 es6Promise.polyfill();
 
@@ -28,7 +28,7 @@ let subdomain: string | undefined;
 
 // Undo Browsersync mangling of host
 let host = window.App.state.host;
-if (host.indexOf('//') === 0) {
+if (host.indexOf("//") === 0) {
   host = host.slice(2);
 }
 const teamSlug = window.App.state.team.slug;
@@ -41,7 +41,7 @@ window.App.state.host = host;
 if (!subdomain) {
   // escape domain periods to not appear as regex wildcards
   const subdomainMatch = window.location.host.match(
-    `^(.*)\\.${host.replace(/\./g, '\\.')}`
+    `^(.*)\\.${host.replace(/\./g, "\\.")}`
   );
   if (subdomainMatch) {
     subdomain = subdomainMatch[1];
@@ -71,20 +71,22 @@ const context: ResolveContext = {
   // Initialize a new Redux store
   // http://redux.js.org/docs/basics/UsageWithReact.html
   store,
-  pathname: '',
-  query: undefined
+  pathname: "",
+  query: undefined,
 };
 
-const container = document.getElementById('app');
+const container = document.getElementById("app");
 let currentLocation = history!.location;
 
-const scrollPositionsHistory: {[index: string]: { scrollX: number, scrollY: number }} = {};
+const scrollPositionsHistory: {
+  [index: string]: { scrollX: number; scrollY: number };
+} = {};
 
 let routes;
 if (subdomain) {
-  routes = require('./routes/team').default; // eslint-disable-line global-require, @typescript-eslint/no-var-requires
+  routes = require("./routes/team").default; // eslint-disable-line global-require, @typescript-eslint/no-var-requires
 } else {
-  routes = require('./routes/main').default; // eslint-disable-line global-require, @typescript-eslint/no-var-requires
+  routes = require("./routes/main").default; // eslint-disable-line global-require, @typescript-eslint/no-var-requires
 }
 
 const router = routerCreator(routes);
@@ -92,14 +94,20 @@ const router = routerCreator(routes);
 const root = createRoot(container!);
 
 // Re-render the app when window.location changes
-const onLocationChange = async ({ action, location }: { action?: Action, location: Location }) => {
+const onLocationChange = async ({
+  action,
+  location,
+}: {
+  action?: Action;
+  location: Location;
+}) => {
   // Remember the latest scroll position for the previous location
   scrollPositionsHistory[currentLocation.key] = {
     scrollX: window.pageXOffset,
     scrollY: window.pageYOffset,
   };
   // Delete stored scroll position for next page if any
-  if (action === 'PUSH') {
+  if (action === "PUSH") {
     delete scrollPositionsHistory[location.key];
   }
   currentLocation = location;
@@ -123,7 +131,7 @@ const onLocationChange = async ({ action, location }: { action?: Action, locatio
     }
 
     if (route.redirect) {
-      if (route.redirect.slice(0, 2) === '//') {
+      if (route.redirect.slice(0, 2) === "//") {
         window.location.href = route.redirect;
       } else {
         history!.replace(route.redirect);
@@ -136,18 +144,18 @@ const onLocationChange = async ({ action, location }: { action?: Action, locatio
         if (isInitialRender) {
           // Switch off the native scroll restoration behavior and handle it manually
           // https://developers.google.com/web/updates/2015/09/history-api-scroll-restoration
-          if (window.history && 'scrollRestoration' in window.history) {
-            window.history.scrollRestoration = 'manual';
+          if (window.history && "scrollRestoration" in window.history) {
+            window.history.scrollRestoration = "manual";
           }
 
-          const elem = document.getElementById('css');
+          const elem = document.getElementById("css");
           if (elem) elem.parentNode!.removeChild(elem);
           return;
         }
 
         document.title = route.title;
 
-        updateMeta('description', route.description);
+        updateMeta("description", route.description);
         // Update necessary tags in <head> at runtime here, ie:
         // updateMeta('keywords', route.keywords);
         // updateCustomMeta('og:url', route.canonicalUrl);
@@ -179,7 +187,7 @@ const onLocationChange = async ({ action, location }: { action?: Action, locatio
         // Google Analytics tracking. Don't send 'pageview' event after
         // the initial rendering, as it was already sent
         if (window.ga) {
-          window.ga('send', 'pageview', createPath(location));
+          window.ga("send", "pageview", createPath(location));
         }
       });
 
@@ -200,7 +208,7 @@ const onLocationChange = async ({ action, location }: { action?: Action, locatio
 
     // Do a full page reload if error occurs during client-side navigation
     if (!isInitialRender && currentLocation.key === location.key) {
-      console.error('RSK will reload your page after error');
+      console.error("RSK will reload your page after error");
       window.location.reload();
     }
   }

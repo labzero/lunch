@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@import "../../styles/variables";
 
 .root {
   background: #fcb3f2;
@@ -9,25 +9,25 @@
   position: relative;
 }
 
-@media only screen and (max-height: 600px) {
+@media only screen and (height <= 600px) {
   .root {
     height: 300px;
   }
 }
 
-@media only screen and (max-height: 500px) {
+@media only screen and (height <= 500px) {
   .root {
     height: 250px;
   }
 }
 
-@media only screen and (max-height: 400px) {
+@media only screen and (height <= 400px) {
   .root {
     height: 200px;
   }
 }
 
-@media only screen and (min-width: 1000px) {
+@media only screen and (width >= 1000px) {
   .root {
     border-width: 0 0 0 $default-border-width;
     height: 100%;

@@ -5,7 +5,9 @@
 }
 
 @keyframes dash {
-  to { stroke-dashoffset: -6; }
+  to {
+    stroke-dashoffset: -6;
+  }
 }
 
 .tempMarkerCircle {

@@ -1,13 +1,13 @@
 /* eslint-disable no-undef */
-const superuserEmail = Cypress.env('superuserEmail');
-const superuserPassword = Cypress.env('superuserPassword');
+const superuserEmail = Cypress.env("superuserEmail");
+const superuserPassword = Cypress.env("superuserPassword");
 
 export default () => {
   const email = superuserEmail;
   const password = superuserPassword;
-  cy.request('POST', '/login', {
+  cy.request("POST", "/login", {
     email,
-    password
+    password,
   });
-  cy.visit('/');
+  cy.visit("/");
 };

@@ -1,15 +1,14 @@
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Container from 'react-bootstrap/Container';
-import s from './About.scss';
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Container from "react-bootstrap/Container";
+import s from "./About.scss";
 
 const About = () => (
   <div className={s.root}>
     <Container className={s.grid}>
       <h2>About Lunch</h2>
       <p>
-        Hi! I’m
-        {' '}
+        Hi! I’m{" "}
         <a
           href="https://jeffreyatw.com"
           rel="noopener noreferrer"
@@ -17,12 +16,10 @@ const About = () => (
         >
           Jeffrey
         </a>
-        , the guy behind Lunch. I created Lunch when my coworkers at
-        {' '}
+        , the guy behind Lunch. I created Lunch when my coworkers at{" "}
         <a href="https://labzero.com" rel="noopener noreferrer" target="_blank">
           Lab Zero
-        </a>
-        {' '}
+        </a>{" "}
         realized we had fallen into sort of a rut, food-wise. We kept going to
         the same few places, and our routine was getting stale. So I made Lunch,
         an easy way to keep a list of our favorite restaurants, and decide where
@@ -52,8 +49,7 @@ const About = () => (
       </p>
       <h4>Open-source</h4>
       <p>
-        First of all, Lunch is
-        {' '}
+        First of all, Lunch is{" "}
         <a
           href="https://github.com/labzero/lunch"
           rel="noopener noreferrer"
@@ -95,19 +91,16 @@ const About = () => (
       </p>
       <h4>Google Analytics</h4>
       <p>
-        This site also uses
-        {' '}
+        This site also uses{" "}
         <a
           href="https://analytics.google.com/"
           rel="noopener noreferrer"
           target="_blank"
         >
           Google Analytics
-        </a>
-        {' '}
+        </a>{" "}
         to give me an idea of what sorts of people are using Lunch, and from
-        where.
-        {' '}
+        where.{" "}
         <a
           href="https://support.google.com/analytics/answer/6004245?hl=en"
           rel="noopener noreferrer"
@@ -146,10 +139,8 @@ const About = () => (
         kick you out.
       </p>
       <p>
-        Any other questions or things I forgot to mention? Drop me a line at
-        {' '}
-        <a href="mailto:jeffrey@labzero.com">jeffrey@labzero.com</a>
-        . I’d be
+        Any other questions or things I forgot to mention? Drop me a line at{" "}
+        <a href="mailto:jeffrey@labzero.com">jeffrey@labzero.com</a>. I’d be
         happy to hear from you.
       </p>
       <p>I last updated this page on May 1, 2017.</p>

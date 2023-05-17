@@ -1,14 +1,14 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import Button from 'react-bootstrap/Button';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from './GoogleInfoWindow.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
+import Button from "react-bootstrap/Button";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "./GoogleInfoWindow.scss";
 
 let google = {
   maps: {
     Marker: { MAX_ZINDEX: 1000000 },
-    places: { PlacesService: () => {}, PlacesServiceStatus: {} },
+    places: { PlacesService: () => undefined, PlacesServiceStatus: {} },
   },
 };
 if (canUseDOM) {

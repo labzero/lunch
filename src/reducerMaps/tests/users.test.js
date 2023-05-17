@@ -1,11 +1,11 @@
 /* eslint-env mocha */
 /* eslint-disable no-unused-expressions */
 
-import { expect } from 'chai';
-import users from '../users';
+import { expect } from "chai";
+import users from "../users";
 
-describe('reducerMaps/users', () => {
-  describe('USER_PATCHED', () => {
+describe("reducerMaps/users", () => {
+  describe("USER_PATCHED", () => {
     let beforeState;
     let afterState;
     beforeEach(() => {
@@ -16,27 +16,27 @@ describe('reducerMaps/users', () => {
           entities: {
             users: {
               1: {
-                foo: 'bar'
-              }
-            }
-          }
-        }
+                foo: "bar",
+              },
+            },
+          },
+        },
       };
       afterState = users(beforeState, {
         id: 1,
-        type: 'USER_PATCHED',
+        type: "USER_PATCHED",
         user: {
-          foo: 'baz'
-        }
+          foo: "baz",
+        },
       });
     });
 
-    it('sets isFetching to false', () => {
+    it("sets isFetching to false", () => {
       expect(afterState.isFetching).to.be.false;
     });
 
-    it('replaces user with updated user', () => {
-      expect(afterState.items.entities.users[1].foo).to.eq('baz');
+    it("replaces user with updated user", () => {
+      expect(afterState.items.entities.users[1].foo).to.eq("baz");
     });
   });
 });

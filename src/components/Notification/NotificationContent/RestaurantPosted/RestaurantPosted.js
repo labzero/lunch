@@ -1,7 +1,7 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from '../NotificationContent.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "../NotificationContent.scss";
 
 const RestaurantPosted = ({
   loggedIn,
@@ -21,21 +21,12 @@ const RestaurantPosted = ({
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b>
-        {' '}
-        added
-        {restaurantEl}
-        .
+        <b>{user}</b> added
+        {restaurantEl}.
       </span>
     );
   }
-  return (
-    <span>
-      {restaurantEl}
-      {' '}
-      was added.
-    </span>
-  );
+  return <span>{restaurantEl} was added.</span>;
 };
 
 RestaurantPosted.propTypes = {
@@ -46,7 +37,7 @@ RestaurantPosted.propTypes = {
 };
 
 RestaurantPosted.defaultProps = {
-  user: '',
+  user: "",
 };
 
 export default withStyles(s)(RestaurantPosted);

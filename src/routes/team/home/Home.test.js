@@ -1,35 +1,53 @@
 /* eslint-env mocha */
 /* eslint-disable padded-blocks, no-unused-expressions */
 
-import React from 'react';
-import { spy, useFakeTimers } from 'sinon';
-import { expect } from 'chai';
-import proxyquire from 'proxyquire';
-import { render, screen } from '../../../../test/test-utils';
+import React from "react";
+import { spy, useFakeTimers } from "sinon";
+import { expect } from "chai";
+import proxyquire from "proxyquire";
+import { render, screen } from "../../../../test/test-utils";
 
 const proxy = proxyquire.noCallThru();
 
 const FooterContainer = () => <div>Stubbed footercontainer.</div>;
-const NameFilterFormContainer = () => <div>Stubbed name filter form container.</div>;
-const PastDecisionsModalContainer = () => <div>Stubbed past decisions modal container.</div>;
-const RestaurantMapContainer = () => <div>Stubbed restaurant map container.</div>;
-const RestaurantListContainer = () => <div>Stubbed restaurant list container.</div>;
-const RestaurantAddFormContainer = () => <div>Stubbed restaurant add form container.</div>;
-const TagFilterFormContainer = () => <div>Stubbed tag filter form container.</div>;
+const NameFilterFormContainer = () => (
+  <div>Stubbed name filter form container.</div>
+);
+const PastDecisionsModalContainer = () => (
+  <div>Stubbed past decisions modal container.</div>
+);
+const RestaurantMapContainer = () => (
+  <div>Stubbed restaurant map container.</div>
+);
+const RestaurantListContainer = () => (
+  <div>Stubbed restaurant list container.</div>
+);
+const RestaurantAddFormContainer = () => (
+  <div>Stubbed restaurant add form container.</div>
+);
+const TagFilterFormContainer = () => (
+  <div>Stubbed tag filter form container.</div>
+);
 
 // eslint-disable-next-line no-underscore-dangle
-const Home = proxy('./Home', {
-  'fbjs/lib/ExecutionEnvironment': { canUseDOM: false },
-  '../../../components/RestaurantAddForm/RestaurantAddFormContainer': RestaurantAddFormContainer,
-  '../../../components/Footer/FooterContainer': FooterContainer,
-  '../../../components/NameFilterForm/NameFilterFormContainer': NameFilterFormContainer,
-  '../../../components/PastDecisionsModal/PastDecisionsModalContainer': PastDecisionsModalContainer,
-  '../../../components/RestaurantMap/RestaurantMapContainer': RestaurantMapContainer,
-  '../../../components/RestaurantList/RestaurantListContainer': RestaurantListContainer,
-  '../../../components/TagFilterForm/TagFilterFormContainer': TagFilterFormContainer,
+const Home = proxy("./Home", {
+  "fbjs/lib/ExecutionEnvironment": { canUseDOM: false },
+  "../../../components/RestaurantAddForm/RestaurantAddFormContainer":
+    RestaurantAddFormContainer,
+  "../../../components/Footer/FooterContainer": FooterContainer,
+  "../../../components/NameFilterForm/NameFilterFormContainer":
+    NameFilterFormContainer,
+  "../../../components/PastDecisionsModal/PastDecisionsModalContainer":
+    PastDecisionsModalContainer,
+  "../../../components/RestaurantMap/RestaurantMapContainer":
+    RestaurantMapContainer,
+  "../../../components/RestaurantList/RestaurantListContainer":
+    RestaurantListContainer,
+  "../../../components/TagFilterForm/TagFilterFormContainer":
+    TagFilterFormContainer,
 })._Home;
 
-describe('Home', () => {
+describe("Home", () => {
   let props;
   let fetchDecisions;
   let fetchRestaurants;
@@ -68,18 +86,20 @@ describe('Home', () => {
   const renderComponent = async () => {
     render(<Home {...props} />);
 
-    expect(await screen.findByText('Stubbed restaurant map container.')).to.be.in.document;
+    expect(await screen.findByText("Stubbed restaurant map container.")).to.be
+      .in.document;
   };
 
-  it('renders form if user is logged in', async () => {
+  it("renders form if user is logged in", async () => {
     props.user.id = 1;
 
     await renderComponent();
 
-    expect(await screen.findByText('Stubbed restaurant add form container.')).to.be.in.document;
+    expect(await screen.findByText("Stubbed restaurant add form container.")).to
+      .be.in.document;
   });
 
-  it('invalidates and fetches all data upon mount', async () => {
+  it("invalidates and fetches all data upon mount", async () => {
     await renderComponent();
 
     expect(invalidateDecisions.callCount).to.eq(1);
@@ -93,7 +113,7 @@ describe('Home', () => {
     expect(fetchUsers.callCount).to.eq(1);
   });
 
-  it('fetches all data after an hour', async () => {
+  it("fetches all data after an hour", async () => {
     const clock = useFakeTimers({ shouldAdvanceTime: true });
 
     await renderComponent();

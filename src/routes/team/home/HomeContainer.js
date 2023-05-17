@@ -1,18 +1,24 @@
-import { connect } from 'react-redux';
-import { fetchDecisions, invalidateDecisions } from '../../../actions/decisions';
-import { fetchRestaurants, invalidateRestaurants } from '../../../actions/restaurants';
-import { fetchTags, invalidateTags } from '../../../actions/tags';
-import { fetchUsers, invalidateUsers } from '../../../actions/users';
-import { messageReceived } from '../../../actions/websockets';
-import Home from './Home';
+import { connect } from "react-redux";
+import {
+  fetchDecisions,
+  invalidateDecisions,
+} from "../../../actions/decisions";
+import {
+  fetchRestaurants,
+  invalidateRestaurants,
+} from "../../../actions/restaurants";
+import { fetchTags, invalidateTags } from "../../../actions/tags";
+import { fetchUsers, invalidateUsers } from "../../../actions/users";
+import { messageReceived } from "../../../actions/websockets";
+import Home from "./Home";
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   pastDecisionsShown: !!state.modals.pastDecisions,
   user: state.user,
-  wsPort: state.wsPort
+  wsPort: state.wsPort,
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   fetchDecisions() {
     dispatch(fetchDecisions());
   },
@@ -39,10 +45,7 @@ const mapDispatchToProps = dispatch => ({
   },
   messageReceived(event) {
     dispatch(messageReceived(event.data));
-  }
+  },
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Home);
+export default connect(mapStateToProps, mapDispatchToProps)(Home);

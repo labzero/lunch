@@ -7,31 +7,36 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import fs from 'fs';
-import path from 'path';
-import webpack from 'webpack';
-import WebpackAssetsManifest from 'webpack-assets-manifest';
-import nodeExternals from 'webpack-node-externals';
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
-import { InjectManifest } from 'workbox-webpack-plugin';
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
-import overrideRules from './lib/overrideRules';
-import pkg from '../package.json';
+/* eslint-disable no-nested-ternary */
 
-const ROOT_DIR = path.resolve(__dirname, '..');
+import fs from "fs";
+import path from "path";
+import webpack from "webpack";
+import WebpackAssetsManifest from "webpack-assets-manifest";
+import nodeExternals from "webpack-node-externals";
+import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
+import { InjectManifest } from "workbox-webpack-plugin";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
+import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
+import overrideRules from "./lib/overrideRules";
+import pkg from "../package.json";
+
+const ROOT_DIR = path.resolve(__dirname, "..");
 const resolvePath = (...args) => path.resolve(ROOT_DIR, ...args);
-const SRC_DIR = resolvePath('src');
-const BUILD_DIR = resolvePath('build');
+const SRC_DIR = resolvePath("src");
+const BUILD_DIR = resolvePath("build");
 
-const isDebug = !process.argv.includes('--release');
-const isVerbose = process.argv.includes('--verbose');
-const isAnalyze = process.argv.includes('--analyze') || process.argv.includes('--analyse');
+const isDebug = !process.argv.includes("--release");
+const isVerbose = process.argv.includes("--verbose");
+const isAnalyze =
+  process.argv.includes("--analyze") || process.argv.includes("--analyse");
 
 const reScript = /\.(js|jsx|mjs|ts|tsx)$/;
 const reStyle = /\.(css|less|styl|scss|sass|sss)$/;
 const reImage = /\.(bmp|gif|jpg|jpeg|png|svg)$/;
-const staticAssetName = isDebug ? '[path][name].[ext]?[hash:8]' : '[hash:8].[ext]';
+const staticAssetName = isDebug
+  ? "[path][name].[ext]?[hash:8]"
+  : "[hash:8].[ext]";
 
 //
 // Common configuration chunk to be used for both
@@ -41,29 +46,32 @@ const staticAssetName = isDebug ? '[path][name].[ext]?[hash:8]' : '[hash:8].[ext
 const config = {
   context: ROOT_DIR,
 
-  mode: isDebug ? 'development' : 'production',
+  mode: isDebug ? "development" : "production",
 
   output: {
-    path: resolvePath(BUILD_DIR, 'public/assets'),
-    publicPath: '/assets/',
+    path: resolvePath(BUILD_DIR, "public/assets"),
+    publicPath: "/assets/",
     pathinfo: isVerbose,
-    filename: isDebug ? '[name].js' : '[name].[chunkhash:8].js',
-    chunkFilename: isDebug ? '[name].chunk.js' : '[name].[chunkhash:8].chunk.js',
-    devtoolModuleFilenameTemplate: info => path.resolve(info.absoluteResourcePath),
+    filename: isDebug ? "[name].js" : "[name].[chunkhash:8].js",
+    chunkFilename: isDebug
+      ? "[name].chunk.js"
+      : "[name].[chunkhash:8].chunk.js",
+    devtoolModuleFilenameTemplate: (info) =>
+      path.resolve(info.absoluteResourcePath),
   },
 
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: [".tsx", ".ts", ".js"],
 
     // Add support for TypeScripts fully qualified ESM imports.
     extensionAlias: {
-      '.js': ['.js', '.ts'],
-      '.cjs': ['.cjs', '.cts'],
-      '.mjs': ['.mjs', '.mts']
+      ".js": [".js", ".ts"],
+      ".cjs": [".cjs", ".cts"],
+      ".mjs": [".mjs", ".mts"],
     },
     // Allow absolute paths in imports, e.g. import Button from 'components/Button'
     // Keep in sync with .flowconfig and .eslintrc
-    modules: ['node_modules', 'src'],
+    modules: ["node_modules", "src"],
 
     // Do not replace node globals with polyfills
     // https://webpack.js.org/configuration/node/
@@ -71,7 +79,7 @@ const config = {
       buffer: false,
       console: false,
       process: false,
-    }
+    },
   },
 
   module: {
@@ -82,8 +90,8 @@ const config = {
       // Rules for JS / JSX
       {
         test: /\.(js|jsx|mjs|ts|tsx)$/,
-        include: [ROOT_DIR, resolvePath('tools')],
-        loader: 'babel-loader',
+        include: [ROOT_DIR, resolvePath("tools")],
+        loader: "babel-loader",
         options: {
           // https://github.com/babel/babel-loader#options
           cacheDirectory: isDebug,
@@ -92,33 +100,35 @@ const config = {
           babelrc: false,
           configFile: false,
           presets: [
-            ['@babel/preset-typescript', { allowDeclareFields: true }],
+            ["@babel/preset-typescript", { allowDeclareFields: true }],
             // A Babel preset that can automatically determine the Babel plugins and polyfills
             // https://github.com/babel/babel-preset-env
             [
-              '@babel/preset-env',
+              "@babel/preset-env",
               {
                 forceAllTransforms: !isDebug, // for UglifyJS
               },
             ],
             // JSX
             // https://github.com/babel/babel/tree/master/packages/babel-preset-react
-            ['@babel/preset-react', { development: isDebug }],
+            ["@babel/preset-react", { development: isDebug }],
           ],
           plugins: [
             // Experimental ECMAScript proposals
             // '@babel/plugin-proposal-class-properties',
-            '@babel/plugin-syntax-dynamic-import',
+            "@babel/plugin-syntax-dynamic-import",
             // Treat React JSX elements as value types and hoist them to the highest scope
             // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-constant-elements
-            ...(isDebug ? [] : ['@babel/transform-react-constant-elements']),
+            ...(isDebug ? [] : ["@babel/transform-react-constant-elements"]),
             // Replaces the React.createElement function with one that is more optimized for production
             // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-inline-elements
-            ...(isDebug ? [] : ['@babel/transform-react-inline-elements']),
+            ...(isDebug ? [] : ["@babel/transform-react-inline-elements"]),
             // Remove unnecessary React propTypes from the production build
             // https://github.com/oliviertassinari/babel-plugin-transform-react-remove-prop-types
-            ...(isDebug ? [] : ['transform-react-remove-prop-types']),
-            ...(isDebug && process.env.NODE_ENV !== 'test' ? ['react-refresh/babel'] : []),
+            ...(isDebug ? [] : ["transform-react-remove-prop-types"]),
+            ...(isDebug && process.env.NODE_ENV !== "test"
+              ? ["react-refresh/babel"]
+              : []),
           ],
         },
       },
@@ -130,13 +140,13 @@ const config = {
           // Convert CSS into JS module
           {
             issuer: { not: [reStyle] },
-            use: 'isomorphic-style-loader',
+            use: "isomorphic-style-loader",
           },
 
           // Process external/third-party styles
           {
             exclude: SRC_DIR,
-            loader: 'css-loader',
+            loader: "css-loader",
             options: {
               esModule: false,
               sourceMap: isDebug,
@@ -147,7 +157,7 @@ const config = {
           {
             test: /^((?!globalCss).)*\.(css|scss|less|sss)$/,
             include: SRC_DIR,
-            loader: 'css-loader',
+            loader: "css-loader",
             options: {
               esModule: false,
               // CSS Loader https://github.com/webpack/css-loader
@@ -156,8 +166,13 @@ const config = {
               // CSS Modules https://github.com/css-modules/css-modules
               modules: {
                 // eslint-disable-next-line no-nested-ternary
-                localIdentName: process.env.NODE_ENV === 'test' ? '[name]-[local]' : (isDebug ? '[name]-[local]-[hash:base64:5]' : '[hash:base64:5]'),
-              }
+                localIdentName:
+                  process.env.NODE_ENV === "test"
+                    ? "[name]-[local]"
+                    : isDebug
+                    ? "[name]-[local]-[hash:base64:5]"
+                    : "[hash:base64:5]",
+              },
             },
           },
 
@@ -165,7 +180,7 @@ const config = {
           {
             test: /globalCss\.scss$/,
             include: SRC_DIR,
-            loader: 'css-loader',
+            loader: "css-loader",
             options: {
               esModule: false,
               // CSS Loader https://github.com/webpack/css-loader
@@ -173,7 +188,7 @@ const config = {
               sourceMap: isDebug,
               // CSS Modules https://github.com/css-modules/css-modules
               modules: {
-                localIdentName: '[local]',
+                localIdentName: "[local]",
               },
             },
           },
@@ -191,10 +206,10 @@ const config = {
           // Install dependencies before uncommenting: yarn add --dev sass-loader node-sass,
           {
             test: /\.scss$/,
-            loader: 'postcss-loader',
+            loader: "postcss-loader",
             options: {
               postcssOptions: {
-                config: './tools/postcss.sass.config.js',
+                config: "./tools/postcss.sass.config.js",
               },
             },
           },
@@ -202,7 +217,7 @@ const config = {
             test: /\.scss$/,
             use: [
               {
-                loader: 'sass-loader'
+                loader: "sass-loader",
               },
             ],
           },
@@ -220,7 +235,7 @@ const config = {
               // Inline lightweight SVGs as UTF-8 encoded DataUrl string
               {
                 test: /\.svg$/,
-                loader: 'svg-url-loader',
+                loader: "svg-url-loader",
                 options: {
                   esModule: false,
                   name: staticAssetName,
@@ -230,7 +245,7 @@ const config = {
 
               // Inline lightweight images as Base64 encoded DataUrl string
               {
-                loader: 'url-loader',
+                loader: "url-loader",
                 options: {
                   esModule: false,
                   name: staticAssetName,
@@ -242,7 +257,7 @@ const config = {
 
           // Or return public URL to image resource
           {
-            loader: 'file-loader',
+            loader: "file-loader",
             options: {
               esModule: false,
               name: staticAssetName,
@@ -254,27 +269,20 @@ const config = {
       // Convert plain text into JS module
       {
         test: /\.txt$/,
-        loader: 'raw-loader',
+        loader: "raw-loader",
       },
 
       // Convert Markdown into HTML
       {
         test: /\.md$/,
-        loader: path.resolve(__dirname, './lib/markdown-loader.js'),
+        loader: path.resolve(__dirname, "./lib/markdown-loader.js"),
       },
 
       // Return public URL for all assets unless explicitly excluded
       // DO NOT FORGET to update `exclude` list when you adding a new loader
       {
-        exclude: [
-          reScript,
-          reStyle,
-          reImage,
-          /\.json$/,
-          /\.txt$/,
-          /\.md$/,
-        ],
-        loader: 'file-loader',
+        exclude: [reScript, reStyle, reImage, /\.json$/, /\.txt$/, /\.md$/],
+        loader: "file-loader",
         options: {
           name: staticAssetName,
         },
@@ -284,24 +292,28 @@ const config = {
       ...(isDebug
         ? []
         : [
-          {
-            test: resolvePath(
-              'node_modules/react-deep-force-update/lib/index.js',
-            ),
-            loader: 'null-loader',
-          },
-        ]),
+            {
+              test: resolvePath(
+                "node_modules/react-deep-force-update/lib/index.js"
+              ),
+              loader: "null-loader",
+            },
+          ]),
     ],
   },
 
   plugins: [
     new ForkTsCheckerWebpackPlugin(),
-    isDebug && process.env.NODE_ENV !== 'test' && new webpack.HotModuleReplacementPlugin(),
-    isDebug && process.env.NODE_ENV !== 'test' && new ReactRefreshWebpackPlugin({
-      overlay: {
-        sockIntegration: 'whm',
-      }
-    })
+    isDebug &&
+      process.env.NODE_ENV !== "test" &&
+      new webpack.HotModuleReplacementPlugin(),
+    isDebug &&
+      process.env.NODE_ENV !== "test" &&
+      new ReactRefreshWebpackPlugin({
+        overlay: {
+          sockIntegration: "whm",
+        },
+      }),
   ].filter(Boolean),
 
   // Don't attempt to continue if there are any errors.
@@ -311,11 +323,11 @@ const config = {
 
   // Specify what bundle information gets displayed
   // https://webpack.js.org/configuration/stats/
-  stats: 'errors-warnings',
+  stats: "errors-warnings",
 
   // Choose a developer tool to enhance debugging
   // https://webpack.js.org/configuration/devtool/#devtool
-  devtool: isDebug ? 'inline-source-map' : 'source-map',
+  devtool: isDebug ? "inline-source-map" : "source-map",
 };
 
 //
@@ -325,11 +337,11 @@ const config = {
 const clientConfig = {
   ...config,
 
-  name: 'client',
-  target: 'web',
+  name: "client",
+  target: "web",
 
   entry: {
-    client: './src/client.tsx',
+    client: "./src/client.tsx",
   },
 
   plugins: [
@@ -337,7 +349,7 @@ const clientConfig = {
     // Define free variables
     // https://webpack.js.org/plugins/define-plugin/
     new webpack.DefinePlugin({
-      'process.env.BROWSER': true,
+      "process.env.BROWSER": true,
       __DEV__: isDebug,
     }),
 
@@ -349,15 +361,15 @@ const clientConfig = {
       writeToDisk: true,
       customize: ({ key, value }) => {
         // You can prevent adding items to the manifest by returning false.
-        if (key.toLowerCase().endsWith('.map')) return false;
+        if (key.toLowerCase().endsWith(".map")) return false;
         return { key, value };
       },
       done: (manifest, stats) => {
         // Write chunk-manifest.json.json
         const chunkFileName = `${BUILD_DIR}/chunk-manifest.json`;
         try {
-          const fileFilter = file => !file.endsWith('.map');
-          const addPath = file => manifest.getPublicPath(file);
+          const fileFilter = (file) => !file.endsWith(".map");
+          const addPath = (file) => manifest.getPublicPath(file);
           const chunkFiles = stats.compilation.chunkGroups.reduce((acc, c) => {
             acc[c.name] = [
               ...(acc[c.name] || []),
@@ -366,7 +378,7 @@ const clientConfig = {
                   ...files,
                   ...Array.from(cc.files).filter(fileFilter).map(addPath),
                 ],
-                [],
+                []
               ),
             ];
             return acc;
@@ -382,14 +394,14 @@ const clientConfig = {
     ...(isDebug
       ? []
       : [
-        // Webpack Bundle Analyzer
-        // https://github.com/th0r/webpack-bundle-analyzer
-        ...(isAnalyze ? [new BundleAnalyzerPlugin()] : []),
-      ]),
+          // Webpack Bundle Analyzer
+          // https://github.com/th0r/webpack-bundle-analyzer
+          ...(isAnalyze ? [new BundleAnalyzerPlugin()] : []),
+        ]),
 
     new InjectManifest({
-      swSrc: './src/service-worker.js',
-      swDest: resolvePath(BUILD_DIR, 'public/service-worker.js'),
+      swSrc: "./src/service-worker.js",
+      swDest: resolvePath(BUILD_DIR, "public/service-worker.js"),
     }),
   ],
 
@@ -398,9 +410,9 @@ const clientConfig = {
     splitChunks: {
       cacheGroups: {
         commons: {
-          chunks: 'initial',
+          chunks: "initial",
           test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
+          name: "vendors",
         },
       },
     },
@@ -414,10 +426,10 @@ const clientConfig = {
     ...config.resolve,
     fallback: {
       ...config.resolve.fallback,
-      fs: 'empty',
-      net: 'empty',
-      tls: 'empty',
-    }
+      fs: "empty",
+      net: "empty",
+      tls: "empty",
+    },
   },
 };
 
@@ -428,19 +440,19 @@ const clientConfig = {
 const serverConfig = {
   ...config,
 
-  name: 'server',
-  target: 'node',
+  name: "server",
+  target: "node",
 
   entry: {
-    server: './src/server.tsx',
+    server: "./src/server.tsx",
   },
 
   output: {
     ...config.output,
     path: BUILD_DIR,
-    filename: '[name].js',
-    chunkFilename: 'chunks/[name].js',
-    libraryTarget: 'commonjs2',
+    filename: "[name].js",
+    chunkFilename: "chunks/[name].js",
+    libraryTarget: "commonjs2",
   },
 
   // Webpack mutates resolve object, so clone it to avoid issues
@@ -452,36 +464,44 @@ const serverConfig = {
   module: {
     ...config.module,
 
-    rules: overrideRules(config.module.rules, rule => {
+    rules: overrideRules(config.module.rules, (rule) => {
       // Override babel-preset-env configuration for Node.js
-      if (rule.loader === 'babel-loader') {
+      if (rule.loader === "babel-loader") {
         return {
           ...rule,
           options: {
             ...rule.options,
-            presets: rule.options.presets.map(preset => preset[0] !== '@babel/preset-env' ? preset : [
-              '@babel/preset-env',
-              {
-                targets: {
-                  node: pkg.engines.node.match(/(\d+\.?)+/)[0],
-                },
-                modules: false,
-                useBuiltIns: false,
-                debug: false,
-              },
-            ]),
+            presets: rule.options.presets.map((preset) =>
+              preset[0] !== "@babel/preset-env"
+                ? preset
+                : [
+                    "@babel/preset-env",
+                    {
+                      targets: {
+                        node: pkg.engines.node.match(/(\d+\.?)+/)[0],
+                      },
+                      modules: false,
+                      useBuiltIns: false,
+                      debug: false,
+                    },
+                  ]
+            ),
           },
         };
       }
 
       // Override paths to static assets
-      if (rule.loader === 'file-loader' || rule.loader === 'url-loader' || rule.loader === 'svg-url-loader') {
+      if (
+        rule.loader === "file-loader" ||
+        rule.loader === "url-loader" ||
+        rule.loader === "svg-url-loader"
+      ) {
         return {
           ...rule,
           options: {
             ...rule.options,
             name: `public/assets/${rule.options.name}`,
-            publicPath: url => url.replace(/^public/, ''),
+            publicPath: (url) => url.replace(/^public/, ""),
           },
         };
       }
@@ -491,13 +511,10 @@ const serverConfig = {
   },
 
   externals: [
-    './chunk-manifest.json',
-    './asset-manifest.json',
+    "./chunk-manifest.json",
+    "./asset-manifest.json",
     nodeExternals({
-      allowlist: [
-        reStyle,
-        reImage,
-      ],
+      allowlist: [reStyle, reImage],
     }),
   ],
 
@@ -507,8 +524,13 @@ const serverConfig = {
     // https://webpack.js.org/plugins/define-plugin/
     new webpack.DefinePlugin({
       // eslint-disable-next-line no-nested-ternary
-      'process.env.NODE_ENV': process.env.NODE_ENV === 'test' ? '"test"' : (isDebug ? '"development"' : '"production"'),
-      'process.env.BROWSER': false,
+      "process.env.NODE_ENV":
+        process.env.NODE_ENV === "test"
+          ? '"test"'
+          : isDebug
+          ? '"development"'
+          : '"production"',
+      "process.env.BROWSER": false,
       __DEV__: isDebug,
     }),
 

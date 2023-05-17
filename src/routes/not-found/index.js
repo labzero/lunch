@@ -7,6 +7,6 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import render404 from '../helpers/render404';
+import render404 from "../helpers/render404";
 
 export default (context) => render404(context);

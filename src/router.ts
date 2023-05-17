@@ -7,13 +7,14 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import UniversalRouter, { Route } from 'universal-router';
+import UniversalRouter, { Route } from "universal-router";
 
-export default (routes: Route) => new UniversalRouter(routes, {
-  async resolveRoute(context, params) {
-    if (typeof context.route.action === 'function') {
-      return await context.route.action(context, params);
-    }
-    return undefined;
-  },
-});
+export default (routes: Route) =>
+  new UniversalRouter(routes, {
+    async resolveRoute(context, params) {
+      if (typeof context.route.action === "function") {
+        return await context.route.action(context, params);
+      }
+      return undefined;
+    },
+  });

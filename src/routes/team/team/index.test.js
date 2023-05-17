@@ -1,15 +1,15 @@
 /* eslint-env mocha */
 /* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates */
 
-import { expect } from 'chai';
-import proxyquire from 'proxyquire';
-import { configureMockStore } from '@jedmao/redux-mock-store';
-import mockEsmodule from '../../../../test/mockEsmodule';
+import { expect } from "chai";
+import proxyquire from "proxyquire";
+import { configureMockStore } from "@jedmao/redux-mock-store";
+import mockEsmodule from "../../../../test/mockEsmodule";
 
 const proxyquireStrict = proxyquire.noCallThru();
 const mockStore = configureMockStore();
 
-describe('routes/team/team', () => {
+describe("routes/team/team", () => {
   let context;
   let render404;
   let team;
@@ -17,7 +17,7 @@ describe('routes/team/team', () => {
 
   beforeEach(() => {
     team = {
-      id: 77
+      id: 77,
     };
     context = {
       params: {},
@@ -25,51 +25,51 @@ describe('routes/team/team', () => {
       store: mockStore({
         team,
         user: {
-          id: 1
-        }
-      })
+          id: 1,
+        },
+      }),
     };
   });
 
-  describe('when user is a guest', () => {
+  describe("when user is a guest", () => {
     let result;
     beforeEach(() => {
-      render404 = 'render404';
-      landingProxy = proxyquireStrict('./index', {
-        '../../../helpers/hasRole': mockEsmodule({
+      render404 = "render404";
+      landingProxy = proxyquireStrict("./index", {
+        "../../../helpers/hasRole": mockEsmodule({
           default: () => false,
         }),
-        '../../helpers/renderIfHasName': mockEsmodule({
+        "../../helpers/renderIfHasName": mockEsmodule({
           default: (_, cb) => cb(),
         }),
-        '../../helpers/render404': mockEsmodule({
+        "../../helpers/render404": mockEsmodule({
           default: () => render404,
-        })
+        }),
       }).default;
       result = landingProxy(context);
     });
 
-    it('renders 404', () => {
+    it("renders 404", () => {
       expect(result).to.eq(render404);
     });
   });
 
-  describe('when user is at least a member', () => {
+  describe("when user is at least a member", () => {
     let result;
     beforeEach(() => {
-      landingProxy = proxyquireStrict('./index', {
-        '../../../helpers/hasRole': mockEsmodule({
+      landingProxy = proxyquireStrict("./index", {
+        "../../../helpers/hasRole": mockEsmodule({
           default: () => true,
         }),
-        '../../helpers/renderIfHasName': mockEsmodule({
+        "../../helpers/renderIfHasName": mockEsmodule({
           default: (_, cb) => cb(),
-        })
+        }),
       }).default;
       result = landingProxy(context);
     });
 
-    it('renders team', () => {
-      expect(result).to.have.keys('component', 'chunks', 'map', 'title');
+    it("renders team", () => {
+      expect(result).to.have.keys("component", "chunks", "map", "title");
     });
   });
 });

@@ -1,12 +1,12 @@
-import PropTypes from 'prop-types';
-import React, { useCallback } from 'react';
-import { Flipper, Flipped } from 'react-flip-toolkit';
-import { Element as ScrollElement } from 'react-scroll';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Container from 'react-bootstrap/Container';
-import Loading from '../Loading/Loading';
-import RestaurantContainer from '../Restaurant/RestaurantContainer';
-import s from './RestaurantList.scss';
+import PropTypes from "prop-types";
+import React, { useCallback } from "react";
+import { Flipper, Flipped } from "react-flip-toolkit";
+import { Element as ScrollElement } from "react-scroll";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Container from "react-bootstrap/Container";
+import Loading from "../Loading/Loading";
+import RestaurantContainer from "../Restaurant/RestaurantContainer";
+import s from "./RestaurantList.scss";
 
 const RestaurantList = ({
   allRestaurantIds,
@@ -63,17 +63,19 @@ const RestaurantList = ({
     }, i * 50);
   }, []);
 
-  const handleEnterUpdateDelete = useCallback(({
-    hideEnteringElements,
-    animateEnteringElements,
-    animateExitingElements,
-    animateFlippedElements
-  }) => {
-    hideEnteringElements();
-    animateEnteringElements();
-    animateExitingElements()
-      .then(animateFlippedElements);
-  }, []);
+  const handleEnterUpdateDelete = useCallback(
+    ({
+      hideEnteringElements,
+      animateEnteringElements,
+      animateExitingElements,
+      animateFlippedElements,
+    }) => {
+      hideEnteringElements();
+      animateEnteringElements();
+      animateExitingElements().then(animateFlippedElements);
+    },
+    []
+  );
 
   return (
     <Flipper
@@ -85,11 +87,18 @@ const RestaurantList = ({
         default: {
           reverse: true,
           speed: 0.75,
-        }
+        },
       }}
     >
       {ids.map((id) => (
-        <Flipped key={id} flipId={id} onAppear={onAppear} onExit={onExit} shouldFlip={shouldFlip} stagger>
+        <Flipped
+          key={id}
+          flipId={id}
+          onAppear={onAppear}
+          onExit={onExit}
+          shouldFlip={shouldFlip}
+          stagger
+        >
           <li key={`restaurantListItem_${id}`}>
             <ScrollElement name={`restaurantListItem_${id}`}>
               <RestaurantContainer

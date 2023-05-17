@@ -7,9 +7,9 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import hasRole from '../../../helpers/hasRole';
-import renderIfHasName from '../../helpers/renderIfHasName';
-import render404 from '../../helpers/render404';
+import hasRole from "../../../helpers/hasRole";
+import renderIfHasName from "../../helpers/renderIfHasName";
+import render404 from "../../helpers/render404";
 
 export default (context) => {
   const state = context.store.getState();
@@ -21,7 +21,7 @@ export default (context) => {
     if (team.id && hasRole(user, team)) {
       return {
         redirect: `//${host}/teams`,
-        status: 301
+        status: 301,
       };
     }
     return render404(context);

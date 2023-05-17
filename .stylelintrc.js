@@ -12,62 +12,61 @@ const lowerKebabCase = /^[a-z][a-zA-Z0-9]+$/;
 // stylelint configuration
 // https://stylelint.io/user-guide/configuration/
 module.exports = {
-
   // The standard config based on a handful of CSS style guides
   // https://github.com/stylelint/stylelint-config-standard
-  extends: 'stylelint-config-standard-scss',
+  extends: "stylelint-config-standard-scss",
 
   plugins: [
     // stylelint plugin to sort CSS rules content with specified order
     // https://github.com/hudochenkov/stylelint-order
-    'stylelint-order',
+    "stylelint-order",
   ],
 
   rules: {
-    'at-rule-no-unknown': null,
-    'scss/at-rule-no-unknown': true,
-    'declaration-empty-line-before': null,
-    'keyframes-name-pattern': lowerKebabCase,
-    'number-leading-zero': 'never',
-    'property-no-unknown': [true, {
-      ignoreProperties: [
-        // CSS Modules composition
-        // https://github.com/css-modules/css-modules#composition
-        'composes',
-        'overflow-anchor'
-      ],
-    }],
-    'selector-class-pattern': lowerKebabCase,
+    "at-rule-no-unknown": null,
+    "scss/at-rule-no-unknown": true,
+    "declaration-empty-line-before": null,
+    "keyframes-name-pattern": lowerKebabCase,
+    "number-leading-zero": "never",
+    "property-no-unknown": [
+      true,
+      {
+        ignoreProperties: [
+          // CSS Modules composition
+          // https://github.com/css-modules/css-modules#composition
+          "composes",
+          "overflow-anchor",
+        ],
+      },
+    ],
+    "selector-class-pattern": lowerKebabCase,
 
-    'selector-pseudo-class-no-unknown': [
+    "selector-pseudo-class-no-unknown": [
       true,
       {
         ignorePseudoClasses: [
           // CSS Modules :global scope
           // https://github.com/css-modules/css-modules#exceptions
-          'global',
-          'local',
+          "global",
+          "local",
         ],
       },
     ],
 
-    // Opinionated rule, you can disable it if you want
-    'string-quotes': 'single',
-
     // https://github.com/hudochenkov/stylelint-order/blob/master/rules/order/README.md
-    'order/order': [
-      'custom-properties',
-      'dollar-variables',
+    "order/order": [
+      "custom-properties",
+      "dollar-variables",
       {
-        type: 'at-rule',
-        name: 'include',
+        type: "at-rule",
+        name: "include",
       },
-      'declarations',
-      'at-rules',
-      'rules',
+      "declarations",
+      "at-rules",
+      "rules",
     ],
 
     // https://github.com/hudochenkov/stylelint-order/blob/master/rules/properties-order/README.md
-    'order/properties-order': [],
+    "order/properties-order": [],
   },
 };

@@ -1,29 +1,30 @@
-exports.up = (queryInterface, Sequelize) => queryInterface.createTable('votes', {
-  id: {
-    type: Sequelize.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  restaurant_id: {
-    type: Sequelize.INTEGER,
-
-    references: {
-      model: 'restaurants',
-      key: 'id'
+exports.up = (queryInterface, Sequelize) =>
+  queryInterface.createTable("votes", {
+    id: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    allowNull: false,
-    onDelete: 'cascade'
-  },
-  user_id: {
-    type: Sequelize.INTEGER,
+    restaurant_id: {
+      type: Sequelize.INTEGER,
 
-    references: {
-      model: 'users',
-      key: 'id'
+      references: {
+        model: "restaurants",
+        key: "id",
+      },
+      allowNull: false,
+      onDelete: "cascade",
     },
-    allowNull: false,
-    onDelete: 'cascade'
-  }
-});
+    user_id: {
+      type: Sequelize.INTEGER,
 
-exports.down = queryInterface => queryInterface.dropTable('votes');
+      references: {
+        model: "users",
+        key: "id",
+      },
+      allowNull: false,
+      onDelete: "cascade",
+    },
+  });
+
+exports.down = (queryInterface) => queryInterface.dropTable("votes");

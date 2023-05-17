@@ -1,5 +1,5 @@
-import getRole from './getRole';
-import canChangeRole from './canChangeRole';
+import getRole from "./getRole";
+import canChangeRole from "./canChangeRole";
 
 export default (user, userToChange, team, users) => {
   if (!user || !user.id) {
@@ -13,8 +13,10 @@ export default (user, userToChange, team, users) => {
   if (!userRole || !userToChangeRole) {
     return false;
   }
-  if (userRole.type === 'owner' && user.id === userToChange.id) {
-    const otherOwners = users.some(otherUser => otherUser.type === 'owner' && otherUser.id !== user.id);
+  if (userRole.type === "owner" && user.id === userToChange.id) {
+    const otherOwners = users.some(
+      (otherUser) => otherUser.type === "owner" && otherUser.id !== user.id
+    );
 
     if (!otherOwners) {
       return false;

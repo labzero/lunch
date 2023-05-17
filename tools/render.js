@@ -7,10 +7,10 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import path from 'path';
-import fetch from 'node-fetch';
-import { writeFile, makeDir } from './lib/fs';
-import runServer from './runServer';
+import path from "path";
+import fetch from "node-fetch";
+import { writeFile, makeDir } from "./lib/fs";
+import runServer from "./runServer";
 
 // Enter your paths here which you want to render as static
 // Example:
@@ -22,13 +22,13 @@ import runServer from './runServer';
 //   '/page/name/', // => build/public/page/name/index.html
 // ];
 const routes = [
-  '/',
-  '/contact',
-  '/login',
-  '/register',
-  '/about',
-  '/privacy',
-  '/404', // https://help.github.com/articles/creating-a-custom-404-page-for-your-github-pages-site/
+  "/",
+  "/contact",
+  "/login",
+  "/register",
+  "/about",
+  "/privacy",
+  "/404", // https://help.github.com/articles/creating-a-custom-404-page-for-your-github-pages-site/
 ];
 
 async function render() {
@@ -44,12 +44,12 @@ async function render() {
   await Promise.all(
     routes.map(async (route, index) => {
       const url = `http://${server.host}${route}`;
-      const fileName = route.endsWith('/')
-        ? 'index.html'
-        : `${path.basename(route, '.html')}.html`;
+      const fileName = route.endsWith("/")
+        ? "index.html"
+        : `${path.basename(route, ".html")}.html`;
       const dirName = path.join(
-        'build/public',
-        route.endsWith('/') ? route : path.dirname(route),
+        "build/public",
+        route.endsWith("/") ? route : path.dirname(route)
       );
       const dist = path.join(dirName, fileName);
       const timeStart = new Date();
@@ -62,12 +62,12 @@ async function render() {
       console.info(
         `#${index + 1} ${dist} => ${response.status} ${
           response.statusText
-        } (${time} ms)`,
+        } (${time} ms)`
       );
-    }),
+    })
   );
 
-  server.kill('SIGTERM');
+  server.kill("SIGTERM");
 }
 
 export default render;

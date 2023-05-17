@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import s from './RestaurantNameForm.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import s from "./RestaurantNameForm.scss";
 
 class RestaurantNameForm extends Component {
   componentDidMount() {
@@ -30,7 +30,7 @@ class RestaurantNameForm extends Component {
         <Button
           type="submit"
           className={s.button}
-          disabled={this.props.editNameFormValue === ''}
+          disabled={this.props.editNameFormValue === ""}
           size="sm"
           variant="primary"
         >

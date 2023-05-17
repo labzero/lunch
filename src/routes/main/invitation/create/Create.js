@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Container from 'react-bootstrap/Container';
-import s from './Create.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Container from "react-bootstrap/Container";
+import s from "./Create.scss";
 
 class Create extends Component {
   static propTypes = {
@@ -21,7 +21,7 @@ class Create extends Component {
     return (
       <div className={s.root}>
         <Container>
-          {success === 'sent' && (
+          {success === "sent" && (
             <div>
               <h2>Confirmation sent</h2>
               <p>

@@ -1,5 +1,5 @@
-import PropTypes from 'prop-types';
-import React from 'react';
+import PropTypes from "prop-types";
+import React from "react";
 
 const TooltipUser = ({ vote, user }) => {
   if (user !== undefined) {
@@ -10,7 +10,7 @@ const TooltipUser = ({ vote, user }) => {
 
 TooltipUser.propTypes = {
   vote: PropTypes.object.isRequired,
-  user: PropTypes.object.isRequired
+  user: PropTypes.object.isRequired,
 };
 
 export default TooltipUser;

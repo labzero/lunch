@@ -1,8 +1,11 @@
-import { connect } from 'react-redux';
-import { getRestaurantById } from '../../selectors/restaurants';
-import { getTags } from '../../selectors/tags';
-import { addNewTagToRestaurant, addTagToRestaurant } from '../../actions/restaurants';
-import RestaurantAddTagForm from './RestaurantAddTagForm';
+import { connect } from "react-redux";
+import { getRestaurantById } from "../../selectors/restaurants";
+import { getTags } from "../../selectors/tags";
+import {
+  addNewTagToRestaurant,
+  addTagToRestaurant,
+} from "../../actions/restaurants";
+import RestaurantAddTagForm from "./RestaurantAddTagForm";
 
 const mapStateToProps = (state, ownProps) => {
   const restaurant = getRestaurantById(state, ownProps.id);
@@ -11,12 +14,12 @@ const mapStateToProps = (state, ownProps) => {
   return {
     ...ownProps,
     addedTags,
-    tags
+    tags,
   };
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  addNewTagToRestaurant: autosuggestValue => {
+  addNewTagToRestaurant: (autosuggestValue) => {
     dispatch(addNewTagToRestaurant(ownProps.id, autosuggestValue));
   },
   addTagToRestaurant: (id) => {
@@ -26,5 +29,5 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 )(RestaurantAddTagForm);

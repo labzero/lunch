@@ -1,1 +1,1 @@
-export const getTagFilters = state => state.tagFilters;
+export const getTagFilters = (state) => state.tagFilters;

@@ -1,6 +1,6 @@
-import { connect } from 'react-redux';
-import { getTagById } from '../../selectors/tags';
-import Tag from './Tag';
+import { connect } from "react-redux";
+import { getTagById } from "../../selectors/tags";
+import Tag from "./Tag";
 
 const mapStateToProps = () => {
   let name;
@@ -15,11 +15,9 @@ const mapStateToProps = () => {
     }
     return {
       name,
-      exclude: ownProps.exclude
+      exclude: ownProps.exclude,
     };
   };
 };
 
-export default connect(
-  mapStateToProps
-)(Tag);
+export default connect(mapStateToProps)(Tag);

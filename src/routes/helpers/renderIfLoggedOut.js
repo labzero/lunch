@@ -1,4 +1,4 @@
-import { getTeams } from '../../selectors/teams';
+import { getTeams } from "../../selectors/teams";
 
 export default (state, makeRoute) => {
   const user = state.user;
@@ -9,12 +9,12 @@ export default (state, makeRoute) => {
       const team = getTeams(state)[0];
       if (team) {
         return {
-          redirect: `//${team.slug}.${host}`
+          redirect: `//${team.slug}.${host}`,
         };
       }
     }
     return {
-      redirect: '/teams'
+      redirect: "/teams",
     };
   }
   return makeRoute();

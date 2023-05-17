@@ -1,4 +1,4 @@
-import redirectToLogin from './redirectToLogin';
+import redirectToLogin from "./redirectToLogin";
 
 export default (context, makeRoute) => {
   const state = context.store.getState();
@@ -15,7 +15,7 @@ export default (context, makeRoute) => {
       return makeRoute();
     }
     return {
-      redirect
+      redirect,
     };
   }
   return redirectToLogin(context);

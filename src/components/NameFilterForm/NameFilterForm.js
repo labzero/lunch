@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import s from './NameFilterForm.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import s from "./NameFilterForm.scss";
 
 class NameFilterForm extends Component {
   static propTypes = {
@@ -50,7 +50,7 @@ class NameFilterForm extends Component {
 
   hideForm = () => {
     this.props.setFlipMove(false);
-    this.props.setNameFilter('');
+    this.props.setNameFilter("");
     this.setState(() => ({
       shown: false,
     }));
@@ -89,20 +89,14 @@ class NameFilterForm extends Component {
               }}
             />
           </div>
-          <Button
-            onClick={this.hideForm}
-            variant="light"
-          >
+          <Button onClick={this.hideForm} variant="light">
             cancel
           </Button>
         </form>
       );
     } else {
       child = (
-        <Button
-          onClick={this.showForm}
-          variant="light"
-        >
+        <Button onClick={this.showForm} variant="light">
           filter by name
         </Button>
       );

@@ -7,9 +7,9 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from 'react';
-import LayoutContainer from '../../../../components/Layout/LayoutContainer';
-import New from './New';
+import React from "react";
+import LayoutContainer from "../../../../components/Layout/LayoutContainer";
+import New from "./New";
 
 export default (context) => {
   const email = context.query.email;
@@ -20,6 +20,6 @@ export default (context) => {
         <New email={email} />
       </LayoutContainer>
     ),
-    title: 'Invitation',
+    title: "Invitation",
   };
 };

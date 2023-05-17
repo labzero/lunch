@@ -1,18 +1,15 @@
 /* eslint-disable css-modules/no-unused-class */
 
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from '../NotificationContent.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "../NotificationContent.scss";
 
 const TagDeleted = ({ loggedIn, user, tagName }) => {
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b>
-        {' '}
-        deleted tag
-        {' '}
+        <b>{user}</b> deleted tag{" "}
         <b>
           &ldquo;
           {tagName}
@@ -29,8 +26,7 @@ const TagDeleted = ({ loggedIn, user, tagName }) => {
         &ldquo;
         {tagName}
         &rdquo;
-      </b>
-      {' '}
+      </b>{" "}
       was deleted.
     </span>
   );
@@ -43,7 +39,7 @@ TagDeleted.propTypes = {
 };
 
 TagDeleted.defaultProps = {
-  user: '',
+  user: "",
 };
 
 export default withStyles(s)(TagDeleted);

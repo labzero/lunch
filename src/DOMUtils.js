@@ -9,7 +9,7 @@
 
 export function updateTag(tagName, keyName, keyValue, attrName, attrValue) {
   const node = document.head.querySelector(
-    `${tagName}[${keyName}="${keyValue}"]`,
+    `${tagName}[${keyName}="${keyValue}"]`
   );
   if (node && node.getAttribute(attrName) === attrValue) return;
 
@@ -17,7 +17,7 @@ export function updateTag(tagName, keyName, keyValue, attrName, attrValue) {
   if (node) {
     node.parentNode.removeChild(node);
   }
-  if (typeof attrValue === 'string') {
+  if (typeof attrValue === "string") {
     const nextNode = document.createElement(tagName);
     nextNode.setAttribute(keyName, keyValue);
     nextNode.setAttribute(attrName, attrValue);
@@ -26,13 +26,13 @@ export function updateTag(tagName, keyName, keyValue, attrName, attrValue) {
 }
 
 export function updateMeta(name, content) {
-  updateTag('meta', 'name', name, 'content', content);
+  updateTag("meta", "name", name, "content", content);
 }
 
 export function updateCustomMeta(property, content) {
-  updateTag('meta', 'property', property, 'content', content);
+  updateTag("meta", "property", property, "content", content);
 }
 
 export function updateLink(rel, href) {
-  updateTag('link', 'rel', rel, 'href', href);
+  updateTag("link", "rel", rel, "href", href);
 }

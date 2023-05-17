@@ -1,7 +1,7 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from '../NotificationContent.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "../NotificationContent.scss";
 
 const DecisionDeleted = ({
   loggedIn,
@@ -21,20 +21,15 @@ const DecisionDeleted = ({
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b>
-        {' '}
-        cancelled the decision for
-        {restaurantEl}
-        .
+        <b>{user}</b> cancelled the decision for
+        {restaurantEl}.
       </span>
     );
   }
   return (
     <span>
       The decision for
-      {restaurantEl}
-      {' '}
-      was cancelled.
+      {restaurantEl} was cancelled.
     </span>
   );
 };
@@ -47,7 +42,7 @@ DecisionDeleted.propTypes = {
 };
 
 DecisionDeleted.defaultProps = {
-  user: '',
+  user: "",
 };
 
 export default withStyles(s)(DecisionDeleted);

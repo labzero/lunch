@@ -1,17 +1,17 @@
-import { Router } from 'express';
-import cors from 'cors';
-import { Invitation, Role, User } from '../../models';
-import { bsHost } from '../../config';
-import { TEAM_LIMIT } from '../../constants';
-import generateToken from '../../helpers/generateToken';
-import generateUrl from '../../helpers/generateUrl';
-import getRole from '../../helpers/getRole';
-import hasRole from '../../helpers/hasRole';
-import canChangeRole from '../../helpers/canChangeRole';
-import checkTeamRole from '../helpers/checkTeamRole';
-import corsOptionsDelegate from '../helpers/corsOptionsDelegate';
-import loggedIn from '../helpers/loggedIn';
-import transporter from '../../mailers/transporter';
+import { Router } from "express";
+import cors from "cors";
+import { Invitation, Role, User } from "../../models";
+import { bsHost } from "../../config";
+import { TEAM_LIMIT } from "../../constants";
+import generateToken from "../../helpers/generateToken";
+import generateUrl from "../../helpers/generateUrl";
+import getRole from "../../helpers/getRole";
+import hasRole from "../../helpers/hasRole";
+import canChangeRole from "../../helpers/canChangeRole";
+import checkTeamRole from "../helpers/checkTeamRole";
+import corsOptionsDelegate from "../helpers/corsOptionsDelegate";
+import loggedIn from "../helpers/loggedIn";
+import transporter from "../../mailers/transporter";
 
 export default () => {
   const router = new Router({ mergeParams: true });
@@ -25,17 +25,25 @@ export default () => {
 
   const hasOtherOwners = async (team, id) => {
     const allTeamRoles = await Role.findAll({ where: { teamId: team.id } });
-    return allTeamRoles.some(role => role.type === 'owner' && role.userId !== id);
+    return allTeamRoles.some(
+      (role) => role.type === "owner" && role.userId !== id
+    );
   };
 
   const getExtraAttributes = (req) => {
-    if (hasRole(req.user, req.team, 'owner')) {
-      return ['email'];
+    if (hasRole(req.user, req.team, "owner")) {
+      return ["email"];
     }
     return undefined;
   };
 
-  const canChangeUser = async (user, roleToChange, target, team, noOtherOwners) => {
+  const canChangeUser = async (
+    user,
+    roleToChange,
+    target,
+    team,
+    noOtherOwners
+  ) => {
     let currentUserRole;
     if (user.id === roleToChange.userId) {
       currentUserRole = roleToChange;
@@ -45,7 +53,7 @@ export default () => {
     let allowed = false;
     if (user.superuser) {
       allowed = true;
-    } else if (currentUserRole.type === 'owner') {
+    } else if (currentUserRole.type === "owner") {
       if (user.id === roleToChange.userId) {
         const otherOwners = await hasOtherOwners(team, roleToChange.userId);
         if (otherOwners) {
@@ -65,126 +73,168 @@ export default () => {
   };
 
   return router
-    .get(
-      '/',
-      loggedIn,
-      checkTeamRole(),
-      async (req, res, next) => {
-        const extraAttributes = getExtraAttributes(req);
+    .get("/", loggedIn, checkTeamRole(), async (req, res, next) => {
+      const extraAttributes = getExtraAttributes(req);
 
-        try {
-          const users = await User.scope({ method: ['withTeamRole', req.team.id, extraAttributes] }).findAll({
-            include: {
-              attributes: [],
-              model: Role,
-              where: { teamId: req.team.id }
-            }
+      try {
+        const users = await User.scope({
+          method: ["withTeamRole", req.team.id, extraAttributes],
+        }).findAll({
+          include: {
+            attributes: [],
+            model: Role,
+            where: { teamId: req.team.id },
+          },
+        });
+
+        res.status(200).json({ error: false, data: users });
+      } catch (err) {
+        next(err);
+      }
+    })
+    .post("/", loggedIn, checkTeamRole("member"), async (req, res, next) => {
+      const { email, name, type } = req.body;
+
+      const extraAttributes = getExtraAttributes(req);
+
+      try {
+        if (!hasRole(req.user, req.team, type)) {
+          return res.status(403).json({
+            error: true,
+            data: {
+              message:
+                "You cannot add a user with a role greater than your own.",
+            },
+          });
+        }
+
+        // WARNING: this retrieves all attributes (incl. password).
+        // But it is overridden with the scoped findOne call below
+        let userToAdd = await User.findOne({
+          where: { email },
+          include: [Role],
+        });
+
+        const UserWithTeamRole = User.scope({
+          method: ["withTeamRole", req.team.id, extraAttributes],
+        });
+
+        if (userToAdd) {
+          if (
+            !req.user.get("superuser") &&
+            userToAdd.roles.length >= TEAM_LIMIT
+          ) {
+            return res.status(403).json({
+              error: true,
+              data: {
+                message:
+                  "This user currently cannot be added to any more teams.",
+              },
+            });
+          }
+          if (hasRole(userToAdd, req.team, undefined, true)) {
+            return res.status(409).json({
+              error: true,
+              data: { message: "User already exists on this team." },
+            });
+          }
+          await Role.create({
+            teamId: req.team.id,
+            userId: userToAdd.id,
+            type,
           });
 
-          res.status(200).json({ error: false, data: users });
-        } catch (err) {
-          next(err);
-        }
-      }
-    )
-    .post(
-      '/',
-      loggedIn,
-      checkTeamRole('member'),
-      async (req, res, next) => {
-        const { email, name, type } = req.body;
-
-        const extraAttributes = getExtraAttributes(req);
-
-        try {
-          if (!hasRole(req.user, req.team, type)) {
-            return res.status(403).json({ error: true, data: { message: 'You cannot add a user with a role greater than your own.' } });
-          }
-
-          // WARNING: this retrieves all attributes (incl. password).
-          // But it is overridden with the scoped findOne call below
-          let userToAdd = await User.findOne({ where: { email }, include: [Role] });
-
-          const UserWithTeamRole = User.scope({ method: ['withTeamRole', req.team.id, extraAttributes] });
-
-          if (userToAdd) {
-            if (!req.user.get('superuser') && userToAdd.roles.length >= TEAM_LIMIT) {
-              return res.status(403).json({ error: true, data: { message: 'This user currently cannot be added to any more teams.' } });
-            }
-            if (hasRole(userToAdd, req.team, undefined, true)) {
-              return res.status(409).json({ error: true, data: { message: 'User already exists on this team.' } });
-            }
-            await Role.create({ teamId: req.team.id, userId: userToAdd.id, type });
-
-            // returns a promise but we're not going to wait to see if it succeeds.
-            transporter.sendMail({
+          // returns a promise but we're not going to wait to see if it succeeds.
+          transporter
+            .sendMail({
               name,
               email,
-              subject: 'You were added to a team!',
+              subject: "You were added to a team!",
               text: `Hi there!
 
-${req.user.get('name')} invited you to the ${req.team.get('name')} team on Lunch!
+${req.user.get("name")} invited you to the ${req.team.get(
+                "name"
+              )} team on Lunch!
 
-To get started, simply visit ${generateUrl(req, `${req.team.get('slug')}.${bsHost}`)} and vote away.
+To get started, simply visit ${generateUrl(
+                req,
+                `${req.team.get("slug")}.${bsHost}`
+              )} and vote away.
 
-Happy Lunching!`
-            }).then(() => undefined).catch(() => undefined);
+Happy Lunching!`,
+            })
+            .then(() => undefined)
+            .catch(() => undefined);
 
-            userToAdd = await UserWithTeamRole.findOne({
-              where: { email },
-              include: [Role]
-            });
+          userToAdd = await UserWithTeamRole.findOne({
+            where: { email },
+            include: [Role],
+          });
 
-            return res.status(201).json({ error: false, data: userToAdd });
-          }
+          return res.status(201).json({ error: false, data: userToAdd });
+        }
 
-          const resetPasswordToken = await generateToken();
+        const resetPasswordToken = await generateToken();
 
-          let newUser = await User.create({
+        let newUser = await User.create(
+          {
             email,
             name,
             resetPasswordToken,
             resetPasswordSentAt: new Date(),
-            roles: [{
-              teamId: req.team.id,
-              type
-            }]
-          }, { include: [Role] });
+            roles: [
+              {
+                teamId: req.team.id,
+                type,
+              },
+            ],
+          },
+          { include: [Role] }
+        );
 
-          // returns a promise but we're not going to wait to see if it succeeds.
-          Invitation.destroy({ where: { email } }).then(() => undefined).catch(() => undefined);
+        // returns a promise but we're not going to wait to see if it succeeds.
+        Invitation.destroy({ where: { email } })
+          .then(() => undefined)
+          .catch(() => undefined);
 
-          // returns a promise but we're not going to wait to see if it succeeds.
-          transporter.sendMail({
+        // returns a promise but we're not going to wait to see if it succeeds.
+        transporter
+          .sendMail({
             name,
             email,
-            subject: 'Welcome to Lunch!',
+            subject: "Welcome to Lunch!",
             text: `Hi there!
 
-${req.user.get('name')} invited you to the ${req.team.get('name')} team on Lunch!
+${req.user.get("name")} invited you to the ${req.team.get(
+              "name"
+            )} team on Lunch!
 
-To get started, simply visit ${generateUrl(req, bsHost)} and log in with Google using the email address with which you've received this message.
+To get started, simply visit ${generateUrl(
+              req,
+              bsHost
+            )} and log in with Google using the email address with which you've received this message.
 
 If you'd like to log in using a password instead, just follow this URL to generate one:
 ${generateUrl(req, bsHost, `/password/edit?token=${resetPasswordToken}`)}
 
-Happy Lunching!`
-          }).then(() => undefined).catch(() => undefined);
+Happy Lunching!`,
+          })
+          .then(() => undefined)
+          .catch(() => undefined);
 
-          // Sequelize can't apply scopes on create, so just get user again.
-          // Also will exclude hidden fields like password, token, etc.
-          newUser = await UserWithTeamRole.findOne({ where: { id: newUser.id } });
+        // Sequelize can't apply scopes on create, so just get user again.
+        // Also will exclude hidden fields like password, token, etc.
+        newUser = await UserWithTeamRole.findOne({ where: { id: newUser.id } });
 
-          return res.status(201).json({ error: false, data: newUser });
-        } catch (err) {
-          return next(err);
-        }
+        return res.status(201).json({ error: false, data: newUser });
+      } catch (err) {
+        return next(err);
       }
-    )
+    })
     .patch(
-      '/:id',
+      "/:id",
       loggedIn,
-      checkTeamRole('member'),
+      checkTeamRole("member"),
       async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
 
@@ -194,38 +244,55 @@ Happy Lunching!`
           const roleToChange = await getRoleToChange(req.user, id, req.team);
 
           if (roleToChange) {
-            const allowed = await canChangeUser(req.user, roleToChange, req.body.type, req.team, () => res.status(403).json({
-              error: true,
-              data: {
-                message: `You cannot demote yourself if you are the only owner.
-  Grant ownership to another user first.`
-              }
-            }));
+            const allowed = await canChangeUser(
+              req.user,
+              roleToChange,
+              req.body.type,
+              req.team,
+              () =>
+                res.status(403).json({
+                  error: true,
+                  data: {
+                    message: `You cannot demote yourself if you are the only owner.
+  Grant ownership to another user first.`,
+                  },
+                })
+            );
 
             // in case of error response within canChangeUser
-            if (typeof allowed !== 'boolean') {
+            if (typeof allowed !== "boolean") {
               return allowed;
             }
 
             if (allowed) {
               await roleToChange.update({ type: req.body.type });
-              const user = await User.scope({ method: ['withTeamRole', req.team.id, extraAttributes] }).findOne({ where: { id } });
+              const user = await User.scope({
+                method: ["withTeamRole", req.team.id, extraAttributes],
+              }).findOne({ where: { id } });
               return res.status(200).json({ error: false, data: user });
             }
-            return res.status(403).json({ error: true, data: { message: 'You do not have permission to change this user.' } });
+            return res.status(403).json({
+              error: true,
+              data: {
+                message: "You do not have permission to change this user.",
+              },
+            });
           }
-          return res.status(404).json({ error: true, data: { message: 'User not found on team.' } });
+          return res.status(404).json({
+            error: true,
+            data: { message: "User not found on team." },
+          });
         } catch (err) {
           return next(err);
         }
       }
     )
-    .options('/:id', cors(corsOptionsDelegate)) // enable pre-flight request for DELETE request
+    .options("/:id", cors(corsOptionsDelegate)) // enable pre-flight request for DELETE request
     .delete(
-      '/:id',
+      "/:id",
       cors(corsOptionsDelegate),
       loggedIn,
-      checkTeamRole('member'),
+      checkTeamRole("member"),
       async (req, res, next) => {
         const id = parseInt(req.params.id, 10);
 
@@ -233,16 +300,23 @@ Happy Lunching!`
           const roleToDelete = await getRoleToChange(req.user, id, req.team);
 
           if (roleToDelete) {
-            const allowed = await canChangeUser(req.user, roleToDelete, undefined, req.team, () => res.status(403).json({
-              error: true,
-              data: {
-                message: `You cannot remove yourself if you are the only owner.
-  Transfer ownership to another user first.`
-              }
-            }));
+            const allowed = await canChangeUser(
+              req.user,
+              roleToDelete,
+              undefined,
+              req.team,
+              () =>
+                res.status(403).json({
+                  error: true,
+                  data: {
+                    message: `You cannot remove yourself if you are the only owner.
+  Transfer ownership to another user first.`,
+                  },
+                })
+            );
 
             // in case of error response within canChangeUser
-            if (typeof allowed !== 'boolean') {
+            if (typeof allowed !== "boolean") {
               return allowed;
             }
 
@@ -250,9 +324,17 @@ Happy Lunching!`
               await roleToDelete.destroy();
               return res.status(204).send();
             }
-            return res.status(403).json({ error: true, data: { message: 'You do not have permission to remove this user.' } });
+            return res.status(403).json({
+              error: true,
+              data: {
+                message: "You do not have permission to remove this user.",
+              },
+            });
           }
-          return res.status(404).json({ error: true, data: { message: 'User not found on team.' } });
+          return res.status(404).json({
+            error: true,
+            data: { message: "User not found on team." },
+          });
         } catch (err) {
           return next(err);
         }

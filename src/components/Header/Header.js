@@ -7,15 +7,15 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import HeaderLoginContainer from '../HeaderLogin/HeaderLoginContainer';
-import FlashContainer from '../Flash/FlashContainer';
-import MenuContainer from '../Menu/MenuContainer';
-import Link from '../Link';
-import lunch from './lunch.png';
-import s from './Header.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import HeaderLoginContainer from "../HeaderLogin/HeaderLoginContainer";
+import FlashContainer from "../Flash/FlashContainer";
+import MenuContainer from "../Menu/MenuContainer";
+import Link from "../Link";
+import lunch from "./lunch.png";
+import s from "./Header.scss";
 
 class Header extends Component {
   static propTypes = {
@@ -78,7 +78,7 @@ class Header extends Component {
     const { loggedIn } = this.props;
     const { menuOpen } = this.state;
     return (
-      <div className={`${s.root} ${loggedIn ? s.loggedIn : ''}`} id="header">
+      <div className={`${s.root} ${loggedIn ? s.loggedIn : ""}`} id="header">
         <div className={s.backgroundOverflow}>
           <div className={s.background} />
         </div>

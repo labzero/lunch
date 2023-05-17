@@ -7,17 +7,17 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import emptyFunction from 'fbjs/lib/emptyFunction';
-import HeaderContainer from '../Header/HeaderContainer';
-import FooterContainer from '../Footer/FooterContainer';
-import NotificationListContainer from '../NotificationList/NotificationListContainer';
-import ConfirmModalContainer from '../ConfirmModal/ConfirmModalContainer';
-import s from './Layout.scss';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
+import emptyFunction from "fbjs/lib/emptyFunction";
+import HeaderContainer from "../Header/HeaderContainer";
+import FooterContainer from "../Footer/FooterContainer";
+import NotificationListContainer from "../NotificationList/NotificationListContainer";
+import ConfirmModalContainer from "../ConfirmModal/ConfirmModalContainer";
+import s from "./Layout.scss";
 // eslint-disable-next-line css-modules/no-unused-class, no-unused-vars
-import globalCss from '../../styles/globalCss.scss';
+import globalCss from "../../styles/globalCss.scss";
 
 class Layout extends Component {
   static propTypes = {

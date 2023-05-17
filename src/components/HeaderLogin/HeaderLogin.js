@@ -7,11 +7,11 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import s from './HeaderLogin.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import s from "./HeaderLogin.scss";
 
 const HeaderLogin = ({ user }) => {
   let content = <div />;

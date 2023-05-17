@@ -1,1 +1,1 @@
-export const getTagExclusions = state => state.tagExclusions;
+export const getTagExclusions = (state) => state.tagExclusions;

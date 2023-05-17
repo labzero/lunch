@@ -8,46 +8,62 @@
  */
 
 /* eslint-disable global-require */
-import { Route } from 'universal-router';
-import rootAction from '../helpers/rootAction';
+import { Route } from "universal-router";
+import rootAction from "../helpers/rootAction";
 
 // The top-level (parent) route
 const team: Route = {
-
-  path: '',
+  path: "",
 
   // Keep in mind, routes are evaluated in order
   children: [
     {
-      path: '',
-      action: async (context) => (await import(/* webpackChunkName: 'home' */ './home')).default(context)
+      path: "",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'home' */ "./home")).default(
+          context
+        ),
     },
     {
-      path: '/team',
-      action: async (context) => (await import(/* webpackChunkName: 'team' */ './team')).default(context)
+      path: "/team",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'team' */ "./team")).default(
+          context
+        ),
     },
     {
-      path: '/tags',
-      action: async (context) => (await import(/* webpackChunkName: 'tags' */ './tags')).default(context)
+      path: "/tags",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'tags' */ "./tags")).default(
+          context
+        ),
     },
     {
-      path: '/teams',
-      action: async (context) => (await import(/* webpackChunkName: 'teams' */ './teams')).default(context)
+      path: "/teams",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'teams' */ "./teams")).default(
+          context
+        ),
     },
     {
-      path: '/login',
-      action: async (context) => (await import(/* webpackChunkName: 'login' */ '../login')).default(context)
+      path: "/login",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'login' */ "../login")).default(
+          context
+        ),
     },
 
     // Wildcard routes, e.g. { path: '(.*)', ... } (must go last)
     {
-      path: '(.*)',
-      action: async (context) => (await import(/* webpackChunkName: 'not-found' */ '../not-found')).default(context)
-    }
+      path: "(.*)",
+      action: async (context) =>
+        (
+          await import(/* webpackChunkName: 'not-found' */ "../not-found")
+        ).default(context),
+    },
   ],
 
-  action: rootAction
-
+  action: rootAction,
 };
 
 export default team;

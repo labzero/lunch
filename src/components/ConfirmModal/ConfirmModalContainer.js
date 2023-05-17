@@ -1,19 +1,19 @@
-import { connect } from 'react-redux';
-import { hideModal } from '../../actions/modals';
-import ConfirmModal from './ConfirmModal';
+import { connect } from "react-redux";
+import { hideModal } from "../../actions/modals";
+import ConfirmModal from "./ConfirmModal";
 
-const modalName = 'confirm';
+const modalName = "confirm";
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   actionLabel: state.modals[modalName].actionLabel,
   body: state.modals[modalName].body,
   action: state.modals[modalName].action,
-  shown: !!state.modals[modalName].shown
+  shown: !!state.modals[modalName].shown,
 });
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   dispatch,
-  hideModal: () => dispatch(hideModal('confirm')),
+  hideModal: () => dispatch(hideModal("confirm")),
 });
 
 const mergeProps = (stateProps, dispatchProps) => ({
@@ -22,7 +22,7 @@ const mergeProps = (stateProps, dispatchProps) => ({
   handleSubmit: () => {
     dispatchProps.dispatch(stateProps.action);
     dispatchProps.hideModal();
-  }
+  },
 });
 
 export default connect(

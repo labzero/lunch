@@ -1,36 +1,36 @@
-import { sequelize, DataTypes } from './db';
+import { sequelize, DataTypes } from "./db";
 
 const RestaurantTag = sequelize.define(
-  'restaurantsTags',
+  "restaurantsTags",
   {
     restaurantId: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'restaurant',
-        key: 'id'
+        model: "restaurant",
+        key: "id",
       },
       allowNull: false,
-      onDelete: 'cascade'
+      onDelete: "cascade",
     },
     tagId: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'tag',
-        key: 'id'
+        model: "tag",
+        key: "id",
       },
       allowNull: false,
-      onDelete: 'cascade'
-    }
+      onDelete: "cascade",
+    },
   },
   {
     indexes: [
       {
-        fields: ['restaurantId', 'tagId'],
-        unique: true
-      }
-    ]
+        fields: ["restaurantId", "tagId"],
+        unique: true,
+      },
+    ],
   }
 );
-RestaurantTag.removeAttribute('id');
+RestaurantTag.removeAttribute("id");
 
 export default RestaurantTag;

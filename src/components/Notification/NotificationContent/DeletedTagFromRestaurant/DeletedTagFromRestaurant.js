@@ -1,7 +1,7 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from '../NotificationContent.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "../NotificationContent.scss";
 
 const DeletedTagFromRestaurant = ({
   loggedIn,
@@ -22,35 +22,26 @@ const DeletedTagFromRestaurant = ({
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b>
-        {' '}
-        removed tag
+        <b>{user}</b> removed tag
         <b>
           &ldquo;
           {tagName}
           &rdquo;
-        </b>
-        {' '}
+        </b>{" "}
         from
-        {restaurantEl}
-        .
+        {restaurantEl}.
       </span>
     );
   }
   return (
     <span>
-      Tag
-      {' '}
+      Tag{" "}
       <b>
         &ldquo;
         {tagName}
         &rdquo;
-      </b>
-      {' '}
-      was removed from
-      {' '}
-      {restaurantEl}
-      .
+      </b>{" "}
+      was removed from {restaurantEl}.
     </span>
   );
 };
@@ -64,7 +55,7 @@ DeletedTagFromRestaurant.propTypes = {
 };
 
 DeletedTagFromRestaurant.defaultProps = {
-  user: '',
+  user: "",
 };
 
 export default withStyles(s)(DeletedTagFromRestaurant);
