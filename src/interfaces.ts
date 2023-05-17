@@ -24,6 +24,7 @@ interface Role {
 
 export interface User extends Record {
   roles: Role[]
+  superuser?: boolean;
   type?: RoleType
 }
 
