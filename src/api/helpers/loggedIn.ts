@@ -1,4 +1,6 @@
-export default (req, res, next) => {
+import { RequestHandler } from 'express';
+
+const loggedIn: RequestHandler = (req, res, next) => {
   if (req.user) {
     next();
   } else if (req.accepts('html') === 'html') {
@@ -7,3 +9,5 @@ export default (req, res, next) => {
     res.status(401).send();
   }
 };
+
+export default loggedIn;
