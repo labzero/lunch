@@ -5,7 +5,7 @@ import generateUrl from "../helpers/generateUrl";
 import getPasswordError from "../helpers/getPasswordError";
 import getUserPasswordUpdates from "../helpers/getUserPasswordUpdates";
 import transporter from "../mailers/transporter";
-import { User } from "../models";
+import { User } from "../db";
 
 export default () => {
   const router = new Router();

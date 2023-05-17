@@ -7,7 +7,7 @@ import passport from "../passport";
 const setCookie = (req, res, next) => {
   if (req.user) {
     const expiresIn = 60 * 60 * 24 * 180; // 180 days
-    const token = jwt.sign(req.user, auth.jwt.secret);
+    const token = jwt.sign(req.user.id, auth.jwt.secret);
     res.cookie("id_token", token, {
       domain,
       maxAge: 1000 * expiresIn,

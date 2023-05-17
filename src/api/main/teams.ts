@@ -1,7 +1,7 @@
-import { Router } from "express";
+import { RequestHandler, Response, Router } from "express";
 import cors from "cors";
 import { bsHost } from "../../config";
-import { Team, Role, User } from "../../models";
+import { Team, Role, User } from "../../db";
 import reservedTeamSlugs from "../../constants/reservedTeamSlugs";
 import { TEAM_LIMIT, TEAM_SLUG_REGEX } from "../../constants";
 import generateUrl from "../../helpers/generateUrl";
@@ -11,23 +11,27 @@ import checkTeamRole from "../helpers/checkTeamRole";
 import corsOptionsDelegate from "../helpers/corsOptionsDelegate";
 import loggedIn from "../helpers/loggedIn";
 
-const getTeam = async (req, res, next) => {
+const getTeam: RequestHandler = async (req, res, next) => {
   const id = parseInt(req.params.id, 10);
   const team = await Team.findOne({ where: { id } });
-  req.team = team; // eslint-disable-line no-param-reassign
-  next();
+  if (team) {
+    req.team = team; // eslint-disable-line no-param-reassign
+    next();
+  } else {
+    next(new Error("Team doesn't exist"));
+  }
 };
 
-const error409 = (res, message) =>
+const error409 = (res: Response, message: string) =>
   res.status(409).json({ error: true, data: { message } });
 
 export default () => {
-  const router = new Router();
+  const router = Router();
 
   return router
     .get("/", loggedIn, async (req, res, next) => {
       try {
-        const teams = await Team.findAllForUser(req.user);
+        const teams = await Team.findAllForUser(req.user!);
 
         res.status(200).json({ error: false, data: teams });
       } catch (err) {
@@ -38,8 +42,8 @@ export default () => {
       const { address, lat, lng, name, slug } = req.body;
       const message409 = "Could not create new team. It might already exist.";
 
-      if (!req.user.superuser) {
-        const roles = await req.user.getRoles();
+      if (!req.user!.superuser) {
+        const roles = await req.user!.$get("roles");
         if (roles.length >= TEAM_LIMIT) {
           return res.status(403).json({
             error: true,
@@ -71,7 +75,7 @@ export default () => {
             slug,
             roles: [
               {
-                userId: req.user.id,
+                userId: req.user!.id,
                 type: "owner",
               },
             ],
@@ -81,7 +85,7 @@ export default () => {
 
         const json = obj.toJSON();
         return res.status(201).send({ error: false, data: json });
-      } catch (err) {
+      } catch (err: any) {
         if (err.name === "SequelizeUniqueConstraintError") {
           return error409(res, message409);
         }
@@ -97,7 +101,7 @@ export default () => {
       checkTeamRole("owner"),
       async (req, res, next) => {
         try {
-          await req.team.destroy();
+          await req.team!.destroy();
           return res.status(204).send();
         } catch (err) {
           return next(err);
@@ -146,7 +150,9 @@ export default () => {
           );
         }
 
-        const filteredPayload = {};
+        const filteredPayload: {
+          [key in (typeof allowedFields)[number]["type"]]: string;
+        } = {};
 
         allowedFields.forEach((f) => {
           const value = req.body[f.name];
@@ -159,7 +165,7 @@ export default () => {
 
         if (fieldCount) {
           try {
-            const oldSlug = req.team.get("slug");
+            const oldSlug = req.team!.get("slug");
 
             if (
               oldSlug !== filteredPayload.slug &&
@@ -168,13 +174,13 @@ export default () => {
               return error409(res, message409);
             }
 
-            await req.team.update(filteredPayload);
+            await req.team!.update(filteredPayload);
 
             if (filteredPayload.slug && oldSlug !== filteredPayload.slug) {
               req.flash("success", "Team URL has been updated.");
               return req.session.save(async () => {
                 const teamRoles = await Role.findAll({
-                  where: { teamId: req.team.get("id") },
+                  where: { teamId: req.team!.get("id") },
                 });
                 const userIds = teamRoles.map((r) => r.get("userId"));
                 const recipients = await User.findAll({
@@ -185,10 +191,10 @@ export default () => {
                 transporter
                   .sendMail({
                     recipients,
-                    subject: `${req.team.get("name")}'s team URL has changed`,
+                    subject: `${req.team!.get("name")}'s team URL has changed`,
                     text: `Hi there!
 
-${req.user.get("name")} has changed the URL of the ${req.team.get(
+${req.user!.get("name")} has changed the URL of the ${req.team!.get(
                       "name"
                     )} team on Lunch.
 
@@ -206,7 +212,7 @@ Happy Lunching!`,
               });
             }
             return res.status(200).json({ error: false, data: req.team });
-          } catch (err) {
+          } catch (err: any) {
             if (err.name === "SequelizeUniqueConstraintError") {
               return error409(res, message409);
             }

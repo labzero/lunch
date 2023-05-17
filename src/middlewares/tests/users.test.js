@@ -36,7 +36,7 @@ describe("middlewares/users", () => {
         "../helpers/generateToken": mockEsmodule({
           default: () => "12345",
         }),
-        "../models": mockEsmodule({
+        "../db": mockEsmodule({
           Invitation: InvitationMock,
           User: UserMock,
         }),

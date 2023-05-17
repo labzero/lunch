@@ -31,7 +31,7 @@ describe("middlewares/invitation", () => {
     flashSpy = spy();
     makeApp = (deps) => {
       const invitationMiddleware = proxyquireStrict("../invitation", {
-        "../models": mockEsmodule({
+        "../db": mockEsmodule({
           Invitation: InvitationMock,
           Role: RoleMock,
           User: UserMock,

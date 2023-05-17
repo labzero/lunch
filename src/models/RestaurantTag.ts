@@ -1,36 +1,34 @@
-import { sequelize, DataTypes } from "./db";
+import {
+  BelongsTo,
+  Column,
+  ForeignKey,
+  Index,
+  Model,
+  PrimaryKey,
+  Table,
+} from "sequelize-typescript";
+import Restaurant from "./Restaurant";
+import Tag from "./Tag";
 
-const RestaurantTag = sequelize.define(
-  "restaurantsTags",
-  {
-    restaurantId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "restaurant",
-        key: "id",
-      },
-      allowNull: false,
-      onDelete: "cascade",
-    },
-    tagId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "tag",
-        key: "id",
-      },
-      allowNull: false,
-      onDelete: "cascade",
-    },
-  },
-  {
-    indexes: [
-      {
-        fields: ["restaurantId", "tagId"],
-        unique: true,
-      },
-    ],
-  }
-);
-RestaurantTag.removeAttribute("id");
+@Table({ modelName: "restaurantsTags" })
+class RestaurantTag extends Model {
+  @PrimaryKey
+  @ForeignKey(() => Restaurant)
+  @Index({ unique: true })
+  @Column
+  restaurantId: number;
+
+  @BelongsTo(() => Restaurant)
+  restaurant: Awaited<Restaurant>;
+
+  @PrimaryKey
+  @ForeignKey(() => Tag)
+  @Index({ unique: true })
+  @Column
+  tagId: number;
+
+  @BelongsTo(() => Tag)
+  tag: Awaited<Tag>;
+}
 
 export default RestaurantTag;

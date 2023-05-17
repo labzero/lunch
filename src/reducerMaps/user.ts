@@ -7,7 +7,7 @@ const user: Reducer<"user"> = (state, action) => {
       let newState: typeof state | undefined;
       if (action.team.roles) {
         action.team.roles.forEach((role) => {
-          if (role.userId === state.id) {
+          if (role.userId === state!.id) {
             newState = update(newState || state, {
               roles: {
                 $push: [role],
@@ -25,7 +25,7 @@ const user: Reducer<"user"> = (state, action) => {
           roles: {
             $splice: [
               [
-                state.roles.map((role) => role.teamId).indexOf(action.team.id),
+                state!.roles.map((role) => role.teamId).indexOf(action.team.id),
                 1,
               ],
             ],
@@ -39,7 +39,7 @@ const user: Reducer<"user"> = (state, action) => {
         return {
           ...state,
           ...action.user,
-          roles: state.roles.map((role) => {
+          roles: state!.roles.map((role) => {
             if (role.teamId === action.team.id) {
               return {
                 ...role,
@@ -49,12 +49,15 @@ const user: Reducer<"user"> = (state, action) => {
             return role;
           }),
           type: undefined,
-        };
+        } as User;
       }
       return state;
     }
     case "CURRENT_USER_PATCHED": {
       return action.user;
+    }
+    default: {
+      break;
     }
   }
   return state;

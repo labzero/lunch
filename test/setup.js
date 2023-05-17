@@ -21,9 +21,11 @@ const chaiJSDOM = require("chai-jsdom");
 use(chaiJSDOM);
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const register = require("@babel/register").default;
+const babelRegister = require("@babel/register").default;
 
-register({ extensions: [".ts", ".tsx", ".js", ".jsx"] });
+babelRegister({ extensions: [".js", ".jsx"] });
+
+require("ts-node/register");
 
 process.env.NODE_ENV = "test";
 

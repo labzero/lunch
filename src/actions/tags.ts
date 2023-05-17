@@ -85,6 +85,6 @@ export function removeTag(
       method: "delete",
     })
       .then((response) => processResponse(response, dispatch))
-      .then(() => dispatch(tagDeleted(id, getState().user.id)));
+      .then(() => dispatch(tagDeleted(id, getState().user!.id)));
   };
 }

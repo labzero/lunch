@@ -1,6 +1,6 @@
 import { Router } from "express";
 import fetch from "node-fetch";
-import { Restaurant, Vote, Tag } from "../../models";
+import { Restaurant, Vote, Tag } from "../../db";
 import checkTeamRole from "../helpers/checkTeamRole";
 import loggedIn from "../helpers/loggedIn";
 import {

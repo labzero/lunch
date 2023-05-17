@@ -1,6 +1,6 @@
-import { Router } from "express";
+import { Request, Router } from "express";
 import cors from "cors";
-import { Invitation, Role, User } from "../../models";
+import { Invitation, Role, Team, User } from "../../db";
 import { bsHost } from "../../config";
 import { TEAM_LIMIT } from "../../constants";
 import generateToken from "../../helpers/generateToken";
@@ -11,26 +11,31 @@ import canChangeRole from "../../helpers/canChangeRole";
 import checkTeamRole from "../helpers/checkTeamRole";
 import corsOptionsDelegate from "../helpers/corsOptionsDelegate";
 import loggedIn from "../helpers/loggedIn";
+import { RoleType } from "../../interfaces";
 import transporter from "../../mailers/transporter";
 
 export default () => {
-  const router = new Router({ mergeParams: true });
+  const router = Router({ mergeParams: true });
 
-  const getRoleToChange = async (currentUser, targetId, team) => {
+  const getRoleToChange = async (
+    currentUser: User,
+    targetId: number,
+    team: Team
+  ) => {
     if (currentUser.id === targetId) {
       return getRole(currentUser, team);
     }
     return Role.findOne({ where: { teamId: team.id, userId: targetId } });
   };
 
-  const hasOtherOwners = async (team, id) => {
+  const hasOtherOwners = async (team: Team, id: number) => {
     const allTeamRoles = await Role.findAll({ where: { teamId: team.id } });
     return allTeamRoles.some(
       (role) => role.type === "owner" && role.userId !== id
     );
   };
 
-  const getExtraAttributes = (req) => {
+  const getExtraAttributes = (req: Request) => {
     if (hasRole(req.user, req.team, "owner")) {
       return ["email"];
     }
@@ -38,11 +43,11 @@ export default () => {
   };
 
   const canChangeUser = async (
-    user,
-    roleToChange,
-    target,
-    team,
-    noOtherOwners
+    user: User,
+    roleToChange: Role,
+    target: RoleType | undefined,
+    team: Team,
+    noOtherOwners: () => void
   ) => {
     let currentUserRole;
     if (user.id === roleToChange.userId) {
@@ -78,12 +83,12 @@ export default () => {
 
       try {
         const users = await User.scope({
-          method: ["withTeamRole", req.team.id, extraAttributes],
+          method: ["withTeamRole", req.team!.id, extraAttributes],
         }).findAll({
           include: {
             attributes: [],
             model: Role,
-            where: { teamId: req.team.id },
+            where: { teamId: req.team!.id },
           },
         });
 
@@ -116,12 +121,12 @@ export default () => {
         });
 
         const UserWithTeamRole = User.scope({
-          method: ["withTeamRole", req.team.id, extraAttributes],
+          method: ["withTeamRole", req.team!.id, extraAttributes],
         });
 
         if (userToAdd) {
           if (
-            !req.user.get("superuser") &&
+            !req.user!.get("superuser") &&
             userToAdd.roles.length >= TEAM_LIMIT
           ) {
             return res.status(403).json({
@@ -139,7 +144,7 @@ export default () => {
             });
           }
           await Role.create({
-            teamId: req.team.id,
+            teamId: req.team!.id,
             userId: userToAdd.id,
             type,
           });
@@ -152,13 +157,13 @@ export default () => {
               subject: "You were added to a team!",
               text: `Hi there!
 
-${req.user.get("name")} invited you to the ${req.team.get(
+${req.user!.get("name")} invited you to the ${req.team!.get(
                 "name"
               )} team on Lunch!
 
 To get started, simply visit ${generateUrl(
                 req,
-                `${req.team.get("slug")}.${bsHost}`
+                `${req.team!.get("slug")}.${bsHost}`
               )} and vote away.
 
 Happy Lunching!`,
@@ -184,7 +189,7 @@ Happy Lunching!`,
             resetPasswordSentAt: new Date(),
             roles: [
               {
-                teamId: req.team.id,
+                teamId: req.team!.id,
                 type,
               },
             ],
@@ -205,7 +210,7 @@ Happy Lunching!`,
             subject: "Welcome to Lunch!",
             text: `Hi there!
 
-${req.user.get("name")} invited you to the ${req.team.get(
+${req.user!.get("name")} invited you to the ${req.team!.get(
               "name"
             )} team on Lunch!
 
@@ -224,7 +229,9 @@ Happy Lunching!`,
 
         // Sequelize can't apply scopes on create, so just get user again.
         // Also will exclude hidden fields like password, token, etc.
-        newUser = await UserWithTeamRole.findOne({ where: { id: newUser.id } });
+        newUser = (await UserWithTeamRole.findOne({
+          where: { id: newUser.id },
+        })) as User;
 
         return res.status(201).json({ error: false, data: newUser });
       } catch (err) {
@@ -241,14 +248,14 @@ Happy Lunching!`,
         const extraAttributes = getExtraAttributes(req);
 
         try {
-          const roleToChange = await getRoleToChange(req.user, id, req.team);
+          const roleToChange = await getRoleToChange(req.user!, id, req.team!);
 
           if (roleToChange) {
             const allowed = await canChangeUser(
-              req.user,
+              req.user!,
               roleToChange,
               req.body.type,
-              req.team,
+              req.team!,
               () =>
                 res.status(403).json({
                   error: true,
@@ -267,7 +274,7 @@ Happy Lunching!`,
             if (allowed) {
               await roleToChange.update({ type: req.body.type });
               const user = await User.scope({
-                method: ["withTeamRole", req.team.id, extraAttributes],
+                method: ["withTeamRole", req.team!.id, extraAttributes],
               }).findOne({ where: { id } });
               return res.status(200).json({ error: false, data: user });
             }
@@ -297,14 +304,14 @@ Happy Lunching!`,
         const id = parseInt(req.params.id, 10);
 
         try {
-          const roleToDelete = await getRoleToChange(req.user, id, req.team);
+          const roleToDelete = await getRoleToChange(req.user!, id, req.team!);
 
           if (roleToDelete) {
             const allowed = await canChangeUser(
-              req.user,
+              req.user!,
               roleToDelete,
               undefined,
-              req.team,
+              req.team!,
               () =>
                 res.status(403).json({
                   error: true,

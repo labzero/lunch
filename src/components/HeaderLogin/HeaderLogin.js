@@ -15,7 +15,7 @@ import s from "./HeaderLogin.scss";
 
 const HeaderLogin = ({ user }) => {
   let content = <div />;
-  if (user.id === undefined) {
+  if (user === null) {
     content = (
       <div className={s.root}>
         <Button size="sm" variant="primary" href="/login">
@@ -29,7 +29,11 @@ const HeaderLogin = ({ user }) => {
 };
 
 HeaderLogin.propTypes = {
-  user: PropTypes.object.isRequired,
+  user: PropTypes.object,
+};
+
+HeaderLogin.defaultProps = {
+  user: null,
 };
 
 export default withStyles(s)(HeaderLogin);

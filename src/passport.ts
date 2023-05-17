@@ -18,7 +18,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as LocalStrategy } from "passport-local";
 import { InferAttributes } from "sequelize";
-import { User } from "./models";
+import { User } from "./db";
 
 /**
  * Sign in with Google.
@@ -59,7 +59,7 @@ passport.use(
           }
 
           if (!user) {
-            return done(null, false, accountEmail);
+            return done(null, undefined, accountEmail);
           }
 
           if (
@@ -73,15 +73,15 @@ passport.use(
 
           if (doUpdates) {
             const updatedUser = await user.update(userUpdates);
-            return done(null, updatedUser.get("id"));
+            return done(null, updatedUser);
           }
 
-          return done(null, user.get("id"));
+          return done(null, user);
         } catch (err) {
           return done(err as Error);
         }
       }
-      return done(null, false);
+      return done(null, undefined);
     }
   )
 );
@@ -109,7 +109,7 @@ passport.use(
           user.get("encryptedPassword")!
         );
         if (passwordValid) {
-          return done(null, user.get("id"));
+          return done(null, user);
         }
         return done(null, false, { message });
       } catch (err) {

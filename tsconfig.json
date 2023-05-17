@@ -2,7 +2,9 @@
   "compilerOptions": {
     "baseUrl": "./",
     "downlevelIteration": true,
+    "emitDecoratorMetadata": true,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
     "incremental": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "outDir": "./build/public/assets/",
@@ -11,14 +13,23 @@
     "sourceMap": true,
     "noImplicitAny": true,
     "module": "esnext",
-    "target": "es5",
+    "target": "es6",
     "jsx": "react",
     "allowJs": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    // Ensure that .d.ts files are created by tsc, but not .js files
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    // Ensure that Babel can safely transpile files in the TypeScript project
+    "isolatedModules": true
   },
-  "files": ["node_modules/chai-jsdom/typings/chai/index.d.ts"],
+  "files": [
+    "./global.d.ts",
+    "./types.d.ts",
+    "node_modules/chai-jsdom/typings/chai/index.d.ts"
+  ],
   "include": ["./**/*.ts", "./**/*.tsx", "./*.d.ts"],
   "exclude": ["node_modules"]
 }

@@ -58,7 +58,7 @@ describe("api/team/users", () => {
 
     makeApp = (deps) => {
       const usersApi = proxyquireStrict("../team/users", {
-        "../../models": mockEsmodule({
+        "../../db": mockEsmodule({
           Invitation: InvitationMock,
           Role: RoleMock,
           User: UserMock,
@@ -172,7 +172,7 @@ describe("api/team/users", () => {
           "../../helpers/hasRole": mockEsmodule({
             default: () => true,
           }),
-          "../../models": mockEsmodule({
+          "../../db": mockEsmodule({
             User: {
               scope: stub().throws("Oh No"),
             },
@@ -906,7 +906,7 @@ describe("api/team/users", () => {
       beforeEach((done) => {
         app = makeApp({
           "../../helpers/hasRole": hasRole,
-          "../../models": mockEsmodule({
+          "../../db": mockEsmodule({
             Role: {
               findOne: stub().throws("Oh No"),
             },

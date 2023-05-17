@@ -1,25 +1,18 @@
-import { sequelize, DataTypes } from "./db";
+import { Column, Model, Table } from "sequelize-typescript";
 
-const Invitation = sequelize.define(
-  "invitation",
-  {
-    email: {
-      type: DataTypes.CITEXT,
-      allowNull: false,
-      unique: true,
-    },
-    confirmedAt: {
-      type: DataTypes.DATE,
-    },
-    confirmationToken: {
-      type: DataTypes.STRING,
-      unique: true,
-    },
-    confirmationSentAt: {
-      type: DataTypes.DATE,
-    },
-  },
-  {}
-);
+@Table({ modelName: "invitation" })
+class Invitation extends Model {
+  @Column({ allowNull: false, unique: true })
+  email: string;
+
+  @Column
+  confirmedAt: Date;
+
+  @Column({ unique: true })
+  confirmationToken: string;
+
+  @Column
+  confirmationSentAt: Date;
+}
 
 export default Invitation;

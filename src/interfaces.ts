@@ -1,5 +1,12 @@
 import { BrowserHistory } from "history";
-import { Team as TeamModel } from "./models";
+import {
+  Decision as DecisionModel,
+  Restaurant as RestaurantModel,
+  Tag as TagModel,
+  Team as TeamModel,
+  User as UserModel,
+  Vote as VoteModel,
+} from "./db";
 
 export interface Route {}
 
@@ -8,44 +15,24 @@ export interface NormalizedItems<U> {
   result: number[];
 }
 
-interface Record {
-  id: number;
-}
-
 export type RoleType = "guest" | "member" | "owner";
 
-interface Role {
-  type: RoleType;
-  teamId: number;
-  userId: number;
-}
-
-export interface User extends Record {
-  roles: Role[];
-  superuser?: boolean;
+export interface User extends UserModel {
   type?: RoleType;
 }
 
-export interface Restaurant extends Record {
-  address: string;
+export interface Restaurant extends Omit<RestaurantModel, "tags" | "votes"> {
   all_decision_count: number | string;
   all_vote_count: number | string;
-  lat: number;
-  lng: number;
-  name: string;
-  placeId: string;
   tags: number[];
   votes: number[];
 }
 
-export interface Tag extends Record {
+export interface Tag extends TagModel {
   restaurant_count: string | number;
 }
 
-export interface Team extends Record {
-  roles?: Role[];
-  slug: string;
-}
+export interface Team extends TeamModel {}
 
 export interface Flash {
   id: string;
@@ -53,14 +40,9 @@ export interface Flash {
   type: "error" | "success";
 }
 
-export interface Vote extends Record {
-  restaurantId: number;
-  userId: number;
-}
+export interface Vote extends VoteModel {}
 
-export interface Decision extends Record {
-  restaurantId: number;
-}
+export interface Decision extends DecisionModel {}
 
 interface NewlyAdded {
   id: number;
@@ -74,117 +56,6 @@ export interface StateData {
   teams: TeamModel[];
   user: Express.User;
 }
-
-interface BaseState {
-  restaurants: {
-    didInvalidate: boolean;
-    nameFilter: string;
-    isFetching: boolean;
-  };
-  decisions: {
-    isFetching: boolean;
-    didInvalidate: boolean;
-  };
-  flashes: Flash[];
-  host: string;
-  notifications: Notification[];
-  modals: {};
-  listUi: {
-    editNameFormValue?: string;
-    flipMove: boolean;
-    newlyAdded?: NewlyAdded;
-  };
-  locale: "en";
-  mapUi: {
-    center?: {
-      lat: number;
-      lng: number;
-    };
-    infoWindow?:
-      | {
-          latLng: {
-            lat: number;
-            lng: number;
-          };
-          placeId: string;
-        }
-      | {
-          id: number;
-        }
-      | {};
-    newlyAdded?: NewlyAdded;
-    showUnvoted: boolean;
-    showPOIs: boolean;
-    tempMarker?: {
-      latLng: {
-        lat: number;
-        lng: number;
-      };
-    };
-  };
-  pageUi: {};
-  tagFilters: number[];
-  tagExclusions: number[];
-  tags: {
-    isFetching: boolean;
-    didInvalidate: boolean;
-  };
-  teams: {
-    isFetching: boolean;
-    didInvalidate: boolean;
-  };
-  users: {
-    isFetching: boolean;
-    didInvalidate: boolean;
-  };
-  wsPort: number;
-}
-
-export type State = BaseState & {
-  restaurants: {
-    items: {
-      entities: {
-        restaurants: { [index: number]: Restaurant };
-        votes?: { [index: number]: Vote };
-      };
-      result: number[];
-    };
-  };
-  decisions: {
-    items: NormalizedItems<Decision>;
-  };
-  tags: {
-    items: NormalizedItems<Tag>;
-  };
-  team: Team;
-  teams: {
-    items: NormalizedItems<Team>;
-  };
-  user: User;
-  users: {
-    items: NormalizedItems<User>;
-  };
-};
-
-export type NonNormalizedState = BaseState & {
-  decisions: {
-    items: Decision[];
-  };
-  restaurants: {
-    items: Restaurant[];
-  };
-  tags: {
-    items: Tag[];
-  };
-  team: Partial<TeamModel>;
-  teams: {
-    items: TeamModel[];
-  };
-  user: Express.User;
-  users: {
-    items: User[];
-  };
-};
 
 export interface StateHelpers {
   fetch?: (url: string, options: any) => Promise<any>;
@@ -535,11 +406,6 @@ export type Action =
       type: "SCROLLED_TO_TOP";
     };
 
-export type Reducer<T extends keyof State> = (
-  state: State[T],
-  action: Action
-) => State[T];
-
 export interface Notification {
   actionType: Action["type"];
   id: string;
@@ -570,3 +436,119 @@ export type ConfirmOpts = {
   body: string;
   action: Action;
 };
+
+interface BaseState {
+  restaurants: {
+    didInvalidate: boolean;
+    nameFilter: string;
+    isFetching: boolean;
+  };
+  decisions: {
+    isFetching: boolean;
+    didInvalidate: boolean;
+  };
+  flashes: Flash[];
+  host: string;
+  notifications: Notification[];
+  modals: {};
+  listUi: {
+    editNameFormValue?: string;
+    flipMove: boolean;
+    newlyAdded?: NewlyAdded;
+  };
+  locale: "en";
+  mapUi: {
+    center?: {
+      lat: number;
+      lng: number;
+    };
+    infoWindow?:
+      | {
+          latLng: {
+            lat: number;
+            lng: number;
+          };
+          placeId: string;
+        }
+      | {
+          id: number;
+        }
+      | {};
+    newlyAdded?: NewlyAdded;
+    showUnvoted: boolean;
+    showPOIs: boolean;
+    tempMarker?: {
+      latLng: {
+        lat: number;
+        lng: number;
+      };
+    };
+  };
+  pageUi: {};
+  tagFilters: number[];
+  tagExclusions: number[];
+  tags: {
+    isFetching: boolean;
+    didInvalidate: boolean;
+  };
+  teams: {
+    isFetching: boolean;
+    didInvalidate: boolean;
+  };
+  users: {
+    isFetching: boolean;
+    didInvalidate: boolean;
+  };
+  wsPort: number;
+}
+
+export type State = BaseState & {
+  restaurants: {
+    items: {
+      entities: {
+        restaurants: { [index: number]: Restaurant };
+        votes?: { [index: number]: Vote };
+      };
+      result: number[];
+    };
+  };
+  decisions: {
+    items: NormalizedItems<Decision>;
+  };
+  tags: {
+    items: NormalizedItems<Tag>;
+  };
+  team: Team;
+  teams: {
+    items: NormalizedItems<Team>;
+  };
+  user: User | null;
+  users: {
+    items: NormalizedItems<User>;
+  };
+};
+
+export type NonNormalizedState = BaseState & {
+  decisions: {
+    items: Decision[];
+  };
+  restaurants: {
+    items: Restaurant[];
+  };
+  tags: {
+    items: Tag[];
+  };
+  team: Partial<TeamModel>;
+  teams: {
+    items: TeamModel[];
+  };
+  user: User | null;
+  users: {
+    items: User[];
+  };
+};
+
+export type Reducer<T extends keyof State> = (
+  state: State[T],
+  action: Action
+) => State[T];

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { bsHost } from "../config";
 import generateToken from "../helpers/generateToken";
 import generateUrl from "../helpers/generateUrl";
-import { Invitation, User } from "../models";
+import { Invitation, User } from "../db";
 import transporter from "../mailers/transporter";
 
 export default () => {

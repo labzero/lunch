@@ -1,6 +1,6 @@
 import { Action } from "redux";
 import WebSocket from "ws";
-import { Team, User as UserModel } from "./src/models";
+import { Team, User as UserInterface } from "./src/interfaces";
 
 declare global {
   interface Window {
@@ -11,9 +11,10 @@ declare global {
       broadcast: (teamId: number, data: Action) => void;
       subdomain?: string;
       team?: Team;
-      user?: UserModel;
+      user?: UserInterface;
       wss?: Server;
     }
+    export interface User extends UserInterface {}
   }
 }
 

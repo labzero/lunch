@@ -41,7 +41,7 @@ describe("api/main/user", () => {
 
     makeApp = (deps, middleware) => {
       const userApi = proxyquireStrict("../main/user", {
-        "../../models": mockEsmodule({
+        "../../db": mockEsmodule({
           User: UserMock,
         }),
         "../helpers/loggedIn": mockEsmodule({

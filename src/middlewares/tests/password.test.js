@@ -27,7 +27,7 @@ describe("middlewares/password", () => {
     flashSpy = spy();
     makeApp = (deps) => {
       const passwordMiddleware = proxyquireStrict("../password", {
-        "../models": mockEsmodule({
+        "../db": mockEsmodule({
           User: UserMock,
         }),
         "../mailers/transporter": mockEsmodule({

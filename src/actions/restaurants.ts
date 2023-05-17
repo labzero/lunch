@@ -1,8 +1,8 @@
+import { ThunkAction } from "@reduxjs/toolkit";
 import { getDecision } from "../selectors/decisions";
 import { getNewlyAdded } from "../selectors/listUi";
 import { getCurrentUser } from "../selectors/user";
 import { processResponse, credentials, jsonHeaders } from "../core/ApiClient";
-import { ThunkAction } from "@reduxjs/toolkit";
 import { Action, Restaurant, State, Tag, Vote } from "../interfaces";
 
 export function sortRestaurants(): ThunkAction<void, State, unknown, Action> {
@@ -12,7 +12,7 @@ export function sortRestaurants(): ThunkAction<void, State, unknown, Action> {
       type: "SORT_RESTAURANTS",
       decision: getDecision(state),
       newlyAdded: getNewlyAdded(state),
-      user: getCurrentUser(state),
+      user: getCurrentUser(state)!,
     });
   };
 }

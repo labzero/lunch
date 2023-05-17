@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Tag } from "../../models";
+import { Tag } from "../../db";
 import checkTeamRole from "../helpers/checkTeamRole";
 import loggedIn from "../helpers/loggedIn";
 import { tagDeleted } from "../../actions/tags";

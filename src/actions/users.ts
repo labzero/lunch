@@ -92,7 +92,7 @@ export function removeUser(
   return (dispatch, getState) => {
     const state = getState();
     let isSelf = false;
-    if (getCurrentUser(state).id === id) {
+    if (getCurrentUser(state)!.id === id) {
       isSelf = true;
     }
     dispatch(deleteUser(id, team, isSelf));
@@ -183,7 +183,7 @@ export function changeUserRole(
     const state = getState();
     const team = state.team;
     let isSelf = false;
-    if (getCurrentUser(state).id === id) {
+    if (getCurrentUser(state)!.id === id) {
       isSelf = true;
     }
     dispatch(patchUser(id, type, team, isSelf));

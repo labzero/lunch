@@ -1,48 +1,37 @@
-import { InferAttributes, InferCreationAttributes, Model } from "sequelize";
-import { RoleType } from "../interfaces";
-import { sequelize, DataTypes } from "./db";
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  Index,
+  Model,
+  Table,
+} from "sequelize-typescript";
 
-class Role extends Model<InferAttributes<Role>, InferCreationAttributes<Role>> {
-  declare teamId: number;
-  declare type: RoleType;
-  declare userId: number;
+import type { RoleType } from "../interfaces";
+import Team from "./Team";
+import User from "./User";
+
+@Table({ modelName: "role" })
+class Role extends Model {
+  @ForeignKey(() => User)
+  @Index({ unique: true })
+  @Column({ allowNull: false, onDelete: "cascade" })
+  userId: number;
+
+  @BelongsTo(() => User)
+  user: Awaited<User>;
+
+  @ForeignKey(() => Team)
+  @Index({ unique: true })
+  @Column({ allowNull: false, onDelete: "cascade" })
+  teamId: number;
+
+  @BelongsTo(() => Team)
+  team: Awaited<Team>;
+
+  @Column({ allowNull: false, type: DataType.ENUM("guest", "member", "owner") })
+  type: RoleType;
 }
-
-Role.init(
-  {
-    type: {
-      allowNull: false,
-      type: DataTypes.ENUM("guest", "member", "owner"),
-    },
-    userId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "user",
-        key: "id",
-      },
-      allowNull: false,
-      onDelete: "cascade",
-    },
-    teamId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "team",
-        key: "id",
-      },
-      allowNull: false,
-      onDelete: "cascade",
-    },
-  },
-  {
-    indexes: [
-      {
-        fields: ["userId", "teamId"],
-        unique: true,
-      },
-    ],
-    modelName: "role",
-    sequelize,
-  }
-);
 
 export default Role;

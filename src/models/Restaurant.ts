@@ -1,13 +1,22 @@
-import { Model } from "sequelize";
-import { sequelize, DataTypes } from "./db";
+import {
+  BelongsToMany,
+  Column,
+  HasMany,
+  Model,
+  Table,
+} from "sequelize-typescript";
+import { sequelize } from "../db";
 import Decision from "./Decision";
+import RestaurantTag from "./RestaurantTag";
+import Tag from "./Tag";
 import Team from "./Team";
 import Vote from "./Vote";
 
+@Table({ modelName: "restaurant" })
 class Restaurant extends Model {
   static findAllWithTagIds = ({ teamId }: { teamId: number }) =>
-    Team.findByPk(teamId).then((team) => {
-      return team
+    Team.findByPk(teamId).then((team) =>
+      team
         ? Restaurant.findAll({
             attributes: {
               include: [
@@ -60,23 +69,35 @@ class Restaurant extends Model {
               teamId,
             },
           })
-        : [];
-    });
-}
+        : []
+    );
 
-Restaurant.init(
-  {
-    name: DataTypes.STRING,
-    address: DataTypes.STRING,
-    lat: DataTypes.FLOAT,
-    lng: DataTypes.FLOAT,
-    placeId: DataTypes.STRING,
-    teamId: DataTypes.INTEGER,
-  },
-  {
-    modelName: "restaurant",
-    sequelize,
-  }
-);
+  @Column
+  name: string;
+
+  @Column
+  address: string;
+
+  @Column
+  lat: number;
+
+  @Column
+  lng: number;
+
+  @Column
+  placeId: string;
+
+  @Column
+  teamId: string;
+
+  @HasMany(() => Vote)
+  votes: Vote[];
+
+  @HasMany(() => Decision)
+  decisions: Decision[];
+
+  @BelongsToMany(() => Tag, () => RestaurantTag)
+  tags: Tag[];
+}
 
 export default Restaurant;
