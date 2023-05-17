@@ -1,30 +1,35 @@
-import update from 'immutability-helper';
-import { Reducer, User } from '../interfaces';
+import update from "immutability-helper";
+import { Reducer, User } from "../interfaces";
 
 const user: Reducer<"user"> = (state, action) => {
-  switch(action.type) {
+  switch (action.type) {
     case "TEAM_POSTED": {
       let newState: typeof state | undefined;
       if (action.team.roles) {
-        action.team.roles.forEach(role => {
+        action.team.roles.forEach((role) => {
           if (role.userId === state.id) {
             newState = update(newState || state, {
               roles: {
-                $push: [role]
-              }
+                $push: [role],
+              },
             });
           }
         });
       }
-  
+
       return newState || state;
     }
     case "USER_DELETED": {
       if (action.isSelf) {
         return update(state, {
           roles: {
-            $splice: [[state.roles.map(role => role.teamId).indexOf(action.team.id), 1]]
-          }
+            $splice: [
+              [
+                state.roles.map((role) => role.teamId).indexOf(action.team.id),
+                1,
+              ],
+            ],
+          },
         });
       }
       return state;
@@ -38,12 +43,12 @@ const user: Reducer<"user"> = (state, action) => {
             if (role.teamId === action.team.id) {
               return {
                 ...role,
-                type: action.user.type!
+                type: action.user.type!,
               };
             }
             return role;
           }),
-          type: undefined
+          type: undefined,
         };
       }
       return state;
@@ -53,6 +58,6 @@ const user: Reducer<"user"> = (state, action) => {
     }
   }
   return state;
-}
+};
 
 export default user;

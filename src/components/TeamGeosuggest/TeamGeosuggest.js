@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import loadComponent from '../../helpers/loadComponent';
-import GoogleMapsLoaderContext from '../GoogleMapsLoaderContext/GoogleMapsLoaderContext';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
+import loadComponent from "../../helpers/loadComponent";
+import GoogleMapsLoaderContext from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 
 let Geosuggest = () => null;
 
@@ -13,7 +13,7 @@ class TeamGeosuggest extends Component {
     id: PropTypes.string.isRequired,
     initialValue: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired,
-    setCenter: PropTypes.func.isRequired
+    setCenter: PropTypes.func.isRequired,
   };
 
   constructor(props, context) {
@@ -29,7 +29,13 @@ class TeamGeosuggest extends Component {
   }
 
   componentDidMount() {
-    loadComponent(() => require.ensure([], require => require('react-geosuggest').default, 'map')).then((g) => {
+    loadComponent(() =>
+      require.ensure(
+        [],
+        (require) => require("react-geosuggest").default,
+        "map"
+      )
+    ).then((g) => {
       Geosuggest = g;
       this.forceUpdate();
     });
@@ -45,7 +51,7 @@ class TeamGeosuggest extends Component {
           const location = results[0].geometry.location;
           const center = {
             lat: location.lat(),
-            lng: location.lng()
+            lng: location.lng(),
           };
           this.props.setCenter(center);
         }
@@ -59,7 +65,7 @@ class TeamGeosuggest extends Component {
     }
   };
 
-  handleChange = value => this.props.onChange({ target: { value } });
+  handleChange = (value) => this.props.onChange({ target: { value } });
 
   render() {
     const { id, initialValue } = this.props;
@@ -75,7 +81,7 @@ class TeamGeosuggest extends Component {
         onChange={this.handleChange}
         onSuggestSelect={this.handleSuggestSelect}
         placeholder="Enter team address"
-        types={['geocode']}
+        types={["geocode"]}
       />
     ) : null;
   }

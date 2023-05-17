@@ -1,15 +1,15 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import RestaurantVoteCountContainer from '../RestaurantVoteCount/RestaurantVoteCountContainer';
-import RestaurantVoteButtonContainer from '../RestaurantVoteButton/RestaurantVoteButtonContainer';
-import RestaurantDecisionContainer from '../RestaurantDecision/RestaurantDecisionContainer';
-import RestaurantTagListContainer from '../RestaurantTagList/RestaurantTagListContainer';
-import RestaurantAddTagFormContainer from '../RestaurantAddTagForm/RestaurantAddTagFormContainer';
-import RestaurantNameFormContainer from '../RestaurantNameForm/RestaurantNameFormContainer';
-import RestaurantDropdownContainer from '../RestaurantDropdown/RestaurantDropdownContainer';
-import s from './Restaurant.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import RestaurantVoteCountContainer from "../RestaurantVoteCount/RestaurantVoteCountContainer";
+import RestaurantVoteButtonContainer from "../RestaurantVoteButton/RestaurantVoteButtonContainer";
+import RestaurantDecisionContainer from "../RestaurantDecision/RestaurantDecisionContainer";
+import RestaurantTagListContainer from "../RestaurantTagList/RestaurantTagListContainer";
+import RestaurantAddTagFormContainer from "../RestaurantAddTagForm/RestaurantAddTagFormContainer";
+import RestaurantNameFormContainer from "../RestaurantNameForm/RestaurantNameFormContainer";
+import RestaurantDropdownContainer from "../RestaurantDropdown/RestaurantDropdownContainer";
+import s from "./Restaurant.scss";
 
 class Restaurant extends Component {
   static propTypes = {
@@ -77,11 +77,7 @@ class Restaurant extends Component {
           );
         } else {
           addTagArea = (
-            <Button
-              onClick={this.showAddTagForm}
-              size="sm"
-              variant="light"
-            >
+            <Button onClick={this.showAddTagForm} size="sm" variant="light">
               add tag
             </Button>
           );

@@ -1,6 +1,6 @@
-import { InferAttributes, InferCreationAttributes, Model } from 'sequelize';
-import { RoleType } from '../interfaces';
-import { sequelize, DataTypes } from './db';
+import { InferAttributes, InferCreationAttributes, Model } from "sequelize";
+import { RoleType } from "../interfaces";
+import { sequelize, DataTypes } from "./db";
 
 class Role extends Model<InferAttributes<Role>, InferCreationAttributes<Role>> {
   declare teamId: number;
@@ -12,36 +12,36 @@ Role.init(
   {
     type: {
       allowNull: false,
-      type: DataTypes.ENUM('guest', 'member', 'owner'),
+      type: DataTypes.ENUM("guest", "member", "owner"),
     },
     userId: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'user',
-        key: 'id'
+        model: "user",
+        key: "id",
       },
       allowNull: false,
-      onDelete: 'cascade'
+      onDelete: "cascade",
     },
     teamId: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'team',
-        key: 'id'
+        model: "team",
+        key: "id",
       },
       allowNull: false,
-      onDelete: 'cascade'
-    }
+      onDelete: "cascade",
+    },
   },
   {
     indexes: [
       {
-        fields: ['userId', 'teamId'],
-        unique: true
-      }
+        fields: ["userId", "teamId"],
+        unique: true,
+      },
     ],
-    modelName: 'role',
-    sequelize
+    modelName: "role",
+    sequelize,
   }
 );
 

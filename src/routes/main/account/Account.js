@@ -1,13 +1,13 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import { PASSWORD_MIN_LENGTH } from '../../../constants';
-import s from './Account.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import { PASSWORD_MIN_LENGTH } from "../../../constants";
+import s from "./Account.scss";
 
 class Account extends Component {
   static propTypes = {
@@ -23,11 +23,12 @@ class Account extends Component {
     this.state = {
       name: user.name,
       email: user.email,
-      password: '',
+      password: "",
     };
   }
 
-  handleChange = (field) => (event) => this.setState({ [field]: event.target.value });
+  handleChange = (field) => (event) =>
+    this.setState({ [field]: event.target.value });
 
   handleSubmit = (event) => {
     event.preventDefault();
@@ -35,10 +36,10 @@ class Account extends Component {
       .updateCurrentUser(this.state)
       .then(() => {
         this.setState({
-          password: '',
+          password: "",
         });
       })
-      .catch(() => {});
+      .catch(() => undefined);
   };
 
   render() {
@@ -55,7 +56,7 @@ class Account extends Component {
                 <Col sm={6}>
                   <Form.Control
                     name="name"
-                    onChange={this.handleChange('name')}
+                    onChange={this.handleChange("name")}
                     required
                     type="text"
                     value={name}
@@ -69,7 +70,7 @@ class Account extends Component {
                 <Col sm={6}>
                   <Form.Control
                     name="email"
-                    onChange={this.handleChange('email')}
+                    onChange={this.handleChange("email")}
                     required
                     type="email"
                     value={email}
@@ -84,7 +85,7 @@ class Account extends Component {
                   <Form.Control
                     minLength={PASSWORD_MIN_LENGTH}
                     name="password"
-                    onChange={this.handleChange('password')}
+                    onChange={this.handleChange("password")}
                     type="password"
                     value={password}
                   />

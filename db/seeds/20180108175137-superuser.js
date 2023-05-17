@@ -1,7 +1,8 @@
-require('dotenv').config();
-const bcrypt = require('bcrypt');
+/* eslint-disable @typescript-eslint/no-var-requires */
+require("dotenv").config();
+const bcrypt = require("bcrypt");
 
-const name = process.env.SUPERUSER_NAME || 'superuser';
+const name = process.env.SUPERUSER_NAME || "superuser";
 
 module.exports = {
   up(queryInterface) {
@@ -9,20 +10,28 @@ module.exports = {
     const now = new Date().toISOString();
 
     function createUser(encryptedPassword) {
-      return queryInterface.bulkInsert('users', [{
-        name,
-        encryptedPassword,
-        superuser: true,
-        email: process.env.SUPERUSER_EMAIL,
-        createdAt: now,
-        updatedAt: now
-      }], {});
+      return queryInterface.bulkInsert(
+        "users",
+        [
+          {
+            name,
+            encryptedPassword,
+            superuser: true,
+            email: process.env.SUPERUSER_EMAIL,
+            createdAt: now,
+            updatedAt: now,
+          },
+        ],
+        {}
+      );
     }
 
-    return (password ? bcrypt.hash(password, 10).then(createUser) : createUser(null));
+    return password
+      ? bcrypt.hash(password, 10).then(createUser)
+      : createUser(null);
   },
 
   down(queryInterface) {
-    return queryInterface.bulkDelete('users', { name }, {});
-  }
+    return queryInterface.bulkDelete("users", { name }, {});
+  },
 };

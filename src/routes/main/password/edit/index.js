@@ -7,10 +7,10 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from 'react';
-import LayoutContainer from '../../../../components/Layout/LayoutContainer';
-import renderIfLoggedOut from '../../../helpers/renderIfLoggedOut';
-import Edit from './Edit';
+import React from "react";
+import LayoutContainer from "../../../../components/Layout/LayoutContainer";
+import renderIfLoggedOut from "../../../helpers/renderIfLoggedOut";
+import Edit from "./Edit";
 
 export default (context) => {
   const state = context.store.getState();
@@ -20,7 +20,7 @@ export default (context) => {
   return renderIfLoggedOut(state, () => {
     if (!token) {
       return {
-        redirect: '/password/new'
+        redirect: "/password/new",
       };
     }
 
@@ -30,7 +30,7 @@ export default (context) => {
           <Edit token={token} />
         </LayoutContainer>
       ),
-      title: 'Reset password',
+      title: "Reset password",
     };
   });
 };

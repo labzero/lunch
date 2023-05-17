@@ -7,10 +7,10 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import serialize from 'serialize-javascript';
-import config from '../config';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import serialize from "serialize-javascript";
+import config from "../config";
 
 /* eslint-disable react/no-danger */
 
@@ -21,10 +21,12 @@ class Html extends Component {
     ogTitle: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     root: PropTypes.string,
-    styles: PropTypes.arrayOf(PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      cssText: PropTypes.string.isRequired,
-    }).isRequired),
+    styles: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        cssText: PropTypes.string.isRequired,
+      }).isRequired
+    ),
     scripts: PropTypes.arrayOf(PropTypes.string.isRequired),
     children: PropTypes.string.isRequired,
   };
@@ -32,7 +34,7 @@ class Html extends Component {
   static defaultProps = {
     styles: [],
     scripts: [],
-    root: ''
+    root: "",
   };
 
   render() {
@@ -44,25 +46,28 @@ class Html extends Component {
       root,
       styles,
       scripts,
-      children
+      children,
     } = this.props;
 
     return (
       <html className="no-js" lang="en">
         <head>
-          {config.analytics.googleTrackingId
-            && (
+          {config.analytics.googleTrackingId && (
             <>
               <script
                 dangerouslySetInnerHTML={{
                   __html:
-                'window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;'
-                + `ga('create','${config.analytics.googleTrackingId}','auto');ga('send','pageview')`
+                    "window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;" +
+                    `ga('create','${config.analytics.googleTrackingId}','auto');ga('send','pageview')`,
                 }}
               />
-              <script src="https://www.google-analytics.com/analytics.js" async defer />
+              <script
+                src="https://www.google-analytics.com/analytics.js"
+                async
+                defer
+              />
             </>
-            )}
+          )}
           <meta charSet="utf-8" />
           <meta httpEquiv="x-ua-compatible" content="ie=edge" />
           <title>{title}</title>
@@ -77,14 +82,20 @@ class Html extends Component {
           <meta property="twitter:site" content="labzero" />
           <meta property="twitter:image" content={`${root}/tile.png`} />
           <meta name="theme-color" content="#FFC0CB" />
-          <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-          <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:400,900" />
-          {scripts.map(script => (
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, user-scalable=no"
+          />
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css?family=Nunito:400,900"
+          />
+          {scripts.map((script) => (
             <link key={script} rel="preload" href={script} as="script" />
           ))}
           <link rel="manifest" href="/site.webmanifest" />
           <link rel="apple-touch-icon" href="/icon.png" />
-          {styles.map(style => (
+          {styles.map((style) => (
             <style
               key={style.id}
               id={style.id}
@@ -94,9 +105,20 @@ class Html extends Component {
         </head>
         <body>
           <div id="app" dangerouslySetInnerHTML={{ __html: children }} />
-          <script dangerouslySetInnerHTML={{ __html: `window.App=${serialize(app)}` }} />
-          {!module.hot && <script dangerouslySetInnerHTML={{ __html: 'if (\'serviceWorker\' in navigator) { window.addEventListener(\'load\', () => { navigator.serviceWorker.register(\'/service-worker.js\').then(function(registration) {registration.addEventListener(\'updatefound\', () => {window.swUpdate = true; }); }); }); }' }} />}
-          {scripts.map(script => <script key={script} src={script} />)}
+          <script
+            dangerouslySetInnerHTML={{ __html: `window.App=${serialize(app)}` }}
+          />
+          {!module.hot && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html:
+                  "if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('/service-worker.js').then(function(registration) {registration.addEventListener('updatefound', () => {window.swUpdate = true; }); }); }); }",
+              }}
+            />
+          )}
+          {scripts.map((script) => (
+            <script key={script} src={script} />
+          ))}
         </body>
       </html>
     );

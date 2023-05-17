@@ -1,32 +1,40 @@
 exports.up = (queryInterface, Sequelize) => {
-  const Team = queryInterface.sequelize.define('team', {
-    name: Sequelize.STRING,
-  }, {
-    underscored: true
-  });
-
-  return queryInterface.createTable('teams', {
-    id: {
-      allowNull: false,
-      autoIncrement: true,
-      primaryKey: true,
-      type: Sequelize.INTEGER
+  const Team = queryInterface.sequelize.define(
+    "team",
+    {
+      name: Sequelize.STRING,
     },
-    name: {
-      allowNull: false,
-      type: Sequelize.STRING,
-    },
-    created_at: {
-      allowNull: false,
-      type: Sequelize.DATE
-    },
-    updated_at: {
-      allowNull: false,
-      type: Sequelize.DATE
+    {
+      underscored: true,
     }
-  }).then(() => Team.create({
-    name: 'Lab Zero'
-  }));
+  );
+
+  return queryInterface
+    .createTable("teams", {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER,
+      },
+      name: {
+        allowNull: false,
+        type: Sequelize.STRING,
+      },
+      created_at: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+      updated_at: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
+    })
+    .then(() =>
+      Team.create({
+        name: "Lab Zero",
+      })
+    );
 };
 
-exports.down = queryInterface => queryInterface.dropTable('teams');
+exports.down = (queryInterface) => queryInterface.dropTable("teams");

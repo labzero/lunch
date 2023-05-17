@@ -1,12 +1,12 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import ListGroup from 'react-bootstrap/ListGroup';
-import { FaTimes } from 'react-icons/fa';
-import Container from 'react-bootstrap/Container';
-import Link from '../../../components/Link';
-import s from './Teams.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import ListGroup from "react-bootstrap/ListGroup";
+import { FaTimes } from "react-icons/fa";
+import Container from "react-bootstrap/Container";
+import Link from "../../../components/Link";
+import s from "./Teams.scss";
 
 class Teams extends Component {
   static propTypes = {
@@ -19,7 +19,7 @@ class Teams extends Component {
   confirmLeave = (team) => (event) => {
     event.preventDefault();
     this.props.confirm({
-      actionLabel: 'Leave',
+      actionLabel: "Leave",
       body: `Are you sure you want to leave this team?
 You will need to be invited back by another member.`,
       action: this.props.leaveTeam(team),
@@ -37,7 +37,12 @@ You will need to be invited back by another member.`,
               <h2>Visit one of your teams:</h2>
               <ListGroup activeKey={null} className={s.list}>
                 {teams.map((team) => (
-                  <ListGroup.Item action className={s.item} href={`//${team.slug}.${host}`} key={team.slug}>
+                  <ListGroup.Item
+                    action
+                    className={s.item}
+                    href={`//${team.slug}.${host}`}
+                    key={team.slug}
+                  >
                     <div className={s.itemName}>{team.name}</div>
                     <button
                       className={s.leave}
@@ -58,9 +63,7 @@ You will need to be invited back by another member.`,
           )}
           <div className={s.centerer}>
             <Link className="btn btn-default" to="/new-team">
-              <Button variant="light">
-                Create a new team
-              </Button>
+              <Button variant="light">Create a new team</Button>
             </Link>
           </div>
         </Container>

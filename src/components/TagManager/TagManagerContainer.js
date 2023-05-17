@@ -1,11 +1,9 @@
-import { connect } from 'react-redux';
-import { getTagIds } from '../../selectors/tags';
-import TagManager from './TagManager';
+import { connect } from "react-redux";
+import { getTagIds } from "../../selectors/tags";
+import TagManager from "./TagManager";
 
-const mapStateToProps = state => ({
-  tags: getTagIds(state)
+const mapStateToProps = (state) => ({
+  tags: getTagIds(state),
 });
 
-export default connect(
-  mapStateToProps
-)(TagManager);
+export default connect(mapStateToProps)(TagManager);

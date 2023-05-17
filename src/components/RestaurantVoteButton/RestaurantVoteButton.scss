@@ -1,5 +1,5 @@
-@import '../../styles/mixins';
-@import '../../styles/variables';
+@import "../../styles/mixins";
+@import "../../styles/variables";
 
 .root {
   border: $default-border;
@@ -18,7 +18,8 @@
     outline: none;
   }
 
-  &:focus { /* stylelint-disable-line no-descending-specificity */
+  /* stylelint-disable-next-line no-descending-specificity */
+  &:focus {
     @include shadow-focus;
   }
 }

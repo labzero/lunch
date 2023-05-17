@@ -7,10 +7,10 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from 'react';
-import LayoutContainer from '../../../../components/Layout/LayoutContainer';
-import render404 from '../../../helpers/render404';
-import New from './New';
+import React from "react";
+import LayoutContainer from "../../../../components/Layout/LayoutContainer";
+import render404 from "../../../helpers/render404";
+import New from "./New";
 
 export default (context) => {
   const state = context.store.getState();
@@ -25,7 +25,7 @@ export default (context) => {
           <New email={email} />
         </LayoutContainer>
       ),
-      title: 'New user',
+      title: "New user",
     };
   }
 

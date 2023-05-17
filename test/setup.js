@@ -9,33 +9,33 @@
 
 /* Configure Mocha test runner, see package.json/scripts/test */
 
-require('global-jsdom/register');
+require("global-jsdom/register");
 
-require('core-js/stable');
+require("core-js/stable");
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { use } = require('chai');
+const { use } = require("chai");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const chaiJSDOM = require('chai-jsdom');
+const chaiJSDOM = require("chai-jsdom");
 
 use(chaiJSDOM);
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const register = require('@babel/register').default;
+const register = require("@babel/register").default;
 
-register({ extensions: ['.ts', '.tsx', '.js', '.jsx'] });
+register({ extensions: [".ts", ".tsx", ".js", ".jsx"] });
 
-process.env.NODE_ENV = 'test';
+process.env.NODE_ENV = "test";
 
 function noop() {
   return null;
 }
 
-require.extensions['.css'] = noop;
-require.extensions['.scss'] = noop;
-require.extensions['.md'] = noop;
-require.extensions['.png'] = noop;
-require.extensions['.svg'] = noop;
-require.extensions['.jpg'] = noop;
-require.extensions['.jpeg'] = noop;
-require.extensions['.gif'] = noop;
+require.extensions[".css"] = noop;
+require.extensions[".scss"] = noop;
+require.extensions[".md"] = noop;
+require.extensions[".png"] = noop;
+require.extensions[".svg"] = noop;
+require.extensions[".jpg"] = noop;
+require.extensions[".jpeg"] = noop;
+require.extensions[".gif"] = noop;

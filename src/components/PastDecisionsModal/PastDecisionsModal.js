@@ -1,11 +1,11 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import Form from 'react-bootstrap/Form';
-import Modal from 'react-bootstrap/Modal';
-import ModalBody from 'react-bootstrap/ModalBody';
-import ModalHeader from 'react-bootstrap/ModalHeader';
-import ModalFooter from 'react-bootstrap/ModalFooter';
-import Button from 'react-bootstrap/Button';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import Form from "react-bootstrap/Form";
+import Modal from "react-bootstrap/Modal";
+import ModalBody from "react-bootstrap/ModalBody";
+import ModalHeader from "react-bootstrap/ModalHeader";
+import ModalFooter from "react-bootstrap/ModalFooter";
+import Button from "react-bootstrap/Button";
 
 class PastDecisionsModal extends Component {
   static propTypes = {
@@ -24,9 +24,10 @@ class PastDecisionsModal extends Component {
     };
   }
 
-  handleChange = event => this.setState({
-    daysAgo: event.target.value
-  });
+  handleChange = (event) =>
+    this.setState({
+      daysAgo: event.target.value,
+    });
 
   handleSubmit = () => {
     const { decide } = this.props;
@@ -41,18 +42,24 @@ class PastDecisionsModal extends Component {
     let children = text || `${index} days ago`;
     let disabled = false;
     if (index > 0 && decisionsByDay[index].length > 0) {
-      const decisionNamesForDay = decisionsByDay[index].reduce((acc, curr) => {
-        const restaurant = restaurantEntities[curr.restaurantId];
-        if (restaurant) {
-          disabled = true;
-          acc.push(restaurant.name);
-        }
-        return acc;
-      }, []).join(', ');
+      const decisionNamesForDay = decisionsByDay[index]
+        .reduce((acc, curr) => {
+          const restaurant = restaurantEntities[curr.restaurantId];
+          if (restaurant) {
+            disabled = true;
+            acc.push(restaurant.name);
+          }
+          return acc;
+        }, [])
+        .join(", ");
       children = `${children} (${decisionNamesForDay})`;
     }
 
-    return <option disabled={disabled} value={index}>{children}</option>;
+    return (
+      <option disabled={disabled} value={index}>
+        {children}
+      </option>
+    );
   }
 
   render() {
@@ -61,24 +68,20 @@ class PastDecisionsModal extends Component {
 
     return (
       <Modal show={shown} onHide={hideModal}>
-        <ModalHeader>
-          We ate here...
-        </ModalHeader>
+        <ModalHeader>We ate here...</ModalHeader>
         <ModalBody>
-          <Form.Select
-            onChange={this.handleChange}
-            value={daysAgo}
-            required
-          >
-            {this.renderOption(0, 'Today')}
-            {this.renderOption(1, 'Yesterday')}
+          <Form.Select onChange={this.handleChange} value={daysAgo} required>
+            {this.renderOption(0, "Today")}
+            {this.renderOption(1, "Yesterday")}
             {this.renderOption(2)}
             {this.renderOption(3)}
             {this.renderOption(4)}
           </Form.Select>
         </ModalBody>
         <ModalFooter>
-          <Button size="sm" onClick={hideModal} variant="light">Cancel</Button>
+          <Button size="sm" onClick={hideModal} variant="light">
+            Cancel
+          </Button>
           <Button
             autoFocus
             size="sm"

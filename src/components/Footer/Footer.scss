@@ -7,11 +7,11 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-@import '../../styles/mixins';
-@import '../../styles/variables';
+@import "../../styles/mixins";
+@import "../../styles/variables";
 
 .root {
-  background: url('./footer-bg.jpg');
+  background: url("./footer-bg.jpg");
   background-size: cover;
   border-top: $default-border;
   padding: 20px 15px;

@@ -1,12 +1,20 @@
-import { connect } from 'react-redux';
-import { getRestaurantIds } from '../../selectors/restaurants';
-import { getTagFilters } from '../../selectors/tagFilters';
-import { getTagExclusions } from '../../selectors/tagExclusions';
-import { getTags } from '../../selectors/tags';
-import { addTagFilter, clearTagFilters, removeTagFilter } from '../../actions/tagFilters';
-import { addTagExclusion, clearTagExclusions, removeTagExclusion } from '../../actions/tagExclusions';
-import { setFlipMove } from '../../actions/listUi';
-import TagFilterForm from './TagFilterForm';
+import { connect } from "react-redux";
+import { getRestaurantIds } from "../../selectors/restaurants";
+import { getTagFilters } from "../../selectors/tagFilters";
+import { getTagExclusions } from "../../selectors/tagExclusions";
+import { getTags } from "../../selectors/tags";
+import {
+  addTagFilter,
+  clearTagFilters,
+  removeTagFilter,
+} from "../../actions/tagFilters";
+import {
+  addTagExclusion,
+  clearTagExclusions,
+  removeTagExclusion,
+} from "../../actions/tagExclusions";
+import { setFlipMove } from "../../actions/listUi";
+import TagFilterForm from "./TagFilterForm";
 
 const mapStateToProps = (state, ownProps) => {
   let addedTags;
@@ -24,7 +32,7 @@ const mapStateToProps = (state, ownProps) => {
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
-  setFlipMove: val => dispatch(setFlipMove(val)),
+  setFlipMove: (val) => dispatch(setFlipMove(val)),
   clearTags() {
     if (ownProps.exclude) {
       dispatch(clearTagExclusions());
@@ -40,7 +48,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     }
   },
   handleSuggestionSelected(event, { suggestion, method }) {
-    if (method === 'enter') {
+    if (method === "enter") {
       event.preventDefault();
     }
     if (ownProps.exclude) {
@@ -56,7 +64,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
       dispatch(removeTagFilter(id));
     }
   },
-  dispatch
+  dispatch,
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => ({
@@ -64,7 +72,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
   ...dispatchProps,
   addByName(event) {
     event.preventDefault();
-    const tag = stateProps.tags.find(t => t.name === stateProps.autosuggestValue);
+    const tag = stateProps.tags.find(
+      (t) => t.name === stateProps.autosuggestValue
+    );
     if (tag !== undefined) {
       if (ownProps.exclude) {
         dispatchProps.dispatch(addTagExclusion(tag.id));
@@ -72,7 +82,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
         dispatchProps.dispatch(addTagFilter(tag.id));
       }
     }
-  }
+  },
 });
 
 export default connect(

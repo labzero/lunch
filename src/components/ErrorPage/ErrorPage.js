@@ -7,20 +7,20 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from './ErrorPage.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "./ErrorPage.scss";
 
 export const ErrorPage = ({ error }) => {
-  let title = 'Error';
-  let content = 'Sorry, a critical error occurred on this page.';
+  let title = "Error";
+  let content = "Sorry, a critical error occurred on this page.";
   let errorMessage = null;
 
   if (error.status === 404) {
-    title = 'Page not found';
-    content = 'Sorry, the page you were trying to view does not exist.';
-  } else if (process.env.NODE_ENV !== 'production') {
+    title = "Page not found";
+    content = "Sorry, the page you were trying to view does not exist.";
+  } else if (process.env.NODE_ENV !== "production") {
     errorMessage = <pre>{error.stack}</pre>;
   }
 

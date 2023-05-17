@@ -1,10 +1,8 @@
-import { connect } from 'react-redux';
-import NotificationList from './NotificationList';
+import { connect } from "react-redux";
+import NotificationList from "./NotificationList";
 
-const mapStateToProps = state => ({
-  notifications: state.notifications
+const mapStateToProps = (state) => ({
+  notifications: state.notifications,
 });
 
-export default connect(
-  mapStateToProps
-)(NotificationList);
+export default connect(mapStateToProps)(NotificationList);

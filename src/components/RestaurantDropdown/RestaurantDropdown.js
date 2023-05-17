@@ -1,9 +1,9 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import Dropdown from 'react-bootstrap/Dropdown';
-import { FaEllipsisH } from 'react-icons/fa';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from './RestaurantDropdown.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import Dropdown from "react-bootstrap/Dropdown";
+import { FaEllipsisH } from "react-icons/fa";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "./RestaurantDropdown.scss";
 
 const DropdownToggle = Dropdown.Toggle;
 const DropdownMenu = Dropdown.Menu;
@@ -96,23 +96,16 @@ const RestaurantDropdown = ({
         {lastVisited}
         <Dropdown.Divider />
         <Dropdown.Header>
-          Last
-          {' '}
-          {sortDuration}
-          {' '}
-          day
-          {sortDuration === 1 ? '' : 's'}
-          :
+          Last {sortDuration} day
+          {sortDuration === 1 ? "" : "s"}:
         </Dropdown.Header>
         <Dropdown.ItemText className={s.stat}>
-          {restaurant.all_vote_count}
-          {' '}
-          vote
-          {parseInt(restaurant.all_vote_count, 10) === 1 ? '' : 's'}
+          {restaurant.all_vote_count} vote
+          {parseInt(restaurant.all_vote_count, 10) === 1 ? "" : "s"}
         </Dropdown.ItemText>
         <Dropdown.ItemText className={s.stat}>
           {`${restaurant.all_decision_count} \
-decision${parseInt(restaurant.all_decision_count, 10) === 1 ? '' : 's'}`}
+decision${parseInt(restaurant.all_decision_count, 10) === 1 ? "" : "s"}`}
         </Dropdown.ItemText>
       </DropdownMenu>
     </Dropdown>
@@ -135,7 +128,7 @@ RestaurantDropdown.propTypes = {
 RestaurantDropdown.defaultProps = {
   decision: {},
   pastDecisions: {},
-  removeDecision: () => {},
+  removeDecision: () => undefined,
 };
 
 export default withStyles(s)(RestaurantDropdown);

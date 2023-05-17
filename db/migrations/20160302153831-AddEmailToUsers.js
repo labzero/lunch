@@ -1,5 +1,7 @@
-exports.up = (queryInterface, Sequelize) => queryInterface.addColumn('users', 'email', {
-  type: Sequelize.STRING
-});
+exports.up = (queryInterface, Sequelize) =>
+  queryInterface.addColumn("users", "email", {
+    type: Sequelize.STRING,
+  });
 
-exports.down = queryInterface => queryInterface.removeColumn('users', 'email');
+exports.down = (queryInterface) =>
+  queryInterface.removeColumn("users", "email");

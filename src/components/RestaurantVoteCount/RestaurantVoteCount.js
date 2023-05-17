@@ -1,10 +1,10 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import TooltipUserContainer from '../TooltipUser/TooltipUserContainer';
-import s from './RestaurantVoteCount.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
+import withStyles from "isomorphic-style-loader/withStyles";
+import TooltipUserContainer from "../TooltipUser/TooltipUserContainer";
+import s from "./RestaurantVoteCount.scss";
 
 export class _RestaurantVoteCount extends Component {
   static contextTypes = {
@@ -38,7 +38,7 @@ export class _RestaurantVoteCount extends Component {
       const voteCount = (
         <span>
           <strong>{this.props.votes.length}</strong>
-          {this.props.votes.length === 1 ? ' vote' : ' votes'}
+          {this.props.votes.length === 1 ? " vote" : " votes"}
         </span>
       );
 
@@ -61,7 +61,7 @@ export class _RestaurantVoteCount extends Component {
           <OverlayTrigger
             placement="top"
             overlay={tooltip}
-            trigger={['click', 'hover']}
+            trigger={["click", "hover"]}
           >
             {voteCount}
           </OverlayTrigger>

@@ -8,66 +8,89 @@
  */
 
 /* eslint-disable global-require */
-import rootAction from '../helpers/rootAction';
+import rootAction from "../helpers/rootAction";
 
-import invitation from './invitation';
-import password from './password';
-import users from './users';
+import invitation from "./invitation";
+import password from "./password";
+import users from "./users";
 
 // The top-level (parent) route
 export default {
-
-  path: '',
+  path: "",
 
   // Keep in mind, routes are evaluated in order
   children: [
     {
-      path: '',
-      action: async (context) => (await import(/* webpackChunkName: 'landing' */ './landing')).default(context)
+      path: "",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'landing' */ "./landing")).default(
+          context
+        ),
     },
     {
-      path: '/teams',
-      action: async (context) => (await import(/* webpackChunkName: 'teams' */ './teams')).default(context)
+      path: "/teams",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'teams' */ "./teams")).default(
+          context
+        ),
     },
     {
-      path: '/new-team',
-      action: async (context) => (await import(/* webpackChunkName: 'new-team' */ './new-team')).default(context)
+      path: "/new-team",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'new-team' */ "./new-team")).default(
+          context
+        ),
     },
     {
-      path: '/account',
-      action: async (context) => (await import(/* webpackChunkName: 'account' */ './account')).default(context)
+      path: "/account",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'account' */ "./account")).default(
+          context
+        ),
     },
     {
-      path: '/welcome',
-      action: async (context) => (await import(/* webpackChunkName: 'welcome' */ './welcome')).default(context)
+      path: "/welcome",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'welcome' */ "./welcome")).default(
+          context
+        ),
     },
     {
-      path: '/invitation',
+      path: "/invitation",
       children: invitation,
     },
     {
-      path: '/password',
+      path: "/password",
       children: password,
     },
     {
-      path: '/users',
+      path: "/users",
       children: users,
     },
     {
-      path: '/about',
-      action: async (context) => (await import(/* webpackChunkName: 'about' */ './about')).default(context)
+      path: "/about",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'about' */ "./about")).default(
+          context
+        ),
     },
     {
-      path: '/login',
-      action: async (context) => (await import(/* webpackChunkName: 'login' */ '../login')).default(context)
+      path: "/login",
+      action: async (context) =>
+        (await import(/* webpackChunkName: 'login' */ "../login")).default(
+          context
+        ),
     },
 
     // Wildcard routes, e.g. { path: '(.*)', ... } (must go last)
     {
-      path: '(.*)',
-      action: async (context) => (await import(/* webpackChunkName: 'not-found' */ '../not-found')).default(context)
-    }
+      path: "(.*)",
+      action: async (context) =>
+        (
+          await import(/* webpackChunkName: 'not-found' */ "../not-found")
+        ).default(context),
+    },
   ],
 
-  action: rootAction
+  action: rootAction,
 };

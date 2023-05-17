@@ -1,22 +1,18 @@
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import search from './search.png';
-import tag from './tag.png';
-import vote from './vote.png';
-import decide from './decide.png';
-import s from './Landing.scss';
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import search from "./search.png";
+import tag from "./tag.png";
+import vote from "./vote.png";
+import decide from "./decide.png";
+import s from "./Landing.scss";
 
 const renderForm = () => (
-  <Form
-    className={s.form}
-    action="/invitation?success=sent"
-    method="post"
-  >
+  <Form className={s.form} action="/invitation?success=sent" method="post">
     <Form.Group className={s.formGroup} controlId="landing-email">
       <Form.Label visuallyHidden>Email</Form.Label>
       <Form.Control
@@ -27,8 +23,7 @@ const renderForm = () => (
         required
         type="email"
       />
-    </Form.Group>
-    {' '}
+    </Form.Group>{" "}
     <Button size="lg" variant="primary" type="submit">
       Get invited
     </Button>

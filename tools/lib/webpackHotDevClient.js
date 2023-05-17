@@ -7,23 +7,23 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import hotClient from 'webpack-hot-middleware/client';
-import launchEditorEndpoint from 'react-dev-utils/launchEditorEndpoint';
-import formatWebpackMessages from 'react-dev-utils/formatWebpackMessages';
+import hotClient from "webpack-hot-middleware/client";
+import launchEditorEndpoint from "react-dev-utils/launchEditorEndpoint";
+import formatWebpackMessages from "react-dev-utils/formatWebpackMessages";
 import {
   setEditorHandler,
   reportBuildError,
   dismissBuildError,
   startReportingRuntimeErrors,
   stopReportingRuntimeErrors,
-} from 'react-error-overlay';
+} from "react-error-overlay";
 
-setEditorHandler(errorLocation => {
+setEditorHandler((errorLocation) => {
   const fileName = encodeURIComponent(errorLocation.fileName);
   const lineNumber = encodeURIComponent(errorLocation.lineNumber || 1);
   fetch(
     // Keep in sync with react-dev-utils/errorOverlayMiddleware
-    `${launchEditorEndpoint}?fileName=${fileName}&lineNumber=${lineNumber}`,
+    `${launchEditorEndpoint}?fileName=${fileName}&lineNumber=${lineNumber}`
   );
 });
 
@@ -42,12 +42,12 @@ hotClient.useCustomOverlay({
 });
 
 hotClient.setOptionsAndConnect({
-  name: 'client',
+  name: "client",
   reload: true,
 });
 
 startReportingRuntimeErrors({
-  filename: '/assets/client.tsx',
+  filename: "/assets/client.tsx",
 });
 
 if (module.hot) {

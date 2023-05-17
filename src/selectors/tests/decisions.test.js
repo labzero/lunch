@@ -1,10 +1,10 @@
 /* eslint-env mocha */
-import dayjs from 'dayjs';
-import { expect } from 'chai';
-import { getDecisionsByDay } from '../decisions';
+import dayjs from "dayjs";
+import { expect } from "chai";
+import { getDecisionsByDay } from "../decisions";
 
-describe('selectors/decisions', () => {
-  describe('getDecisionsByDay', () => {
+describe("selectors/decisions", () => {
+  describe("getDecisionsByDay", () => {
     let state;
     beforeEach(() => {
       const now = dayjs();
@@ -19,13 +19,13 @@ describe('selectors/decisions', () => {
                   createdAt: dayjs(now),
                 },
                 2: {
-                  createdAt: dayjs(now).subtract(23, 'hours'),
+                  createdAt: dayjs(now).subtract(23, "hours"),
                 },
                 3: {
-                  createdAt: dayjs(now).subtract(25, 'hours'),
+                  createdAt: dayjs(now).subtract(25, "hours"),
                 },
                 4: {
-                  createdAt: dayjs(now).subtract(48, 'hours'),
+                  createdAt: dayjs(now).subtract(48, "hours"),
                 },
               },
             },
@@ -34,7 +34,7 @@ describe('selectors/decisions', () => {
       };
     });
 
-    it('groups decisions into per-day arrays', () => {
+    it("groups decisions into per-day arrays", () => {
       const decisions = state.decisions.items.entities.decisions;
       expect(getDecisionsByDay(state)).to.eql({
         0: [decisions[1]],

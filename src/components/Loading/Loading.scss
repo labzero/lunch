@@ -1,4 +1,4 @@
-@import '../../styles/variables';
+@import "../../styles/variables";
 
 @keyframes move {
   0% {
@@ -108,7 +108,7 @@
   }
 }
 
-@media (max-width: 439px) {
+@media (width <= 439px) {
   .root {
     width: 300px;
 

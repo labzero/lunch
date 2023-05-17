@@ -1,5 +1,5 @@
-@import '../../styles/mixins';
-@import '../../styles/variables';
+@import "../../styles/mixins";
+@import "../../styles/variables";
 
 .root,
 .lists {
@@ -9,7 +9,7 @@
 }
 
 .root {
-  background: url('./hamburgers.jpg') repeat-y;
+  background: url("./hamburgers.jpg") repeat-y;
   background-size: 100%;
   border-left: $default-border;
   height: 100%;

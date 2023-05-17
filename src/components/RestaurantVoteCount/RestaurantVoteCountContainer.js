@@ -1,13 +1,11 @@
-import { connect } from 'react-redux';
-import { getRestaurantById } from '../../selectors/restaurants';
-import RestaurantVoteCount from './RestaurantVoteCount';
+import { connect } from "react-redux";
+import { getRestaurantById } from "../../selectors/restaurants";
+import RestaurantVoteCount from "./RestaurantVoteCount";
 
 const mapStateToProps = (state, ownProps) => ({
   user: state.user,
   votes: getRestaurantById(state, ownProps.id).votes,
-  ...ownProps
+  ...ownProps,
 });
 
-export default connect(
-  mapStateToProps
-)(RestaurantVoteCount);
+export default connect(mapStateToProps)(RestaurantVoteCount);

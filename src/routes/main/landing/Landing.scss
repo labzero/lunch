@@ -1,7 +1,7 @@
-@import '../../../styles/variables';
+@import "../../../styles/variables";
 
 .root {
-  background: pink url('../../../styles/ham.jpg');
+  background: pink url("../../../styles/ham.jpg");
   background-attachment: fixed;
 
   img {
@@ -11,7 +11,7 @@
 }
 
 .jumbotron {
-  background: url('./jumbotron.jpg') no-repeat 50%;
+  background: url("./jumbotron.jpg") no-repeat 50%;
   background-size: cover;
   border-bottom: $default-border;
   margin: 0;
@@ -53,7 +53,7 @@
   &::before,
   &::after {
     border-bottom: $default-border;
-    content: '';
+    content: "";
     display: block;
     height: 100%;
     position: absolute;
@@ -123,13 +123,13 @@
   }
 }
 
-@media (max-width: calc($screen-md-min - 1px)) {
+@media (width <= calc($screen-md-min - 1px)) {
   .feature {
     font-size: 1.5em;
   }
 }
 
-@media (max-width: calc($screen-xs-min - 1px)) {
+@media (width <= calc($screen-xs-min - 1px)) {
   .root {
     img {
       height: auto;
@@ -167,7 +167,7 @@
         background: $white-color;
         border: $default-border;
         border-width: $default-border-width 0;
-        content: '';
+        content: "";
         height: 100%;
         left: 0;
         position: absolute;

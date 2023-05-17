@@ -1,10 +1,10 @@
 /* eslint-env mocha */
 /* eslint-disable no-unused-expressions */
 
-import { expect } from 'chai';
-import canChangeUser from '../canChangeUser';
+import { expect } from "chai";
+import canChangeUser from "../canChangeUser";
 
-describe('helpers/canChangeUser', () => {
+describe("helpers/canChangeUser", () => {
   let user;
   let userToChange;
   let team;
@@ -12,73 +12,73 @@ describe('helpers/canChangeUser', () => {
 
   beforeEach(() => {
     user = {
-      name: 'dev',
+      name: "dev",
       id: 1,
       superuser: false,
-      roles: [{ type: 'owner', teamId: 1, userId: 1 }],
-      email: 'dev@labzero.com'
+      roles: [{ type: "owner", teamId: 1, userId: 1 }],
+      email: "dev@labzero.com",
     };
     userToChange = {
-      name: 'test',
+      name: "test",
       id: 2,
-      type: 'member',
-      email: 'test@labzero.com'
+      type: "member",
+      email: "test@labzero.com",
     };
     team = {
       id: 1,
     };
     users = [
       {
-        name: 'dev',
+        name: "dev",
         id: 1,
-        type: 'owner',
-        email: 'dev@labzero.com'
+        type: "owner",
+        email: "dev@labzero.com",
       },
       {
-        name: 'test',
+        name: "test",
         id: 2,
-        type: 'member',
-        email: 'test@labzero.com'
-      }
+        type: "member",
+        email: "test@labzero.com",
+      },
     ];
   });
 
-  it('returns false when user is undefined', () => {
+  it("returns false when user is undefined", () => {
     user = undefined;
     expect(canChangeUser(user, userToChange, team, users)).to.be.false;
   });
 
-  it('returns true when user is superuser', () => {
+  it("returns true when user is superuser", () => {
     user.superuser = true;
     expect(canChangeUser(user, userToChange, team, users)).to.be.true;
   });
 
-  it('returns false when team is undefined', () => {
+  it("returns false when team is undefined", () => {
     team = undefined;
     expect(canChangeUser(user, userToChange, team, users)).to.be.false;
   });
 
-  describe('when user role is owner and changing their own role', () => {
+  describe("when user role is owner and changing their own role", () => {
     beforeEach(() => {
       userToChange = {
-        name: 'dev',
+        name: "dev",
         id: 1,
-        type: 'owner',
-        email: 'dev@labzero.com'
+        type: "owner",
+        email: "dev@labzero.com",
       };
     });
 
-    it('returns false when there are no other owners', () => {
+    it("returns false when there are no other owners", () => {
       expect(canChangeUser(user, userToChange, team, users)).to.be.false;
     });
 
-    it('returns true when there are other owners', () => {
-      users[1].type = 'owner';
+    it("returns true when there are other owners", () => {
+      users[1].type = "owner";
       expect(canChangeUser(user, userToChange, team, users)).to.be.true;
     });
   });
 
-  it('returns true when user role is owner and none of above conditions are met', () => {
+  it("returns true when user role is owner and none of above conditions are met", () => {
     expect(canChangeUser(user, userToChange, team, users)).to.be.true;
   });
 });

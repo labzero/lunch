@@ -1,9 +1,9 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import NotificationContainer from '../Notification/NotificationContainer';
-import s from './NotificationList.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
+import withStyles from "isomorphic-style-loader/withStyles";
+import NotificationContainer from "../Notification/NotificationContainer";
+import s from "./NotificationList.scss";
 
 const NotificationList = ({ notifications }) => (
   <ul className={s.notifications}>

@@ -1,34 +1,34 @@
-import dayjs from 'dayjs';
-import { sequelize, DataTypes, Op } from './db';
+import dayjs from "dayjs";
+import { sequelize, DataTypes, Op } from "./db";
 
 const Decision = sequelize.define(
-  'decision',
+  "decision",
   {
     restaurantId: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'restaurant',
-        key: 'id'
+        model: "restaurant",
+        key: "id",
       },
       allowNull: false,
-      onDelete: 'cascade'
+      onDelete: "cascade",
     },
-    teamId: DataTypes.INTEGER
+    teamId: DataTypes.INTEGER,
   },
   {
     indexes: [
       {
-        fields: ['createdAt', 'restaurantId']
-      }
+        fields: ["createdAt", "restaurantId"],
+      },
     ],
     scopes: {
       fromToday: () => ({
         where: {
           createdAt: {
-            [Op.gt]: dayjs().subtract(12, 'hours').toDate()
-          }
-        }
-      })
+            [Op.gt]: dayjs().subtract(12, "hours").toDate(),
+          },
+        },
+      }),
     },
   }
 );

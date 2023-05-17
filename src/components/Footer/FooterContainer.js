@@ -1,8 +1,8 @@
-import { connect } from 'react-redux';
-import Footer from './Footer';
+import { connect } from "react-redux";
+import Footer from "./Footer";
 
-const mapStateToProps = state => ({
-  host: state.host
+const mapStateToProps = (state) => ({
+  host: state.host,
 });
 
 export default connect(mapStateToProps)(Footer);

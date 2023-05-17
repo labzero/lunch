@@ -1,10 +1,10 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import { canUseDOM } from 'fbjs/lib/ExecutionEnvironment';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import App from '../App';
-import RestaurantContainer from '../Restaurant/RestaurantContainer';
-import s from './RestaurantMarker.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
+import withStyles from "isomorphic-style-loader/withStyles";
+import App from "../App";
+import RestaurantContainer from "../Restaurant/RestaurantContainer";
+import s from "./RestaurantMarker.scss";
 
 let google = { maps: { Marker: { MAX_ZINDEX: 1000000 } } };
 if (canUseDOM) {
@@ -20,19 +20,20 @@ const InnerRestaurantMarker = ({
   showInfoWindow,
 }) => {
   const length = restaurant.votes.length;
-  let label = '';
+  let label = "";
 
   // place markers over default markers
   // place markers higher based on vote length
   // place markers lower based on how far down they are in the list
   // add item length so index doesn't dip below MAX_ZINDEX
-  const zIndex = google.maps.Marker.MAX_ZINDEX
-    + restaurant.votes.length
-    + -index
-    + baseZIndex;
+  const zIndex =
+    google.maps.Marker.MAX_ZINDEX +
+    restaurant.votes.length +
+    -index +
+    baseZIndex;
 
   if (restaurant.votes.length > 99 || decided) {
-    label = '✔';
+    label = "✔";
   } else if (restaurant.votes.length > 0) {
     label = String(length);
   }
@@ -52,7 +53,7 @@ const InnerRestaurantMarker = ({
   return (
     <div
       className={`${s.root} ${
-        restaurant.votes.length > 0 || decided ? s.voted : ''
+        restaurant.votes.length > 0 || decided ? s.voted : ""
       }`}
       data-marker
     >

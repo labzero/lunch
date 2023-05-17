@@ -1,8 +1,8 @@
-import { connect } from 'react-redux';
-import { getDecision } from '../../selectors/decisions';
-import { getRestaurantById } from '../../selectors/restaurants';
-import { decide, removeDecision } from '../../actions/decisions';
-import RestaurantDecision from './RestaurantDecision';
+import { connect } from "react-redux";
+import { getDecision } from "../../selectors/decisions";
+import { getRestaurantById } from "../../selectors/restaurants";
+import { decide, removeDecision } from "../../actions/decisions";
+import RestaurantDecision from "./RestaurantDecision";
 
 const mapStateToProps = (state, ownProps) => {
   const decision = getDecision(state);
@@ -10,12 +10,12 @@ const mapStateToProps = (state, ownProps) => {
     id: ownProps.id,
     loggedIn: state.user.id !== undefined,
     decided: decision !== undefined && decision.restaurantId === ownProps.id,
-    votes: getRestaurantById(state, ownProps.id).votes
+    votes: getRestaurantById(state, ownProps.id).votes,
   };
 };
 
-const mapDispatchToProps = dispatch => ({
-  dispatch
+const mapDispatchToProps = (dispatch) => ({
+  dispatch,
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => ({

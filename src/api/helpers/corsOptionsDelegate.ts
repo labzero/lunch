@@ -1,8 +1,8 @@
-import { CorsOptionsDelegate } from 'cors';
-import { Request } from 'express';
-import { hostname } from '../../config';
+import { CorsOptionsDelegate } from "cors";
+import { Request } from "express";
+import { hostname } from "../../config";
 
-const isDev = typeof __DEV__ !== 'undefined' && __DEV__;
+const isDev = typeof __DEV__ !== "undefined" && __DEV__;
 
 const corsOptionsDelegate: CorsOptionsDelegate<Request> = (req, callback) => {
   callback(null, {

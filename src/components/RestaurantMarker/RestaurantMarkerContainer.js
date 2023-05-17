@@ -1,24 +1,25 @@
-import { connect } from 'react-redux';
-import { getRestaurantById } from '../../selectors/restaurants';
-import { getDecision } from '../../selectors/decisions';
-import { showRestaurantInfoWindow, hideInfoWindow } from '../../actions/mapUi';
-import { getMapUi } from '../../selectors/mapUi';
-import RestaurantMarker from './RestaurantMarker';
+import { connect } from "react-redux";
+import { getRestaurantById } from "../../selectors/restaurants";
+import { getDecision } from "../../selectors/decisions";
+import { showRestaurantInfoWindow, hideInfoWindow } from "../../actions/mapUi";
+import { getMapUi } from "../../selectors/mapUi";
+import RestaurantMarker from "./RestaurantMarker";
 
 const mapStateToProps = (state, ownProps) => {
   const restaurant = getRestaurantById(state, ownProps.id);
   const decision = getDecision(state);
-  const decided = decision !== undefined && decision.restaurantId === restaurant.id;
+  const decided =
+    decision !== undefined && decision.restaurantId === restaurant.id;
   return {
     restaurant,
     decided,
     showInfoWindow: getMapUi(state).infoWindow.id === ownProps.id,
-    ...ownProps
+    ...ownProps,
   };
 };
 
 const mapDispatchToProps = (dispatch) => ({
-  dispatch
+  dispatch,
 });
 
 const mergeProps = (stateProps, dispatchProps) => ({
@@ -31,7 +32,7 @@ const mergeProps = (stateProps, dispatchProps) => ({
     } else {
       dispatchProps.dispatch(showRestaurantInfoWindow(stateProps.restaurant));
     }
-  }
+  },
 });
 
 export default connect(

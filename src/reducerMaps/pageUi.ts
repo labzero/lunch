@@ -1,21 +1,21 @@
-import update from 'immutability-helper';
-import { Reducer } from '../interfaces';
+import update from "immutability-helper";
+import { Reducer } from "../interfaces";
 
 const pageUi: Reducer<"pageUi"> = (state, action) => {
-  switch(action.type) {
+  switch (action.type) {
     case "SCROLL_TO_TOP": {
       return update(state, {
         $merge: {
-          shouldScrollToTop: true
-        }
-      })
+          shouldScrollToTop: true,
+        },
+      });
     }
     case "SCROLLED_TO_TOP": {
       return update(state, {
         $merge: {
-          shouldScrollToTop: false
-        }
-      })
+          shouldScrollToTop: false,
+        },
+      });
     }
   }
   return state;

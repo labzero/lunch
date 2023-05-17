@@ -7,15 +7,15 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from 'react';
-import LayoutContainer from '../../../components/Layout/LayoutContainer';
-import About from './About';
+import React from "react";
+import LayoutContainer from "../../../components/Layout/LayoutContainer";
+import About from "./About";
 
-const title = 'About / Privacy';
+const title = "About / Privacy";
 
 export default (context) => ({
   title,
-  chunks: ['about'],
+  chunks: ["about"],
   component: (
     <LayoutContainer path={context.pathname}>
       <About />

@@ -7,12 +7,12 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from 'react';
-import LayoutContainer from '../../../components/Layout/LayoutContainer';
-import redirectToLogin from '../../helpers/redirectToLogin';
-import WelcomeContainer from './WelcomeContainer';
+import React from "react";
+import LayoutContainer from "../../../components/Layout/LayoutContainer";
+import redirectToLogin from "../../helpers/redirectToLogin";
+import WelcomeContainer from "./WelcomeContainer";
 
-const title = 'Welcome!';
+const title = "Welcome!";
 
 export default (context) => {
   const state = context.store.getState();
@@ -21,12 +21,15 @@ export default (context) => {
   if (user.id) {
     return {
       title,
-      chunks: ['welcome'],
+      chunks: ["welcome"],
       component: (
         <LayoutContainer path={context.pathname}>
-          <WelcomeContainer next={context.query.next} team={context.query.team} />
+          <WelcomeContainer
+            next={context.query.next}
+            team={context.query.team}
+          />
         </LayoutContainer>
-      )
+      ),
     };
   }
 

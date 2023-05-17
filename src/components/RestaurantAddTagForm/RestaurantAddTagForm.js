@@ -1,22 +1,22 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import Autosuggest from 'react-autosuggest';
-import Button from 'react-bootstrap/Button';
-import withStyles from 'isomorphic-style-loader/withStyles';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import Autosuggest from "react-autosuggest";
+import Button from "react-bootstrap/Button";
+import withStyles from "isomorphic-style-loader/withStyles";
 import {
   generateTagList,
   getSuggestionValue,
   renderSuggestion,
-} from '../../helpers/TagAutosuggestHelper';
-import s from './RestaurantAddTagForm.scss';
+} from "../../helpers/TagAutosuggestHelper";
+import s from "./RestaurantAddTagForm.scss";
 
 // eslint-disable-next-line css-modules/no-unused-class
-import autosuggestTheme from './RestaurantAddTagFormAutosuggest.scss';
+import autosuggestTheme from "./RestaurantAddTagFormAutosuggest.scss";
 
 const returnTrue = () => true;
 
 // eslint-disable-next-line css-modules/no-undef-class
-autosuggestTheme.input = 'form-control input-sm';
+autosuggestTheme.input = "form-control input-sm";
 
 export class _RestaurantAddTagForm extends Component {
   static propTypes = {
@@ -31,7 +31,7 @@ export class _RestaurantAddTagForm extends Component {
     super(props);
 
     this.state = {
-      autosuggestValue: '',
+      autosuggestValue: "",
     };
   }
 
@@ -40,7 +40,7 @@ export class _RestaurantAddTagForm extends Component {
   }
 
   setAddTagAutosuggestValue = (event, { newValue, method }) => {
-    if (method === 'up' || method === 'down') {
+    if (method === "up" || method === "down") {
       return;
     }
     this.setState(() => ({
@@ -52,17 +52,17 @@ export class _RestaurantAddTagForm extends Component {
     event.preventDefault();
     this.props.addNewTagToRestaurant(this.state.autosuggestValue);
     this.setState(() => ({
-      autosuggestValue: '',
+      autosuggestValue: "",
     }));
   };
 
   handleSuggestionSelected = (event, { suggestion, method }) => {
-    if (method === 'enter') {
+    if (method === "enter") {
       event.preventDefault();
     }
     this.props.addTagToRestaurant(suggestion.id);
     this.setState(() => ({
-      autosuggestValue: '',
+      autosuggestValue: "",
     }));
   };
 
@@ -86,8 +86,8 @@ export class _RestaurantAddTagForm extends Component {
           }}
           theme={autosuggestTheme}
           onSuggestionSelected={this.handleSuggestionSelected}
-          onSuggestionsFetchRequested={() => {}}
-          onSuggestionsClearRequested={() => {}}
+          onSuggestionsFetchRequested={() => undefined}
+          onSuggestionsClearRequested={() => undefined}
           shouldRenderSuggestions={returnTrue}
           ref={(a) => {
             this.autosuggest = a;
@@ -96,7 +96,7 @@ export class _RestaurantAddTagForm extends Component {
         <Button
           className={s.button}
           type="submit"
-          disabled={autosuggestValue === ''}
+          disabled={autosuggestValue === ""}
           size="sm"
           variant="primary"
         >

@@ -1,9 +1,9 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import s from './RestaurantMapSettings.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
+import s from "./RestaurantMapSettings.scss";
 
 class RestaurantMapSettings extends Component {
   static propTypes = {
@@ -22,7 +22,8 @@ class RestaurantMapSettings extends Component {
     };
   }
 
-  toggleCollapsed = () => this.setState((prevState) => ({ collapsed: !prevState.collapsed }));
+  toggleCollapsed = () =>
+    this.setState((prevState) => ({ collapsed: !prevState.collapsed }));
 
   render() {
     const {

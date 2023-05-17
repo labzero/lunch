@@ -1,6 +1,6 @@
-import { ThunkAction } from '@reduxjs/toolkit';
-import { credentials, jsonHeaders, processResponse } from '../core/ApiClient';
-import { Action, State, Tag } from '../interfaces';
+import { ThunkAction } from "@reduxjs/toolkit";
+import { credentials, jsonHeaders, processResponse } from "../core/ApiClient";
+import { Action, State, Tag } from "../interfaces";
 
 export function invalidateTags(): Action {
   return { type: "INVALIDATE_TAGS" };
@@ -8,26 +8,26 @@ export function invalidateTags(): Action {
 
 export function requestTags(): Action {
   return {
-    type: "REQUEST_TAGS"
+    type: "REQUEST_TAGS",
   };
 }
 
 export function receiveTags(json: Tag[]): Action {
   return {
     type: "RECEIVE_TAGS",
-    items: json
+    items: json,
   };
 }
 
 export function fetchTags(): ThunkAction<void, State, unknown, Action> {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(requestTags());
-    return fetch('/api/tags', {
+    return fetch("/api/tags", {
       credentials,
-      headers: jsonHeaders
+      headers: jsonHeaders,
     })
-      .then(response => processResponse(response, dispatch))
-      .then(json => dispatch(receiveTags(json)));
+      .then((response) => processResponse(response, dispatch))
+      .then((json) => dispatch(receiveTags(json)));
   };
 }
 
@@ -63,7 +63,7 @@ export function fetchTagsIfNeeded(): ThunkAction<void, State, unknown, Action> {
 export function deleteTag(id: number): Action {
   return {
     type: "DELETE_TAG",
-    id
+    id,
   };
 }
 
@@ -71,18 +71,20 @@ export function tagDeleted(id: number, userId: number): Action {
   return {
     type: "TAG_DELETED",
     id,
-    userId
+    userId,
   };
 }
 
-export function removeTag(id: number): ThunkAction<void, State, unknown, Action> {
+export function removeTag(
+  id: number
+): ThunkAction<void, State, unknown, Action> {
   return (dispatch, getState) => {
     dispatch(deleteTag(id));
     return fetch(`/api/tags/${id}`, {
       credentials,
-      method: 'delete'
+      method: "delete",
     })
-      .then(response => processResponse(response, dispatch))
+      .then((response) => processResponse(response, dispatch))
       .then(() => dispatch(tagDeleted(id, getState().user.id)));
   };
 }

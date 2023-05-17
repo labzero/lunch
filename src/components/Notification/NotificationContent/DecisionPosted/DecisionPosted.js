@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import dayjs from 'dayjs';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from '../NotificationContent.scss';
+import PropTypes from "prop-types";
+import React from "react";
+import dayjs from "dayjs";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "../NotificationContent.scss";
 
 const DecisionPosted = ({
   decision,
@@ -21,36 +21,22 @@ const DecisionPosted = ({
     </button>
   );
   if (loggedIn) {
-    if (dayjs().subtract(12, 'hours').isAfter(decision.createdAt)) {
+    if (dayjs().subtract(12, "hours").isAfter(decision.createdAt)) {
       return (
         <span>
-          <b>{user}</b>
-          {' '}
-          marked
-          {restaurantEl}
-          {' '}
-          as a past decision.
+          <b>{user}</b> marked
+          {restaurantEl} as a past decision.
         </span>
       );
     }
     return (
       <span>
-        <b>{user}</b>
-        {' '}
-        marked
-        {restaurantEl}
-        {' '}
-        as today&rsquo;s decision.
+        <b>{user}</b> marked
+        {restaurantEl} as today&rsquo;s decision.
       </span>
     );
   }
-  return (
-    <span>
-      {restaurantEl}
-      {' '}
-      was decided upon.
-    </span>
-  );
+  return <span>{restaurantEl} was decided upon.</span>;
 };
 
 DecisionPosted.propTypes = {
@@ -62,7 +48,7 @@ DecisionPosted.propTypes = {
 };
 
 DecisionPosted.defaultProps = {
-  user: '',
+  user: "",
 };
 
 export default withStyles(s)(DecisionPosted);

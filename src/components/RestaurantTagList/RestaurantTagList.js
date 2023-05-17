@@ -1,11 +1,11 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from './RestaurantTagList.scss';
-import TagContainer from '../Tag/TagContainer';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "./RestaurantTagList.scss";
+import TagContainer from "../Tag/TagContainer";
 
 const RestaurantTagList = ({ ids, removeTag, loggedIn }) => (
-  <ul className={`${s.root} ${ids.length === 0 ? s.empty : ''}`}>
+  <ul className={`${s.root} ${ids.length === 0 ? s.empty : ""}`}>
     {ids.map((tagId) => {
       const boundRemoveTag = () => {
         removeTag(tagId);

@@ -1,18 +1,18 @@
-import { Router } from 'express';
-import jwt from 'jsonwebtoken';
-import { auth, bsHost, domain } from '../config';
-import generateUrl from '../helpers/generateUrl';
-import passport from '../passport';
+import { Router } from "express";
+import jwt from "jsonwebtoken";
+import { auth, bsHost, domain } from "../config";
+import generateUrl from "../helpers/generateUrl";
+import passport from "../passport";
 
 const setCookie = (req, res, next) => {
   if (req.user) {
     const expiresIn = 60 * 60 * 24 * 180; // 180 days
     const token = jwt.sign(req.user, auth.jwt.secret);
-    res.cookie('id_token', token, {
+    res.cookie("id_token", token, {
       domain,
       maxAge: 1000 * expiresIn,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production'
+      secure: process.env.NODE_ENV === "production",
     });
     let state = {};
     if (req.query.state) {
@@ -27,7 +27,7 @@ const setCookie = (req, res, next) => {
     if (state.team) {
       res.redirect(generateUrl(req, `${state.team}.${bsHost}`, path));
     } else {
-      res.redirect(path || '/');
+      res.redirect(path || "/");
     }
   } else {
     next();
@@ -37,60 +37,83 @@ const setCookie = (req, res, next) => {
 export default () => {
   const router = new Router();
 
-  router.get(
-    '/google',
-    (req, res, next) => {
+  router
+    .get("/google", (req, res, next) => {
       if (req.subdomain) {
-        let nextQuery = '';
+        let nextQuery = "";
         if (req.query.next) {
           nextQuery = `&next=${req.query.next}`;
         }
-        res.redirect(301, generateUrl(req, bsHost, `/login/google?team=${req.subdomain}${nextQuery}`));
+        res.redirect(
+          301,
+          generateUrl(
+            req,
+            bsHost,
+            `/login/google?team=${req.subdomain}${nextQuery}`
+          )
+        );
       } else {
-        const options = { scope: ['email', 'profile'], session: false };
+        const options = { scope: ["email", "profile"], session: false };
         options.state = JSON.stringify({
           team: req.query.team,
-          next: req.query.next
+          next: req.query.next,
         });
-        passport.authenticate('google', options)(req, res, next);
+        passport.authenticate("google", options)(req, res, next);
       }
-    },
-  ).get(
-    '/google/callback',
-    (req, res, next) => {
-      passport.authenticate('google', { session: false }, (err, user, email) => {
-        if (err) { return next(err); }
-        if (!user) {
-          let path = '/invitation/new';
-          if (email) {
-            path = `${path}?email=${email}`;
+    })
+    .get(
+      "/google/callback",
+      (req, res, next) => {
+        passport.authenticate(
+          "google",
+          { session: false },
+          (err, user, email) => {
+            if (err) {
+              return next(err);
+            }
+            if (!user) {
+              let path = "/invitation/new";
+              if (email) {
+                path = `${path}?email=${email}`;
+              }
+              return res.redirect(path);
+            }
+            return req.logIn(user, (logInErr) => {
+              if (logInErr) {
+                return next(logInErr);
+              }
+              return next();
+            });
           }
-          return res.redirect(path);
-        }
-        return req.logIn(user, (logInErr) => {
-          if (logInErr) { return next(logInErr); }
-          return next();
-        });
-      })(req, res, next);
-    },
-    setCookie
-  ).post(
-    '/',
-    (req, res, next) => {
-      passport.authenticate('local', { session: false }, (err, user, info) => {
-        if (err) { return next(err); }
-        if (!user) {
-          req.flash('error', info.message); // eslint-disable-line no-param-reassign
-          return next();
-        }
-        return req.logIn(user, (logInErr) => {
-          if (logInErr) { return next(logInErr); }
-          return next();
-        });
-      })(req, res, next);
-    },
-    setCookie
-  );
+        )(req, res, next);
+      },
+      setCookie
+    )
+    .post(
+      "/",
+      (req, res, next) => {
+        passport.authenticate(
+          "local",
+          { session: false },
+          (err, user, info) => {
+            if (err) {
+              return next(err);
+            }
+            if (!user) {
+              req.flash("error", info.message); // eslint-disable-line no-param-reassign
+              return next();
+            }
+            return req.logIn(user, (logInErr) => {
+              if (logInErr) {
+                return next(logInErr);
+              }
+              return next();
+            });
+          }
+        )(req, res, next);
+      },
+      setCookie
+    );
 
   return router;
 };

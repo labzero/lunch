@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import React from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import s from './TagManagerItem.scss';
-import TagContainer from '../Tag/TagContainer';
+import PropTypes from "prop-types";
+import React from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import s from "./TagManagerItem.scss";
+import TagContainer from "../Tag/TagContainer";
 
 const TagManagerItem = ({ tag, showDelete, handleDeleteClicked }) => (
   <li>
@@ -13,9 +13,7 @@ const TagManagerItem = ({ tag, showDelete, handleDeleteClicked }) => (
         onDeleteClicked={handleDeleteClicked}
       />
     </span>
-    (
-    {tag.restaurant_count}
-    )
+    ({tag.restaurant_count})
   </li>
 );
 

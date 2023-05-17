@@ -1,14 +1,14 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import queryString from 'query-string';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import google from './google.svg';
-import s from './Login.scss';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import queryString from "query-string";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import google from "./google.svg";
+import s from "./Login.scss";
 
 class Login extends Component {
   static propTypes = {
@@ -26,14 +26,15 @@ class Login extends Component {
     super(props);
 
     this.state = {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     };
   }
 
-  handleChange = (field) => (event) => this.setState({
-    [field]: event.target.value,
-  });
+  handleChange = (field) => (event) =>
+    this.setState({
+      [field]: event.target.value,
+    });
 
   render() {
     const { host, next, team } = this.props;
@@ -52,7 +53,7 @@ class Login extends Component {
               variant="primary"
               className={s.googleButton}
               href={`//${host}/login/google${
-                googleQuery ? `?${googleQuery}` : ''
+                googleQuery ? `?${googleQuery}` : ""
               }`}
             >
               <img className={s.googleLogo} src={google} alt="" />
@@ -61,7 +62,7 @@ class Login extends Component {
           </div>
           <h3>Email/password</h3>
           <form
-            action={`/login${nextQuery ? `?${nextQuery}` : ''}`}
+            action={`/login${nextQuery ? `?${nextQuery}` : ""}`}
             method="post"
           >
             <Row>
@@ -69,7 +70,7 @@ class Login extends Component {
                 <Form.Group className="mb-3" controlId="login-email">
                   <Form.Label>Email</Form.Label>
                   <Form.Control
-                    onChange={this.handleChange('email')}
+                    onChange={this.handleChange("email")}
                     name="email"
                     type="email"
                     required
@@ -79,7 +80,7 @@ class Login extends Component {
                 <Form.Group className="mb-3" controlId="login-password">
                   <Form.Label>Password</Form.Label>
                   <Form.Control
-                    onChange={this.handleChange('password')}
+                    onChange={this.handleChange("password")}
                     name="password"
                     type="password"
                     required
@@ -90,7 +91,7 @@ class Login extends Component {
             </Row>
             <Button type="submit">Log in</Button>
             <Button
-              href={`//${host}/password/new${email ? `?email=${email}` : ''}`}
+              href={`//${host}/password/new${email ? `?email=${email}` : ""}`}
               variant="link"
             >
               Forgot password?

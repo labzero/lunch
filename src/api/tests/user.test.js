@@ -1,20 +1,20 @@
 /* eslint-env mocha */
 /* eslint-disable no-unused-expressions */
 
-import { expect } from 'chai';
-import { spy, stub } from 'sinon';
-import bodyParser from 'body-parser';
-import request from 'supertest';
-import express from 'express';
-import proxyquire from 'proxyquire';
-import SequelizeMock from 'sequelize-mock';
-import mockEsmodule from '../../../test/mockEsmodule';
+import { expect } from "chai";
+import { spy, stub } from "sinon";
+import bodyParser from "body-parser";
+import request from "supertest";
+import express from "express";
+import proxyquire from "proxyquire";
+import SequelizeMock from "sequelize-mock";
+import mockEsmodule from "../../../test/mockEsmodule";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
 const dbMock = new SequelizeMock();
 
-describe('api/main/user', () => {
+describe("api/main/user", () => {
   let app;
   let UserMock;
   let loggedInSpy;
@@ -22,31 +22,32 @@ describe('api/main/user', () => {
   let updateSpy;
 
   beforeEach(() => {
-    UserMock = dbMock.define('user', {});
+    UserMock = dbMock.define("user", {});
     UserMock.getSessionUser = () => Promise.resolve({});
 
     updateSpy = spy();
 
     loggedInSpy = spy((req, res, next) => {
-      req.user = { // eslint-disable-line no-param-reassign
-        get: () => {},
-        name: 'Old Name',
+      req.user = {
+        // eslint-disable-line no-param-reassign
+        get: () => undefined,
+        name: "Old Name",
         id: 231,
         roles: [],
-        update: updateSpy
+        update: updateSpy,
       };
       next();
     });
 
     makeApp = (deps, middleware) => {
-      const userApi = proxyquireStrict('../main/user', {
-        '../../models': mockEsmodule({
-          User: UserMock
+      const userApi = proxyquireStrict("../main/user", {
+        "../../models": mockEsmodule({
+          User: UserMock,
         }),
-        '../helpers/loggedIn': mockEsmodule({
-          default: loggedInSpy
+        "../helpers/loggedIn": mockEsmodule({
+          default: loggedInSpy,
         }),
-        ...deps
+        ...deps,
       }).default;
 
       const server = express();
@@ -58,147 +59,165 @@ describe('api/main/user', () => {
           next();
         }
       });
-      server.use('/', userApi());
+      server.use("/", userApi());
       return server;
     };
 
     app = makeApp();
   });
 
-  describe('PATCH /:id', () => {
-    describe('before updating', () => {
-      beforeEach(() => request(app).patch('/'));
+  describe("PATCH /:id", () => {
+    describe("before updating", () => {
+      beforeEach(() => request(app).patch("/"));
 
-      it('checks for login', () => {
+      it("checks for login", () => {
         expect(loggedInSpy.called).to.be.true;
       });
     });
 
-    describe('without valid parameters', () => {
+    describe("without valid parameters", () => {
       let response;
       beforeEach((done) => {
-        request(app).patch('/').send({ id: 123 }).then((r) => {
-          response = r;
-          done();
-        });
+        request(app)
+          .patch("/")
+          .send({ id: 123 })
+          .then((r) => {
+            response = r;
+            done();
+          });
       });
 
-      it('returns 422', () => {
+      it("returns 422", () => {
         expect(response.statusCode).to.eq(422);
       });
 
-      it('returns json with error', () => {
+      it("returns json with error", () => {
         expect(response.body.error).to.eq(true);
-        expect(response.body.data.message).to.be.a('string');
+        expect(response.body.data.message).to.be.a("string");
       });
     });
 
-    describe('with at least one valid parameter', () => {
-      beforeEach(() => request(app).patch('/').send({ name: 'New Name', id: 123 }));
+    describe("with at least one valid parameter", () => {
+      beforeEach(() =>
+        request(app).patch("/").send({ name: "New Name", id: 123 })
+      );
 
-      it('updates user', () => {
+      it("updates user", () => {
         expect(updateSpy.callCount).to.eq(1);
       });
     });
 
-    describe('with bad password', () => {
+    describe("with bad password", () => {
       let response;
       beforeEach((done) => {
         app = makeApp({
-          '../../helpers/getPasswordError': mockEsmodule({
-            default: () => 'Bad Password!!!'
-          })
+          "../../helpers/getPasswordError": mockEsmodule({
+            default: () => "Bad Password!!!",
+          }),
         });
 
-        request(app).patch('/').send({ password: 'badpassword' }).then((r) => {
-          response = r;
-          done();
-        });
+        request(app)
+          .patch("/")
+          .send({ password: "badpassword" })
+          .then((r) => {
+            response = r;
+            done();
+          });
       });
 
-      it('returns 422', () => {
+      it("returns 422", () => {
         expect(response.statusCode).to.eq(422);
       });
 
-      it('returns json with error', () => {
+      it("returns json with error", () => {
         expect(response.body.error).to.eq(true);
-        expect(response.body.data.message).to.eq('Bad Password!!!');
+        expect(response.body.data.message).to.eq("Bad Password!!!");
       });
     });
 
-    describe('with good password', () => {
+    describe("with good password", () => {
       beforeEach(() => {
         app = makeApp({
-          '../../helpers/getPasswordError': mockEsmodule({
-            default: () => undefined
+          "../../helpers/getPasswordError": mockEsmodule({
+            default: () => undefined,
           }),
-          '../../helpers/getUserPasswordUpdates': mockEsmodule({
-            default: () => Promise.resolve({
-              encryptedPassword: 'drowssapdoog'
-            })
-          })
+          "../../helpers/getUserPasswordUpdates": mockEsmodule({
+            default: () =>
+              Promise.resolve({
+                encryptedPassword: "drowssapdoog",
+              }),
+          }),
         });
 
-        return request(app).patch('/').send({ password: 'goodpassword' });
+        return request(app).patch("/").send({ password: "goodpassword" });
       });
 
-      it('updates with password updates, not password', () => {
-        expect(updateSpy.calledWith({ encryptedPassword: 'drowssapdoog' })).to.be.true;
-      });
-    });
-
-    describe('with new name', () => {
-      beforeEach(() => request(app).patch('/').send({ name: 'New Name' }));
-
-      it('sets namedChanged', () => {
-        expect(updateSpy.calledWith({ name: 'New Name', namedChanged: true })).to.be.true;
+      it("updates with password updates, not password", () => {
+        expect(updateSpy.calledWith({ encryptedPassword: "drowssapdoog" })).to
+          .be.true;
       });
     });
 
-    describe('success', () => {
+    describe("with new name", () => {
+      beforeEach(() => request(app).patch("/").send({ name: "New Name" }));
+
+      it("sets namedChanged", () => {
+        expect(updateSpy.calledWith({ name: "New Name", namedChanged: true }))
+          .to.be.true;
+      });
+    });
+
+    describe("success", () => {
       let response;
       beforeEach((done) => {
-        request(app).patch('/').send({ name: 'New Name' }).then(r => {
-          response = r;
-          done();
-        });
+        request(app)
+          .patch("/")
+          .send({ name: "New Name" })
+          .then((r) => {
+            response = r;
+            done();
+          });
       });
 
-      it('returns 200', () => {
+      it("returns 200", () => {
         expect(response.statusCode).to.eq(200);
       });
 
-      it('returns json with user', () => {
+      it("returns json with user", () => {
         expect(response.body.error).to.eq(false);
-        expect(response.body.data).to.be.an('object');
+        expect(response.body.data).to.be.an("object");
       });
     });
 
-    describe('failure', () => {
+    describe("failure", () => {
       let response;
       beforeEach((done) => {
         app = makeApp({
-          '../helpers/loggedIn': mockEsmodule({
+          "../helpers/loggedIn": mockEsmodule({
             default: spy((req, res, next) => {
-              req.user = { // eslint-disable-line no-param-reassign
-                get: () => {},
+              req.user = {
+                // eslint-disable-line no-param-reassign
+                get: () => undefined,
                 id: 231,
                 roles: [],
-                update: stub().throws('Oh No')
+                update: stub().throws("Oh No"),
               };
               next();
-            })
-          })
+            }),
+          }),
         });
 
-        request(app).patch('/').send({ name: 'New Name' }).then((r) => {
-          response = r;
-          done();
-        });
+        request(app)
+          .patch("/")
+          .send({ name: "New Name" })
+          .then((r) => {
+            response = r;
+            done();
+          });
       });
 
-      it('returns error', () => {
-        expect(response.error.text).to.contain('Oh No');
+      it("returns error", () => {
+        expect(response.error.text).to.contain("Oh No");
       });
     });
   });

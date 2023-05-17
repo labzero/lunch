@@ -1,21 +1,21 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import Autosuggest from 'react-autosuggest';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import TagContainer from '../Tag/TagContainer';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import Autosuggest from "react-autosuggest";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import TagContainer from "../Tag/TagContainer";
 import {
   generateTagList,
   getSuggestionValue,
   renderSuggestion,
-} from '../../helpers/TagAutosuggestHelper';
-import s from './TagFilterForm.scss';
+} from "../../helpers/TagAutosuggestHelper";
+import s from "./TagFilterForm.scss";
 
 // eslint-disable-next-line css-modules/no-unused-class
-import autosuggestTheme from './TagFilterFormAutosuggest.scss';
+import autosuggestTheme from "./TagFilterFormAutosuggest.scss";
 
 // eslint-disable-next-line css-modules/no-undef-class
-autosuggestTheme.input = 'form-control';
+autosuggestTheme.input = "form-control";
 
 const returnTrue = () => true;
 
@@ -40,7 +40,7 @@ class TagFilterForm extends Component {
     super(props);
 
     this.state = {
-      autosuggestValue: '',
+      autosuggestValue: "",
     };
 
     this.state.shown = !!props.addedTags.length;
@@ -54,7 +54,7 @@ class TagFilterForm extends Component {
   }
 
   setAutosuggestValue = (event, { newValue, method }) => {
-    if (method === 'up' || method === 'down') {
+    if (method === "up" || method === "down") {
       return;
     }
     this.setState(() => ({
@@ -63,13 +63,13 @@ class TagFilterForm extends Component {
   };
 
   handleSuggestionSelected = (event, { suggestion, method }) => {
-    if (method === 'enter') {
+    if (method === "enter") {
       event.preventDefault();
     }
     this.props.setFlipMove(false);
     this.props.addTag(suggestion.id);
     this.setState(() => ({
-      autosuggestValue: '',
+      autosuggestValue: "",
     }));
   };
 
@@ -77,7 +77,7 @@ class TagFilterForm extends Component {
     this.props.clearTags();
     this.props.setFlipMove(false);
     this.setState(() => ({
-      autosuggestValue: '',
+      autosuggestValue: "",
       shown: false,
     }));
   };
@@ -94,9 +94,8 @@ class TagFilterForm extends Component {
   };
 
   render() {
-    const {
-      addByName, addedTags, allTags, exclude, restaurantIds
-    } = this.props;
+    const { addByName, addedTags, allTags, exclude, restaurantIds } =
+      this.props;
 
     const { autosuggestValue, shown } = this.state;
 
@@ -118,14 +117,14 @@ class TagFilterForm extends Component {
             getSuggestionValue={getSuggestionValue}
             renderSuggestion={renderSuggestion}
             inputProps={{
-              placeholder: exclude ? 'exclude' : 'filter',
+              placeholder: exclude ? "exclude" : "filter",
               value: autosuggestValue,
               onChange: this.setAutosuggestValue,
             }}
             theme={autosuggestTheme}
             onSuggestionSelected={this.handleSuggestionSelected}
-            onSuggestionsFetchRequested={() => {}}
-            onSuggestionsClearRequested={() => {}}
+            onSuggestionsFetchRequested={() => undefined}
+            onSuggestionsClearRequested={() => undefined}
             shouldRenderSuggestions={returnTrue}
             ref={(a) => {
               this.autosuggest = a;
@@ -144,21 +143,15 @@ class TagFilterForm extends Component {
               />
             </div>
           ))}
-          <Button
-            onClick={this.hideForm}
-            variant="light"
-          >
+          <Button onClick={this.hideForm} variant="light">
             cancel
           </Button>
         </form>
       );
     } else {
       showButton = (
-        <Button
-          onClick={this.showForm}
-          variant="light"
-        >
-          {exclude ? 'exclude tags' : 'filter by tag'}
+        <Button onClick={this.showForm} variant="light">
+          {exclude ? "exclude tags" : "filter by tag"}
         </Button>
       );
     }

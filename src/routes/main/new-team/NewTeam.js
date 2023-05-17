@@ -1,18 +1,18 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Button from 'react-bootstrap/Button';
-import Col from 'react-bootstrap/Col';
-import Form from 'react-bootstrap/Form';
-import Container from 'react-bootstrap/Container';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Row from 'react-bootstrap/Row';
-import { TEAM_SLUG_REGEX } from '../../../constants';
-import defaultCoords from '../../../constants/defaultCoords';
-import TeamGeosuggestContainer from '../../../components/TeamGeosuggest/TeamGeosuggestContainer';
-import TeamMapContainer from '../../../components/TeamMap/TeamMapContainer';
-import history from '../../../history';
-import s from './NewTeam.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import Container from "react-bootstrap/Container";
+import InputGroup from "react-bootstrap/InputGroup";
+import Row from "react-bootstrap/Row";
+import { TEAM_SLUG_REGEX } from "../../../constants";
+import defaultCoords from "../../../constants/defaultCoords";
+import TeamGeosuggestContainer from "../../../components/TeamGeosuggest/TeamGeosuggestContainer";
+import TeamMapContainer from "../../../components/TeamMap/TeamMapContainer";
+import history from "../../../history";
+import s from "./NewTeam.scss";
 
 class NewTeam extends Component {
   static propTypes = {
@@ -31,13 +31,14 @@ class NewTeam extends Component {
     super(props);
 
     this.state = {
-      name: '',
-      slug: '',
-      address: '',
+      name: "",
+      slug: "",
+      address: "",
     };
   }
 
-  handleChange = (field) => (event) => this.setState({ [field]: event.target.value });
+  handleChange = (field) => (event) =>
+    this.setState({ [field]: event.target.value });
 
   handleSlugChange = (event) => {
     this.setState({
@@ -53,7 +54,7 @@ class NewTeam extends Component {
     createTeam({
       ...center,
       ...this.state,
-    }).then(() => history.push('/teams'));
+    }).then(() => history.push("/teams"));
   };
 
   render() {
@@ -70,7 +71,7 @@ class NewTeam extends Component {
                 <Col sm={6}>
                   <Form.Control
                     type="text"
-                    onChange={this.handleChange('name')}
+                    onChange={this.handleChange("name")}
                     value={name}
                     required
                   />
@@ -113,7 +114,7 @@ class NewTeam extends Component {
               <TeamGeosuggestContainer
                 id="newTeam-address"
                 initialValue=""
-                onChange={this.handleChange('address')}
+                onChange={this.handleChange("address")}
               />
             </Form.Group>
             <Button type="submit">Submit</Button>

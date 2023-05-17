@@ -1,9 +1,9 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Container from 'react-bootstrap/Container';
-import Link from '../../../../components/Link';
-import s from './Create.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Container from "react-bootstrap/Container";
+import Link from "../../../../components/Link";
+import s from "./Create.scss";
 
 class Create extends Component {
   static propTypes = {
@@ -16,7 +16,7 @@ class Create extends Component {
     return (
       <div className={s.root}>
         <Container>
-          {success === 'sent' && (
+          {success === "sent" && (
             <div>
               <h2>Instructions sent</h2>
               <p>
@@ -25,13 +25,12 @@ class Create extends Component {
               </p>
             </div>
           )}
-          {success === 'reset' && (
+          {success === "reset" && (
             <div>
               <h2>Password reset</h2>
               <p>
                 Your password has been reset. Go ahead and
-                <Link to="/login">log in</Link>
-                .
+                <Link to="/login">log in</Link>.
               </p>
             </div>
           )}

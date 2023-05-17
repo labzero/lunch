@@ -1,8 +1,8 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import Link from '../Link';
-import s from './Menu.scss';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import Link from "../Link";
+import s from "./Menu.scss";
 
 class Menu extends Component {
   static propTypes = {
@@ -20,14 +20,13 @@ class Menu extends Component {
   };
 
   render() {
-    const {
-      closeMenu, hasGuestRole, hasMemberRole, host, open, team, user
-    } = this.props;
+    const { closeMenu, hasGuestRole, hasMemberRole, host, open, team, user } =
+      this.props;
 
     const tabIndex = open ? 0 : -1;
 
     return (
-      <nav className={`${s.root} ${open ? s.open : ''}`}>
+      <nav className={`${s.root} ${open ? s.open : ""}`}>
         <div className={s.name}>
           <div>{user.name}</div>
           <div>{user.email}</div>

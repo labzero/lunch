@@ -1,10 +1,10 @@
-import { connect } from 'react-redux';
-import { getRestaurantById } from '../../selectors/restaurants';
-import { getTagById } from '../../selectors/tags';
-import { getUserById } from '../../selectors/users';
-import { expireNotification } from '../../actions/notifications';
-import { showMapAndInfoWindow } from '../../actions/mapUi';
-import Notification from './Notification';
+import { connect } from "react-redux";
+import { getRestaurantById } from "../../selectors/restaurants";
+import { getTagById } from "../../selectors/tags";
+import { getUserById } from "../../selectors/users";
+import { expireNotification } from "../../actions/notifications";
+import { showMapAndInfoWindow } from "../../actions/mapUi";
+import Notification from "./Notification";
 
 const mapStateToProps = () => {
   let contentProps;
@@ -32,15 +32,17 @@ const mapStateToProps = () => {
         loggedIn: state.user.id !== undefined,
         restaurantName,
         tagName,
-        newName: vals.newName
+        newName: vals.newName,
       };
       if (contentProps.loggedIn) {
-        contentProps.user = vals.userId ? getUserById(state, vals).name : undefined;
+        contentProps.user = vals.userId
+          ? getUserById(state, vals).name
+          : undefined;
       }
     }
     return {
       actionType: ownProps.actionType,
-      contentProps
+      contentProps,
     };
   };
 };
@@ -49,7 +51,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   expireNotification: () => {
     dispatch(expireNotification(ownProps.id));
   },
-  dispatch
+  dispatch,
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => ({
@@ -59,8 +61,8 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
     ...stateProps.contentProps,
     showMapAndInfoWindow: () => {
       dispatchProps.dispatch(showMapAndInfoWindow(ownProps.vals.restaurantId));
-    }
-  }
+    },
+  },
 });
 
 export default connect(

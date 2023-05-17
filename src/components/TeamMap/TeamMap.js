@@ -1,12 +1,12 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import withStyles from 'isomorphic-style-loader/withStyles';
-import HereMarker from '../HereMarker';
-import { GOOGLE_MAP_ZOOM } from '../../constants';
-import googleMapOptions from '../../helpers/googleMapOptions';
-import loadComponent from '../../helpers/loadComponent';
-import s from './TeamMap.scss';
-import GoogleMapsLoaderContext from '../GoogleMapsLoaderContext/GoogleMapsLoaderContext';
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import withStyles from "isomorphic-style-loader/withStyles";
+import HereMarker from "../HereMarker";
+import { GOOGLE_MAP_ZOOM } from "../../constants";
+import googleMapOptions from "../../helpers/googleMapOptions";
+import loadComponent from "../../helpers/loadComponent";
+import s from "./TeamMap.scss";
+import GoogleMapsLoaderContext from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 
 let GoogleMap = () => null;
 
@@ -30,11 +30,13 @@ class TeamMap extends Component {
 
   componentDidMount() {
     this.props.clearCenter();
-    loadComponent(() => require.ensure(
-      [],
-      (require) => require('google-map-react').default,
-      'map'
-    )).then((map) => {
+    loadComponent(() =>
+      require.ensure(
+        [],
+        (require) => require("google-map-react").default,
+        "map"
+      )
+    ).then((map) => {
       GoogleMap = map;
       this.forceUpdate();
     });
@@ -42,7 +44,7 @@ class TeamMap extends Component {
 
   setMap = ({ map }) => {
     this.map = map;
-    this.map.addListener('bounds_changed', () => {
+    this.map.addListener("bounds_changed", () => {
       const center = map.getCenter();
       this.props.setCenter({
         lat: center.lat(),
@@ -62,7 +64,9 @@ class TeamMap extends Component {
               center={center}
               defaultZoom={GOOGLE_MAP_ZOOM}
               defaultCenter={defaultCenter}
-              googleMapLoader={() => loader.load().then(google => google.maps)}
+              googleMapLoader={() =>
+                loader.load().then((google) => google.maps)
+              }
               onGoogleApiLoaded={this.setMap}
               options={googleMapOptions()}
               yesIWantToUseGoogleMapApiInternals

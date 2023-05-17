@@ -9,22 +9,25 @@
 
 /* eslint-disable global-require */
 
-import create from './create';
-import newAction from './new';
+import create from "./create";
+import newAction from "./new";
 
 export default [
   {
-    path: '',
+    path: "",
     action: create,
   },
   {
-    path: '/new',
+    path: "/new",
     action: newAction,
   },
 
   // Wildcard routes, e.g. { path: '(.*)', ... } (must go last)
   {
-    path: '(.*)',
-    action: async (context) => (await import(/* webpackChunkName: 'not-found' */ '../../not-found')).default(context)
-  }
+    path: "(.*)",
+    action: async (context) =>
+      (
+        await import(/* webpackChunkName: 'not-found' */ "../../not-found")
+      ).default(context),
+  },
 ];

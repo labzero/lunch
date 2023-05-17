@@ -3,7 +3,7 @@ export default async ({ next }) => {
   const route = await next(true);
 
   // Provide default values for title, description etc.
-  const title = 'Lunch';
+  const title = "Lunch";
   if (route.fullTitle) {
     route.title = route.fullTitle;
   } else if (route.title) {
@@ -11,7 +11,7 @@ export default async ({ next }) => {
   } else {
     route.title = title;
   }
-  route.description = route.description || '';
+  route.description = route.description || "";
 
   return route;
 };

@@ -1,15 +1,16 @@
-const path = require('path');
+/* eslint-disable @typescript-eslint/no-var-requires */
+const path = require("path");
 
-if (process.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV === "test") {
   // eslint-disable-next-line global-require
-  require('dotenv').config({
-    path: path.resolve(process.cwd(), '.env.test'),
+  require("dotenv").config({
+    path: path.resolve(process.cwd(), ".env.test"),
   });
 }
-require('dotenv').config();
+require("dotenv").config();
 
 const settings = {
-  dialect: 'postgres',
+  dialect: "postgres",
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
@@ -21,7 +22,7 @@ const config = {
   test: {
     logging: false,
   },
-  production: {}
+  production: {},
 };
 
 Object.assign(config.development, settings);
