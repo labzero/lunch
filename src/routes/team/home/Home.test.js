@@ -78,7 +78,7 @@ describe("Home", () => {
       invalidateUsers,
       messageReceived: () => undefined,
       pastDecisionsShown: false,
-      user: {},
+      user: null,
       wsPort: 3000,
     };
   });
@@ -91,7 +91,7 @@ describe("Home", () => {
   };
 
   it("renders form if user is logged in", async () => {
-    props.user.id = 1;
+    props.user = { id: 1 };
 
     await renderComponent();
 

@@ -14,7 +14,7 @@ describe("RestaurantAddTagForm", () => {
     props = {
       id: 1,
       votes: [{ restaurantId: 1 }],
-      user: {},
+      user: { id: 1 },
       users: [],
     };
   });

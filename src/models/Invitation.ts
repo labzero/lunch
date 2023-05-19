@@ -1,8 +1,8 @@
-import { Column, Model, Table } from "sequelize-typescript";
+import { Column, DataType, Model, Table } from "sequelize-typescript";
 
 @Table({ modelName: "invitation" })
 class Invitation extends Model {
-  @Column({ allowNull: false, unique: true })
+  @Column({ allowNull: false, type: DataType.CITEXT, unique: true })
   email: string;
 
   @Column
