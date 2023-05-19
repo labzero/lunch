@@ -1,6 +1,7 @@
 import {
   BelongsToMany,
   Column,
+  DataType,
   HasMany,
   Model,
   Scopes,
@@ -92,7 +93,7 @@ class User extends Model {
   @Column
   name: string;
 
-  @Column
+  @Column({ type: DataType.CITEXT })
   email: string;
 
   @Column

@@ -14,7 +14,7 @@ import s from "./Home.scss";
 
 export class _Home extends Component {
   static propTypes = {
-    user: PropTypes.object.isRequired,
+    user: PropTypes.object,
     fetchDecisions: PropTypes.func.isRequired,
     fetchRestaurants: PropTypes.func.isRequired,
     fetchTags: PropTypes.func.isRequired,
@@ -26,6 +26,10 @@ export class _Home extends Component {
     messageReceived: PropTypes.func.isRequired,
     pastDecisionsShown: PropTypes.bool.isRequired,
     wsPort: PropTypes.number.isRequired,
+  };
+
+  static defaultProps = {
+    user: null,
   };
 
   componentDidMount() {
@@ -98,7 +102,7 @@ export class _Home extends Component {
         </div>
         <div className={s.listContainer} id="listContainer">
           <section className={s.forms} id="listForms">
-            {user.id && <RestaurantAddFormContainer />}
+            {user && <RestaurantAddFormContainer />}
             <NameFilterFormContainer />
             <TagFilterFormContainer />
             <TagFilterFormContainer exclude />

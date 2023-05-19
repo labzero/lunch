@@ -10,7 +10,7 @@ export default (context, makeRoute) => {
     redirect = `${redirect}&team=${context.subdomain}`;
   }
 
-  if (user.id) {
+  if (user) {
     if (user.name) {
       return makeRoute();
     }

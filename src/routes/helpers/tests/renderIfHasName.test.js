@@ -30,7 +30,7 @@ describe("routes/helpers/renderIfHasName", () => {
       }).default;
       context = {
         store: mockStore({
-          user: {},
+          user: null,
         }),
       };
       renderIfHasNameProxy(context, makeRouteSpy);

@@ -18,7 +18,7 @@ export default (context) => {
   const state = context.store.getState();
   const user = state.user;
 
-  if (user.id) {
+  if (user) {
     return {
       title,
       chunks: ["welcome"],
