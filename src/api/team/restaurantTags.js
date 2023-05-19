@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Tag, RestaurantTag } from "../../models";
+import { Tag, RestaurantTag } from "../../db";
 import checkTeamRole from "../helpers/checkTeamRole";
 import loggedIn from "../helpers/loggedIn";
 import {

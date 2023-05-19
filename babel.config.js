@@ -13,6 +13,8 @@ module.exports = {
   plugins: [
     "@babel/plugin-syntax-dynamic-import",
     "@babel/plugin-transform-modules-commonjs",
+    // Decorators
+    ["@babel/plugin-proposal-decorators", { version: "legacy" }],
   ],
   presets: [
     ["@babel/preset-typescript", { allowDeclareFields: true }],

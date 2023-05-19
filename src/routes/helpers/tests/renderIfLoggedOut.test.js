@@ -79,7 +79,7 @@ describe("routes/helpers/renderIfLoggedOut", () => {
   describe("when there is no user", () => {
     beforeEach(() => {
       state = {
-        user: {},
+        user: null,
       };
       renderIfLoggedOut(state, makeRouteSpy);
     });

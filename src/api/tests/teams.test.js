@@ -35,7 +35,7 @@ describe("api/main/teams", () => {
         // eslint-disable-line no-param-reassign
         get: () => undefined,
         id: 231,
-        getRoles: () => [],
+        $get: () => [],
         roles: [],
       };
       next();
@@ -45,7 +45,7 @@ describe("api/main/teams", () => {
 
     makeApp = (deps, middleware) => {
       const teamsApi = proxyquireStrict("../main/teams", {
-        "../../models": mockEsmodule({
+        "../../db": mockEsmodule({
           Team: TeamMock,
           Role: RoleMock,
           User: UserMock,
@@ -129,7 +129,7 @@ describe("api/main/teams", () => {
           req.user = {
             // eslint-disable-line no-param-reassign
             id: 231,
-            getRoles: () => [{}, {}, {}, {}, {}],
+            $get: () => [{}, {}, {}, {}, {}],
             roles: [{}, {}, {}, {}, {}],
           };
           next();
@@ -359,7 +359,7 @@ describe("api/main/teams", () => {
       let response;
       beforeEach((done) => {
         app = makeApp({
-          "../../models": mockEsmodule({
+          "../../db": mockEsmodule({
             Team: {
               create: stub().throws(),
               destroy: TeamMock.destroy,

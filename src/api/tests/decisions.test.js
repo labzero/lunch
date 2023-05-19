@@ -46,13 +46,7 @@ describe("api/team/decisions", () => {
 
     makeApp = (deps) => {
       const decisionsApi = proxyquireStrict("../team/decisions", {
-        "../../models/db": mockEsmodule({
-          Op: {
-            lt: "lt",
-            gt: "gt",
-          },
-        }),
-        "../../models": mockEsmodule({
+        "../../db": mockEsmodule({
           Decision: DecisionMock,
         }),
         "../helpers/loggedIn": mockEsmodule({
@@ -101,9 +95,10 @@ describe("api/team/decisions", () => {
         expect(
           findAllSpy.calledWith({
             where: {
-              createdAt: {
-                gt: match.date,
-              },
+              createdAt: match(
+                (value) =>
+                  value[Object.getOwnPropertySymbols(value)[0]] instanceof Date
+              ),
               teamId: 77,
             },
           })
@@ -204,10 +199,12 @@ describe("api/team/decisions", () => {
         expect(
           destroySpy.calledWith({
             where: {
-              createdAt: {
-                lt: match.date,
-                gt: match.date,
-              },
+              createdAt: match(
+                (value) =>
+                  value[Object.getOwnPropertySymbols(value)[0]] instanceof
+                    Date &&
+                  value[Object.getOwnPropertySymbols(value)[1]] instanceof Date
+              ),
               teamId: 77,
             },
           })
@@ -284,7 +281,7 @@ describe("api/team/decisions", () => {
         let response;
         beforeEach((done) => {
           app = makeApp({
-            "../../models": mockEsmodule({
+            "../../db": mockEsmodule({
               Decision: {
                 create: stub().throws(),
                 destroy: DecisionMock.destroy,

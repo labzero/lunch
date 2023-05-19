@@ -1,13 +1,28 @@
-import dayjs from "dayjs";
 import {
-  InferAttributes,
-  InferCreationAttributes,
+  BelongsTo,
+  Column,
+  ForeignKey,
+  Index,
   Model,
-  Transaction,
-} from "sequelize";
-import { sequelize, DataTypes, Op } from "./db";
+  Scopes,
+  Table,
+} from "sequelize-typescript";
+import dayjs from "dayjs";
+import { Op, Transaction } from "sequelize";
+import User from "./User";
+import Restaurant from "./Restaurant";
 
-class Vote extends Model<InferAttributes<Vote>, InferCreationAttributes<Vote>> {
+@Scopes(() => ({
+  fromToday: () => ({
+    where: {
+      createdAt: {
+        [Op.gt]: dayjs().subtract(12, "hours").toDate(),
+      },
+    },
+  }),
+}))
+@Table({ modelName: "vote" })
+class Vote extends Model {
   static recentForRestaurantAndUser = (
     restaurantId: number,
     userId: number,
@@ -21,49 +36,24 @@ class Vote extends Model<InferAttributes<Vote>, InferCreationAttributes<Vote>> {
       },
     });
 
-  declare userId: number;
-  declare restaurantId: number;
+  @ForeignKey(() => User)
+  @Index
+  @Column({ allowNull: false })
+  userId: number;
+
+  @BelongsTo(() => User)
+  user: Awaited<User>;
+
+  @ForeignKey(() => Restaurant)
+  @Index
+  @Column({ allowNull: false, onDelete: "cascade" })
+  restaurantId: number;
+
+  @BelongsTo(() => Restaurant)
+  restaurant: Awaited<Restaurant>;
+
+  @Index
+  createdAt: Date;
 }
-
-Vote.init(
-  {
-    userId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "user",
-        key: "id",
-      },
-      allowNull: false,
-    },
-
-    restaurantId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "restaurant",
-        key: "id",
-      },
-      allowNull: false,
-      onDelete: "cascade",
-    },
-  },
-  {
-    indexes: [
-      {
-        fields: ["createdAt", "restaurantId", "userId"],
-      },
-    ],
-    modelName: "vote",
-    scopes: {
-      fromToday: () => ({
-        where: {
-          createdAt: {
-            [Op.gt]: dayjs().subtract(12, "hours").toDate(),
-          },
-        },
-      }),
-    },
-    sequelize,
-  }
-);
 
 export default Vote;

@@ -55,8 +55,7 @@ import loginMiddleware from "./middlewares/login";
 import passwordMiddleware from "./middlewares/password";
 import usersMiddleware from "./middlewares/users";
 import api from "./api";
-import { sequelize } from "./models/db";
-import { Team, User } from "./models";
+import { sequelize, Team, User } from "./db";
 import { Flash, StateData } from "./interfaces";
 import { ExtWebSocket, Style } from "../global";
 

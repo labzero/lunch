@@ -40,7 +40,7 @@ const getInitialState = (): NonNormalizedState => ({
     didInvalidate: true,
     items: [],
   },
-  user: {},
+  user: null,
   users: {
     isFetching: false,
     didInvalidate: true,

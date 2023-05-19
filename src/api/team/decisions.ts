@@ -1,22 +1,33 @@
 import { Router } from "express";
 import dayjs from "dayjs";
-import { Op } from "../../models/db";
-import { Decision } from "../../models";
+import {
+  Attributes,
+  CreationAttributes,
+  FindOptions,
+  ModelStatic,
+  Op,
+} from "sequelize";
+import { Decision } from "../../db";
 import checkTeamRole from "../helpers/checkTeamRole";
 import loggedIn from "../helpers/loggedIn";
 import { decisionPosted, decisionsDeleted } from "../../actions/decisions";
 
 export default () => {
-  const router = new Router({ mergeParams: true });
+  const router = Router({ mergeParams: true });
 
   return router
     .get("/", loggedIn, checkTeamRole(), async (req, res, next) => {
       try {
-        const opts = { where: { teamId: req.team.id } };
-        const days = parseInt(req.query.days, 10);
+        const opts: FindOptions<Attributes<Decision>> = {
+          where: { teamId: req.team!.id },
+        };
+        const days = parseInt(req.query.days as string, 10);
         if (!Number.isNaN(days)) {
-          opts.where.createdAt = {
-            [Op.gt]: dayjs().subtract(days, "days").toDate(),
+          opts.where = {
+            ...opts.where,
+            createdAt: {
+              [Op.gt]: dayjs().subtract(days, "days").toDate(),
+            },
           };
         }
 
@@ -30,19 +41,25 @@ export default () => {
     .post("/", loggedIn, checkTeamRole(), async (req, res, next) => {
       const restaurantId = parseInt(req.body.restaurantId, 10);
       try {
-        const destroyOpts = { where: { teamId: req.team.id } };
+        const destroyOpts: FindOptions<Attributes<Decision>> = {
+          where: { teamId: req.team!.id },
+        };
         const daysAgo = parseInt(req.body.daysAgo, 10);
-        let MaybeScopedDecision = Decision;
+        let MaybeScopedDecision: typeof Decision | ModelStatic<Decision> =
+          Decision;
         if (daysAgo > 0) {
-          destroyOpts.where.createdAt = {
-            [Op.gt]: dayjs()
-              .subtract(daysAgo, "days")
-              .subtract(12, "hours")
-              .toDate(),
-            [Op.lt]: dayjs()
-              .subtract(daysAgo, "days")
-              .add(12, "hours")
-              .toDate(),
+          destroyOpts.where = {
+            ...destroyOpts.where,
+            createdAt: {
+              [Op.gt]: dayjs()
+                .subtract(daysAgo, "days")
+                .subtract(12, "hours")
+                .toDate(),
+              [Op.lt]: dayjs()
+                .subtract(daysAgo, "days")
+                .add(12, "hours")
+                .toDate(),
+            },
           };
         } else {
           MaybeScopedDecision = MaybeScopedDecision.scope("fromToday");
@@ -52,9 +69,9 @@ export default () => {
         await MaybeScopedDecision.destroy(destroyOpts);
 
         try {
-          const createOpts = {
+          const createOpts: CreationAttributes<Decision> = {
             restaurantId,
-            teamId: req.team.id,
+            teamId: req.team!.id,
           };
           if (daysAgo > 0) {
             createOpts.createdAt = dayjs().subtract(daysAgo, "days").toDate();
@@ -63,8 +80,8 @@ export default () => {
 
           const json = obj.toJSON();
           req.broadcast(
-            req.team.id,
-            decisionPosted(json, deselected, req.user.id)
+            req.team!.id,
+            decisionPosted(json, deselected, req.user!.id)
           );
           res.status(201).send({ error: false, data: obj });
         } catch (err) {
@@ -78,13 +95,13 @@ export default () => {
     .delete("/fromToday", loggedIn, checkTeamRole(), async (req, res, next) => {
       try {
         const decisions = await Decision.scope("fromToday").findAll({
-          where: { teamId: req.team.id },
+          where: { teamId: req.team!.id },
         });
         await Decision.scope("fromToday").destroy({
-          where: { teamId: req.team.id },
+          where: { teamId: req.team!.id },
         });
 
-        req.broadcast(req.team.id, decisionsDeleted(decisions, req.user.id));
+        req.broadcast(req.team!.id, decisionsDeleted(decisions, req.user!.id));
         res.status(204).send();
       } catch (err) {
         next(err);

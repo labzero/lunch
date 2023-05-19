@@ -1,13 +1,17 @@
 import {
-  InferAttributes,
-  InferCreationAttributes,
+  BelongsToMany,
+  Column,
+  HasMany,
   Model,
-  NonAttribute,
-  ProjectionAlias,
-} from "sequelize";
+  Scopes,
+  Table,
+} from "sequelize-typescript";
+import { ProjectionAlias } from "sequelize";
 import { Literal } from "sequelize/types/utils";
-import { sequelize, DataTypes } from "./db";
+import { sequelize } from "../db";
 import Role from "./Role";
+import Vote from "./Vote";
+import Team from "./Team";
 
 const teamUserAttributes = (
   teamId: number | string,
@@ -25,7 +29,21 @@ const teamUserAttributes = (
 
 type FindAttributeOptions = (string | ProjectionAlias)[];
 
-class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+@Scopes(() => ({
+  withTeamRole: (teamId: string, extraAttributes: string[]) => ({
+    attributes: [
+      "name",
+      "id",
+      [
+        sequelize.literal(`(SELECT "roles"."type" FROM "roles"
+      WHERE "roles"."teamId" = ${teamId} AND "roles"."userId" = "user"."id")`),
+        "type",
+      ] as [Literal, string],
+    ].concat(extraAttributes || []),
+  }),
+}))
+@Table({ modelName: "user" })
+class User extends Model {
   static findAllForTeam = (
     teamId: number,
     extraAttributes: FindAttributeOptions
@@ -33,6 +51,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     User.findAll({
       attributes: teamUserAttributes(teamId, extraAttributes),
     });
+
   static findOneWithRoleType = (
     id: number,
     teamId: number,
@@ -42,6 +61,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
       attributes: teamUserAttributes(teamId, extraAttributes),
       where: { id },
     });
+
   resetPasswordValid() {
     const resetPasswordSentAt = this.get("resetPasswordSentAt");
     if (resetPasswordSentAt) {
@@ -52,7 +72,8 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     }
     return false;
   }
-  static getSessionUser = (id: number | string) =>
+
+  static getSessionUser = (id: number) =>
     User.findOne({
       attributes: ["id", "name", "email", "superuser"],
       where: { id },
@@ -65,58 +86,47 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
       ],
     });
 
-  declare id: number;
-  declare googleId: string;
-  declare name: string;
-  declare email: string;
-  declare encryptedPassword?: string;
-  declare resetPasswordToken?: string;
-  declare resetPasswordSentAt?: Date;
-  declare confirmationToken?: string;
-  declare confirmationSentAt?: Date;
-  declare confirmedAt?: Date;
-  declare nameChanged: boolean;
-  declare superuser: boolean;
+  @Column
+  googleId: string;
 
-  declare roles: NonAttribute<Role[]>;
+  @Column
+  name: string;
+
+  @Column
+  email: string;
+
+  @Column
+  encryptedPassword?: string;
+
+  @Column
+  resetPasswordToken?: string;
+
+  @Column
+  resetPasswordSentAt?: Date;
+
+  @Column
+  confirmationToken?: string;
+
+  @Column
+  confirmationSentAt?: Date;
+
+  @Column
+  confirmedAt?: Date;
+
+  @Column
+  nameChanged: boolean;
+
+  @Column
+  superuser: boolean;
+
+  @HasMany(() => Vote)
+  votes: Vote[];
+
+  @HasMany(() => Role)
+  roles: Role[];
+
+  @BelongsToMany(() => Team, () => Role)
+  teams: Team[];
 }
-
-User.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    googleId: DataTypes.STRING,
-    name: DataTypes.STRING,
-    email: DataTypes.CITEXT,
-    encryptedPassword: DataTypes.STRING,
-    resetPasswordToken: DataTypes.STRING,
-    resetPasswordSentAt: DataTypes.DATE,
-    confirmationToken: DataTypes.STRING,
-    confirmationSentAt: DataTypes.DATE,
-    confirmedAt: DataTypes.DATE,
-    nameChanged: DataTypes.BOOLEAN,
-    superuser: DataTypes.BOOLEAN,
-  },
-  {
-    modelName: "user",
-    scopes: {
-      withTeamRole: (teamId: string, extraAttributes: string[]) => ({
-        attributes: [
-          "name",
-          "id",
-          [
-            sequelize.literal(`(SELECT "roles"."type" FROM "roles"
-          WHERE "roles"."teamId" = ${teamId} AND "roles"."userId" = "user"."id")`),
-            "type",
-          ] as [Literal, string],
-        ].concat(extraAttributes || []),
-      }),
-    },
-    sequelize,
-  }
-);
 
 export default User;

@@ -4,7 +4,7 @@ export default (state, makeRoute) => {
   const user = state.user;
   const host = state.host;
 
-  if (user.id) {
+  if (user) {
     if (user.roles.length === 1) {
       const team = getTeams(state)[0];
       if (team) {

@@ -85,6 +85,8 @@ const users: Reducer<"users"> = (state, action) => {
         },
       });
     }
+    default:
+      break;
   }
   return state;
 };

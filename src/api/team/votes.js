@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { Vote } from "../../models";
-import { sequelize } from "../../models/db";
+import { sequelize, Vote } from "../../db";
 import checkTeamRole from "../helpers/checkTeamRole";
 import loggedIn from "../helpers/loggedIn";
 import { votePosted, voteDeleted } from "../../actions/restaurants";

@@ -406,6 +406,8 @@ const restaurants: Reducer<"restaurants"> = (state, action) => {
         },
       });
     }
+    default:
+      break;
   }
   return state;
 };

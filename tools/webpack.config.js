@@ -87,9 +87,14 @@ const config = {
     strictExportPresence: true,
 
     rules: [
+      {
+        test: /\.tsx?$/,
+        use: "ts-loader",
+        exclude: /node_modules/,
+      },
       // Rules for JS / JSX
       {
-        test: /\.(js|jsx|mjs|ts|tsx)$/,
+        test: /\.(js|jsx|mjs)$/,
         include: [ROOT_DIR, resolvePath("tools")],
         loader: "babel-loader",
         options: {
@@ -100,7 +105,6 @@ const config = {
           babelrc: false,
           configFile: false,
           presets: [
-            ["@babel/preset-typescript", { allowDeclareFields: true }],
             // A Babel preset that can automatically determine the Babel plugins and polyfills
             // https://github.com/babel/babel-preset-env
             [
@@ -114,8 +118,6 @@ const config = {
             ["@babel/preset-react", { development: isDebug }],
           ],
           plugins: [
-            // Experimental ECMAScript proposals
-            // '@babel/plugin-proposal-class-properties',
             "@babel/plugin-syntax-dynamic-import",
             // Treat React JSX elements as value types and hoist them to the highest scope
             // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-constant-elements

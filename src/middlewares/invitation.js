@@ -3,7 +3,7 @@ import querystring from "querystring";
 import { bsHost } from "../config";
 import generateToken from "../helpers/generateToken";
 import generateUrl from "../helpers/generateUrl";
-import { Invitation, Role, User } from "../models";
+import { Invitation, Role, User } from "../db";
 import transporter from "../mailers/transporter";
 
 const sendConfirmation = async (req, email, token) => {
