@@ -1,3 +1,5 @@
+/// <reference types="chai-jsdom" />
+
 /* eslint-env mocha */
 /* eslint-disable no-unused-expressions */
 import React from "react";

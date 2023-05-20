@@ -2,10 +2,12 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from "chai";
-import { match, spy, stub } from "sinon";
+import { match, spy, SinonSpy, stub } from "sinon";
 import bodyParser from "body-parser";
-import request from "supertest";
-import express from "express";
+import { HTTPError } from "superagent";
+import request, { Response } from "supertest";
+import express, { RequestHandler } from "express";
+import session, { Session } from "express-session";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
 import mockEsmodule from "../../../test/mockEsmodule";
@@ -15,13 +17,13 @@ const proxyquireStrict = proxyquire.noCallThru();
 const dbMock = new SequelizeMock();
 
 describe("api/main/teams", () => {
-  let app;
-  let RoleMock;
-  let TeamMock;
-  let UserMock;
-  let loggedInSpy;
-  let makeApp;
-  let sendMailSpy;
+  let app: Express.Application;
+  let RoleMock: SequelizeMockObject;
+  let TeamMock: SequelizeMockObject;
+  let UserMock: SequelizeMockObject;
+  let loggedInSpy: SinonSpy;
+  let makeApp: (deps?: any, middleware?: RequestHandler) => Express.Application;
+  let sendMailSpy: SinonSpy;
 
   beforeEach(() => {
     TeamMock = dbMock.define("team", {});
@@ -43,7 +45,7 @@ describe("api/main/teams", () => {
 
     sendMailSpy = spy(() => Promise.resolve());
 
-    makeApp = (deps, middleware) => {
+    makeApp = (deps, middleware): Express.Application => {
       const teamsApi = proxyquireStrict("../main/teams", {
         "../../db": mockEsmodule({
           Team: TeamMock,
@@ -62,7 +64,13 @@ describe("api/main/teams", () => {
       }).default;
 
       const server = express();
+
       server.use(bodyParser.json());
+
+      server.use(
+        session({ resave: true, secret: "123456", saveUninitialized: true })
+      );
+
       server.use((req, res, next) => {
         if (middleware) {
           middleware(req, res, next);
@@ -87,7 +95,7 @@ describe("api/main/teams", () => {
     });
 
     describe("success", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         request(app)
           .get("/")
@@ -121,8 +129,8 @@ describe("api/main/teams", () => {
     });
 
     describe("exceeds team limit", () => {
-      let createSpy;
-      let response;
+      let createSpy: SinonSpy;
+      let response: Response;
       beforeEach((done) => {
         createSpy = spy(TeamMock, "create");
         loggedInSpy = spy((req, res, next) => {
@@ -163,8 +171,8 @@ describe("api/main/teams", () => {
     });
 
     describe("reserved slug check", () => {
-      let createSpy;
-      let response;
+      let createSpy: SinonSpy;
+      let response: Response;
       beforeEach((done) => {
         createSpy = spy(TeamMock, "create");
         request(app)
@@ -191,7 +199,7 @@ describe("api/main/teams", () => {
     });
 
     describe("existing slug check", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         stub(TeamMock, "create").callsFake(() => {
           const e = new Error();
@@ -219,8 +227,8 @@ describe("api/main/teams", () => {
     });
 
     describe("invalid slug", () => {
-      let createSpy;
-      let response;
+      let createSpy: SinonSpy;
+      let response: Response;
       beforeEach(() => {
         createSpy = spy(TeamMock, "create");
       });
@@ -302,7 +310,7 @@ describe("api/main/teams", () => {
     });
 
     describe("queries", () => {
-      let createSpy;
+      let createSpy: SinonSpy;
       beforeEach(() => {
         createSpy = spy(TeamMock, "create");
         return request(app).post("/").send({
@@ -334,7 +342,7 @@ describe("api/main/teams", () => {
     });
 
     describe("success", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         request(app)
           .post("/")
@@ -356,7 +364,7 @@ describe("api/main/teams", () => {
     });
 
     describe("failure", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         app = makeApp({
           "../../db": mockEsmodule({
@@ -377,15 +385,15 @@ describe("api/main/teams", () => {
       });
 
       it("returns error", () => {
-        expect(response.error.text).to.exist;
+        expect((response.error as HTTPError).text).to.exist;
       });
     });
   });
 
   describe("DELETE /:id", () => {
-    let checkTeamRoleSpy;
+    let checkTeamRoleSpy: SinonSpy;
     beforeEach(() => {
-      checkTeamRoleSpy = spy(() => (req, res, next) => next());
+      checkTeamRoleSpy = spy((): RequestHandler => (req, res, next) => next());
 
       app = makeApp({
         "../helpers/checkTeamRole": checkTeamRoleSpy,
@@ -393,7 +401,7 @@ describe("api/main/teams", () => {
     });
 
     describe("before deletion", () => {
-      let findOneSpy;
+      let findOneSpy: SinonSpy;
       beforeEach(() => {
         findOneSpy = spy(TeamMock, "findOne");
 
@@ -410,7 +418,7 @@ describe("api/main/teams", () => {
     });
 
     describe("query", () => {
-      let destroySpy;
+      let destroySpy: SinonSpy;
       beforeEach(() => {
         destroySpy = spy();
         stub(TeamMock, "findOne").callsFake(() =>
@@ -428,7 +436,7 @@ describe("api/main/teams", () => {
     });
 
     describe("success", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         request(app)
           .delete("/1")
@@ -444,7 +452,7 @@ describe("api/main/teams", () => {
     });
 
     describe("failure", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         stub(TeamMock, "findOne").callsFake(() =>
           Promise.resolve({
@@ -463,13 +471,13 @@ describe("api/main/teams", () => {
       });
 
       it("returns error", () => {
-        expect(response.error.text).to.contain("Oh No");
+        expect((response.error as HTTPError).text).to.contain("Oh No");
       });
     });
   });
 
   describe("PATCH /:id", () => {
-    let checkTeamRoleSpy;
+    let checkTeamRoleSpy: SinonSpy;
     beforeEach(() => {
       checkTeamRoleSpy = spy((req, res, next) => next());
 
@@ -479,7 +487,7 @@ describe("api/main/teams", () => {
     });
 
     describe("before updating", () => {
-      let findOneSpy;
+      let findOneSpy: SinonSpy;
       beforeEach(() => {
         findOneSpy = spy(TeamMock, "findOne");
 
@@ -496,7 +504,7 @@ describe("api/main/teams", () => {
     });
 
     describe("without valid parameters", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         request(app)
           .patch("/1")
@@ -518,7 +526,7 @@ describe("api/main/teams", () => {
     });
 
     describe("with at least one valid parameter", () => {
-      let updateSpy;
+      let updateSpy: SinonSpy;
       beforeEach(() => {
         updateSpy = spy();
         stub(TeamMock, "findOne").callsFake(() =>
@@ -537,8 +545,8 @@ describe("api/main/teams", () => {
     });
 
     describe("reserved slug check", () => {
-      let updateSpy;
-      let response;
+      let updateSpy: SinonSpy;
+      let response: Response;
       beforeEach((done) => {
         app = makeApp({
           "../../helpers/hasRole": mockEsmodule({
@@ -581,7 +589,7 @@ describe("api/main/teams", () => {
     });
 
     describe("existing slug check", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         app = makeApp({
           "../../helpers/hasRole": mockEsmodule({
@@ -623,7 +631,7 @@ describe("api/main/teams", () => {
     });
 
     describe("success", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         request(app)
           .patch("/1")
@@ -645,7 +653,7 @@ describe("api/main/teams", () => {
     });
 
     describe("if team has changed", () => {
-      let flashSpy;
+      let flashSpy: SinonSpy;
       beforeEach(() => {
         flashSpy = spy();
 
@@ -659,11 +667,14 @@ describe("api/main/teams", () => {
             }),
           },
           (req, res, next) => {
-            req.flash = flashSpy; // eslint-disable-line no-param-reassign
-            req.session = {
-              // eslint-disable-line no-param-reassign
-              save: (cb) => cb(),
-            };
+            req.flash = flashSpy;
+            stub(req.session, "save").callsFake(function save(
+              this: Session,
+              cb
+            ) {
+              cb!({});
+              return this;
+            });
             next();
           }
         );
@@ -681,7 +692,7 @@ describe("api/main/teams", () => {
     });
 
     describe("failure", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         stub(TeamMock, "findOne").callsFake(() =>
           Promise.resolve({
@@ -699,7 +710,7 @@ describe("api/main/teams", () => {
       });
 
       it("returns error", () => {
-        expect(response.error.text).to.contain("Oh No");
+        expect((response.error as HTTPError).text).to.contain("Oh No");
       });
     });
   });

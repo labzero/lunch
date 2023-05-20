@@ -20,7 +20,6 @@ import configureStore from "./store/configureStore";
 import history from "./history";
 import { updateMeta } from "./DOMUtils";
 import routerCreator from "./router";
-import { Style } from "../global";
 
 es6Promise.polyfill();
 
