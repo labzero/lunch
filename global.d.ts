@@ -12,7 +12,7 @@ declare global {
       subdomain?: string;
       team?: Team;
       user?: UserInterface;
-      wss?: Server;
+      wss?: WebSocket.Server;
     }
     export interface User extends UserInterface {}
   }

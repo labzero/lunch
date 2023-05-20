@@ -9,7 +9,7 @@ import {
 } from "../../actions/restaurants";
 
 export default () => {
-  const router = new Router({ mergeParams: true });
+  const router = Router({ mergeParams: true });
 
   return router
     .post("/", loggedIn, checkTeamRole(), async (req, res, next) => {
@@ -24,7 +24,7 @@ export default () => {
         Tag.findOrCreate({
           where: {
             name: req.body.name.toLowerCase().trim(),
-            teamId: req.team.id,
+            teamId: req.team!.id,
           },
         })
           .then(async ([tag]) => {
@@ -36,12 +36,12 @@ export default () => {
               const json = tag.toJSON();
               json.restaurant_count = 1;
               req.broadcast(
-                req.team.id,
-                postedNewTagToRestaurant(restaurantId, json, req.user.id)
+                req.team!.id,
+                postedNewTagToRestaurant(restaurantId, json, req.user!.id)
               );
               res.status(201).send({ error: false, data: json });
             } catch (err) {
-              alreadyAddedError(err);
+              alreadyAddedError();
             }
           })
           .catch((err) => {
@@ -57,12 +57,12 @@ export default () => {
 
           const json = obj.toJSON();
           req.broadcast(
-            req.team.id,
-            postedTagToRestaurant(restaurantId, id, req.user.id)
+            req.team!.id,
+            postedTagToRestaurant(restaurantId, id, req.user!.id)
           );
           res.status(201).send({ error: false, data: json });
         } catch (err) {
-          alreadyAddedError(err);
+          alreadyAddedError();
         }
       } else {
         next();
@@ -74,8 +74,8 @@ export default () => {
       try {
         await RestaurantTag.destroy({ where: { restaurantId, tagId: id } });
         req.broadcast(
-          req.team.id,
-          deletedTagFromRestaurant(restaurantId, id, req.user.id)
+          req.team!.id,
+          deletedTagFromRestaurant(restaurantId, id, req.user!.id)
         );
         res.status(204).send();
       } catch (err) {

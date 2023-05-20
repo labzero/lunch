@@ -1,6 +1,7 @@
-import { Router } from "express";
+import { Response, Router } from "express";
 import fetch from "node-fetch";
 import { Restaurant, Vote, Tag } from "../../db";
+import { Restaurant as RestaurantInterface } from "../../interfaces";
 import checkTeamRole from "../helpers/checkTeamRole";
 import loggedIn from "../helpers/loggedIn";
 import {
@@ -12,10 +13,10 @@ import voteApi from "./votes";
 import restaurantTagApi from "./restaurantTags";
 
 export default () => {
-  const router = new Router({ mergeParams: true });
+  const router = Router({ mergeParams: true });
   const apikey = process.env.GOOGLE_SERVER_APIKEY;
 
-  const notFound = (res) => {
+  const notFound = (res: Response) => {
     res
       .status(404)
       .json({ error: true, data: { message: "Restaurant not found." } });
@@ -24,7 +25,9 @@ export default () => {
   return router
     .get("/", loggedIn, checkTeamRole(), async (req, res, next) => {
       try {
-        const all = await Restaurant.findAllWithTagIds({ teamId: req.team.id });
+        const all = await Restaurant.findAllWithTagIds({
+          teamId: req.team!.id,
+        });
 
         res.status(200).json({ error: false, data: all });
       } catch (err) {
@@ -39,7 +42,7 @@ export default () => {
         try {
           const r = await Restaurant.findByPk(parseInt(req.params.id, 10));
 
-          if (r === null || r.teamId !== req.team.id) {
+          if (r === null || r.teamId !== req.team!.id) {
             notFound(res);
           } else {
             const response = await fetch(
@@ -83,7 +86,7 @@ removed its entry. Try removing it and adding it to Lunch again.`,
             address,
             lat,
             lng,
-            teamId: req.team.id,
+            teamId: req.team!.id,
             votes: [],
             tags: [],
           },
@@ -93,7 +96,7 @@ removed its entry. Try removing it and adding it to Lunch again.`,
         const json = obj.toJSON();
         json.all_decision_count = 0;
         json.all_vote_count = 0;
-        req.broadcast(req.team.id, restaurantPosted(json, req.user.id));
+        req.broadcast(req.team!.id, restaurantPosted(json, req.user!.id));
         res.status(201).send({ error: false, data: json });
       } catch (err) {
         const error = {
@@ -110,7 +113,7 @@ removed its entry. Try removing it and adding it to Lunch again.`,
         { name },
         {
           fields: ["name"],
-          where: { id, teamId: req.team.id },
+          where: { id, teamId: req.team!.id },
           returning: true,
         }
       )
@@ -118,10 +121,12 @@ removed its entry. Try removing it and adding it to Lunch again.`,
           if (count === 0) {
             notFound(res);
           } else {
-            const json = { name: rows[0].toJSON().name };
+            const json: Partial<RestaurantInterface> = {
+              name: rows[0].toJSON().name,
+            };
             req.broadcast(
-              req.team.id,
-              restaurantRenamed(id, json, req.user.id)
+              req.team!.id,
+              restaurantRenamed(id, json, req.user!.id)
             );
             res.status(200).send({ error: false, data: json });
           }
@@ -135,12 +140,12 @@ removed its entry. Try removing it and adding it to Lunch again.`,
       const id = parseInt(req.params.id, 10);
       try {
         const count = await Restaurant.destroy({
-          where: { id, teamId: req.team.id },
+          where: { id, teamId: req.team!.id },
         });
         if (count === 0) {
           notFound(res);
         } else {
-          req.broadcast(req.team.id, restaurantDeleted(id, req.user.id));
+          req.broadcast(req.team!.id, restaurantDeleted(id, req.user!.id));
           res.status(204).send();
         }
       } catch (err) {

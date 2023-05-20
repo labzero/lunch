@@ -61,7 +61,7 @@ export function renameRestaurant(id: number, obj: Partial<Restaurant>): Action {
 
 export function restaurantRenamed(
   id: number,
-  obj: Restaurant,
+  obj: Partial<Restaurant>,
   userId: number
 ): Action {
   return {
