@@ -105,9 +105,7 @@ export type Action =
   | {
       type: "RESTAURANT_RENAMED";
       id: number;
-      fields: {
-        name: string;
-      };
+      fields: Partial<Restaurant>;
       userId: number;
     }
   | {
