@@ -18,7 +18,7 @@ const HeaderLogin = ({ user }) => {
   if (user === null) {
     content = (
       <div className={s.root}>
-        <Button size="sm" variant="primary" href="/login">
+        <Button size="md" variant="primary" href="/login">
           Log in
         </Button>
       </div>
