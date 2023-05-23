@@ -1,5 +1,5 @@
 import { createContext } from "react";
 
-const GoogleMapsLoaderContext = createContext();
+const GoogleMapsLoaderContext = createContext({});
 
 export default GoogleMapsLoaderContext;
