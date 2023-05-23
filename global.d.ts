@@ -25,3 +25,8 @@ declare module "*.css" {
   const style: Style;
   export default style;
 }
+
+declare module "*.png" {
+  const value: string;
+  export default value;
+}

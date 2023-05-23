@@ -7,29 +7,29 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import PropTypes from "prop-types";
 import React, { Component } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
+import { Flash } from "../../interfaces";
 import HeaderLoginContainer from "../HeaderLogin/HeaderLoginContainer";
 import FlashContainer from "../Flash/FlashContainer";
 import MenuContainer from "../Menu/MenuContainer";
-import Link from "../Link";
+import Link from "../Link/Link";
 import lunch from "./lunch.png";
 import s from "./Header.scss";
 
-class Header extends Component {
-  static propTypes = {
-    flashes: PropTypes.array.isRequired,
-    loggedIn: PropTypes.bool.isRequired,
-    // eslint-disable-next-line react/no-unused-prop-types
-    path: PropTypes.string,
-  };
+interface HeaderProps {
+  flashes: Flash[];
+  loggedIn: boolean;
+  path: string;
+}
 
-  static defaultProps = {
-    path: PropTypes.string,
-  };
+interface HeaderState {
+  menuOpen: boolean;
+  prevPath: string | null;
+}
 
-  static getDerivedStateFromProps(nextProps, state) {
+class Header extends Component<HeaderProps, HeaderState> {
+  static getDerivedStateFromProps(nextProps: HeaderProps, state: HeaderState) {
     if (nextProps.path !== state.prevPath) {
       return {
         menuOpen: false,
@@ -39,7 +39,7 @@ class Header extends Component {
     return null;
   }
 
-  constructor(props) {
+  constructor(props: HeaderProps) {
     super(props);
 
     this.state = {
@@ -52,14 +52,7 @@ class Header extends Component {
   flashContainers = () => {
     const { flashes } = this.props;
 
-    return flashes.map((flash) => (
-      <FlashContainer
-        message={flash.message}
-        type={flash.type}
-        id={flash.id}
-        key={flash.id}
-      />
-    ));
+    return flashes.map((flash) => <FlashContainer key={flash.id} {...flash} />);
   };
 
   closeMenu = () => {

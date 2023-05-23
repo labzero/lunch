@@ -1,12 +1,12 @@
 import { connect } from "react-redux";
-import Flash from "./Flash";
+import FlashComponent from "./Flash";
 import { expireFlash } from "../../actions/flash";
-import { Dispatch } from "../../interfaces";
+import { Dispatch, Flash } from "../../interfaces";
 
-const mapDispatchToProps = (dispatch: Dispatch, ownProps: { id: string }) => ({
+const mapDispatchToProps = (dispatch: Dispatch, ownProps: Flash) => ({
   expireFlash: () => {
     dispatch(expireFlash(ownProps.id));
   },
 });
 
-export default connect(null, mapDispatchToProps)(Flash);
+export default connect(null, mapDispatchToProps)(FlashComponent);
