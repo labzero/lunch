@@ -131,4 +131,4 @@ class ChangeTeamURLModal extends Component<
   }
 }
 
-export default withStyles<typeof ChangeTeamURLModal>(s)(ChangeTeamURLModal);
+export default withStyles(s)(ChangeTeamURLModal);

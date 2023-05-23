@@ -13,6 +13,6 @@ declare module "isomorphic-style-loader/StyleContext" {
 }
 
 declare module "isomorphic-style-loader/withStyles" {
-  function withStyles<T>(...styles: Style[]): (component: T) => T;
+  function withStyles(...styles: Style[]): (component: T) => T;
   export default withStyles;
 }
