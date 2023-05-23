@@ -1,48 +1,53 @@
-import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import Button from "react-bootstrap/Button";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "./GoogleInfoWindow.scss";
 
-let google = {
-  maps: {
-    Marker: { MAX_ZINDEX: 1000000 },
-    places: { PlacesService: () => undefined, PlacesServiceStatus: {} },
-  },
-};
+let google: typeof window.google;
+
 if (canUseDOM) {
-  google = window.google || google;
+  google = window.google;
 }
 
-class GoogleInfoWindow extends Component {
-  static propTypes = {
-    addRestaurant: PropTypes.func.isRequired,
-    map: PropTypes.any.isRequired,
-    placeId: PropTypes.string.isRequired,
-  };
+interface GoogleInfoWindowProps {
+  addRestaurant: (restaurant: google.maps.places.PlaceResult) => void;
+  map: google.maps.Map;
+  placeId: string;
+}
 
-  constructor(props) {
+class GoogleInfoWindow extends Component<GoogleInfoWindowProps> {
+  placesService: google.maps.places.PlacesService;
+
+  constructor(props: GoogleInfoWindowProps) {
     super(props);
-    this.placesService = new google.maps.places.PlacesService(props.map);
+    if (google) {
+      this.placesService = new google.maps.places.PlacesService(props.map);
+    }
   }
 
   handleClick = () => {
     const { addRestaurant, placeId } = this.props;
 
     this.placesService.getDetails({ placeId }, (result, status) => {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
+      if (status === google.maps.places.PlacesServiceStatus.OK && result) {
         addRestaurant(result);
       }
     });
   };
 
   render() {
+    if (!google) {
+      return null;
+    }
+
     return (
       <div
         className={s.root}
         data-marker
-        style={{ zIndex: google.maps.Marker.MAX_ZINDEX * 2 }}
+        style={{
+          zIndex: google.maps.Marker.MAX_ZINDEX * 2,
+        }}
       >
         <div className={s.buttonContainer}>
           <Button size="lg" variant="primary" onClick={this.handleClick}>
