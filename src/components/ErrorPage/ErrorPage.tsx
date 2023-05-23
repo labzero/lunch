@@ -7,12 +7,15 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import PropTypes from "prop-types";
 import React from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "./ErrorPage.scss";
 
-export const ErrorPage = ({ error }) => {
+interface ErrorPageProps {
+  error: { stack: string; status: number };
+}
+
+export const ErrorPage = ({ error }: ErrorPageProps) => {
   let title = "Error";
   let content = "Sorry, a critical error occurred on this page.";
   let errorMessage = null;
@@ -32,8 +35,6 @@ export const ErrorPage = ({ error }) => {
     </div>
   );
 };
-
-ErrorPage.propTypes = { error: PropTypes.object.isRequired };
 
 export { ErrorPage as ErrorPageWithoutStyle };
 export default withStyles(s)(ErrorPage);
