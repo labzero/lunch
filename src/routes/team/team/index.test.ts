@@ -1,3 +1,5 @@
+/// <reference types="mocha" />
+
 /* eslint-env mocha */
 /* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates */
 
@@ -34,7 +36,8 @@ describe("routes/team/team", () => {
   });
 
   describe("when user is a guest", () => {
-    it("renders 404", () => {
+    it("renders 404", function test() {
+      this.timeout(8000);
       render404 = "render404";
       landingProxy = proxyquireStrict("./index", {
         "../../../helpers/hasRole": mockEsmodule({

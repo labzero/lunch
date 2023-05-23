@@ -1,5 +1,4 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { ChangeEvent, Component } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
@@ -10,18 +9,27 @@ import ModalFooter from "react-bootstrap/ModalFooter";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
 import { TEAM_SLUG_REGEX } from "../../constants";
+import { Action, Team } from "../../interfaces";
 import s from "./ChangeTeamURLModal.scss";
 
-class ChangeTeamURLModal extends Component {
-  static propTypes = {
-    host: PropTypes.string.isRequired,
-    team: PropTypes.object.isRequired,
-    shown: PropTypes.bool.isRequired,
-    hideModal: PropTypes.func.isRequired,
-    updateTeam: PropTypes.func.isRequired,
-  };
+export interface ChangeTeamURLModalProps {
+  host: string;
+  team: Team;
+  shown: boolean;
+  hideModal: () => void;
+  updateTeam: (team: Partial<Team>) => Promise<Action>;
+}
 
-  constructor(props) {
+export interface ChangeTeamURLModalState {
+  newSlug?: string;
+  oldSlug?: string;
+}
+
+class ChangeTeamURLModal extends Component<
+  ChangeTeamURLModalProps,
+  ChangeTeamURLModalState
+> {
+  constructor(props: ChangeTeamURLModalProps) {
     super(props);
 
     this.state = {
@@ -30,16 +38,18 @@ class ChangeTeamURLModal extends Component {
     };
   }
 
-  handleChange = (field) => (event) =>
-    this.setState({
-      [field]: event.target.value,
-    });
+  handleChange =
+    (field: keyof ChangeTeamURLModalState) =>
+    (event: ChangeEvent<HTMLInputElement>) =>
+      this.setState({
+        [field]: event.target.value,
+      });
 
   handleSubmit = () => {
     const { updateTeam, host } = this.props;
     const { newSlug } = this.state;
 
-    updateTeam({ slug: newSlug }).then(() => {
+    updateTeam({ slug: newSlug! }).then(() => {
       window.location.href = `//${newSlug}.${host}/team`;
     });
   };
@@ -109,7 +119,7 @@ class ChangeTeamURLModal extends Component {
             autoFocus
             size="sm"
             variant="primary"
-            disabled={team.slug !== oldSlug}
+            disabled={team.slug !== oldSlug || !newSlug}
             onClick={this.handleSubmit}
             type="submit"
           >
@@ -121,4 +131,4 @@ class ChangeTeamURLModal extends Component {
   }
 }
 
-export default withStyles(s)(ChangeTeamURLModal);
+export default withStyles<typeof ChangeTeamURLModal>(s)(ChangeTeamURLModal);

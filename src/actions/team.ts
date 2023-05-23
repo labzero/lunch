@@ -30,7 +30,7 @@ export function removeTeam(): ThunkAction<void, State, unknown, Action> {
   };
 }
 
-export function patchTeam(obj: Team): Action {
+export function patchTeam(obj: Partial<Team>): Action {
   return {
     type: "PATCH_TEAM",
     team: obj,
@@ -45,8 +45,8 @@ export function teamPatched(json: Team): Action {
 }
 
 export function updateTeam(
-  payload: Team
-): ThunkAction<void, State, unknown, Action> {
+  payload: Partial<Team>
+): ThunkAction<Promise<Action>, State, unknown, Action> {
   return (dispatch, getState) => {
     const state = getState();
     const teamId = state.team.id;

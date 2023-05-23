@@ -1,4 +1,5 @@
 import { BrowserHistory } from "history";
+import { WebSocket } from "ws";
 import {
   Decision as DecisionModel,
   Restaurant as RestaurantModel,
@@ -7,6 +8,10 @@ import {
   User as UserModel,
   Vote as VoteModel,
 } from "./db";
+
+export interface ExtWebSocket extends WebSocket {
+  teamId?: number;
+}
 
 export interface Route {}
 
@@ -220,7 +225,7 @@ export type Action =
     }
   | {
       type: "PATCH_TEAM";
-      team: Team;
+      team: Partial<Team>;
     }
   | {
       type: "TEAM_PATCHED";
@@ -448,7 +453,7 @@ interface BaseState {
   flashes: Flash[];
   host: string;
   notifications: Notification[];
-  modals: {};
+  modals: { [index: string]: { shown: boolean } };
   listUi: {
     editNameFormValue?: string;
     flipMove: boolean;

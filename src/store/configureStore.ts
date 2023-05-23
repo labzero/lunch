@@ -15,9 +15,8 @@ import {
 // eslint-disable-next-line default-param-last
 const generateReducer =
   <T extends keyof State>(reducer: Reducer<T>, initial: State[T]): Reducer<T> =>
-  (state = initial, action: Action) => {
-    return reducer(state, action);
-  };
+  (state = initial, action: Action) =>
+    reducer(state, action);
 
 const generateReducers = <T extends keyof State>(
   newReducers: { [key in T]: Reducer<key> },

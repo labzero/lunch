@@ -22,13 +22,13 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     // Ensure that Babel can safely transpile files in the TypeScript project
-    "isolatedModules": true
+    "isolatedModules": true,
+    "typeRoots": ["./typings", "node_modules/@types"]
   },
-  "files": [
-    "./global.d.ts",
-    "./types.d.ts",
-    "node_modules/chai-jsdom/typings/chai/index.d.ts"
-  ],
+  "files": ["./global.d.ts"],
   "include": ["./**/*.ts", "./**/*.tsx", "./*.d.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "files": true
+  }
 }

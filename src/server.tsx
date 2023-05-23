@@ -12,7 +12,11 @@ import path from "path";
 import fs from "fs";
 import { createStream } from "rotating-file-stream";
 import morgan from "morgan";
-import express, { ErrorRequestHandler, RequestHandler } from "express";
+import express, {
+  Application,
+  ErrorRequestHandler,
+  RequestHandler,
+} from "express";
 import cors from "cors";
 import http from "http";
 import https from "https";
@@ -56,8 +60,7 @@ import passwordMiddleware from "./middlewares/password";
 import usersMiddleware from "./middlewares/users";
 import api from "./api";
 import { sequelize, Team, User } from "./db";
-import { Flash, StateData } from "./interfaces";
-import { ExtWebSocket, Style } from "../global";
+import { ExtWebSocket, Flash, StateData } from "./interfaces";
 
 process.on("unhandledRejection", (reason, p) => {
   console.error("Unhandled Rejection at:", p, "reason:", reason);
@@ -82,7 +85,7 @@ const accessLogStream = createStream("access.log", {
   path: logDirectory,
 });
 
-const app = express();
+const app: Application = express();
 
 let internalWsServer;
 if (process.env.USE_HTTPS === "true") {

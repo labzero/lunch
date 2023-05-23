@@ -6,7 +6,7 @@ import decisionApi from "./team/decisions";
 import tagApi from "./team/tags";
 import usersApi from "./team/users";
 import restaurantApi from "./team/restaurants";
-import { ExtWebSocket } from "../../global";
+import { ExtWebSocket } from "../interfaces";
 
 export default (): RequestHandler => {
   const mainRouter = Router();
