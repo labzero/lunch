@@ -1,8 +1,9 @@
 import { connect } from "react-redux";
-import { IntlProvider } from "react-intl";
+import { IntlConfig, IntlProvider } from "react-intl";
+import { State } from "../../interfaces";
 import { getLocale, getMessages } from "../../selectors/locale";
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = (state: State, ownProps: Partial<IntlConfig>) => ({
   locale: getLocale(state),
   messages: getMessages(state),
   ...ownProps,
