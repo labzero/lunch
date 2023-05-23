@@ -5,10 +5,10 @@ import { expect } from "chai";
 import React from "react";
 import sinon from "sinon";
 import { render, screen } from "../../../test/test-utils";
-import ConfirmModal from "./ConfirmModal";
+import ConfirmModal, { ConfirmModalProps } from "./ConfirmModal";
 
 describe("ConfirmModal", () => {
-  let props;
+  let props: ConfirmModalProps;
 
   beforeEach(() => {
     props = {

@@ -8,6 +8,8 @@ import {
   User as UserModel,
   Vote as VoteModel,
 } from "./db";
+import { ThunkDispatch } from "@reduxjs/toolkit";
+import { ReactNode } from "react";
 
 export interface ExtWebSocket extends WebSocket {
   teamId?: number;
@@ -239,7 +241,7 @@ export type Action =
     }
   | {
       type: "POST_USER";
-      user: User;
+      user: Partial<User>;
     }
   | {
       type: "USER_POSTED";
@@ -453,7 +455,14 @@ interface BaseState {
   flashes: Flash[];
   host: string;
   notifications: Notification[];
-  modals: { [index: string]: { shown: boolean } };
+  modals: {
+    [index: string]: {
+      action: () => void;
+      actionLabel: string;
+      body: ReactNode;
+      shown: boolean;
+    };
+  };
   listUi: {
     editNameFormValue?: string;
     flipMove: boolean;
@@ -555,3 +564,5 @@ export type Reducer<T extends keyof State> = (
   state: State[T],
   action: Action
 ) => State[T];
+
+export type Dispatch = ThunkDispatch<State, unknown, Action>;

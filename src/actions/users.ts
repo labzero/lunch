@@ -114,7 +114,7 @@ export function removeUser(
   };
 }
 
-export function postUser(obj: User): Action {
+export function postUser(obj: Partial<User>): Action {
   return {
     type: "POST_USER",
     user: obj,
@@ -129,7 +129,7 @@ export function userPosted(json: User): Action {
 }
 
 export function addUser(
-  payload: User
+  payload: Partial<User>
 ): ThunkAction<void, State, unknown, Action> {
   return (dispatch) => {
     dispatch(postUser(payload));

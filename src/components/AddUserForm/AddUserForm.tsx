@@ -5,11 +5,12 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import { IntlShape } from "react-intl";
 import { globalMessageDescriptor as gm } from "../../helpers/generateMessageDescriptor";
+import { RoleType } from "../../interfaces";
 
 interface AddUserFormState {
   email?: string;
   name?: string;
-  type?: string;
+  type?: RoleType;
 }
 
 export interface AddUserFormProps {
@@ -21,7 +22,7 @@ export interface AddUserFormProps {
 }
 
 class AddUserForm extends Component<AddUserFormProps, AddUserFormState> {
-  static defaultState = {
+  static defaultState: AddUserFormState = {
     email: "",
     name: "",
     type: "member",
