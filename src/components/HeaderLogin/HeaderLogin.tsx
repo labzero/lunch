@@ -11,14 +11,19 @@ import PropTypes from "prop-types";
 import React from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
+import { User } from "../../interfaces";
 import s from "./HeaderLogin.scss";
 
-const HeaderLogin = ({ user }) => {
+interface HeaderLoginProps {
+  user: User;
+}
+
+const HeaderLogin = ({ user }: HeaderLoginProps) => {
   let content = <div />;
   if (user === null) {
     content = (
       <div className={s.root}>
-        <Button size="md" variant="primary" href="/login">
+        <Button variant="primary" href="/login">
           Log in
         </Button>
       </div>
