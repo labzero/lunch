@@ -2,5 +2,5 @@
   "name": "HereMarker",
   "version": "0.0.0",
   "private": true,
-  "main": "./HereMarker.js"
+  "main": "./HereMarker.tsx"
 }
