@@ -1,5 +1,4 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { ChangeEvent, Component } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
@@ -10,18 +9,26 @@ import ModalFooter from "react-bootstrap/ModalFooter";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
 import { TEAM_SLUG_REGEX } from "../../constants";
+import { Team } from "../../interfaces";
 import s from "./DeleteTeamModal.scss";
 
-class DeleteTeamModal extends Component {
-  static propTypes = {
-    host: PropTypes.string.isRequired,
-    team: PropTypes.object.isRequired,
-    shown: PropTypes.bool.isRequired,
-    hideModal: PropTypes.func.isRequired,
-    deleteTeam: PropTypes.func.isRequired,
-  };
+interface DeleteTeamModalProps {
+  host: string;
+  team: Team;
+  shown: boolean;
+  hideModal: () => void;
+  deleteTeam: () => Promise<void>;
+}
 
-  constructor(props) {
+interface DeleteTeamModalState {
+  confirmSlug: string;
+}
+
+class DeleteTeamModal extends Component<
+  DeleteTeamModalProps,
+  DeleteTeamModalState
+> {
+  constructor(props: DeleteTeamModalProps) {
     super(props);
 
     this.state = {
@@ -29,7 +36,7 @@ class DeleteTeamModal extends Component {
     };
   }
 
-  handleChange = (event) => {
+  handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       confirmSlug: event.target.value,
     });

@@ -1,5 +1,7 @@
 import { BrowserHistory } from "history";
 import { WebSocket } from "ws";
+import { ThunkDispatch } from "@reduxjs/toolkit";
+import { ReactNode } from "react";
 import {
   Decision as DecisionModel,
   Restaurant as RestaurantModel,
@@ -8,8 +10,6 @@ import {
   User as UserModel,
   Vote as VoteModel,
 } from "./db";
-import { ThunkDispatch } from "@reduxjs/toolkit";
-import { ReactNode } from "react";
 
 export interface ExtWebSocket extends WebSocket {
   teamId?: number;
