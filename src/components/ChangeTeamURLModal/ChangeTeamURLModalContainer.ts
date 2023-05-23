@@ -1,8 +1,7 @@
 import { connect } from "react-redux";
-import { ThunkDispatch } from "@reduxjs/toolkit";
 import { updateTeam } from "../../actions/team";
 import { hideModal } from "../../actions/modals";
-import { Action, State, Team } from "../../interfaces";
+import { Dispatch, State, Team } from "../../interfaces";
 import { getTeam } from "../../selectors/team";
 import ChangeTeamURLModal from "./ChangeTeamURLModal";
 
@@ -14,9 +13,7 @@ const mapStateToProps = (state: State) => ({
   shown: !!state.modals[modalName].shown,
 });
 
-const mapDispatchToProps = (
-  dispatch: ThunkDispatch<State, unknown, Action>
-) => ({
+const mapDispatchToProps = (dispatch: Dispatch) => ({
   hideModal: () => {
     dispatch(hideModal(modalName));
   },

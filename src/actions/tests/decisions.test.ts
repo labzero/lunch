@@ -1,7 +1,6 @@
 /* eslint-env mocha */
 /* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates, arrow-body-style */
 
-import { ThunkDispatch } from "@reduxjs/toolkit";
 import { expect } from "chai";
 import {
   configureMockStore,
@@ -10,17 +9,13 @@ import {
 import fetchMock from "fetch-mock";
 import thunk from "redux-thunk";
 import * as decisions from "../decisions";
-import { Action, State } from "../../interfaces";
+import { Action, Dispatch, State } from "../../interfaces";
 
 const middlewares = [thunk];
 const mockStore = configureMockStore<State, Action>(middlewares);
 
 describe("actions/decisions", () => {
-  let store: MockStoreEnhanced<
-    State,
-    Action,
-    ThunkDispatch<State, unknown, Action>
-  >;
+  let store: MockStoreEnhanced<State, Action, Dispatch>;
 
   beforeEach(() => {
     store = mockStore({});

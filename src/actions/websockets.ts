@@ -1,11 +1,11 @@
+import { ThunkAction } from "@reduxjs/toolkit";
 import { sortRestaurants } from "./restaurants";
 import { notify } from "./notifications";
-import { Action, State } from "../interfaces";
-import { ThunkAction, ThunkDispatch } from "@reduxjs/toolkit";
+import { Action, Dispatch, State } from "../interfaces";
 
 let sortTimeout: NodeJS.Timer;
 
-const sort = (dispatch: ThunkDispatch<State, unknown, Action>) => {
+const sort = (dispatch: Dispatch) => {
   clearTimeout(sortTimeout);
   sortTimeout = setTimeout(() => {
     dispatch(sortRestaurants());
@@ -47,17 +47,17 @@ const actionMap: Partial<{
     data: Action
   ) => ThunkAction<void, State, unknown, Action>;
 }> = {
-  ["RESTAURANT_POSTED"]: dispatchSortNotify,
-  ["RESTAURANT_DELETED"]: notifyDispatch,
-  ["RESTAURANT_RENAMED"]: notifyDispatchSort,
-  ["VOTE_POSTED"]: notifyDispatchSort,
-  ["VOTE_DELETED"]: notifyDispatchSort,
-  ["POSTED_TAG_TO_RESTAURANT"]: dispatchNotify,
-  ["POSTED_NEW_TAG_TO_RESTAURANT"]: dispatchNotify,
-  ["DELETED_TAG_FROM_RESTAURANT"]: dispatchNotify,
-  ["TAG_DELETED"]: notifyDispatch,
-  ["DECISION_POSTED"]: dispatchSortNotify,
-  ["DECISIONS_DELETED"]: dispatchSortNotify,
+  RESTAURANT_POSTED: dispatchSortNotify,
+  RESTAURANT_DELETED: notifyDispatch,
+  RESTAURANT_RENAMED: notifyDispatchSort,
+  VOTE_POSTED: notifyDispatchSort,
+  VOTE_DELETED: notifyDispatchSort,
+  POSTED_TAG_TO_RESTAURANT: dispatchNotify,
+  POSTED_NEW_TAG_TO_RESTAURANT: dispatchNotify,
+  DELETED_TAG_FROM_RESTAURANT: dispatchNotify,
+  TAG_DELETED: notifyDispatch,
+  DECISION_POSTED: dispatchSortNotify,
+  DECISIONS_DELETED: dispatchSortNotify,
 };
 
 export function messageReceived(
