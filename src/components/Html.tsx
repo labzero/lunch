@@ -7,31 +7,28 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import PropTypes from "prop-types";
 import React, { Component } from "react";
 import serialize from "serialize-javascript";
 import config from "../config";
+import { App } from "../interfaces";
 
 /* eslint-disable react/no-danger */
 
-class Html extends Component {
-  static propTypes = {
-    app: PropTypes.object, // eslint-disable-line
-    title: PropTypes.string.isRequired,
-    ogTitle: PropTypes.string.isRequired,
-    description: PropTypes.string.isRequired,
-    root: PropTypes.string,
-    styles: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        cssText: PropTypes.string.isRequired,
-      }).isRequired
-    ),
-    scripts: PropTypes.arrayOf(PropTypes.string.isRequired),
-    children: PropTypes.string.isRequired,
-  };
+export interface HtmlProps {
+  app?: App;
+  title: string;
+  ogTitle?: string;
+  description: string;
+  root?: string;
+  styles?: { id: string; cssText: string }[];
+  scripts?: string[];
+  children: string;
+}
 
+class Html extends Component<HtmlProps> {
   static defaultProps = {
+    app: {},
+    ogTitle: "",
     styles: [],
     scripts: [],
     root: "",
@@ -90,12 +87,12 @@ class Html extends Component {
             rel="stylesheet"
             href="https://fonts.googleapis.com/css?family=Nunito:400,900"
           />
-          {scripts.map((script) => (
+          {scripts!.map((script) => (
             <link key={script} rel="preload" href={script} as="script" />
           ))}
           <link rel="manifest" href="/site.webmanifest" />
           <link rel="apple-touch-icon" href="/icon.png" />
-          {styles.map((style) => (
+          {styles!.map((style) => (
             <style
               key={style.id}
               id={style.id}
@@ -116,7 +113,7 @@ class Html extends Component {
               }}
             />
           )}
-          {scripts.map((script) => (
+          {scripts!.map((script) => (
             <script key={script} src={script} />
           ))}
         </body>

@@ -7,30 +7,29 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from "react";
-import PropTypes from "prop-types";
+import React, { Component, MouseEvent, ReactNode } from "react";
 import history from "../../history";
 
-function isLeftClickEvent(event) {
+function isLeftClickEvent(event: MouseEvent) {
   return event.button === 0;
 }
 
-function isModifiedEvent(event) {
+function isModifiedEvent(event: MouseEvent) {
   return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 }
 
-class Link extends React.Component {
-  static propTypes = {
-    to: PropTypes.string.isRequired,
-    children: PropTypes.node.isRequired,
-    onClick: PropTypes.func,
-  };
+interface LinkProps {
+  to: string;
+  children: ReactNode;
+  onClick?: (event: MouseEvent) => void;
+}
 
+class Link extends Component<LinkProps> {
   static defaultProps = {
     onClick: null,
   };
 
-  handleClick = (event) => {
+  handleClick = (event: MouseEvent) => {
     if (this.props.onClick) {
       this.props.onClick(event);
     }
@@ -46,9 +45,9 @@ class Link extends React.Component {
     event.preventDefault();
 
     if (window.swUpdate) {
-      window.location = this.props.to;
+      window.location.href = this.props.to;
     } else {
-      history.push(this.props.to);
+      history!.push(this.props.to);
     }
   };
 

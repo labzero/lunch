@@ -38,8 +38,8 @@ import Honeybadger from "@honeybadger-io/js";
 import PrettyError from "pretty-error";
 import { v1 } from "uuid";
 import { ResolveContext } from "universal-router";
-import App from "./components/App";
-import Html from "./components/Html";
+import AppComponent from "./components/App";
+import Html, { HtmlProps } from "./components/Html";
 import { ErrorPageWithoutStyle } from "./components/ErrorPage/ErrorPage";
 import errorPageStyle from "./components/ErrorPage/ErrorPage.scss";
 import generateUrl from "./helpers/generateUrl";
@@ -60,7 +60,7 @@ import passwordMiddleware from "./middlewares/password";
 import usersMiddleware from "./middlewares/users";
 import api from "./api";
 import { sequelize, Team, User } from "./db";
-import { ExtWebSocket, Flash, StateData } from "./interfaces";
+import { App, ExtWebSocket, Flash, StateData } from "./interfaces";
 
 process.on("unhandledRejection", (reason, p) => {
   console.error("Unhandled Rejection at:", p, "reason:", reason);
@@ -404,7 +404,7 @@ const render: RequestHandler = async (req, res, next) => {
 
     const pageTitle = route.title || "Lunch";
 
-    const data = {
+    const data: HtmlProps = {
       ...route,
       title: pageTitle,
       ogTitle: route.ogTitle || pageTitle,
@@ -415,11 +415,11 @@ const render: RequestHandler = async (req, res, next) => {
     };
 
     data.children = ReactDOM.renderToString(
-      <App context={context}>{route.component}</App>
+      <AppComponent context={context}>{route.component}</AppComponent>
     );
     data.styles = [{ id: "css", cssText: [...css].join("") }];
 
-    const scripts = new Set();
+    const scripts = new Set<string>();
     const addChunk = (chunk: string) => {
       if (chunks[chunk]) {
         chunks[chunk].forEach((asset: string) => scripts.add(asset));

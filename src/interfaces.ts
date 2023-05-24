@@ -11,6 +11,8 @@ import {
   Vote as VoteModel,
 } from "./db";
 
+export interface App {}
+
 export interface ExtWebSocket extends WebSocket {
   teamId?: number;
 }

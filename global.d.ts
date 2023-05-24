@@ -4,6 +4,11 @@ declare const __DEV__: boolean;
 /// <reference types="webpack-env" />
 /// <reference types="chai-jsdom" />
 
+declare interface Window {
+  App: any;
+  swUpdate?: boolean;
+}
+
 type Dispose = () => void;
 type InsertCssItem = () => Dispose;
 type GetCSSItem = () => string;
