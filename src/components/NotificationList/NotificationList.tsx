@@ -2,10 +2,15 @@ import PropTypes from "prop-types";
 import React from "react";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import withStyles from "isomorphic-style-loader/withStyles";
+import { Notification } from "../../interfaces";
 import NotificationContainer from "../Notification/NotificationContainer";
 import s from "./NotificationList.scss";
 
-const NotificationList = ({ notifications }) => (
+interface NotificationListProps {
+  notifications: Notification[];
+}
+
+const NotificationList = ({ notifications }: NotificationListProps) => (
   <ul className={s.notifications}>
     <TransitionGroup>
       {notifications.map((notification) => (

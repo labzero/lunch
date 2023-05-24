@@ -13,11 +13,11 @@ interface OwnProps extends Pick<NotificationProps, "actionType"> {
   vals: {
     decision?: Decision;
     newName?: string;
-    userId?: string;
+    userId?: number;
     restaurant?: Restaurant;
     restaurantId?: number;
     tag?: Tag;
-    tagId?: string;
+    tagId?: number;
   };
 }
 
