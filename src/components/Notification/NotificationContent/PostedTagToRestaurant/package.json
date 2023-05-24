@@ -2,5 +2,5 @@
   "name": "PostedTagToRestaurant",
   "version": "0.0.0",
   "private": true,
-  "main": "./PostedTagToRestaurant.js"
+  "main": "./PostedTagToRestaurant.tsx"
 }

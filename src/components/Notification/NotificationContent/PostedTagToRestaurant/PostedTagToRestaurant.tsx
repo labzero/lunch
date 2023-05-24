@@ -2,13 +2,15 @@ import PropTypes from "prop-types";
 import React from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "../NotificationContent.scss";
+import { NotificationContentProps } from "..";
 
-const DecisionDeleted = ({
+const PostedTagToRestaurant = ({
   loggedIn,
   user,
   restaurantName,
+  tagName,
   showMapAndInfoWindow,
-}) => {
+}: NotificationContentProps) => {
   const restaurantEl = (
     <button
       className={s.clickable}
@@ -21,28 +23,40 @@ const DecisionDeleted = ({
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b> cancelled the decision for
-        {restaurantEl}.
+        <b>{user}</b> added tag{" "}
+        <b>
+          &ldquo;
+          {tagName}
+          &rdquo;
+        </b>{" "}
+        to {restaurantEl}.
       </span>
     );
   }
   return (
     <span>
-      The decision for
-      {restaurantEl} was cancelled.
+      Tag
+      <b>
+        &ldquo;
+        {tagName}
+        &rdquo;
+      </b>{" "}
+      was added to
+      {restaurantEl}.
     </span>
   );
 };
 
-DecisionDeleted.propTypes = {
+PostedTagToRestaurant.propTypes = {
   loggedIn: PropTypes.bool.isRequired,
   user: PropTypes.string,
   restaurantName: PropTypes.string.isRequired,
+  tagName: PropTypes.string.isRequired,
   showMapAndInfoWindow: PropTypes.func.isRequired,
 };
 
-DecisionDeleted.defaultProps = {
+PostedTagToRestaurant.defaultProps = {
   user: "",
 };
 
-export default withStyles(s)(DecisionDeleted);
+export default withStyles(s)(PostedTagToRestaurant);

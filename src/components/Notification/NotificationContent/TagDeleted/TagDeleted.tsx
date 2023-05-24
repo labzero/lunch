@@ -1,11 +1,11 @@
 /* eslint-disable css-modules/no-unused-class */
 
-import PropTypes from "prop-types";
 import React from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "../NotificationContent.scss";
+import { NotificationContentProps } from "..";
 
-const TagDeleted = ({ loggedIn, user, tagName }) => {
+const TagDeleted = ({ loggedIn, user, tagName }: NotificationContentProps) => {
   if (loggedIn) {
     return (
       <span>
@@ -30,12 +30,6 @@ const TagDeleted = ({ loggedIn, user, tagName }) => {
       was deleted.
     </span>
   );
-};
-
-TagDeleted.propTypes = {
-  loggedIn: PropTypes.bool.isRequired,
-  user: PropTypes.string,
-  tagName: PropTypes.string.isRequired,
 };
 
 TagDeleted.defaultProps = {

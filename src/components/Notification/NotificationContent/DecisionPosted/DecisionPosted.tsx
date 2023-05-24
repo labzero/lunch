@@ -1,8 +1,8 @@
-import PropTypes from "prop-types";
 import React from "react";
 import dayjs from "dayjs";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "../NotificationContent.scss";
+import { NotificationContentProps } from "..";
 
 const DecisionPosted = ({
   decision,
@@ -10,7 +10,7 @@ const DecisionPosted = ({
   user,
   restaurantName,
   showMapAndInfoWindow,
-}) => {
+}: NotificationContentProps) => {
   const restaurantEl = (
     <button
       className={s.clickable}
@@ -21,7 +21,7 @@ const DecisionPosted = ({
     </button>
   );
   if (loggedIn) {
-    if (dayjs().subtract(12, "hours").isAfter(decision.createdAt)) {
+    if (dayjs().subtract(12, "hours").isAfter(decision!.createdAt)) {
       return (
         <span>
           <b>{user}</b> marked
@@ -37,14 +37,6 @@ const DecisionPosted = ({
     );
   }
   return <span>{restaurantEl} was decided upon.</span>;
-};
-
-DecisionPosted.propTypes = {
-  decision: PropTypes.object.isRequired,
-  loggedIn: PropTypes.bool.isRequired,
-  user: PropTypes.string,
-  restaurantName: PropTypes.string.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired,
 };
 
 DecisionPosted.defaultProps = {

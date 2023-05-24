@@ -1,14 +1,14 @@
-import PropTypes from "prop-types";
 import React from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "../NotificationContent.scss";
+import { NotificationContentProps } from "..";
 
 const VotePosted = ({
   loggedIn,
   user,
   restaurantName,
   showMapAndInfoWindow,
-}) => {
+}: NotificationContentProps) => {
   const restaurantEl = (
     <button
       className={s.clickable}
@@ -26,13 +26,6 @@ const VotePosted = ({
     );
   }
   return <span>{restaurantEl} was upvoted.</span>;
-};
-
-VotePosted.propTypes = {
-  loggedIn: PropTypes.bool.isRequired,
-  user: PropTypes.string,
-  restaurantName: PropTypes.string.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired,
 };
 
 VotePosted.defaultProps = {

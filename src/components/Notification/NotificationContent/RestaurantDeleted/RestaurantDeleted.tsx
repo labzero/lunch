@@ -1,11 +1,15 @@
 /* eslint-disable css-modules/no-unused-class */
 
-import PropTypes from "prop-types";
 import React from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "../NotificationContent.scss";
+import { NotificationContentProps } from "..";
 
-const RestaurantDeleted = ({ loggedIn, user, restaurantName }) => {
+const RestaurantDeleted = ({
+  loggedIn,
+  user,
+  restaurantName,
+}: NotificationContentProps) => {
   if (loggedIn) {
     return (
       <span>
@@ -19,12 +23,6 @@ const RestaurantDeleted = ({ loggedIn, user, restaurantName }) => {
       <b>{restaurantName}</b> was deleted.
     </span>
   );
-};
-
-RestaurantDeleted.propTypes = {
-  loggedIn: PropTypes.bool.isRequired,
-  user: PropTypes.string,
-  restaurantName: PropTypes.string.isRequired,
 };
 
 RestaurantDeleted.defaultProps = {

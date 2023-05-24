@@ -1,7 +1,7 @@
-import PropTypes from "prop-types";
 import React from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "../NotificationContent.scss";
+import { NotificationContentProps } from "..";
 
 const RestaurantRenamed = ({
   loggedIn,
@@ -9,7 +9,7 @@ const RestaurantRenamed = ({
   restaurantName,
   newName,
   showMapAndInfoWindow,
-}) => {
+}: NotificationContentProps) => {
   const oldNameEl = (
     <button
       className={s.clickable}
@@ -43,14 +43,6 @@ const RestaurantRenamed = ({
       {newNameEl}.
     </span>
   );
-};
-
-RestaurantRenamed.propTypes = {
-  loggedIn: PropTypes.bool.isRequired,
-  user: PropTypes.string,
-  restaurantName: PropTypes.string.isRequired,
-  newName: PropTypes.string.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired,
 };
 
 RestaurantRenamed.defaultProps = {

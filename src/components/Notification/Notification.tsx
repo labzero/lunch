@@ -1,20 +1,21 @@
 import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { Component, FC } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
-import RestaurantPosted from "./NotificationContent/RestaurantPosted";
-import RestaurantDeleted from "./NotificationContent/RestaurantDeleted";
-import RestaurantRenamed from "./NotificationContent/RestaurantRenamed";
-import VotePosted from "./NotificationContent/VotePosted";
-import VoteDeleted from "./NotificationContent/VoteDeleted";
-import PostedNewTagToRestaurant from "./NotificationContent/PostedNewTagToRestaurant";
-import PostedTagToRestaurant from "./NotificationContent/PostedTagToRestaurant";
-import DeletedTagFromRestaurant from "./NotificationContent/DeletedTagFromRestaurant";
-import TagDeleted from "./NotificationContent/TagDeleted";
-import DecisionPosted from "./NotificationContent/DecisionPosted";
-import DecisionDeleted from "./NotificationContent/DecisionDeleted";
+import RestaurantPosted from "./NotificationContent/RestaurantPosted/RestaurantPosted";
+import RestaurantDeleted from "./NotificationContent/RestaurantDeleted/RestaurantDeleted";
+import RestaurantRenamed from "./NotificationContent/RestaurantRenamed/RestaurantRenamed";
+import VotePosted from "./NotificationContent/VotePosted/VotePosted";
+import VoteDeleted from "./NotificationContent/VoteDeleted/VoteDeleted";
+import PostedNewTagToRestaurant from "./NotificationContent/PostedNewTagToRestaurant/PostedNewTagToRestaurant";
+import PostedTagToRestaurant from "./NotificationContent/PostedTagToRestaurant/PostedTagToRestaurant";
+import DeletedTagFromRestaurant from "./NotificationContent/DeletedTagFromRestaurant/DeletedTagFromRestaurant";
+import TagDeleted from "./NotificationContent/TagDeleted/TagDeleted";
+import DecisionPosted from "./NotificationContent/DecisionPosted/DecisionPosted";
+import DecisionDeleted from "./NotificationContent/DecisionDeleted/DecisionDeleted";
 import s from "./Notification.scss";
+import { NotificationContentProps } from "./NotificationContent";
 
-const contentMap = {
+const contentMap: { [key: string]: FC<NotificationContentProps> } = {
   RESTAURANT_POSTED: RestaurantPosted,
   RESTAURANT_DELETED: RestaurantDeleted,
   RESTAURANT_RENAMED: RestaurantRenamed,
@@ -28,7 +29,16 @@ const contentMap = {
   DECISIONS_DELETED: DecisionDeleted,
 };
 
-class Notification extends Component {
+export interface NotificationProps {
+  expireNotification: () => void;
+  noRender?: boolean;
+  actionType: keyof typeof contentMap;
+  contentProps: NotificationContentProps;
+}
+
+class Notification extends Component<NotificationProps> {
+  timeout: NodeJS.Timeout;
+
   static propTypes = {
     expireNotification: PropTypes.func.isRequired,
     noRender: PropTypes.bool,

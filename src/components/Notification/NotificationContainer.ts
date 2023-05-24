@@ -1,17 +1,32 @@
 import { connect } from "react-redux";
+import { showMapAndInfoWindow } from "../../actions/mapUi";
+import { expireNotification } from "../../actions/notifications";
+import { Decision, Dispatch, Restaurant, State, Tag } from "../../interfaces";
 import { getRestaurantById } from "../../selectors/restaurants";
 import { getTagById } from "../../selectors/tags";
 import { getUserById } from "../../selectors/users";
-import { expireNotification } from "../../actions/notifications";
-import { showMapAndInfoWindow } from "../../actions/mapUi";
-import Notification from "./Notification";
+import Notification, { NotificationProps } from "./Notification";
+import { NotificationContentProps } from "./NotificationContent";
+
+interface OwnProps extends Pick<NotificationProps, "actionType"> {
+  id: string;
+  vals: {
+    decision?: Decision;
+    newName?: string;
+    userId?: string;
+    restaurant?: Restaurant;
+    restaurantId?: number;
+    tag?: Tag;
+    tagId?: string;
+  };
+}
 
 const mapStateToProps = () => {
-  let contentProps;
-  return (state, ownProps) => {
+  let contentProps: Partial<NotificationContentProps>;
+  return (state: State, ownProps: OwnProps) => {
     if (contentProps === undefined) {
       const { vals } = ownProps;
-      if (vals.userId === state.user.id) {
+      if (vals.userId === state.user?.id) {
         return { noRender: true };
       }
       let restaurantName;
@@ -29,7 +44,7 @@ const mapStateToProps = () => {
       }
       contentProps = {
         decision: vals.decision,
-        loggedIn: state.user.id !== undefined,
+        loggedIn: state.user !== null,
         restaurantName,
         tagName,
         newName: vals.newName,
@@ -47,20 +62,24 @@ const mapStateToProps = () => {
   };
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = (dispatch: Dispatch, ownProps: OwnProps) => ({
   expireNotification: () => {
     dispatch(expireNotification(ownProps.id));
   },
   dispatch,
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+const mergeProps = (
+  stateProps: ReturnType<ReturnType<typeof mapStateToProps>>,
+  dispatchProps: ReturnType<typeof mapDispatchToProps>,
+  ownProps: OwnProps
+) => ({
   ...stateProps,
   ...dispatchProps,
   contentProps: {
     ...stateProps.contentProps,
     showMapAndInfoWindow: () => {
-      dispatchProps.dispatch(showMapAndInfoWindow(ownProps.vals.restaurantId));
+      dispatchProps.dispatch(showMapAndInfoWindow(ownProps.vals.restaurantId!));
     },
   },
 });

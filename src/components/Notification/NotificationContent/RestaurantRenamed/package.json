@@ -2,5 +2,5 @@
   "name": "RestaurantRenamed",
   "version": "0.0.0",
   "private": true,
-  "main": "./RestaurantRenamed.js"
+  "main": "./RestaurantRenamed.tsx"
 }

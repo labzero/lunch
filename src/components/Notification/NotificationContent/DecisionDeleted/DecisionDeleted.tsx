@@ -1,14 +1,14 @@
-import PropTypes from "prop-types";
 import React from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "../NotificationContent.scss";
+import { NotificationContentProps } from "..";
 
-const RestaurantPosted = ({
+const DecisionDeleted = ({
   loggedIn,
   user,
   restaurantName,
   showMapAndInfoWindow,
-}) => {
+}: NotificationContentProps) => {
   const restaurantEl = (
     <button
       className={s.clickable}
@@ -21,23 +21,21 @@ const RestaurantPosted = ({
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b> added
+        <b>{user}</b> cancelled the decision for
         {restaurantEl}.
       </span>
     );
   }
-  return <span>{restaurantEl} was added.</span>;
+  return (
+    <span>
+      The decision for
+      {restaurantEl} was cancelled.
+    </span>
+  );
 };
 
-RestaurantPosted.propTypes = {
-  loggedIn: PropTypes.bool.isRequired,
-  user: PropTypes.string,
-  restaurantName: PropTypes.string.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired,
-};
-
-RestaurantPosted.defaultProps = {
+DecisionDeleted.defaultProps = {
   user: "",
 };
 
-export default withStyles(s)(RestaurantPosted);
+export default withStyles(s)(DecisionDeleted);

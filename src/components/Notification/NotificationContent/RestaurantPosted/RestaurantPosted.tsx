@@ -1,14 +1,14 @@
-import PropTypes from "prop-types";
 import React from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "../NotificationContent.scss";
+import { NotificationContentProps } from "..";
 
-const VoteDeleted = ({
+const RestaurantPosted = ({
   loggedIn,
   user,
   restaurantName,
   showMapAndInfoWindow,
-}) => {
+}: NotificationContentProps) => {
   const restaurantEl = (
     <button
       className={s.clickable}
@@ -21,22 +21,16 @@ const VoteDeleted = ({
   if (loggedIn) {
     return (
       <span>
-        <b>{user}</b> downvoted {restaurantEl}.
+        <b>{user}</b> added
+        {restaurantEl}.
       </span>
     );
   }
-  return <span>{restaurantEl} was downvoted.</span>;
+  return <span>{restaurantEl} was added.</span>;
 };
 
-VoteDeleted.propTypes = {
-  loggedIn: PropTypes.bool.isRequired,
-  user: PropTypes.string,
-  restaurantName: PropTypes.string.isRequired,
-  showMapAndInfoWindow: PropTypes.func.isRequired,
-};
-
-VoteDeleted.defaultProps = {
+RestaurantPosted.defaultProps = {
   user: "",
 };
 
-export default withStyles(s)(VoteDeleted);
+export default withStyles(s)(RestaurantPosted);
