@@ -1,19 +1,29 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { ChangeEvent, Component, RefObject, createRef } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import s from "./NameFilterForm.scss";
 
-class NameFilterForm extends Component {
-  static propTypes = {
-    nameFilter: PropTypes.string.isRequired,
-    restaurantIds: PropTypes.array.isRequired,
-    setFlipMove: PropTypes.func.isRequired,
-    setNameFilter: PropTypes.func.isRequired,
-  };
+interface NameFilterFormProps {
+  nameFilter: string;
+  restaurantIds: string[];
+  setFlipMove: (value: boolean) => void;
+  setNameFilter: (value: string) => void;
+}
 
-  constructor(props) {
+interface NameFilterFormState {
+  shown: boolean;
+}
+
+class NameFilterForm extends Component<
+  NameFilterFormProps,
+  NameFilterFormState
+> {
+  declare input: RefObject<HTMLInputElement>;
+
+  constructor(props: NameFilterFormProps) {
     super(props);
+
+    this.input = createRef();
 
     if (props.nameFilter.length) {
       this.state = {
@@ -26,10 +36,13 @@ class NameFilterForm extends Component {
     }
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(
+    prevProps: NameFilterFormProps,
+    prevState: NameFilterFormState
+  ) {
     if (this.state.shown !== prevState.shown) {
       if (this.state.shown) {
-        this.input.focus();
+        this.input.current?.focus();
       } else {
         this.setFlipMoveTrue();
       }
@@ -44,7 +57,7 @@ class NameFilterForm extends Component {
     this.props.setFlipMove(true);
   };
 
-  setNameFilterValue = (event) => {
+  setNameFilterValue = (event: ChangeEvent<HTMLInputElement>) => {
     this.props.setNameFilter(event.target.value);
   };
 
@@ -84,9 +97,7 @@ class NameFilterForm extends Component {
               onChange={this.setNameFilterValue}
               onFocus={this.setFlipMoveFalse}
               onBlur={this.setFlipMoveTrue}
-              ref={(i) => {
-                this.input = i;
-              }}
+              ref={this.input}
             />
           </div>
           <Button onClick={this.hideForm} variant="light">
