@@ -7,7 +7,7 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React, { Component } from "react";
+import React, { Component, ReactNode } from "react";
 import PropTypes from "prop-types";
 import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import emptyFunction from "fbjs/lib/emptyFunction";
@@ -19,19 +19,24 @@ import s from "./Layout.scss";
 // eslint-disable-next-line css-modules/no-unused-class, no-unused-vars
 import globalCss from "../../styles/globalCss.scss";
 
-class Layout extends Component {
-  static propTypes = {
-    children: PropTypes.element.isRequired,
-    isHome: PropTypes.bool,
-    path: PropTypes.string,
-    shouldScrollToTop: PropTypes.bool.isRequired,
-    confirmShown: PropTypes.bool.isRequired,
-    scrolledToTop: PropTypes.func.isRequired,
-  };
+export interface LayoutProps {
+  children: ReactNode;
+  isHome?: boolean;
+  path: string;
+  shouldScrollToTop: boolean;
+  confirmShown: boolean;
+  scrolledToTop: () => void;
+}
+
+interface LayoutContext {
+  insertCss: (...styles: Style[]) => void;
+}
+
+class Layout extends Component<LayoutProps> {
+  declare context: LayoutContext;
 
   static defaultProps = {
     isHome: false,
-    path: undefined,
   };
 
   static contextTypes = {
@@ -42,7 +47,7 @@ class Layout extends Component {
     insertCss: PropTypes.func.isRequired,
   };
 
-  constructor(props, context) {
+  constructor(props: LayoutProps, context: LayoutContext) {
     super(props);
     context.insertCss(s, globalCss);
   }

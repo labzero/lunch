@@ -496,7 +496,9 @@ interface BaseState {
       };
     };
   };
-  pageUi: {};
+  pageUi: {
+    shouldScrollToTop?: boolean;
+  };
   tagFilters: number[];
   tagExclusions: number[];
   tags: {

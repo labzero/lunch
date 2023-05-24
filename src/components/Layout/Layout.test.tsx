@@ -15,6 +15,7 @@ import PropTypes from "prop-types";
 import { expect } from "chai";
 import proxyquire from "proxyquire";
 import { render, screen } from "../../../test/test-utils";
+import { LayoutProps } from "./Layout";
 
 const proxy = proxyquire.noCallThru();
 
@@ -33,12 +34,13 @@ const Layout = proxy("./Layout", {
 }).default;
 
 describe("Layout", () => {
-  let props;
+  let props: LayoutProps;
 
   beforeEach(() => {
     props = {
       children: <div>Child</div>,
       confirmShown: false,
+      path: "/",
       shouldScrollToTop: false,
       scrolledToTop: () => undefined,
     };
