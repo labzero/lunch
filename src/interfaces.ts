@@ -444,6 +444,11 @@ export type ConfirmOpts = {
   action: Action;
 };
 
+export interface ListUiItem {
+  isEditingName?: boolean;
+  editNameFormValue?: string;
+}
+
 interface BaseState {
   restaurants: {
     didInvalidate: boolean;
@@ -467,6 +472,7 @@ interface BaseState {
     };
   };
   listUi: {
+    [index: number]: ListUiItem;
     editNameFormValue?: string;
     flipMove: boolean;
     newlyAdded?: NewlyAdded;

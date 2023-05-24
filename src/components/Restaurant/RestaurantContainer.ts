@@ -1,17 +1,22 @@
 import { connect } from "react-redux";
-import { getRestaurantById } from "../../selectors/restaurants";
-import { getListUiItemForId } from "../../selectors/listUi";
 import { showMapAndInfoWindow } from "../../actions/mapUi";
+import { Dispatch, State } from "../../interfaces";
+import { getListUiItemForId } from "../../selectors/listUi";
+import { getRestaurantById } from "../../selectors/restaurants";
 import Restaurant from "./Restaurant";
 
-const mapStateToProps = (state, ownProps) => ({
+interface OwnProps {
+  id: number;
+}
+
+const mapStateToProps = (state: State, ownProps: OwnProps) => ({
   restaurant: getRestaurantById(state, ownProps.id),
-  loggedIn: state.user.id !== undefined,
+  loggedIn: state.user !== null,
   listUiItem: getListUiItemForId(state, ownProps.id),
   ...ownProps,
 });
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = (dispatch: Dispatch, ownProps: OwnProps) => ({
   showMapAndInfoWindow: () => {
     dispatch(showMapAndInfoWindow(ownProps.id));
   },

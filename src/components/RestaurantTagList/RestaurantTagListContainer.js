@@ -5,7 +5,7 @@ import RestaurantTagList from "./RestaurantTagList";
 
 const mapStateToProps = (state, ownProps) => ({
   ids: getTagsForRestaurant(state, ownProps.id),
-  loggedIn: state.user.id !== undefined,
+  loggedIn: state.user !== null,
 });
 
 const mapDispatchToProps = (dispatch, ownProps) => ({

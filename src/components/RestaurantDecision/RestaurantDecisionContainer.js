@@ -8,7 +8,7 @@ const mapStateToProps = (state, ownProps) => {
   const decision = getDecision(state);
   return {
     id: ownProps.id,
-    loggedIn: state.user.id !== undefined,
+    loggedIn: state.user !== null,
     decided: decision !== undefined && decision.restaurantId === ownProps.id,
     votes: getRestaurantById(state, ownProps.id).votes,
   };

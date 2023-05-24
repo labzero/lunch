@@ -1,7 +1,7 @@
-import PropTypes from "prop-types";
 import React, { Component } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
+import { ListUiItem, Restaurant as RestaurantType } from "../../interfaces";
 import RestaurantVoteCountContainer from "../RestaurantVoteCount/RestaurantVoteCountContainer";
 import RestaurantVoteButtonContainer from "../RestaurantVoteButton/RestaurantVoteButtonContainer";
 import RestaurantDecisionContainer from "../RestaurantDecision/RestaurantDecisionContainer";
@@ -11,22 +11,26 @@ import RestaurantNameFormContainer from "../RestaurantNameForm/RestaurantNameFor
 import RestaurantDropdownContainer from "../RestaurantDropdown/RestaurantDropdownContainer";
 import s from "./Restaurant.scss";
 
-class Restaurant extends Component {
-  static propTypes = {
-    restaurant: PropTypes.object.isRequired,
-    loggedIn: PropTypes.bool.isRequired,
-    shouldShowAddTagArea: PropTypes.bool,
-    shouldShowDropdown: PropTypes.bool,
-    listUiItem: PropTypes.object.isRequired,
-    showMapAndInfoWindow: PropTypes.func.isRequired,
-  };
+export interface RestaurantProps {
+  restaurant: RestaurantType;
+  loggedIn: boolean;
+  shouldShowAddTagArea?: boolean;
+  shouldShowDropdown?: boolean;
+  listUiItem: ListUiItem;
+  showMapAndInfoWindow: () => void;
+}
 
+interface RestaurantState {
+  isAddingTags: boolean;
+}
+
+class Restaurant extends Component<RestaurantProps, RestaurantState> {
   static defaultProps = {
     shouldShowAddTagArea: false,
     shouldShowDropdown: false,
   };
 
-  constructor(props) {
+  constructor(props: RestaurantProps) {
     super(props);
 
     this.state = {
