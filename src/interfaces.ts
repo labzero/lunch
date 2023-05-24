@@ -53,7 +53,7 @@ export interface Vote extends VoteModel {}
 
 export interface Decision extends DecisionModel {}
 
-interface NewlyAdded {
+export interface NewlyAdded {
   id: number;
   userId: number;
 }
@@ -462,6 +462,7 @@ interface BaseState {
       action: () => void;
       actionLabel: string;
       body: ReactNode;
+      restaurantId?: number;
       shown: boolean;
     };
   };

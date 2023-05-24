@@ -1,22 +1,29 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { ChangeEvent, Component } from "react";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import ModalBody from "react-bootstrap/ModalBody";
 import ModalHeader from "react-bootstrap/ModalHeader";
 import ModalFooter from "react-bootstrap/ModalFooter";
 import Button from "react-bootstrap/Button";
+import { Action, Decision, Restaurant } from "../../interfaces";
 
-class PastDecisionsModal extends Component {
-  static propTypes = {
-    decide: PropTypes.func.isRequired,
-    decisionsByDay: PropTypes.object.isRequired,
-    hideModal: PropTypes.func.isRequired,
-    restaurantEntities: PropTypes.object.isRequired,
-    shown: PropTypes.bool.isRequired,
-  };
+export interface PastDecisionsModalProps {
+  decide: (daysAgo: number) => Promise<Action>;
+  decisionsByDay: { [key: number]: Decision[] };
+  hideModal: () => void;
+  restaurantEntities: { [key: number]: Restaurant };
+  shown: boolean;
+}
 
-  constructor(props) {
+interface PastDecisionsModalState {
+  daysAgo: number;
+}
+
+class PastDecisionsModal extends Component<
+  PastDecisionsModalProps,
+  PastDecisionsModalState
+> {
+  constructor(props: PastDecisionsModalProps) {
     super(props);
 
     this.state = {
@@ -24,9 +31,9 @@ class PastDecisionsModal extends Component {
     };
   }
 
-  handleChange = (event) =>
+  handleChange = (event: ChangeEvent<HTMLSelectElement>) =>
     this.setState({
-      daysAgo: event.target.value,
+      daysAgo: Number(event.target.value),
     });
 
   handleSubmit = () => {
@@ -36,14 +43,14 @@ class PastDecisionsModal extends Component {
     decide(daysAgo).then(() => this.setState({ daysAgo: 0 }));
   };
 
-  renderOption(index, text) {
+  renderOption(index: number, text?: string) {
     const { decisionsByDay, restaurantEntities } = this.props;
 
     let children = text || `${index} days ago`;
     let disabled = false;
     if (index > 0 && decisionsByDay[index].length > 0) {
       const decisionNamesForDay = decisionsByDay[index]
-        .reduce((acc, curr) => {
+        .reduce<string[]>((acc, curr) => {
           const restaurant = restaurantEntities[curr.restaurantId];
           if (restaurant) {
             disabled = true;
