@@ -18,7 +18,7 @@ function isModifiedEvent(event: MouseEvent) {
   return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 }
 
-interface LinkProps {
+interface LinkProps extends React.HTMLProps<HTMLAnchorElement> {
   to: string;
   children: ReactNode;
   onClick?: (event: MouseEvent) => void;

@@ -10,7 +10,7 @@ if (canUseDOM) {
   google = window.google;
 }
 
-interface GoogleInfoWindowProps {
+export interface GoogleInfoWindowProps {
   addRestaurant: (restaurant: google.maps.places.PlaceResult) => void;
   map: google.maps.Map;
   placeId: string;

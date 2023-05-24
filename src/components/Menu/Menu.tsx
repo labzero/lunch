@@ -1,20 +1,20 @@
-import PropTypes from "prop-types";
 import React, { Component } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
-import Link from "../Link";
+import { Team, User } from "../../interfaces";
+import Link from "../Link/Link";
 import s from "./Menu.scss";
 
-class Menu extends Component {
-  static propTypes = {
-    closeMenu: PropTypes.func.isRequired,
-    hasGuestRole: PropTypes.bool.isRequired,
-    hasMemberRole: PropTypes.bool.isRequired,
-    host: PropTypes.string.isRequired,
-    open: PropTypes.bool.isRequired,
-    team: PropTypes.object,
-    user: PropTypes.object.isRequired,
-  };
+export interface MenuProps {
+  closeMenu: () => void;
+  hasGuestRole: boolean;
+  hasMemberRole: boolean;
+  host: string;
+  open: boolean;
+  team?: Team;
+  user: User;
+}
 
+class Menu extends Component<MenuProps> {
   static defaultProps = {
     team: undefined,
   };
@@ -32,7 +32,7 @@ class Menu extends Component {
           <div>{user.email}</div>
         </div>
         <div className={s.lists}>
-          {team.id && (
+          {team && (
             <ul className={s.list}>
               {hasMemberRole && (
                 <li className={s.item}>

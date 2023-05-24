@@ -17,7 +17,7 @@ import Link from "../Link/Link";
 import lunch from "./lunch.png";
 import s from "./Header.scss";
 
-interface HeaderProps {
+export interface HeaderProps {
   flashes: Flash[];
   loggedIn: boolean;
   path: string;

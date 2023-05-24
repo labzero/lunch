@@ -1,9 +1,12 @@
 import { connect } from "react-redux";
 import { scrolledToTop } from "../../actions/pageUi";
 import { Dispatch, State } from "../../interfaces";
-import Layout from "./Layout";
+import Layout, { LayoutProps } from "./Layout";
 
-const mapStateToProps = (state: State, ownProps: { path: string }) => ({
+const mapStateToProps = (
+  state: State,
+  ownProps: Pick<LayoutProps, "path">
+) => ({
   confirmShown: !!state.modals.confirm,
   shouldScrollToTop: state.pageUi.shouldScrollToTop || false,
   ...ownProps,

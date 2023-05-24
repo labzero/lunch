@@ -1,11 +1,11 @@
 import { connect } from "react-redux";
 import { addRestaurant } from "../../actions/restaurants";
 import { Dispatch } from "../../interfaces";
-import GoogleInfoWindow from "./GoogleInfoWindow";
+import GoogleInfoWindow, { GoogleInfoWindowProps } from "./GoogleInfoWindow";
 
 const mapDispatchToProps = (
   dispatch: Dispatch,
-  ownProps: { placeId: string }
+  ownProps: Pick<GoogleInfoWindowProps, "placeId">
 ) => ({
   addRestaurant: (result: google.maps.places.PlaceResult) => {
     // eslint-disable-next-line camelcase
