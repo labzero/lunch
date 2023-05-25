@@ -187,15 +187,15 @@ const restaurants: Reducer<"restaurants"> = (state, action) => {
                   },
                 },
             restaurants: {
-              $apply: (restaurants) => {
+              $apply: (r) => {
+                let ret = r;
                 if (
-                  restaurants[action.vote.restaurantId].votes.indexOf(
-                    action.vote.id
-                  ) === -1
+                  r[action.vote.restaurantId].votes.indexOf(action.vote.id) ===
+                  -1
                 ) {
-                  const restaurant = restaurants[action.vote.restaurantId];
-                  restaurants = {
-                    ...restaurants,
+                  const restaurant = r[action.vote.restaurantId];
+                  ret = {
+                    ...r,
                     [action.vote.restaurantId]: {
                       ...restaurant,
                       votes: [...restaurant.votes, action.vote.id],
@@ -206,7 +206,7 @@ const restaurants: Reducer<"restaurants"> = (state, action) => {
                     },
                   };
                 }
-                return restaurants;
+                return ret;
               },
             },
           },
@@ -381,10 +381,11 @@ const restaurants: Reducer<"restaurants"> = (state, action) => {
         items: {
           entities: {
             restaurants: {
-              $apply: (restaurants) => {
+              $apply: (r) => {
+                const ret = r;
                 action.decisions.forEach((decision) => {
-                  const restaurant = restaurants[decision.restaurantId];
-                  restaurants[decision.restaurantId] = {
+                  const restaurant = r[decision.restaurantId];
+                  ret[decision.restaurantId] = {
                     ...restaurant,
                     all_decision_count: maybeAddToString(
                       restaurant.all_decision_count,
@@ -392,7 +393,7 @@ const restaurants: Reducer<"restaurants"> = (state, action) => {
                     ),
                   };
                 });
-                return restaurants;
+                return ret;
               },
             },
           },

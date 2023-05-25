@@ -1,30 +1,56 @@
-import PropTypes from "prop-types";
+/* eslint-disable max-classes-per-file */
+
 import React, { Component } from "react";
+import { Loader } from "@googlemaps/js-api-loader";
+import GeosuggestClass, { GeosuggestProps, Suggest } from "react-geosuggest";
+import { IntlShape } from "react-intl";
 import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import withStyles from "isomorphic-style-loader/withStyles";
 import loadComponent from "../../helpers/loadComponent";
-import s from "./RestaurantAddForm.scss";
 import generateMessageDescriptor from "../../helpers/generateMessageDescriptor";
+import { LatLng } from "../../interfaces";
 import GoogleMapsLoaderContext from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
+import s from "./RestaurantAddForm.scss";
 
 const m = generateMessageDescriptor("RestaurantAddForm");
 
-const renderNull = () => null;
-let Geosuggest = renderNull;
+class RenderNull extends GeosuggestClass {
+  render() {
+    return null;
+  }
+}
 
-class RestaurantAddForm extends Component {
+let Geosuggest: typeof GeosuggestClass = RenderNull;
+
+interface RestaurantAddFormProps
+  extends Pick<GeosuggestProps, "getSuggestLabel"> {
+  createTempMarker: (result: google.maps.GeocoderResult) => void;
+  clearTempMarker: () => void;
+  handleSuggestSelect: (
+    suggestion: Suggest,
+    geosuggest: GeosuggestClass
+  ) => void;
+  latLng: LatLng;
+  intl: IntlShape;
+}
+
+interface RestaurantAddFormContext {
+  loader: Loader;
+}
+
+class RestaurantAddForm extends Component<RestaurantAddFormProps> {
   static contextType = GoogleMapsLoaderContext;
 
-  static propTypes = {
-    getSuggestLabel: PropTypes.func.isRequired,
-    createTempMarker: PropTypes.func.isRequired,
-    clearTempMarker: PropTypes.func.isRequired,
-    handleSuggestSelect: PropTypes.func.isRequired,
-    latLng: PropTypes.object.isRequired,
-    intl: PropTypes.shape().isRequired,
-  };
+  geocoder: google.maps.Geocoder;
 
-  constructor(props, context) {
+  geosuggest: GeosuggestClass;
+
+  maps: typeof google.maps;
+
+  constructor(
+    props: RestaurantAddFormProps,
+    context: RestaurantAddFormContext
+  ) {
     super(props, context);
 
     if (canUseDOM) {
@@ -49,20 +75,20 @@ class RestaurantAddForm extends Component {
     });
   }
 
-  getCoordsForMarker = (suggest) => {
+  getCoordsForMarker = (suggest: Suggest) => {
     if (suggest !== null) {
       if (this.geocoder === undefined) {
         this.geocoder = new this.maps.Geocoder();
       }
       this.geocoder.geocode({ placeId: suggest.placeId }, (results, status) => {
         if (status === this.maps.GeocoderStatus.OK) {
-          this.props.createTempMarker(results[0]);
+          this.props.createTempMarker(results![0]);
         }
       });
     }
   };
 
-  handleSuggestSelect = (suggestion) => {
+  handleSuggestSelect = (suggestion: Suggest) => {
     this.props.handleSuggestSelect(suggestion, this.geosuggest);
   };
 
@@ -76,6 +102,14 @@ class RestaurantAddForm extends Component {
         {this.maps ? (
           <Geosuggest
             autoActivateFirstSuggest
+            bounds={
+              new google.maps.LatLngBounds(
+                new google.maps.LatLng(
+                  this.props.latLng.lat,
+                  this.props.latLng.lng
+                )
+              )
+            }
             className={s.geosuggest}
             ignoreTab
             inputClassName={s.input}
@@ -83,21 +117,16 @@ class RestaurantAddForm extends Component {
             suggestItemClassName={s.suggestItem}
             suggestItemActiveClassName={s.suggestItemActive}
             suggestsClassName={s.suggests}
-            location={{
-              lat: () => this.props.latLng.lat,
-              lng: () => this.props.latLng.lng,
-            }}
             placeholder={f(m("addPlaces"))}
-            radius="0"
             onBlur={this.props.clearTempMarker}
             onActivateSuggest={this.getCoordsForMarker}
             onSuggestSelect={this.handleSuggestSelect}
             getSuggestLabel={this.props.getSuggestLabel}
             // to silence ref warning in React 16
             ref={
-              Geosuggest === renderNull
+              Geosuggest === RenderNull
                 ? undefined
-                : (g) => {
+                : (g: GeosuggestClass) => {
                     this.geosuggest = g;
                   }
             }

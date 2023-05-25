@@ -1,6 +1,8 @@
+import Geosuggest, { Suggest } from "react-geosuggest";
 import { connect } from "react-redux";
 import { scroller } from "react-scroll";
 import { injectIntl } from "react-intl";
+import { Dispatch, State } from "../../interfaces";
 import { getRestaurants } from "../../selectors/restaurants";
 import { getTeamLatLng } from "../../selectors/team";
 import { addRestaurant } from "../../actions/restaurants";
@@ -9,24 +11,24 @@ import RestaurantAddForm from "./RestaurantAddForm";
 
 // Keep a cache of terms[0] since our geosuggest library doesn't allow us to receive a label
 // different than what is in the suggest dropdown
-let suggestCache = {};
+let suggestCache: { [placeId: string]: string } = {};
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state: State) => ({
   latLng: getTeamLatLng(state),
   restaurants: getRestaurants(state),
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  getSuggestLabel: (suggest) => {
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  getSuggestLabel: (suggest: Suggest) => {
     if (suggest.terms !== undefined && suggest.terms.length > 0) {
-      suggestCache[suggest.placeId] = suggest.terms[0].value;
+      suggestCache[suggest.place_id] = suggest.terms[0].value;
     }
     return suggest.description;
   },
-  createTempMarker: (result) => {
+  createTempMarker: (result: google.maps.GeocoderResult) => {
     const location = result.geometry.location;
     const marker = {
-      label: suggestCache[location.placeId],
+      label: suggestCache[result.place_id],
       latLng: {
         lat: location.lat(),
         lng: location.lng(),
@@ -40,13 +42,19 @@ const mapDispatchToProps = (dispatch) => ({
   dispatch,
 });
 
-const mergeProps = (stateProps, dispatchProps) => ({
+const mergeProps = (
+  stateProps: ReturnType<typeof mapStateToProps>,
+  dispatchProps: ReturnType<typeof mapDispatchToProps>
+) => ({
   ...stateProps,
   ...dispatchProps,
-  handleSuggestSelect: (suggestion, geosuggest) => {
+  handleSuggestSelect: (
+    suggestion: Suggest | undefined,
+    geosuggest: Geosuggest
+  ) => {
     if (suggestion) {
       let name = suggestion.label;
-      let address;
+      let address = "";
       const {
         placeId,
         location: { lat, lng },
@@ -62,7 +70,7 @@ const mergeProps = (stateProps, dispatchProps) => ({
       if (suggestion.gmaps !== undefined) {
         address = suggestion.gmaps.formatted_address;
       }
-      suggestCache = [];
+      suggestCache = {};
       geosuggest.update("");
       geosuggest.showSuggests();
       const existingRestaurant = stateProps.restaurants.find(
@@ -73,10 +81,10 @@ const mergeProps = (stateProps, dispatchProps) => ({
       } else {
         scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, {
           containerId: "listContainer",
-          offset: document.getElementById("listForms").offsetHeight,
+          offset: document.getElementById("listForms")!.offsetHeight,
           smooth: true,
         });
-        scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`);
+        scroller.scrollTo(`restaurantListItem_${existingRestaurant.id}`, {});
       }
     }
     dispatchProps.dispatch(clearTempMarker());

@@ -2630,6 +2630,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/google.maps@npm:*":
+  version: 3.53.1
+  resolution: "@types/google.maps@npm:3.53.1"
+  checksum: b2d59b3772e7a3d39517089752a5211d7f0e6778e5cc97598a680c8dde4f307968902910bad4e5135a79a965d7e74c9571eafa3dcb5af9e264673601f8fada14
+  languageName: node
+  linkType: hard
+
 "@types/google.maps@npm:^3.52.1":
   version: 3.52.1
   resolution: "@types/google.maps@npm:3.52.1"
@@ -2902,6 +2909,25 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: 8301f35cf1cbfec8c723e9477aecf87774e3c168bd457d353b23c45064737213d3e8008b067c6767b7b08e4f2b3823ee239242a6c225fc91e7f8725ef8734124
+  languageName: node
+  linkType: hard
+
+"@types/react-geosuggest@npm:^2.7.13":
+  version: 2.7.13
+  resolution: "@types/react-geosuggest@npm:2.7.13"
+  dependencies:
+    "@types/google.maps": "*"
+    "@types/react": "*"
+  checksum: 38744592d1f4f5086b7b90ed3fdbe7877d0e726cc650cfaf2b7cfe5005a5723a0ba131a4026dc4d7c0d208a2a3ecad97f700090cb240c362c27621bb4df06b09
+  languageName: node
+  linkType: hard
+
+"@types/react-scroll@npm:^1.8.7":
+  version: 1.8.7
+  resolution: "@types/react-scroll@npm:1.8.7"
+  dependencies:
+    "@types/react": "*"
+  checksum: 1308d2d24bcd9e2e78eaaff3b29ed6df59d903c32d0e0d94536ade4b34f544d09737a18798e38ed1c613d2b8b634f83736a64ef55a072686dacdca1e94f4cc05
   languageName: node
   linkType: hard
 
@@ -9989,6 +10015,8 @@ __metadata:
     "@types/passport-local": ^1.0.35
     "@types/proxyquire": ^1.3.28
     "@types/react-dom": ^18.2.4
+    "@types/react-geosuggest": ^2.7.13
+    "@types/react-scroll": ^1.8.7
     "@types/serialize-javascript": ^5.0.2
     "@types/sinon": ^10.0.15
     "@types/supertest": ^2.0.12

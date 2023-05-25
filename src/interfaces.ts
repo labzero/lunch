@@ -31,8 +31,8 @@ export interface User extends UserModel {
 }
 
 export interface Restaurant extends Omit<RestaurantModel, "tags" | "votes"> {
-  all_decision_count: number | string;
-  all_vote_count: number | string;
+  all_decision_count: number;
+  all_vote_count: number;
   tags: number[];
   votes: number[];
 }
