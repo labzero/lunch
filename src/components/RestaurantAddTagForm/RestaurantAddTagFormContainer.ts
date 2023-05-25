@@ -5,9 +5,15 @@ import {
   addNewTagToRestaurant,
   addTagToRestaurant,
 } from "../../actions/restaurants";
+import { Dispatch, State } from "../../interfaces";
 import RestaurantAddTagForm from "./RestaurantAddTagForm";
 
-const mapStateToProps = (state, ownProps) => {
+interface OwnProps {
+  hideAddTagForm: () => void;
+  id: number;
+}
+
+const mapStateToProps = (state: State, ownProps: OwnProps) => {
   const restaurant = getRestaurantById(state, ownProps.id);
   const addedTags = restaurant.tags;
   const tags = getTags(state);
@@ -18,11 +24,11 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
-  addNewTagToRestaurant: (autosuggestValue) => {
+const mapDispatchToProps = (dispatch: Dispatch, ownProps: OwnProps) => ({
+  addNewTagToRestaurant: (autosuggestValue: string) => {
     dispatch(addNewTagToRestaurant(ownProps.id, autosuggestValue));
   },
-  addTagToRestaurant: (id) => {
+  addTagToRestaurant: (id: number) => {
     dispatch(addTagToRestaurant(ownProps.id, id));
   },
 });

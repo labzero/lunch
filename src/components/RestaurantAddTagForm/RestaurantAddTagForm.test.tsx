@@ -5,10 +5,13 @@ import React from "react";
 import sinon from "sinon";
 import { expect } from "chai";
 import { render, screen } from "../../../test/test-utils";
-import { _RestaurantAddTagForm as RestaurantAddTagForm } from "./RestaurantAddTagForm";
+import {
+  _RestaurantAddTagForm as RestaurantAddTagForm,
+  RestaurantAddTagFormProps,
+} from "./RestaurantAddTagForm";
 
 describe("RestaurantAddTagForm", () => {
-  let props;
+  let props: RestaurantAddTagFormProps;
 
   beforeEach(() => {
     props = {
