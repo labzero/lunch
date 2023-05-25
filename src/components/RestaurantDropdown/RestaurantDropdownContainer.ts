@@ -1,19 +1,24 @@
 import { connect } from "react-redux";
-import { getRestaurantById } from "../../selectors/restaurants";
-import { getListUiItemForId } from "../../selectors/listUi";
+import { removeDecision } from "../../actions/decisions";
+import { showEditNameForm, setEditNameFormValue } from "../../actions/listUi";
+import { showMapAndInfoWindow } from "../../actions/mapUi";
+import { showModal } from "../../actions/modals";
+import { removeRestaurant } from "../../actions/restaurants";
+import { Dispatch, State } from "../../interfaces";
 import {
   getDecision,
   getDecisionsByRestaurantId,
 } from "../../selectors/decisions";
-import { showModal } from "../../actions/modals";
-import { removeDecision } from "../../actions/decisions";
-import { showMapAndInfoWindow } from "../../actions/mapUi";
-import { showEditNameForm, setEditNameFormValue } from "../../actions/listUi";
-import { removeRestaurant } from "../../actions/restaurants";
+import { getListUiItemForId } from "../../selectors/listUi";
+import { getRestaurantById } from "../../selectors/restaurants";
 import { getTeamSortDuration } from "../../selectors/team";
 import RestaurantDropdown from "./RestaurantDropdown";
 
-const mapStateToProps = (state, ownProps) => ({
+interface OwnProps {
+  id: number;
+}
+
+const mapStateToProps = (state: State, ownProps: OwnProps) => ({
   restaurant: getRestaurantById(state, ownProps.id),
   sortDuration: getTeamSortDuration(state),
   listUiItem: getListUiItemForId(state, ownProps.id),
@@ -22,7 +27,7 @@ const mapStateToProps = (state, ownProps) => ({
   ...ownProps,
 });
 
-const mapDispatchToProps = (dispatch, ownProps) => ({
+const mapDispatchToProps = (dispatch: Dispatch, ownProps: OwnProps) => ({
   removeDecision: () => {
     dispatch(removeDecision());
   },
@@ -39,7 +44,11 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
   dispatch,
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+const mergeProps = (
+  stateProps: ReturnType<typeof mapStateToProps>,
+  dispatchProps: ReturnType<typeof mapDispatchToProps>,
+  ownProps: OwnProps
+) => ({
   ...stateProps,
   ...dispatchProps,
   deleteRestaurant: () =>

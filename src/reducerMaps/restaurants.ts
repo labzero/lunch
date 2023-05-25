@@ -54,13 +54,14 @@ const restaurants: Reducer<"restaurants"> = (state, action) => {
                   restaurantB.all_decision_count
                 ) {
                   return (
-                    restaurantA.all_decision_count -
-                    restaurantB.all_decision_count
+                    Number(restaurantA.all_decision_count) -
+                    Number(restaurantB.all_decision_count)
                   );
                 }
                 if (restaurantA.all_vote_count !== restaurantB.all_vote_count) {
                   return (
-                    restaurantB.all_vote_count - restaurantA.all_vote_count
+                    Number(restaurantB.all_vote_count) -
+                    Number(restaurantA.all_vote_count)
                   );
                 }
                 // stable sort

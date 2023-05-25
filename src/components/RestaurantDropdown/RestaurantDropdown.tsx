@@ -1,13 +1,26 @@
-import PropTypes from "prop-types";
 import React from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import { FaEllipsisH } from "react-icons/fa";
 import withStyles from "isomorphic-style-loader/withStyles";
+import { Decision, ListUiItem, Restaurant } from "../../interfaces";
 import s from "./RestaurantDropdown.scss";
 
 const DropdownToggle = Dropdown.Toggle;
 const DropdownMenu = Dropdown.Menu;
 const MenuItem = Dropdown.Item;
+
+interface RestaurantDropdownProps {
+  restaurant: Restaurant;
+  sortDuration: number;
+  listUiItem: ListUiItem;
+  decision?: Decision;
+  pastDecisions?: { [key: number]: string };
+  showMapAndInfoWindow: () => void;
+  showEditNameForm: () => void;
+  deleteRestaurant: () => void;
+  removeDecision?: () => void;
+  showPastDecisionsModal: () => void;
+}
 
 const RestaurantDropdown = ({
   restaurant,
@@ -20,7 +33,7 @@ const RestaurantDropdown = ({
   deleteRestaurant,
   removeDecision,
   showPastDecisionsModal,
-}) => {
+}: RestaurantDropdownProps) => {
   let editButton;
   if (!listUiItem.isEditingName) {
     editButton = (
@@ -101,28 +114,15 @@ const RestaurantDropdown = ({
         </Dropdown.Header>
         <Dropdown.ItemText className={s.stat}>
           {restaurant.all_vote_count} vote
-          {parseInt(restaurant.all_vote_count, 10) === 1 ? "" : "s"}
+          {Number(restaurant.all_vote_count) === 1 ? "" : "s"}
         </Dropdown.ItemText>
         <Dropdown.ItemText className={s.stat}>
           {`${restaurant.all_decision_count} \
-decision${parseInt(restaurant.all_decision_count, 10) === 1 ? "" : "s"}`}
+decision${Number(restaurant.all_decision_count) === 1 ? "" : "s"}`}
         </Dropdown.ItemText>
       </DropdownMenu>
     </Dropdown>
   );
-};
-
-RestaurantDropdown.propTypes = {
-  restaurant: PropTypes.object.isRequired,
-  sortDuration: PropTypes.number.isRequired,
-  listUiItem: PropTypes.object.isRequired,
-  decision: PropTypes.object,
-  pastDecisions: PropTypes.object,
-  showMapAndInfoWindow: PropTypes.func.isRequired,
-  showEditNameForm: PropTypes.func.isRequired,
-  deleteRestaurant: PropTypes.func.isRequired,
-  removeDecision: PropTypes.func,
-  showPastDecisionsModal: PropTypes.func.isRequired,
 };
 
 RestaurantDropdown.defaultProps = {

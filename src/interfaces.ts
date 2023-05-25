@@ -1,6 +1,6 @@
 import { BrowserHistory } from "history";
 import { WebSocket } from "ws";
-import { ThunkDispatch } from "@reduxjs/toolkit";
+import { ThunkAction, ThunkDispatch } from "@reduxjs/toolkit";
 import { ReactNode } from "react";
 import {
   Decision as DecisionModel,
@@ -31,8 +31,8 @@ export interface User extends UserModel {
 }
 
 export interface Restaurant extends Omit<RestaurantModel, "tags" | "votes"> {
-  all_decision_count: number;
-  all_vote_count: number;
+  all_decision_count: number | string;
+  all_vote_count: number | string;
   tags: number[];
   votes: number[];
 }
@@ -441,7 +441,7 @@ export interface Notification {
 export type ConfirmOpts = {
   actionLabel: string;
   body: string;
-  action: Action;
+  action: Action | ThunkAction<void, State, unknown, Action>;
 };
 
 export interface ListUiItem {
