@@ -1,14 +1,15 @@
 import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { Component, Suspense, lazy } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import HereMarker from "../HereMarker";
 import { GOOGLE_MAP_ZOOM } from "../../constants";
 import googleMapOptions from "../../helpers/googleMapOptions";
-import loadComponent from "../../helpers/loadComponent";
 import s from "./TeamMap.scss";
 import GoogleMapsLoaderContext from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 
-let GoogleMap = () => null;
+const GoogleMap = lazy(() =>
+  import(/* webpackChunkName: 'map' */ "google-map-react")
+);
 
 class TeamMap extends Component {
   static propTypes = {
@@ -30,16 +31,6 @@ class TeamMap extends Component {
 
   componentDidMount() {
     this.props.clearCenter();
-    loadComponent(() =>
-      require.ensure(
-        [],
-        (require) => require("google-map-react").default,
-        "map"
-      )
-    ).then((map) => {
-      GoogleMap = map;
-      this.forceUpdate();
-    });
   }
 
   setMap = ({ map }) => {
@@ -60,17 +51,19 @@ class TeamMap extends Component {
       <div className={s.root}>
         <GoogleMapsLoaderContext.Consumer>
           {({ loader }) => (
-            <GoogleMap
-              center={center}
-              defaultZoom={GOOGLE_MAP_ZOOM}
-              defaultCenter={defaultCenter}
-              googleMapLoader={() =>
-                loader.load().then((google) => google.maps)
-              }
-              onGoogleApiLoaded={this.setMap}
-              options={googleMapOptions()}
-              yesIWantToUseGoogleMapApiInternals
-            />
+            <Suspense>
+              <GoogleMap
+                center={center}
+                defaultZoom={GOOGLE_MAP_ZOOM}
+                defaultCenter={defaultCenter}
+                googleMapLoader={() =>
+                  loader.load().then((google) => google.maps)
+                }
+                onGoogleApiLoaded={this.setMap}
+                options={googleMapOptions()}
+                yesIWantToUseGoogleMapApiInternals
+              />
+            </Suspense>
           )}
         </GoogleMapsLoaderContext.Consumer>
         <div className={s.hereCenterer}>

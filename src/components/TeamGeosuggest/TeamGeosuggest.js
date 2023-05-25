@@ -1,10 +1,11 @@
 import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { Component, Suspense, lazy } from "react";
 import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
-import loadComponent from "../../helpers/loadComponent";
 import GoogleMapsLoaderContext from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 
-let Geosuggest = () => null;
+const Geosuggest = lazy(() =>
+  import(/* webpackChunkName: 'geosuggest' */ "react-geosuggest")
+);
 
 class TeamGeosuggest extends Component {
   static contextType = GoogleMapsLoaderContext;
@@ -26,19 +27,6 @@ class TeamGeosuggest extends Component {
         this.forceUpdate();
       });
     }
-  }
-
-  componentDidMount() {
-    loadComponent(() =>
-      require.ensure(
-        [],
-        (require) => require("react-geosuggest").default,
-        "map"
-      )
-    ).then((g) => {
-      Geosuggest = g;
-      this.forceUpdate();
-    });
   }
 
   getCoordsForMarker = (suggest) => {
@@ -71,18 +59,20 @@ class TeamGeosuggest extends Component {
     const { id, initialValue } = this.props;
 
     return this.maps ? (
-      <Geosuggest
-        autoActivateFirstSuggest
-        id={id}
-        initialValue={initialValue}
-        inputClassName="form-control"
-        googleMaps={this.maps}
-        onActivateSuggest={this.getCoordsForMarker}
-        onChange={this.handleChange}
-        onSuggestSelect={this.handleSuggestSelect}
-        placeholder="Enter team address"
-        types={["geocode"]}
-      />
+      <Suspense>
+        <Geosuggest
+          autoActivateFirstSuggest
+          id={id}
+          initialValue={initialValue}
+          inputClassName="form-control"
+          googleMaps={this.maps}
+          onActivateSuggest={this.getCoordsForMarker}
+          onChange={this.handleChange}
+          onSuggestSelect={this.handleSuggestSelect}
+          placeholder="Enter team address"
+          types={["geocode"]}
+        />
+      </Suspense>
     ) : null;
   }
 }

@@ -1,12 +1,11 @@
 /* eslint-disable max-classes-per-file */
 
-import React, { Component } from "react";
+import React, { Component, RefObject, Suspense, createRef, lazy } from "react";
 import { Loader } from "@googlemaps/js-api-loader";
 import GeosuggestClass, { GeosuggestProps, Suggest } from "react-geosuggest";
 import { IntlShape } from "react-intl";
 import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import withStyles from "isomorphic-style-loader/withStyles";
-import loadComponent from "../../helpers/loadComponent";
 import generateMessageDescriptor from "../../helpers/generateMessageDescriptor";
 import { LatLng } from "../../interfaces";
 import GoogleMapsLoaderContext from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
@@ -14,13 +13,9 @@ import s from "./RestaurantAddForm.scss";
 
 const m = generateMessageDescriptor("RestaurantAddForm");
 
-class RenderNull extends GeosuggestClass {
-  render() {
-    return null;
-  }
-}
-
-let Geosuggest: typeof GeosuggestClass = RenderNull;
+const Geosuggest = lazy(
+  () => import(/* webpackChunkName: 'geosuggest' */ "react-geosuggest")
+);
 
 interface RestaurantAddFormProps
   extends Pick<GeosuggestProps, "getSuggestLabel"> {
@@ -43,7 +38,7 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
 
   geocoder: google.maps.Geocoder;
 
-  geosuggest: GeosuggestClass;
+  geosuggest: RefObject<GeosuggestClass>;
 
   maps: typeof google.maps;
 
@@ -53,6 +48,8 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
   ) {
     super(props, context);
 
+    this.geosuggest = createRef();
+
     if (canUseDOM) {
       const { loader } = context;
       loader.load().then((google) => {
@@ -60,19 +57,6 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
         this.forceUpdate();
       });
     }
-  }
-
-  componentDidMount() {
-    loadComponent(() =>
-      require.ensure(
-        [],
-        (require) => require("react-geosuggest").default,
-        "map"
-      )
-    ).then((g) => {
-      Geosuggest = g;
-      this.forceUpdate();
-    });
   }
 
   getCoordsForMarker = (suggest: Suggest) => {
@@ -89,7 +73,7 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
   };
 
   handleSuggestSelect = (suggestion: Suggest) => {
-    this.props.handleSuggestSelect(suggestion, this.geosuggest);
+    this.props.handleSuggestSelect(suggestion, this.geosuggest!.current!);
   };
 
   render() {
@@ -100,37 +84,32 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
     return (
       <form>
         {this.maps ? (
-          <Geosuggest
-            autoActivateFirstSuggest
-            bounds={
-              new google.maps.LatLngBounds(
-                new google.maps.LatLng(
-                  this.props.latLng.lat,
-                  this.props.latLng.lng
+          <Suspense>
+            <Geosuggest
+              autoActivateFirstSuggest
+              bounds={
+                new google.maps.LatLngBounds(
+                  new google.maps.LatLng(
+                    this.props.latLng.lat,
+                    this.props.latLng.lng
+                  )
                 )
-              )
-            }
-            className={s.geosuggest}
-            ignoreTab
-            inputClassName={s.input}
-            googleMaps={this.maps}
-            suggestItemClassName={s.suggestItem}
-            suggestItemActiveClassName={s.suggestItemActive}
-            suggestsClassName={s.suggests}
-            placeholder={f(m("addPlaces"))}
-            onBlur={this.props.clearTempMarker}
-            onActivateSuggest={this.getCoordsForMarker}
-            onSuggestSelect={this.handleSuggestSelect}
-            getSuggestLabel={this.props.getSuggestLabel}
-            // to silence ref warning in React 16
-            ref={
-              Geosuggest === RenderNull
-                ? undefined
-                : (g: GeosuggestClass) => {
-                    this.geosuggest = g;
-                  }
-            }
-          />
+              }
+              className={s.geosuggest}
+              ignoreTab
+              inputClassName={s.input}
+              googleMaps={this.maps}
+              suggestItemClassName={s.suggestItem}
+              suggestItemActiveClassName={s.suggestItemActive}
+              suggestsClassName={s.suggests}
+              placeholder={f(m("addPlaces"))}
+              onBlur={this.props.clearTempMarker}
+              onActivateSuggest={this.getCoordsForMarker}
+              onSuggestSelect={this.handleSuggestSelect}
+              getSuggestLabel={this.props.getSuggestLabel}
+              ref={this.geosuggest}
+            />
+          </Suspense>
         ) : null}
       </form>
     );

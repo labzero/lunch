@@ -5,7 +5,7 @@ import GoogleInfoWindow, { GoogleInfoWindowProps } from "./GoogleInfoWindow";
 
 const mapDispatchToProps = (
   dispatch: Dispatch,
-  ownProps: Pick<GoogleInfoWindowProps, "placeId">
+  ownProps: Pick<GoogleInfoWindowProps, "placeId" | "map">
 ) => ({
   addRestaurant: (result: google.maps.places.PlaceResult) => {
     // eslint-disable-next-line camelcase

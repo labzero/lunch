@@ -449,6 +449,19 @@ export interface ListUiItem {
   editNameFormValue?: string;
 }
 
+export type InfoWindow =
+  | {
+      latLng: {
+        lat: number;
+        lng: number;
+      };
+      placeId: string;
+    }
+  | {
+      id: number;
+    }
+  | {};
+
 interface BaseState {
   restaurants: {
     didInvalidate: boolean;
@@ -483,18 +496,7 @@ interface BaseState {
       lat: number;
       lng: number;
     };
-    infoWindow?:
-      | {
-          latLng: {
-            lat: number;
-            lng: number;
-          };
-          placeId: string;
-        }
-      | {
-          id: number;
-        }
-      | {};
+    infoWindow?: InfoWindow;
     newlyAdded?: NewlyAdded;
     showUnvoted: boolean;
     showPOIs: boolean;

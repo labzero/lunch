@@ -6,17 +6,19 @@ import {
   showGoogleInfoWindow,
   showRestaurantInfoWindow,
 } from "../../actions/mapUi";
+import { Dispatch, State } from "../../interfaces";
 import { getRestaurantById } from "../../selectors/restaurants";
 import { getTeamDefaultZoom, getTeamLatLng } from "../../selectors/team";
 import { getMapUi } from "../../selectors/mapUi";
 import { getCurrentUser } from "../../selectors/user";
 import { getMapItems } from "../../selectors";
 import RestaurantMap from "./RestaurantMap";
+import { ClickEventValue } from "google-map-react";
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state: State) => {
   const mapUi = getMapUi(state);
   return {
-    infoWindow: state.mapUi.infoWindow,
+    infoWindow: mapUi.infoWindow,
     items: getMapItems(state),
     center: mapUi.center,
     defaultZoom: getTeamDefaultZoom(state),
@@ -31,24 +33,28 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = (dispatch: Dispatch) => ({
   clearCenter: () => dispatch(clearCenter()),
-  mapClicked: ({ event }) => {
+  mapClicked: ({ event }: ClickEventValue) => {
     if (!event.target.closest("[data-marker]")) {
       dispatch(hideInfoWindow());
     }
   },
-  showGoogleInfoWindow: (event) => dispatch(showGoogleInfoWindow(event)),
+  showGoogleInfoWindow: (event: google.maps.IconMouseEvent) =>
+    dispatch(showGoogleInfoWindow(event)),
   dispatch,
 });
 
-const mergeProps = (stateProps, dispatchProps) => ({
+const mergeProps = (
+  stateProps: ReturnType<typeof mapStateToProps>,
+  dispatchProps: ReturnType<typeof mapDispatchToProps>
+) => ({
   ...stateProps,
   ...dispatchProps,
   showNewlyAddedInfoWindow: () => {
-    if (stateProps.newlyAddedUserId === stateProps.user.id) {
+    if (stateProps.newlyAddedUserId === stateProps.user?.id) {
       dispatchProps.dispatch(
-        showRestaurantInfoWindow(stateProps.newlyAddedRestaurant)
+        showRestaurantInfoWindow(stateProps.newlyAddedRestaurant!)
       );
       dispatchProps.dispatch(clearNewlyAdded());
     }

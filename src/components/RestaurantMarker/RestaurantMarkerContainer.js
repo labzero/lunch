@@ -27,6 +27,8 @@ const mergeProps = (stateProps, dispatchProps) => ({
   ...dispatchProps,
   handleMarkerClick(event) {
     event.preventDefault();
+    // prevents POIs from receiving click event afterwards
+    event.stopPropagation();
     if (stateProps.showInfoWindow) {
       dispatchProps.dispatch(hideInfoWindow());
     } else {
