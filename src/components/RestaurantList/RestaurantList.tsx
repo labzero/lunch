@@ -1,6 +1,10 @@
-import PropTypes from "prop-types";
 import React, { useCallback } from "react";
 import { Flipper, Flipped } from "react-flip-toolkit";
+import {
+  CallbackFlippedProps,
+  HandleEnterUpdateDelete,
+  // eslint-disable-next-line import/no-unresolved
+} from "flip-toolkit/lib/types";
 import { Element as ScrollElement } from "react-scroll";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Container from "react-bootstrap/Container";
@@ -8,12 +12,19 @@ import Loading from "../Loading/Loading";
 import RestaurantContainer from "../Restaurant/RestaurantContainer";
 import s from "./RestaurantList.scss";
 
+interface RestaurantListProps {
+  allRestaurantIds: number[];
+  flipMove: boolean;
+  ids: number[];
+  restaurantListReady: boolean;
+}
+
 const RestaurantList = ({
   allRestaurantIds,
   flipMove,
   ids,
   restaurantListReady,
-}) => {
+}: RestaurantListProps) => {
   if (!restaurantListReady) {
     return <Loading />;
   }
@@ -45,25 +56,31 @@ const RestaurantList = ({
 
   const shouldFlip = useCallback(() => flipMove, []);
 
-  const onAppear = useCallback((el, i) => {
-    setTimeout(() => {
-      el.classList.add(s.fadeIn);
+  const onAppear = useCallback<NonNullable<CallbackFlippedProps["onAppear"]>>(
+    (el, i) => {
       setTimeout(() => {
-        // eslint-disable-next-line no-param-reassign
-        el.style.opacity = 1;
-        el.classList.remove(s.fadeIn);
-      }, 500);
-    }, i * 50);
-  }, []);
+        el.classList.add(s.fadeIn);
+        setTimeout(() => {
+          // eslint-disable-next-line no-param-reassign
+          el.style.opacity = "1";
+          el.classList.remove(s.fadeIn);
+        }, 500);
+      }, i * 50);
+    },
+    []
+  );
 
-  const onExit = useCallback((el, i, removeElement) => {
-    setTimeout(() => {
-      el.classList.add(s.fadeOut);
-      setTimeout(removeElement, 500);
-    }, i * 50);
-  }, []);
+  const onExit = useCallback<NonNullable<CallbackFlippedProps["onExit"]>>(
+    (el, i, removeElement) => {
+      setTimeout(() => {
+        el.classList.add(s.fadeOut);
+        setTimeout(removeElement, 500);
+      }, i * 50);
+    },
+    []
+  );
 
-  const handleEnterUpdateDelete = useCallback(
+  const handleEnterUpdateDelete: HandleEnterUpdateDelete = useCallback(
     ({
       hideEnteringElements,
       animateEnteringElements,
@@ -112,13 +129,6 @@ const RestaurantList = ({
       ))}
     </Flipper>
   );
-};
-
-RestaurantList.propTypes = {
-  allRestaurantIds: PropTypes.array.isRequired,
-  flipMove: PropTypes.bool.isRequired,
-  ids: PropTypes.array.isRequired,
-  restaurantListReady: PropTypes.bool.isRequired,
 };
 
 export default withStyles(s)(RestaurantList);

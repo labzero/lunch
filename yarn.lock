@@ -7364,6 +7364,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"flip-toolkit@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "flip-toolkit@npm:7.1.0"
+  dependencies:
+    rematrix: 0.2.2
+  checksum: e6cda6f4e1f1ca54da47cdcb2b28409fa1983696be380e73352fd70d046dc3bfa0c3d0a8213093c492ed350d6dbca4b913813d3703b595f2eacd3ba040c7ee21
+  languageName: node
+  linkType: hard
+
 "follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.14.0":
   version: 1.15.2
   resolution: "follow-redirects@npm:1.15.2"
@@ -10085,6 +10094,7 @@ __metadata:
     fbjs: ^3.0.4
     fetch-mock: ^9.11.0
     file-loader: ^6.2.0
+    flip-toolkit: ^7.1.0
     fork-ts-checker-webpack-plugin: ^7.3.0
     git-repository: ^0.1.4
     glob: ^7.1.3

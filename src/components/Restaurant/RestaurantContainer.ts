@@ -3,9 +3,10 @@ import { showMapAndInfoWindow } from "../../actions/mapUi";
 import { Dispatch, State } from "../../interfaces";
 import { getListUiItemForId } from "../../selectors/listUi";
 import { getRestaurantById } from "../../selectors/restaurants";
-import Restaurant from "./Restaurant";
+import Restaurant, { RestaurantProps } from "./Restaurant";
 
-interface OwnProps {
+interface OwnProps
+  extends Pick<RestaurantProps, "shouldShowAddTagArea" | "shouldShowDropdown"> {
   id: number;
 }
 
