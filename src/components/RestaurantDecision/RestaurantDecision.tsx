@@ -1,12 +1,25 @@
-import PropTypes from "prop-types";
 import React from "react";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import withStyles from "isomorphic-style-loader/withStyles";
+import { Vote } from "../../interfaces";
 import s from "./RestaurantDecision.scss";
 
-// TODO return null when upgrading to React 15
-const RestaurantDecision = ({ id, votes, decided, loggedIn, handleClick }) => {
+interface RestaurantDecisionProps {
+  id: number;
+  votes: Vote[];
+  decided: boolean;
+  loggedIn: boolean;
+  handleClick: () => void;
+}
+
+const RestaurantDecision = ({
+  id,
+  votes,
+  decided,
+  loggedIn,
+  handleClick,
+}: RestaurantDecisionProps) => {
   const tooltip = (
     <Tooltip id={`restaurantDecisionTooltip_${id}`}>
       We ate here
@@ -22,7 +35,7 @@ const RestaurantDecision = ({ id, votes, decided, loggedIn, handleClick }) => {
             decided ? s.decided : ""
           }`}
           onClick={handleClick}
-          onKeyPress={handleClick}
+          onKeyUp={handleClick}
           role="button"
           tabIndex={0}
         >
@@ -31,14 +44,6 @@ const RestaurantDecision = ({ id, votes, decided, loggedIn, handleClick }) => {
       </OverlayTrigger>
     )
   );
-};
-
-RestaurantDecision.propTypes = {
-  id: PropTypes.number.isRequired,
-  votes: PropTypes.array.isRequired,
-  decided: PropTypes.bool.isRequired,
-  handleClick: PropTypes.func.isRequired,
-  loggedIn: PropTypes.bool.isRequired,
 };
 
 export default withStyles(s)(RestaurantDecision);
