@@ -1,8 +1,11 @@
-import PropTypes from "prop-types";
 import React from "react";
 import TagManagerItemContainer from "../TagManagerItem/TagManagerItemContainer";
 
-const TagManager = ({ tags }) => {
+export interface TagManagerProps {
+  tags: number[];
+}
+
+const TagManager = ({ tags }: TagManagerProps) => {
   if (!tags.length) {
     return (
       <p>
@@ -19,10 +22,6 @@ const TagManager = ({ tags }) => {
       ))}
     </ul>
   );
-};
-
-TagManager.propTypes = {
-  tags: PropTypes.arrayOf(PropTypes.number).isRequired,
 };
 
 export default TagManager;
