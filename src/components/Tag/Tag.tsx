@@ -1,9 +1,15 @@
-import PropTypes from "prop-types";
 import React from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "./Tag.scss";
 
-const Tag = ({ name, showDelete, onDeleteClicked, exclude }) => {
+export interface TagProps {
+  name: string;
+  showDelete: boolean;
+  onDeleteClicked: () => void;
+  exclude?: boolean;
+}
+
+const Tag = ({ name, showDelete, onDeleteClicked, exclude }: TagProps) => {
   let deleteButton = null;
   if (showDelete) {
     deleteButton = (
@@ -19,13 +25,6 @@ const Tag = ({ name, showDelete, onDeleteClicked, exclude }) => {
       {deleteButton}
     </div>
   );
-};
-
-Tag.propTypes = {
-  name: PropTypes.string.isRequired,
-  showDelete: PropTypes.bool.isRequired,
-  onDeleteClicked: PropTypes.func.isRequired,
-  exclude: PropTypes.bool,
 };
 
 Tag.defaultProps = {
