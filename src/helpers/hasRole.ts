@@ -3,7 +3,7 @@ import canOperateAtRole from "./canOperateAtRole";
 import getRole from "./getRole";
 
 export default (
-  user: User | undefined,
+  user: User | null | undefined,
   team: Team | undefined,
   role?: RoleType,
   ignoreSuperuser?: boolean

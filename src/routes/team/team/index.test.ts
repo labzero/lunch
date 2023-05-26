@@ -5,15 +5,15 @@
 
 import { expect } from "chai";
 import proxyquire from "proxyquire";
-import { ResolveContext } from "universal-router";
 import { configureMockStore } from "@jedmao/redux-mock-store";
 import mockEsmodule from "../../../../test/mockEsmodule";
+import { AppContext } from "../../../interfaces";
 
 const proxyquireStrict = proxyquire.noCallThru();
 const mockStore = configureMockStore();
 
 describe("routes/team/team", () => {
-  let context: Partial<ResolveContext>;
+  let context: Partial<Omit<AppContext, "store">>;
   let render404: string;
   let team;
   let landingProxy;
@@ -44,7 +44,7 @@ describe("routes/team/team", () => {
           default: () => false,
         }),
         "../../helpers/renderIfHasName": mockEsmodule({
-          default: (_: ResolveContext, cb: () => void) => cb(),
+          default: (_: AppContext, cb: () => void) => cb(),
         }),
         "../../helpers/render404": mockEsmodule({
           default: () => render404,
@@ -61,7 +61,7 @@ describe("routes/team/team", () => {
           default: () => true,
         }),
         "../../helpers/renderIfHasName": mockEsmodule({
-          default: (_: ResolveContext, cb: () => void) => cb(),
+          default: (_: AppContext, cb: () => void) => cb(),
         }),
       }).default;
 

@@ -1,31 +1,38 @@
 import { connect } from "react-redux";
+import { Dispatch, State } from "../../interfaces";
 import { getRestaurantById } from "../../selectors/restaurants";
 import { getDecision } from "../../selectors/decisions";
 import { showRestaurantInfoWindow, hideInfoWindow } from "../../actions/mapUi";
 import { getMapUi } from "../../selectors/mapUi";
 import RestaurantMarker from "./RestaurantMarker";
+import { MouseEvent } from "react";
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state: State, ownProps: { id: number }) => {
   const restaurant = getRestaurantById(state, ownProps.id);
   const decision = getDecision(state);
   const decided =
     decision !== undefined && decision.restaurantId === restaurant.id;
+  const mapUi = getMapUi(state);
   return {
     restaurant,
     decided,
-    showInfoWindow: getMapUi(state).infoWindow.id === ownProps.id,
+    showInfoWindow:
+      "id" in mapUi.infoWindow && mapUi.infoWindow.id === ownProps.id,
     ...ownProps,
   };
 };
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = (dispatch: Dispatch) => ({
   dispatch,
 });
 
-const mergeProps = (stateProps, dispatchProps) => ({
+const mergeProps = (
+  stateProps: ReturnType<typeof mapStateToProps>,
+  dispatchProps: ReturnType<typeof mapDispatchToProps>
+) => ({
   ...stateProps,
   ...dispatchProps,
-  handleMarkerClick(event) {
+  handleMarkerClick(event: MouseEvent) {
     event.preventDefault();
     // prevents POIs from receiving click event afterwards
     event.stopPropagation();

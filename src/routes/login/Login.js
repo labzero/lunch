@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import queryString from "query-string";
+import qs from "qs";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
@@ -40,8 +40,8 @@ class Login extends Component {
     const { host, next, team } = this.props;
     const { email, password } = this.state;
 
-    const googleQuery = queryString.stringify({ team, next });
-    const nextQuery = queryString.stringify({ next });
+    const googleQuery = qs.stringify({ team, next });
+    const nextQuery = qs.stringify({ next });
 
     return (
       <div className={s.root}>

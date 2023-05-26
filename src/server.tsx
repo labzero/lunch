@@ -7,7 +7,6 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import "isomorphic-fetch";
 import path from "path";
 import fs from "fs";
 import { createStream } from "rotating-file-stream";
@@ -30,14 +29,12 @@ import session from "express-session";
 import connectSessionSequelize from "connect-session-sequelize";
 import flash from "connect-flash";
 import { expressjwt, UnauthorizedError as Jwt401Error } from "express-jwt";
-import nodeFetch from "node-fetch";
 import React from "react";
 import ReactDOM from "react-dom/server";
 import expressWs from "express-ws";
 import Honeybadger from "@honeybadger-io/js";
 import PrettyError from "pretty-error";
 import { v1 } from "uuid";
-import { ResolveContext } from "universal-router";
 import AppComponent from "./components/App";
 import Html, { HtmlProps } from "./components/Html";
 import { ErrorPageWithoutStyle } from "./components/ErrorPage/ErrorPage";
@@ -46,7 +43,6 @@ import generateUrl from "./helpers/generateUrl";
 import hasRole from "./helpers/hasRole";
 import teamRoutes from "./routes/team";
 import mainRoutes from "./routes/main";
-import createFetch from "./createFetch";
 import passport from "./passport";
 import routerCreator from "./router";
 // @ts-ignore
@@ -60,7 +56,7 @@ import passwordMiddleware from "./middlewares/password";
 import usersMiddleware from "./middlewares/users";
 import api from "./api";
 import { sequelize, Team, User } from "./db";
-import { App, ExtWebSocket, Flash, StateData } from "./interfaces";
+import { App, AppContext, ExtWebSocket, Flash, StateData } from "./interfaces";
 
 process.on("unhandledRejection", (reason, p) => {
   console.error("Unhandled Rejection at:", p, "reason:", reason);
@@ -360,23 +356,13 @@ const render: RequestHandler = async (req, res, next) => {
       styles.forEach((style) => css.add(style._getCss()));
     };
 
-    // Universal HTTP client
-    const fetch = createFetch(nodeFetch, {
-      baseUrl: config.api.serverUrl,
-      cookie: req.headers.cookie as string,
-    });
-
     const initialState = makeInitialState(stateData as Required<StateData>);
-    const store = configureStore(initialState, {
-      fetch,
-      // I should not use `history` on server.. but how I do redirection? follow universal-router
-    });
+    const store = configureStore(initialState);
 
     // Global (context) variables that can be easily accessed from any React component
     // https://facebook.github.io/react/docs/context.html
-    const context: ResolveContext = {
+    const context: AppContext = {
       insertCss,
-      fetch,
       googleApiKey: config.googleApiKey,
       // The twins below are wild, be careful!
       pathname: req.path,

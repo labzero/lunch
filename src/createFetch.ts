@@ -7,8 +7,6 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-type Fetch = (url: string, options?: any) => Promise<any>;
-
 type Options = {
   baseUrl: string;
   cookie?: string;
@@ -20,9 +18,9 @@ type Options = {
  * of boilerplate code in the application.
  * https://developer.mozilla.org/docs/Web/API/Fetch_API/Using_Fetch
  */
-function createFetch(fetch: Fetch, { baseUrl, cookie }: Options) {
+function createFetch({ baseUrl, cookie }: Options) {
   // NOTE: Tweak the default options to suite your application needs
-  const defaults = {
+  const defaults: RequestInit = {
     method: "POST", // handy with GraphQL backends
     mode: baseUrl ? "cors" : "same-origin",
     credentials: baseUrl ? "include" : "same-origin",
@@ -33,8 +31,8 @@ function createFetch(fetch: Fetch, { baseUrl, cookie }: Options) {
     },
   };
 
-  return async (url: string, options: any) =>
-    url.startsWith("/api")
+  return async (url: RequestInfo | URL, options?: RequestInit) =>
+    (url as string).startsWith("/api")
       ? fetch(`${baseUrl}${url}`, {
           ...defaults,
           ...options,

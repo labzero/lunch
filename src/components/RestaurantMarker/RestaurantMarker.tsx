@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import withStyles from "isomorphic-style-loader/withStyles";
+import { AppContext, Restaurant } from "../../interfaces";
 import App from "../App";
 import RestaurantContainer from "../Restaurant/RestaurantContainer";
 import s from "./RestaurantMarker.scss";
@@ -11,6 +12,15 @@ if (canUseDOM) {
   google = window.google || google;
 }
 
+interface InnerRestaurantMarkerProps {
+  restaurant: Restaurant;
+  decided: boolean;
+  index: number;
+  baseZIndex: number;
+  handleMarkerClick: () => void;
+  showInfoWindow: boolean;
+}
+
 const InnerRestaurantMarker = ({
   restaurant,
   decided,
@@ -18,7 +28,7 @@ const InnerRestaurantMarker = ({
   baseZIndex,
   handleMarkerClick,
   showInfoWindow,
-}) => {
+}: InnerRestaurantMarkerProps) => {
   const length = restaurant.votes.length;
   let label = "";
 
@@ -73,21 +83,15 @@ const InnerRestaurantMarker = ({
   );
 };
 
-InnerRestaurantMarker.propTypes = {
-  restaurant: PropTypes.object.isRequired,
-  decided: PropTypes.bool.isRequired,
-  index: PropTypes.number.isRequired,
-  baseZIndex: PropTypes.number.isRequired,
-  showInfoWindow: PropTypes.bool.isRequired,
-  handleMarkerClick: PropTypes.func.isRequired,
-};
-
 const StyledRestaurantMarker = withStyles(s)(InnerRestaurantMarker);
 
-const RestaurantMarker = ({ restaurant, ...props }) => {
+export interface RestaurantMarkerProps extends AppContext {
+  restaurant: Restaurant;
+}
+
+const RestaurantMarker = ({ restaurant, ...props }: RestaurantMarkerProps) => {
   const context = {
     googleApiKey: props.googleApiKey,
-    fetch: props.fetch,
     insertCss: props.insertCss,
     store: props.store,
     pathname: props.pathname,
@@ -104,16 +108,6 @@ const RestaurantMarker = ({ restaurant, ...props }) => {
       />
     </App>
   );
-};
-
-RestaurantMarker.propTypes = {
-  fetch: PropTypes.func.isRequired,
-  googleApiKey: PropTypes.string.isRequired,
-  store: PropTypes.object.isRequired,
-  insertCss: PropTypes.func.isRequired,
-  pathname: PropTypes.string.isRequired,
-  query: PropTypes.object,
-  restaurant: PropTypes.object.isRequired,
 };
 
 RestaurantMarker.defaultProps = {

@@ -1,7 +1,9 @@
 import { BrowserHistory } from "history";
 import { WebSocket } from "ws";
-import { ThunkAction, ThunkDispatch } from "@reduxjs/toolkit";
+import { EnhancedStore, ThunkAction, ThunkDispatch } from "@reduxjs/toolkit";
+import { ParsedQs } from "qs";
 import { ReactNode } from "react";
+import { ResolveContext } from "universal-router";
 import {
   Decision as DecisionModel,
   Restaurant as RestaurantModel,
@@ -67,7 +69,6 @@ export interface StateData {
 }
 
 export interface StateHelpers {
-  fetch?: (url: string, options: any) => Promise<any>;
   history?: BrowserHistory;
 }
 
@@ -496,7 +497,7 @@ interface BaseState {
       lat: number;
       lng: number;
     };
-    infoWindow?: InfoWindow;
+    infoWindow: InfoWindow;
     newlyAdded?: NewlyAdded;
     showUnvoted: boolean;
     showPOIs: boolean;
@@ -579,3 +580,11 @@ export type Reducer<T extends keyof State> = (
 ) => State[T];
 
 export type Dispatch = ThunkDispatch<State, unknown, Action>;
+
+export interface AppContext extends ResolveContext {
+  insertCss: (...styles: Style[]) => void;
+  googleApiKey?: string;
+  pathname: string;
+  query?: ParsedQs;
+  store: EnhancedStore<State, Action>;
+}

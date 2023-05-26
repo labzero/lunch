@@ -1,5 +1,4 @@
 import { Response, Router } from "express";
-import fetch from "node-fetch";
 import { Restaurant, Vote, Tag } from "../../db";
 import { Restaurant as RestaurantInterface } from "../../interfaces";
 import checkTeamRole from "../helpers/checkTeamRole";

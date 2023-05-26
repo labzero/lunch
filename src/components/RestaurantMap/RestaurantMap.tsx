@@ -3,10 +3,9 @@
 import PropTypes from "prop-types";
 import React, { Component, ReactNode, Suspense, lazy } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
-import { ResolveContext } from "universal-router";
 import { GOOGLE_MAP_ZOOM } from "../../constants";
 import googleMapOptions from "../../helpers/googleMapOptions";
-import { InfoWindow, LatLng, Restaurant } from "../../interfaces";
+import { AppContext, InfoWindow, LatLng, Restaurant } from "../../interfaces";
 import RestaurantMarkerContainer from "../RestaurantMarker/RestaurantMarkerContainer";
 import RestaurantMapSettingsContainer from "../RestaurantMapSettings/RestaurantMapSettingsContainer";
 import GoogleInfoWindowContainer from "../GoogleInfoWindow/GoogleInfoWindowContainer";
@@ -35,12 +34,11 @@ interface RestaurantMapProps {
 }
 
 class RestaurantMap extends Component<RestaurantMapProps> {
-  context: ResolveContext;
+  context: AppContext;
 
   map: google.maps.Map;
 
   static contextTypes = {
-    fetch: PropTypes.func.isRequired,
     insertCss: PropTypes.func.isRequired,
     store: PropTypes.object.isRequired,
     pathname: PropTypes.string.isRequired,
@@ -144,7 +142,6 @@ class RestaurantMap extends Component<RestaurantMapProps> {
                       baseZIndex={items.length}
                       googleApiKey={loader.apiKey}
                       store={this.context.store}
-                      fetch={this.context.fetch}
                       insertCss={this.context.insertCss}
                       pathname={this.context.pathname}
                       query={this.context.query}
