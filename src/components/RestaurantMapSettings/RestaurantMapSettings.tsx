@@ -1,20 +1,32 @@
-import PropTypes from "prop-types";
 import React, { Component } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
-import Button from "react-bootstrap/Button";
+import Button, { ButtonPropsWithXsSize } from "react-bootstrap/Button";
+import { BsPrefixRefForwardingComponent } from "react-bootstrap/esm/helpers";
 import Form from "react-bootstrap/Form";
 import s from "./RestaurantMapSettings.scss";
 
-class RestaurantMapSettings extends Component {
-  static propTypes = {
-    setDefaultZoom: PropTypes.func.isRequired,
-    showPOIs: PropTypes.bool.isRequired,
-    setShowPOIs: PropTypes.func.isRequired,
-    showUnvoted: PropTypes.bool.isRequired,
-    setShowUnvoted: PropTypes.func.isRequired,
-  };
+const ButtonWithCustomProps = Button as BsPrefixRefForwardingComponent<
+  "button",
+  ButtonPropsWithXsSize
+>;
 
-  constructor(props) {
+interface RestaurantMapSettingsProps {
+  setDefaultZoom: () => void;
+  showPOIs: boolean;
+  setShowPOIs: () => void;
+  showUnvoted: boolean;
+  setShowUnvoted: () => void;
+}
+
+interface RestaurantMapSettingsState {
+  collapsed: boolean;
+}
+
+class RestaurantMapSettings extends Component<
+  RestaurantMapSettingsProps,
+  RestaurantMapSettingsState
+> {
+  constructor(props: RestaurantMapSettingsProps) {
     super(props);
 
     this.state = {
@@ -39,18 +51,30 @@ class RestaurantMapSettings extends Component {
     return (
       <div className={s.root}>
         {collapsed ? (
-          <Button size="xs" onClick={this.toggleCollapsed} variant="light">
+          <ButtonWithCustomProps
+            size="xs"
+            onClick={this.toggleCollapsed}
+            variant="light"
+          >
             Show
-          </Button>
+          </ButtonWithCustomProps>
         ) : (
           <div>
             <div className={s.buttons}>
-              <Button size="xs" onClick={setDefaultZoom} variant="light">
+              <ButtonWithCustomProps
+                size="xs"
+                onClick={setDefaultZoom}
+                variant="light"
+              >
                 Save zoom level
-              </Button>
-              <Button size="xs" onClick={this.toggleCollapsed} variant="light">
+              </ButtonWithCustomProps>
+              <ButtonWithCustomProps
+                size="xs"
+                onClick={this.toggleCollapsed}
+                variant="light"
+              >
                 Hide
-              </Button>
+              </ButtonWithCustomProps>
             </div>
             <Form.Check
               checked={showUnvoted}
