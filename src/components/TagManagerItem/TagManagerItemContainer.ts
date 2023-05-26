@@ -2,18 +2,27 @@ import { connect } from "react-redux";
 import { getTagById } from "../../selectors/tags";
 import { showModal } from "../../actions/modals";
 import { removeTag } from "../../actions/tags";
+import { Dispatch, State } from "../../interfaces";
 import TagManagerItem from "./TagManagerItem";
 
-const mapStateToProps = (state, ownProps) => ({
+interface OwnProps {
+  id: number;
+}
+
+const mapStateToProps = (state: State, ownProps: OwnProps) => ({
   tag: getTagById(state, ownProps.id),
-  showDelete: state.user.id !== undefined,
+  showDelete: state.user !== null,
 });
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = (dispatch: Dispatch) => ({
   dispatch,
 });
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+const mergeProps = (
+  stateProps: ReturnType<typeof mapStateToProps>,
+  dispatchProps: ReturnType<typeof mapDispatchToProps>,
+  ownProps: OwnProps
+) => ({
   ...stateProps,
   ...dispatchProps,
   handleDeleteClicked() {

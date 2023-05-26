@@ -1,10 +1,20 @@
-import PropTypes from "prop-types";
 import React from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
-import s from "./TagManagerItem.scss";
+import { Tag } from "../../interfaces";
 import TagContainer from "../Tag/TagContainer";
+import s from "./TagManagerItem.scss";
 
-const TagManagerItem = ({ tag, showDelete, handleDeleteClicked }) => (
+interface TagManagerItemProps {
+  tag: Tag;
+  showDelete: boolean;
+  handleDeleteClicked: () => void;
+}
+
+const TagManagerItem = ({
+  tag,
+  showDelete,
+  handleDeleteClicked,
+}: TagManagerItemProps) => (
   <li>
     <span className={s.tagContainer}>
       <TagContainer
@@ -16,11 +26,5 @@ const TagManagerItem = ({ tag, showDelete, handleDeleteClicked }) => (
     ({tag.restaurant_count})
   </li>
 );
-
-TagManagerItem.propTypes = {
-  tag: PropTypes.object.isRequired,
-  showDelete: PropTypes.bool.isRequired,
-  handleDeleteClicked: PropTypes.func.isRequired,
-};
 
 export default withStyles(s)(TagManagerItem);

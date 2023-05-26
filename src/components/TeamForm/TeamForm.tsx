@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { ChangeEvent, Component, FormEvent } from "react";
 import { FaRegQuestionCircle } from "react-icons/fa";
-import Button from "react-bootstrap/Button";
+import { BsPrefixRefForwardingComponent } from "react-bootstrap/esm/helpers";
+import Button, { ButtonPropsWithXsSize } from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
@@ -9,11 +10,37 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Popover from "react-bootstrap/Popover";
 import Row from "react-bootstrap/Row";
 import withStyles from "isomorphic-style-loader/withStyles";
+import { LatLng, Team } from "../../interfaces";
 import TeamGeosuggestContainer from "../TeamGeosuggest/TeamGeosuggestContainer";
 import TeamMapContainer from "../TeamMap/TeamMapContainer";
 import s from "./TeamForm.scss";
 
-class TeamForm extends Component {
+const ButtonWithCustomProps = Button as BsPrefixRefForwardingComponent<
+  "button",
+  ButtonPropsWithXsSize
+>;
+
+interface TeamFormProps {
+  center: LatLng;
+  team: {
+    address: string;
+    name: string;
+    lat: number;
+    lng: number;
+    sortDuration: number;
+  };
+  updateTeam: (team: Partial<Team>) => void;
+}
+
+interface TeamFormState {
+  address?: string;
+  name?: string;
+  sortDuration?: number | string;
+}
+
+class TeamForm extends Component<TeamFormProps, TeamFormState> {
+  defaultCenter: LatLng;
+
   static propTypes = {
     center: PropTypes.object,
     team: PropTypes.object.isRequired,
@@ -24,7 +51,7 @@ class TeamForm extends Component {
     center: undefined,
   };
 
-  constructor(props) {
+  constructor(props: TeamFormProps) {
     super(props);
     this.defaultCenter = {
       lat: props.team.lat,
@@ -37,15 +64,13 @@ class TeamForm extends Component {
     };
   }
 
-  handleChange = (field) => (event) =>
-    this.setState({ [field]: event.target.value });
+  handleChange =
+    (field: keyof TeamFormState) => (event: ChangeEvent<HTMLInputElement>) =>
+      this.setState({ [field]: event.target.value });
 
-  handleSubmit = (event) => {
+  handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const typedsortDuration =
-      typeof this.state.sortDuration === "number"
-        ? this.state.sortDuration
-        : parseInt(this.state.sortDuration.slice(), 10);
+    const typedsortDuration = Number(this.state.sortDuration);
     if (typedsortDuration > 0) {
       this.props.updateTeam({
         ...this.state,
@@ -59,8 +84,7 @@ class TeamForm extends Component {
 
   render() {
     const { name, address, sortDuration } = this.state;
-    const sortDurationAddonLabel =
-      parseInt(sortDuration, 10) === 1 ? "day" : "days";
+    const sortDurationAddonLabel = Number(sortDuration) === 1 ? "day" : "days";
     const popoverRight = (
       <Popover id="sortDuration">
         <Popover.Header>Sort Duration</Popover.Header>
@@ -107,9 +131,13 @@ class TeamForm extends Component {
         <Form.Group className="mb-3" controlId="teamForm-vote-duration">
           <Form.Label>Sort duration</Form.Label>
           <OverlayTrigger placement="right" overlay={popoverRight}>
-            <Button size="xs" className={s.overlayTrigger} variant="light">
+            <ButtonWithCustomProps
+              size="xs"
+              className={s.overlayTrigger}
+              variant="light"
+            >
               <FaRegQuestionCircle />
-            </Button>
+            </ButtonWithCustomProps>
           </OverlayTrigger>
           <Row>
             <Col sm={2}>
