@@ -11,6 +11,11 @@ export interface RestaurantVoteButtonProps {
 export class _RestaurantVoteButton extends Component<RestaurantVoteButtonProps> {
   el: RefObject<HTMLButtonElement>;
 
+  constructor(props: RestaurantVoteButtonProps) {
+    super(props);
+    this.el = React.createRef();
+  }
+
   componentDidUpdate() {
     // if it's focused, page scrolls to its new location once it's sorted
     this.el.current?.blur();

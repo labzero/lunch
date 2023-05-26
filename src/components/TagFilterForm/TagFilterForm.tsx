@@ -1,6 +1,8 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
-import Autosuggest from "react-autosuggest";
+import React, { Component, FormEvent, RefObject, createRef } from "react";
+import Autosuggest, {
+  ChangeEvent,
+  SuggestionSelectedEventData,
+} from "react-autosuggest";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import TagContainer from "../Tag/TagContainer";
@@ -9,6 +11,7 @@ import {
   getSuggestionValue,
   renderSuggestion,
 } from "../../helpers/TagAutosuggestHelper";
+import { Tag } from "../../interfaces";
 import s from "./TagFilterForm.scss";
 
 // eslint-disable-next-line css-modules/no-unused-class
@@ -19,41 +22,55 @@ autosuggestTheme.input = "form-control";
 
 const returnTrue = () => true;
 
-class TagFilterForm extends Component {
-  static propTypes = {
-    exclude: PropTypes.bool,
-    addByName: PropTypes.func.isRequired,
-    addTag: PropTypes.func.isRequired,
-    allTags: PropTypes.array.isRequired,
-    clearTags: PropTypes.func.isRequired,
-    removeTag: PropTypes.func.isRequired,
-    restaurantIds: PropTypes.array.isRequired,
-    addedTags: PropTypes.array.isRequired,
-    setFlipMove: PropTypes.func.isRequired,
-  };
+export interface TagFilterFormProps {
+  exclude?: boolean;
+  addByName: (autosuggestValue: string) => (event: FormEvent) => void;
+  addTag: (id: number) => void;
+  allTags: Tag[];
+  clearTags: () => void;
+  removeTag: (id: number) => void;
+  restaurantIds: number[];
+  addedTags: number[];
+  setFlipMove: (flip: boolean) => void;
+}
+
+interface TagFilterFormState {
+  autosuggestValue: string;
+  shown: boolean;
+}
+
+class TagFilterForm extends Component<TagFilterFormProps, TagFilterFormState> {
+  autosuggest: RefObject<Autosuggest>;
 
   static defaultProps = {
     exclude: false,
   };
 
-  constructor(props) {
+  constructor(props: TagFilterFormProps) {
     super(props);
+
+    this.autosuggest = createRef();
 
     this.state = {
       autosuggestValue: "",
+      shown: !!props.addedTags.length,
     };
-
-    this.state.shown = !!props.addedTags.length;
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(
+    prevProps: TagFilterFormProps,
+    prevState: TagFilterFormState
+  ) {
     if (this.state.shown !== prevState.shown && this.state.shown) {
-      this.autosuggest.input.focus();
+      this.autosuggest.current?.input?.focus();
     }
     this.props.setFlipMove(true);
   }
 
-  setAutosuggestValue = (event, { newValue, method }) => {
+  setAutosuggestValue = (
+    event: FormEvent,
+    { newValue, method }: ChangeEvent
+  ) => {
     if (method === "up" || method === "down") {
       return;
     }
@@ -62,7 +79,10 @@ class TagFilterForm extends Component {
     }));
   };
 
-  handleSuggestionSelected = (event, { suggestion, method }) => {
+  handleSuggestionSelected = (
+    event: FormEvent,
+    { suggestion, method }: SuggestionSelectedEventData<Tag>
+  ) => {
     if (method === "enter") {
       event.preventDefault();
     }
@@ -88,7 +108,7 @@ class TagFilterForm extends Component {
     }));
   };
 
-  removeTagFilter = (tag) => {
+  removeTagFilter = (tag: number) => {
     this.props.removeTag(tag);
     this.props.setFlipMove(false);
   };
@@ -110,7 +130,7 @@ class TagFilterForm extends Component {
       const tags = generateTagList(allTags, addedTags, autosuggestValue);
 
       form = (
-        <form className={s.form} onSubmit={addByName}>
+        <form className={s.form} onSubmit={addByName(autosuggestValue)}>
           <Autosuggest
             suggestions={tags}
             focusInputOnSuggestionClick={false}
@@ -126,9 +146,7 @@ class TagFilterForm extends Component {
             onSuggestionsFetchRequested={() => undefined}
             onSuggestionsClearRequested={() => undefined}
             shouldRenderSuggestions={returnTrue}
-            ref={(a) => {
-              this.autosuggest = a;
-            }}
+            ref={this.autosuggest}
           />
           {addedTags.map((tag) => (
             <div

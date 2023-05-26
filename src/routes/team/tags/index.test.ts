@@ -5,13 +5,14 @@ import { expect } from "chai";
 import { configureMockStore } from "@jedmao/redux-mock-store";
 import proxyquire from "proxyquire";
 import mockEsmodule from "../../../../test/mockEsmodule";
+import { AppContext, AppRoute } from "../../../interfaces";
 
 const proxyquireStrict = proxyquire.noCallThru();
 const mockStore = configureMockStore();
 
 describe("routes/team/tags", () => {
-  let context;
-  let render404;
+  let context: Omit<AppContext, "store">;
+  let render404: string;
   let team;
   let landingProxy;
 
@@ -39,7 +40,7 @@ describe("routes/team/tags", () => {
           default: () => false,
         }),
         "../../helpers/renderIfHasName": mockEsmodule({
-          default: (_, cb) => cb(),
+          default: (_: AppContext, cb: () => void) => cb(),
         }),
         "../../helpers/render404": mockEsmodule({
           default: () => render404,
@@ -50,14 +51,14 @@ describe("routes/team/tags", () => {
   });
 
   describe("when user is on team", () => {
-    let result;
+    let result: AppRoute;
     beforeEach(() => {
       landingProxy = proxyquireStrict("./index", {
         "../../../helpers/hasRole": mockEsmodule({
           default: () => true,
         }),
         "../../helpers/renderIfHasName": mockEsmodule({
-          default: (_, cb) => cb(),
+          default: (_: AppContext, cb: () => void) => cb(),
         }),
       }).default;
       result = landingProxy(context);

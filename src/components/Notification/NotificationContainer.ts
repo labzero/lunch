@@ -40,7 +40,7 @@ const mapStateToProps = () => {
       if (vals.tag) {
         tagName = vals.tag.name;
       } else if (vals.tagId) {
-        tagName = getTagById(state, vals).name;
+        tagName = getTagById(state, vals.tagId).name;
       }
       contentProps = {
         decision: vals.decision,

@@ -588,3 +588,14 @@ export interface AppContext extends ResolveContext {
   query?: ParsedQs;
   store: EnhancedStore<State, Action>;
 }
+
+export interface AppRoute {
+  chunk?: string;
+  chunks?: string[];
+  component: ReactNode;
+  description: string;
+  ogTitle: string;
+  redirect?: string;
+  status?: number;
+  title: string;
+}

@@ -116,6 +116,8 @@ const tags: Reducer<"tags"> = (state, action) => {
         },
       });
     }
+    default:
+      break;
   }
   return state;
 };

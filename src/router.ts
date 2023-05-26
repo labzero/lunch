@@ -8,12 +8,14 @@
  */
 
 import UniversalRouter, { Route } from "universal-router";
+import { AppContext, AppRoute } from "./interfaces";
 
-export default (routes: Route) =>
-  new UniversalRouter(routes, {
-    async resolveRoute(context, params) {
+export default (routes: Route<AppContext, AppRoute>) =>
+  new UniversalRouter<AppContext, AppRoute>(routes, {
+    async resolveRoute(context, params): Promise<AppRoute | undefined> {
       if (typeof context.route.action === "function") {
-        return await context.route.action(context, params);
+        const route = await context.route.action(context, params);
+        return route;
       }
       return undefined;
     },
