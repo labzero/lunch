@@ -1,14 +1,15 @@
 /* eslint-disable max-classes-per-file */
 
 import React, { Component, RefObject, Suspense, createRef, lazy } from "react";
-import { Loader } from "@googlemaps/js-api-loader";
 import GeosuggestClass, { GeosuggestProps, Suggest } from "react-geosuggest";
 import { IntlShape } from "react-intl";
 import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import withStyles from "isomorphic-style-loader/withStyles";
 import generateMessageDescriptor from "../../helpers/generateMessageDescriptor";
 import { LatLng } from "../../interfaces";
-import GoogleMapsLoaderContext from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
+import GoogleMapsLoaderContext, {
+  IGoogleMapsLoaderContext,
+} from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 import s from "./RestaurantAddForm.scss";
 
 const m = generateMessageDescriptor("RestaurantAddForm");
@@ -29,10 +30,6 @@ interface RestaurantAddFormProps
   intl: IntlShape;
 }
 
-interface RestaurantAddFormContext {
-  loader: Loader;
-}
-
 class RestaurantAddForm extends Component<RestaurantAddFormProps> {
   static contextType = GoogleMapsLoaderContext;
 
@@ -44,7 +41,7 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
 
   constructor(
     props: RestaurantAddFormProps,
-    context: RestaurantAddFormContext
+    context: IGoogleMapsLoaderContext
   ) {
     super(props, context);
 
@@ -52,7 +49,7 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
 
     if (canUseDOM) {
       const { loader } = context;
-      loader.load().then((google) => {
+      loader?.load().then((google) => {
         this.maps = google.maps;
         this.forceUpdate();
       });

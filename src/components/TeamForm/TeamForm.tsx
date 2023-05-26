@@ -64,6 +64,8 @@ class TeamForm extends Component<TeamFormProps, TeamFormState> {
     };
   }
 
+  handleGeosuggestChange = (value: string) => this.setState({ address: value });
+
   handleChange =
     (field: keyof TeamFormState) => (event: ChangeEvent<HTMLInputElement>) =>
       this.setState({ [field]: event.target.value });
@@ -125,7 +127,7 @@ class TeamForm extends Component<TeamFormProps, TeamFormState> {
           <TeamGeosuggestContainer
             id="teamForm-address"
             initialValue={address}
-            onChange={this.handleChange("address")}
+            onChange={this.handleGeosuggestChange}
           />
         </Form.Group>
         <Form.Group className="mb-3" controlId="teamForm-vote-duration">

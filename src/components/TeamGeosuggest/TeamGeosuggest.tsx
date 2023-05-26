@@ -1,42 +1,53 @@
-import PropTypes from "prop-types";
 import React, { Component, Suspense, lazy } from "react";
+import { Suggest } from "react-geosuggest";
 import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
-import GoogleMapsLoaderContext from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
+import { LatLng } from "../../interfaces";
+import GoogleMapsLoaderContext, {
+  IGoogleMapsLoaderContext,
+} from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 
-const Geosuggest = lazy(() =>
-  import(/* webpackChunkName: 'geosuggest' */ "react-geosuggest")
+const Geosuggest = lazy(
+  () => import(/* webpackChunkName: 'geosuggest' */ "react-geosuggest")
 );
 
-class TeamGeosuggest extends Component {
+export interface TeamGeosuggestProps {
+  id: string;
+  initialValue?: string;
+  onChange: (value: string) => void;
+  setCenter: (center: LatLng) => void;
+}
+
+class TeamGeosuggest extends Component<TeamGeosuggestProps> {
   static contextType = GoogleMapsLoaderContext;
 
-  static propTypes = {
-    id: PropTypes.string.isRequired,
-    initialValue: PropTypes.string.isRequired,
-    onChange: PropTypes.func.isRequired,
-    setCenter: PropTypes.func.isRequired,
+  static defaultProps = {
+    initialValue: undefined,
   };
 
-  constructor(props, context) {
+  geocoder: google.maps.Geocoder;
+
+  maps: typeof google.maps;
+
+  constructor(props: TeamGeosuggestProps, context: IGoogleMapsLoaderContext) {
     super(props, context);
 
     if (canUseDOM) {
       const { loader } = context;
-      loader.load().then((google) => {
+      loader?.load().then((google) => {
         this.maps = google.maps;
         this.forceUpdate();
       });
     }
   }
 
-  getCoordsForMarker = (suggest) => {
+  getCoordsForMarker = (suggest: Suggest) => {
     if (suggest !== null) {
       if (this.geocoder === undefined) {
         this.geocoder = new this.maps.Geocoder();
       }
       this.geocoder.geocode({ placeId: suggest.placeId }, (results, status) => {
         if (status === this.maps.GeocoderStatus.OK) {
-          const location = results[0].geometry.location;
+          const location = results![0].geometry.location;
           const center = {
             lat: location.lat(),
             lng: location.lng(),
@@ -47,13 +58,11 @@ class TeamGeosuggest extends Component {
     }
   };
 
-  handleSuggestSelect = (suggestion) => {
+  handleSuggestSelect = (suggestion: Suggest) => {
     if (suggestion) {
       this.props.setCenter(suggestion.location);
     }
   };
-
-  handleChange = (value) => this.props.onChange({ target: { value } });
 
   render() {
     const { id, initialValue } = this.props;
@@ -67,7 +76,7 @@ class TeamGeosuggest extends Component {
           inputClassName="form-control"
           googleMaps={this.maps}
           onActivateSuggest={this.getCoordsForMarker}
-          onChange={this.handleChange}
+          onChange={this.props.onChange}
           onSuggestSelect={this.handleSuggestSelect}
           placeholder="Enter team address"
           types={["geocode"]}

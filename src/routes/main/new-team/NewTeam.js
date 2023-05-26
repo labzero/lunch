@@ -37,6 +37,8 @@ class NewTeam extends Component {
     };
   }
 
+  handleGeosuggestChange = (value) => this.setState({ address: value });
+
   handleChange = (field) => (event) =>
     this.setState({ [field]: event.target.value });
 
@@ -114,7 +116,7 @@ class NewTeam extends Component {
               <TeamGeosuggestContainer
                 id="newTeam-address"
                 initialValue=""
-                onChange={this.handleChange("address")}
+                onChange={this.handleGeosuggestChange}
               />
             </Form.Group>
             <Button type="submit">Submit</Button>
