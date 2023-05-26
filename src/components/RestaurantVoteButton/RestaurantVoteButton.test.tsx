@@ -5,10 +5,13 @@ import React from "react";
 import sinon from "sinon";
 import { expect } from "chai";
 import { render, screen } from "../../../test/test-utils";
-import { _RestaurantVoteButton as RestaurantVoteButton } from "./RestaurantVoteButton";
+import {
+  _RestaurantVoteButton as RestaurantVoteButton,
+  RestaurantVoteButtonProps,
+} from "./RestaurantVoteButton";
 
 describe("RestaurantVoteButton", () => {
-  let props;
+  let props: RestaurantVoteButtonProps;
 
   beforeEach(() => {
     props = {

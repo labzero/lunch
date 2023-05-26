@@ -1,12 +1,19 @@
 import { connect } from "react-redux";
-import { makeGetRestaurantVotesForUser } from "../../selectors";
+import { ThunkDispatch } from "redux-thunk";
 import { removeVote, addVote } from "../../actions/restaurants";
+import { State } from "../../interfaces";
+import { makeGetRestaurantVotesForUser } from "../../selectors";
 import RestaurantVoteButton from "./RestaurantVoteButton";
+import { Action } from "../../interfaces";
+
+interface OwnProps {
+  id: number;
+}
 
 const mapStateToProps = () => {
   const getRestaurantVotesForUser = makeGetRestaurantVotesForUser();
-  return (state, ownProps) => {
-    const props = { restaurantId: ownProps.id, userId: state.user.id };
+  return (state: State, ownProps: OwnProps) => {
+    const props = { restaurantId: ownProps.id, userId: state.user?.id };
     return {
       userVotes: getRestaurantVotesForUser(state, props),
     };
@@ -15,7 +22,11 @@ const mapStateToProps = () => {
 
 const mapDispatchToProps = null;
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => ({
+const mergeProps = (
+  stateProps: ReturnType<ReturnType<typeof mapStateToProps>>,
+  dispatchProps: { dispatch: ThunkDispatch<State, void, Action> },
+  ownProps: OwnProps
+) => ({
   ...stateProps,
   ...dispatchProps,
   handleClick: () => {

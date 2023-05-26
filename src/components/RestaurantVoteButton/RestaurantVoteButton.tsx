@@ -1,12 +1,19 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { Component, RefObject } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
+import { Vote } from "../../interfaces";
 import s from "./RestaurantVoteButton.scss";
 
-export class _RestaurantVoteButton extends Component {
+export interface RestaurantVoteButtonProps {
+  handleClick: () => void;
+  userVotes: Partial<Vote>[];
+}
+
+export class _RestaurantVoteButton extends Component<RestaurantVoteButtonProps> {
+  el: RefObject<HTMLButtonElement>;
+
   componentDidUpdate() {
     // if it's focused, page scrolls to its new location once it's sorted
-    this.el.blur();
+    this.el.current?.blur();
   }
 
   render() {
@@ -17,9 +24,7 @@ export class _RestaurantVoteButton extends Component {
 
     return (
       <button
-        ref={(r) => {
-          this.el = r;
-        }}
+        ref={this.el}
         onClick={this.props.handleClick}
         className={`${s.root} btn btn-sm ${btnClass}`}
         type="button"
@@ -29,10 +34,5 @@ export class _RestaurantVoteButton extends Component {
     );
   }
 }
-
-_RestaurantVoteButton.propTypes = {
-  handleClick: PropTypes.func.isRequired,
-  userVotes: PropTypes.array.isRequired,
-};
 
 export default withStyles(s)(_RestaurantVoteButton);
