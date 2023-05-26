@@ -1,12 +1,25 @@
 import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { Component, RefObject, createRef } from "react";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import withStyles from "isomorphic-style-loader/withStyles";
+import { AppContext, User } from "../../interfaces";
 import TooltipUserContainer from "../TooltipUser/TooltipUserContainer";
 import s from "./RestaurantVoteCount.scss";
 
-export class _RestaurantVoteCount extends Component {
+export interface RestaurantVoteCountProps {
+  id: number;
+  votes: number[];
+  user: Partial<User>;
+}
+
+export class _RestaurantVoteCount extends Component<RestaurantVoteCountProps> {
+  context: AppContext;
+
+  el: RefObject<HTMLSpanElement>;
+
+  timeout: NodeJS.Timeout;
+
   static contextTypes = {
     store: PropTypes.object.isRequired,
   };
@@ -17,12 +30,17 @@ export class _RestaurantVoteCount extends Component {
     user: PropTypes.object.isRequired,
   };
 
+  constructor(props: RestaurantVoteCountProps) {
+    super(props);
+    this.el = createRef();
+  }
+
   componentDidUpdate() {
     if (this.el) {
-      this.el.classList.add(s.updated);
+      this.el.current?.classList.add(s.updated);
       this.timeout = setTimeout(() => {
         if (this.el) {
-          this.el.classList.remove(s.updated);
+          this.el.current?.classList.remove(s.updated);
         }
       }, 100);
     }
@@ -70,12 +88,7 @@ export class _RestaurantVoteCount extends Component {
     }
 
     return (
-      <span
-        ref={(e) => {
-          this.el = e;
-        }}
-        className={s.root}
-      >
+      <span ref={this.el} className={s.root}>
         {voteCountContainer}
       </span>
     );

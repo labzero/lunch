@@ -5,22 +5,24 @@ import React from "react";
 import PropTypes from "prop-types";
 import { expect } from "chai";
 import { render, screen } from "../../../test/test-utils";
-import { _RestaurantVoteCount as RestaurantVoteCount } from "./RestaurantVoteCount";
+import {
+  _RestaurantVoteCount as RestaurantVoteCount,
+  RestaurantVoteCountProps,
+} from "./RestaurantVoteCount";
 
 describe("RestaurantAddTagForm", () => {
-  let props;
+  let props: RestaurantVoteCountProps;
 
   beforeEach(() => {
     props = {
       id: 1,
-      votes: [{ restaurantId: 1 }],
+      votes: [1],
       user: { id: 1 },
-      users: [],
     };
   });
 
   const renderComponent = () => {
-    class RestaurantVoteCountWithContext extends React.Component {
+    class RestaurantVoteCountWithContext extends React.Component<RestaurantVoteCountProps> {
       static childContextTypes = {
         store: PropTypes.shape({}).isRequired,
       };

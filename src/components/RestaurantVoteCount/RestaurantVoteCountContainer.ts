@@ -1,8 +1,13 @@
 import { connect } from "react-redux";
+import { State } from "../../interfaces";
 import { getRestaurantById } from "../../selectors/restaurants";
 import RestaurantVoteCount from "./RestaurantVoteCount";
 
-const mapStateToProps = (state, ownProps) => ({
+interface OwnProps {
+  id: number;
+}
+
+const mapStateToProps = (state: State, ownProps: OwnProps) => ({
   user: state.user,
   votes: getRestaurantById(state, ownProps.id).votes,
   ...ownProps,
