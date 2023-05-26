@@ -1,3 +1,4 @@
+import { MouseEvent } from "react";
 import { connect } from "react-redux";
 import { Dispatch, State } from "../../interfaces";
 import { getRestaurantById } from "../../selectors/restaurants";
@@ -5,7 +6,6 @@ import { getDecision } from "../../selectors/decisions";
 import { showRestaurantInfoWindow, hideInfoWindow } from "../../actions/mapUi";
 import { getMapUi } from "../../selectors/mapUi";
 import RestaurantMarker from "./RestaurantMarker";
-import { MouseEvent } from "react";
 
 const mapStateToProps = (state: State, ownProps: { id: number }) => {
   const restaurant = getRestaurantById(state, ownProps.id);

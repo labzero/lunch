@@ -1,15 +1,29 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, {
+  ChangeEvent,
+  Component,
+  FormEvent,
+  RefObject,
+  createRef,
+} from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import s from "./RestaurantNameForm.scss";
 
-class RestaurantNameForm extends Component {
+interface RestaurantNameFormProps {
+  editNameFormValue: string;
+  setEditNameFormValue: (e: ChangeEvent<HTMLInputElement>) => void;
+  changeRestaurantName: (e: FormEvent<HTMLFormElement>) => void;
+  hideEditNameForm: () => void;
+}
+
+class RestaurantNameForm extends Component<RestaurantNameFormProps> {
+  input: RefObject<HTMLInputElement>;
+
   componentDidMount() {
     // React Bootstrap steals focus, grab it back
-    const input = this.input;
+    this.input = createRef<HTMLInputElement>();
     setTimeout(() => {
-      input.focus();
+      this.input.current?.focus();
     }, 1);
   }
 
@@ -22,9 +36,7 @@ class RestaurantNameForm extends Component {
             className="form-control input-sm"
             value={this.props.editNameFormValue}
             onChange={this.props.setEditNameFormValue}
-            ref={(i) => {
-              this.input = i;
-            }}
+            ref={this.input}
           />
         </span>
         <Button
@@ -48,12 +60,5 @@ class RestaurantNameForm extends Component {
     );
   }
 }
-
-RestaurantNameForm.propTypes = {
-  editNameFormValue: PropTypes.string.isRequired,
-  setEditNameFormValue: PropTypes.func.isRequired,
-  changeRestaurantName: PropTypes.func.isRequired,
-  hideEditNameForm: PropTypes.func.isRequired,
-};
 
 export default withStyles(s)(RestaurantNameForm);
