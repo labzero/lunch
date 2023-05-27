@@ -2,16 +2,20 @@
 /* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates, arrow-body-style */
 
 import { expect } from "chai";
-import { configureMockStore } from "@jedmao/redux-mock-store";
+import {
+  MockStoreEnhanced,
+  configureMockStore,
+} from "@jedmao/redux-mock-store";
 import fetchMock from "fetch-mock";
 import thunk from "redux-thunk";
+import { Action, Dispatch, State } from "../../interfaces";
 import * as tags from "../tags";
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
 
 describe("actions/tags", () => {
-  let store;
+  let store: MockStoreEnhanced<State, Action, Dispatch>;
 
   beforeEach(() => {
     store = mockStore({
@@ -36,7 +40,7 @@ describe("actions/tags", () => {
 
       it("fetches tags", () => {
         store.dispatch(tags.fetchTags());
-        expect(fetchMock.lastCall()[0]).to.eq("/api/tags");
+        expect(fetchMock.lastCall()![0]).to.eq("/api/tags");
       });
     });
 
@@ -49,7 +53,9 @@ describe("actions/tags", () => {
         return store.dispatch(tags.fetchTags()).then(() => {
           const actions = store.getActions();
           expect(actions[1].type).to.eq("RECEIVE_TAGS");
-          expect(actions[1].items).to.eql([{ foo: "bar" }]);
+          expect("items" in actions[1] && actions[1].items).to.eql([
+            { foo: "bar" },
+          ]);
         });
       });
     });
@@ -69,10 +75,7 @@ describe("actions/tags", () => {
   });
 
   describe("removeTag", () => {
-    let id;
-    beforeEach(() => {
-      id = 1;
-    });
+    const id = 1;
 
     describe("before fetch", () => {
       beforeEach(() => {
@@ -83,13 +86,13 @@ describe("actions/tags", () => {
         return store.dispatch(tags.removeTag(id)).then(() => {
           const actions = store.getActions();
           expect(actions[0].type).to.eq("DELETE_TAG");
-          expect(actions[0].id).to.eq(1);
+          expect("id" in actions[0] && actions[0].id).to.eq(1);
         });
       });
 
       it("fetches restaurant", () => {
         store.dispatch(tags.removeTag(id));
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/tags/${id}`);
+        expect(fetchMock.lastCall()![0]).to.eq(`/api/tags/${id}`);
       });
     });
 
@@ -107,7 +110,7 @@ describe("actions/tags", () => {
         return store.dispatch(tags.removeTag(id)).then(() => {
           const actions = store.getActions();
           expect(actions[1].type).to.eq("TAG_DELETED");
-          expect(actions[1].id).to.eq(1);
+          expect("id" in actions[1] && actions[1].id).to.eq(1);
         });
       });
     });
