@@ -12,6 +12,7 @@ import {
   User as UserModel,
   Vote as VoteModel,
 } from "./db";
+import { InsertCSS } from "isomorphic-style-loader/StyleContext";
 
 export interface App {}
 
@@ -582,8 +583,8 @@ export type Reducer<T extends keyof State> = (
 export type Dispatch = ThunkDispatch<State, unknown, Action>;
 
 export interface AppContext extends ResolveContext {
-  insertCss: (...styles: Style[]) => void;
-  googleApiKey?: string;
+  insertCss: InsertCSS;
+  googleApiKey: string;
   pathname: string;
   query?: ParsedQs;
   store: EnhancedStore<State, Action>;

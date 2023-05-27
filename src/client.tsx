@@ -53,7 +53,7 @@ const store = configureStore(window.App.state, { history });
 const context: AppContext = {
   // Enables critical path CSS rendering
   // https://github.com/kriasoft/isomorphic-style-loader
-  insertCss: (...styles: Style[]) => {
+  insertCss: (...styles) => {
     // eslint-disable-next-line no-underscore-dangle
     const removeCss = styles.map((x) => x._insertCss());
     return () => {

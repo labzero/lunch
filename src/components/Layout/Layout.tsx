@@ -18,6 +18,7 @@ import ConfirmModalContainer from "../ConfirmModal/ConfirmModalContainer";
 import s from "./Layout.scss";
 // eslint-disable-next-line css-modules/no-unused-class, no-unused-vars
 import globalCss from "../../styles/globalCss.scss";
+import { InsertCSS } from "isomorphic-style-loader/StyleContext";
 
 export interface LayoutProps {
   children: ReactNode;
@@ -29,7 +30,7 @@ export interface LayoutProps {
 }
 
 interface LayoutContext {
-  insertCss: (...styles: Style[]) => void;
+  insertCss: InsertCSS;
 }
 
 class Layout extends Component<LayoutProps> {

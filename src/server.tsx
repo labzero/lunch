@@ -57,6 +57,7 @@ import usersMiddleware from "./middlewares/users";
 import api from "./api";
 import { sequelize, Team, User } from "./db";
 import { App, AppContext, ExtWebSocket, Flash, StateData } from "./interfaces";
+import { InsertCSS } from "isomorphic-style-loader/StyleContext";
 
 process.on("unhandledRejection", (reason, p) => {
   console.error("Unhandled Rejection at:", p, "reason:", reason);
@@ -351,7 +352,7 @@ const render: RequestHandler = async (req, res, next) => {
 
     // Enables critical path CSS rendering
     // https://github.com/kriasoft/isomorphic-style-loader
-    const insertCss = (...styles: Style[]) => {
+    const insertCss: InsertCSS = (...styles) => {
       // eslint-disable-next-line no-underscore-dangle
       styles.forEach((style) => css.add(style._getCss()));
     };
@@ -363,7 +364,7 @@ const render: RequestHandler = async (req, res, next) => {
     // https://facebook.github.io/react/docs/context.html
     const context: AppContext = {
       insertCss,
-      googleApiKey: config.googleApiKey,
+      googleApiKey: config.googleApiKey!,
       // The twins below are wild, be careful!
       pathname: req.path,
       query: req.query,

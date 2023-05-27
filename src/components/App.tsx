@@ -7,11 +7,12 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import StyleContext from "isomorphic-style-loader/StyleContext";
+import StyleContext, { InsertCSS } from "isomorphic-style-loader/StyleContext";
 import PropTypes from "prop-types";
-import React, { Children } from "react";
+import React, { Children, ReactNode } from "react";
 import { Provider as ReduxProvider } from "react-redux";
-import { Loader } from "@googlemaps/js-api-loader";
+import { Libraries, Loader } from "@googlemaps/js-api-loader";
+import { AppContext } from "../interfaces";
 import IntlProviderContainer from "./IntlProvider/IntlProviderContainer";
 import GoogleMapsLoaderContext from "./GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 
@@ -23,10 +24,12 @@ const ContextType = {
   pathname: PropTypes.string.isRequired,
   query: PropTypes.object,
   store: PropTypes.object.isRequired,
-  // Integrate Redux
-  // http://redux.js.org/docs/basics/UsageWithReact.html
-  ...ReduxProvider.childContextTypes,
 };
+
+interface AppProps {
+  children: ReactNode;
+  context: AppContext;
+}
 
 /**
  * The top-level React component setting context (global) variables
@@ -50,22 +53,25 @@ const ContextType = {
  *     container,
  *   );
  */
-class App extends React.PureComponent {
-  static propTypes = {
-    context: PropTypes.shape(ContextType).isRequired,
-    children: PropTypes.element.isRequired,
+class App extends React.PureComponent<AppProps> {
+  loaderContextValue: {
+    loader: Loader;
+  };
+
+  styleContextValue: {
+    insertCss: InsertCSS;
   };
 
   static childContextTypes = ContextType;
 
-  constructor(props) {
+  constructor(props: AppProps) {
     super(props);
 
     this.loaderContextValue = {
       loader: new Loader({
         apiKey: this.props.context.googleApiKey,
         version: "weekly",
-        libraries: ["places", "geocoding"],
+        libraries: ["places", "geocoding"] as Libraries,
       }),
     };
 
