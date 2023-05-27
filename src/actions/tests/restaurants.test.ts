@@ -2,16 +2,20 @@
 /* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates, arrow-body-style */
 
 import { expect } from "chai";
-import { configureMockStore } from "@jedmao/redux-mock-store";
+import {
+  MockStoreEnhanced,
+  configureMockStore,
+} from "@jedmao/redux-mock-store";
 import fetchMock from "fetch-mock";
 import thunk from "redux-thunk";
+import { Action, Dispatch, State } from "../../interfaces";
 import * as restaurants from "../restaurants";
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
 
 describe("actions/restaurants", () => {
-  let store;
+  let store: MockStoreEnhanced<State, Action, Dispatch>;
 
   beforeEach(() => {
     store = mockStore({});
@@ -32,7 +36,7 @@ describe("actions/restaurants", () => {
 
       it("fetches restaurants", () => {
         store.dispatch(restaurants.fetchRestaurants());
-        expect(fetchMock.lastCall()[0]).to.eq("/api/restaurants");
+        expect(fetchMock.lastCall()![0]).to.eq("/api/restaurants");
       });
     });
 
@@ -45,7 +49,9 @@ describe("actions/restaurants", () => {
         return store.dispatch(restaurants.fetchRestaurants()).then(() => {
           const actions = store.getActions();
           expect(actions[1].type).to.eq("RECEIVE_RESTAURANTS");
-          expect(actions[1].items).to.eql([{ foo: "bar" }]);
+          expect("items" in actions[1] && actions[1].items).to.eql([
+            { foo: "bar" },
+          ]);
         });
       });
     });
@@ -65,19 +71,11 @@ describe("actions/restaurants", () => {
   });
 
   describe("addRestaurant", () => {
-    let name;
-    let placeId;
-    let address;
-    let lat;
-    let lng;
-
-    beforeEach(() => {
-      name = "Lab Zero";
-      placeId = "12345";
-      address = "123 Main";
-      lat = 50;
-      lng = 100;
-    });
+    const name = "Lab Zero";
+    const placeId = "12345";
+    const address = "123 Main";
+    const lat = 50;
+    const lng = 100;
 
     describe("before fetch", () => {
       beforeEach(() => {
@@ -90,7 +88,7 @@ describe("actions/restaurants", () => {
           .then(() => {
             const actions = store.getActions();
             expect(actions[0].type).to.eq("POST_RESTAURANT");
-            expect(actions[0].restaurant).to.eql({
+            expect("restaurant" in actions[0] && actions[0].restaurant).to.eql({
               name: "Lab Zero",
               placeId: "12345",
               address: "123 Main",
@@ -105,8 +103,8 @@ describe("actions/restaurants", () => {
           restaurants.addRestaurant(name, placeId, address, lat, lng)
         );
 
-        expect(fetchMock.lastCall()[0]).to.eq("/api/restaurants");
-        expect(fetchMock.lastCall()[1].body).to.eq(
+        expect(fetchMock.lastCall()![0]).to.eq("/api/restaurants");
+        expect(fetchMock.lastCall()![1]!.body).to.eq(
           JSON.stringify({
             name,
             placeId,
@@ -135,10 +133,7 @@ describe("actions/restaurants", () => {
   });
 
   describe("removeRestaurant", () => {
-    let id;
-    beforeEach(() => {
-      id = 1;
-    });
+    const id = 1;
 
     describe("before fetch", () => {
       beforeEach(() => {
@@ -149,13 +144,13 @@ describe("actions/restaurants", () => {
         return store.dispatch(restaurants.removeRestaurant(id)).then(() => {
           const actions = store.getActions();
           expect(actions[0].type).to.eq("DELETE_RESTAURANT");
-          expect(actions[0].id).to.eq(1);
+          expect("id" in actions[0] && actions[0].id).to.eq(1);
         });
       });
 
       it("fetches restaurant", () => {
         store.dispatch(restaurants.removeRestaurant(id));
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${id}`);
+        expect(fetchMock.lastCall()![0]).to.eq(`/api/restaurants/${id}`);
       });
     });
 
@@ -174,13 +169,8 @@ describe("actions/restaurants", () => {
   });
 
   describe("changeRestaurantName", () => {
-    let id;
-    let name;
-
-    beforeEach(() => {
-      id = 1;
-      name = "Lab Zero";
-    });
+    const id = 1;
+    const name = "Lab Zero";
 
     describe("before fetch", () => {
       beforeEach(() => {
@@ -193,16 +183,18 @@ describe("actions/restaurants", () => {
           .then(() => {
             const actions = store.getActions();
             expect(actions[0].type).to.eq("RENAME_RESTAURANT");
-            expect(actions[0].id).to.eq(1);
-            expect(actions[0].restaurant.name).to.eq("Lab Zero");
+            expect("id" in actions[0] && actions[0].id).to.eq(1);
+            expect(
+              "restaurant" in actions[0] && actions[0].restaurant.name
+            ).to.eq("Lab Zero");
           });
       });
 
       it("fetches restaurant", () => {
         store.dispatch(restaurants.changeRestaurantName(id, name));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${id}`);
-        expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ name }));
+        expect(fetchMock.lastCall()![0]).to.eq(`/api/restaurants/${id}`);
+        expect(fetchMock.lastCall()![1]!.body).to.eq(JSON.stringify({ name }));
       });
     });
 
@@ -223,10 +215,7 @@ describe("actions/restaurants", () => {
   });
 
   describe("addVote", () => {
-    let id;
-    beforeEach(() => {
-      id = 1;
-    });
+    const id = 1;
 
     describe("before fetch", () => {
       beforeEach(() => {
@@ -237,14 +226,14 @@ describe("actions/restaurants", () => {
         return store.dispatch(restaurants.addVote(id)).then(() => {
           const actions = store.getActions();
           expect(actions[0].type).to.eq("POST_VOTE");
-          expect(actions[0].id).to.eq(1);
+          expect("id" in actions[0] && actions[0].id).to.eq(1);
         });
       });
 
       it("fetches vote", () => {
         store.dispatch(restaurants.addVote(id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${id}/votes`);
+        expect(fetchMock.lastCall()![0]).to.eq(`/api/restaurants/${id}/votes`);
       });
     });
 
@@ -263,12 +252,8 @@ describe("actions/restaurants", () => {
   });
 
   describe("removeVote", () => {
-    let restaurantId;
-    let id;
-    beforeEach(() => {
-      restaurantId = 1;
-      id = 2;
-    });
+    const restaurantId = 1;
+    const id = 2;
 
     describe("before fetch", () => {
       beforeEach(() => {
@@ -281,15 +266,17 @@ describe("actions/restaurants", () => {
           .then(() => {
             const actions = store.getActions();
             expect(actions[0].type).to.eq("DELETE_VOTE");
-            expect(actions[0].restaurantId).to.eq(1);
-            expect(actions[0].id).to.eq(2);
+            expect(
+              "restaurantId" in actions[0] && actions[0].restaurantId
+            ).to.eq(1);
+            expect("id" in actions[0] && actions[0].id).to.eq(2);
           });
       });
 
       it("fetches vote", () => {
         store.dispatch(restaurants.removeVote(restaurantId, id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(
+        expect(fetchMock.lastCall()![0]).to.eq(
           `/api/restaurants/${restaurantId}/votes/${id}`
         );
       });
@@ -312,12 +299,8 @@ describe("actions/restaurants", () => {
   });
 
   describe("addNewTagToRestaurant", () => {
-    let id;
-    let name;
-    beforeEach(() => {
-      id = 1;
-      name = "zap";
-    });
+    const id = 1;
+    const name = "zap";
 
     describe("before fetch", () => {
       beforeEach(() => {
@@ -330,16 +313,18 @@ describe("actions/restaurants", () => {
           .then(() => {
             const actions = store.getActions();
             expect(actions[0].type).to.eq("POST_NEW_TAG_TO_RESTAURANT");
-            expect(actions[0].restaurantId).to.eq(1);
-            expect(actions[0].value).to.eq("zap");
+            expect(
+              "restaurantId" in actions[0] && actions[0].restaurantId
+            ).to.eq(1);
+            expect("value" in actions[0] && actions[0].value).to.eq("zap");
           });
       });
 
       it("fetches tag", () => {
         store.dispatch(restaurants.addNewTagToRestaurant(id, name));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/restaurants/${id}/tags`);
-        expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ name }));
+        expect(fetchMock.lastCall()![0]).to.eq(`/api/restaurants/${id}/tags`);
+        expect(fetchMock.lastCall()![1]!.body).to.eq(JSON.stringify({ name }));
       });
     });
 
@@ -360,12 +345,8 @@ describe("actions/restaurants", () => {
   });
 
   describe("addTagToRestaurant", () => {
-    let restaurantId;
-    let id;
-    beforeEach(() => {
-      restaurantId = 1;
-      id = 2;
-    });
+    const restaurantId = 1;
+    const id = 2;
 
     describe("before fetch", () => {
       beforeEach(() => {
@@ -378,18 +359,20 @@ describe("actions/restaurants", () => {
           .then(() => {
             const actions = store.getActions();
             expect(actions[0].type).to.eq("POST_TAG_TO_RESTAURANT");
-            expect(actions[0].restaurantId).to.eq(1);
-            expect(actions[0].id).to.eq(2);
+            expect(
+              "restaurantId" in actions[0] && actions[0].restaurantId
+            ).to.eq(1);
+            expect("id" in actions[0] && actions[0].id).to.eq(2);
           });
       });
 
       it("fetches tag", () => {
         store.dispatch(restaurants.addTagToRestaurant(restaurantId, id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(
+        expect(fetchMock.lastCall()![0]).to.eq(
           `/api/restaurants/${restaurantId}/tags`
         );
-        expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify({ id }));
+        expect(fetchMock.lastCall()![1]!.body).to.eq(JSON.stringify({ id }));
       });
     });
 
@@ -410,12 +393,8 @@ describe("actions/restaurants", () => {
   });
 
   describe("removeTagFromRestaurant", () => {
-    let restaurantId;
-    let id;
-    beforeEach(() => {
-      restaurantId = 1;
-      id = 2;
-    });
+    const restaurantId = 1;
+    const id = 2;
 
     describe("before fetch", () => {
       beforeEach(() => {
@@ -428,15 +407,17 @@ describe("actions/restaurants", () => {
           .then(() => {
             const actions = store.getActions();
             expect(actions[0].type).to.eq("DELETE_TAG_FROM_RESTAURANT");
-            expect(actions[0].restaurantId).to.eq(1);
-            expect(actions[0].id).to.eq(2);
+            expect(
+              "restaurantId" in actions[0] && actions[0].restaurantId
+            ).to.eq(1);
+            expect("id" in actions[0] && actions[0].id).to.eq(2);
           });
       });
 
       it("fetches tag", () => {
         store.dispatch(restaurants.removeTagFromRestaurant(restaurantId, id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(
+        expect(fetchMock.lastCall()![0]).to.eq(
           `/api/restaurants/${restaurantId}/tags/${id}`
         );
       });

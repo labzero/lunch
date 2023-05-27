@@ -196,7 +196,12 @@ export function setNameFilter(val: string): Action {
   };
 }
 
-export function fetchRestaurants(): ThunkAction<void, State, unknown, Action> {
+export function fetchRestaurants(): ThunkAction<
+  Promise<Action>,
+  State,
+  unknown,
+  Action
+> {
   return (dispatch) => {
     dispatch(requestRestaurants());
     return fetch("/api/restaurants", {
@@ -248,7 +253,7 @@ export function addRestaurant(
   address: string,
   lat: number,
   lng: number
-): ThunkAction<void, State, unknown, Action> {
+): ThunkAction<Promise<void>, State, unknown, Action> {
   const payload: Partial<Restaurant> = {
     name,
     placeId,
@@ -269,7 +274,7 @@ export function addRestaurant(
 
 export function removeRestaurant(
   id: number
-): ThunkAction<void, State, unknown, Action> {
+): ThunkAction<Promise<void>, State, unknown, Action> {
   return (dispatch) => {
     dispatch(deleteRestaurant(id));
     return fetch(`/api/restaurants/${id}`, {
@@ -282,7 +287,7 @@ export function removeRestaurant(
 export function changeRestaurantName(
   id: number,
   name: string
-): ThunkAction<void, State, unknown, Action> {
+): ThunkAction<Promise<void>, State, unknown, Action> {
   const payload: Partial<Restaurant> = { name };
   return (dispatch) => {
     dispatch(renameRestaurant(id, payload));
@@ -295,7 +300,9 @@ export function changeRestaurantName(
   };
 }
 
-export function addVote(id: number): ThunkAction<void, State, unknown, Action> {
+export function addVote(
+  id: number
+): ThunkAction<Promise<void>, State, unknown, Action> {
   return (dispatch) => {
     dispatch(postVote(id));
     return fetch(`/api/restaurants/${id}/votes`, {
@@ -308,7 +315,7 @@ export function addVote(id: number): ThunkAction<void, State, unknown, Action> {
 export function removeVote(
   restaurantId: number,
   id: number
-): ThunkAction<void, State, unknown, Action> {
+): ThunkAction<Promise<void>, State, unknown, Action> {
   return (dispatch) => {
     dispatch(deleteVote(restaurantId, id));
     return fetch(`/api/restaurants/${restaurantId}/votes/${id}`, {
@@ -321,7 +328,7 @@ export function removeVote(
 export function addNewTagToRestaurant(
   restaurantId: number,
   name: string
-): ThunkAction<void, State, unknown, Action> {
+): ThunkAction<Promise<void>, State, unknown, Action> {
   return (dispatch) => {
     dispatch(postNewTagToRestaurant(restaurantId, name));
     return fetch(`/api/restaurants/${restaurantId}/tags`, {
@@ -336,7 +343,7 @@ export function addNewTagToRestaurant(
 export function addTagToRestaurant(
   restaurantId: number,
   id: number
-): ThunkAction<void, State, unknown, Action> {
+): ThunkAction<Promise<void>, State, unknown, Action> {
   return (dispatch) => {
     dispatch(postTagToRestaurant(restaurantId, id));
     return fetch(`/api/restaurants/${restaurantId}/tags`, {
@@ -351,7 +358,7 @@ export function addTagToRestaurant(
 export function removeTagFromRestaurant(
   restaurantId: number,
   id: number
-): ThunkAction<void, State, unknown, Action> {
+): ThunkAction<Promise<void>, State, unknown, Action> {
   return (dispatch) => {
     dispatch(deleteTagFromRestaurant(restaurantId, id));
     return fetch(`/api/restaurants/${restaurantId}/tags/${id}`, {
