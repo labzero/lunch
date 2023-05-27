@@ -223,7 +223,7 @@ export type Action =
     }
   | {
       type: "POST_TEAM";
-      team: Team;
+      team: Partial<Team>;
     }
   | {
       type: "TEAM_POSTED";
