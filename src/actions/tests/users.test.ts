@@ -2,17 +2,21 @@
 /* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates, arrow-body-style */
 
 import { expect } from "chai";
-import { configureMockStore } from "@jedmao/redux-mock-store";
+import {
+  MockStoreEnhanced,
+  configureMockStore,
+} from "@jedmao/redux-mock-store";
 import fetchMock from "fetch-mock";
 import proxyquire from "proxyquire";
 import thunk from "redux-thunk";
+import { Action, Dispatch, State, User } from "../../interfaces";
 import * as users from "../users";
 
 const middlewares = [thunk];
 const mockStore = configureMockStore(middlewares);
 
 describe("actions/users", () => {
-  let store;
+  let store: MockStoreEnhanced<State, Action, Dispatch>;
 
   beforeEach(() => {
     store = mockStore({});
@@ -34,7 +38,7 @@ describe("actions/users", () => {
       it("fetches users", () => {
         store.dispatch(users.fetchUsers());
 
-        expect(fetchMock.lastCall()[0]).to.eq("/api/users");
+        expect(fetchMock.lastCall()![0]).to.eq("/api/users");
       });
     });
 
@@ -47,7 +51,9 @@ describe("actions/users", () => {
         return store.dispatch(users.fetchUsers()).then(() => {
           const actions = store.getActions();
           expect(actions[1].type).to.eq("RECEIVE_USERS");
-          expect(actions[1].items).to.eql([{ foo: "bar" }]);
+          expect("items" in actions[1] && actions[1].items).to.eql([
+            { foo: "bar" },
+          ]);
         });
       });
     });
@@ -67,10 +73,10 @@ describe("actions/users", () => {
   });
 
   describe("addUser", () => {
-    let payload;
+    let payload: Partial<User>;
 
     beforeEach(() => {
-      payload = { foo: "bar" };
+      payload = { email: "foo@bar.com" };
     });
 
     describe("before fetch", () => {
@@ -82,15 +88,17 @@ describe("actions/users", () => {
         return store.dispatch(users.addUser(payload)).then(() => {
           const actions = store.getActions();
           expect(actions[0].type).to.eq("POST_USER");
-          expect(actions[0].user).to.eql({ foo: "bar" });
+          expect("user" in actions[0] && actions[0].user).to.eql({
+            email: "foo@bar.com",
+          });
         });
       });
 
       it("fetches restaurant", () => {
         store.dispatch(users.addUser(payload));
 
-        expect(fetchMock.lastCall()[0]).to.eq("/api/users");
-        expect(fetchMock.lastCall()[1].body).to.eq(JSON.stringify(payload));
+        expect(fetchMock.lastCall()![0]).to.eq("/api/users");
+        expect(fetchMock.lastCall()![1]!.body).to.eq(JSON.stringify(payload));
       });
     });
 
@@ -103,7 +111,9 @@ describe("actions/users", () => {
         return store.dispatch(users.addUser(payload)).then(() => {
           const actions = store.getActions();
           expect(actions[1].type).to.eq("USER_POSTED");
-          expect(actions[1].user).to.eql({ foo: "bar" });
+          expect("user" in actions[1] && actions[1].user).to.eql({
+            foo: "bar",
+          });
         });
       });
     });
@@ -123,17 +133,17 @@ describe("actions/users", () => {
   });
 
   describe("removeUser", () => {
-    let id;
-    let proxyUsers;
+    let id = 1;
+    const proxyUsers = proxyquire("../users", {
+      "../selectors/user": {
+        getCurrentUser: () => {
+          return { id: 231 };
+        },
+      },
+    });
+
     beforeEach(() => {
       id = 1;
-      proxyUsers = proxyquire("../users", {
-        "../selectors/user": {
-          getCurrentUser: () => {
-            return { id: 231 };
-          },
-        },
-      });
     });
 
     describe("before fetch", () => {
@@ -145,14 +155,14 @@ describe("actions/users", () => {
         return store.dispatch(proxyUsers.removeUser(id)).then(() => {
           const actions = store.getActions();
           expect(actions[0].type).to.eq("DELETE_USER");
-          expect(actions[0].id).to.eq(1);
+          expect("id" in actions[0] && actions[0].id).to.eq(1);
         });
       });
 
       it("fetches user", () => {
         store.dispatch(proxyUsers.removeUser(id));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/users/${id}`);
+        expect(fetchMock.lastCall()![0]).to.eq(`/api/users/${id}`);
       });
     });
 
@@ -166,22 +176,22 @@ describe("actions/users", () => {
         return store.dispatch(proxyUsers.removeUser(id)).then(() => {
           const actions = store.getActions();
           expect(actions[0].type).to.eq("DELETE_USER");
-          expect(actions[0].isSelf).to.eq(true);
-          expect(actions[0].id).to.eq(231);
-          expect(actions[0].team).to.eq(undefined);
+          expect("isSelf" in actions[0] && actions[0].isSelf).to.eq(true);
+          expect("id" in actions[0] && actions[0].id).to.eq(231);
+          expect("team" in actions[0] && actions[0].team).to.eq(undefined);
         });
       });
     });
 
     describe("when team is provided", () => {
-      let team;
+      const team = {
+        slug: "labzero",
+      };
+
       beforeEach(() => {
         store = mockStore({
           host: "lunch.pink",
         });
-        team = {
-          slug: "labzero",
-        };
         fetchMock.mock("*", {});
       });
 
@@ -189,14 +199,16 @@ describe("actions/users", () => {
         return store.dispatch(proxyUsers.removeUser(id, team)).then(() => {
           const actions = store.getActions();
           expect(actions[0].type).to.eq("DELETE_USER");
-          expect(actions[0].team).to.eql({ slug: "labzero" });
-          expect(actions[0].id).to.eq(1);
+          expect("team" in actions[0] && actions[0].team).to.eql({
+            slug: "labzero",
+          });
+          expect("id" in actions[0] && actions[0].id).to.eq(1);
         });
       });
 
       it("fetches user with full url", () => {
         store.dispatch(proxyUsers.removeUser(id, team));
-        expect(fetchMock.lastCall()[0]).to.eq(
+        expect(fetchMock.lastCall()![0]).to.eq(
           `http://${team.slug}.lunch.pink/api/users/${id}`
         );
       });
@@ -211,7 +223,7 @@ describe("actions/users", () => {
         return store.dispatch(proxyUsers.removeUser(id)).then(() => {
           const actions = store.getActions();
           expect(actions[1].type).to.eq("USER_DELETED");
-          expect(actions[1].id).to.eq(1);
+          expect("id" in actions[1] && actions[1].id).to.eq(1);
         });
       });
     });
@@ -231,19 +243,14 @@ describe("actions/users", () => {
   });
 
   describe("changeUserRole", () => {
-    let id;
-    let roleType;
-    let proxyUsers;
-    beforeEach(() => {
-      id = 1;
-      roleType = "member";
-      proxyUsers = proxyquire("../users", {
-        "../selectors/user": {
-          getCurrentUser: () => {
-            return { id: 231 };
-          },
+    const id = 1;
+    const roleType = "member";
+    const proxyUsers = proxyquire("../users", {
+      "../selectors/user": {
+        getCurrentUser: () => {
+          return { id: 231 };
         },
-      });
+      },
     });
 
     describe("before fetch", () => {
@@ -257,16 +264,18 @@ describe("actions/users", () => {
           .then(() => {
             const actions = store.getActions();
             expect(actions[0].type).to.eq("PATCH_USER");
-            expect(actions[0].id).to.eq(1);
-            expect(actions[0].roleType).to.eq("member");
+            expect("id" in actions[0] && actions[0].id).to.eq(1);
+            expect("roleType" in actions[0] && actions[0].roleType).to.eq(
+              "member"
+            );
           });
       });
 
       it("fetches user", () => {
         store.dispatch(proxyUsers.changeUserRole(id, roleType));
 
-        expect(fetchMock.lastCall()[0]).to.eq(`/api/users/${id}`);
-        expect(fetchMock.lastCall()[1].body).to.eq(
+        expect(fetchMock.lastCall()![0]).to.eq(`/api/users/${id}`);
+        expect(fetchMock.lastCall()![1]!.body).to.eq(
           JSON.stringify({ id, type: roleType })
         );
       });
@@ -283,8 +292,10 @@ describe("actions/users", () => {
           .then(() => {
             const actions = store.getActions();
             expect(actions[1].type).to.eq("USER_PATCHED");
-            expect(actions[1].id).to.eq(1);
-            expect(actions[1].user).to.eql({ foo: "bar" });
+            expect("id" in actions[1] && actions[1].id).to.eq(1);
+            expect("user" in actions[1] && actions[1].user).to.eql({
+              foo: "bar",
+            });
           });
       });
     });
