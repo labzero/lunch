@@ -2,10 +2,11 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from "chai";
-import { spy, stub } from "sinon";
+import { SinonSpy, spy, stub } from "sinon";
 import bodyParser from "body-parser";
+import { Response } from "superagent";
 import request from "supertest";
-import express from "express";
+import express, { Application, RequestHandler } from "express";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
 import mockEsmodule from "../../../test/mockEsmodule";
@@ -15,11 +16,11 @@ const proxyquireStrict = proxyquire.noCallThru();
 const dbMock = new SequelizeMock();
 
 describe("api/main/user", () => {
-  let app;
-  let UserMock;
-  let loggedInSpy;
-  let makeApp;
-  let updateSpy;
+  let app: Application;
+  let UserMock: SequelizeMockObject;
+  let loggedInSpy: SinonSpy;
+  let makeApp: (deps?: any, middleware?: RequestHandler) => Application;
+  let updateSpy: SinonSpy;
 
   beforeEach(() => {
     UserMock = dbMock.define("user", {});
@@ -76,7 +77,7 @@ describe("api/main/user", () => {
     });
 
     describe("without valid parameters", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         request(app)
           .patch("/")
@@ -108,7 +109,7 @@ describe("api/main/user", () => {
     });
 
     describe("with bad password", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         app = makeApp({
           "../../helpers/getPasswordError": mockEsmodule({
@@ -168,7 +169,7 @@ describe("api/main/user", () => {
     });
 
     describe("success", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         request(app)
           .patch("/")
@@ -190,7 +191,7 @@ describe("api/main/user", () => {
     });
 
     describe("failure", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         app = makeApp({
           "../helpers/loggedIn": mockEsmodule({
@@ -217,7 +218,9 @@ describe("api/main/user", () => {
       });
 
       it("returns error", () => {
-        expect(response.error.text).to.contain("Oh No");
+        expect(
+          typeof response.error !== "boolean" && response.error.text
+        ).to.contain("Oh No");
       });
     });
   });

@@ -384,7 +384,8 @@ describe("api/main/teams", () => {
       });
 
       it("returns error", () => {
-        expect((response.error as HTTPError).text).to.exist;
+        expect(typeof response.error !== "boolean" && response.error.text).to
+          .exist;
       });
     });
   });
@@ -470,7 +471,9 @@ describe("api/main/teams", () => {
       });
 
       it("returns error", () => {
-        expect((response.error as HTTPError).text).to.contain("Oh No");
+        expect(
+          typeof response.error !== "boolean" && response.error.text
+        ).to.contain("Oh No");
       });
     });
   });
@@ -709,7 +712,9 @@ describe("api/main/teams", () => {
       });
 
       it("returns error", () => {
-        expect((response.error as HTTPError).text).to.contain("Oh No");
+        expect(
+          typeof response.error !== "boolean" && response.error.text
+        ).to.contain("Oh No");
       });
     });
   });

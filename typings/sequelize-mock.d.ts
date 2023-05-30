@@ -4,6 +4,7 @@ interface SequelizeMockObject {
   findAll: () => Promise<any[]>;
   findAllForUser: (userId: string) => Promise<any[]>;
   findOne: () => Promise<any>;
+  getSessionUser: () => Promise<any>;
   hasMany: (obj: SequelizeMockObject) => void;
   scope: () => void;
 }
