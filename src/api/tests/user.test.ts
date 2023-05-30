@@ -30,7 +30,6 @@ describe("api/main/user", () => {
 
     loggedInSpy = spy((req, res, next) => {
       req.user = {
-        // eslint-disable-line no-param-reassign
         get: () => undefined,
         name: "Old Name",
         id: 231,

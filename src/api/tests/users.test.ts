@@ -2,12 +2,15 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from "chai";
-import { match, spy, stub } from "sinon";
+import { SinonSpy, SinonStub, match, spy, stub } from "sinon";
 import bodyParser from "body-parser";
+import { Response } from "superagent";
 import request from "supertest";
-import express from "express";
+import express, { Application, RequestHandler } from "express";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
+import hasRoleHelper from "../../helpers/hasRole";
+import { Role, Team, User } from "../../interfaces";
 import mockEsmodule from "../../../test/mockEsmodule";
 
 const proxyquireStrict = proxyquire.noCallThru();
@@ -15,16 +18,16 @@ const proxyquireStrict = proxyquire.noCallThru();
 const dbMock = new SequelizeMock();
 
 describe("api/team/users", () => {
-  let app;
-  let checkTeamRoleSpy;
-  let InvitationMock;
-  let RoleMock;
-  let UserMock;
-  let loggedInSpy;
-  let makeApp;
-  let broadcastSpy;
-  let team;
-  let user;
+  let app: Application;
+  let checkTeamRoleSpy: SinonSpy;
+  let InvitationMock: SequelizeMockObject;
+  let RoleMock: SequelizeMockObject;
+  let UserMock: SequelizeMockObject;
+  let loggedInSpy: SinonSpy;
+  let makeApp: (deps?: any, middleware?: RequestHandler) => Application;
+  let broadcastSpy: SinonSpy;
+  let team: Team;
+  let user: User;
 
   beforeEach(() => {
     InvitationMock = dbMock.define("invitation", {});
@@ -33,22 +36,23 @@ describe("api/team/users", () => {
 
     team = {
       id: 77,
-      get: function get(prop) {
+      get: function get<K extends keyof Team>(prop: K) {
         return this[prop];
       },
-      stub: "Lab Zero",
-    };
-    checkTeamRoleSpy = spy(() => (req, res, next) => {
-      req.team = team; // eslint-disable-line no-param-reassign
-      next();
-    });
+    } as Team;
+    checkTeamRoleSpy = spy(
+      (): RequestHandler => (req, res, next) => {
+        req.team = team; // eslint-disable-line no-param-reassign
+        next();
+      }
+    );
 
     user = {
-      get: function get(prop) {
+      get: function get<K extends keyof User>(prop: K) {
         return this[prop];
       },
       id: 231,
-    };
+    } as User;
     loggedInSpy = spy((req, res, next) => {
       req.user = user; // eslint-disable-line no-param-reassign
       next();
@@ -107,7 +111,7 @@ describe("api/team/users", () => {
     });
 
     describe("query", () => {
-      let scopeSpy;
+      let scopeSpy: SinonSpy;
       beforeEach(() => {
         scopeSpy = spy(UserMock, "scope");
       });
@@ -145,7 +149,7 @@ describe("api/team/users", () => {
     });
 
     describe("success", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         request(app)
           .get("/")
@@ -166,7 +170,7 @@ describe("api/team/users", () => {
     });
 
     describe("failure", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         app = makeApp({
           "../../helpers/hasRole": mockEsmodule({
@@ -188,13 +192,15 @@ describe("api/team/users", () => {
       });
 
       it("returns error", () => {
-        expect(response.error.text).to.contain("Oh No");
+        expect(
+          typeof response.error !== "boolean" && response.error.text
+        ).to.contain("Oh No");
       });
     });
   });
 
   describe("POST /", () => {
-    let sendMailSpy;
+    let sendMailSpy: SinonSpy;
     beforeEach(() => {
       sendMailSpy = spy(() => Promise.resolve());
     });
@@ -219,7 +225,7 @@ describe("api/team/users", () => {
     });
 
     describe("when adding disallowed type", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         app = makeApp({
           "../../helpers/hasRole": mockEsmodule({
@@ -245,7 +251,7 @@ describe("api/team/users", () => {
     });
 
     describe("when allowed", () => {
-      let findOneSpy;
+      let findOneSpy: SinonSpy;
       beforeEach(() => {
         app = makeApp({
           "../../helpers/hasRole": mockEsmodule({
@@ -267,7 +273,7 @@ describe("api/team/users", () => {
     });
 
     describe("when user exists and has many roles", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         stub(UserMock, "findOne").callsFake(() =>
           Promise.resolve({
@@ -313,7 +319,7 @@ describe("api/team/users", () => {
       });
 
       describe("but is already on team", () => {
-        let response;
+        let response: Response;
         beforeEach((done) => {
           app = makeApp({
             "../../helpers/hasRole": mockEsmodule({
@@ -340,7 +346,7 @@ describe("api/team/users", () => {
       });
 
       describe("and is not on team", () => {
-        let createSpy;
+        let createSpy: SinonSpy;
         beforeEach(() => {
           app = makeApp({
             "../../helpers/hasRole": mockEsmodule({
@@ -381,9 +387,9 @@ describe("api/team/users", () => {
     });
 
     describe("when user does not exist", () => {
-      let createStub;
-      let destroyStub;
-      let findOneStub;
+      let createStub: SinonStub;
+      let destroyStub: SinonStub;
+      let findOneStub: SinonStub;
       beforeEach(() => {
         app = makeApp({
           "../../helpers/hasRole": mockEsmodule({
@@ -454,8 +460,8 @@ describe("api/team/users", () => {
     });
 
     describe("success", () => {
-      let userToCreate;
-      let response;
+      let userToCreate: Partial<User>;
+      let response: Response;
       beforeEach((done) => {
         userToCreate = { id: 2 };
         app = makeApp({
@@ -494,7 +500,7 @@ describe("api/team/users", () => {
     });
 
     describe("failure", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         app = makeApp({
           "../../helpers/hasRole": mockEsmodule({
@@ -512,13 +518,15 @@ describe("api/team/users", () => {
       });
 
       it("returns error", () => {
-        expect(response.error.text).to.contain("Oh No");
+        expect(
+          typeof response.error !== "boolean" && response.error.text
+        ).to.contain("Oh No");
       });
     });
   });
 
   describe("PATCH /:id", () => {
-    let hasRole;
+    let hasRole: typeof hasRoleHelper;
     beforeEach(() => {
       hasRole = mockEsmodule({
         default: () => true,
@@ -542,8 +550,8 @@ describe("api/team/users", () => {
     });
 
     describe("when patching self", () => {
-      let getRoleSpy;
-      let path;
+      let getRoleSpy: SinonSpy;
+      let path: string;
       beforeEach(() => {
         getRoleSpy = spy();
         app = makeApp({
@@ -562,15 +570,15 @@ describe("api/team/users", () => {
     });
 
     describe("when owner is changing self", () => {
-      let role;
-      let path;
+      let role: Role;
+      let path: string;
       beforeEach(() => {
         role = {
-          update: spy(),
           userId: user.id,
           teamId: team.id,
           type: "owner",
-        };
+        } as Role;
+        role.update = spy();
         path = `/${user.id}`;
         app = makeApp({
           "../../helpers/hasRole": hasRole,
@@ -581,14 +589,14 @@ describe("api/team/users", () => {
       });
 
       describe("to member", () => {
-        let payload;
+        let payload: Partial<Role>;
         beforeEach(() => {
           payload = { type: "member" };
         });
 
         describe("but there are no other owners", () => {
-          let findAllStub;
-          let response;
+          let findAllStub: SinonStub;
+          let response: Response;
           beforeEach((done) => {
             findAllStub = stub(RoleMock, "findAll").callsFake(() =>
               Promise.resolve([
@@ -638,14 +646,15 @@ describe("api/team/users", () => {
           });
 
           it("updates role", () => {
-            expect(role.update.calledWith({ type: "member" })).to.be.true;
+            expect((role.update as SinonSpy).calledWith({ type: "member" })).to
+              .be.true;
           });
         });
       });
     });
 
     describe("when patching other", () => {
-      let findOneSpy;
+      let findOneSpy: SinonSpy;
       beforeEach(() => {
         findOneSpy = spy(RoleMock, "findOne");
         return request(app).patch("/2").send({ type: "member" });
@@ -664,21 +673,21 @@ describe("api/team/users", () => {
     });
 
     describe("when owner is changing other", () => {
-      let currentUserRole;
-      let otherUserId;
-      let path;
-      let role;
+      let currentUserRole: Role;
+      let otherUserId: number;
+      let path: string;
+      let role: Role;
       beforeEach(() => {
         currentUserRole = {
           userId: user.id,
           teamId: team.id,
           type: "owner",
-        };
+        } as Role;
         role = {
-          update: spy(),
           userId: otherUserId,
           teamId: team.id,
-        };
+        } as Role;
+        role.update = spy();
         otherUserId = 2;
         path = `/${otherUserId}`;
         app = makeApp({
@@ -697,7 +706,8 @@ describe("api/team/users", () => {
         });
 
         it("updates role", () => {
-          expect(role.update.calledWith({ type: "member" })).to.be.true;
+          expect((role.update as SinonSpy).calledWith({ type: "member" })).to.be
+            .true;
         });
       });
 
@@ -709,7 +719,8 @@ describe("api/team/users", () => {
         });
 
         it("updates role", () => {
-          expect(role.update.calledWith({ type: "owner" })).to.be.true;
+          expect((role.update as SinonSpy).calledWith({ type: "owner" })).to.be
+            .true;
         });
       });
 
@@ -721,27 +732,28 @@ describe("api/team/users", () => {
         });
 
         it("updates role", () => {
-          expect(role.update.calledWith({ type: "owner" })).to.be.true;
+          expect((role.update as SinonSpy).calledWith({ type: "owner" })).to.be
+            .true;
         });
       });
     });
 
     describe("when member is changing other", () => {
-      let currentUserRole;
-      let otherUserId;
-      let path;
-      let role;
+      let currentUserRole: Role;
+      let otherUserId: number;
+      let path: string;
+      let role: Role;
       beforeEach(() => {
         currentUserRole = {
           userId: user.id,
           teamId: team.id,
           type: "member",
-        };
+        } as Role;
         role = {
-          update: spy(),
           userId: otherUserId,
           teamId: team.id,
-        };
+        } as Role;
+        role.update = spy();
         otherUserId = 2;
         path = `/${otherUserId}`;
         app = makeApp({
@@ -753,7 +765,7 @@ describe("api/team/users", () => {
       });
 
       describe("owner", () => {
-        let response;
+        let response: Response;
         beforeEach((done) => {
           role.type = "owner";
           stub(RoleMock, "findOne").callsFake(() => Promise.resolve(role));
@@ -777,7 +789,7 @@ describe("api/team/users", () => {
       });
 
       describe("member", () => {
-        let response;
+        let response: Response;
         beforeEach((done) => {
           role.type = "member";
           stub(RoleMock, "findOne").callsFake(() => Promise.resolve(role));
@@ -805,12 +817,13 @@ describe("api/team/users", () => {
           beforeEach(() => request(app).patch(path).send({ type: "member" }));
 
           it("updates role", () => {
-            expect(role.update.calledWith({ type: "member" })).to.be.true;
+            expect((role.update as SinonSpy).calledWith({ type: "member" })).to
+              .be.true;
           });
         });
 
         describe("to owner", () => {
-          let response;
+          let response: Response;
           beforeEach((done) => {
             request(app)
               .patch(path)
@@ -829,7 +842,7 @@ describe("api/team/users", () => {
     });
 
     describe("when no user is found", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         stub(RoleMock, "findOne").callsFake(() => Promise.resolve(null));
         request(app)
@@ -852,18 +865,18 @@ describe("api/team/users", () => {
     });
 
     describe("success", () => {
-      let response;
-      let currentUserRole;
-      let userToChange;
+      let response: Response;
+      let currentUserRole: Role;
+      let userToChange: User;
       beforeEach((done) => {
         currentUserRole = {
           userId: user.id,
           teamId: team.id,
           type: "member",
-        };
+        } as Role;
         userToChange = {
           id: 2,
-        };
+        } as User;
         stub(RoleMock, "findOne").callsFake(() =>
           Promise.resolve({
             update: () => Promise.resolve(),
@@ -902,7 +915,7 @@ describe("api/team/users", () => {
     });
 
     describe("failure", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         app = makeApp({
           "../../helpers/hasRole": hasRole,
@@ -922,7 +935,9 @@ describe("api/team/users", () => {
       });
 
       it("returns error", () => {
-        expect(response.error.text).to.contain("Oh No");
+        expect(
+          typeof response.error !== "boolean" && response.error.text
+        ).to.contain("Oh No");
       });
     });
   });
@@ -941,25 +956,25 @@ describe("api/team/users", () => {
     });
 
     describe("success", () => {
-      let response;
-      let roleToDestroy;
-      let currentUserRole;
-      let userToDelete;
+      let response: Response;
+      let roleToDestroy: Role;
+      let currentUserRole: Role;
+      let userToDelete: User;
       beforeEach((done) => {
         currentUserRole = {
           userId: user.id,
           teamId: team.id,
           type: "member",
-        };
+        } as Role;
         userToDelete = {
           id: 2,
-        };
+        } as User;
         roleToDestroy = {
-          destroy: spy(() => Promise.resolve()),
           userId: userToDelete.id,
           teamId: team.id,
           type: "guest",
-        };
+        } as Role;
+        roleToDestroy.destroy = spy(() => Promise.resolve());
         stub(RoleMock, "findOne").callsFake(() =>
           Promise.resolve(roleToDestroy)
         );
@@ -981,7 +996,7 @@ describe("api/team/users", () => {
       });
 
       it("deletes role", () => {
-        expect(roleToDestroy.destroy.callCount).to.eq(1);
+        expect((roleToDestroy.destroy as SinonSpy).callCount).to.eq(1);
       });
 
       it("returns 204", () => {

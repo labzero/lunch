@@ -1,18 +1,19 @@
-import { BrowserHistory } from "history";
-import { WebSocket } from "ws";
 import { EnhancedStore, ThunkAction, ThunkDispatch } from "@reduxjs/toolkit";
+import { BrowserHistory } from "history";
+import { InsertCSS } from "isomorphic-style-loader/StyleContext";
 import { ParsedQs } from "qs";
 import { ReactNode } from "react";
 import { ResolveContext } from "universal-router";
+import { WebSocket } from "ws";
 import {
   Decision as DecisionModel,
   Restaurant as RestaurantModel,
+  Role as RoleModel,
   Tag as TagModel,
   Team as TeamModel,
   User as UserModel,
   Vote as VoteModel,
 } from "./db";
-import { InsertCSS } from "isomorphic-style-loader/StyleContext";
 
 export interface App {}
 
@@ -32,6 +33,8 @@ export type RoleType = "guest" | "member" | "owner";
 export interface User extends UserModel {
   type?: RoleType;
 }
+
+export interface Role extends RoleModel {}
 
 export interface Restaurant extends Omit<RestaurantModel, "tags" | "votes"> {
   all_decision_count: number | string;
