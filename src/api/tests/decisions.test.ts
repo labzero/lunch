@@ -2,41 +2,42 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from "chai";
-import { match, spy, stub } from "sinon";
+import { SinonSpy, match, spy, stub } from "sinon";
 import bodyParser from "body-parser";
+import { Response } from "superagent";
 import request from "supertest";
-import express from "express";
+import express, { Application, RequestHandler } from "express";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
 import mockEsmodule from "../../../test/mockEsmodule";
+import { Team } from "../../interfaces";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
 const dbMock = new SequelizeMock();
 
 describe("api/team/decisions", () => {
-  let app;
-  let checkTeamRoleSpy;
-  let DecisionMock;
-  let loggedInSpy;
-  let makeApp;
-  let broadcastSpy;
+  let app: Application;
+  let DecisionMock: SequelizeMockObject;
+  let checkTeamRoleSpy: SinonSpy;
+  let loggedInSpy: SinonSpy;
+  let makeApp: (deps?: any, middleware?: RequestHandler) => Application;
+  let broadcastSpy: SinonSpy;
 
   beforeEach(() => {
     DecisionMock = dbMock.define("decision", {});
 
-    checkTeamRoleSpy = spy(() => (req, res, next) => {
-      req.team = {
-        // eslint-disable-line no-param-reassign
-        id: 77,
-        stub: "Lab Zero",
-      };
-      next();
-    });
+    checkTeamRoleSpy = spy(
+      (): RequestHandler => (req, res, next) => {
+        req.team = {
+          id: 77,
+        } as Team;
+        next();
+      }
+    );
 
     loggedInSpy = spy((req, res, next) => {
       req.user = {
-        // eslint-disable-line no-param-reassign
         id: 231,
       };
       next();
@@ -85,7 +86,7 @@ describe("api/team/decisions", () => {
     });
 
     describe("5 days of decisions", () => {
-      let findAllSpy;
+      let findAllSpy: SinonSpy;
       beforeEach(() => {
         findAllSpy = spy(DecisionMock, "findAll");
         return request(app).get("/?days=5");
@@ -107,7 +108,7 @@ describe("api/team/decisions", () => {
     });
 
     describe("success", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         request(app)
           .get("/")
@@ -128,7 +129,7 @@ describe("api/team/decisions", () => {
     });
 
     describe("failure", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         stub(DecisionMock, "findAll").throws("Oh No");
 
@@ -141,7 +142,9 @@ describe("api/team/decisions", () => {
       });
 
       it("returns error", () => {
-        expect(response.error.text).to.contain("Oh No");
+        expect(
+          typeof response.error !== "boolean" && response.error.text
+        ).to.contain("Oh No");
       });
     });
   });
@@ -160,8 +163,8 @@ describe("api/team/decisions", () => {
     });
 
     describe("queries", () => {
-      let destroySpy;
-      let createSpy;
+      let destroySpy: SinonSpy;
+      let createSpy: SinonSpy;
       beforeEach(() => {
         destroySpy = spy(DecisionMock, "destroy");
         createSpy = spy(DecisionMock, "create");
@@ -187,8 +190,8 @@ describe("api/team/decisions", () => {
     });
 
     describe("1 day ago", () => {
-      let destroySpy;
-      let createSpy;
+      let destroySpy: SinonSpy;
+      let createSpy: SinonSpy;
       beforeEach(() => {
         destroySpy = spy(DecisionMock, "destroy");
         createSpy = spy(DecisionMock, "create");
@@ -223,8 +226,8 @@ describe("api/team/decisions", () => {
     });
 
     describe("success", () => {
-      let decisionPostedSpy;
-      let response;
+      let decisionPostedSpy: SinonSpy;
+      let response: Response;
       beforeEach((done) => {
         decisionPostedSpy = spy();
         app = makeApp({
@@ -260,7 +263,7 @@ describe("api/team/decisions", () => {
 
     describe("failure", () => {
       describe("when destroying", () => {
-        let response;
+        let response: Response;
         beforeEach((done) => {
           stub(DecisionMock, "scope").throws("Oh No");
 
@@ -273,12 +276,14 @@ describe("api/team/decisions", () => {
         });
 
         it("returns error", () => {
-          expect(response.error.text).to.contain("Oh No");
+          expect(
+            typeof response.error !== "boolean" && response.error.text
+          ).to.contain("Oh No");
         });
       });
 
       describe("when creating", () => {
-        let response;
+        let response: Response;
         beforeEach((done) => {
           app = makeApp({
             "../../db": mockEsmodule({
@@ -299,7 +304,8 @@ describe("api/team/decisions", () => {
         });
 
         it("returns error", () => {
-          expect(response.error.text).to.exist;
+          expect(typeof response.error !== "boolean" && response.error.text).to
+            .exist;
         });
       });
     });
@@ -319,7 +325,7 @@ describe("api/team/decisions", () => {
     });
 
     describe("query", () => {
-      let findAllSpy;
+      let findAllSpy: SinonSpy;
       beforeEach(() => {
         findAllSpy = spy(DecisionMock, "findAll");
         return request(app).delete("/fromToday").send();
@@ -335,8 +341,8 @@ describe("api/team/decisions", () => {
     });
 
     describe("success", () => {
-      let decisionsDeletedSpy;
-      let response;
+      let decisionsDeletedSpy: SinonSpy;
+      let response: Response;
       beforeEach((done) => {
         decisionsDeletedSpy = spy();
         app = makeApp({
@@ -366,7 +372,7 @@ describe("api/team/decisions", () => {
     });
 
     describe("failure", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         stub(DecisionMock, "scope").throws("Oh No");
 
@@ -379,7 +385,9 @@ describe("api/team/decisions", () => {
       });
 
       it("returns error", () => {
-        expect(response.error.text).to.contain("Oh No");
+        expect(
+          typeof response.error !== "boolean" && response.error.text
+        ).to.contain("Oh No");
       });
     });
   });

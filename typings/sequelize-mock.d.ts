@@ -1,6 +1,7 @@
 interface SequelizeMockObject {
   create: () => void;
   destroy: () => void;
+  findAll: () => Promise<any[]>;
   findAllForUser: (userId: string) => Promise<any[]>;
   findOne: () => Promise<any>;
   hasMany: (obj: SequelizeMockObject) => void;
