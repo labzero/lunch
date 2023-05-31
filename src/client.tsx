@@ -17,11 +17,17 @@ import configureStore from "./store/configureStore";
 import history from "./history";
 import { updateMeta } from "./DOMUtils";
 import routerCreator from "./router";
-import { AppContext } from "./interfaces";
+import { AppContext, App as AppType } from "./interfaces";
 
 es6Promise.polyfill();
 
 let subdomain: string | undefined;
+
+interface WindowWithApp extends Window {
+  App: AppType;
+}
+
+declare const window: WindowWithApp;
 
 // Undo Browsersync mangling of host
 let host = window.App.state.host;
@@ -179,8 +185,8 @@ const onLocationChange = async ({
 
         // Google Analytics tracking. Don't send 'pageview' event after
         // the initial rendering, as it was already sent
-        if (window.ga) {
-          window.ga("send", "pageview", createPath(location));
+        if (typeof ga === "function") {
+          ga("send", "pageview", createPath(location));
         }
       });
 

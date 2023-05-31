@@ -5,7 +5,6 @@ declare const __DEV__: boolean;
 /// <reference types="chai-jsdom" />
 
 declare interface Window {
-  App: any;
   swUpdate?: boolean;
 }
 

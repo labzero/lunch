@@ -15,7 +15,11 @@ import {
   Vote as VoteModel,
 } from "./db";
 
-export interface App {}
+export interface App {
+  apiUrl: string;
+  state: NonNormalizedState;
+  googleApiKey: string;
+}
 
 export interface ExtWebSocket extends WebSocket {
   teamId?: number;

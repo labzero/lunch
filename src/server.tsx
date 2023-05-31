@@ -421,7 +421,7 @@ const render: RequestHandler = async (req, res, next) => {
     data.scripts = Array.from(scripts);
     data.app = {
       apiUrl: config.api.clientUrl,
-      googleApiKey: config.googleApiKey,
+      googleApiKey: config.googleApiKey!,
       state: initialState,
     };
 
