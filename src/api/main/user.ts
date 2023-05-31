@@ -50,8 +50,8 @@ export default () => {
               .json({ error: true, data: { message: passwordError } });
           }
           const passwordUpdates = await getUserPasswordUpdates(
-            req.user,
-            filteredPayload.password
+            req.user!,
+            filteredPayload.password as string
           );
           Object.assign(filteredPayload, passwordUpdates);
           delete filteredPayload.password;
