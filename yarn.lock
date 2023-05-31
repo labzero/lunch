@@ -2723,6 +2723,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/lodash.get@npm:^4.4.7":
+  version: 4.4.7
+  resolution: "@types/lodash.get@npm:4.4.7"
+  dependencies:
+    "@types/lodash": "*"
+  checksum: 0dbf1960606e4707c34e8ffbe97ffaad0e47fc5df7a6e24ea6e4fe5838d2468aa13360f38815c77b06e3c9932631ae15662b4139036a69ee16aeb54827a21405
+  languageName: node
+  linkType: hard
+
+"@types/lodash@npm:*":
+  version: 4.14.195
+  resolution: "@types/lodash@npm:4.14.195"
+  checksum: 39b75ca635b3fa943d17d3d3aabc750babe4c8212485a4df166fe0516e39288e14b0c60afc6e21913cc0e5a84734633c71e617e2bd14eaa1cf51b8d7799c432e
+  languageName: node
+  linkType: hard
+
 "@types/method-override@npm:^0.0.32":
   version: 0.0.32
   resolution: "@types/method-override@npm:0.0.32"
@@ -9986,6 +10002,7 @@ __metadata:
     "@types/google-map-react": ^2.1.7
     "@types/google.analytics": ^0.0.42
     "@types/google.maps": ^3.52.1
+    "@types/lodash.get": ^4.4.7
     "@types/method-override": ^0.0.32
     "@types/mocha": ^10.0.1
     "@types/morgan": ^1.9.4
@@ -10070,6 +10087,7 @@ __metadata:
     json-loader: ^0.5.7
     jsonwebtoken: ^9.0.0
     lint-staged: ^13.2.2
+    lodash.get: ^4.4.2
     method-override: ^3.0.0
     mkdirp: ^2.1.3
     mocha: ^10.2.0

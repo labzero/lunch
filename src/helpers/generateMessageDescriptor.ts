@@ -1,5 +1,5 @@
+import get from "lodash.get";
 import * as messages from "../core/messages";
-import get from "./get";
 
 export const globalMessageDescriptor = (id: string) => ({
   id,
