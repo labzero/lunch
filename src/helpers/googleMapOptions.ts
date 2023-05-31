@@ -1,4 +1,4 @@
-export default (showPOIs) => ({
+export default (showPOIs?: boolean) => ({
   backgroundColor: "#fcb3f2",
   scrollwheel: false,
   styles: [
