@@ -1,19 +1,20 @@
 /* eslint-env mocha */
-import { spy } from "sinon";
+import { SinonSpy, spy } from "sinon";
 import { expect } from "chai";
 import proxyquire from "proxyquire";
+import { processResponse as processResponseOrig } from "../ApiClient";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
 describe("processResponse", () => {
-  let processResponse;
-  let replaceSpy;
+  let processResponse: typeof processResponseOrig;
+  let replaceSpy: SinonSpy;
 
   beforeEach(() => {
     replaceSpy = spy();
     processResponse = proxyquireStrict("../ApiClient.ts", {
       "../actions/flash": {
-        flashError: (message) => ({
+        flashError: (message: string) => ({
           type: "FLASH_ERROR",
           message,
         }),
@@ -32,18 +33,17 @@ describe("processResponse", () => {
       json: () => Promise.resolve({ data: { foo: "bar" } }),
     };
 
-    return processResponse(response).then((data) => {
+    return processResponse(response as Response).then((data) => {
       expect(data).to.eql({ foo: "bar" });
     });
   });
 
   it("returns nothing when 204", () => {
     const response = {
-      json: () => Promise.reject(),
       status: 204,
     };
 
-    return processResponse(response).then((data) => {
+    return processResponse(response as Response).then((data) => {
       expect(data).to.eq(undefined);
     });
   });
@@ -55,7 +55,7 @@ describe("processResponse", () => {
       status: 400,
     };
 
-    return processResponse(response, dispatch).catch((err) => {
+    return processResponse(response as Response, dispatch).catch((err) => {
       expect(dispatch.args[0][0].type).to.eq("FLASH_ERROR");
       expect(err).to.eq("Oh No");
     });
@@ -68,7 +68,7 @@ describe("processResponse", () => {
       status: 401,
     };
 
-    return processResponse(response, dispatch).catch(() => {
+    return processResponse(response as Response, dispatch).catch(() => {
       expect(replaceSpy.args[0][0]).to.eq("/login?next=/team");
     });
   });
