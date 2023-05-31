@@ -41,7 +41,9 @@ export default () => {
     if (fieldCount) {
       try {
         if (filteredPayload.password) {
-          const passwordError = getPasswordError(filteredPayload.password);
+          const passwordError = getPasswordError(
+            filteredPayload.password as string | undefined
+          );
           if (passwordError) {
             return res
               .status(422)

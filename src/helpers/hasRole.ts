@@ -4,7 +4,7 @@ import getRole from "./getRole";
 
 export default (
   user: User | null | undefined,
-  team: Team | undefined,
+  team: Team | null | undefined,
   role?: RoleType,
   ignoreSuperuser?: boolean
 ) => {
