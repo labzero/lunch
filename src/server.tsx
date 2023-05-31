@@ -398,7 +398,7 @@ const render: RequestHandler = async (req, res, next) => {
       description:
         "A simple lunch voting app for you and your team. Search nearby restaurants, add them to your list, vote for as many as you like, and decide on today’s pick!",
       children: "",
-      root: generateUrl(req, req.get("host")),
+      root: generateUrl(req, req.get("host")!),
     };
 
     data.children = ReactDOM.renderToString(

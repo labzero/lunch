@@ -28,7 +28,7 @@ let host = window.App.state.host;
 if (host.indexOf("//") === 0) {
   host = host.slice(2);
 }
-const teamSlug = window.App.state.team.slug;
+const teamSlug = window.App.state.team?.slug;
 if (teamSlug && host.indexOf(teamSlug) === 0) {
   subdomain = teamSlug;
   host = host.slice(teamSlug.length + 1); // + 1 for dot
