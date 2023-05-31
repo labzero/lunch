@@ -22,7 +22,7 @@ export default (context) => {
   const team = state.team;
 
   return renderIfHasName(context, () => {
-    if (team.id && hasRole(user, team, "member")) {
+    if (team && hasRole(user, team, "member")) {
       return {
         title,
         chunks: ["team"],

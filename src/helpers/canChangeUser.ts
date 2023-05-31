@@ -1,10 +1,8 @@
 import getRole from "./getRole";
 import canChangeRole from "./canChangeRole";
+import { Team, User } from "../interfaces";
 
-export default (user, userToChange, team, users) => {
-  if (!user || !user.id) {
-    return false;
-  }
+export default (user: User, userToChange: User, team: Team, users: User[]) => {
   if (user.superuser) {
     return true;
   }

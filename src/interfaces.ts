@@ -548,7 +548,7 @@ export type State = BaseState & {
   tags: {
     items: NormalizedItems<Tag>;
   };
-  team: Team;
+  team: Team | null;
   teams: {
     items: NormalizedItems<Team>;
   };
@@ -568,7 +568,7 @@ export type NonNormalizedState = BaseState & {
   tags: {
     items: Tag[];
   };
-  team: Partial<TeamModel>;
+  team: Partial<TeamModel> | null;
   teams: {
     items: TeamModel[];
   };

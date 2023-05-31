@@ -19,7 +19,9 @@ describe("actions/users", () => {
   let store: MockStoreEnhanced<State, Action, Dispatch>;
 
   beforeEach(() => {
-    store = mockStore({});
+    store = mockStore({
+      team: { id: 1 },
+    });
   });
 
   describe("fetchUsers", () => {

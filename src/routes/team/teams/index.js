@@ -18,7 +18,7 @@ export default (context) => {
   const user = state.user;
 
   return renderIfHasName(context, () => {
-    if (team.id && hasRole(user, team)) {
+    if (team && hasRole(user, team)) {
       return {
         redirect: `//${host}/teams`,
         status: 301,

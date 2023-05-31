@@ -14,7 +14,7 @@ export default (context: AppContext) => {
   const team = state.team;
 
   return renderIfHasName(context, () => {
-    if (team.id && hasRole(user, team)) {
+    if (team && hasRole(user, team)) {
       return {
         chunks: ["home", "map"],
         component: (

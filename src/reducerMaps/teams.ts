@@ -44,6 +44,8 @@ const teams: Reducer<"teams"> = (state, action) => {
       }
       return state;
     }
+    default:
+      break;
   }
   return state;
 };

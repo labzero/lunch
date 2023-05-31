@@ -187,10 +187,10 @@ export function changeUserRole(
   return (dispatch, getState) => {
     const state = getState();
     const team = state.team;
-    let isSelf = false;
-    if (getCurrentUser(state)!.id === id) {
-      isSelf = true;
+    if (!team) {
+      return Promise.reject(new Error("No team selected"));
     }
+    const isSelf = getCurrentUser(state)!.id === id;
     dispatch(patchUser(id, type, team, isSelf));
     return fetch(`/api/users/${id}`, {
       method: "PATCH",

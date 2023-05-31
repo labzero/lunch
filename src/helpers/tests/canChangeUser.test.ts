@@ -3,12 +3,13 @@
 
 import { expect } from "chai";
 import canChangeUser from "../canChangeUser";
+import { Team, User } from "../../interfaces";
 
 describe("helpers/canChangeUser", () => {
-  let user;
-  let userToChange;
-  let team;
-  let users;
+  let user: User;
+  let userToChange: User;
+  let team: Team;
+  let users: User[];
 
   beforeEach(() => {
     user = {
@@ -17,16 +18,16 @@ describe("helpers/canChangeUser", () => {
       superuser: false,
       roles: [{ type: "owner", teamId: 1, userId: 1 }],
       email: "dev@labzero.com",
-    };
+    } as User;
     userToChange = {
       name: "test",
       id: 2,
       type: "member",
       email: "test@labzero.com",
-    };
+    } as User;
     team = {
       id: 1,
-    };
+    } as Team;
     users = [
       {
         name: "dev",
@@ -40,22 +41,12 @@ describe("helpers/canChangeUser", () => {
         type: "member",
         email: "test@labzero.com",
       },
-    ];
-  });
-
-  it("returns false when user is undefined", () => {
-    user = undefined;
-    expect(canChangeUser(user, userToChange, team, users)).to.be.false;
+    ] as User[];
   });
 
   it("returns true when user is superuser", () => {
     user.superuser = true;
     expect(canChangeUser(user, userToChange, team, users)).to.be.true;
-  });
-
-  it("returns false when team is undefined", () => {
-    team = undefined;
-    expect(canChangeUser(user, userToChange, team, users)).to.be.false;
   });
 
   describe("when user role is owner and changing their own role", () => {
@@ -65,7 +56,7 @@ describe("helpers/canChangeUser", () => {
         id: 1,
         type: "owner",
         email: "dev@labzero.com",
-      };
+      } as User;
     });
 
     it("returns false when there are no other owners", () => {

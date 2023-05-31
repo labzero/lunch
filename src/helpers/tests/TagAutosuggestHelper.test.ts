@@ -3,10 +3,11 @@
 
 import { expect } from "chai";
 import { generateTagList } from "../TagAutosuggestHelper";
+import { Tag } from "../../interfaces";
 
 describe("TagAutosuggestHelper", () => {
   describe("generateTagList", () => {
-    let tags;
+    let tags: Tag[];
 
     beforeEach(() => {
       tags = [
@@ -54,7 +55,7 @@ describe("TagAutosuggestHelper", () => {
           id: 11,
           name: "chain",
         },
-      ];
+      ] as Tag[];
     });
 
     it("returns up to 10 tags", () => {

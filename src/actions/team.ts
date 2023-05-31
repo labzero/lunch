@@ -17,6 +17,9 @@ export function teamDeleted(): Action {
 export function removeTeam(): ThunkAction<void, State, unknown, Action> {
   return (dispatch, getState) => {
     const state = getState();
+    if (!state.team) {
+      return Promise.reject(new Error("No team selected"));
+    }
     const teamId = state.team.id;
     const host = state.host;
     dispatch(deleteTeam());
@@ -49,6 +52,9 @@ export function updateTeam(
 ): ThunkAction<Promise<Action>, State, unknown, Action> {
   return (dispatch, getState) => {
     const state = getState();
+    if (!state.team) {
+      return Promise.reject(new Error("No team selected"));
+    }
     const teamId = state.team.id;
     const host = state.host;
     dispatch(patchTeam(payload));

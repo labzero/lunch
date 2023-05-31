@@ -34,7 +34,7 @@ const getInitialState = (): NonNormalizedState => ({
     didInvalidate: true,
     items: [],
   },
-  team: {},
+  team: null,
   teams: {
     isFetching: false,
     didInvalidate: true,
