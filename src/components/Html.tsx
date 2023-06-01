@@ -49,20 +49,19 @@ class Html extends Component<HtmlProps> {
     return (
       <html className="no-js" lang="en">
         <head>
-          {config.analytics.googleTrackingId && (
+          {config.analytics.googleMeasurementId && (
             <>
               <script
-                dangerouslySetInnerHTML={{
-                  __html:
-                    "window.ga=function(){ga.q.push(arguments)};ga.q=[];ga.l=+new Date;" +
-                    `ga('create','${config.analytics.googleTrackingId}','auto');ga('send','pageview')`,
-                }}
-              />
-              <script
-                src="https://www.google-analytics.com/analytics.js"
                 async
-                defer
+                src={`https://www.googletagmanager.com/gtag/js?id=${config.analytics.googleMeasurementId}`}
               />
+              <script>
+                {`window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+
+                gtag('config', '${config.analytics.googleMeasurementId}');`}
+              </script>
             </>
           )}
           <meta charSet="utf-8" />

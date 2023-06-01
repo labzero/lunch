@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 export default () =>
-  new Promise((resolve, reject) => {
+  new Promise<string>((resolve, reject) => {
     crypto.randomBytes(20, (error, buf) => {
       if (error) {
         return reject(error);

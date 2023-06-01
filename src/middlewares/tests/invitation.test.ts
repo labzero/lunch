@@ -2,10 +2,12 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from "chai";
-import { match, spy, stub } from "sinon";
+import { SinonSpy, match, spy, stub } from "sinon";
 import bodyParser from "body-parser";
+import { Response } from "superagent";
 import request from "supertest";
-import express from "express";
+import express, { Application, RequestHandler } from "express";
+import session, { Session } from "express-session";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
 import mockEsmodule from "../../../test/mockEsmodule";
@@ -15,13 +17,13 @@ const proxyquireStrict = proxyquire.noCallThru();
 const dbMock = new SequelizeMock();
 
 describe("middlewares/invitation", () => {
-  let app;
-  let makeApp;
-  let sendMailSpy;
-  let InvitationMock;
-  let RoleMock;
-  let UserMock;
-  let flashSpy;
+  let app: Application;
+  let makeApp: (deps?: any, middleware?: RequestHandler) => Application;
+  let sendMailSpy: SinonSpy;
+  let InvitationMock: SequelizeMockObject;
+  let RoleMock: SequelizeMockObject;
+  let UserMock: SequelizeMockObject;
+  let flashSpy: SinonSpy;
 
   beforeEach(() => {
     InvitationMock = dbMock.define("invitation", {});
@@ -46,12 +48,15 @@ describe("middlewares/invitation", () => {
 
       const server = express();
       server.use(bodyParser.json());
+      server.use(
+        session({ resave: true, secret: "123456", saveUninitialized: true })
+      );
       server.use((req, res, next) => {
         req.flash = flashSpy; // eslint-disable-line no-param-reassign
-        req.session = {
-          // eslint-disable-line no-param-reassign
-          save: (cb) => cb(),
-        };
+        stub(req.session, "save").callsFake(function save(this: Session, cb) {
+          cb!({});
+          return this;
+        });
         next();
       });
       server.use("/", invitationMiddleware());
@@ -62,13 +67,13 @@ describe("middlewares/invitation", () => {
   });
 
   describe("POST /", () => {
-    let updateSpy;
+    let updateSpy: SinonSpy;
     beforeEach(() => {
       updateSpy = spy();
     });
 
     describe("when invitation has already been confirmed", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         stub(InvitationMock, "findOne").callsFake(() =>
           Promise.resolve({
@@ -99,7 +104,7 @@ describe("middlewares/invitation", () => {
     });
 
     describe("when confirmation was recently sent", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         stub(InvitationMock, "findOne").callsFake(() =>
           Promise.resolve({
@@ -141,7 +146,7 @@ describe("middlewares/invitation", () => {
               .onFirstCall()
               .returns(false)
               .onSecondCall()
-              .returns(new Date() - 60 * 60 * 1000 * 24),
+              .returns(new Date().getTime() - 60 * 60 * 1000 * 24),
             update: updateSpy,
           })
         );
@@ -150,8 +155,13 @@ describe("middlewares/invitation", () => {
       });
 
       it("sends confirmation", () => {
-        expect(sendMailSpy.calledWith(match({ email: "jeffrey@labzero.com" })))
-          .to.be.true;
+        expect(
+          sendMailSpy.calledWith(
+            match({
+              email: "jeffrey@labzero.com",
+            })
+          )
+        ).to.be.true;
       });
 
       it("updates confirmationSentAt", () => {

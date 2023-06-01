@@ -4,7 +4,6 @@
 import { expect } from "chai";
 import { match, spy, SinonSpy, stub } from "sinon";
 import bodyParser from "body-parser";
-import { HTTPError } from "superagent";
 import request, { Response } from "supertest";
 import express, { Application, RequestHandler } from "express";
 import session, { Session } from "express-session";

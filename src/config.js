@@ -40,8 +40,7 @@ module.exports = {
   bsHost: host,
   domain: `.${hostname}`,
   analytics: {
-    // https://analytics.google.com/
-    googleTrackingId: process.env.GOOGLE_TRACKING_ID, // UA-XXXXX-X
+    googleMeasurementId: process.env.GOOGLE_MEASUREMENT_ID,
   },
   auth: {
     jwt: { secret: process.env.JWT_SECRET || "React Starter Kit" },

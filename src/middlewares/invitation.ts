@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Request, Router } from "express";
 import qs from "qs";
 import { bsHost } from "../config";
 import generateToken from "../helpers/generateToken";
@@ -6,7 +6,7 @@ import generateUrl from "../helpers/generateUrl";
 import { Invitation, Role, User } from "../db";
 import transporter from "../mailers/transporter";
 
-const sendConfirmation = async (req, email, token) => {
+const sendConfirmation = async (req: Request, email: string, token: string) => {
   await transporter.sendMail({
     email,
     subject: "Confirm your email for an invitation",
@@ -20,7 +20,7 @@ Hope to see you on Lunch soon!`,
 };
 
 export default () => {
-  const router = new Router();
+  const router = Router();
 
   return router
     .get("/", async (req, res, next) => {
@@ -96,9 +96,15 @@ Add them here: ${generateUrl(
           }
           const confirmationSentAt =
             existingInvitation.get("confirmationSentAt");
+          let confirmationSentAtTime: number;
+          if (confirmationSentAt instanceof Date) {
+            confirmationSentAtTime = confirmationSentAt.getTime();
+          } else {
+            confirmationSentAtTime = confirmationSentAt;
+          }
           if (
-            confirmationSentAt &&
-            Date.now() - confirmationSentAt < 60 * 60 * 1000 * 24
+            confirmationSentAtTime &&
+            Date.now() - confirmationSentAtTime < 60 * 60 * 1000 * 24
           ) {
             req.flash(
               "error",
@@ -108,7 +114,11 @@ Add them here: ${generateUrl(
               res.redirect("/invitation/new");
             });
           }
-          await sendConfirmation(req, email, existingInvitation.get("token"));
+          await sendConfirmation(
+            req,
+            email,
+            existingInvitation.get("token") as string
+          );
           await existingInvitation.update({
             confirmationSentAt: new Date(),
           });
