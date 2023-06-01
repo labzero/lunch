@@ -8,7 +8,7 @@ import transporter from "../mailers/transporter";
 import { User } from "../db";
 
 export default () => {
-  const router = new Router();
+  const router = Router();
 
   router
     .post("/", async (req, res, next) => {

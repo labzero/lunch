@@ -10,6 +10,7 @@ import session, { Session } from "express-session";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
 import mockEsmodule from "../../../test/mockEsmodule";
+import { MakeApp } from "../../interfaces";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
@@ -21,7 +22,7 @@ describe("api/main/teams", () => {
   let TeamMock: SequelizeMockObject;
   let UserMock: SequelizeMockObject;
   let loggedInSpy: SinonSpy;
-  let makeApp: (deps?: any, middleware?: RequestHandler) => Application;
+  let makeApp: MakeApp;
   let sendMailSpy: SinonSpy;
 
   beforeEach(() => {

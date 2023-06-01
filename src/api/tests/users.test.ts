@@ -9,8 +9,7 @@ import request from "supertest";
 import express, { Application, RequestHandler } from "express";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
-import hasRoleHelper from "../../helpers/hasRole";
-import { Role, Team, User } from "../../interfaces";
+import { MakeApp, Role, Team, User } from "../../interfaces";
 import mockEsmodule from "../../../test/mockEsmodule";
 
 const proxyquireStrict = proxyquire.noCallThru();
@@ -24,7 +23,7 @@ describe("api/team/users", () => {
   let RoleMock: SequelizeMockObject;
   let UserMock: SequelizeMockObject;
   let loggedInSpy: SinonSpy;
-  let makeApp: (deps?: any, middleware?: RequestHandler) => Application;
+  let makeApp: MakeApp;
   let broadcastSpy: SinonSpy;
   let team: Team;
   let user: User;
@@ -526,7 +525,7 @@ describe("api/team/users", () => {
   });
 
   describe("PATCH /:id", () => {
-    let hasRole: typeof hasRoleHelper;
+    let hasRole: Record<string, () => boolean>;
     beforeEach(() => {
       hasRole = mockEsmodule({
         default: () => true,

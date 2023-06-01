@@ -6,7 +6,7 @@ import { Invitation, User } from "../db";
 import transporter from "../mailers/transporter";
 
 export default () => {
-  const router = new Router();
+  const router = Router();
 
   return router.post("/", async (req, res, next) => {
     if (req.user && req.user.get("superuser")) {
@@ -47,7 +47,7 @@ Happy Lunching!`,
         });
 
         next();
-      } catch (err) {
+      } catch (err: any) {
         req.flash("error", err.message);
         req.session.save(() => {
           res.redirect("/users/new");

@@ -1,3 +1,4 @@
+import { Application, RequestHandler } from "express";
 import { EnhancedStore, ThunkAction, ThunkDispatch } from "@reduxjs/toolkit";
 import { BrowserHistory } from "history";
 import { InsertCSS } from "isomorphic-style-loader/StyleContext";
@@ -15,11 +16,10 @@ import {
   Vote as VoteModel,
 } from "./db";
 
-export interface App {
-  apiUrl: string;
-  state: NonNormalizedState;
-  googleApiKey: string;
-}
+export type MakeApp = (
+  deps?: Record<string, Record<string, any>>,
+  middleware?: RequestHandler
+) => Application;
 
 export interface ExtWebSocket extends WebSocket {
   teamId?: number;
@@ -38,7 +38,7 @@ export interface User extends UserModel {
   type?: RoleType;
 }
 
-export interface Role extends RoleModel {}
+export type Role = RoleModel;
 
 export interface Restaurant extends Omit<RestaurantModel, "tags" | "votes"> {
   all_decision_count: number | string;
@@ -51,7 +51,7 @@ export interface Tag extends TagModel {
   restaurant_count: string | number;
 }
 
-export interface Team extends TeamModel {}
+export type Team = TeamModel;
 
 export interface Flash {
   id: string;
@@ -59,9 +59,9 @@ export interface Flash {
   type: "error" | "success";
 }
 
-export interface Vote extends VoteModel {}
+export type Vote = VoteModel;
 
-export interface Decision extends DecisionModel {}
+export type Decision = DecisionModel;
 
 export interface NewlyAdded {
   id: number;
@@ -588,6 +588,12 @@ export type Reducer<T extends keyof State> = (
 ) => State[T];
 
 export type Dispatch = ThunkDispatch<State, unknown, Action>;
+
+export interface App {
+  apiUrl: string;
+  state: NonNormalizedState;
+  googleApiKey: string;
+}
 
 export interface AppContext extends ResolveContext {
   insertCss: InsertCSS;

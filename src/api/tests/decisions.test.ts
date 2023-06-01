@@ -10,7 +10,7 @@ import express, { Application, RequestHandler } from "express";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
 import mockEsmodule from "../../../test/mockEsmodule";
-import { Team } from "../../interfaces";
+import { MakeApp, Team } from "../../interfaces";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
@@ -21,7 +21,7 @@ describe("api/team/decisions", () => {
   let DecisionMock: SequelizeMockObject;
   let checkTeamRoleSpy: SinonSpy;
   let loggedInSpy: SinonSpy;
-  let makeApp: (deps?: any, middleware?: RequestHandler) => Application;
+  let makeApp: MakeApp;
   let broadcastSpy: SinonSpy;
 
   beforeEach(() => {

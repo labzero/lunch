@@ -2,24 +2,26 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from "chai";
-import { match, spy, stub } from "sinon";
+import { SinonSpy, match, spy, stub } from "sinon";
 import bodyParser from "body-parser";
-import request from "supertest";
-import express from "express";
+import request, { Response } from "supertest";
+import express, { Application } from "express";
+import session, { Session } from "express-session";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
 import mockEsmodule from "../../../test/mockEsmodule";
+import { MakeApp } from "../../interfaces";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
 const dbMock = new SequelizeMock();
 
 describe("middlewares/password", () => {
-  let app;
-  let makeApp;
-  let sendMailSpy;
-  let UserMock;
-  let flashSpy;
+  let app: Application;
+  let makeApp: MakeApp;
+  let sendMailSpy: SinonSpy;
+  let UserMock: SequelizeMockObject;
+  let flashSpy: SinonSpy;
 
   beforeEach(() => {
     UserMock = dbMock.define("user", {});
@@ -40,12 +42,15 @@ describe("middlewares/password", () => {
 
       const server = express();
       server.use(bodyParser.json());
+      server.use(
+        session({ resave: true, secret: "123456", saveUninitialized: true })
+      );
       server.use((req, res, next) => {
         req.flash = flashSpy; // eslint-disable-line no-param-reassign
-        req.session = {
-          // eslint-disable-line no-param-reassign
-          save: (cb) => cb(),
-        };
+        stub(req.session, "save").callsFake(function save(this: Session, cb) {
+          cb!({});
+          return this;
+        });
         next();
       });
       server.use("/", passwordMiddleware());
@@ -56,7 +61,7 @@ describe("middlewares/password", () => {
   });
 
   describe("POST /", () => {
-    let updateSpy;
+    let updateSpy: SinonSpy;
     beforeEach(() => {
       updateSpy = spy();
     });
@@ -88,7 +93,7 @@ describe("middlewares/password", () => {
 
     describe("when user does not exist", () => {
       beforeEach(() => {
-        stub(UserMock, "findOne").callsFake(() => null);
+        stub(UserMock, "findOne").callsFake(async () => null);
 
         return request(app).post("/").send({ email: "jeffrey@labzero.com" });
       });
@@ -105,9 +110,9 @@ describe("middlewares/password", () => {
 
   describe("PUT /", () => {
     describe("when user does not exist", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
-        stub(UserMock, "findOne").callsFake(() => null);
+        stub(UserMock, "findOne").callsFake(async () => null);
 
         request(app)
           .put("/")
@@ -131,9 +136,9 @@ describe("middlewares/password", () => {
     });
 
     describe("when user does not have valid reset password token", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
-        stub(UserMock, "findOne").callsFake(() => ({
+        stub(UserMock, "findOne").callsFake(async () => ({
           resetPasswordValid: () => false,
         }));
 
@@ -159,11 +164,11 @@ describe("middlewares/password", () => {
     });
 
     describe("when user submits password that is too short", () => {
-      let response;
-      let updateSpy;
+      let response: Response;
+      let updateSpy: SinonSpy;
       beforeEach((done) => {
         updateSpy = spy(() => Promise.resolve());
-        stub(UserMock, "findOne").callsFake(() => ({
+        stub(UserMock, "findOne").callsFake(async () => ({
           get: () => false,
           update: updateSpy,
           resetPasswordValid: () => true,
@@ -195,11 +200,11 @@ describe("middlewares/password", () => {
     });
 
     describe("when user submits password that is too common", () => {
-      let response;
-      let updateSpy;
+      let response: Response;
+      let updateSpy: SinonSpy;
       beforeEach((done) => {
         updateSpy = spy(() => Promise.resolve());
-        stub(UserMock, "findOne").callsFake(() => ({
+        stub(UserMock, "findOne").callsFake(async () => ({
           get: () => false,
           update: updateSpy,
           resetPasswordValid: () => true,
@@ -231,10 +236,10 @@ describe("middlewares/password", () => {
     });
 
     describe("when user has valid reset token", () => {
-      let updateSpy;
+      let updateSpy: SinonSpy;
       beforeEach(() => {
         updateSpy = spy(() => Promise.resolve());
-        stub(UserMock, "findOne").callsFake(() => ({
+        stub(UserMock, "findOne").callsFake(async () => ({
           get: () => false,
           update: updateSpy,
           resetPasswordValid: () => true,
@@ -273,9 +278,9 @@ describe("middlewares/password", () => {
 
   describe("GET /edit", () => {
     describe("when user does not exist", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
-        stub(UserMock, "findOne").callsFake(() => null);
+        stub(UserMock, "findOne").callsFake(async () => null);
 
         request(app)
           .get("/edit")
@@ -295,9 +300,9 @@ describe("middlewares/password", () => {
     });
 
     describe("when user does not have valid reset password token", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
-        stub(UserMock, "findOne").callsFake(() => ({
+        stub(UserMock, "findOne").callsFake(async () => ({
           resetPasswordValid: () => false,
         }));
 

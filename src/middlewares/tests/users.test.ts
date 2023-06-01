@@ -2,27 +2,29 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from "chai";
-import { match, spy, stub } from "sinon";
+import { SinonSpy, match, spy, stub } from "sinon";
 import bodyParser from "body-parser";
-import request from "supertest";
-import express from "express";
+import request, { Response } from "supertest";
+import express, { Application } from "express";
+import session, { Session } from "express-session";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
 import mockEsmodule from "../../../test/mockEsmodule";
+import { MakeApp, User } from "../../interfaces";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
 const dbMock = new SequelizeMock();
 
 describe("middlewares/users", () => {
-  let app;
-  let createSpy;
-  let destroySpy;
-  let makeApp;
-  let sendMailSpy;
-  let InvitationMock;
-  let UserMock;
-  let flashSpy;
+  let app: Application;
+  let createSpy: SinonSpy;
+  let destroySpy: SinonSpy;
+  let makeApp: MakeApp;
+  let sendMailSpy: SinonSpy;
+  let InvitationMock: SequelizeMockObject;
+  let UserMock: SequelizeMockObject;
+  let flashSpy: SinonSpy;
 
   beforeEach(() => {
     InvitationMock = dbMock.define("invitation", {});
@@ -57,12 +59,15 @@ describe("middlewares/users", () => {
           next();
         }
       });
+      server.use(
+        session({ resave: true, secret: "123456", saveUninitialized: true })
+      );
       server.use((req, res, next) => {
         req.flash = flashSpy; // eslint-disable-line no-param-reassign
-        req.session = {
-          // eslint-disable-line no-param-reassign
-          save: (cb) => cb(),
-        };
+        stub(req.session, "save").callsFake(function save(this: Session, cb) {
+          cb!({});
+          return this;
+        });
         next();
       });
       server.use("/", usersMiddleware());
@@ -78,7 +83,7 @@ describe("middlewares/users", () => {
         app = makeApp({}, (req, res, next) => {
           req.user = {
             get: () => true,
-          };
+          } as User;
           next();
         });
 
@@ -125,7 +130,7 @@ describe("middlewares/users", () => {
         app = makeApp({}, (req, res, next) => {
           req.user = {
             get: () => false,
-          };
+          } as User;
           next();
         });
 
@@ -148,16 +153,16 @@ describe("middlewares/users", () => {
     });
 
     describe("failure", () => {
-      let response;
+      let response: Response;
       beforeEach((done) => {
         app = makeApp({}, (req, res, next) => {
           req.user = {
             get: () => true,
-          };
+          } as User;
           next();
         });
 
-        UserMock.create.restore();
+        createSpy.restore();
         stub(UserMock, "create").throws();
 
         request(app)

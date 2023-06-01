@@ -11,6 +11,7 @@ import session, { Session } from "express-session";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
 import mockEsmodule from "../../../test/mockEsmodule";
+import { MakeApp } from "../../interfaces";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
@@ -18,7 +19,7 @@ const dbMock = new SequelizeMock();
 
 describe("middlewares/invitation", () => {
   let app: Application;
-  let makeApp: (deps?: any, middleware?: RequestHandler) => Application;
+  let makeApp: MakeApp;
   let sendMailSpy: SinonSpy;
   let InvitationMock: SequelizeMockObject;
   let RoleMock: SequelizeMockObject;

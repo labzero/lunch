@@ -6,10 +6,11 @@ import { SinonSpy, spy, stub } from "sinon";
 import bodyParser from "body-parser";
 import { Response } from "superagent";
 import request from "supertest";
-import express, { Application, RequestHandler } from "express";
+import express, { Application } from "express";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
 import mockEsmodule from "../../../test/mockEsmodule";
+import { MakeApp } from "../../interfaces";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
@@ -19,7 +20,7 @@ describe("api/main/user", () => {
   let app: Application;
   let UserMock: SequelizeMockObject;
   let loggedInSpy: SinonSpy;
-  let makeApp: (deps?: any, middleware?: RequestHandler) => Application;
+  let makeApp: MakeApp;
   let updateSpy: SinonSpy;
 
   beforeEach(() => {
