@@ -114,7 +114,7 @@ const onLocationChange = async ({
   const isInitialRender = !action;
   try {
     context.pathname = location.pathname;
-    context.query = qs.parse(location.search);
+    context.query = qs.parse(location.search, { ignoreQueryPrefix: true });
 
     // Traverses the list of routes in the order they are defined until
     // it finds the first route that matches provided URL path string

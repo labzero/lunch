@@ -2,25 +2,25 @@
 /* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates */
 
 import { expect } from "chai";
-import { spy } from "sinon";
+import { SinonSpy, spy } from "sinon";
 import proxyquire from "proxyquire";
-import { mail } from "sendgrid";
 import mockEsmodule from "../../../test/mockEsmodule";
+import { User } from "../../interfaces";
+import transporterOrig from "../transporter";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
 describe("mailers/transporter", () => {
-  let emptyRequestSpy;
-  let transporter;
+  let sendSpy: SinonSpy;
+  let transporter: typeof transporterOrig;
   beforeEach(() => {
-    emptyRequestSpy = spy();
+    sendSpy = spy();
     transporter = proxyquireStrict("../transporter", {
-      sendgrid: mockEsmodule({
-        default: () => ({
-          emptyRequest: emptyRequestSpy,
-          API: () => undefined,
-        }),
-        mail,
+      "@sendgrid/mail": mockEsmodule({
+        default: {
+          send: sendSpy,
+          setApiKey: () => undefined,
+        },
       }),
       "../config": mockEsmodule({
         auth: {
@@ -45,7 +45,7 @@ describe("mailers/transporter", () => {
       });
 
       it("contains the to email in the tos value", () => {
-        const body = emptyRequestSpy.lastCall.args[0].body;
+        const body = sendSpy.lastCall.args[0];
         expect(body.subject).to.eq("Hello");
         expect(body.personalizations[0].to[0]).to.deep.eq({
           name: "Jeffrey",
@@ -66,14 +66,14 @@ describe("mailers/transporter", () => {
               name: "Matt",
               email: "m@l.com",
             },
-          ],
+          ] as User[],
           subject: "Hello",
           text: "Hi!",
         });
       });
 
       it("makes Lunch the sender and sendee", () => {
-        const body = emptyRequestSpy.lastCall.args[0].body;
+        const body = sendSpy.lastCall.args[0];
 
         expect(body.from).to.deep.eq({
           name: "Lunch",
@@ -86,7 +86,7 @@ describe("mailers/transporter", () => {
       });
 
       it("contains the emails in the bccs value", () => {
-        const body = emptyRequestSpy.lastCall.args[0].body;
+        const body = sendSpy.lastCall.args[0];
         expect(body.personalizations[0].bcc).to.deep.contain.members([
           {
             name: "Jeffrey",
