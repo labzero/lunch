@@ -52,16 +52,22 @@ class Html extends Component<HtmlProps> {
           {config.analytics.googleMeasurementId && (
             <>
               <script
+                key="ga_script"
                 async
                 src={`https://www.googletagmanager.com/gtag/js?id=${config.analytics.googleMeasurementId}`}
               />
-              <script>
-                {`window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
 
-                gtag('config', '${config.analytics.googleMeasurementId}');`}
-              </script>
+              <script
+                key="ga_init"
+                dangerouslySetInnerHTML={{
+                  __html: `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${config.analytics.googleMeasurementId}');
+`,
+                }}
+              />
             </>
           )}
           <meta charSet="utf-8" />
