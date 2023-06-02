@@ -152,7 +152,9 @@ const onLocationChange = async ({
           return;
         }
 
-        document.title = route.title;
+        if (route.title) {
+          document.title = route.title;
+        }
 
         updateMeta("description", route.description);
         // Update necessary tags in <head> at runtime here, ie:

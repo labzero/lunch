@@ -607,10 +607,10 @@ export interface AppContext extends ResolveContext {
 export interface AppRoute {
   chunk?: string;
   chunks?: string[];
-  component: ReactNode;
-  description: string;
-  ogTitle: string;
+  component?: ReactNode;
+  description?: string;
+  ogTitle?: string;
   redirect?: string;
   status?: number;
-  title: string;
+  title?: string;
 }

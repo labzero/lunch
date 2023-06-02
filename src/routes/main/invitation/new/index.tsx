@@ -9,10 +9,11 @@
 
 import React from "react";
 import LayoutContainer from "../../../../components/Layout/LayoutContainer";
+import { AppContext } from "../../../../interfaces";
 import New from "./New";
 
-export default (context) => {
-  const email = context.query.email;
+export default (context: AppContext) => {
+  const email = context.query?.email;
 
   return {
     component: (
