@@ -9,13 +9,14 @@
 
 import React from "react";
 import LayoutContainer from "../../../../components/Layout/LayoutContainer";
+import { AppContext } from "../../../../interfaces";
 import renderIfLoggedOut from "../../../helpers/renderIfLoggedOut";
 import Create from "./Create";
 
-export default (context) => {
+export default (context: AppContext) => {
   const state = context.store.getState();
 
-  const success = context.query.success;
+  const success = context.query?.success;
 
   return renderIfLoggedOut(state, () => {
     if (!success) {
