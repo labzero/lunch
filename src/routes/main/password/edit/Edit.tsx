@@ -1,5 +1,4 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { Component, RefObject, createRef } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
@@ -9,13 +8,20 @@ import Row from "react-bootstrap/Row";
 import { PASSWORD_MIN_LENGTH } from "../../../../constants";
 import s from "./Edit.scss";
 
-class Edit extends Component {
-  static propTypes = {
-    token: PropTypes.string.isRequired,
-  };
+interface EditProps {
+  token: string;
+}
+
+class Edit extends Component<EditProps> {
+  passwordField: RefObject<HTMLInputElement>;
+
+  constructor(props: EditProps) {
+    super(props);
+    this.passwordField = createRef();
+  }
 
   componentDidMount() {
-    this.passwordField.focus();
+    this.passwordField.current?.focus();
   }
 
   render() {
@@ -31,9 +37,7 @@ class Edit extends Component {
                 <Form.Group className="mb-3" controlId="resetPassword-password">
                   <Form.Label>New password</Form.Label>
                   <Form.Control
-                    ref={(i) => {
-                      this.passwordField = i;
-                    }}
+                    ref={this.passwordField}
                     minLength={PASSWORD_MIN_LENGTH}
                     name="password"
                     required

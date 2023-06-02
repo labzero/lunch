@@ -9,13 +9,14 @@
 
 import React from "react";
 import LayoutContainer from "../../../../components/Layout/LayoutContainer";
+import { AppContext } from "../../../../interfaces";
 import renderIfLoggedOut from "../../../helpers/renderIfLoggedOut";
 import Edit from "./Edit";
 
-export default (context) => {
+export default (context: AppContext) => {
   const state = context.store.getState();
 
-  const token = context.query.token;
+  const token = context.query?.token as string | undefined;
 
   return renderIfLoggedOut(state, () => {
     if (!token) {
