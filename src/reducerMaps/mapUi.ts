@@ -1,31 +1,30 @@
 import update, { Spec } from "immutability-helper";
 import { Reducer } from "../interfaces";
-import resetRestaurant from "./helpers/resetRestaurant";
 
 const mapUi: Reducer<"mapUi"> = (state, action) => {
   switch (action.type) {
     case "RECEIVE_RESTAURANTS": {
-      return {
-        infoWindow: {},
-        showPOIs: false,
-        showUnvoted: true,
-      };
+      return update(state, {
+        infoWindow: {
+          $set: {},
+        },
+        showPOIs: {
+          $set: !action.items.length,
+        },
+        showUnvoted: {
+          $set: true,
+        },
+      });
     }
     case "RESTAURANT_POSTED": {
-      return resetRestaurant(
-        update(state, {
-          newlyAdded: {
-            $set: {
-              id: action.restaurant.id,
-              userId: action.userId,
-            },
+      return update(state, {
+        newlyAdded: {
+          $set: {
+            id: action.restaurant.id,
+            userId: action.userId,
           },
-        }),
-        action
-      );
-    }
-    case "RESTAURANT_DELETED": {
-      return resetRestaurant(state, action);
+        },
+      });
     }
     case "SHOW_GOOGLE_INFO_WINDOW": {
       return update(state, {
@@ -136,16 +135,8 @@ const mapUi: Reducer<"mapUi"> = (state, action) => {
         },
       });
     }
-    case "RECEIVE_RESTAURANTS": {
-      if (!action.items.length) {
-        return update(state, {
-          showPOIs: {
-            $set: true,
-          },
-        });
-      }
-      return state;
-    }
+    default:
+      break;
   }
   return state;
 };

@@ -25,8 +25,6 @@ export interface ExtWebSocket extends WebSocket {
   teamId?: number;
 }
 
-export interface Route {}
-
 export interface NormalizedItems<U> {
   entities: { [index: string]: { [index: number]: U } };
   result: number[];
@@ -89,6 +87,24 @@ export type PastDecisionsOpts = {
   restaurantId: number;
 };
 
+export type RestaurantIdAction =
+  | {
+      type: "RESTAURANT_RENAMED";
+      id: number;
+      fields: Partial<Restaurant>;
+      userId: number;
+    }
+  | {
+      type: "RESTAURANT_DELETED";
+      id: number;
+      userId: number;
+    }
+  | {
+      type: "RESTAURANT_POSTED";
+      restaurant: Restaurant;
+      userId: number;
+    };
+
 export type Action =
   | { type: "INVALIDATE_DECISIONS" }
   | {
@@ -120,22 +136,7 @@ export type Action =
       type: "RECEIVE_RESTAURANTS";
       items: Restaurant[];
     }
-  | {
-      type: "RESTAURANT_RENAMED";
-      id: number;
-      fields: Partial<Restaurant>;
-      userId: number;
-    }
-  | {
-      type: "RESTAURANT_DELETED";
-      id: number;
-      userId: number;
-    }
-  | {
-      type: "RESTAURANT_POSTED";
-      restaurant: Restaurant;
-      userId: number;
-    }
+  | RestaurantIdAction
   | {
       type: "SORT_RESTAURANTS";
       decision?: Decision;
@@ -469,7 +470,7 @@ export type InfoWindow =
   | {
       id: number;
     }
-  | {};
+  | Record<string, undefined>;
 
 interface BaseState {
   restaurants: {

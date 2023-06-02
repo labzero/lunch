@@ -71,6 +71,8 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
 
   handleSuggestSelect = (suggestion: Suggest) => {
     this.props.handleSuggestSelect(suggestion, this.geosuggest!.current!);
+    this.geosuggest.current?.clear();
+    this.geosuggest.current?.focus();
   };
 
   render() {
