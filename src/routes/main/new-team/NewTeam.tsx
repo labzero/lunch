@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { ChangeEvent, Component, FormEvent } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
@@ -12,22 +12,26 @@ import defaultCoords from "../../../constants/defaultCoords";
 import TeamGeosuggestContainer from "../../../components/TeamGeosuggest/TeamGeosuggestContainer";
 import TeamMapContainer from "../../../components/TeamMap/TeamMapContainer";
 import history from "../../../history";
+import { LatLng, Team } from "../../../interfaces";
 import s from "./NewTeam.scss";
 
-class NewTeam extends Component {
-  static propTypes = {
-    center: PropTypes.shape({
-      lat: PropTypes.number.isRequired,
-      lng: PropTypes.number.isRequired,
-    }),
-    createTeam: PropTypes.func.isRequired,
-  };
+interface NewTeamProps {
+  center?: LatLng;
+  createTeam: (team: Partial<Team>) => Promise<void>;
+}
 
+interface NewTeamState {
+  name?: string;
+  slug?: string;
+  address?: string;
+}
+
+class NewTeam extends Component<NewTeamProps, NewTeamState> {
   static defaultProps = {
     center: defaultCoords,
   };
 
-  constructor(props) {
+  constructor(props: NewTeamProps) {
     super(props);
 
     this.state = {
@@ -37,18 +41,19 @@ class NewTeam extends Component {
     };
   }
 
-  handleGeosuggestChange = (value) => this.setState({ address: value });
+  handleGeosuggestChange = (value: string) => this.setState({ address: value });
 
-  handleChange = (field) => (event) =>
-    this.setState({ [field]: event.target.value });
+  handleChange =
+    (field: keyof NewTeamState) => (event: ChangeEvent<HTMLInputElement>) =>
+      this.setState({ [field]: event.target.value });
 
-  handleSlugChange = (event) => {
+  handleSlugChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       slug: event.target.value.toLowerCase(),
     });
   };
 
-  handleSubmit = (event) => {
+  handleSubmit = (event: FormEvent) => {
     const { center, createTeam } = this.props;
 
     event.preventDefault();
@@ -56,7 +61,7 @@ class NewTeam extends Component {
     createTeam({
       ...center,
       ...this.state,
-    }).then(() => history.push("/teams"));
+    }).then(() => history?.push("/teams"));
   };
 
   render() {

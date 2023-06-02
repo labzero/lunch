@@ -10,11 +10,12 @@
 import React from "react";
 import LayoutContainer from "../../../components/Layout/LayoutContainer";
 import renderIfHasName from "../../helpers/renderIfHasName";
+import { AppContext } from "../../../interfaces";
 import NewTeamContainer from "./NewTeamContainer";
 
 const title = "New team";
 
-export default (context) =>
+export default (context: AppContext) =>
   renderIfHasName(context, () => ({
     title,
     chunks: ["map", "new-team"],
