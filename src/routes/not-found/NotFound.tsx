@@ -8,12 +8,16 @@ import PropTypes from "prop-types";
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from "react";
+import React, { Component } from "react";
 import Container from "react-bootstrap/Container";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "./NotFound.scss";
 
-class NotFound extends React.Component {
+interface NotFoundProps {
+  title: string;
+}
+
+class NotFound extends Component<NotFoundProps> {
   static propTypes = {
     title: PropTypes.string.isRequired,
   };
