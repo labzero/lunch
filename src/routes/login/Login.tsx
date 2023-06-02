@@ -1,5 +1,4 @@
 import React, { ChangeEvent, Component } from "react";
-import PropTypes from "prop-types";
 import qs from "qs";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
@@ -22,12 +21,6 @@ interface LoginState {
 }
 
 class Login extends Component<LoginProps, LoginState> {
-  static propTypes = {
-    host: PropTypes.string.isRequired,
-    next: PropTypes.string,
-    team: PropTypes.string,
-  };
-
   static defaultProps = {
     next: undefined,
     team: undefined,

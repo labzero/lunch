@@ -9,11 +9,12 @@
 
 import React from "react";
 import LayoutContainer from "../../../../components/Layout/LayoutContainer";
+import { AppContext } from "../../../../interfaces";
 import Create from "./Create";
 
-export default (context) => {
-  const success = context.query.success;
-  const token = context.query.token;
+export default (context: AppContext) => {
+  const success = context.query?.success;
+  const token = context.query?.token;
 
   if (!success && !token) {
     return {

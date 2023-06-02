@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React, { ChangeEvent, Component, FormEvent } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
@@ -22,11 +21,6 @@ interface AccountState {
 }
 
 class Account extends Component<AccountProps, AccountState> {
-  static propTypes = {
-    updateCurrentUser: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired,
-  };
-
   constructor(props: AccountProps) {
     super(props);
 

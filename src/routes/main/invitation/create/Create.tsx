@@ -4,7 +4,12 @@ import withStyles from "isomorphic-style-loader/withStyles";
 import Container from "react-bootstrap/Container";
 import s from "./Create.scss";
 
-class Create extends Component {
+interface CreateProps {
+  success?: string;
+  token?: string;
+}
+
+class Create extends Component<CreateProps> {
   static propTypes = {
     success: PropTypes.string,
     token: PropTypes.string,
