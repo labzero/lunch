@@ -1,5 +1,4 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { Component, RefObject, createRef } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
@@ -8,17 +7,24 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import s from "./New.scss";
 
-class New extends Component {
-  static propTypes = {
-    email: PropTypes.string,
-  };
+interface NewProps {
+  email?: string;
+}
+
+class New extends Component<NewProps> {
+  emailField: RefObject<HTMLInputElement>;
 
   static defaultProps = {
     email: "",
   };
 
+  constructor(props: NewProps) {
+    super(props);
+    this.emailField = createRef();
+  }
+
   componentDidMount() {
-    this.emailField.focus();
+    this.emailField.current?.focus();
   }
 
   render() {
@@ -39,9 +45,7 @@ class New extends Component {
                   <Form.Label>Email</Form.Label>
                   <Form.Control
                     defaultValue={email}
-                    ref={(i) => {
-                      this.emailField = i;
-                    }}
+                    ref={this.emailField}
                     name="email"
                     required
                     type="email"

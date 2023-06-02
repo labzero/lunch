@@ -9,13 +9,14 @@
 
 import React from "react";
 import LayoutContainer from "../../../../components/Layout/LayoutContainer";
+import { AppContext } from "../../../../interfaces";
 import renderIfLoggedOut from "../../../helpers/renderIfLoggedOut";
 import New from "./New";
 
-export default (context) => {
+export default (context: AppContext) => {
   const state = context.store.getState();
 
-  const email = context.query.email;
+  const email = context.query?.email;
 
   return renderIfLoggedOut(state, () => ({
     component: (
