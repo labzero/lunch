@@ -9,10 +9,11 @@
 
 import React from "react";
 import LayoutContainer from "../../../components/Layout/LayoutContainer";
+import { AppContext } from "../../../interfaces";
 import renderIfLoggedOut from "../../helpers/renderIfLoggedOut";
 import Landing from "./Landing";
 
-export default (context) => {
+export default (context: AppContext) => {
   const state = context.store.getState();
 
   return renderIfLoggedOut(state, () => ({
