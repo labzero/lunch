@@ -9,16 +9,17 @@
 
 import React from "react";
 import LayoutContainer from "../../../../components/Layout/LayoutContainer";
+import { AppContext } from "../../../../interfaces";
 import render404 from "../../../helpers/render404";
 import New from "./New";
 
-export default (context) => {
+export default (context: AppContext) => {
   const state = context.store.getState();
   const user = state.user;
 
-  const email = context.query.email;
+  const email = context.query?.email;
 
-  if (user.superuser) {
+  if (user?.superuser) {
     return {
       component: (
         <LayoutContainer path={context.pathname}>
