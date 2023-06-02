@@ -2,14 +2,16 @@
 
 import { expect } from "chai";
 import restaurants from "../restaurants";
+import { Decision, Restaurant, State, User } from "../../interfaces";
 
 describe("reducerMaps/restaurants", () => {
-  describe("SORT_RESTAURANTS", () => {
-    let beforeState;
-    let afterState;
+  let beforeState: State["restaurants"];
+  let afterState: State["restaurants"];
 
+  describe("SORT_RESTAURANTS", () => {
     beforeEach(() => {
       beforeState = {
+        didInvalidate: false,
         isFetching: false,
         items: {
           entities: {
@@ -19,48 +21,49 @@ describe("reducerMaps/restaurants", () => {
                 name: "Tokyo Express",
                 votes: [1, 2],
                 all_vote_count: 0,
-              },
+              } as Restaurant,
               2: {
                 id: 2,
                 name: "Ferry Building",
                 votes: [2, 3, 4, 5, 6],
                 all_vote_count: 0,
-              },
+              } as Restaurant,
               3: {
                 id: 3,
                 name: "Ramen Grill",
                 votes: [7],
                 all_vote_count: 5,
-              },
+              } as Restaurant,
               4: {
                 id: 4,
                 name: "Burger Bonanza",
                 votes: [7],
                 all_vote_count: 10,
-              },
+              } as Restaurant,
               5: {
                 id: 5,
                 name: "Sandwich Area",
                 votes: [7, 8],
                 all_vote_count: 0,
-              },
+              } as Restaurant,
               6: {
                 id: 6,
                 name: "Taco Deli",
-                votes: [],
+                votes: [] as number[],
                 all_vote_count: 0,
-              },
+              } as Restaurant,
             },
           },
           result: [1, 2, 3, 4, 5, 6],
         },
+        nameFilter: "",
       };
 
       afterState = restaurants(beforeState, {
-        decision: { restaurantId: 5 },
+        decision: { restaurantId: 5 } as Decision,
         newlyAdded: { id: 6, userId: 1 },
         type: "SORT_RESTAURANTS",
-        user: { id: 1 },
+        user: { id: 1 } as User,
       });
     });
 
@@ -84,11 +87,9 @@ describe("reducerMaps/restaurants", () => {
   });
 
   describe("DECISION_POSTED", () => {
-    let beforeState;
-    let afterState;
-
     beforeEach(() => {
       beforeState = {
+        didInvalidate: false,
         isFetching: false,
         items: {
           entities: {
@@ -97,27 +98,30 @@ describe("reducerMaps/restaurants", () => {
                 id: 1,
                 name: "Tokyo Express",
                 all_decision_count: "1",
-              },
+              } as Restaurant,
               2: {
                 id: 2,
                 name: "Ferry Building",
                 all_decision_count: "1",
-              },
+              } as Restaurant,
             },
           },
+          result: [1, 2],
         },
+        nameFilter: "",
       };
 
       afterState = restaurants(beforeState, {
         decision: {
           restaurantId: 1,
-        },
+        } as Decision,
         deselected: [
           {
             restaurantId: 2,
-          },
+          } as Decision,
         ],
         type: "DECISION_POSTED",
+        userId: 1,
       });
     });
 
