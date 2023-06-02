@@ -1,26 +1,29 @@
 import { connect } from "react-redux";
 import { showModal } from "../../../actions/modals";
 import { removeUser } from "../../../actions/users";
+import { ConfirmOpts, Dispatch, State, Team } from "../../../interfaces";
 import { getCurrentUser } from "../../../selectors/user";
 import { getTeams } from "../../../selectors/teams";
 import Teams from "./Teams";
 
-const mapStateToProps = (state, ownProps) => ({
+const mapStateToProps = (state: State) => ({
   host: state.host,
   user: getCurrentUser(state),
   teams: getTeams(state),
-  title: ownProps.title,
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  confirm: (opts) => dispatch(showModal("confirm", opts)),
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  confirm: (opts: ConfirmOpts) => dispatch(showModal("confirm", opts)),
   dispatch,
 });
 
-const mergeProps = (stateProps, dispatchProps) => ({
+const mergeProps = (
+  stateProps: ReturnType<typeof mapStateToProps>,
+  dispatchProps: ReturnType<typeof mapDispatchToProps>
+) => ({
   ...stateProps,
   ...dispatchProps,
-  leaveTeam: (team) => removeUser(stateProps.user.id, team),
+  leaveTeam: (team: Team) => removeUser(stateProps.user!.id, team),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps, mergeProps)(Teams);

@@ -1,22 +1,22 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { Component, MouseEvent } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import ListGroup from "react-bootstrap/ListGroup";
 import { FaTimes } from "react-icons/fa";
 import Container from "react-bootstrap/Container";
-import Link from "../../../components/Link";
+import Link from "../../../components/Link/Link";
+import { ConfirmOpts, Team } from "../../../interfaces";
 import s from "./Teams.scss";
 
-class Teams extends Component {
-  static propTypes = {
-    confirm: PropTypes.func.isRequired,
-    host: PropTypes.string.isRequired,
-    leaveTeam: PropTypes.func.isRequired,
-    teams: PropTypes.array.isRequired,
-  };
+interface TeamsProps {
+  confirm: (props: ConfirmOpts) => void;
+  host: string;
+  leaveTeam: (team: Team) => () => void;
+  teams: Team[];
+}
 
-  confirmLeave = (team) => (event) => {
+class Teams extends Component<TeamsProps> {
+  confirmLeave = (team: Team) => (event: MouseEvent) => {
     event.preventDefault();
     this.props.confirm({
       actionLabel: "Leave",
@@ -35,7 +35,7 @@ You will need to be invited back by another member.`,
           {teams.length ? (
             <div>
               <h2>Visit one of your teams:</h2>
-              <ListGroup activeKey={null} className={s.list}>
+              <ListGroup className={s.list}>
                 {teams.map((team) => (
                   <ListGroup.Item
                     action
