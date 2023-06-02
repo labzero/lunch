@@ -287,7 +287,7 @@ export type Action =
     }
   | {
       type: "PATCH_CURRENT_USER";
-      payload: User;
+      payload: Partial<User>;
     }
   | {
       type: "CURRENT_USER_PATCHED";

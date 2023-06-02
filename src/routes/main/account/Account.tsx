@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { ChangeEvent, Component, FormEvent } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
@@ -7,15 +7,27 @@ import Form from "react-bootstrap/Form";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import { PASSWORD_MIN_LENGTH } from "../../../constants";
+import { Action, User } from "../../../interfaces";
 import s from "./Account.scss";
 
-class Account extends Component {
+interface AccountProps {
+  updateCurrentUser: (user: Partial<User>) => Promise<Action>;
+  user: User;
+}
+
+interface AccountState {
+  name?: string;
+  email?: string;
+  password?: string;
+}
+
+class Account extends Component<AccountProps, AccountState> {
   static propTypes = {
     updateCurrentUser: PropTypes.func.isRequired,
     user: PropTypes.object.isRequired,
   };
 
-  constructor(props) {
+  constructor(props: AccountProps) {
     super(props);
 
     const { user } = props;
@@ -27,10 +39,11 @@ class Account extends Component {
     };
   }
 
-  handleChange = (field) => (event) =>
-    this.setState({ [field]: event.target.value });
+  handleChange =
+    (field: keyof AccountState) => (event: ChangeEvent<HTMLInputElement>) =>
+      this.setState({ [field]: event.target.value });
 
-  handleSubmit = (event) => {
+  handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     this.props
       .updateCurrentUser(this.state)
