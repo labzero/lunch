@@ -10,13 +10,14 @@
 import React from "react";
 import LayoutContainer from "../../components/Layout/LayoutContainer";
 import renderIfLoggedOut from "../helpers/renderIfLoggedOut";
+import { AppContext } from "../../interfaces";
 import LoginContainer from "./LoginContainer";
 
-function action(context) {
+function action(context: AppContext) {
   const state = context.store.getState();
 
   const subdomain = context.subdomain;
-  const next = context.query.next;
+  const next = context.query?.next as string | undefined;
 
   return renderIfLoggedOut(state, () => ({
     chunks: ["login"],

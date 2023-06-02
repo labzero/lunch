@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { ChangeEvent, Component } from "react";
 import PropTypes from "prop-types";
 import qs from "qs";
 import withStyles from "isomorphic-style-loader/withStyles";
@@ -10,7 +10,18 @@ import Row from "react-bootstrap/Row";
 import google from "./google.svg";
 import s from "./Login.scss";
 
-class Login extends Component {
+interface LoginProps {
+  host: string;
+  next?: string;
+  team?: string;
+}
+
+interface LoginState {
+  email?: string;
+  password?: string;
+}
+
+class Login extends Component<LoginProps, LoginState> {
   static propTypes = {
     host: PropTypes.string.isRequired,
     next: PropTypes.string,
@@ -22,7 +33,7 @@ class Login extends Component {
     team: undefined,
   };
 
-  constructor(props) {
+  constructor(props: LoginProps) {
     super(props);
 
     this.state = {
@@ -31,10 +42,11 @@ class Login extends Component {
     };
   }
 
-  handleChange = (field) => (event) =>
-    this.setState({
-      [field]: event.target.value,
-    });
+  handleChange =
+    (field: keyof LoginState) => (event: ChangeEvent<HTMLInputElement>) =>
+      this.setState({
+        [field]: event.target.value,
+      });
 
   render() {
     const { host, next, team } = this.props;
