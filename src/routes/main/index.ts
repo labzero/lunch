@@ -8,6 +8,7 @@
  */
 
 /* eslint-disable global-require */
+import { AppContext } from "../../interfaces";
 import rootAction from "../helpers/rootAction";
 
 import invitation from "./invitation";
@@ -22,35 +23,35 @@ export default {
   children: [
     {
       path: "",
-      action: async (context) =>
+      action: async (context: AppContext) =>
         (await import(/* webpackChunkName: 'landing' */ "./landing")).default(
           context
         ),
     },
     {
       path: "/teams",
-      action: async (context) =>
+      action: async (context: AppContext) =>
         (await import(/* webpackChunkName: 'teams' */ "./teams")).default(
           context
         ),
     },
     {
       path: "/new-team",
-      action: async (context) =>
+      action: async (context: AppContext) =>
         (await import(/* webpackChunkName: 'new-team' */ "./new-team")).default(
           context
         ),
     },
     {
       path: "/account",
-      action: async (context) =>
+      action: async (context: AppContext) =>
         (await import(/* webpackChunkName: 'account' */ "./account")).default(
           context
         ),
     },
     {
       path: "/welcome",
-      action: async (context) =>
+      action: async (context: AppContext) =>
         (await import(/* webpackChunkName: 'welcome' */ "./welcome")).default(
           context
         ),
@@ -69,14 +70,14 @@ export default {
     },
     {
       path: "/about",
-      action: async (context) =>
+      action: async (context: AppContext) =>
         (await import(/* webpackChunkName: 'about' */ "./about")).default(
           context
         ),
     },
     {
       path: "/login",
-      action: async (context) =>
+      action: async (context: AppContext) =>
         (await import(/* webpackChunkName: 'login' */ "../login")).default(
           context
         ),
@@ -85,7 +86,7 @@ export default {
     // Wildcard routes, e.g. { path: '(.*)', ... } (must go last)
     {
       path: "(.*)",
-      action: async (context) =>
+      action: async (context: AppContext) =>
         (
           await import(/* webpackChunkName: 'not-found' */ "../not-found")
         ).default(context),
