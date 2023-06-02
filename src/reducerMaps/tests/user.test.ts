@@ -2,17 +2,19 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from "chai";
+import { State, Team, User } from "../../interfaces";
 import users from "../user";
 
 describe("reducerMaps/user", () => {
+  let beforeState: State["user"];
+  let afterState: State["user"];
+
   describe("TEAM_POSTED", () => {
-    let beforeState;
-    let afterState;
     beforeEach(() => {
       beforeState = {
         id: 1,
         roles: [],
-      };
+      } as unknown as User;
     });
 
     describe("when role is on different user", () => {
@@ -25,7 +27,7 @@ describe("reducerMaps/user", () => {
                 type: "owner",
               },
             ],
-          },
+          } as Team,
           type: "TEAM_POSTED",
         });
       });
@@ -45,20 +47,18 @@ describe("reducerMaps/user", () => {
                 type: "owner",
               },
             ],
-          },
+          } as Team,
           type: "TEAM_POSTED",
         });
       });
 
       it("pushes role onto user", () => {
-        expect(afterState.roles).to.have.length(1);
+        expect(afterState!.roles).to.have.length(1);
       });
     });
   });
 
   describe("USER_DELETED", () => {
-    let beforeState;
-    let afterState;
     beforeEach(() => {
       beforeState = {
         id: 1,
@@ -70,7 +70,7 @@ describe("reducerMaps/user", () => {
             teamId: 12345,
           },
         ],
-      };
+      } as unknown as User;
     });
 
     describe("when current user has not been deleted", () => {
@@ -80,7 +80,7 @@ describe("reducerMaps/user", () => {
           isSelf: false,
           team: {
             id: 12345,
-          },
+          } as Team,
           type: "USER_DELETED",
         });
       });
@@ -97,20 +97,18 @@ describe("reducerMaps/user", () => {
           isSelf: true,
           team: {
             id: 77,
-          },
+          } as Team,
           type: "USER_DELETED",
         });
       });
 
       it("removes role from user", () => {
-        expect(afterState.roles).to.have.length(1);
+        expect(afterState!.roles).to.have.length(1);
       });
     });
   });
 
   describe("USER_PATCHED", () => {
-    let beforeState;
-    let afterState;
     beforeEach(() => {
       beforeState = {
         id: 1,
@@ -124,7 +122,7 @@ describe("reducerMaps/user", () => {
             type: "owner",
           },
         ],
-      };
+      } as unknown as User;
     });
 
     describe("when current user has not been updated", () => {
@@ -132,10 +130,10 @@ describe("reducerMaps/user", () => {
         afterState = users(beforeState, {
           id: 2,
           isSelf: false,
-          user: { foo: "bar" },
+          user: { id: 1 } as User,
           team: {
             id: 12345,
-          },
+          } as Team,
           type: "USER_PATCHED",
         });
       });
@@ -152,20 +150,20 @@ describe("reducerMaps/user", () => {
           isSelf: true,
           team: {
             id: 77,
-          },
+          } as Team,
           type: "USER_PATCHED",
           user: {
             type: "member",
-          },
+          } as User,
         });
       });
 
       it("updates user role", () => {
-        expect(afterState.roles[0].type).to.eq("member");
+        expect(afterState!.roles[0].type).to.eq("member");
       });
 
       it("does not set type attribute", () => {
-        expect(afterState.type).to.be.undefined;
+        expect(afterState!.type).to.be.undefined;
       });
     });
   });
