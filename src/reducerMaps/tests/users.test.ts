@@ -2,32 +2,39 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from "chai";
+import { State, Team, User } from "../../interfaces";
 import users from "../users";
 
 describe("reducerMaps/users", () => {
+  let beforeState: State["users"];
+  let afterState: State["users"];
+
   describe("USER_PATCHED", () => {
-    let beforeState;
-    let afterState;
     beforeEach(() => {
       beforeState = {
+        didInvalidate: false,
         isFetching: false,
         items: {
-          results: [1],
+          result: [1],
           entities: {
             users: {
               1: {
-                foo: "bar",
-              },
+                name: "bar",
+              } as User,
             },
           },
         },
       };
       afterState = users(beforeState, {
         id: 1,
+        isSelf: false,
+        team: {
+          id: 1,
+        } as Team,
         type: "USER_PATCHED",
         user: {
-          foo: "baz",
-        },
+          name: "baz",
+        } as User,
       });
     });
 
@@ -36,7 +43,7 @@ describe("reducerMaps/users", () => {
     });
 
     it("replaces user with updated user", () => {
-      expect(afterState.items.entities.users[1].foo).to.eq("baz");
+      expect(afterState.items.entities.users[1].name).to.eq("baz");
     });
   });
 });
