@@ -1,10 +1,9 @@
 import { connect } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import { removeVote, addVote } from "../../actions/restaurants";
-import { State } from "../../interfaces";
+import { Action, State } from "../../interfaces";
 import { makeGetRestaurantVotesForUser } from "../../selectors";
 import RestaurantVoteButton from "./RestaurantVoteButton";
-import { Action } from "../../interfaces";
 
 interface OwnProps {
   id: number;

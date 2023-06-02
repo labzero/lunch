@@ -1,20 +1,24 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
+import React, { ChangeEvent, Component, FormEvent } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
+import { User } from "../../../interfaces";
 import s from "./Welcome.scss";
 
-class Welcome extends Component {
-  static propTypes = {
-    updateCurrentUser: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired,
-  };
+interface WelcomeProps {
+  updateCurrentUser: (user: Partial<User>) => void;
+  user: User;
+}
 
-  constructor(props) {
+interface WelcomeState {
+  name?: string;
+}
+
+class Welcome extends Component<WelcomeProps, WelcomeState> {
+  constructor(props: WelcomeProps) {
     super(props);
 
     const { user } = props;
@@ -24,9 +28,10 @@ class Welcome extends Component {
     };
   }
 
-  handleChange = (event) => this.setState({ name: event.target.value });
+  handleChange = (event: ChangeEvent<HTMLInputElement>) =>
+    this.setState({ name: event.target.value });
 
-  handleSubmit = (event) => {
+  handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     this.props.updateCurrentUser(this.state);
   };

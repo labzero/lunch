@@ -9,12 +9,13 @@
 
 import React from "react";
 import LayoutContainer from "../../../components/Layout/LayoutContainer";
+import { AppContext } from "../../../interfaces";
 import redirectToLogin from "../../helpers/redirectToLogin";
 import WelcomeContainer from "./WelcomeContainer";
 
 const title = "Welcome!";
 
-export default (context) => {
+export default (context: AppContext) => {
   const state = context.store.getState();
   const user = state.user;
 
@@ -25,8 +26,8 @@ export default (context) => {
       component: (
         <LayoutContainer path={context.pathname}>
           <WelcomeContainer
-            next={context.query.next}
-            team={context.query.team}
+            next={context.query?.next as string | undefined}
+            team={context.query?.team as string | undefined}
           />
         </LayoutContainer>
       ),
