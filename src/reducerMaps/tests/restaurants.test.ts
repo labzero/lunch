@@ -1,8 +1,8 @@
 /* eslint-env mocha */
 
 import { expect } from "chai";
-import restaurants from "../restaurants";
 import { Decision, Restaurant, State, User } from "../../interfaces";
+import restaurants from "../restaurants";
 
 describe("reducerMaps/restaurants", () => {
   let beforeState: State["restaurants"];

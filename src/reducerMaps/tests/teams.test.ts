@@ -2,14 +2,17 @@
 /* eslint-disable no-unused-expressions */
 
 import { expect } from "chai";
+import { State, Team } from "../../interfaces";
 import teams from "../teams";
 
 describe("reducerMaps/teams", () => {
   describe("USER_DELETED", () => {
-    let beforeState;
-    let afterState;
+    let beforeState: State["teams"];
+    let afterState: State["teams"];
     beforeEach(() => {
       beforeState = {
+        didInvalidate: false,
+        isFetching: false,
         items: {
           result: [77, 12345],
           entities: {
@@ -27,7 +30,7 @@ describe("reducerMaps/teams", () => {
           isSelf: false,
           team: {
             id: 12345,
-          },
+          } as Team,
           type: "USER_DELETED",
         });
       });
@@ -44,7 +47,7 @@ describe("reducerMaps/teams", () => {
           isSelf: true,
           team: {
             id: 77,
-          },
+          } as Team,
           type: "USER_DELETED",
         });
       });
