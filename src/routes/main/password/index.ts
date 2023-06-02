@@ -9,6 +9,7 @@
 
 /* eslint-disable global-require */
 
+import { AppContext } from "../../../interfaces";
 import create from "./create";
 import edit from "./edit";
 import newAction from "./new";
@@ -30,7 +31,7 @@ export default [
   // Wildcard routes, e.g. { path: '(.*)', ... } (must go last)
   {
     path: "(.*)",
-    action: async (context) =>
+    action: async (context: AppContext) =>
       (
         await import(/* webpackChunkName: 'not-found' */ "../../not-found")
       ).default(context),
