@@ -1,5 +1,4 @@
 import update from "immutability-helper";
-import setOrMerge from "./helpers/setOrMerge";
 import { Reducer } from "../interfaces";
 
 const listUi: Reducer<"listUi"> = (state, action) => {
@@ -27,20 +26,22 @@ const listUi: Reducer<"listUi"> = (state, action) => {
     }
     case "SET_EDIT_NAME_FORM_VALUE": {
       return update(state, {
-        $apply: (target: typeof state) =>
-          setOrMerge(target, action.id, { editNameFormValue: action.value }),
+        [action.id]: (stateValue) =>
+          update(stateValue || {}, {
+            $merge: { editNameFormValue: action.value },
+          }),
       });
     }
     case "SHOW_EDIT_NAME_FORM": {
       return update(state, {
-        $apply: (target: typeof state) =>
-          setOrMerge(target, action.id, { isEditingName: true }),
+        [action.id]: (stateValue) =>
+          update(stateValue || {}, { $merge: { isEditingName: true } }),
       });
     }
     case "HIDE_EDIT_NAME_FORM": {
       return update(state, {
-        $apply: (target: typeof state) =>
-          setOrMerge(target, action.id, { isEditingName: false }),
+        [action.id]: (stateValue) =>
+          update(stateValue || {}, { $merge: { isEditingName: false } }),
       });
     }
     case "SET_FLIP_MOVE": {
