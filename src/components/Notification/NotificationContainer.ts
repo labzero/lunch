@@ -51,7 +51,7 @@ const mapStateToProps = () => {
       };
       if (contentProps.loggedIn) {
         contentProps.user = vals.userId
-          ? getUserById(state, vals).name
+          ? getUserById(state, vals as { userId: number }).name
           : undefined;
       }
     }
