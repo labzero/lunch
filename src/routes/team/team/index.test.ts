@@ -13,7 +13,7 @@ const proxyquireStrict = proxyquire.noCallThru();
 const mockStore = configureMockStore();
 
 describe("routes/team/team", () => {
-  let context: Partial<Omit<AppContext, "store">>;
+  let context: Omit<AppContext, "store">;
   let render404: string;
   let team;
   let landingProxy;
@@ -36,8 +36,7 @@ describe("routes/team/team", () => {
   });
 
   describe("when user is a guest", () => {
-    it("renders 404", function test() {
-      this.timeout(8000);
+    it("renders 404", () => {
       render404 = "render404";
       landingProxy = proxyquireStrict("./index", {
         "../../../helpers/hasRole": mockEsmodule({

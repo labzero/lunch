@@ -3,23 +3,24 @@
 
 import { expect } from "chai";
 import { configureMockStore } from "@jedmao/redux-mock-store";
-import { spy } from "sinon";
+import { SinonSpy, spy } from "sinon";
 import proxyquire from "proxyquire";
+import { AppContext } from "../../../interfaces";
 import mockEsmodule from "../../../../test/mockEsmodule";
 
 const proxyquireStrict = proxyquire.noCallThru();
 const mockStore = configureMockStore();
 
 describe("routes/helpers/renderIfHasName", () => {
-  let makeRouteSpy;
-  let context;
+  let makeRouteSpy: SinonSpy;
+  let context: Omit<AppContext, "store">;
 
   beforeEach(() => {
     makeRouteSpy = spy();
   });
 
   describe("when there is no user", () => {
-    let redirectToLoginSpy;
+    let redirectToLoginSpy: SinonSpy;
     let renderIfHasNameProxy;
     beforeEach(() => {
       redirectToLoginSpy = spy();

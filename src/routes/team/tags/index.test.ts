@@ -32,8 +32,7 @@ describe("routes/team/tags", () => {
   });
 
   describe("when user is not on team", () => {
-    it("renders 404", function test() {
-      this.timeout(8000);
+    it("renders 404", () => {
       render404 = "render404";
       landingProxy = proxyquireStrict("./index", {
         "../../../helpers/hasRole": mockEsmodule({

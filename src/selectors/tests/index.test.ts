@@ -1,14 +1,15 @@
 /* eslint-env mocha */
 import { expect } from "chai";
 import proxyquire from "proxyquire";
+import { Restaurant } from "../../interfaces";
 
 describe("selectors/index", () => {
   describe("getFilteredRestaurants", () => {
-    let restaurantIds;
-    let nameFilter;
-    let tagFilters;
-    let tagExclusions;
-    let restaurantEntities;
+    let restaurantIds: number[];
+    let nameFilter: string;
+    let tagFilters: number[];
+    let tagExclusions: number[];
+    let restaurantEntities: { [index: number]: Restaurant };
     const proxyIndex = proxyquire("../index", {
       "./restaurants": {
         getRestaurantIds: () => restaurantIds,
@@ -33,12 +34,12 @@ describe("selectors/index", () => {
           id: 1,
           name: "foo",
           tags: [1],
-        },
+        } as Restaurant,
         2: {
           id: 1,
           name: "bar",
-          tags: [],
-        },
+          tags: [] as number[],
+        } as Restaurant,
       };
     });
 

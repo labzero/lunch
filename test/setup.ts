@@ -11,21 +11,12 @@
 
 require("global-jsdom/register");
 
-require("core-js/stable");
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { use } = require("chai");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const chaiJSDOM = require("chai-jsdom");
 
 use(chaiJSDOM);
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const babelRegister = require("@babel/register").default;
-
-babelRegister({ extensions: [".js", ".jsx"] });
-
-require("ts-node/register");
 
 process.env.NODE_ENV = "test";
 

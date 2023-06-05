@@ -5192,7 +5192,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^3.0.0, core-js@npm:^3.30.2":
+"core-js@npm:^3.0.0":
   version: 3.30.2
   resolution: "core-js@npm:3.30.2"
   checksum: 73d47e2b9d9f502800973982d08e995bbf04832e20b04e04be31dd7607247158271315e9328788a2408190e291c7ffbefad141167b1e57dea9f983e1e723541e
@@ -9942,7 +9942,6 @@ __metadata:
     connect-flash: ^0.1.1
     connect-session-sequelize: ^7.1.5
     cookie-parser: ^1.4.6
-    core-js: ^3.30.2
     cors: ^2.8.3
     cross-env: ^5.0.1
     css-loader: ^6.7.3

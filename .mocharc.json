@@ -1,0 +1,11 @@
+{
+  "extension": [
+    "ts"
+  ],
+  "require": [
+    "ts-node/register",
+    "./test/setup.ts"
+  ],
+  "exit": true,
+  "file": "./test/mocha-setup.ts"
+}

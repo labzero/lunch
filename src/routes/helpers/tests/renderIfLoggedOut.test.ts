@@ -2,14 +2,15 @@
 /* eslint-disable no-unused-expressions, no-underscore-dangle, import/no-duplicates */
 
 import { expect } from "chai";
-import { spy } from "sinon";
+import { SinonSpy, spy } from "sinon";
 import proxyquire from "proxyquire";
+import { Role, State, User } from "../../../interfaces";
 import renderIfLoggedOut from "../renderIfLoggedOut";
 
 describe("routes/helpers/renderIfLoggedOut", () => {
-  let makeRouteSpy;
-  let state;
-  let renderIfLoggedOutProxy;
+  let makeRouteSpy: SinonSpy;
+  let state: State;
+  let renderIfLoggedOutProxy: typeof renderIfLoggedOut;
 
   beforeEach(() => {
     makeRouteSpy = spy();
@@ -30,9 +31,9 @@ describe("routes/helpers/renderIfLoggedOut", () => {
         host: "lunch.pink",
         user: {
           id: 1,
-          roles: [{}],
-        },
-      };
+          roles: [{}] as Role[],
+        } as User,
+      } as State;
     });
 
     it("redirects user to team home", () => {
@@ -47,9 +48,9 @@ describe("routes/helpers/renderIfLoggedOut", () => {
       state = {
         user: {
           id: 1,
-          roles: [],
-        },
-      };
+          roles: [] as Role[],
+        } as User,
+      } as State;
     });
 
     it("redirects user to teams list", () => {
@@ -64,9 +65,9 @@ describe("routes/helpers/renderIfLoggedOut", () => {
       state = {
         user: {
           id: 1,
-          roles: [{}, {}, {}],
-        },
-      };
+          roles: [{}, {}, {}] as Role[],
+        } as User,
+      } as State;
     });
 
     it("redirects user to teams list", () => {
@@ -80,7 +81,7 @@ describe("routes/helpers/renderIfLoggedOut", () => {
     beforeEach(() => {
       state = {
         user: null,
-      };
+      } as State;
       renderIfLoggedOut(state, makeRouteSpy);
     });
 
