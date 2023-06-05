@@ -48,7 +48,7 @@ import routerCreator from "./router";
 // @ts-ignore
 import chunks from "./chunk-manifest.json"; // eslint-disable-line import/no-unresolved
 import configureStore from "./store/configureStore";
-import config from "./config";
+import * as config from "./config";
 import makeInitialState from "./initialState";
 import invitationMiddleware from "./middlewares/invitation";
 import loginMiddleware from "./middlewares/login";

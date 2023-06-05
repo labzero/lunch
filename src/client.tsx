@@ -156,7 +156,7 @@ const onLocationChange = async ({
           document.title = route.title;
         }
 
-        updateMeta("description", route.description);
+        updateMeta("description", route.description || "");
         // Update necessary tags in <head> at runtime here, ie:
         // updateMeta('keywords', route.keywords);
         // updateCustomMeta('og:url', route.canonicalUrl);

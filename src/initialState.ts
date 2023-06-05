@@ -46,7 +46,7 @@ const getInitialState = (): NonNormalizedState => ({
     didInvalidate: true,
     items: [],
   },
-  wsPort: module.hot ? wsPort : 0,
+  wsPort: module.hot ? Number(wsPort) : 0,
 });
 
 export default (stateData: StateData) => {

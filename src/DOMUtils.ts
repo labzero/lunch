@@ -7,7 +7,13 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-export function updateTag(tagName, keyName, keyValue, attrName, attrValue) {
+export function updateTag(
+  tagName: string,
+  keyName: string,
+  keyValue: string,
+  attrName: string,
+  attrValue: string
+) {
   const node = document.head.querySelector(
     `${tagName}[${keyName}="${keyValue}"]`
   );
@@ -15,7 +21,7 @@ export function updateTag(tagName, keyName, keyValue, attrName, attrValue) {
 
   // Remove and create a new tag in order to make it work with bookmarks in Safari
   if (node) {
-    node.parentNode.removeChild(node);
+    node.parentNode?.removeChild(node);
   }
   if (typeof attrValue === "string") {
     const nextNode = document.createElement(tagName);
@@ -25,14 +31,14 @@ export function updateTag(tagName, keyName, keyValue, attrName, attrValue) {
   }
 }
 
-export function updateMeta(name, content) {
+export function updateMeta(name: string, content: string) {
   updateTag("meta", "name", name, "content", content);
 }
 
-export function updateCustomMeta(property, content) {
+export function updateCustomMeta(property: string, content: string) {
   updateTag("meta", "property", property, "content", content);
 }
 
-export function updateLink(rel, href) {
+export function updateLink(rel: string, href: string) {
   updateTag("link", "rel", rel, "href", href);
 }
