@@ -8,10 +8,11 @@
  */
 
 import hasRole from "../../../helpers/hasRole";
+import { AppContext } from "../../../interfaces";
 import renderIfHasName from "../../helpers/renderIfHasName";
 import render404 from "../../helpers/render404";
 
-export default (context) => {
+export default (context: AppContext) => {
   const state = context.store.getState();
   const host = state.host;
   const team = state.team;
