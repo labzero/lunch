@@ -29,6 +29,10 @@
   "include": ["./**/*.ts", "./**/*.tsx", "./*.d.ts"],
   "exclude": ["node_modules"],
   "ts-node": {
-    "files": true
+    "files": true,
+    "transpileOnly": true, // you can specify ts-node options here
+    "compilerOptions": {
+      "module": "commonjs" // you can also override compilerOptions.  Only ts-node will use these overrides
+    }
   }
 }

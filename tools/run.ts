@@ -9,11 +9,10 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-export function format(time) {
-  return time.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
-}
+export const format = (time: Date) =>
+  time.toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
 
-function run(fn, options) {
+function run(task: (o?: string) => Promise<void>, options?: string) {
   // eslint-disable-next-line global-require
   const path = require("path");
 
@@ -27,7 +26,6 @@ function run(fn, options) {
   // eslint-disable-next-line global-require
   require("dotenv").config();
 
-  const task = typeof fn.default === "undefined" ? fn : fn.default;
   const start = new Date();
   console.info(
     `[${format(start)}] Starting '${task.name}${
