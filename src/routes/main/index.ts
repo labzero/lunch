@@ -8,7 +8,8 @@
  */
 
 /* eslint-disable global-require */
-import { AppContext } from "../../interfaces";
+import { Route } from "universal-router";
+import { AppContext, AppRoute } from "../../interfaces";
 import rootAction from "../helpers/rootAction";
 
 import invitation from "./invitation";
@@ -16,42 +17,42 @@ import password from "./password";
 import users from "./users";
 
 // The top-level (parent) route
-export default {
+const main: Route<AppContext, AppRoute> = {
   path: "",
 
   // Keep in mind, routes are evaluated in order
   children: [
     {
       path: "",
-      action: async (context: AppContext) =>
+      action: async (context) =>
         (await import(/* webpackChunkName: 'landing' */ "./landing")).default(
           context
         ),
     },
     {
       path: "/teams",
-      action: async (context: AppContext) =>
+      action: async (context) =>
         (await import(/* webpackChunkName: 'teams' */ "./teams")).default(
           context
         ),
     },
     {
       path: "/new-team",
-      action: async (context: AppContext) =>
+      action: async (context) =>
         (await import(/* webpackChunkName: 'new-team' */ "./new-team")).default(
           context
         ),
     },
     {
       path: "/account",
-      action: async (context: AppContext) =>
+      action: async (context) =>
         (await import(/* webpackChunkName: 'account' */ "./account")).default(
           context
         ),
     },
     {
       path: "/welcome",
-      action: async (context: AppContext) =>
+      action: async (context) =>
         (await import(/* webpackChunkName: 'welcome' */ "./welcome")).default(
           context
         ),
@@ -70,14 +71,14 @@ export default {
     },
     {
       path: "/about",
-      action: async (context: AppContext) =>
+      action: async (context) =>
         (await import(/* webpackChunkName: 'about' */ "./about")).default(
           context
         ),
     },
     {
       path: "/login",
-      action: async (context: AppContext) =>
+      action: async (context) =>
         (await import(/* webpackChunkName: 'login' */ "../login")).default(
           context
         ),
@@ -86,7 +87,7 @@ export default {
     // Wildcard routes, e.g. { path: '(.*)', ... } (must go last)
     {
       path: "(.*)",
-      action: async (context: AppContext) =>
+      action: async (context) =>
         (
           await import(/* webpackChunkName: 'not-found' */ "../not-found")
         ).default(context),
@@ -95,3 +96,5 @@ export default {
 
   action: rootAction,
 };
+
+export default main;

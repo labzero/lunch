@@ -1,6 +1,7 @@
+import { AppRoute, State } from "../../interfaces";
 import { getTeams } from "../../selectors/teams";
 
-export default (state, makeRoute) => {
+export default (state: State, makeRoute: () => AppRoute) => {
   const user = state.user;
   const host = state.host;
 

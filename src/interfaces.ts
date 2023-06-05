@@ -609,6 +609,7 @@ export interface AppRoute {
   chunks?: string[];
   component?: ReactNode;
   description?: string;
+  fullTitle?: string;
   ogTitle?: string;
   redirect?: string;
   status?: number;

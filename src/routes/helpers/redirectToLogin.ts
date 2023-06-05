@@ -1,6 +1,7 @@
 import qs from "qs";
+import { AppContext } from "../../interfaces";
 
-export default (context) => {
+export default (context: AppContext) => {
   const stringifiedQuery = qs.stringify(context.query);
   let params = "";
   if (context.path !== "/" || stringifiedQuery) {
