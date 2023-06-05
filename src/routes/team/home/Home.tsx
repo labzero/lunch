@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import RobustWebSocket from "robust-websocket";
@@ -10,23 +9,30 @@ import RestaurantMapContainer from "../../../components/RestaurantMap/Restaurant
 import RestaurantListContainer from "../../../components/RestaurantList/RestaurantListContainer";
 import RestaurantAddFormContainer from "../../../components/RestaurantAddForm/RestaurantAddFormContainer";
 import TagFilterFormContainer from "../../../components/TagFilterForm/TagFilterFormContainer";
+import { User } from "../../../interfaces";
 import s from "./Home.scss";
 
-export class _Home extends Component {
-  static propTypes = {
-    user: PropTypes.object,
-    fetchDecisions: PropTypes.func.isRequired,
-    fetchRestaurants: PropTypes.func.isRequired,
-    fetchTags: PropTypes.func.isRequired,
-    fetchUsers: PropTypes.func.isRequired,
-    invalidateDecisions: PropTypes.func.isRequired,
-    invalidateRestaurants: PropTypes.func.isRequired,
-    invalidateTags: PropTypes.func.isRequired,
-    invalidateUsers: PropTypes.func.isRequired,
-    messageReceived: PropTypes.func.isRequired,
-    pastDecisionsShown: PropTypes.bool.isRequired,
-    wsPort: PropTypes.number.isRequired,
-  };
+export interface HomeProps {
+  user?: User | null;
+  fetchDecisions: () => void;
+  fetchRestaurants: () => void;
+  fetchTags: () => void;
+  fetchUsers: () => void;
+  invalidateDecisions: () => void;
+  invalidateRestaurants: () => void;
+  invalidateTags: () => void;
+  invalidateUsers: () => void;
+  messageReceived: (event: MessageEvent) => void;
+  pastDecisionsShown: boolean;
+  wsPort: number;
+}
+
+export class _Home extends Component<HomeProps> {
+  fetchAllInterval: NodeJS.Timer;
+
+  pingInterval: NodeJS.Timer;
+
+  socket: RobustWebSocket;
 
   static defaultProps = {
     user: null,
@@ -46,7 +52,7 @@ export class _Home extends Component {
         window.location.port &&
         typeof wsPort === "number" &&
         wsPort !== 0 &&
-        wsPort !== window.location.port
+        wsPort !== Number(window.location.port)
       ) {
         host = `${window.location.hostname}:${wsPort}`;
       }
@@ -55,7 +61,7 @@ export class _Home extends Component {
         protocol = "wss:";
       }
       this.socket = new RobustWebSocket(`${protocol}//${host}/api`, null, {
-        shouldReconnect: (event, ws) => {
+        shouldReconnect: (event: CloseEvent, ws: RobustWebSocket) => {
           if (event.code === 1008 || event.code === 1011) return undefined;
           return Math.min(1000 * ws.attempts, 5000);
         },

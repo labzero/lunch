@@ -11,14 +11,15 @@ import { fetchTags, invalidateTags } from "../../../actions/tags";
 import { fetchUsers, invalidateUsers } from "../../../actions/users";
 import { messageReceived } from "../../../actions/websockets";
 import Home from "./Home";
+import { Dispatch, State } from "../../../interfaces";
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state: State) => ({
   pastDecisionsShown: !!state.modals.pastDecisions,
   user: state.user,
   wsPort: state.wsPort,
 });
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = (dispatch: Dispatch) => ({
   fetchDecisions() {
     dispatch(fetchDecisions());
   },
@@ -43,7 +44,7 @@ const mapDispatchToProps = (dispatch) => ({
   invalidateUsers() {
     dispatch(invalidateUsers());
   },
-  messageReceived(event) {
+  messageReceived(event: MessageEvent) {
     dispatch(messageReceived(event.data));
   },
 });

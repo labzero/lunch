@@ -2,10 +2,12 @@
 /* eslint-disable padded-blocks, no-unused-expressions */
 
 import React from "react";
-import { spy, useFakeTimers } from "sinon";
+import { SinonSpy, spy, useFakeTimers } from "sinon";
 import { expect } from "chai";
 import proxyquire from "proxyquire";
 import { render, screen } from "../../../../test/test-utils";
+import { HomeProps } from "./Home";
+import { User } from "../../../interfaces";
 
 const proxy = proxyquire.noCallThru();
 
@@ -48,15 +50,15 @@ const Home = proxy("./Home", {
 })._Home;
 
 describe("Home", () => {
-  let props;
-  let fetchDecisions;
-  let fetchRestaurants;
-  let fetchTags;
-  let fetchUsers;
-  let invalidateDecisions;
-  let invalidateRestaurants;
-  let invalidateTags;
-  let invalidateUsers;
+  let props: HomeProps;
+  let fetchDecisions: SinonSpy;
+  let fetchRestaurants: SinonSpy;
+  let fetchTags: SinonSpy;
+  let fetchUsers: SinonSpy;
+  let invalidateDecisions: SinonSpy;
+  let invalidateRestaurants: SinonSpy;
+  let invalidateTags: SinonSpy;
+  let invalidateUsers: SinonSpy;
 
   beforeEach(() => {
     fetchDecisions = spy();
@@ -91,7 +93,7 @@ describe("Home", () => {
   };
 
   it("renders form if user is logged in", async () => {
-    props.user = { id: 1 };
+    props.user = { id: 1 } as User;
 
     await renderComponent();
 
