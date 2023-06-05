@@ -10,13 +10,14 @@
 import React from "react";
 import LayoutContainer from "../../../components/Layout/LayoutContainer";
 import hasRole from "../../../helpers/hasRole";
+import { AppContext } from "../../../interfaces";
 import renderIfHasName from "../../helpers/renderIfHasName";
 import render404 from "../../helpers/render404";
 import TagsContainer from "./TagsContainer";
 
 const title = "Tags";
 
-export default (context) => {
+export default (context: AppContext) => {
   const state = context.store.getState();
   const user = state.user;
   const team = state.team;

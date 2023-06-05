@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React, { Component } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Container from "react-bootstrap/Container";
@@ -6,7 +5,12 @@ import Loading from "../../../components/Loading/Loading";
 import TagManagerContainer from "../../../components/TagManager/TagManagerContainer";
 import s from "./Tags.scss";
 
-class Tags extends Component {
+interface TagsProps {
+  fetchTagsIfNeeded: () => void;
+  tagListReady: boolean;
+}
+
+class Tags extends Component<TagsProps> {
   componentDidMount() {
     this.props.fetchTagsIfNeeded();
   }
@@ -26,10 +30,5 @@ class Tags extends Component {
     );
   }
 }
-
-Tags.propTypes = {
-  fetchTagsIfNeeded: PropTypes.func.isRequired,
-  tagListReady: PropTypes.bool.isRequired,
-};
 
 export default withStyles(s)(Tags);
