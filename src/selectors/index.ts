@@ -1,5 +1,6 @@
 import { createSelector } from "reselect";
 import hasRole from "../helpers/hasRole";
+import { RoleType, State } from "../interfaces";
 import { areDecisionsLoading } from "./decisions";
 import {
   areRestaurantsLoading,
@@ -17,8 +18,13 @@ import { areUsersLoading, getUserId, getUserById } from "./users";
 import { getCurrentUser } from "./user";
 import { getMapUi } from "./mapUi";
 
-export const getUserByVoteId = (state, voteId) =>
-  getUserById(state, getVoteById(state, voteId).userId);
+export const getUserByVoteId = (state: State, voteId: number) => {
+  const vote = getVoteById(state, voteId);
+  if (vote) {
+    return getUserById(state, vote.userId);
+  }
+  return undefined;
+};
 
 export const makeGetRestaurantVotesForUser = () =>
   createSelector(
@@ -27,7 +33,7 @@ export const makeGetRestaurantVotesForUser = () =>
     getUserId,
     (restaurant, voteEntities, userId) =>
       restaurant.votes.filter(
-        (voteId) => voteEntities[voteId].userId === userId
+        (voteId) => voteEntities?.[voteId].userId === userId
       )
   );
 
@@ -87,7 +93,7 @@ export const getFilteredRestaurants = createSelector(
   }
 );
 
-const getRoleProp = (state, props) => props.role || props;
+const getRoleProp = (state: State, role: RoleType) => role;
 export const currentUserHasRole = createSelector(
   getCurrentUser,
   getTeam,
