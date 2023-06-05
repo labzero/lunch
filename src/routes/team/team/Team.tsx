@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 /**
  * React Starter Kit (https://www.reactstarterkit.com/)
  *
@@ -8,7 +7,7 @@ import PropTypes from "prop-types";
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React from "react";
+import React, { ChangeEvent } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import ButtonToolbar from "react-bootstrap/ButtonToolbar";
@@ -17,6 +16,7 @@ import Container from "react-bootstrap/Container";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import Table from "react-bootstrap/Table";
+import { IntlShape } from "react-intl";
 import Loading from "../../../components/Loading/Loading";
 import AddUserFormContainer from "../../../components/AddUserForm/AddUserFormContainer";
 import ChangeTeamURLModalContainer from "../../../components/ChangeTeamURLModal/ChangeTeamURLModalContainer";
@@ -25,68 +25,75 @@ import TeamFormContainer from "../../../components/TeamForm/TeamFormContainer";
 import { globalMessageDescriptor as gm } from "../../../helpers/generateMessageDescriptor";
 import getRole from "../../../helpers/getRole";
 import canChangeUser from "../../../helpers/canChangeUser";
+import {
+  User,
+  Team as TeamType,
+  ConfirmOpts,
+  Action,
+} from "../../../interfaces";
 import s from "./Team.scss";
 
-class Team extends React.Component {
-  static propTypes = {
-    changeTeamURLShown: PropTypes.bool.isRequired,
-    changeUserRole: PropTypes.func.isRequired,
-    confirm: PropTypes.func.isRequired,
-    confirmChangeTeamURL: PropTypes.func.isRequired,
-    confirmDeleteTeam: PropTypes.func.isRequired,
-    currentUser: PropTypes.object.isRequired,
-    deleteTeamShown: PropTypes.bool.isRequired,
-    dispatch: PropTypes.func.isRequired,
-    fetchUsersIfNeeded: PropTypes.func.isRequired,
-    hasGuestRole: PropTypes.bool.isRequired,
-    hasMemberRole: PropTypes.bool.isRequired,
-    hasOwnerRole: PropTypes.bool.isRequired,
-    intl: PropTypes.shape().isRequired,
-    removeUserFromTeam: PropTypes.func.isRequired,
-    userListReady: PropTypes.bool.isRequired,
-    users: PropTypes.array.isRequired,
-    team: PropTypes.object.isRequired,
-  };
+interface TeamProps {
+  changeTeamURLShown: boolean;
+  changeUserRole: (userId: number, role: string) => Action;
+  confirm: (options: ConfirmOpts) => void;
+  confirmChangeTeamURL: () => void;
+  confirmDeleteTeam: () => void;
+  currentUser: User;
+  deleteTeamShown: boolean;
+  dispatch: (action: Action) => void;
+  fetchUsersIfNeeded: () => void;
+  hasGuestRole: boolean;
+  hasMemberRole: boolean;
+  hasOwnerRole: boolean;
+  intl: IntlShape;
+  removeUserFromTeam: (userId: number) => void;
+  userListReady: boolean;
+  users: User[];
+  team: TeamType;
+}
 
+class Team extends React.Component<TeamProps> {
   componentDidMount() {
     this.props.fetchUsersIfNeeded();
   }
 
-  handleRoleChange = (user) => (event) => {
-    const { currentUser, team } = this.props;
+  handleRoleChange =
+    (user: User) => (event: ChangeEvent<HTMLSelectElement>) => {
+      const { currentUser, team } = this.props;
 
-    const newRole = event.target.value;
+      const newRole = event.target.value;
 
-    const changeRole = this.props.changeUserRole(user.id, newRole);
+      const changeRole = this.props.changeUserRole(user.id, newRole);
 
-    if (
-      event.target.value === "member" &&
-      getRole(currentUser, team).type === "member"
-    ) {
-      this.props.confirm({
-        actionLabel: "Promote",
-        body: "Are you sure you want to promote this user to Member status? You will not be able to demote them later.",
-        action: changeRole,
-      });
-    } else if (currentUser.id === user.id && !currentUser.superuser) {
-      this.props.confirm({
-        actionLabel: "Demote",
-        body: "Are you sure you want to demote yourself? You will not be able to undo this by yourself.",
-        action: changeRole,
-      });
-    } else {
-      this.props.dispatch(changeRole);
-    }
-  };
+      if (
+        event.target.value === "member" &&
+        getRole(currentUser, team)?.type === "member"
+      ) {
+        this.props.confirm({
+          actionLabel: "Promote",
+          body: "Are you sure you want to promote this user to Member status? You will not be able to demote them later.",
+          action: changeRole,
+        });
+      } else if (currentUser.id === user.id && !currentUser.superuser) {
+        this.props.confirm({
+          actionLabel: "Demote",
+          body: "Are you sure you want to demote yourself? You will not be able to undo this by yourself.",
+          action: changeRole,
+        });
+      } else {
+        this.props.dispatch(changeRole);
+      }
+    };
 
-  handleDeleteUserClicked = (id) => () => {
+  handleDeleteUserClicked = (id: number) => () => {
     // eslint-disable-next-line no-restricted-globals, no-alert
     if (confirm("Are you sure you want to remove this user from this team?")) {
       this.props.removeUserFromTeam(id);
     }
   };
 
-  roleOptions = (user) => {
+  roleOptions = (user: User) => {
     const {
       currentUser,
       hasGuestRole,

@@ -6,13 +6,14 @@ import {
   fetchUsersIfNeeded,
   removeUser,
 } from "../../../actions/users";
+import { ConfirmOpts, Dispatch, State } from "../../../interfaces";
 import { currentUserHasRole, isUserListReady } from "../../../selectors";
 import { getTeam } from "../../../selectors/team";
 import { getCurrentUser } from "../../../selectors/user";
 import { getUsers } from "../../../selectors/users";
 import Team from "./Team";
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state: State) => ({
   changeTeamURLShown: !!state.modals.changeTeamURL,
   currentUser: getCurrentUser(state),
   deleteTeamShown: !!state.modals.deleteTeam,
@@ -24,16 +25,29 @@ const mapStateToProps = (state) => ({
   team: getTeam(state),
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  changeUserRole: (id, type) => changeUserRole(id, type),
-  confirm: (opts) => dispatch(showModal("confirm", opts)),
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  changeUserRole,
+  confirm: (opts: ConfirmOpts) => dispatch(showModal("confirm", opts)),
   confirmChangeTeamURL: () => dispatch(showModal("changeTeamURL")),
   confirmDeleteTeam: () => dispatch(showModal("deleteTeam")),
   dispatch,
   fetchUsersIfNeeded() {
     dispatch(fetchUsersIfNeeded());
   },
-  removeUserFromTeam: (id) => dispatch(removeUser(id)),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(Team));
+const mergeProps = (
+  stateProps: ReturnType<typeof mapStateToProps>,
+  dispatchProps: ReturnType<typeof mapDispatchToProps>
+) => ({
+  ...stateProps,
+  ...dispatchProps,
+  removeUserFromTeam: (id: number) =>
+    dispatchProps.dispatch(removeUser(id, stateProps.team)),
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+  mergeProps
+)(injectIntl(Team));
