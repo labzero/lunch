@@ -43,7 +43,7 @@ const mergeProps = (
   ...stateProps,
   ...dispatchProps,
   removeUserFromTeam: (id: number) =>
-    dispatchProps.dispatch(removeUser(id, stateProps.team)),
+    dispatchProps.dispatch(removeUser(id, stateProps.team!)),
 });
 
 export default connect(
