@@ -12,11 +12,11 @@
 require("global-jsdom/register");
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { use: chaiUse } = require("chai");
+const { use } = require("chai");
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const chaiJsdom = require("chai-jsdom");
+const chaiJSDOM = require("chai-jsdom");
 
-chaiUse(chaiJsdom);
+use(chaiJSDOM);
 
 process.env.NODE_ENV = "test";
 
