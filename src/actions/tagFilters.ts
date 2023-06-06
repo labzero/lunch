@@ -3,7 +3,7 @@ import { Action } from "../interfaces";
 export function addTagFilter(id: number): Action {
   return {
     type: "ADD_TAG_FILTER",
-    id
+    id,
   };
 }
 
@@ -14,6 +14,6 @@ export function clearTagFilters(): Action {
 export function removeTagFilter(id: number): Action {
   return {
     type: "REMOVE_TAG_FILTER",
-    id
+    id,
   };
 }

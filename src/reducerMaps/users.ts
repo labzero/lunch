@@ -1,18 +1,18 @@
-import { normalize } from 'normalizr';
-import update from 'immutability-helper';
-import { getUserIds } from '../selectors/users';
-import * as schemas from '../schemas';
-import isFetching from './helpers/isFetching';
-import { Reducer } from '../interfaces';
+import { normalize } from "normalizr";
+import update from "immutability-helper";
+import { getUserIds } from "../selectors/users";
+import * as schemas from "../schemas";
+import isFetching from "./helpers/isFetching";
+import { Reducer, State } from "../interfaces";
 
 const users: Reducer<"users"> = (state, action) => {
-  switch(action.type) {
+  switch (action.type) {
     case "INVALIDATE_USERS": {
       return update(state, {
         $merge: {
           didInvalidate: true,
         },
-      })
+      });
     }
     case "REQUEST_USERS": {
       return update(state, {
@@ -28,7 +28,7 @@ const users: Reducer<"users"> = (state, action) => {
           didInvalidate: false,
           items: normalize(action.items, [schemas.user]),
         },
-      })
+      });
     }
     case "DELETE_USER":
     case "POST_USER":
@@ -42,10 +42,12 @@ const users: Reducer<"users"> = (state, action) => {
         },
         items: {
           result: {
-            $splice: [[getUserIds({ users: state }).indexOf(action.id), 1]],
+            $splice: [
+              [getUserIds({ users: state } as State).indexOf(action.id), 1],
+            ],
           },
         },
-      })
+      });
     }
     case "USER_POSTED": {
       return update(state, {
@@ -56,18 +58,18 @@ const users: Reducer<"users"> = (state, action) => {
           entities: {
             users: state.items.entities.users
               ? {
-                $merge: {
-                  [action.user.id]: action.user,
-                },
-              }
+                  $merge: {
+                    [action.user.id]: action.user,
+                  },
+                }
               : {
-                $set: {
-                  [action.user.id]: action.user,
+                  $set: {
+                    [action.user.id]: action.user,
+                  },
                 },
-              },
           },
         },
-      })
+      });
     }
     case "USER_PATCHED": {
       return update(state, {
@@ -83,10 +85,12 @@ const users: Reducer<"users"> = (state, action) => {
             },
           },
         },
-      })
+      });
     }
+    default:
+      break;
   }
   return state;
-}
+};
 
 export default users;

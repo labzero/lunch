@@ -7,8 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-@import '../../styles/mixins';
-@import '../../styles/variables';
+@import "../../styles/mixins";
+@import "../../styles/variables";
 
 @keyframes animatedBackground {
   from {
@@ -48,7 +48,7 @@
 
 .background {
   animation: animatedBackground infinite 15s linear;
-  background: pink url('./background.svg');
+  background: pink url("./background.svg");
   height: 600px;
   left: -300px;
   position: absolute;
@@ -103,7 +103,7 @@
 
   span {
     @include image-replace;
-    background: url('./hamburger.svg') no-repeat center;
+    background: url("./hamburger.svg") no-repeat center;
     display: block;
     height: 30px;
     transform: scale(1);
@@ -113,7 +113,7 @@
 
   &:hover {
     span {
-      background-image: url('./hamburger-hover.svg');
+      background-image: url("./hamburger-hover.svg");
     }
   }
 
@@ -147,7 +147,7 @@
   z-index: 2; /* above map controls */
 }
 
-@media only screen and (max-height: 500px) {
+@media only screen and (height <= 500px) {
   .bannerTitle {
     img {
       height: 5em;

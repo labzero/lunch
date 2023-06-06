@@ -1,13 +1,13 @@
-import { v1 } from 'uuid';
-import { Notification, Reducer } from '../interfaces';
+import { v1 } from "uuid";
+import { Notification, Reducer } from "../interfaces";
 
 const notifications: Reducer<"notifications"> = (state, action) => {
-  switch(action.type) {
+  switch (action.type) {
     case "NOTIFY": {
       const { realAction } = action;
       const baseNotification = {
         actionType: realAction.type,
-        id: v1()
+        id: v1(),
       };
       let notification: Notification;
       switch (realAction.type) {
@@ -18,8 +18,8 @@ const notifications: Reducer<"notifications"> = (state, action) => {
             vals: {
               userId,
               restaurant,
-            }
-          }
+            },
+          };
           break;
         }
         case "RESTAURANT_DELETED": {
@@ -28,8 +28,8 @@ const notifications: Reducer<"notifications"> = (state, action) => {
             ...baseNotification,
             vals: {
               userId,
-              restaurantId: id
-            }
+              restaurantId: id,
+            },
           };
           break;
         }
@@ -40,8 +40,8 @@ const notifications: Reducer<"notifications"> = (state, action) => {
             vals: {
               userId,
               restaurantId: id,
-              newName: fields.name
-            }
+              newName: fields.name,
+            },
           };
           break;
         }
@@ -50,8 +50,8 @@ const notifications: Reducer<"notifications"> = (state, action) => {
             ...baseNotification,
             vals: {
               userId: realAction.vote.userId,
-              restaurantId: realAction.vote.restaurantId
-            }
+              restaurantId: realAction.vote.restaurantId,
+            },
           };
           break;
         }
@@ -61,8 +61,8 @@ const notifications: Reducer<"notifications"> = (state, action) => {
             ...baseNotification,
             vals: {
               userId,
-              restaurantId
-            }
+              restaurantId,
+            },
           };
           break;
         }
@@ -73,8 +73,8 @@ const notifications: Reducer<"notifications"> = (state, action) => {
             vals: {
               userId,
               restaurantId,
-              tag
-            }
+              tag,
+            },
           };
           break;
         }
@@ -85,8 +85,8 @@ const notifications: Reducer<"notifications"> = (state, action) => {
             vals: {
               userId,
               restaurantId,
-              tagId: id
-            }
+              tagId: id,
+            },
           };
           break;
         }
@@ -97,8 +97,8 @@ const notifications: Reducer<"notifications"> = (state, action) => {
             vals: {
               userId,
               restaurantId,
-              tagId: id
-            }
+              tagId: id,
+            },
           };
           break;
         }
@@ -108,8 +108,8 @@ const notifications: Reducer<"notifications"> = (state, action) => {
             ...baseNotification,
             vals: {
               userId,
-              tagId: id
-            }
+              tagId: id,
+            },
           };
           break;
         }
@@ -120,8 +120,8 @@ const notifications: Reducer<"notifications"> = (state, action) => {
             vals: {
               decision,
               userId,
-              restaurantId: decision.restaurantId
-            }
+              restaurantId: decision.restaurantId,
+            },
           };
           break;
         }
@@ -132,7 +132,7 @@ const notifications: Reducer<"notifications"> = (state, action) => {
             vals: {
               userId,
               restaurantId: decisions[0].restaurantId,
-            }
+            },
           };
           break;
         }
@@ -141,13 +141,10 @@ const notifications: Reducer<"notifications"> = (state, action) => {
         }
       }
 
-      return [
-        ...state.slice(-3),
-        notification
-      ];
+      return [...state.slice(-3), notification];
     }
     case "EXPIRE_NOTIFICATION": {
-      return state.filter(n => n.id !== action.id)
+      return state.filter((n) => n.id !== action.id);
     }
   }
   return state;

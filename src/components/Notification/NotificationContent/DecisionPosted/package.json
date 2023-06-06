@@ -2,5 +2,5 @@
   "name": "DecisionPosted",
   "version": "0.0.0",
   "private": true,
-  "main": "./DecisionPosted.js"
+  "main": "./DecisionPosted.tsx"
 }

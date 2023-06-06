@@ -5,23 +5,25 @@ export function setEditNameFormValue(id: number, value: string): Action {
   return {
     type: "SET_EDIT_NAME_FORM_VALUE",
     id,
-    value
+    value,
   };
 }
 
 export function showEditNameForm(id: number): Action {
   return {
     type: "SHOW_EDIT_NAME_FORM",
-    id
+    id,
   };
 }
 
-export function hideEditNameForm(id: number): ThunkAction<void, State, unknown, Action> {
-  return dispatch => {
-    dispatch(setEditNameFormValue(id, ''));
+export function hideEditNameForm(
+  id: number
+): ThunkAction<void, State, unknown, Action> {
+  return (dispatch) => {
+    dispatch(setEditNameFormValue(id, ""));
     dispatch({
       type: "HIDE_EDIT_NAME_FORM",
-      id
+      id,
     });
   };
 }

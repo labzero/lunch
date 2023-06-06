@@ -7,12 +7,10 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-/* eslint-disable global-require */
+/* eslint-disable global-require, @typescript-eslint/no-var-requires */
 
 module.exports = () => ({
   // The list of plugins for PostCSS
   // https://github.com/postcss/postcss
-  plugins: [
-    require('autoprefixer')(),
-  ],
+  plugins: [require("autoprefixer")()],
 });

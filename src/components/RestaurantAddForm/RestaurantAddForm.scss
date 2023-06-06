@@ -1,5 +1,5 @@
-@use 'sass:color';
-@import '../../styles/variables';
+@use "sass:color";
+@import "../../styles/variables";
 
 .suggestItem {
   &:hover {
@@ -24,7 +24,8 @@
 
   &:focus {
     // copied from bootstrap
-    box-shadow: inset 0 1px 1px rgb(0 0 0 / 7.5%), 0 0 8px rgb(102 175 233 / 60%);
+    box-shadow: inset 0 1px 1px rgb(0 0 0 / 7.5%),
+      0 0 8px rgb(102 175 233 / 60%);
   }
 }
 
@@ -33,7 +34,7 @@
   margin: 0 20px;
 }
 
-@media (max-width: 640px), (min-width: 1000px) {
+@media (width <= 640px), (width >= 1000px) {
   .geosuggest {
     width: 100%;
   }

@@ -1,9 +1,9 @@
-@import '../../../styles/mixins';
+@import "../../../styles/mixins";
 
 .root,
 .forms,
 .restaurantList {
-  background: pink url('../../../styles/ham.jpg');
+  background: pink url("../../../styles/ham.jpg");
   background-attachment: fixed;
 }
 
@@ -30,7 +30,7 @@
   padding-top: 1em;
 }
 
-@media (min-width: 1000px) {
+@media (width >= 1000px) {
   .root {
     flex-direction: row-reverse;
     overflow: hidden;

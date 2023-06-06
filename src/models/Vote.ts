@@ -1,59 +1,59 @@
-import dayjs from 'dayjs';
-import { InferAttributes, InferCreationAttributes, Model, Transaction } from 'sequelize';
-import { sequelize, DataTypes, Op } from './db';
+import {
+  BelongsTo,
+  Column,
+  ForeignKey,
+  Index,
+  Model,
+  Scopes,
+  Table,
+} from "sequelize-typescript";
+import dayjs from "dayjs";
+import { Op, Transaction } from "sequelize";
+import User from "./User";
+import Restaurant from "./Restaurant";
 
-class Vote extends Model<InferAttributes<Vote>, InferCreationAttributes<Vote>> {
-  static recentForRestaurantAndUser = (restaurantId: number, userId: number, transaction: Transaction) => Vote.scope('fromToday').count({
-    transaction,
+@Scopes(() => ({
+  fromToday: () => ({
     where: {
-      userId,
-      restaurantId
-    }
-  });
+      createdAt: {
+        [Op.gt]: dayjs().subtract(12, "hours").toDate(),
+      },
+    },
+  }),
+}))
+@Table({ modelName: "vote" })
+class Vote extends Model {
+  static recentForRestaurantAndUser = (
+    restaurantId: number,
+    userId: number,
+    transaction: Transaction
+  ) =>
+    Vote.scope("fromToday").count({
+      transaction,
+      where: {
+        userId,
+        restaurantId,
+      },
+    });
 
-  declare userId: number;
-  declare restaurantId: number;
+  @ForeignKey(() => User)
+  @Index
+  @Column({ allowNull: false })
+  userId: number;
+
+  @BelongsTo(() => User)
+  user: Awaited<User>;
+
+  @ForeignKey(() => Restaurant)
+  @Index
+  @Column({ allowNull: false, onDelete: "cascade" })
+  restaurantId: number;
+
+  @BelongsTo(() => Restaurant)
+  restaurant: Awaited<Restaurant>;
+
+  @Index
+  createdAt: Date;
 }
-
-Vote.init(
-  {
-    userId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'user',
-        key: 'id'
-      },
-      allowNull: false
-    },
-
-    restaurantId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'restaurant',
-        key: 'id'
-      },
-      allowNull: false,
-      onDelete: 'cascade'
-    }
-  },
-  {
-    indexes: [
-      {
-        fields: ['createdAt', 'restaurantId', 'userId']
-      }
-    ],
-    modelName: 'vote',
-    scopes: {
-      fromToday: () => ({
-        where: {
-          createdAt: {
-            [Op.gt]: dayjs().subtract(12, 'hours').toDate()
-          }
-        }
-      })
-    },
-    sequelize
-  }
-);
 
 export default Vote;

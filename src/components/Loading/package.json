@@ -2,5 +2,5 @@
   "name": "Loading",
   "version": "0.0.0",
   "private": true,
-  "main": "./Loading.js"
+  "main": "./Loading.tsx"
 }

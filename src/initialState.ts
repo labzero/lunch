@@ -1,12 +1,12 @@
-import { host, wsPort } from './config';
-import { NonNormalizedState, StateData } from './interfaces';
+import { host, wsPort } from "./config";
+import { NonNormalizedState, StateData } from "./interfaces";
 
 const getInitialState = (): NonNormalizedState => ({
   restaurants: {
     didInvalidate: true,
-    nameFilter: '',
+    nameFilter: "",
     isFetching: false,
-    items: []
+    items: [],
   },
   decisions: {
     isFetching: false,
@@ -20,11 +20,11 @@ const getInitialState = (): NonNormalizedState => ({
   listUi: {
     flipMove: true,
   },
-  locale: 'en',
+  locale: "en",
   mapUi: {
     infoWindow: {},
     showUnvoted: true,
-    showPOIs: false
+    showPOIs: false,
   },
   pageUi: {},
   tagFilters: [],
@@ -32,27 +32,27 @@ const getInitialState = (): NonNormalizedState => ({
   tags: {
     isFetching: false,
     didInvalidate: true,
-    items: []
+    items: [],
   },
-  team: {},
+  team: null,
   teams: {
     isFetching: false,
     didInvalidate: true,
-    items: []
+    items: [],
   },
-  user: {},
+  user: null,
   users: {
     isFetching: false,
     didInvalidate: true,
-    items: []
+    items: [],
   },
-  wsPort: module.hot ? wsPort : 0
+  wsPort: module.hot ? Number(wsPort) : 0,
 });
 
 export default (stateData: StateData) => {
   const initialState = getInitialState();
   if (stateData.teams) {
-    initialState.teams.items = stateData.teams.map(t => t.toJSON());
+    initialState.teams.items = stateData.teams.map((t) => t.toJSON());
     initialState.teams.didInvalidate = false;
   }
   if (stateData.user) {

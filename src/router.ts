@@ -7,13 +7,16 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import UniversalRouter, { Route } from 'universal-router';
+import UniversalRouter, { Route } from "universal-router";
+import { AppContext, AppRoute } from "./interfaces";
 
-export default (routes: Route) => new UniversalRouter(routes, {
-  async resolveRoute(context, params) {
-    if (typeof context.route.action === 'function') {
-      return await context.route.action(context, params);
-    }
-    return undefined;
-  },
-});
+export default (routes: Route<AppContext, AppRoute>) =>
+  new UniversalRouter<AppContext, AppRoute>(routes, {
+    async resolveRoute(context, params): Promise<AppRoute | undefined> {
+      if (typeof context.route.action === "function") {
+        const route = await context.route.action(context, params);
+        return route;
+      }
+      return undefined;
+    },
+  });

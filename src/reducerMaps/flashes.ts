@@ -1,4 +1,4 @@
-import { Reducer } from '../interfaces';
+import { Reducer } from "../interfaces";
 
 const flashes: Reducer<"flashes"> = (state, action) => {
   switch (action.type) {
@@ -8,9 +8,9 @@ const flashes: Reducer<"flashes"> = (state, action) => {
         {
           id: action.id,
           message: action.message,
-          type: 'error'
-        }
-      ]
+          type: "error",
+        },
+      ];
     }
     case "FLASH_SUCCESS": {
       return [
@@ -18,12 +18,12 @@ const flashes: Reducer<"flashes"> = (state, action) => {
         {
           id: action.id,
           message: action.message,
-          type: 'success'
-        }
+          type: "success",
+        },
       ];
     }
     case "EXPIRE_FLASH": {
-      return state.filter(arr => arr.id !== action.id);
+      return state.filter((arr) => arr.id !== action.id);
     }
   }
   return state;

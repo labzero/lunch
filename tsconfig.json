@@ -2,23 +2,32 @@
   "compilerOptions": {
     "baseUrl": "./",
     "downlevelIteration": true,
+    "emitDecoratorMetadata": true,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
     "incremental": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "outDir": "./build/public/assets/",
     "skipLibCheck": true,
     "strict": true,
     "sourceMap": true,
-    "noImplicitAny": true,
     "module": "esnext",
-    "target": "es5",
+    "target": "es6",
     "jsx": "react",
     "allowJs": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "typeRoots": ["./typings", "node_modules/@types"]
   },
-  "files": ["node_modules/chai-jsdom/typings/chai/index.d.ts"],
+  "files": ["./global.d.ts"],
   "include": ["./**/*.ts", "./**/*.tsx", "./*.d.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "files": true,
+    "transpileOnly": true, // you can specify ts-node options here
+    "compilerOptions": {
+      "module": "commonjs" // you can also override compilerOptions.  Only ts-node will use these overrides
+    }
+  }
 }

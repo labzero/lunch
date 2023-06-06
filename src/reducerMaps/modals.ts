@@ -1,24 +1,26 @@
-import update from 'immutability-helper';
-import { Reducer } from '../interfaces';
-import setOrMerge from './helpers/setOrMerge';
+import update from "immutability-helper";
+import { Reducer } from "../interfaces";
 
 const modals: Reducer<"modals"> = (state, action) => {
-  switch(action.type) {
+  switch (action.type) {
     case "SHOW_MODAL": {
       return update(state, {
         $merge: {
           [action.name]: {
             shown: true,
-            ...action.opts
-          }
-        }
-      })
+            ...action.opts,
+          },
+        },
+      });
     }
     case "HIDE_MODAL": {
       return update(state, {
-        $apply: (target: typeof state) => setOrMerge(target, action.name, { shown: false })
-      })
+        [action.name]: (stateValue) =>
+          update(stateValue || {}, { $merge: { shown: false } }),
+      });
     }
+    default:
+      break;
   }
   return state;
 };

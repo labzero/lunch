@@ -1,4 +1,4 @@
-@import './variables';
+@import "./variables";
 
 @mixin plain-button {
   background: none;
@@ -85,7 +85,7 @@
   &::before,
   &::after {
     border-style: solid;
-    content: '';
+    content: "";
     left: 50%;
     margin-top: -13px;
     position: absolute;
@@ -109,7 +109,8 @@
 
 @mixin text-on-texture {
   color: $white-color;
-  text-shadow: 0 0 5px $black-color, 0 0 10px $black-color, 0 0 20px $black-color;
+  text-shadow: 0 0 5px $black-color, 0 0 10px $black-color,
+    0 0 20px $black-color;
 }
 
 @mixin shadow-focus {
@@ -125,7 +126,7 @@
 
 @mixin clearfix {
   &::after {
-    content: '';
+    content: "";
     display: table;
     clear: both;
   }
