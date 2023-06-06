@@ -1,21 +1,29 @@
+import { Application, RequestHandler } from "express";
+import { EnhancedStore, ThunkAction, ThunkDispatch } from "@reduxjs/toolkit";
 import { BrowserHistory } from "history";
-import { WebSocket } from "ws";
-import { ThunkDispatch } from "@reduxjs/toolkit";
+import { InsertCSS } from "isomorphic-style-loader/StyleContext";
+import { ParsedQs } from "qs";
 import { ReactNode } from "react";
+import { ResolveContext } from "universal-router";
+import { WebSocket } from "ws";
 import {
   Decision as DecisionModel,
   Restaurant as RestaurantModel,
+  Role as RoleModel,
   Tag as TagModel,
   Team as TeamModel,
   User as UserModel,
   Vote as VoteModel,
 } from "./db";
 
+export type MakeApp = (
+  deps?: Record<string, Record<string, any>>,
+  middleware?: RequestHandler
+) => Application;
+
 export interface ExtWebSocket extends WebSocket {
   teamId?: number;
 }
-
-export interface Route {}
 
 export interface NormalizedItems<U> {
   entities: { [index: string]: { [index: number]: U } };
@@ -28,6 +36,8 @@ export interface User extends UserModel {
   type?: RoleType;
 }
 
+export type Role = RoleModel;
+
 export interface Restaurant extends Omit<RestaurantModel, "tags" | "votes"> {
   all_decision_count: number | string;
   all_vote_count: number | string;
@@ -39,7 +49,7 @@ export interface Tag extends TagModel {
   restaurant_count: string | number;
 }
 
-export interface Team extends TeamModel {}
+export type Team = TeamModel;
 
 export interface Flash {
   id: string;
@@ -47,11 +57,11 @@ export interface Flash {
   type: "error" | "success";
 }
 
-export interface Vote extends VoteModel {}
+export type Vote = VoteModel;
 
-export interface Decision extends DecisionModel {}
+export type Decision = DecisionModel;
 
-interface NewlyAdded {
+export interface NewlyAdded {
   id: number;
   userId: number;
 }
@@ -65,7 +75,6 @@ export interface StateData {
 }
 
 export interface StateHelpers {
-  fetch?: (url: string, options: any) => Promise<any>;
   history?: BrowserHistory;
 }
 
@@ -77,6 +86,24 @@ export interface LatLng {
 export type PastDecisionsOpts = {
   restaurantId: number;
 };
+
+export type RestaurantIdAction =
+  | {
+      type: "RESTAURANT_RENAMED";
+      id: number;
+      fields: Partial<Restaurant>;
+      userId: number;
+    }
+  | {
+      type: "RESTAURANT_DELETED";
+      id: number;
+      userId: number;
+    }
+  | {
+      type: "RESTAURANT_POSTED";
+      restaurant: Restaurant;
+      userId: number;
+    };
 
 export type Action =
   | { type: "INVALIDATE_DECISIONS" }
@@ -109,22 +136,7 @@ export type Action =
       type: "RECEIVE_RESTAURANTS";
       items: Restaurant[];
     }
-  | {
-      type: "RESTAURANT_RENAMED";
-      id: number;
-      fields: Partial<Restaurant>;
-      userId: number;
-    }
-  | {
-      type: "RESTAURANT_DELETED";
-      id: number;
-      userId: number;
-    }
-  | {
-      type: "RESTAURANT_POSTED";
-      restaurant: Restaurant;
-      userId: number;
-    }
+  | RestaurantIdAction
   | {
       type: "SORT_RESTAURANTS";
       decision?: Decision;
@@ -219,7 +231,7 @@ export type Action =
     }
   | {
       type: "POST_TEAM";
-      team: Team;
+      team: Partial<Team>;
     }
   | {
       type: "TEAM_POSTED";
@@ -275,7 +287,7 @@ export type Action =
     }
   | {
       type: "PATCH_CURRENT_USER";
-      payload: User;
+      payload: Partial<User>;
     }
   | {
       type: "CURRENT_USER_PATCHED";
@@ -439,8 +451,26 @@ export interface Notification {
 export type ConfirmOpts = {
   actionLabel: string;
   body: string;
-  action: Action;
+  action: Action | ThunkAction<void, State, unknown, Action>;
 };
+
+export interface ListUiItem {
+  isEditingName?: boolean;
+  editNameFormValue?: string;
+}
+
+export type InfoWindow =
+  | {
+      latLng: {
+        lat: number;
+        lng: number;
+      };
+      placeId: string;
+    }
+  | {
+      id: number;
+    }
+  | Record<string, undefined>;
 
 interface BaseState {
   restaurants: {
@@ -460,10 +490,12 @@ interface BaseState {
       action: () => void;
       actionLabel: string;
       body: ReactNode;
+      restaurantId?: number;
       shown: boolean;
     };
   };
   listUi: {
+    [index: number]: ListUiItem;
     editNameFormValue?: string;
     flipMove: boolean;
     newlyAdded?: NewlyAdded;
@@ -474,18 +506,7 @@ interface BaseState {
       lat: number;
       lng: number;
     };
-    infoWindow?:
-      | {
-          latLng: {
-            lat: number;
-            lng: number;
-          };
-          placeId: string;
-        }
-      | {
-          id: number;
-        }
-      | {};
+    infoWindow: InfoWindow;
     newlyAdded?: NewlyAdded;
     showUnvoted: boolean;
     showPOIs: boolean;
@@ -496,7 +517,9 @@ interface BaseState {
       };
     };
   };
-  pageUi: {};
+  pageUi: {
+    shouldScrollToTop?: boolean;
+  };
   tagFilters: number[];
   tagExclusions: number[];
   tags: {
@@ -530,7 +553,7 @@ export type State = BaseState & {
   tags: {
     items: NormalizedItems<Tag>;
   };
-  team: Team;
+  team: Team | null;
   teams: {
     items: NormalizedItems<Team>;
   };
@@ -550,7 +573,7 @@ export type NonNormalizedState = BaseState & {
   tags: {
     items: Tag[];
   };
-  team: Partial<TeamModel>;
+  team: Partial<TeamModel> | null;
   teams: {
     items: TeamModel[];
   };
@@ -566,3 +589,29 @@ export type Reducer<T extends keyof State> = (
 ) => State[T];
 
 export type Dispatch = ThunkDispatch<State, unknown, Action>;
+
+export interface App {
+  apiUrl: string;
+  state: NonNormalizedState;
+  googleApiKey: string;
+}
+
+export interface AppContext extends ResolveContext {
+  insertCss: InsertCSS;
+  googleApiKey: string;
+  pathname: string;
+  query?: ParsedQs;
+  store: EnhancedStore<State, Action>;
+}
+
+export interface AppRoute {
+  chunk?: string;
+  chunks?: string[];
+  component?: ReactNode;
+  description?: string;
+  fullTitle?: string;
+  ogTitle?: string;
+  redirect?: string;
+  status?: number;
+  title?: string;
+}

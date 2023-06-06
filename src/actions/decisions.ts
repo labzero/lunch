@@ -2,7 +2,7 @@ import { ThunkAction } from "@reduxjs/toolkit";
 import { processResponse, credentials, jsonHeaders } from "../core/ApiClient";
 import { Action, Decision, State } from "../interfaces";
 
-export function invalidateDecisions() {
+export function invalidateDecisions(): Action {
   return { type: "INVALIDATE_DECISIONS" };
 }
 

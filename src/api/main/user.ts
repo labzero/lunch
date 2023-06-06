@@ -41,15 +41,17 @@ export default () => {
     if (fieldCount) {
       try {
         if (filteredPayload.password) {
-          const passwordError = getPasswordError(filteredPayload.password);
+          const passwordError = getPasswordError(
+            filteredPayload.password as string | undefined
+          );
           if (passwordError) {
             return res
               .status(422)
               .json({ error: true, data: { message: passwordError } });
           }
           const passwordUpdates = await getUserPasswordUpdates(
-            req.user,
-            filteredPayload.password
+            req.user!,
+            filteredPayload.password as string
           );
           Object.assign(filteredPayload, passwordUpdates);
           delete filteredPayload.password;

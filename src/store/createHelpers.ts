@@ -1,8 +1,7 @@
 import { StateHelpers } from "../interfaces";
 
-export default function createHelpers({ fetch, history }: StateHelpers) {
+export default function createHelpers({ history }: StateHelpers) {
   return {
-    fetch,
     history,
   };
 }

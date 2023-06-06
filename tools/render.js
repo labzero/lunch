@@ -8,7 +8,6 @@
  */
 
 import path from "path";
-import fetch from "node-fetch";
 import { writeFile, makeDir } from "./lib/fs";
 import runServer from "./runServer";
 

@@ -19,7 +19,6 @@ import { InjectManifest } from "workbox-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import overrideRules from "./lib/overrideRules";
-import pkg from "../package.json";
 
 const ROOT_DIR = path.resolve(__dirname, "..");
 const resolvePath = (...args) => path.resolve(ROOT_DIR, ...args);
@@ -92,49 +91,6 @@ const config = {
         use: "ts-loader",
         exclude: /node_modules/,
       },
-      // Rules for JS / JSX
-      {
-        test: /\.(js|jsx|mjs)$/,
-        include: [ROOT_DIR, resolvePath("tools")],
-        loader: "babel-loader",
-        options: {
-          // https://github.com/babel/babel-loader#options
-          cacheDirectory: isDebug,
-
-          // https://babeljs.io/docs/usage/options/
-          babelrc: false,
-          configFile: false,
-          presets: [
-            // A Babel preset that can automatically determine the Babel plugins and polyfills
-            // https://github.com/babel/babel-preset-env
-            [
-              "@babel/preset-env",
-              {
-                forceAllTransforms: !isDebug, // for UglifyJS
-              },
-            ],
-            // JSX
-            // https://github.com/babel/babel/tree/master/packages/babel-preset-react
-            ["@babel/preset-react", { development: isDebug }],
-          ],
-          plugins: [
-            "@babel/plugin-syntax-dynamic-import",
-            // Treat React JSX elements as value types and hoist them to the highest scope
-            // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-constant-elements
-            ...(isDebug ? [] : ["@babel/transform-react-constant-elements"]),
-            // Replaces the React.createElement function with one that is more optimized for production
-            // https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-react-inline-elements
-            ...(isDebug ? [] : ["@babel/transform-react-inline-elements"]),
-            // Remove unnecessary React propTypes from the production build
-            // https://github.com/oliviertassinari/babel-plugin-transform-react-remove-prop-types
-            ...(isDebug ? [] : ["transform-react-remove-prop-types"]),
-            ...(isDebug && process.env.NODE_ENV !== "test"
-              ? ["react-refresh/babel"]
-              : []),
-          ],
-        },
-      },
-
       // Rules for Style Sheets
       {
         test: reStyle,
@@ -409,6 +365,7 @@ const clientConfig = {
 
   // Move modules that occur in multiple entry chunks to a new entry chunk (the commons chunk).
   optimization: {
+    sideEffects: false,
     splitChunks: {
       cacheGroups: {
         commons: {
@@ -467,31 +424,6 @@ const serverConfig = {
     ...config.module,
 
     rules: overrideRules(config.module.rules, (rule) => {
-      // Override babel-preset-env configuration for Node.js
-      if (rule.loader === "babel-loader") {
-        return {
-          ...rule,
-          options: {
-            ...rule.options,
-            presets: rule.options.presets.map((preset) =>
-              preset[0] !== "@babel/preset-env"
-                ? preset
-                : [
-                    "@babel/preset-env",
-                    {
-                      targets: {
-                        node: pkg.engines.node.match(/(\d+\.?)+/)[0],
-                      },
-                      modules: false,
-                      useBuiltIns: false,
-                      debug: false,
-                    },
-                  ]
-            ),
-          },
-        };
-      }
-
       // Override paths to static assets
       if (
         rule.loader === "file-loader" ||

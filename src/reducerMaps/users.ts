@@ -3,7 +3,7 @@ import update from "immutability-helper";
 import { getUserIds } from "../selectors/users";
 import * as schemas from "../schemas";
 import isFetching from "./helpers/isFetching";
-import { Reducer } from "../interfaces";
+import { Reducer, State } from "../interfaces";
 
 const users: Reducer<"users"> = (state, action) => {
   switch (action.type) {
@@ -42,7 +42,9 @@ const users: Reducer<"users"> = (state, action) => {
         },
         items: {
           result: {
-            $splice: [[getUserIds({ users: state }).indexOf(action.id), 1]],
+            $splice: [
+              [getUserIds({ users: state } as State).indexOf(action.id), 1],
+            ],
           },
         },
       });

@@ -21,7 +21,12 @@ export function receiveUsers(json: User[]): Action {
   };
 }
 
-export function fetchUsers(): ThunkAction<void, State, unknown, Action> {
+export function fetchUsers(): ThunkAction<
+  Promise<Action>,
+  State,
+  unknown,
+  Action
+> {
   return (dispatch) => {
     dispatch(requestUsers());
     return fetch("/api/users", {
@@ -130,7 +135,7 @@ export function userPosted(json: User): Action {
 
 export function addUser(
   payload: Partial<User>
-): ThunkAction<void, State, unknown, Action> {
+): ThunkAction<Promise<Action>, State, unknown, Action> {
   return (dispatch) => {
     dispatch(postUser(payload));
     return fetch("/api/users", {
@@ -182,10 +187,10 @@ export function changeUserRole(
   return (dispatch, getState) => {
     const state = getState();
     const team = state.team;
-    let isSelf = false;
-    if (getCurrentUser(state)!.id === id) {
-      isSelf = true;
+    if (!team) {
+      return Promise.reject(new Error("No team selected"));
     }
+    const isSelf = getCurrentUser(state)!.id === id;
     dispatch(patchUser(id, type, team, isSelf));
     return fetch(`/api/users/${id}`, {
       method: "PATCH",

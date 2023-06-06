@@ -7,30 +7,34 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import "whatwg-fetch";
 import es6Promise from "es6-promise";
 import React, { useEffect } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
-import queryString from "query-string";
+import qs from "qs";
 import { Action, createPath, Location } from "history";
-import { ResolveContext } from "universal-router";
 import App from "./components/App";
-import createFetch from "./createFetch";
 import configureStore from "./store/configureStore";
 import history from "./history";
 import { updateMeta } from "./DOMUtils";
 import routerCreator from "./router";
+import { AppContext, App as AppType } from "./interfaces";
 
 es6Promise.polyfill();
 
 let subdomain: string | undefined;
+
+interface WindowWithApp extends Window {
+  App: AppType;
+}
+
+declare const window: WindowWithApp;
 
 // Undo Browsersync mangling of host
 let host = window.App.state.host;
 if (host.indexOf("//") === 0) {
   host = host.slice(2);
 }
-const teamSlug = window.App.state.team.slug;
+const teamSlug = window.App.state.team?.slug;
 if (teamSlug && host.indexOf(teamSlug) === 0) {
   subdomain = teamSlug;
   host = host.slice(teamSlug.length + 1); // + 1 for dot
@@ -52,20 +56,16 @@ const store = configureStore(window.App.state, { history });
 
 // Global (context) variables that can be easily accessed from any React component
 // https://facebook.github.io/react/docs/context.html
-const context: ResolveContext = {
+const context: AppContext = {
   // Enables critical path CSS rendering
   // https://github.com/kriasoft/isomorphic-style-loader
-  insertCss: (...styles: Style[]) => {
+  insertCss: (...styles) => {
     // eslint-disable-next-line no-underscore-dangle
     const removeCss = styles.map((x) => x._insertCss());
     return () => {
       removeCss.forEach((f) => f());
     };
   },
-  // Universal HTTP client
-  fetch: createFetch(fetch, {
-    baseUrl: window.App.apiUrl,
-  }),
   googleApiKey: window.App.googleApiKey,
   // Initialize a new Redux store
   // http://redux.js.org/docs/basics/UsageWithReact.html
@@ -114,7 +114,7 @@ const onLocationChange = async ({
   const isInitialRender = !action;
   try {
     context.pathname = location.pathname;
-    context.query = queryString.parse(location.search);
+    context.query = qs.parse(location.search, { ignoreQueryPrefix: true });
 
     // Traverses the list of routes in the order they are defined until
     // it finds the first route that matches provided URL path string
@@ -152,9 +152,11 @@ const onLocationChange = async ({
           return;
         }
 
-        document.title = route.title;
+        if (route.title) {
+          document.title = route.title;
+        }
 
-        updateMeta("description", route.description);
+        updateMeta("description", route.description || "");
         // Update necessary tags in <head> at runtime here, ie:
         // updateMeta('keywords', route.keywords);
         // updateCustomMeta('og:url', route.canonicalUrl);
@@ -185,8 +187,8 @@ const onLocationChange = async ({
 
         // Google Analytics tracking. Don't send 'pageview' event after
         // the initial rendering, as it was already sent
-        if (window.ga) {
-          window.ga("send", "pageview", createPath(location));
+        if (typeof ga === "function") {
+          ga("send", "pageview", createPath(location));
         }
       });
 

@@ -3,18 +3,18 @@ import LayoutContainer from "../../../components/Layout/LayoutContainer";
 import hasRole from "../../../helpers/hasRole";
 import renderIfHasName from "../../helpers/renderIfHasName";
 import render404 from "../../helpers/render404";
+import { AppContext } from "../../../interfaces";
 import HomeContainer from "./HomeContainer";
-import { ResolveContext } from "universal-router";
 
 /* eslint-disable global-require */
 
-export default (context: ResolveContext) => {
+export default (context: AppContext) => {
   const state = context.store.getState();
   const user = state.user;
   const team = state.team;
 
   return renderIfHasName(context, () => {
-    if (team.id && hasRole(user, team)) {
+    if (team && hasRole(user, team)) {
       return {
         chunks: ["home", "map"],
         component: (

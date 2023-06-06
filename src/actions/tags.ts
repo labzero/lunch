@@ -19,7 +19,12 @@ export function receiveTags(json: Tag[]): Action {
   };
 }
 
-export function fetchTags(): ThunkAction<void, State, unknown, Action> {
+export function fetchTags(): ThunkAction<
+  Promise<Action>,
+  State,
+  unknown,
+  Action
+> {
   return (dispatch) => {
     dispatch(requestTags());
     return fetch("/api/tags", {
@@ -77,7 +82,7 @@ export function tagDeleted(id: number, userId: number): Action {
 
 export function removeTag(
   id: number
-): ThunkAction<void, State, unknown, Action> {
+): ThunkAction<Promise<Action>, State, unknown, Action> {
   return (dispatch, getState) => {
     dispatch(deleteTag(id));
     return fetch(`/api/tags/${id}`, {

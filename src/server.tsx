@@ -7,7 +7,6 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import "isomorphic-fetch";
 import path from "path";
 import fs from "fs";
 import { createStream } from "rotating-file-stream";
@@ -30,29 +29,26 @@ import session from "express-session";
 import connectSessionSequelize from "connect-session-sequelize";
 import flash from "connect-flash";
 import { expressjwt, UnauthorizedError as Jwt401Error } from "express-jwt";
-import nodeFetch from "node-fetch";
 import React from "react";
 import ReactDOM from "react-dom/server";
 import expressWs from "express-ws";
 import Honeybadger from "@honeybadger-io/js";
 import PrettyError from "pretty-error";
 import { v1 } from "uuid";
-import { ResolveContext } from "universal-router";
-import App from "./components/App";
-import Html from "./components/Html";
+import AppComponent from "./components/App";
+import Html, { HtmlProps } from "./components/Html";
 import { ErrorPageWithoutStyle } from "./components/ErrorPage/ErrorPage";
 import errorPageStyle from "./components/ErrorPage/ErrorPage.scss";
 import generateUrl from "./helpers/generateUrl";
 import hasRole from "./helpers/hasRole";
 import teamRoutes from "./routes/team";
 import mainRoutes from "./routes/main";
-import createFetch from "./createFetch";
 import passport from "./passport";
 import routerCreator from "./router";
 // @ts-ignore
 import chunks from "./chunk-manifest.json"; // eslint-disable-line import/no-unresolved
 import configureStore from "./store/configureStore";
-import config from "./config";
+import * as config from "./config";
 import makeInitialState from "./initialState";
 import invitationMiddleware from "./middlewares/invitation";
 import loginMiddleware from "./middlewares/login";
@@ -60,7 +56,8 @@ import passwordMiddleware from "./middlewares/password";
 import usersMiddleware from "./middlewares/users";
 import api from "./api";
 import { sequelize, Team, User } from "./db";
-import { ExtWebSocket, Flash, StateData } from "./interfaces";
+import { App, AppContext, ExtWebSocket, Flash, StateData } from "./interfaces";
+import { InsertCSS } from "isomorphic-style-loader/StyleContext";
 
 process.on("unhandledRejection", (reason, p) => {
   console.error("Unhandled Rejection at:", p, "reason:", reason);
@@ -355,29 +352,19 @@ const render: RequestHandler = async (req, res, next) => {
 
     // Enables critical path CSS rendering
     // https://github.com/kriasoft/isomorphic-style-loader
-    const insertCss = (...styles: Style[]) => {
+    const insertCss: InsertCSS = (...styles) => {
       // eslint-disable-next-line no-underscore-dangle
       styles.forEach((style) => css.add(style._getCss()));
     };
 
-    // Universal HTTP client
-    const fetch = createFetch(nodeFetch, {
-      baseUrl: config.api.serverUrl,
-      cookie: req.headers.cookie as string,
-    });
-
     const initialState = makeInitialState(stateData as Required<StateData>);
-    const store = configureStore(initialState, {
-      fetch,
-      // I should not use `history` on server.. but how I do redirection? follow universal-router
-    });
+    const store = configureStore(initialState);
 
     // Global (context) variables that can be easily accessed from any React component
     // https://facebook.github.io/react/docs/context.html
-    const context: ResolveContext = {
+    const context: AppContext = {
       insertCss,
-      fetch,
-      googleApiKey: config.googleApiKey,
+      googleApiKey: config.googleApiKey!,
       // The twins below are wild, be careful!
       pathname: req.path,
       query: req.query,
@@ -404,22 +391,22 @@ const render: RequestHandler = async (req, res, next) => {
 
     const pageTitle = route.title || "Lunch";
 
-    const data = {
+    const data: HtmlProps = {
       ...route,
       title: pageTitle,
       ogTitle: route.ogTitle || pageTitle,
       description:
         "A simple lunch voting app for you and your team. Search nearby restaurants, add them to your list, vote for as many as you like, and decide on today’s pick!",
-      body: "",
-      root: generateUrl(req, req.get("host")),
+      children: "",
+      root: generateUrl(req, req.get("host")!),
     };
 
     data.children = ReactDOM.renderToString(
-      <App context={context}>{route.component}</App>
+      <AppComponent context={context}>{route.component}</AppComponent>
     );
     data.styles = [{ id: "css", cssText: [...css].join("") }];
 
-    const scripts = new Set();
+    const scripts = new Set<string>();
     const addChunk = (chunk: string) => {
       if (chunks[chunk]) {
         chunks[chunk].forEach((asset: string) => scripts.add(asset));
@@ -434,7 +421,7 @@ const render: RequestHandler = async (req, res, next) => {
     data.scripts = Array.from(scripts);
     data.app = {
       apiUrl: config.api.clientUrl,
-      googleApiKey: config.googleApiKey,
+      googleApiKey: config.googleApiKey!,
       state: initialState,
     };
 

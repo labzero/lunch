@@ -58,7 +58,7 @@ export default () => {
     let allowed = false;
     if (user.superuser) {
       allowed = true;
-    } else if (currentUserRole.type === "owner") {
+    } else if (currentUserRole?.type === "owner") {
       if (user.id === roleToChange.userId) {
         const otherOwners = await hasOtherOwners(team, roleToChange.userId);
         if (otherOwners) {
@@ -71,7 +71,7 @@ export default () => {
       }
     } else if (target === undefined && user.id === roleToChange.userId) {
       allowed = true;
-    } else {
+    } else if (currentUserRole) {
       allowed = canChangeRole(currentUserRole.type, roleToChange.type, target);
     }
     return allowed;

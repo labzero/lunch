@@ -4,25 +4,25 @@
 import { expect } from "chai";
 import { match, spy, SinonSpy, stub } from "sinon";
 import bodyParser from "body-parser";
-import { HTTPError } from "superagent";
 import request, { Response } from "supertest";
-import express, { RequestHandler } from "express";
+import express, { Application, RequestHandler } from "express";
 import session, { Session } from "express-session";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";
 import mockEsmodule from "../../../test/mockEsmodule";
+import { MakeApp } from "../../interfaces";
 
 const proxyquireStrict = proxyquire.noCallThru();
 
 const dbMock = new SequelizeMock();
 
 describe("api/main/teams", () => {
-  let app: Express.Application;
+  let app: Application;
   let RoleMock: SequelizeMockObject;
   let TeamMock: SequelizeMockObject;
   let UserMock: SequelizeMockObject;
   let loggedInSpy: SinonSpy;
-  let makeApp: (deps?: any, middleware?: RequestHandler) => Express.Application;
+  let makeApp: MakeApp;
   let sendMailSpy: SinonSpy;
 
   beforeEach(() => {
@@ -34,7 +34,6 @@ describe("api/main/teams", () => {
 
     loggedInSpy = spy((req, res, next) => {
       req.user = {
-        // eslint-disable-line no-param-reassign
         get: () => undefined,
         id: 231,
         $get: () => [],
@@ -45,7 +44,7 @@ describe("api/main/teams", () => {
 
     sendMailSpy = spy(() => Promise.resolve());
 
-    makeApp = (deps, middleware): Express.Application => {
+    makeApp = (deps, middleware) => {
       const teamsApi = proxyquireStrict("../main/teams", {
         "../../db": mockEsmodule({
           Team: TeamMock,
@@ -385,7 +384,8 @@ describe("api/main/teams", () => {
       });
 
       it("returns error", () => {
-        expect((response.error as HTTPError).text).to.exist;
+        expect(typeof response.error !== "boolean" && response.error.text).to
+          .exist;
       });
     });
   });
@@ -471,7 +471,9 @@ describe("api/main/teams", () => {
       });
 
       it("returns error", () => {
-        expect((response.error as HTTPError).text).to.contain("Oh No");
+        expect(
+          typeof response.error !== "boolean" && response.error.text
+        ).to.contain("Oh No");
       });
     });
   });
@@ -710,7 +712,9 @@ describe("api/main/teams", () => {
       });
 
       it("returns error", () => {
-        expect((response.error as HTTPError).text).to.contain("Oh No");
+        expect(
+          typeof response.error !== "boolean" && response.error.text
+        ).to.contain("Oh No");
       });
     });
   });

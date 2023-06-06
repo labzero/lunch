@@ -1,43 +1,47 @@
 import update from "immutability-helper";
-import setOrMerge from "./helpers/setOrMerge";
-import resetRestaurant from "./helpers/resetRestaurant";
 import { Reducer } from "../interfaces";
 
 const listUi: Reducer<"listUi"> = (state, action) => {
   switch (action.type) {
     case "RESTAURANT_RENAMED":
     case "RESTAURANT_DELETED": {
-      return resetRestaurant(state, action);
+      return update(state, {
+        $merge: {
+          [action.id]: {},
+        },
+      });
     }
     case "RESTAURANT_POSTED": {
-      return resetRestaurant(
-        update(state, {
-          newlyAdded: {
-            $set: {
-              id: action.restaurant.id,
-              userId: action.userId,
-            },
+      return update(state, {
+        newlyAdded: {
+          $set: {
+            id: action.restaurant.id,
+            userId: action.userId,
           },
-        }),
-        action
-      );
+        },
+        $merge: {
+          [action.restaurant.id]: {},
+        },
+      });
     }
     case "SET_EDIT_NAME_FORM_VALUE": {
       return update(state, {
-        $apply: (target: typeof state) =>
-          setOrMerge(target, action.id, { editNameFormValue: action.value }),
+        [action.id]: (stateValue) =>
+          update(stateValue || {}, {
+            $merge: { editNameFormValue: action.value },
+          }),
       });
     }
     case "SHOW_EDIT_NAME_FORM": {
       return update(state, {
-        $apply: (target: typeof state) =>
-          setOrMerge(target, action.id, { isEditingName: true }),
+        [action.id]: (stateValue) =>
+          update(stateValue || {}, { $merge: { isEditingName: true } }),
       });
     }
     case "HIDE_EDIT_NAME_FORM": {
       return update(state, {
-        $apply: (target: typeof state) =>
-          setOrMerge(target, action.id, { isEditingName: false }),
+        [action.id]: (stateValue) =>
+          update(stateValue || {}, { $merge: { isEditingName: false } }),
       });
     }
     case "SET_FLIP_MOVE": {
@@ -47,6 +51,8 @@ const listUi: Reducer<"listUi"> = (state, action) => {
         },
       });
     }
+    default:
+      break;
   }
   return state;
 };

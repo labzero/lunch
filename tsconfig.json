@@ -18,17 +18,16 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "strictPropertyInitialization": false,
-    // Ensure that .d.ts files are created by tsc, but not .js files
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    // Ensure that Babel can safely transpile files in the TypeScript project
-    "isolatedModules": true,
     "typeRoots": ["./typings", "node_modules/@types"]
   },
   "files": ["./global.d.ts"],
   "include": ["./**/*.ts", "./**/*.tsx", "./*.d.ts"],
   "exclude": ["node_modules"],
   "ts-node": {
-    "files": true
+    "files": true,
+    "transpileOnly": true, // you can specify ts-node options here
+    "compilerOptions": {
+      "module": "commonjs" // you can also override compilerOptions.  Only ts-node will use these overrides
+    }
   }
 }

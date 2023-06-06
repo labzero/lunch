@@ -2,7 +2,7 @@ import { ThunkAction } from "@reduxjs/toolkit";
 import { credentials, jsonHeaders, processResponse } from "../core/ApiClient";
 import { Action, State, User } from "../interfaces";
 
-export function patchCurrentUser(payload: User): Action {
+export function patchCurrentUser(payload: Partial<User>): Action {
   return {
     type: "PATCH_CURRENT_USER",
     payload,
@@ -17,8 +17,8 @@ export function currentUserPatched(user: User): Action {
 }
 
 export function updateCurrentUser(
-  payload: User
-): ThunkAction<void, State, unknown, Action> {
+  payload: Partial<User>
+): ThunkAction<Promise<Action>, State, unknown, Action> {
   return (dispatch) => {
     dispatch(patchCurrentUser(payload));
     return fetch("/api/user", {

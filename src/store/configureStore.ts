@@ -38,7 +38,7 @@ const generateReducers = <T extends keyof State>(
 // Add the reducer to your store on the `routing` key
 export default function configureStore(
   initialState: NonNormalizedState,
-  helpersConfig: StateHelpers
+  helpersConfig: StateHelpers = {}
 ) {
   const normalizedInitialState = JSON.parse(JSON.stringify(initialState));
 

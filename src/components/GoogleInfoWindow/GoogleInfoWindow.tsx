@@ -1,16 +1,9 @@
 import React, { Component } from "react";
-import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import Button from "react-bootstrap/Button";
 import withStyles from "isomorphic-style-loader/withStyles";
 import s from "./GoogleInfoWindow.scss";
 
-let google: typeof window.google;
-
-if (canUseDOM) {
-  google = window.google;
-}
-
-interface GoogleInfoWindowProps {
+export interface GoogleInfoWindowProps {
   addRestaurant: (restaurant: google.maps.places.PlaceResult) => void;
   map: google.maps.Map;
   placeId: string;
@@ -37,7 +30,7 @@ class GoogleInfoWindow extends Component<GoogleInfoWindowProps> {
   };
 
   render() {
-    if (!google) {
+    if (!window.google) {
       return null;
     }
 
@@ -46,7 +39,7 @@ class GoogleInfoWindow extends Component<GoogleInfoWindowProps> {
         className={s.root}
         data-marker
         style={{
-          zIndex: google.maps.Marker.MAX_ZINDEX * 2,
+          zIndex: google ? google.maps.Marker.MAX_ZINDEX * 2 : 0,
         }}
       >
         <div className={s.buttonContainer}>

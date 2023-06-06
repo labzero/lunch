@@ -4,6 +4,10 @@ declare const __DEV__: boolean;
 /// <reference types="webpack-env" />
 /// <reference types="chai-jsdom" />
 
+declare interface Window {
+  swUpdate?: boolean;
+}
+
 type Dispose = () => void;
 type InsertCssItem = () => Dispose;
 type GetCSSItem = () => string;
@@ -27,6 +31,11 @@ declare module "*.css" {
 }
 
 declare module "*.png" {
+  const value: string;
+  export default value;
+}
+
+declare module "*.svg" {
   const value: string;
   export default value;
 }

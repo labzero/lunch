@@ -1,5 +1,10 @@
+import { Loader } from "@googlemaps/js-api-loader";
 import { createContext } from "react";
 
-const GoogleMapsLoaderContext = createContext({});
+export interface IGoogleMapsLoaderContext {
+  loader?: Loader;
+}
+
+const GoogleMapsLoaderContext = createContext<IGoogleMapsLoaderContext>({});
 
 export default GoogleMapsLoaderContext;

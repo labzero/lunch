@@ -3,9 +3,6 @@ import WebSocket from "ws";
 import { Team, User as UserInterface } from "../src/interfaces";
 
 declare global {
-  interface Window {
-    App: any;
-  }
   namespace Express {
     export interface Request {
       broadcast: (teamId: number, data: Action) => void;
