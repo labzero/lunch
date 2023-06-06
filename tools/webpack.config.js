@@ -19,7 +19,6 @@ import { InjectManifest } from "workbox-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import overrideRules from "./lib/overrideRules";
-import pkg from "../package.json";
 
 const ROOT_DIR = path.resolve(__dirname, "..");
 const resolvePath = (...args) => path.resolve(ROOT_DIR, ...args);
