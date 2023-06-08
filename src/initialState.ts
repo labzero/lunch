@@ -20,7 +20,6 @@ const getInitialState = (): NonNormalizedState => ({
   listUi: {
     flipMove: true,
   },
-  locale: "en",
   mapUi: {
     infoWindow: {},
     showUnvoted: true,

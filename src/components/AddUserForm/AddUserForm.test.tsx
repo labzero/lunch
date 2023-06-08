@@ -4,27 +4,11 @@
 /* eslint-disable no-unused-expressions */
 import React from "react";
 import { expect } from "chai";
-import proxyquire from "proxyquire";
-import PropTypes from "prop-types";
 import { render, screen, within } from "../../../test/test-utils";
-import { AddUserFormProps } from "./AddUserForm";
-
-const proxyquireStrict = proxyquire.noCallThru();
-
-const AddUserForm = proxyquireStrict("./AddUserForm", {
-  "react-intl": {
-    intlShape: {
-      isRequired: PropTypes.shape({}).isRequired,
-    },
-  },
-}).default;
-
-interface MockAddUserFormProps extends Omit<AddUserFormProps, "intl"> {
-  intl: unknown;
-}
+import AddUserForm, { AddUserFormProps } from "./AddUserForm";
 
 describe("AddUserForm", () => {
-  let props: MockAddUserFormProps;
+  let props: AddUserFormProps;
 
   beforeEach(() => {
     props = {
@@ -32,9 +16,6 @@ describe("AddUserForm", () => {
       hasGuestRole: false,
       hasMemberRole: false,
       hasOwnerRole: false,
-      intl: {
-        formatMessage: () => "",
-      },
     };
   });
 

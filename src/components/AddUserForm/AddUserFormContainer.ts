@@ -1,5 +1,4 @@
 import { connect } from "react-redux";
-import { injectIntl } from "react-intl";
 import { addUser } from "../../actions/users";
 import { currentUserHasRole, isUserListReady } from "../../selectors";
 import AddUserForm from "./AddUserForm";
@@ -16,7 +15,4 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   addUserToTeam: (payload: Partial<User>) => dispatch(addUser(payload)),
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(injectIntl(AddUserForm));
+export default connect(mapStateToProps, mapDispatchToProps)(AddUserForm);

@@ -1,9 +1,0 @@
-{
-  "RestaurantAddForm": {
-    "addPlaces": "Add places"
-  },
-  "memberRole": "Member",
-  "noUserName": "(Name not entered)",
-  "ownerRole": "Owner",
-  "guestRole": "Guest"
-}
