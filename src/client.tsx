@@ -7,7 +7,6 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import es6Promise from "es6-promise";
 import React, { useEffect } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import qs from "qs";
@@ -18,8 +17,6 @@ import history from "./history";
 import { updateMeta } from "./DOMUtils";
 import routerCreator from "./router";
 import { AppContext, App as AppType } from "./interfaces";
-
-es6Promise.polyfill();
 
 let subdomain: string | undefined;
 

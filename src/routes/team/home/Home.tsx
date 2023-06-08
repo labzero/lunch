@@ -11,6 +11,9 @@ import RestaurantAddFormContainer from "../../../components/RestaurantAddForm/Re
 import TagFilterFormContainer from "../../../components/TagFilterForm/TagFilterFormContainer";
 import { User } from "../../../interfaces";
 import s from "./Home.scss";
+import GoogleMapsLoaderContext, {
+  IGoogleMapsLoaderContext,
+} from "../../../components/GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 
 export interface HomeProps {
   user?: User | null;
@@ -28,6 +31,8 @@ export interface HomeProps {
 }
 
 export class _Home extends Component<HomeProps> {
+  static contextType = GoogleMapsLoaderContext;
+
   fetchAllInterval: NodeJS.Timer;
 
   pingInterval: NodeJS.Timer;
@@ -37,6 +42,15 @@ export class _Home extends Component<HomeProps> {
   static defaultProps = {
     user: null,
   };
+
+  constructor(props: HomeProps, context: IGoogleMapsLoaderContext) {
+    super(props);
+
+    if (canUseDOM) {
+      const { loader } = context;
+      loader?.load();
+    }
+  }
 
   componentDidMount() {
     const { messageReceived, wsPort } = this.props;
