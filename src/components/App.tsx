@@ -13,7 +13,6 @@ import React, { Children, ReactNode } from "react";
 import { Provider as ReduxProvider } from "react-redux";
 import { Libraries, Loader } from "@googlemaps/js-api-loader";
 import { AppContext } from "../interfaces";
-import IntlProviderContainer from "./IntlProvider/IntlProviderContainer";
 import GoogleMapsLoaderContext from "./GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 
 const ContextType = {
@@ -88,11 +87,9 @@ class App extends React.PureComponent<AppProps> {
     return (
       <StyleContext.Provider value={this.styleContextValue}>
         <ReduxProvider store={this.props.context.store}>
-          <IntlProviderContainer>
-            <GoogleMapsLoaderContext.Provider value={this.loaderContextValue}>
-              {Children.only(this.props.children)}
-            </GoogleMapsLoaderContext.Provider>
-          </IntlProviderContainer>
+          <GoogleMapsLoaderContext.Provider value={this.loaderContextValue}>
+            {Children.only(this.props.children)}
+          </GoogleMapsLoaderContext.Provider>
         </ReduxProvider>
       </StyleContext.Provider>
     );

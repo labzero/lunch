@@ -16,13 +16,11 @@ import Container from "react-bootstrap/Container";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import Table from "react-bootstrap/Table";
-import { IntlShape } from "react-intl";
 import Loading from "../../../components/Loading/Loading";
 import AddUserFormContainer from "../../../components/AddUserForm/AddUserFormContainer";
 import ChangeTeamURLModalContainer from "../../../components/ChangeTeamURLModal/ChangeTeamURLModalContainer";
 import DeleteTeamModalContainer from "../../../components/DeleteTeamModal/DeleteTeamModalContainer";
 import TeamFormContainer from "../../../components/TeamForm/TeamFormContainer";
-import { globalMessageDescriptor as gm } from "../../../helpers/generateMessageDescriptor";
 import getRole from "../../../helpers/getRole";
 import canChangeUser from "../../../helpers/canChangeUser";
 import {
@@ -46,7 +44,6 @@ interface TeamProps {
   hasGuestRole: boolean;
   hasMemberRole: boolean;
   hasOwnerRole: boolean;
-  intl: IntlShape;
   removeUserFromTeam: (userId: number) => void;
   userListReady: boolean;
   users: User[];
@@ -99,7 +96,6 @@ class Team extends React.Component<TeamProps> {
       hasGuestRole,
       hasMemberRole,
       hasOwnerRole,
-      intl: { formatMessage: f },
       team,
       users,
     } = this.props;
@@ -107,26 +103,20 @@ class Team extends React.Component<TeamProps> {
     if (canChangeUser(currentUser, user, team, users)) {
       return (
         <select onChange={this.handleRoleChange(user)} value={user.type}>
-          {hasGuestRole && <option value="guest">{f(gm("guestRole"))}</option>}
-          {hasMemberRole && (
-            <option value="member">{f(gm("memberRole"))}</option>
-          )}
-          {hasOwnerRole && <option value="owner">{f(gm("ownerRole"))}</option>}
+          {hasGuestRole && <option value="guest">Guest</option>}
+          {hasMemberRole && <option value="member">Member</option>}
+          {hasOwnerRole && <option value="owner">Owner</option>}
         </select>
       );
     }
-    return f(gm(`${user.type}Role`));
+    return user.type
+      ? user.type.charAt(0).toUpperCase() + user.type.slice(1)
+      : "";
   };
 
   renderUsers = () => {
-    const {
-      currentUser,
-      hasMemberRole,
-      hasOwnerRole,
-      intl: { formatMessage: f },
-      team,
-      users,
-    } = this.props;
+    const { currentUser, hasMemberRole, hasOwnerRole, team, users } =
+      this.props;
 
     return (
       <div>
@@ -143,7 +133,7 @@ class Team extends React.Component<TeamProps> {
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td>{user.name ? user.name : f(gm("noUserName"))}</td>
+                <td>{user.name}</td>
                 {hasOwnerRole && <td>{user.email}</td>}
                 <td>{this.roleOptions(user)}</td>
                 <td className={s.deleteCell}>

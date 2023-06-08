@@ -1,5 +1,4 @@
 import { connect } from "react-redux";
-import { injectIntl } from "react-intl";
 import { showModal } from "../../../actions/modals";
 import {
   changeUserRole,
@@ -46,8 +45,4 @@ const mergeProps = (
     dispatchProps.dispatch(removeUser(id, stateProps.team!)),
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(injectIntl(Team));
+export default connect(mapStateToProps, mapDispatchToProps, mergeProps)(Team);

@@ -500,7 +500,6 @@ interface BaseState {
     flipMove: boolean;
     newlyAdded?: NewlyAdded;
   };
-  locale: "en";
   mapUi: {
     center?: {
       lat: number;

@@ -1,7 +1,6 @@
 import Geosuggest, { Suggest } from "react-geosuggest";
 import { connect } from "react-redux";
 import { scroller } from "react-scroll";
-import { injectIntl } from "react-intl";
 import { Dispatch, State } from "../../interfaces";
 import { getRestaurants } from "../../selectors/restaurants";
 import { getTeamLatLng } from "../../selectors/team";
@@ -95,4 +94,4 @@ export default connect(
   mapStateToProps,
   mapDispatchToProps,
   mergeProps
-)(injectIntl(RestaurantAddForm));
+)(RestaurantAddForm);
