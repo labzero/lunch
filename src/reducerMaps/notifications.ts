@@ -1,4 +1,4 @@
-import { v1 } from "uuid";
+import crypto from "crypto";
 import { Notification, Reducer } from "../interfaces";
 
 const notifications: Reducer<"notifications"> = (state, action) => {
@@ -7,7 +7,7 @@ const notifications: Reducer<"notifications"> = (state, action) => {
       const { realAction } = action;
       const baseNotification = {
         actionType: realAction.type,
-        id: v1(),
+        id: crypto.randomUUID(),
       };
       let notification: Notification;
       switch (realAction.type) {

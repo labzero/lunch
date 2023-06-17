@@ -16,7 +16,7 @@ import Create from "./Create";
 export default (context: AppContext) => {
   const state = context.store.getState();
 
-  const success = context.query?.success;
+  const success = context.query?.get("success");
 
   return renderIfLoggedOut(state, () => {
     if (!success) {

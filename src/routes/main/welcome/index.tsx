@@ -26,8 +26,8 @@ export default (context: AppContext) => {
       component: (
         <LayoutContainer path={context.pathname}>
           <WelcomeContainer
-            next={context.query?.next as string | undefined}
-            team={context.query?.team as string | undefined}
+            next={context.query?.get("next") as string | undefined}
+            team={context.query?.get("team") as string | undefined}
           />
         </LayoutContainer>
       ),

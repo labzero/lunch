@@ -17,6 +17,7 @@ import express, {
   RequestHandler,
 } from "express";
 import cors from "cors";
+import crypto from "crypto";
 import http from "http";
 import https from "https";
 import enforce from "express-sslify";
@@ -34,7 +35,6 @@ import ReactDOM from "react-dom/server";
 import expressWs from "express-ws";
 import Honeybadger from "@honeybadger-io/js";
 import PrettyError from "pretty-error";
-import { v1 } from "uuid";
 import AppComponent from "./components/App";
 import Html, { HtmlProps } from "./components/Html";
 import { ErrorPageWithoutStyle } from "./components/ErrorPage/ErrorPage";
@@ -341,7 +341,7 @@ const render: RequestHandler = async (req, res, next) => {
       flashKeys.forEach((k) => {
         flashes[k].forEach((f) => {
           stateData.flashes!.push({
-            id: v1(),
+            id: crypto.randomUUID(),
             message: f,
             type: k as Flash["type"],
           });
@@ -367,7 +367,7 @@ const render: RequestHandler = async (req, res, next) => {
       googleApiKey: config.googleApiKey!,
       // The twins below are wild, be careful!
       pathname: req.path,
-      query: req.query,
+      query: new URLSearchParams(req.query as { [key: string]: string }),
       // You can access redux through react-redux connect
       store,
     };

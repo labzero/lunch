@@ -1,5 +1,4 @@
 import React, { ChangeEvent, Component } from "react";
-import qs from "qs";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
@@ -45,8 +44,18 @@ class Login extends Component<LoginProps, LoginState> {
     const { host, next, team } = this.props;
     const { email, password } = this.state;
 
-    const googleQuery = qs.stringify({ team, next });
-    const nextQuery = qs.stringify({ next });
+    const googleParams: Record<string, string> = {};
+    const nextParams: Record<string, string> = {};
+    if (team) {
+      googleParams.team = team;
+    }
+    if (next) {
+      googleParams.next = next;
+      nextParams.next = next;
+    }
+
+    const googleQuery = new URLSearchParams(googleParams).toString();
+    const nextQuery = new URLSearchParams(nextParams).toString();
 
     return (
       <div className={s.root}>

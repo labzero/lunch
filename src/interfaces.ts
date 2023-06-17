@@ -2,7 +2,6 @@ import { Application, RequestHandler } from "express";
 import { EnhancedStore, ThunkAction, ThunkDispatch } from "@reduxjs/toolkit";
 import { BrowserHistory } from "history";
 import { InsertCSS } from "isomorphic-style-loader/StyleContext";
-import { ParsedQs } from "qs";
 import { ReactNode } from "react";
 import { ResolveContext } from "universal-router";
 import { WebSocket } from "ws";
@@ -599,7 +598,7 @@ export interface AppContext extends ResolveContext {
   insertCss: InsertCSS;
   googleApiKey: string;
   pathname: string;
-  query?: ParsedQs;
+  query?: URLSearchParams;
   store: EnhancedStore<State, Action>;
 }
 

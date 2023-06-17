@@ -13,8 +13,8 @@ import { AppContext } from "../../../../interfaces";
 import Create from "./Create";
 
 export default (context: AppContext) => {
-  const success = context.query?.success;
-  const token = context.query?.token;
+  const success = context.query?.get("success");
+  const token = context.query?.get("token");
 
   if (!success && !token) {
     return {

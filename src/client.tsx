@@ -9,7 +9,6 @@
 
 import React, { useEffect } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
-import qs from "qs";
 import { Action, createPath, Location } from "history";
 import App from "./components/App";
 import configureStore from "./store/configureStore";
@@ -111,7 +110,7 @@ const onLocationChange = async ({
   const isInitialRender = !action;
   try {
     context.pathname = location.pathname;
-    context.query = qs.parse(location.search, { ignoreQueryPrefix: true });
+    context.query = new URLSearchParams(location.search);
 
     // Traverses the list of routes in the order they are defined until
     // it finds the first route that matches provided URL path string

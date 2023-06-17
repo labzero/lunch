@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import withStyles from "isomorphic-style-loader/withStyles";
@@ -108,10 +107,6 @@ const RestaurantMarker = ({ restaurant, ...props }: RestaurantMarkerProps) => {
       />
     </App>
   );
-};
-
-RestaurantMarker.defaultProps = {
-  query: undefined,
 };
 
 export default RestaurantMarker;

@@ -16,7 +16,7 @@ import New from "./New";
 export default (context: AppContext) => {
   const state = context.store.getState();
 
-  const email = context.query?.email;
+  const email = context.query?.get("email");
 
   return renderIfLoggedOut(state, () => ({
     component: (

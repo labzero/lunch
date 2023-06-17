@@ -1,6 +1,8 @@
-import { combineReducers } from "redux";
 import { normalize } from "normalizr";
-import { configureStore as reduxConfigureStore } from "@reduxjs/toolkit";
+import {
+  combineReducers,
+  configureStore as reduxConfigureStore,
+} from "@reduxjs/toolkit";
 import * as schemas from "../schemas";
 import * as reducerMaps from "../reducerMaps";
 import createHelpers from "./createHelpers";

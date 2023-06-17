@@ -17,7 +17,7 @@ function action(context: AppContext) {
   const state = context.store.getState();
 
   const subdomain = context.subdomain;
-  const next = context.query?.next as string | undefined;
+  const next = context.query?.get("next") as string | undefined;
 
   return renderIfLoggedOut(state, () => ({
     chunks: ["login"],
