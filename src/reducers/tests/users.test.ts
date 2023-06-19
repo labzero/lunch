@@ -5,7 +5,7 @@ import { expect } from "chai";
 import { State, Team, User } from "../../interfaces";
 import users from "../users";
 
-describe("reducerMaps/users", () => {
+describe("reducers/users", () => {
   let beforeState: State["users"];
   let afterState: State["users"];
 

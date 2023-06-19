@@ -7724,13 +7724,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immutability-helper@npm:^3.1.1":
-  version: 3.1.1
-  resolution: "immutability-helper@npm:3.1.1"
-  checksum: 6fdbf6d2123efa567263e904bbaff07aca0e24560d270d34967b03aab8ec20bd3e4057f394d59e50eb6c4718c9415591a6281692bb0aafd522ad72cf4887133f
-  languageName: node
-  linkType: hard
-
 "immutable@npm:^3":
   version: 3.8.2
   resolution: "immutable@npm:3.8.2"
@@ -9324,7 +9317,6 @@ __metadata:
     google-map-react: ^2.2.0
     history: ^5.3.0
     husky: ^8.0.3
-    immutability-helper: ^3.1.1
     isomorphic-style-loader: ^5.3.2
     jsdom: ^22.0.0
     jsonwebtoken: ^9.0.0
