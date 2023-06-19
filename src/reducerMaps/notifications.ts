@@ -1,5 +1,8 @@
-import crypto from "crypto";
+import nodeCrypto from "crypto";
 import { Notification, Reducer } from "../interfaces";
+import canUseDOM from "../helpers/canUseDOM";
+
+const crypto = canUseDOM ? window.crypto : nodeCrypto;
 
 const notifications: Reducer<"notifications"> = (state, action) => {
   switch (action.type) {
@@ -146,6 +149,8 @@ const notifications: Reducer<"notifications"> = (state, action) => {
     case "EXPIRE_NOTIFICATION": {
       return state.filter((n) => n.id !== action.id);
     }
+    default:
+      break;
   }
   return state;
 };

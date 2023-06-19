@@ -8,6 +8,7 @@ import proxyquire from "proxyquire";
 import { render, screen } from "../../../../test/test-utils";
 import { HomeProps } from "./Home";
 import { User } from "../../../interfaces";
+import mockEsmodule from "test/mockEsmodule";
 
 const proxy = proxyquire.noCallThru();
 
@@ -33,7 +34,9 @@ const TagFilterFormContainer = () => (
 
 // eslint-disable-next-line no-underscore-dangle
 const Home = proxy("./Home", {
-  "fbjs/lib/ExecutionEnvironment": { canUseDOM: false },
+  "../../../helpers/canUseDOM": mockEsmodule({
+    default: false,
+  }),
   "../../../components/RestaurantAddForm/RestaurantAddFormContainer":
     RestaurantAddFormContainer,
   "../../../components/Footer/FooterContainer": FooterContainer,

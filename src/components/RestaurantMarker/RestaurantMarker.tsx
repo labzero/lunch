@@ -1,6 +1,6 @@
 import React from "react";
-import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import withStyles from "isomorphic-style-loader/withStyles";
+import canUseDOM from "../../helpers/canUseDOM";
 import { AppContext, Restaurant } from "../../interfaces";
 import App from "../App";
 import RestaurantContainer from "../Restaurant/RestaurantContainer";

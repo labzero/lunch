@@ -1,6 +1,6 @@
 import React, { Component, Suspense, lazy } from "react";
 import { Suggest } from "react-geosuggest";
-import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
+import canUseDOM from "../../helpers/canUseDOM";
 import { LatLng } from "../../interfaces";
 import GoogleMapsLoaderContext, {
   IGoogleMapsLoaderContext,

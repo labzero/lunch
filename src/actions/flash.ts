@@ -1,5 +1,8 @@
-import crypto from "crypto";
+import nodeCrypto from "crypto";
 import { Action } from "../interfaces";
+import canUseDOM from "../helpers/canUseDOM";
+
+const crypto = canUseDOM ? window.crypto : nodeCrypto;
 
 export function flashError(message: string): Action {
   return {

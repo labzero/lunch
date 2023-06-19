@@ -1,6 +1,6 @@
 import { ThunkAction } from "@reduxjs/toolkit";
-import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import { credentials, jsonHeaders, processResponse } from "../core/ApiClient";
+import canUseDOM from "../helpers/canUseDOM";
 import { Action, RoleType, State, Team, User } from "../interfaces";
 import { getCurrentUser } from "../selectors/user";
 

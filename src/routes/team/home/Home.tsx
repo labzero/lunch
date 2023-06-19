@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import RobustWebSocket from "robust-websocket";
 import withStyles from "isomorphic-style-loader/withStyles";
 import FooterContainer from "../../../components/Footer/FooterContainer";
@@ -9,6 +8,7 @@ import RestaurantMapContainer from "../../../components/RestaurantMap/Restaurant
 import RestaurantListContainer from "../../../components/RestaurantList/RestaurantListContainer";
 import RestaurantAddFormContainer from "../../../components/RestaurantAddForm/RestaurantAddFormContainer";
 import TagFilterFormContainer from "../../../components/TagFilterForm/TagFilterFormContainer";
+import canUseDOM from "../../../helpers/canUseDOM";
 import { User } from "../../../interfaces";
 import s from "./Home.scss";
 import GoogleMapsLoaderContext, {

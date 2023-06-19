@@ -2,8 +2,8 @@
 
 import React, { Component, RefObject, Suspense, createRef, lazy } from "react";
 import GeosuggestClass, { GeosuggestProps, Suggest } from "react-geosuggest";
-import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import withStyles from "isomorphic-style-loader/withStyles";
+import canUseDOM from "../../helpers/canUseDOM";
 import { LatLng } from "../../interfaces";
 import GoogleMapsLoaderContext, {
   IGoogleMapsLoaderContext,
