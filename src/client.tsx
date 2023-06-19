@@ -37,6 +37,11 @@ if (teamSlug && host.indexOf(teamSlug) === 0) {
 }
 window.App.state.host = host;
 
+// Hack for Electron (Cypress)
+window.crypto.randomUUID =
+  window.crypto.randomUUID ||
+  (() => Math.round(Math.random() * 10 ** 16).toString());
+
 if (!subdomain) {
   // escape domain periods to not appear as regex wildcards
   const subdomainMatch = window.location.host.match(
