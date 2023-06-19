@@ -100,6 +100,10 @@ module.exports = {
     "import/no-relative-packages": "off",
     "import/no-import-module-exports": "off",
     "no-use-before-define": "off",
+    "no-param-reassign": [
+      "error",
+      { props: true, ignorePropertyModificationsFor: ["draftState"] },
+    ],
     "@typescript-eslint/no-use-before-define": ["error"],
   },
 

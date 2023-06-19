@@ -390,6 +390,10 @@ export type Action =
       opts: ConfirmOpts;
     }
   | {
+      type: "SHOW_MODAL";
+      name: string;
+    }
+  | {
       type: "HIDE_MODAL";
       name: string;
     }
@@ -486,9 +490,11 @@ interface BaseState {
   notifications: Notification[];
   modals: {
     [index: string]: {
-      action: () => void;
-      actionLabel: string;
-      body: ReactNode;
+      action?:
+        | Action
+        | ThunkAction<Promise<void> | void, State, unknown, Action>;
+      actionLabel?: string;
+      body?: ReactNode;
       restaurantId?: number;
       shown: boolean;
     };

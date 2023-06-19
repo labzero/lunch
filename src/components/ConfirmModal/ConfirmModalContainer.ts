@@ -6,7 +6,7 @@ import { Dispatch, State } from "../../interfaces";
 const modalName = "confirm";
 
 const mapStateToProps = (state: State) => ({
-  actionLabel: state.modals[modalName].actionLabel,
+  actionLabel: state.modals[modalName].actionLabel!,
   body: state.modals[modalName].body,
   action: state.modals[modalName].action,
   shown: !!state.modals[modalName].shown,
@@ -24,7 +24,7 @@ const mergeProps = (
   ...stateProps,
   ...dispatchProps,
   handleSubmit: () => {
-    dispatchProps.dispatch(stateProps.action);
+    dispatchProps.dispatch(stateProps.action!);
     dispatchProps.hideModal();
   },
 });

@@ -4,9 +4,8 @@
 import { expect } from "chai";
 import { SinonSpy, match, spy, stub } from "sinon";
 import bodyParser from "body-parser";
-import { Response } from "superagent";
-import request from "supertest";
-import express, { Application, RequestHandler } from "express";
+import request, { Response } from "supertest";
+import express, { Application } from "express";
 import session, { Session } from "express-session";
 import proxyquire from "proxyquire";
 import SequelizeMock from "sequelize-mock";

@@ -5,6 +5,8 @@ const team: Reducer<"team"> = (state, action) => {
     case "TEAM_PATCHED": {
       return action.team;
     }
+    default:
+      break;
   }
   return state;
 };
