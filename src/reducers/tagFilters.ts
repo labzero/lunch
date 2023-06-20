@@ -1,18 +1,20 @@
 import { Reducer } from "../interfaces";
 
-const tagExclusions: Reducer<"tagExclusions"> = (state, action) => {
+const tagFilters: Reducer<"tagFilters"> = (state, action) => {
   switch (action.type) {
-    case "ADD_TAG_EXCLUSION": {
+    case "ADD_TAG_FILTER": {
       return [...state, action.id];
     }
-    case "REMOVE_TAG_EXCLUSION": {
+    case "REMOVE_TAG_FILTER": {
       return state.filter((t) => t !== action.id);
     }
-    case "CLEAR_TAG_EXCLUSIONS": {
+    case "CLEAR_TAG_FILTERS": {
       return [];
     }
+    default:
+      break;
   }
   return state;
 };
 
-export default tagExclusions;
+export default tagFilters;

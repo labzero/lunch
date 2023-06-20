@@ -7,10 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import es6Promise from "es6-promise";
 import React, { useEffect } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
-import qs from "qs";
 import { Action, createPath, Location } from "history";
 import App from "./components/App";
 import configureStore from "./store/configureStore";
@@ -18,8 +16,6 @@ import history from "./history";
 import { updateMeta } from "./DOMUtils";
 import routerCreator from "./router";
 import { AppContext, App as AppType } from "./interfaces";
-
-es6Promise.polyfill();
 
 let subdomain: string | undefined;
 
@@ -40,6 +36,11 @@ if (teamSlug && host.indexOf(teamSlug) === 0) {
   host = host.slice(teamSlug.length + 1); // + 1 for dot
 }
 window.App.state.host = host;
+
+// Hack for Electron (Cypress)
+window.crypto.randomUUID =
+  window.crypto.randomUUID ||
+  (() => Math.round(Math.random() * 10 ** 16).toString());
 
 if (!subdomain) {
   // escape domain periods to not appear as regex wildcards
@@ -114,7 +115,7 @@ const onLocationChange = async ({
   const isInitialRender = !action;
   try {
     context.pathname = location.pathname;
-    context.query = qs.parse(location.search, { ignoreQueryPrefix: true });
+    context.query = new URLSearchParams(location.search);
 
     // Traverses the list of routes in the order they are defined until
     // it finds the first route that matches provided URL path string

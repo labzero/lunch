@@ -17,7 +17,7 @@ export default (context: AppContext) => {
   const state = context.store.getState();
   const user = state.user;
 
-  const email = context.query?.email;
+  const email = context.query?.get("email");
 
   if (user?.superuser) {
     return {

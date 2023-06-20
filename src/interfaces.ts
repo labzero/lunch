@@ -1,11 +1,11 @@
 import { Application, RequestHandler } from "express";
-import { EnhancedStore, ThunkAction, ThunkDispatch } from "@reduxjs/toolkit";
+import { EnhancedStore, ThunkDispatch } from "@reduxjs/toolkit";
 import { BrowserHistory } from "history";
 import { InsertCSS } from "isomorphic-style-loader/StyleContext";
-import { ParsedQs } from "qs";
 import { ReactNode } from "react";
 import { ResolveContext } from "universal-router";
 import { WebSocket } from "ws";
+import { confirmableActions } from "./actions";
 import {
   Decision as DecisionModel,
   Restaurant as RestaurantModel,
@@ -388,7 +388,11 @@ export type Action =
   | {
       type: "SHOW_MODAL";
       name: "confirm";
-      opts: ConfirmOpts;
+      opts: ConfirmOpts<keyof typeof confirmableActions>;
+    }
+  | {
+      type: "SHOW_MODAL";
+      name: string;
     }
   | {
       type: "HIDE_MODAL";
@@ -448,11 +452,24 @@ export interface Notification {
     );
 }
 
-export type ConfirmOpts = {
+export type ConfirmOpts<T extends keyof typeof confirmableActions> = {
   actionLabel: string;
   body: string;
-  action: Action | ThunkAction<void, State, unknown, Action>;
+  action: T;
+  actionArgs: Parameters<(typeof confirmableActions)[T]>;
 };
+
+export type BaseModal = {
+  shown: boolean;
+};
+
+export type ConfirmModal<T extends keyof typeof confirmableActions> =
+  BaseModal & ConfirmOpts<T>;
+export type PastDecisionsModal = BaseModal & PastDecisionsOpts;
+export type Modal =
+  | BaseModal
+  | ConfirmModal<keyof typeof confirmableActions>
+  | PastDecisionsModal;
 
 export interface ListUiItem {
   isEditingName?: boolean;
@@ -486,13 +503,7 @@ interface BaseState {
   host: string;
   notifications: Notification[];
   modals: {
-    [index: string]: {
-      action: () => void;
-      actionLabel: string;
-      body: ReactNode;
-      restaurantId?: number;
-      shown: boolean;
-    };
+    [index: string]: Modal;
   };
   listUi: {
     [index: number]: ListUiItem;
@@ -500,7 +511,6 @@ interface BaseState {
     flipMove: boolean;
     newlyAdded?: NewlyAdded;
   };
-  locale: "en";
   mapUi: {
     center?: {
       lat: number;
@@ -600,7 +610,7 @@ export interface AppContext extends ResolveContext {
   insertCss: InsertCSS;
   googleApiKey: string;
   pathname: string;
-  query?: ParsedQs;
+  query?: URLSearchParams;
   store: EnhancedStore<State, Action>;
 }
 

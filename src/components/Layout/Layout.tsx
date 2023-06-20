@@ -9,16 +9,17 @@
 
 import React, { Component, ReactNode } from "react";
 import PropTypes from "prop-types";
-import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
-import emptyFunction from "fbjs/lib/emptyFunction";
+import { InsertCSS } from "isomorphic-style-loader/StyleContext";
+// eslint-disable-next-line css-modules/no-unused-class, no-unused-vars
+import globalCss from "../../styles/globalCss.scss";
+import canUseDOM from "../../helpers/canUseDOM";
 import HeaderContainer from "../Header/HeaderContainer";
 import FooterContainer from "../Footer/FooterContainer";
 import NotificationListContainer from "../NotificationList/NotificationListContainer";
 import ConfirmModalContainer from "../ConfirmModal/ConfirmModalContainer";
 import s from "./Layout.scss";
-// eslint-disable-next-line css-modules/no-unused-class, no-unused-vars
-import globalCss from "../../styles/globalCss.scss";
-import { InsertCSS } from "isomorphic-style-loader/StyleContext";
+
+const emptyFunction = () => undefined;
 
 export interface LayoutProps {
   children: ReactNode;

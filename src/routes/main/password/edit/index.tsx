@@ -16,7 +16,7 @@ import Edit from "./Edit";
 export default (context: AppContext) => {
   const state = context.store.getState();
 
-  const token = context.query?.token as string | undefined;
+  const token = context.query?.get("token") as string | undefined;
 
   return renderIfLoggedOut(state, () => {
     if (!token) {

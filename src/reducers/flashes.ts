@@ -25,6 +25,8 @@ const flashes: Reducer<"flashes"> = (state, action) => {
     case "EXPIRE_FLASH": {
       return state.filter((arr) => arr.id !== action.id);
     }
+    default:
+      break;
   }
   return state;
 };

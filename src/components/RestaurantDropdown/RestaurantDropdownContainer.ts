@@ -56,7 +56,8 @@ const mergeProps = (
       showModal("confirm", {
         actionLabel: "Delete",
         body: `Are you sure you want to delete ${stateProps.restaurant.name}?`,
-        action: removeRestaurant(ownProps.id),
+        action: "removeRestaurant",
+        actionArgs: [ownProps.id],
       })
     ),
   showEditNameForm: () => {

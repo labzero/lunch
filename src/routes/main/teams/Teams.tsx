@@ -5,29 +5,30 @@ import ListGroup from "react-bootstrap/ListGroup";
 import { FaTimes } from "react-icons/fa";
 import Container from "react-bootstrap/Container";
 import Link from "../../../components/Link/Link";
-import { ConfirmOpts, Team } from "../../../interfaces";
+import { ConfirmOpts, Team, User } from "../../../interfaces";
 import s from "./Teams.scss";
 
 interface TeamsProps {
-  confirm: (props: ConfirmOpts) => void;
+  confirm: (props: ConfirmOpts<"removeUser">) => void;
   host: string;
-  leaveTeam: (team: Team) => () => void;
   teams: Team[];
+  user: User;
 }
 
 class Teams extends Component<TeamsProps> {
-  confirmLeave = (team: Team) => (event: MouseEvent) => {
+  confirmLeave = (user: User, team: Team) => (event: MouseEvent) => {
     event.preventDefault();
     this.props.confirm({
       actionLabel: "Leave",
       body: `Are you sure you want to leave this team?
 You will need to be invited back by another member.`,
-      action: this.props.leaveTeam(team),
+      action: "removeUser",
+      actionArgs: [user.id, team],
     });
   };
 
   render() {
-    const { host, teams } = this.props;
+    const { host, teams, user } = this.props;
 
     return (
       <div className={s.root}>
@@ -46,7 +47,7 @@ You will need to be invited back by another member.`,
                     <div className={s.itemName}>{team.name}</div>
                     <button
                       className={s.leave}
-                      onClick={this.confirmLeave(team)}
+                      onClick={this.confirmLeave(user, team)}
                       aria-label="Leave"
                       type="button"
                     >

@@ -3,8 +3,7 @@
 
 import { expect } from "chai";
 import { SinonSpy, SinonStub, match, spy, stub } from "sinon";
-import { Response } from "superagent";
-import request from "supertest";
+import request, { Response } from "supertest";
 import express, { Application, NextFunction, RequestHandler } from "express";
 import proxyquire from "proxyquire";
 import mockEsmodule from "../../../test/mockEsmodule";

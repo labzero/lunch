@@ -2,17 +2,13 @@
 
 import React, { Component, RefObject, Suspense, createRef, lazy } from "react";
 import GeosuggestClass, { GeosuggestProps, Suggest } from "react-geosuggest";
-import { IntlShape } from "react-intl";
-import { canUseDOM } from "fbjs/lib/ExecutionEnvironment";
 import withStyles from "isomorphic-style-loader/withStyles";
-import generateMessageDescriptor from "../../helpers/generateMessageDescriptor";
+import canUseDOM from "../../helpers/canUseDOM";
 import { LatLng } from "../../interfaces";
 import GoogleMapsLoaderContext, {
   IGoogleMapsLoaderContext,
 } from "../GoogleMapsLoaderContext/GoogleMapsLoaderContext";
 import s from "./RestaurantAddForm.scss";
-
-const m = generateMessageDescriptor("RestaurantAddForm");
 
 const Geosuggest = lazy(
   () => import(/* webpackChunkName: 'geosuggest' */ "react-geosuggest")
@@ -27,7 +23,6 @@ interface RestaurantAddFormProps
     geosuggest: GeosuggestClass
   ) => void;
   latLng: LatLng;
-  intl: IntlShape;
 }
 
 class RestaurantAddForm extends Component<RestaurantAddFormProps> {
@@ -76,10 +71,6 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
   };
 
   render() {
-    const {
-      intl: { formatMessage: f },
-    } = this.props;
-
     return (
       <form>
         {this.maps ? (
@@ -101,7 +92,7 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
               suggestItemClassName={s.suggestItem}
               suggestItemActiveClassName={s.suggestItemActive}
               suggestsClassName={s.suggests}
-              placeholder={f(m("addPlaces"))}
+              placeholder="Add places"
               onBlur={this.props.clearTempMarker}
               onActivateSuggest={this.getCoordsForMarker}
               onSuggestSelect={this.handleSuggestSelect}

@@ -13,7 +13,7 @@ import { AppContext } from "../../../../interfaces";
 import New from "./New";
 
 export default (context: AppContext) => {
-  const email = context.query?.email;
+  const email = context.query?.get("email");
 
   return {
     component: (

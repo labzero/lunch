@@ -9,12 +9,10 @@
 
 /* Configure Mocha test runner, see package.json/scripts/test */
 
-require("global-jsdom/register");
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { use } = require("chai");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const chaiJSDOM = require("chai-jsdom");
+import "global-jsdom/register";
+import { use } from "chai";
+import chaiJSDOM from "chai-jsdom";
+import nodeCrypto from "crypto";
 
 use(chaiJSDOM);
 
@@ -23,6 +21,8 @@ process.env.NODE_ENV = "test";
 function noop() {
   return null;
 }
+
+window.crypto.randomUUID = nodeCrypto.randomUUID;
 
 require.extensions[".css"] = noop;
 require.extensions[".scss"] = noop;

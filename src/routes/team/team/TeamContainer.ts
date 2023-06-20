@@ -1,5 +1,4 @@
 import { connect } from "react-redux";
-import { injectIntl } from "react-intl";
 import { showModal } from "../../../actions/modals";
 import {
   changeUserRole,
@@ -27,7 +26,8 @@ const mapStateToProps = (state: State) => ({
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   changeUserRole,
-  confirm: (opts: ConfirmOpts) => dispatch(showModal("confirm", opts)),
+  confirm: (opts: ConfirmOpts<"changeUserRole">) =>
+    dispatch(showModal("confirm", opts)),
   confirmChangeTeamURL: () => dispatch(showModal("changeTeamURL")),
   confirmDeleteTeam: () => dispatch(showModal("deleteTeam")),
   dispatch,
@@ -46,8 +46,4 @@ const mergeProps = (
     dispatchProps.dispatch(removeUser(id, stateProps.team!)),
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  mergeProps
-)(injectIntl(Team));
+export default connect(mapStateToProps, mapDispatchToProps, mergeProps)(Team);

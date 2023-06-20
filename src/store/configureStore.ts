@@ -1,8 +1,10 @@
-import { combineReducers } from "redux";
 import { normalize } from "normalizr";
-import { configureStore as reduxConfigureStore } from "@reduxjs/toolkit";
+import {
+  combineReducers,
+  configureStore as reduxConfigureStore,
+} from "@reduxjs/toolkit";
 import * as schemas from "../schemas";
-import * as reducerMaps from "../reducerMaps";
+import * as reducers from "../reducers";
 import createHelpers from "./createHelpers";
 import {
   Action,
@@ -22,17 +24,17 @@ const generateReducers = <T extends keyof State>(
   newReducers: { [key in T]: Reducer<key> },
   normalizedInitialState: State
 ) => {
-  const reducers: Partial<{ [key in T]: Reducer<key> }> = {};
+  const rs: Partial<{ [key in T]: Reducer<key> }> = {};
 
   let name: T;
   for (name in newReducers) {
-    reducers[name] = generateReducer<typeof name>(
+    rs[name] = generateReducer<typeof name>(
       newReducers[name],
       normalizedInitialState[name]
     );
   }
 
-  return reducers;
+  return rs;
 };
 
 // Add the reducer to your store on the `routing` key
@@ -58,12 +60,12 @@ export default function configureStore(
   normalizedInitialState.restaurants.items.entities.votes =
     normalizedInitialState.restaurants.items.entities.votes || {};
 
-  const reducers = generateReducers(reducerMaps, normalizedInitialState);
+  const allReducers = generateReducers(reducers, normalizedInitialState);
 
   const helpers = createHelpers(helpersConfig);
 
   const store = reduxConfigureStore({
-    reducer: combineReducers(reducers),
+    reducer: combineReducers(allReducers),
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         thunk: {
@@ -74,14 +76,14 @@ export default function configureStore(
 
   // Hot reload reducers (requires Webpack or Browserify HMR to be enabled)
   if (__DEV__ && module.hot) {
-    module.hot.accept("../reducerMaps", () => {
-      // eslint-disable-next-line global-require
-      const newReducerMaps = require("../reducerMaps");
-      const newReducers = generateReducers(
-        newReducerMaps,
+    module.hot.accept("../reducers", () => {
+      // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+      const newReducers = require("../reducers");
+      const newAllReducers = generateReducers(
+        newReducers,
         normalizedInitialState
       );
-      return store.replaceReducer(combineReducers(newReducers));
+      return store.replaceReducer(combineReducers(newAllReducers));
     });
   }
 

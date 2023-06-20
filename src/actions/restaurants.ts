@@ -274,7 +274,7 @@ export function addRestaurant(
 
 export function removeRestaurant(
   id: number
-): ThunkAction<Promise<void>, State, unknown, Action> {
+): ThunkAction<Promise<Action>, State, unknown, Action> {
   return (dispatch) => {
     dispatch(deleteRestaurant(id));
     return fetch(`/api/restaurants/${id}`, {

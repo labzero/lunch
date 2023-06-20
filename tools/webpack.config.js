@@ -77,6 +77,7 @@ const config = {
     fallback: {
       buffer: false,
       console: false,
+      crypto: false,
       process: false,
     },
   },

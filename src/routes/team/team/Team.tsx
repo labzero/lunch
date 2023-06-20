@@ -16,13 +16,11 @@ import Container from "react-bootstrap/Container";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import Table from "react-bootstrap/Table";
-import { IntlShape } from "react-intl";
 import Loading from "../../../components/Loading/Loading";
 import AddUserFormContainer from "../../../components/AddUserForm/AddUserFormContainer";
 import ChangeTeamURLModalContainer from "../../../components/ChangeTeamURLModal/ChangeTeamURLModalContainer";
 import DeleteTeamModalContainer from "../../../components/DeleteTeamModal/DeleteTeamModalContainer";
 import TeamFormContainer from "../../../components/TeamForm/TeamFormContainer";
-import { globalMessageDescriptor as gm } from "../../../helpers/generateMessageDescriptor";
 import getRole from "../../../helpers/getRole";
 import canChangeUser from "../../../helpers/canChangeUser";
 import {
@@ -30,13 +28,14 @@ import {
   Team as TeamType,
   ConfirmOpts,
   Action,
+  RoleType,
 } from "../../../interfaces";
 import s from "./Team.scss";
 
 interface TeamProps {
   changeTeamURLShown: boolean;
   changeUserRole: (userId: number, role: string) => Action;
-  confirm: (options: ConfirmOpts) => void;
+  confirm: (options: ConfirmOpts<"changeUserRole">) => void;
   confirmChangeTeamURL: () => void;
   confirmDeleteTeam: () => void;
   currentUser: User;
@@ -46,7 +45,6 @@ interface TeamProps {
   hasGuestRole: boolean;
   hasMemberRole: boolean;
   hasOwnerRole: boolean;
-  intl: IntlShape;
   removeUserFromTeam: (userId: number) => void;
   userListReady: boolean;
   users: User[];
@@ -62,9 +60,7 @@ class Team extends React.Component<TeamProps> {
     (user: User) => (event: ChangeEvent<HTMLSelectElement>) => {
       const { currentUser, team } = this.props;
 
-      const newRole = event.target.value;
-
-      const changeRole = this.props.changeUserRole(user.id, newRole);
+      const newRole = event.target.value as RoleType;
 
       if (
         event.target.value === "member" &&
@@ -73,15 +69,18 @@ class Team extends React.Component<TeamProps> {
         this.props.confirm({
           actionLabel: "Promote",
           body: "Are you sure you want to promote this user to Member status? You will not be able to demote them later.",
-          action: changeRole,
+          action: "changeUserRole",
+          actionArgs: [user.id, newRole],
         });
       } else if (currentUser.id === user.id && !currentUser.superuser) {
         this.props.confirm({
           actionLabel: "Demote",
           body: "Are you sure you want to demote yourself? You will not be able to undo this by yourself.",
-          action: changeRole,
+          action: "changeUserRole",
+          actionArgs: [user.id, newRole],
         });
       } else {
+        const changeRole = this.props.changeUserRole(user.id, newRole);
         this.props.dispatch(changeRole);
       }
     };
@@ -99,7 +98,6 @@ class Team extends React.Component<TeamProps> {
       hasGuestRole,
       hasMemberRole,
       hasOwnerRole,
-      intl: { formatMessage: f },
       team,
       users,
     } = this.props;
@@ -107,26 +105,20 @@ class Team extends React.Component<TeamProps> {
     if (canChangeUser(currentUser, user, team, users)) {
       return (
         <select onChange={this.handleRoleChange(user)} value={user.type}>
-          {hasGuestRole && <option value="guest">{f(gm("guestRole"))}</option>}
-          {hasMemberRole && (
-            <option value="member">{f(gm("memberRole"))}</option>
-          )}
-          {hasOwnerRole && <option value="owner">{f(gm("ownerRole"))}</option>}
+          {hasGuestRole && <option value="guest">Guest</option>}
+          {hasMemberRole && <option value="member">Member</option>}
+          {hasOwnerRole && <option value="owner">Owner</option>}
         </select>
       );
     }
-    return f(gm(`${user.type}Role`));
+    return user.type
+      ? user.type.charAt(0).toUpperCase() + user.type.slice(1)
+      : "";
   };
 
   renderUsers = () => {
-    const {
-      currentUser,
-      hasMemberRole,
-      hasOwnerRole,
-      intl: { formatMessage: f },
-      team,
-      users,
-    } = this.props;
+    const { currentUser, hasMemberRole, hasOwnerRole, team, users } =
+      this.props;
 
     return (
       <div>
@@ -143,7 +135,7 @@ class Team extends React.Component<TeamProps> {
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                <td>{user.name ? user.name : f(gm("noUserName"))}</td>
+                <td>{user.name}</td>
                 {hasOwnerRole && <td>{user.email}</td>}
                 <td>{this.roleOptions(user)}</td>
                 <td className={s.deleteCell}>

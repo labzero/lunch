@@ -1,8 +1,7 @@
 import { connect } from "react-redux";
 import { getTagById } from "../../selectors/tags";
 import { showModal } from "../../actions/modals";
-import { removeTag } from "../../actions/tags";
-import { Dispatch, State } from "../../interfaces";
+import { ConfirmOpts, Dispatch, State } from "../../interfaces";
 import TagManagerItem from "./TagManagerItem";
 
 interface OwnProps {
@@ -28,11 +27,12 @@ const mergeProps = (
   handleDeleteClicked() {
     dispatchProps.dispatch(
       showModal("confirm", {
+        action: "removeTag",
+        actionArgs: [ownProps.id],
         actionLabel: "Delete",
         body: `Are you sure you want to delete the “${stateProps.tag.name}” tag?
         All restaurants will be untagged.`,
-        action: removeTag(ownProps.id),
-      })
+      } as ConfirmOpts<"removeTag">)
     );
   },
 });

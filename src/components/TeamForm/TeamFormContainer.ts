@@ -1,5 +1,4 @@
 import { connect } from "react-redux";
-import { injectIntl } from "react-intl";
 import { flashSuccess } from "../../actions/flash";
 import { updateTeam } from "../../actions/team";
 import { Dispatch, State, Team } from "../../interfaces";
@@ -19,7 +18,4 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     ),
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(injectIntl(TeamForm));
+export default connect(mapStateToProps, mapDispatchToProps)(TeamForm);

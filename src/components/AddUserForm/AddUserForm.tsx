@@ -3,8 +3,6 @@ import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
-import { IntlShape } from "react-intl";
-import { globalMessageDescriptor as gm } from "../../helpers/generateMessageDescriptor";
 import { RoleType } from "../../interfaces";
 
 interface AddUserFormState {
@@ -18,7 +16,6 @@ export interface AddUserFormProps {
   hasGuestRole: boolean;
   hasMemberRole: boolean;
   hasOwnerRole: boolean;
-  intl: IntlShape;
 }
 
 class AddUserForm extends Component<AddUserFormProps, AddUserFormState> {
@@ -50,12 +47,7 @@ class AddUserForm extends Component<AddUserFormProps, AddUserFormState> {
   };
 
   render() {
-    const {
-      hasGuestRole,
-      hasMemberRole,
-      hasOwnerRole,
-      intl: { formatMessage: f },
-    } = this.props;
+    const { hasGuestRole, hasMemberRole, hasOwnerRole } = this.props;
     const { email, name, type } = this.state;
 
     return (
@@ -96,15 +88,9 @@ class AddUserForm extends Component<AddUserFormProps, AddUserFormState> {
                   value={type}
                   required
                 >
-                  {hasGuestRole && (
-                    <option value="guest">{f(gm("guestRole"))}</option>
-                  )}
-                  {hasMemberRole && (
-                    <option value="member">{f(gm("memberRole"))}</option>
-                  )}
-                  {hasOwnerRole && (
-                    <option value="owner">{f(gm("ownerRole"))}</option>
-                  )}
+                  {hasGuestRole && <option value="guest">Guest</option>}
+                  {hasMemberRole && <option value="member">Member</option>}
+                  {hasOwnerRole && <option value="owner">Owner</option>}
                 </Form.Select>
               </Col>
             </Row>

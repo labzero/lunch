@@ -4,7 +4,7 @@ import { expect } from "chai";
 import { Decision, Restaurant, State, User } from "../../interfaces";
 import restaurants from "../restaurants";
 
-describe("reducerMaps/restaurants", () => {
+describe("reducers/restaurants", () => {
   let beforeState: State["restaurants"];
   let afterState: State["restaurants"];
 

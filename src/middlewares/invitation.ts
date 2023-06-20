@@ -1,5 +1,4 @@
 import { Request, Router } from "express";
-import qs from "qs";
 import { bsHost } from "../config";
 import generateToken from "../helpers/generateToken";
 import generateUrl from "../helpers/generateUrl";
@@ -53,7 +52,7 @@ export default () => {
 Add them here: ${generateUrl(
                     req,
                     bsHost,
-                    `/users/new?email=${qs.stringify(invitation.email)}`
+                    `/users/new?email=${encodeURIComponent(invitation.email)}`
                   )}`,
                 });
               }
