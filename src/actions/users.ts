@@ -93,7 +93,7 @@ export function userDeleted(id: number, team: Team, isSelf: boolean): Action {
 export function removeUser(
   id: number,
   team: Team
-): ThunkAction<void, State, unknown, Action> {
+): ThunkAction<Promise<Action>, State, unknown, Action> {
   return (dispatch, getState) => {
     const state = getState();
     let isSelf = false;
@@ -182,7 +182,7 @@ export function userPatched(
 export function changeUserRole(
   id: number,
   type: RoleType
-): ThunkAction<void, State, unknown, Action> {
+): ThunkAction<Promise<Action>, State, unknown, Action> {
   const payload = { id, type };
   return (dispatch, getState) => {
     const state = getState();

@@ -1,7 +1,11 @@
 import { connect } from "react-redux";
 import { decide } from "../../actions/decisions";
 import { hideModal } from "../../actions/modals";
-import { Dispatch, State } from "../../interfaces";
+import {
+  Dispatch,
+  State,
+  PastDecisionsModal as PastDecisionsModalType,
+} from "../../interfaces";
 import { getDecisionsByDay } from "../../selectors/decisions";
 import { getRestaurantEntities } from "../../selectors/restaurants";
 import PastDecisionsModal from "./PastDecisionsModal";
@@ -10,7 +14,8 @@ const modalName = "pastDecisions";
 
 const mapStateToProps = (state: State) => ({
   decisionsByDay: getDecisionsByDay(state),
-  restaurantId: state.modals[modalName].restaurantId,
+  restaurantId: (state.modals[modalName] as PastDecisionsModalType)
+    .restaurantId,
   restaurantEntities: getRestaurantEntities(state),
   shown: !!state.modals[modalName].shown,
 });
