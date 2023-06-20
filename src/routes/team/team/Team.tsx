@@ -28,13 +28,14 @@ import {
   Team as TeamType,
   ConfirmOpts,
   Action,
+  RoleType,
 } from "../../../interfaces";
 import s from "./Team.scss";
 
 interface TeamProps {
   changeTeamURLShown: boolean;
   changeUserRole: (userId: number, role: string) => Action;
-  confirm: (options: ConfirmOpts) => void;
+  confirm: (options: ConfirmOpts<"changeUserRole">) => void;
   confirmChangeTeamURL: () => void;
   confirmDeleteTeam: () => void;
   currentUser: User;
@@ -59,9 +60,7 @@ class Team extends React.Component<TeamProps> {
     (user: User) => (event: ChangeEvent<HTMLSelectElement>) => {
       const { currentUser, team } = this.props;
 
-      const newRole = event.target.value;
-
-      const changeRole = this.props.changeUserRole(user.id, newRole);
+      const newRole = event.target.value as RoleType;
 
       if (
         event.target.value === "member" &&
@@ -70,15 +69,18 @@ class Team extends React.Component<TeamProps> {
         this.props.confirm({
           actionLabel: "Promote",
           body: "Are you sure you want to promote this user to Member status? You will not be able to demote them later.",
-          action: changeRole,
+          action: "changeUserRole",
+          actionArgs: [user.id, newRole],
         });
       } else if (currentUser.id === user.id && !currentUser.superuser) {
         this.props.confirm({
           actionLabel: "Demote",
           body: "Are you sure you want to demote yourself? You will not be able to undo this by yourself.",
-          action: changeRole,
+          action: "changeUserRole",
+          actionArgs: [user.id, newRole],
         });
       } else {
+        const changeRole = this.props.changeUserRole(user.id, newRole);
         this.props.dispatch(changeRole);
       }
     };

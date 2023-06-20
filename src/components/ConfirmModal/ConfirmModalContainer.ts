@@ -1,30 +1,36 @@
 import { connect } from "react-redux";
+import { confirmableActions } from "../../actions";
 import { hideModal } from "../../actions/modals";
 import ConfirmModal from "./ConfirmModal";
-import { Dispatch, State } from "../../interfaces";
+import {
+  ConfirmModal as ConfirmModalType,
+  Dispatch,
+  State,
+} from "../../interfaces";
 
 const modalName = "confirm";
 
-const mapStateToProps = (state: State) => ({
-  actionLabel: state.modals[modalName].actionLabel!,
-  body: state.modals[modalName].body,
-  action: state.modals[modalName].action,
-  shown: !!state.modals[modalName].shown,
-});
+const mapStateToProps = <T extends keyof typeof confirmableActions>(
+  state: State
+) => state.modals[modalName] as ConfirmModalType<T>;
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   dispatch,
   hideModal: () => dispatch(hideModal("confirm")),
 });
 
-const mergeProps = (
-  stateProps: ReturnType<typeof mapStateToProps>,
+const mergeProps = <T extends keyof typeof confirmableActions>(
+  stateProps: ConfirmModalType<T>,
   dispatchProps: ReturnType<typeof mapDispatchToProps>
 ) => ({
   ...stateProps,
   ...dispatchProps,
   handleSubmit: () => {
-    dispatchProps.dispatch(stateProps.action!);
+    dispatchProps.dispatch(
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      confirmableActions[stateProps.action](...stateProps.actionArgs)
+    );
     dispatchProps.hideModal();
   },
 });
