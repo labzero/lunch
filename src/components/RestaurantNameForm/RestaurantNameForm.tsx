@@ -1,10 +1,4 @@
-import React, {
-  ChangeEvent,
-  Component,
-  FormEvent,
-  RefObject,
-  createRef,
-} from "react";
+import React, { ChangeEvent, TargetedEvent, useEffect, useRef } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import s from "./RestaurantNameForm.scss";
@@ -12,53 +6,50 @@ import s from "./RestaurantNameForm.scss";
 interface RestaurantNameFormProps {
   editNameFormValue: string;
   setEditNameFormValue: (e: ChangeEvent<HTMLInputElement>) => void;
-  changeRestaurantName: (e: FormEvent<HTMLFormElement>) => void;
+  changeRestaurantName: (e: TargetedEvent<HTMLFormElement>) => void;
   hideEditNameForm: () => void;
 }
 
-class RestaurantNameForm extends Component<RestaurantNameFormProps> {
-  input: RefObject<HTMLInputElement>;
+const RestaurantNameForm = (props: RestaurantNameFormProps) => {
+  const input = useRef<HTMLInputElement>(null);
 
-  componentDidMount() {
+  useEffect(() => {
     // React Bootstrap steals focus, grab it back
-    this.input = createRef<HTMLInputElement>();
     setTimeout(() => {
-      this.input.current?.focus();
+      input.current?.focus();
     }, 1);
-  }
+  }, []);
 
-  render() {
-    return (
-      <form onSubmit={this.props.changeRestaurantName}>
-        <span className={s.inputContainer}>
-          <input
-            type="text"
-            className="form-control input-sm"
-            value={this.props.editNameFormValue}
-            onChange={this.props.setEditNameFormValue}
-            ref={this.input}
-          />
-        </span>
-        <Button
-          type="submit"
-          className={s.button}
-          disabled={this.props.editNameFormValue === ""}
-          size="sm"
-          variant="primary"
-        >
-          ok
-        </Button>
-        <Button
-          className={s.button}
-          onClick={this.props.hideEditNameForm}
-          size="sm"
-          variant="light"
-        >
-          cancel
-        </Button>
-      </form>
-    );
-  }
-}
+  return (
+    <form onSubmit={props.changeRestaurantName}>
+      <span className={s.inputContainer}>
+        <input
+          type="text"
+          className="form-control input-sm"
+          value={props.editNameFormValue}
+          onChange={props.setEditNameFormValue}
+          ref={input}
+        />
+      </span>
+      <Button
+        type="submit"
+        className={s.button}
+        disabled={props.editNameFormValue === ""}
+        size="sm"
+        variant="primary"
+      >
+        ok
+      </Button>
+      <Button
+        className={s.button}
+        onClick={props.hideEditNameForm}
+        size="sm"
+        variant="light"
+      >
+        cancel
+      </Button>
+    </form>
+  );
+};
 
 export default withStyles(s)(RestaurantNameForm);

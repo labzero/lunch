@@ -1,4 +1,3 @@
-import { MouseEvent } from "react";
 import { connect } from "react-redux";
 import { Dispatch, State } from "../../interfaces";
 import { getRestaurantById } from "../../selectors/restaurants";

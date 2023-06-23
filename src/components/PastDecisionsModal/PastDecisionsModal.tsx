@@ -33,7 +33,7 @@ class PastDecisionsModal extends Component<
 
   handleChange = (event: ChangeEvent<HTMLSelectElement>) =>
     this.setState({
-      daysAgo: Number(event.target.value),
+      daysAgo: Number(event.currentTarget.value),
     });
 
   handleSubmit = () => {

@@ -1,4 +1,4 @@
-import React, { Component, FormEvent, RefObject, createRef } from "react";
+import React, { Component, RefObject, TargetedEvent, createRef } from "react";
 import Autosuggest, {
   ChangeEvent,
   SuggestionSelectedEventData,
@@ -24,7 +24,7 @@ const returnTrue = () => true;
 
 export interface TagFilterFormProps {
   exclude?: boolean;
-  addByName: (autosuggestValue: string) => (event: FormEvent) => void;
+  addByName: (autosuggestValue: string) => (event: TargetedEvent) => void;
   addTag: (id: number) => void;
   allTags: Tag[];
   clearTags: () => void;
@@ -68,7 +68,7 @@ class TagFilterForm extends Component<TagFilterFormProps, TagFilterFormState> {
   }
 
   setAutosuggestValue = (
-    event: FormEvent,
+    event: TargetedEvent,
     { newValue, method }: ChangeEvent
   ) => {
     if (method === "up" || method === "down") {
@@ -80,7 +80,7 @@ class TagFilterForm extends Component<TagFilterFormProps, TagFilterFormState> {
   };
 
   handleSuggestionSelected = (
-    event: FormEvent,
+    event: TargetedEvent,
     { suggestion, method }: SuggestionSelectedEventData<Tag>
   ) => {
     if (method === "enter") {

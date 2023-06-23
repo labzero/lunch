@@ -35,9 +35,10 @@ class Login extends Component<LoginProps, LoginState> {
   }
 
   handleChange =
-    (field: keyof LoginState) => (event: ChangeEvent<HTMLInputElement>) =>
+    (field: keyof LoginState) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       this.setState({
-        [field]: event.target.value,
+        [field]: event.currentTarget.value,
       });
 
   render() {

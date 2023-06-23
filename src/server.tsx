@@ -34,8 +34,10 @@ import React from "react";
 import ReactDOM from "react-dom/server";
 import expressWs from "express-ws";
 import Honeybadger from "@honeybadger-io/js";
+import prepass from "preact-ssr-prepass";
 import PrettyError from "pretty-error";
-import AppComponent from "./components/App";
+import { InsertCSS } from "isomorphic-style-loader/StyleContext";
+import App from "./components/App";
 import Html, { HtmlProps } from "./components/Html";
 import { ErrorPageWithoutStyle } from "./components/ErrorPage/ErrorPage";
 import errorPageStyle from "./components/ErrorPage/ErrorPage.scss";
@@ -45,6 +47,7 @@ import teamRoutes from "./routes/team";
 import mainRoutes from "./routes/main";
 import passport from "./passport";
 import routerCreator from "./router";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import chunks from "./chunk-manifest.json"; // eslint-disable-line import/no-unresolved
 import configureStore from "./store/configureStore";
@@ -56,8 +59,7 @@ import passwordMiddleware from "./middlewares/password";
 import usersMiddleware from "./middlewares/users";
 import api from "./api";
 import { sequelize, Team, User } from "./db";
-import { App, AppContext, ExtWebSocket, Flash, StateData } from "./interfaces";
-import { InsertCSS } from "isomorphic-style-loader/StyleContext";
+import { AppContext, ExtWebSocket, Flash, StateData } from "./interfaces";
 
 process.on("unhandledRejection", (reason, p) => {
   console.error("Unhandled Rejection at:", p, "reason:", reason);
@@ -104,6 +106,7 @@ export const wsServer = internalWsServer;
 // user agent is not known.
 // -----------------------------------------------------------------------------
 globalThis.navigator = globalThis.navigator || {};
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 globalThis.navigator.userAgent = globalThis.navigator.userAgent || "all";
 
@@ -283,6 +286,7 @@ const wsInstance = expressWs(app, wsServer);
 export const wss = wsInstance.getWss();
 
 app.use((req, res, next) => {
+  // eslint-disable-next-line no-param-reassign
   req.broadcast = (teamId, data) => {
     wss.clients?.forEach((client: ExtWebSocket) => {
       if (client.teamId === teamId) {
@@ -401,9 +405,11 @@ const render: RequestHandler = async (req, res, next) => {
       root: generateUrl(req, req.get("host")!),
     };
 
-    data.children = ReactDOM.renderToString(
-      <AppComponent context={context}>{route.component}</AppComponent>
-    );
+    const vdom = <App context={context}>{route.component}</App>;
+
+    await prepass(vdom);
+
+    data.children = ReactDOM.renderToString(vdom);
     data.styles = [{ id: "css", cssText: [...css].join("") }];
 
     const scripts = new Set<string>();
@@ -429,6 +435,7 @@ const render: RequestHandler = async (req, res, next) => {
     res.status(route.status || 200);
     res.send(`<!doctype html>${html}`);
   } catch (err) {
+    console.log("HERES THE ERROR YOU WNATED", err);
     next(err);
   }
 };

@@ -2,7 +2,7 @@ import { Application, RequestHandler } from "express";
 import { EnhancedStore, ThunkDispatch } from "@reduxjs/toolkit";
 import { BrowserHistory } from "history";
 import { InsertCSS } from "isomorphic-style-loader/StyleContext";
-import { ReactNode } from "react";
+import { VNode } from "preact";
 import { ResolveContext } from "universal-router";
 import { WebSocket } from "ws";
 import { confirmableActions } from "./actions";
@@ -617,7 +617,7 @@ export interface AppContext extends ResolveContext {
 export interface AppRoute {
   chunk?: string;
   chunks?: string[];
-  component?: ReactNode;
+  component?: VNode;
   description?: string;
   fullTitle?: string;
   ogTitle?: string;

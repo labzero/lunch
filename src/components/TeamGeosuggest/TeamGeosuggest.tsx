@@ -68,7 +68,7 @@ class TeamGeosuggest extends Component<TeamGeosuggestProps> {
     const { id, initialValue } = this.props;
 
     return this.maps ? (
-      <Suspense>
+      <Suspense fallback={null}>
         <Geosuggest
           autoActivateFirstSuggest
           id={id}

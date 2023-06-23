@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { ChangeEvent, Component, FormEvent } from "react";
+import React, { ChangeEvent, Component, TargetedEvent } from "react";
 import { FaRegQuestionCircle } from "react-icons/fa";
 import { BsPrefixRefForwardingComponent } from "react-bootstrap/esm/helpers";
 import Button, { ButtonPropsWithXsSize } from "react-bootstrap/Button";
@@ -67,10 +67,11 @@ class TeamForm extends Component<TeamFormProps, TeamFormState> {
   handleGeosuggestChange = (value: string) => this.setState({ address: value });
 
   handleChange =
-    (field: keyof TeamFormState) => (event: ChangeEvent<HTMLInputElement>) =>
-      this.setState({ [field]: event.target.value });
+    (field: keyof TeamFormState) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      this.setState({ [field]: event.currentTarget.value });
 
-  handleSubmit = (event: FormEvent) => {
+  handleSubmit = (event: TargetedEvent) => {
     event.preventDefault();
     const typedsortDuration = Number(this.state.sortDuration);
     if (typedsortDuration > 0) {

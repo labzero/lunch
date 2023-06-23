@@ -1,4 +1,4 @@
-import React, { Component, FormEvent, RefObject, createRef } from "react";
+import React, { Component, RefObject, TargetedEvent, createRef } from "react";
 import Autosuggest, {
   ChangeEvent,
   SuggestionSelectedEventData,
@@ -54,7 +54,7 @@ export class _RestaurantAddTagForm extends Component<
   }
 
   setAddTagAutosuggestValue = (
-    event: FormEvent,
+    event: TargetedEvent,
     { newValue, method }: ChangeEvent
   ) => {
     if (method === "up" || method === "down") {
@@ -65,7 +65,7 @@ export class _RestaurantAddTagForm extends Component<
     }));
   };
 
-  handleSubmit = (event: FormEvent) => {
+  handleSubmit = (event: TargetedEvent) => {
     event.preventDefault();
     this.props.addNewTagToRestaurant(this.state.autosuggestValue);
     this.setState(() => ({
@@ -74,7 +74,7 @@ export class _RestaurantAddTagForm extends Component<
   };
 
   handleSuggestionSelected = (
-    event: FormEvent,
+    event: TargetedEvent,
     { suggestion, method }: SuggestionSelectedEventData<Tag>
   ) => {
     if (method === "enter") {
