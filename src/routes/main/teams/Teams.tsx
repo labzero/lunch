@@ -1,4 +1,4 @@
-import React, { Component, MouseEvent } from "react";
+import React, { Component, TargetedEvent } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import ListGroup from "react-bootstrap/ListGroup";
@@ -16,7 +16,7 @@ interface TeamsProps {
 }
 
 class Teams extends Component<TeamsProps> {
-  confirmLeave = (user: User, team: Team) => (event: MouseEvent) => {
+  confirmLeave = (user: User, team: Team) => (event: TargetedEvent) => {
     event.preventDefault();
     this.props.confirm({
       actionLabel: "Leave",

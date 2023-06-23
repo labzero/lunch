@@ -1,4 +1,4 @@
-import { FormEvent } from "react";
+import { TargetedEvent } from "react";
 import { connect } from "react-redux";
 import {
   addTagFilter,
@@ -69,7 +69,7 @@ const mergeProps = (
   ...stateProps,
   ...dispatchProps,
   addByName(autosuggestValue: string) {
-    return (event: FormEvent<HTMLFormElement>) => {
+    return (event: TargetedEvent<HTMLFormElement>) => {
       event.preventDefault();
       const tag = stateProps.allTags.find((t) => t.name === autosuggestValue);
       if (tag !== undefined) {

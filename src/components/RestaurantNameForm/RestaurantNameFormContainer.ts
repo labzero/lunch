@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent } from "react";
+import { ChangeEvent, TargetedEvent } from "react";
 import { connect } from "react-redux";
 import { changeRestaurantName } from "../../actions/restaurants";
 import { hideEditNameForm, setEditNameFormValue } from "../../actions/listUi";
@@ -23,7 +23,7 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps: OwnProps) => ({
     dispatch(hideEditNameForm(ownProps.id));
   },
   setEditNameFormValue: (event: ChangeEvent<HTMLInputElement>) => {
-    dispatch(setEditNameFormValue(ownProps.id, event.target.value));
+    dispatch(setEditNameFormValue(ownProps.id, event.currentTarget.value));
   },
   dispatch,
 });
@@ -35,7 +35,7 @@ const mergeProps = (
 ) => ({
   ...stateProps,
   ...dispatchProps,
-  changeRestaurantName: (event: FormEvent<HTMLInputElement>) => {
+  changeRestaurantName: (event: TargetedEvent<HTMLInputElement>) => {
     event.preventDefault();
     dispatchProps.dispatch(
       changeRestaurantName(ownProps.id, stateProps.editNameFormValue)

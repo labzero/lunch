@@ -12,6 +12,7 @@ interface NotificationListProps {
 
 const NotificationList = ({ notifications }: NotificationListProps) => (
   <ul className={s.notifications}>
+    {/* @ts-expect-error: expects component instead of children */}
     <TransitionGroup>
       {notifications.map((notification) => (
         <CSSTransition

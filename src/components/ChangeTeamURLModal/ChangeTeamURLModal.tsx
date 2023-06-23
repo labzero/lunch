@@ -40,9 +40,9 @@ class ChangeTeamURLModal extends Component<
 
   handleChange =
     (field: keyof ChangeTeamURLModalState) =>
-    (event: ChangeEvent<HTMLInputElement>) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       this.setState({
-        [field]: event.target.value,
+        [field]: event.currentTarget.value,
       });
 
   handleSubmit = () => {

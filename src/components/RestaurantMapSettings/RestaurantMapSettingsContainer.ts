@@ -20,9 +20,9 @@ const mapDispatchToProps = (
       dispatch(flashSuccess("Default zoom level set for team."))
     ),
   setShowUnvoted: (event: ChangeEvent<HTMLInputElement>) =>
-    dispatch(setShowUnvoted(event.target.checked)),
+    dispatch(setShowUnvoted(event.currentTarget.checked)),
   setShowPOIs: (event: ChangeEvent<HTMLInputElement>) =>
-    dispatch(setShowPOIs(event.target.checked)),
+    dispatch(setShowPOIs(event.currentTarget.checked)),
 });
 
 export default connect(

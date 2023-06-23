@@ -1,4 +1,5 @@
-import React, { ReactNode } from "react";
+import React from "react";
+import { ComponentChildren } from "preact";
 import Modal from "react-bootstrap/Modal";
 import ModalBody from "react-bootstrap/ModalBody";
 import ModalFooter from "react-bootstrap/ModalFooter";
@@ -8,7 +9,7 @@ export interface ConfirmModalProps {
   actionLabel: string;
   shown: boolean;
   hideModal: () => void;
-  body: ReactNode;
+  body: ComponentChildren;
   handleSubmit: () => void;
 }
 

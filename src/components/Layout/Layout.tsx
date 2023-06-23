@@ -7,7 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React, { Component, ReactNode } from "react";
+import React, { Component } from "react";
+import { VNode } from "preact";
 import PropTypes from "prop-types";
 import { InsertCSS } from "isomorphic-style-loader/StyleContext";
 // eslint-disable-next-line css-modules/no-unused-class, no-unused-vars
@@ -22,7 +23,7 @@ import s from "./Layout.scss";
 const emptyFunction = () => undefined;
 
 export interface LayoutProps {
-  children: ReactNode;
+  children: VNode;
   isHome?: boolean;
   path: string;
   shouldScrollToTop: boolean;

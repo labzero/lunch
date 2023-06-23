@@ -7,8 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
+import { hydrate, render } from "preact";
 import React, { useEffect } from "react";
-import { createRoot, hydrateRoot } from "react-dom/client";
 import { Action, createPath, Location } from "history";
 import App from "./components/App";
 import configureStore from "./store/configureStore";
@@ -90,8 +90,6 @@ if (subdomain) {
 }
 
 const router = routerCreator(routes);
-
-const root = createRoot(container!);
 
 // Re-render the app when window.location changes
 const onLocationChange = async ({
@@ -197,9 +195,9 @@ const onLocationChange = async ({
     };
 
     if (isInitialRender) {
-      hydrateRoot(container!, <AppWithCallbackAfterRender />);
+      hydrate(<AppWithCallbackAfterRender />, container!);
     } else {
-      root.render(<AppWithCallbackAfterRender />);
+      render(<AppWithCallbackAfterRender />, container!);
     }
   } catch (error) {
     if (__DEV__) {
