@@ -60,10 +60,10 @@ class Team extends React.Component<TeamProps> {
     (user: User) => (event: ChangeEvent<HTMLSelectElement>) => {
       const { currentUser, team } = this.props;
 
-      const newRole = event.target.value as RoleType;
+      const newRole = event.currentTarget.value as RoleType;
 
       if (
-        event.target.value === "member" &&
+        event.currentTarget.value === "member" &&
         getRole(currentUser, team)?.type === "member"
       ) {
         this.props.confirm({
@@ -104,7 +104,7 @@ class Team extends React.Component<TeamProps> {
 
     if (canChangeUser(currentUser, user, team, users)) {
       return (
-        <select onChange={this.handleRoleChange(user)} value={user.type}>
+        <select onInput={this.handleRoleChange(user)} value={user.type}>
           {hasGuestRole && <option value="guest">Guest</option>}
           {hasMemberRole && <option value="member">Member</option>}
           {hasOwnerRole && <option value="owner">Owner</option>}

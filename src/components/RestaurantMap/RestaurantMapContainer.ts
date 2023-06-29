@@ -1,4 +1,5 @@
 import { connect } from "react-redux";
+import { ClickEventValue } from "google-map-react";
 import {
   clearCenter,
   clearNewlyAdded,
@@ -13,7 +14,6 @@ import { getMapUi } from "../../selectors/mapUi";
 import { getCurrentUser } from "../../selectors/user";
 import { getMapItems } from "../../selectors";
 import RestaurantMap from "./RestaurantMap";
-import { ClickEventValue } from "google-map-react";
 
 const mapStateToProps = (state: State) => {
   const mapUi = getMapUi(state);

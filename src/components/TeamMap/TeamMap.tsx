@@ -50,7 +50,7 @@ class TeamMap extends Component<TeamMapProps> {
         <GoogleMapsLoaderContext.Consumer>
           {({ loader }) =>
             loader ? (
-              <Suspense>
+              <Suspense fallback={null}>
                 <GoogleMap
                   center={center}
                   defaultZoom={GOOGLE_MAP_ZOOM}

@@ -9,7 +9,8 @@
 
 import StyleContext, { InsertCSS } from "isomorphic-style-loader/StyleContext";
 import PropTypes from "prop-types";
-import React, { Children, ReactNode } from "react";
+import React from "react";
+import { ComponentChildren } from "preact";
 import { Provider as ReduxProvider } from "react-redux";
 import { Libraries, Loader } from "@googlemaps/js-api-loader";
 import { AppContext } from "../interfaces";
@@ -26,7 +27,7 @@ const ContextType = {
 };
 
 interface AppProps {
-  children: ReactNode;
+  children?: ComponentChildren;
   context: AppContext;
 }
 
@@ -63,6 +64,10 @@ class App extends React.PureComponent<AppProps> {
 
   static childContextTypes = ContextType;
 
+  static defaultProps = {
+    children: null,
+  };
+
   constructor(props: AppProps) {
     super(props);
 
@@ -88,7 +93,7 @@ class App extends React.PureComponent<AppProps> {
       <StyleContext.Provider value={this.styleContextValue}>
         <ReduxProvider store={this.props.context.store}>
           <GoogleMapsLoaderContext.Provider value={this.loaderContextValue}>
-            {Children.only(this.props.children)}
+            {this.props.children}
           </GoogleMapsLoaderContext.Provider>
         </ReduxProvider>
       </StyleContext.Provider>

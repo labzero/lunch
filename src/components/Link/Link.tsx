@@ -7,7 +7,8 @@
  * LICENSE.txt file in the root directory of this source tree.
  */
 
-import React, { Component, MouseEvent, ReactNode } from "react";
+import React, { Component, HTMLAttributes } from "react";
+import { ComponentChildren } from "preact";
 import history from "../../history";
 
 function isLeftClickEvent(event: MouseEvent) {
@@ -18,9 +19,9 @@ function isModifiedEvent(event: MouseEvent) {
   return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 }
 
-interface LinkProps extends React.HTMLProps<HTMLAnchorElement> {
+interface LinkProps extends HTMLAttributes<HTMLAnchorElement> {
   to: string;
-  children: ReactNode;
+  children: ComponentChildren;
   onClick?: (event: MouseEvent) => void;
 }
 

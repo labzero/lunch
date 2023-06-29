@@ -1,4 +1,4 @@
-import React, { ChangeEvent, Component, FormEvent } from "react";
+import React, { ChangeEvent, Component, TargetedEvent } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
@@ -28,10 +28,10 @@ class Welcome extends Component<WelcomeProps, WelcomeState> {
     };
   }
 
-  handleChange = (event: ChangeEvent<HTMLInputElement>) =>
-    this.setState({ name: event.target.value });
+  handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    this.setState({ name: event.currentTarget.value });
 
-  handleSubmit = (event: FormEvent) => {
+  handleSubmit = (event: TargetedEvent) => {
     event.preventDefault();
     this.props.updateCurrentUser(this.state);
   };

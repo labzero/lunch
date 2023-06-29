@@ -36,9 +36,11 @@ class DeleteTeamModal extends Component<
     };
   }
 
-  handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+  handleChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     this.setState({
-      confirmSlug: event.target.value,
+      confirmSlug: event.currentTarget.value,
     });
   };
 

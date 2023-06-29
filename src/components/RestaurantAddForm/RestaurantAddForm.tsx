@@ -74,7 +74,7 @@ class RestaurantAddForm extends Component<RestaurantAddFormProps> {
     return (
       <form>
         {this.maps ? (
-          <Suspense>
+          <Suspense fallback={null}>
             <Geosuggest
               autoActivateFirstSuggest
               bounds={

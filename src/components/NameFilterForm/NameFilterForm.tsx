@@ -58,7 +58,7 @@ class NameFilterForm extends Component<
   };
 
   setNameFilterValue = (event: ChangeEvent<HTMLInputElement>) => {
-    this.props.setNameFilter(event.target.value);
+    this.props.setNameFilter(event.currentTarget.value);
   };
 
   hideForm = () => {

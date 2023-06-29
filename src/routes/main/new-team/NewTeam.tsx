@@ -1,5 +1,4 @@
-import PropTypes from "prop-types";
-import React, { ChangeEvent, Component, FormEvent } from "react";
+import React, { ChangeEvent, Component, TargetedEvent } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
@@ -44,16 +43,19 @@ class NewTeam extends Component<NewTeamProps, NewTeamState> {
   handleGeosuggestChange = (value: string) => this.setState({ address: value });
 
   handleChange =
-    (field: keyof NewTeamState) => (event: ChangeEvent<HTMLInputElement>) =>
-      this.setState({ [field]: event.target.value });
+    (field: keyof NewTeamState) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      this.setState({ [field]: event.currentTarget.value });
 
-  handleSlugChange = (event: ChangeEvent<HTMLInputElement>) => {
+  handleSlugChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     this.setState({
-      slug: event.target.value.toLowerCase(),
+      slug: event.currentTarget.value.toLowerCase(),
     });
   };
 
-  handleSubmit = (event: FormEvent) => {
+  handleSubmit = (event: TargetedEvent) => {
     const { center, createTeam } = this.props;
 
     event.preventDefault();

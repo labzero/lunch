@@ -9159,7 +9159,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.4.0":
+"loose-envify@npm:^1.0.0, loose-envify@npm:^1.4.0":
   version: 1.4.0
   resolution: "loose-envify@npm:1.4.0"
   dependencies:
@@ -9338,16 +9338,19 @@ __metadata:
     pg: ^8.9.0
     postcss: ^8.4.21
     postcss-loader: ^7.0.2
+    preact: ^10.15.1
+    preact-render-to-string: ^6.1.0
+    preact-ssr-prepass: ^1.2.0
     prettier: 2.8.8
     pretty-error: ^3.0.4
     prop-types: ^15.8.1
     proxyquire: ^1.7.11
     raw-loader: ^0.5.1
-    react: ^18.2.0
+    react: "npm:@preact/compat@*"
     react-autosuggest: ^10.0.2
     react-bootstrap: ^2.7.0
     react-dev-utils: ^12.0.1
-    react-dom: ^18.2.0
+    react-dom: "npm:@preact/compat@*"
     react-error-overlay: ^4.0.1
     react-flip-toolkit: ^7.0.17
     react-geosuggest: ^2.14.1
@@ -11156,6 +11159,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"preact-render-to-string@npm:^6.1.0":
+  version: 6.1.0
+  resolution: "preact-render-to-string@npm:6.1.0"
+  dependencies:
+    pretty-format: ^3.8.0
+  peerDependencies:
+    preact: ">=10"
+  checksum: 2bf62e90d14b391bf20a16442ceaec252c94cf9dd22ec27e9aa7ce92ff4339c299a025ae804d5237867c398c6609aeee282bbc269a15ecf28be4923491fb9f55
+  languageName: node
+  linkType: hard
+
+"preact-ssr-prepass@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "preact-ssr-prepass@npm:1.2.0"
+  peerDependencies:
+    preact: ">=10 || ^10.0.0-beta.0 || ^10.0.0-alpha.0"
+  checksum: 5c27122cb5e0838d25ffc8be4e63641c9ce7637a9e210d32852be609bee74cb68f79601089270b08812e45f779f81a316fb8a7e6ebb27a3b1493b17c36df41f6
+  languageName: node
+  linkType: hard
+
+"preact@npm:^10.15.1":
+  version: 10.15.1
+  resolution: "preact@npm:10.15.1"
+  checksum: dabad11843b19b40b11846a25ff0b1fc4bc58268909e01a7faddb341a40983d24fbe7d44ad6e2c5d35e43091963af616800552fec9af44dd0a2f0f698d1bba1f
+  languageName: node
+  linkType: hard
+
 "prelude-ls@npm:^1.2.1":
   version: 1.2.1
   resolution: "prelude-ls@npm:1.2.1"
@@ -11208,6 +11238,13 @@ __metadata:
     ansi-styles: ^5.0.0
     react-is: ^18.0.0
   checksum: 4065356b558e6db25b4d41a01efb386935a6c06a0c9c104ef5ce59f2f476b8210edb8b3949b386e60ada0a6dc5ebcb2e6ccddc8c64dfd1a9943c3c3a9e7eaf89
+  languageName: node
+  linkType: hard
+
+"pretty-format@npm:^3.8.0":
+  version: 3.8.0
+  resolution: "pretty-format@npm:3.8.0"
+  checksum: 21a114d43ef06978f8f7f6212be4649b0b094f05d9b30e14e37550bf35c8ca24d8adbca9e5adc4cc15d9eaf7a1e7a30478a4dc37b30982bfdf0292a5b385484c
   languageName: node
   linkType: hard
 
@@ -11510,15 +11547,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^18.2.0":
-  version: 18.2.0
-  resolution: "react-dom@npm:18.2.0"
-  dependencies:
-    loose-envify: ^1.1.0
-    scheduler: ^0.23.0
+"react-dom@npm:@preact/compat@*, react@npm:@preact/compat@*":
+  version: 17.1.2
+  resolution: "@preact/compat@npm:17.1.2"
   peerDependencies:
-    react: ^18.2.0
-  checksum: 7d323310bea3a91be2965f9468d552f201b1c27891e45ddc2d6b8f717680c95a75ae0bc1e3f5cf41472446a2589a75aed4483aee8169287909fcd59ad149e8cc
+    preact: "*"
+  checksum: 512b0f149fc11e36c5980c4173c696d17b2b4e78f500ca44fde9c688a1d58b835b70c91161d6d5d903e5d46b4649fc73b28151f43d7cdf91ec2825b24e8cdf7b
   languageName: node
   linkType: hard
 
@@ -11672,15 +11706,6 @@ __metadata:
     react: ">=16.6.0"
     react-dom: ">=16.6.0"
   checksum: 75602840106aa9c6545149d6d7ae1502fb7b7abadcce70a6954c4b64a438ff1cd16fc77a0a1e5197cdd72da398f39eb929ea06f9005c45b132ed34e056ebdeb1
-  languageName: node
-  linkType: hard
-
-"react@npm:^18.2.0":
-  version: 18.2.0
-  resolution: "react@npm:18.2.0"
-  dependencies:
-    loose-envify: ^1.1.0
-  checksum: 88e38092da8839b830cda6feef2e8505dec8ace60579e46aa5490fc3dc9bba0bd50336507dc166f43e3afc1c42939c09fe33b25fae889d6f402721dcd78fca1b
   languageName: node
   linkType: hard
 
@@ -12311,15 +12336,6 @@ __metadata:
   dependencies:
     xmlchars: ^2.2.0
   checksum: d3fa3e2aaf6c65ed52ee993aff1891fc47d5e47d515164b5449cbf5da2cbdc396137e55590472e64c5c436c14ae64a8a03c29b9e7389fc6f14035cf4e982ef3b
-  languageName: node
-  linkType: hard
-
-"scheduler@npm:^0.23.0":
-  version: 0.23.0
-  resolution: "scheduler@npm:0.23.0"
-  dependencies:
-    loose-envify: ^1.1.0
-  checksum: d79192eeaa12abef860c195ea45d37cbf2bbf5f66e3c4dcd16f54a7da53b17788a70d109ee3d3dde1a0fd50e6a8fc171f4300356c5aee4fc0171de526bf35f8a
   languageName: node
   linkType: hard
 

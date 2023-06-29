@@ -1,7 +1,8 @@
 /* eslint-disable max-classes-per-file */
 
 import PropTypes from "prop-types";
-import React, { Component, ReactNode, Suspense, lazy } from "react";
+import React, { Component, Suspense, lazy } from "react";
+import { VNode } from "preact";
 import withStyles from "isomorphic-style-loader/withStyles";
 import { GOOGLE_MAP_ZOOM } from "../../constants";
 import googleMapOptions from "../../helpers/googleMapOptions";
@@ -94,12 +95,12 @@ class RestaurantMap extends Component<RestaurantMapProps> {
       tempMarker,
     } = this.props;
 
-    let tempMarkerComponent: ReactNode;
+    let tempMarkerComponent: VNode;
     if (tempMarker !== undefined) {
       tempMarkerComponent = <TempMarker {...tempMarker.latLng} />;
     }
 
-    let googleInfoWindow: ReactNode;
+    let googleInfoWindow: VNode;
     if ("placeId" in infoWindow && infoWindow.placeId && infoWindow.latLng) {
       googleInfoWindow = (
         <GoogleInfoWindowContainer
@@ -115,7 +116,7 @@ class RestaurantMap extends Component<RestaurantMapProps> {
         <GoogleMapsLoaderContext.Consumer>
           {({ loader }) =>
             loader ? (
-              <Suspense>
+              <Suspense fallback={null}>
                 <GoogleMap
                   defaultZoom={defaultZoom || GOOGLE_MAP_ZOOM}
                   defaultCenter={latLng}
