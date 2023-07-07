@@ -161,7 +161,7 @@
     "sass-loader": "^13.2.0",
     "sequelize-mock": "^0.7.0",
     "sinon": "^15.1.0",
-    "stylelint": "^15.6.2",
+    "stylelint": "^15.10.1",
     "stylelint-config-standard-scss": "^9.0.0",
     "stylelint-order": "^6.0.3",
     "supertest": "^6.3.3",
