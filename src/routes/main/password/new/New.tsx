@@ -1,4 +1,4 @@
-import React, { Component, RefObject, createRef } from "react";
+import React, { ChangeEvent, Component, RefObject, createRef } from "react";
 import withStyles from "isomorphic-style-loader/withStyles";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
@@ -11,7 +11,11 @@ interface NewProps {
   email?: string;
 }
 
-class New extends Component<NewProps> {
+interface NewState {
+  email?: string;
+}
+
+class New extends Component<NewProps, NewState> {
   emailField: RefObject<HTMLInputElement>;
 
   static defaultProps = {
@@ -21,14 +25,21 @@ class New extends Component<NewProps> {
   constructor(props: NewProps) {
     super(props);
     this.emailField = createRef();
+
+    this.state = {
+      email: props.email,
+    };
   }
 
   componentDidMount() {
     this.emailField.current?.focus();
   }
 
+  handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    this.setState({ email: event.currentTarget.value });
+
   render() {
-    const { email } = this.props;
+    const { email } = this.state;
 
     return (
       <div className={s.root}>
@@ -44,11 +55,12 @@ class New extends Component<NewProps> {
                 <Form.Group className="mb-3" controlId="passwordNew-email">
                   <Form.Label>Email</Form.Label>
                   <Form.Control
-                    defaultValue={email}
                     ref={this.emailField}
                     name="email"
+                    onChange={this.handleChange}
                     required
                     type="email"
+                    value={email}
                   />
                 </Form.Group>
               </Col>
