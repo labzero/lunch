@@ -435,7 +435,6 @@ const render: RequestHandler = async (req, res, next) => {
     res.status(route.status || 200);
     res.send(`<!doctype html>${html}`);
   } catch (err) {
-    console.log("HERES THE ERROR YOU WNATED", err);
     next(err);
   }
 };

@@ -1,6 +1,5 @@
 import { Application, RequestHandler } from "express";
 import { EnhancedStore, ThunkDispatch } from "@reduxjs/toolkit";
-import { BrowserHistory } from "history";
 import { InsertCSS } from "isomorphic-style-loader/StyleContext";
 import { VNode } from "preact";
 import { ResolveContext } from "universal-router";
@@ -73,11 +72,6 @@ export interface StateData {
   teams: TeamModel[];
   user: Express.User;
 }
-
-export interface StateHelpers {
-  history?: BrowserHistory;
-}
-
 export interface LatLng {
   lat: number;
   lng: number;

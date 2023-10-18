@@ -8,7 +8,7 @@
  */
 
 import cp from "child_process";
-import run from "./run";
+import run from "./lib/runTask";
 import clean from "./clean";
 import copy from "./copy";
 import bundle from "./bundle";

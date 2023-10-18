@@ -22,6 +22,7 @@ module.exports = {
   plugins: ["css-modules", "@typescript-eslint", "import"],
 
   globals: {
+    Bun: true,
     __DEV__: true,
   },
 

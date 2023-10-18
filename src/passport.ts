@@ -13,7 +13,6 @@
  * https://github.com/membership/membership.db/tree/master/postgres
  */
 
-import bcrypt from "bcrypt";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -104,7 +103,7 @@ passport.use(
         if (!user || !user.get("encryptedPassword")) {
           return done(null, false, { message });
         }
-        const passwordValid = await bcrypt.compare(
+        const passwordValid = await Bun.password.verify(
           password,
           user.get("encryptedPassword")!
         );

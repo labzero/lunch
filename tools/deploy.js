@@ -10,7 +10,7 @@
 import path from "path";
 import { spawn } from "./lib/cp";
 import { makeDir, moveDir, cleanDir } from "./lib/fs";
-import run from "./run";
+import run from "./lib/runTask";
 
 // GitHub Pages
 const remote = {

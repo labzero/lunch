@@ -15,7 +15,7 @@ import webpack from "webpack";
 import WebpackAssetsManifest from "webpack-assets-manifest";
 import nodeExternals from "webpack-node-externals";
 import { BundleAnalyzerPlugin } from "webpack-bundle-analyzer";
-import { InjectManifest } from "workbox-webpack-plugin";
+// import { InjectManifest } from "workbox-webpack-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import ReactRefreshWebpackPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import overrideRules from "./lib/overrideRules";
@@ -329,19 +329,22 @@ const clientConfig = {
         try {
           const fileFilter = (file) => !file.endsWith(".map");
           const addPath = (file) => manifest.getPublicPath(file);
-          const chunkFiles = stats.compilation.chunkGroups.reduce((acc, c) => {
-            acc[c.name] = [
-              ...(acc[c.name] || []),
-              ...c.chunks.reduce(
-                (files, cc) => [
-                  ...files,
-                  ...Array.from(cc.files).filter(fileFilter).map(addPath),
-                ],
-                []
-              ),
-            ];
-            return acc;
-          }, Object.create(null));
+          const chunkFiles = stats.compilation.chunkGroups.reduce(
+            (acc, c) => ({
+              ...acc,
+              [c.name]: [
+                ...(acc[c.name] || []),
+                ...c.chunks.reduce(
+                  (files, cc) => [
+                    ...files,
+                    ...Array.from(cc.files).filter(fileFilter).map(addPath),
+                  ],
+                  []
+                ),
+              ],
+            }),
+            Object.create(null)
+          );
           fs.writeFileSync(chunkFileName, JSON.stringify(chunkFiles, null, 2));
         } catch (err) {
           console.error(`ERROR: Cannot write ${chunkFileName}: `, err);
@@ -358,10 +361,11 @@ const clientConfig = {
           ...(isAnalyze ? [new BundleAnalyzerPlugin()] : []),
         ]),
 
-    new InjectManifest({
+    // TODO: this makes Bun die
+    /* new InjectManifest({
       swSrc: "./src/service-worker.js",
       swDest: resolvePath(BUILD_DIR, "public/service-worker.js"),
-    }),
+    }), */
   ],
 
   // Move modules that occur in multiple entry chunks to a new entry chunk (the commons chunk).

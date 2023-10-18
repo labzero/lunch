@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 require("dotenv").config();
-const bcrypt = require("bcrypt");
 
 const name = process.env.SUPERUSER_NAME || "superuser";
 
@@ -27,7 +26,12 @@ module.exports = {
     }
 
     return password
-      ? bcrypt.hash(password, 10).then(createUser)
+      ? Bun.password
+          .hash(password, {
+            algorithm: "bcrypt",
+            cost: 10,
+          })
+          .then(createUser)
       : createUser(null);
   },
 

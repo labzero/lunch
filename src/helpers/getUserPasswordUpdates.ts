@@ -1,8 +1,10 @@
-import bcrypt from "bcrypt";
 import { User } from "../interfaces";
 
 export default async (user: User, password: string) => {
-  const encryptedPassword = await bcrypt.hash(password, 10);
+  const encryptedPassword = await Bun.password.hash(password, {
+    algorithm: "bcrypt",
+    cost: 10,
+  });
   const updates: {
     encryptedPassword: string;
     resetPasswordToken: null;

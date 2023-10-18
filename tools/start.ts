@@ -9,6 +9,7 @@
 
 /* eslint-disable no-promise-executor-return */
 
+import fs from "fs";
 import path from "path";
 import express from "express";
 import browserSync from "browser-sync";
@@ -16,9 +17,11 @@ import webpack from "webpack";
 import webpackDevMiddleware from "webpack-dev-middleware";
 import webpackHotMiddleware from "webpack-hot-middleware";
 import createLaunchEditorMiddleware from "react-dev-utils/errorOverlayMiddleware";
+import https from "https";
 import webpackConfig from "./webpack.config";
-import run, { format } from "./run";
+import run from "./lib/runTask";
 import clean from "./clean";
+import formatDate from "./lib/formatDate";
 
 // https://webpack.js.org/configuration/watch/#watchoptions
 const watchOptions = {
@@ -34,7 +37,7 @@ function createCompilationPromise(name, compiler, config) {
     let timeStart = new Date();
     compiler.hooks.compile.tap(name, () => {
       timeStart = new Date();
-      console.info(`[${format(timeStart)}] Compiling '${name}'...`);
+      console.info(`[${formatDate(timeStart)}] Compiling '${name}'...`);
     });
 
     compiler.hooks.done.tap(name, (stats) => {
@@ -43,12 +46,16 @@ function createCompilationPromise(name, compiler, config) {
       const time = timeEnd.getTime() - timeStart.getTime();
       if (stats.hasErrors()) {
         console.info(
-          `[${format(timeEnd)}] Failed to compile '${name}' after ${time} ms`
+          `[${formatDate(
+            timeEnd
+          )}] Failed to compile '${name}' after ${time} ms`
         );
         reject(new Error("Compilation failed!"));
       } else {
         console.info(
-          `[${format(timeEnd)}] Finished '${name}' compilation after ${time} ms`
+          `[${formatDate(
+            timeEnd
+          )}] Finished '${name}' compilation after ${time} ms`
         );
         resolve(stats);
       }
@@ -155,7 +162,7 @@ async function start() {
   await serverPromise;
 
   const timeStart = new Date();
-  console.info(`[${format(timeStart)}] Launching server...`);
+  console.info(`[${formatDate(timeStart)}] Launching server...`);
 
   // Load compiled src/server.js as a middleware
   // eslint-disable-next-line global-require, import/no-unresolved, import/extensions, @typescript-eslint/no-var-requires
@@ -164,30 +171,25 @@ async function start() {
   appPromiseIsResolved = true;
   appPromiseResolve();
 
-  // Launch the development server with Browsersync and HMR
-  await new Promise((resolve, reject) =>
-    browserSync.create().init(
+  https
+    .createServer(
       {
-        // https://www.browsersync.io/docs/options
-        ghostMode: false,
-        host: server.hostname,
-        https: {
-          key: path.join(__dirname, "../cert/server.key"),
-          cert: path.join(__dirname, "../cert/server.crt"),
-        },
-        server: "src/server.tsx",
-        middleware: [server],
-        open: !process.argv.includes("--silent"),
-        notify: false,
-        ui: false,
+        key: fs.readFileSync(
+          path.join(__dirname, "../cert/server.key"),
+          "utf-8"
+        ),
+        cert: fs.readFileSync(
+          path.join(__dirname, "../cert/server.crt"),
+          "utf-8"
+        ),
       },
-      (error, bs) => (error ? reject(error) : resolve(bs))
+      server
     )
-  );
+    .listen(process.env.PORT || 3000);
 
   const timeEnd = new Date();
   const time = timeEnd.getTime() - timeStart.getTime();
-  console.info(`[${format(timeEnd)}] Server launched after ${time} ms`);
+  console.info(`[${formatDate(timeEnd)}] Server launched after ${time} ms`);
 
   return server;
 }
