@@ -72,6 +72,11 @@ jobs:
           keys:
             - v1-test-dependencies-{{ checksum "package.json" }}
 
+      # install bun
+      - run:
+          name: bun-install
+          command: npm install -g bun
+
       # install deps
       - run:
           name: yarn-install
@@ -151,6 +156,11 @@ jobs:
       #     paths:
       #       - node_modules
       #     key: v1-build-dependencies-{{ checksum "package.json" }}
+
+      # install bun
+      - run:
+          name: bun-install
+          command: npm install -g bun
 
       - node/install-packages:
           pkg-manager: yarn
