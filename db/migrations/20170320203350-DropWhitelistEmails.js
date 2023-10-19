@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 
 exports.up = ({ context: queryInterface }) =>
-  queryInterface.dropTable("whitelist_emails");
+  queryInterface.dropTable("whitelist_emails", {});
 
 exports.down = ({ context: queryInterface }) =>
   queryInterface.createTable("whitelist_emails", {

@@ -23,4 +23,4 @@ exports.up = ({ context: queryInterface }) =>
   });
 
 exports.down = ({ context: queryInterface }) =>
-  queryInterface.dropTable("whitelist_emails");
+  queryInterface.dropTable("whitelist_emails", {});

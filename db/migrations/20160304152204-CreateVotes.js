@@ -30,4 +30,4 @@ exports.up = ({ context: queryInterface }) =>
   });
 
 exports.down = ({ context: queryInterface }) =>
-  queryInterface.dropTable("votes");
+  queryInterface.dropTable("votes", {});

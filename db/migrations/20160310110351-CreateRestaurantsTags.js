@@ -41,4 +41,4 @@ exports.up = ({ context: queryInterface }) =>
   );
 
 exports.down = ({ context: queryInterface }) =>
-  queryInterface.dropTable("restaurants_tags");
+  queryInterface.dropTable("restaurants_tags", {});
