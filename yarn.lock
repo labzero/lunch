@@ -2297,6 +2297,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/dotenv@npm:^8.2.0":
+  version: 8.2.0
+  resolution: "@types/dotenv@npm:8.2.0"
+  dependencies:
+    dotenv: "*"
+  checksum: a1f524da7dc18b09bdb6c2613b9abbbe8ca575621cce4625efc7f98daf2ba07c7dbab622c9bb394507a12c5c515f9cbbbba4aeec17b801c88faeb8e8e656d460
+  languageName: node
+  linkType: hard
+
 "@types/eslint-scope@npm:^3.7.3":
   version: 3.7.6
   resolution: "@types/eslint-scope@npm:3.7.6"
@@ -5737,6 +5746,13 @@ __metadata:
     domelementtype: ^2.2.0
     domhandler: ^4.2.0
   checksum: abf7434315283e9aadc2a24bac0e00eab07ae4313b40cc239f89d84d7315ebdfd2fb1b5bf750a96bc1b4403d7237c7b2ebf60459be394d625ead4ca89b934391
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:*":
+  version: 16.3.1
+  resolution: "dotenv@npm:16.3.1"
+  checksum: 15d75e7279018f4bafd0ee9706593dd14455ddb71b3bcba9c52574460b7ccaf67d5cf8b2c08a5af1a9da6db36c956a04a1192b101ee102a3e0cf8817bbcf3dfd
   languageName: node
   linkType: hard
 
@@ -9776,6 +9792,7 @@ __metadata:
     "@types/compression": ^1.7.2
     "@types/connect-flash": ^0.0.37
     "@types/cookie-parser": ^1.4.3
+    "@types/dotenv": ^8.2.0
     "@types/express-serve-static-core": ^4.17.35
     "@types/express-session": ^1.17.6
     "@types/express-sslify": ^1.2.2

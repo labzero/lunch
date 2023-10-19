@@ -1,18 +1,7 @@
 import formatDate from "./formatDate";
 
 function runTask(task: (o?: string) => Promise<void>, options?: string) {
-  // eslint-disable-next-line global-require
-  const path = require("path");
-
-  if (process.env.NODE_ENV === "test") {
-    // eslint-disable-next-line global-require
-    require("dotenv").config({
-      path: path.resolve(process.cwd(), ".env.test"),
-    });
-  }
-
-  // eslint-disable-next-line global-require
-  require("dotenv").config();
+  require("../../env");
 
   const start = new Date();
   console.info(

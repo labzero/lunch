@@ -1,5 +1,5 @@
-import umzug from "./umzug";
+import createUmzug from "./createUmzug";
 
 (async () => {
-  await umzug.down({ to: 0 });
+  await createUmzug().down({ to: 0 });
 })();

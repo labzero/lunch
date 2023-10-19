@@ -1,13 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const path = require("path");
-
-if (process.env.NODE_ENV === "test") {
-  // eslint-disable-next-line global-require
-  require("dotenv").config({
-    path: path.resolve(process.cwd(), ".env.test"),
-  });
-}
-require("dotenv").config();
+require("./env");
 
 const settings = {
   dialect: "postgres",
